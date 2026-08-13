@@ -52,8 +52,7 @@ function App() {
 
             <div className="hero-actions">
               <button className="btn btn-dark btn-large">
-                Znajdź wykonawcę
-                <span>→</span>
+                Znajdź wykonawcę <span>→</span>
               </button>
 
               <button className="btn btn-outline btn-large">
@@ -105,6 +104,7 @@ function App() {
 
             <div className="floating-card card-small card-top">
               <span className="mini-icon">✦</span>
+
               <div>
                 <strong>Nowe zgłoszenie</strong>
                 <span>Projektant UI/UX</span>
@@ -113,6 +113,7 @@ function App() {
 
             <div className="floating-card card-small card-bottom">
               <span className="check-icon">✓</span>
+
               <div>
                 <strong>Projekt zakończony</strong>
                 <span>Wszystko gotowe</span>
@@ -127,7 +128,12 @@ function App() {
           <div className="section-heading">
             <div>
               <span className="section-label">Kategorie</span>
-              <h2>Znajdź dokładnie to,<br />czego potrzebujesz.</h2>
+
+              <h2>
+                Znajdź dokładnie to,
+                <br />
+                czego potrzebujesz.
+              </h2>
             </div>
 
             <p>
@@ -156,7 +162,9 @@ function App() {
         <section className="how section" id="how-it-works">
           <div className="section-heading centered">
             <span className="section-label">Jak to działa</span>
+
             <h2>Prościej się nie da.</h2>
+
             <p>
               Trzy kroki. Jeden konkretny cel.
             </p>
@@ -165,8 +173,105 @@ function App() {
           <div className="steps">
             <article className="step">
               <span>01</span>
+
               <h3>Opisz potrzebę</h3>
+
               <p>
                 Powiedz nam, czego potrzebujesz i określ
                 podstawowe szczegóły projektu.
               </p>
+            </article>
+
+            <article className="step">
+              <span>02</span>
+
+              <h3>Wybierz osobę</h3>
+
+              <p>
+                Przejrzyj zgłoszenia i wybierz wykonawcę,
+                który najlepiej pasuje do Twojego projektu.
+              </p>
+            </article>
+
+            <article className="step">
+              <span>03</span>
+
+              <h3>Zrealizuj projekt</h3>
+
+              <p>
+                Ustal szczegóły, rozpocznij współpracę
+                i doprowadź projekt do końca.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section className="split-section section" id="for-users">
+          <div className="split-card">
+            <span className="section-label">Dla zlecających</span>
+
+            <h2>Masz coś do zrobienia?</h2>
+
+            <p>
+              Znajdź osobę, która ma odpowiednie umiejętności
+              i może zająć się Twoim projektem.
+            </p>
+
+            <button className="btn btn-light">
+              Dodaj zlecenie →
+            </button>
+          </div>
+
+          <div className="split-card light">
+            <span className="section-label">Dla wykonawców</span>
+
+            <h2>Masz coś do zaoferowania?</h2>
+
+            <p>
+              Pokaż swoje umiejętności, znajdź interesujące
+              projekty i rozwijaj swoje portfolio.
+            </p>
+
+            <button className="btn btn-outline">
+              Znajdź zlecenia →
+            </button>
+          </div>
+        </section>
+
+        <section className="final-cta">
+          <span className="section-label">IdeaHire</span>
+
+          <h2>
+            Twój następny projekt
+            <br />
+            zaczyna się tutaj.
+          </h2>
+
+          <button className="btn btn-light btn-large">
+            Zacznij teraz →
+          </button>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <div>
+          <a className="logo" href="/">
+            Idea<span>Hire</span>
+          </a>
+
+          <p>Prosto. Szybko. Skutecznie.</p>
+        </div>
+
+        <div className="footer-links">
+          <a href="#how-it-works">Jak to działa</a>
+          <a href="#categories">Kategorie</a>
+          <a href="#for-users">Dla Ciebie</a>
+        </div>
+
+        <span>© 2026 IdeaHire</span>
+      </footer>
+    </div>
+  );
+}
+
+export default App;
