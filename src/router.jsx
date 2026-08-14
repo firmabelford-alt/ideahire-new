@@ -1,3 +1,4 @@
+```jsx
 import {
   BrowserRouter,
   Routes,
@@ -32,7 +33,6 @@ function Login() {
     }
 
     alert("Zalogowano pomyślnie!");
-
     navigate("/");
   }
 
@@ -44,9 +44,7 @@ function Login() {
         </Link>
 
         <div className="auth-header">
-          <span className="section-label">
-            Witaj ponownie
-          </span>
+          <span className="section-label">Witaj ponownie</span>
 
           <h1>Zaloguj się</h1>
 
@@ -56,10 +54,7 @@ function Login() {
           </p>
         </div>
 
-        <form
-          className="auth-form"
-          onSubmit={handleLogin}
-        >
+        <form className="auth-form" onSubmit={handleLogin}>
           <label>
             Adres e-mail
 
@@ -127,7 +122,9 @@ function Register() {
     });
 
     if (error) {
-      alert(`Nie udało się utworzyć konta: ${error.message}`);
+      alert(
+        `Nie udało się utworzyć konta: ${error.message}`
+      );
       return;
     }
 
@@ -210,7 +207,7 @@ function Register() {
               type="password"
               name="password"
               placeholder="Utwórz hasło"
-              minLength="6"
+              minLength={6}
               required
             />
           </label>
@@ -401,3 +398,4 @@ function Router() {
 }
 
 export default Router;
+```
