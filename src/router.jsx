@@ -1,19 +1,31 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+} from "react-router-dom";
+
 import App from "./App";
 
 function Login() {
   return (
     <div className="page">
       <div className="auth-card">
-        <a className="logo" href="/">
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
-        </a>
+        </Link>
 
         <div className="auth-header">
-          <span className="section-label">Witaj ponownie</span>
+          <span className="section-label">
+            Witaj ponownie
+          </span>
+
           <h1>Zaloguj się</h1>
+
           <p>
-            Zaloguj się do swojego konta IdeaHire i przejdź do swoich projektów.
+            Zaloguj się do swojego konta IdeaHire i przejdź
+            do swoich projektów.
           </p>
         </div>
 
@@ -23,6 +35,7 @@ function Login() {
         >
           <label>
             Adres e-mail
+
             <input
               type="email"
               name="email"
@@ -33,6 +46,7 @@ function Login() {
 
           <label>
             Hasło
+
             <input
               type="password"
               name="password"
@@ -41,14 +55,19 @@ function Login() {
             />
           </label>
 
-          <button className="btn btn-dark btn-large" type="submit">
+          <button
+            className="btn btn-dark btn-large"
+            type="submit"
+          >
             Zaloguj się →
           </button>
         </form>
 
         <p className="auth-footer">
           Nie masz jeszcze konta?{" "}
-          <a href="/register">Utwórz konto</a>
+          <Link to="/register">
+            Utwórz konto
+          </Link>
         </p>
       </div>
     </div>
@@ -59,15 +78,19 @@ function Register() {
   return (
     <div className="page">
       <div className="auth-card">
-        <a className="logo" href="/">
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
-        </a>
+        </Link>
 
         <div className="auth-header">
-          <span className="section-label">IdeaHire</span>
+          <span className="section-label">
+            Dołącz do IdeaHire
+          </span>
+
           <h1>Utwórz konto</h1>
+
           <p>
-            Załóż konto i zacznij korzystać z IdeaHire.
+            Załóż swoje konto i zacznij korzystać z IdeaHire.
           </p>
         </div>
 
@@ -77,6 +100,7 @@ function Register() {
         >
           <label>
             Imię
+
             <input
               type="text"
               name="name"
@@ -87,6 +111,7 @@ function Register() {
 
           <label>
             Adres e-mail
+
             <input
               type="email"
               name="email"
@@ -97,6 +122,7 @@ function Register() {
 
           <label>
             Hasło
+
             <input
               type="password"
               name="password"
@@ -105,14 +131,19 @@ function Register() {
             />
           </label>
 
-          <button className="btn btn-dark btn-large" type="submit">
+          <button
+            className="btn btn-dark btn-large"
+            type="submit"
+          >
             Utwórz konto →
           </button>
         </form>
 
         <p className="auth-footer">
           Masz już konto?{" "}
-          <a href="/login">Zaloguj się</a>
+          <Link to="/login">
+            Zaloguj się
+          </Link>
         </p>
       </div>
     </div>
@@ -123,15 +154,20 @@ function FindTalent() {
   return (
     <div className="page">
       <div className="app-page">
-        <a className="logo" href="/">
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
-        </a>
+        </Link>
 
         <div className="app-page-header">
-          <span className="section-label">Dla zlecających</span>
+          <span className="section-label">
+            Dla zlecających
+          </span>
+
           <h1>Znajdź wykonawcę</h1>
+
           <p>
-            Opisz swój projekt i znajdź osobę, która pomoże Ci go zrealizować.
+            Opisz swój projekt i znajdź osobę, która pomoże
+            Ci go zrealizować.
           </p>
         </div>
 
@@ -141,29 +177,41 @@ function FindTalent() {
         >
           <label>
             Czego potrzebujesz?
+
             <input
               type="text"
+              name="title"
               placeholder="Np. nowoczesna strona internetowa"
+              required
             />
           </label>
 
           <label>
             Opisz swój projekt
+
             <textarea
+              name="description"
               placeholder="Napisz kilka słów o tym, czego potrzebujesz..."
               rows="6"
+              required
             />
           </label>
 
           <label>
             Budżet
+
             <input
               type="text"
+              name="budget"
               placeholder="Np. 1 500–3 000 zł"
+              required
             />
           </label>
 
-          <button className="btn btn-dark btn-large" type="submit">
+          <button
+            className="btn btn-dark btn-large"
+            type="submit"
+          >
             Szukaj wykonawcy →
           </button>
         </form>
@@ -194,27 +242,41 @@ function Jobs() {
   return (
     <div className="page">
       <div className="app-page">
-        <a className="logo" href="/">
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
-        </a>
+        </Link>
 
         <div className="app-page-header">
-          <span className="section-label">Dla wykonawców</span>
+          <span className="section-label">
+            Dla wykonawców
+          </span>
+
           <h1>Znajdź zlecenie</h1>
+
           <p>
-            Przeglądaj projekty i znajdź zlecenie dopasowane do Twoich
-            umiejętności.
+            Przeglądaj projekty i znajdź zlecenie dopasowane
+            do Twoich umiejętności.
           </p>
         </div>
 
         <div className="jobs-list">
           {jobs.map((job) => (
-            <article className="job-card" key={job.title}>
-              <span className="section-label">{job.category}</span>
+            <article
+              className="job-card"
+              key={job.title}
+            >
+              <span className="section-label">
+                {job.category}
+              </span>
+
               <h2>{job.title}</h2>
+
               <p>Budżet: {job.budget}</p>
 
-              <button className="btn btn-dark" type="button">
+              <button
+                className="btn btn-dark"
+                type="button"
+              >
                 Zobacz zlecenie →
               </button>
             </article>
@@ -225,16 +287,33 @@ function Jobs() {
   );
 }
 
-export default function Router() {
+function Router() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
+
         <Route path="/login" element={<Login />} />
+
         <Route path="/register" element={<Register />} />
-        <Route path="/find-talent" element={<FindTalent />} />
-        <Route path="/jobs" element={<Jobs />} />
+
+        <Route
+          path="/find-talent"
+          element={<FindTalent />}
+        />
+
+        <Route
+          path="/jobs"
+          element={<Jobs />}
+        />
+
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
       </Routes>
     </BrowserRouter>
   );
 }
+
+export default Router;
