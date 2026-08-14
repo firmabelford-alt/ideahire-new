@@ -1,4 +1,3 @@
-jsx
 import "./App.css";
 import { Link } from "react-router-dom";
 
@@ -15,9 +14,9 @@ function App() {
   return (
     <div className="app">
       <header className="navbar">
-        <a className="logo" href="/">
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
-        </a>
+        </Link>
 
         <nav className="nav-links">
           <a href="#how-it-works">Jak to działa</a>
@@ -58,11 +57,17 @@ function App() {
             </p>
 
             <div className="hero-actions">
-              <Link className="btn btn-dark btn-large" to="/find-talent">
+              <Link
+                className="btn btn-dark btn-large"
+                to="/find-talent"
+              >
                 Znajdź wykonawcę <span>→</span>
               </Link>
 
-              <Link className="btn btn-outline btn-large" to="/jobs">
+              <Link
+                className="btn btn-outline btn-large"
+                to="/jobs"
+              >
                 Znajdź zlecenie
               </Link>
             </div>
@@ -131,7 +136,10 @@ function App() {
           </div>
         </section>
 
-        <section className="categories section" id="categories">
+        <section
+          className="categories section"
+          id="categories"
+        >
           <div className="section-heading">
             <div>
               <span className="section-label">Kategorie</span>
@@ -151,7 +159,11 @@ function App() {
 
           <div className="category-grid">
             {categories.map((category, index) => (
-              <button className="category-card" key={category} type="button">
+              <button
+                className="category-card"
+                key={category}
+                type="button"
+              >
                 <span className="category-number">
                   0{index + 1}
                 </span>
@@ -166,13 +178,20 @@ function App() {
           </div>
         </section>
 
-        <section className="how section" id="how-it-works">
+        <section
+          className="how section"
+          id="how-it-works"
+        >
           <div className="section-heading centered">
-            <span className="section-label">Jak to działa</span>
+            <span className="section-label">
+              Jak to działa
+            </span>
 
             <h2>Prościej się nie da.</h2>
 
-            <p>Trzy kroki. Jeden konkretny cel.</p>
+            <p>
+              Trzy kroki. Jeden konkretny cel.
+            </p>
           </div>
 
           <div className="steps">
@@ -211,9 +230,14 @@ function App() {
           </div>
         </section>
 
-        <section className="split-section section" id="for-users">
+        <section
+          className="split-section section"
+          id="for-users"
+        >
           <div className="split-card">
-            <span className="section-label">Dla zlecających</span>
+            <span className="section-label">
+              Dla zlecających
+            </span>
 
             <h2>Masz coś do zrobienia?</h2>
 
@@ -222,13 +246,18 @@ function App() {
               i może zająć się Twoim projektem.
             </p>
 
-            <Link className="btn btn-light" to="/find-talent">
+            <Link
+              className="btn btn-light"
+              to="/find-talent"
+            >
               Dodaj zlecenie →
             </Link>
           </div>
 
           <div className="split-card light">
-            <span className="section-label">Dla wykonawców</span>
+            <span className="section-label">
+              Dla wykonawców
+            </span>
 
             <h2>Masz coś do zaoferowania?</h2>
 
@@ -237,7 +266,10 @@ function App() {
               projekty i rozwijaj swoje portfolio.
             </p>
 
-            <Link className="btn btn-outline" to="/jobs">
+            <Link
+              className="btn btn-outline"
+              to="/jobs"
+            >
               Znajdź zlecenia →
             </Link>
           </div>
@@ -252,7 +284,10 @@ function App() {
             zaczyna się tutaj.
           </h2>
 
-          <Link className="btn btn-light btn-large" to="/register">
+          <Link
+            className="btn btn-light btn-large"
+            to="/register"
+          >
             Zacznij teraz →
           </Link>
         </section>
@@ -260,9 +295,9 @@ function App() {
 
       <footer className="footer">
         <div>
-          <a className="logo" href="/">
+          <Link className="logo" to="/">
             Idea<span>Hire</span>
-          </a>
+          </Link>
 
           <p>Prosto. Szybko. Skutecznie.</p>
         </div>
