@@ -55,6 +55,70 @@ function Login() {
   );
 }
 
+function Register() {
+  return (
+    <div className="page">
+      <div className="auth-card">
+        <a className="logo" href="/">
+          Idea<span>Hire</span>
+        </a>
+
+        <div className="auth-header">
+          <span className="section-label">IdeaHire</span>
+          <h1>Utwórz konto</h1>
+          <p>
+            Załóż konto i zacznij korzystać z IdeaHire.
+          </p>
+        </div>
+
+        <form
+          className="auth-form"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            Imię
+            <input
+              type="text"
+              name="name"
+              placeholder="Twoje imię"
+              required
+            />
+          </label>
+
+          <label>
+            Adres e-mail
+            <input
+              type="email"
+              name="email"
+              placeholder="twoj@email.com"
+              required
+            />
+          </label>
+
+          <label>
+            Hasło
+            <input
+              type="password"
+              name="password"
+              placeholder="Utwórz hasło"
+              required
+            />
+          </label>
+
+          <button className="btn btn-dark btn-large" type="submit">
+            Utwórz konto →
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Masz już konto?{" "}
+          <a href="/login">Zaloguj się</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function FindTalent() {
   return (
     <div className="page">
@@ -71,7 +135,10 @@ function FindTalent() {
           </p>
         </div>
 
-        <form className="project-form">
+        <form
+          className="project-form"
+          onSubmit={(event) => event.preventDefault()}
+        >
           <label>
             Czego potrzebujesz?
             <input
@@ -164,6 +231,7 @@ export default function Router() {
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/find-talent" element={<FindTalent />} />
         <Route path="/jobs" element={<Jobs />} />
       </Routes>
