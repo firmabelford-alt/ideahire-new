@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   BrowserRouter,
@@ -29,6 +28,8 @@ function Login() {
     });
 
     if (error) {
+      console.error("LOGIN ERROR:", error);
+
       alert(`Nie udało się zalogować: ${error.message}`);
       return;
     }
@@ -109,6 +110,14 @@ function Register() {
     const email = formData.get("email");
     const password = formData.get("password");
 
+    console.log("REGISTER START");
+    console.log("EMAIL:", email);
+    console.log("NAME:", name);
+
+    // ==========================================
+    // KROK 1 — SUPABASE AUTH
+    // ==========================================
+
     const {
       data,
       error,
@@ -122,36 +131,71 @@ function Register() {
       },
     });
 
+    console.log("SIGNUP DATA:", data);
+    console.log("SIGNUP ERROR:", error);
+
     if (error) {
+      console.error("SIGNUP ERROR:", error);
+
       alert(
         `Nie udało się utworzyć konta: ${error.message}`
       );
+
       return;
     }
 
-    if (!data.user) {
-      alert("Nie udało się utworzyć użytkownika.");
+    if (!data || !data.user) {
+      console.error("SUPABASE DID NOT RETURN USER:", data);
+
+      alert(
+        "Supabase nie zwrócił użytkownika po rejestracji."
+      );
+
       return;
     }
+
+    console.log(
+      "USER CREATED:",
+      data.user.id
+    );
+
+    // ==========================================
+    // KROK 2 — TABELA USERS
+    // ==========================================
 
     const { error: profileError } = await supabase
       .from("users")
       .insert([
         {
           id: data.user.id,
-          name,
-          email,
+          name: name,
+          email: email,
         },
       ]);
 
+    console.log(
+      "PROFILE ERROR:",
+      profileError
+    );
+
     if (profileError) {
+      console.error(
+        "USERS TABLE ERROR:",
+        profileError
+      );
+
       alert(
         `Konto zostało utworzone, ale nie udało się zapisać profilu: ${profileError.message}`
       );
+
       return;
     }
 
-    alert("Konto zostało utworzone pomyślnie!");
+    console.log("PROFILE CREATED SUCCESSFULLY");
+
+    alert(
+      "Konto zostało utworzone pomyślnie!"
+    );
 
     navigate("/login");
   }
@@ -255,7 +299,9 @@ function FindTalent() {
 
         <form
           className="project-form"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={(event) =>
+            event.preventDefault()
+          }
         >
           <label>
             Czego potrzebujesz?
@@ -373,11 +419,20 @@ function Router() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App />} />
+        <Route
+          path="/"
+          element={<App />}
+        />
 
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
         <Route
           path="/find-talent"
@@ -391,7 +446,12 @@ function Router() {
 
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
         />
       </Routes>
     </BrowserRouter>
