@@ -58,17 +58,11 @@ function App() {
             </p>
 
             <div className="hero-actions">
-              <Link
-                className="btn btn-dark btn-large"
-                to="/find-talent"
-              >
+              <Link className="btn btn-dark btn-large" to="/find-talent">
                 Znajdź wykonawcę <span>→</span>
               </Link>
 
-              <Link
-                className="btn btn-outline btn-large"
-                to="/jobs"
-              >
+              <Link className="btn btn-outline btn-large" to="/jobs">
                 Znajdź zlecenie
               </Link>
             </div>
@@ -157,7 +151,7 @@ function App() {
 
           <div className="category-grid">
             {categories.map((category, index) => (
-              <button className="category-card" key={category}>
+              <button className="category-card" key={category} type="button">
                 <span className="category-number">
                   0{index + 1}
                 </span>
@@ -178,9 +172,7 @@ function App() {
 
             <h2>Prościej się nie da.</h2>
 
-            <p>
-              Trzy kroki. Jeden konkretny cel.
-            </p>
+            <p>Trzy kroki. Jeden konkretny cel.</p>
           </div>
 
           <div className="steps">
@@ -260,10 +252,7 @@ function App() {
             zaczyna się tutaj.
           </h2>
 
-          <Link
-            className="btn btn-light btn-large"
-            to="/register"
-          >
+          <Link className="btn btn-light btn-large" to="/register">
             Zacznij teraz →
           </Link>
         </section>
