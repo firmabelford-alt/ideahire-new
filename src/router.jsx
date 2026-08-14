@@ -4,11 +4,38 @@ import {
   Route,
   Navigate,
   Link,
+  useNavigate,
 } from "react-router-dom";
 
 import App from "./App";
+import { supabase } from "./supabase";
 
 function Login() {
+  const navigate = useNavigate();
+
+  async function handleLogin(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert(`Nie udało się zalogować: ${error.message}`);
+      return;
+    }
+
+    alert("Zalogowano pomyślnie!");
+
+    navigate("/");
+  }
+
   return (
     <div className="page">
       <div className="auth-card">
@@ -31,7 +58,7 @@ function Login() {
 
         <form
           className="auth-form"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleLogin}
         >
           <label>
             Adres e-mail
@@ -75,6 +102,62 @@ function Login() {
 }
 
 function Register() {
+  const navigate = useNavigate();
+
+  async function handleRegister(event) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    const {
+      data,
+      error,
+    } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
+    });
+
+    if (error) {
+      alert(`Nie udało się utworzyć konta: ${error.message}`);
+      return;
+    }
+
+    if (!data.user) {
+      alert("Nie udało się utworzyć użytkownika.");
+      return;
+    }
+
+    const { error: profileError } = await supabase
+      .from("users")
+      .insert([
+        {
+          id: data.user.id,
+          name,
+          email,
+        },
+      ]);
+
+    if (profileError) {
+      alert(
+        `Konto zostało utworzone, ale nie udało się zapisać profilu: ${profileError.message}`
+      );
+      return;
+    }
+
+    alert("Konto zostało utworzone pomyślnie!");
+
+    navigate("/login");
+  }
+
   return (
     <div className="page">
       <div className="auth-card">
@@ -96,7 +179,7 @@ function Register() {
 
         <form
           className="auth-form"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={handleRegister}
         >
           <label>
             Imię
@@ -127,6 +210,7 @@ function Register() {
               type="password"
               name="password"
               placeholder="Utwórz hasło"
+              minLength="6"
               required
             />
           </label>
