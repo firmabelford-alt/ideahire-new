@@ -1,5 +1,7 @@
+```jsx
 import "./App.css";
 import { Link } from "react-router-dom";
+a
 const categories = [
   "Programowanie",
   "Grafika i design",
@@ -25,11 +27,12 @@ function App() {
 
         <div className="nav-actions">
           <Link className="btn btn-ghost" to="/login">
-  Zaloguj się
-</Link>
-          <Link className="btn btn-dark" to="/login">
-  Zacznij teraz
-</Link>
+            Zaloguj się
+          </Link>
+
+          <Link className="btn btn-dark" to="/register">
+            Zacznij teraz
+          </Link>
         </div>
       </header>
 
@@ -55,13 +58,19 @@ function App() {
             </p>
 
             <div className="hero-actions">
-              <Link className="btn btn-dark btn-large" to="/find-talent">
-  Znajdź wykonawcę <span>→</span>
-</Link>
+              <Link
+                className="btn btn-dark btn-large"
+                to="/find-talent"
+              >
+                Znajdź wykonawcę <span>→</span>
+              </Link>
 
-             <Link className="btn btn-outline btn-large" to="/jobs">
-  Znajdź zlecenie
-</Link>
+              <Link
+                className="btn btn-outline btn-large"
+                to="/jobs"
+              >
+                Znajdź zlecenie
+              </Link>
             </div>
 
             <div className="hero-stats">
@@ -251,9 +260,12 @@ function App() {
             zaczyna się tutaj.
           </h2>
 
-          <button className="btn btn-light btn-large">
+          <Link
+            className="btn btn-light btn-large"
+            to="/register"
+          >
             Zacznij teraz →
-          </button>
+          </Link>
         </section>
       </main>
 
@@ -279,3 +291,4 @@ function App() {
 }
 
 export default App;
+```
