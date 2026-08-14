@@ -2,7 +2,57 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 
 function Login() {
-  return <h1>Logowanie</h1>;
+  return (
+    <div className="page">
+      <div className="auth-card">
+        <a className="logo" href="/">
+          Idea<span>Hire</span>
+        </a>
+
+        <div className="auth-header">
+          <span className="section-label">Witaj ponownie</span>
+          <h1>Zaloguj się</h1>
+          <p>
+            Zaloguj się do swojego konta IdeaHire i przejdź do swoich projektów.
+          </p>
+        </div>
+
+        <form
+          className="auth-form"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <label>
+            Adres e-mail
+            <input
+              type="email"
+              name="email"
+              placeholder="twoj@email.com"
+              required
+            />
+          </label>
+
+          <label>
+            Hasło
+            <input
+              type="password"
+              name="password"
+              placeholder="Wpisz swoje hasło"
+              required
+            />
+          </label>
+
+          <button className="btn btn-dark btn-large" type="submit">
+            Zaloguj się →
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Nie masz jeszcze konta?{" "}
+          <a href="/register">Utwórz konto</a>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function FindTalent() {
