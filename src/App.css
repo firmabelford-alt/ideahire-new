@@ -654,3 +654,267 @@ a {
     flex-wrap: wrap;
   }
 }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Arial, sans-serif;
+  background: #ffffff;
+  color: #111111;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* APP PAGES */
+
+.page {
+  min-height: 100vh;
+  background: #f7f7f5;
+  padding: 32px 20px;
+}
+
+.app-page {
+  width: min(900px, 100%);
+  margin: 0 auto;
+}
+
+.app-page > .logo {
+  display: inline-block;
+  margin-bottom: 70px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  color: #777777;
+}
+
+.app-page-header {
+  max-width: 700px;
+  margin-bottom: 42px;
+}
+
+.app-page-header h1 {
+  margin: 12px 0 16px;
+  font-size: clamp(42px, 7vw, 72px);
+  line-height: 0.98;
+  letter-spacing: -3px;
+}
+
+.app-page-header p {
+  max-width: 600px;
+  margin: 0;
+  color: #666666;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* AUTH */
+
+.auth-card {
+  width: min(500px, 100%);
+  margin: 50px auto;
+  padding: 42px;
+  background: #ffffff;
+  border: 1px solid #e8e8e5;
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+}
+
+.auth-card .logo {
+  display: inline-block;
+  margin-bottom: 60px;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.auth-header h1 {
+  margin: 10px 0;
+  font-size: 46px;
+  letter-spacing: -2px;
+}
+
+.auth-header p {
+  color: #666666;
+  line-height: 1.6;
+}
+
+.auth-form {
+  display: grid;
+  gap: 22px;
+  margin-top: 35px;
+}
+
+.auth-form label,
+.project-form label {
+  display: grid;
+  gap: 9px;
+  color: #333333;
+  font-weight: 600;
+}
+
+.auth-form input,
+.project-form input,
+.project-form textarea {
+  width: 100%;
+  border: 1px solid #ddddda;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 15px 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-form input:focus,
+.project-form input:focus,
+.project-form textarea:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.auth-form button {
+  border: 0;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.auth-footer {
+  margin: 25px 0 0;
+  text-align: center;
+  color: #777777;
+}
+
+.auth-footer a {
+  color: #111111;
+  font-weight: 700;
+}
+
+/* PROJECT FORM */
+
+.project-form {
+  display: grid;
+  gap: 24px;
+  max-width: 700px;
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #e8e8e5;
+  border-radius: 24px;
+}
+
+.project-form textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.project-form button {
+  width: fit-content;
+  border: 0;
+  cursor: pointer;
+}
+
+/* JOBS */
+
+.jobs-list {
+  display: grid;
+  gap: 18px;
+}
+
+.job-card {
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e8e8e5;
+  border-radius: 22px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.job-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.07);
+}
+
+.job-card h2 {
+  margin: 12px 0 10px;
+  font-size: 25px;
+  letter-spacing: -0.7px;
+}
+
+.job-card p {
+  margin: 0 0 22px;
+  color: #666666;
+}
+
+.job-card button {
+  border: 0;
+  cursor: pointer;
+}
+
+/* LABEL */
+
+.section-label {
+  display: inline-block;
+  color: #777777;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+  .page {
+    padding: 20px 16px;
+  }
+
+  .app-page > .logo {
+    margin-bottom: 45px;
+  }
+
+  .app-page-header h1 {
+    letter-spacing: -2px;
+  }
+
+  .auth-card {
+    margin: 20px auto;
+    padding: 28px 22px;
+    border-radius: 22px;
+  }
+
+  .auth-card .logo {
+    margin-bottom: 45px;
+  }
+
+  .auth-header h1 {
+    font-size: 38px;
+  }
+
+  .project-form {
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .job-card {
+    padding: 22px;
+  }
+}
