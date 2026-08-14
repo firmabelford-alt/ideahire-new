@@ -1,4 +1,4 @@
-```jsx
+jsx
 import {
   BrowserRouter,
   Routes,
@@ -398,4 +398,3 @@ function Router() {
 }
 
 export default Router;
-```
