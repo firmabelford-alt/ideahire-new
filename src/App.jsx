@@ -1,7 +1,7 @@
 ```jsx
 import "./App.css";
 import { Link } from "react-router-dom";
-a
+
 const categories = [
   "Programowanie",
   "Grafika i design",
@@ -230,9 +230,9 @@ function App() {
               i może zająć się Twoim projektem.
             </p>
 
-            <button className="btn btn-light">
+            <Link className="btn btn-light" to="/find-talent">
               Dodaj zlecenie →
-            </button>
+            </Link>
           </div>
 
           <div className="split-card light">
@@ -245,9 +245,9 @@ function App() {
               projekty i rozwijaj swoje portfolio.
             </p>
 
-            <button className="btn btn-outline">
+            <Link className="btn btn-outline" to="/jobs">
               Znajdź zlecenia →
-            </button>
+            </Link>
           </div>
         </section>
 
