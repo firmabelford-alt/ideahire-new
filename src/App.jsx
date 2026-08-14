@@ -24,8 +24,12 @@ function App() {
         </nav>
 
         <div className="nav-actions">
-          <button className="btn btn-ghost">Zaloguj się</button>
-          <button className="btn btn-dark">Zacznij teraz</button>
+          <Link className="btn btn-ghost" to="/login">
+  Zaloguj się
+</Link>
+          <Link className="btn btn-dark" to="/login">
+  Zacznij teraz
+</Link>
         </div>
       </header>
 
