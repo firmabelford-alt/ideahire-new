@@ -56,7 +56,56 @@ function FindTalent() {
 }
 
 function Jobs() {
-  return <h1>Znajdź zlecenie</h1>;
+  const jobs = [
+    {
+      title: "Nowoczesna strona internetowa",
+      category: "Programowanie",
+      budget: "1 500–3 000 zł",
+    },
+    {
+      title: "Logo dla nowej marki",
+      category: "Grafika i design",
+      budget: "500–1 000 zł",
+    },
+    {
+      title: "Materiały do social media",
+      category: "Marketing",
+      budget: "800–1 500 zł",
+    },
+  ];
+
+  return (
+    <div className="page">
+      <div className="app-page">
+        <a className="logo" href="/">
+          Idea<span>Hire</span>
+        </a>
+
+        <div className="app-page-header">
+          <span className="section-label">Dla wykonawców</span>
+          <h1>Znajdź zlecenie</h1>
+          <p>
+            Przeglądaj projekty i znajdź zlecenie dopasowane do Twoich
+            umiejętności.
+          </p>
+        </div>
+
+        <div className="jobs-list">
+          {jobs.map((job) => (
+            <article className="job-card" key={job.title}>
+              <span className="section-label">{job.category}</span>
+              <h2>{job.title}</h2>
+              <p>Budżet: {job.budget}</p>
+
+              <button className="btn btn-dark" type="button">
+                Zobacz zlecenie →
+              </button>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function Router() {
