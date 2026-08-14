@@ -55,13 +55,13 @@ function App() {
             </p>
 
             <div className="hero-actions">
-              <button className="btn btn-dark btn-large">
-                Znajdź wykonawcę <span>→</span>
-              </button>
+              <Link className="btn btn-dark btn-large" to="/find-talent">
+  Znajdź wykonawcę <span>→</span>
+</Link>
 
-              <button className="btn btn-outline btn-large">
-                Znajdź zlecenie
-              </button>
+             <Link className="btn btn-outline btn-large" to="/jobs">
+  Znajdź zlecenie
+</Link>
             </div>
 
             <div className="hero-stats">
