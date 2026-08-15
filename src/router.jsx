@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -162,6 +163,8 @@ function PublicOnlyRoute({ children }) {
 function AccountNavbar() {
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
   async function handleLogout() {
     const { error } =
       await supabase.auth.signOut();
@@ -178,8 +181,20 @@ function AccountNavbar() {
     });
   }
 
+  const avatarUrl =
+    user?.user_metadata?.avatar_url || "";
+
+  const userName =
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Użytkownik";
+
+  const initial =
+    userName.charAt(0).toUpperCase();
+
   return (
     <header className="navbar">
+
       <Link
         className="logo"
         to="/"
@@ -202,11 +217,25 @@ function AccountNavbar() {
       </nav>
 
       <div className="nav-actions">
+
         <Link
-          className="btn btn-ghost"
+          className="account-mini"
           to="/account"
         >
-          Moje konto
+          <span className="account-mini-avatar">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt=""
+              />
+            ) : (
+              initial
+            )}
+          </span>
+
+          <span className="account-mini-name">
+            {userName}
+          </span>
         </Link>
 
         <button
@@ -216,6 +245,7 @@ function AccountNavbar() {
         >
           Wyloguj się
         </button>
+
       </div>
     </header>
   );
@@ -233,10 +263,17 @@ function Login() {
     loading: authLoading,
   } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
     if (!authLoading && isLoggedIn) {
@@ -290,16 +327,13 @@ function Login() {
     });
   }
 
-  if (authLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (isLoggedIn) {
+  if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
   }
 
   return (
     <div className="page">
+
       <div className="auth-card">
 
         <Link
@@ -310,6 +344,7 @@ function Login() {
         </Link>
 
         <div className="auth-header">
+
           <span className="section-label">
             Witaj ponownie
           </span>
@@ -321,6 +356,7 @@ function Login() {
           <p>
             Zaloguj się do swojego konta IdeaHire.
           </p>
+
         </div>
 
         <form
@@ -400,9 +436,14 @@ function Register() {
     loading: authLoading,
   } = useAuth();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
 
   const [loading, setLoading] =
     useState(false);
@@ -479,16 +520,13 @@ function Register() {
     });
   }
 
-  if (authLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (isLoggedIn) {
+  if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
   }
 
   return (
     <div className="page">
+
       <div className="auth-card">
 
         <Link
@@ -596,73 +634,87 @@ function Register() {
 }
 
 /* =========================================================
-   ZMNIEJSZANIE I KONWERSJA ZDJĘCIA
+   ZDJĘCIE — 400 × 400 JPEG
 ========================================================= */
 
 async function resizeAndConvertImage(file) {
   return new Promise((resolve, reject) => {
+
     const image = new Image();
 
     const objectUrl =
       URL.createObjectURL(file);
 
     image.onload = () => {
+
       URL.revokeObjectURL(objectUrl);
 
-      const MAX_SIZE = 400;
+      const SIZE = 400;
 
-      let width = image.width;
-      let height = image.height;
+      const sourceWidth =
+        image.width;
+
+      const sourceHeight =
+        image.height;
 
       /*
-        Zachowujemy proporcje zdjęcia.
-        Następnie przycinamy je wizualnie
-        przez object-fit: cover.
+        Bierzemy kwadrat ze środka zdjęcia.
       */
 
-      if (width > height) {
-        if (width > MAX_SIZE) {
-          height =
-            height *
-            (MAX_SIZE / width);
+      const sourceSize =
+        Math.min(
+          sourceWidth,
+          sourceHeight
+        );
 
-          width = MAX_SIZE;
-        }
-      } else {
-        if (height > MAX_SIZE) {
-          width =
-            width *
-            (MAX_SIZE / height);
+      const sourceX =
+        (sourceWidth - sourceSize) / 2;
 
-          height = MAX_SIZE;
-        }
-      }
+      const sourceY =
+        (sourceHeight - sourceSize) / 2;
 
       const canvas =
         document.createElement("canvas");
 
-      canvas.width =
-        Math.round(width);
-
-      canvas.height =
-        Math.round(height);
+      canvas.width = SIZE;
+      canvas.height = SIZE;
 
       const context =
         canvas.getContext("2d");
 
+      if (!context) {
+        reject(
+          new Error(
+            "Przeglądarka nie obsługuje Canvas."
+          )
+        );
+
+        return;
+      }
+
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = "high";
 
+      /*
+        Kwadratowe przycięcie + skalowanie
+        do dokładnie 400 × 400.
+      */
+
       context.drawImage(
         image,
+        sourceX,
+        sourceY,
+        sourceSize,
+        sourceSize,
         0,
         0,
-        canvas.width,
-        canvas.height
+        SIZE,
+        SIZE
       );
 
       canvas.toBlob(
         (blob) => {
+
           if (!blob) {
             reject(
               new Error(
@@ -674,6 +726,7 @@ async function resizeAndConvertImage(file) {
           }
 
           resolve(blob);
+
         },
         "image/jpeg",
         0.82
@@ -681,6 +734,7 @@ async function resizeAndConvertImage(file) {
     };
 
     image.onerror = () => {
+
       URL.revokeObjectURL(objectUrl);
 
       reject(
@@ -699,6 +753,7 @@ async function resizeAndConvertImage(file) {
 ========================================================= */
 
 function Account() {
+
   const {
     user,
     loading: authLoading,
@@ -722,6 +777,7 @@ function Account() {
     useState("");
 
   useEffect(() => {
+
     if (!user) return;
 
     setName(
@@ -734,6 +790,7 @@ function Account() {
       user.user_metadata?.avatar_url ||
       ""
     );
+
   }, [user]);
 
   if (authLoading) {
@@ -754,6 +811,7 @@ function Account() {
   ======================================================= */
 
   async function handleAvatarChange(event) {
+
     const file =
       event.target.files?.[0];
 
@@ -762,49 +820,47 @@ function Account() {
     setMessage("");
 
     if (!file.type.startsWith("image/")) {
+
       setMessage(
         "Wybierz plik graficzny."
       );
 
       event.target.value = "";
+
       return;
     }
 
-    /*
-      Maksymalny rozmiar oryginalnego
-      pliku przed konwersją.
-    */
-
     if (file.size > 10 * 1024 * 1024) {
+
       setMessage(
         "Oryginalne zdjęcie może mieć maksymalnie 10 MB."
       );
 
       event.target.value = "";
+
       return;
     }
 
     try {
+
       setUploading(true);
 
       /*
-        Zmniejszamy zdjęcie i konwertujemy
-        do JPEG.
+        1. Konwersja do 400 × 400 JPEG.
       */
 
       const convertedFile =
         await resizeAndConvertImage(file);
 
       /*
-        Unikalna nazwa pliku.
-        Każdy użytkownik ma swój folder.
+        2. Każdy użytkownik ma własny folder.
       */
 
       const filePath =
         `${user.id}/avatar-${Date.now()}.jpg`;
 
       /*
-        Upload do bucketa "avatars".
+        3. Upload do avatars.
       */
 
       const {
@@ -815,17 +871,14 @@ function Account() {
           filePath,
           convertedFile,
           {
-            contentType:
-              "image/jpeg",
-
-            cacheControl:
-              "3600",
-
+            contentType: "image/jpeg",
+            cacheControl: "3600",
             upsert: false,
           }
         );
 
       if (uploadError) {
+
         console.error(
           "AVATAR UPLOAD ERROR:",
           uploadError
@@ -839,7 +892,7 @@ function Account() {
       }
 
       /*
-        Pobieramy publiczny URL.
+        4. Pobieramy publiczny URL.
       */
 
       const {
@@ -852,6 +905,7 @@ function Account() {
         publicUrlData?.publicUrl;
 
       if (!publicUrl) {
+
         setMessage(
           "Zdjęcie zostało przesłane, ale nie udało się pobrać jego adresu."
         );
@@ -860,7 +914,8 @@ function Account() {
       }
 
       /*
-        Zapisujemy URL w user_metadata.
+        5. Zapisujemy avatar_url
+        razem z nazwą użytkownika.
       */
 
       const {
@@ -875,8 +930,9 @@ function Account() {
         });
 
       if (updateError) {
+
         console.error(
-          "AVATAR PROFILE UPDATE ERROR:",
+          "PROFILE UPDATE ERROR:",
           updateError
         );
 
@@ -888,16 +944,13 @@ function Account() {
       }
 
       /*
-        Natychmiast pokazujemy nowe zdjęcie.
+        6. Natychmiast aktualizujemy podgląd.
       */
 
       setAvatarUrl(publicUrl);
 
-      /*
-        Odświeżamy lokalne dane użytkownika.
-      */
-
       if (updatedUser?.user) {
+
         setName(
           updatedUser.user.user_metadata?.name ||
           name
@@ -909,6 +962,7 @@ function Account() {
       );
 
     } catch (error) {
+
       console.error(
         "AVATAR ERROR:",
         error
@@ -919,6 +973,7 @@ function Account() {
       );
 
     } finally {
+
       setUploading(false);
 
       event.target.value = "";
@@ -926,27 +981,52 @@ function Account() {
   }
 
   /* =======================================================
-     ZAPIS NAZWY
+     ZAPIS PROFILU
   ======================================================= */
 
   async function handleSave(event) {
+
     event.preventDefault();
 
     setSaving(true);
     setMessage("");
 
-    const {
-      error,
-    } = await supabase.auth.updateUser({
-      data: {
-        name: name.trim(),
-        avatar_url: avatarUrl,
-      },
-    });
+    try {
 
-    setSaving(false);
+      const {
+        data,
+        error,
+      } =
+        await supabase.auth.updateUser({
+          data: {
+            name: name.trim(),
+            avatar_url: avatarUrl || null,
+          },
+        });
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      if (data?.user) {
+
+        setName(
+          data.user.user_metadata?.name ||
+          name
+        );
+
+        setAvatarUrl(
+          data.user.user_metadata?.avatar_url ||
+          ""
+        );
+      }
+
+      setMessage(
+        "Zmiany zostały zapisane."
+      );
+
+    } catch (error) {
+
       console.error(
         "PROFILE UPDATE ERROR:",
         error
@@ -956,12 +1036,10 @@ function Account() {
         `Nie udało się zapisać profilu: ${error.message}`
       );
 
-      return;
-    }
+    } finally {
 
-    setMessage(
-      "Zmiany zostały zapisane."
-    );
+      setSaving(false);
+    }
   }
 
   /* =======================================================
@@ -969,11 +1047,14 @@ function Account() {
   ======================================================= */
 
   async function handleLogout() {
+
     const {
       error,
-    } = await supabase.auth.signOut();
+    } =
+      await supabase.auth.signOut();
 
     if (error) {
+
       alert(
         `Nie udało się wylogować: ${error.message}`
       );
@@ -1022,7 +1103,7 @@ function Account() {
         <section className="account-card">
 
           {/* =================================================
-              PROFIL
+              PODGLĄD PROFILU
           ================================================= */}
 
           <div className="profile-preview">
@@ -1030,15 +1111,19 @@ function Account() {
             <div className="profile-avatar-wrapper">
 
               {avatarUrl ? (
+
                 <img
                   src={avatarUrl}
                   alt="Zdjęcie profilowe"
                   className="profile-avatar"
                 />
+
               ) : (
+
                 <div className="profile-avatar profile-avatar-placeholder">
                   {initial}
                 </div>
+
               )}
 
             </div>
@@ -1062,59 +1147,60 @@ function Account() {
           ================================================= */}
 
           <form
-            className="auth-form"
+            className="auth-form account-form"
             onSubmit={handleSave}
           >
 
             <label>
+
               Zdjęcie profilowe
 
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={
-                  handleAvatarChange
-                }
+                onChange={handleAvatarChange}
                 disabled={uploading}
               />
 
               <small>
-                Zdjęcie zostanie automatycznie
-                zmniejszone i zapisane jako JPEG.
+                JPG, PNG lub WEBP. Zdjęcie zostanie
+                automatycznie przycięte do kwadratu
+                400 × 400 px i zapisane jako JPEG.
               </small>
+
             </label>
 
             {uploading && (
-              <p>
-                Przetwarzanie zdjęcia...
-              </p>
+              <div className="profile-upload-status">
+                Przetwarzanie i zapisywanie zdjęcia...
+              </div>
             )}
 
             <label>
+
               Imię / nazwa
 
               <input
                 type="text"
                 value={name}
                 onChange={(event) =>
-                  setName(
-                    event.target.value
-                  )
+                  setName(event.target.value)
                 }
                 required
               />
+
             </label>
 
             <label>
+
               E-mail
 
               <input
                 type="email"
-                value={
-                  user.email || ""
-                }
+                value={user.email || ""}
                 disabled
               />
+
             </label>
 
             {message && (
@@ -1176,6 +1262,7 @@ function Account() {
 ========================================================= */
 
 function FindTalent() {
+
   const {
     isLoggedIn,
     loading,
@@ -1189,8 +1276,11 @@ function FindTalent() {
     <div className="page">
 
       {isLoggedIn ? (
+
         <AccountNavbar />
+
       ) : (
+
         <header className="navbar">
 
           <Link
@@ -1296,6 +1386,7 @@ function FindTalent() {
 ========================================================= */
 
 function Jobs() {
+
   const jobs = [
     {
       title:
@@ -1350,6 +1441,7 @@ function Jobs() {
         <div className="jobs-list">
 
           {jobs.map((job) => (
+
             <article
               className="job-card"
               key={job.title}
@@ -1375,6 +1467,7 @@ function Jobs() {
               </button>
 
             </article>
+
           ))}
 
         </div>
@@ -1389,6 +1482,7 @@ function Jobs() {
 ========================================================= */
 
 function Home() {
+
   const { loading } = useAuth();
 
   if (loading) {
@@ -1403,6 +1497,7 @@ function Home() {
 ========================================================= */
 
 function Router() {
+
   return (
     <BrowserRouter>
 
@@ -1412,9 +1507,7 @@ function Router() {
 
           <Route
             path="/"
-            element={
-              <Home />
-            }
+            element={<Home />}
           />
 
           <Route
