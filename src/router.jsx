@@ -12,12 +12,54 @@ import {
 import App from "./App";
 import { supabase } from "./supabase";
 
-// ==========================================
-// LOGOWANIE
-// ==========================================
+/* =========================================================
+   KOMPONENT: NAVIGACJA DLA ZALOGOWANEGO UŻYTKOWNIKA
+========================================================= */
+
+function AccountNav() {
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      alert(`Nie udało się wylogować: ${error.message}`);
+      return;
+    }
+
+    navigate("/");
+  }
+
+  return (
+    <header className="account-navbar">
+      <Link className="logo" to="/">
+        Idea<span>Hire</span>
+      </Link>
+
+      <div className="account-nav-actions">
+        <Link className="btn btn-ghost" to="/account">
+          Moje konto
+        </Link>
+
+        <button
+          className="btn btn-dark"
+          type="button"
+          onClick={handleLogout}
+        >
+          Wyloguj się
+        </button>
+      </div>
+    </header>
+  );
+}
+
+/* =========================================================
+   KOMPONENT: LOGIN
+========================================================= */
 
 function Login() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin(event) {
     event.preventDefault();
@@ -27,35 +69,23 @@ function Login() {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    const { data, error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    setLoading(false);
 
     if (error) {
       console.error("LOGIN ERROR:", error);
 
-      alert(
-        `Nie udało się zalogować: ${error.message}`
-      );
-
+      alert(`Nie udało się zalogować: ${error.message}`);
       return;
     }
 
-    console.log("LOGIN SUCCESS:", data);
-    console.log("LOGGED USER:", data?.user);
-
-    // ==========================================
-    // TEST - JEŚLI TO SIĘ POJAWI,
-    // LOGOWANIE DZIAŁA I TEN ROUTER JEST UŻYWANY
-    // ==========================================
-
-    alert(
-      "LOGIN OK — PRZECHODZĘ DO PROFILU"
-    );
-
-    navigate("/profile");
+    navigate("/account");
   }
 
   return (
@@ -73,8 +103,7 @@ function Login() {
           <h1>Zaloguj się</h1>
 
           <p>
-            Zaloguj się do swojego konta IdeaHire i przejdź
-            do swoich projektów.
+            Zaloguj się do swojego konta IdeaHire.
           </p>
         </div>
 
@@ -107,8 +136,11 @@ function Login() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
+            disabled={loading}
           >
-            Zaloguj się →
+            {loading
+              ? "Logowanie..."
+              : "Zaloguj się →"}
           </button>
         </form>
 
@@ -123,12 +155,13 @@ function Login() {
   );
 }
 
-// ==========================================
-// REJESTRACJA
-// ==========================================
+/* =========================================================
+   KOMPONENT: REGISTER
+========================================================= */
 
 function Register() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -138,6 +171,8 @@ function Register() {
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
+
+    setLoading(true);
 
     const {
       data,
@@ -152,13 +187,15 @@ function Register() {
       },
     });
 
-    if (error) {
-      console.error("SIGNUP ERROR:", error);
+    setLoading(false);
 
+    console.log("SIGNUP DATA:", data);
+    console.log("SIGNUP ERROR:", error);
+
+    if (error) {
       alert(
         `Nie udało się utworzyć konta: ${error.message}`
       );
-
       return;
     }
 
@@ -166,14 +203,8 @@ function Register() {
       alert(
         "Supabase nie zwrócił użytkownika po rejestracji."
       );
-
       return;
     }
-
-    console.log(
-      "USER CREATED:",
-      data.user.id
-    );
 
     alert(
       "Konto zostało utworzone. Sprawdź swoją skrzynkę e-mail i potwierdź adres."
@@ -242,8 +273,11 @@ function Register() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
+            disabled={loading}
           >
-            Utwórz konto →
+            {loading
+              ? "Tworzenie konta..."
+              : "Utwórz konto →"}
           </button>
         </form>
 
@@ -258,78 +292,111 @@ function Register() {
   );
 }
 
-// ==========================================
-// PROFIL
-// ==========================================
+/* =========================================================
+   KOMPONENT: MOJE KONTO
+========================================================= */
 
-function Profile() {
+function Account() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [name, setName] = useState("");
+  const [avatar, setAvatar] = useState("");
   const [loading, setLoading] = useState(true);
-  const [profileError, setProfileError] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    async function loadProfile() {
-      console.log("PROFILE PAGE START");
+    loadUser();
+  }, []);
 
-      // Pobieramy zalogowanego użytkownika
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+  async function loadUser() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      console.log("CURRENT USER:", user);
-      console.log("USER ERROR:", userError);
-
-      if (userError || !user) {
-        console.error(
-          "NO LOGGED USER:",
-          userError
-        );
-
-        setLoading(false);
-        navigate("/login");
-        return;
-      }
-
-      setUser(user);
-
-      // Pobieramy profil z public.users
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      console.log("PROFILE DATA:", data);
-      console.log("PROFILE ERROR:", error);
-
-      if (error) {
-        setProfileError(error.message);
-      } else {
-        setProfile(data);
-      }
-
-      setLoading(false);
+    if (!user) {
+      navigate("/login");
+      return;
     }
 
-    loadProfile();
-  }, [navigate]);
+    setUser(user);
 
-  async function handleLogout() {
-    const { error } =
-      await supabase.auth.signOut();
+    setName(
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      ""
+    );
+
+    setAvatar(
+      user.user_metadata?.avatar_url || ""
+    );
+
+    setLoading(false);
+  }
+
+  async function handleSave(event) {
+    event.preventDefault();
+
+    setSaving(true);
+
+    const {
+      data,
+      error,
+    } = await supabase.auth.updateUser({
+      data: {
+        name: name.trim(),
+        avatar_url: avatar,
+      },
+    });
+
+    setSaving(false);
 
     if (error) {
+      console.error("PROFILE UPDATE ERROR:", error);
+
       alert(
-        `Nie udało się wylogować: ${error.message}`
+        `Nie udało się zapisać profilu: ${error.message}`
       );
 
+      return;
+    }
+
+    setUser(data.user);
+
+    alert("Profil został zapisany.");
+  }
+
+  function handleAvatarChange(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      alert("Wybierz plik graficzny.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Zdjęcie może mieć maksymalnie 2 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setAvatar(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      alert(`Nie udało się wylogować: ${error.message}`);
       return;
     }
 
@@ -339,8 +406,10 @@ function Profile() {
   if (loading) {
     return (
       <div className="page">
+        <AccountNav />
+
         <div className="app-page">
-          <h1>Ładowanie profilu...</h1>
+          <p>Ładowanie konta...</p>
         </div>
       </div>
     );
@@ -348,117 +417,129 @@ function Profile() {
 
   return (
     <div className="page">
-      <div className="app-page">
+      <AccountNav />
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "40px",
-          }}
-        >
-          <Link className="logo" to="/">
-            Idea<span>Hire</span>
-          </Link>
-
-          <button
-            className="btn btn-outline"
-            type="button"
-            onClick={handleLogout}
-          >
-            Wyloguj się
-          </button>
-        </div>
-
+      <div className="app-page account-page">
         <div className="app-page-header">
           <span className="section-label">
             Twoje konto
           </span>
 
-          <h1>
-            Cześć,{" "}
-            {profile?.name ||
-              user?.user_metadata?.name ||
-              "Użytkowniku"}!
-          </h1>
+          <h1>Moje konto</h1>
 
           <p>
-            Jesteś zalogowany do IdeaHire.
+            Zarządzaj swoim profilem i ustawieniami konta.
           </p>
         </div>
 
-        <div className="jobs-list">
-
-          <article className="job-card">
-            <span className="section-label">
-              Twój profil
-            </span>
-
-            <h2>
-              {profile?.name ||
-                user?.user_metadata?.name ||
-                "Brak imienia"}
-            </h2>
-
-            <p>
-              E-mail: {user?.email}
-            </p>
-
-            <p>
-              ID: {user?.id}
-            </p>
-
-            {profileError && (
-              <p>
-                Nie udało się pobrać profilu z
-                public.users: {profileError}
-              </p>
+        <div className="account-card">
+          <div className="profile-preview">
+            {avatar ? (
+              <img
+                src={avatar}
+                alt="Zdjęcie profilowe"
+                className="profile-avatar"
+              />
+            ) : (
+              <div className="profile-avatar profile-avatar-placeholder">
+                {name
+                  ? name.charAt(0).toUpperCase()
+                  : "U"}
+              </div>
             )}
-          </article>
 
-          <article className="job-card">
-            <span className="section-label">
-              IdeaHire
-            </span>
+            <div>
+              <h2>
+                {name || "Użytkownik"}
+              </h2>
 
-            <h2>
-              Co chcesz zrobić?
-            </h2>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                flexWrap: "wrap",
-                marginTop: "20px",
-              }}
-            >
-              <Link
-                className="btn btn-dark"
-                to="/find-talent"
-              >
-                Dodaj zlecenie →
-              </Link>
-
-              <Link
-                className="btn btn-outline"
-                to="/jobs"
-              >
-                Znajdź zlecenie →
-              </Link>
+              <p>
+                {user?.email}
+              </p>
             </div>
-          </article>
+          </div>
 
+          <form
+            className="auth-form"
+            onSubmit={handleSave}
+          >
+            <label>
+              Zdjęcie profilowe
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+              />
+            </label>
+
+            <label>
+              Imię / nazwa
+
+              <input
+                type="text"
+                value={name}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
+                placeholder="Twoje imię"
+                required
+              />
+            </label>
+
+            <label>
+              Adres e-mail
+
+              <input
+                type="email"
+                value={user?.email || ""}
+                disabled
+              />
+            </label>
+
+            <button
+              className="btn btn-dark btn-large"
+              type="submit"
+              disabled={saving}
+            >
+              {saving
+                ? "Zapisywanie..."
+                : "Zapisz profil →"}
+            </button>
+          </form>
         </div>
+
+        <div className="account-actions">
+          <Link
+            className="btn btn-outline btn-large"
+            to="/find-talent"
+          >
+            Dodaj zlecenie →
+          </Link>
+
+          <Link
+            className="btn btn-outline btn-large"
+            to="/jobs"
+          >
+            Znajdź zlecenie →
+          </Link>
+        </div>
+
+        <button
+          className="btn btn-ghost"
+          type="button"
+          onClick={handleLogout}
+        >
+          Wyloguj się
+        </button>
       </div>
     </div>
   );
 }
 
-// ==========================================
-// ZNAJDŹ WYKONAWCĘ
-// ==========================================
+/* =========================================================
+   KOMPONENT: FIND TALENT
+========================================================= */
 
 function FindTalent() {
   return (
@@ -473,11 +554,11 @@ function FindTalent() {
             Dla zlecających
           </span>
 
-          <h1>Znajdź wykonawcę</h1>
+          <h1>Dodaj zlecenie</h1>
 
           <p>
-            Opisz swój projekt i znajdź osobę,
-            która pomoże Ci go zrealizować.
+            Opisz swój projekt i znajdź osobę, która pomoże
+            Ci go zrealizować.
           </p>
         </div>
 
@@ -524,7 +605,7 @@ function FindTalent() {
             className="btn btn-dark btn-large"
             type="submit"
           >
-            Szukaj wykonawcy →
+            Opublikuj zlecenie →
           </button>
         </form>
       </div>
@@ -532,9 +613,9 @@ function FindTalent() {
   );
 }
 
-// ==========================================
-// ZLECENIA
-// ==========================================
+/* =========================================================
+   KOMPONENT: JOBS
+========================================================= */
 
 function Jobs() {
   const jobs = [
@@ -570,8 +651,8 @@ function Jobs() {
           <h1>Znajdź zlecenie</h1>
 
           <p>
-            Przeglądaj projekty i znajdź zlecenie
-            dopasowane do Twoich umiejętności.
+            Przeglądaj projekty i znajdź zlecenie dopasowane
+            do Twoich umiejętności.
           </p>
         </div>
 
@@ -605,9 +686,9 @@ function Jobs() {
   );
 }
 
-// ==========================================
-// ROUTER
-// ==========================================
+/* =========================================================
+   ROUTER
+========================================================= */
 
 function Router() {
   return (
@@ -630,8 +711,8 @@ function Router() {
         />
 
         <Route
-          path="/profile"
-          element={<Profile />}
+          path="/account"
+          element={<Account />}
         />
 
         <Route
