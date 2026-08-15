@@ -1,11 +1,4 @@
-
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -21,10 +14,9 @@ import { supabase } from "./supabase";
 
 /* =========================================================
    AUTH CONTEXT
-   Jedno źródło prawdy dla całej aplikacji.
 ========================================================= */
 
-const AuthContext = createContext(null);
+const AuthContext = React.createContext(null);
 
 function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
@@ -32,96 +24,69 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let active = true;
+    let mounted = true;
 
-    async function initializeAuth() {
+    async function loadSession() {
       try {
-        const {
-          data,
-          error,
-        } = await supabase.auth.getSession();
+        const { data, error } =
+          await supabase.auth.getSession();
 
         if (error) {
-          console.error(
-            "SUPABASE GET SESSION ERROR:",
-            error
-          );
+          console.error("GET SESSION ERROR:", error);
         }
 
-        if (!active) return;
+        if (!mounted) return;
 
-        const currentSession =
-          data?.session || null;
-
-        setSession(currentSession);
-        setUser(
-          currentSession?.user || null
-        );
+        setSession(data?.session || null);
+        setUser(data?.session?.user || null);
         setLoading(false);
       } catch (error) {
-        console.error(
-          "AUTH INITIALIZATION ERROR:",
-          error
-        );
+        console.error("SESSION LOAD ERROR:", error);
 
-        if (!active) return;
-
-        setSession(null);
-        setUser(null);
-        setLoading(false);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+        }
       }
     }
 
-    initializeAuth();
+    loadSession();
 
     const {
-      data: listener,
+      data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        if (!active) return;
+      (_event, newSession) => {
+        if (!mounted) return;
 
-        console.log(
-          "AUTH EVENT:",
-          event
-        );
-
-        setSession(
-          newSession || null
-        );
-
-        setUser(
-          newSession?.user || null
-        );
-
+        setSession(newSession || null);
+        setUser(newSession?.user || null);
         setLoading(false);
       }
     );
 
     return () => {
-      active = false;
-
-      listener?.subscription?.unsubscribe();
+      mounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
-  const value = {
-    session,
-    user,
-    loading,
-    isLoggedIn:
-      Boolean(session) &&
-      Boolean(user),
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user,
+        loading,
+        isLoggedIn: !!session && !!user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
 function useAuth() {
-  return useContext(AuthContext);
+  return React.useContext(AuthContext);
 }
 
 /* =========================================================
@@ -132,16 +97,11 @@ function LoadingScreen() {
   return (
     <div className="page">
       <div className="auth-card">
-        <Link
-          className="logo"
-          to="/"
-        >
+        <div className="logo">
           Idea<span>Hire</span>
-        </Link>
+        </div>
 
-        <p>
-          Ładowanie...
-        </p>
+        <p>Ładowanie...</p>
       </div>
     </div>
   );
@@ -151,16 +111,9 @@ function LoadingScreen() {
    PROTECTED ROUTE
 ========================================================= */
 
-function ProtectedRoute({
-  children,
-}) {
-  const {
-    loading,
-    isLoggedIn,
-  } = useAuth();
-
-  const location =
-    useLocation();
+function ProtectedRoute({ children }) {
+  const { loading, isLoggedIn } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <LoadingScreen />;
@@ -171,10 +124,7 @@ function ProtectedRoute({
       <Navigate
         to="/login"
         replace
-        state={{
-          from:
-            location.pathname,
-        }}
+        state={{ from: location.pathname }}
       />
     );
   }
@@ -183,18 +133,11 @@ function ProtectedRoute({
 }
 
 /* =========================================================
-   PUBLIC ONLY ROUTE
-   Jeżeli ktoś jest już zalogowany,
-   nie pokazujemy mu ponownie loginu.
+   PUBLIC ONLY
 ========================================================= */
 
-function PublicOnlyRoute({
-  children,
-}) {
-  const {
-    loading,
-    isLoggedIn,
-  } = useAuth();
+function PublicOnlyRoute({ children }) {
+  const { loading, isLoggedIn } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -213,38 +156,20 @@ function PublicOnlyRoute({
 }
 
 /* =========================================================
-   NAVBAR ZALOGOWANEGO UŻYTKOWNIKA
+   NAVBAR
 ========================================================= */
 
 function AccountNavbar() {
-  const {
-    user,
-  } = useAuth();
-
-  const navigate =
-    useNavigate();
-
-  const name =
-    user?.user_metadata?.name ||
-    user?.email?.split("@")[0] ||
-    "Użytkownik";
+  const navigate = useNavigate();
 
   async function handleLogout() {
-    const {
-      error,
-    } =
+    const { error } =
       await supabase.auth.signOut();
 
     if (error) {
-      console.error(
-        "LOGOUT ERROR:",
-        error
-      );
-
       alert(
         `Nie udało się wylogować: ${error.message}`
       );
-
       return;
     }
 
@@ -281,7 +206,7 @@ function AccountNavbar() {
           className="btn btn-ghost"
           to="/account"
         >
-          {name}
+          Moje konto
         </Link>
 
         <button
@@ -301,31 +226,20 @@ function AccountNavbar() {
 ========================================================= */
 
 function Login() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   const {
     isLoggedIn,
     loading: authLoading,
   } = useAuth();
 
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (
-      !authLoading &&
-      isLoggedIn
-    ) {
+    if (!authLoading && isLoggedIn) {
       navigate("/account", {
         replace: true,
       });
@@ -336,76 +250,44 @@ function Login() {
     navigate,
   ]);
 
-  async function handleLogin(
-    event
-  ) {
+  async function handleLogin(event) {
     event.preventDefault();
 
-    setErrorMessage("");
+    setMessage("");
     setLoading(true);
 
-    try {
-      const {
-        data,
-        error,
-      } =
-        await supabase.auth.signInWithPassword(
-          {
-            email:
-              email.trim(),
-            password,
-          }
-        );
-
-      if (error) {
-        console.error(
-          "LOGIN ERROR:",
-          error
-        );
-
-        setErrorMessage(
-          `Nie udało się zalogować: ${error.message}`
-        );
-
-        return;
-      }
-
-      if (
-        !data?.session ||
-        !data?.user
-      ) {
-        setErrorMessage(
-          "Logowanie zakończyło się bez aktywnej sesji."
-        );
-
-        return;
-      }
-
-      console.log(
-        "LOGIN SUCCESS:",
-        data.user.id
-      );
-
-      /*
-        Supabase posiada już sesję.
-        Przechodzimy bezpośrednio do konta.
-      */
-
-      navigate("/account", {
-        replace: true,
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
       });
-    } catch (error) {
+
+    setLoading(false);
+
+    if (error) {
       console.error(
-        "LOGIN EXCEPTION:",
+        "LOGIN ERROR:",
         error
       );
 
-      setErrorMessage(
-        "Wystąpił nieoczekiwany błąd podczas logowania."
+      setMessage(
+        `Nie udało się zalogować: ${error.message}`
       );
-    } finally {
-      setLoading(false);
+
+      return;
     }
+
+    if (!data?.session || !data?.user) {
+      setMessage(
+        "Logowanie nie utworzyło aktywnej sesji."
+      );
+
+      return;
+    }
+
+    navigate("/account", {
+      replace: true,
+    });
   }
 
   if (authLoading) {
@@ -419,6 +301,7 @@ function Login() {
   return (
     <div className="page">
       <div className="auth-card">
+
         <Link
           className="logo"
           to="/"
@@ -442,10 +325,9 @@ function Login() {
 
         <form
           className="auth-form"
-          onSubmit={
-            handleLogin
-          }
+          onSubmit={handleLogin}
         >
+
           <label>
             Adres e-mail
 
@@ -453,9 +335,7 @@ function Login() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -470,9 +350,7 @@ function Login() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Wpisz swoje hasło"
               autoComplete="current-password"
@@ -480,9 +358,9 @@ function Login() {
             />
           </label>
 
-          {errorMessage && (
+          {message && (
             <p className="auth-error">
-              {errorMessage}
+              {message}
             </p>
           )}
 
@@ -495,6 +373,7 @@ function Login() {
               ? "Logowanie..."
               : "Zaloguj się →"}
           </button>
+
         </form>
 
         <p className="auth-footer">
@@ -503,6 +382,7 @@ function Login() {
             Utwórz konto
           </Link>
         </p>
+
       </div>
     </div>
   );
@@ -513,22 +393,16 @@ function Login() {
 ========================================================= */
 
 function Register() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   const {
     isLoggedIn,
     loading: authLoading,
   } = useAuth();
 
-  const [name, setName] =
-    useState("");
-
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [loading, setLoading] =
     useState(false);
@@ -537,10 +411,7 @@ function Register() {
     useState("");
 
   useEffect(() => {
-    if (
-      !authLoading &&
-      isLoggedIn
-    ) {
+    if (!authLoading && isLoggedIn) {
       navigate("/account", {
         replace: true,
       });
@@ -551,91 +422,61 @@ function Register() {
     navigate,
   ]);
 
-  async function handleRegister(
-    event
-  ) {
+  async function handleRegister(event) {
     event.preventDefault();
 
     setMessage("");
     setLoading(true);
 
-    try {
-      const {
-        data,
-        error,
-      } =
-        await supabase.auth.signUp(
-          {
-            email:
-              email.trim(),
-            password,
-            options: {
-              data: {
-                name:
-                  name.trim(),
-              },
-            },
-          }
-        );
-
-      if (error) {
-        console.error(
-          "REGISTER ERROR:",
-          error
-        );
-
-        setMessage(
-          `Nie udało się utworzyć konta: ${error.message}`
-        );
-
-        return;
-      }
-
-      if (!data?.user) {
-        setMessage(
-          "Supabase nie zwrócił użytkownika."
-        );
-
-        return;
-      }
-
-      console.log(
-        "REGISTER SUCCESS:",
-        data.user.id
-      );
-
-      /*
-        Jeśli e-mail confirmation jest włączone,
-        data.session będzie null.
-      */
-
-      if (!data.session) {
-        alert(
-          "Konto zostało utworzone. Sprawdź skrzynkę e-mail i potwierdź adres."
-        );
-
-        navigate("/login", {
-          replace: true,
-        });
-
-        return;
-      }
-
-      navigate("/account", {
-        replace: true,
+    const { data, error } =
+      await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            name: name.trim(),
+          },
+        },
       });
-    } catch (error) {
+
+    setLoading(false);
+
+    if (error) {
       console.error(
-        "REGISTER EXCEPTION:",
+        "REGISTER ERROR:",
         error
       );
 
       setMessage(
-        "Wystąpił nieoczekiwany błąd podczas rejestracji."
+        `Nie udało się utworzyć konta: ${error.message}`
       );
-    } finally {
-      setLoading(false);
+
+      return;
     }
+
+    if (!data?.user) {
+      setMessage(
+        "Supabase nie zwrócił użytkownika."
+      );
+
+      return;
+    }
+
+    if (!data.session) {
+      alert(
+        "Konto zostało utworzone. Sprawdź e-mail i potwierdź adres."
+      );
+
+      navigate("/login", {
+        replace: true,
+      });
+
+      return;
+    }
+
+    navigate("/account", {
+      replace: true,
+    });
   }
 
   if (authLoading) {
@@ -649,6 +490,7 @@ function Register() {
   return (
     <div className="page">
       <div className="auth-card">
+
         <Link
           className="logo"
           to="/"
@@ -657,6 +499,7 @@ function Register() {
         </Link>
 
         <div className="auth-header">
+
           <span className="section-label">
             Dołącz do IdeaHire
           </span>
@@ -668,14 +511,14 @@ function Register() {
           <p>
             Załóż konto i zacznij korzystać z IdeaHire.
           </p>
+
         </div>
 
         <form
           className="auth-form"
-          onSubmit={
-            handleRegister
-          }
+          onSubmit={handleRegister}
         >
+
           <label>
             Imię / nazwa
 
@@ -683,9 +526,7 @@ function Register() {
               type="text"
               value={name}
               onChange={(event) =>
-                setName(
-                  event.target.value
-                )
+                setName(event.target.value)
               }
               placeholder="Twoje imię"
               autoComplete="name"
@@ -700,9 +541,7 @@ function Register() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -717,9 +556,7 @@ function Register() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Utwórz hasło"
               autoComplete="new-password"
@@ -743,6 +580,7 @@ function Register() {
               ? "Tworzenie konta..."
               : "Utwórz konto →"}
           </button>
+
         </form>
 
         <p className="auth-footer">
@@ -751,9 +589,109 @@ function Register() {
             Zaloguj się
           </Link>
         </p>
+
       </div>
     </div>
   );
+}
+
+/* =========================================================
+   ZMNIEJSZANIE I KONWERSJA ZDJĘCIA
+========================================================= */
+
+async function resizeAndConvertImage(file) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    const objectUrl =
+      URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      const MAX_SIZE = 400;
+
+      let width = image.width;
+      let height = image.height;
+
+      /*
+        Zachowujemy proporcje zdjęcia.
+        Następnie przycinamy je wizualnie
+        przez object-fit: cover.
+      */
+
+      if (width > height) {
+        if (width > MAX_SIZE) {
+          height =
+            height *
+            (MAX_SIZE / width);
+
+          width = MAX_SIZE;
+        }
+      } else {
+        if (height > MAX_SIZE) {
+          width =
+            width *
+            (MAX_SIZE / height);
+
+          height = MAX_SIZE;
+        }
+      }
+
+      const canvas =
+        document.createElement("canvas");
+
+      canvas.width =
+        Math.round(width);
+
+      canvas.height =
+        Math.round(height);
+
+      const context =
+        canvas.getContext("2d");
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      context.drawImage(
+        image,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(
+              new Error(
+                "Nie udało się skonwertować zdjęcia."
+              )
+            );
+
+            return;
+          }
+
+          resolve(blob);
+        },
+        "image/jpeg",
+        0.82
+      );
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      reject(
+        new Error(
+          "Nie udało się odczytać zdjęcia."
+        )
+      );
+    };
+
+    image.src = objectUrl;
+  });
 }
 
 /* =========================================================
@@ -763,16 +701,21 @@ function Register() {
 function Account() {
   const {
     user,
-    loading,
+    loading: authLoading,
   } = useAuth();
+
+  const navigate = useNavigate();
 
   const [name, setName] =
     useState("");
 
-  const [avatar, setAvatar] =
+  const [avatarUrl, setAvatarUrl] =
     useState("");
 
   const [saving, setSaving] =
+    useState(false);
+
+  const [uploading, setUploading] =
     useState(false);
 
   const [message, setMessage] =
@@ -783,17 +726,17 @@ function Account() {
 
     setName(
       user.user_metadata?.name ||
-        user.email?.split("@")[0] ||
-        ""
+      user.email?.split("@")[0] ||
+      ""
     );
 
-    setAvatar(
-      user.user_metadata
-        ?.avatar_url || ""
+    setAvatarUrl(
+      user.user_metadata?.avatar_url ||
+      ""
     );
   }, [user]);
 
-  if (loading) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -806,33 +749,202 @@ function Account() {
     );
   }
 
-  const displayName =
-    name ||
-    user.email?.split("@")[0] ||
-    "Użytkownik";
+  /* =======================================================
+     UPLOAD AVATARA
+  ======================================================= */
 
-  async function handleSave(
-    event
-  ) {
+  async function handleAvatarChange(event) {
+    const file =
+      event.target.files?.[0];
+
+    if (!file) return;
+
+    setMessage("");
+
+    if (!file.type.startsWith("image/")) {
+      setMessage(
+        "Wybierz plik graficzny."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    /*
+      Maksymalny rozmiar oryginalnego
+      pliku przed konwersją.
+    */
+
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage(
+        "Oryginalne zdjęcie może mieć maksymalnie 10 MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      /*
+        Zmniejszamy zdjęcie i konwertujemy
+        do JPEG.
+      */
+
+      const convertedFile =
+        await resizeAndConvertImage(file);
+
+      /*
+        Unikalna nazwa pliku.
+        Każdy użytkownik ma swój folder.
+      */
+
+      const filePath =
+        `${user.id}/avatar-${Date.now()}.jpg`;
+
+      /*
+        Upload do bucketa "avatars".
+      */
+
+      const {
+        error: uploadError,
+      } = await supabase.storage
+        .from("avatars")
+        .upload(
+          filePath,
+          convertedFile,
+          {
+            contentType:
+              "image/jpeg",
+
+            cacheControl:
+              "3600",
+
+            upsert: false,
+          }
+        );
+
+      if (uploadError) {
+        console.error(
+          "AVATAR UPLOAD ERROR:",
+          uploadError
+        );
+
+        setMessage(
+          `Nie udało się przesłać zdjęcia: ${uploadError.message}`
+        );
+
+        return;
+      }
+
+      /*
+        Pobieramy publiczny URL.
+      */
+
+      const {
+        data: publicUrlData,
+      } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const publicUrl =
+        publicUrlData?.publicUrl;
+
+      if (!publicUrl) {
+        setMessage(
+          "Zdjęcie zostało przesłane, ale nie udało się pobrać jego adresu."
+        );
+
+        return;
+      }
+
+      /*
+        Zapisujemy URL w user_metadata.
+      */
+
+      const {
+        data: updatedUser,
+        error: updateError,
+      } =
+        await supabase.auth.updateUser({
+          data: {
+            name: name.trim(),
+            avatar_url: publicUrl,
+          },
+        });
+
+      if (updateError) {
+        console.error(
+          "AVATAR PROFILE UPDATE ERROR:",
+          updateError
+        );
+
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${updateError.message}`
+        );
+
+        return;
+      }
+
+      /*
+        Natychmiast pokazujemy nowe zdjęcie.
+      */
+
+      setAvatarUrl(publicUrl);
+
+      /*
+        Odświeżamy lokalne dane użytkownika.
+      */
+
+      if (updatedUser?.user) {
+        setName(
+          updatedUser.user.user_metadata?.name ||
+          name
+        );
+      }
+
+      setMessage(
+        "Zdjęcie profilowe zostało zapisane."
+      );
+
+    } catch (error) {
+      console.error(
+        "AVATAR ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się ustawić zdjęcia: ${error.message}`
+      );
+
+    } finally {
+      setUploading(false);
+
+      event.target.value = "";
+    }
+  }
+
+  /* =======================================================
+     ZAPIS NAZWY
+  ======================================================= */
+
+  async function handleSave(event) {
     event.preventDefault();
 
     setSaving(true);
     setMessage("");
 
     const {
-      data,
       error,
-    } =
-      await supabase.auth.updateUser(
-        {
-          data: {
-            name:
-              name.trim(),
-            avatar_url:
-              avatar,
-          },
-        }
-      );
+    } = await supabase.auth.updateUser({
+      data: {
+        name: name.trim(),
+        avatar_url: avatarUrl,
+      },
+    });
+
+    setSaving(false);
 
     if (error) {
       console.error(
@@ -844,105 +956,95 @@ function Account() {
         `Nie udało się zapisać profilu: ${error.message}`
       );
 
-      setSaving(false);
       return;
     }
-
-    console.log(
-      "PROFILE UPDATED:",
-      data?.user?.id
-    );
 
     setMessage(
-      "Profil został zapisany."
+      "Zmiany zostały zapisane."
     );
-
-    setSaving(false);
   }
 
-  function handleAvatarChange(
-    event
-  ) {
-    const file =
-      event.target.files?.[0];
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
 
-    if (!file) return;
+  async function handleLogout() {
+    const {
+      error,
+    } = await supabase.auth.signOut();
 
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
+    if (error) {
       alert(
-        "Wybierz plik graficzny."
+        `Nie udało się wylogować: ${error.message}`
       );
 
       return;
     }
 
-    if (
-      file.size >
-      2 * 1024 * 1024
-    ) {
-      alert(
-        "Zdjęcie może mieć maksymalnie 2 MB."
-      );
-
-      return;
-    }
-
-    const reader =
-      new FileReader();
-
-    reader.onload = () => {
-      setAvatar(
-        String(
-          reader.result
-        )
-      );
-    };
-
-    reader.readAsDataURL(
-      file
-    );
+    navigate("/", {
+      replace: true,
+    });
   }
+
+  const displayName =
+    name ||
+    user.email?.split("@")[0] ||
+    "Użytkownik";
+
+  const initial =
+    displayName
+      .charAt(0)
+      .toUpperCase();
 
   return (
     <div className="page">
+
       <AccountNavbar />
 
       <main className="app-page">
+
         <div className="app-page-header">
+
           <span className="section-label">
             Twoje konto
           </span>
 
           <h1>
-            {displayName}
+            Mój profil
           </h1>
 
           <p>
-            Zarządzaj swoim profilem i korzystaj z platformy IdeaHire.
+            Zarządzaj swoim profilem IdeaHire.
           </p>
+
         </div>
 
         <section className="account-card">
-          <div className="profile-preview">
-            {avatar ? (
-              <img
-                src={avatar}
-                alt="Zdjęcie profilowe"
-                className="profile-avatar"
-              />
-            ) : (
-              <div className="profile-avatar profile-avatar-placeholder">
-                {displayName
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-            )}
 
-            <div>
+          {/* =================================================
+              PROFIL
+          ================================================= */}
+
+          <div className="profile-preview">
+
+            <div className="profile-avatar-wrapper">
+
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Zdjęcie profilowe"
+                  className="profile-avatar"
+                />
+              ) : (
+                <div className="profile-avatar profile-avatar-placeholder">
+                  {initial}
+                </div>
+              )}
+
+            </div>
+
+            <div className="profile-info">
+
               <h2>
                 {displayName}
               </h2>
@@ -950,26 +1052,43 @@ function Account() {
               <p>
                 {user.email}
               </p>
+
             </div>
+
           </div>
+
+          {/* =================================================
+              FORMULARZ
+          ================================================= */}
 
           <form
             className="auth-form"
-            onSubmit={
-              handleSave
-            }
+            onSubmit={handleSave}
           >
+
             <label>
               Zdjęcie profilowe
 
               <input
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/webp"
                 onChange={
                   handleAvatarChange
                 }
+                disabled={uploading}
               />
+
+              <small>
+                Zdjęcie zostanie automatycznie
+                zmniejszone i zapisane jako JPEG.
+              </small>
             </label>
+
+            {uploading && (
+              <p>
+                Przetwarzanie zdjęcia...
+              </p>
+            )}
 
             <label>
               Imię / nazwa
@@ -999,7 +1118,7 @@ function Account() {
             </label>
 
             {message && (
-              <p>
+              <p className="auth-message">
                 {message}
               </p>
             )}
@@ -1007,16 +1126,22 @@ function Account() {
             <button
               className="btn btn-dark btn-large"
               type="submit"
-              disabled={saving}
+              disabled={
+                saving ||
+                uploading
+              }
             >
               {saving
                 ? "Zapisywanie..."
                 : "Zapisz zmiany →"}
             </button>
+
           </form>
+
         </section>
 
         <section className="account-actions">
+
           <Link
             className="btn btn-outline btn-large"
             to="/find-talent"
@@ -1030,7 +1155,17 @@ function Account() {
           >
             Znajdź zlecenie →
           </Link>
+
         </section>
+
+        <button
+          className="btn btn-ghost"
+          type="button"
+          onClick={handleLogout}
+        >
+          Wyloguj się
+        </button>
+
       </main>
     </div>
   );
@@ -1041,12 +1176,55 @@ function Account() {
 ========================================================= */
 
 function FindTalent() {
+  const {
+    isLoggedIn,
+    loading,
+  } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="page">
-      <AccountNavbar />
+
+      {isLoggedIn ? (
+        <AccountNavbar />
+      ) : (
+        <header className="navbar">
+
+          <Link
+            className="logo"
+            to="/"
+          >
+            Idea<span>Hire</span>
+          </Link>
+
+          <div className="nav-actions">
+
+            <Link
+              className="btn btn-ghost"
+              to="/login"
+            >
+              Zaloguj się
+            </Link>
+
+            <Link
+              className="btn btn-dark"
+              to="/register"
+            >
+              Zacznij teraz
+            </Link>
+
+          </div>
+
+        </header>
+      )}
 
       <main className="app-page">
+
         <div className="app-page-header">
+
           <span className="section-label">
             Dla zlecających
           </span>
@@ -1056,26 +1234,24 @@ function FindTalent() {
           </h1>
 
           <p>
-            Opisz swój projekt i znajdź osobę, która pomoże Ci go zrealizować.
+            Opisz swój projekt i znajdź osobę,
+            która pomoże Ci go zrealizować.
           </p>
+
         </div>
 
         <form
           className="project-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-
-            alert(
-              "Formularz jest gotowy. Następnym krokiem będzie zapis zlecenia do Supabase."
-            );
-          }}
+          onSubmit={(event) =>
+            event.preventDefault()
+          }
         >
+
           <label>
             Czego potrzebujesz?
 
             <input
               type="text"
-              name="title"
               placeholder="Np. nowoczesna strona internetowa"
               required
             />
@@ -1085,7 +1261,6 @@ function FindTalent() {
             Opisz swój projekt
 
             <textarea
-              name="description"
               rows="6"
               placeholder="Napisz kilka słów o tym, czego potrzebujesz..."
               required
@@ -1097,7 +1272,6 @@ function FindTalent() {
 
             <input
               type="text"
-              name="budget"
               placeholder="Np. 1 500–3 000 zł"
               required
             />
@@ -1109,7 +1283,9 @@ function FindTalent() {
           >
             Opublikuj zlecenie →
           </button>
+
         </form>
+
       </main>
     </div>
   );
@@ -1149,10 +1325,13 @@ function Jobs() {
 
   return (
     <div className="page">
+
       <AccountNavbar />
 
       <main className="app-page">
+
         <div className="app-page-header">
+
           <span className="section-label">
             Dla wykonawców
           </span>
@@ -1162,48 +1341,44 @@ function Jobs() {
           </h1>
 
           <p>
-            Przeglądaj projekty i znajdź zlecenie dopasowane do Twoich umiejętności.
+            Przeglądaj projekty i znajdź zlecenie
+            dopasowane do Twoich umiejętności.
           </p>
+
         </div>
 
         <div className="jobs-list">
-          {jobs.map(
-            (job) => (
-              <article
-                className="job-card"
-                key={
-                  job.title
-                }
+
+          {jobs.map((job) => (
+            <article
+              className="job-card"
+              key={job.title}
+            >
+
+              <span className="section-label">
+                {job.category}
+              </span>
+
+              <h2>
+                {job.title}
+              </h2>
+
+              <p>
+                Budżet: {job.budget}
+              </p>
+
+              <button
+                className="btn btn-dark"
+                type="button"
               >
-                <span className="section-label">
-                  {
-                    job.category
-                  }
-                </span>
+                Zobacz zlecenie →
+              </button>
 
-                <h2>
-                  {
-                    job.title
-                  }
-                </h2>
+            </article>
+          ))}
 
-                <p>
-                  Budżet:{" "}
-                  {
-                    job.budget
-                  }
-                </p>
-
-                <button
-                  className="btn btn-dark"
-                  type="button"
-                >
-                  Zobacz zlecenie →
-                </button>
-              </article>
-            )
-          )}
         </div>
+
       </main>
     </div>
   );
@@ -1214,6 +1389,12 @@ function Jobs() {
 ========================================================= */
 
 function Home() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return <App />;
 }
 
@@ -1224,10 +1405,10 @@ function Home() {
 function Router() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
 
-          {/* STRONA GŁÓWNA */}
+      <AuthProvider>
+
+        <Routes>
 
           <Route
             path="/"
@@ -1235,8 +1416,6 @@ function Router() {
               <Home />
             }
           />
-
-          {/* LOGOWANIE */}
 
           <Route
             path="/login"
@@ -1247,8 +1426,6 @@ function Router() {
             }
           />
 
-          {/* REJESTRACJA */}
-
           <Route
             path="/register"
             element={
@@ -1257,8 +1434,6 @@ function Router() {
               </PublicOnlyRoute>
             }
           />
-
-          {/* KONTO */}
 
           <Route
             path="/account"
@@ -1269,8 +1444,6 @@ function Router() {
             }
           />
 
-          {/* DODAJ ZLECENIE */}
-
           <Route
             path="/find-talent"
             element={
@@ -1280,8 +1453,6 @@ function Router() {
             }
           />
 
-          {/* ZNAJDŹ ZLECENIE */}
-
           <Route
             path="/jobs"
             element={
@@ -1290,8 +1461,6 @@ function Router() {
               </ProtectedRoute>
             }
           />
-
-          {/* FALLBACK */}
 
           <Route
             path="*"
@@ -1304,7 +1473,9 @@ function Router() {
           />
 
         </Routes>
+
       </AuthProvider>
+
     </BrowserRouter>
   );
 }
