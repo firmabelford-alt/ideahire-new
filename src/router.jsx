@@ -27,49 +27,101 @@ function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true;
 
+    /*
+      Maksymalnie 8 sekund na pobranie sesji.
+      Aplikacja nie może wisieć w nieskończoność
+      na ekranie "Ładowanie...".
+    */
+
+    const timeout = setTimeout(() => {
+      if (!mounted) return;
+
+      console.warn(
+        "AUTH SESSION TIMEOUT - kończę ładowanie"
+      );
+
+      setLoading(false);
+    }, 8000);
+
     async function loadSession() {
       try {
-        const { data, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error("GET SESSION ERROR:", error);
-        }
+        const { data, error } =
+          await supabase.auth.getSession();
 
         if (!mounted) return;
 
-        const currentSession = data?.session || null;
+        if (error) {
+          console.error(
+            "GET SESSION ERROR:",
+            error
+          );
 
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
-        setLoading(false);
-      } catch (error) {
-        console.error("SESSION LOAD ERROR:", error);
-
-        if (mounted) {
           setSession(null);
           setUser(null);
           setLoading(false);
+
+          return;
         }
+
+        setSession(
+          data?.session || null
+        );
+
+        setUser(
+          data?.session?.user || null
+        );
+
+        setLoading(false);
+      } catch (error) {
+        console.error(
+          "SESSION LOAD ERROR:",
+          error
+        );
+
+        if (!mounted) return;
+
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      } finally {
+        clearTimeout(timeout);
       }
     }
 
     loadSession();
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        if (!mounted) return;
+      data: authListener,
+    } =
+      supabase.auth.onAuthStateChange(
+        (event, newSession) => {
+          if (!mounted) return;
 
-        setSession(newSession || null);
-        setUser(newSession?.user || null);
-        setLoading(false);
-      }
-    );
+          console.log(
+            "AUTH EVENT:",
+            event,
+            newSession?.user?.email ||
+              "brak użytkownika"
+          );
+
+          setSession(
+            newSession || null
+          );
+
+          setUser(
+            newSession?.user || null
+          );
+
+          setLoading(false);
+        }
+      );
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+
+      clearTimeout(timeout);
+
+      authListener?.subscription?.unsubscribe();
     };
   }, []);
 
@@ -79,7 +131,8 @@ function AuthProvider({ children }) {
         session,
         user,
         loading,
-        isLoggedIn: !!session && !!user,
+        isLoggedIn:
+          !!session && !!user,
       }}
     >
       {children}
@@ -88,7 +141,9 @@ function AuthProvider({ children }) {
 }
 
 function useAuth() {
-  return React.useContext(AuthContext);
+  return React.useContext(
+    AuthContext
+  );
 }
 
 /* =========================================================
@@ -114,7 +169,11 @@ function LoadingScreen() {
 ========================================================= */
 
 function ProtectedRoute({ children }) {
-  const { loading, isLoggedIn } = useAuth();
+  const {
+    loading,
+    isLoggedIn,
+  } = useAuth();
+
   const location = useLocation();
 
   if (loading) {
@@ -126,7 +185,9 @@ function ProtectedRoute({ children }) {
       <Navigate
         to="/login"
         replace
-        state={{ from: location.pathname }}
+        state={{
+          from: location.pathname,
+        }}
       />
     );
   }
@@ -138,15 +199,25 @@ function ProtectedRoute({ children }) {
    PUBLIC ONLY
 ========================================================= */
 
-function PublicOnlyRoute({ children }) {
-  const { loading, isLoggedIn } = useAuth();
+function PublicOnlyRoute({
+  children,
+}) {
+  const {
+    loading,
+    isLoggedIn,
+  } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
   if (isLoggedIn) {
-    return <Navigate to="/account" replace />;
+    return (
+      <Navigate
+        to="/account"
+        replace
+      />
+    );
   }
 
   return children;
@@ -156,14 +227,20 @@ function PublicOnlyRoute({ children }) {
    NAVBAR
 ========================================================= */
 
-function AccountNavbar({ profile }) {
+function AccountNavbar() {
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
   async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
+    const { error } =
+      await supabase.auth.signOut();
 
     if (error) {
-      alert(`Nie udało się wylogować: ${error.message}`);
+      alert(
+        `Nie udało się wylogować: ${error.message}`
+      );
+
       return;
     }
 
@@ -172,18 +249,26 @@ function AccountNavbar({ profile }) {
     });
   }
 
-  const avatarUrl = profile?.avatar_url || "";
+  const avatarUrl =
+    user?.user_metadata
+      ?.avatar_url || "";
 
   const userName =
-    profile?.name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
     "Użytkownik";
 
   const initial =
-    userName.charAt(0).toUpperCase();
+    userName
+      .charAt(0)
+      .toUpperCase();
 
   return (
     <header className="navbar">
-      <Link className="logo" to="/">
+      <Link
+        className="logo"
+        to="/"
+      >
         Idea<span>Hire</span>
       </Link>
 
@@ -239,20 +324,31 @@ function AccountNavbar({ profile }) {
 ========================================================= */
 
 function Login() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const {
     isLoggedIn,
     loading: authLoading,
   } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
-    if (!authLoading && isLoggedIn) {
+    if (
+      !authLoading &&
+      isLoggedIn
+    ) {
       navigate("/account", {
         replace: true,
       });
@@ -263,21 +359,31 @@ function Login() {
     navigate,
   ]);
 
-  async function handleLogin(event) {
+  async function handleLogin(
+    event
+  ) {
     event.preventDefault();
 
     setMessage("");
     setLoading(true);
 
     try {
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
+      const {
+        data,
+        error,
+      } =
+        await supabase.auth.signInWithPassword(
+          {
+            email: email.trim(),
+            password,
+          }
+        );
 
       if (error) {
-        console.error("LOGIN ERROR:", error);
+        console.error(
+          "LOGIN ERROR:",
+          error
+        );
 
         setMessage(
           `Nie udało się zalogować: ${error.message}`
@@ -286,7 +392,10 @@ function Login() {
         return;
       }
 
-      if (!data?.session || !data?.user) {
+      if (
+        !data?.session ||
+        !data?.user
+      ) {
         setMessage(
           "Logowanie nie utworzyło aktywnej sesji."
         );
@@ -298,11 +407,15 @@ function Login() {
         replace: true,
       });
     } catch (error) {
-      console.error("LOGIN FETCH ERROR:", error);
+      console.error(
+        "LOGIN EXCEPTION:",
+        error
+      );
 
       setMessage(
         `Nie udało się zalogować: ${
-          error?.message || "Failed to fetch"
+          error?.message ||
+          "Nieznany błąd"
         }`
       );
     } finally {
@@ -310,7 +423,10 @@ function Login() {
     }
   }
 
-  if (authLoading || isLoggedIn) {
+  if (
+    authLoading ||
+    isLoggedIn
+  ) {
     return <LoadingScreen />;
   }
 
@@ -349,7 +465,9 @@ function Login() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(event.target.value)
+                setEmail(
+                  event.target.value
+                )
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -364,7 +482,9 @@ function Login() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(event.target.value)
+                setPassword(
+                  event.target.value
+                )
               }
               placeholder="Wpisz swoje hasło"
               autoComplete="current-password"
@@ -405,21 +525,34 @@ function Login() {
 ========================================================= */
 
 function Register() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const {
     isLoggedIn,
     loading: authLoading,
   } = useAuth();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [name, setName] =
+    useState("");
+
+  const [email, setEmail] =
+    useState("");
+
+  const [password, setPassword] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
-    if (!authLoading && isLoggedIn) {
+    if (
+      !authLoading &&
+      isLoggedIn
+    ) {
       navigate("/account", {
         replace: true,
       });
@@ -430,14 +563,19 @@ function Register() {
     navigate,
   ]);
 
-  async function handleRegister(event) {
+  async function handleRegister(
+    event
+  ) {
     event.preventDefault();
 
     setMessage("");
     setLoading(true);
 
     try {
-      const { data, error } =
+      const {
+        data,
+        error,
+      } =
         await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -449,7 +587,10 @@ function Register() {
         });
 
       if (error) {
-        console.error("REGISTER ERROR:", error);
+        console.error(
+          "REGISTER ERROR:",
+          error
+        );
 
         setMessage(
           `Nie udało się utworzyć konta: ${error.message}`
@@ -465,11 +606,6 @@ function Register() {
 
         return;
       }
-
-      /*
-        Profil jest tworzony przez trigger
-        public.handle_new_user().
-      */
 
       if (!data.session) {
         alert(
@@ -487,11 +623,15 @@ function Register() {
         replace: true,
       });
     } catch (error) {
-      console.error("REGISTER FETCH ERROR:", error);
+      console.error(
+        "REGISTER EXCEPTION:",
+        error
+      );
 
       setMessage(
         `Nie udało się utworzyć konta: ${
-          error?.message || "Failed to fetch"
+          error?.message ||
+          "Nieznany błąd"
         }`
       );
     } finally {
@@ -499,7 +639,10 @@ function Register() {
     }
   }
 
-  if (authLoading || isLoggedIn) {
+  if (
+    authLoading ||
+    isLoggedIn
+  ) {
     return <LoadingScreen />;
   }
 
@@ -538,7 +681,9 @@ function Register() {
               type="text"
               value={name}
               onChange={(event) =>
-                setName(event.target.value)
+                setName(
+                  event.target.value
+                )
               }
               placeholder="Twoje imię"
               autoComplete="name"
@@ -553,7 +698,9 @@ function Register() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(event.target.value)
+                setEmail(
+                  event.target.value
+                )
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -568,7 +715,9 @@ function Register() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(event.target.value)
+                setPassword(
+                  event.target.value
+                )
               }
               placeholder="Utwórz hasło"
               autoComplete="new-password"
@@ -609,159 +758,134 @@ function Register() {
    AVATAR — 400 × 400 JPEG
 ========================================================= */
 
-async function resizeAndConvertImage(file) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-
-    const objectUrl =
-      URL.createObjectURL(file);
-
-    image.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-
-      const SIZE = 400;
-
-      const sourceWidth =
-        image.naturalWidth;
-
-      const sourceHeight =
-        image.naturalHeight;
-
-      if (!sourceWidth || !sourceHeight) {
-        reject(
-          new Error(
-            "Zdjęcie ma nieprawidłowe wymiary."
-          )
-        );
-
-        return;
-      }
-
-      const sourceSize =
-        Math.min(
-          sourceWidth,
-          sourceHeight
-        );
-
-      const sourceX =
-        (sourceWidth - sourceSize) / 2;
-
-      const sourceY =
-        (sourceHeight - sourceSize) / 2;
-
-      const canvas =
-        document.createElement("canvas");
-
-      canvas.width = SIZE;
-      canvas.height = SIZE;
-
-      const context =
-        canvas.getContext("2d");
-
-      if (!context) {
-        reject(
-          new Error(
-            "Przeglądarka nie obsługuje Canvas."
-          )
-        );
-
-        return;
-      }
-
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-
-      context.drawImage(
-        image,
-        sourceX,
-        sourceY,
-        sourceSize,
-        sourceSize,
-        0,
-        0,
-        SIZE,
-        SIZE
-      );
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(
-              new Error(
-                "Nie udało się skonwertować zdjęcia."
-              )
-            );
-
-            return;
-          }
-
-          resolve(blob);
-        },
-        "image/jpeg",
-        0.82
-      );
-    };
-
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-
-      reject(
-        new Error(
-          "Nie udało się odczytać zdjęcia."
-        )
-      );
-    };
-
-    image.src = objectUrl;
-  });
-}
-
-/* =========================================================
-   PROFILE DATABASE HELPERS
-========================================================= */
-
-async function getProfile(userId) {
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("users")
-    .select("id, name, email, avatar_url")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data;
-}
-
-async function updateProfile(
-  userId,
-  email,
-  name,
-  avatarUrl
+async function resizeAndConvertImage(
+  file
 ) {
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("users")
-    .update({
-      name,
-      email,
-      avatar_url: avatarUrl || null,
-    })
-    .eq("id", userId)
-    .select("id, name, email, avatar_url")
-    .single();
+  return new Promise(
+    (resolve, reject) => {
+      const image =
+        new Image();
 
-  if (error) {
-    throw error;
-  }
+      const objectUrl =
+        URL.createObjectURL(file);
 
-  return data;
+      image.onload = () => {
+        URL.revokeObjectURL(
+          objectUrl
+        );
+
+        const SIZE = 400;
+
+        const sourceWidth =
+          image.naturalWidth;
+
+        const sourceHeight =
+          image.naturalHeight;
+
+        if (
+          !sourceWidth ||
+          !sourceHeight
+        ) {
+          reject(
+            new Error(
+              "Zdjęcie ma nieprawidłowe wymiary."
+            )
+          );
+
+          return;
+        }
+
+        const sourceSize =
+          Math.min(
+            sourceWidth,
+            sourceHeight
+          );
+
+        const sourceX =
+          (sourceWidth -
+            sourceSize) /
+          2;
+
+        const sourceY =
+          (sourceHeight -
+            sourceSize) /
+          2;
+
+        const canvas =
+          document.createElement(
+            "canvas"
+          );
+
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+
+        const context =
+          canvas.getContext(
+            "2d"
+          );
+
+        if (!context) {
+          reject(
+            new Error(
+              "Przeglądarka nie obsługuje Canvas."
+            )
+          );
+
+          return;
+        }
+
+        context.imageSmoothingEnabled =
+          true;
+
+        context.imageSmoothingQuality =
+          "high";
+
+        context.drawImage(
+          image,
+          sourceX,
+          sourceY,
+          sourceSize,
+          sourceSize,
+          0,
+          0,
+          SIZE,
+          SIZE
+        );
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(
+                new Error(
+                  "Nie udało się skonwertować zdjęcia."
+                )
+              );
+
+              return;
+            }
+
+            resolve(blob);
+          },
+          "image/jpeg",
+          0.82
+        );
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(
+          objectUrl
+        );
+
+        reject(
+          new Error(
+            "Nie udało się odczytać zdjęcia."
+          )
+        );
+      };
+
+      image.src = objectUrl;
+    }
+  );
 }
 
 /* =========================================================
@@ -774,19 +898,14 @@ function Account() {
     loading: authLoading,
   } = useAuth();
 
-  const navigate = useNavigate();
-
-  const [profile, setProfile] =
-    useState(null);
+  const navigate =
+    useNavigate();
 
   const [name, setName] =
     useState("");
 
   const [avatarUrl, setAvatarUrl] =
     useState("");
-
-  const [loadingProfile, setLoadingProfile] =
-    useState(true);
 
   const [saving, setSaving] =
     useState(false);
@@ -797,105 +916,22 @@ function Account() {
   const [message, setMessage] =
     useState("");
 
-  /* =======================================================
-     LOAD PROFILE FROM public.users
-  ======================================================= */
-
   useEffect(() => {
     if (!user) return;
 
-    let mounted = true;
+    setName(
+      user.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        ""
+    );
 
-    async function loadProfile() {
-      try {
-        setLoadingProfile(true);
-        setMessage("");
-
-        const existingProfile =
-          await getProfile(user.id);
-
-        if (!mounted) return;
-
-        if (existingProfile) {
-          setProfile(existingProfile);
-
-          setName(
-            existingProfile.name ||
-            user.email?.split("@")[0] ||
-            ""
-          );
-
-          setAvatarUrl(
-            existingProfile.avatar_url ||
-            ""
-          );
-        } else {
-          /*
-            Awaryjnie tworzymy profil,
-            gdyby użytkownik nie miał rekordu.
-          */
-
-          const fallbackName =
-            user.user_metadata?.name ||
-            user.email?.split("@")[0] ||
-            "Użytkownik";
-
-          const {
-            data: createdProfile,
-            error: createError,
-          } = await supabase
-            .from("users")
-            .insert({
-              id: user.id,
-              name: fallbackName,
-              email: user.email || "",
-              avatar_url: null,
-            })
-            .select(
-              "id, name, email, avatar_url"
-            )
-            .single();
-
-          if (createError) {
-            throw createError;
-          }
-
-          if (!mounted) return;
-
-          setProfile(createdProfile);
-          setName(createdProfile.name || "");
-          setAvatarUrl(
-            createdProfile.avatar_url || ""
-          );
-        }
-      } catch (error) {
-        console.error(
-          "PROFILE LOAD ERROR:",
-          error
-        );
-
-        if (mounted) {
-          setMessage(
-            `Nie udało się pobrać profilu: ${
-              error?.message || "Nieznany błąd"
-            }`
-          );
-        }
-      } finally {
-        if (mounted) {
-          setLoadingProfile(false);
-        }
-      }
-    }
-
-    loadProfile();
-
-    return () => {
-      mounted = false;
-    };
+    setAvatarUrl(
+      user.user_metadata?.avatar_url ||
+        ""
+    );
   }, [user]);
 
-  if (authLoading || loadingProfile) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -908,11 +944,9 @@ function Account() {
     );
   }
 
-  /* =======================================================
-     UPLOAD AVATARA
-  ======================================================= */
-
-  async function handleAvatarChange(event) {
+  async function handleAvatarChange(
+    event
+  ) {
     const file =
       event.target.files?.[0];
 
@@ -920,58 +954,60 @@ function Account() {
 
     setMessage("");
 
-    if (!file.type.startsWith("image/")) {
+    if (
+      !file.type.startsWith(
+        "image/"
+      )
+    ) {
       setMessage(
         "Wybierz plik graficzny."
       );
 
       event.target.value = "";
+
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
       setMessage(
         "Oryginalne zdjęcie może mieć maksymalnie 10 MB."
       );
 
       event.target.value = "";
+
       return;
     }
 
     try {
       setUploading(true);
 
-      /*
-        1. Konwersja do 400 × 400 JPEG.
-      */
-
       const convertedFile =
-        await resizeAndConvertImage(file);
-
-      /*
-        2. Ścieżka w bucketcie avatars.
-      */
+        await resizeAndConvertImage(
+          file
+        );
 
       const filePath =
         `${user.id}/avatar-${Date.now()}.jpg`;
 
-      /*
-        3. Upload do Storage.
-      */
-
       const {
         error: uploadError,
-      } = await supabase.storage
-        .from("avatars")
-        .upload(
-          filePath,
-          convertedFile,
-          {
-            contentType: "image/jpeg",
-            cacheControl: "3600",
-            upsert: false,
-          }
-        );
+      } =
+        await supabase.storage
+          .from("avatars")
+          .upload(
+            filePath,
+            convertedFile,
+            {
+              contentType:
+                "image/jpeg",
+              cacheControl:
+                "3600",
+              upsert: false,
+            }
+          );
 
       if (uploadError) {
         console.error(
@@ -979,60 +1015,79 @@ function Account() {
           uploadError
         );
 
-        throw uploadError;
-      }
+        setMessage(
+          `Nie udało się przesłać zdjęcia: ${uploadError.message}`
+        );
 
-      /*
-        4. Publiczny URL.
-      */
+        return;
+      }
 
       const {
         data: publicUrlData,
       } =
         supabase.storage
           .from("avatars")
-          .getPublicUrl(filePath);
+          .getPublicUrl(
+            filePath
+          );
 
       const publicUrl =
         publicUrlData?.publicUrl;
 
       if (!publicUrl) {
-        throw new Error(
-          "Nie udało się pobrać publicznego URL zdjęcia."
+        setMessage(
+          "Zdjęcie zostało przesłane, ale nie udało się pobrać adresu."
         );
+
+        return;
       }
 
-      /*
-        5. Zapisujemy avatar_url
-        w public.users.
-
-        UWAGA:
-        Nie używamy tutaj auth.updateUser().
-      */
-
-      const updatedProfile =
-        await updateProfile(
-          user.id,
-          user.email || "",
-          name.trim() ||
-            user.email?.split("@")[0] ||
-            "Użytkownik",
-          publicUrl
+      const {
+        data: updatedData,
+        error: updateError,
+      } =
+        await supabase.auth.updateUser(
+          {
+            data: {
+              name:
+                name.trim(),
+              avatar_url:
+                publicUrl,
+            },
+          }
         );
 
-      /*
-        6. Aktualizujemy ekran.
-      */
+      if (updateError) {
+        console.error(
+          "AVATAR PROFILE UPDATE ERROR:",
+          updateError
+        );
 
-      setProfile(updatedProfile);
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${updateError.message}`
+        );
 
-      setName(
-        updatedProfile.name || ""
-      );
+        return;
+      }
+
+      const savedAvatarUrl =
+        updatedData?.user
+          ?.user_metadata
+          ?.avatar_url ||
+        publicUrl;
 
       setAvatarUrl(
-        updatedProfile.avatar_url || ""
+        savedAvatarUrl
       );
+
+      if (updatedData?.user) {
+        setName(
+          updatedData.user
+            .user_metadata
+            ?.name ||
+            name
+        );
+      }
 
       setMessage(
         "Zdjęcie profilowe zostało zapisane."
@@ -1045,7 +1100,8 @@ function Account() {
 
       setMessage(
         `Nie udało się ustawić zdjęcia: ${
-          error?.message || "Nieznany błąd"
+          error?.message ||
+          "Nieznany błąd"
         }`
       );
     } finally {
@@ -1054,17 +1110,20 @@ function Account() {
     }
   }
 
-  /* =======================================================
-     ZAPIS PROFILU
-  ======================================================= */
-
-  async function handleSave(event) {
+  async function handleSave(
+    event
+  ) {
     event.preventDefault();
+
+    setSaving(true);
+    setMessage("");
 
     const cleanName =
       name.trim();
 
     if (!cleanName) {
+      setSaving(false);
+
       setMessage(
         "Imię / nazwa nie może być puste."
       );
@@ -1073,36 +1132,39 @@ function Account() {
     }
 
     try {
-      setSaving(true);
-      setMessage("");
-
-      /*
-        Najważniejsza zmiana:
-
-        NIE:
-        supabase.auth.updateUser()
-
-        TAK:
-        public.users
-      */
-
-      const updatedProfile =
-        await updateProfile(
-          user.id,
-          user.email || "",
-          cleanName,
-          avatarUrl
+      const {
+        data,
+        error,
+      } =
+        await supabase.auth.updateUser(
+          {
+            data: {
+              name: cleanName,
+              avatar_url:
+                avatarUrl || null,
+            },
+          }
         );
 
-      setProfile(updatedProfile);
+      if (error) {
+        throw error;
+      }
 
-      setName(
-        updatedProfile.name || cleanName
-      );
+      if (data?.user) {
+        setName(
+          data.user
+            .user_metadata
+            ?.name ||
+            cleanName
+        );
 
-      setAvatarUrl(
-        updatedProfile.avatar_url || ""
-      );
+        setAvatarUrl(
+          data.user
+            .user_metadata
+            ?.avatar_url ||
+            ""
+        );
+      }
 
       setMessage(
         "Zmiany zostały zapisane."
@@ -1115,7 +1177,8 @@ function Account() {
 
       setMessage(
         `Nie udało się zapisać profilu: ${
-          error?.message || "Nieznany błąd"
+          error?.message ||
+          "Nieznany błąd"
         }`
       );
     } finally {
@@ -1123,14 +1186,11 @@ function Account() {
     }
   }
 
-  /* =======================================================
-     LOGOUT
-  ======================================================= */
-
   async function handleLogout() {
     const {
       error,
-    } = await supabase.auth.signOut();
+    } =
+      await supabase.auth.signOut();
 
     if (error) {
       alert(
@@ -1146,7 +1206,6 @@ function Account() {
   }
 
   const displayName =
-    profile?.name ||
     name ||
     user.email?.split("@")[0] ||
     "Użytkownik";
@@ -1158,7 +1217,7 @@ function Account() {
 
   return (
     <div className="page">
-      <AccountNavbar profile={profile} />
+      <AccountNavbar />
 
       <main className="app-page">
         <div className="app-page-header">
@@ -1176,10 +1235,6 @@ function Account() {
         </div>
 
         <section className="account-card">
-          {/* =================================================
-              PODGLĄD PROFILU
-          ================================================= */}
-
           <div className="profile-preview">
             <div className="profile-avatar-wrapper">
               {avatarUrl ? (
@@ -1206,10 +1261,6 @@ function Account() {
             </div>
           </div>
 
-          {/* =================================================
-              FORMULARZ
-          ================================================= */}
-
           <form
             className="auth-form account-form"
             onSubmit={handleSave}
@@ -1220,8 +1271,12 @@ function Account() {
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                onChange={handleAvatarChange}
-                disabled={uploading}
+                onChange={
+                  handleAvatarChange
+                }
+                disabled={
+                  uploading
+                }
               />
 
               <small>
@@ -1244,7 +1299,9 @@ function Account() {
                 type="text"
                 value={name}
                 onChange={(event) =>
-                  setName(event.target.value)
+                  setName(
+                    event.target.value
+                  )
                 }
                 required
               />
@@ -1255,7 +1312,9 @@ function Account() {
 
               <input
                 type="email"
-                value={user.email || ""}
+                value={
+                  user.email || ""
+                }
                 disabled
               />
             </label>
@@ -1300,7 +1359,9 @@ function Account() {
         <button
           className="btn btn-ghost"
           type="button"
-          onClick={handleLogout}
+          onClick={
+            handleLogout
+          }
         >
           Wyloguj się
         </button>
@@ -1326,7 +1387,7 @@ function FindTalent() {
   return (
     <div className="page">
       {isLoggedIn ? (
-        <AccountNavbar profile={null} />
+        <AccountNavbar />
       ) : (
         <header className="navbar">
           <Link
@@ -1452,7 +1513,7 @@ function Jobs() {
 
   return (
     <div className="page">
-      <AccountNavbar profile={null} />
+      <AccountNavbar />
 
       <main className="app-page">
         <div className="app-page-header">
@@ -1507,7 +1568,8 @@ function Jobs() {
 ========================================================= */
 
 function Home() {
-  const { loading } = useAuth();
+  const { loading } =
+    useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -1591,3 +1653,4 @@ function Router() {
 }
 
 export default Router;
+
