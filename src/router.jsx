@@ -162,7 +162,6 @@ function PublicOnlyRoute({ children }) {
 
 function AccountNavbar() {
   const navigate = useNavigate();
-
   const { user } = useAuth();
 
   async function handleLogout() {
@@ -194,7 +193,6 @@ function AccountNavbar() {
 
   return (
     <header className="navbar">
-
       <Link
         className="logo"
         to="/"
@@ -634,7 +632,7 @@ function Register() {
 }
 
 /* =========================================================
-   ZDJĘCIE — 400 × 400 JPEG
+   AVATAR — 400 × 400 JPEG
 ========================================================= */
 
 async function resizeAndConvertImage(file) {
@@ -652,13 +650,23 @@ async function resizeAndConvertImage(file) {
       const SIZE = 400;
 
       const sourceWidth =
-        image.width;
+        image.naturalWidth;
 
       const sourceHeight =
-        image.height;
+        image.naturalHeight;
+
+      if (!sourceWidth || !sourceHeight) {
+        reject(
+          new Error(
+            "Zdjęcie ma nieprawidłowe wymiary."
+          )
+        );
+
+        return;
+      }
 
       /*
-        Bierzemy kwadrat ze środka zdjęcia.
+        Bierzemy kwadrat ze środka.
       */
 
       const sourceSize =
@@ -696,8 +704,7 @@ async function resizeAndConvertImage(file) {
       context.imageSmoothingQuality = "high";
 
       /*
-        Kwadratowe przycięcie + skalowanie
-        do dokładnie 400 × 400.
+        Dokładnie 400 × 400.
       */
 
       context.drawImage(
@@ -846,21 +853,22 @@ function Account() {
       setUploading(true);
 
       /*
-        1. Konwersja do 400 × 400 JPEG.
+        1. Konwertujemy zdjęcie
+        do 400 × 400 JPEG.
       */
 
       const convertedFile =
         await resizeAndConvertImage(file);
 
       /*
-        2. Każdy użytkownik ma własny folder.
+        2. Własny folder użytkownika.
       */
 
       const filePath =
         `${user.id}/avatar-${Date.now()}.jpg`;
 
       /*
-        3. Upload do avatars.
+        3. Upload do bucketa avatars.
       */
 
       const {
@@ -897,9 +905,10 @@ function Account() {
 
       const {
         data: publicUrlData,
-      } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
+      } =
+        supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
 
       const publicUrl =
         publicUrlData?.publicUrl;
@@ -907,7 +916,7 @@ function Account() {
       if (!publicUrl) {
 
         setMessage(
-          "Zdjęcie zostało przesłane, ale nie udało się pobrać jego adresu."
+          "Zdjęcie zostało przesłane, ale nie udało się pobrać adresu."
         );
 
         return;
@@ -915,11 +924,11 @@ function Account() {
 
       /*
         5. Zapisujemy avatar_url
-        razem z nazwą użytkownika.
+        w danych użytkownika.
       */
 
       const {
-        data: updatedUser,
+        data: updatedData,
         error: updateError,
       } =
         await supabase.auth.updateUser({
@@ -932,7 +941,7 @@ function Account() {
       if (updateError) {
 
         console.error(
-          "PROFILE UPDATE ERROR:",
+          "AVATAR PROFILE UPDATE ERROR:",
           updateError
         );
 
@@ -944,15 +953,22 @@ function Account() {
       }
 
       /*
-        6. Natychmiast aktualizujemy podgląd.
+        6. Natychmiast pokazujemy nowe zdjęcie.
       */
 
-      setAvatarUrl(publicUrl);
+      const savedAvatarUrl =
+        updatedData?.user?.user_metadata?.avatar_url ||
+        publicUrl;
 
-      if (updatedUser?.user) {
+      setAvatarUrl(savedAvatarUrl);
 
+      /*
+        7. Aktualizujemy lokalne dane.
+      */
+
+      if (updatedData?.user) {
         setName(
-          updatedUser.user.user_metadata?.name ||
+          updatedData.user.user_metadata?.name ||
           name
         );
       }
@@ -969,7 +985,9 @@ function Account() {
       );
 
       setMessage(
-        `Nie udało się ustawić zdjęcia: ${error.message}`
+        `Nie udało się ustawić zdjęcia: ${
+          error?.message || "Nieznany błąd"
+        }`
       );
 
     } finally {
@@ -991,7 +1009,25 @@ function Account() {
     setSaving(true);
     setMessage("");
 
+    const cleanName =
+      name.trim();
+
+    if (!cleanName) {
+
+      setSaving(false);
+
+      setMessage(
+        "Imię / nazwa nie może być puste."
+      );
+
+      return;
+    }
+
     try {
+
+      /*
+        Aktualizujemy tylko dane profilu.
+      */
 
       const {
         data,
@@ -999,7 +1035,7 @@ function Account() {
       } =
         await supabase.auth.updateUser({
           data: {
-            name: name.trim(),
+            name: cleanName,
             avatar_url: avatarUrl || null,
           },
         });
@@ -1012,7 +1048,7 @@ function Account() {
 
         setName(
           data.user.user_metadata?.name ||
-          name
+          cleanName
         );
 
         setAvatarUrl(
@@ -1033,7 +1069,9 @@ function Account() {
       );
 
       setMessage(
-        `Nie udało się zapisać profilu: ${error.message}`
+        `Nie udało się zapisać profilu: ${
+          error?.message || "Nieznany błąd"
+        }`
       );
 
     } finally {
@@ -1157,7 +1195,7 @@ function Account() {
 
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={handleAvatarChange}
                 disabled={uploading}
               />
