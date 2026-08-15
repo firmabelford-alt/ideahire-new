@@ -13,7 +13,7 @@ import App from "./App";
 import { supabase } from "./supabase";
 
 // ==========================================
-// STRONA LOGOWANIA
+// LOGOWANIE
 // ==========================================
 
 function Login() {
@@ -43,9 +43,18 @@ function Login() {
       return;
     }
 
-    console.log("LOGIN SUCCESS:", data.user);
+    console.log("LOGIN SUCCESS:", data);
+    console.log("LOGGED USER:", data?.user);
 
-    // Po prawidłowym logowaniu idziemy do konta
+    // ==========================================
+    // TEST - JEŚLI TO SIĘ POJAWI,
+    // LOGOWANIE DZIAŁA I TEN ROUTER JEST UŻYWANY
+    // ==========================================
+
+    alert(
+      "LOGIN OK — PRZECHODZĘ DO PROFILU"
+    );
+
     navigate("/profile");
   }
 
@@ -130,10 +139,6 @@ function Register() {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    console.log("REGISTER START");
-    console.log("EMAIL:", email);
-    console.log("NAME:", name);
-
     const {
       data,
       error,
@@ -147,9 +152,6 @@ function Register() {
       },
     });
 
-    console.log("SIGNUP DATA:", data);
-    console.log("SIGNUP ERROR:", error);
-
     if (error) {
       console.error("SIGNUP ERROR:", error);
 
@@ -160,12 +162,7 @@ function Register() {
       return;
     }
 
-    if (!data || !data.user) {
-      console.error(
-        "SUPABASE DID NOT RETURN USER:",
-        data
-      );
-
+    if (!data?.user) {
       alert(
         "Supabase nie zwrócił użytkownika po rejestracji."
       );
@@ -262,78 +259,7 @@ function Register() {
 }
 
 // ==========================================
-// OCHRONA STRONY DLA ZALOGOWANYCH
-// ==========================================
-
-function ProtectedRoute({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function checkUser() {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-
-      if (error) {
-        console.error(
-          "GET USER ERROR:",
-          error
-        );
-      }
-
-      if (mounted) {
-        setUser(user);
-        setLoading(false);
-      }
-    }
-
-    checkUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (mounted) {
-          setUser(session?.user ?? null);
-          setLoading(false);
-        }
-      }
-    );
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="page">
-        <div className="app-page">
-          <h1>Ładowanie konta...</h1>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Navigate
-        to="/login"
-        replace
-      />
-    );
-  }
-
-  return children;
-}
-
-// ==========================================
-// PROFIL UŻYTKOWNIKA
+// PROFIL
 // ==========================================
 
 function Profile() {
@@ -342,43 +268,53 @@ function Profile() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profileError, setProfileError] = useState(null);
 
   useEffect(() => {
     async function loadProfile() {
+      console.log("PROFILE PAGE START");
+
+      // Pobieramy zalogowanego użytkownika
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
+      console.log("CURRENT USER:", user);
+      console.log("USER ERROR:", userError);
+
       if (userError || !user) {
         console.error(
-          "USER ERROR:",
+          "NO LOGGED USER:",
           userError
         );
 
+        setLoading(false);
         navigate("/login");
         return;
       }
 
       setUser(user);
 
+      // Pobieramy profil z public.users
       const {
-        data: profileData,
-        error: profileError,
+        data,
+        error,
       } = await supabase
         .from("users")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      if (profileError) {
-        console.error(
-          "PROFILE ERROR:",
-          profileError
-        );
+      console.log("PROFILE DATA:", data);
+      console.log("PROFILE ERROR:", error);
+
+      if (error) {
+        setProfileError(error.message);
+      } else {
+        setProfile(data);
       }
 
-      setProfile(profileData);
       setLoading(false);
     }
 
@@ -390,11 +326,6 @@ function Profile() {
       await supabase.auth.signOut();
 
     if (error) {
-      console.error(
-        "LOGOUT ERROR:",
-        error
-      );
-
       alert(
         `Nie udało się wylogować: ${error.message}`
       );
@@ -409,7 +340,7 @@ function Profile() {
     return (
       <div className="page">
         <div className="app-page">
-          <h1>Ładowanie konta...</h1>
+          <h1>Ładowanie profilu...</h1>
         </div>
       </div>
     );
@@ -418,13 +349,13 @@ function Profile() {
   return (
     <div className="page">
       <div className="app-page">
+
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            gap: "20px",
-            marginBottom: "50px",
+            marginBottom: "40px",
           }}
         >
           <Link className="logo" to="/">
@@ -449,20 +380,19 @@ function Profile() {
             Cześć,{" "}
             {profile?.name ||
               user?.user_metadata?.name ||
-              "Użytkowniku"}
-            !
+              "Użytkowniku"}!
           </h1>
 
           <p>
-            To jest Twoje konto IdeaHire.
-            Stąd będziemy rozwijać całą platformę.
+            Jesteś zalogowany do IdeaHire.
           </p>
         </div>
 
         <div className="jobs-list">
+
           <article className="job-card">
             <span className="section-label">
-              Dane konta
+              Twój profil
             </span>
 
             <h2>
@@ -472,27 +402,29 @@ function Profile() {
             </h2>
 
             <p>
-              E-mail: {user.email}
+              E-mail: {user?.email}
             </p>
 
             <p>
-              ID użytkownika: {user.id}
+              ID: {user?.id}
             </p>
+
+            {profileError && (
+              <p>
+                Nie udało się pobrać profilu z
+                public.users: {profileError}
+              </p>
+            )}
           </article>
 
           <article className="job-card">
             <span className="section-label">
-              Twoje możliwości
+              IdeaHire
             </span>
 
             <h2>
               Co chcesz zrobić?
             </h2>
-
-            <p>
-              Możesz znaleźć wykonawcę albo
-              przeglądać dostępne zlecenia.
-            </p>
 
             <div
               style={{
@@ -517,6 +449,7 @@ function Profile() {
               </Link>
             </div>
           </article>
+
         </div>
       </div>
     </div>
@@ -681,55 +614,36 @@ function Router() {
     <BrowserRouter>
       <Routes>
 
-        {/* STRONA GŁÓWNA */}
         <Route
           path="/"
           element={<App />}
         />
 
-        {/* LOGOWANIE */}
         <Route
           path="/login"
           element={<Login />}
         />
 
-        {/* REJESTRACJA */}
         <Route
           path="/register"
           element={<Register />}
         />
 
-        {/* KONTO - TYLKO DLA ZALOGOWANYCH */}
         <Route
           path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
+          element={<Profile />}
         />
 
-        {/* DODAWANIE / SZUKANIE WYKONAWCY */}
         <Route
           path="/find-talent"
-          element={
-            <ProtectedRoute>
-              <FindTalent />
-            </ProtectedRoute>
-          }
+          element={<FindTalent />}
         />
 
-        {/* ZLECENIA */}
         <Route
           path="/jobs"
-          element={
-            <ProtectedRoute>
-              <Jobs />
-            </ProtectedRoute>
-          }
+          element={<Jobs />}
         />
 
-        {/* NIEZNANA STRONA */}
         <Route
           path="*"
           element={
