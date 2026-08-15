@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -157,12 +156,96 @@ function PublicOnlyRoute({ children }) {
 }
 
 /* =========================================================
+   AVATAR URL
+========================================================= */
+
+function getAvatarUrl(userId) {
+  if (!userId) return "";
+
+  const filePath = `${userId}/avatar.jpg`;
+
+  const {
+    data,
+  } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(filePath);
+
+  if (!data?.publicUrl) {
+    return "";
+  }
+
+  /*
+    Dodajemy timestamp, żeby przeglądarka
+    nie pokazywała starego zdjęcia z cache.
+  */
+
+  return `${data.publicUrl}?v=${Date.now()}`;
+}
+
+/* =========================================================
+   LOAD PROFILE FROM public.users
+========================================================= */
+
+async function loadProfile(userId) {
+  if (!userId) {
+    return null;
+  }
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from("users")
+    .select("id, name, email, created_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(
+      "LOAD PROFILE ERROR:",
+      error
+    );
+
+    return null;
+  }
+
+  return data || null;
+}
+
+/* =========================================================
    NAVBAR
 ========================================================= */
 
 function AccountNavbar() {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const [profile, setProfile] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadNavbarProfile() {
+      if (!user?.id) return;
+
+      const loadedProfile =
+        await loadProfile(user.id);
+
+      if (!mounted) return;
+
+      setProfile(loadedProfile);
+      setAvatarUrl(
+        getAvatarUrl(user.id)
+      );
+    }
+
+    loadNavbarProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
 
   async function handleLogout() {
     const { error } =
@@ -180,19 +263,19 @@ function AccountNavbar() {
     });
   }
 
-  const avatarUrl =
-    user?.user_metadata?.avatar_url || "";
-
   const userName =
-    user?.user_metadata?.name ||
+    profile?.name ||
     user?.email?.split("@")[0] ||
     "Użytkownik";
 
   const initial =
-    userName.charAt(0).toUpperCase();
+    userName
+      .charAt(0)
+      .toUpperCase();
 
   return (
     <header className="navbar">
+
       <Link
         className="logo"
         to="/"
@@ -467,13 +550,16 @@ function Register() {
     setMessage("");
     setLoading(true);
 
+    const cleanName =
+      name.trim();
+
     const { data, error } =
       await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
           data: {
-            name: name.trim(),
+            name: cleanName,
           },
         },
       });
@@ -665,10 +751,6 @@ async function resizeAndConvertImage(file) {
         return;
       }
 
-      /*
-        Bierzemy kwadrat ze środka.
-      */
-
       const sourceSize =
         Math.min(
           sourceWidth,
@@ -702,10 +784,6 @@ async function resizeAndConvertImage(file) {
 
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = "high";
-
-      /*
-        Dokładnie 400 × 400.
-      */
 
       context.drawImage(
         image,
@@ -785,18 +863,33 @@ function Account() {
 
   useEffect(() => {
 
-    if (!user) return;
+    if (!user?.id) return;
 
-    setName(
-      user.user_metadata?.name ||
-      user.email?.split("@")[0] ||
-      ""
-    );
+    let mounted = true;
 
-    setAvatarUrl(
-      user.user_metadata?.avatar_url ||
-      ""
-    );
+    async function loadAccount() {
+
+      const profile =
+        await loadProfile(user.id);
+
+      if (!mounted) return;
+
+      setName(
+        profile?.name ||
+        user.email?.split("@")[0] ||
+        ""
+      );
+
+      setAvatarUrl(
+        getAvatarUrl(user.id)
+      );
+    }
+
+    loadAccount();
+
+    return () => {
+      mounted = false;
+    };
 
   }, [user]);
 
@@ -853,22 +946,23 @@ function Account() {
       setUploading(true);
 
       /*
-        1. Konwertujemy zdjęcie
-        do 400 × 400 JPEG.
+        1. Konwersja do 400 × 400 JPEG.
       */
 
       const convertedFile =
         await resizeAndConvertImage(file);
 
       /*
-        2. Własny folder użytkownika.
+        2. Stała ścieżka dla użytkownika.
+
+        Dzięki temu nie tworzymy setek starych avatarów.
       */
 
       const filePath =
-        `${user.id}/avatar-${Date.now()}.jpg`;
+        `${user.id}/avatar.jpg`;
 
       /*
-        3. Upload do bucketa avatars.
+        3. Upload / nadpisanie zdjęcia.
       */
 
       const {
@@ -880,8 +974,8 @@ function Account() {
           convertedFile,
           {
             contentType: "image/jpeg",
-            cacheControl: "3600",
-            upsert: false,
+            cacheControl: "0",
+            upsert: true,
           }
         );
 
@@ -910,68 +1004,72 @@ function Account() {
           .from("avatars")
           .getPublicUrl(filePath);
 
-      const publicUrl =
+      const basePublicUrl =
         publicUrlData?.publicUrl;
 
-      if (!publicUrl) {
+      if (!basePublicUrl) {
 
         setMessage(
-          "Zdjęcie zostało przesłane, ale nie udało się pobrać adresu."
+          "Zdjęcie zostało przesłane, ale nie udało się pobrać jego adresu."
         );
 
         return;
       }
 
       /*
-        5. Zapisujemy avatar_url
-        w danych użytkownika.
+        Cache busting.
+      */
+
+      const newAvatarUrl =
+        `${basePublicUrl}?v=${Date.now()}`;
+
+      /*
+        5. Nie używamy auth.updateUser().
+        Zapisujemy tylko nazwę w public.users.
+
+        Zdjęcie jest już zapisane w Storage
+        pod stałą ścieżką użytkownika.
       */
 
       const {
-        data: updatedData,
-        error: updateError,
+        error: profileError,
       } =
-        await supabase.auth.updateUser({
-          data: {
+        await supabase
+          .from("users")
+          .update({
             name: name.trim(),
-            avatar_url: publicUrl,
-          },
-        });
+          })
+          .eq("id", user.id);
 
-      if (updateError) {
+      if (profileError) {
 
         console.error(
-          "AVATAR PROFILE UPDATE ERROR:",
-          updateError
+          "PROFILE DATABASE UPDATE ERROR:",
+          profileError
         );
 
         setMessage(
-          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${updateError.message}`
+          `Zdjęcie zapisane, ale nazwa nie została zapisana: ${profileError.message}`
+        );
+
+        /*
+          Zdjęcie i tak pokazujemy.
+        */
+
+        setAvatarUrl(
+          newAvatarUrl
         );
 
         return;
       }
 
       /*
-        6. Natychmiast pokazujemy nowe zdjęcie.
+        6. Natychmiastowy podgląd.
       */
 
-      const savedAvatarUrl =
-        updatedData?.user?.user_metadata?.avatar_url ||
-        publicUrl;
-
-      setAvatarUrl(savedAvatarUrl);
-
-      /*
-        7. Aktualizujemy lokalne dane.
-      */
-
-      if (updatedData?.user) {
-        setName(
-          updatedData.user.user_metadata?.name ||
-          name
-        );
-      }
+      setAvatarUrl(
+        newAvatarUrl
+      );
 
       setMessage(
         "Zdjęcie profilowe zostało zapisane."
@@ -1026,36 +1124,41 @@ function Account() {
     try {
 
       /*
-        Aktualizujemy tylko dane profilu.
+        WAŻNE:
+
+        Nie używamy:
+
+        supabase.auth.updateUser()
+
+        tylko public.users.
       */
 
       const {
         data,
         error,
       } =
-        await supabase.auth.updateUser({
-          data: {
+        await supabase
+          .from("users")
+          .update({
             name: cleanName,
-            avatar_url: avatarUrl || null,
-          },
-        });
+          })
+          .eq("id", user.id)
+          .select("id, name, email")
+          .single();
 
       if (error) {
         throw error;
       }
 
-      if (data?.user) {
-
-        setName(
-          data.user.user_metadata?.name ||
-          cleanName
-        );
-
-        setAvatarUrl(
-          data.user.user_metadata?.avatar_url ||
-          ""
+      if (!data) {
+        throw new Error(
+          "Nie znaleziono profilu użytkownika w public.users."
         );
       }
+
+      setName(
+        data.name || cleanName
+      );
 
       setMessage(
         "Zmiany zostały zapisane."
