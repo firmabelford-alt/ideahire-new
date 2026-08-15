@@ -1,3 +1,4 @@
+jsx
 import React from "react";
 import {
   BrowserRouter,
@@ -115,7 +116,7 @@ function Register() {
     console.log("NAME:", name);
 
     // ==========================================
-    // KROK 1 — SUPABASE AUTH
+    // REJESTRACJA W SUPABASE AUTH
     // ==========================================
 
     const {
@@ -154,47 +155,18 @@ function Register() {
       return;
     }
 
-    console.log(
-      "USER CREATED:",
-      data.user.id
-    );
+    console.log("USER CREATED:", data.user.id);
 
     // ==========================================
-    // KROK 2 — TABELA USERS
+    // PROFIL W public.users
+    //
+    // Profil jest teraz tworzony AUTOMATYCZNIE
+    // przez trigger w Supabase.
+    // Nie robimy tutaj .from("users").insert(...)
     // ==========================================
-
-    const { error: profileError } = await supabase
-      .from("users")
-      .insert([
-        {
-          id: data.user.id,
-          name: name,
-          email: email,
-        },
-      ]);
-
-    console.log(
-      "PROFILE ERROR:",
-      profileError
-    );
-
-    if (profileError) {
-      console.error(
-        "USERS TABLE ERROR:",
-        profileError
-      );
-
-      alert(
-        `Konto zostało utworzone, ale nie udało się zapisać profilu: ${profileError.message}`
-      );
-
-      return;
-    }
-
-    console.log("PROFILE CREATED SUCCESSFULLY");
 
     alert(
-      "Konto zostało utworzone pomyślnie!"
+      "Konto zostało utworzone pomyślnie! Sprawdź swoją skrzynkę e-mail i potwierdź adres."
     );
 
     navigate("/login");
