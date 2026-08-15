@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -12,6 +12,10 @@ import {
 import App from "./App";
 import { supabase } from "./supabase";
 
+// ==========================================
+// STRONA LOGOWANIA
+// ==========================================
+
 function Login() {
   const navigate = useNavigate();
 
@@ -23,20 +27,26 @@ function Login() {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (error) {
       console.error("LOGIN ERROR:", error);
 
-      alert(`Nie udało się zalogować: ${error.message}`);
+      alert(
+        `Nie udało się zalogować: ${error.message}`
+      );
+
       return;
     }
 
-    alert("Zalogowano pomyślnie!");
-    navigate("/");
+    console.log("LOGIN SUCCESS:", data.user);
+
+    // Po prawidłowym logowaniu idziemy do konta
+    navigate("/profile");
   }
 
   return (
@@ -47,7 +57,9 @@ function Login() {
         </Link>
 
         <div className="auth-header">
-          <span className="section-label">Witaj ponownie</span>
+          <span className="section-label">
+            Witaj ponownie
+          </span>
 
           <h1>Zaloguj się</h1>
 
@@ -57,7 +69,10 @@ function Login() {
           </p>
         </div>
 
-        <form className="auth-form" onSubmit={handleLogin}>
+        <form
+          className="auth-form"
+          onSubmit={handleLogin}
+        >
           <label>
             Adres e-mail
 
@@ -99,6 +114,10 @@ function Login() {
   );
 }
 
+// ==========================================
+// REJESTRACJA
+// ==========================================
+
 function Register() {
   const navigate = useNavigate();
 
@@ -114,10 +133,6 @@ function Register() {
     console.log("REGISTER START");
     console.log("EMAIL:", email);
     console.log("NAME:", name);
-
-    // ==========================================
-    // REJESTRACJA W SUPABASE AUTH
-    // ==========================================
 
     const {
       data,
@@ -146,7 +161,10 @@ function Register() {
     }
 
     if (!data || !data.user) {
-      console.error("SUPABASE DID NOT RETURN USER:", data);
+      console.error(
+        "SUPABASE DID NOT RETURN USER:",
+        data
+      );
 
       alert(
         "Supabase nie zwrócił użytkownika po rejestracji."
@@ -155,18 +173,13 @@ function Register() {
       return;
     }
 
-    console.log("USER CREATED:", data.user.id);
-
-    // ==========================================
-    // PROFIL W public.users
-    //
-    // Profil jest teraz tworzony AUTOMATYCZNIE
-    // przez trigger w Supabase.
-    // Nie robimy tutaj .from("users").insert(...)
-    // ==========================================
+    console.log(
+      "USER CREATED:",
+      data.user.id
+    );
 
     alert(
-      "Konto zostało utworzone pomyślnie! Sprawdź swoją skrzynkę e-mail i potwierdź adres."
+      "Konto zostało utworzone. Sprawdź swoją skrzynkę e-mail i potwierdź adres."
     );
 
     navigate("/login");
@@ -248,6 +261,272 @@ function Register() {
   );
 }
 
+// ==========================================
+// OCHRONA STRONY DLA ZALOGOWANYCH
+// ==========================================
+
+function ProtectedRoute({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkUser() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error(
+          "GET USER ERROR:",
+          error
+        );
+      }
+
+      if (mounted) {
+        setUser(user);
+        setLoading(false);
+      }
+    }
+
+    checkUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="app-page">
+          <h1>Ładowanie konta...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+// ==========================================
+// PROFIL UŻYTKOWNIKA
+// ==========================================
+
+function Profile() {
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProfile() {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.error(
+          "USER ERROR:",
+          userError
+        );
+
+        navigate("/login");
+        return;
+      }
+
+      setUser(user);
+
+      const {
+        data: profileData,
+        error: profileError,
+      } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        console.error(
+          "PROFILE ERROR:",
+          profileError
+        );
+      }
+
+      setProfile(profileData);
+      setLoading(false);
+    }
+
+    loadProfile();
+  }, [navigate]);
+
+  async function handleLogout() {
+    const { error } =
+      await supabase.auth.signOut();
+
+    if (error) {
+      console.error(
+        "LOGOUT ERROR:",
+        error
+      );
+
+      alert(
+        `Nie udało się wylogować: ${error.message}`
+      );
+
+      return;
+    }
+
+    navigate("/");
+  }
+
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="app-page">
+          <h1>Ładowanie konta...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page">
+      <div className="app-page">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "20px",
+            marginBottom: "50px",
+          }}
+        >
+          <Link className="logo" to="/">
+            Idea<span>Hire</span>
+          </Link>
+
+          <button
+            className="btn btn-outline"
+            type="button"
+            onClick={handleLogout}
+          >
+            Wyloguj się
+          </button>
+        </div>
+
+        <div className="app-page-header">
+          <span className="section-label">
+            Twoje konto
+          </span>
+
+          <h1>
+            Cześć,{" "}
+            {profile?.name ||
+              user?.user_metadata?.name ||
+              "Użytkowniku"}
+            !
+          </h1>
+
+          <p>
+            To jest Twoje konto IdeaHire.
+            Stąd będziemy rozwijać całą platformę.
+          </p>
+        </div>
+
+        <div className="jobs-list">
+          <article className="job-card">
+            <span className="section-label">
+              Dane konta
+            </span>
+
+            <h2>
+              {profile?.name ||
+                user?.user_metadata?.name ||
+                "Brak imienia"}
+            </h2>
+
+            <p>
+              E-mail: {user.email}
+            </p>
+
+            <p>
+              ID użytkownika: {user.id}
+            </p>
+          </article>
+
+          <article className="job-card">
+            <span className="section-label">
+              Twoje możliwości
+            </span>
+
+            <h2>
+              Co chcesz zrobić?
+            </h2>
+
+            <p>
+              Możesz znaleźć wykonawcę albo
+              przeglądać dostępne zlecenia.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
+                marginTop: "20px",
+              }}
+            >
+              <Link
+                className="btn btn-dark"
+                to="/find-talent"
+              >
+                Dodaj zlecenie →
+              </Link>
+
+              <Link
+                className="btn btn-outline"
+                to="/jobs"
+              >
+                Znajdź zlecenie →
+              </Link>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// ZNAJDŹ WYKONAWCĘ
+// ==========================================
+
 function FindTalent() {
   return (
     <div className="page">
@@ -264,8 +543,8 @@ function FindTalent() {
           <h1>Znajdź wykonawcę</h1>
 
           <p>
-            Opisz swój projekt i znajdź osobę, która pomoże
-            Ci go zrealizować.
+            Opisz swój projekt i znajdź osobę,
+            która pomoże Ci go zrealizować.
           </p>
         </div>
 
@@ -320,6 +599,10 @@ function FindTalent() {
   );
 }
 
+// ==========================================
+// ZLECENIA
+// ==========================================
+
 function Jobs() {
   const jobs = [
     {
@@ -354,8 +637,8 @@ function Jobs() {
           <h1>Znajdź zlecenie</h1>
 
           <p>
-            Przeglądaj projekty i znajdź zlecenie dopasowane
-            do Twoich umiejętności.
+            Przeglądaj projekty i znajdź zlecenie
+            dopasowane do Twoich umiejętności.
           </p>
         </div>
 
@@ -371,7 +654,9 @@ function Jobs() {
 
               <h2>{job.title}</h2>
 
-              <p>Budżet: {job.budget}</p>
+              <p>
+                Budżet: {job.budget}
+              </p>
 
               <button
                 className="btn btn-dark"
@@ -387,35 +672,64 @@ function Jobs() {
   );
 }
 
+// ==========================================
+// ROUTER
+// ==========================================
+
 function Router() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* STRONA GŁÓWNA */}
         <Route
           path="/"
           element={<App />}
         />
 
+        {/* LOGOWANIE */}
         <Route
           path="/login"
           element={<Login />}
         />
 
+        {/* REJESTRACJA */}
         <Route
           path="/register"
           element={<Register />}
         />
 
+        {/* KONTO - TYLKO DLA ZALOGOWANYCH */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* DODAWANIE / SZUKANIE WYKONAWCY */}
         <Route
           path="/find-talent"
-          element={<FindTalent />}
+          element={
+            <ProtectedRoute>
+              <FindTalent />
+            </ProtectedRoute>
+          }
         />
 
+        {/* ZLECENIA */}
         <Route
           path="/jobs"
-          element={<Jobs />}
+          element={
+            <ProtectedRoute>
+              <Jobs />
+            </ProtectedRoute>
+          }
         />
 
+        {/* NIEZNANA STRONA */}
         <Route
           path="*"
           element={
@@ -425,6 +739,7 @@ function Router() {
             />
           }
         />
+
       </Routes>
     </BrowserRouter>
   );
