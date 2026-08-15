@@ -1,5 +1,8 @@
+
+import { useEffect, useState } from "react";
 import "./App.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "./supabase";
 
 const categories = [
   "Programowanie",
@@ -11,6 +14,57 @@ const categories = [
 ];
 
 function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function getSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (mounted) {
+        setSession(session);
+        setLoading(false);
+      }
+    }
+
+    getSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      alert(`Nie udało się wylogować: ${error.message}`);
+      return;
+    }
+
+    navigate("/");
+  }
+
+  const userName =
+    session?.user?.user_metadata?.name ||
+    session?.user?.email?.split("@")[0] ||
+    "Użytkownik";
+
   return (
     <div className="app">
       <header className="navbar">
@@ -25,13 +79,46 @@ function App() {
         </nav>
 
         <div className="nav-actions">
-          <Link className="btn btn-ghost" to="/login">
-            Zaloguj się
-          </Link>
+          {loading ? (
+            <span>Ładowanie...</span>
+          ) : session ? (
+            <>
+              <span className="auth-user">
+                Cześć, {userName}
+              </span>
 
-          <Link className="btn btn-dark" to="/register">
-            Zacznij teraz
-          </Link>
+              <Link
+                className="btn btn-ghost"
+                to="/account"
+              >
+                Moje konto
+              </Link>
+
+              <button
+                className="btn btn-dark"
+                type="button"
+                onClick={handleLogout}
+              >
+                Wyloguj się
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                className="btn btn-ghost"
+                to="/login"
+              >
+                Zaloguj się
+              </Link>
+
+              <Link
+                className="btn btn-dark"
+                to="/register"
+              >
+                Zacznij teraz
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -286,9 +373,11 @@ function App() {
 
           <Link
             className="btn btn-light btn-large"
-            to="/register"
+            to={session ? "/account" : "/register"}
           >
-            Zacznij teraz →
+            {session
+              ? "Przejdź do konta →"
+              : "Zacznij teraz →"}
           </Link>
         </section>
       </main>
