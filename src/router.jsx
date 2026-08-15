@@ -944,12 +944,6 @@ function Account() {
           error
         );
 
-        /*
-          Nie blokujemy całego konta.
-          Jeżeli public.users nie odpowie,
-          pokazujemy dane z Auth jako fallback.
-        */
-
         setName(
           user.email?.split("@")[0] ||
           ""
@@ -1063,25 +1057,13 @@ function Account() {
     try {
       setUploading(true);
 
-      /*
-        1. Konwersja obrazu.
-      */
-
       const convertedFile =
         await resizeAndConvertImage(
           file
         );
 
-      /*
-        2. Unikalna ścieżka.
-      */
-
       const filePath =
         `${user.id}/avatar-${Date.now()}.jpg`;
-
-      /*
-        3. Upload.
-      */
 
       const {
         error: uploadError,
@@ -1113,10 +1095,6 @@ function Account() {
         return;
       }
 
-      /*
-        4. Public URL.
-      */
-
       const {
         data: publicUrlData,
       } =
@@ -1136,11 +1114,6 @@ function Account() {
 
         return;
       }
-
-      /*
-        5. Zapisujemy TYLKO avatar_url
-           do public.users.
-      */
 
       const {
         error:
@@ -1171,10 +1144,6 @@ function Account() {
         return;
       }
 
-      /*
-        6. Aktualizacja UI.
-      */
-
       setAvatarUrl(
         publicUrl
       );
@@ -1201,19 +1170,18 @@ function Account() {
   }
 
   /* =======================================================
-     SAVE PROFILE
+     SAVE PROFILE — POPRAWIONA WERSJA
   ======================================================= */
 
-  async function handleSave(
-    event
-  ) {
+  async function handleSave(event) {
     event.preventDefault();
+
+    setMessage("");
 
     if (!user?.id) {
       setMessage(
         "Brak zalogowanego użytkownika."
       );
-
       return;
     }
 
@@ -1224,52 +1192,103 @@ function Account() {
       setMessage(
         "Imię / nazwa nie może być puste."
       );
-
       return;
     }
 
     setSaving(true);
-    setMessage("");
 
     try {
+      console.log(
+        "=== SAVE PROFILE START ==="
+      );
+
+      console.log(
+        "USER ID:",
+        user.id
+      );
+
+      console.log(
+        "NEW NAME:",
+        cleanName
+      );
+
       /*
-        =====================================================
-        KLUCZOWA ZMIANA
-
-        NIE używamy:
-          supabase.auth.updateUser()
-
-        NIE robimy:
-          UPDATE + SELECT + SINGLE
-
-        Robimy prosty UPDATE do public.users.
-        =====================================================
+        1. Sprawdzamy, czy Supabase nadal widzi
+           aktywną sesję.
       */
 
       const {
-        error,
-      } = await supabase
-        .from("users")
-        .update({
-          name: cleanName,
-        })
-        .eq(
-          "id",
-          user.id
-        );
+        data: sessionData,
+        error: sessionError,
+      } =
+        await supabase.auth.getSession();
 
-      if (error) {
+      if (sessionError) {
         console.error(
-          "PROFILE NAME UPDATE ERROR:",
-          error
+          "SESSION CHECK ERROR:",
+          sessionError
         );
 
-        throw error;
+        throw new Error(
+          `Sesja Supabase jest niedostępna: ${sessionError.message}`
+        );
+      }
+
+      const currentSession =
+        sessionData?.session;
+
+      if (
+        !currentSession?.access_token
+      ) {
+        throw new Error(
+          "Brak aktywnej sesji Supabase."
+        );
+      }
+
+      console.log(
+        "SESSION OK:",
+        currentSession.user?.id
+      );
+
+      /*
+        2. Aktualizujemy TYLKO rekord
+           w public.users.
+
+        Nie używamy:
+          auth.updateUser()
+
+        Nie robimy:
+          UPDATE + SELECT + SINGLE
+      */
+
+      const {
+        error: updateError,
+      } =
+        await supabase
+          .from("users")
+          .update({
+            name: cleanName,
+          })
+          .eq(
+            "id",
+            user.id
+          );
+
+      if (updateError) {
+        console.error(
+          "SUPABASE UPDATE ERROR:",
+          updateError
+        );
+
+        throw new Error(
+          updateError.message ||
+          "Supabase odrzucił aktualizację profilu."
+        );
       }
 
       /*
-        Aktualizujemy lokalny ekran
-        bez kolejnego requestu.
+        3. Sukces.
+        Nie robimy kolejnego SELECT-a.
       */
 
       setName(
@@ -1279,19 +1298,38 @@ function Account() {
       setMessage(
         "Nazwa została zapisana."
       );
+
+      console.log(
+        "=== SAVE PROFILE SUCCESS ==="
+      );
     } catch (error) {
       console.error(
-        "PROFILE UPDATE ERROR:",
+        "=== SAVE PROFILE FAILED ===",
         error
       );
 
-      const errorMessage =
-        error?.message ||
-        "Failed to fetch";
+      /*
+        Failed to fetch oznacza zwykle problem
+        z komunikacją przeglądarka → Supabase,
+        a nie problem samego pola name.
+      */
 
-      setMessage(
-        `Nie udało się zapisać profilu: ${errorMessage}`
-      );
+      if (
+        error instanceof TypeError &&
+        error.message ===
+          "Failed to fetch"
+      ) {
+        setMessage(
+          "Nie można połączyć się z Supabase. Sprawdź adres projektu, klucz API, domenę Cloudflare i połączenie z Supabase."
+        );
+      } else {
+        setMessage(
+          `Nie udało się zapisać profilu: ${
+            error?.message ||
+            "Nieznany błąd"
+          }`
+        );
+      }
     } finally {
       setSaving(false);
     }
