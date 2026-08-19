@@ -159,6 +159,12 @@ function PublicOnlyRoute({ children }) {
 
 function AccountNavbar() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const userName =
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Użytkownik";
 
   async function handleLogout() {
     const { error } =
@@ -198,6 +204,10 @@ function AccountNavbar() {
       </nav>
 
       <div className="nav-actions">
+        <span className="account-mini-name">
+          {userName}
+        </span>
+
         <button
           className="btn btn-dark"
           type="button"
@@ -558,7 +568,7 @@ function Register() {
 }
 
 /* =========================================================
-   ACCOUNT — CZYSTA WERSJA
+   ACCOUNT — NOWY PROFIL
 ========================================================= */
 
 function Account() {
@@ -566,6 +576,20 @@ function Account() {
     user,
     loading: authLoading,
   } = useAuth();
+
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+
+    setName(
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      ""
+    );
+  }, [user]);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -580,6 +604,75 @@ function Account() {
     );
   }
 
+  async function handleSave(event) {
+    event.preventDefault();
+
+    const cleanName = name.trim();
+
+    setMessage("");
+
+    if (!cleanName) {
+      setMessage(
+        "Imię / nazwa nie może być puste."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const { data, error } =
+        await supabase.auth.updateUser({
+          data: {
+            name: cleanName,
+          },
+        });
+
+      if (error) {
+        console.error(
+          "PROFILE UPDATE ERROR:",
+          error
+        );
+
+        setMessage(
+          `Nie udało się zapisać profilu: ${error.message}`
+        );
+
+        return;
+      }
+
+      if (!data?.user) {
+        setMessage(
+          "Profil nie został zaktualizowany."
+        );
+
+        return;
+      }
+
+      setName(
+        data.user.user_metadata?.name ||
+        cleanName
+      );
+
+      setMessage(
+        "Nazwa została zapisana."
+      );
+    } catch (error) {
+      console.error(
+        "PROFILE UPDATE FETCH ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się zapisać profilu: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="page">
       <AccountNavbar />
@@ -591,24 +684,70 @@ function Account() {
           </span>
 
           <h1>
-            Moje konto
+            Mój profil
           </h1>
 
           <p>
-            To jest podstawowy widok konta.
+            Tutaj będziemy stopniowo budować Twój profil IdeaHire.
           </p>
         </div>
 
         <section className="account-card">
           <div className="profile-info">
             <h2>
-              Konto IdeaHire
+              {name || "Użytkownik"}
             </h2>
 
             <p>
               {user.email}
             </p>
           </div>
+
+          <form
+            className="auth-form account-form"
+            onSubmit={handleSave}
+          >
+            <label>
+              Imię / nazwa
+
+              <input
+                type="text"
+                value={name}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
+                placeholder="Np. Jan Kowalski"
+                autoComplete="name"
+                required
+              />
+            </label>
+
+            <label>
+              E-mail
+
+              <input
+                type="email"
+                value={user.email || ""}
+                disabled
+              />
+            </label>
+
+            {message && (
+              <p className="auth-message">
+                {message}
+              </p>
+            )}
+
+            <button
+              className="btn btn-dark btn-large"
+              type="submit"
+              disabled={saving}
+            >
+              {saving
+                ? "Zapisywanie..."
+                : "Zapisz zmiany →"}
+            </button>
+          </form>
         </section>
       </main>
     </div>
@@ -852,4 +991,6 @@ function Router() {
 }
 
 export default Router;
+
+
 
