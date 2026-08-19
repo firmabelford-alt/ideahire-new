@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -38,10 +37,10 @@ function AuthProvider({ children }) {
 
         if (!mounted) return;
 
-        const currentSession = data?.session ?? null;
+        const currentSession = data?.session || null;
 
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        setUser(currentSession?.user || null);
         setLoading(false);
       } catch (error) {
         console.error("SESSION LOAD ERROR:", error);
@@ -62,8 +61,8 @@ function AuthProvider({ children }) {
       (_event, newSession) => {
         if (!mounted) return;
 
-        setSession(newSession ?? null);
-        setUser(newSession?.user ?? null);
+        setSession(newSession || null);
+        setUser(newSession?.user || null);
         setLoading(false);
       }
     );
@@ -80,7 +79,7 @@ function AuthProvider({ children }) {
         session,
         user,
         loading,
-        isLoggedIn: Boolean(session && user),
+        isLoggedIn: !!session && !!user,
       }}
     >
       {children}
@@ -180,6 +179,7 @@ function AccountNavbar() {
       alert(
         `Nie udało się wylogować: ${error.message}`
       );
+
       return;
     }
 
@@ -258,6 +258,18 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    if (!authLoading && isLoggedIn) {
+      navigate("/account", {
+        replace: true,
+      });
+    }
+  }, [
+    authLoading,
+    isLoggedIn,
+    navigate,
+  ]);
+
   async function handleLogin(event) {
     event.preventDefault();
 
@@ -272,15 +284,9 @@ function Login() {
         });
 
       if (error) {
-        console.error(
-          "LOGIN ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się zalogować: ${error.message}`
         );
-
         return;
       }
 
@@ -288,7 +294,6 @@ function Login() {
         setMessage(
           "Logowanie nie utworzyło aktywnej sesji."
         );
-
         return;
       }
 
@@ -296,11 +301,6 @@ function Login() {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "LOGIN ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się zalogować: ${
           error?.message || "Nieznany błąd"
@@ -311,21 +311,14 @@ function Login() {
     }
   }
 
-  if (authLoading) {
+  if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
-  }
-
-  if (isLoggedIn) {
-    return <Navigate to="/account" replace />;
   }
 
   return (
     <div className="page">
       <div className="auth-card">
-        <Link
-          className="logo"
-          to="/"
-        >
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
         </Link>
 
@@ -421,6 +414,18 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    if (!authLoading && isLoggedIn) {
+      navigate("/account", {
+        replace: true,
+      });
+    }
+  }, [
+    authLoading,
+    isLoggedIn,
+    navigate,
+  ]);
+
   async function handleRegister(event) {
     event.preventDefault();
 
@@ -443,15 +448,9 @@ function Register() {
         });
 
       if (error) {
-        console.error(
-          "REGISTER ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się utworzyć konta: ${error.message}`
         );
-
         return;
       }
 
@@ -459,7 +458,6 @@ function Register() {
         setMessage(
           "Supabase nie zwrócił użytkownika."
         );
-
         return;
       }
 
@@ -479,11 +477,6 @@ function Register() {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "REGISTER ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się utworzyć konta: ${
           error?.message || "Nieznany błąd"
@@ -494,21 +487,14 @@ function Register() {
     }
   }
 
-  if (authLoading) {
+  if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
-  }
-
-  if (isLoggedIn) {
-    return <Navigate to="/account" replace />;
   }
 
   return (
     <div className="page">
       <div className="auth-card">
-        <Link
-          className="logo"
-          to="/"
-        >
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
         </Link>
 
@@ -609,15 +595,20 @@ function Register() {
 async function resizeAndConvertImage(file) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    const objectUrl = URL.createObjectURL(file);
+
+    const objectUrl =
+      URL.createObjectURL(file);
 
     image.onload = () => {
       URL.revokeObjectURL(objectUrl);
 
       const SIZE = 400;
 
-      const sourceWidth = image.naturalWidth;
-      const sourceHeight = image.naturalHeight;
+      const sourceWidth =
+        image.naturalWidth;
+
+      const sourceHeight =
+        image.naturalHeight;
 
       if (!sourceWidth || !sourceHeight) {
         reject(
@@ -625,6 +616,7 @@ async function resizeAndConvertImage(file) {
             "Zdjęcie ma nieprawidłowe wymiary."
           )
         );
+
         return;
       }
 
@@ -655,6 +647,7 @@ async function resizeAndConvertImage(file) {
             "Przeglądarka nie obsługuje Canvas."
           )
         );
+
         return;
       }
 
@@ -681,10 +674,19 @@ async function resizeAndConvertImage(file) {
                 "Nie udało się skonwertować zdjęcia."
               )
             );
+
             return;
           }
 
-          resolve(blob);
+          resolve(
+            new File(
+              [blob],
+              "avatar.jpg",
+              {
+                type: "image/jpeg",
+              }
+            )
+          );
         },
         "image/jpeg",
         0.82
@@ -731,8 +733,7 @@ function Account() {
     );
 
     setAvatarUrl(
-      user.user_metadata?.avatar_url ||
-      ""
+      user.user_metadata?.avatar_url || ""
     );
   }, [user]);
 
@@ -889,6 +890,7 @@ function Account() {
       setMessage(
         "Imię / nazwa nie może być puste."
       );
+
       return;
     }
 
@@ -971,7 +973,9 @@ function Account() {
             Twoje konto
           </span>
 
-          <h1>Mój profil</h1>
+          <h1>
+            Mój profil
+          </h1>
 
           <p>
             Zarządzaj swoim profilem IdeaHire.
@@ -995,8 +999,13 @@ function Account() {
             </div>
 
             <div className="profile-info">
-              <h2>{displayName}</h2>
-              <p>{user.email}</p>
+              <h2>
+                {displayName}
+              </h2>
+
+              <p>
+                {user.email}
+              </p>
             </div>
           </div>
 
@@ -1095,7 +1104,9 @@ function FindTalent() {
             Dla zlecających
           </span>
 
-          <h1>Dodaj zlecenie</h1>
+          <h1>
+            Dodaj zlecenie
+          </h1>
 
           <p>
             Opisz swój projekt i znajdź osobę,
@@ -1184,7 +1195,9 @@ function Jobs() {
             Dla wykonawców
           </span>
 
-          <h1>Znajdź zlecenie</h1>
+          <h1>
+            Znajdź zlecenie
+          </h1>
 
           <p>
             Przeglądaj projekty i znajdź zlecenie
@@ -1202,7 +1215,9 @@ function Jobs() {
                 {job.category}
               </span>
 
-              <h2>{job.title}</h2>
+              <h2>
+                {job.title}
+              </h2>
 
               <p>
                 Budżet: {job.budget}
@@ -1311,4 +1326,3 @@ function Router() {
 }
 
 export default Router;
-
