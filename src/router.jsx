@@ -639,6 +639,54 @@ function Register() {
 }
 
 /* =========================================================
+   PROFILE DATABASE HELPER
+========================================================= */
+
+async function getProfile(userId) {
+  if (!userId) {
+    return {
+      data: null,
+      error: new Error(
+        "Brak identyfikatora użytkownika."
+      ),
+    };
+  }
+
+  try {
+    const { data, error } =
+      await supabase
+        .from("users")
+        .select(
+          "id, name, email, avatar_url"
+        )
+        .eq("id", userId)
+        .maybeSingle();
+
+    if (error) {
+      console.error(
+        "GET PROFILE ERROR:",
+        error
+      );
+    }
+
+    return {
+      data: data || null,
+      error: error || null,
+    };
+  } catch (error) {
+    console.error(
+      "GET PROFILE FETCH ERROR:",
+      error
+    );
+
+    return {
+      data: null,
+      error,
+    };
+  }
+}
+
+/* =========================================================
    ACCOUNT
 ========================================================= */
 
@@ -650,6 +698,12 @@ function Account() {
 
   const navigate =
     useNavigate();
+
+  const [profile, setProfile] =
+    useState(null);
+
+  const [profileLoading, setProfileLoading] =
+    useState(true);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -663,6 +717,40 @@ function Account() {
       />
     );
   }
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProfile() {
+      setProfileLoading(true);
+
+      const { data, error } =
+        await getProfile(user.id);
+
+      if (!mounted) return;
+
+      if (error) {
+        console.error(
+          "ACCOUNT PROFILE ERROR:",
+          error
+        );
+
+        setProfile(null);
+        setProfileLoading(false);
+
+        return;
+      }
+
+      setProfile(data);
+      setProfileLoading(false);
+    }
+
+    loadProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user.id]);
 
   async function handleLogout() {
     const { error } =
@@ -680,6 +768,20 @@ function Account() {
       replace: true,
     });
   }
+
+  const profileName =
+    profile?.name ||
+    user.user_metadata?.name ||
+    user.email?.split("@")[0] ||
+    "Użytkownik";
+
+  const avatarUrl =
+    profile?.avatar_url || "";
+
+  const initial =
+    profileName
+      .charAt(0)
+      .toUpperCase();
 
   return (
     <div className="page">
@@ -701,15 +803,43 @@ function Account() {
         </div>
 
         <section className="account-card">
-          <div className="profile-info">
-            <h2>
-              Konto IdeaHire
-            </h2>
+          {profileLoading ? (
+            <div className="profile-info">
+              <p>
+                Ładowanie profilu...
+              </p>
+            </div>
+          ) : (
+            <div className="profile-preview">
+              <div className="profile-avatar-wrapper">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Zdjęcie profilowe"
+                    className="profile-avatar"
+                  />
+                ) : (
+                  <div className="profile-avatar profile-avatar-placeholder">
+                    {initial}
+                  </div>
+                )}
+              </div>
 
-            <p>
-              {user.email}
-            </p>
-          </div>
+              <div className="profile-info">
+                <span className="section-label">
+                  Konto IdeaHire
+                </span>
+
+                <h2>
+                  {profileName}
+                </h2>
+
+                <p>
+                  {user.email}
+                </p>
+              </div>
+            </div>
+          )}
         </section>
 
         <button
@@ -971,5 +1101,3 @@ function Router() {
 }
 
 export default Router;
-
-
