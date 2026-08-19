@@ -155,89 +155,11 @@ function PublicOnlyRoute({ children }) {
 }
 
 /* =========================================================
-   PROFILE DATABASE HELPER
-========================================================= */
-
-async function getProfile(userId) {
-  if (!userId) {
-    return {
-      data: null,
-      error: new Error(
-        "Brak identyfikatora użytkownika."
-      ),
-    };
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .select("id, name, email, avatar_url")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error(
-        "GET PROFILE ERROR:",
-        error
-      );
-    }
-
-    return {
-      data: data || null,
-      error: error || null,
-    };
-  } catch (error) {
-    console.error(
-      "GET PROFILE FETCH ERROR:",
-      error
-    );
-
-    return {
-      data: null,
-      error,
-    };
-  }
-}
-
-/* =========================================================
    NAVBAR
 ========================================================= */
 
 function AccountNavbar() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const [profile, setProfile] =
-    useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadProfile() {
-      if (!user?.id) return;
-
-      const { data, error } =
-        await getProfile(user.id);
-
-      if (!mounted) return;
-
-      if (error) {
-        console.error(
-          "NAVBAR PROFILE ERROR:",
-          error
-        );
-        return;
-      }
-
-      setProfile(data);
-    }
-
-    loadProfile();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user?.id]);
 
   async function handleLogout() {
     const { error } =
@@ -247,6 +169,7 @@ function AccountNavbar() {
       alert(
         `Nie udało się wylogować: ${error.message}`
       );
+
       return;
     }
 
@@ -254,18 +177,6 @@ function AccountNavbar() {
       replace: true,
     });
   }
-
-  const avatarUrl =
-    profile?.avatar_url || "";
-
-  const userName =
-    profile?.name ||
-    user?.user_metadata?.name ||
-    user?.email?.split("@")[0] ||
-    "Użytkownik";
-
-  const initial =
-    userName.charAt(0).toUpperCase();
 
   return (
     <header className="navbar">
@@ -288,26 +199,6 @@ function AccountNavbar() {
       </nav>
 
       <div className="nav-actions">
-        <Link
-          className="account-mini"
-          to="/account"
-        >
-          <span className="account-mini-avatar">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt=""
-              />
-            ) : (
-              initial
-            )}
-          </span>
-
-          <span className="account-mini-name">
-            {userName}
-          </span>
-        </Link>
-
         <button
           className="btn btn-dark"
           type="button"
@@ -748,138 +639,6 @@ function Register() {
 }
 
 /* =========================================================
-   AVATAR — 400 × 400 JPEG
-========================================================= */
-
-async function resizeAndConvertImage(
-  file
-) {
-  return new Promise(
-    (resolve, reject) => {
-      const image =
-        new Image();
-
-      const objectUrl =
-        URL.createObjectURL(file);
-
-      image.onload = () => {
-        URL.revokeObjectURL(
-          objectUrl
-        );
-
-        const SIZE = 400;
-
-        const sourceWidth =
-          image.naturalWidth;
-
-        const sourceHeight =
-          image.naturalHeight;
-
-        if (
-          !sourceWidth ||
-          !sourceHeight
-        ) {
-          reject(
-            new Error(
-              "Zdjęcie ma nieprawidłowe wymiary."
-            )
-          );
-
-          return;
-        }
-
-        const sourceSize =
-          Math.min(
-            sourceWidth,
-            sourceHeight
-          );
-
-        const sourceX =
-          (sourceWidth -
-            sourceSize) /
-          2;
-
-        const sourceY =
-          (sourceHeight -
-            sourceSize) /
-          2;
-
-        const canvas =
-          document.createElement(
-            "canvas"
-          );
-
-        canvas.width = SIZE;
-        canvas.height = SIZE;
-
-        const context =
-          canvas.getContext("2d");
-
-        if (!context) {
-          reject(
-            new Error(
-              "Przeglądarka nie obsługuje Canvas."
-            )
-          );
-
-          return;
-        }
-
-        context.imageSmoothingEnabled =
-          true;
-
-        context.imageSmoothingQuality =
-          "high";
-
-        context.drawImage(
-          image,
-          sourceX,
-          sourceY,
-          sourceSize,
-          sourceSize,
-          0,
-          0,
-          SIZE,
-          SIZE
-        );
-
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(
-                new Error(
-                  "Nie udało się skonwertować zdjęcia."
-                )
-              );
-
-              return;
-            }
-
-            resolve(blob);
-          },
-          "image/jpeg",
-          0.82
-        );
-      };
-
-      image.onerror = () => {
-        URL.revokeObjectURL(
-          objectUrl
-        );
-
-        reject(
-          new Error(
-            "Nie udało się odczytać zdjęcia."
-          )
-        );
-      };
-
-      image.src = objectUrl;
-    }
-  );
-}
-
-/* =========================================================
    ACCOUNT
 ========================================================= */
 
@@ -891,92 +650,6 @@ function Account() {
 
   const navigate =
     useNavigate();
-
-  const [name, setName] =
-    useState("");
-
-  const [avatarUrl, setAvatarUrl] =
-    useState("");
-
-  const [
-    profileLoading,
-    setProfileLoading,
-  ] = useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [
-    uploading,
-    setUploading,
-  ] = useState(false);
-
-  const [message, setMessage] =
-    useState("");
-
-  /* =======================================================
-     LOAD PROFILE
-  ======================================================= */
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadProfile() {
-      if (!user?.id) {
-        if (mounted) {
-          setProfileLoading(false);
-        }
-
-        return;
-      }
-
-      setProfileLoading(true);
-      setMessage("");
-
-      const { data, error } =
-        await getProfile(user.id);
-
-      if (!mounted) return;
-
-      if (error) {
-        console.error(
-          "PROFILE LOAD ERROR:",
-          error
-        );
-
-        setName(
-          user.email?.split("@")[0] ||
-          ""
-        );
-
-        setAvatarUrl("");
-        setProfileLoading(false);
-
-        return;
-      }
-
-      setName(
-        data?.name ||
-        user.email?.split("@")[0] ||
-        ""
-      );
-
-      setAvatarUrl(
-        data?.avatar_url || ""
-      );
-
-      setProfileLoading(false);
-    }
-
-    loadProfile();
-
-    return () => {
-      mounted = false;
-    };
-  }, [
-    user?.id,
-    user?.email,
-  ]);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -990,354 +663,6 @@ function Account() {
       />
     );
   }
-
-  if (profileLoading) {
-    return (
-      <div className="page">
-        <AccountNavbar />
-
-        <main className="app-page">
-          <div className="app-page-header">
-            <span className="section-label">
-              Twoje konto
-            </span>
-
-            <h1>
-              Mój profil
-            </h1>
-
-            <p>
-              Ładowanie profilu...
-            </p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  /* =======================================================
-     UPLOAD AVATAR
-  ======================================================= */
-
-  async function handleAvatarChange(
-    event
-  ) {
-    const file =
-      event.target.files?.[0];
-
-    if (!file) return;
-
-    setMessage("");
-
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
-      setMessage(
-        "Wybierz plik graficzny."
-      );
-
-      event.target.value = "";
-      return;
-    }
-
-    if (
-      file.size >
-      10 * 1024 * 1024
-    ) {
-      setMessage(
-        "Oryginalne zdjęcie może mieć maksymalnie 10 MB."
-      );
-
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setUploading(true);
-
-      const convertedFile =
-        await resizeAndConvertImage(
-          file
-        );
-
-      const filePath =
-        `${user.id}/avatar-${Date.now()}.jpg`;
-
-      const {
-        error: uploadError,
-      } =
-        await supabase.storage
-          .from("avatars")
-          .upload(
-            filePath,
-            convertedFile,
-            {
-              contentType:
-                "image/jpeg",
-              cacheControl:
-                "3600",
-              upsert: false,
-            }
-          );
-
-      if (uploadError) {
-        console.error(
-          "AVATAR UPLOAD ERROR:",
-          uploadError
-        );
-
-        setMessage(
-          `Nie udało się przesłać zdjęcia: ${uploadError.message}`
-        );
-
-        return;
-      }
-
-      const {
-        data: publicUrlData,
-      } =
-        supabase.storage
-          .from("avatars")
-          .getPublicUrl(
-            filePath
-          );
-
-      const publicUrl =
-        publicUrlData?.publicUrl;
-
-      if (!publicUrl) {
-        setMessage(
-          "Zdjęcie zostało przesłane, ale nie udało się pobrać adresu."
-        );
-
-        return;
-      }
-
-      const {
-        error:
-          avatarDatabaseError,
-      } = await supabase
-        .from("users")
-        .update({
-          avatar_url:
-            publicUrl,
-        })
-        .eq(
-          "id",
-          user.id
-        );
-
-      if (
-        avatarDatabaseError
-      ) {
-        console.error(
-          "AVATAR DATABASE ERROR:",
-          avatarDatabaseError
-        );
-
-        setMessage(
-          `Zdjęcie przesłane, ale zapis profilu nie powiódł się: ${avatarDatabaseError.message}`
-        );
-
-        return;
-      }
-
-      setAvatarUrl(
-        publicUrl
-      );
-
-      setMessage(
-        "Zdjęcie profilowe zostało zapisane."
-      );
-    } catch (error) {
-      console.error(
-        "AVATAR FETCH ERROR:",
-        error
-      );
-
-      setMessage(
-        `Nie udało się ustawić zdjęcia: ${
-          error?.message ||
-          "Failed to fetch"
-        }`
-      );
-    } finally {
-      setUploading(false);
-      event.target.value = "";
-    }
-  }
-
-  /* =======================================================
-     SAVE PROFILE — POPRAWIONA WERSJA
-  ======================================================= */
-
-  async function handleSave(event) {
-    event.preventDefault();
-
-    setMessage("");
-
-    if (!user?.id) {
-      setMessage(
-        "Brak zalogowanego użytkownika."
-      );
-      return;
-    }
-
-    const cleanName =
-      name.trim();
-
-    if (!cleanName) {
-      setMessage(
-        "Imię / nazwa nie może być puste."
-      );
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      console.log(
-        "=== SAVE PROFILE START ==="
-      );
-
-      console.log(
-        "USER ID:",
-        user.id
-      );
-
-      console.log(
-        "NEW NAME:",
-        cleanName
-      );
-
-      /*
-        1. Sprawdzamy, czy Supabase nadal widzi
-           aktywną sesję.
-      */
-
-      const {
-        data: sessionData,
-        error: sessionError,
-      } =
-        await supabase.auth.getSession();
-
-      if (sessionError) {
-        console.error(
-          "SESSION CHECK ERROR:",
-          sessionError
-        );
-
-        throw new Error(
-          `Sesja Supabase jest niedostępna: ${sessionError.message}`
-        );
-      }
-
-      const currentSession =
-        sessionData?.session;
-
-      if (
-        !currentSession?.access_token
-      ) {
-        throw new Error(
-          "Brak aktywnej sesji Supabase."
-        );
-      }
-
-      console.log(
-        "SESSION OK:",
-        currentSession.user?.id
-      );
-
-      /*
-        2. Aktualizujemy TYLKO rekord
-           w public.users.
-
-        Nie używamy:
-          auth.updateUser()
-
-        Nie robimy:
-          UPDATE + SELECT + SINGLE
-      */
-
-      const {
-        error: updateError,
-      } =
-        await supabase
-          .from("users")
-          .update({
-            name: cleanName,
-          })
-          .eq(
-            "id",
-            user.id
-          );
-
-      if (updateError) {
-        console.error(
-          "SUPABASE UPDATE ERROR:",
-          updateError
-        );
-
-        throw new Error(
-          updateError.message ||
-          "Supabase odrzucił aktualizację profilu."
-        );
-      }
-
-      /*
-        3. Sukces.
-        Nie robimy kolejnego SELECT-a.
-      */
-
-      setName(
-        cleanName
-      );
-
-      setMessage(
-        "Nazwa została zapisana."
-      );
-
-      console.log(
-        "=== SAVE PROFILE SUCCESS ==="
-      );
-    } catch (error) {
-      console.error(
-        "=== SAVE PROFILE FAILED ===",
-        error
-      );
-
-      /*
-        Failed to fetch oznacza zwykle problem
-        z komunikacją przeglądarka → Supabase,
-        a nie problem samego pola name.
-      */
-
-      if (
-        error instanceof TypeError &&
-        error.message ===
-          "Failed to fetch"
-      ) {
-        setMessage(
-          "Nie można połączyć się z Supabase. Sprawdź adres projektu, klucz API, domenę Cloudflare i połączenie z Supabase."
-        );
-      } else {
-        setMessage(
-          `Nie udało się zapisać profilu: ${
-            error?.message ||
-            "Nieznany błąd"
-          }`
-        );
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  /* =======================================================
-     LOGOUT
-  ======================================================= */
 
   async function handleLogout() {
     const { error } =
@@ -1356,16 +681,6 @@ function Account() {
     });
   }
 
-  const displayName =
-    name ||
-    user.email?.split("@")[0] ||
-    "Użytkownik";
-
-  const initial =
-    displayName
-      .charAt(0)
-      .toUpperCase();
-
   return (
     <div className="page">
       <AccountNavbar />
@@ -1377,134 +692,24 @@ function Account() {
           </span>
 
           <h1>
-            Mój profil
+            Moje konto
           </h1>
 
           <p>
-            Zarządzaj swoim profilem IdeaHire.
+            To jest podstawowy widok konta.
           </p>
         </div>
 
         <section className="account-card">
-          <div className="profile-preview">
-            <div className="profile-avatar-wrapper">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Zdjęcie profilowe"
-                  className="profile-avatar"
-                />
-              ) : (
-                <div className="profile-avatar profile-avatar-placeholder">
-                  {initial}
-                </div>
-              )}
-            </div>
+          <div className="profile-info">
+            <h2>
+              Konto IdeaHire
+            </h2>
 
-            <div className="profile-info">
-              <h2>
-                {displayName}
-              </h2>
-
-              <p>
-                {user.email}
-              </p>
-            </div>
+            <p>
+              {user.email}
+            </p>
           </div>
-
-          <form
-            className="auth-form account-form"
-            onSubmit={handleSave}
-          >
-            <label>
-              Zdjęcie profilowe
-
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={
-                  handleAvatarChange
-                }
-                disabled={uploading}
-              />
-
-              <small>
-                JPG, PNG lub WEBP.
-                Zdjęcie zostanie
-                automatycznie przycięte
-                do 400 × 400 px.
-              </small>
-            </label>
-
-            {uploading && (
-              <div className="profile-upload-status">
-                Przetwarzanie i
-                zapisywanie zdjęcia...
-              </div>
-            )}
-
-            <label>
-              Imię / nazwa
-
-              <input
-                type="text"
-                value={name}
-                onChange={(event) =>
-                  setName(
-                    event.target.value
-                  )
-                }
-                required
-              />
-            </label>
-
-            <label>
-              E-mail
-
-              <input
-                type="email"
-                value={
-                  user.email || ""
-                }
-                disabled
-              />
-            </label>
-
-            {message && (
-              <p className="auth-message">
-                {message}
-              </p>
-            )}
-
-            <button
-              className="btn btn-dark btn-large"
-              type="submit"
-              disabled={
-                saving ||
-                uploading
-              }
-            >
-              {saving
-                ? "Zapisywanie..."
-                : "Zapisz zmiany →"}
-            </button>
-          </form>
-        </section>
-
-        <section className="account-actions">
-          <Link
-            className="btn btn-outline btn-large"
-            to="/find-talent"
-          >
-            Dodaj zlecenie →
-          </Link>
-
-          <Link
-            className="btn btn-outline btn-large"
-            to="/jobs"
-          >
-            Znajdź zlecenie →
-          </Link>
         </section>
 
         <button
@@ -1524,45 +729,9 @@ function Account() {
 ========================================================= */
 
 function FindTalent() {
-  const {
-    isLoggedIn,
-    loading,
-  } = useAuth();
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <div className="page">
-      {isLoggedIn ? (
-        <AccountNavbar />
-      ) : (
-        <header className="navbar">
-          <Link
-            className="logo"
-            to="/"
-          >
-            Idea<span>Hire</span>
-          </Link>
-
-          <div className="nav-actions">
-            <Link
-              className="btn btn-ghost"
-              to="/login"
-            >
-              Zaloguj się
-            </Link>
-
-            <Link
-              className="btn btn-dark"
-              to="/register"
-            >
-              Zacznij teraz
-            </Link>
-          </div>
-        </header>
-      )}
+      <AccountNavbar />
 
       <main className="app-page">
         <div className="app-page-header">
@@ -1802,3 +971,5 @@ function Router() {
 }
 
 export default Router;
+
+
