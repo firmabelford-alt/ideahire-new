@@ -38,8 +38,7 @@ function AuthProvider({ children }) {
 
         if (!mounted) return;
 
-        const currentSession =
-          data?.session || null;
+        const currentSession = data?.session || null;
 
         setSession(currentSession);
         setUser(currentSession?.user || null);
@@ -223,23 +222,13 @@ function Login() {
     loading: authLoading,
   } = useAuth();
 
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [message, setMessage] =
-    useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (
-      !authLoading &&
-      isLoggedIn
-    ) {
+    if (!authLoading && isLoggedIn) {
       navigate("/account", {
         replace: true,
       });
@@ -264,26 +253,16 @@ function Login() {
         });
 
       if (error) {
-        console.error(
-          "LOGIN ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się zalogować: ${error.message}`
         );
-
         return;
       }
 
-      if (
-        !data?.session ||
-        !data?.user
-      ) {
+      if (!data?.session || !data?.user) {
         setMessage(
           "Logowanie nie utworzyło aktywnej sesji."
         );
-
         return;
       }
 
@@ -291,15 +270,9 @@ function Login() {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "LOGIN FETCH ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się zalogować: ${
-          error?.message ||
-          "Failed to fetch"
+          error?.message || "Nieznany błąd"
         }`
       );
     } finally {
@@ -307,20 +280,14 @@ function Login() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
   }
 
   return (
     <div className="page">
       <div className="auth-card">
-        <Link
-          className="logo"
-          to="/"
-        >
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
         </Link>
 
@@ -329,9 +296,7 @@ function Login() {
             Witaj ponownie
           </span>
 
-          <h1>
-            Zaloguj się
-          </h1>
+          <h1>Zaloguj się</h1>
 
           <p>
             Zaloguj się do swojego konta IdeaHire.
@@ -349,9 +314,7 @@ function Login() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -366,9 +329,7 @@ function Login() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Wpisz swoje hasło"
               autoComplete="current-password"
@@ -416,26 +377,14 @@ function Register() {
     loading: authLoading,
   } = useAuth();
 
-  const [name, setName] =
-    useState("");
-
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [message, setMessage] =
-    useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (
-      !authLoading &&
-      isLoggedIn
-    ) {
+    if (!authLoading && isLoggedIn) {
       navigate("/account", {
         replace: true,
       });
@@ -452,11 +401,8 @@ function Register() {
     setMessage("");
     setLoading(true);
 
-    const cleanName =
-      name.trim();
-
-    const cleanEmail =
-      email.trim();
+    const cleanName = name.trim();
+    const cleanEmail = email.trim();
 
     try {
       const { data, error } =
@@ -471,15 +417,9 @@ function Register() {
         });
 
       if (error) {
-        console.error(
-          "REGISTER ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się utworzyć konta: ${error.message}`
         );
-
         return;
       }
 
@@ -487,7 +427,6 @@ function Register() {
         setMessage(
           "Supabase nie zwrócił użytkownika."
         );
-
         return;
       }
 
@@ -507,15 +446,9 @@ function Register() {
         replace: true,
       });
     } catch (error) {
-      console.error(
-        "REGISTER FETCH ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się utworzyć konta: ${
-          error?.message ||
-          "Failed to fetch"
+          error?.message || "Nieznany błąd"
         }`
       );
     } finally {
@@ -523,20 +456,14 @@ function Register() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
   }
 
   return (
     <div className="page">
       <div className="auth-card">
-        <Link
-          className="logo"
-          to="/"
-        >
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
         </Link>
 
@@ -545,9 +472,7 @@ function Register() {
             Dołącz do IdeaHire
           </span>
 
-          <h1>
-            Utwórz konto
-          </h1>
+          <h1>Utwórz konto</h1>
 
           <p>
             Załóż konto i zacznij korzystać z IdeaHire.
@@ -565,9 +490,7 @@ function Register() {
               type="text"
               value={name}
               onChange={(event) =>
-                setName(
-                  event.target.value
-                )
+                setName(event.target.value)
               }
               placeholder="Twoje imię"
               autoComplete="name"
@@ -582,9 +505,7 @@ function Register() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -599,9 +520,7 @@ function Register() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Utwórz hasło"
               autoComplete="new-password"
@@ -639,55 +558,7 @@ function Register() {
 }
 
 /* =========================================================
-   PROFILE DATABASE HELPER
-========================================================= */
-
-async function getProfile(userId) {
-  if (!userId) {
-    return {
-      data: null,
-      error: new Error(
-        "Brak identyfikatora użytkownika."
-      ),
-    };
-  }
-
-  try {
-    const { data, error } =
-      await supabase
-        .from("users")
-        .select(
-          "id, name, email, avatar_url"
-        )
-        .eq("id", userId)
-        .maybeSingle();
-
-    if (error) {
-      console.error(
-        "GET PROFILE ERROR:",
-        error
-      );
-    }
-
-    return {
-      data: data || null,
-      error: error || null,
-    };
-  } catch (error) {
-    console.error(
-      "GET PROFILE FETCH ERROR:",
-      error
-    );
-
-    return {
-      data: null,
-      error,
-    };
-  }
-}
-
-/* =========================================================
-   ACCOUNT
+   ACCOUNT — CZYSTA WERSJA
 ========================================================= */
 
 function Account() {
@@ -695,15 +566,6 @@ function Account() {
     user,
     loading: authLoading,
   } = useAuth();
-
-  const navigate =
-    useNavigate();
-
-  const [profile, setProfile] =
-    useState(null);
-
-  const [profileLoading, setProfileLoading] =
-    useState(true);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -717,71 +579,6 @@ function Account() {
       />
     );
   }
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadProfile() {
-      setProfileLoading(true);
-
-      const { data, error } =
-        await getProfile(user.id);
-
-      if (!mounted) return;
-
-      if (error) {
-        console.error(
-          "ACCOUNT PROFILE ERROR:",
-          error
-        );
-
-        setProfile(null);
-        setProfileLoading(false);
-
-        return;
-      }
-
-      setProfile(data);
-      setProfileLoading(false);
-    }
-
-    loadProfile();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user.id]);
-
-  async function handleLogout() {
-    const { error } =
-      await supabase.auth.signOut();
-
-    if (error) {
-      alert(
-        `Nie udało się wylogować: ${error.message}`
-      );
-
-      return;
-    }
-
-    navigate("/", {
-      replace: true,
-    });
-  }
-
-  const profileName =
-    profile?.name ||
-    user.user_metadata?.name ||
-    user.email?.split("@")[0] ||
-    "Użytkownik";
-
-  const avatarUrl =
-    profile?.avatar_url || "";
-
-  const initial =
-    profileName
-      .charAt(0)
-      .toUpperCase();
 
   return (
     <div className="page">
@@ -803,52 +600,16 @@ function Account() {
         </div>
 
         <section className="account-card">
-          {profileLoading ? (
-            <div className="profile-info">
-              <p>
-                Ładowanie profilu...
-              </p>
-            </div>
-          ) : (
-            <div className="profile-preview">
-              <div className="profile-avatar-wrapper">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Zdjęcie profilowe"
-                    className="profile-avatar"
-                  />
-                ) : (
-                  <div className="profile-avatar profile-avatar-placeholder">
-                    {initial}
-                  </div>
-                )}
-              </div>
+          <div className="profile-info">
+            <h2>
+              Konto IdeaHire
+            </h2>
 
-              <div className="profile-info">
-                <span className="section-label">
-                  Konto IdeaHire
-                </span>
-
-                <h2>
-                  {profileName}
-                </h2>
-
-                <p>
-                  {user.email}
-                </p>
-              </div>
-            </div>
-          )}
+            <p>
+              {user.email}
+            </p>
+          </div>
         </section>
-
-        <button
-          className="btn btn-ghost"
-          type="button"
-          onClick={handleLogout}
-        >
-          Wyloguj się
-        </button>
       </main>
     </div>
   );
@@ -934,28 +695,19 @@ function FindTalent() {
 function Jobs() {
   const jobs = [
     {
-      title:
-        "Nowoczesna strona internetowa",
-      category:
-        "Programowanie",
-      budget:
-        "1 500–3 000 zł",
+      title: "Nowoczesna strona internetowa",
+      category: "Programowanie",
+      budget: "1 500–3 000 zł",
     },
     {
-      title:
-        "Logo dla nowej marki",
-      category:
-        "Grafika i design",
-      budget:
-        "500–1 000 zł",
+      title: "Logo dla nowej marki",
+      category: "Grafika i design",
+      budget: "500–1 000 zł",
     },
     {
-      title:
-        "Materiały do social media",
-      category:
-        "Marketing",
-      budget:
-        "800–1 500 zł",
+      title: "Materiały do social media",
+      category: "Marketing",
+      budget: "800–1 500 zł",
     },
   ];
 
@@ -1016,8 +768,7 @@ function Jobs() {
 ========================================================= */
 
 function Home() {
-  const { loading } =
-    useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -1101,3 +852,4 @@ function Router() {
 }
 
 export default Router;
+
