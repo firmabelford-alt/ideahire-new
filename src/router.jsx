@@ -166,6 +166,12 @@ function AccountNavbar() {
     user?.email?.split("@")[0] ||
     "Użytkownik";
 
+  const avatarUrl =
+    user?.user_metadata?.avatar_url || "";
+
+  const initial =
+    userName.charAt(0).toUpperCase();
+
   async function handleLogout() {
     const { error } =
       await supabase.auth.signOut();
@@ -204,9 +210,25 @@ function AccountNavbar() {
       </nav>
 
       <div className="nav-actions">
-        <span className="account-mini-name">
-          {userName}
-        </span>
+        <Link
+          className="account-mini"
+          to="/account"
+        >
+          <span className="account-mini-avatar">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt=""
+              />
+            ) : (
+              initial
+            )}
+          </span>
+
+          <span className="account-mini-name">
+            {userName}
+          </span>
+        </Link>
 
         <button
           className="btn btn-dark"
@@ -568,7 +590,118 @@ function Register() {
 }
 
 /* =========================================================
-   ACCOUNT — NOWY PROFIL
+   AVATAR
+========================================================= */
+
+async function resizeAndConvertImage(file) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    const objectUrl =
+      URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      const SIZE = 400;
+
+      const sourceWidth =
+        image.naturalWidth;
+
+      const sourceHeight =
+        image.naturalHeight;
+
+      if (!sourceWidth || !sourceHeight) {
+        reject(
+          new Error(
+            "Zdjęcie ma nieprawidłowe wymiary."
+          )
+        );
+
+        return;
+      }
+
+      const sourceSize =
+        Math.min(
+          sourceWidth,
+          sourceHeight
+        );
+
+      const sourceX =
+        (sourceWidth - sourceSize) / 2;
+
+      const sourceY =
+        (sourceHeight - sourceSize) / 2;
+
+      const canvas =
+        document.createElement("canvas");
+
+      canvas.width = SIZE;
+      canvas.height = SIZE;
+
+      const context =
+        canvas.getContext("2d");
+
+      if (!context) {
+        reject(
+          new Error(
+            "Przeglądarka nie obsługuje Canvas."
+          )
+        );
+
+        return;
+      }
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+
+      context.drawImage(
+        image,
+        sourceX,
+        sourceY,
+        sourceSize,
+        sourceSize,
+        0,
+        0,
+        SIZE,
+        SIZE
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(
+              new Error(
+                "Nie udało się skonwertować zdjęcia."
+              )
+            );
+
+            return;
+          }
+
+          resolve(blob);
+        },
+        "image/jpeg",
+        0.82
+      );
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      reject(
+        new Error(
+          "Nie udało się odczytać zdjęcia."
+        )
+      );
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+/* =========================================================
+   ACCOUNT
 ========================================================= */
 
 function Account() {
@@ -578,7 +711,9 @@ function Account() {
   } = useAuth();
 
   const [name, setName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -588,6 +723,10 @@ function Account() {
       user.user_metadata?.name ||
       user.email?.split("@")[0] ||
       ""
+    );
+
+    setAvatarUrl(
+      user.user_metadata?.avatar_url || ""
     );
   }, [user]);
 
@@ -604,6 +743,135 @@ function Account() {
     );
   }
 
+  async function handleAvatarChange(event) {
+    const file =
+      event.target.files?.[0];
+
+    if (!file) return;
+
+    setMessage("");
+
+    if (!file.type.startsWith("image/")) {
+      setMessage(
+        "Wybierz plik graficzny."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage(
+        "Zdjęcie może mieć maksymalnie 10 MB."
+      );
+
+      event.target.value = "";
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const convertedFile =
+        await resizeAndConvertImage(file);
+
+      const filePath =
+        `${user.id}/avatar-${Date.now()}.jpg`;
+
+      const {
+        error: uploadError,
+      } =
+        await supabase.storage
+          .from("avatars")
+          .upload(
+            filePath,
+            convertedFile,
+            {
+              contentType: "image/jpeg",
+              cacheControl: "3600",
+              upsert: false,
+            }
+          );
+
+      if (uploadError) {
+        console.error(
+          "AVATAR UPLOAD ERROR:",
+          uploadError
+        );
+
+        setMessage(
+          `Nie udało się przesłać zdjęcia: ${uploadError.message}`
+        );
+
+        return;
+      }
+
+      const {
+        data: publicUrlData,
+      } =
+        supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+
+      const publicUrl =
+        publicUrlData?.publicUrl;
+
+      if (!publicUrl) {
+        setMessage(
+          "Zdjęcie zostało przesłane, ale nie udało się pobrać adresu."
+        );
+
+        return;
+      }
+
+      const {
+        data: updatedUser,
+        error: metadataError,
+      } =
+        await supabase.auth.updateUser({
+          data: {
+            avatar_url: publicUrl,
+          },
+        });
+
+      if (metadataError) {
+        console.error(
+          "AVATAR METADATA ERROR:",
+          metadataError
+        );
+
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
+        );
+
+        return;
+      }
+
+      setAvatarUrl(
+        updatedUser?.user?.user_metadata
+          ?.avatar_url || publicUrl
+      );
+
+      setMessage(
+        "Zdjęcie profilowe zostało zapisane."
+      );
+    } catch (error) {
+      console.error(
+        "AVATAR ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się ustawić zdjęcia: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
   async function handleSave(event) {
     event.preventDefault();
 
@@ -615,6 +883,7 @@ function Account() {
       setMessage(
         "Imię / nazwa nie może być puste."
       );
+
       return;
     }
 
@@ -625,6 +894,7 @@ function Account() {
         await supabase.auth.updateUser({
           data: {
             name: cleanName,
+            avatar_url: avatarUrl || null,
           },
         });
 
@@ -654,12 +924,17 @@ function Account() {
         cleanName
       );
 
+      setAvatarUrl(
+        data.user.user_metadata?.avatar_url ||
+        ""
+      );
+
       setMessage(
-        "Nazwa została zapisana."
+        "Profil został zapisany."
       );
     } catch (error) {
       console.error(
-        "PROFILE UPDATE FETCH ERROR:",
+        "PROFILE UPDATE ERROR:",
         error
       );
 
@@ -672,6 +947,14 @@ function Account() {
       setSaving(false);
     }
   }
+
+  const displayName =
+    name ||
+    user.email?.split("@")[0] ||
+    "Użytkownik";
+
+  const initial =
+    displayName.charAt(0).toUpperCase();
 
   return (
     <div className="page">
@@ -688,25 +971,67 @@ function Account() {
           </h1>
 
           <p>
-            Tutaj będziemy stopniowo budować Twój profil IdeaHire.
+            Zarządzaj swoim profilem IdeaHire.
           </p>
         </div>
 
         <section className="account-card">
-          <div className="profile-info">
-            <h2>
-              {name || "Użytkownik"}
-            </h2>
+          <div className="profile-preview">
+            <div className="profile-avatar-wrapper">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Zdjęcie profilowe"
+                  className="profile-avatar"
+                />
+              ) : (
+                <div className="profile-avatar profile-avatar-placeholder">
+                  {initial}
+                </div>
+              )}
+            </div>
 
-            <p>
-              {user.email}
-            </p>
+            <div className="profile-info">
+              <h2>
+                {displayName}
+              </h2>
+
+              <p>
+                {user.email}
+              </p>
+            </div>
           </div>
 
           <form
             className="auth-form account-form"
             onSubmit={handleSave}
           >
+            <label>
+              Zdjęcie profilowe
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleAvatarChange}
+                disabled={
+                  uploading ||
+                  saving
+                }
+              />
+
+              <small>
+                JPG, PNG lub WEBP.
+                Zdjęcie zostanie automatycznie
+                przycięte do 400 × 400 px.
+              </small>
+            </label>
+
+            {uploading && (
+              <div className="profile-upload-status">
+                Przetwarzanie i zapisywanie zdjęcia...
+              </div>
+            )}
+
             <label>
               Imię / nazwa
 
@@ -741,7 +1066,10 @@ function Account() {
             <button
               className="btn btn-dark btn-large"
               type="submit"
-              disabled={saving}
+              disabled={
+                saving ||
+                uploading
+              }
             >
               {saving
                 ? "Zapisywanie..."
@@ -991,6 +1319,4 @@ function Router() {
 }
 
 export default Router;
-
-
 
