@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -253,10 +254,14 @@ function Login() {
     loading: authLoading,
   } = useAuth();
 
+  const [mode, setMode] = useState("login");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (!authLoading && isLoggedIn) {
@@ -270,10 +275,24 @@ function Login() {
     navigate,
   ]);
 
+  function switchToReset() {
+    setMode("reset");
+    setMessage("");
+    setSuccess(false);
+    setPassword("");
+  }
+
+  function switchToLogin() {
+    setMode("login");
+    setMessage("");
+    setSuccess(false);
+  }
+
   async function handleLogin(event) {
     event.preventDefault();
 
     setMessage("");
+    setSuccess(false);
     setLoading(true);
 
     try {
@@ -311,9 +330,159 @@ function Login() {
     }
   }
 
+  async function handlePasswordReset(event) {
+    event.preventDefault();
+
+    setMessage("");
+    setSuccess(false);
+
+    const cleanEmail = email.trim();
+
+    if (!cleanEmail) {
+      setMessage(
+        "Wpisz adres e-mail."
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } =
+        await supabase.auth.resetPasswordForEmail(
+          cleanEmail,
+          {
+            redirectTo:
+              `${window.location.origin}/reset-password`,
+          }
+        );
+
+      if (error) {
+        console.error(
+          "PASSWORD RESET ERROR:",
+          error
+        );
+
+        setMessage(
+          `Nie udało się wysłać wiadomości: ${error.message}`
+        );
+
+        return;
+      }
+
+      setSuccess(true);
+
+      setMessage(
+        "Link do resetowania hasła został wysłany na podany adres e-mail."
+      );
+    } catch (error) {
+      console.error(
+        "PASSWORD RESET ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się wysłać wiadomości: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (authLoading || isLoggedIn) {
     return <LoadingScreen />;
   }
+
+  /* =======================================================
+     RESET PASSWORD REQUEST
+  ======================================================= */
+
+  if (mode === "reset") {
+    return (
+      <div className="page">
+        <div className="auth-card">
+          <Link className="logo" to="/">
+            Idea<span>Hire</span>
+          </Link>
+
+          <div className="auth-header">
+            <span className="section-label">
+              Odzyskiwanie konta
+            </span>
+
+            <h1>
+              Reset hasła
+            </h1>
+
+            <p>
+              Podaj adres e-mail przypisany do
+              Twojego konta. Wyślemy Ci link,
+              za pomocą którego ustawisz nowe hasło.
+            </p>
+          </div>
+
+          <form
+            className="auth-form"
+            onSubmit={handlePasswordReset}
+          >
+            <label>
+              Adres e-mail
+
+              <input
+                type="email"
+                value={email}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
+                placeholder="twoj@email.com"
+                autoComplete="email"
+                required
+              />
+            </label>
+
+            {message && (
+              <p
+                className={
+                  success
+                    ? "auth-message"
+                    : "auth-error"
+                }
+              >
+                {message}
+              </p>
+            )}
+
+            <button
+              className="btn btn-dark btn-large"
+              type="submit"
+              disabled={loading}
+            >
+              {loading
+                ? "Wysyłanie..."
+                : "Wyślij link →"}
+            </button>
+          </form>
+
+          <p className="auth-footer">
+            Pamiętasz hasło?{" "}
+            <button
+              type="button"
+              onClick={switchToLogin}
+              className="auth-link-button"
+            >
+              Wróć do logowania
+            </button>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* =======================================================
+     NORMAL LOGIN
+  ======================================================= */
 
   return (
     <div className="page">
@@ -327,7 +496,9 @@ function Login() {
             Witaj ponownie
           </span>
 
-          <h1>Zaloguj się</h1>
+          <h1>
+            Zaloguj się
+          </h1>
 
           <p>
             Zaloguj się do swojego konta IdeaHire.
@@ -368,6 +539,23 @@ function Login() {
             />
           </label>
 
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginTop: "-8px",
+              marginBottom: "4px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={switchToReset}
+              className="auth-link-button"
+            >
+              Nie pamiętasz hasła?
+            </button>
+          </div>
+
           {message && (
             <p className="auth-error">
               {message}
@@ -389,6 +577,189 @@ function Login() {
           Nie masz jeszcze konta?{" "}
           <Link to="/register">
             Utwórz konto
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   RESET PASSWORD — USTAWIENIE NOWEGO HASŁA
+========================================================= */
+
+function ResetPassword() {
+  const navigate = useNavigate();
+
+  const [password, setPassword] = useState("");
+  const [passwordAgain, setPasswordAgain] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState(false);
+
+  async function handleUpdatePassword(event) {
+    event.preventDefault();
+
+    setMessage("");
+    setSuccess(false);
+
+    if (password.length < 6) {
+      setMessage(
+        "Hasło musi mieć co najmniej 6 znaków."
+      );
+      return;
+    }
+
+    if (password !== passwordAgain) {
+      setMessage(
+        "Hasła nie są takie same."
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } =
+        await supabase.auth.updateUser({
+          password,
+        });
+
+      if (error) {
+        console.error(
+          "UPDATE PASSWORD ERROR:",
+          error
+        );
+
+        setMessage(
+          `Nie udało się zmienić hasła: ${error.message}`
+        );
+
+        return;
+      }
+
+      setSuccess(true);
+
+      setMessage(
+        "Hasło zostało zmienione. Możesz teraz się zalogować."
+      );
+
+      setPassword("");
+      setPasswordAgain("");
+
+      setTimeout(() => {
+        navigate("/login", {
+          replace: true,
+        });
+      }, 1800);
+    } catch (error) {
+      console.error(
+        "UPDATE PASSWORD ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się zmienić hasła: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="page">
+      <div className="auth-card">
+        <Link className="logo" to="/">
+          Idea<span>Hire</span>
+        </Link>
+
+        <div className="auth-header">
+          <span className="section-label">
+            Nowe hasło
+          </span>
+
+          <h1>
+            Ustaw nowe hasło
+          </h1>
+
+          <p>
+            Wpisz nowe hasło do swojego konta.
+          </p>
+        </div>
+
+        <form
+          className="auth-form"
+          onSubmit={handleUpdatePassword}
+        >
+          <label>
+            Nowe hasło
+
+            <input
+              type="password"
+              value={password}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
+              placeholder="Wpisz nowe hasło"
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </label>
+
+          <label>
+            Powtórz nowe hasło
+
+            <input
+              type="password"
+              value={passwordAgain}
+              onChange={(event) =>
+                setPasswordAgain(
+                  event.target.value
+                )
+              }
+              placeholder="Wpisz hasło ponownie"
+              autoComplete="new-password"
+              minLength={6}
+              required
+            />
+          </label>
+
+          {message && (
+            <p
+              className={
+                success
+                  ? "auth-message"
+                  : "auth-error"
+              }
+            >
+              {message}
+            </p>
+          )}
+
+          <button
+            className="btn btn-dark btn-large"
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Zapisywanie..."
+              : "Ustaw nowe hasło →"}
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          <Link to="/login">
+            Wróć do logowania
           </Link>
         </p>
       </div>
@@ -503,7 +874,9 @@ function Register() {
             Dołącz do IdeaHire
           </span>
 
-          <h1>Utwórz konto</h1>
+          <h1>
+            Utwórz konto
+          </h1>
 
           <p>
             Załóż konto i zacznij korzystać z IdeaHire.
@@ -1280,6 +1653,13 @@ function Router() {
               <PublicOnlyRoute>
                 <Register />
               </PublicOnlyRoute>
+            }
+          />
+
+          <Route
+            path="/reset-password"
+            element={
+              <ResetPassword />
             }
           />
 
