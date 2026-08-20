@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -1690,71 +1689,168 @@ function Account() {
 }
 
 /* =========================================================
-   FIND TALENT
+   FIND TALENT — DODAWANIE PRAWDZIWEGO ZLECENIA
 ========================================================= */
 
+const JOB_CATEGORIES = [
+  "Programowanie",
+  "Grafika i design",
+  "Marketing",
+  "Copywriting",
+  "Video",
+  "Fotografia",
+];
+
 function FindTalent() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(JOB_CATEGORIES[0]);
+  const [budget, setBudget] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  function handleBudgetChange(event) {
+    setBudget(event.target.value.replace(/\D/g, ""));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setMessage("");
+    setSuccess(false);
+
+    const cleanTitle = title.trim();
+    const cleanDescription = description.trim();
+    const numericBudget = Number(budget);
+
+    if (!cleanTitle) {
+      setMessage("Wpisz nazwę zlecenia.");
+      return;
+    }
+
+    if (!cleanDescription) {
+      setMessage("Opisz krótko swoje zlecenie.");
+      return;
+    }
+
+    if (!budget || !Number.isInteger(numericBudget) || numericBudget <= 0) {
+      setMessage("Budżet musi zawierać wyłącznie cyfry i być większy od 0.");
+      return;
+    }
+
+    if (!user?.id) {
+      setMessage("Twoja sesja wygasła. Zaloguj się ponownie.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const { error } = await supabase.from("jobs").insert({
+        user_id: user.id,
+        title: cleanTitle,
+        description: cleanDescription,
+        category,
+        budget: numericBudget,
+      });
+
+      if (error) {
+        console.error("CREATE JOB ERROR:", error);
+        setMessage(`Nie udało się opublikować zlecenia: ${error.message}`);
+        return;
+      }
+
+      setSuccess(true);
+      setMessage("Zlecenie zostało opublikowane.");
+      setTitle("");
+      setDescription("");
+      setCategory(JOB_CATEGORIES[0]);
+      setBudget("");
+
+      setTimeout(() => {
+        navigate("/jobs");
+      }, 900);
+    } catch (error) {
+      console.error("CREATE JOB ERROR:", error);
+      setMessage(`Nie udało się opublikować zlecenia: ${error?.message || "Nieznany błąd"}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="page">
       <AccountNavbar />
 
       <main className="app-page">
         <div className="app-page-header">
-          <span className="section-label">
-            Dla zlecających
-          </span>
-
-          <h1>
-            Dodaj zlecenie
-          </h1>
-
-          <p>
-            Opisz swój projekt i znajdź osobę,
-            która pomoże Ci go zrealizować.
-          </p>
+          <span className="section-label">Dla zlecających</span>
+          <h1>Dodaj zlecenie</h1>
+          <p>Opisz projekt, wybierz kategorię i ustaw prosty budżet.</p>
         </div>
 
-        <form
-          className="project-form"
-          onSubmit={(event) =>
-            event.preventDefault()
-          }
-        >
+        <form className="project-form" onSubmit={handleSubmit}>
           <label>
             Czego potrzebujesz?
-
             <input
               type="text"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
               placeholder="Np. nowoczesna strona internetowa"
+              maxLength={120}
               required
             />
+          </label>
+
+          <label>
+            Kategoria
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              required
+            >
+              {JOB_CATEGORIES.map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </select>
           </label>
 
           <label>
             Opisz swój projekt
-
             <textarea
               rows="6"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
               placeholder="Napisz kilka słów o tym, czego potrzebujesz..."
+              maxLength={2000}
               required
             />
           </label>
 
           <label>
-            Budżet
-
+            Budżet (zł)
             <input
               type="text"
-              placeholder="Np. 1 500–3 000 zł"
+              value={budget}
+              onChange={handleBudgetChange}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Np. 3000"
+              maxLength={9}
               required
             />
+            <small>Wpisz tylko cyfry, bez zł, spacji i kropek.</small>
           </label>
 
-          <button
-            className="btn btn-dark btn-large"
-            type="submit"
-          >
-            Opublikuj zlecenie →
+          {message && (
+            <p className={success ? "auth-message" : "auth-error"}>{message}</p>
+          )}
+
+          <button className="btn btn-dark btn-large" type="submit" disabled={saving}>
+            {saving ? "Publikowanie..." : "Opublikuj zlecenie →"}
           </button>
         </form>
       </main>
@@ -1763,27 +1859,56 @@ function FindTalent() {
 }
 
 /* =========================================================
-   JOBS
+   JOBS — PRAWDZIWE ZLECENIA Z SUPABASE
 ========================================================= */
 
 function Jobs() {
-  const jobs = [
-    {
-      title: "Nowoczesna strona internetowa",
-      category: "Programowanie",
-      budget: "1 500–3 000 zł",
-    },
-    {
-      title: "Logo dla nowej marki",
-      category: "Grafika i design",
-      budget: "500–1 000 zł",
-    },
-    {
-      title: "Materiały do social media",
-      category: "Marketing",
-      budget: "800–1 500 zł",
-    },
-  ];
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [openJobId, setOpenJobId] = useState(null);
+
+  async function loadJobs() {
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, title, description, category, budget, created_at")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("LOAD JOBS ERROR:", error);
+        setMessage(`Nie udało się pobrać zleceń: ${error.message}`);
+        return;
+      }
+
+      setJobs(data || []);
+    } catch (error) {
+      console.error("LOAD JOBS ERROR:", error);
+      setMessage(`Nie udało się pobrać zleceń: ${error?.message || "Nieznany błąd"}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+  function formatBudget(value) {
+    return `${Number(value || 0).toLocaleString("pl-PL")} zł`;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    return new Date(value).toLocaleDateString("pl-PL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
 
   return (
     <div className="page">
@@ -1791,46 +1916,52 @@ function Jobs() {
 
       <main className="app-page">
         <div className="app-page-header">
-          <span className="section-label">
-            Dla wykonawców
-          </span>
-
-          <h1>
-            Znajdź zlecenie
-          </h1>
-
-          <p>
-            Przeglądaj projekty i znajdź zlecenie
-            dopasowane do Twoich umiejętności.
-          </p>
+          <span className="section-label">Dla wykonawców</span>
+          <h1>Znajdź zlecenie</h1>
+          <p>Przeglądaj prawdziwe zlecenia opublikowane przez użytkowników IdeaHire.</p>
         </div>
 
+        {loading && <p>Ładowanie zleceń...</p>}
+
+        {!loading && message && (
+          <p className="auth-error">{message}</p>
+        )}
+
+        {!loading && !message && jobs.length === 0 && (
+          <section className="account-card">
+            <span className="section-label">Brak zleceń</span>
+            <h2>Na razie nie ma żadnych zleceń.</h2>
+            <p>Dodaj pierwsze zlecenie, aby pojawiło się tutaj dla innych użytkowników.</p>
+          </section>
+        )}
+
         <div className="jobs-list">
-          {jobs.map((job) => (
-            <article
-              className="job-card"
-              key={job.title}
-            >
-              <span className="section-label">
-                {job.category}
-              </span>
+          {jobs.map((job) => {
+            const isOpen = openJobId === job.id;
 
-              <h2>
-                {job.title}
-              </h2>
+            return (
+              <article className="job-card" key={job.id}>
+                <span className="section-label">{job.category}</span>
+                <h2>{job.title}</h2>
+                <p><strong>Budżet:</strong> {formatBudget(job.budget)}</p>
+                <p><small>Opublikowano: {formatDate(job.created_at)}</small></p>
 
-              <p>
-                Budżet: {job.budget}
-              </p>
+                {isOpen && (
+                  <div style={{ marginTop: "18px" }}>
+                    <p>{job.description}</p>
+                  </div>
+                )}
 
-              <button
-                className="btn btn-dark"
-                type="button"
-              >
-                Zobacz zlecenie →
-              </button>
-            </article>
-          ))}
+                <button
+                  className="btn btn-dark"
+                  type="button"
+                  onClick={() => setOpenJobId(isOpen ? null : job.id)}
+                >
+                  {isOpen ? "Ukryj szczegóły ↑" : "Zobacz zlecenie →"}
+                </button>
+              </article>
+            );
+          })}
         </div>
       </main>
     </div>
