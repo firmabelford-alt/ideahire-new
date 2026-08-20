@@ -596,7 +596,7 @@ function ResetPassword() {
     useState("");
 
   const [loading, setLoading] =
-    useState(false);
+    useState(true);
 
   const [message, setMessage] =
     useState("");
@@ -604,16 +604,203 @@ function ResetPassword() {
   const [success, setSuccess] =
     useState(false);
 
+  const [recoveryReady, setRecoveryReady] =
+    useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    let recoveryTimeout = null;
+
+    async function prepareRecovery() {
+      try {
+        /*
+         * Supabase może przekazać kod w parametrze ?code=...
+         * W takim przypadku wymieniamy go na sesję.
+         */
+        const params =
+          new URLSearchParams(
+            window.location.search
+          );
+
+        const code = params.get("code");
+
+        if (code) {
+          const {
+            error,
+          } =
+            await supabase.auth.exchangeCodeForSession(
+              code
+            );
+
+          if (error) {
+            console.error(
+              "RECOVERY CODE ERROR:",
+              error
+            );
+
+            if (!mounted) return;
+
+            setMessage(
+              "Link do resetowania hasła jest nieprawidłowy lub wygasł."
+            );
+
+            setLoading(false);
+
+            return;
+          }
+
+          /*
+           * Usuwamy ?code=... z adresu.
+           * Użytkownik zostaje normalnie na /reset-password.
+           */
+          window.history.replaceState(
+            {},
+            document.title,
+            "/reset-password"
+          );
+
+          if (!mounted) return;
+
+          setRecoveryReady(true);
+          setLoading(false);
+
+          return;
+        }
+
+        /*
+         * Jeśli Supabase już utworzył sesję
+         * z linku recovery, możemy od razu pokazać formularz.
+         */
+        const {
+          data,
+          error,
+        } =
+          await supabase.auth.getSession();
+
+        if (error) {
+          console.error(
+            "RECOVERY SESSION ERROR:",
+            error
+          );
+
+          if (!mounted) return;
+
+          setMessage(
+            "Nie udało się przygotować resetowania hasła."
+          );
+
+          setLoading(false);
+
+          return;
+        }
+
+        if (data?.session) {
+          if (!mounted) return;
+
+          setRecoveryReady(true);
+          setLoading(false);
+
+          return;
+        }
+
+        /*
+         * Dajemy Supabase chwilę na przetworzenie
+         * parametrów recovery z adresu.
+         */
+        recoveryTimeout = setTimeout(
+          async () => {
+            const {
+              data: latestData,
+            } =
+              await supabase.auth.getSession();
+
+            if (!mounted) return;
+
+            if (latestData?.session) {
+              setRecoveryReady(true);
+            } else {
+              setMessage(
+                "Link do resetowania hasła jest nieprawidłowy, wygasł albo został już wykorzystany."
+              );
+            }
+
+            setLoading(false);
+          },
+          1200
+        );
+      } catch (error) {
+        console.error(
+          "RECOVERY PREPARE ERROR:",
+          error
+        );
+
+        if (!mounted) return;
+
+        setMessage(
+          `Nie udało się przygotować resetowania hasła: ${
+            error?.message || "Nieznany błąd"
+          }`
+        );
+
+        setLoading(false);
+      }
+    }
+
+    /*
+     * Najważniejsze:
+     * PASSWORD_RECOVERY oznacza, że użytkownik
+     * wszedł przez prawidłowy link resetujący.
+     */
+    const {
+      data: { subscription },
+    } =
+      supabase.auth.onAuthStateChange(
+        (event, session) => {
+          if (!mounted) return;
+
+          if (
+            event === "PASSWORD_RECOVERY" &&
+            session
+          ) {
+            setRecoveryReady(true);
+            setLoading(false);
+            setMessage("");
+          }
+        }
+      );
+
+    prepareRecovery();
+
+    return () => {
+      mounted = false;
+
+      if (recoveryTimeout) {
+        clearTimeout(recoveryTimeout);
+      }
+
+      subscription.unsubscribe();
+    };
+  }, []);
+
   async function handleUpdatePassword(event) {
     event.preventDefault();
 
     setMessage("");
     setSuccess(false);
 
+    if (!recoveryReady) {
+      setMessage(
+        "Sesja resetowania hasła nie jest aktywna. Otwórz ponownie link z wiadomości e-mail."
+      );
+
+      return;
+    }
+
     if (password.length < 6) {
       setMessage(
         "Hasło musi mieć co najmniej 6 znaków."
       );
+
       return;
     }
 
@@ -621,6 +808,7 @@ function ResetPassword() {
       setMessage(
         "Hasła nie są takie same."
       );
+
       return;
     }
 
@@ -648,11 +836,18 @@ function ResetPassword() {
       setSuccess(true);
 
       setMessage(
-        "Hasło zostało zmienione. Możesz teraz się zalogować."
+        "Hasło zostało zmienione. Za chwilę przejdziesz do logowania."
       );
 
       setPassword("");
       setPasswordAgain("");
+
+      /*
+       * Po zmianie hasła wylogowujemy bieżącą sesję recovery.
+       * Dzięki temu użytkownik faktycznie loguje się
+       * nowym hasłem jak w klasycznym systemie.
+       */
+      await supabase.auth.signOut();
 
       setTimeout(() => {
         navigate("/login", {
@@ -675,6 +870,10 @@ function ResetPassword() {
     }
   }
 
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="page">
       <div className="auth-card">
@@ -684,7 +883,7 @@ function ResetPassword() {
 
         <div className="auth-header">
           <span className="section-label">
-            Nowe hasło
+            Odzyskiwanie konta
           </span>
 
           <h1>
@@ -696,72 +895,100 @@ function ResetPassword() {
           </p>
         </div>
 
-        <form
-          className="auth-form"
-          onSubmit={handleUpdatePassword}
-        >
-          <label>
-            Nowe hasło
+        {!recoveryReady ? (
+          <>
+            {message && (
+              <p className="auth-error">
+                {message}
+              </p>
+            )}
 
-            <input
-              type="password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              placeholder="Wpisz nowe hasło"
-              autoComplete="new-password"
-              minLength={6}
-              required
-            />
-          </label>
-
-          <label>
-            Powtórz nowe hasło
-
-            <input
-              type="password"
-              value={passwordAgain}
-              onChange={(event) =>
-                setPasswordAgain(
-                  event.target.value
-                )
-              }
-              placeholder="Wpisz hasło ponownie"
-              autoComplete="new-password"
-              minLength={6}
-              required
-            />
-          </label>
-
-          {message && (
-            <p
-              className={
-                success
-                  ? "auth-message"
-                  : "auth-error"
-              }
+            <div
+              style={{
+                marginTop: "20px",
+                textAlign: "center",
+              }}
             >
-              {message}
+              <Link
+                className="btn btn-dark btn-large"
+                to="/login"
+              >
+                Wróć do logowania
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <form
+              className="auth-form"
+              onSubmit={handleUpdatePassword}
+            >
+              <label>
+                Nowe hasło
+
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Wpisz nowe hasło"
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+              </label>
+
+              <label>
+                Powtórz nowe hasło
+
+                <input
+                  type="password"
+                  value={passwordAgain}
+                  onChange={(event) =>
+                    setPasswordAgain(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Wpisz hasło ponownie"
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+              </label>
+
+              {message && (
+                <p
+                  className={
+                    success
+                      ? "auth-message"
+                      : "auth-error"
+                  }
+                >
+                  {message}
+                </p>
+              )}
+
+              <button
+                className="btn btn-dark btn-large"
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? "Zapisywanie..."
+                  : "Ustaw nowe hasło →"}
+              </button>
+            </form>
+
+            <p className="auth-footer">
+              <Link to="/login">
+                Wróć do logowania
+              </Link>
             </p>
-          )}
-
-          <button
-            className="btn btn-dark btn-large"
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Zapisywanie..."
-              : "Ustaw nowe hasło →"}
-          </button>
-        </form>
-
-        <p className="auth-footer">
-          <Link to="/login">
-            Wróć do logowania
-          </Link>
-        </p>
+          </>
+        )}
       </div>
     </div>
   );
@@ -1655,6 +1882,14 @@ function Router() {
               </PublicOnlyRoute>
             }
           />
+
+          {/* =================================================
+              WAŻNE:
+              RESET PASSWORD NIE JEST PublicOnlyRoute.
+              Dzięki temu link z Gmaila może otworzyć
+              tę stronę również wtedy, gdy przeglądarka
+              ma już istniejącą sesję.
+          ================================================= */}
 
           <Route
             path="/reset-password"
