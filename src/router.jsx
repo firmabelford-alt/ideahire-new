@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -8,7 +7,6 @@ import {
   Link,
   useLocation,
   useNavigate,
-  useParams,
 } from "react-router-dom";
 
 import App from "./App";
@@ -30,8 +28,10 @@ function AuthProvider({ children }) {
 
     async function loadSession() {
       try {
-        const { data, error } =
-          await supabase.auth.getSession();
+        const {
+          data: { session: currentSession },
+          error,
+        } = await supabase.auth.getSession();
 
         if (error) {
           console.error("GET SESSION ERROR:", error);
@@ -39,9 +39,7 @@ function AuthProvider({ children }) {
 
         if (!mounted) return;
 
-        const currentSession = data?.session || null;
-
-        setSession(currentSession);
+        setSession(currentSession || null);
         setUser(currentSession?.user || null);
         setLoading(false);
       } catch (error) {
@@ -60,11 +58,28 @@ function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
+      async (event, newSession) => {
         if (!mounted) return;
 
-        setSession(newSession || null);
-        setUser(newSession?.user || null);
+        console.log("AUTH EVENT:", event);
+
+        /*
+         * Nie czyścimy sesji przy przypadkowym przejściowym
+         * evencie. Supabase jest źródłem prawdy.
+         */
+        if (newSession) {
+          setSession(newSession);
+          setUser(newSession.user || null);
+        } else {
+          /*
+           * Przy SIGNED_OUT rzeczywiście czyścimy sesję.
+           */
+          if (event === "SIGNED_OUT") {
+            setSession(null);
+            setUser(null);
+          }
+        }
+
         setLoading(false);
       }
     );
@@ -94,43 +109,6 @@ function useAuth() {
 }
 
 /* =========================================================
-   PUBLIC PROFILE SYNC
-========================================================= */
-
-async function syncPublicProfile(user) {
-  if (!user?.id) return;
-
-  const name =
-    user.user_metadata?.name ||
-    user.email?.split("@")[0] ||
-    "Użytkownik";
-
-  const avatarUrl =
-    user.user_metadata?.avatar_url || null;
-
-  const { error } = await supabase
-    .from("public_profiles")
-    .upsert(
-      {
-        user_id: user.id,
-        name,
-        avatar_url: avatarUrl,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "user_id",
-      }
-    );
-
-  if (error) {
-    console.error(
-      "PUBLIC PROFILE SYNC ERROR:",
-      error
-    );
-  }
-}
-
-/* =========================================================
    LOADING
 ========================================================= */
 
@@ -153,9 +131,19 @@ function LoadingScreen() {
 ========================================================= */
 
 function ProtectedRoute({ children }) {
-  const { loading, isLoggedIn } = useAuth();
+  const {
+    loading,
+    isLoggedIn,
+  } = useAuth();
+
   const location = useLocation();
 
+  /*
+   * Najważniejsza zmiana:
+   *
+   * Dopóki AuthProvider nie zakończy sprawdzania sesji,
+   * NIE przekierowujemy użytkownika na /login.
+   */
   if (loading) {
     return <LoadingScreen />;
   }
@@ -180,7 +168,10 @@ function ProtectedRoute({ children }) {
 ========================================================= */
 
 function PublicOnlyRoute({ children }) {
-  const { loading, isLoggedIn } = useAuth();
+  const {
+    loading,
+    isLoggedIn,
+  } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -206,12 +197,6 @@ function AccountNavbar() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      syncPublicProfile(user);
-    }
-  }, [user]);
-
   const userName =
     user?.user_metadata?.name ||
     user?.email?.split("@")[0] ||
@@ -224,8 +209,9 @@ function AccountNavbar() {
     userName.charAt(0).toUpperCase();
 
   async function handleLogout() {
-    const { error } =
-      await supabase.auth.signOut();
+    const {
+      error,
+    } = await supabase.auth.signOut();
 
     if (error) {
       alert(
@@ -331,12 +317,9 @@ function Login() {
       !authLoading &&
       isLoggedIn
     ) {
-      navigate(
-        "/account",
-        {
-          replace: true,
-        }
-      );
+      navigate("/account", {
+        replace: true,
+      });
     }
   }, [
     authLoading,
@@ -369,12 +352,10 @@ function Login() {
         data,
         error,
       } =
-        await supabase.auth.signInWithPassword(
-          {
-            email: email.trim(),
-            password,
-          }
-        );
+        await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
 
       if (error) {
         setMessage(
@@ -384,27 +365,48 @@ function Login() {
         return;
       }
 
-      if (
-        !data?.session ||
-        !data?.user
-      ) {
+      /*
+       * Nie przechodzimy dalej tylko dlatego,
+       * że signInWithPassword zwrócił odpowiedź.
+       *
+       * Pobieramy aktualną sesję bezpośrednio
+       * z Supabase.
+       */
+      const {
+        data: sessionData,
+        error: sessionError,
+      } =
+        await supabase.auth.getSession();
+
+      if (sessionError) {
         setMessage(
-          "Logowanie nie utworzyło aktywnej sesji."
+          `Nie udało się potwierdzić sesji: ${sessionError.message}`
         );
 
         return;
       }
 
-      await syncPublicProfile(
-        data.user
-      );
+      if (
+        !sessionData?.session ||
+        !sessionData?.session?.user
+      ) {
+        setMessage(
+          "Logowanie się nie powiodło — Supabase nie utworzył aktywnej sesji."
+        );
 
-      navigate(
-        "/account",
-        {
-          replace: true,
-        }
-      );
+        return;
+      }
+
+      /*
+       * AuthProvider dostanie również SIGNED_IN
+       * i zaktualizuje stan.
+       *
+       * Tutaj przechodzimy dopiero po potwierdzeniu
+       * aktywnej sesji.
+       */
+      navigate("/account", {
+        replace: true,
+      });
     } catch (error) {
       setMessage(
         `Nie udało się zalogować: ${
@@ -417,9 +419,7 @@ function Login() {
     }
   }
 
-  async function handlePasswordReset(
-    event
-  ) {
+  async function handlePasswordReset(event) {
     event.preventDefault();
 
     setMessage("");
@@ -439,7 +439,9 @@ function Login() {
     setLoading(true);
 
     try {
-      const { error } =
+      const {
+        error,
+      } =
         await supabase.auth.resetPasswordForEmail(
           cleanEmail,
           {
@@ -449,6 +451,11 @@ function Login() {
         );
 
       if (error) {
+        console.error(
+          "PASSWORD RESET ERROR:",
+          error
+        );
+
         setMessage(
           `Nie udało się wysłać wiadomości: ${error.message}`
         );
@@ -462,6 +469,11 @@ function Login() {
         "Link do resetowania hasła został wysłany na podany adres e-mail."
       );
     } catch (error) {
+      console.error(
+        "PASSWORD RESET ERROR:",
+        error
+      );
+
       setMessage(
         `Nie udało się wysłać wiadomości: ${
           error?.message ||
@@ -501,9 +513,10 @@ function Login() {
             </h1>
 
             <p>
-              Podaj adres e-mail przypisany do
-              Twojego konta. Wyślemy Ci link,
-              za pomocą którego ustawisz nowe hasło.
+              Podaj adres e-mail przypisany
+              do Twojego konta. Wyślemy Ci
+              link, za pomocą którego
+              ustawisz nowe hasło.
             </p>
           </div>
 
@@ -555,7 +568,6 @@ function Login() {
 
           <p className="auth-footer">
             Pamiętasz hasło?{" "}
-
             <button
               type="button"
               onClick={
@@ -591,7 +603,8 @@ function Login() {
           </h1>
 
           <p>
-            Zaloguj się do swojego konta IdeaHire.
+            Zaloguj się do swojego konta
+            IdeaHire.
           </p>
         </div>
 
@@ -636,8 +649,7 @@ function Login() {
           <div
             style={{
               display: "flex",
-              justifyContent:
-                "flex-end",
+              justifyContent: "flex-end",
               marginTop: "-8px",
               marginBottom: "4px",
             }}
@@ -672,7 +684,6 @@ function Login() {
 
         <p className="auth-footer">
           Nie masz jeszcze konta?{" "}
-
           <Link to="/register">
             Utwórz konto
           </Link>
@@ -715,9 +726,7 @@ function ResetPassword() {
     setMessage("");
     setSuccess(false);
 
-    if (
-      password.length < 6
-    ) {
+    if (password.length < 6) {
       setMessage(
         "Hasło musi mieć co najmniej 6 znaków."
       );
@@ -738,12 +747,12 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const { error } =
-        await supabase.auth.updateUser(
-          {
-            password,
-          }
-        );
+      const {
+        error,
+      } =
+        await supabase.auth.updateUser({
+          password,
+        });
 
       if (error) {
         setMessage(
@@ -763,12 +772,9 @@ function ResetPassword() {
       setPasswordAgain("");
 
       setTimeout(() => {
-        navigate(
-          "/login",
-          {
-            replace: true,
-          }
-        );
+        navigate("/login", {
+          replace: true,
+        });
       }, 1800);
     } catch (error) {
       setMessage(
@@ -914,12 +920,9 @@ function Register() {
       !authLoading &&
       isLoggedIn
     ) {
-      navigate(
-        "/account",
-        {
-          replace: true,
-        }
-      );
+      navigate("/account", {
+        replace: true,
+      });
     }
   }, [
     authLoading,
@@ -946,17 +949,15 @@ function Register() {
         data,
         error,
       } =
-        await supabase.auth.signUp(
-          {
-            email: cleanEmail,
-            password,
-            options: {
-              data: {
-                name: cleanName,
-              },
+        await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: {
+            data: {
+              name: cleanName,
             },
-          }
-        );
+          },
+        });
 
       if (error) {
         setMessage(
@@ -974,31 +975,21 @@ function Register() {
         return;
       }
 
-      await syncPublicProfile(
-        data.user
-      );
-
       if (!data.session) {
         alert(
           "Konto zostało utworzone. Sprawdź e-mail i potwierdź adres."
         );
 
-        navigate(
-          "/login",
-          {
-            replace: true,
-          }
-        );
+        navigate("/login", {
+          replace: true,
+        });
 
         return;
       }
 
-      navigate(
-        "/account",
-        {
-          replace: true,
-        }
-      );
+      navigate("/account", {
+        replace: true,
+      });
     } catch (error) {
       setMessage(
         `Nie udało się utworzyć konta: ${
@@ -1117,7 +1108,6 @@ function Register() {
 
         <p className="auth-footer">
           Masz już konto?{" "}
-
           <Link to="/login">
             Zaloguj się
           </Link>
@@ -1189,16 +1179,11 @@ async function resizeAndConvertImage(
             "canvas"
           );
 
-        canvas.width =
-          SIZE;
-
-        canvas.height =
-          SIZE;
+        canvas.width = SIZE;
+        canvas.height = SIZE;
 
         const context =
-          canvas.getContext(
-            "2d"
-          );
+          canvas.getContext("2d");
 
         if (!context) {
           reject(
@@ -1267,8 +1252,7 @@ async function resizeAndConvertImage(
         );
       };
 
-      image.src =
-        objectUrl;
+      image.src = objectUrl;
     }
   );
 }
@@ -1303,14 +1287,13 @@ function Account() {
 
     setName(
       user.user_metadata?.name ||
-      user.email?.split("@")[0] ||
-      ""
+        user.email?.split("@")[0] ||
+        ""
     );
 
     setAvatarUrl(
       user.user_metadata
-        ?.avatar_url ||
-      ""
+        ?.avatar_url || ""
     );
   }, [user]);
 
@@ -1346,9 +1329,7 @@ function Account() {
         "Wybierz plik graficzny."
       );
 
-      event.target.value =
-        "";
-
+      event.target.value = "";
       return;
     }
 
@@ -1360,9 +1341,7 @@ function Account() {
         "Zdjęcie może mieć maksymalnie 10 MB."
       );
 
-      event.target.value =
-        "";
-
+      event.target.value = "";
       return;
     }
 
@@ -1403,8 +1382,7 @@ function Account() {
       }
 
       const {
-        data:
-          publicUrlData,
+        data: publicUrlData,
       } =
         supabase.storage
           .from("avatars")
@@ -1424,10 +1402,8 @@ function Account() {
       }
 
       const {
-        data:
-          updatedUser,
-        error:
-          metadataError,
+        data: updatedUser,
+        error: metadataError,
       } =
         await supabase.auth.updateUser(
           {
@@ -1450,12 +1426,7 @@ function Account() {
         updatedUser?.user
           ?.user_metadata
           ?.avatar_url ||
-        publicUrl
-      );
-
-      await syncPublicProfile(
-        updatedUser?.user ||
-        user
+          publicUrl
       );
 
       setMessage(
@@ -1504,8 +1475,7 @@ function Account() {
             data: {
               name: cleanName,
               avatar_url:
-                avatarUrl ||
-                null,
+                avatarUrl || null,
             },
           }
         );
@@ -1527,21 +1497,13 @@ function Account() {
       }
 
       setName(
-        data.user
-          .user_metadata
-          ?.name ||
-        cleanName
+        data.user.user_metadata
+          ?.name || cleanName
       );
 
       setAvatarUrl(
-        data.user
-          .user_metadata
-          ?.avatar_url ||
-        ""
-      );
-
-      await syncPublicProfile(
-        data.user
+        data.user.user_metadata
+          ?.avatar_url || ""
       );
 
       setMessage(
@@ -1561,9 +1523,7 @@ function Account() {
 
   const displayName =
     name ||
-    user.email?.split(
-      "@"
-    )[0] ||
+    user.email?.split("@")[0] ||
     "Użytkownik";
 
   const initial =
@@ -1672,8 +1632,7 @@ function Account() {
               <input
                 type="email"
                 value={
-                  user.email ||
-                  ""
+                  user.email || ""
                 }
                 disabled
               />
@@ -1705,182 +1664,10 @@ function Account() {
 }
 
 /* =========================================================
-   JOB CATEGORIES
-========================================================= */
-
-const JOB_CATEGORIES = [
-  "Programowanie",
-  "Grafika i design",
-  "Marketing",
-  "Copywriting",
-  "Video",
-  "Fotografia",
-];
-
-/* =========================================================
-   FIND TALENT — ADD JOB
+   FIND TALENT
 ========================================================= */
 
 function FindTalent() {
-  const navigate =
-    useNavigate();
-
-  const { user } =
-    useAuth();
-
-  const [title, setTitle] =
-    useState("");
-
-  const [
-    description,
-    setDescription,
-  ] = useState("");
-
-  const [
-    category,
-    setCategory,
-  ] = useState(
-    JOB_CATEGORIES[0]
-  );
-
-  const [budget, setBudget] =
-    useState("");
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState(false);
-
-  function handleBudgetChange(
-    event
-  ) {
-    setBudget(
-      event.target.value.replace(
-        /\D/g,
-        ""
-      )
-    );
-  }
-
-  async function handleSubmit(
-    event
-  ) {
-    event.preventDefault();
-
-    setMessage("");
-    setSuccess(false);
-
-    const cleanTitle =
-      title.trim();
-
-    const cleanDescription =
-      description.trim();
-
-    const numericBudget =
-      Number(budget);
-
-    if (!cleanTitle) {
-      setMessage(
-        "Wpisz nazwę zlecenia."
-      );
-
-      return;
-    }
-
-    if (!cleanDescription) {
-      setMessage(
-        "Opisz krótko swoje zlecenie."
-      );
-
-      return;
-    }
-
-    if (
-      !budget ||
-      !Number.isInteger(
-        numericBudget
-      ) ||
-      numericBudget <= 0
-    ) {
-      setMessage(
-        "Budżet musi zawierać wyłącznie cyfry i być większy od 0."
-      );
-
-      return;
-    }
-
-    if (!user?.id) {
-      setMessage(
-        "Twoja sesja wygasła. Zaloguj się ponownie."
-      );
-
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      const {
-        error,
-      } =
-        await supabase
-          .from("jobs")
-          .insert({
-            user_id:
-              user.id,
-            title:
-              cleanTitle,
-            description:
-              cleanDescription,
-            category,
-            budget:
-              numericBudget,
-          });
-
-      if (error) {
-        setMessage(
-          `Nie udało się opublikować zlecenia: ${error.message}`
-        );
-
-        return;
-      }
-
-      await syncPublicProfile(
-        user
-      );
-
-      setSuccess(true);
-
-      setMessage(
-        "Zlecenie zostało opublikowane."
-      );
-
-      setTitle("");
-      setDescription("");
-      setCategory(
-        JOB_CATEGORIES[0]
-      );
-      setBudget("");
-
-      setTimeout(() => {
-        navigate("/jobs");
-      }, 900);
-    } catch (error) {
-      setMessage(
-        `Nie udało się opublikować zlecenia: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
     <div className="page">
       <AccountNavbar />
@@ -1896,14 +1683,15 @@ function FindTalent() {
           </h1>
 
           <p>
-            Opisz projekt, wybierz kategorię i ustaw prosty budżet.
+            Opisz swój projekt i znajdź osobę,
+            która pomoże Ci go zrealizować.
           </p>
         </div>
 
         <form
           className="project-form"
-          onSubmit={
-            handleSubmit
+          onSubmit={(event) =>
+            event.preventDefault()
           }
         >
           <label>
@@ -1911,41 +1699,9 @@ function FindTalent() {
 
             <input
               type="text"
-              value={title}
-              onChange={(event) =>
-                setTitle(
-                  event.target.value
-                )
-              }
               placeholder="Np. nowoczesna strona internetowa"
-              maxLength={120}
               required
             />
-          </label>
-
-          <label>
-            Kategoria
-
-            <select
-              value={category}
-              onChange={(event) =>
-                setCategory(
-                  event.target.value
-                )
-              }
-              required
-            >
-              {JOB_CATEGORIES.map(
-                (item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                )
-              )}
-            </select>
           </label>
 
           <label>
@@ -1953,79 +1709,26 @@ function FindTalent() {
 
             <textarea
               rows="6"
-              value={description}
-              onChange={(event) =>
-                setDescription(
-                  event.target.value
-                )
-              }
               placeholder="Napisz kilka słów o tym, czego potrzebujesz..."
-              maxLength={2000}
               required
             />
           </label>
 
           <label>
-            Budżet (zł)
+            Budżet
 
             <input
               type="text"
-              value={budget}
-              onChange={
-                handleBudgetChange
-              }
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="Np. 3000"
-              maxLength={9}
+              placeholder="Np. 1 500–3 000 zł"
               required
             />
-
-            <small>
-              Wpisz tylko cyfry, bez zł, spacji i kropek.
-            </small>
           </label>
-
-          <div
-            className="account-card"
-            style={{
-              margin: 0,
-            }}
-          >
-            <strong>
-              Ważne
-            </strong>
-
-            <p
-              style={{
-                marginBottom: 0,
-              }}
-            >
-              Budżet ustalasz przy publikacji.
-              Po opublikowaniu nie można go zmienić.
-            </p>
-          </div>
-
-          {message && (
-            <p
-              className={
-                success
-                  ? "auth-message"
-                  : "auth-error"
-              }
-            >
-              {message}
-            </p>
-          )}
 
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={saving}
           >
-            {saving
-              ? "Publikowanie..."
-              : "Opublikuj zlecenie →"}
+            Opublikuj zlecenie →
           </button>
         </form>
       </main>
@@ -2038,433 +1741,32 @@ function FindTalent() {
 ========================================================= */
 
 function Jobs() {
-  const { user } =
-    useAuth();
-
-  const [jobs, setJobs] =
-    useState([]);
-
-  const [profiles, setProfiles] =
-    useState({});
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [openJobId, setOpenJobId] =
-    useState(null);
-
-  const [
-    editingJobId,
-    setEditingJobId,
-  ] = useState(null);
-
-  const [
-    savingEdit,
-    setSavingEdit,
-  ] = useState(false);
-
-  const [
-    deletingJobId,
-    setDeletingJobId,
-  ] = useState(null);
-
-  const [
-    editTitle,
-    setEditTitle,
-  ] = useState("");
-
-  const [
-    editDescription,
-    setEditDescription,
-  ] = useState("");
-
-  const [
-    editCategory,
-    setEditCategory,
-  ] = useState(
-    JOB_CATEGORIES[0]
-  );
-
-  async function loadJobs() {
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const {
-        data,
-        error,
-      } =
-        await supabase
-          .from("jobs")
-          .select(
-            "id, user_id, title, description, category, budget, created_at, updated_at"
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false,
-            }
-          );
-
-      if (error) {
-        setMessage(
-          `Nie udało się pobrać zleceń: ${error.message}`
-        );
-
-        return;
-      }
-
-      const loadedJobs =
-        data || [];
-
-      setJobs(
-        loadedJobs
-      );
-
-      const userIds = [
-        ...new Set(
-          loadedJobs
-            .map(
-              (job) =>
-                job.user_id
-            )
-            .filter(Boolean)
-        ),
-      ];
-
-      if (
-        userIds.length > 0
-      ) {
-        const {
-          data:
-            profileData,
-          error:
-            profileError,
-        } =
-          await supabase
-            .from(
-              "public_profiles"
-            )
-            .select(
-              "user_id, name, avatar_url"
-            )
-            .in(
-              "user_id",
-              userIds
-            );
-
-        if (profileError) {
-          console.error(
-            "LOAD JOB PROFILES ERROR:",
-            profileError
-          );
-        }
-
-        const profileMap =
-          {};
-
-        (
-          profileData ||
-          []
-        ).forEach(
-          (profile) => {
-            profileMap[
-              profile.user_id
-            ] = profile;
-          }
-        );
-
-        setProfiles(
-          profileMap
-        );
-      } else {
-        setProfiles({});
-      }
-    } catch (error) {
-      setMessage(
-        `Nie udało się pobrać zleceń: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadJobs();
-  }, []);
-
-  function formatBudget(
-    value
-  ) {
-    return `${Number(
-      value || 0
-    ).toLocaleString(
-      "pl-PL"
-    )} zł`;
-  }
-
-  function formatDate(
-    value
-  ) {
-    if (!value) return "";
-
-    return new Date(
-      value
-    ).toLocaleDateString(
-      "pl-PL",
-      {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }
-    );
-  }
-
-  function startEditing(
-    job
-  ) {
-    setEditingJobId(
-      job.id
-    );
-
-    setEditTitle(
-      job.title || ""
-    );
-
-    setEditDescription(
-      job.description || ""
-    );
-
-    setEditCategory(
-      job.category ||
-        JOB_CATEGORIES[0]
-    );
-
-    setOpenJobId(
-      job.id
-    );
-
-    setMessage("");
-  }
-
-  function cancelEditing() {
-    setEditingJobId(
-      null
-    );
-
-    setEditTitle("");
-    setEditDescription("");
-    setEditCategory(
-      JOB_CATEGORIES[0]
-    );
-  }
-
-  async function handleEditSubmit(
-    event,
-    job
-  ) {
-    event.preventDefault();
-
-    setMessage("");
-
-    const cleanTitle =
-      editTitle.trim();
-
-    const cleanDescription =
-      editDescription.trim();
-
-    if (!cleanTitle) {
-      setMessage(
-        "Nazwa zlecenia nie może być pusta."
-      );
-
-      return;
-    }
-
-    if (!cleanDescription) {
-      setMessage(
-        "Opis zlecenia nie może być pusty."
-      );
-
-      return;
-    }
-
-    if (
-      job.user_id !==
-      user?.id
-    ) {
-      setMessage(
-        "Nie możesz edytować tego zlecenia."
-      );
-
-      return;
-    }
-
-    setSavingEdit(true);
-
-    try {
-      const {
-        data,
-        error,
-      } =
-        await supabase
-          .from("jobs")
-          .update({
-            title:
-              cleanTitle,
-            description:
-              cleanDescription,
-            category:
-              editCategory,
-          })
-          .eq(
-            "id",
-            job.id
-          )
-          .eq(
-            "user_id",
-            user.id
-          )
-          .select(
-            "id, user_id, title, description, category, budget, created_at, updated_at"
-          )
-          .single();
-
-      if (error) {
-        setMessage(
-          `Nie udało się zapisać zmian: ${error.message}`
-        );
-
-        return;
-      }
-
-      setJobs(
-        (current) =>
-          current.map(
-            (item) =>
-              item.id ===
-              job.id
-                ? data
-                : item
-          )
-      );
-
-      cancelEditing();
-
-      setMessage(
-        "Zlecenie zostało zaktualizowane. Budżet pozostał bez zmian."
-      );
-    } catch (error) {
-      setMessage(
-        `Nie udało się zapisać zmian: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setSavingEdit(false);
-    }
-  }
-
-  async function handleDelete(
-    job
-  ) {
-    if (
-      job.user_id !==
-      user?.id
-    ) {
-      setMessage(
-        "Nie możesz usunąć tego zlecenia."
-      );
-
-      return;
-    }
-
-    const confirmed =
-      window.confirm(
-        `Czy na pewno chcesz usunąć zlecenie „${job.title}”? Tej operacji nie można cofnąć.`
-      );
-
-    if (!confirmed)
-      return;
-
-    setDeletingJobId(
-      job.id
-    );
-
-    setMessage("");
-
-    try {
-      const {
-        error,
-      } =
-        await supabase
-          .from("jobs")
-          .delete()
-          .eq(
-            "id",
-            job.id
-          )
-          .eq(
-            "user_id",
-            user.id
-          );
-
-      if (error) {
-        setMessage(
-          `Nie udało się usunąć zlecenia: ${error.message}`
-        );
-
-        return;
-      }
-
-      setJobs(
-        (current) =>
-          current.filter(
-            (item) =>
-              item.id !==
-              job.id
-          )
-      );
-
-      if (
-        openJobId ===
-        job.id
-      ) {
-        setOpenJobId(
-          null
-        );
-      }
-
-      if (
-        editingJobId ===
-        job.id
-      ) {
-        cancelEditing();
-      }
-
-      setMessage(
-        "Zlecenie zostało usunięte."
-      );
-    } catch (error) {
-      setMessage(
-        `Nie udało się usunąć zlecenia: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setDeletingJobId(
-        null
-      );
-    }
-  }
+  const jobs = [
+    {
+      title:
+        "Nowoczesna strona internetowa",
+      category:
+        "Programowanie",
+      budget:
+        "1 500–3 000 zł",
+    },
+    {
+      title:
+        "Logo dla nowej marki",
+      category:
+        "Grafika i design",
+      budget:
+        "500–1 000 zł",
+    },
+    {
+      title:
+        "Materiały do social media",
+      category:
+        "Marketing",
+      budget:
+        "800–1 500 zł",
+    },
+  ];
 
   return (
     <div className="page">
@@ -2481,779 +1783,38 @@ function Jobs() {
           </h1>
 
           <p>
-            Przeglądaj prawdziwe zlecenia opublikowane przez użytkowników IdeaHire.
+            Przeglądaj projekty i znajdź zlecenie
+            dopasowane do Twoich umiejętności.
           </p>
         </div>
 
-        {message && (
-          <p className="auth-message">
-            {message}
-          </p>
-        )}
-
-        {loading && (
-          <p>
-            Ładowanie zleceń...
-          </p>
-        )}
-
-        {!loading &&
-          jobs.length ===
-            0 && (
-            <section className="account-card">
+        <div className="jobs-list">
+          {jobs.map((job) => (
+            <article
+              className="job-card"
+              key={job.title}
+            >
               <span className="section-label">
-                Brak zleceń
+                {job.category}
               </span>
 
               <h2>
-                Na razie nie ma żadnych zleceń.
+                {job.title}
               </h2>
 
               <p>
-                Dodaj pierwsze zlecenie, aby pojawiło się tutaj dla innych użytkowników.
+                Budżet: {job.budget}
               </p>
 
-              <Link
+              <button
                 className="btn btn-dark"
-                to="/find-talent"
+                type="button"
               >
-                Dodaj zlecenie →
-              </Link>
-            </section>
-          )}
-
-        <div className="jobs-list">
-          {jobs.map(
-            (job) => {
-              const isOpen =
-                openJobId ===
-                job.id;
-
-              const isEditing =
-                editingJobId ===
-                job.id;
-
-              const isOwner =
-                job.user_id ===
-                user?.id;
-
-              const profile =
-                profiles[
-                  job.user_id
-                ];
-
-              const profileName =
-                profile?.name ||
-                "Użytkownik";
-
-              const profileInitial =
-                profileName
-                  .charAt(0)
-                  .toUpperCase();
-
-              return (
-                <article
-                  className="job-card"
-                  key={job.id}
-                >
-                  <div
-                    style={{
-                      display:
-                        "flex",
-                      justifyContent:
-                        "space-between",
-                      gap: "16px",
-                      alignItems:
-                        "flex-start",
-                    }}
-                  >
-                    <span className="section-label">
-                      {job.category}
-                    </span>
-
-                    <small>
-                      {formatDate(
-                        job.created_at
-                      )}
-                    </small>
-                  </div>
-
-                  <h2>
-                    {job.title}
-                  </h2>
-
-                  <div
-                    style={{
-                      display:
-                        "flex",
-                      alignItems:
-                        "center",
-                      gap: "10px",
-                      margin:
-                        "12px 0",
-                    }}
-                  >
-                    <Link
-                      to={`/profile/${job.user_id}`}
-                      style={{
-                        display:
-                          "inline-flex",
-                        alignItems:
-                          "center",
-                        gap: "10px",
-                        textDecoration:
-                          "none",
-                      }}
-                    >
-                      <span className="account-mini-avatar">
-                        {profile?.avatar_url ? (
-                          <img
-                            src={
-                              profile.avatar_url
-                            }
-                            alt=""
-                          />
-                        ) : (
-                          profileInitial
-                        )}
-                      </span>
-
-                      <strong>
-                        {profileName}
-                      </strong>
-                    </Link>
-                  </div>
-
-                  <p>
-                    <strong>
-                      Budżet:
-                    </strong>{" "}
-                    {formatBudget(
-                      job.budget
-                    )}
-                  </p>
-
-                  {isEditing ? (
-                    <form
-                      className="project-form"
-                      onSubmit={(
-                        event
-                      ) =>
-                        handleEditSubmit(
-                          event,
-                          job
-                        )
-                      }
-                      style={{
-                        marginTop:
-                          "20px",
-                      }}
-                    >
-                      <label>
-                        Nazwa zlecenia
-
-                        <input
-                          type="text"
-                          value={
-                            editTitle
-                          }
-                          onChange={(
-                            event
-                          ) =>
-                            setEditTitle(
-                              event
-                                .target
-                                .value
-                            )
-                          }
-                          maxLength={
-                            120
-                          }
-                          required
-                        />
-                      </label>
-
-                      <label>
-                        Kategoria
-
-                        <select
-                          value={
-                            editCategory
-                          }
-                          onChange={(
-                            event
-                          ) =>
-                            setEditCategory(
-                              event
-                                .target
-                                .value
-                            )
-                          }
-                          required
-                        >
-                          {JOB_CATEGORIES.map(
-                            (
-                              item
-                            ) => (
-                              <option
-                                key={
-                                  item
-                                }
-                                value={
-                                  item
-                                }
-                              >
-                                {
-                                  item
-                                }
-                              </option>
-                            )
-                          )}
-                        </select>
-                      </label>
-
-                      <label>
-                        Opis zlecenia
-
-                        <textarea
-                          rows="6"
-                          value={
-                            editDescription
-                          }
-                          onChange={(
-                            event
-                          ) =>
-                            setEditDescription(
-                              event
-                                .target
-                                .value
-                            )
-                          }
-                          maxLength={
-                            2000
-                          }
-                          required
-                        />
-                      </label>
-
-                      <div
-                        className="account-card"
-                        style={{
-                          margin: 0,
-                        }}
-                      >
-                        <strong>
-                          Budżet:{" "}
-                          {formatBudget(
-                            job.budget
-                          )}
-                        </strong>
-
-                        <p
-                          style={{
-                            marginBottom:
-                              0,
-                          }}
-                        >
-                          Budżet jest ustalany podczas publikacji i nie można go później zmienić.
-                        </p>
-                      </div>
-
-                      <div
-                        style={{
-                          display:
-                            "flex",
-                          gap: "10px",
-                          flexWrap:
-                            "wrap",
-                        }}
-                      >
-                        <button
-                          className="btn btn-dark"
-                          type="submit"
-                          disabled={
-                            savingEdit
-                          }
-                        >
-                          {savingEdit
-                            ? "Zapisywanie..."
-                            : "Zapisz zmiany →"}
-                        </button>
-
-                        <button
-                          className="btn btn-outline"
-                          type="button"
-                          onClick={
-                            cancelEditing
-                          }
-                          disabled={
-                            savingEdit
-                          }
-                        >
-                          Anuluj
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    <>
-                      {isOpen && (
-                        <div
-                          style={{
-                            marginTop:
-                              "18px",
-                          }}
-                        >
-                          <p>
-                            {
-                              job.description
-                            }
-                          </p>
-
-                          <p
-                            style={{
-                              marginTop:
-                                "12px",
-                            }}
-                          >
-                            <small>
-                              Budżet jest ustalany z góry i nie może zostać zmieniony po publikacji.
-                            </small>
-                          </p>
-                        </div>
-                      )}
-
-                      <div
-                        style={{
-                          display:
-                            "flex",
-                          gap: "10px",
-                          flexWrap:
-                            "wrap",
-                          marginTop:
-                            "16px",
-                        }}
-                      >
-                        <button
-                          className="btn btn-dark"
-                          type="button"
-                          onClick={() =>
-                            setOpenJobId(
-                              isOpen
-                                ? null
-                                : job.id
-                            )
-                          }
-                        >
-                          {isOpen
-                            ? "Ukryj szczegóły ↑"
-                            : "Zobacz zlecenie →"}
-                        </button>
-
-                        {isOwner && (
-                          <>
-                            <button
-                              className="btn btn-outline"
-                              type="button"
-                              onClick={() =>
-                                startEditing(
-                                  job
-                                )
-                              }
-                            >
-                              Edytuj
-                            </button>
-
-                            <button
-                              className="btn btn-outline"
-                              type="button"
-                              onClick={() =>
-                                handleDelete(
-                                  job
-                                )
-                              }
-                              disabled={
-                                deletingJobId ===
-                                job.id
-                              }
-                            >
-                              {deletingJobId ===
-                              job.id
-                                ? "Usuwanie..."
-                                : "Usuń"}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </>
-                  )}
-                </article>
-              );
-            }
-          )}
+                Zobacz zlecenie →
+              </button>
+            </article>
+          ))}
         </div>
-      </main>
-    </div>
-  );
-}
-
-/* =========================================================
-   PUBLIC PROFILE
-========================================================= */
-
-function PublicProfile() {
-  const { userId } =
-    useParams();
-
-  const [
-    profile,
-    setProfile,
-  ] = useState(null);
-
-  const [jobs, setJobs] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [
-    openJobId,
-    setOpenJobId,
-  ] = useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadProfile() {
-      setLoading(true);
-      setMessage("");
-
-      try {
-        const [
-          profileResult,
-          jobsResult,
-        ] =
-          await Promise.all([
-            supabase
-              .from(
-                "public_profiles"
-              )
-              .select(
-                "user_id, name, avatar_url, created_at"
-              )
-              .eq(
-                "user_id",
-                userId
-              )
-              .maybeSingle(),
-
-            supabase
-              .from("jobs")
-              .select(
-                "id, user_id, title, description, category, budget, created_at"
-              )
-              .eq(
-                "user_id",
-                userId
-              )
-              .order(
-                "created_at",
-                {
-                  ascending:
-                    false,
-                }
-              ),
-          ]);
-
-        if (
-          jobsResult.error
-        ) {
-          throw jobsResult.error;
-        }
-
-        if (!mounted)
-          return;
-
-        const profileData =
-          profileResult.data;
-
-        const jobData =
-          jobsResult.data ||
-          [];
-
-        if (
-          !profileData &&
-          jobData.length ===
-            0
-        ) {
-          setMessage(
-            "Nie znaleziono tego profilu."
-          );
-
-          return;
-        }
-
-        setProfile(
-          profileData || {
-            user_id:
-              userId,
-            name:
-              "Użytkownik",
-            avatar_url:
-              null,
-          }
-        );
-
-        setJobs(
-          jobData
-        );
-      } catch (error) {
-        if (mounted) {
-          setMessage(
-            `Nie udało się pobrać profilu: ${
-              error?.message ||
-              "Nieznany błąd"
-            }`
-          );
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    if (userId) {
-      loadProfile();
-    }
-
-    return () => {
-      mounted = false;
-    };
-  }, [userId]);
-
-  function formatBudget(
-    value
-  ) {
-    return `${Number(
-      value || 0
-    ).toLocaleString(
-      "pl-PL"
-    )} zł`;
-  }
-
-  function formatDate(
-    value
-  ) {
-    if (!value) return "";
-
-    return new Date(
-      value
-    ).toLocaleDateString(
-      "pl-PL",
-      {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }
-    );
-  }
-
-  const displayName =
-    profile?.name ||
-    "Użytkownik";
-
-  const initial =
-    displayName
-      .charAt(0)
-      .toUpperCase();
-
-  return (
-    <div className="page">
-      <AccountNavbar />
-
-      <main className="app-page">
-        {loading && (
-          <p>
-            Ładowanie profilu...
-          </p>
-        )}
-
-        {!loading &&
-          message && (
-            <section className="account-card">
-              <p className="auth-error">
-                {message}
-              </p>
-
-              <Link
-                className="btn btn-dark"
-                to="/jobs"
-              >
-                Wróć do zleceń →
-              </Link>
-            </section>
-          )}
-
-        {!loading &&
-          !message &&
-          profile && (
-            <>
-              <div className="app-page-header">
-                <span className="section-label">
-                  Profil użytkownika
-                </span>
-
-                <div
-                  style={{
-                    display:
-                      "flex",
-                    alignItems:
-                      "center",
-                    gap: "18px",
-                    marginTop:
-                      "12px",
-                  }}
-                >
-                  {profile.avatar_url ? (
-                    <img
-                      src={
-                        profile.avatar_url
-                      }
-                      alt="Zdjęcie profilowe"
-                      className="profile-avatar"
-                      style={{
-                        width:
-                          "88px",
-                        height:
-                          "88px",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      className="profile-avatar profile-avatar-placeholder"
-                      style={{
-                        width:
-                          "88px",
-                        height:
-                          "88px",
-                      }}
-                    >
-                      {initial}
-                    </div>
-                  )}
-
-                  <div>
-                    <h1>
-                      {displayName}
-                    </h1>
-
-                    <p>
-                      {jobs.length}{" "}
-                      {jobs.length ===
-                      1
-                        ? "zlecenie"
-                        : "zleceń"}{" "}
-                      opublikowanych na IdeaHire.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <section className="account-card">
-                <span className="section-label">
-                  Zlecenia tej osoby
-                </span>
-
-                {jobs.length ===
-                0 ? (
-                  <p>
-                    Ta osoba nie ma jeszcze aktywnych zleceń.
-                  </p>
-                ) : (
-                  <div className="jobs-list">
-                    {jobs.map(
-                      (job) => {
-                        const isOpen =
-                          openJobId ===
-                          job.id;
-
-                        return (
-                          <article
-                            className="job-card"
-                            key={
-                              job.id
-                            }
-                          >
-                            <span className="section-label">
-                              {
-                                job.category
-                              }
-                            </span>
-
-                            <h2>
-                              {
-                                job.title
-                              }
-                            </h2>
-
-                            <p>
-                              <strong>
-                                Budżet:
-                              </strong>{" "}
-                              {formatBudget(
-                                job.budget
-                              )}
-                            </p>
-
-                            <p>
-                              <small>
-                                Opublikowano:{" "}
-                                {formatDate(
-                                  job.created_at
-                                )}
-                              </small>
-                            </p>
-
-                            {isOpen && (
-                              <p
-                                style={{
-                                  marginTop:
-                                    "18px",
-                                }}
-                              >
-                                {
-                                  job.description
-                                }
-                              </p>
-                            )}
-
-                            <button
-                              className="btn btn-dark"
-                              type="button"
-                              onClick={() =>
-                                setOpenJobId(
-                                  isOpen
-                                    ? null
-                                    : job.id
-                                )
-                              }
-                            >
-                              {isOpen
-                                ? "Ukryj szczegóły ↑"
-                                : "Zobacz zlecenie →"}
-                            </button>
-                          </article>
-                        );
-                      }
-                    )}
-                  </div>
-                )}
-              </section>
-            </>
-          )}
       </main>
     </div>
   );
@@ -3283,6 +1844,7 @@ function Router() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+
           <Route
             path="/"
             element={<Home />}
@@ -3341,15 +1903,6 @@ function Router() {
           />
 
           <Route
-            path="/profile/:userId"
-            element={
-              <ProtectedRoute>
-                <PublicProfile />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
             path="*"
             element={
               <Navigate
@@ -3358,6 +1911,7 @@ function Router() {
               />
             }
           />
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
