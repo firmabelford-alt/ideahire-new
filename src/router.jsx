@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter,
@@ -28,10 +29,8 @@ function AuthProvider({ children }) {
 
     async function loadSession() {
       try {
-        const {
-          data: { session: currentSession },
-          error,
-        } = await supabase.auth.getSession();
+        const { data, error } =
+          await supabase.auth.getSession();
 
         if (error) {
           console.error("GET SESSION ERROR:", error);
@@ -39,7 +38,9 @@ function AuthProvider({ children }) {
 
         if (!mounted) return;
 
-        setSession(currentSession || null);
+        const currentSession = data?.session || null;
+
+        setSession(currentSession);
         setUser(currentSession?.user || null);
         setLoading(false);
       } catch (error) {
@@ -58,28 +59,11 @@ function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (_event, newSession) => {
         if (!mounted) return;
 
-        console.log("AUTH EVENT:", event);
-
-        /*
-         * Nie czyścimy sesji przy przypadkowym przejściowym
-         * evencie. Supabase jest źródłem prawdy.
-         */
-        if (newSession) {
-          setSession(newSession);
-          setUser(newSession.user || null);
-        } else {
-          /*
-           * Przy SIGNED_OUT rzeczywiście czyścimy sesję.
-           */
-          if (event === "SIGNED_OUT") {
-            setSession(null);
-            setUser(null);
-          }
-        }
-
+        setSession(newSession || null);
+        setUser(newSession?.user || null);
         setLoading(false);
       }
     );
@@ -96,7 +80,7 @@ function AuthProvider({ children }) {
         session,
         user,
         loading,
-        isLoggedIn: !!session && !!user,
+        isLoggedIn: Boolean(session && user),
       }}
     >
       {children}
@@ -131,19 +115,9 @@ function LoadingScreen() {
 ========================================================= */
 
 function ProtectedRoute({ children }) {
-  const {
-    loading,
-    isLoggedIn,
-  } = useAuth();
-
+  const { loading, isLoggedIn } = useAuth();
   const location = useLocation();
 
-  /*
-   * Najważniejsza zmiana:
-   *
-   * Dopóki AuthProvider nie zakończy sprawdzania sesji,
-   * NIE przekierowujemy użytkownika na /login.
-   */
   if (loading) {
     return <LoadingScreen />;
   }
@@ -164,14 +138,11 @@ function ProtectedRoute({ children }) {
 }
 
 /* =========================================================
-   PUBLIC ONLY
+   PUBLIC ONLY ROUTE
 ========================================================= */
 
 function PublicOnlyRoute({ children }) {
-  const {
-    loading,
-    isLoggedIn,
-  } = useAuth();
+  const { loading, isLoggedIn } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -190,7 +161,7 @@ function PublicOnlyRoute({ children }) {
 }
 
 /* =========================================================
-   NAVBAR
+   ACCOUNT NAVBAR
 ========================================================= */
 
 function AccountNavbar() {
@@ -209,29 +180,39 @@ function AccountNavbar() {
     userName.charAt(0).toUpperCase();
 
   async function handleLogout() {
-    const {
-      error,
-    } = await supabase.auth.signOut();
+    try {
+      const { error } =
+        await supabase.auth.signOut();
 
-    if (error) {
+      if (error) {
+        alert(
+          `Nie udało się wylogować: ${error.message}`
+        );
+
+        return;
+      }
+
+      /*
+        NIE przekierowujemy tutaj do /login.
+        Najpierw pozwalamy Supabase wyemitować
+        SIGNED_OUT i AuthProvider zaktualizować stan.
+      */
+
+      navigate("/", {
+        replace: true,
+      });
+    } catch (error) {
       alert(
-        `Nie udało się wylogować: ${error.message}`
+        `Nie udało się wylogować: ${
+          error?.message || "Nieznany błąd"
+        }`
       );
-
-      return;
     }
-
-    navigate("/", {
-      replace: true,
-    });
   }
 
   return (
     <header className="navbar">
-      <Link
-        className="logo"
-        to="/"
-      >
+      <Link className="logo" to="/">
         Idea<span>Hire</span>
       </Link>
 
@@ -294,37 +275,61 @@ function Login() {
     loading: authLoading,
   } = useAuth();
 
-  const [mode, setMode] =
-    useState("login");
+  const location = useLocation();
 
-  const [email, setEmail] =
-    useState("");
+  const [mode, setMode] = useState("login");
 
-  const [password, setPassword] =
-    useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  /*
+    WAŻNE:
 
-  const [success, setSuccess] =
-    useState(false);
+    Nie przekierowujemy tutaj po samym signInWithPassword.
+
+    Najpierw AuthProvider musi otrzymać sesję
+    przez onAuthStateChange.
+
+    Dopiero wtedy ten efekt wykona przekierowanie.
+  */
 
   useEffect(() => {
     if (
       !authLoading &&
       isLoggedIn
     ) {
-      navigate("/account", {
-        replace: true,
-      });
+      const requestedPath =
+        location.state?.from;
+
+      if (
+        requestedPath &&
+        requestedPath !== "/login" &&
+        requestedPath !== "/register"
+      ) {
+        navigate(
+          requestedPath,
+          {
+            replace: true,
+          }
+        );
+      } else {
+        navigate(
+          "/account",
+          {
+            replace: true,
+          }
+        );
+      }
     }
   }, [
     authLoading,
     isLoggedIn,
     navigate,
+    location.state,
   ]);
 
   function switchToReset() {
@@ -365,53 +370,27 @@ function Login() {
         return;
       }
 
-      /*
-       * Nie przechodzimy dalej tylko dlatego,
-       * że signInWithPassword zwrócił odpowiedź.
-       *
-       * Pobieramy aktualną sesję bezpośrednio
-       * z Supabase.
-       */
-      const {
-        data: sessionData,
-        error: sessionError,
-      } =
-        await supabase.auth.getSession();
-
-      if (sessionError) {
+      if (!data?.session || !data?.user) {
         setMessage(
-          `Nie udało się potwierdzić sesji: ${sessionError.message}`
-        );
-
-        return;
-      }
-
-      if (
-        !sessionData?.session ||
-        !sessionData?.session?.user
-      ) {
-        setMessage(
-          "Logowanie się nie powiodło — Supabase nie utworzył aktywnej sesji."
+          "Logowanie nie utworzyło aktywnej sesji."
         );
 
         return;
       }
 
       /*
-       * AuthProvider dostanie również SIGNED_IN
-       * i zaktualizuje stan.
-       *
-       * Tutaj przechodzimy dopiero po potwierdzeniu
-       * aktywnej sesji.
-       */
-      navigate("/account", {
-        replace: true,
-      });
+        NIE MA TUTAJ navigate("/account").
+
+        To była przyczyna problemu z przekierowaniem.
+
+        Supabase uruchomi onAuthStateChange,
+        AuthProvider zaktualizuje session/user,
+        a dopiero wtedy Login wykona redirect.
+      */
     } catch (error) {
       setMessage(
         `Nie udało się zalogować: ${
-          error?.message ||
-          "Nieznany błąd"
+          error?.message || "Nieznany błąd"
         }`
       );
     } finally {
@@ -425,8 +404,7 @@ function Login() {
     setMessage("");
     setSuccess(false);
 
-    const cleanEmail =
-      email.trim();
+    const cleanEmail = email.trim();
 
     if (!cleanEmail) {
       setMessage(
@@ -476,8 +454,7 @@ function Login() {
 
       setMessage(
         `Nie udało się wysłać wiadomości: ${
-          error?.message ||
-          "Nieznany błąd"
+          error?.message || "Nieznany błąd"
         }`
       );
     } finally {
@@ -485,12 +462,17 @@ function Login() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
+
+  if (isLoggedIn) {
+    return <LoadingScreen />;
+  }
+
+  /* =======================================================
+     RESET PASSWORD REQUEST
+  ======================================================= */
 
   if (mode === "reset") {
     return (
@@ -513,18 +495,15 @@ function Login() {
             </h1>
 
             <p>
-              Podaj adres e-mail przypisany
-              do Twojego konta. Wyślemy Ci
-              link, za pomocą którego
-              ustawisz nowe hasło.
+              Podaj adres e-mail przypisany do
+              Twojego konta. Wyślemy Ci link,
+              za pomocą którego ustawisz nowe hasło.
             </p>
           </div>
 
           <form
             className="auth-form"
-            onSubmit={
-              handlePasswordReset
-            }
+            onSubmit={handlePasswordReset}
           >
             <label>
               Adres e-mail
@@ -533,9 +512,7 @@ function Login() {
                 type="email"
                 value={email}
                 onChange={(event) =>
-                  setEmail(
-                    event.target.value
-                  )
+                  setEmail(event.target.value)
                 }
                 placeholder="twoj@email.com"
                 autoComplete="email"
@@ -568,11 +545,10 @@ function Login() {
 
           <p className="auth-footer">
             Pamiętasz hasło?{" "}
+
             <button
               type="button"
-              onClick={
-                switchToLogin
-              }
+              onClick={switchToLogin}
               className="auth-link-button"
             >
               Wróć do logowania
@@ -582,6 +558,10 @@ function Login() {
       </div>
     );
   }
+
+  /* =======================================================
+     NORMAL LOGIN
+  ======================================================= */
 
   return (
     <div className="page">
@@ -603,8 +583,7 @@ function Login() {
           </h1>
 
           <p>
-            Zaloguj się do swojego konta
-            IdeaHire.
+            Zaloguj się do swojego konta IdeaHire.
           </p>
         </div>
 
@@ -619,9 +598,7 @@ function Login() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -636,9 +613,7 @@ function Login() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Wpisz swoje hasło"
               autoComplete="current-password"
@@ -656,9 +631,7 @@ function Login() {
           >
             <button
               type="button"
-              onClick={
-                switchToReset
-              }
+              onClick={switchToReset}
               className="auth-link-button"
             >
               Nie pamiętasz hasła?
@@ -684,6 +657,7 @@ function Login() {
 
         <p className="auth-footer">
           Nie masz jeszcze konta?{" "}
+
           <Link to="/register">
             Utwórz konto
           </Link>
@@ -694,20 +668,17 @@ function Login() {
 }
 
 /* =========================================================
-   RESET PASSWORD
+   RESET PASSWORD — USTAWIENIE NOWEGO HASŁA
 ========================================================= */
 
 function ResetPassword() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   const [password, setPassword] =
     useState("");
 
-  const [
-    passwordAgain,
-    setPasswordAgain,
-  ] = useState("");
+  const [passwordAgain, setPasswordAgain] =
+    useState("");
 
   const [loading, setLoading] =
     useState(false);
@@ -718,9 +689,7 @@ function ResetPassword() {
   const [success, setSuccess] =
     useState(false);
 
-  async function handleUpdatePassword(
-    event
-  ) {
+  async function handleUpdatePassword(event) {
     event.preventDefault();
 
     setMessage("");
@@ -734,9 +703,7 @@ function ResetPassword() {
       return;
     }
 
-    if (
-      password !== passwordAgain
-    ) {
+    if (password !== passwordAgain) {
       setMessage(
         "Hasła nie są takie same."
       );
@@ -755,6 +722,11 @@ function ResetPassword() {
         });
 
       if (error) {
+        console.error(
+          "UPDATE PASSWORD ERROR:",
+          error
+        );
+
         setMessage(
           `Nie udało się zmienić hasła: ${error.message}`
         );
@@ -772,15 +744,22 @@ function ResetPassword() {
       setPasswordAgain("");
 
       setTimeout(() => {
-        navigate("/login", {
-          replace: true,
-        });
+        navigate(
+          "/login",
+          {
+            replace: true,
+          }
+        );
       }, 1800);
     } catch (error) {
+      console.error(
+        "UPDATE PASSWORD ERROR:",
+        error
+      );
+
       setMessage(
         `Nie udało się zmienić hasła: ${
-          error?.message ||
-          "Nieznany błąd"
+          error?.message || "Nieznany błąd"
         }`
       );
     } finally {
@@ -814,9 +793,7 @@ function ResetPassword() {
 
         <form
           className="auth-form"
-          onSubmit={
-            handleUpdatePassword
-          }
+          onSubmit={handleUpdatePassword}
         >
           <label>
             Nowe hasło
@@ -825,9 +802,7 @@ function ResetPassword() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Wpisz nowe hasło"
               autoComplete="new-password"
@@ -892,8 +867,7 @@ function ResetPassword() {
 ========================================================= */
 
 function Register() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   const {
     isLoggedIn,
@@ -915,14 +889,25 @@ function Register() {
   const [message, setMessage] =
     useState("");
 
+  /*
+    Tak samo jak przy logowaniu:
+    po rejestracji z aktywną sesją NIE robimy
+    natychmiast navigate("/account").
+
+    Czekamy na AuthProvider.
+  */
+
   useEffect(() => {
     if (
       !authLoading &&
       isLoggedIn
     ) {
-      navigate("/account", {
-        replace: true,
-      });
+      navigate(
+        "/account",
+        {
+          replace: true,
+        }
+      );
     }
   }, [
     authLoading,
@@ -930,9 +915,7 @@ function Register() {
     navigate,
   ]);
 
-  async function handleRegister(
-    event
-  ) {
+  async function handleRegister(event) {
     event.preventDefault();
 
     setMessage("");
@@ -975,26 +958,38 @@ function Register() {
         return;
       }
 
+      /*
+        Jeśli Supabase wymaga potwierdzenia e-mail,
+        nie będzie aktywnej sesji.
+
+        Wtedy normalnie wracamy do logowania.
+      */
+
       if (!data.session) {
         alert(
           "Konto zostało utworzone. Sprawdź e-mail i potwierdź adres."
         );
 
-        navigate("/login", {
-          replace: true,
-        });
+        navigate(
+          "/login",
+          {
+            replace: true,
+          }
+        );
 
         return;
       }
 
-      navigate("/account", {
-        replace: true,
-      });
+      /*
+        NIE ROBIMY tutaj navigate("/account").
+
+        AuthProvider wykryje sesję i efekt powyżej
+        przeniesie użytkownika do konta.
+      */
     } catch (error) {
       setMessage(
         `Nie udało się utworzyć konta: ${
-          error?.message ||
-          "Nieznany błąd"
+          error?.message || "Nieznany błąd"
         }`
       );
     } finally {
@@ -1044,9 +1039,7 @@ function Register() {
               type="text"
               value={name}
               onChange={(event) =>
-                setName(
-                  event.target.value
-                )
+                setName(event.target.value)
               }
               placeholder="Twoje imię"
               autoComplete="name"
@@ -1061,9 +1054,7 @@ function Register() {
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(
-                  event.target.value
-                )
+                setEmail(event.target.value)
               }
               placeholder="twoj@email.com"
               autoComplete="email"
@@ -1078,9 +1069,7 @@ function Register() {
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(
-                  event.target.value
-                )
+                setPassword(event.target.value)
               }
               placeholder="Utwórz hasło"
               autoComplete="new-password"
@@ -1108,6 +1097,7 @@ function Register() {
 
         <p className="auth-footer">
           Masz już konto?{" "}
+
           <Link to="/login">
             Zaloguj się
           </Link>
@@ -1121,9 +1111,7 @@ function Register() {
    AVATAR
 ========================================================= */
 
-async function resizeAndConvertImage(
-  file
-) {
+async function resizeAndConvertImage(file) {
   return new Promise(
     (resolve, reject) => {
       const image =
@@ -1183,7 +1171,9 @@ async function resizeAndConvertImage(
         canvas.height = SIZE;
 
         const context =
-          canvas.getContext("2d");
+          canvas.getContext(
+            "2d"
+          );
 
         if (!context) {
           reject(
@@ -1252,7 +1242,8 @@ async function resizeAndConvertImage(
         );
       };
 
-      image.src = objectUrl;
+      image.src =
+        objectUrl;
     }
   );
 }
@@ -1287,13 +1278,13 @@ function Account() {
 
     setName(
       user.user_metadata?.name ||
-        user.email?.split("@")[0] ||
-        ""
+      user.email?.split("@")[0] ||
+      ""
     );
 
     setAvatarUrl(
-      user.user_metadata
-        ?.avatar_url || ""
+      user.user_metadata?.avatar_url ||
+      ""
     );
   }, [user]);
 
@@ -1310,9 +1301,7 @@ function Account() {
     );
   }
 
-  async function handleAvatarChange(
-    event
-  ) {
+  async function handleAvatarChange(event) {
     const file =
       event.target.files?.[0];
 
@@ -1374,6 +1363,11 @@ function Account() {
           );
 
       if (uploadError) {
+        console.error(
+          "AVATAR UPLOAD ERROR:",
+          uploadError
+        );
+
         setMessage(
           `Nie udało się przesłać zdjęcia: ${uploadError.message}`
         );
@@ -1415,6 +1409,11 @@ function Account() {
         );
 
       if (metadataError) {
+        console.error(
+          "AVATAR METADATA ERROR:",
+          metadataError
+        );
+
         setMessage(
           `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
         );
@@ -1426,13 +1425,18 @@ function Account() {
         updatedUser?.user
           ?.user_metadata
           ?.avatar_url ||
-          publicUrl
+        publicUrl
       );
 
       setMessage(
         "Zdjęcie profilowe zostało zapisane."
       );
     } catch (error) {
+      console.error(
+        "AVATAR ERROR:",
+        error
+      );
+
       setMessage(
         `Nie udało się ustawić zdjęcia: ${
           error?.message ||
@@ -1445,9 +1449,7 @@ function Account() {
     }
   }
 
-  async function handleSave(
-    event
-  ) {
+  async function handleSave(event) {
     event.preventDefault();
 
     const cleanName =
@@ -1481,6 +1483,11 @@ function Account() {
         );
 
       if (error) {
+        console.error(
+          "PROFILE UPDATE ERROR:",
+          error
+        );
+
         setMessage(
           `Nie udało się zapisać profilu: ${error.message}`
         );
@@ -1498,18 +1505,25 @@ function Account() {
 
       setName(
         data.user.user_metadata
-          ?.name || cleanName
+          ?.name ||
+        cleanName
       );
 
       setAvatarUrl(
         data.user.user_metadata
-          ?.avatar_url || ""
+          ?.avatar_url ||
+        ""
       );
 
       setMessage(
         "Profil został zapisany."
       );
     } catch (error) {
+      console.error(
+        "PROFILE UPDATE ERROR:",
+        error
+      );
+
       setMessage(
         `Nie udało się zapisać profilu: ${
           error?.message ||
@@ -1719,7 +1733,8 @@ function FindTalent() {
 
             <input
               type="text"
-              placeholder="Np. 1 500–3 000 zł"
+              inputMode="numeric"
+              placeholder="Np. 3000"
               required
             />
           </label>
@@ -1845,11 +1860,15 @@ function Router() {
       <AuthProvider>
         <Routes>
 
+          {/* HOME */}
           <Route
             path="/"
-            element={<Home />}
+            element={
+              <Home />
+            }
           />
 
+          {/* LOGIN */}
           <Route
             path="/login"
             element={
@@ -1859,6 +1878,7 @@ function Router() {
             }
           />
 
+          {/* REGISTER */}
           <Route
             path="/register"
             element={
@@ -1868,6 +1888,7 @@ function Router() {
             }
           />
 
+          {/* PASSWORD RESET */}
           <Route
             path="/reset-password"
             element={
@@ -1875,6 +1896,7 @@ function Router() {
             }
           />
 
+          {/* ACCOUNT */}
           <Route
             path="/account"
             element={
@@ -1884,6 +1906,7 @@ function Router() {
             }
           />
 
+          {/* FIND TALENT */}
           <Route
             path="/find-talent"
             element={
@@ -1893,6 +1916,7 @@ function Router() {
             }
           />
 
+          {/* JOBS */}
           <Route
             path="/jobs"
             element={
@@ -1902,6 +1926,7 @@ function Router() {
             }
           />
 
+          {/* UNKNOWN ROUTE */}
           <Route
             path="*"
             element={
