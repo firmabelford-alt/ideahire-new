@@ -14,6 +14,7 @@ import {
   Link,
   useLocation,
   useNavigate,
+  useParams,
 } from "react-router-dom";
 
 import App from "./App";
@@ -403,8 +404,6 @@ function Login() {
         setMessage(
           "Logowanie nie utworzyło aktywnej sesji."
         );
-
-        return;
       }
     } catch (error) {
       console.error(
@@ -1663,7 +1662,10 @@ function Account() {
     setSaving(true);
 
     try {
-      const { data, error } =
+      const {
+        data,
+        error,
+      } =
         await supabase.auth.updateUser({
           data: {
             name: cleanName,
@@ -1690,6 +1692,44 @@ function Account() {
       if (!data?.user) {
         setMessage(
           "Profil nie został zaktualizowany."
+        );
+
+        return;
+      }
+
+      /*
+       * Zapisujemy również profil do
+       * public.profiles, ponieważ właśnie
+       * z tej tabeli korzystają publiczne
+       * profile widoczne przy zleceniach.
+       */
+      const {
+        error: profileError,
+      } =
+        await supabase
+          .from("profiles")
+          .upsert(
+            {
+              id: user.id,
+              name: cleanName,
+              avatar_url:
+                avatarUrl || null,
+              about:
+                cleanAbout || null,
+            },
+            {
+              onConflict: "id",
+            }
+          );
+
+      if (profileError) {
+        console.error(
+          "PUBLIC PROFILE UPDATE ERROR:",
+          profileError
+        );
+
+        setMessage(
+          `Dane konta zapisane, ale nie udało się zapisać publicznego profilu: ${profileError.message}`
         );
 
         return;
@@ -1891,6 +1931,339 @@ function Account() {
 }
 
 /* =========================================================
+   PUBLIC PROFILE
+========================================================= */
+
+function PublicProfile() {
+  const { userId } =
+    useParams();
+
+  const { user } =
+    useAuth();
+
+  const [profile, setProfile] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [message, setMessage] =
+    useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProfile() {
+      if (!userId) {
+        setMessage(
+          "Nie znaleziono użytkownika."
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      setLoading(true);
+      setMessage("");
+
+      try {
+        const {
+          data,
+          error,
+        } =
+          await supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url, about, completed_jobs, posted_jobs, created_at"
+            )
+            .eq("id", userId)
+            .maybeSingle();
+
+        if (error) {
+          console.error(
+            "LOAD PUBLIC PROFILE ERROR:",
+            error
+          );
+
+          if (!mounted) return;
+
+          setMessage(
+            `Nie udało się pobrać profilu: ${error.message}`
+          );
+
+          return;
+        }
+
+        if (!data) {
+          if (!mounted) return;
+
+          setMessage(
+            "Ten profil nie istnieje."
+          );
+
+          return;
+        }
+
+        if (!mounted) return;
+
+        setProfile(data);
+      } catch (error) {
+        console.error(
+          "LOAD PUBLIC PROFILE ERROR:",
+          error
+        );
+
+        if (!mounted) return;
+
+        setMessage(
+          `Nie udało się pobrać profilu: ${
+            error?.message ||
+            "Nieznany błąd"
+          }`
+        );
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="page">
+        <AccountNavbar />
+
+        <main className="app-page">
+          <p>
+            Ładowanie profilu...
+          </p>
+        </main>
+      </div>
+    );
+  }
+
+  if (message) {
+    return (
+      <div className="page">
+        <AccountNavbar />
+
+        <main className="app-page">
+          <section className="account-card">
+            <span className="section-label">
+              Profil
+            </span>
+
+            <h1>
+              Nie udało się otworzyć profilu
+            </h1>
+
+            <p className="auth-error">
+              {message}
+            </p>
+
+            <Link
+              className="btn btn-dark"
+              to="/jobs"
+            >
+              Wróć do zleceń
+            </Link>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  const displayName =
+    profile?.name ||
+    "Użytkownik";
+
+  const initial =
+    displayName
+      .charAt(0)
+      .toUpperCase();
+
+  const isOwnProfile =
+    user?.id === profile?.id;
+
+  return (
+    <div className="page">
+      <AccountNavbar />
+
+      <main className="app-page">
+        <div className="app-page-header">
+          <span className="section-label">
+            Profil użytkownika
+          </span>
+
+          <h1>
+            {displayName}
+          </h1>
+
+          <p>
+            Profil osoby korzystającej z IdeaHire.
+          </p>
+        </div>
+
+        <section className="account-card">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "24px",
+              marginBottom: "32px",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              className="profile-avatar-wrapper"
+              style={{
+                width: "110px",
+                height: "110px",
+                flexShrink: 0,
+              }}
+            >
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={`Zdjęcie profilowe ${displayName}`}
+                  className="profile-avatar"
+                />
+              ) : (
+                <div className="profile-avatar profile-avatar-placeholder">
+                  {initial}
+                </div>
+              )}
+            </div>
+
+            <div className="profile-info">
+              <h2>
+                {displayName}
+              </h2>
+
+              <p>
+                Użytkownik IdeaHire
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginBottom: "28px",
+            }}
+          >
+            <span className="section-label">
+              O mnie
+            </span>
+
+            <p
+              style={{
+                marginTop: "10px",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.7,
+              }}
+            >
+              {profile?.about?.trim()
+                ? profile.about
+                : "Ten użytkownik nie dodał jeszcze opisu."}
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(160px, 1fr))",
+              gap: "14px",
+              marginBottom: "28px",
+            }}
+          >
+            <div
+              style={{
+                padding: "18px",
+                borderRadius: "14px",
+                background: "#f7f7f7",
+              }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  fontSize: "24px",
+                  marginBottom: "5px",
+                }}
+              >
+                {Number(
+                  profile?.posted_jobs || 0
+                )}
+              </strong>
+
+              <span>
+                Opublikowanych zleceń
+              </span>
+            </div>
+
+            <div
+              style={{
+                padding: "18px",
+                borderRadius: "14px",
+                background: "#f7f7f7",
+              }}
+            >
+              <strong
+                style={{
+                  display: "block",
+                  fontSize: "24px",
+                  marginBottom: "5px",
+                }}
+              >
+                {Number(
+                  profile?.completed_jobs || 0
+                )}
+              </strong>
+
+              <span>
+                Ukończonych zleceń
+              </span>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Link
+              className="btn btn-dark"
+              to="/jobs"
+            >
+              Wróć do zleceń
+            </Link>
+
+            {isOwnProfile && (
+              <Link
+                className="btn btn-outline"
+                to="/account"
+              >
+                Edytuj profil
+              </Link>
+            )}
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+/* =========================================================
    JOB CATEGORIES
 ========================================================= */
 
@@ -2008,9 +2381,9 @@ function FindTalent() {
     try {
       /*
        * UWAGA:
-       * Nie zapisujemy tutaj statusu,
-       * ponieważ tabela jobs nie posiada
-       * kolumny status.
+       * Nie dodajemy status, ponieważ
+       * tabela jobs w Twoim Supabase
+       * nie posiada tej kolumny.
        */
       const { error } =
         await supabase
@@ -2038,6 +2411,37 @@ function FindTalent() {
         );
 
         return;
+      }
+
+      /*
+       * Aktualizujemy licznik zleceń
+       * na profilu użytkownika.
+       */
+      const {
+        data: currentProfile,
+      } =
+        await supabase
+          .from("profiles")
+          .select(
+            "posted_jobs"
+          )
+          .eq("id", user.id)
+          .maybeSingle();
+
+      if (currentProfile) {
+        await supabase
+          .from("profiles")
+          .update({
+            posted_jobs:
+              Number(
+                currentProfile.posted_jobs ||
+                  0
+              ) + 1,
+          })
+          .eq(
+            "id",
+            user.id
+          );
       }
 
       setSuccess(true);
@@ -2231,12 +2635,18 @@ function Jobs() {
 
     try {
       /*
-       * WAŻNE:
-       * status został usunięty z SELECT,
-       * ponieważ jobs.status nie istnieje
-       * w bazie danych.
+       * NIE POBIERAMY status.
+       *
+       * Twoja tabela jobs nie ma kolumny
+       * "status", dlatego poprzednie
+       * zapytanie powodowało:
+       *
+       * column jobs.status does not exist
        */
-      const { data, error } =
+      const {
+        data: jobData,
+        error: jobsError,
+      } =
         await supabase
           .from("jobs")
           .select(
@@ -2249,20 +2659,96 @@ function Jobs() {
             }
           );
 
-      if (error) {
+      if (jobsError) {
         console.error(
           "LOAD JOBS ERROR:",
-          error
+          jobsError
         );
 
         setMessage(
-          `Nie udało się pobrać zleceń: ${error.message}`
+          `Nie udało się pobrać zleceń: ${jobsError.message}`
         );
 
         return;
       }
 
-      setJobs(data || []);
+      const loadedJobs =
+        jobData || [];
+
+      /*
+       * Pobieramy profile wszystkich
+       * autorów zleceń jednym zapytaniem.
+       */
+      const userIds = [
+        ...new Set(
+          loadedJobs
+            .map(
+              (job) =>
+                job.user_id
+            )
+            .filter(Boolean)
+        ),
+      ];
+
+      let profiles = [];
+
+      if (userIds.length > 0) {
+        const {
+          data: profileData,
+          error: profilesError,
+        } =
+          await supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url, about, completed_jobs, posted_jobs"
+            )
+            .in(
+              "id",
+              userIds
+            );
+
+        if (profilesError) {
+          console.error(
+            "LOAD JOB PROFILES ERROR:",
+            profilesError
+          );
+
+          /*
+           * Same zlecenia nadal możemy
+           * wyświetlić, nawet jeżeli
+           * profil chwilowo nie jest dostępny.
+           */
+          profiles = [];
+        } else {
+          profiles =
+            profileData || [];
+        }
+      }
+
+      const profileMap =
+        new Map(
+          profiles.map(
+            (profile) => [
+              profile.id,
+              profile,
+            ]
+          )
+        );
+
+      const jobsWithProfiles =
+        loadedJobs.map(
+          (job) => ({
+            ...job,
+            profile:
+              profileMap.get(
+                job.user_id
+              ) || null,
+          })
+        );
+
+      setJobs(
+        jobsWithProfiles
+      );
     } catch (error) {
       console.error(
         "LOAD JOBS ERROR:",
@@ -2305,6 +2791,21 @@ function Jobs() {
         year: "numeric",
       }
     );
+  }
+
+  function getProfileName(job) {
+    return (
+      job.profile?.name ||
+      "Użytkownik IdeaHire"
+    );
+  }
+
+  function getProfileInitial(job) {
+    return getProfileName(
+      job
+    )
+      .charAt(0)
+      .toUpperCase();
   }
 
   return (
@@ -2370,11 +2871,124 @@ function Jobs() {
               user?.id ===
               job.user_id;
 
+            const profile =
+              job.profile;
+
+            const profileName =
+              getProfileName(
+                job
+              );
+
+            const profileInitial =
+              getProfileInitial(
+                job
+              );
+
             return (
               <article
                 className="job-card"
                 key={job.id}
               >
+                {/* =========================================
+                    AUTHOR
+                ========================================= */}
+
+                <Link
+                  to={`/profile/${job.user_id}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    textDecoration:
+                      "none",
+                    color:
+                      "inherit",
+                    marginBottom:
+                      "20px",
+                    width:
+                      "fit-content",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius:
+                        "50%",
+                      overflow:
+                        "hidden",
+                      flexShrink: 0,
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      justifyContent:
+                        "center",
+                      background:
+                        "#111",
+                      color:
+                        "#fff",
+                      fontWeight:
+                        "700",
+                      fontSize:
+                        "17px",
+                    }}
+                  >
+                    {profile?.avatar_url ? (
+                      <img
+                        src={
+                          profile.avatar_url
+                        }
+                        alt={`Zdjęcie profilowe ${profileName}`}
+                        style={{
+                          width:
+                            "100%",
+                          height:
+                            "100%",
+                          objectFit:
+                            "cover",
+                        }}
+                      />
+                    ) : (
+                      profileInitial
+                    )}
+                  </span>
+
+                  <span
+                    style={{
+                      display:
+                        "flex",
+                      flexDirection:
+                        "column",
+                      gap: "2px",
+                    }}
+                  >
+                    <strong
+                      style={{
+                        fontSize:
+                          "15px",
+                      }}
+                    >
+                      {profileName}
+                    </strong>
+
+                    <span
+                      style={{
+                        fontSize:
+                          "13px",
+                        opacity:
+                          0.6,
+                      }}
+                    >
+                      Zobacz profil →
+                    </span>
+                  </span>
+                </Link>
+
+                {/* =========================================
+                    CATEGORY
+                ========================================= */}
+
                 <div
                   style={{
                     display: "flex",
@@ -2408,6 +3022,10 @@ function Jobs() {
                     Aktywne
                   </span>
                 </div>
+
+                {/* =========================================
+                    JOB
+                ========================================= */}
 
                 <h2>
                   {job.title}
@@ -2454,6 +3072,100 @@ function Jobs() {
                         </small>
                       </p>
                     )}
+
+                    {/* =====================================
+                        PROFILE PREVIEW
+                    ===================================== */}
+
+                    <Link
+                      to={`/profile/${job.user_id}`}
+                      style={{
+                        display:
+                          "flex",
+                        alignItems:
+                          "center",
+                        gap: "12px",
+                        marginTop:
+                          "20px",
+                        padding:
+                          "14px",
+                        borderRadius:
+                          "14px",
+                        background:
+                          "#f7f7f7",
+                        textDecoration:
+                          "none",
+                        color:
+                          "inherit",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width:
+                            "42px",
+                          height:
+                            "42px",
+                          borderRadius:
+                            "50%",
+                          overflow:
+                            "hidden",
+                          flexShrink: 0,
+                          display:
+                            "flex",
+                          alignItems:
+                            "center",
+                          justifyContent:
+                            "center",
+                          background:
+                            "#111",
+                          color:
+                            "#fff",
+                          fontWeight:
+                            "700",
+                        }}
+                      >
+                        {profile?.avatar_url ? (
+                          <img
+                            src={
+                              profile.avatar_url
+                            }
+                            alt=""
+                            style={{
+                              width:
+                                "100%",
+                              height:
+                                "100%",
+                              objectFit:
+                                "cover",
+                            }}
+                          />
+                        ) : (
+                          profileInitial
+                        )}
+                      </span>
+
+                      <span>
+                        <strong
+                          style={{
+                            display:
+                              "block",
+                          }}
+                        >
+                          {profileName}
+                        </strong>
+
+                        <span
+                          style={{
+                            fontSize:
+                              "13px",
+                            opacity:
+                              0.65,
+                          }}
+                        >
+                          Przejdź do profilu →
+                        </span>
+                      </span>
+                    </Link>
                   </div>
                 )}
 
@@ -2467,6 +3179,10 @@ function Jobs() {
                         : job.id
                     )
                   }
+                  style={{
+                    marginTop:
+                      "18px",
+                  }}
                 >
                   {isOpen
                     ? "Ukryj szczegóły ↑"
@@ -2540,6 +3256,19 @@ function Router() {
             element={
               <ProtectedRoute>
                 <Account />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* =============================================
+              PUBLIC USER PROFILE
+          ============================================= */}
+
+          <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <PublicProfile />
               </ProtectedRoute>
             }
           />
