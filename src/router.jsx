@@ -1904,24 +1904,6 @@ const JOB_CATEGORIES = [
 ];
 
 /* =========================================================
-   JOB STATUS
-========================================================= */
-
-const JOB_STATUSES = {
-  open: {
-    label: "Aktywne",
-  },
-
-  in_progress: {
-    label: "W trakcie",
-  },
-
-  completed: {
-    label: "Zakończone",
-  },
-};
-
-/* =========================================================
    FIND TALENT
 ========================================================= */
 
@@ -2024,6 +2006,12 @@ function FindTalent() {
     setSaving(true);
 
     try {
+      /*
+       * UWAGA:
+       * Nie zapisujemy tutaj statusu,
+       * ponieważ tabela jobs nie posiada
+       * kolumny status.
+       */
       const { error } =
         await supabase
           .from("jobs")
@@ -2037,12 +2025,6 @@ function FindTalent() {
             category,
             budget:
               numericBudget,
-
-            /*
-             * Nowe zlecenie zawsze
-             * zaczyna jako aktywne.
-             */
-            status: "open",
           });
 
       if (error) {
@@ -2249,14 +2231,16 @@ function Jobs() {
 
     try {
       /*
-       * Pobieramy status razem
-       * z pozostałymi informacjami.
+       * WAŻNE:
+       * status został usunięty z SELECT,
+       * ponieważ jobs.status nie istnieje
+       * w bazie danych.
        */
       const { data, error } =
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, budget, status, created_at"
+            "id, user_id, title, description, category, budget, created_at"
           )
           .order(
             "created_at",
@@ -2320,14 +2304,6 @@ function Jobs() {
         month: "2-digit",
         year: "numeric",
       }
-    );
-  }
-
-  function getStatusLabel(status) {
-    return (
-      JOB_STATUSES[status]
-        ?.label ||
-      "Aktywne"
     );
   }
 
@@ -2426,18 +2402,10 @@ function Jobs() {
                       borderRadius:
                         "999px",
                       background:
-                        job.status ===
-                        "completed"
-                          ? "#e8f5e9"
-                          : job.status ===
-                            "in_progress"
-                          ? "#fff4d6"
-                          : "#eef4ff",
+                        "#eef4ff",
                     }}
                   >
-                    {getStatusLabel(
-                      job.status
-                    )}
+                    Aktywne
                   </span>
                 </div>
 
@@ -2610,4 +2578,3 @@ function Router() {
 }
 
 export default Router;
-
