@@ -14,7 +14,6 @@ import {
   Link,
   useLocation,
   useNavigate,
-  useParams,
 } from "react-router-dom";
 
 import App from "./App";
@@ -50,7 +49,6 @@ function AuthProvider({ children }) {
           setSession(null);
           setUser(null);
           setLoading(false);
-
           return;
         }
 
@@ -98,15 +96,16 @@ function AuthProvider({ children }) {
     };
   }, []);
 
-  const value = {
-    session,
-    user,
-    loading,
-    isLoggedIn: !!session && !!user,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        session,
+        user,
+        loading,
+        isLoggedIn:
+          !!session && !!user,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -117,7 +116,7 @@ function useAuth() {
 }
 
 /* =========================================================
-   LOADING SCREEN
+   LOADING
 ========================================================= */
 
 function LoadingScreen() {
@@ -139,7 +138,11 @@ function LoadingScreen() {
 ========================================================= */
 
 function ProtectedRoute({ children }) {
-  const { loading, isLoggedIn } = useAuth();
+  const {
+    loading,
+    isLoggedIn,
+  } = useAuth();
+
   const location = useLocation();
 
   if (loading) {
@@ -164,11 +167,14 @@ function ProtectedRoute({ children }) {
 }
 
 /* =========================================================
-   PUBLIC ROUTE
+   PUBLIC ONLY ROUTE
 ========================================================= */
 
 function PublicOnlyRoute({ children }) {
-  const { loading, isLoggedIn } = useAuth();
+  const {
+    loading,
+    isLoggedIn,
+  } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -203,9 +209,10 @@ function AccountNavbar() {
     user?.user_metadata?.avatar_url ||
     "";
 
-  const initial = userName
-    .charAt(0)
-    .toUpperCase();
+  const initial =
+    userName
+      .charAt(0)
+      .toUpperCase();
 
   async function handleLogout() {
     try {
@@ -385,15 +392,9 @@ function Login() {
         });
 
       if (error) {
-        console.error(
-          "LOGIN ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się zalogować: ${error.message}`
         );
-
         return;
       }
 
@@ -435,7 +436,6 @@ function Login() {
       setMessage(
         "Wpisz adres e-mail."
       );
-
       return;
     }
 
@@ -452,15 +452,9 @@ function Login() {
         );
 
       if (error) {
-        console.error(
-          "PASSWORD RESET ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się wysłać wiadomości: ${error.message}`
         );
-
         return;
       }
 
@@ -698,35 +692,23 @@ function Login() {
 function ResetPassword() {
   const navigate = useNavigate();
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const [
-    passwordAgain,
-    setPasswordAgain,
-  ] = useState("");
+  const [passwordAgain, setPasswordAgain] =
+    useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [
-    success,
-    setSuccess,
-  ] = useState(false);
+  const [success, setSuccess] =
+    useState(false);
 
-  const [
-    recoveryReady,
-    setRecoveryReady,
-  ] = useState(false);
+  const [recoveryReady, setRecoveryReady] =
+    useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -748,11 +730,6 @@ function ResetPassword() {
             );
 
           if (error) {
-            console.error(
-              "RECOVERY CODE ERROR:",
-              error
-            );
-
             if (!mounted) return;
 
             setMessage(
@@ -760,7 +737,6 @@ function ResetPassword() {
             );
 
             setLoading(false);
-
             return;
           }
 
@@ -774,7 +750,6 @@ function ResetPassword() {
 
           setRecoveryReady(true);
           setLoading(false);
-
           return;
         }
 
@@ -782,11 +757,6 @@ function ResetPassword() {
           await supabase.auth.getSession();
 
         if (error) {
-          console.error(
-            "RECOVERY SESSION ERROR:",
-            error
-          );
-
           if (!mounted) return;
 
           setMessage(
@@ -794,7 +764,6 @@ function ResetPassword() {
           );
 
           setLoading(false);
-
           return;
         }
 
@@ -803,7 +772,6 @@ function ResetPassword() {
 
           setRecoveryReady(true);
           setLoading(false);
-
           return;
         }
 
@@ -872,7 +840,6 @@ function ResetPassword() {
       setMessage(
         "Sesja resetowania hasła nie jest aktywna. Otwórz ponownie link z wiadomości e-mail."
       );
-
       return;
     }
 
@@ -880,7 +847,6 @@ function ResetPassword() {
       setMessage(
         "Hasło musi mieć co najmniej 6 znaków."
       );
-
       return;
     }
 
@@ -890,7 +856,6 @@ function ResetPassword() {
       setMessage(
         "Hasła nie są takie same."
       );
-
       return;
     }
 
@@ -903,15 +868,9 @@ function ResetPassword() {
         });
 
       if (error) {
-        console.error(
-          "UPDATE PASSWORD ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się zmienić hasła: ${error.message}`
         );
-
         return;
       }
 
@@ -932,11 +891,6 @@ function ResetPassword() {
         });
       }, 1500);
     } catch (error) {
-      console.error(
-        "UPDATE PASSWORD ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się zmienić hasła: ${
           error?.message ||
@@ -1108,20 +1062,14 @@ function Register() {
     setMessage("");
     setLoading(true);
 
-    const cleanName =
-      name.trim();
-
-    const cleanEmail =
-      email.trim();
-
     try {
       const { data, error } =
         await supabase.auth.signUp({
-          email: cleanEmail,
+          email: email.trim(),
           password,
           options: {
             data: {
-              name: cleanName,
+              name: name.trim(),
             },
           },
         });
@@ -1130,7 +1078,6 @@ function Register() {
         setMessage(
           `Nie udało się utworzyć konta: ${error.message}`
         );
-
         return;
       }
 
@@ -1138,7 +1085,6 @@ function Register() {
         setMessage(
           "Supabase nie zwrócił użytkownika."
         );
-
         return;
       }
 
@@ -1146,15 +1092,8 @@ function Register() {
         alert(
           "Konto zostało utworzone. Sprawdź e-mail i potwierdź adres."
         );
-
-        return;
       }
     } catch (error) {
-      console.error(
-        "REGISTER ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się utworzyć konta: ${
           error?.message ||
@@ -1286,13 +1225,10 @@ function Register() {
    AVATAR
 ========================================================= */
 
-async function resizeAndConvertImage(
-  file
-) {
+async function resizeAndConvertImage(file) {
   return new Promise(
     (resolve, reject) => {
-      const image =
-        new Image();
+      const image = new Image();
 
       const objectUrl =
         URL.createObjectURL(file);
@@ -1319,7 +1255,6 @@ async function resizeAndConvertImage(
               "Zdjęcie ma nieprawidłowe wymiary."
             )
           );
-
           return;
         }
 
@@ -1358,7 +1293,6 @@ async function resizeAndConvertImage(
               "Przeglądarka nie obsługuje Canvas."
             )
           );
-
           return;
         }
 
@@ -1388,7 +1322,6 @@ async function resizeAndConvertImage(
                   "Nie udało się skonwertować zdjęcia."
                 )
               );
-
               return;
             }
 
@@ -1426,6 +1359,533 @@ async function resizeAndConvertImage(
 }
 
 /* =========================================================
+   JOB CATEGORIES
+========================================================= */
+
+const JOB_CATEGORIES = [
+  "Programowanie",
+  "Grafika i design",
+  "Marketing",
+  "Copywriting",
+  "Video",
+  "Fotografia",
+];
+
+/* =========================================================
+   JOB CARD
+========================================================= */
+
+function JobCard({
+  job,
+  currentUserId,
+  onDeleted,
+  onUpdated,
+  showManagement = false,
+}) {
+  const [open, setOpen] =
+    useState(false);
+
+  const [editing, setEditing] =
+    useState(false);
+
+  const [title, setTitle] =
+    useState(job.title || "");
+
+  const [description, setDescription] =
+    useState(job.description || "");
+
+  const [category, setCategory] =
+    useState(
+      job.category ||
+        JOB_CATEGORIES[0]
+    );
+
+  const [budget, setBudget] =
+    useState(
+      String(job.budget || "")
+    );
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [deleting, setDeleting] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const isOwner =
+    currentUserId ===
+    job.user_id;
+
+  function formatBudget(value) {
+    return `${Number(
+      value || 0
+    ).toLocaleString(
+      "pl-PL"
+    )} zł`;
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+
+    return new Date(
+      value
+    ).toLocaleDateString(
+      "pl-PL",
+      {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }
+    );
+  }
+
+  function handleBudgetChange(
+    event
+  ) {
+    setBudget(
+      event.target.value.replace(
+        /\D/g,
+        ""
+      )
+    );
+  }
+
+  function startEditing() {
+    setTitle(job.title || "");
+    setDescription(
+      job.description || ""
+    );
+    setCategory(
+      job.category ||
+        JOB_CATEGORIES[0]
+    );
+    setBudget(
+      String(job.budget || "")
+    );
+    setMessage("");
+    setEditing(true);
+    setOpen(true);
+  }
+
+  function cancelEditing() {
+    setTitle(job.title || "");
+    setDescription(
+      job.description || ""
+    );
+    setCategory(
+      job.category ||
+        JOB_CATEGORIES[0]
+    );
+    setBudget(
+      String(job.budget || "")
+    );
+    setMessage("");
+    setEditing(false);
+  }
+
+  async function handleUpdate(event) {
+    event.preventDefault();
+
+    if (!isOwner) return;
+
+    const cleanTitle =
+      title.trim();
+
+    const cleanDescription =
+      description.trim();
+
+    const numericBudget =
+      Number(budget);
+
+    setMessage("");
+
+    if (!cleanTitle) {
+      setMessage(
+        "Tytuł zlecenia nie może być pusty."
+      );
+      return;
+    }
+
+    if (!cleanDescription) {
+      setMessage(
+        "Opis zlecenia nie może być pusty."
+      );
+      return;
+    }
+
+    if (
+      !budget ||
+      !Number.isInteger(
+        numericBudget
+      ) ||
+      numericBudget <= 0
+    ) {
+      setMessage(
+        "Budżet musi być większy od 0."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const { data, error } =
+        await supabase
+          .from("jobs")
+          .update({
+            title: cleanTitle,
+            description:
+              cleanDescription,
+            category,
+            budget:
+              numericBudget,
+          })
+          .eq("id", job.id)
+          .eq(
+            "user_id",
+            currentUserId
+          )
+          .select(
+            "id, user_id, title, description, category, budget, created_at"
+          )
+          .single();
+
+      if (error) {
+        console.error(
+          "UPDATE JOB ERROR:",
+          error
+        );
+
+        setMessage(
+          `Nie udało się zapisać zmian: ${error.message}`
+        );
+
+        return;
+      }
+
+      setEditing(false);
+      setMessage("");
+
+      if (onUpdated) {
+        onUpdated(data);
+      }
+    } catch (error) {
+      console.error(
+        "UPDATE JOB ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się zapisać zmian: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!isOwner || deleting) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Czy na pewno chcesz usunąć zlecenie „${job.title}”?`
+      );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setMessage("");
+
+    try {
+      const { error } =
+        await supabase
+          .from("jobs")
+          .delete()
+          .eq("id", job.id)
+          .eq(
+            "user_id",
+            currentUserId
+          );
+
+      if (error) {
+        console.error(
+          "DELETE JOB ERROR:",
+          error
+        );
+
+        setMessage(
+          `Nie udało się usunąć zlecenia: ${error.message}`
+        );
+
+        return;
+      }
+
+      if (onDeleted) {
+        onDeleted(job.id);
+      }
+    } catch (error) {
+      console.error(
+        "DELETE JOB ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się usunąć zlecenia: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <article className="job-card">
+      <div
+        style={{
+          display: "flex",
+          justifyContent:
+            "space-between",
+          alignItems: "center",
+          gap: "16px",
+          marginBottom: "12px",
+        }}
+      >
+        <span className="section-label">
+          {job.category}
+        </span>
+
+        <small>
+          {formatDate(
+            job.created_at
+          )}
+        </small>
+      </div>
+
+      {!editing ? (
+        <>
+          <h2>{job.title}</h2>
+
+          <p>
+            <strong>
+              Budżet:
+            </strong>{" "}
+            {formatBudget(
+              job.budget
+            )}
+          </p>
+
+          {open && (
+            <div
+              style={{
+                marginTop: "18px",
+              }}
+            >
+              <p>
+                {job.description}
+              </p>
+
+              {isOwner && (
+                <p
+                  style={{
+                    marginTop: "12px",
+                  }}
+                >
+                  <small>
+                    To jest Twoje zlecenie.
+                  </small>
+                </p>
+              )}
+            </div>
+          )}
+
+          {message && (
+            <p className="auth-error">
+              {message}
+            </p>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+              marginTop: "18px",
+            }}
+          >
+            <button
+              className="btn btn-dark"
+              type="button"
+              onClick={() =>
+                setOpen(!open)
+              }
+            >
+              {open
+                ? "Ukryj szczegóły ↑"
+                : "Zobacz zlecenie →"}
+            </button>
+
+            {showManagement &&
+              isOwner && (
+                <>
+                  <button
+                    className="btn btn-outline"
+                    type="button"
+                    onClick={
+                      startEditing
+                    }
+                    disabled={deleting}
+                  >
+                    Edytuj
+                  </button>
+
+                  <button
+                    className="btn btn-outline"
+                    type="button"
+                    onClick={
+                      handleDelete
+                    }
+                    disabled={
+                      deleting
+                    }
+                  >
+                    {deleting
+                      ? "Usuwanie..."
+                      : "Usuń"}
+                  </button>
+                </>
+              )}
+          </div>
+        </>
+      ) : (
+        <form
+          className="auth-form"
+          onSubmit={
+            handleUpdate
+          }
+        >
+          <label>
+            Tytuł zlecenia
+
+            <input
+              type="text"
+              value={title}
+              onChange={(event) =>
+                setTitle(
+                  event.target.value
+                )
+              }
+              maxLength={120}
+              required
+            />
+          </label>
+
+          <label>
+            Kategoria
+
+            <select
+              value={category}
+              onChange={(event) =>
+                setCategory(
+                  event.target.value
+                )
+              }
+              required
+            >
+              {JOB_CATEGORIES.map(
+                (item) => (
+                  <option
+                    key={item}
+                    value={item}
+                  >
+                    {item}
+                  </option>
+                )
+              )}
+            </select>
+          </label>
+
+          <label>
+            Opis
+
+            <textarea
+              rows="6"
+              value={description}
+              onChange={(event) =>
+                setDescription(
+                  event.target.value
+                )
+              }
+              maxLength={2000}
+              required
+            />
+          </label>
+
+          <label>
+            Budżet (zł)
+
+            <input
+              type="text"
+              value={budget}
+              onChange={
+                handleBudgetChange
+              }
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={9}
+              required
+            />
+          </label>
+
+          {message && (
+            <p className="auth-error">
+              {message}
+            </p>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "10px",
+            }}
+          >
+            <button
+              className="btn btn-dark"
+              type="submit"
+              disabled={saving}
+            >
+              {saving
+                ? "Zapisywanie..."
+                : "Zapisz zmiany →"}
+            </button>
+
+            <button
+              className="btn btn-outline"
+              type="button"
+              onClick={
+                cancelEditing
+              }
+              disabled={saving}
+            >
+              Anuluj
+            </button>
+          </div>
+        </form>
+      )}
+    </article>
+  );
+}
+
+/* =========================================================
    ACCOUNT
 ========================================================= */
 
@@ -1453,6 +1913,15 @@ function Account() {
   const [message, setMessage] =
     useState("");
 
+  const [myJobs, setMyJobs] =
+    useState([]);
+
+  const [jobsLoading, setJobsLoading] =
+    useState(true);
+
+  const [jobsMessage, setJobsMessage] =
+    useState("");
+
   useEffect(() => {
     if (!user) return;
 
@@ -1472,6 +1941,67 @@ function Account() {
         ""
     );
   }, [user]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    loadMyJobs();
+  }, [user?.id]);
+
+  async function loadMyJobs() {
+    if (!user?.id) return;
+
+    setJobsLoading(true);
+    setJobsMessage("");
+
+    try {
+      const { data, error } =
+        await supabase
+          .from("jobs")
+          .select(
+            "id, user_id, title, description, category, budget, created_at"
+          )
+          .eq(
+            "user_id",
+            user.id
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false,
+            }
+          );
+
+      if (error) {
+        console.error(
+          "LOAD MY JOBS ERROR:",
+          error
+        );
+
+        setJobsMessage(
+          `Nie udało się pobrać Twoich zleceń: ${error.message}`
+        );
+
+        return;
+      }
+
+      setMyJobs(data || []);
+    } catch (error) {
+      console.error(
+        "LOAD MY JOBS ERROR:",
+        error
+      );
+
+      setJobsMessage(
+        `Nie udało się pobrać Twoich zleceń: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setJobsLoading(false);
+    }
+  }
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -1506,7 +2036,6 @@ function Account() {
       );
 
       event.target.value = "";
-
       return;
     }
 
@@ -1519,7 +2048,6 @@ function Account() {
       );
 
       event.target.value = "";
-
       return;
     }
 
@@ -1552,15 +2080,9 @@ function Account() {
           );
 
       if (uploadError) {
-        console.error(
-          "AVATAR UPLOAD ERROR:",
-          uploadError
-        );
-
         setMessage(
           `Nie udało się przesłać zdjęcia: ${uploadError.message}`
         );
-
         return;
       }
 
@@ -1580,7 +2102,6 @@ function Account() {
         setMessage(
           "Nie udało się pobrać adresu zdjęcia."
         );
-
         return;
       }
 
@@ -1588,25 +2109,17 @@ function Account() {
         data: updatedUser,
         error: metadataError,
       } =
-        await supabase.auth.updateUser(
-          {
-            data: {
-              avatar_url:
-                publicUrl,
-            },
-          }
-        );
+        await supabase.auth.updateUser({
+          data: {
+            avatar_url:
+              publicUrl,
+          },
+        });
 
       if (metadataError) {
-        console.error(
-          "AVATAR METADATA ERROR:",
-          metadataError
-        );
-
         setMessage(
           `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
         );
-
         return;
       }
 
@@ -1621,11 +2134,6 @@ function Account() {
         "Zdjęcie profilowe zostało zapisane."
       );
     } catch (error) {
-      console.error(
-        "AVATAR ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się ustawić zdjęcia: ${
           error?.message ||
@@ -1638,9 +2146,7 @@ function Account() {
     }
   }
 
-  async function handleSave(
-    event
-  ) {
+  async function handleSave(event) {
     event.preventDefault();
 
     const cleanName =
@@ -1655,17 +2161,13 @@ function Account() {
       setMessage(
         "Imię / nazwa nie może być puste."
       );
-
       return;
     }
 
     setSaving(true);
 
     try {
-      const {
-        data,
-        error,
-      } =
+      const { data, error } =
         await supabase.auth.updateUser({
           data: {
             name: cleanName,
@@ -1677,15 +2179,9 @@ function Account() {
         });
 
       if (error) {
-        console.error(
-          "PROFILE UPDATE ERROR:",
-          error
-        );
-
         setMessage(
           `Nie udało się zapisać profilu: ${error.message}`
         );
-
         return;
       }
 
@@ -1693,45 +2189,6 @@ function Account() {
         setMessage(
           "Profil nie został zaktualizowany."
         );
-
-        return;
-      }
-
-      /*
-       * Zapisujemy również profil do
-       * public.profiles, ponieważ właśnie
-       * z tej tabeli korzystają publiczne
-       * profile widoczne przy zleceniach.
-       */
-      const {
-        error: profileError,
-      } =
-        await supabase
-          .from("profiles")
-          .upsert(
-            {
-              id: user.id,
-              name: cleanName,
-              avatar_url:
-                avatarUrl || null,
-              about:
-                cleanAbout || null,
-            },
-            {
-              onConflict: "id",
-            }
-          );
-
-      if (profileError) {
-        console.error(
-          "PUBLIC PROFILE UPDATE ERROR:",
-          profileError
-        );
-
-        setMessage(
-          `Dane konta zapisane, ale nie udało się zapisać publicznego profilu: ${profileError.message}`
-        );
-
         return;
       }
 
@@ -1754,11 +2211,6 @@ function Account() {
         "Profil został zapisany."
       );
     } catch (error) {
-      console.error(
-        "PROFILE UPDATE ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się zapisać profilu: ${
           error?.message ||
@@ -1768,6 +2220,25 @@ function Account() {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleJobDeleted(jobId) {
+    setMyJobs((current) =>
+      current.filter(
+        (job) =>
+          job.id !== jobId
+      )
+    );
+  }
+
+  function handleJobUpdated(updatedJob) {
+    setMyJobs((current) =>
+      current.map((job) =>
+        job.id === updatedJob.id
+          ? updatedJob
+          : job
+      )
+    );
   }
 
   const displayName =
@@ -1793,7 +2264,7 @@ function Account() {
           <h1>Mój profil</h1>
 
           <p>
-            Zarządzaj swoim profilem IdeaHire.
+            Zarządzaj swoim profilem i swoimi zleceniami.
           </p>
         </div>
 
@@ -1925,356 +2396,107 @@ function Account() {
             </button>
           </form>
         </section>
-      </main>
-    </div>
-  );
-}
 
-/* =========================================================
-   PUBLIC PROFILE
-========================================================= */
+        {/* =================================================
+            MOJE ZLECENIA
+        ================================================= */}
 
-function PublicProfile() {
-  const { userId } =
-    useParams();
-
-  const { user } =
-    useAuth();
-
-  const [profile, setProfile] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [message, setMessage] =
-    useState("");
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadProfile() {
-      if (!userId) {
-        setMessage(
-          "Nie znaleziono użytkownika."
-        );
-
-        setLoading(false);
-
-        return;
-      }
-
-      setLoading(true);
-      setMessage("");
-
-      try {
-        const {
-          data,
-          error,
-        } =
-          await supabase
-            .from("profiles")
-            .select(
-              "id, name, avatar_url, about, completed_jobs, posted_jobs, created_at"
-            )
-            .eq("id", userId)
-            .maybeSingle();
-
-        if (error) {
-          console.error(
-            "LOAD PUBLIC PROFILE ERROR:",
-            error
-          );
-
-          if (!mounted) return;
-
-          setMessage(
-            `Nie udało się pobrać profilu: ${error.message}`
-          );
-
-          return;
-        }
-
-        if (!data) {
-          if (!mounted) return;
-
-          setMessage(
-            "Ten profil nie istnieje."
-          );
-
-          return;
-        }
-
-        if (!mounted) return;
-
-        setProfile(data);
-      } catch (error) {
-        console.error(
-          "LOAD PUBLIC PROFILE ERROR:",
-          error
-        );
-
-        if (!mounted) return;
-
-        setMessage(
-          `Nie udało się pobrać profilu: ${
-            error?.message ||
-            "Nieznany błąd"
-          }`
-        );
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadProfile();
-
-    return () => {
-      mounted = false;
-    };
-  }, [userId]);
-
-  if (loading) {
-    return (
-      <div className="page">
-        <AccountNavbar />
-
-        <main className="app-page">
-          <p>
-            Ładowanie profilu...
-          </p>
-        </main>
-      </div>
-    );
-  }
-
-  if (message) {
-    return (
-      <div className="page">
-        <AccountNavbar />
-
-        <main className="app-page">
-          <section className="account-card">
+        <section
+          style={{
+            marginTop: "56px",
+          }}
+        >
+          <div className="app-page-header">
             <span className="section-label">
-              Profil
+              Zlecenia
             </span>
 
-            <h1>
-              Nie udało się otworzyć profilu
-            </h1>
+            <h2>
+              Moje zlecenia
+            </h2>
 
-            <p className="auth-error">
-              {message}
+            <p>
+              Tutaj znajdziesz wszystkie zlecenia,
+              które opublikowałeś.
             </p>
+          </div>
 
-            <Link
-              className="btn btn-dark"
-              to="/jobs"
-            >
-              Wróć do zleceń
-            </Link>
-          </section>
-        </main>
-      </div>
-    );
-  }
+          {jobsLoading && (
+            <p>
+              Ładowanie Twoich zleceń...
+            </p>
+          )}
 
-  const displayName =
-    profile?.name ||
-    "Użytkownik";
-
-  const initial =
-    displayName
-      .charAt(0)
-      .toUpperCase();
-
-  const isOwnProfile =
-    user?.id === profile?.id;
-
-  return (
-    <div className="page">
-      <AccountNavbar />
-
-      <main className="app-page">
-        <div className="app-page-header">
-          <span className="section-label">
-            Profil użytkownika
-          </span>
-
-          <h1>
-            {displayName}
-          </h1>
-
-          <p>
-            Profil osoby korzystającej z IdeaHire.
-          </p>
-        </div>
-
-        <section className="account-card">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "24px",
-              marginBottom: "32px",
-              flexWrap: "wrap",
-            }}
-          >
-            <div
-              className="profile-avatar-wrapper"
-              style={{
-                width: "110px",
-                height: "110px",
-                flexShrink: 0,
-              }}
-            >
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={`Zdjęcie profilowe ${displayName}`}
-                  className="profile-avatar"
-                />
-              ) : (
-                <div className="profile-avatar profile-avatar-placeholder">
-                  {initial}
-                </div>
-              )}
-            </div>
-
-            <div className="profile-info">
-              <h2>
-                {displayName}
-              </h2>
-
-              <p>
-                Użytkownik IdeaHire
+          {!jobsLoading &&
+            jobsMessage && (
+              <p className="auth-error">
+                {jobsMessage}
               </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginBottom: "28px",
-            }}
-          >
-            <span className="section-label">
-              O mnie
-            </span>
-
-            <p
-              style={{
-                marginTop: "10px",
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.7,
-              }}
-            >
-              {profile?.about?.trim()
-                ? profile.about
-                : "Ten użytkownik nie dodał jeszcze opisu."}
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(160px, 1fr))",
-              gap: "14px",
-              marginBottom: "28px",
-            }}
-          >
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "14px",
-                background: "#f7f7f7",
-              }}
-            >
-              <strong
-                style={{
-                  display: "block",
-                  fontSize: "24px",
-                  marginBottom: "5px",
-                }}
-              >
-                {Number(
-                  profile?.posted_jobs || 0
-                )}
-              </strong>
-
-              <span>
-                Opublikowanych zleceń
-              </span>
-            </div>
-
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "14px",
-                background: "#f7f7f7",
-              }}
-            >
-              <strong
-                style={{
-                  display: "block",
-                  fontSize: "24px",
-                  marginBottom: "5px",
-                }}
-              >
-                {Number(
-                  profile?.completed_jobs || 0
-                )}
-              </strong>
-
-              <span>
-                Ukończonych zleceń
-              </span>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Link
-              className="btn btn-dark"
-              to="/jobs"
-            >
-              Wróć do zleceń
-            </Link>
-
-            {isOwnProfile && (
-              <Link
-                className="btn btn-outline"
-                to="/account"
-              >
-                Edytuj profil
-              </Link>
             )}
-          </div>
+
+          {!jobsLoading &&
+            !jobsMessage &&
+            myJobs.length === 0 && (
+              <section className="account-card">
+                <span className="section-label">
+                  Brak zleceń
+                </span>
+
+                <h2>
+                  Nie masz jeszcze żadnych zleceń.
+                </h2>
+
+                <p>
+                  Dodaj pierwsze zlecenie,
+                  aby pojawiło się tutaj.
+                </p>
+
+                <div
+                  style={{
+                    marginTop: "20px",
+                  }}
+                >
+                  <Link
+                    className="btn btn-dark"
+                    to="/find-talent"
+                  >
+                    Dodaj zlecenie →
+                  </Link>
+                </div>
+              </section>
+            )}
+
+          {!jobsLoading &&
+            !jobsMessage &&
+            myJobs.length > 0 && (
+              <div className="jobs-list">
+                {myJobs.map(
+                  (job) => (
+                    <JobCard
+                      key={job.id}
+                      job={job}
+                      currentUserId={
+                        user.id
+                      }
+                      showManagement={
+                        true
+                      }
+                      onDeleted={
+                        handleJobDeleted
+                      }
+                      onUpdated={
+                        handleJobUpdated
+                      }
+                    />
+                  )
+                )}
+              </div>
+            )}
         </section>
       </main>
     </div>
   );
 }
-
-/* =========================================================
-   JOB CATEGORIES
-========================================================= */
-
-const JOB_CATEGORIES = [
-  "Programowanie",
-  "Grafika i design",
-  "Marketing",
-  "Copywriting",
-  "Video",
-  "Fotografia",
-];
 
 /* =========================================================
    FIND TALENT
@@ -2310,9 +2532,7 @@ function FindTalent() {
   const [success, setSuccess] =
     useState(false);
 
-  function handleBudgetChange(
-    event
-  ) {
+  function handleBudgetChange(event) {
     setBudget(
       event.target.value.replace(
         /\D/g,
@@ -2321,9 +2541,7 @@ function FindTalent() {
     );
   }
 
-  async function handleSubmit(
-    event
-  ) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     setMessage("");
@@ -2342,7 +2560,6 @@ function FindTalent() {
       setMessage(
         "Wpisz nazwę zlecenia."
       );
-
       return;
     }
 
@@ -2350,7 +2567,6 @@ function FindTalent() {
       setMessage(
         "Opisz krótko swoje zlecenie."
       );
-
       return;
     }
 
@@ -2364,7 +2580,6 @@ function FindTalent() {
       setMessage(
         "Budżet musi zawierać wyłącznie cyfry i być większy od 0."
       );
-
       return;
     }
 
@@ -2372,7 +2587,6 @@ function FindTalent() {
       setMessage(
         "Twoja sesja wygasła. Zaloguj się ponownie."
       );
-
       return;
     }
 
@@ -2380,10 +2594,10 @@ function FindTalent() {
 
     try {
       /*
-       * UWAGA:
-       * Nie dodajemy status, ponieważ
-       * tabela jobs w Twoim Supabase
-       * nie posiada tej kolumny.
+       * WAŻNE:
+       * Nie dodajemy statusu,
+       * ponieważ w Twojej tabeli jobs
+       * kolumna status nie istnieje.
        */
       const { error } =
         await supabase
@@ -2409,39 +2623,7 @@ function FindTalent() {
         setMessage(
           `Nie udało się opublikować zlecenia: ${error.message}`
         );
-
         return;
-      }
-
-      /*
-       * Aktualizujemy licznik zleceń
-       * na profilu użytkownika.
-       */
-      const {
-        data: currentProfile,
-      } =
-        await supabase
-          .from("profiles")
-          .select(
-            "posted_jobs"
-          )
-          .eq("id", user.id)
-          .maybeSingle();
-
-      if (currentProfile) {
-        await supabase
-          .from("profiles")
-          .update({
-            posted_jobs:
-              Number(
-                currentProfile.posted_jobs ||
-                  0
-              ) + 1,
-          })
-          .eq(
-            "id",
-            user.id
-          );
       }
 
       setSuccess(true);
@@ -2461,11 +2643,6 @@ function FindTalent() {
         navigate("/jobs");
       }, 900);
     } catch (error) {
-      console.error(
-        "CREATE JOB ERROR:",
-        error
-      );
-
       setMessage(
         `Nie udało się opublikować zlecenia: ${
           error?.message ||
@@ -2626,27 +2803,17 @@ function Jobs() {
   const [message, setMessage] =
     useState("");
 
-  const [openJobId, setOpenJobId] =
-    useState(null);
-
   async function loadJobs() {
     setLoading(true);
     setMessage("");
 
     try {
       /*
-       * NIE POBIERAMY status.
-       *
-       * Twoja tabela jobs nie ma kolumny
-       * "status", dlatego poprzednie
-       * zapytanie powodowało:
-       *
-       * column jobs.status does not exist
+       * UWAGA:
+       * Nie pobieramy status,
+       * ponieważ jobs.status nie istnieje.
        */
-      const {
-        data: jobData,
-        error: jobsError,
-      } =
+      const { data, error } =
         await supabase
           .from("jobs")
           .select(
@@ -2659,96 +2826,20 @@ function Jobs() {
             }
           );
 
-      if (jobsError) {
+      if (error) {
         console.error(
           "LOAD JOBS ERROR:",
-          jobsError
+          error
         );
 
         setMessage(
-          `Nie udało się pobrać zleceń: ${jobsError.message}`
+          `Nie udało się pobrać zleceń: ${error.message}`
         );
 
         return;
       }
 
-      const loadedJobs =
-        jobData || [];
-
-      /*
-       * Pobieramy profile wszystkich
-       * autorów zleceń jednym zapytaniem.
-       */
-      const userIds = [
-        ...new Set(
-          loadedJobs
-            .map(
-              (job) =>
-                job.user_id
-            )
-            .filter(Boolean)
-        ),
-      ];
-
-      let profiles = [];
-
-      if (userIds.length > 0) {
-        const {
-          data: profileData,
-          error: profilesError,
-        } =
-          await supabase
-            .from("profiles")
-            .select(
-              "id, name, avatar_url, about, completed_jobs, posted_jobs"
-            )
-            .in(
-              "id",
-              userIds
-            );
-
-        if (profilesError) {
-          console.error(
-            "LOAD JOB PROFILES ERROR:",
-            profilesError
-          );
-
-          /*
-           * Same zlecenia nadal możemy
-           * wyświetlić, nawet jeżeli
-           * profil chwilowo nie jest dostępny.
-           */
-          profiles = [];
-        } else {
-          profiles =
-            profileData || [];
-        }
-      }
-
-      const profileMap =
-        new Map(
-          profiles.map(
-            (profile) => [
-              profile.id,
-              profile,
-            ]
-          )
-        );
-
-      const jobsWithProfiles =
-        loadedJobs.map(
-          (job) => ({
-            ...job,
-            profile:
-              profileMap.get(
-                job.user_id
-              ) || null,
-          })
-        );
-
-      setJobs(
-        jobsWithProfiles
-      );
+      setJobs(data || []);
     } catch (error) {
       console.error(
         "LOAD JOBS ERROR:",
@@ -2770,42 +2861,23 @@ function Jobs() {
     loadJobs();
   }, []);
 
-  function formatBudget(value) {
-    return `${Number(
-      value || 0
-    ).toLocaleString(
-      "pl-PL"
-    )} zł`;
-  }
-
-  function formatDate(value) {
-    if (!value) return "";
-
-    return new Date(
-      value
-    ).toLocaleDateString(
-      "pl-PL",
-      {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }
+  function handleJobDeleted(jobId) {
+    setJobs((current) =>
+      current.filter(
+        (job) =>
+          job.id !== jobId
+      )
     );
   }
 
-  function getProfileName(job) {
-    return (
-      job.profile?.name ||
-      "Użytkownik IdeaHire"
+  function handleJobUpdated(updatedJob) {
+    setJobs((current) =>
+      current.map((job) =>
+        job.id === updatedJob.id
+          ? updatedJob
+          : job
+      )
     );
-  }
-
-  function getProfileInitial(job) {
-    return getProfileName(
-      job
-    )
-      .charAt(0)
-      .toUpperCase();
   }
 
   return (
@@ -2823,8 +2895,8 @@ function Jobs() {
           </h1>
 
           <p>
-            Przeglądaj prawdziwe zlecenia
-            opublikowane przez użytkowników IdeaHire.
+            Przeglądaj zlecenia opublikowane
+            przez użytkowników IdeaHire.
           </p>
         </div>
 
@@ -2862,335 +2934,25 @@ function Jobs() {
           )}
 
         <div className="jobs-list">
-          {jobs.map((job) => {
-            const isOpen =
-              openJobId ===
-              job.id;
-
-            const isOwner =
-              user?.id ===
-              job.user_id;
-
-            const profile =
-              job.profile;
-
-            const profileName =
-              getProfileName(
-                job
-              );
-
-            const profileInitial =
-              getProfileInitial(
-                job
-              );
-
-            return (
-              <article
-                className="job-card"
-                key={job.id}
-              >
-                {/* =========================================
-                    AUTHOR
-                ========================================= */}
-
-                <Link
-                  to={`/profile/${job.user_id}`}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    textDecoration:
-                      "none",
-                    color:
-                      "inherit",
-                    marginBottom:
-                      "20px",
-                    width:
-                      "fit-content",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      borderRadius:
-                        "50%",
-                      overflow:
-                        "hidden",
-                      flexShrink: 0,
-                      display:
-                        "flex",
-                      alignItems:
-                        "center",
-                      justifyContent:
-                        "center",
-                      background:
-                        "#111",
-                      color:
-                        "#fff",
-                      fontWeight:
-                        "700",
-                      fontSize:
-                        "17px",
-                    }}
-                  >
-                    {profile?.avatar_url ? (
-                      <img
-                        src={
-                          profile.avatar_url
-                        }
-                        alt={`Zdjęcie profilowe ${profileName}`}
-                        style={{
-                          width:
-                            "100%",
-                          height:
-                            "100%",
-                          objectFit:
-                            "cover",
-                        }}
-                      />
-                    ) : (
-                      profileInitial
-                    )}
-                  </span>
-
-                  <span
-                    style={{
-                      display:
-                        "flex",
-                      flexDirection:
-                        "column",
-                      gap: "2px",
-                    }}
-                  >
-                    <strong
-                      style={{
-                        fontSize:
-                          "15px",
-                      }}
-                    >
-                      {profileName}
-                    </strong>
-
-                    <span
-                      style={{
-                        fontSize:
-                          "13px",
-                        opacity:
-                          0.6,
-                      }}
-                    >
-                      Zobacz profil →
-                    </span>
-                  </span>
-                </Link>
-
-                {/* =========================================
-                    CATEGORY
-                ========================================= */}
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent:
-                      "space-between",
-                    alignItems:
-                      "center",
-                    gap: "16px",
-                    marginBottom:
-                      "12px",
-                  }}
-                >
-                  <span className="section-label">
-                    {job.category}
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize:
-                        "13px",
-                      fontWeight:
-                        "600",
-                      padding:
-                        "6px 10px",
-                      borderRadius:
-                        "999px",
-                      background:
-                        "#eef4ff",
-                    }}
-                  >
-                    Aktywne
-                  </span>
-                </div>
-
-                {/* =========================================
-                    JOB
-                ========================================= */}
-
-                <h2>
-                  {job.title}
-                </h2>
-
-                <p>
-                  <strong>
-                    Budżet:
-                  </strong>{" "}
-                  {formatBudget(
-                    job.budget
-                  )}
-                </p>
-
-                <p>
-                  <small>
-                    Opublikowano:{" "}
-                    {formatDate(
-                      job.created_at
-                    )}
-                  </small>
-                </p>
-
-                {isOpen && (
-                  <div
-                    style={{
-                      marginTop:
-                        "18px",
-                    }}
-                  >
-                    <p>
-                      {job.description}
-                    </p>
-
-                    {isOwner && (
-                      <p
-                        style={{
-                          marginTop:
-                            "12px",
-                        }}
-                      >
-                        <small>
-                          To jest Twoje zlecenie.
-                        </small>
-                      </p>
-                    )}
-
-                    {/* =====================================
-                        PROFILE PREVIEW
-                    ===================================== */}
-
-                    <Link
-                      to={`/profile/${job.user_id}`}
-                      style={{
-                        display:
-                          "flex",
-                        alignItems:
-                          "center",
-                        gap: "12px",
-                        marginTop:
-                          "20px",
-                        padding:
-                          "14px",
-                        borderRadius:
-                          "14px",
-                        background:
-                          "#f7f7f7",
-                        textDecoration:
-                          "none",
-                        color:
-                          "inherit",
-                      }}
-                    >
-                      <span
-                        style={{
-                          width:
-                            "42px",
-                          height:
-                            "42px",
-                          borderRadius:
-                            "50%",
-                          overflow:
-                            "hidden",
-                          flexShrink: 0,
-                          display:
-                            "flex",
-                          alignItems:
-                            "center",
-                          justifyContent:
-                            "center",
-                          background:
-                            "#111",
-                          color:
-                            "#fff",
-                          fontWeight:
-                            "700",
-                        }}
-                      >
-                        {profile?.avatar_url ? (
-                          <img
-                            src={
-                              profile.avatar_url
-                            }
-                            alt=""
-                            style={{
-                              width:
-                                "100%",
-                              height:
-                                "100%",
-                              objectFit:
-                                "cover",
-                            }}
-                          />
-                        ) : (
-                          profileInitial
-                        )}
-                      </span>
-
-                      <span>
-                        <strong
-                          style={{
-                            display:
-                              "block",
-                          }}
-                        >
-                          {profileName}
-                        </strong>
-
-                        <span
-                          style={{
-                            fontSize:
-                              "13px",
-                            opacity:
-                              0.65,
-                          }}
-                        >
-                          Przejdź do profilu →
-                        </span>
-                      </span>
-                    </Link>
-                  </div>
-                )}
-
-                <button
-                  className="btn btn-dark"
-                  type="button"
-                  onClick={() =>
-                    setOpenJobId(
-                      isOpen
-                        ? null
-                        : job.id
-                    )
-                  }
-                  style={{
-                    marginTop:
-                      "18px",
-                  }}
-                >
-                  {isOpen
-                    ? "Ukryj szczegóły ↑"
-                    : "Zobacz zlecenie →"}
-                </button>
-              </article>
-            );
-          })}
+          {jobs.map((job) => (
+            <JobCard
+              key={job.id}
+              job={job}
+              currentUserId={
+                user?.id
+              }
+              showManagement={
+                job.user_id ===
+                user?.id
+              }
+              onDeleted={
+                handleJobDeleted
+              }
+              onUpdated={
+                handleJobUpdated
+              }
+            />
+          ))}
         </div>
       </main>
     </div>
@@ -3221,6 +2983,7 @@ function Router() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* PUBLIC */}
           <Route
             path="/"
             element={<Home />}
@@ -3251,24 +3014,12 @@ function Router() {
             }
           />
 
+          {/* PROTECTED */}
           <Route
             path="/account"
             element={
               <ProtectedRoute>
                 <Account />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* =============================================
-              PUBLIC USER PROFILE
-          ============================================= */}
-
-          <Route
-            path="/profile/:userId"
-            element={
-              <ProtectedRoute>
-                <PublicProfile />
               </ProtectedRoute>
             }
           />
@@ -3291,6 +3042,7 @@ function Router() {
             }
           />
 
+          {/* 404 */}
           <Route
             path="*"
             element={
