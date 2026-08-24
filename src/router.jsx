@@ -1,3 +1,4 @@
+
 import React, {
   useEffect,
   useState,
@@ -34,10 +35,8 @@ function AuthProvider({ children }) {
 
     async function initializeAuth() {
       try {
-        const {
-          data,
-          error,
-        } = await supabase.auth.getSession();
+        const { data, error } =
+          await supabase.auth.getSession();
 
         if (error) {
           console.error(
@@ -60,9 +59,7 @@ function AuthProvider({ children }) {
           data?.session || null;
 
         setSession(currentSession);
-        setUser(
-          currentSession?.user || null
-        );
+        setUser(currentSession?.user || null);
         setLoading(false);
       } catch (error) {
         console.error(
@@ -81,26 +78,15 @@ function AuthProvider({ children }) {
     initializeAuth();
 
     const {
-      data: {
-        subscription,
-      },
+      data: { subscription },
     } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         if (!mounted) return;
 
-        console.log(
-          "AUTH EVENT:",
-          event
-        );
+        console.log("AUTH EVENT:", event);
 
-        setSession(
-          newSession || null
-        );
-
-        setUser(
-          newSession?.user || null
-        );
-
+        setSession(newSession || null);
+        setUser(newSession?.user || null);
         setLoading(false);
       }
     );
@@ -115,9 +101,7 @@ function AuthProvider({ children }) {
     session,
     user,
     loading,
-    isLoggedIn:
-      !!session &&
-      !!user,
+    isLoggedIn: !!session && !!user,
   };
 
   return (
@@ -154,11 +138,7 @@ function LoadingScreen() {
 ========================================================= */
 
 function ProtectedRoute({ children }) {
-  const {
-    loading,
-    isLoggedIn,
-  } = useAuth();
-
+  const { loading, isLoggedIn } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -184,17 +164,10 @@ function ProtectedRoute({ children }) {
 
 /* =========================================================
    PUBLIC ROUTE
-
-   Ważna zmiana:
-   nie wykonujemy żadnego przekierowania
-   zanim AuthProvider nie skończy inicjalizacji.
 ========================================================= */
 
 function PublicOnlyRoute({ children }) {
-  const {
-    loading,
-    isLoggedIn,
-  } = useAuth();
+  const { loading, isLoggedIn } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -218,10 +191,7 @@ function PublicOnlyRoute({ children }) {
 
 function AccountNavbar() {
   const navigate = useNavigate();
-
-  const {
-    user,
-  } = useAuth();
+  const { user } = useAuth();
 
   const userName =
     user?.user_metadata?.name ||
@@ -232,16 +202,13 @@ function AccountNavbar() {
     user?.user_metadata?.avatar_url ||
     "";
 
-  const initial =
-    userName
-      .charAt(0)
-      .toUpperCase();
+  const initial = userName
+    .charAt(0)
+    .toUpperCase();
 
   async function handleLogout() {
     try {
-      const {
-        error,
-      } =
+      const { error } =
         await supabase.auth.signOut();
 
       if (error) {
@@ -256,11 +223,6 @@ function AccountNavbar() {
 
         return;
       }
-
-      /*
-       * Nie ustawiamy ręcznie session = null.
-       * onAuthStateChange zrobi to automatycznie.
-       */
 
       navigate("/", {
         replace: true,
@@ -350,62 +312,29 @@ function Login() {
 
   const location = useLocation();
 
-  const [
-    mode,
-    setMode,
-  ] = useState("login");
+  const [mode, setMode] =
+    useState("login");
 
-  const [
-    email,
-    setEmail,
-  ] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [
-    success,
-    setSuccess,
-  ] = useState(false);
-
-  /*
-   * WAŻNE:
-   * Nie przekierowujemy tutaj po signInWithPassword.
-   *
-   * Po poprawnym logowaniu Supabase wywoła
-   * onAuthStateChange.
-   *
-   * Dopiero wtedy PublicOnlyRoute
-   * zobaczy isLoggedIn = true i przejdzie
-   * do /account.
-   */
+  const [success, setSuccess] =
+    useState(false);
 
   useEffect(() => {
     if (
       !authLoading &&
       isLoggedIn
     ) {
-      /*
-       * Jeśli użytkownik został wysłany
-       * na login przez ProtectedRoute,
-       * możemy wrócić do pierwotnej strony.
-       *
-       * Dla bezpieczeństwa akceptujemy
-       * tylko lokalną ścieżkę.
-       */
-
       const from =
         location.state?.from;
 
@@ -441,19 +370,14 @@ function Login() {
   async function handleLogin(event) {
     event.preventDefault();
 
-    if (loading) {
-      return;
-    }
+    if (loading) return;
 
     setMessage("");
     setSuccess(false);
     setLoading(true);
 
     try {
-      const {
-        data,
-        error,
-      } =
+      const { data, error } =
         await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -482,15 +406,6 @@ function Login() {
 
         return;
       }
-
-      /*
-       * NIE ROBIMY TUTAJ:
-       *
-       * navigate("/account")
-       *
-       * AuthProvider dostanie event
-       * SIGNED_IN i sam zaktualizuje stan.
-       */
     } catch (error) {
       console.error(
         "LOGIN ERROR:",
@@ -528,9 +443,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const {
-        error,
-      } =
+      const { error } =
         await supabase.auth.resetPasswordForEmail(
           cleanEmail,
           {
@@ -597,9 +510,7 @@ function Login() {
               Odzyskiwanie konta
             </span>
 
-            <h1>
-              Reset hasła
-            </h1>
+            <h1>Reset hasła</h1>
 
             <p>
               Podaj adres e-mail przypisany
@@ -687,9 +598,7 @@ function Login() {
             Witaj ponownie
           </span>
 
-          <h1>
-            Zaloguj się
-          </h1>
+          <h1>Zaloguj się</h1>
 
           <p>
             Zaloguj się do swojego konta IdeaHire.
@@ -834,9 +743,7 @@ function ResetPassword() {
           params.get("code");
 
         if (code) {
-          const {
-            error,
-          } =
+          const { error } =
             await supabase.auth.exchangeCodeForSession(
               code
             );
@@ -872,10 +779,7 @@ function ResetPassword() {
           return;
         }
 
-        const {
-          data,
-          error,
-        } =
+        const { data, error } =
           await supabase.auth.getSession();
 
         if (error) {
@@ -931,9 +835,7 @@ function ResetPassword() {
     }
 
     const {
-      data: {
-        subscription,
-      },
+      data: { subscription },
     } =
       supabase.auth.onAuthStateChange(
         (event, session) => {
@@ -996,9 +898,7 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const {
-        error,
-      } =
+      const { error } =
         await supabase.auth.updateUser({
           password,
         });
@@ -1068,9 +968,7 @@ function ResetPassword() {
             Odzyskiwanie konta
           </span>
 
-          <h1>
-            Ustaw nowe hasło
-          </h1>
+          <h1>Ustaw nowe hasło</h1>
 
           <p>
             Wpisz nowe hasło do swojego konta.
@@ -1130,9 +1028,7 @@ function ResetPassword() {
 
                 <input
                   type="password"
-                  value={
-                    passwordAgain
-                  }
+                  value={passwordAgain}
                   onChange={(event) =>
                     setPasswordAgain(
                       event.target.value
@@ -1190,30 +1086,20 @@ function Register() {
     loading: authLoading,
   } = useAuth();
 
-  const [
-    name,
-    setName,
-  ] = useState("");
+  const [name, setName] =
+    useState("");
 
-  const [
-    email,
-    setEmail,
-  ] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const [
-    password,
-    setPassword,
-  ] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
   async function handleRegister(event) {
     event.preventDefault();
@@ -1230,10 +1116,7 @@ function Register() {
       email.trim();
 
     try {
-      const {
-        data,
-        error,
-      } =
+      const { data, error } =
         await supabase.auth.signUp({
           email: cleanEmail,
           password,
@@ -1267,12 +1150,6 @@ function Register() {
 
         return;
       }
-
-      /*
-       * Tak samo jak w Login:
-       * nie robimy ręcznego navigate.
-       * AuthProvider obsłuży SIGNED_IN.
-       */
     } catch (error) {
       console.error(
         "REGISTER ERROR:",
@@ -1312,9 +1189,7 @@ function Register() {
             Dołącz do IdeaHire
           </span>
 
-          <h1>
-            Utwórz konto
-          </h1>
+          <h1>Utwórz konto</h1>
 
           <p>
             Załóż konto i zacznij korzystać z IdeaHire.
@@ -1561,35 +1436,23 @@ function Account() {
     loading: authLoading,
   } = useAuth();
 
-  const [
-    name,
-    setName,
-  ] = useState("");
+  const [name, setName] =
+    useState("");
 
-  const [
-    avatarUrl,
-    setAvatarUrl,
-  ] = useState("");
+  const [avatarUrl, setAvatarUrl] =
+    useState("");
 
-  const [
-    about,
-    setAbout,
-  ] = useState("");
+  const [about, setAbout] =
+    useState("");
 
-  const [
-    saving,
-    setSaving,
-  ] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [
-    uploading,
-    setUploading,
-  ] = useState(false);
+  const [uploading, setUploading] =
+    useState(false);
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -1601,13 +1464,13 @@ function Account() {
     );
 
     setAvatarUrl(
-      user.user_metadata
-        ?.avatar_url || ""
+      user.user_metadata?.avatar_url ||
+        ""
     );
 
     setAbout(
-      user.user_metadata
-        ?.about || ""
+      user.user_metadata?.about ||
+        ""
     );
   }, [user]);
 
@@ -1703,8 +1566,7 @@ function Account() {
       }
 
       const {
-        data:
-          publicUrlData,
+        data: publicUrlData,
       } =
         supabase.storage
           .from("avatars")
@@ -1725,8 +1587,7 @@ function Account() {
 
       const {
         data: updatedUser,
-        error:
-          metadataError,
+        error: metadataError,
       } =
         await supabase.auth.updateUser(
           {
@@ -1802,22 +1663,16 @@ function Account() {
     setSaving(true);
 
     try {
-      const {
-        data,
-        error,
-      } =
-        await supabase.auth.updateUser(
-          {
-            data: {
-              name: cleanName,
-              avatar_url:
-                avatarUrl || null,
-              about:
-                cleanAbout ||
-                null,
-            },
-          }
-        );
+      const { data, error } =
+        await supabase.auth.updateUser({
+          data: {
+            name: cleanName,
+            avatar_url:
+              avatarUrl || null,
+            about:
+              cleanAbout || null,
+          },
+        });
 
       if (error) {
         console.error(
@@ -1841,21 +1696,18 @@ function Account() {
       }
 
       setName(
-        data.user.user_metadata
-          ?.name ||
+        data.user.user_metadata?.name ||
           cleanName
       );
 
       setAvatarUrl(
         data.user.user_metadata
-          ?.avatar_url ||
-          ""
+          ?.avatar_url || ""
       );
 
       setAbout(
         data.user.user_metadata
-          ?.about ||
-          ""
+          ?.about || ""
       );
 
       setMessage(
@@ -1898,9 +1750,7 @@ function Account() {
             Twoje konto
           </span>
 
-          <h1>
-            Mój profil
-          </h1>
+          <h1>Mój profil</h1>
 
           <p>
             Zarządzaj swoim profilem IdeaHire.
@@ -1936,9 +1786,7 @@ function Account() {
 
           <form
             className="auth-form account-form"
-            onSubmit={
-              handleSave
-            }
+            onSubmit={handleSave}
           >
             <label>
               Zdjęcie profilowe
@@ -2056,6 +1904,24 @@ const JOB_CATEGORIES = [
 ];
 
 /* =========================================================
+   JOB STATUS
+========================================================= */
+
+const JOB_STATUSES = {
+  open: {
+    label: "Aktywne",
+  },
+
+  in_progress: {
+    label: "W trakcie",
+  },
+
+  completed: {
+    label: "Zakończone",
+  },
+};
+
+/* =========================================================
    FIND TALENT
 ========================================================= */
 
@@ -2066,42 +1932,28 @@ function FindTalent() {
   const { user } =
     useAuth();
 
-  const [
-    title,
-    setTitle,
-  ] = useState("");
+  const [title, setTitle] =
+    useState("");
 
-  const [
-    description,
-    setDescription,
-  ] = useState("");
+  const [description, setDescription] =
+    useState("");
 
-  const [
-    category,
-    setCategory,
-  ] = useState(
-    JOB_CATEGORIES[0]
-  );
+  const [category, setCategory] =
+    useState(
+      JOB_CATEGORIES[0]
+    );
 
-  const [
-    budget,
-    setBudget,
-  ] = useState("");
+  const [budget, setBudget] =
+    useState("");
 
-  const [
-    saving,
-    setSaving,
-  ] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [
-    success,
-    setSuccess,
-  ] = useState(false);
+  const [success, setSuccess] =
+    useState(false);
 
   function handleBudgetChange(
     event
@@ -2172,9 +2024,7 @@ function FindTalent() {
     setSaving(true);
 
     try {
-      const {
-        error,
-      } =
+      const { error } =
         await supabase
           .from("jobs")
           .insert({
@@ -2187,6 +2037,12 @@ function FindTalent() {
             category,
             budget:
               numericBudget,
+
+            /*
+             * Nowe zlecenie zawsze
+             * zaczyna jako aktywne.
+             */
+            status: "open",
           });
 
       if (error) {
@@ -2257,9 +2113,7 @@ function FindTalent() {
 
         <form
           className="project-form"
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
         >
           <label>
             Czego potrzebujesz?
@@ -2374,29 +2228,20 @@ function FindTalent() {
 ========================================================= */
 
 function Jobs() {
-  const {
-    user,
-  } = useAuth();
+  const { user } =
+    useAuth();
 
-  const [
-    jobs,
-    setJobs,
-  ] = useState([]);
+  const [jobs, setJobs] =
+    useState([]);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [
-    message,
-    setMessage,
-  ] = useState("");
+  const [message, setMessage] =
+    useState("");
 
-  const [
-    openJobId,
-    setOpenJobId,
-  ] = useState(null);
+  const [openJobId, setOpenJobId] =
+    useState(null);
 
   async function loadJobs() {
     setLoading(true);
@@ -2404,19 +2249,14 @@ function Jobs() {
 
     try {
       /*
-       * Na tym etapie pobieramy również user_id,
-       * żeby później bez problemu połączyć
-       * zlecenie z profilem autora.
+       * Pobieramy status razem
+       * z pozostałymi informacjami.
        */
-
-      const {
-        data,
-        error,
-      } =
+      const { data, error } =
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, budget, created_at"
+            "id, user_id, title, description, category, budget, status, created_at"
           )
           .order(
             "created_at",
@@ -2438,9 +2278,7 @@ function Jobs() {
         return;
       }
 
-      setJobs(
-        data || []
-      );
+      setJobs(data || []);
     } catch (error) {
       console.error(
         "LOAD JOBS ERROR:",
@@ -2462,9 +2300,7 @@ function Jobs() {
     loadJobs();
   }, []);
 
-  function formatBudget(
-    value
-  ) {
+  function formatBudget(value) {
     return `${Number(
       value || 0
     ).toLocaleString(
@@ -2472,9 +2308,7 @@ function Jobs() {
     )} zł`;
   }
 
-  function formatDate(
-    value
-  ) {
+  function formatDate(value) {
     if (!value) return "";
 
     return new Date(
@@ -2486,6 +2320,14 @@ function Jobs() {
         month: "2-digit",
         year: "numeric",
       }
+    );
+  }
+
+  function getStatusLabel(status) {
+    return (
+      JOB_STATUSES[status]
+        ?.label ||
+      "Aktywne"
     );
   }
 
@@ -2543,94 +2385,128 @@ function Jobs() {
           )}
 
         <div className="jobs-list">
-          {jobs.map(
-            (job) => {
-              const isOpen =
-                openJobId ===
-                job.id;
+          {jobs.map((job) => {
+            const isOpen =
+              openJobId ===
+              job.id;
 
-              const isOwner =
-                user?.id ===
-                job.user_id;
+            const isOwner =
+              user?.id ===
+              job.user_id;
 
-              return (
-                <article
-                  className="job-card"
-                  key={job.id}
+            return (
+              <article
+                className="job-card"
+                key={job.id}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    alignItems:
+                      "center",
+                    gap: "16px",
+                    marginBottom:
+                      "12px",
+                  }}
                 >
                   <span className="section-label">
                     {job.category}
                   </span>
 
-                  <h2>
-                    {job.title}
-                  </h2>
-
-                  <p>
-                    <strong>
-                      Budżet:
-                    </strong>{" "}
-                    {formatBudget(
-                      job.budget
-                    )}
-                  </p>
-
-                  <p>
-                    <small>
-                      Opublikowano:{" "}
-                      {formatDate(
-                        job.created_at
-                      )}
-                    </small>
-                  </p>
-
-                  {isOpen && (
-                    <div
-                      style={{
-                        marginTop:
-                          "18px",
-                      }}
-                    >
-                      <p>
-                        {
-                          job.description
-                        }
-                      </p>
-
-                      {isOwner && (
-                        <p
-                          style={{
-                            marginTop:
-                              "12px",
-                          }}
-                        >
-                          <small>
-                            To jest Twoje zlecenie.
-                          </small>
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-                  <button
-                    className="btn btn-dark"
-                    type="button"
-                    onClick={() =>
-                      setOpenJobId(
-                        isOpen
-                          ? null
-                          : job.id
-                      )
-                    }
+                  <span
+                    style={{
+                      fontSize:
+                        "13px",
+                      fontWeight:
+                        "600",
+                      padding:
+                        "6px 10px",
+                      borderRadius:
+                        "999px",
+                      background:
+                        job.status ===
+                        "completed"
+                          ? "#e8f5e9"
+                          : job.status ===
+                            "in_progress"
+                          ? "#fff4d6"
+                          : "#eef4ff",
+                    }}
                   >
-                    {isOpen
-                      ? "Ukryj szczegóły ↑"
-                      : "Zobacz zlecenie →"}
-                  </button>
-                </article>
-              );
-            }
-          )}
+                    {getStatusLabel(
+                      job.status
+                    )}
+                  </span>
+                </div>
+
+                <h2>
+                  {job.title}
+                </h2>
+
+                <p>
+                  <strong>
+                    Budżet:
+                  </strong>{" "}
+                  {formatBudget(
+                    job.budget
+                  )}
+                </p>
+
+                <p>
+                  <small>
+                    Opublikowano:{" "}
+                    {formatDate(
+                      job.created_at
+                    )}
+                  </small>
+                </p>
+
+                {isOpen && (
+                  <div
+                    style={{
+                      marginTop:
+                        "18px",
+                    }}
+                  >
+                    <p>
+                      {job.description}
+                    </p>
+
+                    {isOwner && (
+                      <p
+                        style={{
+                          marginTop:
+                            "12px",
+                        }}
+                      >
+                        <small>
+                          To jest Twoje zlecenie.
+                        </small>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <button
+                  className="btn btn-dark"
+                  type="button"
+                  onClick={() =>
+                    setOpenJobId(
+                      isOpen
+                        ? null
+                        : job.id
+                    )
+                  }
+                >
+                  {isOpen
+                    ? "Ukryj szczegóły ↑"
+                    : "Zobacz zlecenie →"}
+                </button>
+              </article>
+            );
+          })}
         </div>
       </main>
     </div>
@@ -2642,9 +2518,8 @@ function Jobs() {
 ========================================================= */
 
 function Home() {
-  const {
-    loading,
-  } = useAuth();
+  const { loading } =
+    useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -2664,9 +2539,7 @@ function Router() {
         <Routes>
           <Route
             path="/"
-            element={
-              <Home />
-            }
+            element={<Home />}
           />
 
           <Route
@@ -2737,3 +2610,4 @@ function Router() {
 }
 
 export default Router;
+
