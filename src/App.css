@@ -1,688 +1,53 @@
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  background: #f7f7f5;
-  color: #111;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-a {
-  color: inherit;
-}
-
-img {
-  max-width: 100%;
-}
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-.page {
-  min-height: 100vh;
-  background: #f7f7f5;
-}
-
-.logo {
-  color: #111;
-  text-decoration: none;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -1px;
-}
-
-.logo span {
-  font-weight: 400;
-}
-
-/* =========================================================
-   NAVBAR
-========================================================= */
-
-.navbar {
-  width: min(
-    1400px,
-    calc(100% - 48px)
-  );
-  margin: 0 auto;
-  padding: 24px 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 28px;
-}
-
-.nav-links a {
-  position: relative;
-  color: #555;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.nav-links a:hover {
-  color: #111;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.account-mini {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: #111;
-  text-decoration: none;
-}
-
-.account-mini-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  overflow: hidden;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  background: #111;
-  color: #fff;
-
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.account-mini-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.account-mini-name {
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.notifications-nav-link {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 7px;
-}
-
-.notification-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  background: #111;
-}
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 44px;
-
-  border-radius: 10px;
-
-  padding: 10px 17px;
-
-  border: 1px solid transparent;
-
-  cursor: pointer;
-
-  text-decoration: none;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-}
-
-.btn-dark {
-  background: #111;
-  border-color: #111;
-  color: #fff;
-}
-
-.btn-dark:hover {
-  background: #252525;
-  border-color: #252525;
-}
-
-.btn-outline {
-  background: transparent;
-  border-color: #d6d6d6;
-  color: #111;
-}
-
-.btn-outline:hover {
-  border-color: #111;
-  background: #fff;
-}
-
-.btn-large {
-  min-height: 52px;
-  padding: 13px 22px;
-}
-
-/* =========================================================
-   APP PAGE
-========================================================= */
-
-.app-page {
-  width: min(
-    1100px,
-    calc(100% - 48px)
-  );
-  margin: 0 auto;
-  padding: 40px 0 80px;
-}
-
-.app-page-header {
-  margin-bottom: 32px;
-}
-
-.app-page-header h1 {
-  margin: 8px 0 12px;
-  font-size: clamp(
-    38px,
-    5vw,
-    64px
-  );
-  line-height: 0.98;
-  letter-spacing: -2.5px;
-}
-
-.app-page-header p {
-  max-width: 650px;
-  margin: 0;
-  color: #666;
-  font-size: 16px;
-  line-height: 1.7;
-}
-
-.section-label {
-  display: inline-block;
-  color: #777;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-/* =========================================================
-   AUTH
-========================================================= */
-
-.auth-card {
-  width: min(
-    460px,
-    calc(100% - 32px)
-  );
-
-  margin: 80px auto;
-
-  padding: 42px;
-
-  background: #fff;
-  border: 1px solid #e7e7e7;
-  border-radius: 24px;
-
-  box-shadow:
-    0 20px 60px
-      rgba(0, 0, 0, 0.05);
-}
-
-.auth-header {
-  margin: 34px 0 28px;
-}
-
-.auth-header h1 {
-  margin: 8px 0 12px;
-  font-size: 40px;
-  line-height: 1;
-  letter-spacing: -1.8px;
-}
-
-.auth-header p {
-  color: #666;
-  line-height: 1.6;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.auth-form label,
-.project-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  color: #333;
-
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.auth-form input,
-.auth-form textarea,
-.auth-form select,
-.project-form input,
-.project-form textarea,
-.project-form select {
-  width: 100%;
-
-  border: 1px solid #ddd;
-  border-radius: 12px;
-
-  outline: none;
-
-  background: #fff;
-  color: #111;
-
-  padding: 13px 14px;
-
-  font-size: 15px;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.auth-form input,
-.project-form input,
-.project-form select {
-  min-height: 48px;
-}
-
-.auth-form textarea,
-.project-form textarea {
-  resize: vertical;
-  line-height: 1.55;
-}
-
-.auth-form input:focus,
-.auth-form textarea:focus,
-.auth-form select:focus,
-.project-form input:focus,
-.project-form textarea:focus,
-.project-form select:focus {
-  border-color: #111;
-  box-shadow:
-    0 0 0 4px
-      rgba(17, 17, 17, 0.06);
-}
-
-.auth-form small,
-.project-form small {
-  color: #777;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-.auth-footer {
-  margin: 24px 0 0;
-  color: #777;
-  text-align: center;
-  font-size: 14px;
-}
-
-.auth-footer a {
-  color: #111;
-  font-weight: 600;
-}
-
-.auth-link-button {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #111;
-  cursor: pointer;
-  font-size: inherit;
-  font-weight: 600;
-}
-
-.auth-error,
-.auth-message {
-  margin: 0;
-  padding: 12px 14px;
-
-  border-radius: 10px;
-
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.auth-error {
-  background: #fff0f0;
-  color: #a00000;
-  border: 1px solid #f1cccc;
-}
-
-.auth-message {
-  background: #eef8ef;
-  color: #276b2c;
-  border: 1px solid #cce6cf;
-}
-
-.forgot-password-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: -8px;
-}
-
-.reset-back-button {
-  margin-top: 20px;
-  text-align: center;
-}
-
-/* =========================================================
-   ACCOUNT
-========================================================= */
-
-.account-card {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 20px;
-  padding: 28px;
-}
-
-.profile-preview {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.profile-avatar-wrapper {
-  flex-shrink: 0;
-}
-
-.profile-avatar {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.profile-avatar-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #111;
-  color: #fff;
-
-  font-size: 30px;
-  font-weight: 700;
-}
-
-.profile-info h1,
-.profile-info h2 {
-  margin: 0 0 7px;
-  letter-spacing: -1px;
-}
-
-.profile-info p {
-  margin: 0;
-  color: #777;
-  line-height: 1.6;
-}
-
-.account-form {
-  margin-top: 34px;
-}
-
-.my-jobs-section,
-.profile-jobs-section {
-  margin-top: 30px;
-}
-
-.my-jobs-section h2,
-.profile-jobs-section h2 {
-  margin: 8px 0 24px;
-  font-size: 28px;
-  letter-spacing: -1px;
-}
-
-/* =========================================================
-   PROJECT FORM
-========================================================= */
-
-.project-form {
-  width: min(
-    760px,
-    100%
-  );
-
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-
-  padding: 30px;
-
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 20px;
-}
-
-.fixed-budget-note {
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #f5f5f5;
-  color: #333;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.fixed-budget-note small {
-  color: #777;
-}
-
-/* =========================================================
-   JOB CARDS
-========================================================= */
-
-.jobs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.job-card {
-  padding: 24px;
-
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 18px;
-}
-
-.job-card h2 {
-  margin: 10px 0 12px;
-
-  font-size: 25px;
-  line-height: 1.15;
-
-  letter-spacing: -0.8px;
-}
-
-.job-card p {
-  color: #555;
-  line-height: 1.6;
-}
-
-.job-card small {
-  color: #888;
-}
-
-.job-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.job-active-badge {
-  padding: 6px 10px;
-
-  border-radius: 999px;
-
-  background: #eef4ff;
-
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.job-details {
-  margin-top: 20px;
-}
-
-.job-details > p {
-  margin-top: 0;
-}
-
-.job-details .btn {
-  margin-top: 8px;
-  margin-right: 8px;
-}
-
-.job-owner-note {
-  margin-top: 14px;
-}
-
-.job-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
-}
-
 /* =========================================================
    JOB SEARCH
 ========================================================= */
 
 .jobs-search {
   width: 100%;
-  margin: 34px 0 28px;
+  margin: 36px 0 28px;
 }
 
 .jobs-search-box {
   position: relative;
-
   display: flex;
   align-items: center;
-
   width: 100%;
   min-height: 64px;
-
-  background: #fff;
-
+  background: #ffffff;
   border: 1px solid #dedede;
   border-radius: 18px;
-
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .jobs-search-box:focus-within {
-  border-color: #111;
-
+  border-color: #111111;
   box-shadow:
-    0 0 0 4px
-      rgba(17, 17, 17, 0.06);
+    0 0 0 4px rgba(17, 17, 17, 0.06);
 }
 
 .jobs-search-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 56px;
   flex: 0 0 56px;
-
-  color: #777;
-
   font-size: 28px;
   line-height: 1;
+  color: #777;
 }
 
 .jobs-search-box input {
   width: 100%;
   height: 62px;
-
   border: 0;
   outline: 0;
-
   background: transparent;
-
   padding: 0 52px 0 0;
-
-  color: #111;
-
   font-family: inherit;
   font-size: 17px;
+  color: #111;
 }
 
 .jobs-search-box input::placeholder {
@@ -691,30 +56,18 @@ img {
 
 .jobs-search-clear {
   position: absolute;
-  top: 50%;
   right: 18px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+  top: 50%;
+  transform: translateY(-50%);
   width: 30px;
   height: 30px;
-
-  transform:
-    translateY(-50%);
-
   border: 0;
   border-radius: 50%;
-
-  background: #eee;
-
+  background: #eeeeee;
   color: #555;
-
   cursor: pointer;
-
   font-size: 21px;
-  line-height: 1;
+  line-height: 28px;
   padding: 0;
 }
 
@@ -724,22 +77,16 @@ img {
 }
 
 /* =========================================================
-   FILTERS
+   JOB FILTERS
 ========================================================= */
 
 .jobs-filter-row {
   display: flex;
   align-items: center;
-
   gap: 10px;
-
   margin-top: 16px;
-
   overflow-x: auto;
-
-  padding:
-    2px 2px 8px;
-
+  padding: 2px 2px 8px;
   scrollbar-width: none;
 }
 
@@ -749,21 +96,14 @@ img {
 
 .jobs-filter {
   flex: 0 0 auto;
-
   border: 1px solid #dedede;
-  border-radius: 999px;
-
-  background: #fff;
-
+  background: #ffffff;
   color: #555;
-
-  cursor: pointer;
-
+  border-radius: 999px;
+  padding: 10px 17px;
   font-family: inherit;
   font-size: 14px;
-
-  padding: 10px 17px;
-
+  cursor: pointer;
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -776,22 +116,22 @@ img {
 }
 
 .jobs-filter.active {
-  border-color: #111;
   background: #111;
+  border-color: #111;
   color: #fff;
 }
+
+/* =========================================================
+   RESULTS HEADER
+========================================================= */
 
 .jobs-results-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 16px;
-
-  margin: 10px 0 18px;
-
+  margin: 12px 0 18px;
   color: #777;
-
   font-size: 14px;
 }
 
@@ -803,20 +143,36 @@ img {
 .jobs-clear-filters {
   border: 0;
   background: transparent;
-
+  padding: 0;
   color: #777;
-
-  cursor: pointer;
-
   font-family: inherit;
   font-size: 14px;
-
-  padding: 0;
+  cursor: pointer;
 }
 
 .jobs-clear-filters:hover {
   color: #111;
   text-decoration: underline;
+}
+
+/* =========================================================
+   JOB CARD
+========================================================= */
+
+.job-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.job-details {
+  margin-top: 18px;
+}
+
+.job-owner-note {
+  margin-top: 12px;
 }
 
 .jobs-empty-search {
@@ -828,268 +184,13 @@ img {
 }
 
 /* =========================================================
-   NOTIFICATIONS
+   MOBILE
 ========================================================= */
-
-.notification-person {
-  display: flex;
-  align-items: center;
-
-  gap: 14px;
-
-  color: inherit;
-  text-decoration: none;
-}
-
-.notification-avatar {
-  width: 54px;
-  height: 54px;
-
-  flex-shrink: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  border-radius: 50%;
-
-  background: #111;
-  color: #fff;
-
-  font-weight: 700;
-}
-
-.notification-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.notification-person strong {
-  font-size: 16px;
-}
-
-.notification-person p {
-  margin: 3px 0 0;
-  color: #777;
-}
-
-.notification-job {
-  margin-top: 18px;
-}
-
-.notification-job h2 {
-  margin-top: 8px;
-}
-
-/* =========================================================
-   HOME / GENERAL SECTIONS
-========================================================= */
-
-.hero {
-  width: min(
-    1400px,
-    calc(100% - 48px)
-  );
-
-  margin: 0 auto;
-}
-
-.section {
-  width: min(
-    1200px,
-    calc(100% - 48px)
-  );
-
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.section-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  align-items: flex-end;
-}
-
-.section-heading h2 {
-  margin: 8px 0 0;
-  font-size: 48px;
-  line-height: 1;
-  letter-spacing: -2px;
-}
-
-.section-heading p {
-  max-width: 420px;
-  margin: 0;
-  color: #666;
-  line-height: 1.7;
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 900px) {
-  .navbar {
-    width: calc(100% - 32px);
-    gap: 16px;
-  }
-
-  .nav-links {
-    gap: 16px;
-  }
-
-  .nav-actions {
-    gap: 8px;
-  }
-
-  .account-mini-name {
-    display: none;
-  }
-
-  .section-heading {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .section-heading h2 {
-    font-size: 40px;
-  }
-}
 
 @media (max-width: 700px) {
-  .navbar {
-    width: calc(100% - 24px);
-
-    padding: 14px 0;
-
-    align-items: flex-start;
-
-    flex-wrap: wrap;
-  }
-
-  .navbar .logo {
-    flex: 0 0 auto;
-  }
-
-  /*
-   * Na telefonie menu nie znika.
-   * Zamiast tego jest przewijane
-   * poziomo, dzięki czemu:
-   * - Moje konto
-   * - Dodaj zlecenie
-   * - Znajdź zlecenie
-   * - Powiadomienia
-   * pozostają dostępne.
-   */
-
-  .nav-links {
-    order: 3;
-
-    width: 100%;
-
-    justify-content: flex-start;
-
-    overflow-x: auto;
-
-    gap: 18px;
-
-    padding:
-      4px 0 8px;
-
-    scrollbar-width: none;
-  }
-
-  .nav-links::-webkit-scrollbar {
-    display: none;
-  }
-
-  .nav-links a {
-    flex: 0 0 auto;
-    font-size: 13px;
-  }
-
-  .nav-actions {
-    margin-left: auto;
-  }
-
-  .nav-actions .btn {
-    display: none;
-  }
-
-  .account-mini-avatar {
-    width: 38px;
-    height: 38px;
-  }
-
-  .app-page {
-    width: calc(100% - 24px);
-    padding-top: 26px;
-    padding-bottom: 50px;
-  }
-
-  .app-page-header {
-    margin-bottom: 24px;
-  }
-
-  .app-page-header h1 {
-    font-size: 42px;
-    letter-spacing: -1.8px;
-  }
-
-  .app-page-header p {
-    font-size: 14px;
-  }
-
-  .auth-card {
-    margin: 32px auto;
-    padding: 26px;
-  }
-
-  .project-form,
-  .account-card {
-    padding: 22px;
-    border-radius: 16px;
-  }
-
-  .profile-preview {
-    align-items: flex-start;
-  }
-
-  .profile-avatar {
-    width: 72px;
-    height: 72px;
-  }
-
-  .profile-avatar-placeholder {
-    font-size: 24px;
-  }
-
-  .job-card {
-    padding: 20px;
-    border-radius: 16px;
-  }
-
-  .job-card h2 {
-    font-size: 22px;
-  }
-
-  .job-actions {
-    align-items: stretch;
-  }
-
-  .job-actions .btn {
-    flex: 1 1 auto;
-  }
-
-  /* SEARCH */
-
   .jobs-search {
-    margin:
-      26px 0 24px;
+    margin-top: 26px;
+    margin-bottom: 24px;
   }
 
   .jobs-search-box {
@@ -1109,79 +210,18 @@ img {
   }
 
   .jobs-filter-row {
-    gap: 8px;
     margin-top: 12px;
+    gap: 8px;
     padding-bottom: 6px;
   }
 
   .jobs-filter {
-    font-size: 13px;
     padding: 9px 14px;
+    font-size: 13px;
   }
 
   .jobs-results-header {
     margin-top: 8px;
     font-size: 13px;
-  }
-
-  .job-details .btn {
-    width: 100%;
-    margin-left: 0 !important;
-    margin-right: 0;
-  }
-
-  .notification-person {
-    gap: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .navbar {
-    width: calc(100% - 18px);
-  }
-
-  .logo {
-    font-size: 21px;
-  }
-
-  .app-page {
-    width: calc(100% - 18px);
-  }
-
-  .app-page-header h1 {
-    font-size: 36px;
-  }
-
-  .auth-card {
-    width: calc(100% - 20px);
-    padding: 22px;
-    border-radius: 18px;
-  }
-
-  .auth-header h1 {
-    font-size: 34px;
-  }
-
-  .project-form,
-  .account-card {
-    padding: 18px;
-  }
-
-  .job-card {
-    padding: 18px;
-  }
-
-  .jobs-results-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .profile-preview {
-    flex-direction: column;
-  }
-
-  .notification-avatar {
-    width: 48px;
-    height: 48px;
   }
 }
