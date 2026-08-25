@@ -16,46 +16,63 @@ function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasNotifications, setHasNotifications] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
 
-    async function getSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    const loadSession = async () => {
+      try {
+        const {
+          data: { session: currentSession },
+        } = await supabase.auth.getSession();
 
-      if (mounted) {
-        setSession(session);
+        if (!mounted) return;
+
+        setSession(currentSession);
         setLoading(false);
-        checkNotifications(session);
-        checkNotifications(session);
-      }
-    }
 
-    getSession();
+        await checkNotifications(currentSession);
+      } catch (error) {
+        console.error("SESSION ERROR:", error);
+
+        if (mounted) {
+          setSession(null);
+          setLoading(false);
+          setHasNotifications(false);
+        }
+      }
+    };
+
+    loadSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
-    );
+    } = supabase.auth.onAuthStateChange(async (_event, currentSession) => {
+      if (!mounted) return;
 
-    const interval = setInterval(() => {
+      setSession(currentSession);
+      setLoading(false);
+
+      await checkNotifications(currentSession);
+    });
+
+    const interval = setInterval(async () => {
+      if (!mounted) return;
+
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+
       if (mounted) {
-        supabase.auth.getSession().then(({ data }) => {
-          checkNotifications(data?.session || null);
-        });
+        await checkNotifications(currentSession);
       }
     }, 10000);
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
       clearInterval(interval);
     };
   }, []);
@@ -75,7 +92,12 @@ function App() {
         .eq("user_id", userId);
 
       if (jobsError) {
-        console.error("HOME NOTIFICATION JOBS ERROR:", jobsError);
+        console.error(
+          "HOME NOTIFICATION JOBS ERROR:",
+          jobsError
+        );
+
+        setHasNotifications(false);
         return;
       }
 
@@ -86,25 +108,55 @@ function App() {
         return;
       }
 
-      const { data: applications, error: applicationsError } = await supabase
+      const {
+        data: applications,
+        error: applicationsError,
+      } = await supabase
         .from("job_applications")
         .select("id, job_id, applicant_id, created_at")
         .in("job_id", jobIds)
-        .order("created_at", { ascending: false });
+        .order("created_at", {
+          ascending: false,
+        });
 
       if (applicationsError) {
-        console.error("HOME NOTIFICATION APPLICATIONS ERROR:", applicationsError);
+        console.error(
+          "HOME NOTIFICATION APPLICATIONS ERROR:",
+          applicationsError
+        );
+
+        setHasNotifications(false);
         return;
       }
 
       const readKey = `ideahire_read_notifications_${userId}`;
-      const readIds = JSON.parse(localStorage.getItem(readKey) || "[]");
 
-      setHasNotifications(
-        (applications || []).some((application) => !readIds.includes(application.id))
+      let readIds = [];
+
+      try {
+        readIds = JSON.parse(
+          localStorage.getItem(readKey) || "[]"
+        );
+
+        if (!Array.isArray(readIds)) {
+          readIds = [];
+        }
+      } catch {
+        readIds = [];
+      }
+
+      const unreadExists = (applications || []).some(
+        (application) => !readIds.includes(application.id)
       );
+
+      setHasNotifications(unreadExists);
     } catch (error) {
-      console.error("HOME NOTIFICATION CHECK ERROR:", error);
+      console.error(
+        "HOME NOTIFICATION CHECK ERROR:",
+        error
+      );
+
+      setHasNotifications(false);
     }
   }
 
@@ -115,6 +167,9 @@ function App() {
       alert(`Nie udało się wylogować: ${error.message}`);
       return;
     }
+
+    setSession(null);
+    setHasNotifications(false);
 
     navigate("/");
   }
@@ -139,7 +194,9 @@ function App() {
 
         <div className="nav-actions">
           {loading ? (
-            <span>Ładowanie...</span>
+            <span className="auth-loading">
+              Ładowanie...
+            </span>
           ) : session ? (
             <>
               <span className="auth-user">
@@ -151,6 +208,7 @@ function App() {
                 to="/notifications"
               >
                 Powiadomienia
+
                 {hasNotifications && (
                   <span className="home-notifications-dot" />
                 )}
@@ -192,6 +250,8 @@ function App() {
       </header>
 
       <main>
+        {/* HERO */}
+
         <section className="hero">
           <div className="hero-content">
             <div className="eyebrow">
@@ -208,8 +268,9 @@ function App() {
             </h1>
 
             <p className="hero-text">
-              IdeaHire łączy osoby szukające wykonawców z ludźmi,
-              którzy potrafią zamienić pomysł w gotowy projekt.
+              IdeaHire łączy osoby szukające wykonawców
+              z ludźmi, którzy potrafią zamienić pomysł
+              w gotowy projekt.
             </p>
 
             <div className="hero-actions">
@@ -260,8 +321,8 @@ function App() {
               </h3>
 
               <p>
-                Szukam osoby, która stworzy prostą i szybką
-                stronę dla nowej marki.
+                Szukam osoby, która stworzy prostą
+                i szybką stronę dla nowej marki.
               </p>
 
               <div className="card-meta">
@@ -292,13 +353,17 @@ function App() {
           </div>
         </section>
 
+        {/* KATEGORIE */}
+
         <section
           className="categories section"
           id="categories"
         >
           <div className="section-heading">
             <div>
-              <span className="section-label">Kategorie</span>
+              <span className="section-label">
+                Kategorie
+              </span>
 
               <h2>
                 Znajdź dokładnie to,
@@ -319,20 +384,31 @@ function App() {
                 className="category-card"
                 key={category}
                 type="button"
+                onClick={() => {
+                  navigate(
+                    `/jobs?category=${encodeURIComponent(
+                      category
+                    )}`
+                  );
+                }}
               >
                 <span className="category-number">
-                  0{index + 1}
+                  {String(index + 1).padStart(2, "0")}
                 </span>
 
                 <span className="category-name">
                   {category}
                 </span>
 
-                <span className="category-arrow">↗</span>
+                <span className="category-arrow">
+                  ↗
+                </span>
               </button>
             ))}
           </div>
         </section>
+
+        {/* JAK TO DZIAŁA */}
 
         <section
           className="how section"
@@ -386,6 +462,8 @@ function App() {
           </div>
         </section>
 
+        {/* DLA UŻYTKOWNIKÓW */}
+
         <section
           className="split-section section"
           id="for-users"
@@ -398,8 +476,9 @@ function App() {
             <h2>Masz coś do zrobienia?</h2>
 
             <p>
-              Znajdź osobę, która ma odpowiednie umiejętności
-              i może zająć się Twoim projektem.
+              Znajdź osobę, która ma odpowiednie
+              umiejętności i może zająć się Twoim
+              projektem.
             </p>
 
             <Link
@@ -418,8 +497,9 @@ function App() {
             <h2>Masz coś do zaoferowania?</h2>
 
             <p>
-              Pokaż swoje umiejętności, znajdź interesujące
-              projekty i rozwijaj swoje portfolio.
+              Pokaż swoje umiejętności, znajdź
+              interesujące projekty i rozwijaj swoje
+              portfolio.
             </p>
 
             <Link
@@ -431,8 +511,12 @@ function App() {
           </div>
         </section>
 
+        {/* CTA */}
+
         <section className="final-cta">
-          <span className="section-label">IdeaHire</span>
+          <span className="section-label">
+            IdeaHire
+          </span>
 
           <h2>
             Twój następny projekt
@@ -451,6 +535,8 @@ function App() {
         </section>
       </main>
 
+      {/* FOOTER */}
+
       <footer className="footer">
         <div>
           <Link className="logo" to="/">
@@ -461,9 +547,17 @@ function App() {
         </div>
 
         <div className="footer-links">
-          <a href="#how-it-works">Jak to działa</a>
-          <a href="#categories">Kategorie</a>
-          <a href="#for-users">Dla Ciebie</a>
+          <a href="#how-it-works">
+            Jak to działa
+          </a>
+
+          <a href="#categories">
+            Kategorie
+          </a>
+
+          <a href="#for-users">
+            Dla Ciebie
+          </a>
         </div>
 
         <span>© 2026 IdeaHire</span>
