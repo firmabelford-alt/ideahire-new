@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import "./App.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,6 +15,7 @@ const categories = [
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasNotifications, setHasNotifications] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +29,8 @@ function App() {
       if (mounted) {
         setSession(session);
         setLoading(false);
+        checkNotifications(session);
+        checkNotifications(session);
       }
     }
 
@@ -43,11 +45,68 @@ function App() {
       }
     );
 
+    const interval = setInterval(() => {
+      if (mounted) {
+        supabase.auth.getSession().then(({ data }) => {
+          checkNotifications(data?.session || null);
+        });
+      }
+    }, 10000);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearInterval(interval);
     };
   }, []);
+
+  async function checkNotifications(currentSession) {
+    const userId = currentSession?.user?.id;
+
+    if (!userId) {
+      setHasNotifications(false);
+      return;
+    }
+
+    try {
+      const { data: myJobs, error: jobsError } = await supabase
+        .from("jobs")
+        .select("id")
+        .eq("user_id", userId);
+
+      if (jobsError) {
+        console.error("HOME NOTIFICATION JOBS ERROR:", jobsError);
+        return;
+      }
+
+      const jobIds = (myJobs || []).map((job) => job.id);
+
+      if (jobIds.length === 0) {
+        setHasNotifications(false);
+        return;
+      }
+
+      const { data: applications, error: applicationsError } = await supabase
+        .from("job_applications")
+        .select("id, job_id, applicant_id, created_at")
+        .in("job_id", jobIds)
+        .order("created_at", { ascending: false });
+
+      if (applicationsError) {
+        console.error("HOME NOTIFICATION APPLICATIONS ERROR:", applicationsError);
+        return;
+      }
+
+      const readKey = `ideahire_read_notifications_${userId}`;
+      const readIds = JSON.parse(localStorage.getItem(readKey) || "[]");
+
+      setHasNotifications(
+        (applications || []).some((application) => !readIds.includes(application.id))
+      );
+    } catch (error) {
+      console.error("HOME NOTIFICATION CHECK ERROR:", error);
+    }
+  }
 
   async function handleLogout() {
     const { error } = await supabase.auth.signOut();
@@ -86,6 +145,16 @@ function App() {
               <span className="auth-user">
                 Cześć, {userName}
               </span>
+
+              <Link
+                className="home-notifications-link btn btn-ghost"
+                to="/notifications"
+              >
+                Powiadomienia
+                {hasNotifications && (
+                  <span className="home-notifications-dot" />
+                )}
+              </Link>
 
               <Link
                 className="btn btn-ghost"
