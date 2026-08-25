@@ -35,20 +35,14 @@ function AuthProvider({ children }) {
 
     async function initializeAuth() {
       try {
-        const {
-          data,
-          error,
-        } = await supabase.auth.getSession();
+        const { data, error } =
+          await supabase.auth.getSession();
 
         if (error) {
-          console.error("AUTH ERROR:", error);
-
-          if (!mounted) return;
-
-          setSession(null);
-          setUser(null);
-          setLoading(false);
-          return;
+          console.error(
+            "AUTH ERROR:",
+            error
+          );
         }
 
         if (!mounted) return;
@@ -62,7 +56,10 @@ function AuthProvider({ children }) {
         );
         setLoading(false);
       } catch (error) {
-        console.error("AUTH ERROR:", error);
+        console.error(
+          "AUTH ERROR:",
+          error
+        );
 
         if (!mounted) return;
 
@@ -81,10 +78,14 @@ function AuthProvider({ children }) {
         (_event, newSession) => {
           if (!mounted) return;
 
-          setSession(newSession || null);
+          setSession(
+            newSession || null
+          );
+
           setUser(
             newSession?.user || null
           );
+
           setLoading(false);
         }
       );
@@ -136,13 +137,16 @@ function LoadingScreen() {
    PROTECTED ROUTE
 ========================================================= */
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({
+  children,
+}) {
   const {
     loading,
     isLoggedIn,
   } = useAuth();
 
-  const location = useLocation();
+  const location =
+    useLocation();
 
   if (loading) {
     return <LoadingScreen />;
@@ -169,7 +173,9 @@ function ProtectedRoute({ children }) {
    PUBLIC ONLY
 ========================================================= */
 
-function PublicOnlyRoute({ children }) {
+function PublicOnlyRoute({
+  children,
+}) {
   const {
     loading,
     isLoggedIn,
@@ -205,15 +211,20 @@ const JOB_CATEGORIES = [
 ];
 
 /* =========================================================
-   ACCOUNT NAVBAR
+   NAVBAR
 ========================================================= */
 
 function AccountNavbar() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const navigate =
+    useNavigate();
 
-  const [hasNotifications, setHasNotifications] =
-    useState(false);
+  const { user } =
+    useAuth();
+
+  const [
+    hasNotifications,
+    setHasNotifications,
+  ] = useState(false);
 
   const userName =
     user?.user_metadata?.name ||
@@ -221,8 +232,8 @@ function AccountNavbar() {
     "Użytkownik";
 
   const avatarUrl =
-    user?.user_metadata?.avatar_url ||
-    "";
+    user?.user_metadata
+      ?.avatar_url || "";
 
   const initial =
     userName
@@ -233,20 +244,16 @@ function AccountNavbar() {
     if (!user?.id) return;
 
     try {
-      /*
-       * Nie używamy jobs.status.
-       * Sprawdzamy wyłącznie zgłoszenia
-       * do zleceń należących do aktualnego
-       * użytkownika.
-       */
-
       const {
         data: myJobs,
         error: jobsError,
       } = await supabase
         .from("jobs")
         .select("id")
-        .eq("user_id", user.id);
+        .eq(
+          "user_id",
+          user.id
+        );
 
       if (jobsError) {
         console.error(
@@ -262,8 +269,13 @@ function AccountNavbar() {
           (job) => job.id
         );
 
-      if (jobIds.length === 0) {
-        setHasNotifications(false);
+      if (
+        jobIds.length === 0
+      ) {
+        setHasNotifications(
+          false
+        );
+
         return;
       }
 
@@ -272,14 +284,22 @@ function AccountNavbar() {
         error:
           applicationsError,
       } = await supabase
-        .from("job_applications")
+        .from(
+          "job_applications"
+        )
         .select(
           "id, job_id, applicant_id, created_at"
         )
-        .in("job_id", jobIds)
-        .order("created_at", {
-          ascending: false,
-        });
+        .in(
+          "job_id",
+          jobIds
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (applicationsError) {
         console.error(
@@ -290,13 +310,13 @@ function AccountNavbar() {
         return;
       }
 
-      const unreadKey =
+      const readKey =
         `ideahire_read_notifications_${user.id}`;
 
       const readIds =
         JSON.parse(
           localStorage.getItem(
-            unreadKey
+            readKey
           ) || "[]"
         );
 
@@ -308,7 +328,9 @@ function AccountNavbar() {
             )
         );
 
-      setHasNotifications(unread);
+      setHasNotifications(
+        unread
+      );
     } catch (error) {
       console.error(
         "NOTIFICATION CHECK ERROR:",
@@ -327,7 +349,9 @@ function AccountNavbar() {
       );
 
     return () =>
-      clearInterval(interval);
+      clearInterval(
+        interval
+      );
   }, [user?.id]);
 
   async function handleLogout() {
@@ -378,33 +402,14 @@ function AccountNavbar() {
           Znajdź zlecenie
         </Link>
 
-        {/* =================================================
-            POWIADOMIENIA - ZAWSZE W NAVBARZE
-        ================================================= */}
-
         <Link
           to="/notifications"
-          style={{
-            position: "relative",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "7px",
-          }}
+          className="notifications-nav-link"
         >
           Powiadomienia
 
           {hasNotifications && (
-            <span
-              style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background:
-                  "#111",
-                display:
-                  "inline-block",
-              }}
-            />
+            <span className="notification-dot" />
           )}
         </Link>
       </nav>
@@ -433,7 +438,9 @@ function AccountNavbar() {
         <button
           className="btn btn-dark"
           type="button"
-          onClick={handleLogout}
+          onClick={
+            handleLogout
+          }
         >
           Wyloguj się
         </button>
@@ -447,14 +454,16 @@ function AccountNavbar() {
 ========================================================= */
 
 function Login() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const {
     isLoggedIn,
     loading: authLoading,
   } = useAuth();
 
-  const location = useLocation();
+  const location =
+    useLocation();
 
   const [mode, setMode] =
     useState("login");
@@ -483,7 +492,8 @@ function Login() {
         location.state?.from;
 
       if (
-        typeof from === "string" &&
+        typeof from ===
+          "string" &&
         from.startsWith("/")
       ) {
         navigate(from, {
@@ -511,7 +521,9 @@ function Login() {
     setSuccess(false);
   }
 
-  async function handleLogin(event) {
+  async function handleLogin(
+    event
+  ) {
     event.preventDefault();
 
     if (loading) return;
@@ -537,6 +549,7 @@ function Login() {
         setMessage(
           `Nie udało się zalogować: ${error.message}`
         );
+
         return;
       }
 
@@ -547,6 +560,7 @@ function Login() {
         setMessage(
           "Logowanie nie utworzyło aktywnej sesji."
         );
+
         return;
       }
     } catch (error) {
@@ -561,7 +575,9 @@ function Login() {
     }
   }
 
-  async function handlePasswordReset(event) {
+  async function handlePasswordReset(
+    event
+  ) {
     event.preventDefault();
 
     setMessage("");
@@ -574,6 +590,7 @@ function Login() {
       setMessage(
         "Wpisz adres e-mail."
       );
+
       return;
     }
 
@@ -593,6 +610,7 @@ function Login() {
         setMessage(
           `Nie udało się wysłać wiadomości: ${error.message}`
         );
+
         return;
       }
 
@@ -641,9 +659,11 @@ function Login() {
             </h1>
 
             <p>
-              Podaj adres e-mail przypisany
-              do Twojego konta. Wyślemy Ci
-              link do ustawienia nowego hasła.
+              Podaj adres e-mail
+              przypisany do Twojego
+              konta. Wyślemy Ci link
+              do ustawienia nowego
+              hasła.
             </p>
           </div>
 
@@ -698,10 +718,10 @@ function Login() {
 
             <button
               type="button"
+              className="auth-link-button"
               onClick={
                 switchToLogin
               }
-              className="auth-link-button"
             >
               Wróć do logowania
             </button>
@@ -731,7 +751,8 @@ function Login() {
           </h1>
 
           <p>
-            Zaloguj się do swojego konta IdeaHire.
+            Zaloguj się do swojego
+            konta IdeaHire.
           </p>
         </div>
 
@@ -773,21 +794,13 @@ function Login() {
             />
           </label>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent:
-                "flex-end",
-              marginTop: "-8px",
-              marginBottom: "4px",
-            }}
-          >
+          <div className="forgot-password-row">
             <button
               type="button"
+              className="auth-link-button"
               onClick={
                 switchToReset
               }
-              className="auth-link-button"
             >
               Nie pamiętasz hasła?
             </button>
@@ -827,7 +840,8 @@ function Login() {
 ========================================================= */
 
 function ResetPassword() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   const [password, setPassword] =
     useState("");
@@ -878,6 +892,7 @@ function ResetPassword() {
             );
 
             setLoading(false);
+
             return;
           }
 
@@ -909,6 +924,7 @@ function ResetPassword() {
           );
 
           setLoading(false);
+
           return;
         }
 
@@ -979,8 +995,9 @@ function ResetPassword() {
 
     if (!recoveryReady) {
       setMessage(
-        "Sesja resetowania hasła nie jest aktywna."
+        "Sesja resetowania hasła nie jest aktywna. Otwórz ponownie link z wiadomości e-mail."
       );
+
       return;
     }
 
@@ -988,6 +1005,7 @@ function ResetPassword() {
       setMessage(
         "Hasło musi mieć co najmniej 6 znaków."
       );
+
       return;
     }
 
@@ -997,6 +1015,7 @@ function ResetPassword() {
       setMessage(
         "Hasła nie są takie same."
       );
+
       return;
     }
 
@@ -1004,14 +1023,17 @@ function ResetPassword() {
 
     try {
       const { error } =
-        await supabase.auth.updateUser({
-          password,
-        });
+        await supabase.auth.updateUser(
+          {
+            password,
+          }
+        );
 
       if (error) {
         setMessage(
           `Nie udało się zmienić hasła: ${error.message}`
         );
+
         return;
       }
 
@@ -1067,7 +1089,8 @@ function ResetPassword() {
           </h1>
 
           <p>
-            Wpisz nowe hasło do swojego konta.
+            Wpisz nowe hasło do
+            swojego konta.
           </p>
         </div>
 
@@ -1079,12 +1102,7 @@ function ResetPassword() {
               </p>
             )}
 
-            <div
-              style={{
-                marginTop: "20px",
-                textAlign: "center",
-              }}
-            >
+            <div className="reset-back-button">
               <Link
                 className="btn btn-dark btn-large"
                 to="/login"
@@ -1197,7 +1215,9 @@ function Register() {
   const [message, setMessage] =
     useState("");
 
-  async function handleRegister(event) {
+  async function handleRegister(
+    event
+  ) {
     event.preventDefault();
 
     if (loading) return;
@@ -1226,6 +1246,7 @@ function Register() {
         setMessage(
           `Nie udało się utworzyć konta: ${error.message}`
         );
+
         return;
       }
 
@@ -1233,6 +1254,7 @@ function Register() {
         setMessage(
           "Supabase nie zwrócił użytkownika."
         );
+
         return;
       }
 
@@ -1280,7 +1302,8 @@ function Register() {
           </h1>
 
           <p>
-            Załóż konto i zacznij korzystać z IdeaHire.
+            Załóż konto i zacznij
+            korzystać z IdeaHire.
           </p>
         </div>
 
@@ -1399,6 +1422,19 @@ async function resizeAndConvertImage(
         const sourceHeight =
           image.naturalHeight;
 
+        if (
+          !sourceWidth ||
+          !sourceHeight
+        ) {
+          reject(
+            new Error(
+              "Zdjęcie ma nieprawidłowe wymiary."
+            )
+          );
+
+          return;
+        }
+
         const sourceSize =
           Math.min(
             sourceWidth,
@@ -1434,6 +1470,7 @@ async function resizeAndConvertImage(
               "Przeglądarka nie obsługuje Canvas."
             )
           );
+
           return;
         }
 
@@ -1463,6 +1500,7 @@ async function resizeAndConvertImage(
                   "Nie udało się skonwertować zdjęcia."
                 )
               );
+
               return;
             }
 
@@ -1567,10 +1605,16 @@ function Account() {
         .select(
           "id, user_id, title, description, category, budget, created_at"
         )
-        .eq("user_id", user.id)
-        .order("created_at", {
-          ascending: false,
-        });
+        .eq(
+          "user_id",
+          user.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        );
 
       if (error) {
         console.error(
@@ -1578,7 +1622,9 @@ function Account() {
           error
         );
       } else {
-        setMyJobs(data || []);
+        setMyJobs(
+          data || []
+        );
       }
 
       setJobsLoading(false);
@@ -1620,6 +1666,7 @@ function Account() {
       );
 
       event.target.value = "";
+
       return;
     }
 
@@ -1632,6 +1679,7 @@ function Account() {
       );
 
       event.target.value = "";
+
       return;
     }
 
@@ -1647,8 +1695,7 @@ function Account() {
         `${user.id}/avatar-${Date.now()}.jpg`;
 
       const {
-        error:
-          uploadError,
+        error: uploadError,
       } =
         await supabase.storage
           .from("avatars")
@@ -1668,6 +1715,7 @@ function Account() {
         setMessage(
           `Nie udało się przesłać zdjęcia: ${uploadError.message}`
         );
+
         return;
       }
 
@@ -1688,12 +1736,12 @@ function Account() {
         setMessage(
           "Nie udało się pobrać adresu zdjęcia."
         );
+
         return;
       }
 
       const {
-        data:
-          updatedUser,
+        data: updatedUser,
         error:
           metadataError,
       } =
@@ -1710,6 +1758,7 @@ function Account() {
         setMessage(
           `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
         );
+
         return;
       }
 
@@ -1751,6 +1800,7 @@ function Account() {
       setMessage(
         "Imię / nazwa nie może być puste."
       );
+
       return;
     }
 
@@ -1762,37 +1812,45 @@ function Account() {
         data,
         error,
       } =
-        await supabase.auth.updateUser({
-          data: {
-            name:
-              cleanName,
-            avatar_url:
-              avatarUrl || null,
-            about:
-              cleanAbout || null,
-          },
-        });
+        await supabase.auth.updateUser(
+          {
+            data: {
+              name:
+                cleanName,
+              avatar_url:
+                avatarUrl ||
+                null,
+              about:
+                cleanAbout ||
+                null,
+            },
+          }
+        );
 
       if (error) {
         setMessage(
           `Nie udało się zapisać profilu: ${error.message}`
         );
+
         return;
       }
 
       setName(
         data.user.user_metadata
-          ?.name || cleanName
+          ?.name ||
+          cleanName
       );
 
       setAvatarUrl(
         data.user.user_metadata
-          ?.avatar_url || ""
+          ?.avatar_url ||
+          ""
       );
 
       setAbout(
         data.user.user_metadata
-          ?.about || ""
+          ?.about ||
+          ""
       );
 
       setMessage(
@@ -1827,20 +1885,25 @@ function Account() {
         .from("jobs")
         .delete()
         .eq("id", jobId)
-        .eq("user_id", user.id);
+        .eq(
+          "user_id",
+          user.id
+        );
 
     if (error) {
       alert(
         `Nie udało się usunąć zlecenia: ${error.message}`
       );
+
       return;
     }
 
-    setMyJobs((current) =>
-      current.filter(
-        (job) =>
-          job.id !== jobId
-      )
+    setMyJobs(
+      (current) =>
+        current.filter(
+          (job) =>
+            job.id !== jobId
+        )
     );
   }
 
@@ -1869,7 +1932,8 @@ function Account() {
           </h1>
 
           <p>
-            Zarządzaj swoim profilem IdeaHire.
+            Zarządzaj swoim
+            profilem IdeaHire.
           </p>
         </div>
 
@@ -1921,8 +1985,10 @@ function Account() {
 
               <small>
                 JPG, PNG lub WEBP.
-                Zdjęcie zostanie automatycznie
-                przycięte do 400 × 400 px.
+                Zdjęcie zostanie
+                automatycznie
+                przycięte do
+                400 × 400 px.
               </small>
             </label>
 
@@ -1957,7 +2023,8 @@ function Account() {
               />
 
               <small>
-                Opis będzie widoczny na Twoim profilu.
+                Opis będzie widoczny
+                na Twoim profilu.
               </small>
             </label>
 
@@ -1994,31 +2061,25 @@ function Account() {
           </form>
         </section>
 
-        {/* =================================================
-            MOJE ZLECENIA
-        ================================================= */}
-
-        <section
-          className="account-card"
-          style={{
-            marginTop: "30px",
-          }}
-        >
+        <section className="account-card my-jobs-section">
           <span className="section-label">
             Moje zlecenia
           </span>
 
           <h2>
-            Zlecenia, które opublikowałeś
+            Zlecenia, które
+            opublikowałeś
           </h2>
 
           {jobsLoading ? (
             <p>
               Ładowanie zleceń...
             </p>
-          ) : myJobs.length === 0 ? (
+          ) : myJobs.length ===
+            0 ? (
             <p>
-              Nie masz jeszcze żadnych zleceń.
+              Nie masz jeszcze
+              żadnych zleceń.
             </p>
           ) : (
             <div className="jobs-list">
@@ -2040,7 +2101,8 @@ function Account() {
                       Budżet:{" "}
                       <strong>
                         {Number(
-                          job.budget || 0
+                          job.budget ||
+                            0
                         ).toLocaleString(
                           "pl-PL"
                         )}{" "}
@@ -2048,16 +2110,7 @@ function Account() {
                       </strong>
                     </p>
 
-                    <div
-                      style={{
-                        display:
-                          "flex",
-                        gap:
-                          "10px",
-                        flexWrap:
-                          "wrap",
-                      }}
-                    >
+                    <div className="job-actions">
                       <Link
                         className="btn btn-dark"
                         to={`/edit-job/${job.id}`}
@@ -2102,8 +2155,10 @@ function FindTalent() {
   const [title, setTitle] =
     useState("");
 
-  const [description, setDescription] =
-    useState("");
+  const [
+    description,
+    setDescription,
+  ] = useState("");
 
   const [category, setCategory] =
     useState(
@@ -2154,6 +2209,7 @@ function FindTalent() {
       setMessage(
         "Wpisz nazwę zlecenia."
       );
+
       return;
     }
 
@@ -2161,6 +2217,7 @@ function FindTalent() {
       setMessage(
         "Opisz krótko swoje zlecenie."
       );
+
       return;
     }
 
@@ -2174,6 +2231,7 @@ function FindTalent() {
       setMessage(
         "Budżet musi być większy od 0."
       );
+
       return;
     }
 
@@ -2181,6 +2239,7 @@ function FindTalent() {
       setMessage(
         "Twoja sesja wygasła."
       );
+
       return;
     }
 
@@ -2189,11 +2248,7 @@ function FindTalent() {
     try {
       /*
        * WAŻNE:
-       * tutaj celowo NIE MA status.
-       *
-       * Dzięki temu router działa z aktualną
-       * strukturą tabeli jobs, w której
-       * jobs.status nie istnieje.
+       * NIE DODAJEMY jobs.status.
        */
 
       const {
@@ -2217,6 +2272,7 @@ function FindTalent() {
         setMessage(
           `Nie udało się opublikować zlecenia: ${error.message}`
         );
+
         return;
       }
 
@@ -2263,8 +2319,9 @@ function FindTalent() {
           </h1>
 
           <p>
-            Opisz projekt, wybierz kategorię
-            i ustaw prosty budżet.
+            Opisz projekt, wybierz
+            kategorię i ustaw
+            prosty budżet.
           </p>
         </div>
 
@@ -2346,9 +2403,10 @@ function FindTalent() {
             />
 
             <small>
-              Cena jest ustalana przy
-              publikacji zlecenia i nie
-              może być później zmieniana.
+              Cena jest ustalana
+              przy publikacji
+              zlecenia i nie może
+              być później zmieniana.
             </small>
           </label>
 
@@ -2399,8 +2457,10 @@ function EditJob() {
   const [title, setTitle] =
     useState("");
 
-  const [description, setDescription] =
-    useState("");
+  const [
+    description,
+    setDescription,
+  ] = useState("");
 
   const [category, setCategory] =
     useState(
@@ -2417,7 +2477,8 @@ function EditJob() {
     useState("");
 
   useEffect(() => {
-    if (!user?.id || !id) return;
+    if (!user?.id || !id)
+      return;
 
     async function loadJob() {
       const {
@@ -2430,19 +2491,26 @@ function EditJob() {
             "id, user_id, title, description, category, budget, created_at"
           )
           .eq("id", id)
-          .eq("user_id", user.id)
+          .eq(
+            "user_id",
+            user.id
+          )
           .single();
 
       if (error) {
         setMessage(
           `Nie udało się pobrać zlecenia: ${error.message}`
         );
+
         setLoading(false);
+
         return;
       }
 
       setJob(data);
-      setTitle(data.title || "");
+      setTitle(
+        data.title || ""
+      );
       setDescription(
         data.description || ""
       );
@@ -2457,21 +2525,25 @@ function EditJob() {
     loadJob();
   }, [id, user?.id]);
 
-  async function handleSave(event) {
+  async function handleSave(
+    event
+  ) {
     event.preventDefault();
 
-    if (!job || !user?.id) return;
+    if (
+      !job ||
+      !user?.id
+    ) {
+      return;
+    }
 
     setSaving(true);
     setMessage("");
 
     try {
       /*
-       * BUDŻET CELOWO NIE JEST TUTAJ
+       * BUDŻET NIE JEST
        * AKTUALIZOWANY.
-       *
-       * Cena jest stała od momentu
-       * utworzenia zlecenia.
        */
 
       const {
@@ -2486,19 +2558,29 @@ function EditJob() {
               description.trim(),
             category,
           })
-          .eq("id", job.id)
-          .eq("user_id", user.id);
+          .eq(
+            "id",
+            job.id
+          )
+          .eq(
+            "user_id",
+            user.id
+          );
 
       if (error) {
         setMessage(
           `Nie udało się zapisać zmian: ${error.message}`
         );
+
         return;
       }
 
-      navigate("/account", {
-        replace: true,
-      });
+      navigate(
+        "/account",
+        {
+          replace: true,
+        }
+      );
     } catch (error) {
       setMessage(
         `Nie udało się zapisać zmian: ${
@@ -2545,7 +2627,8 @@ function EditJob() {
           </h1>
 
           <p>
-            Cena zlecenia pozostaje bez zmian.
+            Cena zlecenia
+            pozostaje bez zmian.
           </p>
         </div>
 
@@ -2609,18 +2692,7 @@ function EditJob() {
             />
           </label>
 
-          <div
-            style={{
-              padding:
-                "14px 16px",
-              borderRadius:
-                "12px",
-              background:
-                "#f5f5f5",
-              fontSize:
-                "14px",
-            }}
-          >
+          <div className="fixed-budget-note">
             <strong>
               Budżet:
             </strong>{" "}
@@ -2634,8 +2706,9 @@ function EditJob() {
             <br />
 
             <small>
-              Cena została ustalona
-              przy publikacji i nie
+              Cena została
+              ustalona przy
+              publikacji i nie
               może być edytowana.
             </small>
           </div>
@@ -2706,6 +2779,7 @@ function Profile() {
           setMessage(
             `Nie udało się pobrać profilu: ${profileError.message}`
           );
+
           return;
         }
 
@@ -2724,10 +2798,16 @@ function Profile() {
             .select(
               "id, user_id, title, description, category, budget, created_at"
             )
-            .eq("user_id", id)
-            .order("created_at", {
-              ascending: false,
-            });
+            .eq(
+              "user_id",
+              id
+            )
+            .order(
+              "created_at",
+              {
+                ascending: false,
+              }
+            );
 
         if (jobsError) {
           console.error(
@@ -2819,24 +2899,23 @@ function Profile() {
           </div>
         </section>
 
-        <section
-          className="account-card"
-          style={{
-            marginTop: "30px",
-          }}
-        >
+        <section className="account-card profile-jobs-section">
           <span className="section-label">
             Zlecenia
           </span>
 
           <h2>
-            Zlecenia tego użytkownika
+            Zlecenia tego
+            użytkownika
           </h2>
 
-          {jobs.length === 0 ? (
+          {jobs.length ===
+          0 ? (
             <p>
-              Ten użytkownik nie ma jeszcze
-              opublikowanych zleceń.
+              Ten użytkownik
+              nie ma jeszcze
+              opublikowanych
+              zleceń.
             </p>
           ) : (
             <div className="jobs-list">
@@ -2858,12 +2937,21 @@ function Profile() {
                       Budżet:{" "}
                       <strong>
                         {Number(
-                          job.budget || 0
+                          job.budget ||
+                            0
                         ).toLocaleString(
                           "pl-PL"
                         )}{" "}
                         zł
                       </strong>
+                    </p>
+
+                    <p>
+                      <small>
+                        Cena została
+                        ustalona przy
+                        publikacji.
+                      </small>
                     </p>
                   </article>
                 )
@@ -2896,11 +2984,30 @@ function Jobs() {
   const [openJobId, setOpenJobId] =
     useState(null);
 
-  const [applyingJobId, setApplyingJobId] =
-    useState(null);
+  const [
+    applyingJobId,
+    setApplyingJobId,
+  ] = useState(null);
 
-  const [appliedJobIds, setAppliedJobIds] =
-    useState([]);
+  const [
+    appliedJobIds,
+    setAppliedJobIds,
+  ] = useState([]);
+
+  /* =======================================================
+     NOWE:
+     WYSZUKIWANIE
+  ======================================================= */
+
+  const [search, setSearch] =
+    useState("");
+
+  const [
+    selectedCategory,
+    setSelectedCategory,
+  ] = useState(
+    "Wszystkie"
+  );
 
   async function loadJobs() {
     setLoading(true);
@@ -2908,13 +3015,9 @@ function Jobs() {
 
     try {
       /*
-       * NAJWAŻNIEJSZA POPRAWKA:
-       *
-       * Nie pobieramy:
-       * jobs.status
-       *
-       * ponieważ tej kolumny nie ma
-       * w Twojej bazie.
+       * NIE MA jobs.status.
+       * Pobieramy tylko kolumny,
+       * które faktycznie istnieją.
        */
 
       const {
@@ -2926,9 +3029,12 @@ function Jobs() {
           .select(
             "id, user_id, title, description, category, budget, created_at"
           )
-          .order("created_at", {
-            ascending: false,
-          });
+          .order(
+            "created_at",
+            {
+              ascending: false,
+            }
+          );
 
       if (error) {
         console.error(
@@ -2943,11 +3049,14 @@ function Jobs() {
         return;
       }
 
-      setJobs(data || []);
+      setJobs(
+        data || []
+      );
 
       /*
-       * Sprawdzamy, do których zleceń
-       * aktualny użytkownik już się zgłosił.
+       * Sprawdzamy, do których
+       * zleceń użytkownik już
+       * się zgłosił.
        */
 
       if (user?.id) {
@@ -3001,7 +3110,9 @@ function Jobs() {
     loadJobs();
   }, [user?.id]);
 
-  function formatBudget(value) {
+  function formatBudget(
+    value
+  ) {
     return `${Number(
       value || 0
     ).toLocaleString(
@@ -3009,7 +3120,9 @@ function Jobs() {
     )} zł`;
   }
 
-  function formatDate(value) {
+  function formatDate(
+    value
+  ) {
     if (!value) return "";
 
     return new Date(
@@ -3024,6 +3137,10 @@ function Jobs() {
     );
   }
 
+  /* =======================================================
+     ZGŁOSZENIE DO ZLECENIA
+  ======================================================= */
+
   async function handleApply(
     job
   ) {
@@ -3031,6 +3148,7 @@ function Jobs() {
       alert(
         "Musisz być zalogowany."
       );
+
       return;
     }
 
@@ -3041,6 +3159,7 @@ function Jobs() {
       alert(
         "Nie możesz zgłosić się do własnego zlecenia."
       );
+
       return;
     }
 
@@ -3057,13 +3176,8 @@ function Jobs() {
     );
 
     try {
-      /*
-       * Jedno zgłoszenie na jedno zlecenie.
-       */
-
       const {
-        data:
-          existing,
+        data: existing,
         error:
           existingError,
       } =
@@ -3086,6 +3200,7 @@ function Jobs() {
         setMessage(
           `Nie udało się sprawdzić zgłoszenia: ${existingError.message}`
         );
+
         return;
       }
 
@@ -3096,6 +3211,7 @@ function Jobs() {
             job.id,
           ]
         );
+
         return;
       }
 
@@ -3117,6 +3233,7 @@ function Jobs() {
         setMessage(
           `Nie udało się wysłać zgłoszenia: ${error.message}`
         );
+
         return;
       }
 
@@ -3138,9 +3255,84 @@ function Jobs() {
         }`
       );
     } finally {
-      setApplyingJobId(null);
+      setApplyingJobId(
+        null
+      );
     }
   }
+
+  /* =======================================================
+     WYSZUKIWANIE
+  ======================================================= */
+
+  const normalizedSearch =
+    search
+      .trim()
+      .toLowerCase();
+
+  const filteredJobs =
+    jobs.filter(
+      (job) => {
+        const categoryMatches =
+          selectedCategory ===
+            "Wszystkie" ||
+          job.category ===
+            selectedCategory;
+
+        if (
+          !categoryMatches
+        ) {
+          return false;
+        }
+
+        if (
+          !normalizedSearch
+        ) {
+          return true;
+        }
+
+        const title =
+          String(
+            job.title || ""
+          ).toLowerCase();
+
+        const description =
+          String(
+            job.description ||
+              ""
+          ).toLowerCase();
+
+        const category =
+          String(
+            job.category ||
+              ""
+          ).toLowerCase();
+
+        return (
+          title.includes(
+            normalizedSearch
+          ) ||
+          description.includes(
+            normalizedSearch
+          ) ||
+          category.includes(
+            normalizedSearch
+          )
+        );
+      }
+    );
+
+  function clearFilters() {
+    setSearch("");
+    setSelectedCategory(
+      "Wszystkie"
+    );
+  }
+
+  const hasFilters =
+    search.trim() !== "" ||
+    selectedCategory !==
+      "Wszystkie";
 
   return (
     <div className="page">
@@ -3157,10 +3349,139 @@ function Jobs() {
           </h1>
 
           <p>
-            Przeglądaj zlecenia opublikowane
-            przez użytkowników IdeaHire.
+            Przeglądaj zlecenia
+            opublikowane przez
+            użytkowników
+            IdeaHire.
           </p>
         </div>
+
+        {/* =================================================
+            WYSZUKIWARKA
+        ================================================= */}
+
+        <section
+          className="jobs-search"
+          aria-label="Wyszukiwarka zleceń"
+        >
+          <div className="jobs-search-box">
+            <span
+              className="jobs-search-icon"
+              aria-hidden="true"
+            >
+              ⌕
+            </span>
+
+            <input
+              type="text"
+              value={search}
+              onChange={(event) =>
+                setSearch(
+                  event.target.value
+                )
+              }
+              placeholder="Czego szukasz?"
+              aria-label="Szukaj zleceń"
+            />
+
+            {search && (
+              <button
+                type="button"
+                className="jobs-search-clear"
+                onClick={() =>
+                  setSearch("")
+                }
+                aria-label="Wyczyść wyszukiwanie"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          {/* =================================================
+              FILTRY KATEGORII
+          ================================================= */}
+
+          <div className="jobs-filter-row">
+            <button
+              type="button"
+              className={
+                selectedCategory ===
+                "Wszystkie"
+                  ? "jobs-filter active"
+                  : "jobs-filter"
+              }
+              onClick={() =>
+                setSelectedCategory(
+                  "Wszystkie"
+                )
+              }
+            >
+              Wszystkie
+            </button>
+
+            {JOB_CATEGORIES.map(
+              (category) => (
+                <button
+                  type="button"
+                  key={category}
+                  className={
+                    selectedCategory ===
+                    category
+                      ? "jobs-filter active"
+                      : "jobs-filter"
+                  }
+                  onClick={() =>
+                    setSelectedCategory(
+                      category
+                    )
+                  }
+                >
+                  {category}
+                </button>
+              )
+            )}
+          </div>
+        </section>
+
+        {/* =================================================
+            WYNIKI
+        ================================================= */}
+
+        {!loading &&
+          !message &&
+          jobs.length > 0 && (
+            <div className="jobs-results-header">
+              <div>
+                <strong>
+                  {
+                    filteredJobs.length
+                  }
+                </strong>{" "}
+                {filteredJobs.length ===
+                1
+                  ? "zlecenie"
+                  : filteredJobs.length >=
+                      2 &&
+                    filteredJobs.length <=
+                      4
+                  ? "zlecenia"
+                  : "zleceń"}
+              </div>
+
+              {hasFilters && (
+                <button
+                  type="button"
+                  className="jobs-clear-filters"
+                  onClick={
+                    clearFilters
+                  }
+                >
+                  Wyczyść filtry
+                </button>
+              )}
+            </div>
+          )}
 
         {loading && (
           <p>
@@ -3184,217 +3505,204 @@ function Jobs() {
               </span>
 
               <h2>
-                Na razie nie ma żadnych zleceń.
+                Na razie nie ma
+                żadnych zleceń.
               </h2>
 
               <p>
-                Dodaj pierwsze zlecenie,
-                aby pojawiło się tutaj.
+                Dodaj pierwsze
+                zlecenie, aby
+                pojawiło się tutaj.
               </p>
             </section>
           )}
 
-        <div className="jobs-list">
-          {jobs.map((job) => {
-            const isOpen =
-              openJobId ===
-              job.id;
+        {!loading &&
+          !message &&
+          jobs.length > 0 &&
+          filteredJobs.length ===
+            0 && (
+            <section className="account-card jobs-empty-search">
+              <span className="section-label">
+                Brak wyników
+              </span>
 
-            const isOwner =
-              user?.id ===
-              job.user_id;
+              <h2>
+                Nie znaleźliśmy
+                takiego zlecenia.
+              </h2>
 
-            const alreadyApplied =
-              appliedJobIds.includes(
-                job.id
-              );
+              <p>
+                Spróbuj użyć innej
+                frazy albo wybierz
+                inną kategorię.
+              </p>
 
-            return (
-              <article
-                className="job-card"
-                key={job.id}
+              <button
+                type="button"
+                className="btn btn-dark"
+                onClick={
+                  clearFilters
+                }
               >
-                <div
-                  style={{
-                    display:
-                      "flex",
-                    justifyContent:
-                      "space-between",
-                    alignItems:
-                      "center",
-                    gap:
-                      "16px",
-                    marginBottom:
-                      "12px",
-                  }}
+                Wyczyść wyszukiwanie →
+              </button>
+            </section>
+          )}
+
+        {/* =================================================
+            LISTA ZLECEŃ
+        ================================================= */}
+
+        <div className="jobs-list">
+          {filteredJobs.map(
+            (job) => {
+              const isOpen =
+                openJobId ===
+                job.id;
+
+              const isOwner =
+                user?.id ===
+                job.user_id;
+
+              const alreadyApplied =
+                appliedJobIds.includes(
+                  job.id
+                );
+
+              return (
+                <article
+                  className="job-card"
+                  key={job.id}
                 >
-                  <span className="section-label">
-                    {job.category}
-                  </span>
+                  <div className="job-card-top">
+                    <span className="section-label">
+                      {job.category}
+                    </span>
 
-                  <span
-                    style={{
-                      fontSize:
-                        "13px",
-                      fontWeight:
-                        "600",
-                      padding:
-                        "6px 10px",
-                      borderRadius:
-                        "999px",
-                      background:
-                        "#eef4ff",
-                    }}
-                  >
-                    Aktywne
-                  </span>
-                </div>
-
-                <h2>
-                  {job.title}
-                </h2>
-
-                <p>
-                  <strong>
-                    Budżet:
-                  </strong>{" "}
-                  {formatBudget(
-                    job.budget
-                  )}
-                </p>
-
-                <p>
-                  <small>
-                    Opublikowano:{" "}
-                    {formatDate(
-                      job.created_at
-                    )}
-                  </small>
-                </p>
-
-                {isOpen && (
-                  <div
-                    style={{
-                      marginTop:
-                        "18px",
-                    }}
-                  >
-                    <p>
-                      {job.description}
-                    </p>
-
-                    <Link
-                      to={`/profile/${job.user_id}`}
-                      className="btn btn-outline"
-                      style={{
-                        marginTop:
-                          "8px",
-                      }}
-                    >
-                      Zobacz profil zleceniodawcy →
-                    </Link>
-
-                    {!isOwner && (
-                      <button
-                        className="btn btn-dark"
-                        type="button"
-                        style={{
-                          marginTop:
-                            "10px",
-                          marginLeft:
-                            "10px",
-                        }}
-                        disabled={
-                          applyingJobId ===
-                            job.id ||
-                          alreadyApplied
-                        }
-                        onClick={() =>
-                          handleApply(
-                            job
-                          )
-                        }
-                      >
-                        {alreadyApplied
-                          ? "Zgłoszono ✓"
-                          : applyingJobId ===
-                            job.id
-                          ? "Wysyłanie..."
-                          : "Zgłoś się do zlecenia →"}
-                      </button>
-                    )}
-
-                    {isOwner && (
-                      <p
-                        style={{
-                          marginTop:
-                            "14px",
-                        }}
-                      >
-                        <small>
-                          To jest Twoje zlecenie.
-                        </small>
-                      </p>
-                    )}
+                    <span className="job-active-badge">
+                      Aktywne
+                    </span>
                   </div>
-                )}
 
-                <div
-                  style={{
-                    display:
-                      "flex",
-                    gap:
-                      "10px",
-                    flexWrap:
-                      "wrap",
-                    marginTop:
-                      "14px",
-                  }}
-                >
-                  <button
-                    className="btn btn-dark"
-                    type="button"
-                    onClick={() =>
-                      setOpenJobId(
-                        isOpen
-                          ? null
-                          : job.id
-                      )
-                    }
-                  >
-                    {isOpen
-                      ? "Ukryj szczegóły ↑"
-                      : "Zobacz zlecenie →"}
-                  </button>
+                  <h2>
+                    {job.title}
+                  </h2>
 
-                  {!isOpen &&
-                    !isOwner && (
-                      <button
-                        className="btn btn-outline"
-                        type="button"
-                        disabled={
-                          applyingJobId ===
-                            job.id ||
-                          alreadyApplied
-                        }
-                        onClick={() =>
-                          handleApply(
-                            job
-                          )
-                        }
-                      >
-                        {alreadyApplied
-                          ? "Zgłoszono ✓"
-                          : applyingJobId ===
-                            job.id
-                          ? "Wysyłanie..."
-                          : "Zgłoś się do zlecenia →"}
-                      </button>
+                  <p>
+                    <strong>
+                      Budżet:
+                    </strong>{" "}
+                    {formatBudget(
+                      job.budget
                     )}
-                </div>
-              </article>
-            );
-          })}
+                  </p>
+
+                  <p>
+                    <small>
+                      Opublikowano:{" "}
+                      {formatDate(
+                        job.created_at
+                      )}
+                    </small>
+                  </p>
+
+                  {isOpen && (
+                    <div className="job-details">
+                      <p>
+                        {
+                          job.description
+                        }
+                      </p>
+
+                      <Link
+                        to={`/profile/${job.user_id}`}
+                        className="btn btn-outline"
+                      >
+                        Zobacz profil zleceniodawcy →
+                      </Link>
+
+                      {!isOwner && (
+                        <button
+                          className="btn btn-dark"
+                          type="button"
+                          disabled={
+                            applyingJobId ===
+                              job.id ||
+                            alreadyApplied
+                          }
+                          onClick={() =>
+                            handleApply(
+                              job
+                            )
+                          }
+                        >
+                          {alreadyApplied
+                            ? "Zgłoszono ✓"
+                            : applyingJobId ===
+                                job.id
+                            ? "Wysyłanie..."
+                            : "Zgłoś się do zlecenia →"}
+                        </button>
+                      )}
+
+                      {isOwner && (
+                        <p className="job-owner-note">
+                          <small>
+                            To jest Twoje
+                            zlecenie.
+                          </small>
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="job-actions">
+                    <button
+                      className="btn btn-dark"
+                      type="button"
+                      onClick={() =>
+                        setOpenJobId(
+                          isOpen
+                            ? null
+                            : job.id
+                        )
+                      }
+                    >
+                      {isOpen
+                        ? "Ukryj szczegóły ↑"
+                        : "Zobacz zlecenie →"}
+                    </button>
+
+                    {!isOpen &&
+                      !isOwner && (
+                        <button
+                          className="btn btn-outline"
+                          type="button"
+                          disabled={
+                            applyingJobId ===
+                              job.id ||
+                            alreadyApplied
+                          }
+                          onClick={() =>
+                            handleApply(
+                              job
+                            )
+                          }
+                        >
+                          {alreadyApplied
+                            ? "Zgłoszono ✓"
+                            : applyingJobId ===
+                                job.id
+                            ? "Wysyłanie..."
+                            : "Zgłoś się do zlecenia →"}
+                        </button>
+                      )}
+                  </div>
+                </article>
+              );
+            }
+          )}
         </div>
       </main>
     </div>
@@ -3409,8 +3717,10 @@ function Notifications() {
   const { user } =
     useAuth();
 
-  const [notifications, setNotifications] =
-    useState([]);
+  const [
+    notifications,
+    setNotifications,
+  ] = useState([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -3425,15 +3735,9 @@ function Notifications() {
     setMessage("");
 
     try {
-      /*
-       * Najpierw pobieramy zlecenia
-       * należące do aktualnego użytkownika.
-       */
-
       const {
         data: myJobs,
-        error:
-          jobsError,
+        error: jobsError,
       } =
         await supabase
           .from("jobs")
@@ -3449,6 +3753,7 @@ function Notifications() {
         setMessage(
           `Nie udało się pobrać powiadomień: ${jobsError.message}`
         );
+
         return;
       }
 
@@ -3457,19 +3762,16 @@ function Notifications() {
           (job) => job.id
         );
 
-      if (jobIds.length === 0) {
+      if (
+        jobIds.length === 0
+      ) {
         setNotifications([]);
+
         return;
       }
 
-      /*
-       * Pobieramy zgłoszenia.
-       * Ponownie: ZERO jobs.status.
-       */
-
       const {
-        data:
-          applications,
+        data: applications,
         error:
           applicationsError,
       } =
@@ -3495,32 +3797,31 @@ function Notifications() {
         setMessage(
           `Nie udało się pobrać zgłoszeń: ${applicationsError.message}`
         );
+
         return;
       }
 
       if (
         !applications ||
-        applications.length === 0
+        applications.length ===
+          0
       ) {
         setNotifications([]);
+
         return;
       }
 
-      const applicantIds =
-        [
-          ...new Set(
-            applications.map(
-              (item) =>
-                item.applicant_id
-            )
-          ),
-        ];
+      const applicantIds = [
+        ...new Set(
+          applications.map(
+            (item) =>
+              item.applicant_id
+          )
+        ),
+      ];
 
       const {
-        data:
-          profiles,
-        error:
-          profilesError,
+        data: profiles,
       } =
         await supabase
           .from("profiles")
@@ -3531,13 +3832,6 @@ function Notifications() {
             "id",
             applicantIds
           );
-
-      if (profilesError) {
-        console.error(
-          "NOTIFICATION PROFILES ERROR:",
-          profilesError
-        );
-      }
 
       const profileMap =
         new Map(
@@ -3578,12 +3872,6 @@ function Notifications() {
         result
       );
 
-      /*
-       * Po wejściu do skrzynki oznaczamy
-       * aktualne zgłoszenia jako przeczytane
-       * lokalnie.
-       */
-
       const readKey =
         `ideahire_read_notifications_${user.id}`;
 
@@ -3615,7 +3903,9 @@ function Notifications() {
     loadNotifications();
   }, [user?.id]);
 
-  function formatDate(value) {
+  function formatDate(
+    value
+  ) {
     if (!value) return "";
 
     return new Date(
@@ -3648,7 +3938,8 @@ function Notifications() {
 
           <p>
             Tutaj znajdziesz osoby,
-            które zgłosiły się do Twoich zleceń.
+            które zgłosiły się do
+            Twoich zleceń.
           </p>
         </div>
 
@@ -3675,13 +3966,15 @@ function Notifications() {
               </span>
 
               <h2>
-                Nie masz nowych zgłoszeń.
+                Nie masz nowych
+                zgłoszeń.
               </h2>
 
               <p>
-                Gdy ktoś zgłosi się do
-                Twojego zlecenia, pojawi się
-                tutaj jego profil.
+                Gdy ktoś zgłosi się
+                do Twojego zlecenia,
+                pojawi się tutaj jego
+                profil.
               </p>
             </section>
           )}
@@ -3710,45 +4003,9 @@ function Notifications() {
                 >
                   <Link
                     to={`/profile/${notification.applicant_id}`}
-                    style={{
-                      display:
-                        "flex",
-                      alignItems:
-                        "center",
-                      gap:
-                        "14px",
-                      textDecoration:
-                        "none",
-                      color:
-                        "inherit",
-                    }}
+                    className="notification-person"
                   >
-                    <div
-                      style={{
-                        width:
-                          "54px",
-                        height:
-                          "54px",
-                        borderRadius:
-                          "50%",
-                        overflow:
-                          "hidden",
-                        flexShrink:
-                          0,
-                        display:
-                          "flex",
-                        alignItems:
-                          "center",
-                        justifyContent:
-                          "center",
-                        background:
-                          "#111",
-                        color:
-                          "#fff",
-                        fontWeight:
-                          "700",
-                      }}
-                    >
+                    <div className="notification-avatar">
                       {applicant?.avatar_url ? (
                         <img
                           src={
@@ -3757,14 +4014,6 @@ function Notifications() {
                           alt={
                             applicantName
                           }
-                          style={{
-                            width:
-                              "100%",
-                            height:
-                              "100%",
-                            objectFit:
-                              "cover",
-                          }}
                         />
                       ) : (
                         initial
@@ -3773,27 +4022,19 @@ function Notifications() {
 
                     <div>
                       <strong>
-                        {applicantName}
+                        {
+                          applicantName
+                        }
                       </strong>
 
-                      <p
-                        style={{
-                          margin:
-                            "3px 0 0",
-                        }}
-                      >
-                        chce wykonać Twoje
-                        zlecenie
+                      <p>
+                        chce wykonać
+                        Twoje zlecenie
                       </p>
                     </div>
                   </Link>
 
-                  <div
-                    style={{
-                      marginTop:
-                        "18px",
-                    }}
-                  >
+                  <div className="notification-job">
                     <span className="section-label">
                       Zlecenie
                     </span>
@@ -3817,10 +4058,6 @@ function Notifications() {
                   <Link
                     className="btn btn-dark"
                     to={`/profile/${notification.applicant_id}`}
-                    style={{
-                      marginTop:
-                        "16px",
-                    }}
                   >
                     Zobacz profil →
                   </Link>
@@ -3858,15 +4095,11 @@ function Router() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* HOME */}
           <Route
             path="/"
-            element={
-              <Home />
-            }
+            element={<Home />}
           />
 
-          {/* AUTH */}
           <Route
             path="/login"
             element={
@@ -3892,7 +4125,6 @@ function Router() {
             }
           />
 
-          {/* ACCOUNT */}
           <Route
             path="/account"
             element={
@@ -3902,7 +4134,6 @@ function Router() {
             }
           />
 
-          {/* ADD JOB */}
           <Route
             path="/find-talent"
             element={
@@ -3912,7 +4143,6 @@ function Router() {
             }
           />
 
-          {/* EDIT JOB */}
           <Route
             path="/edit-job/:id"
             element={
@@ -3922,7 +4152,6 @@ function Router() {
             }
           />
 
-          {/* JOBS */}
           <Route
             path="/jobs"
             element={
@@ -3932,7 +4161,6 @@ function Router() {
             }
           />
 
-          {/* PROFILE */}
           <Route
             path="/profile/:id"
             element={
@@ -3942,7 +4170,6 @@ function Router() {
             }
           />
 
-          {/* NOTIFICATIONS */}
           <Route
             path="/notifications"
             element={
@@ -3952,7 +4179,6 @@ function Router() {
             }
           />
 
-          {/* FALLBACK */}
           <Route
             path="*"
             element={
