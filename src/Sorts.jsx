@@ -1,10 +1,18 @@
 import React from "react";
 
-function Sorts() {
+function Sorts({ children }) {
   return (
-    <div>
-      {/* NOWE ELEMENTY STRONY BĘDĄ TUTAJ */}
-    </div>
+    <>
+      {/*
+        SORTS.JSX = GŁÓWNE MIEJSCE NA NOWE ELEMENTY STRONY.
+
+        Wszystko, co dodamy tutaj, może być używane jako
+        wspólna warstwa aplikacji nad istniejącym routerem.
+        Nie usuwamy istniejącego routera ani jego tras.
+      */}
+
+      {children}
+    </>
   );
 }
 
