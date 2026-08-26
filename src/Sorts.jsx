@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import { supabase } from "./supabase";
 
 export const COUNTRIES = [
@@ -65,59 +67,21 @@ export function CountryPicker({ value, onChange, disabled = false }) {
 
   return (
     <div className="ideahire-country-picker">
-      <button
-        type="button"
-        className={`ideahire-country-trigger ${open ? "is-open" : ""}`}
-        disabled={disabled}
-        onClick={() => setOpen((current) => !current)}
-      >
+      <button type="button" className={`ideahire-country-trigger ${open ? "is-open" : ""}`} disabled={disabled} onClick={() => setOpen((current) => !current)}>
         <span className="ideahire-country-selected">
-          {selected ? (
-            <>
-              <span className="ideahire-country-flag">{selected.flag}</span>
-              <span>{selected.name}</span>
-            </>
-          ) : (
-            <span className="ideahire-country-placeholder">Wybierz kraj</span>
-          )}
+          {selected ? <><span className="ideahire-country-flag">{selected.flag}</span><span>{selected.name}</span></> : <span className="ideahire-country-placeholder">Wybierz kraj</span>}
         </span>
         <span className="ideahire-country-chevron">{open ? "⌃" : "⌄"}</span>
       </button>
-
       {open && (
         <div className="ideahire-country-menu">
-          <div className="ideahire-country-search">
-            <span>⌕</span>
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Wyszukaj kraj..."
-              autoFocus
-            />
-          </div>
-
+          <div className="ideahire-country-search"><span>⌕</span><input type="text" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Wyszukaj kraj..." autoFocus /></div>
           <div className="ideahire-country-list">
-            {filtered.length > 0 ? (
-              filtered.map((country) => (
-                <button
-                  type="button"
-                  key={country.code}
-                  className={`ideahire-country-option ${value === country.code ? "is-selected" : ""}`}
-                  onClick={() => {
-                    onChange?.(country);
-                    setOpen(false);
-                    setSearch("");
-                  }}
-                >
-                  <span className="ideahire-country-option-flag">{country.flag}</span>
-                  <span className="ideahire-country-option-name">{country.name}</span>
-                  <span className="ideahire-country-option-code">{country.code}</span>
-                </button>
-              ))
-            ) : (
-              <div className="ideahire-country-empty">Nie znaleziono kraju</div>
-            )}
+            {filtered.length > 0 ? filtered.map((country) => (
+              <button type="button" key={country.code} className={`ideahire-country-option ${value === country.code ? "is-selected" : ""}`} onClick={() => { onChange?.(country); setOpen(false); setSearch(""); }}>
+                <span className="ideahire-country-option-flag">{country.flag}</span><span className="ideahire-country-option-name">{country.name}</span><span className="ideahire-country-option-code">{country.code}</span>
+              </button>
+            )) : <div className="ideahire-country-empty">Nie znaleziono kraju</div>}
           </div>
         </div>
       )}
@@ -128,28 +92,115 @@ export function CountryPicker({ value, onChange, disabled = false }) {
 export function CountryBadge({ countryCode, countryName }) {
   const country = getCountryByCode(countryCode);
   if (!country && !countryName) return null;
+  return <span className="ideahire-country-badge"><span>{country?.flag || "🌍"}</span><span>{country?.name || countryName}</span></span>;
+}
 
-  return (
-    <span className="ideahire-country-badge">
-      <span>{country?.flag || "🌍"}</span>
-      <span>{country?.name || countryName}</span>
-    </span>
-  );
+function CountryIntegration() {
+  const location = useLocation();
+  const [user, setUser] = useState(null);
+  const [countryCode, setCountryCode] = useState("");
+  const [countryName, setCountryName] = useState("");
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      const { data } = await supabase.auth.getUser();
+      if (!mounted) return;
+      setUser(data?.user || null);
+      if (!data?.user?.id) return;
+      const { data: profile } = await supabase.from("public_profiles").select("country_code, country_name").eq("id", data.user.id).maybeSingle();
+      if (!mounted) return;
+      setCountryCode(profile?.country_code || "");
+      setCountryName(profile?.country_name || "");
+    }
+    load();
+    return () => { mounted = false; };
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname !== "/account") return;
+    let attempts = 0;
+    const timer = setInterval(() => {
+      const form = document.querySelector(".account-form");
+      if (!form) {
+        if (++attempts > 30) clearInterval(timer);
+        return;
+      }
+      let host = form.querySelector(".ideahire-country-host");
+      if (!host) {
+        host = document.createElement("div");
+        host.className = "ideahire-country-host";
+        const email = Array.from(form.querySelectorAll("label")).find((label) => label.textContent.includes("E-mail"));
+        if (email) form.insertBefore(host, email); else form.appendChild(host);
+      }
+      setReady(true);
+      clearInterval(timer);
+    }, 100);
+    return () => clearInterval(timer);
+  }, [location.pathname]);
+
+  async function handleChange(country) {
+    if (!user?.id) {
+      setMessage("Musisz być zalogowany.");
+      return;
+    }
+    setCountryCode(country?.code || "");
+    setCountryName(country?.name || "");
+    setSaving(true);
+    setMessage("");
+    try {
+      await saveUserCountry(user.id, country);
+      setMessage("Kraj został zapisany.");
+    } catch (error) {
+      setMessage(`Nie udało się zapisać kraju: ${error?.message || "Nieznany błąd"}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const accountHost = location.pathname === "/account" && document.querySelector(".ideahire-country-host");
+  const profileHost = location.pathname.startsWith("/profile/") && document.querySelector(".profile-info");
+
+  if (location.pathname === "/account" && ready && accountHost) {
+    return createPortal(
+      <div className="ideahire-country-field">
+        <label className="ideahire-country-label">Kraj</label>
+        <CountryPicker value={countryCode} onChange={handleChange} disabled={saving} />
+        <small>Wybierz kraj, który będzie widoczny na Twoim profilu.</small>
+        {message && <span className="ideahire-country-message">{message}</span>}
+      </div>,
+      accountHost
+    );
+  }
+
+  if (location.pathname.startsWith("/profile/") && profileHost && (countryCode || countryName)) {
+    return createPortal(<CountryBadge countryCode={countryCode} countryName={countryName} />, profileHost);
+  }
+
+  return null;
 }
 
 function Sorts({ children }) {
   return (
     <>
       <style>{`
+        .ideahire-country-host { margin: 0 0 18px; }
+        .ideahire-country-field { width: 100%; }
+        .ideahire-country-label { display: block; margin-bottom: 8px; color: inherit; font-size: 14px; font-weight: 600; }
+        .ideahire-country-field > small { display: block; margin-top: 7px; color: #888; font-size: 12px; line-height: 1.45; }
+        .ideahire-country-message { display: block; margin-top: 7px; color: #777; font-size: 12px; }
         .ideahire-country-picker { position: relative; width: 100%; max-width: 420px; font-family: inherit; }
-        .ideahire-country-trigger { width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; border: 1px solid rgba(20, 20, 20, 0.12); border-radius: 14px; background: #fff; color: #161616; font: inherit; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
-        .ideahire-country-trigger:hover { border-color: rgba(20, 20, 20, .25); }
-        .ideahire-country-trigger:focus, .ideahire-country-trigger.is-open { outline: none; border-color: #161616; box-shadow: 0 0 0 4px rgba(20, 20, 20, .06); }
+        .ideahire-country-trigger { width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; border: 1px solid rgba(20,20,20,.12); border-radius: 14px; background: #fff; color: #161616; font: inherit; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
+        .ideahire-country-trigger:hover { border-color: rgba(20,20,20,.25); }
+        .ideahire-country-trigger:focus, .ideahire-country-trigger.is-open { outline: none; border-color: #161616; box-shadow: 0 0 0 4px rgba(20,20,20,.06); }
         .ideahire-country-selected { display: flex; align-items: center; gap: 11px; min-width: 0; }
         .ideahire-country-flag { font-size: 24px; line-height: 1; }
         .ideahire-country-placeholder { color: #8a8a8a; }
         .ideahire-country-chevron { flex-shrink: 0; color: #777; }
-        .ideahire-country-menu { position: absolute; z-index: 1000; top: calc(100% + 8px); left: 0; width: 100%; overflow: hidden; border: 1px solid rgba(20, 20, 20, .1); border-radius: 16px; background: #fff; box-shadow: 0 18px 45px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.05); }
+        .ideahire-country-menu { position: absolute; z-index: 1000; top: calc(100% + 8px); left: 0; width: 100%; overflow: hidden; border: 1px solid rgba(20,20,20,.1); border-radius: 16px; background: #fff; box-shadow: 0 18px 45px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.05); }
         .ideahire-country-search { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(20,20,20,.08); }
         .ideahire-country-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #161616; font: inherit; }
         .ideahire-country-list { max-height: 310px; overflow-y: auto; padding: 6px; }
@@ -159,12 +210,13 @@ function Sorts({ children }) {
         .ideahire-country-option-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .ideahire-country-option-code { color: #999; font-size: 12px; }
         .ideahire-country-empty { padding: 24px 16px; text-align: center; color: #888; font-size: 14px; }
-        .ideahire-country-badge { display: inline-flex; align-items: center; gap: 7px; width: fit-content; padding: 6px 10px; border-radius: 999px; background: #f3f3f1; color: #242424; font-size: 14px; line-height: 1; }
+        .ideahire-country-badge { display: inline-flex; align-items: center; gap: 7px; width: fit-content; margin-top: 8px; padding: 6px 10px; border-radius: 999px; background: #f3f3f1; color: #242424; font-size: 14px; line-height: 1; }
         .ideahire-country-badge span:first-child { font-size: 17px; }
         @media (max-width: 600px) { .ideahire-country-picker, .ideahire-country-menu { max-width: 100%; } .ideahire-country-list { max-height: 280px; } }
       `}</style>
       <div className="sorts-root">
         {children}
+        <CountryIntegration />
       </div>
     </>
   );
