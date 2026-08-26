@@ -4121,6 +4121,113 @@ function Notifications() {
             </section>
           )}
 
+        <style>{`
+          .notification-person {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            margin-bottom: 24px;
+          }
+
+          .notification-avatar {
+            width: 56px;
+            height: 56px;
+            flex: 0 0 56px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid #e2e2de;
+            border-radius: 50%;
+            background: #f3f3f0;
+            color: #111;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+          }
+
+          .notification-avatar img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center;
+          }
+
+          .notification-person > div:last-child {
+            min-width: 0;
+          }
+
+          .notification-person strong {
+            display: block;
+            margin: 0 0 5px;
+            color: #111;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+          }
+
+          .notification-person p {
+            margin: 0;
+            color: #777;
+            font-size: 13px;
+            line-height: 1.5;
+          }
+
+          .notification-job {
+            min-width: 0;
+            margin-bottom: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #ededeb;
+          }
+
+          .notification-job .section-label {
+            margin-bottom: 8px;
+          }
+
+          .notification-job h2 {
+            margin: 0 0 9px;
+            font-size: 21px;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+            overflow-wrap: anywhere;
+          }
+
+          .notification-job small {
+            display: block;
+            color: #999;
+            font-size: 12px;
+            line-height: 1.5;
+          }
+
+          .job-card > .btn {
+            width: fit-content;
+          }
+
+          @media (max-width: 600px) {
+            .notification-person {
+              gap: 12px;
+              margin-bottom: 20px;
+            }
+
+            .notification-avatar {
+              width: 48px;
+              height: 48px;
+              flex-basis: 48px;
+            }
+
+            .notification-job {
+              margin-bottom: 20px;
+              padding-top: 16px;
+            }
+
+            .notification-job h2 {
+              font-size: 18px;
+            }
+          }
+        `}</style>
+
         <div className="jobs-list">
           {notifications.map(
             (notification) => {
