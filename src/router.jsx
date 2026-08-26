@@ -2903,6 +2903,27 @@ function Jobs() {
   const [appliedJobIds, setAppliedJobIds] =
     useState([]);
 
+  const [search, setSearch] =
+    useState("");
+
+  const filteredJobs =
+    jobs.filter((job) => {
+      const query =
+        search.trim().toLowerCase();
+
+      if (!query) return true;
+
+      return [
+        job.title,
+        job.description,
+        job.category,
+      ].some((value) =>
+        String(value || "")
+          .toLowerCase()
+          .includes(query)
+      );
+    });
+
   async function loadJobs() {
     setLoading(true);
     setMessage("");
@@ -3178,6 +3199,112 @@ function Jobs() {
 
         {!loading &&
           !message &&
+          jobs.length > 0 && (
+            <div
+              style={{
+                marginBottom: "24px",
+              }}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  maxWidth: "720px",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: "18px",
+                    top: "50%",
+                    transform:
+                      "translateY(-50%)",
+                    fontSize: "22px",
+                    lineHeight: 1,
+                    color: "#777",
+                    pointerEvents: "none",
+                  }}
+                >
+                  ⌕
+                </span>
+
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Szukaj zlecenia..."
+                  aria-label="Szukaj zlecenia"
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    minHeight: "54px",
+                    padding:
+                      "0 48px 0 52px",
+                    border:
+                      "1px solid #dedede",
+                    borderRadius: "16px",
+                    background: "#fff",
+                    fontSize: "16px",
+                    outline: "none",
+                    boxShadow:
+                      "0 8px 24px rgba(0,0,0,0.05)",
+                  }}
+                />
+
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSearch("")
+                    }
+                    aria-label="Wyczyść wyszukiwanie"
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      top: "50%",
+                      transform:
+                        "translateY(-50%)",
+                      width: "34px",
+                      height: "34px",
+                      border: "0",
+                      borderRadius: "50%",
+                      background: "#f1f1f1",
+                      color: "#333",
+                      fontSize: "22px",
+                      lineHeight: 1,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              <p
+                style={{
+                  margin:
+                    "10px 2px 0",
+                  fontSize: "14px",
+                  color: "#777",
+                }}
+              >
+                {filteredJobs.length}{" "}
+                {filteredJobs.length === 1
+                  ? "zlecenie"
+                  : filteredJobs.length >= 2 &&
+                    filteredJobs.length <= 4
+                  ? "zlecenia"
+                  : "zleceń"}
+              </p>
+            </div>
+          )}
+
+        {!loading &&
+          !message &&
           jobs.length === 0 && (
             <section className="account-card">
               <span className="section-label">
@@ -3195,8 +3322,28 @@ function Jobs() {
             </section>
           )}
 
+        {!loading &&
+          !message &&
+          jobs.length > 0 &&
+          filteredJobs.length === 0 && (
+            <section className="account-card">
+              <span className="section-label">
+                Brak wyników
+              </span>
+
+              <h2>
+                Nie znaleźliśmy takiego zlecenia.
+              </h2>
+
+              <p>
+                Spróbuj wpisać inną nazwę,
+                kategorię lub słowo z opisu.
+              </p>
+            </section>
+          )}
+
         <div className="jobs-list">
-          {jobs.map((job) => {
+          {filteredJobs.map((job) => {
             const isOpen =
               openJobId ===
               job.id;
