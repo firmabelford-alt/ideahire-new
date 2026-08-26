@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useLocation } from "react-router-dom";
 import { supabase } from "./supabase";
 
 export const COUNTRIES = [
@@ -96,75 +95,143 @@ export function CountryBadge({ countryCode, countryName }) {
 }
 
 function CountryIntegration() {
-  const location = useLocation();
+  const [pathname, setPathname] = useState(() => window.location.pathname);
   const [user, setUser] = useState(null);
   const [countryCode, setCountryCode] = useState("");
   const [countryName, setCountryName] = useState("");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [accountHost, setAccountHost] = useState(null);
+  const [profileHost, setProfileHost] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const detectPath = () => {
+      if (active) setPathname(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", detectPath);
+    const timer = window.setInterval(detectPath, 250);
+
+    return () => {
+      active = false;
+      window.removeEventListener("popstate", detectPath);
+      window.clearInterval(timer);
+    };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
+
     async function load() {
       const { data } = await supabase.auth.getUser();
       if (!mounted) return;
-      setUser(data?.user || null);
-      if (!data?.user?.id) return;
-      const { data: profile } = await supabase.from("public_profiles").select("country_code, country_name").eq("id", data.user.id).maybeSingle();
+
+      const currentUser = data?.user || null;
+      setUser(currentUser);
+
+      if (!currentUser?.id) {
+        setCountryCode("");
+        setCountryName("");
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("public_profiles")
+        .select("country_code, country_name")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
       if (!mounted) return;
       setCountryCode(profile?.country_code || "");
       setCountryName(profile?.country_name || "");
     }
+
     load();
-    return () => { mounted = false; };
-  }, [location.pathname]);
+    return () => {
+      mounted = false;
+    };
+  }, [pathname]);
 
   useEffect(() => {
-    if (location.pathname !== "/account") return;
+    if (pathname !== "/account") {
+      setAccountHost(null);
+      return;
+    }
+
     let attempts = 0;
-    const timer = setInterval(() => {
+
+    const findHost = () => {
       const form = document.querySelector(".account-form");
       if (!form) {
-        if (++attempts > 30) clearInterval(timer);
+        if (++attempts < 40) window.setTimeout(findHost, 100);
         return;
       }
+
       let host = form.querySelector(".ideahire-country-host");
       if (!host) {
         host = document.createElement("div");
         host.className = "ideahire-country-host";
-        const email = Array.from(form.querySelectorAll("label")).find((label) => label.textContent.includes("E-mail"));
-        if (email) form.insertBefore(host, email); else form.appendChild(host);
+        const labels = Array.from(form.querySelectorAll("label"));
+        const email = labels.find((label) => label.textContent.includes("E-mail"));
+        if (email) form.insertBefore(host, email);
+        else form.appendChild(host);
       }
-      setReady(true);
-      clearInterval(timer);
-    }, 100);
-    return () => clearInterval(timer);
-  }, [location.pathname]);
+
+      setAccountHost(host);
+    };
+
+    findHost();
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!pathname.startsWith("/profile/")) {
+      setProfileHost(null);
+      return;
+    }
+
+    let attempts = 0;
+
+    const findHost = () => {
+      const host = document.querySelector(".profile-info");
+      if (!host) {
+        if (++attempts < 40) window.setTimeout(findHost, 100);
+        return;
+      }
+      setProfileHost(host);
+    };
+
+    findHost();
+  }, [pathname]);
 
   async function handleChange(country) {
     if (!user?.id) {
       setMessage("Musisz być zalogowany.");
       return;
     }
+
+    const previousCode = countryCode;
+    const previousName = countryName;
+
     setCountryCode(country?.code || "");
     setCountryName(country?.name || "");
     setSaving(true);
     setMessage("");
+
     try {
       await saveUserCountry(user.id, country);
       setMessage("Kraj został zapisany.");
     } catch (error) {
+      setCountryCode(previousCode);
+      setCountryName(previousName);
       setMessage(`Nie udało się zapisać kraju: ${error?.message || "Nieznany błąd"}`);
     } finally {
       setSaving(false);
     }
   }
 
-  const accountHost = location.pathname === "/account" && document.querySelector(".ideahire-country-host");
-  const profileHost = location.pathname.startsWith("/profile/") && document.querySelector(".profile-info");
-
-  if (location.pathname === "/account" && ready && accountHost) {
+  if (pathname === "/account" && accountHost) {
     return createPortal(
       <div className="ideahire-country-field">
         <label className="ideahire-country-label">Kraj</label>
@@ -176,8 +243,11 @@ function CountryIntegration() {
     );
   }
 
-  if (location.pathname.startsWith("/profile/") && profileHost && (countryCode || countryName)) {
-    return createPortal(<CountryBadge countryCode={countryCode} countryName={countryName} />, profileHost);
+  if (pathname.startsWith("/profile/") && profileHost && (countryCode || countryName)) {
+    return createPortal(
+      <CountryBadge countryCode={countryCode} countryName={countryName} />,
+      profileHost
+    );
   }
 
   return null;
@@ -191,7 +261,7 @@ function Sorts({ children }) {
         .ideahire-country-field { width: 100%; }
         .ideahire-country-label { display: block; margin-bottom: 8px; color: inherit; font-size: 14px; font-weight: 600; }
         .ideahire-country-field > small { display: block; margin-top: 7px; color: #888; font-size: 12px; line-height: 1.45; }
-        .ideahire-country-message { display: block; margin-top: 7px; color: #777; font-size: 12px; }
+        .ideahire-country-message { display: block; margin-top: 7px; color: #777; font-size: 12px; line-height: 1.4; }
         .ideahire-country-picker { position: relative; width: 100%; max-width: 420px; font-family: inherit; }
         .ideahire-country-trigger { width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; border: 1px solid rgba(20,20,20,.12); border-radius: 14px; background: #fff; color: #161616; font: inherit; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
         .ideahire-country-trigger:hover { border-color: rgba(20,20,20,.25); }
