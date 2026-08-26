@@ -17,6 +17,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import Sorts from "./Sorts";
 import { supabase } from "./supabase";
 
 /* =========================================================
@@ -4343,6 +4344,7 @@ function Router() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Sorts />
         <Routes>
           <Route
             path="/"
