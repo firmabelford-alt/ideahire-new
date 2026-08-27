@@ -1645,7 +1645,6 @@ function Account() {
       />
     );
   }
-
 async function handleAvatarChange(event) {
   const file = event.target.files?.[0];
 
@@ -1656,21 +1655,12 @@ async function handleAvatarChange(event) {
   setMessage("");
 
   try {
-    /*
-      1. Przygotowanie zdjęcia
-    */
     const resizedImage =
       await resizeAndConvertImage(file);
 
-    /*
-      2. Unikalna ścieżka użytkownika w Storage
-    */
     const filePath =
       `${user.id}/avatar-${Date.now()}.jpg`;
 
-    /*
-      3. Upload do Supabase Storage
-    */
     const {
       error: uploadError,
     } = await supabase.storage
@@ -1685,6 +1675,11 @@ async function handleAvatarChange(event) {
       );
 
     if (uploadError) {
+      console.error(
+        "AVATAR UPLOAD ERROR:",
+        uploadError
+      );
+
       setMessage(
         `Nie udało się przesłać zdjęcia: ${uploadError.message}`
       );
@@ -1692,9 +1687,6 @@ async function handleAvatarChange(event) {
       return;
     }
 
-    /*
-      4. Pobranie publicznego URL-a
-    */
     const {
       data: publicUrlData,
     } = supabase.storage
@@ -1713,12 +1705,11 @@ async function handleAvatarChange(event) {
     }
 
     /*
-      5. NAJWAŻNIEJSZE:
-         zapisujemy avatar_url bezpośrednio
-         do public.profiles.
+      Sprawdzamy, czy użytkownik ma już
+      rekord w public.profiles.
     */
     const {
-      data: profile,
+      data: existingProfile,
       error: profileReadError,
     } = await supabase
       .from("profiles")
@@ -1733,20 +1724,18 @@ async function handleAvatarChange(event) {
       );
 
       setMessage(
-        `Zdjęcie przesłane, ale nie udało się znaleźć profilu: ${profileReadError.message}`
+        `Nie udało się sprawdzić profilu: ${profileReadError.message}`
       );
 
       return;
     }
 
-    let profileError = null;
-
     /*
-      6. Jeżeli profil istnieje → UPDATE
+      Jeżeli profil istnieje — aktualizujemy tylko avatar.
     */
-    if (profile?.id) {
+    if (existingProfile?.id) {
       const {
-        error,
+        error: profileUpdateError,
       } = await supabase
         .from("profiles")
         .update({
@@ -1754,15 +1743,26 @@ async function handleAvatarChange(event) {
         })
         .eq("id", user.id);
 
-      profileError = error;
+      if (profileUpdateError) {
+        console.error(
+          "PROFILE AVATAR UPDATE ERROR:",
+          profileUpdateError
+        );
+
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zapisać go w profilu: ${profileUpdateError.message}`
+        );
+
+        return;
+      }
     }
 
     /*
-      7. Jeżeli profilu nie ma → INSERT
+      Jeżeli profilu nie ma — tworzymy go.
     */
     else {
       const {
-        error,
+        error: profileInsertError,
       } = await supabase
         .from("profiles")
         .insert({
@@ -1777,28 +1777,22 @@ async function handleAvatarChange(event) {
             null,
         });
 
-      profileError = error;
+      if (profileInsertError) {
+        console.error(
+          "PROFILE INSERT ERROR:",
+          profileInsertError
+        );
+
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się utworzyć profilu: ${profileInsertError.message}`
+        );
+
+        return;
+      }
     }
 
     /*
-      8. Sprawdzamy błąd zapisu do profiles
-    */
-    if (profileError) {
-      console.error(
-        "PROFILE AVATAR UPDATE ERROR:",
-        profileError
-      );
-
-      setMessage(
-        `Zdjęcie przesłane, ale nie udało się zapisać go w profilu: ${profileError.message}`
-      );
-
-      return;
-    }
-
-    /*
-      9. Aktualizujemy również Auth metadata,
-         żeby właściciel konta od razu widział nowe zdjęcie.
+      Aktualizujemy również Auth metadata.
     */
     const {
       error: metadataError,
@@ -1809,19 +1803,14 @@ async function handleAvatarChange(event) {
     });
 
     if (metadataError) {
-      console.error(
+      console.warn(
         "AUTH AVATAR UPDATE ERROR:",
         metadataError
       );
-
-      /*
-        Nie cofamy operacji.
-        profiles.avatar_url zostało już zapisane.
-      */
     }
 
     /*
-      10. Natychmiastowy podgląd nowego zdjęcia
+      Natychmiastowy podgląd nowego avatara.
     */
     setAvatarUrl(publicUrl);
 
@@ -1830,12 +1819,9 @@ async function handleAvatarChange(event) {
     );
 
     /*
-      11. Czyścimy input, żeby można było
-          ponownie wybrać ten sam plik.
+      Pozwala ponownie wybrać ten sam plik.
     */
-    if (event.target) {
-      event.target.value = "";
-    }
+    event.target.value = "";
   } catch (error) {
     console.error(
       "AVATAR CHANGE ERROR:",
@@ -1851,770 +1837,144 @@ async function handleAvatarChange(event) {
   }
 }
 
-    event.preventDefault();
+async function handleSave(event) {
+  event.preventDefault();
 
-    const cleanName =
-      name.trim();
+  if (!user?.id) {
+    setMessage(
+      "Nie znaleziono zalogowanego użytkownika."
+    );
 
-    const cleanAbout =
-      about.trim();
-
-    if (!cleanName) {
-      setMessage(
-        "Imię / nazwa nie może być puste."
-      );
-
-      return;
-    }
-
-    setSaving(true);
-    setMessage("");
-
-    try {
-      const {
-        data,
-        error,
-      } =
-        await supabase.auth.updateUser(
-          {
-            data: {
-              name:
-                cleanName,
-              avatar_url:
-                avatarUrl ||
-                null,
-              about:
-                cleanAbout ||
-                null,
-            },
-          }
-        );
-
-      if (error) {
-        setMessage(
-          `Nie udało się zapisać profilu: ${error.message}`
-        );
-
-        return;
-      }
-
-      const {
-        error: profileSyncError,
-      } = await supabase
-        .from("profiles")
-        .upsert(
-          {
-            id: user.id,
-            name: cleanName,
-            avatar_url: avatarUrl || null,
-            about: cleanAbout || null,
-          },
-          {
-            onConflict: "id",
-          }
-        );
-
-      if (profileSyncError) {
-        setMessage(
-          `Profil zapisano, ale nie udało się zsynchronizować profilu publicznego: ${profileSyncError.message}`
-        );
-
-        return;
-      }
-
-      setName(
-        data.user.user_metadata
-          ?.name ||
-          cleanName
-      );
-
-      setAvatarUrl(
-        data.user.user_metadata
-          ?.avatar_url ||
-          ""
-      );
-
-      setAbout(
-        data.user.user_metadata
-          ?.about ||
-          ""
-      );
-
-      setMessage(
-        "Profil został zapisany."
-      );
-    } catch (error) {
-      setMessage(
-        `Nie udało się zapisać profilu: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setSaving(false);
-    }
+    return;
   }
 
-  async function handleDeleteJob(
-    jobId
-  ) {
-    const confirmed =
-      window.confirm(
-        "Czy na pewno chcesz usunąć to zlecenie?"
-      );
+  setMessage("");
 
-    if (!confirmed) return;
+  const cleanName =
+    name.trim();
 
+  const cleanAbout =
+    about.trim();
+
+  try {
+    /*
+      Najpierw zapisujemy dane konta.
+    */
     const {
+      data,
       error,
     } =
-      await supabase
-        .from("jobs")
-        .delete()
-        .eq("id", jobId)
-        .eq(
-          "user_id",
-          user.id
-        );
+      await supabase.auth.updateUser({
+        data: {
+          name:
+            cleanName,
+          avatar_url:
+            avatarUrl ||
+            null,
+          about:
+            cleanAbout ||
+            null,
+        },
+      });
 
     if (error) {
-      alert(
-        `Nie udało się usunąć zlecenia: ${error.message}`
-      );
-
-      return;
-    }
-
-    setMyJobs(
-      (current) =>
-        current.filter(
-          (job) =>
-            job.id !== jobId
-        )
-    );
-  }
-
-  const displayName =
-    name ||
-    user.email?.split("@")[0] ||
-    "Użytkownik";
-
-  const initial =
-    displayName
-      .charAt(0)
-      .toUpperCase();
-
-  return (
-    <div className="page">
-      <AccountNavbar />
-
-      <main className="app-page">
-        <div className="app-page-header">
-          <span className="section-label">
-            Twoje konto
-          </span>
-
-          <h1>
-            Mój profil
-          </h1>
-
-          <p>
-            Zarządzaj swoim
-            profilem IdeaHire.
-          </p>
-        </div>
-
-        <section className="account-card">
-          <div className="profile-preview">
-            <div className="profile-avatar-wrapper">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Zdjęcie profilowe"
-                  className="profile-avatar"
-                />
-              ) : (
-                <div className="profile-avatar profile-avatar-placeholder">
-                  {initial}
-                </div>
-              )}
-            </div>
-
-            <div className="profile-info">
-              <h2>
-                {displayName}
-              </h2>
-
-              <p>
-                {user.email}
-              </p>
-            </div>
-          </div>
-
-          <form
-            className="auth-form account-form"
-            onSubmit={handleSave}
-          >
-            <label>
-              Zdjęcie profilowe
-
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={
-                  handleAvatarChange
-                }
-                disabled={
-                  uploading ||
-                  saving
-                }
-              />
-
-              <small>
-                JPG, PNG lub WEBP.
-                Zdjęcie zostanie
-                automatycznie
-                przycięte do
-                400 × 400 px.
-              </small>
-            </label>
-
-            <label>
-              Imię / nazwa
-
-              <input
-                type="text"
-                value={name}
-                onChange={(event) =>
-                  setName(
-                    event.target.value
-                  )
-                }
-                required
-              />
-            </label>
-
-            <label>
-              O mnie
-
-              <textarea
-                rows="5"
-                value={about}
-                onChange={(event) =>
-                  setAbout(
-                    event.target.value
-                  )
-                }
-                maxLength={1000}
-                placeholder="Napisz kilka słów o sobie..."
-              />
-
-              <small>
-                Opis będzie widoczny
-                na Twoim profilu.
-              </small>
-            </label>
-
-            <label>
-              E-mail
-
-              <input
-                type="email"
-                value={
-                  user.email || ""
-                }
-                disabled
-              />
-            </label>
-
-            {message && (
-              <p className="auth-message">
-                {message}
-              </p>
-            )}
-
-            <button
-              className="btn btn-dark btn-large"
-              type="submit"
-              disabled={
-                saving ||
-                uploading
-              }
-            >
-              {saving
-                ? "Zapisywanie..."
-                : "Zapisz zmiany →"}
-            </button>
-          </form>
-        </section>
-
-        <section className="account-card my-jobs-section">
-          <span className="section-label">
-            Moje zlecenia
-          </span>
-
-          <h2>
-            Zlecenia, które
-            opublikowałeś
-          </h2>
-
-          {jobsLoading ? (
-            <p>
-              Ładowanie zleceń...
-            </p>
-          ) : myJobs.length ===
-            0 ? (
-            <p>
-              Nie masz jeszcze
-              żadnych zleceń.
-            </p>
-          ) : (
-            <div className="jobs-list">
-              {myJobs.map(
-                (job) => (
-                  <article
-                    className="job-card"
-                    key={job.id}
-                  >
-                    <span className="section-label">
-                      {job.category}
-                    </span>
-
-                    <h2>
-                      {job.title}
-                    </h2>
-
-                    <p>
-                      Budżet:{" "}
-                      <strong>
-                        {Number(
-                          job.budget ||
-                            0
-                        ).toLocaleString(
-                          "pl-PL"
-                        )}{" "}
-                        zł
-                      </strong>
-                    </p>
-
-                    <div className="job-actions">
-                      <Link
-                        className="btn btn-dark"
-                        to={`/edit-job/${job.id}`}
-                      >
-                        Edytuj
-                      </Link>
-
-                      <button
-                        className="btn btn-outline"
-                        type="button"
-                        onClick={() =>
-                          handleDeleteJob(
-                            job.id
-                          )
-                        }
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  </article>
-                )
-              )}
-            </div>
-          )}
-        </section>
-      </main>
-    </div>
-  );
-}
-
-/* =========================================================
-   FIND TALENT
-========================================================= */
-
-function FindTalent() {
-  const navigate =
-    useNavigate();
-
-  const { user } =
-    useAuth();
-
-  const [title, setTitle] =
-    useState("");
-
-  const [
-    description,
-    setDescription,
-  ] = useState("");
-
-  const [category, setCategory] =
-    useState(
-      JOB_CATEGORIES[0]
-    );
-
-  const [budget, setBudget] =
-    useState("");
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState(false);
-
-  function handleBudgetChange(
-    event
-  ) {
-    setBudget(
-      event.target.value.replace(
-        /\D/g,
-        ""
-      )
-    );
-  }
-
-  async function handleSubmit(
-    event
-  ) {
-    event.preventDefault();
-
-    setMessage("");
-    setSuccess(false);
-
-    const cleanTitle =
-      title.trim();
-
-    const cleanDescription =
-      description.trim();
-
-    const numericBudget =
-      Number(budget);
-
-    if (!cleanTitle) {
       setMessage(
-        "Wpisz nazwę zlecenia."
+        `Nie udało się zapisać profilu: ${error.message}`
       );
 
       return;
     }
 
-    if (!cleanDescription) {
+    /*
+      Następnie synchronizujemy public.profiles,
+      z którego korzystają inni użytkownicy.
+    */
+    const {
+      data: existingProfile,
+      error: profileReadError,
+    } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileReadError) {
       setMessage(
-        "Opisz krótko swoje zlecenie."
+        `Nie udało się sprawdzić profilu publicznego: ${profileReadError.message}`
       );
 
       return;
     }
 
-    if (
-      !budget ||
-      !Number.isInteger(
-        numericBudget
-      ) ||
-      numericBudget <= 0
-    ) {
-      setMessage(
-        "Budżet musi być większy od 0."
-      );
+    const profileData = {
+      name:
+        cleanName,
+      avatar_url:
+        avatarUrl ||
+        null,
+      about:
+        cleanAbout ||
+        null,
+    };
 
-      return;
-    }
-
-    if (!user?.id) {
-      setMessage(
-        "Twoja sesja wygasła."
-      );
-
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      /*
-       * WAŻNE:
-       * NIE DODAJEMY jobs.status.
-       */
-
+    if (existingProfile?.id) {
       const {
-        error,
-      } =
-        await supabase
-          .from("jobs")
-          .insert({
-            user_id:
-              user.id,
-            title:
-              cleanTitle,
-            description:
-              cleanDescription,
-            category,
-            budget:
-              numericBudget,
-          });
+        error: profileUpdateError,
+      } = await supabase
+        .from("profiles")
+        .update(profileData)
+        .eq("id", user.id);
 
-      if (error) {
+      if (profileUpdateError) {
         setMessage(
-          `Nie udało się opublikować zlecenia: ${error.message}`
+          `Profil konta zapisano, ale nie udało się zaktualizować profilu publicznego: ${profileUpdateError.message}`
         );
 
         return;
       }
-
-      setSuccess(true);
-
-      setMessage(
-        "Zlecenie zostało opublikowane."
-      );
-
-      setTitle("");
-      setDescription("");
-      setCategory(
-        JOB_CATEGORIES[0]
-      );
-      setBudget("");
-
-      setTimeout(() => {
-        navigate("/jobs");
-      }, 900);
-    } catch (error) {
-      setMessage(
-        `Nie udało się opublikować zlecenia: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="page">
-      <AccountNavbar />
-
-      <main className="app-page">
-        <div className="app-page-header">
-          <span className="section-label">
-            Dla zlecających
-          </span>
-
-          <h1>
-            Dodaj zlecenie
-          </h1>
-
-          <p>
-            Opisz projekt, wybierz
-            kategorię i ustaw
-            prosty budżet.
-          </p>
-        </div>
-
-        <form
-          className="project-form"
-          onSubmit={handleSubmit}
-        >
-          <label>
-            Czego potrzebujesz?
-
-            <input
-              type="text"
-              value={title}
-              onChange={(event) =>
-                setTitle(
-                  event.target.value
-                )
-              }
-              maxLength={120}
-              required
-            />
-          </label>
-
-          <label>
-            Kategoria
-
-            <select
-              value={category}
-              onChange={(event) =>
-                setCategory(
-                  event.target.value
-                )
-              }
-              required
-            >
-              {JOB_CATEGORIES.map(
-                (item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {item}
-                  </option>
-                )
-              )}
-            </select>
-          </label>
-
-          <label>
-            Opisz swój projekt
-
-            <textarea
-              rows="6"
-              value={description}
-              onChange={(event) =>
-                setDescription(
-                  event.target.value
-                )
-              }
-              maxLength={2000}
-              required
-            />
-          </label>
-
-          <label>
-            Budżet (zł)
-
-            <input
-              type="text"
-              value={budget}
-              onChange={
-                handleBudgetChange
-              }
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="Np. 3000"
-              maxLength={9}
-              required
-            />
-
-            <small>
-              Cena jest ustalana
-              przy publikacji
-              zlecenia i nie może
-              być później zmieniana.
-            </small>
-          </label>
-
-          {message && (
-            <p
-              className={
-                success
-                  ? "auth-message"
-                  : "auth-error"
-              }
-            >
-              {message}
-            </p>
-          )}
-
-          <button
-            className="btn btn-dark btn-large"
-            type="submit"
-            disabled={saving}
-          >
-            {saving
-              ? "Publikowanie..."
-              : "Opublikuj zlecenie →"}
-          </button>
-        </form>
-      </main>
-    </div>
-  );
-}
-
-/* =========================================================
-   EDIT JOB
-========================================================= */
-
-function EditJob() {
-  const { id } =
-    useParams();
-
-  const navigate =
-    useNavigate();
-
-  const { user } =
-    useAuth();
-
-  const [job, setJob] =
-    useState(null);
-
-  const [title, setTitle] =
-    useState("");
-
-  const [
-    description,
-    setDescription,
-  ] = useState("");
-
-  const [category, setCategory] =
-    useState(
-      JOB_CATEGORIES[0]
-    );
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [message, setMessage] =
-    useState("");
-
-  useEffect(() => {
-    if (!user?.id || !id)
-      return;
-
-    async function loadJob() {
+    } else {
       const {
-        data,
-        error,
-      } =
-        await supabase
-          .from("jobs")
-          .select(
-            "id, user_id, title, description, category, budget, created_at"
-          )
-          .eq("id", id)
-          .eq(
-            "user_id",
-            user.id
-          )
-          .single();
+        error: profileInsertError,
+      } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          ...profileData,
+        });
 
-      if (error) {
+      if (profileInsertError) {
         setMessage(
-          `Nie udało się pobrać zlecenia: ${error.message}`
+          `Profil konta zapisano, ale nie udało się utworzyć profilu publicznego: ${profileInsertError.message}`
         );
-
-        setLoading(false);
 
         return;
       }
-
-      setJob(data);
-      setTitle(
-        data.title || ""
-      );
-      setDescription(
-        data.description || ""
-      );
-      setCategory(
-        data.category ||
-          JOB_CATEGORIES[0]
-      );
-
-      setLoading(false);
     }
 
-    loadJob();
-  }, [id, user?.id]);
+    /*
+      Odświeżamy lokalne dane użytkownika.
+    */
+    if (data?.user) {
+      setUser(data.user);
+    }
 
-  async function handleSave(
-    event
-  ) {
+    setMessage(
+      "Profil został zapisany."
+    );
+  } catch (error) {
+    console.error(
+      "PROFILE SAVE ERROR:",
+      error
+    );
+
+    setMessage(
+      `Nie udało się zapisać profilu: ${
+        error?.message ||
+        "Nieznany błąd"
+      }`
+    );
+  }
+}
     event.preventDefault();
 
     if (
