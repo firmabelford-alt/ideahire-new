@@ -17,6 +17,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import Sorts from "./Sorts";
 import { supabase } from "./supabase";
 
 /* =========================================================
@@ -1645,336 +1646,925 @@ function Account() {
       />
     );
   }
-async function handleAvatarChange(event) {
-  const file = event.target.files?.[0];
 
-  if (!file || !user?.id) {
-    return;
-  }
+  async function handleAvatarChange(
+    event
+  ) {
+    const file =
+      event.target.files?.[0];
 
-  setMessage("");
+    if (!file) return;
 
-  try {
-    const resizedImage =
-      await resizeAndConvertImage(file);
+    setMessage("");
 
-    const filePath =
-      `${user.id}/avatar-${Date.now()}.jpg`;
-
-    const {
-      error: uploadError,
-    } = await supabase.storage
-      .from("avatars")
-      .upload(
-        filePath,
-        resizedImage,
-        {
-          contentType: "image/jpeg",
-          upsert: true,
-        }
-      );
-
-    if (uploadError) {
-      console.error(
-        "AVATAR UPLOAD ERROR:",
-        uploadError
-      );
-
+    if (
+      !file.type.startsWith(
+        "image/"
+      )
+    ) {
       setMessage(
-        `Nie udało się przesłać zdjęcia: ${uploadError.message}`
+        "Wybierz plik graficzny."
       );
+
+      event.target.value = "";
 
       return;
     }
 
-    const {
-      data: publicUrlData,
-    } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(filePath);
-
-    const publicUrl =
-      publicUrlData?.publicUrl;
-
-    if (!publicUrl) {
+    if (
+      file.size >
+      10 * 1024 * 1024
+    ) {
       setMessage(
-        "Zdjęcie zostało przesłane, ale nie udało się pobrać jego adresu."
+        "Zdjęcie może mieć maksymalnie 10 MB."
       );
+
+      event.target.value = "";
 
       return;
     }
 
-    /*
-      Sprawdzamy, czy użytkownik ma już
-      rekord w public.profiles.
-    */
-    const {
-      data: existingProfile,
-      error: profileReadError,
-    } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", user.id)
-      .maybeSingle();
+    setUploading(true);
 
-    if (profileReadError) {
-      console.error(
-        "PROFILE READ ERROR:",
-        profileReadError
-      );
+    try {
+      const convertedFile =
+        await resizeAndConvertImage(
+          file
+        );
 
-      setMessage(
-        `Nie udało się sprawdzić profilu: ${profileReadError.message}`
-      );
+      const filePath =
+        `${user.id}/avatar-${Date.now()}.jpg`;
 
-      return;
-    }
-
-    /*
-      Jeżeli profil istnieje — aktualizujemy tylko avatar.
-    */
-    if (existingProfile?.id) {
       const {
-        error: profileUpdateError,
+        error: uploadError,
+      } =
+        await supabase.storage
+          .from("avatars")
+          .upload(
+            filePath,
+            convertedFile,
+            {
+              contentType:
+                "image/jpeg",
+              cacheControl:
+                "3600",
+              upsert: false,
+            }
+          );
+
+      if (uploadError) {
+        setMessage(
+          `Nie udało się przesłać zdjęcia: ${uploadError.message}`
+        );
+
+        return;
+      }
+
+      const {
+        data:
+          publicUrlData,
+      } =
+        supabase.storage
+          .from("avatars")
+          .getPublicUrl(
+            filePath
+          );
+
+      const publicUrl =
+        publicUrlData?.publicUrl;
+
+      if (!publicUrl) {
+        setMessage(
+          "Nie udało się pobrać adresu zdjęcia."
+        );
+
+        return;
+      }
+
+      const {
+        data: updatedUser,
+        error:
+          metadataError,
+      } =
+        await supabase.auth.updateUser(
+          {
+            data: {
+              avatar_url:
+                publicUrl,
+            },
+          }
+        );
+
+      if (metadataError) {
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
+        );
+
+        return;
+      }
+
+      const {
+        error: profileError,
       } = await supabase
         .from("profiles")
-        .update({
-          avatar_url: publicUrl,
-        })
-        .eq("id", user.id);
+        .upsert(
+          {
+            id: user.id,
+            name:
+              name.trim() ||
+              user.user_metadata?.name ||
+              user.email?.split("@")[0] ||
+              "Użytkownik",
+            avatar_url: publicUrl,
+            about:
+              about.trim() ||
+              user.user_metadata?.about ||
+              null,
+          },
+          {
+            onConflict: "id",
+          }
+        );
 
-      if (profileUpdateError) {
+      if (profileError) {
         console.error(
           "PROFILE AVATAR UPDATE ERROR:",
-          profileUpdateError
+          profileError
         );
 
         setMessage(
-          `Zdjęcie przesłane, ale nie udało się zapisać go w profilu: ${profileUpdateError.message}`
+          `Zdjęcie zostało przesłane, ale nie udało się zaktualizować profilu publicznego: ${profileError.message}`
         );
 
         return;
       }
-    }
 
-    /*
-      Jeżeli profilu nie ma — tworzymy go.
-    */
-    else {
-      const {
-        error: profileInsertError,
-      } = await supabase
-        .from("profiles")
-        .insert({
-          id: user.id,
-          name:
-            user.user_metadata?.name ||
-            user.email?.split("@")[0] ||
-            "Użytkownik",
-          avatar_url: publicUrl,
-          about:
-            user.user_metadata?.about ||
-            null,
-        });
-
-      if (profileInsertError) {
-        console.error(
-          "PROFILE INSERT ERROR:",
-          profileInsertError
-        );
-
-        setMessage(
-          `Zdjęcie przesłane, ale nie udało się utworzyć profilu: ${profileInsertError.message}`
-        );
-
-        return;
-      }
-    }
-
-    /*
-      Aktualizujemy również Auth metadata.
-    */
-    const {
-      error: metadataError,
-    } = await supabase.auth.updateUser({
-      data: {
-        avatar_url: publicUrl,
-      },
-    });
-
-    if (metadataError) {
-      console.warn(
-        "AUTH AVATAR UPDATE ERROR:",
-        metadataError
+      setAvatarUrl(
+        updatedUser?.user
+          ?.user_metadata
+          ?.avatar_url ||
+          publicUrl
       );
+
+      setMessage(
+        "Zdjęcie profilowe zostało zapisane."
+      );
+    } catch (error) {
+      setMessage(
+        `Nie udało się ustawić zdjęcia: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
+  async function handleSave(
+    event
+  ) {
+    event.preventDefault();
+
+    const cleanName =
+      name.trim();
+
+    const cleanAbout =
+      about.trim();
+
+    if (!cleanName) {
+      setMessage(
+        "Imię / nazwa nie może być puste."
+      );
+
+      return;
     }
 
-    /*
-      Natychmiastowy podgląd nowego avatara.
-    */
-    setAvatarUrl(publicUrl);
+    setSaving(true);
+    setMessage("");
 
-    setMessage(
-      "Zdjęcie profilowe zostało zapisane."
-    );
+    try {
+      const {
+        data,
+        error,
+      } =
+        await supabase.auth.updateUser(
+          {
+            data: {
+              name:
+                cleanName,
+              avatar_url:
+                avatarUrl ||
+                null,
+              about:
+                cleanAbout ||
+                null,
+            },
+          }
+        );
 
-    /*
-      Pozwala ponownie wybrać ten sam plik.
-    */
-    event.target.value = "";
-  } catch (error) {
-    console.error(
-      "AVATAR CHANGE ERROR:",
-      error
-    );
+      if (error) {
+        setMessage(
+          `Nie udało się zapisać profilu: ${error.message}`
+        );
 
-    setMessage(
-      `Nie udało się zmienić zdjęcia: ${
-        error?.message ||
-        "Nieznany błąd"
-      }`
-    );
+        return;
+      }
+
+      setName(
+        data.user.user_metadata
+          ?.name ||
+          cleanName
+      );
+
+      setAvatarUrl(
+        data.user.user_metadata
+          ?.avatar_url ||
+          ""
+      );
+
+      setAbout(
+        data.user.user_metadata
+          ?.about ||
+          ""
+      );
+
+      setMessage(
+        "Profil został zapisany."
+      );
+    } catch (error) {
+      setMessage(
+        `Nie udało się zapisać profilu: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setSaving(false);
+    }
   }
-}
 
-async function handleSave(event) {
-  event.preventDefault();
+  async function handleDeleteJob(
+    jobId
+  ) {
+    const confirmed =
+      window.confirm(
+        "Czy na pewno chcesz usunąć to zlecenie?"
+      );
 
-  if (!user?.id) {
-    setMessage(
-      "Nie znaleziono zalogowanego użytkownika."
-    );
+    if (!confirmed) return;
 
-    return;
-  }
-
-  setMessage("");
-
-  const cleanName =
-    name.trim();
-
-  const cleanAbout =
-    about.trim();
-
-  try {
-    /*
-      Najpierw zapisujemy dane konta.
-    */
     const {
-      data,
       error,
     } =
-      await supabase.auth.updateUser({
-        data: {
-          name:
-            cleanName,
-          avatar_url:
-            avatarUrl ||
-            null,
-          about:
-            cleanAbout ||
-            null,
-        },
-      });
+      await supabase
+        .from("jobs")
+        .delete()
+        .eq("id", jobId)
+        .eq(
+          "user_id",
+          user.id
+        );
 
     if (error) {
-      setMessage(
-        `Nie udało się zapisać profilu: ${error.message}`
+      alert(
+        `Nie udało się usunąć zlecenia: ${error.message}`
       );
 
       return;
     }
 
-    /*
-      Następnie synchronizujemy public.profiles,
-      z którego korzystają inni użytkownicy.
-    */
-    const {
-      data: existingProfile,
-      error: profileReadError,
-    } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profileReadError) {
-      setMessage(
-        `Nie udało się sprawdzić profilu publicznego: ${profileReadError.message}`
-      );
-
-      return;
-    }
-
-    const profileData = {
-      name:
-        cleanName,
-      avatar_url:
-        avatarUrl ||
-        null,
-      about:
-        cleanAbout ||
-        null,
-    };
-
-    if (existingProfile?.id) {
-      const {
-        error: profileUpdateError,
-      } = await supabase
-        .from("profiles")
-        .update(profileData)
-        .eq("id", user.id);
-
-      if (profileUpdateError) {
-        setMessage(
-          `Profil konta zapisano, ale nie udało się zaktualizować profilu publicznego: ${profileUpdateError.message}`
-        );
-
-        return;
-      }
-    } else {
-      const {
-        error: profileInsertError,
-      } = await supabase
-        .from("profiles")
-        .insert({
-          id: user.id,
-          ...profileData,
-        });
-
-      if (profileInsertError) {
-        setMessage(
-          `Profil konta zapisano, ale nie udało się utworzyć profilu publicznego: ${profileInsertError.message}`
-        );
-
-        return;
-      }
-    }
-
-    /*
-      Odświeżamy lokalne dane użytkownika.
-    */
-    if (data?.user) {
-      setUser(data.user);
-    }
-
-    setMessage(
-      "Profil został zapisany."
-    );
-  } catch (error) {
-    console.error(
-      "PROFILE SAVE ERROR:",
-      error
-    );
-
-    setMessage(
-      `Nie udało się zapisać profilu: ${
-        error?.message ||
-        "Nieznany błąd"
-      }`
+    setMyJobs(
+      (current) =>
+        current.filter(
+          (job) =>
+            job.id !== jobId
+        )
     );
   }
+
+  const displayName =
+    name ||
+    user.email?.split("@")[0] ||
+    "Użytkownik";
+
+  const initial =
+    displayName
+      .charAt(0)
+      .toUpperCase();
+
+  return (
+    <div className="page">
+      <AccountNavbar />
+
+      <main className="app-page">
+        <div className="app-page-header">
+          <span className="section-label">
+            Twoje konto
+          </span>
+
+          <h1>
+            Mój profil
+          </h1>
+
+          <p>
+            Zarządzaj swoim
+            profilem IdeaHire.
+          </p>
+        </div>
+
+        <section className="account-card">
+          <div className="profile-preview">
+            <div className="profile-avatar-wrapper">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Zdjęcie profilowe"
+                  className="profile-avatar"
+                />
+              ) : (
+                <div className="profile-avatar profile-avatar-placeholder">
+                  {initial}
+                </div>
+              )}
+            </div>
+
+            <div className="profile-info">
+              <h2>
+                {displayName}
+              </h2>
+
+              <p>
+                {user.email}
+              </p>
+            </div>
+          </div>
+
+          <form
+            className="auth-form account-form"
+            onSubmit={handleSave}
+          >
+            <label>
+              Zdjęcie profilowe
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={
+                  handleAvatarChange
+                }
+                disabled={
+                  uploading ||
+                  saving
+                }
+              />
+
+              <small>
+                JPG, PNG lub WEBP.
+                Zdjęcie zostanie
+                automatycznie
+                przycięte do
+                400 × 400 px.
+              </small>
+            </label>
+
+            <label>
+              Imię / nazwa
+
+              <input
+                type="text"
+                value={name}
+                onChange={(event) =>
+                  setName(
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </label>
+
+            <label>
+              O mnie
+
+              <textarea
+                rows="5"
+                value={about}
+                onChange={(event) =>
+                  setAbout(
+                    event.target.value
+                  )
+                }
+                maxLength={1000}
+                placeholder="Napisz kilka słów o sobie..."
+              />
+
+              <small>
+                Opis będzie widoczny
+                na Twoim profilu.
+              </small>
+            </label>
+
+            <label>
+              E-mail
+
+              <input
+                type="email"
+                value={
+                  user.email || ""
+                }
+                disabled
+              />
+            </label>
+
+            {message && (
+              <p className="auth-message">
+                {message}
+              </p>
+            )}
+
+            <button
+              className="btn btn-dark btn-large"
+              type="submit"
+              disabled={
+                saving ||
+                uploading
+              }
+            >
+              {saving
+                ? "Zapisywanie..."
+                : "Zapisz zmiany →"}
+            </button>
+          </form>
+        </section>
+
+        <section className="account-card my-jobs-section">
+          <span className="section-label">
+            Moje zlecenia
+          </span>
+
+          <h2>
+            Zlecenia, które
+            opublikowałeś
+          </h2>
+
+          {jobsLoading ? (
+            <p>
+              Ładowanie zleceń...
+            </p>
+          ) : myJobs.length ===
+            0 ? (
+            <p>
+              Nie masz jeszcze
+              żadnych zleceń.
+            </p>
+          ) : (
+            <div className="jobs-list">
+              {myJobs.map(
+                (job) => (
+                  <article
+                    className="job-card"
+                    key={job.id}
+                  >
+                    <span className="section-label">
+                      {job.category}
+                    </span>
+
+                    <h2>
+                      {job.title}
+                    </h2>
+
+                    <p>
+                      Budżet:{" "}
+                      <strong>
+                        {Number(
+                          job.budget ||
+                            0
+                        ).toLocaleString(
+                          "pl-PL"
+                        )}{" "}
+                        zł
+                      </strong>
+                    </p>
+
+                    <div className="job-actions">
+                      <Link
+                        className="btn btn-dark"
+                        to={`/edit-job/${job.id}`}
+                      >
+                        Edytuj
+                      </Link>
+
+                      <button
+                        className="btn btn-outline"
+                        type="button"
+                        onClick={() =>
+                          handleDeleteJob(
+                            job.id
+                          )
+                        }
+                      >
+                        Usuń
+                      </button>
+                    </div>
+                  </article>
+                )
+              )}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
 }
+
+/* =========================================================
+   FIND TALENT
+========================================================= */
+
+function FindTalent() {
+  const navigate =
+    useNavigate();
+
+  const { user } =
+    useAuth();
+
+  const [title, setTitle] =
+    useState("");
+
+  const [
+    description,
+    setDescription,
+  ] = useState("");
+
+  const [category, setCategory] =
+    useState(
+      JOB_CATEGORIES[0]
+    );
+
+  const [budget, setBudget] =
+    useState("");
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState(false);
+
+  function handleBudgetChange(
+    event
+  ) {
+    setBudget(
+      event.target.value.replace(
+        /\D/g,
+        ""
+      )
+    );
+  }
+
+  async function handleSubmit(
+    event
+  ) {
+    event.preventDefault();
+
+    setMessage("");
+    setSuccess(false);
+
+    const cleanTitle =
+      title.trim();
+
+    const cleanDescription =
+      description.trim();
+
+    const numericBudget =
+      Number(budget);
+
+    if (!cleanTitle) {
+      setMessage(
+        "Wpisz nazwę zlecenia."
+      );
+
+      return;
+    }
+
+    if (!cleanDescription) {
+      setMessage(
+        "Opisz krótko swoje zlecenie."
+      );
+
+      return;
+    }
+
+    if (
+      !budget ||
+      !Number.isInteger(
+        numericBudget
+      ) ||
+      numericBudget <= 0
+    ) {
+      setMessage(
+        "Budżet musi być większy od 0."
+      );
+
+      return;
+    }
+
+    if (!user?.id) {
+      setMessage(
+        "Twoja sesja wygasła."
+      );
+
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      /*
+       * WAŻNE:
+       * NIE DODAJEMY jobs.status.
+       */
+
+      const {
+        error,
+      } =
+        await supabase
+          .from("jobs")
+          .insert({
+            user_id:
+              user.id,
+            title:
+              cleanTitle,
+            description:
+              cleanDescription,
+            category,
+            budget:
+              numericBudget,
+          });
+
+      if (error) {
+        setMessage(
+          `Nie udało się opublikować zlecenia: ${error.message}`
+        );
+
+        return;
+      }
+
+      setSuccess(true);
+
+      setMessage(
+        "Zlecenie zostało opublikowane."
+      );
+
+      setTitle("");
+      setDescription("");
+      setCategory(
+        JOB_CATEGORIES[0]
+      );
+      setBudget("");
+
+      setTimeout(() => {
+        navigate("/jobs");
+      }, 900);
+    } catch (error) {
+      setMessage(
+        `Nie udało się opublikować zlecenia: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="page">
+      <AccountNavbar />
+
+      <main className="app-page">
+        <div className="app-page-header">
+          <span className="section-label">
+            Dla zlecających
+          </span>
+
+          <h1>
+            Dodaj zlecenie
+          </h1>
+
+          <p>
+            Opisz projekt, wybierz
+            kategorię i ustaw
+            prosty budżet.
+          </p>
+        </div>
+
+        <form
+          className="project-form"
+          onSubmit={handleSubmit}
+        >
+          <label>
+            Czego potrzebujesz?
+
+            <input
+              type="text"
+              value={title}
+              onChange={(event) =>
+                setTitle(
+                  event.target.value
+                )
+              }
+              maxLength={120}
+              required
+            />
+          </label>
+
+          <label>
+            Kategoria
+
+            <select
+              value={category}
+              onChange={(event) =>
+                setCategory(
+                  event.target.value
+                )
+              }
+              required
+            >
+              {JOB_CATEGORIES.map(
+                (item) => (
+                  <option
+                    key={item}
+                    value={item}
+                  >
+                    {item}
+                  </option>
+                )
+              )}
+            </select>
+          </label>
+
+          <label>
+            Opisz swój projekt
+
+            <textarea
+              rows="6"
+              value={description}
+              onChange={(event) =>
+                setDescription(
+                  event.target.value
+                )
+              }
+              maxLength={2000}
+              required
+            />
+          </label>
+
+          <label>
+            Budżet (zł)
+
+            <input
+              type="text"
+              value={budget}
+              onChange={
+                handleBudgetChange
+              }
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Np. 3000"
+              maxLength={9}
+              required
+            />
+
+            <small>
+              Cena jest ustalana
+              przy publikacji
+              zlecenia i nie może
+              być później zmieniana.
+            </small>
+          </label>
+
+          {message && (
+            <p
+              className={
+                success
+                  ? "auth-message"
+                  : "auth-error"
+              }
+            >
+              {message}
+            </p>
+          )}
+
+          <button
+            className="btn btn-dark btn-large"
+            type="submit"
+            disabled={saving}
+          >
+            {saving
+              ? "Publikowanie..."
+              : "Opublikuj zlecenie →"}
+          </button>
+        </form>
+      </main>
+    </div>
+  );
+}
+
+/* =========================================================
+   EDIT JOB
+========================================================= */
+
+function EditJob() {
+  const { id } =
+    useParams();
+
+  const navigate =
+    useNavigate();
+
+  const { user } =
+    useAuth();
+
+  const [job, setJob] =
+    useState(null);
+
+  const [title, setTitle] =
+    useState("");
+
+  const [
+    description,
+    setDescription,
+  ] = useState("");
+
+  const [category, setCategory] =
+    useState(
+      JOB_CATEGORIES[0]
+    );
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [message, setMessage] =
+    useState("");
+
+  useEffect(() => {
+    if (!user?.id || !id)
+      return;
+
+    async function loadJob() {
+      const {
+        data,
+        error,
+      } =
+        await supabase
+          .from("jobs")
+          .select(
+            "id, user_id, title, description, category, budget, created_at"
+          )
+          .eq("id", id)
+          .eq(
+            "user_id",
+            user.id
+          )
+          .single();
+
+      if (error) {
+        setMessage(
+          `Nie udało się pobrać zlecenia: ${error.message}`
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      setJob(data);
+      setTitle(
+        data.title || ""
+      );
+      setDescription(
+        data.description || ""
+      );
+      setCategory(
+        data.category ||
+          JOB_CATEGORIES[0]
+      );
+
+      setLoading(false);
+    }
+
+    loadJob();
+  }, [id, user?.id]);
+
+  async function handleSave(
+    event
+  ) {
     event.preventDefault();
 
     if (
@@ -2803,6 +3393,148 @@ function Jobs() {
           </p>
         </div>
 
+        <style>{`
+          .jobs-search {
+            margin: 0 0 34px;
+            padding: 18px;
+            background: #fff;
+            border: 1px solid #e8e8e5;
+            border-radius: 22px;
+            box-shadow: 0 12px 35px rgba(17, 17, 17, 0.045);
+          }
+
+          .jobs-search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 58px;
+            padding: 0 16px 0 18px;
+            border: 1px solid #deded9;
+            border-radius: 15px;
+            background: #fafaf8;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+          }
+
+          .jobs-search-box:focus-within {
+            border-color: #b9b9b3;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(17, 17, 17, .045);
+          }
+
+          .jobs-search-icon {
+            width: 20px;
+            margin-right: 12px;
+            color: #777;
+            font-size: 22px;
+            line-height: 1;
+            transform: translateY(-1px);
+          }
+
+          .jobs-search-box input {
+            width: 100%;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: #111;
+            font-size: 15px;
+            font-weight: 500;
+          }
+
+          .jobs-search-box input::placeholder {
+            color: #999;
+            font-weight: 400;
+          }
+
+          .jobs-search-clear {
+            width: 30px;
+            height: 30px;
+            flex: 0 0 30px;
+            display: grid;
+            place-items: center;
+            margin-left: 10px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: #ededeb;
+            color: #555;
+            font-size: 19px;
+            line-height: 1;
+            transition: background .2s ease, color .2s ease, transform .2s ease;
+          }
+
+          .jobs-search-clear:hover {
+            background: #deded9;
+            color: #111;
+            transform: none;
+          }
+
+          .jobs-filter-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 2px 1px;
+            overflow-x: auto;
+            scrollbar-width: none;
+          }
+
+          .jobs-filter-row::-webkit-scrollbar {
+            display: none;
+          }
+
+          .jobs-filter {
+            flex: 0 0 auto;
+            min-height: 38px;
+            padding: 8px 14px;
+            border: 1px solid #e1e1dc;
+            border-radius: 999px;
+            background: #fff;
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .1px;
+            white-space: nowrap;
+            transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+          }
+
+          .jobs-filter:hover {
+            border-color: #c8c8c2;
+            background: #f7f7f4;
+            color: #111;
+            transform: none;
+          }
+
+          .jobs-filter.active {
+            border-color: #111;
+            background: #111;
+            color: #fff;
+          }
+
+          .jobs-filter.active:hover {
+            border-color: #111;
+            background: #111;
+            color: #fff;
+          }
+
+          @media (max-width: 600px) {
+            .jobs-search {
+              margin-bottom: 28px;
+              padding: 12px;
+              border-radius: 18px;
+            }
+
+            .jobs-search-box {
+              min-height: 54px;
+              padding-left: 15px;
+            }
+
+            .jobs-filter-row {
+              margin-top: 11px;
+            }
+          }
+        `}</style>
+
         {/* =================================================
             WYSZUKIWARKA
         ================================================= */}
@@ -3426,6 +4158,113 @@ function Notifications() {
             </section>
           )}
 
+        <style>{`
+          .notification-person {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+            margin-bottom: 24px;
+          }
+
+          .notification-avatar {
+            width: 56px;
+            height: 56px;
+            flex: 0 0 56px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            border: 1px solid #e2e2de;
+            border-radius: 50%;
+            background: #f3f3f0;
+            color: #111;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+          }
+
+          .notification-avatar img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center;
+          }
+
+          .notification-person > div:last-child {
+            min-width: 0;
+          }
+
+          .notification-person strong {
+            display: block;
+            margin: 0 0 5px;
+            color: #111;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+          }
+
+          .notification-person p {
+            margin: 0;
+            color: #777;
+            font-size: 13px;
+            line-height: 1.5;
+          }
+
+          .notification-job {
+            min-width: 0;
+            margin-bottom: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #ededeb;
+          }
+
+          .notification-job .section-label {
+            margin-bottom: 8px;
+          }
+
+          .notification-job h2 {
+            margin: 0 0 9px;
+            font-size: 21px;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+            overflow-wrap: anywhere;
+          }
+
+          .notification-job small {
+            display: block;
+            color: #999;
+            font-size: 12px;
+            line-height: 1.5;
+          }
+
+          .job-card > .btn {
+            width: fit-content;
+          }
+
+          @media (max-width: 600px) {
+            .notification-person {
+              gap: 12px;
+              margin-bottom: 20px;
+            }
+
+            .notification-avatar {
+              width: 48px;
+              height: 48px;
+              flex-basis: 48px;
+            }
+
+            .notification-job {
+              margin-bottom: 20px;
+              padding-top: 16px;
+            }
+
+            .notification-job h2 {
+              font-size: 18px;
+            }
+          }
+        `}</style>
+
         <div className="jobs-list">
           {notifications.map(
             (notification) => {
@@ -3541,6 +4380,7 @@ function Router() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Sorts />
         <Routes>
           <Route
             path="/"
