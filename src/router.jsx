@@ -1646,170 +1646,214 @@ function Account() {
     );
   }
 
-  async function handleAvatarChange(
-    event
-  ) {
-    const file =
-      event.target.files?.[0];
+# Poprawiona funkcja `handleAvatarChange`
 
-    if (!file) return;
 
-    setMessage("");
+async function handleAvatarChange(event) {
+  const file = event.target.files?.[0];
 
-    if (
-      !file.type.startsWith(
-        "image/"
-      )
-    ) {
-      setMessage(
-        "Wybierz plik graficzny."
-      );
-
-      event.target.value = "";
-
-      return;
-    }
-
-    if (
-      file.size >
-      10 * 1024 * 1024
-    ) {
-      setMessage(
-        "Zdjęcie może mieć maksymalnie 10 MB."
-      );
-
-      event.target.value = "";
-
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      const convertedFile =
-        await resizeAndConvertImage(
-          file
-        );
-
-      const filePath =
-        `${user.id}/avatar-${Date.now()}.jpg`;
-
-      const {
-        error: uploadError,
-      } =
-        await supabase.storage
-          .from("avatars")
-          .upload(
-            filePath,
-            convertedFile,
-            {
-              contentType:
-                "image/jpeg",
-              cacheControl:
-                "3600",
-              upsert: false,
-            }
-          );
-
-      if (uploadError) {
-        setMessage(
-          `Nie udało się przesłać zdjęcia: ${uploadError.message}`
-        );
-
-        return;
-      }
-
-      const {
-        data:
-          publicUrlData,
-      } =
-        supabase.storage
-          .from("avatars")
-          .getPublicUrl(
-            filePath
-          );
-
-      const publicUrl =
-        publicUrlData?.publicUrl;
-
-      if (!publicUrl) {
-        setMessage(
-          "Nie udało się pobrać adresu zdjęcia."
-        );
-
-        return;
-      }
-
-      const {
-        data: updatedUser,
-        error:
-          metadataError,
-      } =
-        await supabase.auth.updateUser(
-          {
-            data: {
-              avatar_url:
-                publicUrl,
-            },
-          }
-        );
-
-      if (metadataError) {
-        setMessage(
-          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
-        );
-
-        return;
-      }
-
-      const {
-        error: profileAvatarError,
-      } = await supabase
-        .from("profiles")
-        .upsert(
-          {
-            id: user.id,
-            avatar_url: publicUrl,
-          },
-          {
-            onConflict: "id",
-          }
-        );
-
-      if (profileAvatarError) {
-        setMessage(
-          `Zdjęcie przesłane, ale nie udało się zsynchronizować profilu: ${profileAvatarError.message}`
-        );
-
-        return;
-      }
-
-      setAvatarUrl(
-        updatedUser?.user
-          ?.user_metadata
-          ?.avatar_url ||
-          publicUrl
-      );
-
-      setMessage(
-        "Zdjęcie profilowe zostało zapisane."
-      );
-    } catch (error) {
-      setMessage(
-        `Nie udało się ustawić zdjęcia: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setUploading(false);
-      event.target.value = "";
-    }
+  if (!file || !user?.id) {
+    return;
   }
 
-  async function handleSave(
-    event
-  ) {
+  setMessage("");
+
+  try {
+    /*
+      1. Przygotowanie zdjęcia
+    */
+    const resizedImage =
+      await resizeAndConvertImage(file);
+
+    /*
+      2. Unikalna ścieżka użytkownika w Storage
+    */
+    const filePath =
+      `${user.id}/avatar-${Date.now()}.jpg`;
+
+    /*
+      3. Upload do Supabase Storage
+    */
+    const {
+      error: uploadError,
+    } = await supabase.storage
+      .from("avatars")
+      .upload(
+        filePath,
+        resizedImage,
+        {
+          contentType: "image/jpeg",
+          upsert: true,
+        }
+      );
+
+    if (uploadError) {
+      setMessage(
+        `Nie udało się przesłać zdjęcia: ${uploadError.message}`
+      );
+
+      return;
+    }
+
+    /*
+      4. Pobranie publicznego URL-a
+    */
+    const {
+      data: publicUrlData,
+    } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(filePath);
+
+    const publicUrl =
+      publicUrlData?.publicUrl;
+
+    if (!publicUrl) {
+      setMessage(
+        "Zdjęcie zostało przesłane, ale nie udało się pobrać jego adresu."
+      );
+
+      return;
+    }
+
+    /*
+      5. NAJWAŻNIEJSZE:
+         zapisujemy avatar_url bezpośrednio
+         do public.profiles.
+    */
+    const {
+      data: profile,
+      error: profileReadError,
+    } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileReadError) {
+      console.error(
+        "PROFILE READ ERROR:",
+        profileReadError
+      );
+
+      setMessage(
+        `Zdjęcie przesłane, ale nie udało się znaleźć profilu: ${profileReadError.message}`
+      );
+
+      return;
+    }
+
+    let profileError = null;
+
+    /*
+      6. Jeżeli profil istnieje → UPDATE
+    */
+    if (profile?.id) {
+      const {
+        error,
+      } = await supabase
+        .from("profiles")
+        .update({
+          avatar_url: publicUrl,
+        })
+        .eq("id", user.id);
+
+      profileError = error;
+    }
+
+    /*
+      7. Jeżeli profilu nie ma → INSERT
+    */
+    else {
+      const {
+        error,
+      } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          name:
+            user.user_metadata?.name ||
+            user.email?.split("@")[0] ||
+            "Użytkownik",
+          avatar_url: publicUrl,
+          about:
+            user.user_metadata?.about ||
+            null,
+        });
+
+      profileError = error;
+    }
+
+    /*
+      8. Sprawdzamy błąd zapisu do profiles
+    */
+    if (profileError) {
+      console.error(
+        "PROFILE AVATAR UPDATE ERROR:",
+        profileError
+      );
+
+      setMessage(
+        `Zdjęcie przesłane, ale nie udało się zapisać go w profilu: ${profileError.message}`
+      );
+
+      return;
+    }
+
+    /*
+      9. Aktualizujemy również Auth metadata,
+         żeby właściciel konta od razu widział nowe zdjęcie.
+    */
+    const {
+      error: metadataError,
+    } = await supabase.auth.updateUser({
+      data: {
+        avatar_url: publicUrl,
+      },
+    });
+
+    if (metadataError) {
+      console.error(
+        "AUTH AVATAR UPDATE ERROR:",
+        metadataError
+      );
+
+      /*
+        Nie cofamy operacji.
+        profiles.avatar_url zostało już zapisane.
+      */
+    }
+
+    /*
+      10. Natychmiastowy podgląd nowego zdjęcia
+    */
+    setAvatarUrl(publicUrl);
+
+    setMessage(
+      "Zdjęcie profilowe zostało zapisane."
+    );
+
+    /*
+      11. Czyścimy input, żeby można było
+          ponownie wybrać ten sam plik.
+    */
+    if (event.target) {
+      event.target.value = "";
+    }
+  } catch (error) {
+    console.error(
+      "AVATAR CHANGE ERROR:",
+      error
+    );
+
+    setMessage(
+      `Nie udało się zmienić zdjęcia: ${
+        error?.message ||
+        "Nieznany błąd"
+      }`
+    );
+  }
+}
+
     event.preventDefault();
 
     const cleanName =
