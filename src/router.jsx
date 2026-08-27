@@ -1646,9 +1646,6 @@ function Account() {
     );
   }
 
-# Poprawiona funkcja `handleAvatarChange`
-
-
 async function handleAvatarChange(event) {
   const file = event.target.files?.[0];
 
