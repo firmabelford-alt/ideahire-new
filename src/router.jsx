@@ -22,6 +22,7 @@ import Sorts, {
   CountryBadge,
   getCountryByCode,
   saveUserCountry,
+  ApplicationActions,
 } from "./Sorts";
 import { supabase } from "./supabase";
 
@@ -266,7 +267,6 @@ function AccountNavbar() {
           "NOTIFICATION JOBS ERROR:",
           jobsError
         );
-
         return;
       }
 
@@ -275,45 +275,61 @@ function AccountNavbar() {
           (job) => job.id
         );
 
-      if (
-        jobIds.length === 0
-      ) {
-        setHasNotifications(
-          false
-        );
+      let applications = [];
 
-        return;
+      if (jobIds.length > 0) {
+        const {
+          data,
+          error:
+            applicationsError,
+        } = await supabase
+          .from(
+            "job_applications"
+          )
+          .select(
+            "id, job_id, applicant_id, status, created_at"
+          )
+          .in(
+            "job_id",
+            jobIds
+          )
+          .eq(
+            "status",
+            "pending"
+          )
+          .order(
+            "created_at",
+            {
+              ascending: false,
+            }
+          );
+
+        if (applicationsError) {
+          console.error(
+            "NOTIFICATION APPLICATIONS ERROR:",
+            applicationsError
+          );
+          return;
+        }
+
+        applications =
+          data || [];
       }
 
       const {
-        data: applications,
-        error:
-          applicationsError,
+        data: rejectedApplications,
+        error: rejectedApplicationsError,
       } = await supabase
-        .from(
-          "job_applications"
-        )
-        .select(
-          "id, job_id, applicant_id, created_at"
-        )
-        .in(
-          "job_id",
-          jobIds
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        );
+        .from("job_applications")
+        .select("id")
+        .eq("applicant_id", user.id)
+        .eq("status", "rejected");
 
-      if (applicationsError) {
+      if (rejectedApplicationsError) {
         console.error(
-          "NOTIFICATION APPLICATIONS ERROR:",
-          applicationsError
+          "REJECTED APPLICATION NOTIFICATION ERROR:",
+          rejectedApplicationsError
         );
-
-        return;
       }
 
       const readKey =
@@ -326,16 +342,25 @@ function AccountNavbar() {
           ) || "[]"
         );
 
-      const unread =
+      const unreadIncoming =
         (applications || []).some(
           (application) =>
             !readIds.includes(
-              application.id
+              `incoming:${application.id}`
+            )
+        );
+
+      const unreadRejected =
+        (rejectedApplications || []).some(
+          (application) =>
+            !readIds.includes(
+              `rejected:${application.id}`
             )
         );
 
       setHasNotifications(
-        unread
+        unreadIncoming ||
+        unreadRejected
       );
     } catch (error) {
       console.error(
@@ -4075,6 +4100,11 @@ function Notifications() {
     setNotifications,
   ] = useState([]);
 
+  const [
+    rejectedDecisions,
+    setRejectedDecisions,
+  ] = useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -4088,6 +4118,10 @@ function Notifications() {
     setMessage("");
 
     try {
+      /*
+       * 1. Zgłoszenia do zleceń, których jesteś właścicielem.
+       * Pokazujemy wyłącznie aktywne zgłoszenia "pending".
+       */
       const {
         data: myJobs,
         error: jobsError,
@@ -4103,11 +4137,7 @@ function Notifications() {
           );
 
       if (jobsError) {
-        setMessage(
-          `Nie udało się pobrać powiadomień: ${jobsError.message}`
-        );
-
-        return;
+        throw jobsError;
       }
 
       const jobIds =
@@ -4115,29 +4145,142 @@ function Notifications() {
           (job) => job.id
         );
 
-      if (
-        jobIds.length === 0
-      ) {
-        setNotifications([]);
+      let incomingApplications = [];
 
-        return;
+      if (jobIds.length > 0) {
+        const {
+          data: applications,
+          error:
+            applicationsError,
+        } =
+          await supabase
+            .from(
+              "job_applications"
+            )
+            .select(
+              "id, job_id, applicant_id, status, created_at"
+            )
+            .in(
+              "job_id",
+              jobIds
+            )
+            .eq(
+              "status",
+              "pending"
+            )
+            .order(
+              "created_at",
+              {
+                ascending: false,
+              }
+            );
+
+        if (applicationsError) {
+          throw applicationsError;
+        }
+
+        incomingApplications =
+          applications || [];
       }
 
+      let incomingResult = [];
+
+      if (
+        incomingApplications.length >
+        0
+      ) {
+        const applicantIds = [
+          ...new Set(
+            incomingApplications.map(
+              (item) =>
+                item.applicant_id
+            )
+          ),
+        ];
+
+        const {
+          data: profiles,
+          error: profilesError,
+        } =
+          await supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url, about"
+            )
+            .in(
+              "id",
+              applicantIds
+            );
+
+        if (profilesError) {
+          console.error(
+            "NOTIFICATION PROFILE ERROR:",
+            profilesError
+          );
+        }
+
+        const profileMap =
+          new Map(
+            (profiles || []).map(
+              (profile) => [
+                profile.id,
+                profile,
+              ]
+            )
+          );
+
+        const jobMap =
+          new Map(
+            (myJobs || []).map(
+              (job) => [
+                job.id,
+                job,
+              ]
+            )
+          );
+
+        incomingResult =
+          incomingApplications.map(
+            (application) => ({
+              ...application,
+              applicant:
+                profileMap.get(
+                  application.applicant_id
+                ),
+              job:
+                jobMap.get(
+                  application.job_id
+                ),
+            })
+          );
+      }
+
+      setNotifications(
+        incomingResult
+      );
+
+      /*
+       * 2. Decyzje dotyczące zgłoszeń wysłanych przez Ciebie.
+       * Na tym etapie obsługujemy odrzucenie.
+       */
       const {
-        data: applications,
-        error:
-          applicationsError,
+        data: myRejected,
+        error: rejectedError,
       } =
         await supabase
           .from(
             "job_applications"
           )
           .select(
-            "id, job_id, applicant_id, created_at"
+            "id, job_id, applicant_id, status, created_at"
           )
-          .in(
-            "job_id",
-            jobIds
+          .eq(
+            "applicant_id",
+            user.id
+          )
+          .eq(
+            "status",
+            "rejected"
           )
           .order(
             "created_at",
@@ -4146,93 +4289,89 @@ function Notifications() {
             }
           );
 
-      if (applicationsError) {
-        setMessage(
-          `Nie udało się pobrać zgłoszeń: ${applicationsError.message}`
-        );
-
-        return;
+      if (rejectedError) {
+        throw rejectedError;
       }
+
+      let rejectedResult = [];
 
       if (
-        !applications ||
-        applications.length ===
-          0
+        myRejected &&
+        myRejected.length > 0
       ) {
-        setNotifications([]);
+        const rejectedJobIds = [
+          ...new Set(
+            myRejected.map(
+              (application) =>
+                application.job_id
+            )
+          ),
+        ];
 
-        return;
-      }
+        const {
+          data: rejectedJobs,
+          error: rejectedJobsError,
+        } =
+          await supabase
+            .from("jobs")
+            .select(
+              "id, title"
+            )
+            .in(
+              "id",
+              rejectedJobIds
+            );
 
-      const applicantIds = [
-        ...new Set(
-          applications.map(
-            (item) =>
-              item.applicant_id
-          )
-        ),
-      ];
+        if (rejectedJobsError) {
+          console.error(
+            "REJECTED JOBS ERROR:",
+            rejectedJobsError
+          );
+        }
 
-      const {
-        data: profiles,
-      } =
-        await supabase
-          .from("profiles")
-          .select(
-            "id, name, avatar_url, about"
-          )
-          .in(
-            "id",
-            applicantIds
+        const rejectedJobMap =
+          new Map(
+            (rejectedJobs || []).map(
+              (job) => [
+                job.id,
+                job,
+              ]
+            )
           );
 
-      const profileMap =
-        new Map(
-          (profiles || []).map(
-            (profile) => [
-              profile.id,
-              profile,
-            ]
-          )
-        );
+        rejectedResult =
+          myRejected.map(
+            (application) => ({
+              ...application,
+              job:
+                rejectedJobMap.get(
+                  application.job_id
+                ),
+            })
+          );
+      }
 
-      const jobMap =
-        new Map(
-          (myJobs || []).map(
-            (job) => [
-              job.id,
-              job,
-            ]
-          )
-        );
-
-      const result =
-        applications.map(
-          (application) => ({
-            ...application,
-            applicant:
-              profileMap.get(
-                application.applicant_id
-              ),
-            job:
-              jobMap.get(
-                application.job_id
-              ),
-          })
-        );
-
-      setNotifications(
-        result
+      setRejectedDecisions(
+        rejectedResult
       );
 
+      /*
+       * Po otwarciu skrzynki zaznaczamy aktualne elementy
+       * jako przeczytane dla kropki w navbarze.
+       */
       const readKey =
         `ideahire_read_notifications_${user.id}`;
 
-      const readIds =
-        result.map(
+      const readIds = [
+        ...incomingResult.map(
           (item) =>
-            item.id
-        );
+            `incoming:${item.id}`
+        ),
+        ...rejectedResult.map(
+          (item) =>
+            `rejected:${item.id}`
+        ),
+      ];
 
       localStorage.setItem(
         readKey,
@@ -4256,6 +4395,19 @@ function Notifications() {
     loadNotifications();
   }, [user?.id]);
 
+  function handleRejected(
+    applicationId
+  ) {
+    setNotifications(
+      (current) =>
+        current.filter(
+          (notification) =>
+            notification.id !==
+            applicationId
+        )
+    );
+  }
+
   function formatDate(
     value
   ) {
@@ -4275,6 +4427,10 @@ function Notifications() {
     );
   }
 
+  const isInboxEmpty =
+    notifications.length === 0 &&
+    rejectedDecisions.length === 0;
+
   return (
     <div className="page">
       <AccountNavbar />
@@ -4290,9 +4446,10 @@ function Notifications() {
           </h1>
 
           <p>
-            Tutaj znajdziesz osoby,
-            które zgłosiły się do
-            Twoich zleceń.
+            Tutaj znajdziesz zgłoszenia
+            wykonawców oraz decyzje
+            dotyczące Twoich własnych
+            zgłoszeń.
           </p>
         </div>
 
@@ -4311,8 +4468,7 @@ function Notifications() {
 
         {!loading &&
           !message &&
-          notifications.length ===
-            0 && (
+          isInboxEmpty && (
             <section className="account-card">
               <span className="section-label">
                 Skrzynka jest pusta
@@ -4320,14 +4476,16 @@ function Notifications() {
 
               <h2>
                 Nie masz nowych
-                zgłoszeń.
+                powiadomień.
               </h2>
 
               <p>
                 Gdy ktoś zgłosi się
-                do Twojego zlecenia,
-                pojawi się tutaj jego
-                profil.
+                do Twojego zlecenia
+                albo pojawi się decyzja
+                dotycząca Twojego
+                zgłoszenia, zobaczysz
+                ją tutaj.
               </p>
             </section>
           )}
@@ -4388,7 +4546,7 @@ function Notifications() {
 
           .notification-job {
             min-width: 0;
-            margin-bottom: 24px;
+            margin-bottom: 18px;
             padding-top: 20px;
             border-top: 1px solid #ededeb;
           }
@@ -4412,8 +4570,60 @@ function Notifications() {
             line-height: 1.5;
           }
 
-          .job-card > .btn {
+          .notification-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .notification-card-actions > .btn {
             width: fit-content;
+          }
+
+          .notification-section-title {
+            margin: 30px 0 14px;
+          }
+
+          .notification-decision-card {
+            border-color: #eadfdc;
+            background:
+              linear-gradient(
+                180deg,
+                #fff 0%,
+                #fffaf8 100%
+              );
+          }
+
+          .notification-decision-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 14px;
+            border-radius: 50%;
+            background: #f7e9e5;
+            color: #9c392d;
+            font-size: 18px;
+            font-weight: 800;
+          }
+
+          .notification-decision-card h2 {
+            margin: 0 0 9px;
+            font-size: 20px;
+            line-height: 1.3;
+          }
+
+          .notification-decision-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.65;
+          }
+
+          .notification-decision-job {
+            margin-top: 14px;
+            color: #333;
+            font-size: 14px;
           }
 
           @media (max-width: 600px) {
@@ -4429,107 +4639,209 @@ function Notifications() {
             }
 
             .notification-job {
-              margin-bottom: 20px;
+              margin-bottom: 16px;
               padding-top: 16px;
             }
 
             .notification-job h2 {
               font-size: 18px;
             }
+
+            .notification-card-actions {
+              display: grid;
+              grid-template-columns: 1fr;
+            }
+
+            .notification-card-actions > .btn {
+              width: 100%;
+            }
           }
         `}</style>
 
-        <div className="jobs-list">
-          {notifications.map(
-            (notification) => {
-              const applicant =
-                notification.applicant;
+        {!loading &&
+          !message &&
+          notifications.length >
+            0 && (
+            <>
+              <div className="notification-section-title">
+                <span className="section-label">
+                  Zgłoszenia do Twoich zleceń
+                </span>
+              </div>
 
-              const applicantName =
-                applicant?.name ||
-                "Użytkownik";
+              <div className="jobs-list">
+                {notifications.map(
+                  (notification) => {
+                    const applicant =
+                      notification.applicant;
 
-              const initial =
-                applicantName
-                  .charAt(0)
-                  .toUpperCase();
+                    const applicantName =
+                      applicant?.name ||
+                      "Użytkownik";
 
-              return (
-                <article
-                  className="job-card"
-                  key={
-                    notification.id
-                  }
-                >
-                  <Link
-                    to={`/profile/${notification.applicant_id}`}
-                    className="notification-person"
-                  >
-                    <div className="notification-avatar">
-                      {applicant?.avatar_url ? (
-                        <img
-                          src={
-                            applicant.avatar_url
-                          }
-                          alt={
-                            applicantName
-                          }
-                        />
-                      ) : (
-                        initial
-                      )}
-                    </div>
+                    const initial =
+                      applicantName
+                        .charAt(0)
+                        .toUpperCase();
 
-                    <div>
-                      <strong>
-                        {
-                          applicantName
+                    return (
+                      <article
+                        className="job-card"
+                        key={
+                          notification.id
                         }
-                      </strong>
+                      >
+                        <Link
+                          to={`/profile/${notification.applicant_id}`}
+                          className="notification-person"
+                        >
+                          <div className="notification-avatar">
+                            {applicant?.avatar_url ? (
+                              <img
+                                src={
+                                  applicant.avatar_url
+                                }
+                                alt={
+                                  applicantName
+                                }
+                              />
+                            ) : (
+                              initial
+                            )}
+                          </div>
+
+                          <div>
+                            <strong>
+                              {
+                                applicantName
+                              }
+                            </strong>
+
+                            <p>
+                              chce wykonać
+                              Twoje zlecenie
+                            </p>
+                          </div>
+                        </Link>
+
+                        <div className="notification-job">
+                          <span className="section-label">
+                            Zlecenie
+                          </span>
+
+                          <h2>
+                            {
+                              notification
+                                .job
+                                ?.title
+                            }
+                          </h2>
+
+                          <small>
+                            Zgłoszenie:{" "}
+                            {formatDate(
+                              notification.created_at
+                            )}
+                          </small>
+                        </div>
+
+                        <div className="notification-card-actions">
+                          <Link
+                            className="btn btn-outline"
+                            to={`/profile/${notification.applicant_id}`}
+                          >
+                            Zobacz profil →
+                          </Link>
+
+                          <ApplicationActions
+                            applicationId={
+                              notification.id
+                            }
+                            onRejected={
+                              handleRejected
+                            }
+                          />
+                        </div>
+                      </article>
+                    );
+                  }
+                )}
+              </div>
+            </>
+          )}
+
+        {!loading &&
+          !message &&
+          rejectedDecisions.length >
+            0 && (
+            <>
+              <div className="notification-section-title">
+                <span className="section-label">
+                  Decyzje dotyczące Twoich zgłoszeń
+                </span>
+              </div>
+
+              <div className="jobs-list">
+                {rejectedDecisions.map(
+                  (decision) => (
+                    <article
+                      className="job-card notification-decision-card"
+                      key={
+                        `rejected-${decision.id}`
+                      }
+                    >
+                      <div className="notification-decision-icon">
+                        ×
+                      </div>
+
+                      <span className="section-label">
+                        Decyzja dotycząca zgłoszenia
+                      </span>
+
+                      <h2>
+                        Twoje zgłoszenie nie zostało zaakceptowane
+                      </h2>
 
                       <p>
-                        chce wykonać
-                        Twoje zlecenie
+                        Zleceniodawca zdecydował się
+                        nie kontynuować współpracy
+                        w ramach tego zgłoszenia.
+                        Możesz nadal przeglądać
+                        pozostałe zlecenia i zgłaszać
+                        się do kolejnych ofert.
                       </p>
-                    </div>
-                  </Link>
 
-                  <div className="notification-job">
-                    <span className="section-label">
-                      Zlecenie
-                    </span>
+                      <div className="notification-decision-job">
+                        <strong>
+                          Zlecenie:
+                        </strong>{" "}
+                        {decision.job?.title ||
+                          "Zlecenie"}
+                      </div>
 
-                    <h2>
-                      {
-                        notification
-                          .job
-                          ?.title
-                      }
-                    </h2>
-
-                    <small>
-                      Zgłoszenie:{" "}
-                      {formatDate(
-                        notification.created_at
-                      )}
-                    </small>
-                  </div>
-
-                  <Link
-                    className="btn btn-dark"
-                    to={`/profile/${notification.applicant_id}`}
-                  >
-                    Zobacz profil →
-                  </Link>
-                </article>
-              );
-            }
+                      <small
+                        style={{
+                          display: "block",
+                          marginTop: "10px",
+                          color: "#999",
+                        }}
+                      >
+                        Zgłoszenie wysłano:{" "}
+                        {formatDate(
+                          decision.created_at
+                        )}
+                      </small>
+                    </article>
+                  )
+                )}
+              </div>
+            </>
           )}
-        </div>
       </main>
     </div>
   );
 }
+
 
 /* =========================================================
    HOME
