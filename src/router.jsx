@@ -1575,6 +1575,12 @@ function Account() {
   useEffect(() => {
     if (!user) return;
 
+    /*
+     * Formularz inicjalizujemy tylko po zmianie konta.
+     * Aktualizacje Auth (np. USER_UPDATED po zapisie nazwy,
+     * opisu albo avatara) nie mogą nadpisywać wpisywanych
+     * właśnie wartości i powodować migania starej nazwy.
+     */
     setName(
       user.user_metadata?.name ||
         user.email?.split("@")[0] ||
@@ -1590,7 +1596,7 @@ function Account() {
       user.user_metadata?.about ||
         ""
     );
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -1887,13 +1893,9 @@ function Account() {
             id: user.id,
             name: cleanName,
             avatar_url:
-              data.user.user_metadata
-                ?.avatar_url ||
               avatarUrl ||
               null,
             about:
-              data.user.user_metadata
-                ?.about ||
               cleanAbout ||
               null,
           },
@@ -1915,23 +1917,16 @@ function Account() {
         return;
       }
 
-      setName(
-        data.user.user_metadata
-          ?.name ||
-          cleanName
-      );
-
+      /*
+       * Używamy dokładnie wartości zatwierdzonych w formularzu.
+       * Nie czekamy na ponowne odświeżenie user_metadata, dzięki
+       * czemu interfejs nie przeskakuje przez starsze dane.
+       */
+      setName(cleanName);
       setAvatarUrl(
-        data.user.user_metadata
-          ?.avatar_url ||
-          ""
+        avatarUrl || ""
       );
-
-      setAbout(
-        data.user.user_metadata
-          ?.about ||
-          ""
-      );
+      setAbout(cleanAbout);
 
       setMessage(
         "Profil został zapisany."
