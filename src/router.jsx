@@ -17,7 +17,12 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import Sorts from "./Sorts";
+import Sorts, {
+  CountryPicker,
+  CountryBadge,
+  getCountryByCode,
+  saveUserCountry,
+} from "./Sorts";
 import { supabase } from "./supabase";
 
 /* =========================================================
@@ -1557,6 +1562,12 @@ function Account() {
   const [about, setAbout] =
     useState("");
 
+  const [countryCode, setCountryCode] =
+    useState("");
+
+  const [countryLoading, setCountryLoading] =
+    useState(true);
+
   const [saving, setSaving] =
     useState(false);
 
@@ -1596,6 +1607,55 @@ function Account() {
       user.user_metadata?.about ||
         ""
     );
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setCountryCode("");
+      setCountryLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadCountry() {
+      setCountryLoading(true);
+
+      try {
+        const {
+          data,
+          error,
+        } = await supabase
+          .from("public_profiles")
+          .select("country_code")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error(
+            "COUNTRY LOAD ERROR:",
+            error
+          );
+          return;
+        }
+
+        if (mounted) {
+          setCountryCode(
+            data?.country_code || ""
+          );
+        }
+      } finally {
+        if (mounted) {
+          setCountryLoading(false);
+        }
+      }
+    }
+
+    loadCountry();
+
+    return () => {
+      mounted = false;
+    };
   }, [user?.id]);
 
   useEffect(() => {
@@ -1917,6 +1977,24 @@ function Account() {
         return;
       }
 
+      try {
+        await saveUserCountry(
+          user.id,
+          getCountryByCode(countryCode)
+        );
+      } catch (countryError) {
+        console.error(
+          "COUNTRY SAVE ERROR:",
+          countryError
+        );
+
+        setMessage(
+          `Profil został zapisany, ale nie udało się zapisać kraju: ${countryError.message}`
+        );
+
+        return;
+      }
+
       /*
        * Używamy dokładnie wartości zatwierdzonych w formularzu.
        * Nie czekamy na ponowne odświeżenie user_metadata, dzięki
@@ -2036,6 +2114,12 @@ function Account() {
               <p>
                 {user.email}
               </p>
+
+              {countryCode && (
+                <CountryBadge
+                  countryCode={countryCode}
+                />
+              )}
             </div>
           </div>
 
@@ -2113,6 +2197,29 @@ function Account() {
                 }
                 disabled
               />
+            </label>
+
+            <label>
+              Skąd jesteś?
+
+              <CountryPicker
+                value={countryCode}
+                onChange={(country) =>
+                  setCountryCode(
+                    country?.code || ""
+                  )
+                }
+                disabled={
+                  saving ||
+                  uploading ||
+                  countryLoading
+                }
+              />
+
+              <small>
+                Wybierz kraj, który będzie
+                widoczny na Twoim profilu.
+              </small>
             </label>
 
             {message && (
@@ -2820,6 +2927,9 @@ function Profile() {
   const [profile, setProfile] =
     useState(null);
 
+  const [countryCode, setCountryCode] =
+    useState("");
+
   const [jobs, setJobs] =
     useState([]);
 
@@ -2861,6 +2971,26 @@ function Profile() {
         setProfile(
           profileData
         );
+
+        const {
+          data: countryData,
+          error: countryError,
+        } = await supabase
+          .from("public_profiles")
+          .select("country_code")
+          .eq("id", id)
+          .maybeSingle();
+
+        if (countryError) {
+          console.error(
+            "PROFILE COUNTRY ERROR:",
+            countryError
+          );
+        } else {
+          setCountryCode(
+            countryData?.country_code || ""
+          );
+        }
 
         const {
           data:
@@ -2964,6 +3094,12 @@ function Profile() {
               <h1>
                 {name}
               </h1>
+
+              {countryCode && (
+                <CountryBadge
+                  countryCode={countryCode}
+                />
+              )}
 
               {profile.about && (
                 <p>
