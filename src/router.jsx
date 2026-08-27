@@ -17,7 +17,6 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import Sorts from "./Sorts";
 import { supabase } from "./supabase";
 
 /* =========================================================
@@ -1763,6 +1762,28 @@ function Account() {
         return;
       }
 
+      const {
+        error: profileAvatarError,
+      } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            avatar_url: publicUrl,
+          },
+          {
+            onConflict: "id",
+          }
+        );
+
+      if (profileAvatarError) {
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zsynchronizować profilu: ${profileAvatarError.message}`
+        );
+
+        return;
+      }
+
       setAvatarUrl(
         updatedUser?.user
           ?.user_metadata
@@ -1831,6 +1852,30 @@ function Account() {
       if (error) {
         setMessage(
           `Nie udało się zapisać profilu: ${error.message}`
+        );
+
+        return;
+      }
+
+      const {
+        error: profileSyncError,
+      } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            name: cleanName,
+            avatar_url: avatarUrl || null,
+            about: cleanAbout || null,
+          },
+          {
+            onConflict: "id",
+          }
+        );
+
+      if (profileSyncError) {
+        setMessage(
+          `Profil zapisano, ale nie udało się zsynchronizować profilu publicznego: ${profileSyncError.message}`
         );
 
         return;
@@ -3357,148 +3402,6 @@ function Jobs() {
           </p>
         </div>
 
-        <style>{`
-          .jobs-search {
-            margin: 0 0 34px;
-            padding: 18px;
-            background: #fff;
-            border: 1px solid #e8e8e5;
-            border-radius: 22px;
-            box-shadow: 0 12px 35px rgba(17, 17, 17, 0.045);
-          }
-
-          .jobs-search-box {
-            position: relative;
-            display: flex;
-            align-items: center;
-            min-height: 58px;
-            padding: 0 16px 0 18px;
-            border: 1px solid #deded9;
-            border-radius: 15px;
-            background: #fafaf8;
-            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
-          }
-
-          .jobs-search-box:focus-within {
-            border-color: #b9b9b3;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(17, 17, 17, .045);
-          }
-
-          .jobs-search-icon {
-            width: 20px;
-            margin-right: 12px;
-            color: #777;
-            font-size: 22px;
-            line-height: 1;
-            transform: translateY(-1px);
-          }
-
-          .jobs-search-box input {
-            width: 100%;
-            min-width: 0;
-            border: 0;
-            outline: 0;
-            background: transparent;
-            color: #111;
-            font-size: 15px;
-            font-weight: 500;
-          }
-
-          .jobs-search-box input::placeholder {
-            color: #999;
-            font-weight: 400;
-          }
-
-          .jobs-search-clear {
-            width: 30px;
-            height: 30px;
-            flex: 0 0 30px;
-            display: grid;
-            place-items: center;
-            margin-left: 10px;
-            padding: 0;
-            border: 0;
-            border-radius: 50%;
-            background: #ededeb;
-            color: #555;
-            font-size: 19px;
-            line-height: 1;
-            transition: background .2s ease, color .2s ease, transform .2s ease;
-          }
-
-          .jobs-search-clear:hover {
-            background: #deded9;
-            color: #111;
-            transform: none;
-          }
-
-          .jobs-filter-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 14px;
-            padding: 2px 1px;
-            overflow-x: auto;
-            scrollbar-width: none;
-          }
-
-          .jobs-filter-row::-webkit-scrollbar {
-            display: none;
-          }
-
-          .jobs-filter {
-            flex: 0 0 auto;
-            min-height: 38px;
-            padding: 8px 14px;
-            border: 1px solid #e1e1dc;
-            border-radius: 999px;
-            background: #fff;
-            color: #666;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: .1px;
-            white-space: nowrap;
-            transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
-          }
-
-          .jobs-filter:hover {
-            border-color: #c8c8c2;
-            background: #f7f7f4;
-            color: #111;
-            transform: none;
-          }
-
-          .jobs-filter.active {
-            border-color: #111;
-            background: #111;
-            color: #fff;
-          }
-
-          .jobs-filter.active:hover {
-            border-color: #111;
-            background: #111;
-            color: #fff;
-          }
-
-          @media (max-width: 600px) {
-            .jobs-search {
-              margin-bottom: 28px;
-              padding: 12px;
-              border-radius: 18px;
-            }
-
-            .jobs-search-box {
-              min-height: 54px;
-              padding-left: 15px;
-            }
-
-            .jobs-filter-row {
-              margin-top: 11px;
-            }
-          }
-        `}</style>
-
         {/* =================================================
             WYSZUKIWARKA
         ================================================= */}
@@ -4122,113 +4025,6 @@ function Notifications() {
             </section>
           )}
 
-        <style>{`
-          .notification-person {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            min-width: 0;
-            margin-bottom: 24px;
-          }
-
-          .notification-avatar {
-            width: 56px;
-            height: 56px;
-            flex: 0 0 56px;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            border: 1px solid #e2e2de;
-            border-radius: 50%;
-            background: #f3f3f0;
-            color: #111;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-          }
-
-          .notification-avatar img {
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-            object-position: center;
-          }
-
-          .notification-person > div:last-child {
-            min-width: 0;
-          }
-
-          .notification-person strong {
-            display: block;
-            margin: 0 0 5px;
-            color: #111;
-            font-size: 15px;
-            font-weight: 700;
-            line-height: 1.35;
-            overflow-wrap: anywhere;
-          }
-
-          .notification-person p {
-            margin: 0;
-            color: #777;
-            font-size: 13px;
-            line-height: 1.5;
-          }
-
-          .notification-job {
-            min-width: 0;
-            margin-bottom: 24px;
-            padding-top: 20px;
-            border-top: 1px solid #ededeb;
-          }
-
-          .notification-job .section-label {
-            margin-bottom: 8px;
-          }
-
-          .notification-job h2 {
-            margin: 0 0 9px;
-            font-size: 21px;
-            line-height: 1.3;
-            letter-spacing: -0.5px;
-            overflow-wrap: anywhere;
-          }
-
-          .notification-job small {
-            display: block;
-            color: #999;
-            font-size: 12px;
-            line-height: 1.5;
-          }
-
-          .job-card > .btn {
-            width: fit-content;
-          }
-
-          @media (max-width: 600px) {
-            .notification-person {
-              gap: 12px;
-              margin-bottom: 20px;
-            }
-
-            .notification-avatar {
-              width: 48px;
-              height: 48px;
-              flex-basis: 48px;
-            }
-
-            .notification-job {
-              margin-bottom: 20px;
-              padding-top: 16px;
-            }
-
-            .notification-job h2 {
-              font-size: 18px;
-            }
-          }
-        `}</style>
-
         <div className="jobs-list">
           {notifications.map(
             (notification) => {
@@ -4344,7 +4140,6 @@ function Router() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Sorts />
         <Routes>
           <Route
             path="/"
