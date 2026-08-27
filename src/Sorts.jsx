@@ -274,18 +274,25 @@ function Sorts({ children }) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          border-radius: 999px;
+          border-radius: 50%;
           flex: 0 0 auto;
           background: #fff;
           box-sizing: border-box;
+          isolation: isolate;
         }
 
         .ideahire-flag-image {
-          width: 88%;
-          height: 88%;
+          width: 100%;
+          height: 100%;
           display: block;
-          object-fit: contain;
-          border-radius: 4px;
+          object-fit: cover;
+          object-position: center;
+          transform: scale(1.08);
+          transition: transform .18s ease;
+        }
+
+        .ideahire-flag-shell:hover .ideahire-flag-image {
+          transform: scale(1.14);
         }
 
         .ideahire-flag-emoji {
