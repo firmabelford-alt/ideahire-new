@@ -276,23 +276,27 @@ function Sorts({ children }) {
           justify-content: center;
           border-radius: 50%;
           flex: 0 0 auto;
-          background: #fff;
+          background: transparent;
           box-sizing: border-box;
           isolation: isolate;
+          clip-path: circle(50% at 50% 50%);
         }
 
         .ideahire-flag-image {
+          position: absolute;
+          inset: 0;
           width: 100%;
           height: 100%;
           display: block;
           object-fit: cover;
           object-position: center;
-          transform: scale(1.08);
+          border-radius: 50%;
+          transform: none;
           transition: transform .18s ease;
         }
 
         .ideahire-flag-shell:hover .ideahire-flag-image {
-          transform: scale(1.14);
+          transform: scale(1.04);
         }
 
         .ideahire-flag-emoji {
@@ -420,7 +424,7 @@ function Sorts({ children }) {
           height: 26px;
           flex: 0 0 26px;
           font-size: 17px;
-          background: #fff;
+          background: transparent;
           border: 1px solid rgba(20,20,20,.06);
         }
 
