@@ -40,7 +40,7 @@ export async function saveUserCountry(userId, country) {
     error: readError,
   } = await supabase
     .from("public_profiles")
-    .select("id")
+    .select("user_id")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -48,13 +48,13 @@ export async function saveUserCountry(userId, country) {
     throw readError;
   }
 
-  if (existingProfile?.id) {
+  if (existingProfile?.user_id) {
     const { error } = await supabase
       .from("public_profiles")
       .update({
         country_code: countryCode,
       })
-      .eq("id", userId);
+      .eq("user_id", userId);
 
     if (error) throw error;
     return;
@@ -63,7 +63,7 @@ export async function saveUserCountry(userId, country) {
   const { error } = await supabase
     .from("public_profiles")
     .insert({
-      id: userId,
+      user_id: userId,
       country_code: countryCode,
     });
 
