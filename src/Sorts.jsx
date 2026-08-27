@@ -276,13 +276,16 @@ function Sorts({ children }) {
           justify-content: center;
           border-radius: 999px;
           flex: 0 0 auto;
+          background: #fff;
+          box-sizing: border-box;
         }
 
         .ideahire-flag-image {
-          width: 100%;
-          height: 100%;
+          width: 88%;
+          height: 88%;
           display: block;
-          object-fit: cover;
+          object-fit: contain;
+          border-radius: 4px;
         }
 
         .ideahire-flag-emoji {
