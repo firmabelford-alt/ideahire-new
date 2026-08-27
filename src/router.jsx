@@ -4095,6 +4095,9 @@ function Notifications() {
   const { user } =
     useAuth();
 
+  const navigate =
+    useNavigate();
+
   const [
     notifications,
     setNotifications,
@@ -4394,6 +4397,128 @@ function Notifications() {
   useEffect(() => {
     loadNotifications();
   }, [user?.id]);
+
+  async function handleAccepted(
+    applicationId
+  ) {
+    if (!user?.id) {
+      throw new Error("Brak aktywnej sesji użytkownika.");
+    }
+
+    const application =
+      notifications.find(
+        (item) =>
+          item.id === applicationId
+      );
+
+    if (!application) {
+      throw new Error(
+        "Nie znaleziono tego zgłoszenia. Odśwież stronę i spróbuj ponownie."
+      );
+    }
+
+    const jobId =
+      application.job_id;
+
+    const contractorId =
+      application.applicant_id;
+
+    if (!jobId || !contractorId) {
+      throw new Error(
+        "Zgłoszenie nie zawiera kompletnych danych."
+      );
+    }
+
+    /*
+     * Najpierw szukamy istniejącej rozmowy.
+     * Dzięki temu ponowne kliknięcie nie tworzy duplikatów.
+     */
+    const {
+      data: existingConversation,
+      error: existingError,
+    } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("job_id", jobId)
+      .eq("client_id", user.id)
+      .eq(
+        "contractor_id",
+        contractorId
+      )
+      .maybeSingle();
+
+    if (existingError) {
+      throw existingError;
+    }
+
+    let conversationId =
+      existingConversation?.id || null;
+
+    if (!conversationId) {
+      const {
+        data: createdConversation,
+        error: conversationError,
+      } = await supabase
+        .from("conversations")
+        .insert({
+          job_id: jobId,
+          client_id: user.id,
+          contractor_id:
+            contractorId,
+        })
+        .select("id")
+        .single();
+
+      if (conversationError) {
+        throw conversationError;
+      }
+
+      conversationId =
+        createdConversation?.id;
+    }
+
+    if (!conversationId) {
+      throw new Error(
+        "Nie udało się utworzyć rozmowy."
+      );
+    }
+
+    const {
+      data: acceptedApplication,
+      error: acceptError,
+    } = await supabase
+      .from("job_applications")
+      .update({
+        status: "accepted",
+      })
+      .eq("id", applicationId)
+      .eq("status", "pending")
+      .select("id, status")
+      .maybeSingle();
+
+    if (acceptError) {
+      throw acceptError;
+    }
+
+    if (!acceptedApplication?.id) {
+      throw new Error(
+        "Rozmowa została przygotowana, ale nie udało się zmienić statusu zgłoszenia na accepted."
+      );
+    }
+
+    setNotifications(
+      (current) =>
+        current.filter(
+          (notification) =>
+            notification.id !==
+            applicationId
+        )
+    );
+
+    navigate(
+      `/chat/${conversationId}`
+    );
+  }
 
   function handleRejected(
     applicationId
@@ -4757,6 +4882,9 @@ function Notifications() {
                             applicationId={
                               notification.id
                             }
+                            onAccepted={
+                              handleAccepted
+                            }
                             onRejected={
                               handleRejected
                             }
@@ -4837,6 +4965,656 @@ function Notifications() {
               </div>
             </>
           )}
+      </main>
+    </div>
+  );
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+function Chat() {
+  const { user } =
+    useAuth();
+
+  const { id } =
+    useParams();
+
+  const navigate =
+    useNavigate();
+
+  const [conversation, setConversation] =
+    useState(null);
+
+  const [otherProfile, setOtherProfile] =
+    useState(null);
+
+  const [messages, setMessages] =
+    useState([]);
+
+  const [draft, setDraft] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [sending, setSending] =
+    useState(false);
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  async function loadMessages() {
+    if (!id) return;
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from("messages")
+      .select(
+        "id, conversation_id, sender_id, content, created_at"
+      )
+      .eq(
+        "conversation_id",
+        id
+      )
+      .order(
+        "created_at",
+        {
+          ascending: true,
+        }
+      );
+
+    if (error) {
+      throw error;
+    }
+
+    setMessages(
+      data || []
+    );
+  }
+
+  useEffect(() => {
+    if (!user?.id || !id) return;
+
+    let mounted = true;
+
+    async function loadChat() {
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        const {
+          data: conversationData,
+          error: conversationError,
+        } = await supabase
+          .from("conversations")
+          .select(
+            "id, job_id, client_id, contractor_id, created_at"
+          )
+          .eq("id", id)
+          .single();
+
+        if (conversationError) {
+          throw conversationError;
+        }
+
+        if (!mounted) return;
+
+        setConversation(
+          conversationData
+        );
+
+        const otherUserId =
+          conversationData.client_id ===
+          user.id
+            ? conversationData.contractor_id
+            : conversationData.client_id;
+
+        const {
+          data: profileData,
+          error: profileError,
+        } = await supabase
+          .from("profiles")
+          .select(
+            "id, name, avatar_url"
+          )
+          .eq(
+            "id",
+            otherUserId
+          )
+          .maybeSingle();
+
+        if (profileError) {
+          console.error(
+            "CHAT PROFILE ERROR:",
+            profileError
+          );
+        }
+
+        if (mounted) {
+          setOtherProfile(
+            profileData || null
+          );
+        }
+
+        await loadMessages();
+      } catch (error) {
+        if (!mounted) return;
+
+        setErrorMessage(
+          error?.message ||
+            "Nie udało się otworzyć rozmowy."
+        );
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadChat();
+
+    const channel =
+      supabase
+        .channel(
+          `conversation:${id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter:
+              `conversation_id=eq.${id}`,
+          },
+          (payload) => {
+            const newMessage =
+              payload.new;
+
+            setMessages(
+              (current) => {
+                if (
+                  current.some(
+                    (message) =>
+                      message.id ===
+                      newMessage.id
+                  )
+                ) {
+                  return current;
+                }
+
+                return [
+                  ...current,
+                  newMessage,
+                ];
+              }
+            );
+          }
+        )
+        .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(
+        channel
+      );
+    };
+  }, [user?.id, id]);
+
+  async function handleSend(
+    event
+  ) {
+    event.preventDefault();
+
+    const content =
+      draft.trim();
+
+    if (
+      !content ||
+      !user?.id ||
+      !id ||
+      sending
+    ) {
+      return;
+    }
+
+    setSending(true);
+    setErrorMessage("");
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: id,
+          sender_id: user.id,
+          content,
+        })
+        .select(
+          "id, conversation_id, sender_id, content, created_at"
+        )
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setDraft("");
+
+      /*
+       * Dodajemy wiadomość lokalnie od razu.
+       * Realtime ma ochronę przed duplikatem po id.
+       */
+      if (data?.id) {
+        setMessages(
+          (current) =>
+            current.some(
+              (message) =>
+                message.id === data.id
+            )
+              ? current
+              : [...current, data]
+        );
+      }
+    } catch (error) {
+      setErrorMessage(
+        error?.message ||
+          "Nie udało się wysłać wiadomości."
+      );
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const otherName =
+    otherProfile?.name ||
+    "Użytkownik";
+
+  const otherInitial =
+    otherName
+      .charAt(0)
+      .toUpperCase();
+
+  return (
+    <div className="account-page">
+      <AccountNavbar />
+
+      <main className="chat-page">
+        <style>{`
+          .chat-page {
+            width: min(980px, calc(100% - 32px));
+            margin: 34px auto 60px;
+          }
+
+          .chat-shell {
+            min-height: 68vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(20,20,20,.08);
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 18px 55px rgba(20,20,20,.06);
+          }
+
+          .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(20,20,20,.07);
+            background: rgba(250,250,247,.96);
+          }
+
+          .chat-back {
+            border: 0;
+            background: transparent;
+            color: #555;
+            font: inherit;
+            cursor: pointer;
+          }
+
+          .chat-avatar {
+            width: 46px;
+            height: 46px;
+            flex: 0 0 46px;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #ecece8;
+            font-weight: 800;
+          }
+
+          .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .chat-person {
+            min-width: 0;
+          }
+
+          .chat-person strong {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 16px;
+          }
+
+          .chat-person span {
+            display: block;
+            margin-top: 2px;
+            color: #8b8b86;
+            font-size: 12px;
+          }
+
+          .chat-messages {
+            flex: 1;
+            min-height: 420px;
+            max-height: 62vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            padding: 22px;
+            background: #f7f7f4;
+          }
+
+          .chat-empty {
+            margin: auto;
+            max-width: 420px;
+            color: #888;
+            text-align: center;
+            line-height: 1.6;
+          }
+
+          .chat-message {
+            max-width: min(72%, 620px);
+            padding: 11px 14px 8px;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(20,20,20,.04);
+          }
+
+          .chat-message.is-mine {
+            align-self: flex-end;
+            background: #171717;
+            color: #fff;
+            border-bottom-right-radius: 6px;
+          }
+
+          .chat-message.is-theirs {
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+          }
+
+          .chat-message p {
+            margin: 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.5;
+          }
+
+          .chat-message time {
+            display: block;
+            margin-top: 5px;
+            color: #999;
+            font-size: 10px;
+            text-align: right;
+          }
+
+          .chat-message.is-mine time {
+            color: rgba(255,255,255,.58);
+          }
+
+          .chat-form {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid rgba(20,20,20,.07);
+            background: #fff;
+          }
+
+          .chat-form textarea {
+            flex: 1;
+            min-height: 48px;
+            max-height: 140px;
+            resize: vertical;
+            padding: 13px 15px;
+            border: 1px solid rgba(20,20,20,.12);
+            border-radius: 15px;
+            outline: none;
+            background: #f8f8f5;
+            color: #171717;
+            font: inherit;
+            line-height: 1.45;
+          }
+
+          .chat-form textarea:focus {
+            border-color: #171717;
+            box-shadow: 0 0 0 3px rgba(20,20,20,.05);
+          }
+
+          .chat-send {
+            min-height: 48px;
+            padding: 0 18px;
+            border: 1px solid #171717;
+            border-radius: 14px;
+            background: #171717;
+            color: #fff;
+            font: inherit;
+            font-weight: 750;
+            cursor: pointer;
+          }
+
+          .chat-send:disabled {
+            cursor: wait;
+            opacity: .55;
+          }
+
+          .chat-error {
+            margin: 0;
+            padding: 10px 18px;
+            border-top: 1px solid #f0d6d1;
+            background: #fff7f5;
+            color: #9b352b;
+            font-size: 13px;
+          }
+
+          @media (max-width: 600px) {
+            .chat-page {
+              width: 100%;
+              margin: 0;
+            }
+
+            .chat-shell {
+              min-height: calc(100vh - 70px);
+              border: 0;
+              border-radius: 0;
+              box-shadow: none;
+            }
+
+            .chat-header {
+              padding: 14px;
+            }
+
+            .chat-messages {
+              min-height: 0;
+              max-height: none;
+              padding: 15px 12px;
+            }
+
+            .chat-message {
+              max-width: 84%;
+            }
+
+            .chat-form {
+              padding: 10px;
+            }
+
+            .chat-send {
+              padding: 0 14px;
+            }
+          }
+        `}</style>
+
+        <div className="chat-shell">
+          {loading ? (
+            <div className="chat-empty">
+              Ładowanie rozmowy...
+            </div>
+          ) : errorMessage &&
+            !conversation ? (
+            <div className="chat-empty">
+              {errorMessage}
+            </div>
+          ) : (
+            <>
+              <header className="chat-header">
+                <button
+                  type="button"
+                  className="chat-back"
+                  onClick={() =>
+                    navigate(
+                      "/notifications"
+                    )
+                  }
+                >
+                  ← Wróć
+                </button>
+
+                <div className="chat-avatar">
+                  {otherProfile?.avatar_url ? (
+                    <img
+                      src={
+                        otherProfile.avatar_url
+                      }
+                      alt=""
+                    />
+                  ) : (
+                    otherInitial
+                  )}
+                </div>
+
+                <div className="chat-person">
+                  <strong>
+                    {otherName}
+                  </strong>
+                  <span>
+                    Prywatna rozmowa dotycząca zlecenia
+                  </span>
+                </div>
+              </header>
+
+              <div className="chat-messages">
+                {messages.length === 0 ? (
+                  <div className="chat-empty">
+                    Rozmowa została otwarta.
+                    Napisz pierwszą wiadomość
+                    i ustal szczegóły współpracy.
+                  </div>
+                ) : (
+                  messages.map(
+                    (message) => (
+                      <div
+                        key={
+                          message.id
+                        }
+                        className={`chat-message ${
+                          message.sender_id ===
+                          user.id
+                            ? "is-mine"
+                            : "is-theirs"
+                        }`}
+                      >
+                        <p>
+                          {
+                            message.content
+                          }
+                        </p>
+
+                        <time>
+                          {new Date(
+                            message.created_at
+                          ).toLocaleTimeString(
+                            "pl-PL",
+                            {
+                              hour:
+                                "2-digit",
+                              minute:
+                                "2-digit",
+                            }
+                          )}
+                        </time>
+                      </div>
+                    )
+                  )
+                )}
+              </div>
+
+              {errorMessage && (
+                <p className="chat-error">
+                  {errorMessage}
+                </p>
+              )}
+
+              <form
+                className="chat-form"
+                onSubmit={
+                  handleSend
+                }
+              >
+                <textarea
+                  value={draft}
+                  onChange={(event) =>
+                    setDraft(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Napisz wiadomość..."
+                  maxLength={4000}
+                  disabled={sending}
+                  onKeyDown={(event) => {
+                    if (
+                      event.key ===
+                        "Enter" &&
+                      !event.shiftKey
+                    ) {
+                      event.preventDefault();
+                      event.currentTarget
+                        .form
+                        ?.requestSubmit();
+                    }
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  className="chat-send"
+                  disabled={
+                    sending ||
+                    !draft.trim()
+                  }
+                >
+                  {sending
+                    ? "Wysyłanie..."
+                    : "Wyślij"}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
       </main>
     </div>
   );
@@ -4948,6 +5726,15 @@ function Router() {
             element={
               <ProtectedRoute>
                 <Notifications />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/chat/:id"
+            element={
+              <ProtectedRoute>
+                <Chat />
               </ProtectedRoute>
             }
           />
