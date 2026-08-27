@@ -70,6 +70,28 @@ export async function saveUserCountry(userId, country) {
   if (error) throw error;
 }
 
+function CountryFlag({ country, className = "" }) {
+  if (!country) return null;
+
+  const imageUrl =
+    `https://flagcdn.com/w80/${country.code.toLowerCase()}.png`;
+
+  return (
+    <span className={`ideahire-flag-shell ${className}`.trim()}>
+      <img
+        className="ideahire-flag-image"
+        src={imageUrl}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+      <span className="ideahire-flag-emoji" aria-hidden="true">
+        {country.flag}
+      </span>
+    </span>
+  );
+}
+
 export function CountryPicker({ value, onChange, disabled = false }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -107,7 +129,7 @@ export function CountryPicker({ value, onChange, disabled = false }) {
         <span className="ideahire-country-selected">
           {selected ? (
             <>
-              <span className="ideahire-country-flag">{selected.flag}</span>
+              <CountryFlag country={selected} className="ideahire-country-flag" />
               <span className="ideahire-country-selected-name">{selected.name}</span>
               <span className="ideahire-country-selected-code">{selected.code}</span>
             </>
@@ -144,7 +166,7 @@ export function CountryPicker({ value, onChange, disabled = false }) {
                     setSearch("");
                   }}
                 >
-                  <span className="ideahire-country-option-flag">{country.flag}</span>
+                  <CountryFlag country={country} className="ideahire-country-option-flag" />
                   <span className="ideahire-country-option-name">{country.name}</span>
                   <span className="ideahire-country-option-code">{country.code}</span>
                 </button>
@@ -165,17 +187,17 @@ export function CountryBadge({ countryCode, countryName }) {
 
   return (
     <span className="ideahire-country-badge">
-      <span className="ideahire-country-badge-flag">
-        {country?.flag || "🌍"}
-      </span>
+      {country ? (
+        <CountryFlag
+          country={country}
+          className="ideahire-country-badge-flag"
+        />
+      ) : (
+        <span className="ideahire-country-badge-flag">🌍</span>
+      )}
       <span className="ideahire-country-badge-name">
         {country?.name || countryName}
       </span>
-      {country?.code && (
-        <span className="ideahire-country-badge-code">
-          {country.code}
-        </span>
-      )}
     </span>
   );
 }
@@ -243,6 +265,29 @@ function Sorts({ children }) {
           background: #f4f4f1;
           box-shadow: inset 0 0 0 1px rgba(20,20,20,.06);
           font-size: 19px;
+          line-height: 1;
+        }
+
+        .ideahire-flag-shell {
+          position: relative;
+          overflow: hidden;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 999px;
+          flex: 0 0 auto;
+        }
+
+        .ideahire-flag-image {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+        }
+
+        .ideahire-flag-emoji {
+          display: none;
+          font-size: inherit;
           line-height: 1;
         }
 
@@ -344,35 +389,56 @@ function Sorts({ children }) {
         .ideahire-country-badge {
           display: inline-flex;
           align-items: center;
+          justify-content: flex-start;
           gap: 8px;
           width: fit-content;
           max-width: 100%;
-          margin-top: 7px;
-          padding: 5px 10px 5px 6px;
+          margin: 8px 0 0;
+          padding: 5px 11px 5px 6px;
           border: 1px solid rgba(20,20,20,.07);
           border-radius: 999px;
           background: #f7f7f4;
           color: #242424;
           font-size: 13px;
           line-height: 1;
+          vertical-align: middle;
+          box-sizing: border-box;
         }
 
         .ideahire-country-badge-flag {
           width: 26px;
           height: 26px;
-          flex-basis: 26px;
+          flex: 0 0 26px;
           font-size: 17px;
           background: #fff;
+          border: 1px solid rgba(20,20,20,.06);
         }
 
         .ideahire-country-badge-name {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          font-weight: 600;
+          font-weight: 650;
+          line-height: 1.2;
+        }
+
+        @media (min-width: 601px) {
+          .profile-info .ideahire-country-badge {
+            display: flex;
+            margin-top: 9px;
+            margin-left: 0;
+            margin-right: auto;
+          }
         }
 
         @media (max-width: 600px) {
+          .ideahire-flag-image {
+            display: none;
+          }
+
+          .ideahire-flag-emoji {
+            display: inline;
+          }
           .ideahire-country-list {
             max-height: 260px;
           }
