@@ -521,7 +521,7 @@ function Sorts({ children }) {
           flex-wrap: wrap;
           align-items: center;
           gap: 10px;
-          margin-top: 14px;
+          margin-top: 0;
         }
 
         .ideahire-application-accept,
