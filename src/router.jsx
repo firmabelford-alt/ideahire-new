@@ -325,10 +325,26 @@ function AccountNavbar() {
         .eq("applicant_id", user.id)
         .eq("status", "rejected");
 
+      const {
+        data: acceptedApplications,
+        error: acceptedApplicationsError,
+      } = await supabase
+        .from("job_applications")
+        .select("id")
+        .eq("applicant_id", user.id)
+        .eq("status", "accepted");
+
       if (rejectedApplicationsError) {
         console.error(
           "REJECTED APPLICATION NOTIFICATION ERROR:",
           rejectedApplicationsError
+        );
+      }
+
+      if (acceptedApplicationsError) {
+        console.error(
+          "ACCEPTED APPLICATION NOTIFICATION ERROR:",
+          acceptedApplicationsError
         );
       }
 
@@ -358,9 +374,18 @@ function AccountNavbar() {
             )
         );
 
+      const unreadAccepted =
+        (acceptedApplications || []).some(
+          (application) =>
+            !readIds.includes(
+              `accepted:${application.id}`
+            )
+        );
+
       setHasNotifications(
         unreadIncoming ||
-        unreadRejected
+        unreadRejected ||
+        unreadAccepted
       );
     } catch (error) {
       console.error(
@@ -431,6 +456,10 @@ function AccountNavbar() {
 
         <Link to="/jobs">
           Znajdź zlecenie
+        </Link>
+
+        <Link to="/messages">
+          Wiadomości
         </Link>
 
         <Link
@@ -4108,6 +4137,11 @@ function Notifications() {
     setRejectedDecisions,
   ] = useState([]);
 
+  const [
+    acceptedDecisions,
+    setAcceptedDecisions,
+  ] = useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -4359,6 +4393,107 @@ function Notifications() {
       );
 
       /*
+       * 3. Zaakceptowane zgłoszenia wykonawcy.
+       * Rozmowa jest już utworzona, więc od razu dajemy
+       * wykonawcy wejście do czatu.
+       */
+      const {
+        data: myAccepted,
+        error: acceptedError,
+      } = await supabase
+        .from("job_applications")
+        .select(
+          "id, job_id, applicant_id, status, created_at"
+        )
+        .eq("applicant_id", user.id)
+        .eq("status", "accepted")
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (acceptedError) {
+        throw acceptedError;
+      }
+
+      let acceptedResult = [];
+
+      if (myAccepted?.length) {
+        const acceptedJobIds = [
+          ...new Set(
+            myAccepted.map(
+              (application) =>
+                application.job_id
+            )
+          ),
+        ];
+
+        const {
+          data: acceptedJobs,
+          error: acceptedJobsError,
+        } = await supabase
+          .from("jobs")
+          .select("id, title, user_id")
+          .in("id", acceptedJobIds);
+
+        if (acceptedJobsError) {
+          console.error(
+            "ACCEPTED JOBS ERROR:",
+            acceptedJobsError
+          );
+        }
+
+        const {
+          data: acceptedConversations,
+          error: acceptedConversationsError,
+        } = await supabase
+          .from("conversations")
+          .select(
+            "id, job_id, client_id, contractor_id, created_at"
+          )
+          .eq("contractor_id", user.id)
+          .in("job_id", acceptedJobIds);
+
+        if (acceptedConversationsError) {
+          console.error(
+            "ACCEPTED CONVERSATIONS ERROR:",
+            acceptedConversationsError
+          );
+        }
+
+        const jobMap = new Map(
+          (acceptedJobs || []).map(
+            (job) => [job.id, job]
+          )
+        );
+
+        const conversationMap = new Map(
+          (acceptedConversations || []).map(
+            (conversation) => [
+              conversation.job_id,
+              conversation,
+            ]
+          )
+        );
+
+        acceptedResult = myAccepted.map(
+          (application) => ({
+            ...application,
+            job: jobMap.get(
+              application.job_id
+            ),
+            conversation:
+              conversationMap.get(
+                application.job_id
+              ),
+          })
+        );
+      }
+
+      setAcceptedDecisions(
+        acceptedResult
+      );
+
+      /*
        * Po otwarciu skrzynki zaznaczamy aktualne elementy
        * jako przeczytane dla kropki w navbarze.
        */
@@ -4373,6 +4508,10 @@ function Notifications() {
         ...rejectedResult.map(
           (item) =>
             `rejected:${item.id}`
+        ),
+        ...acceptedResult.map(
+          (item) =>
+            `accepted:${item.id}`
         ),
       ];
 
@@ -4554,7 +4693,8 @@ function Notifications() {
 
   const isInboxEmpty =
     notifications.length === 0 &&
-    rejectedDecisions.length === 0;
+    rejectedDecisions.length === 0 &&
+    acceptedDecisions.length === 0;
 
   return (
     <div className="page">
@@ -4751,6 +4891,34 @@ function Notifications() {
             font-size: 14px;
           }
 
+          .notification-accepted-card {
+            border-color: #dfe7df;
+            background:
+              linear-gradient(
+                180deg,
+                #fff 0%,
+                #f8fbf7 100%
+              );
+          }
+
+          .notification-accepted-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 14px;
+            border-radius: 50%;
+            background: #e8f1e7;
+            color: #315b35;
+            font-size: 18px;
+            font-weight: 800;
+          }
+
+          .notification-chat-button {
+            display: inline-flex;
+            margin-top: 18px;
+          }
+
           @media (max-width: 600px) {
             .notification-person {
               gap: 12px;
@@ -4900,6 +5068,76 @@ function Notifications() {
 
         {!loading &&
           !message &&
+          acceptedDecisions.length >
+            0 && (
+            <>
+              <div className="notification-section-title">
+                <span className="section-label">
+                  Zaakceptowane zgłoszenia
+                </span>
+              </div>
+
+              <div className="jobs-list">
+                {acceptedDecisions.map(
+                  (decision) => (
+                    <article
+                      className="job-card notification-accepted-card"
+                      key={
+                        `accepted-${decision.id}`
+                      }
+                    >
+                      <div className="notification-accepted-icon">
+                        ✓
+                      </div>
+
+                      <span className="section-label">
+                        Dobra wiadomość
+                      </span>
+
+                      <h2>
+                        Twoje zgłoszenie zostało zaakceptowane
+                      </h2>
+
+                      <p>
+                        Zleceniodawca wybrał Cię do realizacji
+                        tego zlecenia. Możecie teraz ustalić
+                        szczegóły współpracy w prywatnej rozmowie.
+                      </p>
+
+                      <div className="notification-decision-job">
+                        <strong>Zlecenie:</strong>{" "}
+                        {decision.job?.title ||
+                          "Zlecenie"}
+                      </div>
+
+                      {decision.conversation?.id ? (
+                        <Link
+                          className="btn btn-dark notification-chat-button"
+                          to={`/chat/${decision.conversation.id}`}
+                        >
+                          Przejdź do rozmowy →
+                        </Link>
+                      ) : (
+                        <p
+                          style={{
+                            marginTop: "14px",
+                            color: "#8a6b24",
+                            fontSize: "13px",
+                          }}
+                        >
+                          Rozmowa jest przygotowywana. Odśwież
+                          powiadomienia za chwilę.
+                        </p>
+                      )}
+                    </article>
+                  )
+                )}
+              </div>
+            </>
+          )}
+
+        {!loading &&
+          !message &&
           rejectedDecisions.length >
             0 && (
             <>
@@ -4965,6 +5203,568 @@ function Notifications() {
               </div>
             </>
           )}
+      </main>
+    </div>
+  );
+}
+
+
+/* =========================================================
+   MESSAGES / CONVERSATION LIST
+========================================================= */
+
+function Messages() {
+  const { user } =
+    useAuth();
+
+  const [conversations, setConversations] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+
+    async function loadConversations() {
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        /*
+         * RLS w conversations zwraca tylko rozmowy,
+         * w których zalogowany użytkownik jest stroną.
+         */
+        const {
+          data: conversationRows,
+          error: conversationsError,
+        } = await supabase
+          .from("conversations")
+          .select(
+            "id, job_id, client_id, contractor_id, created_at"
+          )
+          .order("created_at", {
+            ascending: false,
+          });
+
+        if (conversationsError) {
+          throw conversationsError;
+        }
+
+        const rows =
+          conversationRows || [];
+
+        if (!rows.length) {
+          if (mounted) {
+            setConversations([]);
+          }
+          return;
+        }
+
+        const otherUserIds = [
+          ...new Set(
+            rows.map((conversation) =>
+              conversation.client_id ===
+              user.id
+                ? conversation.contractor_id
+                : conversation.client_id
+            )
+          ),
+        ];
+
+        const jobIds = [
+          ...new Set(
+            rows.map(
+              (conversation) =>
+                conversation.job_id
+            )
+          ),
+        ];
+
+        const conversationIds =
+          rows.map(
+            (conversation) =>
+              conversation.id
+          );
+
+        const [
+          profilesResult,
+          jobsResult,
+          messagesResult,
+        ] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url"
+            )
+            .in("id", otherUserIds),
+
+          supabase
+            .from("jobs")
+            .select("id, title")
+            .in("id", jobIds),
+
+          supabase
+            .from("messages")
+            .select(
+              "id, conversation_id, sender_id, content, created_at"
+            )
+            .in(
+              "conversation_id",
+              conversationIds
+            )
+            .order("created_at", {
+              ascending: false,
+            }),
+        ]);
+
+        if (profilesResult.error) {
+          console.error(
+            "MESSAGES PROFILES ERROR:",
+            profilesResult.error
+          );
+        }
+
+        if (jobsResult.error) {
+          console.error(
+            "MESSAGES JOBS ERROR:",
+            jobsResult.error
+          );
+        }
+
+        if (messagesResult.error) {
+          throw messagesResult.error;
+        }
+
+        const profileMap =
+          new Map(
+            (profilesResult.data || []).map(
+              (profile) => [
+                profile.id,
+                profile,
+              ]
+            )
+          );
+
+        const jobMap =
+          new Map(
+            (jobsResult.data || []).map(
+              (job) => [
+                job.id,
+                job,
+              ]
+            )
+          );
+
+        const lastMessageMap =
+          new Map();
+
+        for (
+          const message of
+          messagesResult.data || []
+        ) {
+          if (
+            !lastMessageMap.has(
+              message.conversation_id
+            )
+          ) {
+            lastMessageMap.set(
+              message.conversation_id,
+              message
+            );
+          }
+        }
+
+        const result =
+          rows
+            .map((conversation) => {
+              const otherUserId =
+                conversation.client_id ===
+                user.id
+                  ? conversation.contractor_id
+                  : conversation.client_id;
+
+              const lastMessage =
+                lastMessageMap.get(
+                  conversation.id
+                );
+
+              return {
+                ...conversation,
+                otherProfile:
+                  profileMap.get(
+                    otherUserId
+                  ),
+                job:
+                  jobMap.get(
+                    conversation.job_id
+                  ),
+                lastMessage,
+                sortDate:
+                  lastMessage?.created_at ||
+                  conversation.created_at,
+              };
+            })
+            .sort(
+              (a, b) =>
+                new Date(
+                  b.sortDate
+                ).getTime() -
+                new Date(
+                  a.sortDate
+                ).getTime()
+            );
+
+        if (mounted) {
+          setConversations(
+            result
+          );
+        }
+      } catch (error) {
+        if (mounted) {
+          setErrorMessage(
+            error?.message ||
+              "Nie udało się pobrać rozmów."
+          );
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadConversations();
+
+    const channel =
+      supabase
+        .channel(
+          `messages-list:${user.id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+          },
+          () => {
+            loadConversations();
+          }
+        )
+        .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(
+        channel
+      );
+    };
+  }, [user?.id]);
+
+  function formatConversationDate(
+    value
+  ) {
+    if (!value) return "";
+
+    const date =
+      new Date(value);
+
+    const today =
+      new Date();
+
+    if (
+      date.toDateString() ===
+      today.toDateString()
+    ) {
+      return date.toLocaleTimeString(
+        "pl-PL",
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+        }
+      );
+    }
+
+    return date.toLocaleDateString(
+      "pl-PL",
+      {
+        day: "2-digit",
+        month: "2-digit",
+      }
+    );
+  }
+
+  return (
+    <div className="account-page">
+      <AccountNavbar />
+
+      <main className="messages-page">
+        <style>{`
+          .messages-page {
+            width: min(980px, calc(100% - 32px));
+            margin: 34px auto 60px;
+          }
+
+          .messages-heading {
+            margin-bottom: 22px;
+          }
+
+          .messages-heading h1 {
+            margin: 5px 0 8px;
+            font-size: clamp(30px, 5vw, 46px);
+            letter-spacing: -1.5px;
+          }
+
+          .messages-heading p {
+            margin: 0;
+            max-width: 600px;
+            color: #777;
+            line-height: 1.6;
+          }
+
+          .messages-list {
+            overflow: hidden;
+            border: 1px solid rgba(20,20,20,.08);
+            border-radius: 22px;
+            background: #fff;
+            box-shadow: 0 16px 45px rgba(20,20,20,.05);
+          }
+
+          .messages-row {
+            display: grid;
+            grid-template-columns: 54px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(20,20,20,.07);
+            color: inherit;
+            text-decoration: none;
+            transition: background .16s ease;
+          }
+
+          .messages-row:last-child {
+            border-bottom: 0;
+          }
+
+          .messages-row:hover {
+            background: #f8f8f5;
+          }
+
+          .messages-avatar {
+            width: 54px;
+            height: 54px;
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #ecece8;
+            font-size: 17px;
+            font-weight: 800;
+          }
+
+          .messages-avatar img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+          }
+
+          .messages-content {
+            min-width: 0;
+          }
+
+          .messages-topline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+          }
+
+          .messages-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 800;
+          }
+
+          .messages-job {
+            margin-top: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #777;
+            font-size: 12px;
+          }
+
+          .messages-preview {
+            margin-top: 7px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #555;
+            font-size: 14px;
+          }
+
+          .messages-date {
+            align-self: start;
+            padding-top: 3px;
+            color: #999;
+            font-size: 11px;
+            white-space: nowrap;
+          }
+
+          .messages-empty {
+            padding: 54px 24px;
+            border: 1px solid rgba(20,20,20,.08);
+            border-radius: 22px;
+            background: #fff;
+            text-align: center;
+          }
+
+          .messages-empty h2 {
+            margin: 0 0 8px;
+          }
+
+          .messages-empty p {
+            margin: 0;
+            color: #777;
+            line-height: 1.6;
+          }
+
+          @media (max-width: 600px) {
+            .messages-page {
+              width: calc(100% - 20px);
+              margin: 20px auto 40px;
+            }
+
+            .messages-row {
+              grid-template-columns: 48px minmax(0, 1fr) auto;
+              gap: 11px;
+              padding: 14px 12px;
+            }
+
+            .messages-avatar {
+              width: 48px;
+              height: 48px;
+            }
+
+            .messages-job {
+              max-width: 65vw;
+            }
+          }
+        `}</style>
+
+        <div className="messages-heading">
+          <span className="section-label">
+            Twoje rozmowy
+          </span>
+
+          <h1>Wiadomości</h1>
+
+          <p>
+            Tutaj znajdziesz wszystkie rozmowy
+            rozpoczęte po zaakceptowaniu wykonawcy.
+          </p>
+        </div>
+
+        {loading ? (
+          <p>Ładowanie rozmów...</p>
+        ) : errorMessage ? (
+          <p className="auth-error">
+            {errorMessage}
+          </p>
+        ) : conversations.length === 0 ? (
+          <section className="messages-empty">
+            <h2>
+              Nie masz jeszcze rozmów
+            </h2>
+
+            <p>
+              Gdy zgłoszenie zostanie zaakceptowane,
+              rozmowa pojawi się właśnie tutaj.
+            </p>
+          </section>
+        ) : (
+          <div className="messages-list">
+            {conversations.map(
+              (conversation) => {
+                const profile =
+                  conversation.otherProfile;
+
+                const name =
+                  profile?.name ||
+                  "Użytkownik";
+
+                const initial =
+                  name
+                    .charAt(0)
+                    .toUpperCase();
+
+                const lastMessage =
+                  conversation.lastMessage;
+
+                return (
+                  <Link
+                    key={
+                      conversation.id
+                    }
+                    className="messages-row"
+                    to={`/chat/${conversation.id}`}
+                  >
+                    <div className="messages-avatar">
+                      {profile?.avatar_url ? (
+                        <img
+                          src={
+                            profile.avatar_url
+                          }
+                          alt=""
+                        />
+                      ) : (
+                        initial
+                      )}
+                    </div>
+
+                    <div className="messages-content">
+                      <div className="messages-topline">
+                        <span className="messages-name">
+                          {name}
+                        </span>
+                      </div>
+
+                      <div className="messages-job">
+                        {conversation.job?.title ||
+                          "Rozmowa dotycząca zlecenia"}
+                      </div>
+
+                      <div className="messages-preview">
+                        {lastMessage
+                          ? `${
+                              lastMessage.sender_id ===
+                              user.id
+                                ? "Ty: "
+                                : ""
+                            }${lastMessage.content}`
+                          : "Rozmowa została otwarta — napisz pierwszą wiadomość."}
+                      </div>
+                    </div>
+
+                    <time className="messages-date">
+                      {formatConversationDate(
+                        conversation.sortDate
+                      )}
+                    </time>
+                  </Link>
+                );
+              }
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
@@ -5487,7 +6287,7 @@ function Chat() {
                   className="chat-back"
                   onClick={() =>
                     navigate(
-                      "/notifications"
+                      "/messages"
                     )
                   }
                 >
@@ -5726,6 +6526,15 @@ function Router() {
             element={
               <ProtectedRoute>
                 <Notifications />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
               </ProtectedRoute>
             }
           />
