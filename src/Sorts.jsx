@@ -202,6 +202,85 @@ export function CountryBadge({ countryCode, countryName }) {
   );
 }
 
+
+export function ApplicationActions({
+  applicationId,
+  onRejected,
+  disabled = false,
+}) {
+  const [rejecting, setRejecting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleReject() {
+    if (!applicationId || rejecting || disabled) return;
+
+    const confirmed = window.confirm(
+      "Odrzucić to zgłoszenie? Wykonawca otrzyma informację, że jego zgłoszenie nie zostało zaakceptowane."
+    );
+
+    if (!confirmed) return;
+
+    setRejecting(true);
+    setErrorMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("job_applications")
+        .update({ status: "rejected" })
+        .eq("id", applicationId)
+        .eq("status", "pending")
+        .select("id, status")
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!data?.id) {
+        throw new Error(
+          "Nie udało się odrzucić zgłoszenia. Odśwież stronę i spróbuj ponownie."
+        );
+      }
+
+      onRejected?.(applicationId);
+    } catch (error) {
+      console.error("APPLICATION REJECT ERROR:", error);
+      setErrorMessage(
+        error?.message ||
+          "Nie udało się odrzucić zgłoszenia."
+      );
+    } finally {
+      setRejecting(false);
+    }
+  }
+
+  return (
+    <div className="ideahire-application-actions">
+      <button
+        type="button"
+        className="ideahire-application-accept"
+        disabled
+        title="Akceptacja wykonawcy zostanie podłączona w kolejnym etapie."
+      >
+        Akceptuj wykonawcę
+      </button>
+
+      <button
+        type="button"
+        className="ideahire-application-reject"
+        disabled={disabled || rejecting}
+        onClick={handleReject}
+      >
+        {rejecting ? "Odrzucanie..." : "Odrzuć"}
+      </button>
+
+      {errorMessage && (
+        <p className="ideahire-application-error">
+          {errorMessage}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Sorts({ children }) {
   return (
     <>
@@ -436,6 +515,63 @@ function Sorts({ children }) {
           line-height: 1.2;
         }
 
+
+        .ideahire-application-actions {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          margin-top: 14px;
+        }
+
+        .ideahire-application-accept,
+        .ideahire-application-reject {
+          min-height: 42px;
+          padding: 0 16px;
+          border-radius: 12px;
+          font: inherit;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease, border-color .16s ease;
+        }
+
+        .ideahire-application-accept {
+          border: 1px solid #151515;
+          background: #151515;
+          color: #fff;
+        }
+
+        .ideahire-application-accept:disabled {
+          cursor: default;
+          opacity: .52;
+        }
+
+        .ideahire-application-reject {
+          border: 1px solid #dfd8d5;
+          background: #fff;
+          color: #8f2e24;
+        }
+
+        .ideahire-application-reject:hover:not(:disabled) {
+          transform: translateY(-1px);
+          border-color: #c9b4ae;
+          box-shadow: 0 6px 18px rgba(80, 30, 20, .07);
+        }
+
+        .ideahire-application-reject:disabled {
+          cursor: wait;
+          opacity: .62;
+        }
+
+        .ideahire-application-error {
+          flex-basis: 100%;
+          margin: 2px 0 0;
+          color: #a0382e;
+          font-size: 13px;
+          line-height: 1.45;
+        }
+
         @media (min-width: 601px) {
           .profile-info .ideahire-country-badge {
             display: flex;
@@ -445,7 +581,21 @@ function Sorts({ children }) {
           }
         }
 
+
         @media (max-width: 600px) {
+          .ideahire-application-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+          }
+
+          .ideahire-application-accept,
+          .ideahire-application-reject {
+            width: 100%;
+            padding: 0 12px;
+          }
+
+
           .ideahire-flag-image {
             display: none;
           }
