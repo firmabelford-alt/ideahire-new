@@ -28,12 +28,44 @@ export function getCountryFlag(code) {
 }
 
 export async function saveUserCountry(userId, country) {
-  if (!userId) throw new Error("Brak identyfikatora użytkownika.");
+  if (!userId) {
+    throw new Error("Brak identyfikatora użytkownika.");
+  }
+
+  const countryCode =
+    country?.code || null;
+
+  const {
+    data: existingProfile,
+    error: readError,
+  } = await supabase
+    .from("public_profiles")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (readError) {
+    throw readError;
+  }
+
+  if (existingProfile?.id) {
+    const { error } = await supabase
+      .from("public_profiles")
+      .update({
+        country_code: countryCode,
+      })
+      .eq("id", userId);
+
+    if (error) throw error;
+    return;
+  }
 
   const { error } = await supabase
     .from("public_profiles")
-    .update({ country_code: country?.code || null })
-    .eq("id", userId);
+    .insert({
+      id: userId,
+      country_code: countryCode,
+    });
 
   if (error) throw error;
 }
@@ -76,7 +108,8 @@ export function CountryPicker({ value, onChange, disabled = false }) {
           {selected ? (
             <>
               <span className="ideahire-country-flag">{selected.flag}</span>
-              <span>{selected.name}</span>
+              <span className="ideahire-country-selected-name">{selected.name}</span>
+              <span className="ideahire-country-selected-code">{selected.code}</span>
             </>
           ) : (
             <span className="ideahire-country-placeholder">Wybierz kraj</span>
@@ -132,8 +165,17 @@ export function CountryBadge({ countryCode, countryName }) {
 
   return (
     <span className="ideahire-country-badge">
-      <span>{country?.flag || "🌍"}</span>
-      <span>{country?.name || countryName}</span>
+      <span className="ideahire-country-badge-flag">
+        {country?.flag || "🌍"}
+      </span>
+      <span className="ideahire-country-badge-name">
+        {country?.name || countryName}
+      </span>
+      {country?.code && (
+        <span className="ideahire-country-badge-code">
+          {country.code}
+        </span>
+      )}
     </span>
   );
 }
@@ -142,27 +184,203 @@ function Sorts({ children }) {
   return (
     <>
       <style>{`
-        .ideahire-country-picker { position: relative; width: 100%; max-width: 420px; font-family: inherit; }
-        .ideahire-country-trigger { width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; border: 1px solid rgba(20,20,20,.12); border-radius: 14px; background: #fff; color: #161616; font: inherit; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
-        .ideahire-country-trigger:hover { border-color: rgba(20,20,20,.25); }
-        .ideahire-country-trigger:focus, .ideahire-country-trigger.is-open { outline: none; border-color: #161616; box-shadow: 0 0 0 4px rgba(20,20,20,.06); }
-        .ideahire-country-selected { display: flex; align-items: center; gap: 11px; min-width: 0; }
-        .ideahire-country-flag { font-size: 24px; line-height: 1; }
-        .ideahire-country-placeholder { color: #8a8a8a; }
-        .ideahire-country-chevron { flex-shrink: 0; color: #777; }
-        .ideahire-country-menu { position: absolute; z-index: 1000; top: calc(100% + 8px); left: 0; width: 100%; overflow: hidden; border: 1px solid rgba(20,20,20,.1); border-radius: 16px; background: #fff; box-shadow: 0 18px 45px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.05); }
-        .ideahire-country-search { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(20,20,20,.08); }
-        .ideahire-country-search input { width: 100%; border: 0; outline: 0; background: transparent; color: #161616; font: inherit; }
-        .ideahire-country-list { max-height: 310px; overflow-y: auto; padding: 6px; }
-        .ideahire-country-option { width: 100%; display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px; padding: 10px 11px; border: 0; border-radius: 11px; background: transparent; color: #161616; text-align: left; font: inherit; cursor: pointer; }
-        .ideahire-country-option:hover, .ideahire-country-option.is-selected { background: #f3f3f1; }
-        .ideahire-country-option-flag { font-size: 22px; }
-        .ideahire-country-option-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ideahire-country-option-code { color: #999; font-size: 12px; }
-        .ideahire-country-empty { padding: 24px 16px; text-align: center; color: #888; font-size: 14px; }
-        .ideahire-country-badge { display: inline-flex; align-items: center; gap: 7px; width: fit-content; padding: 6px 10px; border-radius: 999px; background: #f3f3f1; color: #242424; font-size: 14px; line-height: 1; }
-        .ideahire-country-badge span:first-child { font-size: 17px; }
-        @media (max-width: 600px) { .ideahire-country-picker { max-width: 100%; } .ideahire-country-list { max-height: 280px; } }
+        .ideahire-country-picker {
+          position: relative;
+          width: 100%;
+          font-family: inherit;
+        }
+
+        .ideahire-country-trigger {
+          width: 100%;
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          padding: 0 15px;
+          border: 1px solid rgba(20,20,20,.12);
+          border-radius: 14px;
+          background: #fff;
+          color: #161616;
+          font: inherit;
+          cursor: pointer;
+          transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+        }
+
+        .ideahire-country-trigger:hover {
+          border-color: rgba(20,20,20,.24);
+        }
+
+        .ideahire-country-trigger:focus,
+        .ideahire-country-trigger.is-open {
+          outline: none;
+          border-color: #161616;
+          box-shadow: 0 0 0 4px rgba(20,20,20,.06);
+        }
+
+        .ideahire-country-trigger:disabled {
+          cursor: not-allowed;
+          opacity: .65;
+        }
+
+        .ideahire-country-selected {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .ideahire-country-flag,
+        .ideahire-country-option-flag,
+        .ideahire-country-badge-flag {
+          width: 30px;
+          height: 30px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex: 0 0 30px;
+          border-radius: 999px;
+          background: #f4f4f1;
+          box-shadow: inset 0 0 0 1px rgba(20,20,20,.06);
+          font-size: 19px;
+          line-height: 1;
+        }
+
+        .ideahire-country-selected-name {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-weight: 600;
+        }
+
+        .ideahire-country-selected-code,
+        .ideahire-country-option-code,
+        .ideahire-country-badge-code {
+          color: #8d8d8d;
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: .06em;
+        }
+
+        .ideahire-country-placeholder {
+          color: #8a8a8a;
+        }
+
+        .ideahire-country-chevron {
+          flex-shrink: 0;
+          color: #777;
+        }
+
+        .ideahire-country-menu {
+          position: absolute;
+          z-index: 1000;
+          top: calc(100% + 8px);
+          left: 0;
+          width: 100%;
+          overflow: hidden;
+          border: 1px solid rgba(20,20,20,.1);
+          border-radius: 16px;
+          background: #fff;
+          box-shadow: 0 18px 45px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.05);
+        }
+
+        .ideahire-country-search {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px;
+          border-bottom: 1px solid rgba(20,20,20,.08);
+        }
+
+        .ideahire-country-search input {
+          width: 100%;
+          border: 0;
+          outline: 0;
+          background: transparent;
+          color: #161616;
+          font: inherit;
+        }
+
+        .ideahire-country-list {
+          max-height: 310px;
+          overflow-y: auto;
+          padding: 6px;
+        }
+
+        .ideahire-country-option {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 34px 1fr auto;
+          align-items: center;
+          gap: 10px;
+          padding: 9px 11px;
+          border: 0;
+          border-radius: 12px;
+          background: transparent;
+          color: #161616;
+          text-align: left;
+          font: inherit;
+          cursor: pointer;
+        }
+
+        .ideahire-country-option:hover,
+        .ideahire-country-option.is-selected {
+          background: #f3f3f1;
+        }
+
+        .ideahire-country-option-name {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .ideahire-country-empty {
+          padding: 24px 16px;
+          text-align: center;
+          color: #888;
+          font-size: 14px;
+        }
+
+        .ideahire-country-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          width: fit-content;
+          max-width: 100%;
+          margin-top: 7px;
+          padding: 5px 10px 5px 6px;
+          border: 1px solid rgba(20,20,20,.07);
+          border-radius: 999px;
+          background: #f7f7f4;
+          color: #242424;
+          font-size: 13px;
+          line-height: 1;
+        }
+
+        .ideahire-country-badge-flag {
+          width: 26px;
+          height: 26px;
+          flex-basis: 26px;
+          font-size: 17px;
+          background: #fff;
+        }
+
+        .ideahire-country-badge-name {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+          .ideahire-country-list {
+            max-height: 260px;
+          }
+
+          .ideahire-country-selected-code {
+            display: none;
+          }
+        }
       `}</style>
       <div className="sorts-root">{children}</div>
     </>
