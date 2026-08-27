@@ -205,14 +205,35 @@ export function CountryBadge({ countryCode, countryName }) {
 
 export function ApplicationActions({
   applicationId,
+  onAccepted,
   onRejected,
   disabled = false,
 }) {
+  const [accepting, setAccepting] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  async function handleAccept() {
+    if (!applicationId || accepting || rejecting || disabled) return;
+
+    setAccepting(true);
+    setErrorMessage("");
+
+    try {
+      await onAccepted?.(applicationId);
+    } catch (error) {
+      console.error("APPLICATION ACCEPT ERROR:", error);
+      setErrorMessage(
+        error?.message ||
+          "Nie udało się zaakceptować wykonawcy."
+      );
+    } finally {
+      setAccepting(false);
+    }
+  }
+
   async function handleReject() {
-    if (!applicationId || rejecting || disabled) return;
+    if (!applicationId || accepting || rejecting || disabled) return;
 
     const confirmed = window.confirm(
       "Odrzucić to zgłoszenie? Wykonawca otrzyma informację, że jego zgłoszenie nie zostało zaakceptowane."
@@ -257,16 +278,16 @@ export function ApplicationActions({
       <button
         type="button"
         className="ideahire-application-accept"
-        disabled
-        title="Akceptacja wykonawcy zostanie podłączona w kolejnym etapie."
+        disabled={disabled || accepting || rejecting}
+        onClick={handleAccept}
       >
-        Akceptuj wykonawcę
+        {accepting ? "Akceptowanie..." : "Akceptuj wykonawcę"}
       </button>
 
       <button
         type="button"
         className="ideahire-application-reject"
-        disabled={disabled || rejecting}
+        disabled={disabled || accepting || rejecting}
         onClick={handleReject}
       >
         {rejecting ? "Odrzucanie..." : "Odrzuć"}
@@ -542,9 +563,14 @@ function Sorts({ children }) {
           color: #fff;
         }
 
+        .ideahire-application-accept:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 7px 20px rgba(20, 20, 20, .14);
+        }
+
         .ideahire-application-accept:disabled {
-          cursor: default;
-          opacity: .52;
+          cursor: wait;
+          opacity: .62;
         }
 
         .ideahire-application-reject {
