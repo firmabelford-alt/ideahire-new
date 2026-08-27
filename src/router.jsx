@@ -1628,7 +1628,7 @@ function Account() {
         } = await supabase
           .from("public_profiles")
           .select("country_code")
-          .eq("id", user.id)
+          .eq("user_id", user.id)
           .maybeSingle();
 
         if (error) {
@@ -2978,7 +2978,7 @@ function Profile() {
         } = await supabase
           .from("public_profiles")
           .select("country_code")
-          .eq("id", id)
+          .eq("user_id", id)
           .maybeSingle();
 
         if (countryError) {
