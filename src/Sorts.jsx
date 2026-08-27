@@ -41,7 +41,7 @@ export async function saveUserCountry(userId, country) {
   } = await supabase
     .from("public_profiles")
     .select("id")
-    .eq("id", userId)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (readError) {
