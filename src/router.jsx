@@ -1872,6 +1872,49 @@ function Account() {
         return;
       }
 
+      /*
+       * Synchronizujemy publiczny profil.
+       * Inni użytkownicy pobierają opis, nazwę i avatar
+       * z tabeli public.profiles, więc samo Auth metadata
+       * nie wystarcza.
+       */
+      const {
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            name: cleanName,
+            avatar_url:
+              data.user.user_metadata
+                ?.avatar_url ||
+              avatarUrl ||
+              null,
+            about:
+              data.user.user_metadata
+                ?.about ||
+              cleanAbout ||
+              null,
+          },
+          {
+            onConflict: "id",
+          }
+        );
+
+      if (profileError) {
+        console.error(
+          "PROFILE SAVE ERROR:",
+          profileError
+        );
+
+        setMessage(
+          `Dane konta zostały zapisane, ale nie udało się zaktualizować profilu publicznego: ${profileError.message}`
+        );
+
+        return;
+      }
+
       setName(
         data.user.user_metadata
           ?.name ||
