@@ -5,7 +5,7 @@ export function normalizeEmail(value) {
 }
 
 export function getPasswordRecoveryRedirectUrl(origin) {
-  const url = new URL("/", origin);
+  const url = new URL("/reset-password", origin);
 
   url.searchParams.set("recovery", "1");
 
