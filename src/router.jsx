@@ -47,6 +47,15 @@ function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true;
+    let subscription = null;
+
+    function applySession(newSession) {
+      if (!mounted) return;
+
+      setSession(newSession || null);
+      setUser(newSession?.user || null);
+      setLoading(false);
+    }
 
     async function initializeAuth() {
       try {
@@ -62,14 +71,50 @@ function AuthProvider({ children }) {
 
         if (!mounted) return;
 
-        const currentSession =
-          data?.session || null;
-
-        setSession(currentSession);
-        setUser(
-          currentSession?.user || null
+        applySession(
+          data?.session || null
         );
-        setLoading(false);
+
+        const {
+          data: {
+            subscription:
+              authSubscription,
+          },
+        } =
+          supabase.auth.onAuthStateChange(
+            (event, newSession) => {
+              if (!mounted) return;
+
+              /*
+               * Stan początkowy został już pobrany przez getSession().
+               * Ignorujemy powtórne INITIAL_SESSION, ponieważ na części
+               * przeglądarek potrafi ono chwilowo zwrócić null i wyrzucić
+               * użytkownika z chronionej podstrony.
+               */
+              if (
+                event ===
+                "INITIAL_SESSION"
+              ) {
+                return;
+              }
+
+              if (
+                event === "SIGNED_OUT"
+              ) {
+                applySession(null);
+                return;
+              }
+
+              if (newSession) {
+                applySession(
+                  newSession
+                );
+              }
+            }
+          );
+
+        subscription =
+          authSubscription;
       } catch (error) {
         console.error(
           "AUTH ERROR:",
@@ -86,28 +131,9 @@ function AuthProvider({ children }) {
 
     initializeAuth();
 
-    const {
-      data: { subscription },
-    } =
-      supabase.auth.onAuthStateChange(
-        (_event, newSession) => {
-          if (!mounted) return;
-
-          setSession(
-            newSession || null
-          );
-
-          setUser(
-            newSession?.user || null
-          );
-
-          setLoading(false);
-        }
-      );
-
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
@@ -6546,14 +6572,22 @@ function Chat() {
 ========================================================= */
 
 function Home() {
-  const { loading } =
+  const {
+    loading,
+    session,
+  } =
     useAuth();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
-  return <App />;
+  return (
+    <App
+      session={session}
+      loading={loading}
+    />
+  );
 }
 
 /* =========================================================
