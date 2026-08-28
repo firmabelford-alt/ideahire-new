@@ -416,6 +416,14 @@ function AccountNavbar() {
         .eq("applicant_id", user.id)
         .eq("status", "accepted");
 
+      const {
+        data: blockNotifications,
+        error: blockNotificationsError,
+      } = await supabase
+        .from("user_blocks")
+        .select("id")
+        .eq("blocked_id", user.id);
+
       if (rejectedApplicationsError) {
         console.error(
           "REJECTED APPLICATION NOTIFICATION ERROR:",
@@ -427,6 +435,13 @@ function AccountNavbar() {
         console.error(
           "ACCEPTED APPLICATION NOTIFICATION ERROR:",
           acceptedApplicationsError
+        );
+      }
+
+      if (blockNotificationsError) {
+        console.error(
+          "BLOCK NOTIFICATION ERROR:",
+          blockNotificationsError
         );
       }
 
@@ -462,10 +477,19 @@ function AccountNavbar() {
             )
         );
 
+      const unreadBlock =
+        (blockNotifications || []).some(
+          (block) =>
+            !readIds.includes(
+              `blocked:${block.id}`
+            )
+        );
+
       setHasNotifications(
         unreadIncoming ||
         unreadRejected ||
-        unreadAccepted
+        unreadAccepted ||
+        unreadBlock
       );
     } catch (error) {
       console.error(
@@ -3214,6 +3238,9 @@ function Profile() {
   const { id } =
     useParams();
 
+  const { user } =
+    useAuth();
+
   const [profile, setProfile] =
     useState(null);
 
@@ -3227,6 +3254,18 @@ function Profile() {
     useState(true);
 
   const [message, setMessage] =
+    useState("");
+
+  const [blockedByMe, setBlockedByMe] =
+    useState(false);
+
+  const [blockedMe, setBlockedMe] =
+    useState(false);
+
+  const [blockSaving, setBlockSaving] =
+    useState(false);
+
+  const [blockMessage, setBlockMessage] =
     useState("");
 
   useEffect(() => {
@@ -3261,6 +3300,52 @@ function Profile() {
         setProfile(
           profileData
         );
+
+        if (
+          user?.id &&
+          user.id !== id
+        ) {
+          const [
+            blockedByMeResult,
+            blockedMeResult,
+          ] = await Promise.all([
+            supabase
+              .from("user_blocks")
+              .select("id")
+              .eq("blocker_id", user.id)
+              .eq("blocked_id", id)
+              .maybeSingle(),
+
+            supabase
+              .from("user_blocks")
+              .select("id")
+              .eq("blocker_id", id)
+              .eq("blocked_id", user.id)
+              .maybeSingle(),
+          ]);
+
+          if (blockedByMeResult.error) {
+            console.error(
+              "PROFILE BLOCK STATUS ERROR:",
+              blockedByMeResult.error
+            );
+          }
+
+          if (blockedMeResult.error) {
+            console.error(
+              "PROFILE BLOCKED STATUS ERROR:",
+              blockedMeResult.error
+            );
+          }
+
+          setBlockedByMe(
+            !!blockedByMeResult.data?.id
+          );
+
+          setBlockedMe(
+            !!blockedMeResult.data?.id
+          );
+        }
 
         const {
           data: countryData,
@@ -3327,7 +3412,67 @@ function Profile() {
     }
 
     loadProfile();
-  }, [id]);
+  }, [id, user?.id]);
+
+  async function handleBlockToggle() {
+    if (
+      !user?.id ||
+      !id ||
+      user.id === id ||
+      blockSaving
+    ) {
+      return;
+    }
+
+    setBlockSaving(true);
+    setBlockMessage("");
+
+    try {
+      if (blockedByMe) {
+        const { error } =
+          await supabase
+            .from("user_blocks")
+            .delete()
+            .eq("blocker_id", user.id)
+            .eq("blocked_id", id);
+
+        if (error) {
+          throw error;
+        }
+
+        setBlockedByMe(false);
+        setBlockMessage(
+          "Użytkownik został odblokowany."
+        );
+      } else {
+        const { error } =
+          await supabase
+            .from("user_blocks")
+            .insert({
+              blocker_id: user.id,
+              blocked_id: id,
+            });
+
+        if (error) {
+          throw error;
+        }
+
+        setBlockedByMe(true);
+        setBlockMessage(
+          "Użytkownik został zablokowany. Nie może już wysyłać Ci wiadomości."
+        );
+      }
+    } catch (error) {
+      setBlockMessage(
+        `Nie udało się zmienić blokady: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setBlockSaving(false);
+    }
+  }
 
   if (loading) {
     return <LoadingScreen />;
@@ -3362,6 +3507,76 @@ function Profile() {
       <AccountNavbar />
 
       <main className="app-page">
+        <style>{`
+          .profile-safety-panel {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #ededeb;
+          }
+
+          .profile-safety-copy {
+            min-width: 0;
+          }
+
+          .profile-safety-copy strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+          }
+
+          .profile-safety-copy p {
+            margin: 0;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.55;
+          }
+
+          .profile-block-button {
+            flex: 0 0 auto;
+            min-height: 42px;
+            padding: 10px 15px;
+            border: 1px solid #e0d7d4;
+            border-radius: 12px;
+            background: #fff8f6;
+            color: #8e352b;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+          }
+
+          .profile-block-button.is-active {
+            border-color: #d9e3d8;
+            background: #f7fbf6;
+            color: #315b35;
+          }
+
+          .profile-block-notice,
+          .profile-block-message {
+            margin: 14px 0 0;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #f7f7f4;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.55;
+          }
+
+          @media (max-width: 600px) {
+            .profile-safety-panel {
+              align-items: stretch;
+              flex-direction: column;
+            }
+
+            .profile-block-button {
+              width: 100%;
+            }
+          }
+        `}</style>
+
         <section className="account-card">
           <div className="profile-preview">
             <div className="profile-avatar-wrapper">
@@ -3398,6 +3613,54 @@ function Profile() {
               )}
             </div>
           </div>
+
+          {user?.id &&
+            user.id !== id && (
+              <>
+                <div className="profile-safety-panel">
+                  <div className="profile-safety-copy">
+                    <strong>
+                      Bezpieczeństwo rozmowy
+                    </strong>
+
+                    <p>
+                      Blokada zatrzymuje możliwość wysyłania wiadomości między Wami.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={`profile-block-button ${
+                      blockedByMe
+                        ? "is-active"
+                        : ""
+                    }`}
+                    onClick={
+                      handleBlockToggle
+                    }
+                    disabled={blockSaving}
+                  >
+                    {blockSaving
+                      ? "Zapisywanie..."
+                      : blockedByMe
+                      ? "Odblokuj użytkownika"
+                      : "Zablokuj użytkownika"}
+                  </button>
+                </div>
+
+                {blockedMe && (
+                  <p className="profile-block-notice">
+                    Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości między Wami jest wyłączone.
+                  </p>
+                )}
+
+                {blockMessage && (
+                  <p className="profile-block-message">
+                    {blockMessage}
+                  </p>
+                )}
+              </>
+            )}
         </section>
 
         <section className="account-card profile-jobs-section">
@@ -4378,6 +4641,11 @@ function Notifications() {
     setAcceptedDecisions,
   ] = useState([]);
 
+  const [
+    blockNotifications,
+    setBlockNotifications,
+  ] = useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -4752,6 +5020,88 @@ function Notifications() {
       );
 
       /*
+       * 4. Informacje o zablokowaniu profilu.
+       * Osoba zablokowana widzi czytelny status w skrzynce.
+       */
+      const {
+        data: blockRows,
+        error: blockRowsError,
+      } = await supabase
+        .from("user_blocks")
+        .select(
+          "id, blocker_id, blocked_id, created_at"
+        )
+        .eq("blocked_id", user.id)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (blockRowsError) {
+        throw blockRowsError;
+      }
+
+      const visibleBlockRows =
+        (blockRows || []).filter(
+          (block) =>
+            !dismissedIds.includes(
+              `blocked:${block.id}`
+            )
+        );
+
+      let blockResult = [];
+
+      if (visibleBlockRows.length > 0) {
+        const blockerIds = [
+          ...new Set(
+            visibleBlockRows.map(
+              (block) =>
+                block.blocker_id
+            )
+          ),
+        ];
+
+        const {
+          data: blockerProfiles,
+          error: blockerProfilesError,
+        } = await supabase
+          .from("profiles")
+          .select("id, name, avatar_url")
+          .in("id", blockerIds);
+
+        if (blockerProfilesError) {
+          console.error(
+            "BLOCK NOTIFICATION PROFILE ERROR:",
+            blockerProfilesError
+          );
+        }
+
+        const blockerProfileMap =
+          new Map(
+            (blockerProfiles || []).map(
+              (profile) => [
+                profile.id,
+                profile,
+              ]
+            )
+          );
+
+        blockResult =
+          visibleBlockRows.map(
+            (block) => ({
+              ...block,
+              blocker:
+                blockerProfileMap.get(
+                  block.blocker_id
+                ),
+            })
+          );
+      }
+
+      setBlockNotifications(
+        blockResult
+      );
+
+      /*
        * Po otwarciu skrzynki zaznaczamy aktualne elementy
        * jako przeczytane dla kropki w navbarze.
        */
@@ -4770,6 +5120,10 @@ function Notifications() {
         ...acceptedResult.map(
           (item) =>
             `accepted:${item.id}`
+        ),
+        ...blockResult.map(
+          (item) =>
+            `blocked:${item.id}`
         ),
       ];
 
@@ -4815,6 +5169,10 @@ function Notifications() {
         (item) =>
           `accepted:${item.id}`
       ),
+      ...blockNotifications.map(
+        (item) =>
+          `blocked:${item.id}`
+      ),
     ];
 
     if (visibleIds.length === 0) {
@@ -4849,6 +5207,7 @@ function Notifications() {
 
     setRejectedDecisions([]);
     setAcceptedDecisions([]);
+    setBlockNotifications([]);
 
     announceNotificationsRead(
       user.id
@@ -5012,7 +5371,8 @@ function Notifications() {
   const isInboxEmpty =
     notifications.length === 0 &&
     rejectedDecisions.length === 0 &&
-    acceptedDecisions.length === 0;
+    acceptedDecisions.length === 0 &&
+    blockNotifications.length === 0;
 
   return (
     <div className="page">
@@ -5267,6 +5627,41 @@ function Notifications() {
             margin-top: 18px;
           }
 
+          .notification-block-card {
+            border-color: #e4dedc;
+            background:
+              linear-gradient(
+                180deg,
+                #fff 0%,
+                #fbf8f7 100%
+              );
+          }
+
+          .notification-block-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 14px;
+            border-radius: 50%;
+            background: #efe9e7;
+            color: #704a43;
+            font-size: 17px;
+            font-weight: 800;
+          }
+
+          .notification-block-card h2 {
+            margin: 0 0 9px;
+            font-size: 20px;
+            line-height: 1.35;
+          }
+
+          .notification-block-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.65;
+          }
+
           @media (max-width: 600px) {
             .notification-person {
               gap: 12px;
@@ -5310,7 +5705,8 @@ function Notifications() {
         {!loading &&
           !message &&
           (rejectedDecisions.length > 0 ||
-            acceptedDecisions.length > 0) && (
+            acceptedDecisions.length > 0 ||
+            blockNotifications.length > 0) && (
             <div className="notification-toolbar">
               <button
                 type="button"
@@ -5431,6 +5827,59 @@ function Notifications() {
                             }
                           />
                         </div>
+                      </article>
+                    );
+                  }
+                )}
+              </div>
+            </>
+          )}
+
+        {!loading &&
+          !message &&
+          blockNotifications.length >
+            0 && (
+            <>
+              <div className="notification-section-title">
+                <span className="section-label">
+                  Informacje o profilach
+                </span>
+              </div>
+
+              <div className="jobs-list">
+                {blockNotifications.map(
+                  (block) => {
+                    const blockerName =
+                      block.blocker?.name ||
+                      "Użytkownik";
+
+                    return (
+                      <article
+                        className="job-card notification-block-card"
+                        key={`blocked-${block.id}`}
+                      >
+                        <div className="notification-block-icon">
+                          !
+                        </div>
+
+                        <span className="section-label">
+                          Zmiana możliwości kontaktu
+                        </span>
+
+                        <h2>
+                          {blockerName} zablokował Twój profil
+                        </h2>
+
+                        <p>
+                          Nie możecie obecnie wysyłać sobie wiadomości. Informację możesz usunąć przyciskiem „Wyczyść przeczytane”.
+                        </p>
+
+                        <Link
+                          className="btn btn-outline notification-chat-button"
+                          to={`/profile/${block.blocker_id}`}
+                        >
+                          Zobacz profil →
+                        </Link>
                       </article>
                     );
                   }
@@ -5669,6 +6118,7 @@ function Messages() {
           profilesResult,
           jobsResult,
           messagesResult,
+          statesResult,
         ] = await Promise.all([
           supabase
             .from("profiles")
@@ -5685,7 +6135,7 @@ function Messages() {
           supabase
             .from("messages")
             .select(
-              "id, conversation_id, sender_id, content, created_at"
+              "id, conversation_id, sender_id, content, created_at, read_at"
             )
             .in(
               "conversation_id",
@@ -5694,6 +6144,19 @@ function Messages() {
             .order("created_at", {
               ascending: false,
             }),
+
+          supabase
+            .from(
+              "conversation_user_state"
+            )
+            .select(
+              "conversation_id, hidden_at"
+            )
+            .eq("user_id", user.id)
+            .in(
+              "conversation_id",
+              conversationIds
+            ),
         ]);
 
         if (profilesResult.error) {
@@ -5712,6 +6175,10 @@ function Messages() {
 
         if (messagesResult.error) {
           throw messagesResult.error;
+        }
+
+        if (statesResult.error) {
+          throw statesResult.error;
         }
 
         const profileMap =
@@ -5737,6 +6204,16 @@ function Messages() {
         const lastMessageMap =
           new Map();
 
+        const hiddenAtMap =
+          new Map(
+            (statesResult.data || []).map(
+              (state) => [
+                state.conversation_id,
+                state.hidden_at,
+              ]
+            )
+          );
+
         for (
           const message of
           messagesResult.data || []
@@ -5755,6 +6232,31 @@ function Messages() {
 
         const result =
           rows
+            .filter((conversation) => {
+              const hiddenAt =
+                hiddenAtMap.get(
+                  conversation.id
+                );
+
+              if (!hiddenAt) {
+                return true;
+              }
+
+              const lastMessage =
+                lastMessageMap.get(
+                  conversation.id
+                );
+
+              return (
+                !!lastMessage?.created_at &&
+                new Date(
+                  lastMessage.created_at
+                ).getTime() >
+                  new Date(
+                    hiddenAt
+                  ).getTime()
+              );
+            })
             .map((conversation) => {
               const otherUserId =
                 conversation.client_id ===
@@ -6176,8 +6678,74 @@ function Chat() {
   const [sending, setSending] =
     useState(false);
 
+  const [deleting, setDeleting] =
+    useState(false);
+
+  const [blockedByMe, setBlockedByMe] =
+    useState(false);
+
+  const [blockedMe, setBlockedMe] =
+    useState(false);
+
   const [errorMessage, setErrorMessage] =
     useState("");
+
+  async function markIncomingMessagesAsRead(
+    messageRows
+  ) {
+    const unreadIds =
+      (messageRows || [])
+        .filter(
+          (message) =>
+            message.sender_id !==
+              user?.id &&
+            !message.read_at
+        )
+        .map(
+          (message) =>
+            message.id
+        );
+
+    if (unreadIds.length === 0) {
+      return messageRows || [];
+    }
+
+    const readAt =
+      new Date().toISOString();
+
+    const { error } =
+      await supabase
+        .from("messages")
+        .update({
+          read_at: readAt,
+        })
+        .in("id", unreadIds)
+        .eq(
+          "conversation_id",
+          id
+        );
+
+    if (error) {
+      console.error(
+        "MESSAGE READ ERROR:",
+        error
+      );
+
+      return messageRows || [];
+    }
+
+    return (messageRows || []).map(
+      (message) =>
+        unreadIds.includes(
+          message.id
+        )
+          ? {
+              ...message,
+              read_at: readAt,
+            }
+          : message
+    );
+  }
 
   async function loadMessages() {
     if (!id) return;
@@ -6188,7 +6756,7 @@ function Chat() {
     } = await supabase
       .from("messages")
       .select(
-        "id, conversation_id, sender_id, content, created_at"
+        "id, conversation_id, sender_id, content, created_at, read_at"
       )
       .eq(
         "conversation_id",
@@ -6205,9 +6773,12 @@ function Chat() {
       throw error;
     }
 
-    setMessages(
-      data || []
-    );
+    const preparedMessages =
+      await markIncomingMessagesAsRead(
+        data || []
+      );
+
+    setMessages(preparedMessages);
   }
 
   useEffect(() => {
@@ -6247,19 +6818,54 @@ function Chat() {
             ? conversationData.contractor_id
             : conversationData.client_id;
 
-        const {
-          data: profileData,
-          error: profileError,
-        } = await supabase
-          .from("profiles")
-          .select(
-            "id, name, avatar_url"
-          )
-          .eq(
-            "id",
-            otherUserId
-          )
-          .maybeSingle();
+        const [
+          profileResult,
+          blockedByMeResult,
+          blockedMeResult,
+        ] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url"
+            )
+            .eq(
+              "id",
+              otherUserId
+            )
+            .maybeSingle(),
+
+          supabase
+            .from("user_blocks")
+            .select("id")
+            .eq(
+              "blocker_id",
+              user.id
+            )
+            .eq(
+              "blocked_id",
+              otherUserId
+            )
+            .maybeSingle(),
+
+          supabase
+            .from("user_blocks")
+            .select("id")
+            .eq(
+              "blocker_id",
+              otherUserId
+            )
+            .eq(
+              "blocked_id",
+              user.id
+            )
+            .maybeSingle(),
+        ]);
+
+        const profileData =
+          profileResult.data;
+
+        const profileError =
+          profileResult.error;
 
         if (profileError) {
           console.error(
@@ -6268,9 +6874,31 @@ function Chat() {
           );
         }
 
+        if (blockedByMeResult.error) {
+          console.error(
+            "CHAT BLOCK STATUS ERROR:",
+            blockedByMeResult.error
+          );
+        }
+
+        if (blockedMeResult.error) {
+          console.error(
+            "CHAT BLOCKED STATUS ERROR:",
+            blockedMeResult.error
+          );
+        }
+
         if (mounted) {
           setOtherProfile(
             profileData || null
+          );
+
+          setBlockedByMe(
+            !!blockedByMeResult.data?.id
+          );
+
+          setBlockedMe(
+            !!blockedMeResult.data?.id
           );
         }
 
@@ -6306,8 +6934,36 @@ function Chat() {
               `conversation_id=eq.${id}`,
           },
           (payload) => {
-            const newMessage =
+            let newMessage =
               payload.new;
+
+            if (
+              newMessage.sender_id !==
+              user.id
+            ) {
+              const readAt =
+                new Date().toISOString();
+
+              newMessage = {
+                ...newMessage,
+                read_at: readAt,
+              };
+
+              supabase
+                .from("messages")
+                .update({
+                  read_at: readAt,
+                })
+                .eq("id", newMessage.id)
+                .then(({ error }) => {
+                  if (error) {
+                    console.error(
+                      "LIVE MESSAGE READ ERROR:",
+                      error
+                    );
+                  }
+                });
+            }
 
             setMessages(
               (current) => {
@@ -6326,6 +6982,34 @@ function Chat() {
                   newMessage,
                 ];
               }
+            );
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages",
+            filter:
+              `conversation_id=eq.${id}`,
+          },
+          (payload) => {
+            const updatedMessage =
+              payload.new;
+
+            setMessages(
+              (current) =>
+                current.map(
+                  (message) =>
+                    message.id ===
+                    updatedMessage.id
+                      ? {
+                          ...message,
+                          ...updatedMessage,
+                        }
+                      : message
+                )
             );
           }
         )
@@ -6351,7 +7035,9 @@ function Chat() {
       !content ||
       !user?.id ||
       !id ||
-      sending
+      sending ||
+      blockedByMe ||
+      blockedMe
     ) {
       return;
     }
@@ -6371,7 +7057,7 @@ function Chat() {
           content,
         })
         .select(
-          "id, conversation_id, sender_id, content, created_at"
+          "id, conversation_id, sender_id, content, created_at, read_at"
         )
         .single();
 
@@ -6406,6 +7092,66 @@ function Chat() {
     }
   }
 
+  async function handleDeleteConversation() {
+    if (
+      !user?.id ||
+      !id ||
+      deleting
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        "Usunąć tę rozmowę z Twojej listy? Druga osoba nadal zachowa historię wiadomości."
+      );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setErrorMessage("");
+
+    try {
+      const { error } =
+        await supabase
+          .from(
+            "conversation_user_state"
+          )
+          .upsert(
+            {
+              conversation_id: id,
+              user_id: user.id,
+              hidden_at:
+                new Date().toISOString(),
+            },
+            {
+              onConflict:
+                "conversation_id,user_id",
+            }
+          );
+
+      if (error) {
+        throw error;
+      }
+
+      navigate(
+        "/messages",
+        {
+          replace: true,
+        }
+      );
+    } catch (error) {
+      setErrorMessage(
+        `Nie udało się usunąć rozmowy: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const otherName =
     otherProfile?.name ||
     "Użytkownik";
@@ -6414,6 +7160,28 @@ function Chat() {
     otherName
       .charAt(0)
       .toUpperCase();
+
+  const lastReadOwnMessageId =
+    [...messages]
+      .reverse()
+      .find(
+        (message) =>
+          message.sender_id ===
+            user?.id &&
+          !!message.read_at
+      )?.id || null;
+
+  const messagingBlocked =
+    blockedByMe || blockedMe;
+
+  const otherProfileId =
+    otherProfile?.id ||
+    (conversation
+      ? conversation.client_id ===
+        user?.id
+        ? conversation.contractor_id
+        : conversation.client_id
+      : null);
 
   return (
     <div className="account-page">
@@ -6447,11 +7215,26 @@ function Chat() {
           }
 
           .chat-back {
+            flex: 0 0 auto;
             border: 0;
             background: transparent;
             color: #555;
             font: inherit;
             cursor: pointer;
+          }
+
+          .chat-profile-link {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: inherit;
+            text-decoration: none;
+          }
+
+          .chat-profile-link:hover .chat-person strong {
+            text-decoration: underline;
+            text-underline-offset: 3px;
           }
 
           .chat-avatar {
@@ -6489,6 +7272,25 @@ function Chat() {
             margin-top: 2px;
             color: #8b8b86;
             font-size: 12px;
+          }
+
+          .chat-delete-button {
+            flex: 0 0 auto;
+            min-height: 38px;
+            margin-left: auto;
+            padding: 8px 12px;
+            border: 1px solid #e2d9d6;
+            border-radius: 11px;
+            background: #fff;
+            color: #8e352b;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+          }
+
+          .chat-delete-button:hover {
+            background: #fff7f5;
           }
 
           .chat-messages {
@@ -6548,6 +7350,25 @@ function Chat() {
 
           .chat-message.is-mine time {
             color: rgba(255,255,255,.58);
+          }
+
+          .chat-read-receipt {
+            align-self: flex-end;
+            margin: -3px 5px 3px 0;
+            color: #92928d;
+            font-size: 10px;
+            line-height: 1;
+          }
+
+          .chat-block-banner {
+            margin: 0;
+            padding: 12px 18px;
+            border-top: 1px solid #eadfdc;
+            background: #fff8f6;
+            color: #7f4037;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: center;
           }
 
           .chat-form {
@@ -6620,6 +7441,19 @@ function Chat() {
 
             .chat-header {
               padding: 14px;
+              gap: 10px;
+            }
+
+            .chat-profile-link {
+              gap: 9px;
+            }
+
+            .chat-person span {
+              display: none;
+            }
+
+            .chat-delete-button {
+              padding: 8px 10px;
             }
 
             .chat-messages {
@@ -6667,27 +7501,46 @@ function Chat() {
                   ← Wróć
                 </button>
 
-                <div className="chat-avatar">
-                  {otherProfile?.avatar_url ? (
-                    <img
-                      src={
-                        otherProfile.avatar_url
-                      }
-                      alt=""
-                    />
-                  ) : (
-                    otherInitial
-                  )}
-                </div>
+                <Link
+                  className="chat-profile-link"
+                  to={`/profile/${otherProfileId}`}
+                  aria-label={`Otwórz profil: ${otherName}`}
+                >
+                  <div className="chat-avatar">
+                    {otherProfile?.avatar_url ? (
+                      <img
+                        src={
+                          otherProfile.avatar_url
+                        }
+                        alt=""
+                      />
+                    ) : (
+                      otherInitial
+                    )}
+                  </div>
 
-                <div className="chat-person">
-                  <strong>
-                    {otherName}
-                  </strong>
-                  <span>
-                    Prywatna rozmowa dotycząca zlecenia
-                  </span>
-                </div>
+                  <div className="chat-person">
+                    <strong>
+                      {otherName}
+                    </strong>
+                    <span>
+                      Kliknij, aby zobaczyć profil
+                    </span>
+                  </div>
+                </Link>
+
+                <button
+                  type="button"
+                  className="chat-delete-button"
+                  onClick={
+                    handleDeleteConversation
+                  }
+                  disabled={deleting}
+                >
+                  {deleting
+                    ? "Usuwanie..."
+                    : "Usuń rozmowę"}
+                </button>
               </header>
 
               <div className="chat-messages">
@@ -6700,37 +7553,45 @@ function Chat() {
                 ) : (
                   messages.map(
                     (message) => (
-                      <div
-                        key={
-                          message.id
-                        }
-                        className={`chat-message ${
-                          message.sender_id ===
-                          user.id
-                            ? "is-mine"
-                            : "is-theirs"
-                        }`}
+                      <React.Fragment
+                        key={message.id}
                       >
-                        <p>
-                          {
-                            message.content
-                          }
-                        </p>
-
-                        <time>
-                          {new Date(
-                            message.created_at
-                          ).toLocaleTimeString(
-                            "pl-PL",
+                        <div
+                          className={`chat-message ${
+                            message.sender_id ===
+                            user.id
+                              ? "is-mine"
+                              : "is-theirs"
+                          }`}
+                        >
+                          <p>
                             {
-                              hour:
-                                "2-digit",
-                              minute:
-                                "2-digit",
+                              message.content
                             }
-                          )}
-                        </time>
-                      </div>
+                          </p>
+
+                          <time>
+                            {new Date(
+                              message.created_at
+                            ).toLocaleTimeString(
+                              "pl-PL",
+                              {
+                                hour:
+                                  "2-digit",
+                                minute:
+                                  "2-digit",
+                              }
+                            )}
+                          </time>
+                        </div>
+
+                        {message.id ===
+                          lastReadOwnMessageId && (
+                          <span className="chat-read-receipt">
+                            Wyświetlono
+                          </span>
+                        )}
+                      </React.Fragment>
                     )
                   )
                 )}
@@ -6739,6 +7600,14 @@ function Chat() {
               {errorMessage && (
                 <p className="chat-error">
                   {errorMessage}
+                </p>
+              )}
+
+              {messagingBlocked && (
+                <p className="chat-block-banner">
+                  {blockedByMe
+                    ? "Zablokowałeś tego użytkownika. Odblokuj go na profilu, aby ponownie wysyłać wiadomości."
+                    : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
                 </p>
               )}
 
@@ -6757,7 +7626,10 @@ function Chat() {
                   }
                   placeholder="Napisz wiadomość..."
                   maxLength={4000}
-                  disabled={sending}
+                  disabled={
+                    sending ||
+                    messagingBlocked
+                  }
                   onKeyDown={(event) => {
                     if (
                       event.key ===
@@ -6777,7 +7649,8 @@ function Chat() {
                   className="chat-send"
                   disabled={
                     sending ||
-                    !draft.trim()
+                    !draft.trim() ||
+                    messagingBlocked
                   }
                 >
                   {sending
