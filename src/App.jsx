@@ -139,6 +139,7 @@ function App({ session, loading }) {
       const [
         rejectedResult,
         acceptedResult,
+        blockedResult,
       ] = await Promise.all([
         supabase
           .from("job_applications")
@@ -151,6 +152,11 @@ function App({ session, loading }) {
           .select("id")
           .eq("applicant_id", userId)
           .eq("status", "accepted"),
+
+        supabase
+          .from("user_blocks")
+          .select("id")
+          .eq("blocked_id", userId),
       ]);
 
       if (rejectedResult.error) {
@@ -164,6 +170,13 @@ function App({ session, loading }) {
         console.error(
           "HOME ACCEPTED NOTIFICATIONS ERROR:",
           acceptedResult.error
+        );
+      }
+
+      if (blockedResult.error) {
+        console.error(
+          "HOME BLOCK NOTIFICATIONS ERROR:",
+          blockedResult.error
         );
       }
 
@@ -191,10 +204,19 @@ function App({ session, loading }) {
             )
         );
 
+      const hasUnreadBlock =
+        (blockedResult.data || []).some(
+          (block) =>
+            !readIds.includes(
+              `blocked:${block.id}`
+            )
+        );
+
       setHasNotifications(
         hasUnreadIncoming ||
           hasUnreadRejected ||
-          hasUnreadAccepted
+          hasUnreadAccepted ||
+          hasUnreadBlock
       );
     } catch (error) {
       console.error("HOME NOTIFICATION CHECK ERROR:", error);
