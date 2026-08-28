@@ -712,6 +712,7 @@ img {
 }
 
 .auth-form input,
+.auth-form textarea,
 .project-form input,
 .project-form textarea {
   width: 100%;
@@ -726,10 +727,27 @@ img {
 }
 
 .auth-form input:focus,
+.auth-form textarea:focus,
 .project-form input:focus,
 .project-form textarea:focus {
   border-color: #111;
   box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.auth-form textarea {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 170px;
+  box-sizing: border-box;
+  color: #171717;
+  font: inherit;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow-x: hidden;
+  resize: vertical;
 }
 
 .auth-form input[type="file"] {
