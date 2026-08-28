@@ -3607,7 +3607,7 @@ function Profile() {
               )}
 
               {profile.about && (
-                <p>
+                <p className="profile-about">
                   {profile.about}
                 </p>
               )}
@@ -6681,6 +6681,9 @@ function Chat() {
   const [deleting, setDeleting] =
     useState(false);
 
+  const [unblocking, setUnblocking] =
+    useState(false);
+
   const [blockedByMe, setBlockedByMe] =
     useState(false);
 
@@ -7152,6 +7155,60 @@ function Chat() {
     }
   }
 
+  async function handleUnblockFromChat() {
+    if (
+      !user?.id ||
+      !blockedByMe ||
+      unblocking
+    ) {
+      return;
+    }
+
+    const blockedUserId =
+      otherProfile?.id ||
+      (conversation
+        ? conversation.client_id ===
+          user.id
+          ? conversation.contractor_id
+          : conversation.client_id
+        : null);
+
+    if (!blockedUserId) return;
+
+    setUnblocking(true);
+    setErrorMessage("");
+
+    try {
+      const { error } =
+        await supabase
+          .from("user_blocks")
+          .delete()
+          .eq(
+            "blocker_id",
+            user.id
+          )
+          .eq(
+            "blocked_id",
+            blockedUserId
+          );
+
+      if (error) {
+        throw error;
+      }
+
+      setBlockedByMe(false);
+    } catch (error) {
+      setErrorMessage(
+        `Nie udało się odblokować użytkownika: ${
+          error?.message ||
+          "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setUnblocking(false);
+    }
+  }
+
   const otherName =
     otherProfile?.name ||
     "Użytkownik";
@@ -7237,6 +7294,14 @@ function Chat() {
             text-underline-offset: 3px;
           }
 
+          .chat-profile-blocked {
+            cursor: default;
+          }
+
+          .chat-profile-blocked:hover .chat-person strong {
+            text-decoration: none;
+          }
+
           .chat-avatar {
             width: 46px;
             height: 46px;
@@ -7253,6 +7318,13 @@ function Chat() {
             width: 100%;
             height: 100%;
             object-fit: cover;
+          }
+
+          .chat-avatar-blocked {
+            background: #dfdfda;
+            color: #74746f;
+            font-size: 22px;
+            font-weight: 500;
           }
 
           .chat-person {
@@ -7274,23 +7346,49 @@ function Chat() {
             font-size: 12px;
           }
 
-          .chat-delete-button {
+          .chat-header-actions {
+            flex: 0 0 auto;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .chat-delete-button,
+          .chat-unblock-button {
             flex: 0 0 auto;
             min-height: 38px;
-            margin-left: auto;
             padding: 8px 12px;
-            border: 1px solid #e2d9d6;
             border-radius: 11px;
             background: #fff;
-            color: #8e352b;
             font: inherit;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
           }
 
+          .chat-delete-button {
+            border: 1px solid #e2d9d6;
+            color: #8e352b;
+          }
+
+          .chat-unblock-button {
+            border: 1px solid #cfd8cc;
+            color: #315d2f;
+          }
+
           .chat-delete-button:hover {
             background: #fff7f5;
+          }
+
+          .chat-unblock-button:hover {
+            background: #f4faf2;
+          }
+
+          .chat-delete-button:disabled,
+          .chat-unblock-button:disabled {
+            cursor: wait;
+            opacity: .6;
           }
 
           .chat-messages {
@@ -7442,6 +7540,7 @@ function Chat() {
             .chat-header {
               padding: 14px;
               gap: 10px;
+              flex-wrap: wrap;
             }
 
             .chat-profile-link {
@@ -7452,7 +7551,13 @@ function Chat() {
               display: none;
             }
 
-            .chat-delete-button {
+            .chat-header-actions {
+              width: 100%;
+              justify-content: flex-end;
+            }
+
+            .chat-delete-button,
+            .chat-unblock-button {
               padding: 8px 10px;
             }
 
@@ -7501,46 +7606,86 @@ function Chat() {
                   ← Wróć
                 </button>
 
-                <Link
-                  className="chat-profile-link"
-                  to={`/profile/${otherProfileId}`}
-                  aria-label={`Otwórz profil: ${otherName}`}
-                >
-                  <div className="chat-avatar">
-                    {otherProfile?.avatar_url ? (
-                      <img
-                        src={
-                          otherProfile.avatar_url
-                        }
-                        alt=""
-                      />
-                    ) : (
-                      otherInitial
-                    )}
-                  </div>
+                {messagingBlocked ? (
+                  <div
+                    className="chat-profile-link chat-profile-blocked"
+                    aria-label="Zablokowany użytkownik"
+                  >
+                    <div
+                      className="chat-avatar chat-avatar-blocked"
+                      aria-hidden="true"
+                    >
+                      ×
+                    </div>
 
-                  <div className="chat-person">
-                    <strong>
-                      {otherName}
-                    </strong>
-                    <span>
-                      Kliknij, aby zobaczyć profil
-                    </span>
+                    <div className="chat-person">
+                      <strong>
+                        Zablokowany użytkownik
+                      </strong>
+                      <span>
+                        Dane profilu są ukryte
+                      </span>
+                    </div>
                   </div>
-                </Link>
+                ) : (
+                  <Link
+                    className="chat-profile-link"
+                    to={`/profile/${otherProfileId}`}
+                    aria-label={`Otwórz profil: ${otherName}`}
+                  >
+                    <div className="chat-avatar">
+                      {otherProfile?.avatar_url ? (
+                        <img
+                          src={
+                            otherProfile.avatar_url
+                          }
+                          alt=""
+                        />
+                      ) : (
+                        otherInitial
+                      )}
+                    </div>
 
-                <button
-                  type="button"
-                  className="chat-delete-button"
-                  onClick={
-                    handleDeleteConversation
-                  }
-                  disabled={deleting}
-                >
-                  {deleting
-                    ? "Usuwanie..."
-                    : "Usuń rozmowę"}
-                </button>
+                    <div className="chat-person">
+                      <strong>
+                        {otherName}
+                      </strong>
+                      <span>
+                        Kliknij, aby zobaczyć profil
+                      </span>
+                    </div>
+                  </Link>
+                )}
+
+                <div className="chat-header-actions">
+                  {blockedByMe && (
+                    <button
+                      type="button"
+                      className="chat-unblock-button"
+                      onClick={
+                        handleUnblockFromChat
+                      }
+                      disabled={unblocking}
+                    >
+                      {unblocking
+                        ? "Odblokowywanie..."
+                        : "Odblokuj"}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    className="chat-delete-button"
+                    onClick={
+                      handleDeleteConversation
+                    }
+                    disabled={deleting}
+                  >
+                    {deleting
+                      ? "Usuwanie..."
+                      : "Usuń rozmowę"}
+                  </button>
+                </div>
               </header>
 
               <div className="chat-messages">
@@ -7606,7 +7751,7 @@ function Chat() {
               {messagingBlocked && (
                 <p className="chat-block-banner">
                   {blockedByMe
-                    ? "Zablokowałeś tego użytkownika. Odblokuj go na profilu, aby ponownie wysyłać wiadomości."
+                    ? "Zablokowałeś tego użytkownika. Użyj przycisku „Odblokuj” u góry, aby ponownie wysyłać wiadomości."
                     : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
                 </p>
               )}
@@ -7733,6 +7878,7 @@ function Router() {
           .profile-about p {
             min-width: 0;
             max-width: 100%;
+            white-space: pre-wrap;
             overflow-wrap: anywhere;
             word-break: break-word;
           }
