@@ -2224,6 +2224,7 @@ function Account() {
               O mnie
 
               <textarea
+                className="ideahire-multiline-field"
                 rows="5"
                 value={about}
                 onChange={(event) =>
@@ -2568,8 +2569,9 @@ function FindTalent() {
           <label>
             Czego potrzebujesz?
 
-            <input
-              type="text"
+            <textarea
+              className="ideahire-multiline-field ideahire-title-field"
+              rows="2"
               value={title}
               onChange={(event) =>
                 setTitle(
@@ -2610,6 +2612,7 @@ function FindTalent() {
             Opisz swój projekt
 
             <textarea
+              className="ideahire-multiline-field ideahire-description-field"
               rows="6"
               value={description}
               onChange={(event) =>
@@ -2875,8 +2878,9 @@ function EditJob() {
           <label>
             Tytuł
 
-            <input
-              type="text"
+            <textarea
+              className="ideahire-multiline-field ideahire-title-field"
+              rows="2"
               value={title}
               onChange={(event) =>
                 setTitle(
@@ -2916,6 +2920,7 @@ function EditJob() {
             Opis
 
             <textarea
+              className="ideahire-multiline-field ideahire-description-field"
               rows="7"
               value={description}
               onChange={(event) =>
@@ -6445,6 +6450,69 @@ function Router() {
     <BrowserRouter>
       <AuthProvider>
         <Sorts />
+
+        <style>{`
+          /*
+           * Wieloliniowe pola IdeaHire:
+           * tekst zawija się naturalnie zamiast uciekać w jedną linię.
+           */
+          .ideahire-multiline-field {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            line-height: 1.55;
+            resize: vertical;
+            overflow-x: hidden;
+          }
+
+          .ideahire-title-field {
+            min-height: 58px;
+          }
+
+          .ideahire-description-field {
+            min-height: 150px;
+          }
+
+          /*
+           * Zabezpieczenie również dla już wyświetlanego tekstu.
+           * Długie słowo lub URL nie rozszerzy karty poza ekran.
+           */
+          .job-card,
+          .job-card h1,
+          .job-card h2,
+          .job-card h3,
+          .job-card p,
+          .profile-about,
+          .profile-about p {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+          }
+
+          @media (max-width: 600px) {
+            .ideahire-multiline-field {
+              width: 100%;
+              max-width: 100%;
+              font-size: 16px;
+              line-height: 1.5;
+            }
+
+            .ideahire-title-field {
+              min-height: 64px;
+            }
+
+            .ideahire-description-field {
+              min-height: 170px;
+            }
+          }
+        `}</style>
+
         <Routes>
           <Route
             path="/"
