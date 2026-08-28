@@ -623,6 +623,19 @@ function Login() {
 
         return;
       }
+
+      const from =
+        location.state?.from;
+
+      navigate(
+        typeof from === "string" &&
+          from.startsWith("/")
+          ? from
+          : "/account",
+        {
+          replace: true,
+        }
+      );
     } catch (error) {
       setMessage(
         `Nie udało się zalogować: ${
@@ -927,93 +940,230 @@ function ResetPassword() {
 
   useEffect(() => {
     let mounted = true;
+    let recoveryResolved = false;
+
+    function markRecoveryReady() {
+      if (!mounted) return;
+
+      recoveryResolved = true;
+      setRecoveryReady(true);
+      setMessage("");
+      setLoading(false);
+    }
 
     async function prepareRecovery() {
       try {
-        const params =
+        const searchParams =
           new URLSearchParams(
             window.location.search
           );
 
-        const code =
-          params.get("code");
+        const hashParams =
+          new URLSearchParams(
+            window.location.hash.replace(
+              /^#/,
+              ""
+            )
+          );
 
+        const code =
+          searchParams.get("code");
+
+        const tokenHash =
+          searchParams.get(
+            "token_hash"
+          );
+
+        const type =
+          searchParams.get("type");
+
+        const accessToken =
+          hashParams.get(
+            "access_token"
+          );
+
+        const refreshToken =
+          hashParams.get(
+            "refresh_token"
+          );
+
+        /*
+         * 1. Link oparty o token_hash.
+         * Ten wariant jest odporny na otwarcie linku
+         * z klienta pocztowego / innej karty.
+         */
+        if (
+          tokenHash &&
+          type === "recovery"
+        ) {
+          const {
+            data,
+            error,
+          } =
+            await supabase.auth.verifyOtp(
+              {
+                token_hash:
+                  tokenHash,
+                type: "recovery",
+              }
+            );
+
+          if (error) {
+            throw error;
+          }
+
+          if (data?.session) {
+            window.history.replaceState(
+              {},
+              document.title,
+              "/reset-password"
+            );
+
+            markRecoveryReady();
+            return;
+          }
+        }
+
+        /*
+         * 2. Implicit flow:
+         * access_token i refresh_token przychodzą w hash.
+         */
+        if (
+          accessToken &&
+          refreshToken
+        ) {
+          const {
+            data,
+            error,
+          } =
+            await supabase.auth.setSession(
+              {
+                access_token:
+                  accessToken,
+                refresh_token:
+                  refreshToken,
+              }
+            );
+
+          if (error) {
+            throw error;
+          }
+
+          if (data?.session) {
+            window.history.replaceState(
+              {},
+              document.title,
+              "/reset-password"
+            );
+
+            markRecoveryReady();
+            return;
+          }
+        }
+
+        /*
+         * 3. PKCE flow:
+         * Supabase przekierowuje z ?code=...
+         */
         if (code) {
-          const { error } =
+          const {
+            data,
+            error,
+          } =
             await supabase.auth.exchangeCodeForSession(
               code
             );
 
-          if (error) {
-            if (!mounted) return;
-
-            setMessage(
-              "Link do resetowania hasła jest nieprawidłowy lub wygasł."
+          if (!error && data?.session) {
+            window.history.replaceState(
+              {},
+              document.title,
+              "/reset-password"
             );
 
-            setLoading(false);
-
+            markRecoveryReady();
             return;
           }
 
-          window.history.replaceState(
-            {},
-            document.title,
-            "/reset-password"
-          );
+          /*
+           * Nie pokazujemy błędu natychmiast.
+           * Klient Supabase mógł już obsłużyć URL
+           * i zapisać sesję przed mountem komponentu.
+           */
+          const {
+            data: sessionData,
+          } =
+            await supabase.auth.getSession();
 
-          if (!mounted) return;
+          if (
+            sessionData?.session
+          ) {
+            markRecoveryReady();
+            return;
+          }
 
-          setRecoveryReady(true);
-          setLoading(false);
-
-          return;
+          if (error) {
+            console.error(
+              "PASSWORD RECOVERY CODE ERROR:",
+              error
+            );
+          }
         }
 
+        /*
+         * 4. Jeżeli Supabase automatycznie przetworzył link,
+         * wystarczy istniejąca sesja recovery.
+         */
         const {
-          data,
-          error,
+          data: sessionData,
+          error: sessionError,
         } =
           await supabase.auth.getSession();
 
-        if (error) {
-          if (!mounted) return;
+        if (sessionError) {
+          throw sessionError;
+        }
 
-          setMessage(
-            "Nie udało się przygotować resetowania hasła."
-          );
-
-          setLoading(false);
-
+        if (sessionData?.session) {
+          markRecoveryReady();
           return;
         }
 
-        if (data?.session) {
-          if (!mounted) return;
+        /*
+         * Dajemy onAuthStateChange chwilę na PASSWORD_RECOVERY.
+         * Dzięki temu nie pokazujemy fałszywego "link wygasł"
+         * podczas ładowania sesji.
+         */
+        window.setTimeout(
+          () => {
+            if (
+              !mounted ||
+              recoveryResolved
+            ) {
+              return;
+            }
 
-          setRecoveryReady(true);
-          setLoading(false);
-
-          return;
-        }
-
-        if (!mounted) return;
-
-        setMessage(
-          "Link do resetowania hasła jest nieprawidłowy, wygasł albo został już wykorzystany."
+            setMessage(
+              "Nie udało się aktywować linku resetującego. Poproś o nowy link i otwórz najnowszą wiadomość. Jeśli problem wraca, sprawdź Redirect URLs w Supabase."
+            );
+            setLoading(false);
+          },
+          1200
+        );
+      } catch (error) {
+        console.error(
+          "PASSWORD RECOVERY ERROR:",
+          error
         );
 
-        setLoading(false);
-      } catch (error) {
         if (!mounted) return;
 
         setMessage(
-          `Nie udało się przygotować resetowania hasła: ${
+          `Nie udało się aktywować resetowania hasła: ${
             error?.message ||
             "Nieznany błąd"
           }`
         );
-
         setLoading(false);
       }
     }
@@ -1030,9 +1180,7 @@ function ResetPassword() {
               "PASSWORD_RECOVERY" &&
             session
           ) {
-            setRecoveryReady(true);
-            setLoading(false);
-            setMessage("");
+            markRecoveryReady();
           }
         }
       );
@@ -1055,7 +1203,7 @@ function ResetPassword() {
 
     if (!recoveryReady) {
       setMessage(
-        "Sesja resetowania hasła nie jest aktywna. Otwórz ponownie link z wiadomości e-mail."
+        "Sesja resetowania hasła nie jest aktywna. Poproś o nowy link resetujący."
       );
 
       return;
@@ -1082,7 +1230,10 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      const { error } =
+      const {
+        data,
+        error,
+      } =
         await supabase.auth.updateUser(
           {
             password,
@@ -1097,10 +1248,18 @@ function ResetPassword() {
         return;
       }
 
+      if (!data?.user) {
+        setMessage(
+          "Supabase nie potwierdził zmiany hasła."
+        );
+
+        return;
+      }
+
       setSuccess(true);
 
       setMessage(
-        "Hasło zostało zmienione. Za chwilę przejdziesz do logowania."
+        "Hasło zostało zmienione. Możesz zalogować się nowym hasłem."
       );
 
       setPassword("");
@@ -1108,11 +1267,17 @@ function ResetPassword() {
 
       await supabase.auth.signOut();
 
-      setTimeout(() => {
-        navigate("/login", {
-          replace: true,
-        });
-      }, 1500);
+      window.setTimeout(
+        () => {
+          navigate(
+            "/login",
+            {
+              replace: true,
+            }
+          );
+        },
+        900
+      );
     } catch (error) {
       setMessage(
         `Nie udało się zmienić hasła: ${
@@ -1249,6 +1414,7 @@ function ResetPassword() {
     </div>
   );
 }
+
 
 /* =========================================================
    REGISTER
@@ -2224,6 +2390,7 @@ function Account() {
               O mnie
 
               <textarea
+                className="ideahire-multiline-field ideahire-about-field"
                 rows="5"
                 value={about}
                 onChange={(event) =>
@@ -2568,8 +2735,9 @@ function FindTalent() {
           <label>
             Czego potrzebujesz?
 
-            <input
-              type="text"
+            <textarea
+              className="ideahire-multiline-field ideahire-title-field"
+              rows="2"
               value={title}
               onChange={(event) =>
                 setTitle(
@@ -2610,6 +2778,7 @@ function FindTalent() {
             Opisz swój projekt
 
             <textarea
+              className="ideahire-multiline-field ideahire-description-field"
               rows="6"
               value={description}
               onChange={(event) =>
@@ -2875,8 +3044,9 @@ function EditJob() {
           <label>
             Tytuł
 
-            <input
-              type="text"
+            <textarea
+              className="ideahire-multiline-field ideahire-title-field"
+              rows="2"
               value={title}
               onChange={(event) =>
                 setTitle(
@@ -2916,6 +3086,7 @@ function EditJob() {
             Opis
 
             <textarea
+              className="ideahire-multiline-field ideahire-description-field"
               rows="7"
               value={description}
               onChange={(event) =>
@@ -6445,6 +6616,63 @@ function Router() {
     <BrowserRouter>
       <AuthProvider>
         <Sorts />
+
+        <style>{`
+          .ideahire-multiline-field {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            line-height: 1.55;
+            resize: vertical;
+            overflow-x: hidden;
+          }
+
+          .ideahire-title-field {
+            min-height: 62px;
+          }
+
+          .ideahire-about-field,
+          .ideahire-description-field {
+            min-height: 150px;
+          }
+
+          .job-card,
+          .job-card h1,
+          .job-card h2,
+          .job-card h3,
+          .job-card p,
+          .profile-about,
+          .profile-about p {
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+          }
+
+          @media (max-width: 600px) {
+            .ideahire-multiline-field {
+              width: 100%;
+              max-width: 100%;
+              font-size: 16px;
+              line-height: 1.5;
+            }
+
+            .ideahire-title-field {
+              min-height: 68px;
+            }
+
+            .ideahire-about-field,
+            .ideahire-description-field {
+              min-height: 175px;
+            }
+          }
+        `}</style>
+
         <Routes>
           <Route
             path="/"
