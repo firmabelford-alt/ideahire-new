@@ -99,6 +99,25 @@ img {
   color: #111;
 }
 
+.notifications-nav-link,
+.home-notifications-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.notification-dot,
+.home-notifications-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  display: inline-block;
+  border-radius: 50%;
+  background: #111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
