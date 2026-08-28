@@ -24,7 +24,15 @@ import Sorts, {
   saveUserCountry,
   ApplicationActions,
 } from "./Sorts";
-import { supabase } from "./supabase";
+import {
+  passwordRecoveryRequested,
+  supabase,
+} from "./supabase";
+import {
+  getLoginErrorMessage,
+  getPasswordRecoveryRedirectUrl,
+  normalizeEmail,
+} from "./auth";
 
 /* =========================================================
    AUTH CONTEXT
@@ -600,14 +608,14 @@ function Login() {
         await supabase.auth.signInWithPassword(
           {
             email:
-              email.trim(),
+              normalizeEmail(email),
             password,
           }
         );
 
       if (error) {
         setMessage(
-          `Nie udało się zalogować: ${error.message}`
+          getLoginErrorMessage(error)
         );
 
         return;
@@ -638,10 +646,7 @@ function Login() {
       );
     } catch (error) {
       setMessage(
-        `Nie udało się zalogować: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
+        getLoginErrorMessage(error)
       );
     } finally {
       setLoading(false);
@@ -657,7 +662,7 @@ function Login() {
     setSuccess(false);
 
     const cleanEmail =
-      email.trim();
+      normalizeEmail(email);
 
     if (!cleanEmail) {
       setMessage(
@@ -675,7 +680,9 @@ function Login() {
           cleanEmail,
           {
             redirectTo:
-              `${window.location.origin}/reset-password`,
+              getPasswordRecoveryRedirectUrl(
+                window.location.origin
+              ),
           }
         );
 
@@ -941,14 +948,66 @@ function ResetPassword() {
   useEffect(() => {
     let mounted = true;
     let recoveryResolved = false;
+    let failureTimer = null;
 
     function markRecoveryReady() {
       if (!mounted) return;
 
       recoveryResolved = true;
+
+      if (failureTimer) {
+        window.clearTimeout(
+          failureTimer
+        );
+      }
+
+      window.history.replaceState(
+        {},
+        document.title,
+        getPasswordRecoveryRedirectUrl(
+          window.location.origin
+        )
+      );
+
       setRecoveryReady(true);
       setMessage("");
       setLoading(false);
+    }
+
+    function showRecoveryError(error) {
+      if (!mounted) return;
+
+      console.error(
+        "PASSWORD RECOVERY ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się aktywować resetowania hasła: ${
+          error?.message ||
+          "Link jest nieprawidłowy albo wygasł."
+        }`
+      );
+      setLoading(false);
+    }
+
+    function scheduleMissingSessionError() {
+      failureTimer = window.setTimeout(
+        () => {
+          if (
+            !mounted ||
+            recoveryResolved
+          ) {
+            return;
+          }
+
+          setMessage(
+            "Nie udało się aktywować linku resetującego. Poproś o nowy link i otwórz najnowszą wiadomość."
+          );
+          setLoading(false);
+        },
+        3000
+      );
     }
 
     async function prepareRecovery() {
@@ -966,9 +1025,6 @@ function ResetPassword() {
             )
           );
 
-        const code =
-          searchParams.get("code");
-
         const tokenHash =
           searchParams.get(
             "token_hash"
@@ -977,15 +1033,22 @@ function ResetPassword() {
         const type =
           searchParams.get("type");
 
-        const accessToken =
+        const callbackError =
+          searchParams.get(
+            "error_description"
+          ) ||
           hashParams.get(
-            "access_token"
+            "error_description"
           );
 
-        const refreshToken =
-          hashParams.get(
-            "refresh_token"
+        if (callbackError) {
+          throw new Error(
+            callbackError.replace(
+              /\+/g,
+              " "
+            )
           );
+        }
 
         /*
          * 1. Link oparty o token_hash.
@@ -1013,106 +1076,15 @@ function ResetPassword() {
           }
 
           if (data?.session) {
-            window.history.replaceState(
-              {},
-              document.title,
-              "/reset-password"
-            );
-
             markRecoveryReady();
             return;
           }
         }
 
         /*
-         * 2. Implicit flow:
-         * access_token i refresh_token przychodzą w hash.
-         */
-        if (
-          accessToken &&
-          refreshToken
-        ) {
-          const {
-            data,
-            error,
-          } =
-            await supabase.auth.setSession(
-              {
-                access_token:
-                  accessToken,
-                refresh_token:
-                  refreshToken,
-              }
-            );
-
-          if (error) {
-            throw error;
-          }
-
-          if (data?.session) {
-            window.history.replaceState(
-              {},
-              document.title,
-              "/reset-password"
-            );
-
-            markRecoveryReady();
-            return;
-          }
-        }
-
-        /*
-         * 3. PKCE flow:
-         * Supabase przekierowuje z ?code=...
-         */
-        if (code) {
-          const {
-            data,
-            error,
-          } =
-            await supabase.auth.exchangeCodeForSession(
-              code
-            );
-
-          if (!error && data?.session) {
-            window.history.replaceState(
-              {},
-              document.title,
-              "/reset-password"
-            );
-
-            markRecoveryReady();
-            return;
-          }
-
-          /*
-           * Nie pokazujemy błędu natychmiast.
-           * Klient Supabase mógł już obsłużyć URL
-           * i zapisać sesję przed mountem komponentu.
-           */
-          const {
-            data: sessionData,
-          } =
-            await supabase.auth.getSession();
-
-          if (
-            sessionData?.session
-          ) {
-            markRecoveryReady();
-            return;
-          }
-
-          if (error) {
-            console.error(
-              "PASSWORD RECOVERY CODE ERROR:",
-              error
-            );
-          }
-        }
-
-        /*
-         * 4. Jeżeli Supabase automatycznie przetworzył link,
-         * wystarczy istniejąca sesja recovery.
+         * Dla standardowego linku klient Supabase sam odczytuje
+         * tokeny z URL (detectSessionInUrl). Nie przetwarzamy ich
+         * drugi raz, bo kod/link odzyskiwania jest jednorazowy.
          */
         const {
           data: sessionData,
@@ -1124,47 +1096,17 @@ function ResetPassword() {
           throw sessionError;
         }
 
-        if (sessionData?.session) {
+        if (
+          passwordRecoveryRequested &&
+          sessionData?.session
+        ) {
           markRecoveryReady();
           return;
         }
 
-        /*
-         * Dajemy onAuthStateChange chwilę na PASSWORD_RECOVERY.
-         * Dzięki temu nie pokazujemy fałszywego "link wygasł"
-         * podczas ładowania sesji.
-         */
-        window.setTimeout(
-          () => {
-            if (
-              !mounted ||
-              recoveryResolved
-            ) {
-              return;
-            }
-
-            setMessage(
-              "Nie udało się aktywować linku resetującego. Poproś o nowy link i otwórz najnowszą wiadomość. Jeśli problem wraca, sprawdź Redirect URLs w Supabase."
-            );
-            setLoading(false);
-          },
-          1200
-        );
+        scheduleMissingSessionError();
       } catch (error) {
-        console.error(
-          "PASSWORD RECOVERY ERROR:",
-          error
-        );
-
-        if (!mounted) return;
-
-        setMessage(
-          `Nie udało się aktywować resetowania hasła: ${
-            error?.message ||
-            "Nieznany błąd"
-          }`
-        );
-        setLoading(false);
+        showRecoveryError(error);
       }
     }
 
@@ -1189,6 +1131,13 @@ function ResetPassword() {
 
     return () => {
       mounted = false;
+
+      if (failureTimer) {
+        window.clearTimeout(
+          failureTimer
+        );
+      }
+
       subscription.unsubscribe();
     };
   }, []);
@@ -1458,7 +1407,7 @@ function Register() {
       } =
         await supabase.auth.signUp({
           email:
-            email.trim(),
+            normalizeEmail(email),
           password,
           options: {
             data: {
@@ -6676,7 +6625,11 @@ function Router() {
         <Routes>
           <Route
             path="/"
-            element={<Home />}
+            element={
+              passwordRecoveryRequested
+                ? <ResetPassword />
+                : <Home />
+            }
           />
 
           <Route
