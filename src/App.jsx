@@ -13,53 +13,26 @@ const categories = [
   "Fotografia",
 ];
 
-function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+function App({ session, loading }) {
   const [hasNotifications, setHasNotifications] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
 
-    async function getSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (mounted) {
-        setSession(session);
-        setLoading(false);
-        checkNotifications(session);
-        checkNotifications(session);
-      }
-    }
-
-    getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
-    );
+    checkNotifications(session);
 
     const interval = setInterval(() => {
       if (mounted) {
-        supabase.auth.getSession().then(({ data }) => {
-          checkNotifications(data?.session || null);
-        });
+        checkNotifications(session);
       }
     }, 10000);
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
       clearInterval(interval);
     };
-  }, []);
+  }, [session?.user?.id]);
 
   async function checkNotifications(currentSession) {
     const userId = currentSession?.user?.id;
