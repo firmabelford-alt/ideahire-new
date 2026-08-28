@@ -22,6 +22,37 @@ function App({ session, loading }) {
 
     checkNotifications(session);
 
+    function handleNotificationsRead(
+      event
+    ) {
+      if (
+        !event?.detail?.userId ||
+        event.detail.userId ===
+          session?.user?.id
+      ) {
+        setHasNotifications(false);
+      }
+    }
+
+    function handleStorage(event) {
+      if (
+        event.key ===
+        `ideahire_read_notifications_${session?.user?.id}`
+      ) {
+        checkNotifications(session);
+      }
+    }
+
+    window.addEventListener(
+      "ideahire:notifications-read",
+      handleNotificationsRead
+    );
+
+    window.addEventListener(
+      "storage",
+      handleStorage
+    );
+
     const interval = setInterval(() => {
       if (mounted) {
         checkNotifications(session);
@@ -31,6 +62,16 @@ function App({ session, loading }) {
     return () => {
       mounted = false;
       clearInterval(interval);
+
+      window.removeEventListener(
+        "ideahire:notifications-read",
+        handleNotificationsRead
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorage
+      );
     };
   }, [session?.user?.id]);
 
@@ -55,27 +96,105 @@ function App({ session, loading }) {
 
       const jobIds = (myJobs || []).map((job) => job.id);
 
-      if (jobIds.length === 0) {
-        setHasNotifications(false);
-        return;
-      }
+      let applications = [];
 
-      const { data: applications, error: applicationsError } = await supabase
-        .from("job_applications")
-        .select("id, job_id, applicant_id, created_at")
-        .in("job_id", jobIds)
-        .order("created_at", { ascending: false });
+      if (jobIds.length > 0) {
+        const {
+          data,
+          error: applicationsError,
+        } = await supabase
+          .from("job_applications")
+          .select("id, job_id, applicant_id, created_at")
+          .in("job_id", jobIds)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false });
 
-      if (applicationsError) {
-        console.error("HOME NOTIFICATION APPLICATIONS ERROR:", applicationsError);
-        return;
+        if (applicationsError) {
+          console.error(
+            "HOME NOTIFICATION APPLICATIONS ERROR:",
+            applicationsError
+          );
+          return;
+        }
+
+        applications = data || [];
       }
 
       const readKey = `ideahire_read_notifications_${userId}`;
-      const readIds = JSON.parse(localStorage.getItem(readKey) || "[]");
+
+      let readIds = [];
+
+      try {
+        const storedReadIds = JSON.parse(
+          localStorage.getItem(readKey) || "[]"
+        );
+
+        readIds = Array.isArray(storedReadIds)
+          ? storedReadIds
+          : [];
+      } catch {
+        readIds = [];
+      }
+
+      const [
+        rejectedResult,
+        acceptedResult,
+      ] = await Promise.all([
+        supabase
+          .from("job_applications")
+          .select("id")
+          .eq("applicant_id", userId)
+          .eq("status", "rejected"),
+
+        supabase
+          .from("job_applications")
+          .select("id")
+          .eq("applicant_id", userId)
+          .eq("status", "accepted"),
+      ]);
+
+      if (rejectedResult.error) {
+        console.error(
+          "HOME REJECTED NOTIFICATIONS ERROR:",
+          rejectedResult.error
+        );
+      }
+
+      if (acceptedResult.error) {
+        console.error(
+          "HOME ACCEPTED NOTIFICATIONS ERROR:",
+          acceptedResult.error
+        );
+      }
+
+      const hasUnreadIncoming =
+        (applications || []).some(
+          (application) =>
+            !readIds.includes(
+              `incoming:${application.id}`
+            )
+        );
+
+      const hasUnreadRejected =
+        (rejectedResult.data || []).some(
+          (application) =>
+            !readIds.includes(
+              `rejected:${application.id}`
+            )
+        );
+
+      const hasUnreadAccepted =
+        (acceptedResult.data || []).some(
+          (application) =>
+            !readIds.includes(
+              `accepted:${application.id}`
+            )
+        );
 
       setHasNotifications(
-        (applications || []).some((application) => !readIds.includes(application.id))
+        hasUnreadIncoming ||
+          hasUnreadRejected ||
+          hasUnreadAccepted
       );
     } catch (error) {
       console.error("HOME NOTIFICATION CHECK ERROR:", error);
