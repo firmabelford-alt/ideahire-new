@@ -251,6 +251,54 @@ const JOB_CATEGORIES = [
   "Fotografia",
 ];
 
+function getStoredNotificationIds(
+  key
+) {
+  try {
+    const value = JSON.parse(
+      localStorage.getItem(key) ||
+        "[]"
+    );
+
+    return Array.isArray(value)
+      ? value.filter(
+          (item) =>
+            typeof item ===
+            "string"
+        )
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveNotificationIds(
+  key,
+  ids
+) {
+  localStorage.setItem(
+    key,
+    JSON.stringify([
+      ...new Set(ids),
+    ])
+  );
+}
+
+function announceNotificationsRead(
+  userId
+) {
+  window.dispatchEvent(
+    new CustomEvent(
+      "ideahire:notifications-read",
+      {
+        detail: {
+          userId,
+        },
+      }
+    )
+  );
+}
+
 /* =========================================================
    NAVBAR
 ========================================================= */
@@ -386,10 +434,8 @@ function AccountNavbar() {
         `ideahire_read_notifications_${user.id}`;
 
       const readIds =
-        JSON.parse(
-          localStorage.getItem(
-            readKey
-          ) || "[]"
+        getStoredNotificationIds(
+          readKey
         );
 
       const unreadIncoming =
@@ -432,16 +478,60 @@ function AccountNavbar() {
   useEffect(() => {
     checkNotifications();
 
+    function handleNotificationsRead(
+      event
+    ) {
+      if (
+        !event?.detail?.userId ||
+        event.detail.userId ===
+          user?.id
+      ) {
+        setHasNotifications(false);
+      }
+    }
+
+    function handleStorage(event) {
+      if (
+        event.key ===
+          `ideahire_read_notifications_${user?.id}` ||
+        event.key ===
+          `ideahire_dismissed_notifications_${user?.id}`
+      ) {
+        checkNotifications();
+      }
+    }
+
+    window.addEventListener(
+      "ideahire:notifications-read",
+      handleNotificationsRead
+    );
+
+    window.addEventListener(
+      "storage",
+      handleStorage
+    );
+
     const interval =
       setInterval(
         checkNotifications,
         10000
       );
 
-    return () =>
+    return () => {
       clearInterval(
         interval
       );
+
+      window.removeEventListener(
+        "ideahire:notifications-read",
+        handleNotificationsRead
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorage
+      );
+    };
   }, [user?.id]);
 
   async function handleLogout() {
@@ -4300,6 +4390,14 @@ function Notifications() {
     setLoading(true);
     setMessage("");
 
+    const dismissedKey =
+      `ideahire_dismissed_notifications_${user.id}`;
+
+    const dismissedIds =
+      getStoredNotificationIds(
+        dismissedKey
+      );
+
     try {
       /*
        * 1. Zgłoszenia do zleceń, których jesteś właścicielem.
@@ -4523,15 +4621,22 @@ function Notifications() {
           );
 
         rejectedResult =
-          myRejected.map(
-            (application) => ({
-              ...application,
-              job:
-                rejectedJobMap.get(
-                  application.job_id
-                ),
-            })
-          );
+          myRejected
+            .filter(
+              (application) =>
+                !dismissedIds.includes(
+                  `rejected:${application.id}`
+                )
+            )
+            .map(
+              (application) => ({
+                ...application,
+                job:
+                  rejectedJobMap.get(
+                    application.job_id
+                  ),
+              })
+            );
       }
 
       setRejectedDecisions(
@@ -4621,18 +4726,25 @@ function Notifications() {
           )
         );
 
-        acceptedResult = myAccepted.map(
-          (application) => ({
-            ...application,
-            job: jobMap.get(
-              application.job_id
-            ),
-            conversation:
-              conversationMap.get(
+        acceptedResult = myAccepted
+          .filter(
+            (application) =>
+              !dismissedIds.includes(
+                `accepted:${application.id}`
+              )
+          )
+          .map(
+            (application) => ({
+              ...application,
+              job: jobMap.get(
                 application.job_id
               ),
-          })
-        );
+              conversation:
+                conversationMap.get(
+                  application.job_id
+                ),
+            })
+          );
       }
 
       setAcceptedDecisions(
@@ -4661,11 +4773,19 @@ function Notifications() {
         ),
       ];
 
-      localStorage.setItem(
+      saveNotificationIds(
         readKey,
-        JSON.stringify(
-          readIds
-        )
+        [
+          ...getStoredNotificationIds(
+            readKey
+          ),
+          ...dismissedIds,
+          ...readIds,
+        ]
+      );
+
+      announceNotificationsRead(
+        user.id
       );
     } catch (error) {
       setMessage(
@@ -4682,6 +4802,58 @@ function Notifications() {
   useEffect(() => {
     loadNotifications();
   }, [user?.id]);
+
+  function handleClearNotifications() {
+    if (!user?.id) return;
+
+    const visibleIds = [
+      ...rejectedDecisions.map(
+        (item) =>
+          `rejected:${item.id}`
+      ),
+      ...acceptedDecisions.map(
+        (item) =>
+          `accepted:${item.id}`
+      ),
+    ];
+
+    if (visibleIds.length === 0) {
+      return;
+    }
+
+    const dismissedKey =
+      `ideahire_dismissed_notifications_${user.id}`;
+
+    const readKey =
+      `ideahire_read_notifications_${user.id}`;
+
+    saveNotificationIds(
+      dismissedKey,
+      [
+        ...getStoredNotificationIds(
+          dismissedKey
+        ),
+        ...visibleIds,
+      ]
+    );
+
+    saveNotificationIds(
+      readKey,
+      [
+        ...getStoredNotificationIds(
+          readKey
+        ),
+        ...visibleIds,
+      ]
+    );
+
+    setRejectedDecisions([]);
+    setAcceptedDecisions([]);
+
+    announceNotificationsRead(
+      user.id
+    );
+  }
 
   async function handleAccepted(
     applicationId
@@ -4996,6 +5168,36 @@ function Notifications() {
             margin: 30px 0 14px;
           }
 
+          .notification-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin: 4px 0 10px;
+          }
+
+          .notification-clear-button {
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 1px solid #deded9;
+            border-radius: 12px;
+            background: #fff;
+            color: #555;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 650;
+            transition:
+              color 0.18s ease,
+              border-color 0.18s ease,
+              background 0.18s ease,
+              transform 0.18s ease;
+          }
+
+          .notification-clear-button:hover {
+            transform: translateY(-1px);
+            border-color: #bdbdb7;
+            background: #f7f7f4;
+            color: #171717;
+          }
+
           .notification-decision-card {
             border-color: #eadfdc;
             background:
@@ -5094,8 +5296,33 @@ function Notifications() {
             .notification-card-actions > .btn {
               width: 100%;
             }
+
+            .notification-toolbar {
+              margin-top: 8px;
+            }
+
+            .notification-clear-button {
+              width: 100%;
+            }
           }
         `}</style>
+
+        {!loading &&
+          !message &&
+          (rejectedDecisions.length > 0 ||
+            acceptedDecisions.length > 0) && (
+            <div className="notification-toolbar">
+              <button
+                type="button"
+                className="notification-clear-button"
+                onClick={
+                  handleClearNotifications
+                }
+              >
+                Wyczyść przeczytane
+              </button>
+            </div>
+          )}
 
         {!loading &&
           !message &&
