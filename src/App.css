@@ -1274,6 +1274,241 @@ img {
   }
 }
 
+/* =========================================================
+   DARK MODE — FINAL CONTRAST LAYER
+   Kept at the end so it also overrides component styles.
+========================================================= */
+
+html[data-theme="dark"] :is(
+  .messages-list,
+  .messages-empty,
+  .messages-row,
+  .jobs-search,
+  .jobs-search-box,
+  .jobs-filter,
+  .account-mini,
+  .ideahire-application-reject
+) {
+  border-color: #343431 !important;
+  background: #171716 !important;
+  color: #f3f3ef !important;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.26) !important;
+}
+
+html[data-theme="dark"] .messages-row {
+  border-bottom-color: #30302d !important;
+}
+
+html[data-theme="dark"] .messages-row:hover {
+  background: #222220 !important;
+}
+
+html[data-theme="dark"] :is(
+  .messages-heading h1,
+  .messages-empty h2,
+  .messages-name,
+  .messages-topline,
+  .auth-header h1,
+  .auth-footer a,
+  .auth-link-button,
+  .account-mini-name
+) {
+  color: #f5f5f1 !important;
+}
+
+html[data-theme="dark"] :is(
+  .messages-heading p,
+  .messages-empty p,
+  .messages-job,
+  .messages-preview,
+  .messages-date,
+  .auth-header p,
+  .auth-footer,
+  .forgot-password-row,
+  .forgot-password-row p
+) {
+  color: #b8b8b1 !important;
+}
+
+html[data-theme="dark"] .messages-preview {
+  color: #d0d0ca !important;
+}
+
+html[data-theme="dark"] .messages-date {
+  color: #969690 !important;
+}
+
+html[data-theme="dark"] :is(
+  .messages-avatar,
+  .notification-avatar,
+  .chat-avatar,
+  .chat-avatar-blocked,
+  .profile-avatar-placeholder
+) {
+  border-color: #42423e !important;
+  background: #2a2a27 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-theme="dark"] .auth-card {
+  border-color: #343431 !important;
+  background: #171716 !important;
+  color: #f3f3ef !important;
+  box-shadow: 0 22px 65px rgba(0, 0, 0, 0.34) !important;
+}
+
+html[data-theme="dark"] .auth-card :is(p, small) {
+  color: #b8b8b1 !important;
+}
+
+html[data-theme="dark"] .auth-card :is(label, .logo) {
+  color: #f3f3ef !important;
+}
+
+html[data-theme="dark"] .auth-footer a,
+html[data-theme="dark"] .auth-link-button {
+  text-decoration-color: #7b7b75 !important;
+}
+
+html[data-theme="dark"] .auth-footer a:hover,
+html[data-theme="dark"] .auth-link-button:hover {
+  color: #ffffff !important;
+  text-decoration-color: #ffffff !important;
+}
+
+html[data-theme="dark"] :is(
+  .auth-message,
+  .profile-upload-status
+) {
+  border: 1px solid #3b3b37 !important;
+  background: #222220 !important;
+  color: #deded8 !important;
+}
+
+html[data-theme="dark"] .auth-error {
+  border: 1px solid #63423d !important;
+  background: #2a1d1b !important;
+  color: #ffc2b9 !important;
+}
+
+html[data-theme="dark"] :is(
+  .jobs-search-box:focus-within,
+  .jobs-filter:hover,
+  .jobs-search-clear,
+  .ideahire-country-option:hover
+) {
+  border-color: #50504a !important;
+  background: #292926 !important;
+  color: #f3f3ef !important;
+}
+
+html[data-theme="dark"] .jobs-filter.active {
+  border-color: #f1f1ed !important;
+  background: #f1f1ed !important;
+  color: #151514 !important;
+}
+
+html[data-theme="dark"] .jobs-search-icon {
+  color: #aaa9a3 !important;
+}
+
+html[data-theme="dark"] .account-mini:hover {
+  border-color: #50504a !important;
+  background: #222220 !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="dark"] :is(
+  .notification-decision-card,
+  .notification-accepted-card,
+  .notification-block-card
+) {
+  border-color: #3b3b37 !important;
+  background: #191918 !important;
+  background-image: none !important;
+  color: #f3f3ef !important;
+}
+
+html[data-theme="dark"] :is(
+  .notification-person p,
+  .notification-job small,
+  .notification-decision-card p,
+  .notification-block-card p
+) {
+  color: #b8b8b1 !important;
+}
+
+html[data-theme="dark"] :is(
+  .notification-decision-job,
+  .notification-job h2,
+  .notification-decision-card h2,
+  .notification-block-card h2
+) {
+  color: #f3f3ef !important;
+}
+
+html[data-theme="dark"] :is(
+  .notification-decision-icon,
+  .notification-accepted-icon,
+  .notification-block-icon
+) {
+  background: #2b2926 !important;
+  color: #e6ddd7 !important;
+}
+
+html[data-theme="dark"] :is(
+  .notification-dot,
+  .home-notifications-dot
+) {
+  background: #f1f1ed !important;
+  box-shadow: 0 0 0 3px rgba(241, 241, 237, 0.13) !important;
+}
+
+html[data-theme="dark"] :is(
+  .chat-empty,
+  .chat-person span,
+  .chat-read-receipt
+) {
+  color: #aaa9a3 !important;
+}
+
+html[data-theme="dark"] .chat-back {
+  color: #deded8 !important;
+}
+
+html[data-theme="dark"] :is(
+  .profile-more-menu summary,
+  .profile-more-dropdown,
+  .profile-edit-skill-chip,
+  .profile-specialty-chip
+) {
+  border-color: #3d3d39 !important;
+  background: #20201e !important;
+  color: #eeeeea !important;
+}
+
+html[data-theme="dark"] .profile-more-dropdown button:hover {
+  background: #2b2b28 !important;
+}
+
+html[data-theme="dark"] :is(
+  .ideahire-country-placeholder,
+  .ideahire-country-selected-name,
+  .ideahire-country-option-name,
+  .ideahire-country-selected-code,
+  .ideahire-country-option-code
+) {
+  color: #d4d4ce !important;
+}
+
+html[data-theme="dark"] .ideahire-country-empty {
+  color: #aaa9a3 !important;
+}
+
+html[data-theme="dark"] :focus-visible {
+  outline-color: #d7d7d1;
+}
+
 @media (max-width: 480px) {
   .nav-actions .btn-ghost {
     display: inline-flex;
