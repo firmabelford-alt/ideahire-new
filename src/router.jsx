@@ -2032,6 +2032,12 @@ function Account() {
     setSpecialization,
   ] = useState("");
 
+  const [skills, setSkills] =
+    useState([]);
+
+  const [skillDraft, setSkillDraft] =
+    useState("");
+
   const [
     profileDetailsLoading,
     setProfileDetailsLoading,
@@ -2137,6 +2143,8 @@ function Account() {
     if (!user?.id) {
       setSpecialtyCategories([]);
       setSpecialization("");
+      setSkills([]);
+      setSkillDraft("");
       setProfileDetailsLoading(false);
       return;
     }
@@ -2151,7 +2159,7 @@ function Account() {
           await supabase
             .from("profiles")
             .select(
-              "specialty_categories, specialization"
+              "specialty_categories, specialization, skills"
             )
             .eq("id", user.id)
             .maybeSingle();
@@ -2184,6 +2192,17 @@ function Account() {
 
         setSpecialization(
           data?.specialization || ""
+        );
+
+        setSkills(
+          Array.isArray(data?.skills)
+            ? data.skills.filter(
+                (skill) =>
+                  typeof skill ===
+                    "string" &&
+                  !!skill.trim()
+              )
+            : []
         );
       } finally {
         if (mounted) {
@@ -2475,6 +2494,7 @@ function Account() {
               specialization:
                 cleanSpecialization ||
                 null,
+              skills,
             },
           }
         );
@@ -2512,6 +2532,7 @@ function Account() {
             specialization:
               cleanSpecialization ||
               null,
+            skills,
           },
           {
             onConflict: "id",
@@ -2647,6 +2668,69 @@ function Account() {
           category,
         ];
       }
+    );
+  }
+
+  function addSkill() {
+    const cleanSkill =
+      skillDraft
+        .trim()
+        .replace(/\s+/g, " ");
+
+    setMessage("");
+
+    if (!cleanSkill) return;
+
+    if (skills.length >= 12) {
+      setMessage(
+        "Możesz dodać maksymalnie 12 umiejętności."
+      );
+      return;
+    }
+
+    if (
+      skills.some(
+        (skill) =>
+          skill.toLocaleLowerCase(
+            "pl-PL"
+          ) ===
+          cleanSkill.toLocaleLowerCase(
+            "pl-PL"
+          )
+      )
+    ) {
+      setMessage(
+        "Ta umiejętność jest już dodana."
+      );
+      return;
+    }
+
+    setSkills((current) => [
+      ...current,
+      cleanSkill,
+    ]);
+    setSkillDraft("");
+  }
+
+  function handleSkillKeyDown(
+    event
+  ) {
+    if (
+      event.key === "Enter" ||
+      event.key === ","
+    ) {
+      event.preventDefault();
+      addSkill();
+    }
+  }
+
+  function removeSkill(skillToRemove) {
+    setSkills(
+      (current) =>
+        current.filter(
+          (skill) =>
+            skill !== skillToRemove
+        )
     );
   }
 
@@ -2831,6 +2915,84 @@ function Account() {
 
               <small>
                 Wybrano: {specialtyCategories.length}/3
+              </small>
+            </fieldset>
+
+            <fieldset className="profile-skills-field">
+              <legend>
+                Umiejętności
+              </legend>
+
+              <p className="profile-field-hint">
+                Dodaj konkretne narzędzia i umiejętności. Każda pozycja pojawi się na profilu jako osobny kafelek.
+              </p>
+
+              <div className="profile-skill-entry">
+                <input
+                  type="text"
+                  value={skillDraft}
+                  onChange={(event) =>
+                    setSkillDraft(
+                      event.target.value
+                    )
+                  }
+                  onKeyDown={
+                    handleSkillKeyDown
+                  }
+                  maxLength={40}
+                  placeholder="Np. Adobe Illustrator"
+                  disabled={
+                    saving ||
+                    uploading ||
+                    profileDetailsLoading
+                  }
+                />
+
+                <button
+                  type="button"
+                  className="profile-add-skill"
+                  onClick={addSkill}
+                  disabled={
+                    !skillDraft.trim() ||
+                    skills.length >= 12 ||
+                    saving ||
+                    uploading ||
+                    profileDetailsLoading
+                  }
+                >
+                  Dodaj
+                </button>
+              </div>
+
+              {skills.length > 0 && (
+                <div className="profile-edit-skill-chips">
+                  {skills.map(
+                    (skill) => (
+                      <span
+                        className="profile-edit-skill-chip"
+                        key={skill}
+                      >
+                        {skill}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeSkill(
+                              skill
+                            )
+                          }
+                          aria-label={`Usuń umiejętność: ${skill}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
+
+              <small>
+                Dodano: {skills.length}/12. Naciśnij Enter lub przecinek, aby szybko dodać pozycję.
               </small>
             </fieldset>
 
@@ -3648,7 +3810,7 @@ function Profile() {
           await supabase
             .from("profiles")
             .select(
-              "id, name, avatar_url, about, specialty_categories, specialization, completed_jobs, posted_jobs"
+              "id, name, avatar_url, about, specialty_categories, specialization, skills, completed_jobs, disputed_jobs, positive_reviews, neutral_reviews, negative_reviews, posted_jobs"
             )
             .eq("id", id)
             .single();
@@ -3896,9 +4058,64 @@ function Profile() {
         )
       : [];
 
+  const visibleSkills =
+    Array.isArray(profile.skills)
+      ? profile.skills.filter(
+          (skill) =>
+            typeof skill ===
+              "string" &&
+            !!skill.trim()
+        )
+      : [];
+
+  const completedJobs =
+    Math.max(
+      0,
+      Number(
+        profile.completed_jobs
+      ) || 0
+    );
+
+  const disputedJobs =
+    Math.max(
+      0,
+      Number(
+        profile.disputed_jobs
+      ) || 0
+    );
+
+  const positiveReviews =
+    Math.max(
+      0,
+      Number(
+        profile.positive_reviews
+      ) || 0
+    );
+
+  const neutralReviews =
+    Math.max(
+      0,
+      Number(
+        profile.neutral_reviews
+      ) || 0
+    );
+
+  const negativeReviews =
+    Math.max(
+      0,
+      Number(
+        profile.negative_reviews
+      ) || 0
+    );
+
+  const totalReviews =
+    positiveReviews +
+    neutralReviews +
+    negativeReviews;
+
   const hasExpertiseDetails =
     visibleSpecialtyCategories.length > 0 ||
-    !!profile.specialization?.trim();
+    visibleSkills.length > 0;
 
   return (
     <div className="page">
@@ -4020,6 +4237,68 @@ function Profile() {
             border-top: 1px solid #ededeb;
           }
 
+          .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 2px;
+          }
+
+          .profile-stat-card {
+            min-width: 0;
+            padding: 19px 20px;
+            border: 1px solid #e7e7e2;
+            border-radius: 18px;
+            background: #fafaf8;
+          }
+
+          .profile-stat-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+          }
+
+          .profile-stat-top strong {
+            color: #33332f;
+            font-size: 14px;
+          }
+
+          .profile-stat-value {
+            color: #171717;
+            font-size: 27px;
+            font-weight: 850;
+            line-height: 1;
+          }
+
+          .profile-stat-breakdown {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 13px;
+            margin-top: 13px;
+            color: #85857f;
+            font-size: 11px;
+            line-height: 1.4;
+          }
+
+          .profile-content-card {
+            min-width: 0;
+            margin-top: 18px;
+            padding: 20px;
+            border: 1px solid #e8e8e3;
+            border-radius: 18px;
+            background: #fafaf8;
+          }
+
+          .profile-about-copy {
+            margin: 0;
+            color: #555550;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+          }
+
           .profile-expertise-card {
             min-width: 0;
             padding: 20px;
@@ -4066,6 +4345,10 @@ function Profile() {
             overflow-wrap: anywhere;
           }
 
+          .profile-specialization-card {
+            margin-top: 18px;
+          }
+
           .profile-block-notice,
           .profile-block-message {
             margin: 14px 0 0;
@@ -4101,6 +4384,15 @@ function Profile() {
             }
 
             .profile-expertise-card {
+              padding: 17px;
+            }
+
+            .profile-stats {
+              grid-template-columns: 1fr;
+            }
+
+            .profile-stat-card,
+            .profile-content-card {
               padding: 17px;
             }
           }
@@ -4185,13 +4477,6 @@ function Profile() {
                 />
               )}
 
-              {!profileHidden &&
-                profile.about && (
-                <p className="profile-about">
-                  {profile.about}
-                </p>
-              )}
-
               {profileHidden && (
                 <p>
                   Zdjęcie, nazwa, opis i aktywność tego profilu są ukryte.
@@ -4214,6 +4499,71 @@ function Profile() {
                   </p>
                 )}
               </>
+            )}
+
+          {!profileHidden && (
+            <div className="profile-stats">
+              <div className="profile-stat-card">
+                <div className="profile-stat-top">
+                  <strong>
+                    Wykonane zlecenia
+                  </strong>
+
+                  <span className="profile-stat-value">
+                    {completedJobs}
+                  </span>
+                </div>
+
+                <div className="profile-stat-breakdown">
+                  <span>
+                    Zakończone: {completedJobs}
+                  </span>
+
+                  <span>
+                    Sporne: {disputedJobs}
+                  </span>
+                </div>
+              </div>
+
+              <div className="profile-stat-card">
+                <div className="profile-stat-top">
+                  <strong>
+                    Opinie
+                  </strong>
+
+                  <span className="profile-stat-value">
+                    {totalReviews}
+                  </span>
+                </div>
+
+                <div className="profile-stat-breakdown">
+                  <span>
+                    Pozytywne: {positiveReviews}
+                  </span>
+
+                  <span>
+                    Neutralne: {neutralReviews}
+                  </span>
+
+                  <span>
+                    Negatywne: {negativeReviews}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!profileHidden &&
+            profile.about?.trim() && (
+              <div className="profile-content-card">
+                <span className="profile-expertise-label">
+                  O mnie
+                </span>
+
+                <p className="profile-about-copy">
+                  {profile.about}
+                </p>
+              </div>
             )}
 
           {!profileHidden &&
@@ -4240,17 +4590,39 @@ function Profile() {
                   </div>
                 )}
 
-                {profile.specialization?.trim() && (
+                {visibleSkills.length > 0 && (
                   <div className="profile-expertise-card">
                     <span className="profile-expertise-label">
-                      W czym się specjalizuję
+                      Umiejętności
                     </span>
 
-                    <p className="profile-specialization-copy">
-                      {profile.specialization}
-                    </p>
+                    <div className="profile-specialty-chips">
+                      {visibleSkills.map(
+                        (skill) => (
+                          <span
+                            className="profile-specialty-chip"
+                            key={skill}
+                          >
+                            {skill}
+                          </span>
+                        )
+                      )}
+                    </div>
                   </div>
                 )}
+              </div>
+            )}
+
+          {!profileHidden &&
+            profile.specialization?.trim() && (
+              <div className="profile-expertise-card profile-specialization-card">
+                <span className="profile-expertise-label">
+                  W czym się specjalizuję
+                </span>
+
+                <p className="profile-specialization-copy">
+                  {profile.specialization}
+                </p>
               </div>
             )}
         </section>
