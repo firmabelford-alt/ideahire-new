@@ -4785,36 +4785,50 @@ function Jobs() {
                         }
                       </p>
 
-                      <Link
-                        to={`/profile/${job.user_id}`}
-                        className="btn btn-outline"
-                      >
-                        Zobacz profil zleceniodawcy →
-                      </Link>
+                      <div className="job-details-actions">
+                        <Link
+                          to={`/profile/${job.user_id}`}
+                          className="btn btn-outline"
+                        >
+                          Zobacz profil zleceniodawcy →
+                        </Link>
 
-                      {!isOwner && (
+                        {!isOwner && (
+                          <button
+                            className="btn btn-dark"
+                            type="button"
+                            disabled={
+                              applyingJobId ===
+                                job.id ||
+                              alreadyApplied
+                            }
+                            onClick={() =>
+                              handleApply(
+                                job
+                              )
+                            }
+                          >
+                            {alreadyApplied
+                              ? "Zgłoszono ✓"
+                              : applyingJobId ===
+                                  job.id
+                              ? "Wysyłanie..."
+                              : "Zgłoś się do zlecenia →"}
+                          </button>
+                        )}
+
                         <button
-                          className="btn btn-dark"
+                          className="btn btn-outline"
                           type="button"
-                          disabled={
-                            applyingJobId ===
-                              job.id ||
-                            alreadyApplied
-                          }
                           onClick={() =>
-                            handleApply(
-                              job
+                            setOpenJobId(
+                              null
                             )
                           }
                         >
-                          {alreadyApplied
-                            ? "Zgłoszono ✓"
-                            : applyingJobId ===
-                                job.id
-                            ? "Wysyłanie..."
-                            : "Zgłoś się do zlecenia →"}
+                          Ukryj szczegóły ↑
                         </button>
-                      )}
+                      </div>
 
                       {isOwner && (
                         <p className="job-owner-note">
@@ -4827,7 +4841,8 @@ function Jobs() {
                     </div>
                   )}
 
-                  <div className="job-actions">
+                  {!isOpen && (
+                    <div className="job-actions">
                     <button
                       className="btn btn-dark"
                       type="button"
@@ -4839,13 +4854,10 @@ function Jobs() {
                         )
                       }
                     >
-                      {isOpen
-                        ? "Ukryj szczegóły ↑"
-                        : "Zobacz zlecenie →"}
+                      Zobacz zlecenie →
                     </button>
 
-                    {!isOpen &&
-                      !isOwner && (
+                    {!isOwner && (
                         <button
                           className="btn btn-outline"
                           type="button"
@@ -4868,7 +4880,8 @@ function Jobs() {
                             : "Zgłoś się do zlecenia →"}
                         </button>
                       )}
-                  </div>
+                    </div>
+                  )}
                 </article>
               );
             }
