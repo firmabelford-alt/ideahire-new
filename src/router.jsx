@@ -2022,6 +2022,21 @@ function Account() {
   const [about, setAbout] =
     useState("");
 
+  const [
+    specialtyCategories,
+    setSpecialtyCategories,
+  ] = useState([]);
+
+  const [
+    specialization,
+    setSpecialization,
+  ] = useState("");
+
+  const [
+    profileDetailsLoading,
+    setProfileDetailsLoading,
+  ] = useState(true);
+
   const [countryCode, setCountryCode] =
     useState("");
 
@@ -2112,6 +2127,72 @@ function Account() {
     }
 
     loadCountry();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setSpecialtyCategories([]);
+      setSpecialization("");
+      setProfileDetailsLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadProfileDetails() {
+      setProfileDetailsLoading(true);
+
+      try {
+        const { data, error } =
+          await supabase
+            .from("profiles")
+            .select(
+              "specialty_categories, specialization"
+            )
+            .eq("id", user.id)
+            .maybeSingle();
+
+        if (error) {
+          console.error(
+            "PROFILE DETAILS LOAD ERROR:",
+            error
+          );
+          return;
+        }
+
+        if (!mounted) return;
+
+        const storedCategories =
+          Array.isArray(
+            data?.specialty_categories
+          )
+            ? data.specialty_categories
+            : [];
+
+        setSpecialtyCategories(
+          storedCategories.filter(
+            (category) =>
+              JOB_CATEGORIES.includes(
+                category
+              )
+          )
+        );
+
+        setSpecialization(
+          data?.specialization || ""
+        );
+      } finally {
+        if (mounted) {
+          setProfileDetailsLoading(false);
+        }
+      }
+    }
+
+    loadProfileDetails();
 
     return () => {
       mounted = false;
@@ -2359,6 +2440,9 @@ function Account() {
     const cleanAbout =
       about.trim();
 
+    const cleanSpecialization =
+      specialization.trim();
+
     if (!cleanName) {
       setMessage(
         "Imię / nazwa nie może być puste."
@@ -2385,6 +2469,11 @@ function Account() {
                 null,
               about:
                 cleanAbout ||
+                null,
+              specialty_categories:
+                specialtyCategories,
+              specialization:
+                cleanSpecialization ||
                 null,
             },
           }
@@ -2417,6 +2506,11 @@ function Account() {
               null,
             about:
               cleanAbout ||
+              null,
+            specialty_categories:
+              specialtyCategories,
+            specialization:
+              cleanSpecialization ||
               null,
           },
           {
@@ -2465,6 +2559,9 @@ function Account() {
         avatarUrl || ""
       );
       setAbout(cleanAbout);
+      setSpecialization(
+        cleanSpecialization
+      );
 
       setMessage(
         "Profil został zapisany."
@@ -2517,6 +2614,39 @@ function Account() {
           (job) =>
             job.id !== jobId
         )
+    );
+  }
+
+  function toggleSpecialtyCategory(
+    category
+  ) {
+    setMessage("");
+
+    setSpecialtyCategories(
+      (current) => {
+        if (
+          current.includes(
+            category
+          )
+        ) {
+          return current.filter(
+            (item) =>
+              item !== category
+          );
+        }
+
+        if (current.length >= 3) {
+          setMessage(
+            "Możesz wybrać maksymalnie 3 kategorie specjalizacji."
+          );
+          return current;
+        }
+
+        return [
+          ...current,
+          category,
+        ];
+      }
     );
   }
 
@@ -2648,6 +2778,88 @@ function Account() {
               </small>
             </label>
 
+            <fieldset className="profile-specialties-field">
+              <legend>
+                Kategorie specjalizacji
+              </legend>
+
+              <p className="profile-field-hint">
+                Wybierz maksymalnie 3 obszary, w których najlepiej się odnajdujesz.
+              </p>
+
+              <div className="profile-category-options">
+                {JOB_CATEGORIES.map(
+                  (category) => {
+                    const selected =
+                      specialtyCategories.includes(
+                        category
+                      );
+
+                    return (
+                      <button
+                        key={category}
+                        type="button"
+                        className={`profile-category-option ${
+                          selected
+                            ? "is-selected"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          toggleSpecialtyCategory(
+                            category
+                          )
+                        }
+                        disabled={
+                          saving ||
+                          uploading ||
+                          profileDetailsLoading
+                        }
+                        aria-pressed={selected}
+                      >
+                        <span aria-hidden="true">
+                          {selected
+                            ? "✓"
+                            : "+"}
+                        </span>
+
+                        {category}
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+
+              <small>
+                Wybrano: {specialtyCategories.length}/3
+              </small>
+            </fieldset>
+
+            <label>
+              W czym się specjalizujesz?
+
+              <textarea
+                className="ideahire-multiline-field ideahire-specialization-field"
+                rows="5"
+                value={specialization}
+                onChange={(event) =>
+                  setSpecialization(
+                    event.target.value
+                  )
+                }
+                maxLength={1200}
+                placeholder="Np. tworzę nowoczesne strony internetowe, projektuję identyfikację wizualną i dbam o czytelne doświadczenie użytkownika..."
+                disabled={
+                  saving ||
+                  uploading ||
+                  profileDetailsLoading
+                }
+              />
+
+              <small>
+                Opisz konkretnie swoje najmocniejsze umiejętności, doświadczenie i rodzaj projektów, które realizujesz.
+              </small>
+            </label>
+
             <label>
               E-mail
 
@@ -2694,7 +2906,8 @@ function Account() {
               type="submit"
               disabled={
                 saving ||
-                uploading
+                uploading ||
+                profileDetailsLoading
               }
             >
               {saving
@@ -3435,7 +3648,7 @@ function Profile() {
           await supabase
             .from("profiles")
             .select(
-              "id, name, avatar_url, about, completed_jobs, posted_jobs"
+              "id, name, avatar_url, about, specialty_categories, specialization, completed_jobs, posted_jobs"
             )
             .eq("id", id)
             .single();
@@ -3671,6 +3884,22 @@ function Profile() {
     isOtherProfile &&
     (blockedByMe || blockedMe);
 
+  const visibleSpecialtyCategories =
+    Array.isArray(
+      profile.specialty_categories
+    )
+      ? profile.specialty_categories.filter(
+          (category) =>
+            JOB_CATEGORIES.includes(
+              category
+            )
+        )
+      : [];
+
+  const hasExpertiseDetails =
+    visibleSpecialtyCategories.length > 0 ||
+    !!profile.specialization?.trim();
+
   return (
     <div className="page">
       <AccountNavbar />
@@ -3782,6 +4011,61 @@ function Profile() {
             line-height: 1.6;
           }
 
+          .profile-expertise {
+            display: grid;
+            grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr);
+            gap: 18px;
+            margin-top: 26px;
+            padding-top: 24px;
+            border-top: 1px solid #ededeb;
+          }
+
+          .profile-expertise-card {
+            min-width: 0;
+            padding: 20px;
+            border: 1px solid #e8e8e3;
+            border-radius: 18px;
+            background: #fafaf8;
+          }
+
+          .profile-expertise-label {
+            display: block;
+            margin-bottom: 12px;
+            color: #888882;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+          }
+
+          .profile-specialty-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+
+          .profile-specialty-chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            padding: 7px 11px;
+            border: 1px solid #dcdcd6;
+            border-radius: 999px;
+            background: #fff;
+            color: #33332f;
+            font-size: 12px;
+            font-weight: 700;
+          }
+
+          .profile-specialization-copy {
+            margin: 0;
+            color: #555550;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+          }
+
           .profile-block-notice,
           .profile-block-message {
             margin: 14px 0 0;
@@ -3810,6 +4094,14 @@ function Profile() {
 
             .profile-more-dropdown {
               top: 45px;
+            }
+
+            .profile-expertise {
+              grid-template-columns: 1fr;
+            }
+
+            .profile-expertise-card {
+              padding: 17px;
             }
           }
         `}</style>
@@ -3922,6 +4214,44 @@ function Profile() {
                   </p>
                 )}
               </>
+            )}
+
+          {!profileHidden &&
+            hasExpertiseDetails && (
+              <div className="profile-expertise">
+                {visibleSpecialtyCategories.length > 0 && (
+                  <div className="profile-expertise-card">
+                    <span className="profile-expertise-label">
+                      Kategorie specjalizacji
+                    </span>
+
+                    <div className="profile-specialty-chips">
+                      {visibleSpecialtyCategories.map(
+                        (category) => (
+                          <span
+                            className="profile-specialty-chip"
+                            key={category}
+                          >
+                            {category}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {profile.specialization?.trim() && (
+                  <div className="profile-expertise-card">
+                    <span className="profile-expertise-label">
+                      W czym się specjalizuję
+                    </span>
+
+                    <p className="profile-specialization-copy">
+                      {profile.specialization}
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
         </section>
 
