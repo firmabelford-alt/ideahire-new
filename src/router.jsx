@@ -45,36 +45,43 @@ function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  function adoptSession(newSession) {
+    setSession(newSession || null);
+    setUser(newSession?.user || null);
+    setLoading(false);
+  }
+
   useEffect(() => {
     let mounted = true;
     let subscription = null;
+    let confirmedSession = false;
+    let signedOut = false;
+    let signedOutTimer = null;
 
     function applySession(newSession) {
       if (!mounted) return;
 
-      setSession(newSession || null);
-      setUser(newSession?.user || null);
-      setLoading(false);
+      if (newSession) {
+        confirmedSession = true;
+        signedOut = false;
+      }
+
+      adoptSession(newSession);
+    }
+
+    function wait(milliseconds) {
+      return new Promise(
+        (resolve) => {
+          window.setTimeout(
+            resolve,
+            milliseconds
+          );
+        }
+      );
     }
 
     async function initializeAuth() {
       try {
-        const { data, error } =
-          await supabase.auth.getSession();
-
-        if (error) {
-          console.error(
-            "AUTH ERROR:",
-            error
-          );
-        }
-
-        if (!mounted) return;
-
-        applySession(
-          data?.session || null
-        );
-
         const {
           data: {
             subscription:
@@ -86,22 +93,81 @@ function AuthProvider({ children }) {
               if (!mounted) return;
 
               /*
-               * Stan początkowy został już pobrany przez getSession().
-               * Ignorujemy powtórne INITIAL_SESSION, ponieważ na części
-               * przeglądarek potrafi ono chwilowo zwrócić null i wyrzucić
-               * użytkownika z chronionej podstrony.
+               * INITIAL_SESSION z prawidłową sesją przyjmujemy od razu.
+               * Chwilowego null nie traktujemy jako wylogowania, dopóki
+               * initializeAuth nie zakończy bezpiecznych ponownych prób.
                */
               if (
                 event ===
                 "INITIAL_SESSION"
               ) {
+                if (newSession) {
+                  applySession(
+                    newSession
+                  );
+                }
+
                 return;
               }
 
               if (
                 event === "SIGNED_OUT"
               ) {
-                applySession(null);
+                signedOut = true;
+                confirmedSession = false;
+
+                /*
+                 * Nie przekierowujemy w tej samej milisekundzie. Najpierw
+                 * sprawdzamy, czy zdarzenie nie było chwilowym efektem
+                 * synchronizacji karty lub odświeżania tokenu.
+                 */
+                setLoading(true);
+
+                if (signedOutTimer) {
+                  window.clearTimeout(
+                    signedOutTimer
+                  );
+                }
+
+                signedOutTimer =
+                  window.setTimeout(
+                    async () => {
+                      try {
+                        const {
+                          data,
+                          error,
+                        } =
+                          await supabase.auth.getSession();
+
+                        if (!mounted) return;
+
+                        if (error) {
+                          console.error(
+                            "AUTH SIGN OUT CHECK ERROR:",
+                            error
+                          );
+                        }
+
+                        if (data?.session) {
+                          applySession(
+                            data.session
+                          );
+                          return;
+                        }
+                      } catch (error) {
+                        console.error(
+                          "AUTH SIGN OUT CHECK ERROR:",
+                          error
+                        );
+                      }
+
+                      if (mounted) {
+                        adoptSession(null);
+                      }
+                    },
+                    240
+                  );
+
                 return;
               }
 
@@ -115,6 +181,73 @@ function AuthProvider({ children }) {
 
         subscription =
           authSubscription;
+
+        /*
+         * Na części urządzeń zapis sesji w localStorage może być przez
+         * moment niedostępny po przeładowaniu karty. Nie przekierowujemy
+         * wtedy od razu do logowania — wykonujemy kilka krótkich odczytów.
+         */
+        const retryDelays = [
+          0,
+          180,
+          520,
+        ];
+
+        for (
+          let attempt = 0;
+          attempt <
+          retryDelays.length;
+          attempt += 1
+        ) {
+          if (
+            !mounted ||
+            confirmedSession ||
+            signedOut
+          ) {
+            return;
+          }
+
+          if (
+            retryDelays[attempt] > 0
+          ) {
+            await wait(
+              retryDelays[attempt]
+            );
+          }
+
+          if (
+            !mounted ||
+            confirmedSession ||
+            signedOut
+          ) {
+            return;
+          }
+
+          const { data, error } =
+            await supabase.auth.getSession();
+
+          if (error) {
+            console.error(
+              "AUTH SESSION ERROR:",
+              error
+            );
+          }
+
+          if (data?.session) {
+            applySession(
+              data.session
+            );
+            return;
+          }
+        }
+
+        if (
+          mounted &&
+          !confirmedSession &&
+          !signedOut
+        ) {
+          applySession(null);
+        }
       } catch (error) {
         console.error(
           "AUTH ERROR:",
@@ -133,6 +266,13 @@ function AuthProvider({ children }) {
 
     return () => {
       mounted = false;
+
+      if (signedOutTimer) {
+        window.clearTimeout(
+          signedOutTimer
+        );
+      }
+
       subscription?.unsubscribe();
     };
   }, []);
@@ -143,6 +283,7 @@ function AuthProvider({ children }) {
         session,
         user,
         loading,
+        adoptSession,
         isLoggedIn:
           !!session && !!user,
       }}
@@ -668,6 +809,7 @@ function Login() {
   const {
     isLoggedIn,
     loading: authLoading,
+    adoptSession,
   } = useAuth();
 
   const location =
@@ -771,6 +913,15 @@ function Login() {
 
         return;
       }
+
+      /*
+       * Przekazujemy świeżą sesję do routera przed przejściem na stronę
+       * chronioną. Zapobiega to pętli login -> konto -> login na wolniejszych
+       * urządzeniach i przy opóźnionym zdarzeniu SIGNED_IN.
+       */
+      adoptSession(
+        data.session
+      );
 
       const from =
         location.state?.from;
