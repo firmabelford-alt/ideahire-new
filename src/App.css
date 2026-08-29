@@ -1377,6 +1377,102 @@ img {
   line-height: 1.5;
 }
 
+.profile-specialties-field {
+  min-width: 0;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid #e3e3de;
+  border-radius: 18px;
+  background: #fafaf8;
+}
+
+.profile-specialties-field legend {
+  padding: 0 8px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.profile-field-hint {
+  margin: 0 0 15px;
+  color: #777;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.profile-category-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.account-form .profile-category-option {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  border: 1px solid #dfdfda;
+  border-radius: 12px;
+  background: #fff;
+  color: #555550;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.18s,
+    background 0.18s,
+    color 0.18s,
+    transform 0.18s;
+}
+
+.account-form .profile-category-option span {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f0f0ed;
+  color: #777;
+  font-size: 12px;
+}
+
+.account-form .profile-category-option:hover {
+  border-color: #bdbdb6;
+  transform: translateY(-1px);
+}
+
+.account-form .profile-category-option.is-selected {
+  border-color: #171717;
+  background: #171717;
+  color: #fff;
+}
+
+.account-form .profile-category-option.is-selected span {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.account-form .profile-category-option:disabled {
+  cursor: wait;
+  opacity: 0.55;
+  transform: none;
+}
+
+.ideahire-specialization-field {
+  min-height: 165px;
+}
+
 .account-form input[type="file"] {
   width: 100%;
   padding: 12px;
@@ -1397,6 +1493,22 @@ img {
   background: #f3f3f0;
   color: #555;
   font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .profile-category-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 440px) {
+  .profile-specialties-field {
+    padding: 16px;
+  }
+
+  .profile-category-options {
+    grid-template-columns: 1fr;
+  }
 }
 
 .auth-message {
