@@ -3565,7 +3565,14 @@ function Profile() {
     loadProfile();
   }, [id, user?.id]);
 
-  async function handleBlockToggle() {
+  async function handleBlockToggle(
+    event
+  ) {
+    const menu =
+      event?.currentTarget?.closest(
+        "details"
+      );
+
     if (
       !user?.id ||
       !id ||
@@ -3622,6 +3629,9 @@ function Profile() {
       );
     } finally {
       setBlockSaving(false);
+      menu?.removeAttribute(
+        "open"
+      );
     }
   }
 
@@ -3653,56 +3663,123 @@ function Profile() {
       .charAt(0)
       .toUpperCase();
 
+  const isOtherProfile =
+    !!user?.id &&
+    user.id !== id;
+
+  const profileHidden =
+    isOtherProfile &&
+    (blockedByMe || blockedMe);
+
   return (
     <div className="page">
       <AccountNavbar />
 
       <main className="app-page">
         <style>{`
-          .profile-safety-panel {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 18px;
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid #ededeb;
+          .profile-card-with-menu {
+            position: relative;
           }
 
-          .profile-safety-copy {
-            min-width: 0;
+          .profile-card-with-menu .profile-preview {
+            padding-right: 58px;
           }
 
-          .profile-safety-copy strong {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
+          .profile-more-menu {
+            position: absolute;
+            z-index: 20;
+            top: 18px;
+            right: 18px;
           }
 
-          .profile-safety-copy p {
-            margin: 0;
-            color: #777;
-            font-size: 12px;
-            line-height: 1.55;
+          .profile-more-menu summary {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #e2e2de;
+            border-radius: 50%;
+            background: #fff;
+            color: #555550;
+            font-size: 21px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: 2px;
+            cursor: pointer;
+            list-style: none;
+            box-shadow: 0 6px 18px rgba(20,20,20,.06);
           }
 
-          .profile-block-button {
-            flex: 0 0 auto;
+          .profile-more-menu summary::-webkit-details-marker {
+            display: none;
+          }
+
+          .profile-more-menu summary:hover,
+          .profile-more-menu[open] summary {
+            border-color: #cfcfca;
+            background: #f7f7f4;
+          }
+
+          .profile-more-dropdown {
+            position: absolute;
+            top: 49px;
+            right: 0;
+            width: max-content;
+            min-width: 210px;
+            padding: 7px;
+            border: 1px solid #e4e4df;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 16px 38px rgba(20,20,20,.14);
+          }
+
+          .profile-more-dropdown button {
+            width: 100%;
             min-height: 42px;
-            padding: 10px 15px;
-            border: 1px solid #e0d7d4;
-            border-radius: 12px;
-            background: #fff8f6;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
             color: #8e352b;
             font: inherit;
             font-size: 13px;
             font-weight: 700;
+            text-align: left;
+            cursor: pointer;
           }
 
-          .profile-block-button.is-active {
-            border-color: #d9e3d8;
-            background: #f7fbf6;
+          .profile-more-dropdown button.is-unblock {
             color: #315b35;
+          }
+
+          .profile-more-dropdown button:hover {
+            background: #f7f7f4;
+          }
+
+          .profile-more-dropdown button:disabled {
+            cursor: wait;
+            opacity: .6;
+          }
+
+          .profile-hidden-avatar {
+            display: grid;
+            place-items: center;
+            background: #dfdfda;
+            color: #74746f;
+            font-size: 38px;
+            font-weight: 400;
+          }
+
+          .profile-hidden-copy h1 {
+            color: #555550;
+          }
+
+          .profile-hidden-copy p {
+            max-width: 540px;
+            margin: 8px 0 0;
+            color: #85857f;
+            font-size: 13px;
+            line-height: 1.6;
           }
 
           .profile-block-notice,
@@ -3717,21 +3794,73 @@ function Profile() {
           }
 
           @media (max-width: 600px) {
-            .profile-safety-panel {
-              align-items: stretch;
-              flex-direction: column;
+            .profile-card-with-menu .profile-preview {
+              padding-right: 46px;
             }
 
-            .profile-block-button {
-              width: 100%;
+            .profile-more-menu {
+              top: 13px;
+              right: 13px;
+            }
+
+            .profile-more-menu summary {
+              width: 38px;
+              height: 38px;
+            }
+
+            .profile-more-dropdown {
+              top: 45px;
             }
           }
         `}</style>
 
-        <section className="account-card">
+        <section className={`account-card ${
+          isOtherProfile
+            ? "profile-card-with-menu"
+            : ""
+        }`}>
+          {isOtherProfile && (
+            <details className="profile-more-menu">
+              <summary
+                aria-label="Więcej opcji profilu"
+                title="Więcej opcji"
+              >
+                ···
+              </summary>
+
+              <div className="profile-more-dropdown">
+                <button
+                  type="button"
+                  className={
+                    blockedByMe
+                      ? "is-unblock"
+                      : ""
+                  }
+                  onClick={
+                    handleBlockToggle
+                  }
+                  disabled={blockSaving}
+                >
+                  {blockSaving
+                    ? "Zapisywanie..."
+                    : blockedByMe
+                    ? "Odblokuj użytkownika"
+                    : "Zablokuj użytkownika"}
+                </button>
+              </div>
+            </details>
+          )}
+
           <div className="profile-preview">
             <div className="profile-avatar-wrapper">
-              {profile.avatar_url ? (
+              {profileHidden ? (
+                <div
+                  className="profile-avatar profile-hidden-avatar"
+                  aria-hidden="true"
+                >
+                  ×
+                </div>
+              ) : profile.avatar_url ? (
                 <img
                   src={
                     profile.avatar_url
@@ -3746,59 +3875,41 @@ function Profile() {
               )}
             </div>
 
-            <div className="profile-info">
+            <div className={`profile-info ${
+              profileHidden
+                ? "profile-hidden-copy"
+                : ""
+            }`}>
               <h1>
-                {name}
+                {profileHidden
+                  ? "Zablokowany użytkownik"
+                  : name}
               </h1>
 
-              {countryCode && (
+              {!profileHidden &&
+                countryCode && (
                 <CountryBadge
                   countryCode={countryCode}
                 />
               )}
 
-              {profile.about && (
+              {!profileHidden &&
+                profile.about && (
                 <p className="profile-about">
                   {profile.about}
+                </p>
+              )}
+
+              {profileHidden && (
+                <p>
+                  Zdjęcie, nazwa, opis i aktywność tego profilu są ukryte.
                 </p>
               )}
             </div>
           </div>
 
-          {user?.id &&
-            user.id !== id && (
+          {isOtherProfile && (
               <>
-                <div className="profile-safety-panel">
-                  <div className="profile-safety-copy">
-                    <strong>
-                      Bezpieczeństwo rozmowy
-                    </strong>
-
-                    <p>
-                      Blokada zatrzymuje możliwość wysyłania wiadomości między Wami.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    className={`profile-block-button ${
-                      blockedByMe
-                        ? "is-active"
-                        : ""
-                    }`}
-                    onClick={
-                      handleBlockToggle
-                    }
-                    disabled={blockSaving}
-                  >
-                    {blockSaving
-                      ? "Zapisywanie..."
-                      : blockedByMe
-                      ? "Odblokuj użytkownika"
-                      : "Zablokuj użytkownika"}
-                  </button>
-                </div>
-
                 {blockedMe && (
                   <p className="profile-block-notice">
                     Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości między Wami jest wyłączone.
@@ -3814,7 +3925,8 @@ function Profile() {
             )}
         </section>
 
-        <section className="account-card profile-jobs-section">
+        {!profileHidden && (
+          <section className="account-card profile-jobs-section">
           <span className="section-label">
             Zlecenia
           </span>
@@ -3873,7 +3985,8 @@ function Profile() {
               )}
             </div>
           )}
-        </section>
+          </section>
+        )}
       </main>
     </div>
   );
@@ -6832,9 +6945,6 @@ function Chat() {
   const [deleting, setDeleting] =
     useState(false);
 
-  const [unblocking, setUnblocking] =
-    useState(false);
-
   const [blockedByMe, setBlockedByMe] =
     useState(false);
 
@@ -7306,60 +7416,6 @@ function Chat() {
     }
   }
 
-  async function handleUnblockFromChat() {
-    if (
-      !user?.id ||
-      !blockedByMe ||
-      unblocking
-    ) {
-      return;
-    }
-
-    const blockedUserId =
-      otherProfile?.id ||
-      (conversation
-        ? conversation.client_id ===
-          user.id
-          ? conversation.contractor_id
-          : conversation.client_id
-        : null);
-
-    if (!blockedUserId) return;
-
-    setUnblocking(true);
-    setErrorMessage("");
-
-    try {
-      const { error } =
-        await supabase
-          .from("user_blocks")
-          .delete()
-          .eq(
-            "blocker_id",
-            user.id
-          )
-          .eq(
-            "blocked_id",
-            blockedUserId
-          );
-
-      if (error) {
-        throw error;
-      }
-
-      setBlockedByMe(false);
-    } catch (error) {
-      setErrorMessage(
-        `Nie udało się odblokować użytkownika: ${
-          error?.message ||
-          "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setUnblocking(false);
-    }
-  }
-
   const otherName =
     otherProfile?.name ||
     "Użytkownik";
@@ -7446,11 +7502,12 @@ function Chat() {
           }
 
           .chat-profile-blocked {
-            cursor: default;
+            cursor: pointer;
           }
 
           .chat-profile-blocked:hover .chat-person strong {
-            text-decoration: none;
+            text-decoration: underline;
+            text-underline-offset: 3px;
           }
 
           .chat-avatar {
@@ -7505,8 +7562,7 @@ function Chat() {
             gap: 8px;
           }
 
-          .chat-delete-button,
-          .chat-unblock-button {
+          .chat-delete-button {
             flex: 0 0 auto;
             min-height: 38px;
             padding: 8px 12px;
@@ -7523,21 +7579,11 @@ function Chat() {
             color: #8e352b;
           }
 
-          .chat-unblock-button {
-            border: 1px solid #cfd8cc;
-            color: #315d2f;
-          }
-
           .chat-delete-button:hover {
             background: #fff7f5;
           }
 
-          .chat-unblock-button:hover {
-            background: #f4faf2;
-          }
-
-          .chat-delete-button:disabled,
-          .chat-unblock-button:disabled {
+          .chat-delete-button:disabled {
             cursor: wait;
             opacity: .6;
           }
@@ -7707,8 +7753,7 @@ function Chat() {
               justify-content: flex-end;
             }
 
-            .chat-delete-button,
-            .chat-unblock-button {
+            .chat-delete-button {
               padding: 8px 10px;
             }
 
@@ -7758,8 +7803,9 @@ function Chat() {
                 </button>
 
                 {messagingBlocked ? (
-                  <div
+                  <Link
                     className="chat-profile-link chat-profile-blocked"
+                    to={`/profile/${otherProfileId}`}
                     aria-label="Zablokowany użytkownik"
                   >
                     <div
@@ -7774,10 +7820,10 @@ function Chat() {
                         Zablokowany użytkownik
                       </strong>
                       <span>
-                        Dane profilu są ukryte
+                        Kliknij, aby otworzyć ukryty profil
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ) : (
                   <Link
                     className="chat-profile-link"
@@ -7809,21 +7855,6 @@ function Chat() {
                 )}
 
                 <div className="chat-header-actions">
-                  {blockedByMe && (
-                    <button
-                      type="button"
-                      className="chat-unblock-button"
-                      onClick={
-                        handleUnblockFromChat
-                      }
-                      disabled={unblocking}
-                    >
-                      {unblocking
-                        ? "Odblokowywanie..."
-                        : "Odblokuj"}
-                    </button>
-                  )}
-
                   <button
                     type="button"
                     className="chat-delete-button"
@@ -7902,7 +7933,7 @@ function Chat() {
               {messagingBlocked && (
                 <p className="chat-block-banner">
                   {blockedByMe
-                    ? "Zablokowałeś tego użytkownika. Użyj przycisku „Odblokuj” u góry, aby ponownie wysyłać wiadomości."
+                    ? "Zablokowałeś tego użytkownika. Otwórz ukryty profil i użyj menu z trzema kropkami, aby go odblokować."
                     : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
                 </p>
               )}
