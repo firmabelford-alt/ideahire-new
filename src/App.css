@@ -1377,7 +1377,8 @@ img {
   line-height: 1.5;
 }
 
-.profile-specialties-field {
+.profile-specialties-field,
+.profile-skills-field {
   min-width: 0;
   margin: 0;
   padding: 20px;
@@ -1386,7 +1387,8 @@ img {
   background: #fafaf8;
 }
 
-.profile-specialties-field legend {
+.profile-specialties-field legend,
+.profile-skills-field legend {
   padding: 0 8px;
   color: #333;
   font-size: 14px;
@@ -1473,6 +1475,87 @@ img {
   min-height: 165px;
 }
 
+.profile-skill-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.profile-skill-entry input {
+  min-width: 0;
+}
+
+.account-form .profile-add-skill {
+  min-width: 92px;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 16px;
+  border: 1px solid #171717;
+  border-radius: 12px;
+  background: #171717;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.account-form .profile-add-skill:hover {
+  background: #30302e;
+}
+
+.account-form .profile-add-skill:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.profile-edit-skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  margin-bottom: 12px;
+}
+
+.profile-edit-skill-chip {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 8px 7px 11px;
+  border: 1px solid #dcdcd6;
+  border-radius: 10px;
+  background: #fff;
+  color: #3f3f3a;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.account-form .profile-edit-skill-chip button {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: #f0f0ed;
+  color: #777;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.account-form .profile-edit-skill-chip button:hover {
+  background: #eee1de;
+  color: #8e352b;
+}
+
 .account-form input[type="file"] {
   width: 100%;
   padding: 12px;
@@ -1502,12 +1585,21 @@ img {
 }
 
 @media (max-width: 440px) {
-  .profile-specialties-field {
+  .profile-specialties-field,
+  .profile-skills-field {
     padding: 16px;
   }
 
   .profile-category-options {
     grid-template-columns: 1fr;
+  }
+
+  .profile-skill-entry {
+    grid-template-columns: 1fr;
+  }
+
+  .account-form .profile-add-skill {
+    width: 100%;
   }
 }
 
