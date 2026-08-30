@@ -2551,6 +2551,35 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
   gap: 8px;
 }
 
+.agreement-price-input input:disabled {
+  cursor: not-allowed;
+  border-color: #deded8;
+  background: #efefe9;
+  color: #30302d;
+  font-weight: 800;
+  opacity: 1;
+}
+
+.agreement-price-currency {
+  min-height: 46px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid #deded8;
+  border-radius: 13px;
+  background: #efefe9;
+  color: #555550;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.agreement-fixed-price-note {
+  display: block;
+  color: #84847e;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
 .agreement-confirmation {
   display: flex;
   align-items: flex-start;
@@ -2903,6 +2932,18 @@ html[data-theme="dark"] .agreement-field textarea:focus,
 html[data-theme="dark"] .agreement-field select:focus {
   border-color: #deded8 !important;
   box-shadow: 0 0 0 3px rgba(235, 235, 229, 0.08) !important;
+}
+
+html[data-theme="dark"] .agreement-price-input input:disabled,
+html[data-theme="dark"] .agreement-price-currency {
+  border-color: #3c3c38 !important;
+  background: #292927 !important;
+  color: #e8e8e3 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] .agreement-fixed-price-note {
+  color: #969690 !important;
 }
 
 html[data-theme="dark"] .agreement-confirmation,
