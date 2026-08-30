@@ -375,6 +375,19 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Nie masz dostępu do tych ustaleń.": "You do not have access to these terms.",
   "Nie można zaakceptować ustaleń, gdy jeden z użytkowników jest zablokowany.": "The terms cannot be accepted while one of the users is blocked.",
   "Najpierw obie strony muszą zaakceptować warunki współpracy.": "Both parties must accept the collaboration terms first.",
+  "Czekamy na propozycję zleceniodawcy": "Waiting for the client's proposal",
+  "Zleceniodawca wypełnia pierwszy formularz. Gdy go wyśle, zobaczysz wszystkie warunki i będziesz mógł je zaakceptować albo zaproponować zmiany.": "The client completes the first form. Once it is sent, you will see all terms and can accept them or suggest changes.",
+  "Pierwszą propozycję warunków wysyła zleceniodawca.": "The client must send the first terms proposal.",
+  "Nazwa zlecenia musi mieć co najmniej 3 znaki.": "The job name must contain at least 3 characters.",
+  "Zakres pracy musi mieć co najmniej 10 znaków.": "The scope of work must contain at least 10 characters.",
+  "Opisz rezultat końcowy zlecenia.": "Describe the final deliverables.",
+  "Wpisz prawidłową cenę, na przykład 1500 lub 1500,50.": "Enter a valid price, for example 1500 or 1500.50.",
+  "Wybierz termin wykonania.": "Select a delivery deadline.",
+  "Termin wykonania nie może być wcześniejszy niż dzisiaj.": "The delivery deadline cannot be earlier than today.",
+  "Wpisz pełną liczbę poprawek od 0 do 100.": "Enter a whole number of revisions from 0 to 100.",
+  "Wpisz format przekazania pracy.": "Enter the delivery format.",
+  "Opisz sposób odbioru pracy.": "Describe the acceptance criteria.",
+  "Opisz warunki anulowania zlecenia.": "Describe the job cancellation terms.",
 });
 
 const COUNTRY_TRANSLATIONS = Object.freeze({
