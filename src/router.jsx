@@ -7643,6 +7643,49 @@ const EMPTY_AGREEMENT_FORM = {
   additionalTerms: "",
 };
 
+function parseAgreementPrice(value) {
+  let normalized = String(value || "")
+    .trim()
+    .replace(/[\s\u00a0]/g, "")
+    .replace(/PLN|EUR|USD|GBP|ZŁ/gi, "");
+
+  const commaIndex =
+    normalized.lastIndexOf(",");
+
+  const dotIndex =
+    normalized.lastIndexOf(".");
+
+  if (
+    commaIndex >= 0 &&
+    dotIndex >= 0
+  ) {
+    normalized =
+      commaIndex > dotIndex
+        ? normalized
+            .replace(/\./g, "")
+            .replace(",", ".")
+        : normalized.replace(/,/g, "");
+  } else if (commaIndex >= 0) {
+    normalized = normalized.replace(
+      ",",
+      "."
+    );
+  } else if (dotIndex >= 0) {
+    const parts =
+      normalized.split(".");
+
+    if (
+      parts.length === 2 &&
+      parts[1].length === 3 &&
+      parts[0].length <= 3
+    ) {
+      normalized = parts.join("");
+    }
+  }
+
+  return Number(normalized);
+}
+
 function agreementToForm(
   agreement,
   fallbackTitle = ""
@@ -8174,7 +8217,25 @@ function AgreementPanel({
             </div>
           )}
         </div>
-      ) : null}
+      ) : (
+        <div className="agreement-waiting-card">
+          <span
+            className="agreement-waiting-icon"
+            aria-hidden="true"
+          >
+            ◷
+          </span>
+
+          <div>
+            <h3>
+              Czekamy na propozycję zleceniodawcy
+            </h3>
+            <p>
+              Zleceniodawca wypełnia pierwszy formularz. Gdy go wyśle, zobaczysz wszystkie warunki i będziesz mógł je zaakceptować albo zaproponować zmiany.
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -8278,13 +8339,20 @@ function Chat() {
       setAgreement(data || null);
 
       if (!data) {
-        setAgreementForm(
-          agreementToForm(
-            null,
-            fallbackTitle
-          )
-        );
-        setAgreementMode("form");
+        if (
+          conversationData.client_id ===
+          user?.id
+        ) {
+          setAgreementForm(
+            agreementToForm(
+              null,
+              fallbackTitle
+            )
+          );
+          setAgreementMode("form");
+        } else {
+          setAgreementMode("view");
+        }
       } else {
         setAgreementMode("view");
       }
@@ -8737,31 +8805,125 @@ function Chat() {
       return;
     }
 
-    const price = Number(
-      String(
+    if (
+      !agreement &&
+      conversation?.client_id !==
+        user.id
+    ) {
+      setAgreementMessage(
+        "Pierwszą propozycję warunków wysyła zleceniodawca."
+      );
+      return;
+    }
+
+    const price =
+      parseAgreementPrice(
         agreementForm.priceAmount
-      ).replace(",", ".")
-    );
+      );
 
     const revisions = Number(
       agreementForm.revisions
     );
 
+    const today = new Date();
+    const todayLocal = [
+      today.getFullYear(),
+      String(
+        today.getMonth() + 1
+      ).padStart(2, "0"),
+      String(
+        today.getDate()
+      ).padStart(2, "0"),
+    ].join("-");
+
     if (
-      agreementForm.title.trim().length < 3 ||
-      agreementForm.scope.trim().length < 10 ||
-      agreementForm.deliverables.trim().length < 3 ||
+      agreementForm.title.trim().length < 3
+    ) {
+      setAgreementMessage(
+        "Nazwa zlecenia musi mieć co najmniej 3 znaki."
+      );
+      return;
+    }
+
+    if (
+      agreementForm.scope.trim().length < 10
+    ) {
+      setAgreementMessage(
+        "Zakres pracy musi mieć co najmniej 10 znaków."
+      );
+      return;
+    }
+
+    if (
+      agreementForm.deliverables.trim().length < 3
+    ) {
+      setAgreementMessage(
+        "Opisz rezultat końcowy zlecenia."
+      );
+      return;
+    }
+
+    if (
       !Number.isFinite(price) ||
-      price <= 0 ||
-      !agreementForm.deadline ||
+      price <= 0
+    ) {
+      setAgreementMessage(
+        "Wpisz prawidłową cenę, na przykład 1500 lub 1500,50."
+      );
+      return;
+    }
+
+    if (!agreementForm.deadline) {
+      setAgreementMessage(
+        "Wybierz termin wykonania."
+      );
+      return;
+    }
+
+    if (
+      agreementForm.deadline <
+      todayLocal
+    ) {
+      setAgreementMessage(
+        "Termin wykonania nie może być wcześniejszy niż dzisiaj."
+      );
+      return;
+    }
+
+    if (
       !Number.isInteger(revisions) ||
       revisions < 0 ||
-      agreementForm.deliveryFormat.trim().length < 2 ||
-      agreementForm.acceptanceMethod.trim().length < 3 ||
+      revisions > 100
+    ) {
+      setAgreementMessage(
+        "Wpisz pełną liczbę poprawek od 0 do 100."
+      );
+      return;
+    }
+
+    if (
+      agreementForm.deliveryFormat.trim().length < 2
+    ) {
+      setAgreementMessage(
+        "Wpisz format przekazania pracy."
+      );
+      return;
+    }
+
+    if (
+      agreementForm.acceptanceMethod.trim().length < 3
+    ) {
+      setAgreementMessage(
+        "Opisz sposób odbioru pracy."
+      );
+      return;
+    }
+
+    if (
       agreementForm.cancellationTerms.trim().length < 3
     ) {
       setAgreementMessage(
-        "Uzupełnij wszystkie wymagane pola i sprawdź cenę, termin oraz liczbę poprawek."
+        "Opisz warunki anulowania zlecenia."
       );
       return;
     }
