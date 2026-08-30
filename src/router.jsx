@@ -7688,12 +7688,19 @@ function parseAgreementPrice(value) {
 
 function agreementToForm(
   agreement,
-  fallbackTitle = ""
+  fallbackTitle = "",
+  fallbackPrice = ""
 ) {
   if (!agreement) {
     return {
       ...EMPTY_AGREEMENT_FORM,
       title: fallbackTitle || "",
+      priceAmount:
+        fallbackPrice === null ||
+        fallbackPrice === undefined
+          ? ""
+          : String(fallbackPrice),
+      priceCurrency: "PLN",
     };
   }
 
@@ -7976,37 +7983,22 @@ function AgreementPanel({
             </label>
 
             <label className="agreement-field">
-              <span>Cena *</span>
+              <span>Cena zlecenia</span>
               <div className="agreement-price-input">
                 <input
                   type="text"
-                  inputMode="decimal"
                   value={form.priceAmount}
-                  onChange={(event) =>
-                    onFieldChange(
-                      "priceAmount",
-                      event.target.value
-                    )
-                  }
-                  placeholder="1500"
-                  required
+                  disabled
+                  readOnly
+                  aria-label="Cena ustalona przy publikacji zlecenia"
                 />
-                <select
-                  value={form.priceCurrency}
-                  onChange={(event) =>
-                    onFieldChange(
-                      "priceCurrency",
-                      event.target.value
-                    )
-                  }
-                  aria-label="Waluta"
-                >
-                  <option value="PLN">PLN</option>
-                  <option value="EUR">EUR</option>
-                  <option value="USD">USD</option>
-                  <option value="GBP">GBP</option>
-                </select>
+                <span className="agreement-price-currency">
+                  PLN
+                </span>
               </div>
+              <small className="agreement-fixed-price-note">
+                Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie.
+              </small>
             </label>
 
             <label className="agreement-field">
@@ -8283,6 +8275,9 @@ function Chat() {
   const [jobTitle, setJobTitle] =
     useState("");
 
+  const [jobBudget, setJobBudget] =
+    useState("");
+
   const [agreement, setAgreement] =
     useState(null);
 
@@ -8303,7 +8298,8 @@ function Chat() {
 
   async function loadAgreement(
     conversationData,
-    fallbackTitle = ""
+    fallbackTitle = "",
+    fallbackPrice = ""
   ) {
     if (
       !conversationData?.agreements_required
@@ -8346,7 +8342,8 @@ function Chat() {
           setAgreementForm(
             agreementToForm(
               null,
-              fallbackTitle
+              fallbackTitle,
+              fallbackPrice
             )
           );
           setAgreementMode("form");
@@ -8536,7 +8533,7 @@ function Chat() {
 
           supabase
             .from("jobs")
-            .select("title")
+            .select("title, budget")
             .eq(
               "id",
               conversationData.job_id
@@ -8581,8 +8578,15 @@ function Chat() {
         const loadedJobTitle =
           jobResult.data?.title || "";
 
+        const loadedJobBudget =
+          jobResult.data?.budget ?? "";
+
         setJobTitle(
           loadedJobTitle
+        );
+
+        setJobBudget(
+          loadedJobBudget
         );
 
         if (mounted) {
@@ -8601,7 +8605,8 @@ function Chat() {
 
         await loadAgreement(
           conversationData,
-          loadedJobTitle
+          loadedJobTitle,
+          loadedJobBudget
         );
 
         await loadMessages();
@@ -8782,12 +8787,19 @@ function Chat() {
 
   function openAgreementForm() {
     setAgreementMessage("");
-    setAgreementForm(
-      agreementToForm(
+    setAgreementForm({
+      ...agreementToForm(
         agreement,
-        jobTitle
-      )
-    );
+        jobTitle,
+        jobBudget
+      ),
+      priceAmount:
+        jobBudget === null ||
+        jobBudget === undefined
+          ? ""
+          : String(jobBudget),
+      priceCurrency: "PLN",
+    });
     setAgreementMode("form");
   }
 
@@ -8868,7 +8880,7 @@ function Chat() {
       price <= 0
     ) {
       setAgreementMessage(
-        "Wpisz prawidłową cenę, na przykład 1500 lub 1500,50."
+        "Nie udało się pobrać ceny ze zlecenia. Odśwież stronę i spróbuj ponownie."
       );
       return;
     }
@@ -8966,7 +8978,8 @@ function Chat() {
 
       await loadAgreement(
         conversation,
-        jobTitle
+        jobTitle,
+        jobBudget
       );
 
       setAgreementMessage(
@@ -9010,7 +9023,8 @@ function Chat() {
 
       await loadAgreement(
         conversation,
-        jobTitle
+        jobTitle,
+        jobBudget
       );
 
       setAgreementMessage(
