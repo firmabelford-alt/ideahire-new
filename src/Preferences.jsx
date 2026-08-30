@@ -388,6 +388,12 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Wpisz format przekazania pracy.": "Enter the delivery format.",
   "Opisz sposób odbioru pracy.": "Describe the acceptance criteria.",
   "Opisz warunki anulowania zlecenia.": "Describe the job cancellation terms.",
+  "Cena zlecenia": "Job price",
+  "Cena ustalona przy publikacji zlecenia": "Price set when the job was published",
+  "Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie.": "The price was set by the client when the job was published and cannot be changed.",
+  "Nie udało się pobrać ceny ze zlecenia. Odśwież stronę i spróbuj ponownie.": "The job price could not be loaded. Refresh the page and try again.",
+  "Zlecenie nie ma prawidłowo zapisanej ceny.": "The job does not have a valid saved price.",
+  "Cena formularza musi być identyczna z ceną zlecenia.": "The form price must match the job price.",
 });
 
 const COUNTRY_TRANSLATIONS = Object.freeze({
