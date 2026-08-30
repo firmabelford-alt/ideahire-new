@@ -5946,7 +5946,7 @@ function Notifications() {
         } = await supabase
           .from("conversations")
           .select(
-            "id, job_id, client_id, contractor_id, created_at"
+            "id, job_id, client_id, contractor_id, agreements_required, created_at"
           )
           .eq("contractor_id", user.id)
           .in("job_id", acceptedJobIds);
@@ -7629,6 +7629,556 @@ function Messages() {
    CHAT
 ========================================================= */
 
+const EMPTY_AGREEMENT_FORM = {
+  title: "",
+  scope: "",
+  deliverables: "",
+  priceAmount: "",
+  priceCurrency: "PLN",
+  deadline: "",
+  revisions: "1",
+  deliveryFormat: "",
+  acceptanceMethod: "",
+  cancellationTerms: "",
+  additionalTerms: "",
+};
+
+function agreementToForm(
+  agreement,
+  fallbackTitle = ""
+) {
+  if (!agreement) {
+    return {
+      ...EMPTY_AGREEMENT_FORM,
+      title: fallbackTitle || "",
+    };
+  }
+
+  return {
+    title: agreement.title || "",
+    scope: agreement.scope || "",
+    deliverables:
+      agreement.deliverables || "",
+    priceAmount:
+      agreement.price_amount == null
+        ? ""
+        : String(agreement.price_amount),
+    priceCurrency:
+      agreement.price_currency || "PLN",
+    deadline: agreement.deadline || "",
+    revisions: String(
+      agreement.revisions ?? 0
+    ),
+    deliveryFormat:
+      agreement.delivery_format || "",
+    acceptanceMethod:
+      agreement.acceptance_method || "",
+    cancellationTerms:
+      agreement.cancellation_terms || "",
+    additionalTerms:
+      agreement.additional_terms || "",
+  };
+}
+
+function AgreementDetails({ agreement }) {
+  if (!agreement) return null;
+
+  const price = new Intl.NumberFormat(
+    "pl-PL",
+    {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }
+  ).format(
+    Number(agreement.price_amount)
+  );
+
+  const deadline = new Date(
+    `${agreement.deadline}T12:00:00`
+  ).toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  return (
+    <div className="agreement-details">
+      <div className="agreement-detail agreement-detail-wide">
+        <span>Nazwa zlecenia</span>
+        <strong>{agreement.title}</strong>
+      </div>
+
+      <div className="agreement-detail">
+        <span>Cena</span>
+        <strong>
+          {price} {agreement.price_currency}
+        </strong>
+      </div>
+
+      <div className="agreement-detail">
+        <span>Termin wykonania</span>
+        <strong>{deadline}</strong>
+      </div>
+
+      <div className="agreement-detail">
+        <span>Liczba poprawek</span>
+        <strong>{agreement.revisions}</strong>
+      </div>
+
+      <div className="agreement-detail">
+        <span>Format przekazania pracy</span>
+        <strong>
+          {agreement.delivery_format}
+        </strong>
+      </div>
+
+      <div className="agreement-detail agreement-detail-wide">
+        <span>Zakres pracy</span>
+        <p>{agreement.scope}</p>
+      </div>
+
+      <div className="agreement-detail agreement-detail-wide">
+        <span>Rezultat końcowy</span>
+        <p>{agreement.deliverables}</p>
+      </div>
+
+      <div className="agreement-detail agreement-detail-wide">
+        <span>Sposób odbioru pracy</span>
+        <p>{agreement.acceptance_method}</p>
+      </div>
+
+      <div className="agreement-detail agreement-detail-wide">
+        <span>Warunki anulowania</span>
+        <p>{agreement.cancellation_terms}</p>
+      </div>
+
+      {!!agreement.additional_terms && (
+        <div className="agreement-detail agreement-detail-wide">
+          <span>Dodatkowe ustalenia</span>
+          <p>{agreement.additional_terms}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AgreementPanel({
+  required,
+  agreement,
+  loading,
+  saving,
+  mode,
+  form,
+  message,
+  currentUserAccepted,
+  otherUserAccepted,
+  blocked,
+  onFieldChange,
+  onOpenForm,
+  onCancelForm,
+  onSubmit,
+  onAccept,
+}) {
+  const [confirmed, setConfirmed] =
+    useState(false);
+
+  useEffect(() => {
+    setConfirmed(false);
+  }, [mode, agreement?.id]);
+
+  if (!required) return null;
+
+  if (loading) {
+    return (
+      <section className="agreement-gate agreement-loading">
+        <span className="agreement-lock-icon">
+          ◌
+        </span>
+        <p>Ładowanie warunków współpracy...</p>
+      </section>
+    );
+  }
+
+  if (agreement?.status === "accepted") {
+    return (
+      <details className="agreement-summary">
+        <summary>
+          <span className="agreement-status-icon">
+            ✓
+          </span>
+
+          <span className="agreement-summary-copy">
+            <strong>
+              Warunki współpracy zaakceptowane
+            </strong>
+            <small>
+              Wersja {agreement.version} · Czat jest aktywny
+            </small>
+          </span>
+
+          <span className="agreement-summary-action">
+            Pokaż ustalenia
+          </span>
+        </summary>
+
+        <div className="agreement-summary-body">
+          <AgreementDetails
+            agreement={agreement}
+          />
+
+          <p className="agreement-legal-note">
+            Ta zaakceptowana wersja jest zapisem ustaleń obu stron i pozostaje dostępna w historii rozmowy.
+          </p>
+        </div>
+      </details>
+    );
+  }
+
+  return (
+    <section className="agreement-gate">
+      <div className="agreement-gate-heading">
+        <span className="agreement-eyebrow">
+          Ustalenia przed rozpoczęciem
+        </span>
+
+        <h2>Najpierw ustalcie warunki współpracy</h2>
+
+        <p>
+          Czat odblokuje się, gdy obie strony zaakceptują dokładnie tę samą wersję ustaleń.
+        </p>
+
+        <div className="agreement-progress" aria-label="Postęp akceptacji">
+          <span className={currentUserAccepted ? "is-complete" : ""}>
+            <i>{currentUserAccepted ? "✓" : "1"}</i>
+            Twoja akceptacja
+          </span>
+
+          <b aria-hidden="true" />
+
+          <span className={otherUserAccepted ? "is-complete" : ""}>
+            <i>{otherUserAccepted ? "✓" : "2"}</i>
+            Akceptacja drugiej strony
+          </span>
+        </div>
+      </div>
+
+      {mode === "form" ? (
+        <form
+          className="agreement-form"
+          onSubmit={onSubmit}
+        >
+          <div className="agreement-form-heading">
+            <div>
+              <span className="agreement-version-pill">
+                {agreement
+                  ? `Nowa wersja ${agreement.version + 1}`
+                  : "Pierwsza propozycja"}
+              </span>
+              <h3>Warunki realizacji zlecenia</h3>
+            </div>
+
+            <p>
+              Pola oznaczone gwiazdką są wymagane.
+            </p>
+          </div>
+
+          <div className="agreement-form-grid">
+            <label className="agreement-field agreement-field-wide">
+              <span>Nazwa zlecenia *</span>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(event) =>
+                  onFieldChange(
+                    "title",
+                    event.target.value
+                  )
+                }
+                placeholder="Np. Projekt strony internetowej"
+                maxLength={140}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Zakres pracy *</span>
+              <textarea
+                value={form.scope}
+                onChange={(event) =>
+                  onFieldChange(
+                    "scope",
+                    event.target.value
+                  )
+                }
+                placeholder="Opisz dokładnie, co ma zostać wykonane..."
+                maxLength={4000}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Rezultat końcowy *</span>
+              <textarea
+                value={form.deliverables}
+                onChange={(event) =>
+                  onFieldChange(
+                    "deliverables",
+                    event.target.value
+                  )
+                }
+                placeholder="Wymień pliki, materiały lub funkcje, które mają zostać przekazane..."
+                maxLength={2500}
+                required
+              />
+            </label>
+
+            <label className="agreement-field">
+              <span>Cena *</span>
+              <div className="agreement-price-input">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.priceAmount}
+                  onChange={(event) =>
+                    onFieldChange(
+                      "priceAmount",
+                      event.target.value
+                    )
+                  }
+                  placeholder="1500"
+                  required
+                />
+                <select
+                  value={form.priceCurrency}
+                  onChange={(event) =>
+                    onFieldChange(
+                      "priceCurrency",
+                      event.target.value
+                    )
+                  }
+                  aria-label="Waluta"
+                >
+                  <option value="PLN">PLN</option>
+                  <option value="EUR">EUR</option>
+                  <option value="USD">USD</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </div>
+            </label>
+
+            <label className="agreement-field">
+              <span>Termin wykonania *</span>
+              <input
+                type="date"
+                min={new Date().toISOString().slice(0, 10)}
+                value={form.deadline}
+                onChange={(event) =>
+                  onFieldChange(
+                    "deadline",
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </label>
+
+            <label className="agreement-field">
+              <span>Liczba poprawek *</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={form.revisions}
+                onChange={(event) =>
+                  onFieldChange(
+                    "revisions",
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </label>
+
+            <label className="agreement-field">
+              <span>Format przekazania pracy *</span>
+              <input
+                type="text"
+                value={form.deliveryFormat}
+                onChange={(event) =>
+                  onFieldChange(
+                    "deliveryFormat",
+                    event.target.value
+                  )
+                }
+                placeholder="Np. PDF, PNG i pliki źródłowe"
+                maxLength={500}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Sposób odbioru pracy *</span>
+              <textarea
+                value={form.acceptanceMethod}
+                onChange={(event) =>
+                  onFieldChange(
+                    "acceptanceMethod",
+                    event.target.value
+                  )
+                }
+                placeholder="Po czym obie strony poznają, że zlecenie zostało wykonane prawidłowo?"
+                maxLength={2000}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Warunki anulowania *</span>
+              <textarea
+                value={form.cancellationTerms}
+                onChange={(event) =>
+                  onFieldChange(
+                    "cancellationTerms",
+                    event.target.value
+                  )
+                }
+                placeholder="Opisz zasady rezygnacji przed ukończeniem pracy..."
+                maxLength={2000}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Dodatkowe ustalenia</span>
+              <textarea
+                value={form.additionalTerms}
+                onChange={(event) =>
+                  onFieldChange(
+                    "additionalTerms",
+                    event.target.value
+                  )
+                }
+                placeholder="Opcjonalne informacje, które warto zapisać..."
+                maxLength={2500}
+              />
+            </label>
+          </div>
+
+          <label className="agreement-confirmation">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(event) =>
+                setConfirmed(
+                  event.target.checked
+                )
+              }
+            />
+            <span>
+              Potwierdzam, że zapoznałem się z warunkami współpracy i akceptuję treść wysyłanej propozycji.
+            </span>
+          </label>
+
+          {message && (
+            <p className="agreement-message">
+              {message}
+            </p>
+          )}
+
+          <div className="agreement-form-actions">
+            {agreement && (
+              <button
+                type="button"
+                className="agreement-secondary-button"
+                onClick={onCancelForm}
+                disabled={saving}
+              >
+                Anuluj zmiany
+              </button>
+            )}
+
+            <button
+              type="submit"
+              className="agreement-primary-button"
+              disabled={
+                saving ||
+                !confirmed ||
+                blocked
+              }
+            >
+              {saving
+                ? "Zapisywanie..."
+                : agreement
+                ? "Wyślij nową propozycję"
+                : "Wyślij propozycję"}
+            </button>
+          </div>
+        </form>
+      ) : agreement ? (
+        <div className="agreement-proposal-card">
+          <div className="agreement-proposal-topline">
+            <div>
+              <span className="agreement-version-pill">
+                Wersja {agreement.version}
+              </span>
+              <h3>Propozycja warunków</h3>
+            </div>
+
+            <span className="agreement-pending-pill">
+              Oczekuje na wspólną akceptację
+            </span>
+          </div>
+
+          <AgreementDetails
+            agreement={agreement}
+          />
+
+          {message && (
+            <p className="agreement-message is-success">
+              {message}
+            </p>
+          )}
+
+          {blocked ? (
+            <p className="agreement-blocked-note">
+              Ustalenia są wstrzymane, ponieważ jeden z użytkowników jest zablokowany.
+            </p>
+          ) : (
+            <div className="agreement-proposal-actions">
+              <button
+                type="button"
+                className="agreement-secondary-button"
+                onClick={onOpenForm}
+                disabled={saving}
+              >
+                Zaproponuj zmiany
+              </button>
+
+              {!currentUserAccepted ? (
+                <button
+                  type="button"
+                  className="agreement-primary-button"
+                  onClick={onAccept}
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Akceptowanie..."
+                    : "Akceptuję warunki"}
+                </button>
+              ) : (
+                <span className="agreement-waiting-note">
+                  ✓ Zaakceptowałeś tę wersję. Czekamy na drugą stronę.
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 function Chat() {
   const { user } =
     useAuth();
@@ -7668,6 +8218,82 @@ function Chat() {
 
   const [errorMessage, setErrorMessage] =
     useState("");
+
+  const [jobTitle, setJobTitle] =
+    useState("");
+
+  const [agreement, setAgreement] =
+    useState(null);
+
+  const [agreementLoading, setAgreementLoading] =
+    useState(true);
+
+  const [agreementSaving, setAgreementSaving] =
+    useState(false);
+
+  const [agreementMode, setAgreementMode] =
+    useState("view");
+
+  const [agreementMessage, setAgreementMessage] =
+    useState("");
+
+  const [agreementForm, setAgreementForm] =
+    useState(EMPTY_AGREEMENT_FORM);
+
+  async function loadAgreement(
+    conversationData,
+    fallbackTitle = ""
+  ) {
+    if (
+      !conversationData?.agreements_required
+    ) {
+      setAgreement(null);
+      setAgreementLoading(false);
+      return null;
+    }
+
+    setAgreementLoading(true);
+
+    try {
+      const { data, error } =
+        await supabase
+          .from(
+            "conversation_agreements"
+          )
+          .select("*")
+          .eq(
+            "conversation_id",
+            conversationData.id
+          )
+          .order("version", {
+            ascending: false,
+          })
+          .limit(1)
+          .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      setAgreement(data || null);
+
+      if (!data) {
+        setAgreementForm(
+          agreementToForm(
+            null,
+            fallbackTitle
+          )
+        );
+        setAgreementMode("form");
+      } else {
+        setAgreementMode("view");
+      }
+
+      return data || null;
+    } finally {
+      setAgreementLoading(false);
+    }
+  }
 
   async function markIncomingMessagesAsRead(
     messageRows
@@ -7776,7 +8402,7 @@ function Chat() {
         } = await supabase
           .from("conversations")
           .select(
-            "id, job_id, client_id, contractor_id, created_at"
+            "id, job_id, client_id, contractor_id, agreements_required, created_at"
           )
           .eq("id", id)
           .single();
@@ -7801,6 +8427,7 @@ function Chat() {
           profileResult,
           blockedByMeResult,
           blockedMeResult,
+          jobResult,
         ] = await Promise.all([
           supabase
             .from("profiles")
@@ -7838,6 +8465,15 @@ function Chat() {
               user.id
             )
             .maybeSingle(),
+
+          supabase
+            .from("jobs")
+            .select("title")
+            .eq(
+              "id",
+              conversationData.job_id
+            )
+            .maybeSingle(),
         ]);
 
         const profileData =
@@ -7867,6 +8503,20 @@ function Chat() {
           );
         }
 
+        if (jobResult.error) {
+          console.error(
+            "CHAT JOB ERROR:",
+            jobResult.error
+          );
+        }
+
+        const loadedJobTitle =
+          jobResult.data?.title || "";
+
+        setJobTitle(
+          loadedJobTitle
+        );
+
         if (mounted) {
           setOtherProfile(
             profileData || null
@@ -7880,6 +8530,11 @@ function Chat() {
             !!blockedMeResult.data?.id
           );
         }
+
+        await loadAgreement(
+          conversationData,
+          loadedJobTitle
+        );
 
         await loadMessages();
       } catch (error) {
@@ -7992,6 +8647,49 @@ function Chat() {
             );
           }
         )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table:
+              "conversation_agreements",
+            filter:
+              `conversation_id=eq.${id}`,
+          },
+          (payload) => {
+            setAgreement(
+              payload.new
+            );
+            setAgreementMode("view");
+            setAgreementMessage("");
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table:
+              "conversation_agreements",
+            filter:
+              `conversation_id=eq.${id}`,
+          },
+          (payload) => {
+            if (
+              payload.new.status ===
+              "superseded"
+            ) {
+              return;
+            }
+
+            setAgreement(
+              payload.new
+            );
+            setAgreementMode("view");
+            setAgreementMessage("");
+          }
+        )
         .subscribe();
 
     return () => {
@@ -8001,6 +8699,170 @@ function Chat() {
       );
     };
   }, [user?.id, id]);
+
+  function updateAgreementField(
+    field,
+    value
+  ) {
+    setAgreementForm(
+      (current) => ({
+        ...current,
+        [field]: value,
+      })
+    );
+  }
+
+  function openAgreementForm() {
+    setAgreementMessage("");
+    setAgreementForm(
+      agreementToForm(
+        agreement,
+        jobTitle
+      )
+    );
+    setAgreementMode("form");
+  }
+
+  async function handleAgreementSubmit(
+    event
+  ) {
+    event.preventDefault();
+
+    if (
+      !user?.id ||
+      !id ||
+      agreementSaving ||
+      messagingBlocked
+    ) {
+      return;
+    }
+
+    const price = Number(
+      String(
+        agreementForm.priceAmount
+      ).replace(",", ".")
+    );
+
+    const revisions = Number(
+      agreementForm.revisions
+    );
+
+    if (
+      agreementForm.title.trim().length < 3 ||
+      agreementForm.scope.trim().length < 10 ||
+      agreementForm.deliverables.trim().length < 3 ||
+      !Number.isFinite(price) ||
+      price <= 0 ||
+      !agreementForm.deadline ||
+      !Number.isInteger(revisions) ||
+      revisions < 0 ||
+      agreementForm.deliveryFormat.trim().length < 2 ||
+      agreementForm.acceptanceMethod.trim().length < 3 ||
+      agreementForm.cancellationTerms.trim().length < 3
+    ) {
+      setAgreementMessage(
+        "Uzupełnij wszystkie wymagane pola i sprawdź cenę, termin oraz liczbę poprawek."
+      );
+      return;
+    }
+
+    setAgreementSaving(true);
+    setAgreementMessage("");
+
+    try {
+      const { error } =
+        await supabase.rpc(
+          "propose_conversation_agreement",
+          {
+            p_conversation_id: id,
+            p_title:
+              agreementForm.title.trim(),
+            p_scope:
+              agreementForm.scope.trim(),
+            p_deliverables:
+              agreementForm.deliverables.trim(),
+            p_price_amount: price,
+            p_price_currency:
+              agreementForm.priceCurrency,
+            p_deadline:
+              agreementForm.deadline,
+            p_revisions: revisions,
+            p_delivery_format:
+              agreementForm.deliveryFormat.trim(),
+            p_acceptance_method:
+              agreementForm.acceptanceMethod.trim(),
+            p_cancellation_terms:
+              agreementForm.cancellationTerms.trim(),
+            p_additional_terms:
+              agreementForm.additionalTerms.trim(),
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      await loadAgreement(
+        conversation,
+        jobTitle
+      );
+
+      setAgreementMessage(
+        "Propozycja została wysłana. Czat odblokuje się po akceptacji drugiej strony."
+      );
+    } catch (error) {
+      setAgreementMessage(
+        error?.message ||
+          "Nie udało się zapisać warunków współpracy."
+      );
+    } finally {
+      setAgreementSaving(false);
+    }
+  }
+
+  async function handleAgreementAccept() {
+    if (
+      !agreement?.id ||
+      agreementSaving ||
+      messagingBlocked
+    ) {
+      return;
+    }
+
+    setAgreementSaving(true);
+    setAgreementMessage("");
+
+    try {
+      const { error } =
+        await supabase.rpc(
+          "accept_conversation_agreement",
+          {
+            p_agreement_id:
+              agreement.id,
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      await loadAgreement(
+        conversation,
+        jobTitle
+      );
+
+      setAgreementMessage(
+        "Warunki zostały zaakceptowane. Możecie rozpocząć rozmowę."
+      );
+    } catch (error) {
+      setAgreementMessage(
+        error?.message ||
+          "Nie udało się zaakceptować warunków współpracy."
+      );
+    } finally {
+      setAgreementSaving(false);
+    }
+  }
 
   async function handleSend(
     event
@@ -8016,7 +8878,8 @@ function Chat() {
       !id ||
       sending ||
       blockedByMe ||
-      blockedMe
+      blockedMe ||
+      !agreementAccepted
     ) {
       return;
     }
@@ -8152,6 +9015,29 @@ function Chat() {
 
   const messagingBlocked =
     blockedByMe || blockedMe;
+
+  const agreementsRequired =
+    !!conversation?.agreements_required;
+
+  const agreementAccepted =
+    !agreementsRequired ||
+    agreement?.status === "accepted";
+
+  const isClient =
+    conversation?.client_id ===
+    user?.id;
+
+  const currentUserAccepted =
+    !agreementsRequired ||
+    (isClient
+      ? !!agreement?.client_accepted_at
+      : !!agreement?.contractor_accepted_at);
+
+  const otherUserAccepted =
+    !agreementsRequired ||
+    (isClient
+      ? !!agreement?.contractor_accepted_at
+      : !!agreement?.client_accepted_at);
 
   const otherProfileId =
     otherProfile?.id ||
@@ -8585,7 +9471,37 @@ function Chat() {
                 </div>
               </header>
 
-              <div className="chat-messages">
+              <AgreementPanel
+                required={agreementsRequired}
+                agreement={agreement}
+                loading={agreementLoading}
+                saving={agreementSaving}
+                mode={agreementMode}
+                form={agreementForm}
+                message={agreementMessage}
+                currentUserAccepted={currentUserAccepted}
+                otherUserAccepted={otherUserAccepted}
+                blocked={messagingBlocked}
+                onFieldChange={updateAgreementField}
+                onOpenForm={openAgreementForm}
+                onCancelForm={() => {
+                  setAgreementMode("view");
+                  setAgreementMessage("");
+                }}
+                onSubmit={handleAgreementSubmit}
+                onAccept={handleAgreementAccept}
+              />
+
+              {!agreementAccepted &&
+                errorMessage && (
+                  <p className="chat-error">
+                    {errorMessage}
+                  </p>
+                )}
+
+              {agreementAccepted && (
+                <>
+                  <div className="chat-messages">
                 {messages.length === 0 ? (
                   <div className="chat-empty">
                     Rozmowa została otwarta.
@@ -8700,6 +9616,8 @@ function Chat() {
                     : "Wyślij"}
                 </button>
               </form>
+                </>
+              )}
             </>
           )}
         </div>
