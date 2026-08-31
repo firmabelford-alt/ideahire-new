@@ -3854,3 +3854,167 @@ html[data-theme="dark"] .home-account-avatar-link {
     flex-basis: 30px;
   }
 }
+
+/* =========================================================
+   MOBILE-ONLY LAYOUT — DESKTOP STAYS UNCHANGED
+========================================================= */
+
+@media (max-width: 700px) {
+  .home-navbar {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "logo"
+      "links"
+      "actions";
+    gap: 10px;
+  }
+
+  .home-navbar .logo {
+    justify-self: start;
+  }
+
+  .home-navbar .nav-links {
+    width: 100%;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .home-navbar .nav-links a {
+    flex: 1 1 0;
+    text-align: center;
+  }
+
+  .home-navbar .nav-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 6px;
+  }
+
+  .home-navbar .home-account-cluster {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-navbar .home-account-cluster .btn-ghost {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 6px;
+    text-align: center;
+  }
+
+  .home-navbar .home-account-avatar-link {
+    align-self: center;
+  }
+
+  .home-navbar .nav-actions > .btn-dark {
+    min-height: 40px;
+    align-self: center;
+    padding: 9px 10px;
+    font-size: 10px;
+  }
+
+  .hero-visual {
+    width: 100%;
+    min-height: 500px;
+    margin-top: 8px;
+    transform: none;
+  }
+
+  .visual-glow {
+    width: 280px;
+    height: 280px;
+  }
+
+  .hero-visual .card-main {
+    width: min(310px, calc(100% - 18px));
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .hero-visual .card-main h3 {
+    margin-top: 22px;
+  }
+
+  .hero-visual .card-meta {
+    margin-top: 22px;
+  }
+
+  .hero-visual .card-small {
+    width: 195px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .hero-visual .card-top {
+    top: 18px;
+    right: 0;
+  }
+
+  .hero-visual .card-bottom {
+    bottom: 18px;
+    left: 0;
+  }
+
+  html[data-theme="dark"] .how .steps {
+    gap: 14px;
+  }
+
+  html[data-theme="dark"] .how .step {
+    padding: 20px;
+    border: 1px solid #30302d !important;
+    border-radius: 18px;
+    background: linear-gradient(
+      145deg,
+      #1b1b19,
+      #141413
+    ) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18) !important;
+  }
+
+  html[data-theme="dark"] .how .step > span {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #3b3b37;
+    border-radius: 11px;
+    background: #242422;
+    color: #d4d4cf;
+    font-size: 11px;
+  }
+
+  html[data-theme="dark"] .how .step h3 {
+    margin: 16px 0 8px;
+    font-size: 18px;
+  }
+
+  html[data-theme="dark"] .how .step p {
+    max-width: none;
+    color: #b4b4ae !important;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero-visual {
+    min-height: 480px;
+  }
+
+  .visual-glow {
+    width: 250px;
+    height: 250px;
+  }
+
+  .hero-visual .card-main {
+    width: min(292px, calc(100% - 12px));
+    padding: 19px;
+  }
+
+  .hero-visual .card-small {
+    width: 178px;
+    padding: 11px;
+  }
+}
