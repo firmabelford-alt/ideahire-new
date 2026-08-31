@@ -3563,3 +3563,101 @@ html[data-theme="dark"] .home-account-cluster .btn-ghost:hover {
     font-size: 10px;
   }
 }
+
+/* =========================================================
+   EXACT SHARED NAVBAR LOOK / STRICT TEXT TRUNCATION
+========================================================= */
+
+.account-navbar .nav-links,
+.home-navbar .nav-links {
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #111;
+  border-radius: 17px;
+  background: #111;
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.14);
+}
+
+.account-navbar .nav-links a,
+.home-navbar .nav-links a {
+  padding: 10px 12px;
+  border-radius: 11px;
+  color: #d6d6d1;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.account-navbar .nav-links a:hover,
+.home-navbar .nav-links a:hover {
+  color: #fff;
+  background: #282827;
+}
+
+.home-navbar .home-account-cluster {
+  border: 1px solid #111;
+  background: #111;
+}
+
+.rotating-job-card h3 {
+  width: 100%;
+  min-height: 29px;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.rotating-job-card > p {
+  width: 100%;
+  height: 62px;
+  min-height: 62px;
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+html[data-theme="dark"] .account-navbar .nav-links,
+html[data-theme="dark"] .home-navbar .nav-links,
+html[data-theme="dark"] .home-navbar .home-account-cluster {
+  border-color: #383834;
+  background: #090909;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .home-navbar .nav-links a {
+  color: #d4d4cf;
+}
+
+html[data-theme="dark"] .home-navbar .nav-links a:hover {
+  color: #fff;
+  background: #252524;
+}
+
+@media (min-width: 1001px) {
+  .account-navbar {
+    column-gap: 8px;
+  }
+
+  .account-navbar-brand {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 700px) {
+  .home-navbar .nav-links,
+  .account-navbar .nav-links {
+    padding: 5px;
+  }
+
+  .home-navbar .nav-links a,
+  .account-navbar .nav-links a {
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+}
