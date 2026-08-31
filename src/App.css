@@ -3411,3 +3411,155 @@ html[data-theme="dark"] :is(
     animation: none;
   }
 }
+
+/* =========================================================
+   FINAL HEADER SPACING / HOME GROUPS / CARD TEXT
+========================================================= */
+
+.account-navbar {
+  column-gap: 8px;
+}
+
+.account-navbar-brand {
+  justify-content: flex-end;
+}
+
+.home-nav-links {
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #111;
+  border-radius: 17px;
+  background: #111;
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.14);
+}
+
+.home-nav-links a {
+  padding: 10px 12px;
+  border-radius: 11px;
+  color: #d6d6d1;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.home-nav-links a:hover {
+  color: #fff;
+  background: #282827;
+}
+
+.home-account-cluster {
+  min-height: 56px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #111;
+  border-radius: 17px;
+  background: #111;
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.14);
+}
+
+.home-account-cluster .auth-user {
+  max-width: 155px;
+  overflow: hidden;
+  padding: 0 10px;
+  color: #deded9;
+  text-overflow: ellipsis;
+}
+
+.home-account-cluster .btn-ghost {
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  color: #d6d6d1;
+  font-size: 12px;
+}
+
+.home-account-cluster .btn-ghost:hover {
+  color: #fff;
+  background: #282827;
+}
+
+.home-account-cluster .home-notifications-dot {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+}
+
+.card-small span:not(.mini-icon):not(.check-icon) {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  text-overflow: ellipsis;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.rotating-job-card h3,
+.rotating-job-card > p {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+}
+
+html[data-theme="dark"] .home-nav-links,
+html[data-theme="dark"] .home-account-cluster {
+  border-color: #383834;
+  background: #090909;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .home-nav-links a,
+html[data-theme="dark"] .home-account-cluster .btn-ghost,
+html[data-theme="dark"] .home-account-cluster .auth-user {
+  color: #d4d4cf !important;
+}
+
+html[data-theme="dark"] .home-nav-links a:hover,
+html[data-theme="dark"] .home-account-cluster .btn-ghost:hover {
+  color: #fff !important;
+  background: #252524 !important;
+}
+
+@media (max-width: 1000px) {
+  .account-navbar-brand {
+    justify-content: flex-start;
+  }
+
+  .home-nav-links {
+    gap: 3px;
+  }
+
+  .home-account-cluster .auth-user {
+    max-width: 110px;
+  }
+}
+
+@media (max-width: 700px) {
+  .home-nav-links {
+    padding: 5px !important;
+  }
+
+  .home-nav-links a {
+    padding: 9px 11px !important;
+    font-size: 11px !important;
+  }
+
+  .home-account-cluster {
+    min-height: 46px;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 14px;
+  }
+
+  .home-account-cluster .auth-user {
+    display: none;
+  }
+
+  .home-account-cluster .btn-ghost {
+    min-height: 36px;
+    padding: 8px 9px;
+    border-radius: 9px;
+    font-size: 10px;
+  }
+}
