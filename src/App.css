@@ -4018,3 +4018,80 @@ html[data-theme="dark"] .home-account-avatar-link {
     padding: 11px;
   }
 }
+
+/* =========================================================
+   MOBILE LIGHT THEME — WHITE NAVIGATION HOUSING
+========================================================= */
+
+@media (max-width: 700px) {
+  .home-navbar .nav-links,
+  .account-navbar .nav-links,
+  .home-navbar .home-account-cluster {
+    border-color: #e3e3de;
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(17, 17, 17, 0.06);
+  }
+
+  .home-navbar .nav-links a,
+  .account-navbar .nav-links a,
+  .home-navbar .home-account-cluster .btn-ghost,
+  .home-navbar .home-account-cluster .auth-user {
+    color: #292928 !important;
+  }
+
+  .home-navbar .nav-links a:hover,
+  .account-navbar .nav-links a:hover,
+  .home-navbar .home-account-cluster .btn-ghost:hover {
+    color: #111 !important;
+    background: #f2f2ef;
+  }
+
+  .account-navbar .nav-links a.is-active {
+    color: #111 !important;
+    background: #eeeeea;
+  }
+
+  .home-navbar .home-notifications-dot,
+  .account-navbar .notification-dot {
+    background: #111;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+  }
+
+  html[data-theme="dark"] .home-navbar .nav-links,
+  html[data-theme="dark"] .account-navbar .nav-links,
+  html[data-theme="dark"] .home-navbar .home-account-cluster {
+    border-color: #383834;
+    background: #090909;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+  }
+
+  html[data-theme="dark"] .home-navbar .nav-links a,
+  html[data-theme="dark"] .account-navbar .nav-links a,
+  html[data-theme="dark"] .home-navbar .home-account-cluster .btn-ghost,
+  html[data-theme="dark"] .home-navbar .home-account-cluster .auth-user {
+    color: #d4d4cf !important;
+  }
+
+  html[data-theme="dark"] .home-navbar .nav-links a:hover,
+  html[data-theme="dark"] .account-navbar .nav-links a:hover,
+  html[data-theme="dark"] .home-navbar .home-account-cluster .btn-ghost:hover {
+    color: #fff !important;
+    background: #252524;
+  }
+
+  html[data-theme="dark"] .account-navbar .nav-links a.is-active {
+    color: #111 !important;
+    background: #f3f3ef;
+  }
+
+  html[data-theme="dark"] .home-navbar .home-notifications-dot,
+  html[data-theme="dark"] .account-navbar .notification-dot {
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+  }
+
+  html[data-theme="dark"] .account-navbar .is-active .notification-dot {
+    background: #111;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+  }
+}
