@@ -1,4 +1,5 @@
 
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
@@ -1858,6 +1859,15 @@ html[data-theme="dark"] :focus-visible {
   backdrop-filter: blur(14px);
 }
 
+.site-preferences-handle {
+  display: none;
+}
+
+.site-preferences-panel {
+  display: grid;
+  gap: 8px;
+}
+
 .site-theme-toggle,
 .site-language-toggle button {
   min-width: 38px;
@@ -2176,9 +2186,41 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
 @media (max-width: 600px) {
   .site-preferences {
     top: auto;
-    right: 12px;
-    bottom: 12px;
-    transform: none;
+    right: 0;
+    bottom: 86px;
+    transform: translateX(calc(100% - 42px));
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    border-right: 0;
+    border-radius: 17px 0 0 17px;
+    transition: transform 0.22s ease;
+  }
+
+  .site-preferences.is-open {
+    transform: translateX(0);
+  }
+
+  .site-preferences-handle {
+    width: 42px;
+    height: 76px;
+    flex: 0 0 42px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid #e5e5e0;
+    border-radius: 16px 0 0 16px;
+    background: transparent;
+    color: #555550;
+    font: inherit;
+    font-size: 25px;
+    cursor: pointer;
+  }
+
+  .site-preferences-panel {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -2196,6 +2238,11 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
 
   html[data-theme="dark"] .site-language-toggle {
     border-left-color: #343431;
+  }
+
+  html[data-theme="dark"] .site-preferences-handle {
+    border-right-color: #343431;
+    color: #d5d5cf;
   }
 }
 
@@ -2326,13 +2373,75 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
    CHAT AGREEMENTS — WARUNKI WSPÓŁPRACY
 ========================================================= */
 
+.agreement-workspace {
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(20, 20, 20, 0.08);
+  background: #f7f7f4;
+}
+
+.agreement-workspace-toggle {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  border: 0;
+  background: #fff;
+  color: #2c2c29;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.agreement-workspace-toggle span,
+.agreement-workspace-toggle strong,
+.agreement-workspace-toggle small {
+  display: block;
+}
+
+.agreement-workspace-toggle strong {
+  font-size: 12px;
+}
+
+.agreement-workspace-toggle small {
+  margin-top: 3px;
+  color: #7b7b75;
+  font-size: 10px;
+}
+
+.agreement-workspace-toggle b {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dfdfd9;
+  border-radius: 50%;
+  background: #f7f7f3;
+  font-size: 18px;
+  font-weight: 500;
+}
+
 .agreement-gate {
-  flex: 1;
+  max-height: min(62vh, 680px);
   overflow-y: auto;
   padding: 34px;
   background:
     radial-gradient(circle at 12% 0%, rgba(234, 230, 214, 0.72), transparent 34%),
     #f7f7f4;
+}
+
+.agreement-negotiation-banner {
+  margin: 0;
+  padding: 9px 18px;
+  border-bottom: 1px solid #e4dfcf;
+  background: #fff8e5;
+  color: #6d5a25;
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .agreement-gate-heading {
@@ -2854,6 +2963,32 @@ html[data-theme="dark"] .agreement-gate {
     #10100f !important;
 }
 
+html[data-theme="dark"] .agreement-workspace {
+  border-bottom-color: #30302d;
+  background: #10100f;
+}
+
+html[data-theme="dark"] .agreement-workspace-toggle {
+  background: #191918;
+  color: #f2f2ee;
+}
+
+html[data-theme="dark"] .agreement-workspace-toggle small {
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .agreement-workspace-toggle b {
+  border-color: #3d3d38;
+  background: #262624;
+  color: #f2f2ee;
+}
+
+html[data-theme="dark"] .agreement-negotiation-banner {
+  border-bottom-color: #4b422a;
+  background: #2b2517;
+  color: #e0ca87;
+}
+
 html[data-theme="dark"] .agreement-eyebrow,
 html[data-theme="dark"] .agreement-form,
 html[data-theme="dark"] .agreement-proposal-card,
@@ -3020,7 +3155,18 @@ html[data-theme="dark"] .agreement-waiting-card p {
 }
 
 @media (max-width: 700px) {
+  .agreement-workspace-toggle {
+    min-height: 54px;
+    padding: 9px 13px;
+  }
+
+  .agreement-workspace-toggle small {
+    max-width: 250px;
+    line-height: 1.35;
+  }
+
   .agreement-gate {
+    max-height: 55vh;
     padding: 24px 14px 32px;
   }
 
