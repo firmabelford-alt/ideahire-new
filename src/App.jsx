@@ -349,6 +349,14 @@ function App({ session, loading }) {
     session?.user?.email?.split("@")[0] ||
     "Użytkownik";
 
+  const avatarUrl =
+    session?.user?.user_metadata
+      ?.avatar_url || "";
+
+  const userInitial = userName
+    .charAt(0)
+    .toUpperCase();
+
   const activeJob =
     recentJobs[
       activeJobIndex % recentJobs.length
@@ -412,6 +420,23 @@ function App({ session, loading }) {
                   Moje konto
                 </Link>
               </div>
+
+              <Link
+                className="home-account-avatar-link"
+                to="/account"
+                aria-label="Moje konto"
+              >
+                <span className="account-mini-avatar">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                    />
+                  ) : (
+                    userInitial
+                  )}
+                </span>
+              </Link>
 
               <button
                 className="btn btn-dark"
