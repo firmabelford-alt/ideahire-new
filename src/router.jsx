@@ -7734,6 +7734,7 @@ const EMPTY_AGREEMENT_FORM = {
   deliverables: "",
   priceAmount: "",
   priceCurrency: "PLN",
+  depositAmount: "0",
   deadline: "",
   revisions: "1",
   deliveryFormat: "",
@@ -7814,6 +7815,10 @@ function agreementToForm(
         : String(agreement.price_amount),
     priceCurrency:
       agreement.price_currency || "PLN",
+    depositAmount:
+      agreement.deposit_amount == null
+        ? "0"
+        : String(agreement.deposit_amount),
     deadline: agreement.deadline || "",
     revisions: String(
       agreement.revisions ?? 0
@@ -7850,6 +7855,16 @@ function AgreementDetails({ agreement }) {
     year: "numeric",
   });
 
+  const deposit = new Intl.NumberFormat(
+    "pl-PL",
+    {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }
+  ).format(
+    Number(agreement.deposit_amount || 0)
+  );
+
   return (
     <div className="agreement-details">
       <div className="agreement-detail agreement-detail-wide">
@@ -7861,6 +7876,13 @@ function AgreementDetails({ agreement }) {
         <span>Cena</span>
         <strong>
           {price} {agreement.price_currency}
+        </strong>
+      </div>
+
+      <div className="agreement-detail">
+        <span>Zaliczka</span>
+        <strong>
+          {deposit} {agreement.price_currency}
         </strong>
       </div>
 
@@ -7931,8 +7953,12 @@ function AgreementPanel({
   const [confirmed, setConfirmed] =
     useState(false);
 
+  const [expanded, setExpanded] =
+    useState(true);
+
   useEffect(() => {
     setConfirmed(false);
+    setExpanded(true);
   }, [mode, agreement?.id]);
 
   if (!required) return null;
@@ -7984,16 +8010,37 @@ function AgreementPanel({
   }
 
   return (
-    <section className="agreement-gate">
+    <section className="agreement-workspace">
+      <button
+        type="button"
+        className="agreement-workspace-toggle"
+        onClick={() =>
+          setExpanded((current) => !current)
+        }
+        aria-expanded={expanded}
+      >
+        <span>
+          <strong>Warunki współpracy</strong>
+          <small>
+            Czat negocjacyjny jest aktywny · realizacja ruszy po wspólnej akceptacji
+          </small>
+        </span>
+        <b aria-hidden="true">
+          {expanded ? "−" : "+"}
+        </b>
+      </button>
+
+      {expanded && (
+      <section className="agreement-gate">
       <div className="agreement-gate-heading">
         <span className="agreement-eyebrow">
           Ustalenia przed rozpoczęciem
         </span>
 
-        <h2>Najpierw ustalcie warunki współpracy</h2>
+        <h2>Ustalcie warunki współpracy</h2>
 
         <p>
-          Czat odblokuje się, gdy obie strony zaakceptują dokładnie tę samą wersję ustaleń.
+          Możecie już rozmawiać na czacie. Realizacja zlecenia rozpocznie się, gdy obie strony zaakceptują dokładnie tę samą wersję ustaleń.
         </p>
 
         <div className="agreement-progress" aria-label="Postęp akceptacji">
@@ -8097,6 +8144,32 @@ function AgreementPanel({
               </div>
               <small className="agreement-fixed-price-note">
                 Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie.
+              </small>
+            </label>
+
+            <label className="agreement-field">
+              <span>Zaliczka *</span>
+              <div className="agreement-price-input">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.depositAmount}
+                  onChange={(event) =>
+                    onFieldChange(
+                      "depositAmount",
+                      event.target.value
+                    )
+                  }
+                  placeholder="Np. 500"
+                  aria-label="Kwota zaliczki"
+                  required
+                />
+                <span className="agreement-price-currency">
+                  PLN
+                </span>
+              </div>
+              <small className="agreement-fixed-price-note">
+                Zaliczka może być zmieniana w kolejnych propozycjach do wspólnej akceptacji i nie może przekroczyć ceny zlecenia.
               </small>
             </label>
 
@@ -8326,6 +8399,8 @@ function AgreementPanel({
             </p>
           </div>
         </div>
+      )}
+      </section>
       )}
     </section>
   );
@@ -8932,6 +9007,11 @@ function Chat() {
         agreementForm.priceAmount
       );
 
+    const deposit =
+      parseAgreementPrice(
+        agreementForm.depositAmount
+      );
+
     const revisions = Number(
       agreementForm.revisions
     );
@@ -8980,6 +9060,23 @@ function Chat() {
     ) {
       setAgreementMessage(
         "Nie udało się pobrać ceny ze zlecenia. Odśwież stronę i spróbuj ponownie."
+      );
+      return;
+    }
+
+    if (
+      !Number.isFinite(deposit) ||
+      deposit < 0
+    ) {
+      setAgreementMessage(
+        "Wpisz prawidłową kwotę zaliczki. Może wynosić 0 zł."
+      );
+      return;
+    }
+
+    if (deposit > price) {
+      setAgreementMessage(
+        "Zaliczka nie może być wyższa niż cena zlecenia."
       );
       return;
     }
@@ -9057,6 +9154,7 @@ function Chat() {
             p_price_amount: price,
             p_price_currency:
               agreementForm.priceCurrency,
+            p_deposit_amount: deposit,
             p_deadline:
               agreementForm.deadline,
             p_revisions: revisions,
@@ -9082,7 +9180,7 @@ function Chat() {
       );
 
       setAgreementMessage(
-        "Propozycja została wysłana. Czat odblokuje się po akceptacji drugiej strony."
+        "Propozycja została wysłana. Możecie dalej omawiać ją na czacie."
       );
     } catch (error) {
       setAgreementMessage(
@@ -9127,7 +9225,7 @@ function Chat() {
       );
 
       setAgreementMessage(
-        "Warunki zostały zaakceptowane. Możecie rozpocząć rozmowę."
+        "Warunki zostały zaakceptowane i zablokowane. Zlecenie może rozpocząć realizację."
       );
     } catch (error) {
       setAgreementMessage(
@@ -9153,8 +9251,7 @@ function Chat() {
       !id ||
       sending ||
       blockedByMe ||
-      blockedMe ||
-      !agreementAccepted
+      blockedMe
     ) {
       return;
     }
@@ -9767,16 +9864,14 @@ function Chat() {
                 onAccept={handleAgreementAccept}
               />
 
-              {!agreementAccepted &&
-                errorMessage && (
-                  <p className="chat-error">
-                    {errorMessage}
+              {agreementsRequired &&
+                !agreementAccepted && (
+                  <p className="agreement-negotiation-banner">
+                    Czat negocjacyjny jest otwarty. Możecie omawiać i zmieniać propozycję, ale realizacja zlecenia rozpocznie się dopiero po wspólnej akceptacji warunków.
                   </p>
                 )}
 
-              {agreementAccepted && (
-                <>
-                  <div className="chat-messages">
+              <div className="chat-messages">
                 {messages.length === 0 ? (
                   <div className="chat-empty">
                     Rozmowa została otwarta.
@@ -9891,8 +9986,6 @@ function Chat() {
                     : "Wyślij"}
                 </button>
               </form>
-                </>
-              )}
             </>
           )}
         </div>
