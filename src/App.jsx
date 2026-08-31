@@ -13,8 +13,37 @@ const categories = [
   "Fotografia",
 ];
 
+const fallbackJobs = [
+  {
+    id: "fallback-1",
+    title: "Nowoczesna strona internetowa",
+    description:
+      "Szukam osoby, która stworzy prostą i szybką stronę dla nowej marki.",
+    category: "Programowanie",
+    budget: 3000,
+  },
+  {
+    id: "fallback-2",
+    title: "Identyfikacja wizualna marki",
+    description:
+      "Potrzebuję spójnego logo oraz podstawowych materiałów graficznych.",
+    category: "Grafika i design",
+    budget: 1800,
+  },
+  {
+    id: "fallback-3",
+    title: "Teksty na stronę firmową",
+    description:
+      "Zlecę przygotowanie przejrzystych tekstów do sześciu podstron.",
+    category: "Copywriting",
+    budget: 900,
+  },
+];
+
 function App({ session, loading }) {
   const [hasNotifications, setHasNotifications] = useState(false);
+  const [recentJobs, setRecentJobs] = useState(fallbackJobs);
+  const [activeJobIndex, setActiveJobIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,6 +103,87 @@ function App({ session, loading }) {
       );
     };
   }, [session?.user?.id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRecentJobs() {
+      try {
+        const { data, error } =
+          await supabase
+            .from("jobs")
+            .select(
+              "id, title, description, category, budget, created_at"
+            )
+            .order("created_at", {
+              ascending: false,
+            })
+            .limit(8);
+
+        if (error) {
+          console.error(
+            "HOME RECENT JOBS ERROR:",
+            error
+          );
+          return;
+        }
+
+        if (
+          mounted &&
+          Array.isArray(data) &&
+          data.length > 0
+        ) {
+          setRecentJobs(data);
+          setActiveJobIndex(0);
+        }
+      } catch (error) {
+        console.error(
+          "HOME RECENT JOBS ERROR:",
+          error
+        );
+      }
+    }
+
+    loadRecentJobs();
+
+    const channel = supabase
+      .channel("home-recent-jobs")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "jobs",
+        },
+        () => {
+          loadRecentJobs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (recentJobs.length <= 1) return undefined;
+
+    const interval = window.setInterval(
+      () => {
+        setActiveJobIndex(
+          (current) =>
+            (current + 1) % recentJobs.length
+        );
+      },
+      4500
+    );
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [recentJobs.length]);
 
   async function checkNotifications(currentSession) {
     const userId = currentSession?.user?.id;
@@ -239,6 +349,29 @@ function App({ session, loading }) {
     session?.user?.email?.split("@")[0] ||
     "Użytkownik";
 
+  const activeJob =
+    recentJobs[
+      activeJobIndex % recentJobs.length
+    ] || fallbackJobs[0];
+
+  const nextJob =
+    recentJobs[
+      (activeJobIndex + 1) %
+        recentJobs.length
+    ] || fallbackJobs[1];
+
+  const followingJob =
+    recentJobs[
+      (activeJobIndex + 2) %
+        recentJobs.length
+    ] || fallbackJobs[2];
+
+  function formatBudget(value) {
+    return `${Number(
+      value || 0
+    ).toLocaleString("pl-PL")} zł`;
+  }
+
   return (
     <div className="app">
       <header className="navbar">
@@ -362,26 +495,26 @@ function App({ session, loading }) {
           </div>
 
           <div className="hero-visual">
-            <div className="floating-card card-main">
+            <div
+              className="floating-card card-main rotating-job-card"
+              key={activeJob.id}
+            >
               <div className="card-header">
-                <span>Nowe zlecenie</span>
+                <span>Aktualne zlecenie</span>
                 <span className="live-dot">●</span>
               </div>
 
-              <h3>
-                Potrzebuję nowoczesnej
-                <br />
-                strony internetowej
-              </h3>
+              <h3>{activeJob.title}</h3>
 
               <p>
-                Szukam osoby, która stworzy prostą i szybką
-                stronę dla nowej marki.
+                {activeJob.description}
               </p>
 
               <div className="card-meta">
-                <span>1 500–3 000 zł</span>
-                <span>3 zgłoszenia</span>
+                <span>
+                  {formatBudget(activeJob.budget)}
+                </span>
+                <span>{activeJob.category}</span>
               </div>
             </div>
 
@@ -389,17 +522,17 @@ function App({ session, loading }) {
               <span className="mini-icon">✦</span>
 
               <div>
-                <strong>Nowe zgłoszenie</strong>
-                <span>Projektant UI/UX</span>
+                <strong>Najnowsze zlecenia</strong>
+                <span>{nextJob.title}</span>
               </div>
             </div>
 
             <div className="floating-card card-small card-bottom">
-              <span className="check-icon">✓</span>
+              <span className="check-icon">↗</span>
 
               <div>
-                <strong>Projekt zakończony</strong>
-                <span>Wszystko gotowe</span>
+                <strong>Kolejne zlecenie</strong>
+                <span>{followingJob.title}</span>
               </div>
             </div>
 
@@ -434,6 +567,14 @@ function App({ session, loading }) {
                 className="category-card"
                 key={category}
                 type="button"
+                onClick={() =>
+                  navigate(
+                    `/jobs?category=${encodeURIComponent(
+                      category
+                    )}`
+                  )
+                }
+                aria-label={`Pokaż zlecenia: ${category}`}
               >
                 <span className="category-number">
                   0{index + 1}
