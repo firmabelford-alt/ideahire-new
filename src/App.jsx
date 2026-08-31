@@ -374,7 +374,7 @@ function App({ session, loading }) {
 
   return (
     <div className="app">
-      <header className="navbar">
+      <header className="navbar home-navbar">
         <Link className="logo" to="/">
           Idea<span>Hire</span>
         </Link>
