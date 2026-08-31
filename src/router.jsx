@@ -11,6 +11,7 @@ import {
   Route,
   Navigate,
   Link,
+  NavLink,
   useLocation,
   useNavigate,
   useParams,
@@ -726,41 +727,97 @@ function AccountNavbar() {
   }
 
   return (
-    <header className="navbar">
-      <Link
-        className="logo"
-        to="/"
-      >
-        Idea<span>Hire</span>
-      </Link>
-
-      <nav className="nav-links">
-        <Link to="/account">
-          Moje konto
-        </Link>
-
-        <Link to="/find-talent">
-          Dodaj zlecenie
-        </Link>
-
-        <Link to="/jobs">
-          Znajdź zlecenie
-        </Link>
-
-        <Link to="/messages">
-          Wiadomości
+    <header className="navbar account-navbar">
+      <div className="account-navbar-brand">
+        <Link
+          className="navbar-home-back"
+          to="/"
+          aria-label="Wróć na stronę główną"
+          title="Wróć na stronę główną"
+        >
+          ←
         </Link>
 
         <Link
+          className="logo"
+          to="/"
+        >
+          Idea<span>Hire</span>
+        </Link>
+      </div>
+
+      <nav className="nav-links">
+        <NavLink
+          to="/account"
+          end
+          className={({
+            isActive,
+          }) =>
+            isActive
+              ? "is-active"
+              : ""
+          }
+        >
+          Moje konto
+        </NavLink>
+
+        <NavLink
+          to="/find-talent"
+          className={({
+            isActive,
+          }) =>
+            isActive
+              ? "is-active"
+              : ""
+          }
+        >
+          Dodaj zlecenie
+        </NavLink>
+
+        <NavLink
+          to="/jobs"
+          className={({
+            isActive,
+          }) =>
+            isActive
+              ? "is-active"
+              : ""
+          }
+        >
+          Znajdź zlecenie
+        </NavLink>
+
+        <NavLink
+          to="/messages"
+          className={({
+            isActive,
+          }) =>
+            isActive
+              ? "is-active"
+              : ""
+          }
+        >
+          Wiadomości
+        </NavLink>
+
+        <NavLink
           to="/notifications"
-          className="notifications-nav-link"
+          className={({
+            isActive,
+          }) =>
+            `notifications-nav-link${
+              isActive
+                ? " is-active"
+                : ""
+            }`
+          }
         >
           Powiadomienia
 
           {hasNotifications && (
             <span className="notification-dot" />
           )}
-        </Link>
+        </NavLink>
       </nav>
 
       <div className="nav-actions">
@@ -4702,6 +4759,12 @@ function Jobs() {
   const { user } =
     useAuth();
 
+  const location =
+    useLocation();
+
+  const navigate =
+    useNavigate();
+
   const [jobs, setJobs] =
     useState([]);
 
@@ -4738,6 +4801,39 @@ function Jobs() {
   ] = useState(
     "Wszystkie"
   );
+
+  useEffect(() => {
+    const category =
+      new URLSearchParams(
+        location.search
+      ).get("category");
+
+    setSelectedCategory(
+      category &&
+        JOB_CATEGORIES.includes(
+          category
+        )
+        ? category
+        : "Wszystkie"
+    );
+  }, [location.search]);
+
+  function chooseCategory(
+    category
+  ) {
+    setSelectedCategory(
+      category
+    );
+
+    navigate(
+      category === "Wszystkie"
+        ? "/jobs"
+        : `/jobs?category=${encodeURIComponent(
+            category
+          )}`,
+      { replace: true }
+    );
+  }
 
   async function loadJobs() {
     setLoading(true);
@@ -5057,6 +5153,9 @@ function Jobs() {
     setSelectedCategory(
       "Wszystkie"
     );
+    navigate("/jobs", {
+      replace: true,
+    });
   }
 
   const hasFilters =
@@ -5284,7 +5383,7 @@ function Jobs() {
                   : "jobs-filter"
               }
               onClick={() =>
-                setSelectedCategory(
+                chooseCategory(
                   "Wszystkie"
                 )
               }
@@ -5304,7 +5403,7 @@ function Jobs() {
                       : "jobs-filter"
                   }
                   onClick={() =>
-                    setSelectedCategory(
+                    chooseCategory(
                       category
                     )
                   }
