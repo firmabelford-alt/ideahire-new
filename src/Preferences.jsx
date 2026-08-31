@@ -23,6 +23,8 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Cena zlecenia pozostaje bez zmian.": "The job price remains unchanged.",
   "Cena została ustalona przy publikacji i nie może być edytowana.": "The price was set at publication and cannot be edited.",
   "Cena została ustalona przy publikacji.": "The price was set at publication.",
+  "Czat negocjacyjny jest otwarty. Możecie omawiać i zmieniać propozycję, ale realizacja zlecenia rozpocznie się dopiero po wspólnej akceptacji warunków.": "The negotiation chat is open. You can discuss and revise the proposal, but the job will start only after both parties accept the terms.",
+  "Czat negocjacyjny jest aktywny · realizacja ruszy po wspólnej akceptacji": "Negotiation chat is active · work starts after mutual acceptance",
   "Czego szukasz?": "What are you looking for?",
   "Cześć,": "Hello,",
   "Decyzja dotycząca zgłoszenia": "Application decision",
@@ -317,6 +319,12 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Wpisz adres e-mail.": "Enter your email address.",
   "Ładowanie warunków współpracy...": "Loading collaboration terms...",
   "Warunki współpracy zaakceptowane": "Collaboration terms accepted",
+  "Warunki współpracy": "Collaboration terms",
+  "Wpisz prawidłową kwotę zaliczki. Może wynosić 0 zł.": "Enter a valid deposit amount. It may be PLN 0.",
+  "Zaliczka": "Deposit",
+  "Zaliczka *": "Deposit *",
+  "Zaliczka może być zmieniana w kolejnych propozycjach do wspólnej akceptacji i nie może przekroczyć ceny zlecenia.": "The deposit can be changed in subsequent proposals until mutual acceptance and cannot exceed the job price.",
+  "Zaliczka nie może być wyższa niż cena zlecenia.": "The deposit cannot exceed the job price.",
   "Wersja": "Version",
   "· Czat jest aktywny": "· Chat is active",
   "Czat jest aktywny": "Chat is active",
@@ -696,6 +704,9 @@ export default function Preferences({
   const [language, setLanguage] =
     useState(getStoredLanguage);
 
+  const [mobilePanelOpen, setMobilePanelOpen] =
+    useState(false);
+
   useEffect(() => {
     document.documentElement.dataset.theme =
       theme;
@@ -804,7 +815,9 @@ export default function Preferences({
       {children}
 
       <aside
-        className="site-preferences"
+        className={`site-preferences ${
+          mobilePanelOpen ? "is-open" : ""
+        }`}
         data-no-translate="true"
         aria-label={
           language === "en"
@@ -812,6 +825,31 @@ export default function Preferences({
             : "Wygląd i język"
         }
       >
+        <button
+          type="button"
+          className="site-preferences-handle"
+          onClick={() =>
+            setMobilePanelOpen(
+              (current) => !current
+            )
+          }
+          aria-expanded={mobilePanelOpen}
+          aria-label={
+            language === "en"
+              ? mobilePanelOpen
+                ? "Hide appearance and language settings"
+                : "Show appearance and language settings"
+              : mobilePanelOpen
+              ? "Schowaj ustawienia wyglądu i języka"
+              : "Pokaż ustawienia wyglądu i języka"
+          }
+        >
+          <span aria-hidden="true">
+            {mobilePanelOpen ? "›" : "‹"}
+          </span>
+        </button>
+
+        <div className="site-preferences-panel">
         <button
           type="button"
           className="site-theme-toggle"
@@ -890,6 +928,7 @@ export default function Preferences({
           >
             EN
           </button>
+        </div>
         </div>
       </aside>
     </>
