@@ -3108,3 +3108,306 @@ html[data-theme="dark"] .agreement-waiting-card p {
     padding: 3px 13px 16px;
   }
 }
+
+/* =========================================================
+   NAVIGATION POLISH / LIVE JOBS / JOB FILTERS
+========================================================= */
+
+.account-navbar {
+  display: grid;
+  grid-template-columns:
+    minmax(170px, 0.75fr)
+    minmax(0, auto)
+    minmax(190px, 0.85fr);
+  justify-content: stretch;
+  gap: 18px;
+}
+
+.account-navbar-brand {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.navbar-home-back {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #deded9;
+  border-radius: 12px;
+  background: #fff;
+  color: #171716;
+  box-shadow: 0 7px 22px rgba(17, 17, 17, 0.06);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.navbar-home-back:hover {
+  transform: translateX(-2px);
+  border-color: #aaa;
+  box-shadow: 0 9px 25px rgba(17, 17, 17, 0.1);
+}
+
+.account-navbar .nav-links {
+  min-width: 0;
+  justify-self: center;
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #111;
+  border-radius: 17px;
+  background: #111;
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.14);
+}
+
+.account-navbar .nav-links a {
+  padding: 10px 12px;
+  border-radius: 11px;
+  color: #d6d6d1;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.account-navbar .nav-links a:hover {
+  color: #fff;
+  background: #282827;
+}
+
+.account-navbar .nav-links a.is-active {
+  color: #111;
+  background: #fff;
+}
+
+.account-navbar .nav-actions {
+  min-width: 0;
+  justify-self: end;
+}
+
+.account-navbar .notification-dot {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+}
+
+.account-navbar .is-active .notification-dot {
+  background: #111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+
+.rotating-job-card {
+  animation: job-card-swap 0.45s ease both;
+}
+
+.rotating-job-card h3 {
+  min-height: 57px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.rotating-job-card > p {
+  min-height: 62px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.card-small > div:last-child {
+  min-width: 0;
+}
+
+.card-small span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes job-card-swap {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.category-card {
+  cursor: pointer;
+}
+
+.category-card:focus-visible,
+.jobs-clear-filters:focus-visible,
+.navbar-home-back:focus-visible {
+  outline: 3px solid rgba(17, 17, 17, 0.22);
+  outline-offset: 3px;
+}
+
+.jobs-clear-filters {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid #111;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(17, 17, 17, 0.1);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.jobs-clear-filters::before {
+  content: "×";
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.jobs-clear-filters:hover {
+  transform: translateY(-1px);
+  background: #2b2b29;
+  box-shadow: 0 11px 27px rgba(17, 17, 17, 0.15);
+}
+
+html[data-theme="dark"] .navbar-home-back {
+  border-color: #3a3a36;
+  background: #1b1b19;
+  color: #f2f2ee;
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .account-navbar .nav-links {
+  border-color: #383834;
+  background: #090909;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .account-navbar .nav-links a {
+  color: #d4d4cf;
+}
+
+html[data-theme="dark"] .account-navbar .nav-links a:hover {
+  color: #fff;
+  background: #252524;
+}
+
+html[data-theme="dark"] .account-navbar .nav-links a.is-active {
+  color: #111;
+  background: #f3f3ef;
+}
+
+html[data-theme="dark"] .jobs-clear-filters {
+  border-color: #efefeb !important;
+  background: #efefeb !important;
+  color: #151514 !important;
+}
+
+html[data-theme="dark"] .jobs-clear-filters:hover {
+  border-color: #fff !important;
+  background: #fff !important;
+}
+
+html[data-theme="dark"] :is(
+  .category-card,
+  .jobs-clear-filters,
+  .navbar-home-back
+):focus-visible {
+  outline-color: rgba(242, 242, 238, 0.48);
+}
+
+@media (max-width: 1000px) {
+  .account-navbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand actions"
+      "links links";
+    gap: 10px 14px;
+    padding: 12px 0 14px;
+  }
+
+  .account-navbar-brand {
+    grid-area: brand;
+    justify-content: flex-start;
+  }
+
+  .account-navbar .nav-links {
+    width: 100%;
+    grid-area: links;
+    justify-self: stretch;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .account-navbar .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .account-navbar .nav-actions {
+    grid-area: actions;
+  }
+}
+
+@media (max-width: 700px) {
+  .account-navbar {
+    width: calc(100% - 28px);
+  }
+
+  .account-navbar .nav-links {
+    display: flex;
+    padding: 5px;
+  }
+
+  .account-navbar .nav-links a {
+    flex: 0 0 auto;
+    padding: 9px 11px;
+    font-size: 11px;
+  }
+
+  .navbar-home-back {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .jobs-results-header {
+    align-items: center;
+    gap: 12px;
+  }
+
+  .jobs-clear-filters {
+    min-height: 38px;
+    padding: 8px 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotating-job-card {
+    animation: none;
+  }
+}
