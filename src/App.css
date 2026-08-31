@@ -3661,3 +3661,105 @@ html[data-theme="dark"] .home-navbar .nav-links a:hover {
     font-size: 11px;
   }
 }
+
+/* =========================================================
+   SOFTER NAVIGATION / EXACT ACCOUNT HEADING ALIGNMENT
+========================================================= */
+
+.account-navbar .nav-links,
+.home-navbar .nav-links {
+  gap: 6px;
+  padding: 8px;
+  border-color: #2b2b29;
+  border-radius: 20px;
+  background: #191918;
+  box-shadow: 0 10px 26px rgba(17, 17, 17, 0.1);
+}
+
+.account-navbar .nav-links a,
+.home-navbar .nav-links a {
+  padding: 11px 14px;
+  border-radius: 13px;
+  color: #e0e0dc;
+}
+
+.account-navbar .nav-links a:hover,
+.home-navbar .nav-links a:hover {
+  background: #30302e;
+}
+
+.home-navbar .home-account-cluster {
+  min-height: 60px;
+  gap: 6px;
+  padding: 8px;
+  border-color: #2b2b29;
+  border-radius: 20px;
+  background: #191918;
+  box-shadow: 0 10px 26px rgba(17, 17, 17, 0.1);
+}
+
+.home-account-cluster .auth-user {
+  padding: 0 13px;
+}
+
+.home-account-cluster .btn-ghost {
+  padding: 11px 14px;
+  border-radius: 13px;
+}
+
+html[data-theme="dark"] .account-navbar .nav-links,
+html[data-theme="dark"] .home-navbar .nav-links,
+html[data-theme="dark"] .home-navbar .home-account-cluster {
+  border-color: #333330;
+  background: #121211;
+  box-shadow: 0 10px 27px rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 1001px) {
+  .account-navbar {
+    position: relative;
+  }
+
+  .account-navbar-brand {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: max(0px, calc((100% - 900px) / 2));
+    justify-content: flex-start;
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 1000px) {
+  .account-navbar-brand {
+    position: static;
+    transform: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .account-navbar .nav-links,
+  .home-navbar .nav-links {
+    gap: 4px;
+    padding: 6px;
+    border-radius: 17px;
+  }
+
+  .account-navbar .nav-links a,
+  .home-navbar .nav-links a {
+    padding: 10px 12px;
+    border-radius: 11px;
+  }
+
+  .home-navbar .home-account-cluster {
+    min-height: 48px;
+    gap: 3px;
+    padding: 5px;
+    border-radius: 16px;
+  }
+
+  .home-account-cluster .btn-ghost {
+    padding: 9px 10px;
+    border-radius: 10px;
+  }
+}
