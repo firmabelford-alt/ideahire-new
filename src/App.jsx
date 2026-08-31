@@ -379,7 +379,7 @@ function App({ session, loading }) {
           Idea<span>Hire</span>
         </Link>
 
-        <nav className="nav-links">
+        <nav className="nav-links home-nav-links">
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
@@ -390,26 +390,28 @@ function App({ session, loading }) {
             <span>Ładowanie...</span>
           ) : session ? (
             <>
-              <span className="auth-user">
-                Cześć, {userName}
-              </span>
+              <div className="home-account-cluster">
+                <span className="auth-user">
+                  Cześć, {userName}
+                </span>
 
-              <Link
-                className="home-notifications-link btn btn-ghost"
-                to="/notifications"
-              >
-                Powiadomienia
-                {hasNotifications && (
-                  <span className="home-notifications-dot" />
-                )}
-              </Link>
+                <Link
+                  className="home-notifications-link btn btn-ghost"
+                  to="/notifications"
+                >
+                  Powiadomienia
+                  {hasNotifications && (
+                    <span className="home-notifications-dot" />
+                  )}
+                </Link>
 
-              <Link
-                className="btn btn-ghost"
-                to="/account"
-              >
-                Moje konto
-              </Link>
+                <Link
+                  className="btn btn-ghost"
+                  to="/account"
+                >
+                  Moje konto
+                </Link>
+              </div>
 
               <button
                 className="btn btn-dark"
