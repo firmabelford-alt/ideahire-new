@@ -396,7 +396,7 @@ const JOB_CATEGORIES = [
 const MAX_JOB_BUDGET = 15000;
 
 const MAX_JOB_BUDGET_MESSAGE =
-  "Maksymalny budżet zlecenia to 15 000 zł.";
+  "Nie możesz wpisać wyższej ceny. Maksymalny budżet jednego zlecenia to 15 000 zł.";
 
 function getStoredNotificationIds(
   key
@@ -3289,9 +3289,6 @@ function FindTalent() {
       Number(normalizedDigits) >
       MAX_JOB_BUDGET
     ) {
-      setBudget(
-        String(MAX_JOB_BUDGET)
-      );
       setSuccess(false);
       setMessage(
         MAX_JOB_BUDGET_MESSAGE
@@ -3450,6 +3447,89 @@ function FindTalent() {
     <div className="page">
       <AccountNavbar />
 
+      <style>{`
+        .project-form .job-budget-limit-note {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          align-items: center;
+          gap: 13px;
+          margin-top: 3px;
+          padding: 15px 16px;
+          border: 1px solid #e1e1dc;
+          border-radius: 15px;
+          background: #f5f5f1;
+          color: #555550;
+        }
+
+        .project-form .job-budget-limit-icon {
+          width: 34px;
+          height: 34px;
+          display: grid;
+          place-items: center;
+          border: 1px solid #d7d7d1;
+          border-radius: 50%;
+          background: #ffffff;
+          color: #62625d;
+          font-size: 15px;
+          font-style: normal;
+          font-weight: 850;
+        }
+
+        .project-form .job-budget-limit-copy {
+          min-width: 0;
+        }
+
+        .project-form .job-budget-limit-copy strong,
+        .project-form .job-budget-limit-copy small {
+          display: block;
+        }
+
+        .project-form .job-budget-limit-copy strong {
+          color: #343431;
+          font-size: 19px;
+          line-height: 1.25;
+          letter-spacing: -0.25px;
+        }
+
+        .project-form .job-budget-limit-copy small {
+          margin-top: 4px;
+          color: #777771;
+          font-size: 12px;
+          font-weight: 550;
+          line-height: 1.5;
+        }
+
+        html[data-theme="dark"] .project-form .job-budget-limit-note {
+          border-color: #393935;
+          background: #20201e;
+          color: #b7b7b1;
+        }
+
+        html[data-theme="dark"] .project-form .job-budget-limit-icon {
+          border-color: #454540;
+          background: #2a2a27;
+          color: #eeeeea;
+        }
+
+        html[data-theme="dark"] .project-form .job-budget-limit-copy strong {
+          color: #f1f1ed !important;
+        }
+
+        html[data-theme="dark"] .project-form .job-budget-limit-copy small {
+          color: #aaa9a3 !important;
+        }
+
+        @media (max-width: 600px) {
+          .project-form .job-budget-limit-note {
+            padding: 13px 14px;
+          }
+
+          .project-form .job-budget-limit-copy strong {
+            font-size: 17px;
+          }
+        }
+      `}</style>
+
       <main className="app-page">
         <div className="app-page-header">
           <span className="section-label">
@@ -3544,17 +3624,32 @@ function FindTalent() {
               placeholder="Np. 3000"
               maxLength={5}
               aria-describedby="job-budget-help"
+              aria-label="Budżet zlecenia, maksymalnie 15 000 zł"
               required
             />
 
-            <small id="job-budget-help">
-              Cena jest ustalana
-              przy publikacji
-              zlecenia, nie może
-              być później zmieniana,
-              a maksymalny budżet to
-              15 000 zł.
-            </small>
+            <div
+              className="job-budget-limit-note"
+              id="job-budget-help"
+              role="note"
+            >
+              <i
+                className="job-budget-limit-icon"
+                aria-hidden="true"
+              >
+                i
+              </i>
+
+              <span className="job-budget-limit-copy">
+                <strong>
+                  Maksymalnie 15 000 zł
+                </strong>
+
+                <small>
+                  Wyższej kwoty nie można wpisać ani opublikować. Cena po publikacji pozostaje zablokowana.
+                </small>
+              </span>
+            </div>
           </label>
 
           {message && (
@@ -3563,6 +3658,11 @@ function FindTalent() {
                 success
                   ? "auth-message"
                   : "auth-error"
+              }
+              role={
+                success
+                  ? "status"
+                  : "alert"
               }
             >
               {message}
