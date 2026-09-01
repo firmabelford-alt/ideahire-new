@@ -393,6 +393,11 @@ const JOB_CATEGORIES = [
   "Fotografia",
 ];
 
+const MAX_JOB_BUDGET = 15000;
+
+const MAX_JOB_BUDGET_MESSAGE =
+  "Maksymalny budżet zlecenia to 15 000 zł.";
+
 function getStoredNotificationIds(
   key
 ) {
@@ -3255,12 +3260,53 @@ function FindTalent() {
   function handleBudgetChange(
     event
   ) {
-    setBudget(
+    const digits =
       event.target.value.replace(
         /\D/g,
         ""
-      )
-    );
+      );
+
+    if (!digits) {
+      setBudget("");
+
+      if (
+        message ===
+        MAX_JOB_BUDGET_MESSAGE
+      ) {
+        setMessage("");
+      }
+
+      return;
+    }
+
+    const normalizedDigits =
+      digits.replace(
+        /^0+(?=\d)/,
+        ""
+      );
+
+    if (
+      Number(normalizedDigits) >
+      MAX_JOB_BUDGET
+    ) {
+      setBudget(
+        String(MAX_JOB_BUDGET)
+      );
+      setSuccess(false);
+      setMessage(
+        MAX_JOB_BUDGET_MESSAGE
+      );
+      return;
+    }
+
+    setBudget(normalizedDigits);
+
+    if (
+      message ===
+      MAX_JOB_BUDGET_MESSAGE
+    ) {
+      setMessage("");
+    }
   }
 
   async function handleSubmit(
@@ -3310,6 +3356,17 @@ function FindTalent() {
       return;
     }
 
+    if (
+      numericBudget >
+      MAX_JOB_BUDGET
+    ) {
+      setMessage(
+        MAX_JOB_BUDGET_MESSAGE
+      );
+
+      return;
+    }
+
     if (!user?.id) {
       setMessage(
         "Twoja sesja wygasła."
@@ -3344,6 +3401,16 @@ function FindTalent() {
           });
 
       if (error) {
+        if (
+          error.code === "23514"
+        ) {
+          setMessage(
+            MAX_JOB_BUDGET_MESSAGE
+          );
+
+          return;
+        }
+
         setMessage(
           `Nie udało się opublikować zlecenia: ${error.message}`
         );
@@ -3475,15 +3542,18 @@ function FindTalent() {
               inputMode="numeric"
               pattern="[0-9]*"
               placeholder="Np. 3000"
-              maxLength={9}
+              maxLength={5}
+              aria-describedby="job-budget-help"
               required
             />
 
-            <small>
+            <small id="job-budget-help">
               Cena jest ustalana
               przy publikacji
-              zlecenia i nie może
-              być później zmieniana.
+              zlecenia, nie może
+              być później zmieniana,
+              a maksymalny budżet to
+              15 000 zł.
             </small>
           </label>
 
@@ -7734,7 +7804,6 @@ const EMPTY_AGREEMENT_FORM = {
   deliverables: "",
   priceAmount: "",
   priceCurrency: "PLN",
-  depositAmount: "0",
   deadline: "",
   revisions: "1",
   deliveryFormat: "",
@@ -7815,10 +7884,6 @@ function agreementToForm(
         : String(agreement.price_amount),
     priceCurrency:
       agreement.price_currency || "PLN",
-    depositAmount:
-      agreement.deposit_amount == null
-        ? "0"
-        : String(agreement.deposit_amount),
     deadline: agreement.deadline || "",
     revisions: String(
       agreement.revisions ?? 0
@@ -7855,16 +7920,6 @@ function AgreementDetails({ agreement }) {
     year: "numeric",
   });
 
-  const deposit = new Intl.NumberFormat(
-    "pl-PL",
-    {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }
-  ).format(
-    Number(agreement.deposit_amount || 0)
-  );
-
   return (
     <div className="agreement-details">
       <div className="agreement-detail agreement-detail-wide">
@@ -7876,13 +7931,6 @@ function AgreementDetails({ agreement }) {
         <span>Cena</span>
         <strong>
           {price} {agreement.price_currency}
-        </strong>
-      </div>
-
-      <div className="agreement-detail">
-        <span>Zaliczka</span>
-        <strong>
-          {deposit} {agreement.price_currency}
         </strong>
       </div>
 
@@ -8144,32 +8192,6 @@ function AgreementPanel({
               </div>
               <small className="agreement-fixed-price-note">
                 Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie.
-              </small>
-            </label>
-
-            <label className="agreement-field">
-              <span>Zaliczka *</span>
-              <div className="agreement-price-input">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={form.depositAmount}
-                  onChange={(event) =>
-                    onFieldChange(
-                      "depositAmount",
-                      event.target.value
-                    )
-                  }
-                  placeholder="Np. 500"
-                  aria-label="Kwota zaliczki"
-                  required
-                />
-                <span className="agreement-price-currency">
-                  PLN
-                </span>
-              </div>
-              <small className="agreement-fixed-price-note">
-                Zaliczka może być zmieniana w kolejnych propozycjach do wspólnej akceptacji i nie może przekroczyć ceny zlecenia.
               </small>
             </label>
 
@@ -9007,11 +9029,6 @@ function Chat() {
         agreementForm.priceAmount
       );
 
-    const deposit =
-      parseAgreementPrice(
-        agreementForm.depositAmount
-      );
-
     const revisions = Number(
       agreementForm.revisions
     );
@@ -9056,27 +9073,11 @@ function Chat() {
 
     if (
       !Number.isFinite(price) ||
-      price <= 0
+      price <= 0 ||
+      price > MAX_JOB_BUDGET
     ) {
       setAgreementMessage(
         "Nie udało się pobrać ceny ze zlecenia. Odśwież stronę i spróbuj ponownie."
-      );
-      return;
-    }
-
-    if (
-      !Number.isFinite(deposit) ||
-      deposit < 0
-    ) {
-      setAgreementMessage(
-        "Wpisz prawidłową kwotę zaliczki. Może wynosić 0 zł."
-      );
-      return;
-    }
-
-    if (deposit > price) {
-      setAgreementMessage(
-        "Zaliczka nie może być wyższa niż cena zlecenia."
       );
       return;
     }
@@ -9154,7 +9155,6 @@ function Chat() {
             p_price_amount: price,
             p_price_currency:
               agreementForm.priceCurrency,
-            p_deposit_amount: deposit,
             p_deadline:
               agreementForm.deadline,
             p_revisions: revisions,
