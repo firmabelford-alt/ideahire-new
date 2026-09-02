@@ -1,8 +1,10 @@
+
 import React, {
   useEffect,
   useState,
   useContext,
   createContext,
+  useRef,
 } from "react";
 
 import {
@@ -398,6 +400,132 @@ const MAX_JOB_BUDGET = 15000;
 const MAX_JOB_BUDGET_MESSAGE =
   "Nie możesz wpisać wyższej ceny. Maksymalny budżet jednego zlecenia to 15 000 zł.";
 
+const DISPUTE_STATUS_LABELS = {
+  awaiting_response: "Oczekiwanie na odpowiedź",
+  evidence_collection: "Zbieranie wyjaśnień",
+  under_review: "Analiza administratora",
+  decision_issued: "Decyzja wydana",
+  appealed: "Odwołanie w toku",
+  closed: "Sprawa zamknięta",
+  cancelled: "Sprawa wycofana",
+};
+
+const DISPUTE_REASON_OPTIONS = [
+  ["work_not_delivered", "Praca nie została dostarczona"],
+  ["work_incomplete", "Praca jest niekompletna"],
+  ["quality_issue", "Jakość nie odpowiada ustaleniom"],
+  ["deadline_missed", "Nie dotrzymano terminu"],
+  ["requirements_dispute", "Spór dotyczący zakresu prac"],
+  ["communication_problem", "Problem z komunikacją"],
+  ["cancellation", "Anulowanie współpracy"],
+  ["payment_issue", "Problem dotyczący płatności"],
+  ["other", "Inny powód"],
+];
+
+const DISPUTE_OUTCOME_OPTIONS = [
+  ["complete_or_correct_work", "Dokończenie lub poprawienie pracy"],
+  ["extend_deadline", "Ustalenie nowego terminu"],
+  ["cancel_cooperation", "Anulowanie współpracy"],
+  ["full_refund", "Pełny zwrot środków"],
+  ["partial_refund", "Częściowy zwrot środków"],
+  ["release_payment", "Przekazanie płatności wykonawcy"],
+  ["other", "Inne rozwiązanie"],
+];
+
+const ADMIN_DECISION_OPTIONS = [
+  ["work_continue", "Kontynuacja lub poprawienie pracy"],
+  ["deadline_extension", "Przedłużenie terminu"],
+  ["cancel_no_refund", "Anulowanie bez zwrotu"],
+  ["full_refund", "Pełny zwrot"],
+  ["partial_refund", "Częściowy zwrot"],
+  ["release_payment", "Przekazanie płatności wykonawcy"],
+  ["no_action", "Brak dodatkowych działań"],
+  ["other", "Inna decyzja"],
+];
+
+function getDisputeStatusLabel(status) {
+  return DISPUTE_STATUS_LABELS[status] || "Nieznany status";
+}
+
+function getOptionLabel(options, value) {
+  return options.find(([key]) => key === value)?.[1] || value || "—";
+}
+
+function formatDisputeNumber(caseNumber) {
+  return `IH-${String(caseNumber || 0).padStart(8, "0")}`;
+}
+
+function formatDisputeDate(value, includeTime = true) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    ...(includeTime
+      ? { hour: "2-digit", minute: "2-digit" }
+      : {}),
+  });
+}
+
+function cleanSupabaseError(error, fallback) {
+  return error?.message || fallback;
+}
+
+function useStaffRole(userId) {
+  const [staffRole, setStaffRole] = useState(null);
+  const [staffLoading, setStaffLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setStaffRole(null);
+      setStaffLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadStaffRole() {
+      setStaffLoading(true);
+
+      const { data, error } = await supabase
+        .from("ideahire_staff")
+        .select("role, is_active")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (!mounted) return;
+
+      if (error) {
+        console.error("STAFF ROLE ERROR:", error);
+        setStaffRole(null);
+      } else {
+        setStaffRole(data?.role || null);
+      }
+
+      setStaffLoading(false);
+    }
+
+    loadStaffRole();
+
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
+
+  return {
+    staffRole,
+    staffLoading,
+    isStaff: staffRole === "owner" || staffRole === "admin",
+    isOwner: staffRole === "owner",
+  };
+}
+
 function getStoredNotificationIds(
   key
 ) {
@@ -460,6 +588,11 @@ function AccountNavbar() {
   const [
     hasNotifications,
     setHasNotifications,
+  ] = useState(false);
+
+  const [
+    hasDisputeNotifications,
+    setHasDisputeNotifications,
   ] = useState(false);
 
   const userName =
@@ -571,6 +704,16 @@ function AccountNavbar() {
         .select("id")
         .eq("blocked_id", user.id);
 
+      const {
+        data: disputeNotifications,
+        error: disputeNotificationsError,
+      } = await supabase
+        .from("dispute_notifications")
+        .select("id")
+        .eq("user_id", user.id)
+        .is("read_at", null)
+        .limit(1);
+
       if (rejectedApplicationsError) {
         console.error(
           "REJECTED APPLICATION NOTIFICATION ERROR:",
@@ -591,6 +734,18 @@ function AccountNavbar() {
           blockNotificationsError
         );
       }
+
+      if (disputeNotificationsError) {
+        console.error(
+          "DISPUTE NOTIFICATION ERROR:",
+          disputeNotificationsError
+        );
+      }
+
+      setHasDisputeNotifications(
+        !disputeNotificationsError &&
+          (disputeNotifications || []).length > 0
+      );
 
       const readKey =
         `ideahire_read_notifications_${user.id}`;
@@ -672,6 +827,15 @@ function AccountNavbar() {
       }
     }
 
+    function handleDisputeNotificationsRead(event) {
+      if (
+        !event?.detail?.userId ||
+        event.detail.userId === user?.id
+      ) {
+        setHasDisputeNotifications(false);
+      }
+    }
+
     window.addEventListener(
       "ideahire:notifications-read",
       handleNotificationsRead
@@ -680,6 +844,11 @@ function AccountNavbar() {
     window.addEventListener(
       "storage",
       handleStorage
+    );
+
+    window.addEventListener(
+      "ideahire:dispute-notifications-read",
+      handleDisputeNotificationsRead
     );
 
     const interval =
@@ -701,6 +870,11 @@ function AccountNavbar() {
       window.removeEventListener(
         "storage",
         handleStorage
+      );
+
+      window.removeEventListener(
+        "ideahire:dispute-notifications-read",
+        handleDisputeNotificationsRead
       );
     };
   }, [user?.id]);
@@ -803,6 +977,21 @@ function AccountNavbar() {
           }
         >
           Wiadomości
+        </NavLink>
+
+        <NavLink
+          to="/disputes"
+          className={({ isActive }) =>
+            `notifications-nav-link${
+              isActive ? " is-active" : ""
+            }`
+          }
+        >
+          Spory
+
+          {hasDisputeNotifications && (
+            <span className="notification-dot" />
+          )}
         </NavLink>
 
         <NavLink
@@ -7898,6 +8087,359 @@ function Messages() {
    CHAT
 ========================================================= */
 
+const EMPTY_DISPUTE_FORM = {
+  reason: "",
+  requestedOutcome: "",
+  requestedAmount: "",
+  description: "",
+};
+
+function ChatDisputePanel({
+  agreement,
+  conversation,
+}) {
+  const navigate = useNavigate();
+  const [dispute, setDispute] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [form, setForm] = useState(EMPTY_DISPUTE_FORM);
+
+  useEffect(() => {
+    if (
+      !agreement?.id ||
+      agreement.status !== "accepted"
+    ) {
+      setDispute(null);
+      setFormOpen(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadDispute() {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("disputes")
+        .select("*")
+        .eq("agreement_id", agreement.id)
+        .order("opened_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!mounted) return;
+
+      if (error) {
+        setMessage(
+          cleanSupabaseError(
+            error,
+            "Nie udało się sprawdzić statusu sporu."
+          )
+        );
+      } else {
+        setDispute(data || null);
+      }
+
+      setLoading(false);
+    }
+
+    loadDispute();
+
+    return () => {
+      mounted = false;
+    };
+  }, [agreement?.id, agreement?.status]);
+
+  if (
+    !conversation?.id ||
+    !agreement?.id ||
+    agreement.status !== "accepted"
+  ) {
+    return null;
+  }
+
+  function updateField(field, value) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+      ...(field === "requestedOutcome" && value !== "partial_refund"
+        ? { requestedAmount: "" }
+        : {}),
+    }));
+    setMessage("");
+  }
+
+  async function handleOpenDispute(event) {
+    event.preventDefault();
+
+    if (saving) return;
+
+    const description = form.description.trim();
+
+    if (!form.reason) {
+      setMessage("Wybierz powód sporu.");
+      return;
+    }
+
+    if (!form.requestedOutcome) {
+      setMessage("Wybierz oczekiwane rozwiązanie.");
+      return;
+    }
+
+    if (description.length < 20) {
+      setMessage("Opisz sytuację w co najmniej 20 znakach.");
+      return;
+    }
+
+    let requestedAmount = null;
+
+    if (form.requestedOutcome === "partial_refund") {
+      requestedAmount = Number(
+        String(form.requestedAmount).replace(",", ".")
+      );
+
+      if (
+        !Number.isFinite(requestedAmount) ||
+        requestedAmount <= 0 ||
+        requestedAmount >= Number(agreement.price_amount)
+      ) {
+        setMessage(
+          "Kwota częściowego zwrotu musi być większa od 0 i mniejsza od ceny zlecenia."
+        );
+        return;
+      }
+    }
+
+    setSaving(true);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "open_ideahire_dispute",
+        {
+          p_agreement_id: agreement.id,
+          p_reason: form.reason,
+          p_description: description,
+          p_requested_outcome: form.requestedOutcome,
+          p_requested_amount: requestedAmount,
+        }
+      );
+
+      if (error) throw error;
+
+      setForm(EMPTY_DISPUTE_FORM);
+      setFormOpen(false);
+
+      if (data) {
+        navigate(`/disputes/${data}`);
+      }
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(
+          error,
+          "Nie udało się otworzyć sporu."
+        )
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="chat-dispute-card is-loading">
+        Sprawdzanie centrum sporu...
+      </section>
+    );
+  }
+
+  if (dispute) {
+    return (
+      <section className="chat-dispute-card has-dispute">
+        <div className="chat-dispute-copy">
+          <span className="dispute-eyebrow">
+            Centrum sporu
+          </span>
+          <strong>
+            {formatDisputeNumber(dispute.case_number)}
+          </strong>
+          <small>
+            {getDisputeStatusLabel(dispute.status)}
+          </small>
+        </div>
+
+        <button
+          type="button"
+          className="dispute-secondary-button"
+          onClick={() => navigate(`/disputes/${dispute.id}`)}
+        >
+          Otwórz sprawę
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section className="chat-dispute-card">
+      {!formOpen ? (
+        <>
+          <div className="chat-dispute-copy">
+            <span className="dispute-eyebrow">
+              Bezpieczna współpraca
+            </span>
+            <strong>Problem z realizacją zlecenia?</strong>
+            <small>
+              Otwórz uporządkowaną sprawę i przedstaw swoje wyjaśnienia.
+            </small>
+          </div>
+
+          <button
+            type="button"
+            className="dispute-danger-button"
+            onClick={() => {
+              setFormOpen(true);
+              setMessage("");
+            }}
+          >
+            Zgłoś problem
+          </button>
+        </>
+      ) : (
+        <form className="dispute-open-form" onSubmit={handleOpenDispute}>
+          <div className="dispute-form-heading">
+            <div>
+              <span className="dispute-eyebrow">Nowa sprawa</span>
+              <h3>Opisz problem</h3>
+              <p>
+                Druga strona otrzyma Twoje zgłoszenie i będzie mogła odpowiedzieć.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="dispute-close-form"
+              aria-label="Zamknij formularz sporu"
+              onClick={() => {
+                setFormOpen(false);
+                setMessage("");
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="dispute-form-grid">
+            <label className="dispute-field">
+              <span>Powód sporu</span>
+              <select
+                value={form.reason}
+                onChange={(event) =>
+                  updateField("reason", event.target.value)
+                }
+                required
+              >
+                <option value="">Wybierz powód</option>
+                {DISPUTE_REASON_OPTIONS.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="dispute-field">
+              <span>Oczekiwane rozwiązanie</span>
+              <select
+                value={form.requestedOutcome}
+                onChange={(event) =>
+                  updateField("requestedOutcome", event.target.value)
+                }
+                required
+              >
+                <option value="">Wybierz rozwiązanie</option>
+                {DISPUTE_OUTCOME_OPTIONS.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {form.requestedOutcome === "partial_refund" && (
+              <label className="dispute-field">
+                <span>Proponowana kwota zwrotu</span>
+                <div className="dispute-money-input">
+                  <input
+                    type="number"
+                    min="0.01"
+                    max={Math.max(Number(agreement.price_amount) - 0.01, 0.01)}
+                    step="0.01"
+                    value={form.requestedAmount}
+                    onChange={(event) =>
+                      updateField("requestedAmount", event.target.value)
+                    }
+                    required
+                  />
+                  <span>PLN</span>
+                </div>
+              </label>
+            )}
+
+            <label className="dispute-field dispute-field-wide">
+              <span>Opis sytuacji</span>
+              <textarea
+                value={form.description}
+                onChange={(event) =>
+                  updateField("description", event.target.value)
+                }
+                minLength={20}
+                maxLength={10000}
+                rows={6}
+                placeholder="Napisz, co się wydarzyło, kiedy wystąpił problem i które ustalenia nie zostały spełnione."
+                required
+              />
+              <small>{form.description.length}/10 000 znaków</small>
+            </label>
+          </div>
+
+          <p className="dispute-form-notice">
+            Zgłoszenie zostanie przypisane do zaakceptowanej wersji ustaleń. Cena i termin nie mogą zostać podmienione.
+          </p>
+
+          {message && (
+            <p className="dispute-inline-message is-error">{message}</p>
+          )}
+
+          <div className="dispute-form-actions">
+            <button
+              type="button"
+              className="dispute-secondary-button"
+              onClick={() => setFormOpen(false)}
+              disabled={saving}
+            >
+              Anuluj
+            </button>
+
+            <button
+              type="submit"
+              className="dispute-primary-button"
+              disabled={saving}
+            >
+              {saving ? "Wysyłanie..." : "Otwórz spór"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {!formOpen && message && (
+        <p className="dispute-inline-message is-error">{message}</p>
+      )}
+    </section>
+  );
+}
+
 const EMPTY_AGREEMENT_FORM = {
   title: "",
   scope: "",
@@ -9964,6 +10506,11 @@ function Chat() {
                 onAccept={handleAgreementAccept}
               />
 
+              <ChatDisputePanel
+                agreement={agreement}
+                conversation={conversation}
+              />
+
               {agreementsRequired &&
                 !agreementAccepted && (
                   <p className="agreement-negotiation-banner">
@@ -10094,6 +10641,1722 @@ function Chat() {
   );
 }
 
+
+/* =========================================================
+   DISPUTES AND ADMINISTRATION
+========================================================= */
+
+const DISPUTE_WRITABLE_STATUSES = [
+  "awaiting_response",
+  "evidence_collection",
+  "under_review",
+  "appealed",
+];
+
+const EVIDENCE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "text/plain",
+];
+
+const ADMIN_AUDIT_LABELS = {
+  owner_bootstrapped: "Utworzono konto właściciela",
+  admin_granted: "Nadano rolę administratora",
+  admin_revoked: "Odebrano rolę administratora",
+  dispute_opened: "Otwarto spór",
+  statement_added: "Dodano wyjaśnienie",
+  first_response_added: "Dodano pierwszą odpowiedź",
+  dispute_cancelled: "Wycofano spór",
+  evidence_registered: "Dodano plik dowodowy",
+  chat_message_attached: "Dołączono wiadomość jako dowód",
+  dispute_taken_for_review: "Przejęto sprawę do analizy",
+  dispute_viewed: "Wyświetlono sprawę",
+  admin_message_added: "Wysłano wiadomość administratora",
+  internal_note_added: "Dodano notatkę wewnętrzną",
+  decision_issued: "Wydano decyzję",
+  appeal_submitted: "Złożono odwołanie",
+  dispute_closed: "Zamknięto sprawę",
+};
+
+function formatDisputeMoney(value, currency = "PLN") {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) return "—";
+
+  return `${amount.toLocaleString("pl-PL", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} ${currency}`;
+}
+
+function getDisputeProfileName(profile, fallback) {
+  return profile?.name?.trim() || fallback;
+}
+
+function DisputeStatusPill({ status }) {
+  return (
+    <span className={`dispute-status-pill is-${status}`}>
+      {getDisputeStatusLabel(status)}
+    </span>
+  );
+}
+
+function DisputeListCard({ dispute, userId, adminView = false }) {
+  const participantRole =
+    dispute.client_id === userId
+      ? "Zleceniodawca"
+      : "Wykonawca";
+
+  return (
+    <Link
+      className="dispute-list-card"
+      to={`/disputes/${dispute.id}`}
+    >
+      <div className="dispute-list-card-main">
+        <div className="dispute-list-card-topline">
+          <span className="dispute-case-number">
+            {formatDisputeNumber(dispute.case_number)}
+          </span>
+          <DisputeStatusPill status={dispute.status} />
+        </div>
+
+        <h2>{dispute.job_title_snapshot}</h2>
+
+        <div className="dispute-card-meta">
+          <span>
+            {adminView
+              ? dispute.assigned_admin_id
+                ? "Przypisana do administratora"
+                : "Nieprzypisana"
+              : `Twoja rola: ${participantRole}`}
+          </span>
+          <span>{formatDisputeMoney(
+            dispute.price_amount_snapshot,
+            dispute.price_currency_snapshot
+          )}</span>
+          <span>Otwarto: {formatDisputeDate(dispute.opened_at)}</span>
+        </div>
+      </div>
+
+      <span className="dispute-card-arrow" aria-hidden="true">
+        →
+      </span>
+    </Link>
+  );
+}
+
+function Disputes() {
+  const { user } = useAuth();
+  const { isStaff } = useStaffRole(user?.id);
+  const [disputes, setDisputes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [filter, setFilter] = useState("active");
+
+  async function loadDisputes() {
+    if (!user?.id) return;
+
+    const { data, error } = await supabase
+      .from("disputes")
+      .select("*")
+      .or(`client_id.eq.${user.id},contractor_id.eq.${user.id}`)
+      .order("opened_at", { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+
+    setDisputes(data || []);
+  }
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+
+    async function preparePage() {
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        await loadDisputes();
+
+        const { error } = await supabase.rpc(
+          "mark_dispute_notifications_read",
+          { p_notification_ids: null }
+        );
+
+        if (error) {
+          console.error("DISPUTE NOTIFICATIONS READ ERROR:", error);
+        } else {
+          window.dispatchEvent(
+            new CustomEvent("ideahire:dispute-notifications-read", {
+              detail: { userId: user.id },
+            })
+          );
+        }
+      } catch (error) {
+        if (mounted) {
+          setErrorMessage(
+            cleanSupabaseError(error, "Nie udało się pobrać spraw.")
+          );
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    preparePage();
+
+    const channel = supabase
+      .channel(`disputes-list-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "disputes" },
+        () => loadDisputes().catch(console.error)
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "dispute_notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => loadDisputes().catch(console.error)
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  const visibleDisputes = disputes.filter((dispute) => {
+    if (filter === "all") return true;
+    if (filter === "closed") {
+      return ["closed", "cancelled"].includes(dispute.status);
+    }
+
+    return !["closed", "cancelled"].includes(dispute.status);
+  });
+
+  return (
+    <div className="account-page disputes-page">
+      <AccountNavbar />
+
+      <main className="disputes-shell">
+        <header className="disputes-page-header">
+          <div>
+            <span className="section-label">Bezpieczna współpraca</span>
+            <h1>Centrum sporów</h1>
+            <p>
+              Tutaj znajdziesz zgłoszone problemy, wyjaśnienia, dowody i decyzje administratora.
+            </p>
+          </div>
+
+          {isStaff && (
+            <Link className="dispute-primary-button" to="/admin">
+              Otwórz panel administratora
+            </Link>
+          )}
+        </header>
+
+        <div className="disputes-filter-bar" role="group" aria-label="Filtr spraw">
+          {[
+            ["active", "Aktywne"],
+            ["closed", "Zakończone"],
+            ["all", "Wszystkie"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={filter === value ? "is-active" : ""}
+              onClick={() => setFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="dispute-state-card">Ładowanie spraw...</div>
+        ) : errorMessage ? (
+          <div className="dispute-state-card is-error">{errorMessage}</div>
+        ) : visibleDisputes.length === 0 ? (
+          <div className="dispute-state-card">
+            <span className="dispute-state-icon" aria-hidden="true">✓</span>
+            <h2>Brak spraw w tej sekcji</h2>
+            <p>
+              Spór można otworzyć z poziomu rozmowy po wspólnej akceptacji warunków współpracy.
+            </p>
+            <Link className="dispute-secondary-button" to="/messages">
+              Przejdź do wiadomości
+            </Link>
+          </div>
+        ) : (
+          <div className="dispute-list">
+            {visibleDisputes.map((dispute) => (
+              <DisputeListCard
+                key={dispute.id}
+                dispute={dispute}
+                userId={user.id}
+              />
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function DisputeDetails() {
+  const { user } = useAuth();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { staffRole, staffLoading, isStaff } = useStaffRole(user?.id);
+  const recordedAccessRef = useRef("");
+  const fileInputRef = useRef(null);
+
+  const [dispute, setDispute] = useState(null);
+  const [profiles, setProfiles] = useState({});
+  const [statements, setStatements] = useState([]);
+  const [evidence, setEvidence] = useState([]);
+  const [messageEvidence, setMessageEvidence] = useState([]);
+  const [decisions, setDecisions] = useState([]);
+  const [appeals, setAppeals] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState("");
+  const [pageMessage, setPageMessage] = useState("");
+  const [statementBody, setStatementBody] = useState("");
+  const [fileCaption, setFileCaption] = useState("");
+  const [showMessagePicker, setShowMessagePicker] = useState(false);
+  const [appealBody, setAppealBody] = useState("");
+  const [adminNote, setAdminNote] = useState("");
+  const [adminNotePublic, setAdminNotePublic] = useState(true);
+  const [decisionForm, setDecisionForm] = useState({
+    outcome: "",
+    amount: "",
+    rationale: "",
+  });
+
+  const isParticipant = Boolean(
+    dispute &&
+      user?.id &&
+      [dispute.client_id, dispute.contractor_id].includes(user.id)
+  );
+
+  const canAddEvidence = Boolean(
+    isParticipant && DISPUTE_WRITABLE_STATUSES.includes(dispute?.status)
+  );
+
+  async function loadCase(showLoader = false) {
+    if (!id || !user?.id) return;
+
+    if (showLoader) setLoading(true);
+
+    try {
+      const { data: disputeData, error: disputeError } = await supabase
+        .from("disputes")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (disputeError) throw disputeError;
+
+      const participant = [
+        disputeData.client_id,
+        disputeData.contractor_id,
+      ].includes(user.id);
+
+      const relatedRequests = [
+        supabase
+          .from("dispute_statements")
+          .select("*")
+          .eq("dispute_id", id)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("dispute_evidence")
+          .select("*")
+          .eq("dispute_id", id)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("dispute_message_evidence")
+          .select("*")
+          .eq("dispute_id", id)
+          .order("message_created_at_snapshot", { ascending: true }),
+        supabase
+          .from("dispute_decisions")
+          .select("*")
+          .eq("dispute_id", id)
+          .order("version", { ascending: false }),
+        supabase
+          .from("dispute_appeals")
+          .select("*")
+          .eq("dispute_id", id)
+          .order("created_at", { ascending: false }),
+      ];
+
+      const [
+        statementResult,
+        evidenceResult,
+        messageEvidenceResult,
+        decisionResult,
+        appealResult,
+      ] = await Promise.all(relatedRequests);
+
+      for (const result of [
+        statementResult,
+        evidenceResult,
+        messageEvidenceResult,
+        decisionResult,
+        appealResult,
+      ]) {
+        if (result.error) throw result.error;
+      }
+
+      const profileIds = [
+        disputeData.client_id,
+        disputeData.contractor_id,
+        disputeData.assigned_admin_id,
+        ...(statementResult.data || []).map((item) => item.author_user_id),
+      ].filter(Boolean);
+
+      let profileMap = {};
+      const uniqueProfileIds = [...new Set(profileIds)];
+
+      if (uniqueProfileIds.length > 0) {
+        const { data: profileRows, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, name, avatar_url")
+          .in("id", uniqueProfileIds);
+
+        if (profileError) {
+          console.error("DISPUTE PROFILES ERROR:", profileError);
+        } else {
+          profileMap = Object.fromEntries(
+            (profileRows || []).map((profile) => [profile.id, profile])
+          );
+        }
+      }
+
+      let conversationMessages = [];
+
+      if (participant) {
+        const { data, error } = await supabase
+          .from("messages")
+          .select("id, sender_id, content, created_at")
+          .eq("conversation_id", disputeData.conversation_id)
+          .order("created_at", { ascending: false })
+          .limit(100);
+
+        if (error) {
+          console.error("DISPUTE CHAT MESSAGES ERROR:", error);
+        } else {
+          conversationMessages = data || [];
+        }
+      }
+
+      setDispute(disputeData);
+      setProfiles(profileMap);
+      setStatements(statementResult.data || []);
+      setEvidence(evidenceResult.data || []);
+      setMessageEvidence(messageEvidenceResult.data || []);
+      setDecisions(decisionResult.data || []);
+      setAppeals(appealResult.data || []);
+      setChatMessages(conversationMessages);
+      setPageMessage("");
+
+      const { data: notificationRows, error: notificationError } = await supabase
+        .from("dispute_notifications")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("dispute_id", id)
+        .is("read_at", null);
+
+      if (!notificationError && notificationRows?.length) {
+        await supabase.rpc("mark_dispute_notifications_read", {
+          p_notification_ids: notificationRows.map((item) => item.id),
+        });
+
+        window.dispatchEvent(
+          new CustomEvent("ideahire:dispute-notifications-read", {
+            detail: { userId: user.id },
+          })
+        );
+      }
+    } catch (error) {
+      setPageMessage(
+        cleanSupabaseError(error, "Nie udało się pobrać szczegółów sprawy.")
+      );
+      setDispute(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadCase(true);
+  }, [id, user?.id]);
+
+  useEffect(() => {
+    if (!id || !user?.id) return;
+
+    const refresh = () => loadCase(false);
+    const channel = supabase
+      .channel(`dispute-details-${id}-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "disputes", filter: `id=eq.${id}` },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "dispute_statements", filter: `dispute_id=eq.${id}` },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "dispute_evidence", filter: `dispute_id=eq.${id}` },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "dispute_message_evidence", filter: `dispute_id=eq.${id}` },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "dispute_decisions", filter: `dispute_id=eq.${id}` },
+        refresh
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [id, user?.id]);
+
+  useEffect(() => {
+    if (
+      !id ||
+      staffLoading ||
+      !isStaff ||
+      recordedAccessRef.current === id
+    ) {
+      return;
+    }
+
+    recordedAccessRef.current = id;
+    supabase
+      .rpc("admin_record_dispute_access", { p_dispute_id: id })
+      .then(({ error }) => {
+        if (error) console.error("ADMIN ACCESS LOG ERROR:", error);
+      });
+  }, [id, isStaff, staffLoading]);
+
+  async function runAction(actionKey, action, successMessage) {
+    if (busy) return false;
+
+    setBusy(actionKey);
+    setPageMessage("");
+
+    try {
+      await action();
+      setPageMessage(successMessage);
+      await loadCase(false);
+      return true;
+    } catch (error) {
+      setPageMessage(cleanSupabaseError(error, "Nie udało się wykonać operacji."));
+      return false;
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleAddStatement(event) {
+    event.preventDefault();
+    const body = statementBody.trim();
+
+    if (body.length < 3) {
+      setPageMessage("Wyjaśnienie musi mieć co najmniej 3 znaki.");
+      return;
+    }
+
+    const completed = await runAction(
+      "statement",
+      async () => {
+        const { error } = await supabase.rpc("add_dispute_statement", {
+          p_dispute_id: id,
+          p_body: body,
+        });
+        if (error) throw error;
+      },
+      "Wyjaśnienie zostało dodane."
+    );
+
+    if (completed) setStatementBody("");
+  }
+
+  async function handleEvidenceUpload(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    if (!EVIDENCE_MIME_TYPES.includes(file.type)) {
+      setPageMessage("Dozwolone pliki: JPG, PNG, WEBP, PDF lub TXT.");
+      return;
+    }
+
+    if (file.size <= 0 || file.size > 20 * 1024 * 1024) {
+      setPageMessage("Plik dowodowy może mieć maksymalnie 20 MB.");
+      return;
+    }
+
+    const safeName = file.name
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(-100) || "dowod";
+    const uniquePart =
+      typeof window.crypto?.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const storagePath = `${id}/${user.id}/${uniquePart}-${safeName}`;
+
+    await runAction(
+      "evidence",
+      async () => {
+        const { error: uploadError } = await supabase.storage
+          .from("dispute-evidence")
+          .upload(storagePath, file, {
+            cacheControl: "3600",
+            contentType: file.type,
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { error: registerError } = await supabase.rpc(
+          "register_dispute_evidence",
+          {
+            p_dispute_id: id,
+            p_storage_path: storagePath,
+            p_caption: fileCaption.trim(),
+          }
+        );
+
+        if (registerError) throw registerError;
+      },
+      "Plik dowodowy został bezpiecznie dodany."
+    );
+
+    setFileCaption("");
+  }
+
+  async function handleAttachMessage(messageId) {
+    await runAction(
+      `message-${messageId}`,
+      async () => {
+        const { error } = await supabase.rpc(
+          "attach_chat_message_to_dispute",
+          { p_dispute_id: id, p_message_id: messageId }
+        );
+        if (error) throw error;
+      },
+      "Wiadomość została dołączona jako dowód."
+    );
+  }
+
+  async function handleOpenEvidence(item) {
+    setBusy(`open-${item.id}`);
+    setPageMessage("");
+
+    try {
+      const { data, error } = await supabase.storage
+        .from("dispute-evidence")
+        .createSignedUrl(item.storage_path, 60);
+
+      if (error) throw error;
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      setPageMessage(cleanSupabaseError(error, "Nie udało się otworzyć pliku."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleCancelDispute() {
+    if (!window.confirm("Czy na pewno chcesz wycofać ten spór?")) return;
+
+    await runAction(
+      "cancel",
+      async () => {
+        const { error } = await supabase.rpc("cancel_ideahire_dispute", {
+          p_dispute_id: id,
+        });
+        if (error) throw error;
+      },
+      "Spór został wycofany."
+    );
+  }
+
+  async function handleAppeal(event) {
+    event.preventDefault();
+    const reason = appealBody.trim();
+
+    if (reason.length < 20) {
+      setPageMessage("Uzasadnienie odwołania musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    const completed = await runAction(
+      "appeal",
+      async () => {
+        const { error } = await supabase.rpc("appeal_ideahire_dispute", {
+          p_dispute_id: id,
+          p_reason: reason,
+        });
+        if (error) throw error;
+      },
+      "Odwołanie zostało przekazane do ponownej analizy."
+    );
+
+    if (completed) setAppealBody("");
+  }
+
+  async function handleTakeDispute() {
+    await runAction(
+      "take",
+      async () => {
+        const { error } = await supabase.rpc("admin_take_dispute", {
+          p_dispute_id: id,
+        });
+        if (error) throw error;
+      },
+      "Sprawa została przypisana do Ciebie."
+    );
+  }
+
+  async function handleAdminNote(event) {
+    event.preventDefault();
+    const body = adminNote.trim();
+
+    if (body.length < 3) {
+      setPageMessage("Wiadomość administratora musi mieć co najmniej 3 znaki.");
+      return;
+    }
+
+    const completed = await runAction(
+      "admin-note",
+      async () => {
+        const { error } = await supabase.rpc("admin_add_dispute_note", {
+          p_dispute_id: id,
+          p_body: body,
+          p_visible_to_parties: adminNotePublic,
+        });
+        if (error) throw error;
+      },
+      adminNotePublic
+        ? "Wiadomość została wysłana obu stronom."
+        : "Notatka wewnętrzna została zapisana."
+    );
+
+    if (completed) setAdminNote("");
+  }
+
+  async function handleDecision(event) {
+    event.preventDefault();
+    const rationale = decisionForm.rationale.trim();
+
+    if (!decisionForm.outcome) {
+      setPageMessage("Wybierz wynik sprawy.");
+      return;
+    }
+
+    if (rationale.length < 20) {
+      setPageMessage("Uzasadnienie decyzji musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    let amount = null;
+
+    if (decisionForm.outcome === "partial_refund") {
+      amount = Number(String(decisionForm.amount).replace(",", "."));
+
+      if (
+        !Number.isFinite(amount) ||
+        amount <= 0 ||
+        amount >= Number(dispute.price_amount_snapshot)
+      ) {
+        setPageMessage(
+          "Częściowy zwrot musi być większy od 0 i mniejszy od ceny zlecenia."
+        );
+        return;
+      }
+    }
+
+    const completed = await runAction(
+      "decision",
+      async () => {
+        const { error } = await supabase.rpc("admin_issue_dispute_decision", {
+          p_dispute_id: id,
+          p_outcome: decisionForm.outcome,
+          p_rationale: rationale,
+          p_amount: amount,
+        });
+        if (error) throw error;
+      },
+      "Decyzja została zapisana i przekazana obu stronom."
+    );
+
+    if (completed) {
+      setDecisionForm({ outcome: "", amount: "", rationale: "" });
+    }
+  }
+
+  async function handleCloseDispute() {
+    await runAction(
+      "close",
+      async () => {
+        const { error } = await supabase.rpc("admin_close_dispute", {
+          p_dispute_id: id,
+        });
+        if (error) throw error;
+      },
+      "Sprawa została zamknięta."
+    );
+  }
+
+  if (loading || staffLoading) {
+    return (
+      <div className="account-page disputes-page">
+        <AccountNavbar />
+        <main className="disputes-shell">
+          <div className="dispute-state-card">Ładowanie szczegółów sprawy...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!dispute) {
+    return (
+      <div className="account-page disputes-page">
+        <AccountNavbar />
+        <main className="disputes-shell">
+          <div className="dispute-state-card is-error">
+            <h1>Nie znaleziono sprawy</h1>
+            <p>{pageMessage || "Nie masz dostępu do tej sprawy albo nie istnieje."}</p>
+            <button
+              type="button"
+              className="dispute-secondary-button"
+              onClick={() => navigate("/disputes")}
+            >
+              Wróć do centrum sporów
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const clientName = getDisputeProfileName(
+    profiles[dispute.client_id],
+    "Zleceniodawca"
+  );
+  const contractorName = getDisputeProfileName(
+    profiles[dispute.contractor_id],
+    "Wykonawca"
+  );
+  const currentDecision = decisions.find((item) => item.is_current);
+  const alreadyAppealed = appeals.some((item) => item.appealed_by === user.id);
+  const appealIsOpen = Boolean(
+    isParticipant &&
+      dispute.status === "decision_issued" &&
+      dispute.appeal_deadline_at &&
+      new Date(dispute.appeal_deadline_at).getTime() >= Date.now() &&
+      !alreadyAppealed
+  );
+  const canCancel = Boolean(
+    isParticipant &&
+      dispute.opened_by === user.id &&
+      dispute.status === "awaiting_response" &&
+      !statements.some(
+        (item) =>
+          item.author_user_id &&
+          item.author_user_id !== dispute.opened_by &&
+          ["response", "comment"].includes(item.statement_type)
+      )
+  );
+  const attachedMessageIds = new Set(
+    messageEvidence.map((item) => item.message_id)
+  );
+
+  return (
+    <div className="account-page disputes-page">
+      <AccountNavbar />
+
+      <main className="disputes-shell dispute-details-shell">
+        <div className="dispute-back-row">
+          <Link to={isStaff ? "/admin" : "/disputes"}>
+            ← {isStaff ? "Panel administratora" : "Centrum sporów"}
+          </Link>
+        </div>
+
+        <header className="dispute-detail-header">
+          <div>
+            <span className="dispute-case-number">
+              {formatDisputeNumber(dispute.case_number)}
+            </span>
+            <h1>{dispute.job_title_snapshot}</h1>
+            <p>Sprawa otwarta {formatDisputeDate(dispute.opened_at)}</p>
+          </div>
+          <DisputeStatusPill status={dispute.status} />
+        </header>
+
+        {pageMessage && (
+          <p className="dispute-page-message" role="status">{pageMessage}</p>
+        )}
+
+        <div className="dispute-detail-grid">
+          <div className="dispute-detail-main">
+            {currentDecision && (
+              <section className="dispute-panel dispute-decision-panel">
+                <span className="dispute-eyebrow">Aktualna decyzja</span>
+                <h2>{getOptionLabel(ADMIN_DECISION_OPTIONS, currentDecision.outcome)}</h2>
+                {currentDecision.amount != null && (
+                  <strong className="dispute-decision-amount">
+                    {formatDisputeMoney(
+                      currentDecision.amount,
+                      dispute.price_currency_snapshot
+                    )}
+                  </strong>
+                )}
+                <p>{currentDecision.rationale}</p>
+                <div className="dispute-decision-meta">
+                  <span>Wersja {currentDecision.version}</span>
+                  <span>Wydano: {formatDisputeDate(currentDecision.issued_at)}</span>
+                  <span>
+                    Operacja płatnicza: {currentDecision.payment_action_status === "not_connected"
+                      ? "operator płatności nie jest jeszcze podłączony"
+                      : "nie jest wymagana"}
+                  </span>
+                </div>
+                {dispute.appeal_deadline_at && dispute.status === "decision_issued" && (
+                  <p className="dispute-deadline-note">
+                    Termin odwołania: {formatDisputeDate(dispute.appeal_deadline_at)}
+                  </p>
+                )}
+              </section>
+            )}
+
+            <section className="dispute-panel">
+              <div className="dispute-panel-heading">
+                <div>
+                  <span className="dispute-eyebrow">Historia sprawy</span>
+                  <h2>Wyjaśnienia i komunikaty</h2>
+                </div>
+                <span className="dispute-count-badge">{statements.length}</span>
+              </div>
+
+              <div className="dispute-timeline">
+                {statements.map((item) => {
+                  const authorName = item.author_role === "system"
+                    ? "System IdeaHire"
+                    : ["admin", "owner"].includes(item.author_role)
+                    ? item.visibility === "staff"
+                      ? "Notatka administracyjna"
+                      : "Administrator IdeaHire"
+                    : getDisputeProfileName(
+                        profiles[item.author_user_id],
+                        item.author_role === "client" ? "Zleceniodawca" : "Wykonawca"
+                      );
+
+                  return (
+                    <article
+                      className={`dispute-timeline-item is-${item.author_role} ${
+                        item.visibility === "staff" ? "is-private" : ""
+                      }`}
+                      key={item.id}
+                    >
+                      <div className="dispute-timeline-dot" aria-hidden="true" />
+                      <div className="dispute-timeline-content">
+                        <div className="dispute-timeline-meta">
+                          <strong>{authorName}</strong>
+                          {item.visibility === "staff" && <span>Tylko administracja</span>}
+                          <time>{formatDisputeDate(item.created_at)}</time>
+                        </div>
+                        <p>{item.body}</p>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {canAddEvidence && (
+                <form className="dispute-inline-form" onSubmit={handleAddStatement}>
+                  <label htmlFor="dispute-statement">Dodaj wyjaśnienie</label>
+                  <textarea
+                    id="dispute-statement"
+                    value={statementBody}
+                    onChange={(event) => setStatementBody(event.target.value)}
+                    placeholder="Opisz nowe okoliczności lub odpowiedz drugiej stronie..."
+                    maxLength={10000}
+                    disabled={Boolean(busy)}
+                  />
+                  <div className="dispute-form-footer">
+                    <small>{statementBody.length}/10 000</small>
+                    <button
+                      className="dispute-primary-button"
+                      type="submit"
+                      disabled={Boolean(busy) || statementBody.trim().length < 3}
+                    >
+                      {busy === "statement" ? "Dodawanie..." : "Dodaj wyjaśnienie"}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </section>
+
+            <section className="dispute-panel">
+              <div className="dispute-panel-heading">
+                <div>
+                  <span className="dispute-eyebrow">Materiały</span>
+                  <h2>Dowody w sprawie</h2>
+                </div>
+                <span className="dispute-count-badge">
+                  {evidence.length + messageEvidence.length}
+                </span>
+              </div>
+
+              {evidence.length === 0 && messageEvidence.length === 0 ? (
+                <p className="dispute-empty-copy">Nie dodano jeszcze żadnych dowodów.</p>
+              ) : (
+                <div className="dispute-evidence-list">
+                  {evidence.map((item) => (
+                    <article className="dispute-evidence-item" key={item.id}>
+                      <span className="dispute-evidence-icon" aria-hidden="true">↗</span>
+                      <div>
+                        <strong>{item.original_file_name}</strong>
+                        <small>
+                          Plik · {item.size_bytes
+                            ? `${(Number(item.size_bytes) / 1024 / 1024).toFixed(2)} MB`
+                            : "rozmiar nieznany"} · {formatDisputeDate(item.created_at)}
+                        </small>
+                        {item.caption && <p>{item.caption}</p>}
+                      </div>
+                      <button
+                        type="button"
+                        className="dispute-text-button"
+                        onClick={() => handleOpenEvidence(item)}
+                        disabled={busy === `open-${item.id}`}
+                      >
+                        Otwórz
+                      </button>
+                    </article>
+                  ))}
+
+                  {messageEvidence.map((item) => (
+                    <article className="dispute-evidence-item is-message" key={item.id}>
+                      <span className="dispute-evidence-icon" aria-hidden="true">“</span>
+                      <div>
+                        <strong>Wiadomość z rozmowy</strong>
+                        <small>{formatDisputeDate(item.message_created_at_snapshot)}</small>
+                        <p>{item.message_content_snapshot}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {canAddEvidence && (
+                <div className="dispute-evidence-actions">
+                  <label htmlFor="dispute-caption">Opis pliku (opcjonalnie)</label>
+                  <input
+                    id="dispute-caption"
+                    type="text"
+                    value={fileCaption}
+                    onChange={(event) => setFileCaption(event.target.value)}
+                    placeholder="Krótko wyjaśnij, co potwierdza plik"
+                    maxLength={1000}
+                    disabled={Boolean(busy)}
+                  />
+                  <input
+                    ref={fileInputRef}
+                    className="dispute-hidden-input"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,.pdf,.txt,image/jpeg,image/png,image/webp,application/pdf,text/plain"
+                    onChange={handleEvidenceUpload}
+                  />
+                  <div className="dispute-action-row">
+                    <button
+                      type="button"
+                      className="dispute-secondary-button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={Boolean(busy)}
+                    >
+                      {busy === "evidence" ? "Przesyłanie..." : "Dodaj plik"}
+                    </button>
+                    <button
+                      type="button"
+                      className="dispute-secondary-button"
+                      onClick={() => setShowMessagePicker((current) => !current)}
+                      disabled={Boolean(busy)}
+                    >
+                      Dołącz wiadomość z czatu
+                    </button>
+                  </div>
+                  <small>JPG, PNG, WEBP, PDF lub TXT · maksymalnie 20 MB</small>
+                </div>
+              )}
+
+              {canAddEvidence && showMessagePicker && (
+                <div className="dispute-message-picker">
+                  <div className="dispute-panel-heading">
+                    <div>
+                      <h3>Wybierz wiadomość</h3>
+                      <p>Administrator zobaczy tylko dołączoną wiadomość, nie cały czat.</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="dispute-text-button"
+                      onClick={() => setShowMessagePicker(false)}
+                    >
+                      Zamknij
+                    </button>
+                  </div>
+                  <div className="dispute-message-list">
+                    {chatMessages.length === 0 ? (
+                      <p>W tej rozmowie nie ma jeszcze wiadomości.</p>
+                    ) : (
+                      chatMessages.map((message) => {
+                        const alreadyAttached = attachedMessageIds.has(message.id);
+                        return (
+                          <article key={message.id}>
+                            <div>
+                              <strong>
+                                {message.sender_id === user.id ? "Ty" : "Druga strona"}
+                              </strong>
+                              <time>{formatDisputeDate(message.created_at)}</time>
+                              <p>{message.content}</p>
+                            </div>
+                            <button
+                              type="button"
+                              className="dispute-text-button"
+                              onClick={() => handleAttachMessage(message.id)}
+                              disabled={alreadyAttached || Boolean(busy)}
+                            >
+                              {alreadyAttached ? "Dołączono" : "Dołącz"}
+                            </button>
+                          </article>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {appealIsOpen && (
+              <section className="dispute-panel">
+                <span className="dispute-eyebrow">Jedno odwołanie na osobę</span>
+                <h2>Odwołaj się od decyzji</h2>
+                <p>
+                  Wskaż konkretny błąd w ocenie lub nowy istotny dowód. Termin upływa {formatDisputeDate(dispute.appeal_deadline_at)}.
+                </p>
+                <form className="dispute-inline-form" onSubmit={handleAppeal}>
+                  <textarea
+                    value={appealBody}
+                    onChange={(event) => setAppealBody(event.target.value)}
+                    placeholder="Uzasadnij odwołanie..."
+                    maxLength={10000}
+                    disabled={Boolean(busy)}
+                  />
+                  <div className="dispute-form-footer">
+                    <small>{appealBody.length}/10 000</small>
+                    <button
+                      className="dispute-danger-button"
+                      type="submit"
+                      disabled={Boolean(busy) || appealBody.trim().length < 20}
+                    >
+                      {busy === "appeal" ? "Wysyłanie..." : "Złóż odwołanie"}
+                    </button>
+                  </div>
+                </form>
+              </section>
+            )}
+
+            {isStaff && !["closed", "cancelled"].includes(dispute.status) && (
+              <section className="dispute-panel admin-workbench">
+                <div className="dispute-panel-heading">
+                  <div>
+                    <span className="dispute-eyebrow">Tryb administracyjny</span>
+                    <h2>Obsługa sprawy</h2>
+                  </div>
+                  <span className="admin-role-badge">
+                    {staffRole === "owner" ? "Właściciel" : "Administrator"}
+                  </span>
+                </div>
+
+                {dispute.assigned_admin_id !== user.id && (
+                  <button
+                    type="button"
+                    className="dispute-primary-button"
+                    onClick={handleTakeDispute}
+                    disabled={Boolean(busy)}
+                  >
+                    {busy === "take" ? "Przypisywanie..." : "Przejmij sprawę do analizy"}
+                  </button>
+                )}
+
+                <form className="admin-dispute-form" onSubmit={handleAdminNote}>
+                  <h3>Wiadomość lub notatka</h3>
+                  <textarea
+                    value={adminNote}
+                    onChange={(event) => setAdminNote(event.target.value)}
+                    placeholder="Napisz prośbę o informacje albo notatkę dla administracji..."
+                    maxLength={10000}
+                    disabled={Boolean(busy)}
+                  />
+                  <label className="dispute-check-row">
+                    <input
+                      type="checkbox"
+                      checked={adminNotePublic}
+                      onChange={(event) => setAdminNotePublic(event.target.checked)}
+                    />
+                    <span>Wiadomość widoczna dla obu stron</span>
+                  </label>
+                  <button
+                    type="submit"
+                    className="dispute-secondary-button"
+                    disabled={Boolean(busy) || adminNote.trim().length < 3}
+                  >
+                    {busy === "admin-note" ? "Zapisywanie..." : "Zapisz wiadomość"}
+                  </button>
+                </form>
+
+                <form className="admin-dispute-form is-decision" onSubmit={handleDecision}>
+                  <h3>Wydaj decyzję</h3>
+                  <label>
+                    Wynik sprawy
+                    <select
+                      value={decisionForm.outcome}
+                      onChange={(event) =>
+                        setDecisionForm((current) => ({
+                          ...current,
+                          outcome: event.target.value,
+                          amount: event.target.value === "partial_refund" ? current.amount : "",
+                        }))
+                      }
+                    >
+                      <option value="">Wybierz wynik</option>
+                      {ADMIN_DECISION_OPTIONS.map(([value, label]) => (
+                        <option value={value} key={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {decisionForm.outcome === "partial_refund" && (
+                    <label>
+                      Kwota częściowego zwrotu (PLN)
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={decisionForm.amount}
+                        onChange={(event) =>
+                          setDecisionForm((current) => ({
+                            ...current,
+                            amount: event.target.value,
+                          }))
+                        }
+                        placeholder="Np. 500"
+                      />
+                    </label>
+                  )}
+                  <label>
+                    Pełne uzasadnienie
+                    <textarea
+                      value={decisionForm.rationale}
+                      onChange={(event) =>
+                        setDecisionForm((current) => ({
+                          ...current,
+                          rationale: event.target.value,
+                        }))
+                      }
+                      placeholder="Opisz ustalenia, ocenione dowody i podstawę decyzji..."
+                      maxLength={10000}
+                    />
+                  </label>
+                  <p className="dispute-admin-warning">
+                    Decyzja zostanie zapisana w historii i przekazana obu stronom. Operacje finansowe pozostają wyłączone do czasu podłączenia operatora płatności.
+                  </p>
+                  <button
+                    type="submit"
+                    className="dispute-danger-button"
+                    disabled={Boolean(busy)}
+                  >
+                    {busy === "decision" ? "Zapisywanie decyzji..." : "Wydaj decyzję"}
+                  </button>
+                </form>
+
+                {dispute.status === "decision_issued" &&
+                  dispute.appeal_deadline_at &&
+                  new Date(dispute.appeal_deadline_at).getTime() < Date.now() && (
+                    <button
+                      type="button"
+                      className="dispute-secondary-button"
+                      onClick={handleCloseDispute}
+                      disabled={Boolean(busy)}
+                    >
+                      {busy === "close" ? "Zamykanie..." : "Zamknij sprawę po terminie odwołania"}
+                    </button>
+                  )}
+              </section>
+            )}
+          </div>
+
+          <aside className="dispute-detail-sidebar">
+            <section className="dispute-panel dispute-summary-card">
+              <span className="dispute-eyebrow">Podsumowanie</span>
+              <dl>
+                <div>
+                  <dt>Cena zlecenia</dt>
+                  <dd>{formatDisputeMoney(
+                    dispute.price_amount_snapshot,
+                    dispute.price_currency_snapshot
+                  )}</dd>
+                </div>
+                <div>
+                  <dt>Termin wykonania</dt>
+                  <dd>{formatDisputeDate(dispute.deadline_snapshot, false)}</dd>
+                </div>
+                <div>
+                  <dt>Powód</dt>
+                  <dd>{getOptionLabel(DISPUTE_REASON_OPTIONS, dispute.reason)}</dd>
+                </div>
+                <div>
+                  <dt>Oczekiwane rozwiązanie</dt>
+                  <dd>{getOptionLabel(DISPUTE_OUTCOME_OPTIONS, dispute.requested_outcome)}</dd>
+                </div>
+                {dispute.requested_amount != null && (
+                  <div>
+                    <dt>Oczekiwana kwota</dt>
+                    <dd>{formatDisputeMoney(
+                      dispute.requested_amount,
+                      dispute.price_currency_snapshot
+                    )}</dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+
+            <section className="dispute-panel dispute-parties-card">
+              <span className="dispute-eyebrow">Strony</span>
+              <Link to={`/profile/${dispute.client_id}`}>
+                <div className="dispute-party-avatar">
+                  {profiles[dispute.client_id]?.avatar_url ? (
+                    <img src={profiles[dispute.client_id].avatar_url} alt="" />
+                  ) : clientName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <small>Zleceniodawca</small>
+                  <strong>{clientName}</strong>
+                </div>
+              </Link>
+              <Link to={`/profile/${dispute.contractor_id}`}>
+                <div className="dispute-party-avatar">
+                  {profiles[dispute.contractor_id]?.avatar_url ? (
+                    <img src={profiles[dispute.contractor_id].avatar_url} alt="" />
+                  ) : contractorName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <small>Wykonawca</small>
+                  <strong>{contractorName}</strong>
+                </div>
+              </Link>
+            </section>
+
+            {isParticipant && (
+              <Link
+                className="dispute-secondary-button is-full"
+                to={`/chat/${dispute.conversation_id}`}
+              >
+                Otwórz rozmowę
+              </Link>
+            )}
+
+            {canCancel && (
+              <button
+                type="button"
+                className="dispute-text-button is-danger"
+                onClick={handleCancelDispute}
+                disabled={Boolean(busy)}
+              >
+                {busy === "cancel" ? "Wycofywanie..." : "Wycofaj spór"}
+              </button>
+            )}
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function AdminPanel() {
+  const { user } = useAuth();
+  const { staffRole, staffLoading, isStaff, isOwner } = useStaffRole(user?.id);
+  const [disputes, setDisputes] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [profiles, setProfiles] = useState({});
+  const [auditLog, setAuditLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("active");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
+
+  async function loadAdminData() {
+    if (!user?.id || !isStaff) return;
+
+    const [disputeResult, staffResult, auditResult] = await Promise.all([
+      supabase
+        .from("disputes")
+        .select("*")
+        .order("opened_at", { ascending: false })
+        .limit(300),
+      supabase
+        .from("ideahire_staff")
+        .select("user_id, role, is_active, granted_at, revoked_at")
+        .order("granted_at", { ascending: true }),
+      supabase
+        .from("ideahire_admin_audit_log")
+        .select("id, actor_user_id, actor_role, action, dispute_id, target_user_id, created_at")
+        .order("created_at", { ascending: false })
+        .limit(30),
+    ]);
+
+    if (disputeResult.error) throw disputeResult.error;
+    if (staffResult.error) throw staffResult.error;
+    if (auditResult.error) throw auditResult.error;
+
+    const profileIds = [
+      ...(staffResult.data || []).map((item) => item.user_id),
+      ...(auditResult.data || []).flatMap((item) => [
+        item.actor_user_id,
+        item.target_user_id,
+      ]),
+    ].filter(Boolean);
+    const uniqueIds = [...new Set(profileIds)];
+    let profileMap = {};
+
+    if (uniqueIds.length > 0) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, name, avatar_url")
+        .in("id", uniqueIds);
+
+      if (!error) {
+        profileMap = Object.fromEntries(
+          (data || []).map((profile) => [profile.id, profile])
+        );
+      }
+    }
+
+    setDisputes(disputeResult.data || []);
+    setStaff(staffResult.data || []);
+    setAuditLog(auditResult.data || []);
+    setProfiles(profileMap);
+  }
+
+  useEffect(() => {
+    if (staffLoading) return;
+
+    if (!isStaff) {
+      setLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function prepare() {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        await loadAdminData();
+      } catch (error) {
+        if (mounted) {
+          setMessage(cleanSupabaseError(error, "Nie udało się pobrać panelu administratora."));
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    prepare();
+
+    const channel = supabase
+      .channel(`admin-panel-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "disputes" },
+        () => loadAdminData().catch(console.error)
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, isStaff, staffLoading]);
+
+  async function handleStaffChange(enabled) {
+    const email = adminEmail.trim().toLowerCase();
+
+    if (!email || !email.includes("@")) {
+      setMessage("Wpisz prawidłowy adres e-mail konta IdeaHire.");
+      return;
+    }
+
+    setBusy(enabled ? "grant" : "revoke");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc("owner_set_admin_by_email", {
+        p_email: email,
+        p_enabled: enabled,
+      });
+
+      if (error) throw error;
+
+      setMessage(
+        enabled
+          ? "Rola administratora została nadana."
+          : "Rola administratora została odebrana."
+      );
+      setAdminEmail("");
+      await loadAdminData();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zmienić roli administratora."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  if (staffLoading || loading) {
+    return (
+      <div className="account-page admin-page">
+        <AccountNavbar />
+        <main className="admin-shell">
+          <div className="dispute-state-card">Ładowanie panelu administratora...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!isStaff) {
+    return (
+      <div className="account-page admin-page">
+        <AccountNavbar />
+        <main className="admin-shell">
+          <div className="dispute-state-card is-error">
+            <h1>Brak uprawnień</h1>
+            <p>Ten panel jest dostępny wyłącznie dla aktywnego właściciela i administratorów IdeaHire.</p>
+            <Link className="dispute-secondary-button" to="/account">
+              Wróć do konta
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const activeDisputes = disputes.filter(
+    (item) => !["closed", "cancelled"].includes(item.status)
+  );
+  const unassignedCount = activeDisputes.filter(
+    (item) => !item.assigned_admin_id
+  ).length;
+  const awaitingCount = activeDisputes.filter(
+    (item) => item.status === "awaiting_response"
+  ).length;
+  const appealedCount = activeDisputes.filter(
+    (item) => item.status === "appealed"
+  ).length;
+  const visibleDisputes = disputes.filter((item) => {
+    if (filter === "all") return true;
+    if (filter === "mine") return item.assigned_admin_id === user.id;
+    if (filter === "unassigned") {
+      return !item.assigned_admin_id && !["closed", "cancelled"].includes(item.status);
+    }
+    if (filter === "closed") return ["closed", "cancelled"].includes(item.status);
+    return !["closed", "cancelled"].includes(item.status);
+  });
+
+  return (
+    <div className="account-page admin-page">
+      <AccountNavbar />
+
+      <main className="admin-shell">
+        <header className="admin-page-header">
+          <div>
+            <span className="section-label">IdeaHire · administracja</span>
+            <h1>Panel administratora</h1>
+            <p>
+              Kolejka sporów, udokumentowane decyzje i kontrola dostępu administratorów.
+            </p>
+          </div>
+          <span className="admin-role-badge">
+            {staffRole === "owner" ? "Właściciel" : "Administrator"}
+          </span>
+        </header>
+
+        {message && <p className="dispute-page-message" role="status">{message}</p>}
+
+        <section className="admin-stats-grid" aria-label="Statystyki spraw">
+          <article><strong>{activeDisputes.length}</strong><span>Aktywne sprawy</span></article>
+          <article><strong>{unassignedCount}</strong><span>Nieprzypisane</span></article>
+          <article><strong>{awaitingCount}</strong><span>Czekają na odpowiedź</span></article>
+          <article><strong>{appealedCount}</strong><span>Odwołania</span></article>
+        </section>
+
+        <div className="admin-content-grid">
+          <section className="dispute-panel admin-queue-panel">
+            <div className="dispute-panel-heading">
+              <div>
+                <span className="dispute-eyebrow">Kolejka</span>
+                <h2>Sprawy użytkowników</h2>
+              </div>
+              <span className="dispute-count-badge">{visibleDisputes.length}</span>
+            </div>
+
+            <div className="disputes-filter-bar is-compact" role="group" aria-label="Filtr kolejki">
+              {[
+                ["active", "Aktywne"],
+                ["unassigned", "Nieprzypisane"],
+                ["mine", "Moje"],
+                ["closed", "Zakończone"],
+                ["all", "Wszystkie"],
+              ].map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  className={filter === value ? "is-active" : ""}
+                  onClick={() => setFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {visibleDisputes.length === 0 ? (
+              <p className="dispute-empty-copy">Brak spraw spełniających wybrany filtr.</p>
+            ) : (
+              <div className="dispute-list is-admin">
+                {visibleDisputes.map((item) => (
+                  <DisputeListCard
+                    key={item.id}
+                    dispute={item}
+                    userId={user.id}
+                    adminView
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <aside className="admin-side-column">
+            {isOwner && (
+              <section className="dispute-panel owner-access-panel">
+                <span className="dispute-eyebrow">Tylko właściciel</span>
+                <h2>Dostęp administratorów</h2>
+                <p>
+                  Użytkownik musi wcześniej utworzyć i potwierdzić zwykłe konto IdeaHire.
+                </p>
+                <label>
+                  Adres e-mail konta
+                  <input
+                    type="email"
+                    value={adminEmail}
+                    onChange={(event) => setAdminEmail(event.target.value)}
+                    placeholder="admin@firma.pl"
+                    disabled={Boolean(busy)}
+                  />
+                </label>
+                <div className="dispute-action-row">
+                  <button
+                    type="button"
+                    className="dispute-primary-button"
+                    onClick={() => handleStaffChange(true)}
+                    disabled={Boolean(busy)}
+                  >
+                    {busy === "grant" ? "Nadawanie..." : "Nadaj rolę"}
+                  </button>
+                  <button
+                    type="button"
+                    className="dispute-danger-button is-outline"
+                    onClick={() => handleStaffChange(false)}
+                    disabled={Boolean(busy)}
+                  >
+                    {busy === "revoke" ? "Odbieranie..." : "Odbierz rolę"}
+                  </button>
+                </div>
+
+                <div className="admin-staff-list">
+                  {staff.map((item) => (
+                    <article key={item.user_id} className={!item.is_active ? "is-inactive" : ""}>
+                      <div className="admin-staff-avatar">
+                        {profiles[item.user_id]?.avatar_url ? (
+                          <img src={profiles[item.user_id].avatar_url} alt="" />
+                        ) : getDisputeProfileName(
+                            profiles[item.user_id],
+                            item.role === "owner" ? "W" : "A"
+                          ).charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <strong>{getDisputeProfileName(
+                          profiles[item.user_id],
+                          item.role === "owner" ? "Właściciel" : "Administrator"
+                        )}</strong>
+                        <small>
+                          {item.role === "owner" ? "Właściciel" : "Administrator"} · {item.is_active ? "aktywny" : "nieaktywny"}
+                        </small>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="dispute-panel admin-audit-panel">
+              <span className="dispute-eyebrow">Rejestr działań</span>
+              <h2>Ostatnia aktywność</h2>
+              <div className="admin-audit-list">
+                {auditLog.length === 0 ? (
+                  <p>Brak zapisanych działań.</p>
+                ) : (
+                  auditLog.map((item) => (
+                    <article key={item.id}>
+                      <strong>{ADMIN_AUDIT_LABELS[item.action] || item.action}</strong>
+                      <span>
+                        {getDisputeProfileName(
+                          profiles[item.actor_user_id],
+                          item.actor_role === "owner" ? "Właściciel" : "Administrator"
+                        )}
+                      </span>
+                      <time>{formatDisputeDate(item.created_at)}</time>
+                    </article>
+                  ))
+                )}
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 /* =========================================================
    HOME
@@ -10288,6 +12551,33 @@ function Router() {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/disputes"
+            element={
+              <ProtectedRoute>
+                <Disputes />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/disputes/:id"
+            element={
+              <ProtectedRoute>
+                <DisputeDetails />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPanel />
               </ProtectedRoute>
             }
           />
