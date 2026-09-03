@@ -301,6 +301,235 @@ function useAuth() {
 }
 
 /* =========================================================
+   AGE ACCESS
+========================================================= */
+
+const MIN_ACCOUNT_AGE = 16;
+const FULL_ACCOUNT_AGE = 18;
+const AGE_NOTICE_VERSION = "2026-09-03-v1";
+
+const AgeAccessContext = createContext(null);
+
+function parseDateOnly(value) {
+  const match = String(value || "").match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return null;
+  }
+
+  return { year, month, day, date };
+}
+
+function getAgeAnniversary(birthDate, age) {
+  const parsed = parseDateOnly(birthDate);
+
+  if (!parsed) return null;
+
+  const anniversary = new Date(
+    parsed.year + age,
+    parsed.month - 1,
+    parsed.day
+  );
+
+  if (anniversary.getMonth() !== parsed.month - 1) {
+    anniversary.setDate(0);
+  }
+
+  anniversary.setHours(0, 0, 0, 0);
+  return anniversary;
+}
+
+function hasReachedAge(birthDate, age) {
+  const anniversary = getAgeAnniversary(birthDate, age);
+
+  if (!anniversary) return false;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today >= anniversary;
+}
+
+function getDateInputBoundary(yearsAgo = 0) {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  date.setFullYear(date.getFullYear() - yearsAgo);
+
+  const year = String(date.getFullYear());
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getBirthDateValidation(birthDate) {
+  const parsed = parseDateOnly(birthDate);
+
+  if (!parsed) {
+    return {
+      valid: false,
+      code: "invalid",
+      message: "Wpisz prawidłową datę urodzenia.",
+    };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const oldestAllowed = new Date(today);
+  oldestAllowed.setFullYear(today.getFullYear() - 120);
+
+  if (parsed.date > today || parsed.date < oldestAllowed) {
+    return {
+      valid: false,
+      code: "invalid",
+      message: "Wpisz prawidłową datę urodzenia.",
+    };
+  }
+
+  if (!hasReachedAge(birthDate, MIN_ACCOUNT_AGE)) {
+    return {
+      valid: false,
+      code: "under_16",
+      message: "Konto IdeaHire można utworzyć po ukończeniu 16 lat.",
+    };
+  }
+
+  if (!hasReachedAge(birthDate, FULL_ACCOUNT_AGE)) {
+    return {
+      valid: true,
+      code: "minor_limited",
+      message: "Utworzysz konto ograniczone. Pełne funkcje zostaną udostępnione po ukończeniu 18 lat.",
+    };
+  }
+
+  return {
+    valid: true,
+    code: "adult",
+    message: "Spełniasz wymaganie wieku dla pełnego konta IdeaHire.",
+  };
+}
+
+function AgeAccessProvider({ children }) {
+  const { user, loading: authLoading } = useAuth();
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [resolvedUserId, setResolvedUserId] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const activeUserIdRef = useRef(user?.id || null);
+
+  async function loadAgeAccess(requestedUserId = user?.id) {
+    if (!requestedUserId) {
+      setDateOfBirth("");
+      setResolvedUserId(null);
+      setErrorMessage("");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("ideahire_age_profiles")
+        .select("date_of_birth")
+        .eq("user_id", requestedUserId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (activeUserIdRef.current !== requestedUserId) return;
+
+      setDateOfBirth(data?.date_of_birth || "");
+      setResolvedUserId(requestedUserId);
+    } catch (error) {
+      if (activeUserIdRef.current !== requestedUserId) return;
+
+      console.error("AGE ACCESS LOAD ERROR:", error);
+      setDateOfBirth("");
+      setResolvedUserId(requestedUserId);
+      setErrorMessage(
+        "Nie udało się sprawdzić uprawnień wiekowych konta."
+      );
+    } finally {
+      if (activeUserIdRef.current === requestedUserId) {
+        setLoading(false);
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    const nextUserId = user?.id || null;
+    activeUserIdRef.current = nextUserId;
+
+    if (nextUserId !== resolvedUserId) {
+      setDateOfBirth("");
+      setErrorMessage("");
+    }
+
+    loadAgeAccess(nextUserId);
+  }, [authLoading, user?.id]);
+
+  const validation = dateOfBirth
+    ? getBirthDateValidation(dateOfBirth)
+    : null;
+
+  const ageRequired = Boolean(user?.id && !dateOfBirth);
+  const isLimited = validation?.code === "minor_limited";
+  const isAdult = validation?.code === "adult";
+
+  return (
+    <AgeAccessContext.Provider
+      value={{
+        dateOfBirth,
+        status: validation?.code || (ageRequired ? "age_required" : "unknown"),
+        ageRequired,
+        isLimited,
+        isAdult,
+        canTransact: isAdult,
+        loading:
+          authLoading ||
+          loading ||
+          Boolean(user?.id && resolvedUserId !== user.id),
+        errorMessage,
+        refreshAgeAccess: loadAgeAccess,
+      }}
+    >
+      {children}
+    </AgeAccessContext.Provider>
+  );
+}
+
+function useAgeAccess() {
+  return useContext(AgeAccessContext) || {
+    dateOfBirth: "",
+    status: "unknown",
+    ageRequired: false,
+    isLimited: false,
+    isAdult: false,
+    canTransact: false,
+    loading: true,
+    errorMessage: "",
+    refreshAgeAccess: async () => {},
+  };
+}
+
+/* =========================================================
    LOADING
 ========================================================= */
 
@@ -399,14 +628,19 @@ function PublicOnlyRoute({
    ACCOUNT MODE ROUTES
 ========================================================= */
 
-function UserOnlyRoute({ children }) {
+function UserOnlyRoute({ children, allowLimited = false }) {
   const { user } = useAuth();
   const {
     isStaff,
     staffLoading,
   } = useStaffRole(user?.id);
+  const {
+    ageRequired,
+    isLimited,
+    loading: ageLoading,
+  } = useAgeAccess();
 
-  if (staffLoading) {
+  if (staffLoading || ageLoading) {
     return <LoadingScreen />;
   }
 
@@ -419,7 +653,156 @@ function UserOnlyRoute({ children }) {
     );
   }
 
+  if (ageRequired) {
+    return <AgeCompletionScreen />;
+  }
+
+  if (isLimited && !allowLimited) {
+    return (
+      <Navigate
+        to="/account"
+        replace
+        state={{ ageRestricted: true }}
+      />
+    );
+  }
+
   return children;
+}
+
+function AgeCompletionScreen() {
+  const { refreshAgeAccess, errorMessage } = useAgeAccess();
+  const [birthDate, setBirthDate] = useState("");
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const validation = birthDate
+    ? getBirthDateValidation(birthDate)
+    : null;
+
+  async function handleCompleteAge(event) {
+    event.preventDefault();
+
+    if (saving) return;
+
+    if (!validation?.valid) {
+      setMessage(
+        validation?.message || "Wpisz prawidłową datę urodzenia."
+      );
+      return;
+    }
+
+    if (!acknowledged) {
+      setMessage("Potwierdź prawidłowość podanej daty urodzenia.");
+      return;
+    }
+
+    setSaving(true);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "complete_ideahire_age_profile",
+        {
+          p_date_of_birth: birthDate,
+          p_age_notice_acknowledged: acknowledged,
+        }
+      );
+
+      if (error) throw error;
+      await refreshAgeAccess();
+    } catch (error) {
+      setMessage(
+        error?.message || "Nie udało się zapisać daty urodzenia."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="page age-access-page">
+      <AccountNavbar />
+
+      <main className="age-access-shell">
+        <section className="age-access-card">
+          <span className="section-label">Bezpieczeństwo konta</span>
+          <h1>Uzupełnij datę urodzenia</h1>
+          <p>
+            Potrzebujemy jej wyłącznie do przyznania właściwych uprawnień
+            konta. Data nie będzie widoczna na Twoim profilu.
+          </p>
+
+          <form className="age-access-form" onSubmit={handleCompleteAge}>
+            <label>
+              Data urodzenia
+              <input
+                type="date"
+                value={birthDate}
+                min={getDateInputBoundary(120)}
+                max={getDateInputBoundary()}
+                onChange={(event) => {
+                  setBirthDate(event.target.value);
+                  setMessage("");
+                }}
+                autoComplete="bday"
+                required
+              />
+            </label>
+
+            {validation && (
+              <div
+                className={`age-access-result is-${validation.code}`}
+                role="status"
+              >
+                <strong>
+                  {validation.code === "adult"
+                    ? "Pełne konto 18+"
+                    : validation.code === "minor_limited"
+                    ? "Konto ograniczone 16–17"
+                    : "Konto niedostępne"}
+                </strong>
+                <span>{validation.message}</span>
+              </div>
+            )}
+
+            <label className="age-access-confirmation">
+              <input
+                type="checkbox"
+                checked={acknowledged}
+                onChange={(event) => {
+                  setAcknowledged(event.target.checked);
+                  setMessage("");
+                }}
+                required
+              />
+              <span>
+                <strong>Potwierdzam prawidłowość daty urodzenia.</strong>
+                <small>
+                  Po zapisaniu samodzielna zmiana daty nie będzie możliwa.
+                </small>
+              </span>
+            </label>
+
+            {(message || errorMessage) && (
+              <p className="auth-error" role="alert">
+                {message || errorMessage}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-dark btn-large"
+              disabled={saving || !validation?.valid || !acknowledged}
+            >
+              {saving ? "Zapisywanie..." : "Zapisz i kontynuuj →"}
+            </button>
+          </form>
+        </section>
+      </main>
+    </div>
+  );
 }
 
 function StaffOnlyRoute({ children }) {
@@ -648,6 +1031,16 @@ function AccountNavbar() {
   const { user } =
     useAuth();
 
+  const {
+    isLimited,
+    ageRequired,
+    loading: ageAccessLoading,
+  } = useAgeAccess();
+
+  const hasRestrictedAgeAccess =
+    !ageAccessLoading &&
+    (isLimited || ageRequired);
+
   const [
     hasNotifications,
     setHasNotifications,
@@ -674,6 +1067,12 @@ function AccountNavbar() {
 
   async function checkNotifications() {
     if (!user?.id) return;
+
+    if (hasRestrictedAgeAccess) {
+      setHasNotifications(false);
+      setHasDisputeNotifications(false);
+      return;
+    }
 
     try {
       const {
@@ -940,7 +1339,7 @@ function AccountNavbar() {
         handleDisputeNotificationsRead
       );
     };
-  }, [user?.id]);
+  }, [user?.id, hasRestrictedAgeAccess]);
 
   async function handleLogout() {
     try {
@@ -1003,18 +1402,20 @@ function AccountNavbar() {
           Moje konto
         </NavLink>
 
-        <NavLink
-          to="/find-talent"
-          className={({
-            isActive,
-          }) =>
-            isActive
-              ? "is-active"
-              : ""
-          }
-        >
-          Dodaj zlecenie
-        </NavLink>
+        {!hasRestrictedAgeAccess && (
+          <NavLink
+            to="/find-talent"
+            className={({
+              isActive,
+            }) =>
+              isActive
+                ? "is-active"
+                : ""
+            }
+          >
+            Dodaj zlecenie
+          </NavLink>
+        )}
 
         <NavLink
           to="/jobs"
@@ -1029,52 +1430,56 @@ function AccountNavbar() {
           Znajdź zlecenie
         </NavLink>
 
-        <NavLink
-          to="/messages"
-          className={({
-            isActive,
-          }) =>
-            isActive
-              ? "is-active"
-              : ""
-          }
-        >
-          Wiadomości
-        </NavLink>
+        {!hasRestrictedAgeAccess && (
+          <>
+            <NavLink
+              to="/messages"
+              className={({
+                isActive,
+              }) =>
+                isActive
+                  ? "is-active"
+                  : ""
+              }
+            >
+              Wiadomości
+            </NavLink>
 
-        <NavLink
-          to="/disputes"
-          className={({ isActive }) =>
-            `notifications-nav-link${
-              isActive ? " is-active" : ""
-            }`
-          }
-        >
-          Spory
+            <NavLink
+              to="/disputes"
+              className={({ isActive }) =>
+                `notifications-nav-link${
+                  isActive ? " is-active" : ""
+                }`
+              }
+            >
+              Spory
 
-          {hasDisputeNotifications && (
-            <span className="notification-dot" />
-          )}
-        </NavLink>
+              {hasDisputeNotifications && (
+                <span className="notification-dot" />
+              )}
+            </NavLink>
 
-        <NavLink
-          to="/notifications"
-          className={({
-            isActive,
-          }) =>
-            `notifications-nav-link${
-              isActive
-                ? " is-active"
-                : ""
-            }`
-          }
-        >
-          Powiadomienia
+            <NavLink
+              to="/notifications"
+              className={({
+                isActive,
+              }) =>
+                `notifications-nav-link${
+                  isActive
+                    ? " is-active"
+                    : ""
+                }`
+              }
+            >
+              Powiadomienia
 
-          {hasNotifications && (
-            <span className="notification-dot" />
-          )}
-        </NavLink>
+              {hasNotifications && (
+                <span className="notification-dot" />
+              )}
+            </NavLink>
+          </>
+        )}
       </nav>
 
       <div className="nav-actions">
@@ -2073,6 +2478,12 @@ function Register() {
   const [password, setPassword] =
     useState("");
 
+  const [birthDate, setBirthDate] =
+    useState("");
+
+  const [ageNoticeAcknowledged, setAgeNoticeAcknowledged] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(false);
 
@@ -2087,6 +2498,20 @@ function Register() {
     if (loading) return;
 
     setMessage("");
+
+    const birthDateValidation =
+      getBirthDateValidation(birthDate);
+
+    if (!birthDateValidation.valid) {
+      setMessage(birthDateValidation.message);
+      return;
+    }
+
+    if (!ageNoticeAcknowledged) {
+      setMessage("Potwierdź prawidłowość podanej daty urodzenia.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -2102,6 +2527,12 @@ function Register() {
             data: {
               name:
                 name.trim(),
+              date_of_birth:
+                birthDate,
+              age_notice_acknowledged:
+                true,
+              age_notice_version:
+                AGE_NOTICE_VERSION,
             },
           },
         });
@@ -2212,6 +2643,46 @@ function Register() {
           </label>
 
           <label>
+            Data urodzenia
+
+            <input
+              type="date"
+              value={birthDate}
+              min={getDateInputBoundary(120)}
+              max={getDateInputBoundary()}
+              onChange={(event) => {
+                setBirthDate(event.target.value);
+                setMessage("");
+              }}
+              autoComplete="bday"
+              required
+            />
+
+            <small>
+              Data pozostaje prywatna i służy wyłącznie do ustalenia
+              uprawnień konta.
+            </small>
+          </label>
+
+          {birthDate && (
+            <div
+              className={`registration-age-result is-${
+                getBirthDateValidation(birthDate).code
+              }`}
+              role="status"
+            >
+              <strong>
+                {getBirthDateValidation(birthDate).code === "adult"
+                  ? "Pełne konto 18+"
+                  : getBirthDateValidation(birthDate).code === "minor_limited"
+                  ? "Konto ograniczone 16–17"
+                  : "Konto niedostępne"}
+              </strong>
+              <span>{getBirthDateValidation(birthDate).message}</span>
+            </div>
+          )}
+
+          <label>
             Hasło
 
             <input
@@ -2229,6 +2700,25 @@ function Register() {
             />
           </label>
 
+          <label className="age-access-confirmation">
+            <input
+              type="checkbox"
+              checked={ageNoticeAcknowledged}
+              onChange={(event) => {
+                setAgeNoticeAcknowledged(event.target.checked);
+                setMessage("");
+              }}
+              required
+            />
+            <span>
+              <strong>Potwierdzam prawidłowość daty urodzenia.</strong>
+              <small>
+                Osoby w wieku 16–17 lat otrzymują konto ograniczone. Pełne
+                funkcje płatnych zleceń są dostępne od 18 lat.
+              </small>
+            </span>
+          </label>
+
           {message && (
             <p className="auth-error">
               {message}
@@ -2238,7 +2728,7 @@ function Register() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading}
+            disabled={loading || !ageNoticeAcknowledged}
           >
             {loading
               ? "Tworzenie konta..."
@@ -2401,6 +2891,99 @@ async function resizeAndConvertImage(
   );
 }
 
+function AccountEntry() {
+  const { isLimited } = useAgeAccess();
+
+  return isLimited ? <LimitedAccount /> : <Account />;
+}
+
+function LimitedAccount() {
+  const location = useLocation();
+  const { dateOfBirth } = useAgeAccess();
+  const fullAccessDate = getAgeAnniversary(
+    dateOfBirth,
+    FULL_ACCOUNT_AGE
+  );
+
+  const fullAccessLabel = fullAccessDate
+    ? fullAccessDate.toLocaleDateString("pl-PL", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "po ukończeniu 18 lat";
+
+  return (
+    <div className="page limited-account-page">
+      <AccountNavbar />
+
+      <main className="app-page limited-account-shell">
+        <div className="app-page-header">
+          <span className="section-label">Twoje konto</span>
+          <h1>Konto ograniczone</h1>
+          <p>
+            Możesz bezpiecznie poznawać IdeaHire. Funkcje związane z umowami
+            i płatnymi zleceniami zostaną udostępnione po ukończeniu 18 lat.
+          </p>
+        </div>
+
+        {location.state?.ageRestricted && (
+          <p className="limited-account-route-message" role="status">
+            Ta funkcja jest dostępna wyłącznie dla pełnych kont 18+.
+          </p>
+        )}
+
+        <section className="limited-account-hero">
+          <div className="limited-account-status-icon" aria-hidden="true">
+            16+
+          </div>
+          <div>
+            <span>Konto młodzieżowe 16–17</span>
+            <h2>Pełny dostęp od {fullAccessLabel}</h2>
+            <p>
+              Nie musisz ponownie zakładać konta. Wiek jest obliczany
+              automatycznie na podstawie zapisanej, prywatnej daty urodzenia.
+            </p>
+          </div>
+        </section>
+
+        <div className="limited-account-grid">
+          <section className="limited-account-panel is-available">
+            <span className="limited-account-panel-icon" aria-hidden="true">✓</span>
+            <h2>Dostępne teraz</h2>
+            <ul>
+              <li>przeglądanie zleceń,</li>
+              <li>przeglądanie publicznych profili,</li>
+              <li>ustawienia języka i wyglądu strony.</li>
+            </ul>
+            <Link className="btn btn-dark" to="/jobs">
+              Przeglądaj zlecenia →
+            </Link>
+          </section>
+
+          <section className="limited-account-panel is-locked">
+            <span className="limited-account-panel-icon" aria-hidden="true">○</span>
+            <h2>Dostępne od 18 lat</h2>
+            <ul>
+              <li>publikowanie i przyjmowanie zleceń,</li>
+              <li>wiadomości i formularze współpracy,</li>
+              <li>płatności oraz otwieranie nowych sporów.</li>
+            </ul>
+          </section>
+        </div>
+
+        <section className="limited-account-privacy">
+          <strong>Twoja data urodzenia pozostaje prywatna</strong>
+          <p>
+            Nie wyświetlamy jej na profilu ani innym użytkownikom. Jeżeli
+            została podana błędnie, korektę przeprowadzi pomoc IdeaHire.
+          </p>
+        </section>
+      </main>
+    </div>
+  );
+}
+
 /* =========================================================
    ACCOUNT
 ========================================================= */
@@ -2410,6 +2993,8 @@ function Account() {
     user,
     loading: authLoading,
   } = useAuth();
+
+  const { isAdult } = useAgeAccess();
 
   const [name, setName] =
     useState("");
@@ -3191,6 +3776,10 @@ function Account() {
                 <CountryBadge
                   countryCode={countryCode}
                 />
+              )}
+
+              {isAdult && (
+                <span className="account-age-status">Pełne konto · 18+</span>
               )}
             </div>
           </div>
@@ -5265,6 +5854,11 @@ function Jobs() {
   const { user } =
     useAuth();
 
+  const {
+    canTransact,
+    isLimited,
+  } = useAgeAccess();
+
   const location =
     useLocation();
 
@@ -5484,6 +6078,13 @@ function Jobs() {
       return;
     }
 
+    if (!canTransact) {
+      setMessage(
+        "Zgłaszanie się do płatnych zleceń jest dostępne od 18 lat."
+      );
+      return;
+    }
+
     if (
       user.id ===
       job.user_id
@@ -5690,6 +6291,20 @@ function Jobs() {
             IdeaHire.
           </p>
         </div>
+
+        {isLimited && (
+          <section className="jobs-age-notice">
+            <span className="jobs-age-notice-icon" aria-hidden="true">16+</span>
+            <div>
+              <strong>Przeglądanie dostępne</strong>
+              <p>
+                Na koncie ograniczonym możesz oglądać zlecenia i profile.
+                Zgłaszanie się do płatnych zleceń zostanie odblokowane po
+                ukończeniu 18 lat.
+              </p>
+            </div>
+          </section>
+        )}
 
         <style>{`
           .jobs-search {
@@ -6105,6 +6720,7 @@ function Jobs() {
                             className="btn btn-dark"
                             type="button"
                             disabled={
+                              !canTransact ||
                               applyingJobId ===
                                 job.id ||
                               alreadyApplied
@@ -6115,7 +6731,9 @@ function Jobs() {
                               )
                             }
                           >
-                            {alreadyApplied
+                            {!canTransact
+                              ? "Dostępne od 18 lat"
+                              : alreadyApplied
                               ? "Zgłoszono ✓"
                               : applyingJobId ===
                                   job.id
@@ -6169,6 +6787,7 @@ function Jobs() {
                           className="btn btn-outline"
                           type="button"
                           disabled={
+                            !canTransact ||
                             applyingJobId ===
                               job.id ||
                             alreadyApplied
@@ -6179,7 +6798,9 @@ function Jobs() {
                             )
                           }
                         >
-                          {alreadyApplied
+                          {!canTransact
+                            ? "Dostępne od 18 lat"
+                            : alreadyApplied
                             ? "Zgłoszono ✓"
                             : applyingJobId ===
                                 job.id
@@ -13359,9 +13980,15 @@ function Home() {
     staffLoading,
   } = useStaffRole(user?.id);
 
+  const {
+    isLimited,
+    ageRequired,
+    loading: ageLoading,
+  } = useAgeAccess();
+
   if (
     loading ||
-    (user?.id && staffLoading)
+    (user?.id && (staffLoading || ageLoading))
   ) {
     return <LoadingScreen />;
   }
@@ -13373,6 +14000,10 @@ function Home() {
         replace
       />
     );
+  }
+
+  if (user?.id && (isLimited || ageRequired)) {
+    return <Navigate to="/account" replace />;
   }
 
   return (
@@ -13391,7 +14022,8 @@ function Router() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Sorts />
+        <AgeAccessProvider>
+          <Sorts />
 
         <style>{`
           .ideahire-multiline-field {
@@ -13489,8 +14121,8 @@ function Router() {
             path="/account"
             element={
               <ProtectedRoute>
-                <UserOnlyRoute>
-                  <Account />
+                <UserOnlyRoute allowLimited>
+                  <AccountEntry />
                 </UserOnlyRoute>
               </ProtectedRoute>
             }
@@ -13522,7 +14154,7 @@ function Router() {
             path="/jobs"
             element={
               <ProtectedRoute>
-                <UserOnlyRoute>
+                <UserOnlyRoute allowLimited>
                   <Jobs />
                 </UserOnlyRoute>
               </ProtectedRoute>
@@ -13533,7 +14165,7 @@ function Router() {
             path="/profile/:id"
             element={
               <ProtectedRoute>
-                <UserOnlyRoute>
+                <UserOnlyRoute allowLimited>
                   <Profile />
                 </UserOnlyRoute>
               </ProtectedRoute>
@@ -13636,6 +14268,7 @@ function Router() {
             }
           />
         </Routes>
+        </AgeAccessProvider>
       </AuthProvider>
     </BrowserRouter>
   );
