@@ -1,5 +1,4 @@
 
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 :root {
@@ -3355,6 +3354,541 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
   html[data-theme="dark"] .site-preferences-handle {
     border-right-color: #343431;
     color: #d5d5cf;
+  }
+}
+
+/* =========================================================
+   AGE ACCESS / LIMITED ACCOUNT 16–17
+========================================================= */
+
+.registration-age-result,
+.age-access-result {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid #d9dfdc;
+  border-radius: 12px;
+  background: #f5f8f6;
+  color: #5d655f;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.registration-age-result strong,
+.age-access-result strong {
+  color: #252a27;
+  font-size: 12px;
+}
+
+.registration-age-result.is-under_16,
+.registration-age-result.is-invalid,
+.age-access-result.is-under_16,
+.age-access-result.is-invalid {
+  border-color: #edcccc;
+  background: #fff5f5;
+  color: #9a3434;
+}
+
+.registration-age-result.is-under_16 strong,
+.registration-age-result.is-invalid strong,
+.age-access-result.is-under_16 strong,
+.age-access-result.is-invalid strong {
+  color: #842929;
+}
+
+.age-access-confirmation,
+.auth-form .age-access-confirmation {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid #d9d9d4;
+  border-radius: 13px;
+  background: #fafaf7;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.age-access-confirmation:hover,
+.age-access-confirmation:focus-within {
+  border-color: #999f9a;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.05);
+}
+
+.age-access-confirmation:has(input:checked) {
+  border-color: #6f7d75;
+  background: #f4f8f5;
+}
+
+.age-access-confirmation input,
+.auth-form .age-access-confirmation input {
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex: 0 0 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: #171917;
+}
+
+.age-access-confirmation > span {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.age-access-confirmation strong {
+  color: #292c2a;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.age-access-confirmation small {
+  color: #737772;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.age-access-page,
+.limited-account-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 2%, rgba(17, 17, 17, 0.035), transparent 27%),
+    #f7f7f4;
+}
+
+.age-access-shell {
+  width: min(680px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 54px 0 90px;
+}
+
+.age-access-card {
+  padding: 34px;
+  border: 1px solid #e0e0da;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 18px 54px rgba(17, 17, 17, 0.06);
+}
+
+.age-access-card h1 {
+  margin: 10px 0 12px;
+  color: #161615;
+  font-size: clamp(34px, 7vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.age-access-card > p {
+  max-width: 540px;
+  margin: 0;
+  color: #686863;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.age-access-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.age-access-form > label:not(.age-access-confirmation) {
+  display: grid;
+  gap: 8px;
+  color: #333330;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.age-access-form > label:not(.age-access-confirmation) input {
+  width: 100%;
+  min-height: 50px;
+  padding: 13px 15px;
+  border: 1px solid #d9d9d4;
+  border-radius: 13px;
+  outline: none;
+  background: #fff;
+  color: #171716;
+}
+
+.age-access-form > label:not(.age-access-confirmation) input:focus {
+  border-color: #777c78;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.05);
+}
+
+.age-access-form > button {
+  width: 100%;
+}
+
+.limited-account-shell {
+  display: grid;
+  gap: 20px;
+}
+
+.limited-account-shell .app-page-header {
+  margin-bottom: 14px;
+}
+
+.limited-account-route-message {
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid #e8d5ad;
+  border-radius: 13px;
+  background: #fff9e9;
+  color: #725818;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.limited-account-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 27px;
+  border: 1px solid #dcded9;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #ffffff, #f2f5f2);
+  box-shadow: 0 14px 38px rgba(17, 17, 17, 0.045);
+}
+
+.limited-account-status-icon {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 76px;
+  border-radius: 22px;
+  background: #181918;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.limited-account-hero > div:last-child {
+  min-width: 0;
+}
+
+.limited-account-hero span {
+  color: #747973;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.limited-account-hero h2 {
+  margin: 6px 0 8px;
+  color: #1c1e1c;
+  font-size: clamp(22px, 4vw, 32px);
+  letter-spacing: -0.04em;
+}
+
+.limited-account-hero p,
+.limited-account-panel p,
+.limited-account-privacy p {
+  margin: 0;
+  color: #686d68;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.limited-account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.limited-account-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px;
+  border: 1px solid #e0e0da;
+  border-radius: 19px;
+  background: #fff;
+}
+
+.limited-account-panel.is-locked {
+  background: #f3f3ef;
+}
+
+.limited-account-panel-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #1d1e1d;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.limited-account-panel.is-locked .limited-account-panel-icon {
+  background: #deded8;
+  color: #666b66;
+}
+
+.limited-account-panel h2 {
+  margin: 17px 0 8px;
+  color: #222320;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+}
+
+.limited-account-panel ul {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 21px;
+  padding-left: 18px;
+  color: #666b66;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.limited-account-panel .btn {
+  width: 100%;
+  margin-top: auto;
+}
+
+.limited-account-privacy {
+  padding: 18px 20px;
+  border: 1px solid #dce2de;
+  border-radius: 15px;
+  background: #f2f6f4;
+}
+
+.limited-account-privacy strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #2e3430;
+  font-size: 12px;
+}
+
+.account-age-status {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 27px;
+  margin-top: 6px;
+  padding: 5px 10px;
+  border: 1px solid #d8ded9;
+  border-radius: 999px;
+  background: #f2f6f3;
+  color: #4b5a50;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.jobs-age-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin: -15px 0 26px;
+  padding: 16px 18px;
+  border: 1px solid #dce2de;
+  border-radius: 15px;
+  background: #f2f6f4;
+}
+
+.jobs-age-notice-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  border-radius: 12px;
+  background: #1b1d1b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.jobs-age-notice > div {
+  min-width: 0;
+}
+
+.jobs-age-notice strong {
+  display: block;
+  margin: 1px 0 4px;
+  color: #2b302c;
+  font-size: 12px;
+}
+
+.jobs-age-notice p {
+  margin: 0;
+  color: #69706a;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+html[data-theme="dark"] .age-access-page,
+html[data-theme="dark"] .limited-account-page {
+  background:
+    radial-gradient(circle at 10% 2%, rgba(255, 255, 255, 0.035), transparent 27%),
+    #10100f;
+}
+
+html[data-theme="dark"] :is(
+  .registration-age-result,
+  .age-access-result,
+  .age-access-confirmation,
+  .age-access-card,
+  .limited-account-hero,
+  .limited-account-panel,
+  .limited-account-privacy,
+  .jobs-age-notice
+) {
+  border-color: #3a3a36;
+  background: #1a1a18;
+}
+
+html[data-theme="dark"] :is(
+  .registration-age-result strong,
+  .age-access-result strong,
+  .age-access-confirmation strong,
+  .age-access-card h1,
+  .limited-account-hero h2,
+  .limited-account-panel h2,
+  .limited-account-privacy strong,
+  .jobs-age-notice strong
+) {
+  color: #f0f0ec;
+}
+
+html[data-theme="dark"] :is(
+  .registration-age-result,
+  .age-access-result,
+  .age-access-confirmation small,
+  .age-access-card > p,
+  .limited-account-hero p,
+  .limited-account-panel ul,
+  .limited-account-privacy p,
+  .jobs-age-notice p
+) {
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .age-access-confirmation:hover,
+html[data-theme="dark"] .age-access-confirmation:focus-within,
+html[data-theme="dark"] .age-access-confirmation:has(input:checked) {
+  border-color: #71716a;
+  background: #20201e;
+  box-shadow: 0 0 0 3px rgba(240, 240, 236, 0.05);
+}
+
+html[data-theme="dark"] .age-access-confirmation input {
+  accent-color: #efefeb;
+}
+
+html[data-theme="dark"] .age-access-form > label:not(.age-access-confirmation) {
+  color: #eeeeea;
+}
+
+html[data-theme="dark"] .age-access-form > label:not(.age-access-confirmation) input {
+  border-color: #42423d;
+  background: #111110;
+  color: #efefeb;
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .registration-age-result.is-under_16,
+html[data-theme="dark"] .registration-age-result.is-invalid,
+html[data-theme="dark"] .age-access-result.is-under_16,
+html[data-theme="dark"] .age-access-result.is-invalid {
+  border-color: #633b3b;
+  background: #2d1c1c;
+  color: #efb0b0;
+}
+
+html[data-theme="dark"] .limited-account-panel.is-locked {
+  background: #171715;
+}
+
+html[data-theme="dark"] .limited-account-status-icon,
+html[data-theme="dark"] .limited-account-panel-icon,
+html[data-theme="dark"] .jobs-age-notice-icon {
+  background: #efefeb;
+  color: #171716;
+}
+
+html[data-theme="dark"] .limited-account-panel.is-locked .limited-account-panel-icon {
+  background: #30302d;
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .limited-account-privacy,
+html[data-theme="dark"] .jobs-age-notice {
+  border-color: #3b4941;
+  background: #1a221d;
+}
+
+html[data-theme="dark"] .account-age-status {
+  border-color: #3e4b43;
+  background: #1a231d;
+  color: #afd0b8;
+}
+
+html[data-theme="dark"] .limited-account-route-message {
+  border-color: #66562a;
+  background: #302a19;
+  color: #e5c975;
+}
+
+@media (max-width: 700px) {
+  .age-access-shell {
+    width: min(100% - 24px, 680px);
+    padding: 28px 0 70px;
+  }
+
+  .age-access-card {
+    padding: 23px 19px;
+    border-radius: 20px;
+  }
+
+  .age-access-card h1 {
+    font-size: 36px;
+  }
+
+  .limited-account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .limited-account-hero {
+    align-items: flex-start;
+    padding: 21px;
+  }
+}
+
+@media (max-width: 480px) {
+  .limited-account-hero {
+    flex-direction: column;
+  }
+
+  .limited-account-status-icon {
+    width: 58px;
+    height: 58px;
+    flex-basis: 58px;
+    border-radius: 17px;
+    font-size: 17px;
+  }
+
+  .limited-account-panel {
+    padding: 20px;
+  }
+
+  .jobs-age-notice {
+    margin-top: -8px;
+    padding: 14px;
   }
 }
 
