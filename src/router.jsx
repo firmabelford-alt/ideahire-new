@@ -10819,6 +10819,7 @@ const ADMIN_AUDIT_LABELS = {
   chat_message_attached: "Dołączono wiadomość jako dowód",
   dispute_taken_for_review: "Przejęto sprawę do analizy",
   dispute_viewed: "Wyświetlono sprawę",
+  case_context_viewed: "Wyświetlono pełny czat i formularz",
   admin_message_added: "Wysłano wiadomość administratora",
   internal_note_added: "Dodano notatkę wewnętrzną",
   decision_issued: "Wydano decyzję",
@@ -11064,6 +11065,7 @@ function DisputeDetails() {
   const navigate = useNavigate();
   const { staffRole, staffLoading, isStaff } = useStaffRole(user?.id);
   const recordedAccessRef = useRef("");
+  const recordedContextAccessRef = useRef("");
   const fileInputRef = useRef(null);
 
   const [dispute, setDispute] = useState(null);
@@ -11074,6 +11076,10 @@ function DisputeDetails() {
   const [decisions, setDecisions] = useState([]);
   const [appeals, setAppeals] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
+  const [adminChatMessages, setAdminChatMessages] = useState([]);
+  const [adminAgreements, setAdminAgreements] = useState([]);
+  const [adminContextLoading, setAdminContextLoading] = useState(false);
+  const [adminContextError, setAdminContextError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [pageMessage, setPageMessage] = useState("");
@@ -11192,6 +11198,8 @@ function DisputeDetails() {
       }
 
       let conversationMessages = [];
+      let fullAdminMessages = [];
+      let fullAdminAgreements = [];
 
       if (participant && !isStaff) {
         const { data, error } = await supabase
@@ -11208,6 +11216,58 @@ function DisputeDetails() {
         }
       }
 
+      const canReadAdminContext = Boolean(
+        isStaff && disputeData.assigned_admin_id === user.id
+      );
+
+      if (canReadAdminContext) {
+        setAdminContextLoading(true);
+        setAdminContextError("");
+
+        try {
+          const { data: agreementRows, error: agreementError } = await supabase
+            .from("conversation_agreements")
+            .select("*")
+            .eq("conversation_id", disputeData.conversation_id)
+            .order("version", { ascending: false });
+
+          if (agreementError) throw agreementError;
+          fullAdminAgreements = agreementRows || [];
+
+          const pageSize = 500;
+          let from = 0;
+
+          while (true) {
+            const { data: messageRows, error: messageError } = await supabase
+              .from("messages")
+              .select("id, conversation_id, sender_id, content, created_at, read_at")
+              .eq("conversation_id", disputeData.conversation_id)
+              .order("created_at", { ascending: true })
+              .range(from, from + pageSize - 1);
+
+            if (messageError) throw messageError;
+
+            const currentPage = messageRows || [];
+            fullAdminMessages.push(...currentPage);
+
+            if (currentPage.length < pageSize) break;
+            from += pageSize;
+          }
+        } catch (contextError) {
+          console.error("ADMIN CASE CONTEXT ERROR:", contextError);
+          setAdminContextError(
+            cleanSupabaseError(
+              contextError,
+              "Nie udało się pobrać pełnego kontekstu sprawy."
+            )
+          );
+        } finally {
+          setAdminContextLoading(false);
+        }
+      } else {
+        setAdminContextError("");
+      }
+
       setDispute(disputeData);
       setProfiles(profileMap);
       setStatements(statementResult.data || []);
@@ -11216,6 +11276,8 @@ function DisputeDetails() {
       setDecisions(decisionResult.data || []);
       setAppeals(appealResult.data || []);
       setChatMessages(conversationMessages);
+      setAdminChatMessages(fullAdminMessages);
+      setAdminAgreements(fullAdminAgreements);
       setPageMessage("");
 
       const { data: notificationRows, error: notificationError } = await supabase
@@ -11290,6 +11352,51 @@ function DisputeDetails() {
   useEffect(() => {
     if (
       !id ||
+      !user?.id ||
+      !isStaff ||
+      dispute?.assigned_admin_id !== user.id ||
+      !dispute?.conversation_id
+    ) {
+      return;
+    }
+
+    const refreshContext = () => loadCase(false);
+    const channel = supabase
+      .channel(`admin-case-context-${id}-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${dispute.conversation_id}`,
+        },
+        refreshContext
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "conversation_agreements",
+          filter: `conversation_id=eq.${dispute.conversation_id}`,
+        },
+        refreshContext
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [
+    id,
+    user?.id,
+    isStaff,
+    dispute?.assigned_admin_id,
+    dispute?.conversation_id,
+  ]);
+
+  useEffect(() => {
+    if (
+      !id ||
       staffLoading ||
       !isStaff ||
       recordedAccessRef.current === id
@@ -11304,6 +11411,26 @@ function DisputeDetails() {
         if (error) console.error("ADMIN ACCESS LOG ERROR:", error);
       });
   }, [id, isStaff, staffLoading]);
+
+  useEffect(() => {
+    if (
+      !id ||
+      !user?.id ||
+      staffLoading ||
+      !isStaff ||
+      dispute?.assigned_admin_id !== user.id ||
+      recordedContextAccessRef.current === id
+    ) {
+      return;
+    }
+
+    recordedContextAccessRef.current = id;
+    supabase
+      .rpc("admin_record_case_context_access", { p_dispute_id: id })
+      .then(({ error }) => {
+        if (error) console.error("ADMIN CONTEXT ACCESS LOG ERROR:", error);
+      });
+  }, [id, user?.id, isStaff, staffLoading, dispute?.assigned_admin_id]);
 
   async function runAction(actionKey, action, successMessage) {
     if (busy) return false;
@@ -11774,6 +11901,156 @@ function DisputeDetails() {
                 </form>
               )}
             </section>
+
+            {isStaff && (
+              <section className="dispute-panel admin-case-context-panel">
+                <div className="dispute-panel-heading">
+                  <div>
+                    <span className="dispute-eyebrow">Pełny kontekst sprawy</span>
+                    <h2>Rozmowa i ustalenia współpracy</h2>
+                    <p>
+                      Materiały są dostępne wyłącznie do analizy sporu. Nie możesz edytować formularza ani pisać na czacie użytkowników.
+                    </p>
+                  </div>
+                  <span className="admin-readonly-badge">Tylko odczyt</span>
+                </div>
+
+                {dispute.assigned_admin_id !== user.id ? (
+                  <div className="admin-context-locked">
+                    <span className="admin-context-lock-icon" aria-hidden="true">⌁</span>
+                    <div>
+                      <strong>Najpierw przejmij sprawę</strong>
+                      <p>
+                        Pełny czat i formularz zobaczy tylko administrator przypisany do tej sprawy. Otwarcie tych danych zostanie zapisane w rejestrze działań.
+                      </p>
+                    </div>
+                  </div>
+                ) : adminContextLoading ? (
+                  <div className="admin-context-loading">Ładowanie pełnego kontekstu...</div>
+                ) : adminContextError ? (
+                  <div className="admin-context-error" role="alert">
+                    <strong>Nie udało się otworzyć kontekstu</strong>
+                    <p>{adminContextError}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="admin-context-access-note">
+                      <strong>Dostęp kontrolowany</strong>
+                      <span>
+                        Jesteś administratorem przypisanym do sprawy. To otwarcie zostało odnotowane.
+                      </span>
+                    </div>
+
+                    <div className="admin-case-context-grid">
+                      <details className="admin-context-section" open>
+                        <summary>
+                          <span>
+                            <small>Dokument sprawy</small>
+                            <strong>Formularz współpracy</strong>
+                          </span>
+                          <span className="dispute-count-badge">
+                            {adminAgreements.length}
+                          </span>
+                        </summary>
+
+                        <div className="admin-context-section-body">
+                          {adminAgreements.length === 0 ? (
+                            <p className="dispute-empty-copy">
+                              Dla tej rozmowy nie zapisano formularza współpracy.
+                            </p>
+                          ) : (
+                            <div className="admin-agreement-history">
+                              {adminAgreements.map((agreementItem, index) => (
+                                <article
+                                  className={`admin-agreement-version ${
+                                    agreementItem.status === "accepted" ? "is-accepted" : ""
+                                  }`}
+                                  key={agreementItem.id}
+                                >
+                                  <div className="admin-agreement-version-heading">
+                                    <div>
+                                      <span>Wersja {agreementItem.version}</span>
+                                      <strong>
+                                        {agreementItem.status === "accepted"
+                                          ? "Zaakceptowana przez obie strony"
+                                          : agreementItem.status === "superseded"
+                                          ? "Poprzednia wersja"
+                                          : "Oczekuje na akceptację"}
+                                      </strong>
+                                    </div>
+                                    {index === 0 && (
+                                      <span className="admin-current-version-badge">Najnowsza</span>
+                                    )}
+                                  </div>
+
+                                  <AgreementDetails agreement={agreementItem} />
+
+                                  <div className="admin-agreement-acceptance">
+                                    <span>
+                                      Zleceniodawca: {agreementItem.client_accepted_at
+                                        ? formatDisputeDate(agreementItem.client_accepted_at)
+                                        : "brak akceptacji"}
+                                    </span>
+                                    <span>
+                                      Wykonawca: {agreementItem.contractor_accepted_at
+                                        ? formatDisputeDate(agreementItem.contractor_accepted_at)
+                                        : "brak akceptacji"}
+                                    </span>
+                                  </div>
+                                </article>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </details>
+
+                      <details className="admin-context-section" open>
+                        <summary>
+                          <span>
+                            <small>Pełny zapis rozmowy</small>
+                            <strong>Czat użytkowników</strong>
+                          </span>
+                          <span className="dispute-count-badge">
+                            {adminChatMessages.length}
+                          </span>
+                        </summary>
+
+                        <div className="admin-context-section-body">
+                          {adminChatMessages.length === 0 ? (
+                            <p className="dispute-empty-copy">
+                              W tej rozmowie nie ma jeszcze wiadomości.
+                            </p>
+                          ) : (
+                            <div className="admin-full-chat" aria-label="Pełna rozmowa użytkowników">
+                              {adminChatMessages.map((message) => {
+                                const isClientMessage = message.sender_id === dispute.client_id;
+                                const authorName = isClientMessage ? clientName : contractorName;
+
+                                return (
+                                  <article
+                                    className={`admin-chat-message ${
+                                      isClientMessage ? "is-client" : "is-contractor"
+                                    }`}
+                                    key={message.id}
+                                  >
+                                    <div className="admin-chat-message-meta">
+                                      <strong>{authorName}</strong>
+                                      <span>{isClientMessage ? "Zleceniodawca" : "Wykonawca"}</span>
+                                      <time>{formatDisputeDate(message.created_at)}</time>
+                                    </div>
+                                    <p>{message.content}</p>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </details>
+                    </div>
+                  </>
+                )}
+              </section>
+            )}
 
             <section className="dispute-panel">
               <div className="dispute-panel-heading">
