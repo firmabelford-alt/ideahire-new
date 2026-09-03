@@ -1,4 +1,3 @@
-
 import React, {
   useEffect,
   useState,
@@ -364,13 +363,76 @@ function PublicOnlyRoute({
   const {
     loading,
     isLoggedIn,
+    user,
   } = useAuth();
 
-  if (loading) {
+  const {
+    isStaff,
+    staffLoading,
+  } = useStaffRole(user?.id);
+
+  if (
+    loading ||
+    (isLoggedIn && staffLoading)
+  ) {
     return <LoadingScreen />;
   }
 
   if (isLoggedIn) {
+    return (
+      <Navigate
+        to={
+          isStaff
+            ? "/admin"
+            : "/account"
+        }
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+/* =========================================================
+   ACCOUNT MODE ROUTES
+========================================================= */
+
+function UserOnlyRoute({ children }) {
+  const { user } = useAuth();
+  const {
+    isStaff,
+    staffLoading,
+  } = useStaffRole(user?.id);
+
+  if (staffLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isStaff) {
+    return (
+      <Navigate
+        to="/admin"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+function StaffOnlyRoute({ children }) {
+  const { user } = useAuth();
+  const {
+    isStaff,
+    staffLoading,
+  } = useStaffRole(user?.id);
+
+  if (staffLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!isStaff) {
     return (
       <Navigate
         to="/account"
@@ -1041,6 +1103,90 @@ function AccountNavbar() {
           onClick={
             handleLogout
           }
+        >
+          Wyloguj się
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function AdminNavbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { staffRole } = useStaffRole(user?.id);
+
+  const displayName =
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Administracja";
+
+  async function handleAdminLogout() {
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) throw error;
+
+      navigate("/login", { replace: true });
+    } catch (error) {
+      alert(
+        `Nie udało się wylogować: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    }
+  }
+
+  return (
+    <header className="navbar admin-navbar">
+      <Link className="admin-navbar-brand" to="/admin">
+        <span className="logo">
+          Idea<span>Hire</span>
+        </span>
+        <span className="admin-navbar-label">Administracja</span>
+      </Link>
+
+      <nav className="admin-nav-links" aria-label="Nawigacja administracji">
+        <NavLink
+          to="/admin"
+          end
+          className={({ isActive }) =>
+            isActive || location.pathname.startsWith("/disputes/")
+              ? "is-active"
+              : ""
+          }
+        >
+          Spory
+        </NavLink>
+
+        <NavLink
+          to="/admin/jobs"
+          className={({ isActive }) => (isActive ? "is-active" : "")}
+        >
+          Zlecenia
+        </NavLink>
+
+        <NavLink
+          to="/admin/messages"
+          className={({ isActive }) => (isActive ? "is-active" : "")}
+        >
+          Wiadomości dowodowe
+        </NavLink>
+      </nav>
+
+      <div className="admin-navbar-actions">
+        <div className="admin-navbar-identity">
+          <strong>{displayName}</strong>
+          <span>
+            {staffRole === "owner" ? "Właściciel" : "Administrator"}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          className="admin-logout-button"
+          onClick={handleAdminLogout}
         >
           Wyloguj się
         </button>
@@ -10950,7 +11096,9 @@ function DisputeDetails() {
   );
 
   const canAddEvidence = Boolean(
-    isParticipant && DISPUTE_WRITABLE_STATUSES.includes(dispute?.status)
+    !isStaff &&
+      isParticipant &&
+      DISPUTE_WRITABLE_STATUSES.includes(dispute?.status)
   );
 
   async function loadCase(showLoader = false) {
@@ -11045,7 +11193,7 @@ function DisputeDetails() {
 
       let conversationMessages = [];
 
-      if (participant) {
+      if (participant && !isStaff) {
         const { data, error } = await supabase
           .from("messages")
           .select("id, sender_id, content, created_at")
@@ -11099,11 +11247,12 @@ function DisputeDetails() {
   }
 
   useEffect(() => {
+    if (staffLoading) return;
     loadCase(true);
-  }, [id, user?.id]);
+  }, [id, user?.id, isStaff, staffLoading]);
 
   useEffect(() => {
-    if (!id || !user?.id) return;
+    if (!id || !user?.id || staffLoading) return;
 
     const refresh = () => loadCase(false);
     const channel = supabase
@@ -11136,7 +11285,7 @@ function DisputeDetails() {
       .subscribe();
 
     return () => supabase.removeChannel(channel);
-  }, [id, user?.id]);
+  }, [id, user?.id, staffLoading, isStaff]);
 
   useEffect(() => {
     if (
@@ -11430,10 +11579,14 @@ function DisputeDetails() {
     );
   }
 
-  if (loading || staffLoading) {
+  if (staffLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (loading) {
     return (
       <div className="account-page disputes-page">
-        <AccountNavbar />
+        {isStaff ? <AdminNavbar /> : <AccountNavbar />}
         <main className="disputes-shell">
           <div className="dispute-state-card">Ładowanie szczegółów sprawy...</div>
         </main>
@@ -11444,7 +11597,7 @@ function DisputeDetails() {
   if (!dispute) {
     return (
       <div className="account-page disputes-page">
-        <AccountNavbar />
+        {isStaff ? <AdminNavbar /> : <AccountNavbar />}
         <main className="disputes-shell">
           <div className="dispute-state-card is-error">
             <h1>Nie znaleziono sprawy</h1>
@@ -11452,7 +11605,7 @@ function DisputeDetails() {
             <button
               type="button"
               className="dispute-secondary-button"
-              onClick={() => navigate("/disputes")}
+              onClick={() => navigate(isStaff ? "/admin" : "/disputes")}
             >
               Wróć do centrum sporów
             </button>
@@ -11473,14 +11626,16 @@ function DisputeDetails() {
   const currentDecision = decisions.find((item) => item.is_current);
   const alreadyAppealed = appeals.some((item) => item.appealed_by === user.id);
   const appealIsOpen = Boolean(
-    isParticipant &&
+    !isStaff &&
+      isParticipant &&
       dispute.status === "decision_issued" &&
       dispute.appeal_deadline_at &&
       new Date(dispute.appeal_deadline_at).getTime() >= Date.now() &&
       !alreadyAppealed
   );
   const canCancel = Boolean(
-    isParticipant &&
+    !isStaff &&
+      isParticipant &&
       dispute.opened_by === user.id &&
       dispute.status === "awaiting_response" &&
       !statements.some(
@@ -11496,7 +11651,7 @@ function DisputeDetails() {
 
   return (
     <div className="account-page disputes-page">
-      <AccountNavbar />
+      {isStaff ? <AdminNavbar /> : <AccountNavbar />}
 
       <main className="disputes-shell dispute-details-shell">
         <div className="dispute-back-row">
@@ -11953,31 +12108,60 @@ function DisputeDetails() {
 
             <section className="dispute-panel dispute-parties-card">
               <span className="dispute-eyebrow">Strony</span>
-              <Link to={`/profile/${dispute.client_id}`}>
-                <div className="dispute-party-avatar">
-                  {profiles[dispute.client_id]?.avatar_url ? (
-                    <img src={profiles[dispute.client_id].avatar_url} alt="" />
-                  ) : clientName.charAt(0).toUpperCase()}
+              {isStaff ? (
+                <div className="dispute-party-row">
+                  <div className="dispute-party-avatar">
+                    {profiles[dispute.client_id]?.avatar_url ? (
+                      <img src={profiles[dispute.client_id].avatar_url} alt="" />
+                    ) : clientName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <small>Zleceniodawca</small>
+                    <strong>{clientName}</strong>
+                  </div>
                 </div>
-                <div>
-                  <small>Zleceniodawca</small>
-                  <strong>{clientName}</strong>
+              ) : (
+                <Link to={`/profile/${dispute.client_id}`}>
+                  <div className="dispute-party-avatar">
+                    {profiles[dispute.client_id]?.avatar_url ? (
+                      <img src={profiles[dispute.client_id].avatar_url} alt="" />
+                    ) : clientName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <small>Zleceniodawca</small>
+                    <strong>{clientName}</strong>
+                  </div>
+                </Link>
+              )}
+
+              {isStaff ? (
+                <div className="dispute-party-row">
+                  <div className="dispute-party-avatar">
+                    {profiles[dispute.contractor_id]?.avatar_url ? (
+                      <img src={profiles[dispute.contractor_id].avatar_url} alt="" />
+                    ) : contractorName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <small>Wykonawca</small>
+                    <strong>{contractorName}</strong>
+                  </div>
                 </div>
-              </Link>
-              <Link to={`/profile/${dispute.contractor_id}`}>
-                <div className="dispute-party-avatar">
-                  {profiles[dispute.contractor_id]?.avatar_url ? (
-                    <img src={profiles[dispute.contractor_id].avatar_url} alt="" />
-                  ) : contractorName.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <small>Wykonawca</small>
-                  <strong>{contractorName}</strong>
-                </div>
-              </Link>
+              ) : (
+                <Link to={`/profile/${dispute.contractor_id}`}>
+                  <div className="dispute-party-avatar">
+                    {profiles[dispute.contractor_id]?.avatar_url ? (
+                      <img src={profiles[dispute.contractor_id].avatar_url} alt="" />
+                    ) : contractorName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <small>Wykonawca</small>
+                    <strong>{contractorName}</strong>
+                  </div>
+                </Link>
+              )}
             </section>
 
-            {isParticipant && (
+            {isParticipant && !isStaff && (
               <Link
                 className="dispute-secondary-button is-full"
                 to={`/chat/${dispute.conversation_id}`}
@@ -11998,6 +12182,435 @@ function DisputeDetails() {
             )}
           </aside>
         </div>
+      </main>
+    </div>
+  );
+}
+
+function AdminJobs() {
+  const { user } = useAuth();
+  const [jobs, setJobs] = useState([]);
+  const [profiles, setProfiles] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("Wszystkie");
+
+  async function loadAdminJobs() {
+    if (!user?.id) return;
+
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("id, user_id, title, description, category, budget, created_at")
+      .order("created_at", { ascending: false })
+      .limit(300);
+
+    if (error) throw error;
+
+    const rows = data || [];
+    const ownerIds = [...new Set(rows.map((job) => job.user_id).filter(Boolean))];
+    let profileMap = {};
+
+    if (ownerIds.length > 0) {
+      const { data: profileRows, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, name, avatar_url")
+        .in("id", ownerIds);
+
+      if (profileError) {
+        console.error("ADMIN JOB PROFILES ERROR:", profileError);
+      } else {
+        profileMap = Object.fromEntries(
+          (profileRows || []).map((profile) => [profile.id, profile])
+        );
+      }
+    }
+
+    setJobs(rows);
+    setProfiles(profileMap);
+  }
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+
+    async function prepare() {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        await loadAdminJobs();
+      } catch (error) {
+        if (mounted) {
+          setMessage(
+            cleanSupabaseError(error, "Nie udało się pobrać zleceń do podglądu.")
+          );
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    prepare();
+
+    const channel = supabase
+      .channel(`admin-jobs-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "jobs" },
+        () => loadAdminJobs().catch(console.error)
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const visibleJobs = jobs.filter((job) => {
+    if (category !== "Wszystkie" && job.category !== category) return false;
+    if (!normalizedSearch) return true;
+
+    const ownerName = getDisputeProfileName(
+      profiles[job.user_id],
+      "Użytkownik"
+    );
+
+    return [job.title, job.description, job.category, ownerName]
+      .some((value) =>
+        String(value || "").toLowerCase().includes(normalizedSearch)
+      );
+  });
+
+  return (
+    <div className="account-page admin-page">
+      <AdminNavbar />
+
+      <main className="admin-shell admin-readonly-shell">
+        <header className="admin-page-header">
+          <div>
+            <span className="section-label">Tryb tylko do odczytu</span>
+            <h1>Zlecenia użytkowników</h1>
+            <p>
+              Administracja może sprawdzać treść i cenę zleceń, ale nie może ich tworzyć, edytować ani usuwać.
+            </p>
+          </div>
+          <span className="admin-readonly-badge">Tylko podgląd</span>
+        </header>
+
+        <section className="admin-catalog-toolbar" aria-label="Wyszukiwanie zleceń">
+          <label className="admin-search-field">
+            <span>Szukaj</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Nazwa, opis, kategoria lub użytkownik..."
+            />
+          </label>
+
+          <label className="admin-filter-field">
+            <span>Kategoria</span>
+            <select
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            >
+              <option value="Wszystkie">Wszystkie</option>
+              {JOB_CATEGORIES.map((item) => (
+                <option value={item} key={item}>{item}</option>
+              ))}
+            </select>
+          </label>
+        </section>
+
+        {loading ? (
+          <div className="dispute-state-card">Ładowanie zleceń...</div>
+        ) : message ? (
+          <div className="dispute-state-card is-error">{message}</div>
+        ) : visibleJobs.length === 0 ? (
+          <div className="dispute-state-card">
+            <h2>Brak pasujących zleceń</h2>
+            <p>Zmień wyszukiwanie albo wybierz inną kategorię.</p>
+          </div>
+        ) : (
+          <div className="admin-jobs-grid">
+            {visibleJobs.map((job) => {
+              const owner = profiles[job.user_id];
+              const ownerName = getDisputeProfileName(owner, "Użytkownik");
+
+              return (
+                <article className="admin-job-card" key={job.id}>
+                  <div className="admin-job-card-topline">
+                    <span className="section-label">{job.category || "Bez kategorii"}</span>
+                    <span className="admin-readonly-badge is-small">Podgląd</span>
+                  </div>
+
+                  <h2>{job.title}</h2>
+                  <p>{job.description}</p>
+
+                  <div className="admin-job-details">
+                    <div>
+                      <span>Budżet</span>
+                      <strong>{formatDisputeMoney(job.budget, "PLN")}</strong>
+                    </div>
+                    <div>
+                      <span>Opublikowano</span>
+                      <strong>{formatDisputeDate(job.created_at, false)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="admin-job-owner">
+                    <div className="admin-staff-avatar">
+                      {owner?.avatar_url ? (
+                        <img src={owner.avatar_url} alt="" />
+                      ) : ownerName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <small>Zleceniodawca</small>
+                      <strong>{ownerName}</strong>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function AdminEvidenceMessages() {
+  const { user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [disputesById, setDisputesById] = useState({});
+  const [profiles, setProfiles] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [search, setSearch] = useState("");
+
+  async function loadEvidenceMessages() {
+    if (!user?.id) return;
+
+    const { data, error } = await supabase
+      .from("dispute_message_evidence")
+      .select(
+        "id, dispute_id, message_id, message_sender_id, message_content_snapshot, message_created_at_snapshot, submitted_by, created_at"
+      )
+      .order("created_at", { ascending: false })
+      .limit(300);
+
+    if (error) throw error;
+
+    const rows = data || [];
+    const disputeIds = [...new Set(rows.map((item) => item.dispute_id).filter(Boolean))];
+    let disputeMap = {};
+
+    if (disputeIds.length > 0) {
+      const { data: disputeRows, error: disputeError } = await supabase
+        .from("disputes")
+        .select("id, case_number, job_title_snapshot, status, client_id, contractor_id")
+        .in("id", disputeIds);
+
+      if (disputeError) throw disputeError;
+
+      disputeMap = Object.fromEntries(
+        (disputeRows || []).map((dispute) => [dispute.id, dispute])
+      );
+    }
+
+    const profileIds = [
+      ...rows.flatMap((item) => [item.message_sender_id, item.submitted_by]),
+      ...Object.values(disputeMap).flatMap((dispute) => [
+        dispute.client_id,
+        dispute.contractor_id,
+      ]),
+    ].filter(Boolean);
+    const uniqueProfileIds = [...new Set(profileIds)];
+    let profileMap = {};
+
+    if (uniqueProfileIds.length > 0) {
+      const { data: profileRows, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, name, avatar_url")
+        .in("id", uniqueProfileIds);
+
+      if (profileError) {
+        console.error("ADMIN EVIDENCE PROFILES ERROR:", profileError);
+      } else {
+        profileMap = Object.fromEntries(
+          (profileRows || []).map((profile) => [profile.id, profile])
+        );
+      }
+    }
+
+    setItems(rows);
+    setDisputesById(disputeMap);
+    setProfiles(profileMap);
+  }
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+
+    async function prepare() {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        await loadEvidenceMessages();
+      } catch (error) {
+        if (mounted) {
+          setMessage(
+            cleanSupabaseError(
+              error,
+              "Nie udało się pobrać wiadomości dołączonych do sporów."
+            )
+          );
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    prepare();
+
+    const channel = supabase
+      .channel(`admin-evidence-messages-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "dispute_message_evidence",
+        },
+        () => loadEvidenceMessages().catch(console.error)
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const visibleItems = items.filter((item) => {
+    if (!normalizedSearch) return true;
+
+    const dispute = disputesById[item.dispute_id];
+    const senderName = getDisputeProfileName(
+      profiles[item.message_sender_id],
+      "Użytkownik"
+    );
+    const caseNumber = dispute
+      ? formatDisputeNumber(dispute.case_number)
+      : "";
+
+    return [
+      item.message_content_snapshot,
+      dispute?.job_title_snapshot,
+      senderName,
+      caseNumber,
+    ].some((value) =>
+      String(value || "").toLowerCase().includes(normalizedSearch)
+    );
+  });
+
+  return (
+    <div className="account-page admin-page">
+      <AdminNavbar />
+
+      <main className="admin-shell admin-readonly-shell">
+        <header className="admin-page-header">
+          <div>
+            <span className="section-label">Prywatność i dowody</span>
+            <h1>Wiadomości w sporach</h1>
+            <p>
+              Widoczne są wyłącznie wiadomości, które uczestnik świadomie dołączył jako dowód. Administracja nie otrzymuje dostępu do całych rozmów.
+            </p>
+          </div>
+          <span className="admin-readonly-badge">Tylko podgląd</span>
+        </header>
+
+        <section className="admin-catalog-toolbar is-single" aria-label="Wyszukiwanie wiadomości">
+          <label className="admin-search-field">
+            <span>Szukaj wiadomości</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Treść, użytkownik, zlecenie lub numer sprawy..."
+            />
+          </label>
+        </section>
+
+        <div className="admin-privacy-note">
+          <strong>Kontrolowany dostęp</strong>
+          <p>
+            Każda wiadomość poniżej jest niezmienną kopią dołączoną do konkretnej sprawy. Wejście administratora w szczegóły sprawy zapisuje się w rejestrze działań.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="dispute-state-card">Ładowanie wiadomości dowodowych...</div>
+        ) : message ? (
+          <div className="dispute-state-card is-error">{message}</div>
+        ) : visibleItems.length === 0 ? (
+          <div className="dispute-state-card">
+            <h2>Brak wiadomości dowodowych</h2>
+            <p>Użytkownicy nie dołączyli jeszcze wiadomości do spraw albo nic nie pasuje do wyszukiwania.</p>
+          </div>
+        ) : (
+          <div className="admin-evidence-message-list">
+            {visibleItems.map((item) => {
+              const dispute = disputesById[item.dispute_id];
+              const senderName = getDisputeProfileName(
+                profiles[item.message_sender_id],
+                "Użytkownik"
+              );
+              const submitterName = getDisputeProfileName(
+                profiles[item.submitted_by],
+                "Użytkownik"
+              );
+
+              return (
+                <article className="admin-evidence-message-card" key={item.id}>
+                  <div className="admin-evidence-message-heading">
+                    <div>
+                      <span className="dispute-case-number">
+                        {dispute
+                          ? formatDisputeNumber(dispute.case_number)
+                          : "Sprawa"}
+                      </span>
+                      <h2>{dispute?.job_title_snapshot || "Zlecenie"}</h2>
+                    </div>
+                    {dispute && <DisputeStatusPill status={dispute.status} />}
+                  </div>
+
+                  <blockquote>{item.message_content_snapshot}</blockquote>
+
+                  <div className="admin-evidence-message-meta">
+                    <span>Autor wiadomości: <strong>{senderName}</strong></span>
+                    <span>Dołączył: <strong>{submitterName}</strong></span>
+                    <span>Wysłano: {formatDisputeDate(item.message_created_at_snapshot)}</span>
+                  </div>
+
+                  <Link
+                    className="dispute-secondary-button"
+                    to={`/disputes/${item.dispute_id}`}
+                  >
+                    Otwórz powiązaną sprawę
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </main>
     </div>
   );
@@ -12147,7 +12760,7 @@ function AdminPanel() {
   if (staffLoading || loading) {
     return (
       <div className="account-page admin-page">
-        <AccountNavbar />
+        <AdminNavbar />
         <main className="admin-shell">
           <div className="dispute-state-card">Ładowanie panelu administratora...</div>
         </main>
@@ -12196,7 +12809,7 @@ function AdminPanel() {
 
   return (
     <div className="account-page admin-page">
-      <AccountNavbar />
+      <AdminNavbar />
 
       <main className="admin-shell">
         <header className="admin-page-header">
@@ -12366,11 +12979,29 @@ function Home() {
   const {
     loading,
     session,
+    user,
   } =
     useAuth();
 
-  if (loading) {
+  const {
+    isStaff,
+    staffLoading,
+  } = useStaffRole(user?.id);
+
+  if (
+    loading ||
+    (user?.id && staffLoading)
+  ) {
     return <LoadingScreen />;
+  }
+
+  if (isStaff) {
+    return (
+      <Navigate
+        to="/admin"
+        replace
+      />
+    );
   }
 
   return (
@@ -12487,7 +13118,9 @@ function Router() {
             path="/account"
             element={
               <ProtectedRoute>
-                <Account />
+                <UserOnlyRoute>
+                  <Account />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12496,7 +13129,9 @@ function Router() {
             path="/find-talent"
             element={
               <ProtectedRoute>
-                <FindTalent />
+                <UserOnlyRoute>
+                  <FindTalent />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12505,7 +13140,9 @@ function Router() {
             path="/edit-job/:id"
             element={
               <ProtectedRoute>
-                <EditJob />
+                <UserOnlyRoute>
+                  <EditJob />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12514,7 +13151,9 @@ function Router() {
             path="/jobs"
             element={
               <ProtectedRoute>
-                <Jobs />
+                <UserOnlyRoute>
+                  <Jobs />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12523,7 +13162,9 @@ function Router() {
             path="/profile/:id"
             element={
               <ProtectedRoute>
-                <Profile />
+                <UserOnlyRoute>
+                  <Profile />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12532,7 +13173,9 @@ function Router() {
             path="/notifications"
             element={
               <ProtectedRoute>
-                <Notifications />
+                <UserOnlyRoute>
+                  <Notifications />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12541,7 +13184,9 @@ function Router() {
             path="/messages"
             element={
               <ProtectedRoute>
-                <Messages />
+                <UserOnlyRoute>
+                  <Messages />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12550,7 +13195,9 @@ function Router() {
             path="/chat/:id"
             element={
               <ProtectedRoute>
-                <Chat />
+                <UserOnlyRoute>
+                  <Chat />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12559,7 +13206,9 @@ function Router() {
             path="/disputes"
             element={
               <ProtectedRoute>
-                <Disputes />
+                <UserOnlyRoute>
+                  <Disputes />
+                </UserOnlyRoute>
               </ProtectedRoute>
             }
           />
@@ -12577,7 +13226,31 @@ function Router() {
             path="/admin"
             element={
               <ProtectedRoute>
-                <AdminPanel />
+                <StaffOnlyRoute>
+                  <AdminPanel />
+                </StaffOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/jobs"
+            element={
+              <ProtectedRoute>
+                <StaffOnlyRoute>
+                  <AdminJobs />
+                </StaffOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/messages"
+            element={
+              <ProtectedRoute>
+                <StaffOnlyRoute>
+                  <AdminEvidenceMessages />
+                </StaffOnlyRoute>
               </ProtectedRoute>
             }
           />
