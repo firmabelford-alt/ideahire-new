@@ -1536,6 +1536,685 @@ html[data-theme="dark"] :focus-visible {
     width: 310px;
   }
 }
+
+/* =========================================================
+   DEDICATED ADMINISTRATIVE MODE
+========================================================= */
+
+.admin-navbar {
+  width: min(1180px, calc(100% - 40px));
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: minmax(190px, 0.8fr) minmax(0, auto) minmax(220px, 0.9fr);
+  align-items: center;
+  gap: 18px;
+  margin: 0 auto;
+}
+
+.admin-navbar-brand {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  justify-self: start;
+}
+
+.admin-navbar-label {
+  min-height: 25px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border: 1px solid #d6d6d0;
+  border-radius: 999px;
+  background: #f3f3ef;
+  color: #666660;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-nav-links {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid #111;
+  border-radius: 17px;
+  background: #111;
+  box-shadow: 0 12px 30px rgba(17, 17, 17, 0.14);
+}
+
+.admin-nav-links a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 11px;
+  color: #d6d6d1;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease;
+}
+
+.admin-nav-links a:hover {
+  color: #fff;
+  background: #282827;
+}
+
+.admin-nav-links a.is-active {
+  color: #111;
+  background: #fff;
+}
+
+.admin-navbar-actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.admin-navbar-identity {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.admin-navbar-identity strong,
+.admin-navbar-identity span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-navbar-identity strong {
+  color: #272725;
+  font-size: 11px;
+}
+
+.admin-navbar-identity span {
+  color: #82827c;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.admin-logout-button {
+  min-height: 42px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 1px solid #d8d8d2;
+  border-radius: 12px;
+  background: #fff;
+  color: #292927;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.admin-logout-button:hover {
+  transform: translateY(-1px);
+  border-color: #aaa9a2;
+  box-shadow: 0 8px 20px rgba(17, 17, 17, 0.07);
+}
+
+.admin-readonly-shell {
+  min-width: 0;
+}
+
+.admin-readonly-badge {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: 1px solid #bfc8bd;
+  border-radius: 999px;
+  background: #eef4ed;
+  color: #456043;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.admin-readonly-badge.is-small {
+  min-height: 26px;
+  padding: 5px 8px;
+  font-size: 8px;
+}
+
+.admin-catalog-toolbar {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 0.28fr);
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 17px;
+  border: 1px solid #e0e0da;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 28px rgba(17, 17, 17, 0.035);
+}
+
+.admin-catalog-toolbar.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-search-field,
+.admin-filter-field {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.admin-search-field > span,
+.admin-filter-field > span {
+  color: #686862;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-search-field input,
+.admin-filter-field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 11px 13px;
+  border: 1px solid #d8d8d2;
+  border-radius: 11px;
+  outline: none;
+  background: #fafaf7;
+  color: #20201e;
+  font: inherit;
+  font-size: 13px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.admin-search-field input:focus,
+.admin-filter-field select:focus {
+  border-color: #8d8d86;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.065);
+}
+
+.admin-jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-job-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 21px;
+  border: 1px solid #e0e0da;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 11px 30px rgba(17, 17, 17, 0.04);
+}
+
+.admin-job-card-topline,
+.admin-evidence-message-heading {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-job-card h2 {
+  margin: 12px 0 8px;
+  color: #1b1b19;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.admin-job-card > p {
+  display: -webkit-box;
+  min-height: 70px;
+  margin: 0 0 16px;
+  overflow: hidden;
+  color: #6b6b65;
+  font-size: 12px;
+  line-height: 1.62;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.admin-job-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: auto;
+}
+
+.admin-job-details > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 11px;
+  border-radius: 11px;
+  background: #f4f4f0;
+}
+
+.admin-job-details span,
+.admin-job-owner small {
+  color: #85857f;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-job-details strong {
+  color: #333330;
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.admin-job-owner {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid #e7e7e2;
+}
+
+.admin-job-owner > div:last-child {
+  min-width: 0;
+}
+
+.admin-job-owner strong {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #2f2f2c;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-privacy-note {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 13px;
+  margin-bottom: 18px;
+  padding: 15px 17px;
+  border: 1px solid #cfdacf;
+  border-radius: 15px;
+  background: #f3f8f2;
+}
+
+.admin-privacy-note strong {
+  color: #385238;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.admin-privacy-note p {
+  margin: 0;
+  color: #627061;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.admin-evidence-message-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-evidence-message-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e0e0da;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(17, 17, 17, 0.04);
+}
+
+.admin-evidence-message-heading > div {
+  min-width: 0;
+}
+
+.admin-evidence-message-heading h2 {
+  margin: 6px 0 0;
+  color: #222220;
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+.admin-evidence-message-card blockquote {
+  margin: 16px 0;
+  padding: 15px 16px;
+  border: 0;
+  border-left: 3px solid #9b9b94;
+  border-radius: 0 12px 12px 0;
+  background: #f6f6f2;
+  color: #343431;
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-evidence-message-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 15px;
+  color: #7a7a74;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.admin-evidence-message-meta strong {
+  color: #4a4a46;
+}
+
+.dispute-parties-card > .dispute-party-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #e4e4df;
+  border-radius: 12px;
+  background: #fafaf7;
+}
+
+.dispute-party-row > div:last-child {
+  min-width: 0;
+}
+
+.dispute-party-row small,
+.dispute-party-row strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dispute-party-row small {
+  margin-bottom: 3px;
+  color: #85857f;
+  font-size: 9px;
+}
+
+.dispute-party-row strong {
+  color: #292927;
+  font-size: 12px;
+}
+
+/* Dark administrative mode */
+
+html[data-theme="dark"] .admin-navbar-label {
+  border-color: #3c3c38;
+  background: #20201e;
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .admin-nav-links {
+  border-color: #383834;
+  background: #090909;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .admin-nav-links a {
+  color: #d4d4cf;
+}
+
+html[data-theme="dark"] .admin-nav-links a:hover {
+  color: #fff;
+  background: #252524;
+}
+
+html[data-theme="dark"] .admin-nav-links a.is-active {
+  background: #f3f3ef;
+  color: #111;
+}
+
+html[data-theme="dark"] .admin-navbar-identity strong,
+html[data-theme="dark"] .admin-job-card h2,
+html[data-theme="dark"] .admin-job-details strong,
+html[data-theme="dark"] .admin-job-owner strong,
+html[data-theme="dark"] .admin-evidence-message-heading h2,
+html[data-theme="dark"] .admin-evidence-message-card blockquote,
+html[data-theme="dark"] .dispute-party-row strong {
+  color: #f1f1ed;
+}
+
+html[data-theme="dark"] .admin-navbar-identity span {
+  color: #999993;
+}
+
+html[data-theme="dark"] .admin-logout-button {
+  border-color: #41413c;
+  background: #1d1d1b;
+  color: #efefeb;
+}
+
+html[data-theme="dark"] .admin-logout-button:hover {
+  border-color: #66665f;
+  background: #252523;
+}
+
+html[data-theme="dark"] .admin-readonly-badge {
+  border-color: #3e5c41;
+  background: #1c2d1e;
+  color: #a9d4ac;
+}
+
+html[data-theme="dark"] .admin-catalog-toolbar,
+html[data-theme="dark"] .admin-job-card,
+html[data-theme="dark"] .admin-evidence-message-card {
+  border-color: #343430;
+  background: #191918;
+  box-shadow: 0 11px 30px rgba(0, 0, 0, 0.16);
+}
+
+html[data-theme="dark"] .admin-search-field input,
+html[data-theme="dark"] .admin-filter-field select {
+  border-color: #42423d;
+  background: #111110;
+  color: #efefeb;
+}
+
+html[data-theme="dark"] .admin-search-field input::placeholder {
+  color: #777771;
+}
+
+html[data-theme="dark"] .admin-job-card > p,
+html[data-theme="dark"] .admin-privacy-note p,
+html[data-theme="dark"] .admin-evidence-message-meta {
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .admin-job-details > div,
+html[data-theme="dark"] .admin-evidence-message-card blockquote {
+  background: #232321;
+}
+
+html[data-theme="dark"] .admin-job-owner {
+  border-color: #3a3a36;
+}
+
+html[data-theme="dark"] .admin-privacy-note {
+  border-color: #345038;
+  background: #19251b;
+}
+
+html[data-theme="dark"] .admin-privacy-note strong {
+  color: #aad0ad;
+}
+
+html[data-theme="dark"] .admin-evidence-message-card blockquote {
+  border-left-color: #6f6f68;
+}
+
+html[data-theme="dark"] .admin-evidence-message-meta strong {
+  color: #d2d2cc;
+}
+
+html[data-theme="dark"] .dispute-parties-card > .dispute-party-row {
+  border-color: #393935;
+  background: #20201e;
+}
+
+/* Responsive administrative mode */
+
+@media (max-width: 1040px) {
+  .admin-navbar {
+    grid-template-columns: minmax(180px, 1fr) minmax(0, 1.5fr);
+    grid-template-areas:
+      "brand actions"
+      "links links";
+    gap: 10px 14px;
+    padding: 12px 0 14px;
+  }
+
+  .admin-navbar-brand {
+    grid-area: brand;
+  }
+
+  .admin-nav-links {
+    width: 100%;
+    grid-area: links;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .admin-nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-navbar-actions {
+    grid-area: actions;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-navbar {
+    width: calc(100% - 28px);
+  }
+
+  .admin-nav-links {
+    padding: 5px;
+  }
+
+  .admin-nav-links a {
+    min-height: 40px;
+    flex: 0 0 auto;
+    padding: 9px 11px;
+    font-size: 10px;
+  }
+
+  .admin-navbar-identity strong {
+    max-width: 120px;
+  }
+
+  .admin-catalog-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+
+  .admin-jobs-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-privacy-note {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-navbar {
+    width: calc(100% - 22px);
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+
+  .admin-navbar-brand {
+    gap: 7px;
+  }
+
+  .admin-navbar-brand .logo {
+    font-size: 18px;
+  }
+
+  .admin-navbar-label {
+    padding-inline: 6px;
+    font-size: 7px;
+  }
+
+  .admin-navbar-identity {
+    display: none;
+  }
+
+  .admin-logout-button {
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+
+  .admin-job-card,
+  .admin-evidence-message-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .admin-job-card h2 {
+    font-size: 18px;
+  }
+
+  .admin-job-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-evidence-message-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-evidence-message-card .dispute-secondary-button {
+    width: 100%;
+  }
+}
 /* =========================================================
    ACCOUNT / PROFILE
 ========================================================= */
