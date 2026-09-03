@@ -9,6 +9,439 @@
   text-rendering: optimizeLegibility;
 }
 
+/* =========================================================
+   ADMIN — FULL DISPUTE CONTEXT
+========================================================= */
+
+.admin-case-context-panel > .dispute-panel-heading {
+  align-items: flex-start;
+}
+
+.admin-case-context-panel > .dispute-panel-heading p {
+  max-width: 650px;
+  margin: 7px 0 0;
+  color: #74746e;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.admin-context-locked,
+.admin-context-error,
+.admin-context-loading {
+  min-width: 0;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #dfdfd9;
+  border-radius: 16px;
+  background: #f7f7f3;
+}
+
+.admin-context-locked {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.admin-context-lock-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #191918;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.admin-context-locked strong,
+.admin-context-error strong {
+  display: block;
+  color: #292927;
+  font-size: 12px;
+}
+
+.admin-context-locked p,
+.admin-context-error p {
+  margin: 5px 0 0;
+  color: #74746e;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.admin-context-error {
+  border-color: #e1c4c1;
+  background: #fff5f3;
+}
+
+.admin-context-error strong {
+  color: #8a3029;
+}
+
+.admin-context-loading {
+  color: #676761;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.admin-context-access-note {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px 13px;
+  margin: 17px 0 13px;
+  padding: 11px 13px;
+  border: 1px solid #cad8c9;
+  border-radius: 13px;
+  background: #f1f7f0;
+}
+
+.admin-context-access-note strong {
+  flex: 0 0 auto;
+  color: #38543a;
+  font-size: 10px;
+}
+
+.admin-context-access-note span {
+  color: #637164;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.admin-case-context-grid {
+  min-width: 0;
+  display: grid;
+  gap: 13px;
+}
+
+.admin-context-section {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dfdfda;
+  border-radius: 17px;
+  background: #fff;
+}
+
+.admin-context-section > summary {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.admin-context-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-context-section > summary > span:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.admin-context-section > summary small {
+  color: #888882;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-context-section > summary strong {
+  color: #292927;
+  font-size: 14px;
+}
+
+.admin-context-section-body {
+  min-width: 0;
+  padding: 0 16px 16px;
+  border-top: 1px solid #eeeeea;
+}
+
+.admin-agreement-history {
+  display: grid;
+  gap: 12px;
+  padding-top: 15px;
+}
+
+.admin-agreement-version {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e3e3de;
+  border-radius: 14px;
+  background: #fafaf7;
+}
+
+.admin-agreement-version.is-accepted {
+  border-color: #bed0bd;
+  background: #f5faf4;
+}
+
+.admin-agreement-version-heading {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.admin-agreement-version-heading > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.admin-agreement-version-heading span {
+  color: #83837d;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-agreement-version-heading strong {
+  color: #333330;
+  font-size: 11px;
+}
+
+.admin-current-version-badge {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #1c1c1a;
+  color: #fff !important;
+  font-size: 7px !important;
+}
+
+.admin-agreement-version .agreement-details {
+  margin: 0;
+}
+
+.admin-agreement-acceptance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #e2e2dc;
+  color: #73736d;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.admin-full-chat {
+  min-width: 0;
+  max-height: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 15px;
+  padding: 4px 4px 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.admin-chat-message {
+  width: min(82%, 650px);
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #dfdfda;
+  border-radius: 15px 15px 15px 5px;
+  background: #f5f5f1;
+}
+
+.admin-chat-message.is-contractor {
+  align-self: flex-end;
+  border-color: #cfcfca;
+  border-radius: 15px 15px 5px 15px;
+  background: #1e1e1c;
+}
+
+.admin-chat-message-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 6px;
+}
+
+.admin-chat-message-meta strong {
+  color: #2d2d2a;
+  font-size: 9px;
+}
+
+.admin-chat-message-meta span,
+.admin-chat-message-meta time {
+  color: #85857f;
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.admin-chat-message-meta time {
+  margin-left: auto;
+}
+
+.admin-chat-message p {
+  margin: 0;
+  color: #41413d;
+  font-size: 11px;
+  line-height: 1.58;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-chat-message.is-contractor .admin-chat-message-meta strong,
+.admin-chat-message.is-contractor p {
+  color: #f2f2ee;
+}
+
+.admin-chat-message.is-contractor .admin-chat-message-meta span,
+.admin-chat-message.is-contractor .admin-chat-message-meta time {
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .admin-case-context-panel > .dispute-panel-heading p,
+html[data-theme="dark"] .admin-context-locked p,
+html[data-theme="dark"] .admin-context-error p,
+html[data-theme="dark"] .admin-context-loading,
+html[data-theme="dark"] .admin-agreement-acceptance {
+  color: #aaa9a3;
+}
+
+html[data-theme="dark"] .admin-context-locked,
+html[data-theme="dark"] .admin-context-loading,
+html[data-theme="dark"] .admin-context-section,
+html[data-theme="dark"] .admin-agreement-version {
+  border-color: #393935;
+  background: #1b1b19;
+}
+
+html[data-theme="dark"] .admin-context-lock-icon,
+html[data-theme="dark"] .admin-current-version-badge {
+  background: #f1f1ed;
+  color: #111 !important;
+}
+
+html[data-theme="dark"] .admin-context-locked strong,
+html[data-theme="dark"] .admin-context-section > summary strong,
+html[data-theme="dark"] .admin-agreement-version-heading strong {
+  color: #f0f0ec;
+}
+
+html[data-theme="dark"] .admin-context-error {
+  border-color: #633d39;
+  background: #2b1d1b;
+}
+
+html[data-theme="dark"] .admin-context-error strong {
+  color: #efaaa3;
+}
+
+html[data-theme="dark"] .admin-context-access-note {
+  border-color: #345038;
+  background: #19251b;
+}
+
+html[data-theme="dark"] .admin-context-access-note strong {
+  color: #aad0ad;
+}
+
+html[data-theme="dark"] .admin-context-access-note span {
+  color: #99b09b;
+}
+
+html[data-theme="dark"] .admin-context-section-body,
+html[data-theme="dark"] .admin-agreement-acceptance {
+  border-color: #373733;
+}
+
+html[data-theme="dark"] .admin-agreement-version.is-accepted {
+  border-color: #3f6042;
+  background: #1a291c;
+}
+
+html[data-theme="dark"] .admin-chat-message {
+  border-color: #3d3d39;
+  background: #242422;
+}
+
+html[data-theme="dark"] .admin-chat-message-meta strong,
+html[data-theme="dark"] .admin-chat-message p {
+  color: #eeeeea;
+}
+
+html[data-theme="dark"] .admin-chat-message.is-contractor {
+  border-color: #d8d8d2;
+  background: #e9e9e4;
+}
+
+html[data-theme="dark"] .admin-chat-message.is-contractor .admin-chat-message-meta strong,
+html[data-theme="dark"] .admin-chat-message.is-contractor p {
+  color: #181816;
+}
+
+html[data-theme="dark"] .admin-chat-message.is-contractor .admin-chat-message-meta span,
+html[data-theme="dark"] .admin-chat-message.is-contractor .admin-chat-message-meta time {
+  color: #676762;
+}
+
+@media (max-width: 760px) {
+  .admin-case-context-panel > .dispute-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-context-access-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-chat-message {
+    width: 91%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-context-locked {
+    align-items: flex-start;
+  }
+
+  .admin-context-section > summary,
+  .admin-context-section-body {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .admin-agreement-version {
+    padding: 12px;
+  }
+
+  .admin-agreement-version-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-chat-message {
+    width: 96%;
+    padding: 11px 12px;
+  }
+
+  .admin-chat-message-meta time {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
