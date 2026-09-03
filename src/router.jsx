@@ -1,3 +1,4 @@
+
 import React, {
   useEffect,
   useState,
@@ -8238,6 +8239,7 @@ const EMPTY_DISPUTE_FORM = {
   requestedOutcome: "",
   requestedAmount: "",
   description: "",
+  contextNoticeAcknowledged: false,
 };
 
 function ChatDisputePanel({
@@ -8339,6 +8341,13 @@ function ChatDisputePanel({
       return;
     }
 
+    if (!form.contextNoticeAcknowledged) {
+      setMessage(
+        "Potwierdź zapoznanie się z informacją o dostępie administratora."
+      );
+      return;
+    }
+
     let requestedAmount = null;
 
     if (form.requestedOutcome === "partial_refund") {
@@ -8363,13 +8372,15 @@ function ChatDisputePanel({
 
     try {
       const { data, error } = await supabase.rpc(
-        "open_ideahire_dispute",
+        "open_ideahire_dispute_v2",
         {
           p_agreement_id: agreement.id,
           p_reason: form.reason,
           p_description: description,
           p_requested_outcome: form.requestedOutcome,
           p_requested_amount: requestedAmount,
+          p_context_notice_acknowledged:
+            form.contextNoticeAcknowledged,
         }
       );
 
@@ -8550,6 +8561,62 @@ function ChatDisputePanel({
             </label>
           </div>
 
+          <section
+            className="dispute-context-notice"
+            aria-labelledby="dispute-context-notice-title"
+          >
+            <div className="dispute-context-notice-heading">
+              <span className="dispute-context-notice-icon" aria-hidden="true">
+                i
+              </span>
+              <div>
+                <strong id="dispute-context-notice-title">
+                  Jak administracja analizuje spór
+                </strong>
+                <p>
+                  Po przejęciu sprawy przypisany administrator IdeaHire otrzyma
+                  dostęp do materiałów potrzebnych do jej rozpatrzenia.
+                </p>
+              </div>
+            </div>
+
+            <ul className="dispute-context-notice-list">
+              <li>pełna rozmowa dotycząca tego zlecenia,</li>
+              <li>wszystkie wersje formularza współpracy,</li>
+              <li>wyjaśnienia oraz dowody dołączone do sporu.</li>
+            </ul>
+
+            <p className="dispute-context-notice-safety">
+              Dostęp ma wyłącznie administrator przypisany do sprawy, tylko do
+              odczytu. Każde otwarcie pełnego kontekstu jest zapisywane w
+              rejestrze działań.
+            </p>
+
+            <label className="dispute-context-acknowledgement">
+              <input
+                type="checkbox"
+                checked={form.contextNoticeAcknowledged}
+                onChange={(event) =>
+                  updateField(
+                    "contextNoticeAcknowledged",
+                    event.target.checked
+                  )
+                }
+                required
+              />
+              <span>
+                <strong>
+                  Potwierdzam, że zapoznałem się z informacją o dostępie
+                  administratora.
+                </strong>
+                <small>
+                  To potwierdzenie dotyczy zasad analizy sporu i zostanie
+                  zapisane wraz ze zgłoszeniem.
+                </small>
+              </span>
+            </label>
+          </section>
+
           <p className="dispute-form-notice">
             Zgłoszenie zostanie przypisane do zaakceptowanej wersji ustaleń. Cena i termin nie mogą zostać podmienione.
           </p>
@@ -8571,7 +8638,7 @@ function ChatDisputePanel({
             <button
               type="submit"
               className="dispute-primary-button"
-              disabled={saving}
+              disabled={saving || !form.contextNoticeAcknowledged}
             >
               {saving ? "Wysyłanie..." : "Otwórz spór"}
             </button>
@@ -10812,6 +10879,8 @@ const ADMIN_AUDIT_LABELS = {
   admin_granted: "Nadano rolę administratora",
   admin_revoked: "Odebrano rolę administratora",
   dispute_opened: "Otwarto spór",
+  dispute_context_notice_acknowledged:
+    "Potwierdzono informację o dostępie administracji",
   statement_added: "Dodano wyjaśnienie",
   first_response_added: "Dodano pierwszą odpowiedź",
   dispute_cancelled: "Wycofano spór",
@@ -11801,6 +11870,31 @@ function DisputeDetails() {
         {pageMessage && (
           <p className="dispute-page-message" role="status">{pageMessage}</p>
         )}
+
+        <section
+          className="dispute-transparency-banner"
+          aria-labelledby="dispute-transparency-title"
+        >
+          <span className="dispute-transparency-icon" aria-hidden="true">i</span>
+          <div>
+            <strong id="dispute-transparency-title">
+              Kontrolowany dostęp do kontekstu sprawy
+            </strong>
+            <p>
+              Pełną rozmowę, formularz współpracy i dowody może wyświetlić
+              wyłącznie administrator przypisany do tego sporu. Dostęp jest
+              tylko do odczytu, a każde otwarcie zostaje zapisane.
+            </p>
+            {dispute.context_access_acknowledged_at && (
+              <small>
+                Informację potwierdzono przy otwarciu sporu: {" "}
+                {formatDisputeDate(
+                  dispute.context_access_acknowledged_at
+                )}
+              </small>
+            )}
+          </div>
+        </section>
 
         <div className="dispute-detail-grid">
           <div className="dispute-detail-main">
