@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 
 const THEME_KEY = "ideahire_theme";
@@ -432,6 +433,22 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Opis sytuacji": "Description of the situation",
   "Napisz, co się wydarzyło, kiedy wystąpił problem i które ustalenia nie zostały spełnione.": "Describe what happened, when the problem occurred and which terms were not met.",
   "Zgłoszenie zostanie przypisane do zaakceptowanej wersji ustaleń. Cena i termin nie mogą zostać podmienione.": "The report will be linked to the accepted version of the terms. The price and deadline cannot be changed.",
+  "Potwierdź zapoznanie się z informacją o dostępie administratora.": "Confirm that you have read the administrator access notice.",
+  "Nie udało się potwierdzić utworzonego sporu.": "The newly created dispute could not be confirmed.",
+  "Jak administracja analizuje spór": "How the administration reviews a dispute",
+  "Po przejęciu sprawy przypisany administrator IdeaHire otrzyma dostęp do materiałów potrzebnych do jej rozpatrzenia.": "After taking the case, the assigned IdeaHire administrator will receive access to the materials needed to review it.",
+  "pełna rozmowa dotycząca tego zlecenia,": "the full conversation concerning this job,",
+  "wszystkie wersje formularza współpracy,": "all versions of the work agreement form,",
+  "wyjaśnienia oraz dowody dołączone do sporu.": "statements and evidence attached to the dispute.",
+  "Dostęp ma wyłącznie administrator przypisany do sprawy, tylko do odczytu. Każde otwarcie pełnego kontekstu jest zapisywane w rejestrze działań.": "Access is limited to the administrator assigned to the case and is read-only. Every access to the full case context is recorded in the activity log.",
+  "Potwierdzam, że zapoznałem się z informacją o dostępie administratora.": "I confirm that I have read the administrator access notice.",
+  "To potwierdzenie dotyczy zasad analizy sporu i zostanie zapisane wraz ze zgłoszeniem.": "This acknowledgement concerns the dispute review rules and will be stored with the report.",
+  "Kontrolowany dostęp do kontekstu sprawy": "Controlled access to case context",
+  "Pełną rozmowę, formularz współpracy i dowody może wyświetlić wyłącznie administrator przypisany do tego sporu. Dostęp jest tylko do odczytu, a każde otwarcie zostaje zapisane.": "Only the administrator assigned to this dispute can view the full conversation, work agreement form and evidence. Access is read-only and every opening is recorded.",
+  "Informację potwierdzono przy otwarciu sporu:": "Notice acknowledged when the dispute was opened:",
+  "Potwierdzono informację o dostępie administracji": "Acknowledged the administration access notice",
+  "Informacja o dostępie administratora": "Administrator access notice",
+  "W razie analizy sporu przypisany administrator otrzyma dostęp tylko do odczytu do rozmowy, formularza współpracy i dowodów. Każde otwarcie zostanie zapisane.": "If the dispute is reviewed, the assigned administrator will receive read-only access to the conversation, work agreement form and evidence. Every access will be recorded.",
   "Otwórz spór": "Open dispute",
   "Otwórz sprawę": "Open case",
   "Sprawdzanie centrum sporu...": "Checking the dispute center...",
