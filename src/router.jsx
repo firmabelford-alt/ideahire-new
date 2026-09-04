@@ -20,6 +20,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import CookiePolicy from "./CookiePolicy";
 import Sorts, {
   CountryPicker,
   CountryBadge,
@@ -14115,6 +14116,11 @@ function Router() {
             element={
               <ResetPassword />
             }
+          />
+
+          <Route
+            path="/polityka-cookies"
+            element={<CookiePolicy />}
           />
 
           <Route
