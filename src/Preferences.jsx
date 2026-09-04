@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 
 const THEME_KEY = "ideahire_theme";
 const LANGUAGE_KEY = "ideahire_language";
+const COOKIE_NOTICE_KEY = "ideahire_cookie_notice_v1";
+const COOKIE_NOTICE_VERSION = "2026-09-04-v1";
+const COOKIE_NOTICE_LIFETIME = 365 * 24 * 60 * 60 * 1000;
 
 const originalTextByNode = new WeakMap();
 const translatedTextByNode = new WeakMap();
@@ -169,6 +172,7 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Potrzebuję nowoczesnej": "I need a modern",
   "Potrzebuję spójnego logo oraz podstawowych materiałów graficznych.": "I need a consistent logo and essential brand materials.",
   "Powiadomienia": "Notifications",
+  "Polityka cookies": "Cookies policy",
   "Powiedz nam, czego potrzebujesz i określ podstawowe szczegóły projektu.": "Tell us what you need and provide the basic project details.",
   "Powtórz nowe hasło": "Repeat new password",
   "Pozytywne:": "Positive:",
@@ -1046,6 +1050,25 @@ function getStoredLanguage() {
     : "pl";
 }
 
+function shouldShowCookieNotice() {
+  try {
+    const stored = JSON.parse(
+      localStorage.getItem(COOKIE_NOTICE_KEY) || "null"
+    );
+
+    const acknowledgedAt = Number(stored?.acknowledgedAt || 0);
+    const isCurrentVersion =
+      stored?.version === COOKIE_NOTICE_VERSION;
+    const isStillValid =
+      acknowledgedAt > 0 &&
+      Date.now() - acknowledgedAt < COOKIE_NOTICE_LIFETIME;
+
+    return !(isCurrentVersion && isStillValid);
+  } catch {
+    return true;
+  }
+}
+
 export default function Preferences({
   children,
 }) {
@@ -1057,6 +1080,25 @@ export default function Preferences({
 
   const [mobilePanelOpen, setMobilePanelOpen] =
     useState(false);
+
+  const [cookieNoticeVisible, setCookieNoticeVisible] =
+    useState(shouldShowCookieNotice);
+
+  function acknowledgeCookieNotice() {
+    setCookieNoticeVisible(false);
+
+    try {
+      localStorage.setItem(
+        COOKIE_NOTICE_KEY,
+        JSON.stringify({
+          version: COOKIE_NOTICE_VERSION,
+          acknowledgedAt: Date.now(),
+        })
+      );
+    } catch {
+      /* Informacja pozostanie zamknięta do końca bieżącej wizyty. */
+    }
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme =
@@ -1282,6 +1324,46 @@ export default function Preferences({
         </div>
         </div>
       </aside>
+
+      {cookieNoticeVisible && (
+        <section
+          className="cookie-notice"
+          data-no-translate="true"
+          aria-label={
+            language === "en"
+              ? "Information about browser storage"
+              : "Informacja o pamięci przeglądarki"
+          }
+        >
+          <div className="cookie-notice-mark" aria-hidden="true">
+            <span>i</span>
+          </div>
+
+          <div className="cookie-notice-copy">
+            <strong>
+              {language === "en"
+                ? "Your privacy at IdeaHire"
+                : "Twoja prywatność w IdeaHire"}
+            </strong>
+            <p>
+              {language === "en"
+                ? "IdeaHire uses technologies necessary for sign-in, security and remembering settings selected by you. We currently do not use advertising or analytics cookies."
+                : "IdeaHire korzysta z technologii niezbędnych do logowania, bezpieczeństwa oraz zapamiętywania wybranych przez Ciebie ustawień. Obecnie nie używamy cookies reklamowych ani analitycznych."}
+            </p>
+          </div>
+
+          <div className="cookie-notice-actions">
+            <a href="/polityka-cookies">
+              {language === "en"
+                ? "Read the policy"
+                : "Przeczytaj politykę"}
+            </a>
+            <button type="button" onClick={acknowledgeCookieNotice}>
+              {language === "en" ? "Got it" : "Rozumiem"}
+            </button>
+          </div>
+        </section>
+      )}
     </>
   );
 }
