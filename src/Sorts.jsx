@@ -73,18 +73,12 @@ export async function saveUserCountry(userId, country) {
 function CountryFlag({ country, className = "" }) {
   if (!country) return null;
 
-  const imageUrl =
-    `https://flagcdn.com/w80/${country.code.toLowerCase()}.png`;
-
   return (
-    <span className={`ideahire-flag-shell ${className}`.trim()}>
-      <img
-        className="ideahire-flag-image"
-        src={imageUrl}
-        alt=""
-        loading="lazy"
-        decoding="async"
-      />
+    <span
+      className={`ideahire-flag-shell ${className}`.trim()}
+      role="img"
+      aria-label={country.name}
+    >
       <span className="ideahire-flag-emoji" aria-hidden="true">
         {country.flag}
       </span>
@@ -400,7 +394,7 @@ function Sorts({ children }) {
         }
 
         .ideahire-flag-emoji {
-          display: none;
+          display: inline;
           font-size: inherit;
           line-height: 1;
         }
