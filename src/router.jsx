@@ -1,4 +1,5 @@
 
+
 import React, {
   useEffect,
   useState,
@@ -21,6 +22,7 @@ import {
 
 import App from "./App";
 import CookiePolicy from "./CookiePolicy";
+import PrivacyPolicy from "./PrivacyPolicy";
 import Sorts, {
   CountryPicker,
   CountryBadge,
@@ -308,6 +310,7 @@ function useAuth() {
 const MIN_ACCOUNT_AGE = 16;
 const FULL_ACCOUNT_AGE = 18;
 const AGE_NOTICE_VERSION = "2026-09-03-v1";
+const PRIVACY_NOTICE_VERSION = "2026-09-04-v1";
 
 const AgeAccessContext = createContext(null);
 
@@ -2485,6 +2488,9 @@ function Register() {
   const [ageNoticeAcknowledged, setAgeNoticeAcknowledged] =
     useState(false);
 
+  const [privacyNoticeAcknowledged, setPrivacyNoticeAcknowledged] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(false);
 
@@ -2513,6 +2519,11 @@ function Register() {
       return;
     }
 
+    if (!privacyNoticeAcknowledged) {
+      setMessage("Potwierdź zapoznanie się z Polityką prywatności.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -2534,6 +2545,12 @@ function Register() {
                 true,
               age_notice_version:
                 AGE_NOTICE_VERSION,
+              privacy_notice_acknowledged:
+                true,
+              privacy_notice_version:
+                PRIVACY_NOTICE_VERSION,
+              privacy_notice_acknowledged_at:
+                new Date().toISOString(),
             },
           },
         });
@@ -2720,6 +2737,30 @@ function Register() {
             </span>
           </label>
 
+          <div className="registration-privacy-confirmation">
+            <input
+              id="privacy-notice-acknowledgement"
+              type="checkbox"
+              checked={privacyNoticeAcknowledged}
+              onChange={(event) => {
+                setPrivacyNoticeAcknowledged(event.target.checked);
+                setMessage("");
+              }}
+              required
+            />
+            <div>
+              <label htmlFor="privacy-notice-acknowledgement">
+                Zapoznałem się z Polityką prywatności.
+              </label>
+              <small>
+                Dokument wyjaśnia, jak IdeaHire przetwarza i chroni dane. {" "}
+                <Link to="/polityka-prywatnosci" target="_blank">
+                  Otwórz Politykę prywatności
+                </Link>
+              </small>
+            </div>
+          </div>
+
           {message && (
             <p className="auth-error">
               {message}
@@ -2729,7 +2770,11 @@ function Register() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading || !ageNoticeAcknowledged}
+            disabled={
+              loading ||
+              !ageNoticeAcknowledged ||
+              !privacyNoticeAcknowledged
+            }
           >
             {loading
               ? "Tworzenie konta..."
@@ -14121,6 +14166,11 @@ function Router() {
           <Route
             path="/polityka-cookies"
             element={<CookiePolicy />}
+          />
+
+          <Route
+            path="/polityka-prywatnosci"
+            element={<PrivacyPolicy />}
           />
 
           <Route
