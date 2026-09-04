@@ -747,6 +747,7 @@ function App({ session, loading }) {
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
+          <Link to="/polityka-cookies">Polityka cookies</Link>
         </div>
 
         <span>© 2026 IdeaHire</span>
