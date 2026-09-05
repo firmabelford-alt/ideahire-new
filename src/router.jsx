@@ -1,3 +1,4 @@
+/* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
 
 import React, {
   useEffect,
@@ -1402,7 +1403,8 @@ function AccountNavbar() {
               : ""
           }
         >
-          Moje konto
+          <span className="account-nav-label-full">Moje konto</span>
+          <span className="account-nav-label-short">Moje konto</span>
         </NavLink>
 
         {!hasRestrictedAgeAccess && (
@@ -1416,7 +1418,8 @@ function AccountNavbar() {
                 : ""
             }
           >
-            Dodaj zlecenie
+            <span className="account-nav-label-full">Dodaj zlecenie</span>
+            <span className="account-nav-label-short">Dodaj</span>
           </NavLink>
         )}
 
@@ -1430,7 +1433,8 @@ function AccountNavbar() {
               : ""
           }
         >
-          Znajdź zlecenie
+          <span className="account-nav-label-full">Znajdź zlecenie</span>
+          <span className="account-nav-label-short">Zlecenia</span>
         </NavLink>
 
         {!hasRestrictedAgeAccess && (
@@ -1445,7 +1449,8 @@ function AccountNavbar() {
                   : ""
               }
             >
-              Wiadomości
+              <span className="account-nav-label-full">Wiadomości</span>
+              <span className="account-nav-label-short">Wiadomości</span>
             </NavLink>
 
             <NavLink
@@ -1456,7 +1461,8 @@ function AccountNavbar() {
                 }`
               }
             >
-              Spory
+              <span className="account-nav-label-full">Spory</span>
+              <span className="account-nav-label-short">Spory</span>
 
               {hasDisputeNotifications && (
                 <span className="notification-dot" />
@@ -1475,7 +1481,8 @@ function AccountNavbar() {
                 }`
               }
             >
-              Powiadomienia
+              <span className="account-nav-label-full">Powiadomienia</span>
+              <span className="account-nav-label-short">Powiadomienia</span>
 
               {hasNotifications && (
                 <span className="notification-dot" />
@@ -3041,6 +3048,12 @@ function Account() {
 
   const { isAdult } = useAgeAccess();
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const connectReturnHandledRef =
+    useRef("");
+
   const [name, setName] =
     useState("");
 
@@ -3091,6 +3104,18 @@ function Account() {
 
   const [jobsLoading, setJobsLoading] =
     useState(true);
+
+  const [connectStatus, setConnectStatus] =
+    useState("not_started");
+
+  const [connectStatusLoading, setConnectStatusLoading] =
+    useState(true);
+
+  const [connectActionLoading, setConnectActionLoading] =
+    useState(false);
+
+  const [connectFeedback, setConnectFeedback] =
+    useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -3287,6 +3312,91 @@ function Account() {
 
     loadMyJobs();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !isAdult) {
+      setConnectStatus("not_started");
+      setConnectStatusLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadInitialConnectStatus() {
+      setConnectStatusLoading(true);
+
+      try {
+        const { data, error } = await supabase.rpc(
+          "get_my_ideahire_connect_status"
+        );
+
+        if (error) throw error;
+        if (!mounted) return;
+
+        setConnectStatus(
+          data?.[0]?.onboarding_status || "not_started"
+        );
+      } catch (error) {
+        console.error(
+          "CONNECT STATUS LOAD ERROR:",
+          error
+        );
+
+        if (mounted) {
+          setConnectFeedback({
+            type: "error",
+            text: "Nie udało się pobrać statusu konta Stripe.",
+          });
+        }
+      } finally {
+        if (mounted) {
+          setConnectStatusLoading(false);
+        }
+      }
+    }
+
+    loadInitialConnectStatus();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id, isAdult]);
+
+  useEffect(() => {
+    if (!user?.id || !isAdult) return;
+
+    const returnMode = new URLSearchParams(
+      location.search
+    ).get("stripe_connect");
+
+    if (
+      returnMode !== "return" &&
+      returnMode !== "refresh"
+    ) {
+      return;
+    }
+
+    const handledKey = `${user.id}:${returnMode}`;
+
+    if (
+      connectReturnHandledRef.current === handledKey
+    ) {
+      return;
+    }
+
+    connectReturnHandledRef.current = handledKey;
+
+    handleConnectOnboarding({
+      redirectToStripe: returnMode === "refresh",
+      returningFromStripe: true,
+    }).finally(() => {
+      if (returnMode === "return") {
+        navigate("/account", {
+          replace: true,
+        });
+      }
+    });
+  }, [user?.id, isAdult, location.search]);
 
   if (authLoading) {
     return <LoadingScreen />;
@@ -3666,6 +3776,140 @@ function Account() {
     );
   }
 
+  async function refreshConnectStatus() {
+    const { data, error } = await supabase.rpc(
+      "get_my_ideahire_connect_status"
+    );
+
+    if (error) throw error;
+
+    const nextStatus =
+      data?.[0]?.onboarding_status || "not_started";
+
+    setConnectStatus(nextStatus);
+    return nextStatus;
+  }
+
+  async function readFunctionError(error) {
+    if (!error) return "";
+
+    try {
+      const response = error.context;
+
+      if (
+        response &&
+        typeof response.clone === "function"
+      ) {
+        const payload = await response.clone().json();
+
+        if (payload?.error) {
+          return payload.error;
+        }
+      }
+    } catch {
+      // Gdy odpowiedź nie jest JSON-em, używamy bezpiecznego komunikatu niżej.
+    }
+
+    return error.message || "";
+  }
+
+  async function handleConnectOnboarding({
+    redirectToStripe = true,
+    returningFromStripe = false,
+  } = {}) {
+    if (connectActionLoading) return;
+
+    setConnectActionLoading(true);
+    setConnectFeedback(null);
+
+    try {
+      const {
+        data: sessionData,
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (
+        sessionError ||
+        !sessionData?.session?.access_token
+      ) {
+        throw new Error(
+          "Twoja sesja wygasła. Zaloguj się ponownie."
+        );
+      }
+
+      const { data, error } =
+        await supabase.functions.invoke(
+          "create-connect-onboarding",
+          {
+            body: {},
+            headers: {
+              Authorization:
+                `Bearer ${sessionData.session.access_token}`,
+            },
+          }
+        );
+
+      if (error) {
+        const functionMessage =
+          await readFunctionError(error);
+
+        throw new Error(
+          functionMessage ||
+            "Nie udało się połączyć ze Stripe."
+        );
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      const nextStatus =
+        await refreshConnectStatus();
+
+      if (
+        data?.status === "ready" ||
+        nextStatus === "ready"
+      ) {
+        setConnectFeedback({
+          type: "success",
+          text: "Konto Stripe jest połączone i gotowe do otrzymywania wypłat.",
+        });
+        return;
+      }
+
+      if (
+        redirectToStripe &&
+        data?.onboarding_url
+      ) {
+        window.location.assign(
+          data.onboarding_url
+        );
+        return;
+      }
+
+      setConnectFeedback({
+        type: "info",
+        text: returningFromStripe
+          ? "Konfiguracja Stripe nie jest jeszcze kompletna. Możesz ją teraz dokończyć."
+          : "Dokończ dane wymagane przez Stripe.",
+      });
+    } catch (error) {
+      console.error(
+        "CONNECT ONBOARDING ERROR:",
+        error
+      );
+
+      setConnectFeedback({
+        type: "error",
+        text:
+          error?.message ||
+          "Nie udało się przygotować konfiguracji Stripe.",
+      });
+    } finally {
+      setConnectActionLoading(false);
+    }
+  }
+
   function toggleSpecialtyCategory(
     category
   ) {
@@ -3772,6 +4016,48 @@ function Account() {
       .charAt(0)
       .toUpperCase();
 
+  const connectCopy = {
+    not_started: {
+      label: "Niepołączone",
+      title: "Skonfiguruj bezpieczne wypłaty",
+      description:
+        "Połącz konto ze Stripe, aby w przyszłości otrzymywać pieniądze za zrealizowane zlecenia.",
+      action: "Połącz konto Stripe",
+    },
+    in_progress: {
+      label: "Do dokończenia",
+      title: "Dokończ konfigurację wypłat",
+      description:
+        "Konto zostało utworzone. Uzupełnij informacje wymagane przez Stripe.",
+      action: "Dokończ konfigurację",
+    },
+    restricted: {
+      label: "Wymaga działania",
+      title: "Uzupełnij dane konta Stripe",
+      description:
+        "Stripe wymaga uzupełnienia lub poprawienia informacji przed uruchomieniem wypłat.",
+      action: "Uzupełnij dane",
+    },
+    ready: {
+      label: "Gotowe",
+      title: "Konto Stripe jest połączone",
+      description:
+        "Twoje konto przeszło konfigurację i jest gotowe do otrzymywania wypłat.",
+      action: "Konto połączone",
+    },
+    disabled: {
+      label: "Wyłączone",
+      title: "Wypłaty są niedostępne",
+      description:
+        "Konto Stripe zostało wyłączone. Skontaktuj się z pomocą IdeaHire.",
+      action: "Wypłaty niedostępne",
+    },
+  };
+
+  const currentConnectCopy =
+    connectCopy[connectStatus] ||
+    connectCopy.not_started;
+
   return (
     <div className="page">
       <AccountNavbar />
@@ -3828,6 +4114,84 @@ function Account() {
               )}
             </div>
           </div>
+
+          {isAdult && (
+            <section
+              className={`stripe-connect-panel is-${connectStatus}`}
+              aria-labelledby="stripe-connect-title"
+            >
+              <div className="stripe-connect-icon" aria-hidden="true">
+                <span>→</span>
+              </div>
+
+              <div className="stripe-connect-content">
+                <div className="stripe-connect-heading">
+                  <div>
+                    <span className="stripe-connect-eyebrow">
+                      Wypłaty dla wykonawcy
+                    </span>
+
+                    <h2 id="stripe-connect-title">
+                      {connectStatusLoading
+                        ? "Sprawdzamy połączenie ze Stripe..."
+                        : currentConnectCopy.title}
+                    </h2>
+                  </div>
+
+                  <span className={`stripe-connect-status is-${connectStatus}`}>
+                    {connectStatusLoading
+                      ? "Sprawdzanie"
+                      : currentConnectCopy.label}
+                  </span>
+                </div>
+
+                <p>
+                  {connectStatusLoading
+                    ? "Pobieramy aktualny status konfiguracji wypłat."
+                    : currentConnectCopy.description}
+                </p>
+
+                {connectFeedback && (
+                  <p
+                    className={`stripe-connect-feedback is-${connectFeedback.type}`}
+                    role="status"
+                  >
+                    {connectFeedback.text}
+                  </p>
+                )}
+
+                <div className="stripe-connect-footer">
+                  <button
+                    type="button"
+                    className="stripe-connect-button"
+                    onClick={() =>
+                      handleConnectOnboarding()
+                    }
+                    disabled={
+                      connectStatusLoading ||
+                      connectActionLoading ||
+                      connectStatus === "ready" ||
+                      connectStatus === "disabled"
+                    }
+                  >
+                    {connectActionLoading
+                      ? "Łączenie ze Stripe..."
+                      : currentConnectCopy.action}
+
+                    {connectStatus !== "ready" &&
+                      connectStatus !== "disabled" && (
+                        <span aria-hidden="true">↗</span>
+                      )}
+                  </button>
+
+                  <small>
+                    Formularz otworzy się na bezpiecznej stronie Stripe.
+                    IdeaHire nie przechowuje danych Twojego rachunku bankowego.
+                  </small>
+                </div>
+              </div>
+            </section>
+          )}
 
           <form
             className="auth-form account-form"
