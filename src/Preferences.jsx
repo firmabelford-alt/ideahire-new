@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 const THEME_KEY = "ideahire_theme";
 const LANGUAGE_KEY = "ideahire_language";
 const COOKIE_NOTICE_KEY = "ideahire_cookie_notice_v1";
-const COOKIE_NOTICE_VERSION = "2026-09-04-v1";
+const COOKIE_NOTICE_VERSION = "2026-09-06-v2";
 const COOKIE_NOTICE_LIFETIME = 365 * 24 * 60 * 60 * 1000;
 
 const originalTextByNode = new WeakMap();
@@ -58,6 +58,10 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Potwierdzam prawidłowość daty urodzenia.": "I confirm that my date of birth is correct.",
   "Potwierdź zapoznanie się z Polityką prywatności.": "Confirm that you have read the Privacy Policy.",
   "Zapoznałem się z Polityką prywatności.": "I have read the Privacy Policy.",
+  "Zaakceptuj Regulamin IdeaHire, aby utworzyć konto.": "Accept the IdeaHire Terms to create an account.",
+  "Akceptuję Regulamin IdeaHire.": "I accept the IdeaHire Terms.",
+  "Akceptacja Regulaminu jest wymagana do utworzenia konta.": "Accepting the Terms is required to create an account.",
+  "Otwórz Regulamin — wersja 0.9": "Open the Terms — version 0.9",
   "Dokument wyjaśnia, jak IdeaHire przetwarza i chroni dane.": "This document explains how IdeaHire processes and protects data.",
   "Otwórz Politykę prywatności": "Open the Privacy Policy",
   "Osoby w wieku 16–17 lat otrzymują konto ograniczone. Pełne funkcje płatnych zleceń są dostępne od 18 lat.": "Users aged 16–17 receive a limited account. Full paid-job features are available from age 18.",
@@ -213,6 +217,8 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Powiadomienia": "Notifications",
   "Polityka cookies": "Cookies policy",
   "Polityka prywatności": "Privacy Policy",
+  "Regulamin": "Terms",
+  "Zgłoś nielegalną treść": "Report illegal content",
   "Powiedz nam, czego potrzebujesz i określ podstawowe szczegóły projektu.": "Tell us what you need and provide the basic project details.",
   "Powtórz nowe hasło": "Repeat new password",
   "Pozytywne:": "Positive:",
@@ -1393,11 +1399,14 @@ export default function Preferences({
           </div>
 
           <div className="cookie-notice-actions">
-            <a href="/polityka-cookies">
-              {language === "en"
-                ? "Read the policy"
-                : "Przeczytaj politykę"}
-            </a>
+            <div className="cookie-notice-links">
+              <a href="/polityka-cookies">
+                {language === "en" ? "Cookies" : "Cookies"}
+              </a>
+              <a href="/polityka-prywatnosci">
+                {language === "en" ? "Privacy" : "Prywatność"}
+              </a>
+            </div>
             <button type="button" onClick={acknowledgeCookieNotice}>
               {language === "en" ? "Got it" : "Rozumiem"}
             </button>
