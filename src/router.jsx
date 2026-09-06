@@ -23,6 +23,7 @@ import {
 import App from "./App";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
+import TermsOfService from "./TermsOfService";
 import Sorts, {
   CountryPicker,
   CountryBadge,
@@ -310,7 +311,8 @@ function useAuth() {
 const MIN_ACCOUNT_AGE = 16;
 const FULL_ACCOUNT_AGE = 18;
 const AGE_NOTICE_VERSION = "2026-09-03-v1";
-const PRIVACY_NOTICE_VERSION = "2026-09-04-v1";
+const LEGAL_TERMS_VERSION = "0.9-prelaunch-2026-09-06";
+const PRIVACY_NOTICE_VERSION = "0.9-prelaunch-2026-09-06";
 
 const AgeAccessContext = createContext(null);
 
@@ -2497,6 +2499,9 @@ function Register() {
   const [privacyNoticeAcknowledged, setPrivacyNoticeAcknowledged] =
     useState(false);
 
+  const [termsAccepted, setTermsAccepted] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(false);
 
@@ -2530,9 +2535,16 @@ function Register() {
       return;
     }
 
+    if (!termsAccepted) {
+      setMessage("Zaakceptuj Regulamin IdeaHire, aby utworzyć konto.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const acceptedAtClient = new Date().toISOString();
+
       const {
         data,
         error,
@@ -2556,7 +2568,13 @@ function Register() {
               privacy_notice_version:
                 PRIVACY_NOTICE_VERSION,
               privacy_notice_acknowledged_at:
-                new Date().toISOString(),
+                acceptedAtClient,
+              terms_accepted:
+                true,
+              terms_version:
+                LEGAL_TERMS_VERSION,
+              terms_accepted_at_client:
+                acceptedAtClient,
             },
           },
         });
@@ -2767,6 +2785,30 @@ function Register() {
             </div>
           </div>
 
+          <div className="registration-privacy-confirmation registration-terms-confirmation">
+            <input
+              id="terms-acceptance"
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(event) => {
+                setTermsAccepted(event.target.checked);
+                setMessage("");
+              }}
+              required
+            />
+            <div>
+              <label htmlFor="terms-acceptance">
+                Akceptuję Regulamin IdeaHire.
+              </label>
+              <small>
+                Akceptacja Regulaminu jest wymagana do utworzenia konta. {" "}
+                <Link to="/regulamin" target="_blank" rel="noreferrer">
+                  Otwórz Regulamin — wersja 0.9
+                </Link>
+              </small>
+            </div>
+          </div>
+
           {message && (
             <p className="auth-error">
               {message}
@@ -2779,7 +2821,8 @@ function Register() {
             disabled={
               loading ||
               !ageNoticeAcknowledged ||
-              !privacyNoticeAcknowledged
+              !privacyNoticeAcknowledged ||
+              !termsAccepted
             }
           >
             {loading
@@ -14534,6 +14577,11 @@ function Router() {
           <Route
             path="/polityka-prywatnosci"
             element={<PrivacyPolicy />}
+          />
+
+          <Route
+            path="/regulamin"
+            element={<TermsOfService />}
           />
 
           <Route
