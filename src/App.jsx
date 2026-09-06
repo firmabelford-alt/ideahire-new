@@ -747,8 +747,12 @@ function App({ session, loading }) {
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
+          <Link to="/regulamin">Regulamin</Link>
           <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
           <Link to="/polityka-cookies">Polityka cookies</Link>
+          <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">
+            Zgłoś nielegalną treść
+          </a>
         </div>
 
         <span>© 2026 IdeaHire</span>
