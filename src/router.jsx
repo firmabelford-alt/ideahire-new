@@ -903,6 +903,7 @@ const PRIVACY_REQUEST_TYPES = [
   ["restriction", "Ograniczenie przetwarzania"],
   ["objection", "Sprzeciw wobec przetwarzania"],
   ["portability", "Przeniesienie danych"],
+  ["security_review", "Analiza ochrony moich danych"],
   ["other", "Inna sprawa dotycząca prywatności"],
 ];
 
@@ -923,6 +924,100 @@ const PRIVACY_RESPONSE_FORMATS = [
   ["csv", "Dane tabelaryczne CSV"],
   ["pdf", "Dokument PDF"],
 ];
+
+const PRIVACY_AUDIT_STATUSES = {
+  not_started: "Oczekuje na rozpoczęcie",
+  in_review: "Analiza w toku",
+  remediation_required: "Wymaga działań naprawczych",
+  ready_for_approval: "Oczekuje na zatwierdzenie",
+  approved: "Zatwierdzona",
+};
+
+const PRIVACY_AUDIT_RISK_LEVELS = [
+  ["not_assessed", "Jeszcze nie oceniono"],
+  ["low", "Niskie"],
+  ["medium", "Średnie"],
+  ["high", "Wysokie"],
+  ["critical", "Krytyczne"],
+];
+
+const PRIVACY_AUDIT_CHECKS = [
+  {
+    key: "identity_and_scope",
+    label: "Tożsamość i zakres",
+    description: "Potwierdzenie osoby składającej wniosek i dokładnego zakresu analizy.",
+  },
+  {
+    key: "data_inventory",
+    label: "Inwentaryzacja danych",
+    description: "Ustalenie kategorii danych i miejsc, w których są przetwarzane.",
+  },
+  {
+    key: "access_control",
+    label: "Kontrola dostępu",
+    description: "Ocena uprawnień użytkowników, administratorów i usług technicznych.",
+  },
+  {
+    key: "rls_and_api",
+    label: "RLS i dostęp przez API",
+    description: "Sprawdzenie reguł dostępu do rekordów oraz wywołań funkcji bazy.",
+  },
+  {
+    key: "storage_security",
+    label: "Bezpieczeństwo przechowywania",
+    description: "Ocena ochrony bazy, plików, kopii oraz transmisji danych.",
+  },
+  {
+    key: "purpose_and_legal_basis",
+    label: "Cel i podstawa przetwarzania",
+    description: "Przypisanie danych do deklarowanych celów i podstaw przetwarzania.",
+  },
+  {
+    key: "data_minimization",
+    label: "Minimalizacja danych",
+    description: "Ocena, czy system nie zbiera danych szerszych niż potrzebne.",
+  },
+  {
+    key: "retention_and_deletion",
+    label: "Retencja i usuwanie",
+    description: "Sprawdzenie okresów przechowywania i możliwości bezpiecznego usunięcia.",
+  },
+  {
+    key: "processors_and_transfers",
+    label: "Podmioty i transfery",
+    description: "Ustalenie usług zewnętrznych oraz przepływów danych między systemami.",
+  },
+  {
+    key: "incident_history",
+    label: "Historia incydentów",
+    description: "Sprawdzenie zgłoszonych naruszeń i zdarzeń związanych z bezpieczeństwem.",
+  },
+  {
+    key: "user_rights",
+    label: "Realizacja praw użytkownika",
+    description: "Ocena możliwości dostępu, sprostowania, usunięcia i innych praw.",
+  },
+  {
+    key: "remediation_plan",
+    label: "Plan działań naprawczych",
+    description: "Określenie działań, odpowiedzialności i dalszej kontroli wykrytych problemów.",
+  },
+];
+
+const PRIVACY_AUDIT_CHECK_STATUSES = [
+  ["pending", "Do sprawdzenia"],
+  ["passed", "Sprawdzone — bez zastrzeżeń"],
+  ["issue_found", "Wykryto problem"],
+  ["not_applicable", "Nie dotyczy"],
+];
+
+const PRIVACY_AUDIT_EVENT_LABELS = {
+  created: "Utworzono kartę analizy",
+  draft_saved: "Zapisano roboczą analizę",
+  submitted_for_approval: "Przekazano do zatwierdzenia",
+  returned_for_revision: "Odesłano do poprawy",
+  approved: "Zatwierdzono analizę",
+};
 
 function getDisputeStatusLabel(status) {
   return DISPUTE_STATUS_LABELS[status] || "Nieznany status";
@@ -4669,6 +4764,45 @@ function isPrivacyRequestOpen(status) {
   ].includes(status);
 }
 
+function getSecurityReviewProgress(status) {
+  if (status === "submitted") {
+    return {
+      title: "Wniosek czeka na przypisanie",
+      description: "Po przejęciu sprawy administrator rozpocznie kontrolę 12 obszarów ochrony danych.",
+    };
+  }
+
+  if (status === "identity_verification") {
+    return {
+      title: "Trwa weryfikacja zakresu",
+      description: "Możemy poprosić o dodatkowe informacje potrzebne do bezpiecznego przeprowadzenia analizy.",
+    };
+  }
+
+  if (status === "in_progress") {
+    return {
+      title: "Administrator prowadzi analizę",
+      description: "Wewnętrzne ustalenia i dowody nie są publikowane. Po zatwierdzeniu otrzymasz końcowe podsumowanie na swoim koncie.",
+    };
+  }
+
+  if (status === "awaiting_user") {
+    return {
+      title: "Potrzebujemy Twojej odpowiedzi",
+      description: "Sprawdź historię sprawy poniżej i uzupełnij informacje wskazane przez administratora.",
+    };
+  }
+
+  if (status === "completed") {
+    return {
+      title: "Analiza została zakończona",
+      description: "Zatwierdzone podsumowanie znajduje się w odpowiedzi IdeaHire poniżej.",
+    };
+  }
+
+  return null;
+}
+
 function PrivacyCenter() {
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);
@@ -4856,8 +4990,9 @@ function PrivacyCenter() {
             <span className="privacy-card-number">01</span>
             <h2>Złóż nowy wniosek</h2>
             <p>
-              Opisz dokładnie, czego potrzebujesz. Standardowy termin odpowiedzi
-              wynosi jeden miesiąc od otrzymania wniosku.
+              {form.requestType === "security_review"
+                ? "Poproś o techniczną i organizacyjną analizę ochrony danych powiązanych z Twoim kontem."
+                : "Opisz dokładnie, czego potrzebujesz. Standardowy termin odpowiedzi wynosi jeden miesiąc od otrzymania wniosku."}
             </p>
 
             <form className="privacy-request-form" onSubmit={handleSubmit}>
@@ -4907,7 +5042,9 @@ function PrivacyCenter() {
                       description: event.target.value,
                     }))
                   }
-                  placeholder="Napisz, jakich danych lub działań dotyczy Twój wniosek..."
+                  placeholder={form.requestType === "security_review"
+                    ? "Napisz, które dane, funkcje konta albo zdarzenia związane z bezpieczeństwem mamy objąć analizą..."
+                    : "Napisz, jakich danych lub działań dotyczy Twój wniosek..."}
                   minLength={20}
                   maxLength={5000}
                   rows={6}
@@ -4917,14 +5054,26 @@ function PrivacyCenter() {
                 <small>{form.description.length}/5000 · minimum 20 znaków</small>
               </label>
 
-              <div className="privacy-form-notice">
-                <strong>Ważne przy usuwaniu danych</strong>
-                <p>
-                  Złożenie wniosku nie powoduje natychmiastowego skasowania konta.
-                  Najpierw sprawdzimy obowiązki dotyczące rozliczeń, sporów,
-                  bezpieczeństwa i przechowywania wymaganych prawem danych.
-                </p>
-              </div>
+              {form.requestType === "security_review" ? (
+                <div className="privacy-form-notice is-security-review">
+                  <strong>Jak działa analiza ochrony danych</strong>
+                  <p>
+                    Przypisany administrator sprawdzi 12 obszarów technicznych
+                    i organizacyjnych. Wynik zostanie zweryfikowany wewnętrznie,
+                    a zatwierdzone podsumowanie zobaczysz wyłącznie na swoim koncie.
+                    Ta analiza nie jest certyfikatem ani opinią prawną.
+                  </p>
+                </div>
+              ) : form.requestType === "erasure" ? (
+                <div className="privacy-form-notice">
+                  <strong>Ważne przy usuwaniu danych</strong>
+                  <p>
+                    Złożenie wniosku nie powoduje natychmiastowego skasowania konta.
+                    Najpierw sprawdzimy obowiązki dotyczące rozliczeń, sporów,
+                    bezpieczeństwa i przechowywania wymaganych prawem danych.
+                  </p>
+                </div>
+              ) : null}
 
               <button
                 type="submit"
@@ -4978,6 +5127,9 @@ function PrivacyCenter() {
               {requests.map((request) => {
                 const deadline = request.extended_due_at || request.due_at;
                 const events = eventsByRequest[request.id] || [];
+                const securityReviewProgress = request.request_type === "security_review"
+                  ? getSecurityReviewProgress(request.status)
+                  : null;
 
                 return (
                   <article className="privacy-request-card" key={request.id}>
@@ -4992,6 +5144,13 @@ function PrivacyCenter() {
                     </div>
 
                     <p className="privacy-request-description">{request.description}</p>
+
+                    {securityReviewProgress && (
+                      <div className="privacy-security-progress">
+                        <strong>{securityReviewProgress.title}</strong>
+                        <p>{securityReviewProgress.description}</p>
+                      </div>
+                    )}
 
                     <dl className="privacy-request-meta">
                       <div><dt>Wysłano</dt><dd>{formatDisputeDate(request.submitted_at)}</dd></div>
@@ -14514,11 +14673,15 @@ function AdminPrivacyRequests() {
   const [requests, setRequests] = useState([]);
   const [profiles, setProfiles] = useState({});
   const [eventsByRequest, setEventsByRequest] = useState({});
+  const [auditsByRequest, setAuditsByRequest] = useState({});
+  const [auditChecksByAudit, setAuditChecksByAudit] = useState({});
+  const [auditEventsByAudit, setAuditEventsByAudit] = useState({});
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("active");
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [drafts, setDrafts] = useState({});
+  const [auditDrafts, setAuditDrafts] = useState({});
 
   async function loadAdminPrivacyRequests() {
     if (!user?.id) return;
@@ -14575,6 +14738,69 @@ function AdminPrivacyRequests() {
     } else {
       setEventsByRequest({});
     }
+
+    const securityReviewIds = rows
+      .filter((item) => item.request_type === "security_review")
+      .map((item) => item.id);
+
+    if (securityReviewIds.length === 0) {
+      setAuditsByRequest({});
+      setAuditChecksByAudit({});
+      setAuditEventsByAudit({});
+      return;
+    }
+
+    const { data: auditRows, error: auditError } = await supabase
+      .from("ideahire_privacy_audits")
+      .select("id, request_id, status, risk_level, scope, findings_summary, remediation_summary, public_summary, last_updated_by, submitted_for_approval_by, approved_by, created_at, updated_at, submitted_for_approval_at, approved_at")
+      .in("request_id", securityReviewIds);
+
+    if (auditError) throw auditError;
+
+    const accessibleAudits = auditRows || [];
+    setAuditsByRequest(Object.fromEntries(
+      accessibleAudits.map((audit) => [audit.request_id, audit])
+    ));
+
+    const auditIds = accessibleAudits.map((audit) => audit.id);
+
+    if (auditIds.length === 0) {
+      setAuditChecksByAudit({});
+      setAuditEventsByAudit({});
+      return;
+    }
+
+    const [checksResult, auditEventsResult] = await Promise.all([
+      supabase
+        .from("ideahire_privacy_audit_checks")
+        .select("id, audit_id, check_key, status, evidence_note, checked_by, checked_at, created_at, updated_at")
+        .in("audit_id", auditIds)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("ideahire_privacy_audit_events")
+        .select("id, audit_id, actor_role, event_type, note, details, created_at")
+        .in("audit_id", auditIds)
+        .order("created_at", { ascending: true }),
+    ]);
+
+    if (checksResult.error) throw checksResult.error;
+    if (auditEventsResult.error) throw auditEventsResult.error;
+
+    setAuditChecksByAudit(
+      (checksResult.data || []).reduce((result, item) => {
+        if (!result[item.audit_id]) result[item.audit_id] = [];
+        result[item.audit_id].push(item);
+        return result;
+      }, {})
+    );
+
+    setAuditEventsByAudit(
+      (auditEventsResult.data || []).reduce((result, item) => {
+        if (!result[item.audit_id]) result[item.audit_id] = [];
+        result[item.audit_id].push(item);
+        return result;
+      }, {})
+    );
   }
 
   useEffect(() => {
@@ -14628,6 +14854,290 @@ function AdminPrivacyRequests() {
       internalNote: "",
       extensionReason: "",
     };
+  }
+
+  function createAuditDraft(requestId) {
+    const audit = auditsByRequest[requestId];
+    const storedChecks = audit
+      ? auditChecksByAudit[audit.id] || []
+      : [];
+    const storedChecksByKey = Object.fromEntries(
+      storedChecks.map((item) => [item.check_key, item])
+    );
+
+    return {
+      riskLevel: audit?.risk_level || "not_assessed",
+      scope: audit?.scope || "",
+      findingsSummary: audit?.findings_summary || "",
+      remediationSummary: audit?.remediation_summary || "",
+      publicSummary: audit?.public_summary || "",
+      returnNote: "",
+      checks: Object.fromEntries(
+        PRIVACY_AUDIT_CHECKS.map((definition) => {
+          const stored = storedChecksByKey[definition.key];
+          return [
+            definition.key,
+            {
+              status: stored?.status || "pending",
+              note: stored?.evidence_note || "",
+            },
+          ];
+        })
+      ),
+    };
+  }
+
+  function getAuditDraft(requestId) {
+    return auditDrafts[requestId] || createAuditDraft(requestId);
+  }
+
+  function updateAuditDraft(requestId, values) {
+    setAuditDrafts((current) => ({
+      ...current,
+      [requestId]: {
+        ...(current[requestId] || createAuditDraft(requestId)),
+        ...values,
+      },
+    }));
+  }
+
+  function updateAuditCheckDraft(requestId, checkKey, values) {
+    setAuditDrafts((current) => {
+      const currentDraft = current[requestId] || createAuditDraft(requestId);
+
+      return {
+        ...current,
+        [requestId]: {
+          ...currentDraft,
+          checks: {
+            ...currentDraft.checks,
+            [checkKey]: {
+              ...currentDraft.checks[checkKey],
+              ...values,
+            },
+          },
+        },
+      };
+    });
+  }
+
+  function clearAuditDraft(requestId) {
+    setAuditDrafts((current) => {
+      const next = { ...current };
+      delete next[requestId];
+      return next;
+    });
+  }
+
+  function getAuditSaveError(draft) {
+    const optionalSections = [
+      [draft.scope, "Zakres analizy"],
+      [draft.findingsSummary, "Podsumowanie ustaleń"],
+      [draft.remediationSummary, "Plan działań naprawczych"],
+    ];
+
+    const invalidSection = optionalSections.find(
+      ([value]) => value.trim().length > 0 && value.trim().length < 20
+    );
+
+    if (invalidSection) {
+      return `${invalidSection[1]} musi mieć co najmniej 20 znaków albo pozostać pusty.`;
+    }
+
+    const issueWithoutNote = PRIVACY_AUDIT_CHECKS.find((definition) => {
+      const check = draft.checks[definition.key];
+      return check?.status === "issue_found" && check.note.trim().length < 10;
+    });
+
+    if (issueWithoutNote) {
+      return `Opisz wykryty problem w punkcie „${issueWithoutNote.label}” w co najmniej 10 znakach.`;
+    }
+
+    return "";
+  }
+
+  function buildAuditChecksPayload(draft) {
+    return PRIVACY_AUDIT_CHECKS.map((definition) => ({
+      key: definition.key,
+      status: draft.checks[definition.key]?.status || "pending",
+      note: draft.checks[definition.key]?.note.trim() || null,
+    }));
+  }
+
+  async function handleSaveAudit(event, requestId) {
+    event.preventDefault();
+    const draft = getAuditDraft(requestId);
+    const validationError = getAuditSaveError(draft);
+
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
+
+    setBusy(`${requestId}:audit-save`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_save_ideahire_privacy_audit",
+        {
+          p_request_id: requestId,
+          p_risk_level: draft.riskLevel,
+          p_scope: draft.scope.trim() || null,
+          p_findings_summary: draft.findingsSummary.trim() || null,
+          p_remediation_summary: draft.remediationSummary.trim() || null,
+          p_checks: buildAuditChecksPayload(draft),
+        }
+      );
+
+      if (error) throw error;
+
+      setMessage("Robocza analiza i checklista zostały zapisane.");
+      clearAuditDraft(requestId);
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zapisać analizy."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleSubmitAudit(requestId) {
+    const draft = getAuditDraft(requestId);
+    const validationError = getAuditSaveError(draft);
+
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
+
+    const pendingCheck = PRIVACY_AUDIT_CHECKS.find(
+      (definition) => draft.checks[definition.key]?.status === "pending"
+    );
+
+    if (pendingCheck) {
+      setMessage(`Zakończ punkt „${pendingCheck.label}” przed przekazaniem analizy.`);
+      return;
+    }
+
+    if (draft.riskLevel === "not_assessed") {
+      setMessage("Wybierz poziom ryzyka przed przekazaniem analizy.");
+      return;
+    }
+
+    if (draft.scope.trim().length < 20 || draft.findingsSummary.trim().length < 20) {
+      setMessage("Przed przekazaniem uzupełnij zakres i podsumowanie ustaleń — każde w co najmniej 20 znakach.");
+      return;
+    }
+
+    const hasIssue = PRIVACY_AUDIT_CHECKS.some(
+      (definition) => draft.checks[definition.key]?.status === "issue_found"
+    );
+
+    if (hasIssue && draft.remediationSummary.trim().length < 20) {
+      setMessage("Wykryte problemy wymagają planu działań naprawczych zawierającego co najmniej 20 znaków.");
+      return;
+    }
+
+    if (draft.publicSummary.trim().length < 20) {
+      setMessage("Podsumowanie dla użytkownika musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    setBusy(`${requestId}:audit-submit`);
+    setMessage("");
+
+    try {
+      const saveResult = await supabase.rpc(
+        "admin_save_ideahire_privacy_audit",
+        {
+          p_request_id: requestId,
+          p_risk_level: draft.riskLevel,
+          p_scope: draft.scope.trim(),
+          p_findings_summary: draft.findingsSummary.trim(),
+          p_remediation_summary: draft.remediationSummary.trim() || null,
+          p_checks: buildAuditChecksPayload(draft),
+        }
+      );
+
+      if (saveResult.error) throw saveResult.error;
+
+      const submitResult = await supabase.rpc(
+        "admin_submit_ideahire_privacy_audit",
+        {
+          p_request_id: requestId,
+          p_public_summary: draft.publicSummary.trim(),
+        }
+      );
+
+      if (submitResult.error) throw submitResult.error;
+
+      setMessage("Analiza została przekazana właścicielowi technicznemu do zatwierdzenia.");
+      clearAuditDraft(requestId);
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się przekazać analizy do zatwierdzenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleApproveAudit(requestId) {
+    if (!window.confirm(
+      "Czy zatwierdzić analizę i przekazać podsumowanie użytkownikowi?"
+    )) return;
+
+    setBusy(`${requestId}:audit-approve`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "owner_approve_ideahire_privacy_audit",
+        { p_request_id: requestId }
+      );
+
+      if (error) throw error;
+
+      setMessage("Analiza została zatwierdzona, a użytkownik otrzymał podsumowanie.");
+      clearAuditDraft(requestId);
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zatwierdzić analizy."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleReturnAudit(requestId) {
+    const draft = getAuditDraft(requestId);
+
+    if (draft.returnNote.trim().length < 20) {
+      setMessage("Uzasadnienie odesłania analizy musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    setBusy(`${requestId}:audit-return`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "owner_return_ideahire_privacy_audit",
+        {
+          p_request_id: requestId,
+          p_note: draft.returnNote.trim(),
+        }
+      );
+
+      if (error) throw error;
+
+      setMessage("Analiza została odesłana administratorowi do poprawy.");
+      clearAuditDraft(requestId);
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się odesłać analizy do poprawy."));
+    } finally {
+      setBusy("");
+    }
   }
 
   async function handleTake(requestId) {
@@ -14733,12 +15243,12 @@ function AdminPrivacyRequests() {
             <span className="section-label">Ochrona danych</span>
             <h1>Wnioski użytkowników</h1>
             <p>
-              Kontrolowana kolejka wniosków dotyczących dostępu, kopii,
-              sprostowania, sprzeciwu i usunięcia danych.
+              Kontrolowana kolejka wniosków dotyczących praw użytkownika
+              oraz technicznej i organizacyjnej analizy ochrony danych.
             </p>
           </div>
           <span className="admin-role-badge">
-            {staffRole === "owner" ? "Właściciel" : "Administrator"}
+            {staffRole === "owner" ? "Właściciel techniczny" : "Administrator"}
           </span>
         </header>
 
@@ -14801,6 +15311,18 @@ function AdminPrivacyRequests() {
                 const canWork = !request.assigned_admin_id
                   || request.assigned_admin_id === user.id
                   || staffRole === "owner";
+                const isSecurityReview = request.request_type === "security_review";
+                const audit = isSecurityReview
+                  ? auditsByRequest[request.id]
+                  : null;
+                const auditDraft = audit
+                  ? getAuditDraft(request.id)
+                  : null;
+                const auditEvents = audit
+                  ? auditEventsByAudit[audit.id] || []
+                  : [];
+                const auditLocked = audit?.status === "ready_for_approval"
+                  || audit?.status === "approved";
 
                 return (
                   <article className={`privacy-admin-card${isOverdue ? " is-overdue" : ""}`} key={request.id}>
@@ -14857,8 +15379,322 @@ function AdminPrivacyRequests() {
                         </ol>
                       )}
 
-                      {isPrivacyRequestOpen(request.status) && canWork && (
+                      {isSecurityReview && (
+                        <section className="privacy-audit-workspace">
+                          <div className="privacy-audit-heading">
+                            <div>
+                              <span className="section-label">Analiza wewnętrzna</span>
+                              <h4>Kontrola ochrony danych</h4>
+                            </div>
+                            {audit && (
+                              <span className={`privacy-audit-status is-${audit.status}`}>
+                                {PRIVACY_AUDIT_STATUSES[audit.status] || audit.status}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="privacy-audit-legal-note">
+                            Narzędzie wspiera kontrolę techniczną i organizacyjną.
+                            Nie stanowi opinii prawnej ani potwierdzenia zgodności
+                            wydanego przez przyszłego Operatora IdeaHire.
+                          </p>
+
+                          {!audit ? (
+                            <div className="privacy-audit-access-note">
+                              <strong>
+                                {request.assigned_admin_id
+                                  ? "Analiza jest przypisana do innego administratora"
+                                  : "Przejmij wniosek, aby rozpocząć analizę"}
+                              </strong>
+                              <p>
+                                {request.assigned_admin_id
+                                  ? "Jej szczegóły widzi wyłącznie prowadzący administrator oraz właściciel techniczny panelu."
+                                  : "Po przypisaniu otrzymasz dostęp do checklisty. Jej szczegóły będą widoczne wyłącznie dla Ciebie i właściciela technicznego panelu."}
+                              </p>
+                            </div>
+                          ) : (
+                            <>
+                              <form
+                                className="privacy-audit-form"
+                                onSubmit={(event) => handleSaveAudit(event, request.id)}
+                              >
+                                <div className="privacy-audit-overview">
+                                  <label>
+                                    Poziom ryzyka
+                                    <select
+                                      value={auditDraft.riskLevel}
+                                      onChange={(event) => updateAuditDraft(request.id, {
+                                        riskLevel: event.target.value,
+                                      })}
+                                      disabled={Boolean(busy) || auditLocked}
+                                    >
+                                      {PRIVACY_AUDIT_RISK_LEVELS.map(([value, label]) => (
+                                        <option value={value} key={value}>{label}</option>
+                                      ))}
+                                    </select>
+                                  </label>
+
+                                  <div className="privacy-audit-updated">
+                                    <span>Ostatnia aktualizacja</span>
+                                    <strong>{formatDisputeDate(audit.updated_at)}</strong>
+                                  </div>
+                                </div>
+
+                                <label>
+                                  Zakres analizy
+                                  <textarea
+                                    value={auditDraft.scope}
+                                    onChange={(event) => updateAuditDraft(request.id, {
+                                      scope: event.target.value,
+                                    })}
+                                    placeholder="Wskaż dane, funkcje, systemy i okres objęte analizą..."
+                                    minLength={auditDraft.scope ? 20 : undefined}
+                                    maxLength={5000}
+                                    rows={4}
+                                    disabled={Boolean(busy) || auditLocked}
+                                  />
+                                </label>
+
+                                <div className="privacy-audit-section-heading">
+                                  <div>
+                                    <span>12 punktów kontrolnych</span>
+                                    <small>
+                                      Każdy wykryty problem wymaga notatki zawierającej minimum 10 znaków.
+                                    </small>
+                                  </div>
+                                  <strong>
+                                    {PRIVACY_AUDIT_CHECKS.filter((definition) =>
+                                      auditDraft.checks[definition.key]?.status !== "pending"
+                                    ).length}/12
+                                  </strong>
+                                </div>
+
+                                <div className="privacy-audit-checklist">
+                                  {PRIVACY_AUDIT_CHECKS.map((definition, index) => {
+                                    const check = auditDraft.checks[definition.key];
+
+                                    return (
+                                      <article
+                                        className={`privacy-audit-check is-${check.status}`}
+                                        key={definition.key}
+                                      >
+                                        <div className="privacy-audit-check-title">
+                                          <span>{String(index + 1).padStart(2, "0")}</span>
+                                          <div>
+                                            <strong>{definition.label}</strong>
+                                            <p>{definition.description}</p>
+                                          </div>
+                                        </div>
+
+                                        <label>
+                                          Wynik kontroli
+                                          <select
+                                            value={check.status}
+                                            onChange={(event) => updateAuditCheckDraft(
+                                              request.id,
+                                              definition.key,
+                                              { status: event.target.value }
+                                            )}
+                                            disabled={Boolean(busy) || auditLocked}
+                                          >
+                                            {PRIVACY_AUDIT_CHECK_STATUSES.map(([value, label]) => (
+                                              <option value={value} key={value}>{label}</option>
+                                            ))}
+                                          </select>
+                                        </label>
+
+                                        <label>
+                                          Dowód lub notatka
+                                          <textarea
+                                            value={check.note}
+                                            onChange={(event) => updateAuditCheckDraft(
+                                              request.id,
+                                              definition.key,
+                                              { note: event.target.value }
+                                            )}
+                                            placeholder={check.status === "issue_found"
+                                              ? "Opisz wykryty problem i jego znaczenie..."
+                                              : "Dodaj krótką podstawę oceny, jeśli jest potrzebna..."}
+                                            maxLength={5000}
+                                            rows={3}
+                                            disabled={Boolean(busy) || auditLocked}
+                                          />
+                                        </label>
+                                      </article>
+                                    );
+                                  })}
+                                </div>
+
+                                <label>
+                                  Podsumowanie ustaleń
+                                  <textarea
+                                    value={auditDraft.findingsSummary}
+                                    onChange={(event) => updateAuditDraft(request.id, {
+                                      findingsSummary: event.target.value,
+                                    })}
+                                    placeholder="Podsumuj ustalenia bez publikowania zbędnych danych osobowych..."
+                                    maxLength={10000}
+                                    rows={5}
+                                    disabled={Boolean(busy) || auditLocked}
+                                  />
+                                </label>
+
+                                <label>
+                                  Plan działań naprawczych
+                                  <textarea
+                                    value={auditDraft.remediationSummary}
+                                    onChange={(event) => updateAuditDraft(request.id, {
+                                      remediationSummary: event.target.value,
+                                    })}
+                                    placeholder="Jeżeli wykryto problem, opisz działania, priorytet i sposób ponownej kontroli..."
+                                    maxLength={10000}
+                                    rows={5}
+                                    disabled={Boolean(busy) || auditLocked}
+                                  />
+                                </label>
+
+                                <label className="privacy-audit-public-summary">
+                                  Podsumowanie dla użytkownika
+                                  <textarea
+                                    value={auditDraft.publicSummary}
+                                    onChange={(event) => updateAuditDraft(request.id, {
+                                      publicSummary: event.target.value,
+                                    })}
+                                    placeholder="Napisz jasne podsumowanie wyniku, które po zatwierdzeniu zobaczy wyłącznie użytkownik..."
+                                    minLength={20}
+                                    maxLength={5000}
+                                    rows={5}
+                                    disabled={Boolean(busy) || auditLocked}
+                                  />
+                                  <small>
+                                    Treść stanie się widoczna dopiero po zatwierdzeniu przez właściciela technicznego.
+                                  </small>
+                                </label>
+
+                                {!auditLocked && isPrivacyRequestOpen(request.status) && canWork && (
+                                  <div className="privacy-audit-actions">
+                                    <button
+                                      className="privacy-secondary-button"
+                                      type="submit"
+                                      disabled={Boolean(busy)}
+                                    >
+                                      {busy === `${request.id}:audit-save`
+                                        ? "Zapisywanie..."
+                                        : "Zapisz wersję roboczą"}
+                                    </button>
+                                    <button
+                                      className="privacy-primary-button"
+                                      type="button"
+                                      onClick={() => handleSubmitAudit(request.id)}
+                                      disabled={Boolean(busy)}
+                                    >
+                                      {busy === `${request.id}:audit-submit`
+                                        ? "Przekazywanie..."
+                                        : "Przekaż do zatwierdzenia"}
+                                    </button>
+                                  </div>
+                                )}
+                              </form>
+
+                              {audit.status === "ready_for_approval" && (
+                                <div className="privacy-audit-approval-panel">
+                                  {staffRole === "owner" ? (
+                                    <>
+                                      <div>
+                                        <strong>Weryfikacja właściciela technicznego</strong>
+                                        <p>
+                                          Przed zatwierdzeniem sprawdź checklistę, ustalenia,
+                                          plan naprawczy i treść przeznaczoną dla użytkownika.
+                                        </p>
+                                      </div>
+
+                                      <button
+                                        className="privacy-primary-button"
+                                        type="button"
+                                        onClick={() => handleApproveAudit(request.id)}
+                                        disabled={Boolean(busy)}
+                                      >
+                                        {busy === `${request.id}:audit-approve`
+                                          ? "Zatwierdzanie..."
+                                          : "Zatwierdź i wyślij podsumowanie"}
+                                      </button>
+
+                                      <label>
+                                        Powód odesłania do poprawy
+                                        <textarea
+                                          value={auditDraft.returnNote}
+                                          onChange={(event) => updateAuditDraft(request.id, {
+                                            returnNote: event.target.value,
+                                          })}
+                                          placeholder="Opisz, co administrator powinien uzupełnić lub ponownie sprawdzić..."
+                                          minLength={20}
+                                          maxLength={5000}
+                                          rows={3}
+                                          disabled={Boolean(busy)}
+                                        />
+                                      </label>
+                                      <button
+                                        className="privacy-secondary-button"
+                                        type="button"
+                                        onClick={() => handleReturnAudit(request.id)}
+                                        disabled={Boolean(busy) || auditDraft.returnNote.trim().length < 20}
+                                      >
+                                        {busy === `${request.id}:audit-return`
+                                          ? "Odsyłanie..."
+                                          : "Odeślij do poprawy"}
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <p>
+                                      Analiza czeka na wewnętrzne sprawdzenie właściciela technicznego.
+                                      Do tego czasu nie można jej edytować ani zakończyć wniosku.
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+
+                              {audit.status === "approved" && (
+                                <div className="privacy-audit-approved-summary">
+                                  <strong>Podsumowanie przekazane użytkownikowi</strong>
+                                  <p>{audit.public_summary}</p>
+                                  <small>Zatwierdzono: {formatDisputeDate(audit.approved_at)}</small>
+                                </div>
+                              )}
+
+                              {auditEvents.length > 0 && (
+                                <details className="privacy-audit-history">
+                                  <summary>Historia wewnętrzna analizy</summary>
+                                  <ol>
+                                    {auditEvents.map((item) => (
+                                      <li key={item.id}>
+                                        <div>
+                                          <strong>
+                                            {PRIVACY_AUDIT_EVENT_LABELS[item.event_type] || item.event_type}
+                                          </strong>
+                                          {item.note && <p>{item.note}</p>}
+                                        </div>
+                                        <time>{formatDisputeDate(item.created_at)}</time>
+                                      </li>
+                                    ))}
+                                  </ol>
+                                </details>
+                              )}
+                            </>
+                          )}
+                        </section>
+                      )}
+
+                      {isPrivacyRequestOpen(request.status)
+                        && canWork
+                        && (!isSecurityReview || (audit && !auditLocked)) && (
                         <form className="privacy-admin-form" onSubmit={(event) => handleUpdate(event, request.id)}>
+                          {isSecurityReview && (
+                            <div className="privacy-audit-contact-note">
+                              Ten formularz służy do zmiany etapu lub poproszenia
+                              użytkownika o informacje. Zakończenie analizy następuje
+                              wyłącznie przez proces zatwierdzania powyżej.
+                            </div>
+                          )}
                           <label>
                             Nowy status
                             <select
@@ -14868,6 +15704,8 @@ function AdminPrivacyRequests() {
                             >
                               {Object.entries(PRIVACY_REQUEST_STATUSES)
                                 .filter(([value]) => !["submitted", "withdrawn"].includes(value))
+                                .filter(([value]) => !isSecurityReview
+                                  || !["completed", "partially_completed"].includes(value))
                                 .map(([value, label]) => <option value={value} key={value}>{label}</option>)}
                             </select>
                           </label>
