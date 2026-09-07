@@ -11491,6 +11491,422 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
   border-top: 1px solid #dfe1da;
 }
 
+.privacy-form-notice.is-security-review {
+  border-color: #cbdccf;
+  background: #f0f7f1;
+}
+
+.privacy-form-notice.is-security-review strong {
+  color: #2d5136;
+}
+
+.privacy-form-notice.is-security-review p {
+  color: #58705e;
+}
+
+.privacy-security-progress {
+  margin: 0 0 15px;
+  padding: 14px 15px;
+  border: 1px solid #cfddd0;
+  border-radius: 13px;
+  background: #f0f6ef;
+}
+
+.privacy-security-progress strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #2e4934;
+  font-size: 12px;
+}
+
+.privacy-security-progress p {
+  margin: 0;
+  color: #607064;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.privacy-audit-workspace {
+  margin-top: 18px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid #cfd8d0;
+  border-radius: 18px;
+  background: #f5f8f4;
+}
+
+.privacy-audit-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.privacy-audit-heading h4 {
+  margin: 5px 0 0;
+  color: #202820;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.privacy-audit-status {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #e7ebe5;
+  color: #556055;
+  font-size: 9px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.privacy-audit-status.is-in_review {
+  background: #e3eee6;
+  color: #31563a;
+}
+
+.privacy-audit-status.is-remediation_required {
+  background: #fff0d8;
+  color: #795414;
+}
+
+.privacy-audit-status.is-ready_for_approval {
+  background: #e7e9f5;
+  color: #414c78;
+}
+
+.privacy-audit-status.is-approved {
+  background: #dcefe0;
+  color: #245a30;
+}
+
+.privacy-audit-legal-note {
+  margin: 14px 0 18px;
+  padding: 11px 13px;
+  border-left: 3px solid #849287;
+  border-radius: 0 10px 10px 0;
+  background: #eef1ec;
+  color: #616a61;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.privacy-audit-access-note,
+.privacy-audit-approved-summary {
+  padding: 16px;
+  border: 1px solid #d7ddd6;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.privacy-audit-access-note strong,
+.privacy-audit-approved-summary strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #303930;
+  font-size: 12px;
+}
+
+.privacy-audit-access-note p,
+.privacy-audit-approved-summary p {
+  margin: 0;
+  color: #687068;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.privacy-audit-form {
+  display: grid;
+  gap: 17px;
+}
+
+.privacy-audit-form label,
+.privacy-audit-approval-panel label {
+  display: grid;
+  gap: 8px;
+  color: #353d35;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.privacy-audit-form select,
+.privacy-audit-form textarea,
+.privacy-audit-approval-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d5dbd4;
+  border-radius: 12px;
+  background: #fff;
+  color: #252b25;
+  font: inherit;
+  font-size: 11px;
+  outline: none;
+}
+
+.privacy-audit-form select {
+  min-height: 43px;
+  padding: 0 12px;
+}
+
+.privacy-audit-form textarea,
+.privacy-audit-approval-panel textarea {
+  min-height: 92px;
+  padding: 12px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.privacy-audit-form select:focus,
+.privacy-audit-form textarea:focus,
+.privacy-audit-approval-panel textarea:focus {
+  border-color: #778b79;
+  box-shadow: 0 0 0 3px rgba(75, 97, 80, 0.1);
+}
+
+.privacy-audit-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.45fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.privacy-audit-updated {
+  min-height: 43px;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+  padding: 0 12px;
+  border: 1px solid #dce1da;
+  border-radius: 12px;
+  background: #eef2ed;
+}
+
+.privacy-audit-updated span {
+  color: #858d84;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.privacy-audit-updated strong {
+  color: #3e473e;
+  font-size: 10px;
+}
+
+.privacy-audit-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  padding-top: 4px;
+}
+
+.privacy-audit-section-heading span,
+.privacy-audit-section-heading small {
+  display: block;
+}
+
+.privacy-audit-section-heading span {
+  color: #2f372f;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.privacy-audit-section-heading small {
+  margin-top: 4px;
+  color: #7b837a;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.privacy-audit-section-heading > strong {
+  color: #2f5035;
+  font-size: 15px;
+}
+
+.privacy-audit-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.privacy-audit-check {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #dde1da;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.privacy-audit-check.is-passed {
+  border-color: #c7dbc9;
+  box-shadow: inset 3px 0 0 #6f9a75;
+}
+
+.privacy-audit-check.is-issue_found {
+  border-color: #e6caaa;
+  box-shadow: inset 3px 0 0 #c78336;
+}
+
+.privacy-audit-check.is-not_applicable {
+  border-color: #d5d7dd;
+  box-shadow: inset 3px 0 0 #898d9a;
+}
+
+.privacy-audit-check-title {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.privacy-audit-check-title > span {
+  width: 28px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #edf0eb;
+  color: #687067;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.privacy-audit-check-title strong {
+  display: block;
+  color: #323932;
+  font-size: 11px;
+}
+
+.privacy-audit-check-title p {
+  margin: 4px 0 0;
+  color: #7a8279;
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.privacy-audit-check textarea {
+  min-height: 78px;
+}
+
+.privacy-audit-public-summary {
+  padding: 15px;
+  border: 1px solid #cbd9cd;
+  border-radius: 14px;
+  background: #eef5ef;
+}
+
+.privacy-audit-public-summary small {
+  color: #68776a;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.privacy-audit-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.privacy-audit-approval-panel {
+  display: grid;
+  gap: 13px;
+  margin-top: 17px;
+  padding: 16px;
+  border: 1px solid #cfd3e1;
+  border-radius: 14px;
+  background: #f0f1f8;
+}
+
+.privacy-audit-approval-panel strong {
+  color: #343d62;
+  font-size: 12px;
+}
+
+.privacy-audit-approval-panel p {
+  margin: 4px 0 0;
+  color: #666d85;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.privacy-audit-approved-summary {
+  margin-top: 17px;
+  border-color: #c5d9c8;
+  background: #edf6ee;
+}
+
+.privacy-audit-approved-summary small {
+  display: block;
+  margin-top: 8px;
+  color: #738075;
+  font-size: 9px;
+}
+
+.privacy-audit-history {
+  margin-top: 17px;
+  border-top: 1px solid #d9ded7;
+}
+
+.privacy-audit-history summary {
+  padding: 13px 0 2px;
+  color: #3b463c;
+  font-size: 10px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.privacy-audit-history ol {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.privacy-audit-history li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.privacy-audit-history li strong {
+  display: block;
+  color: #3d453d;
+  font-size: 10px;
+}
+
+.privacy-audit-history li p {
+  margin: 4px 0 0;
+  color: #757d74;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.privacy-audit-history time {
+  flex: 0 0 auto;
+  color: #8c938a;
+  font-size: 8px;
+}
+
+.privacy-audit-contact-note {
+  padding: 11px 13px;
+  border: 1px solid #d4d9d2;
+  border-radius: 11px;
+  background: #eef2ed;
+  color: #626b61;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
 html[data-theme="dark"] .privacy-center-page {
   background:
     radial-gradient(circle at 88% 5%, rgba(102, 128, 105, 0.14), transparent 34%),
@@ -11584,8 +12000,92 @@ html[data-theme="dark"] .privacy-secondary-button {
   color: #e4e8df;
 }
 
+html[data-theme="dark"] .privacy-form-notice.is-security-review,
+html[data-theme="dark"] .privacy-security-progress,
+html[data-theme="dark"] .privacy-audit-workspace {
+  border-color: #34473a;
+  background: #131b15;
+}
+
+html[data-theme="dark"] .privacy-form-notice.is-security-review strong,
+html[data-theme="dark"] .privacy-security-progress strong,
+html[data-theme="dark"] .privacy-audit-heading h4,
+html[data-theme="dark"] .privacy-audit-section-heading span,
+html[data-theme="dark"] .privacy-audit-check-title strong,
+html[data-theme="dark"] .privacy-audit-access-note strong,
+html[data-theme="dark"] .privacy-audit-approved-summary strong,
+html[data-theme="dark"] .privacy-audit-history li strong {
+  color: #e3ebe1;
+}
+
+html[data-theme="dark"] .privacy-form-notice.is-security-review p,
+html[data-theme="dark"] .privacy-security-progress p,
+html[data-theme="dark"] .privacy-audit-legal-note,
+html[data-theme="dark"] .privacy-audit-check-title p,
+html[data-theme="dark"] .privacy-audit-access-note p,
+html[data-theme="dark"] .privacy-audit-approved-summary p,
+html[data-theme="dark"] .privacy-audit-history li p,
+html[data-theme="dark"] .privacy-audit-contact-note {
+  color: #aeb8ac;
+}
+
+html[data-theme="dark"] .privacy-audit-legal-note,
+html[data-theme="dark"] .privacy-audit-updated,
+html[data-theme="dark"] .privacy-audit-contact-note {
+  border-color: #343d34;
+  background: #1a211a;
+}
+
+html[data-theme="dark"] .privacy-audit-access-note,
+html[data-theme="dark"] .privacy-audit-check,
+html[data-theme="dark"] .privacy-audit-history li {
+  border-color: #363d35;
+  background: #0f120f;
+}
+
+html[data-theme="dark"] .privacy-audit-approved-summary,
+html[data-theme="dark"] .privacy-audit-public-summary {
+  border-color: #36503b;
+  background: #152019;
+}
+
+html[data-theme="dark"] .privacy-audit-approval-panel {
+  border-color: #3d4256;
+  background: #191b27;
+}
+
+html[data-theme="dark"] .privacy-audit-approval-panel strong {
+  color: #dde1f2;
+}
+
+html[data-theme="dark"] .privacy-audit-approval-panel p {
+  color: #adb2c8;
+}
+
+html[data-theme="dark"] .privacy-audit-form label,
+html[data-theme="dark"] .privacy-audit-approval-panel label {
+  color: #dce3da;
+}
+
+html[data-theme="dark"] .privacy-audit-form select,
+html[data-theme="dark"] .privacy-audit-form textarea,
+html[data-theme="dark"] .privacy-audit-approval-panel textarea {
+  border-color: #3a4239;
+  background: #090b09;
+  color: #edf1eb;
+}
+
+html[data-theme="dark"] .privacy-audit-check-title > span {
+  background: #202720;
+  color: #aab4a8;
+}
+
 @media (max-width: 900px) {
   .privacy-center-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-audit-checklist {
     grid-template-columns: 1fr;
   }
 
@@ -11687,5 +12187,24 @@ html[data-theme="dark"] .privacy-secondary-button {
   .privacy-admin-toolbar .disputes-filter-bar {
     width: 100%;
     overflow-x: auto;
+  }
+
+  .privacy-audit-heading,
+  .privacy-audit-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .privacy-audit-status {
+    align-self: flex-start;
+  }
+
+  .privacy-audit-overview,
+  .privacy-audit-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-audit-history li {
+    display: grid;
   }
 }
