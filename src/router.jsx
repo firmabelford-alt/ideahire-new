@@ -895,6 +895,35 @@ const ADMIN_DECISION_OPTIONS = [
   ["other", "Inna decyzja"],
 ];
 
+const PRIVACY_REQUEST_TYPES = [
+  ["access", "Dostęp do danych"],
+  ["copy", "Kopia przetwarzanych danych"],
+  ["rectification", "Sprostowanie danych"],
+  ["erasure", "Usunięcie danych lub konta"],
+  ["restriction", "Ograniczenie przetwarzania"],
+  ["objection", "Sprzeciw wobec przetwarzania"],
+  ["portability", "Przeniesienie danych"],
+  ["other", "Inna sprawa dotycząca prywatności"],
+];
+
+const PRIVACY_REQUEST_STATUSES = {
+  submitted: "Otrzymany",
+  identity_verification: "Weryfikacja tożsamości",
+  in_progress: "W realizacji",
+  awaiting_user: "Oczekiwanie na odpowiedź użytkownika",
+  completed: "Zrealizowany",
+  partially_completed: "Zrealizowany częściowo",
+  rejected: "Odmowa realizacji",
+  withdrawn: "Wycofany",
+};
+
+const PRIVACY_RESPONSE_FORMATS = [
+  ["electronic", "Odpowiedź elektroniczna"],
+  ["json", "Dane w formacie JSON"],
+  ["csv", "Dane tabelaryczne CSV"],
+  ["pdf", "Dokument PDF"],
+];
+
 function getDisputeStatusLabel(status) {
   return DISPUTE_STATUS_LABELS[status] || "Nieznany status";
 }
@@ -1590,6 +1619,13 @@ function AdminNavbar() {
           className={({ isActive }) => (isActive ? "is-active" : "")}
         >
           Wiadomości dowodowe
+        </NavLink>
+
+        <NavLink
+          to="/admin/privacy"
+          className={({ isActive }) => (isActive ? "is-active" : "")}
+        >
+          Wnioski RODO
         </NavLink>
       </nav>
 
@@ -3073,6 +3109,9 @@ function LimitedAccount() {
             Nie wyświetlamy jej na profilu ani innym użytkownikom. Jeżeli
             została podana błędnie, korektę przeprowadzi pomoc IdeaHire.
           </p>
+          <Link className="privacy-entry-link" to="/privacy-center">
+            Prywatność i moje dane →
+          </Link>
         </section>
       </main>
     </div>
@@ -4518,6 +4557,21 @@ function Account() {
           </form>
         </section>
 
+        <section className="privacy-entry-card" aria-labelledby="privacy-entry-title">
+          <div className="privacy-entry-icon" aria-hidden="true">◉</div>
+          <div className="privacy-entry-copy">
+            <span className="section-label">Prywatność</span>
+            <h2 id="privacy-entry-title">Twoje dane w IdeaHire</h2>
+            <p>
+              Sprawdź swoje prawa albo wyślij bezpieczny wniosek dotyczący
+              dostępu, kopii, poprawienia, ograniczenia lub usunięcia danych.
+            </p>
+          </div>
+          <Link className="privacy-entry-link" to="/privacy-center">
+            Otwórz centrum prywatności →
+          </Link>
+        </section>
+
         <section className="account-card my-jobs-section">
           <span className="section-label">
             Moje zlecenia
@@ -4590,6 +4644,400 @@ function Account() {
                   </article>
                 )
               )}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}
+
+/* =========================================================
+   PRIVACY CENTER — USER
+========================================================= */
+
+function formatPrivacyRequestNumber(value) {
+  return `RODO-${String(value || 0).padStart(6, "0")}`;
+}
+
+function isPrivacyRequestOpen(status) {
+  return ![
+    "completed",
+    "partially_completed",
+    "rejected",
+    "withdrawn",
+  ].includes(status);
+}
+
+function PrivacyCenter() {
+  const { user } = useAuth();
+  const [requests, setRequests] = useState([]);
+  const [eventsByRequest, setEventsByRequest] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
+  const [form, setForm] = useState({
+    requestType: "access",
+    preferredFormat: "electronic",
+    description: "",
+  });
+
+  async function loadPrivacyRequests() {
+    if (!user?.id) return;
+
+    const { data, error } = await supabase
+      .from("ideahire_privacy_requests")
+      .select(
+        "id, request_number, request_type, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, withdrawn_at"
+      )
+      .eq("requester_user_id", user.id)
+      .order("submitted_at", { ascending: false });
+
+    if (error) throw error;
+
+    const rows = data || [];
+    setRequests(rows);
+
+    if (rows.length === 0) {
+      setEventsByRequest({});
+      return;
+    }
+
+    const { data: eventRows, error: eventError } = await supabase
+      .from("ideahire_privacy_request_events")
+      .select("id, request_id, event_type, message, created_at")
+      .in("request_id", rows.map((item) => item.id))
+      .order("created_at", { ascending: true });
+
+    if (eventError) throw eventError;
+
+    setEventsByRequest(
+      (eventRows || []).reduce((result, event) => {
+        if (!result[event.request_id]) result[event.request_id] = [];
+        result[event.request_id].push(event);
+        return result;
+      }, {})
+    );
+  }
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+
+    async function prepare() {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        await loadPrivacyRequests();
+      } catch (error) {
+        if (mounted) {
+          setMessage(
+            cleanSupabaseError(
+              error,
+              "Nie udało się pobrać Twoich wniosków dotyczących prywatności."
+            )
+          );
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    prepare();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (form.description.trim().length < 20) {
+      setMessage("Opisz wniosek w co najmniej 20 znakach.");
+      return;
+    }
+
+    setBusy("submit");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "submit_ideahire_privacy_request",
+        {
+          p_request_type: form.requestType,
+          p_description: form.description.trim(),
+          p_preferred_format: form.preferredFormat,
+        }
+      );
+
+      if (error) throw error;
+
+      setForm({
+        requestType: "access",
+        preferredFormat: "electronic",
+        description: "",
+      });
+      setMessage("Wniosek został bezpiecznie zapisany i przekazany administracji IdeaHire.");
+      await loadPrivacyRequests();
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(error, "Nie udało się wysłać wniosku.")
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleWithdraw(requestId) {
+    const confirmed = window.confirm(
+      "Czy na pewno chcesz wycofać ten wniosek? Historia jego obsługi pozostanie zapisana."
+    );
+
+    if (!confirmed) return;
+
+    setBusy(requestId);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "withdraw_my_ideahire_privacy_request",
+        { p_request_id: requestId }
+      );
+
+      if (error) throw error;
+
+      setMessage("Wniosek został wycofany.");
+      await loadPrivacyRequests();
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(error, "Nie udało się wycofać wniosku.")
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  return (
+    <div className="page privacy-center-page">
+      <AccountNavbar />
+
+      <main className="privacy-center-shell">
+        <header className="privacy-center-header">
+          <div>
+            <span className="section-label">Prywatność i moje dane</span>
+            <h1>Centrum prywatności</h1>
+            <p>
+              Wyślij wniosek dotyczący swoich danych i śledź jego realizację
+              bezpośrednio na koncie IdeaHire.
+            </p>
+          </div>
+          <Link className="privacy-back-link" to="/account">
+            ← Wróć do konta
+          </Link>
+        </header>
+
+        <section className="privacy-trust-panel">
+          <div className="privacy-trust-mark" aria-hidden="true">✓</div>
+          <div>
+            <strong>Bezpieczna obsługa wniosku</strong>
+            <p>
+              Wniosek jest przypisany do zalogowanego konta. Możemy poprosić
+              o dodatkową weryfikację wyłącznie wtedy, gdy pojawią się
+              uzasadnione wątpliwości dotyczące tożsamości.
+            </p>
+          </div>
+        </section>
+
+        <div className="privacy-center-grid">
+          <section className="privacy-request-form-card">
+            <span className="privacy-card-number">01</span>
+            <h2>Złóż nowy wniosek</h2>
+            <p>
+              Opisz dokładnie, czego potrzebujesz. Standardowy termin odpowiedzi
+              wynosi jeden miesiąc od otrzymania wniosku.
+            </p>
+
+            <form className="privacy-request-form" onSubmit={handleSubmit}>
+              <label>
+                Rodzaj wniosku
+                <select
+                  value={form.requestType}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      requestType: event.target.value,
+                    }))
+                  }
+                  disabled={Boolean(busy)}
+                >
+                  {PRIVACY_REQUEST_TYPES.map(([value, label]) => (
+                    <option value={value} key={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Preferowany format odpowiedzi
+                <select
+                  value={form.preferredFormat}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      preferredFormat: event.target.value,
+                    }))
+                  }
+                  disabled={Boolean(busy)}
+                >
+                  {PRIVACY_RESPONSE_FORMATS.map(([value, label]) => (
+                    <option value={value} key={value}>{label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Opis wniosku
+                <textarea
+                  value={form.description}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
+                  placeholder="Napisz, jakich danych lub działań dotyczy Twój wniosek..."
+                  minLength={20}
+                  maxLength={5000}
+                  rows={6}
+                  disabled={Boolean(busy)}
+                  required
+                />
+                <small>{form.description.length}/5000 · minimum 20 znaków</small>
+              </label>
+
+              <div className="privacy-form-notice">
+                <strong>Ważne przy usuwaniu danych</strong>
+                <p>
+                  Złożenie wniosku nie powoduje natychmiastowego skasowania konta.
+                  Najpierw sprawdzimy obowiązki dotyczące rozliczeń, sporów,
+                  bezpieczeństwa i przechowywania wymaganych prawem danych.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                className="privacy-primary-button"
+                disabled={Boolean(busy) || form.description.trim().length < 20}
+              >
+                {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek →"}
+              </button>
+            </form>
+          </section>
+
+          <aside className="privacy-rights-card">
+            <span className="privacy-card-number">02</span>
+            <h2>Twoje prawa</h2>
+            <ul>
+              <li><strong>Dostęp i kopia</strong><span>Sprawdź, jakie dane przetwarzamy.</span></li>
+              <li><strong>Sprostowanie</strong><span>Popraw dane nieprawidłowe lub nieaktualne.</span></li>
+              <li><strong>Usunięcie</strong><span>Poproś o usunięcie danych, gdy zachodzą podstawy.</span></li>
+              <li><strong>Ograniczenie i sprzeciw</strong><span>Zażądaj ograniczenia albo zgłoś sprzeciw.</span></li>
+              <li><strong>Przenoszenie</strong><span>Odbierz właściwe dane w ustrukturyzowanym formacie.</span></li>
+            </ul>
+            <a href="/polityka-prywatnosci">Przeczytaj Politykę prywatności →</a>
+            <small>
+              Możesz również napisać na ideahireprywatnosc@gmail.com.
+            </small>
+          </aside>
+        </div>
+
+        {message && (
+          <p className="privacy-page-message" role="status">{message}</p>
+        )}
+
+        <section className="privacy-history-section">
+          <div className="privacy-section-heading">
+            <div>
+              <span className="section-label">Historia</span>
+              <h2>Twoje wnioski</h2>
+            </div>
+            <span className="privacy-count-badge">{requests.length}</span>
+          </div>
+
+          {loading ? (
+            <div className="privacy-empty-state">Ładowanie wniosków...</div>
+          ) : requests.length === 0 ? (
+            <div className="privacy-empty-state">
+              <strong>Nie masz jeszcze żadnych wniosków</strong>
+              <p>Po wysłaniu pierwszego wniosku jego status pojawi się tutaj.</p>
+            </div>
+          ) : (
+            <div className="privacy-request-list">
+              {requests.map((request) => {
+                const deadline = request.extended_due_at || request.due_at;
+                const events = eventsByRequest[request.id] || [];
+
+                return (
+                  <article className="privacy-request-card" key={request.id}>
+                    <div className="privacy-request-topline">
+                      <div>
+                        <span>{formatPrivacyRequestNumber(request.request_number)}</span>
+                        <h3>{getOptionLabel(PRIVACY_REQUEST_TYPES, request.request_type)}</h3>
+                      </div>
+                      <span className={`privacy-status-pill is-${request.status}`}>
+                        {PRIVACY_REQUEST_STATUSES[request.status] || request.status}
+                      </span>
+                    </div>
+
+                    <p className="privacy-request-description">{request.description}</p>
+
+                    <dl className="privacy-request-meta">
+                      <div><dt>Wysłano</dt><dd>{formatDisputeDate(request.submitted_at)}</dd></div>
+                      <div><dt>Termin odpowiedzi</dt><dd>{formatDisputeDate(deadline, false)}</dd></div>
+                      <div><dt>Format</dt><dd>{getOptionLabel(PRIVACY_RESPONSE_FORMATS, request.preferred_format)}</dd></div>
+                    </dl>
+
+                    {request.extension_reason && (
+                      <p className="privacy-extension-note">
+                        <strong>Przedłużenie terminu:</strong> {request.extension_reason}
+                      </p>
+                    )}
+
+                    {request.decision_summary && (
+                      <p className="privacy-decision-note">
+                        <strong>Odpowiedź IdeaHire:</strong> {request.decision_summary}
+                      </p>
+                    )}
+
+                    {events.length > 0 && (
+                      <details className="privacy-timeline">
+                        <summary>Pokaż historię sprawy</summary>
+                        <ol>
+                          {events.map((item) => (
+                            <li key={item.id}>
+                              <span>{item.message || "Status został zaktualizowany."}</span>
+                              <time>{formatDisputeDate(item.created_at)}</time>
+                            </li>
+                          ))}
+                        </ol>
+                      </details>
+                    )}
+
+                    {isPrivacyRequestOpen(request.status) && (
+                      <button
+                        type="button"
+                        className="privacy-withdraw-button"
+                        onClick={() => handleWithdraw(request.id)}
+                        disabled={Boolean(busy)}
+                      >
+                        {busy === request.id ? "Wycofywanie..." : "Wycofaj wniosek"}
+                      </button>
+                    )}
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
@@ -14060,6 +14508,432 @@ function AdminEvidenceMessages() {
   );
 }
 
+function AdminPrivacyRequests() {
+  const { user } = useAuth();
+  const { staffRole } = useStaffRole(user?.id);
+  const [requests, setRequests] = useState([]);
+  const [profiles, setProfiles] = useState({});
+  const [eventsByRequest, setEventsByRequest] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("active");
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
+  const [drafts, setDrafts] = useState({});
+
+  async function loadAdminPrivacyRequests() {
+    if (!user?.id) return;
+
+    const { data, error } = await supabase
+      .from("ideahire_privacy_requests")
+      .select("*")
+      .order("submitted_at", { ascending: false })
+      .limit(300);
+
+    if (error) throw error;
+
+    const rows = data || [];
+    setRequests(rows);
+
+    const profileIds = [...new Set(
+      rows.flatMap((item) => [
+        item.requester_user_id,
+        item.assigned_admin_id,
+      ]).filter(Boolean)
+    )];
+
+    if (profileIds.length > 0) {
+      const { data: profileRows, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, name, avatar_url")
+        .in("id", profileIds);
+
+      if (!profileError) {
+        setProfiles(Object.fromEntries(
+          (profileRows || []).map((profile) => [profile.id, profile])
+        ));
+      }
+    } else {
+      setProfiles({});
+    }
+
+    if (rows.length > 0) {
+      const { data: eventRows, error: eventError } = await supabase
+        .from("ideahire_privacy_request_events")
+        .select("id, request_id, actor_role, event_type, visibility, message, created_at")
+        .in("request_id", rows.map((item) => item.id))
+        .order("created_at", { ascending: true });
+
+      if (eventError) throw eventError;
+
+      setEventsByRequest(
+        (eventRows || []).reduce((result, item) => {
+          if (!result[item.request_id]) result[item.request_id] = [];
+          result[item.request_id].push(item);
+          return result;
+        }, {})
+      );
+    } else {
+      setEventsByRequest({});
+    }
+  }
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let mounted = true;
+
+    async function prepare() {
+      setLoading(true);
+      setMessage("");
+
+      try {
+        await loadAdminPrivacyRequests();
+      } catch (error) {
+        if (mounted) {
+          setMessage(cleanSupabaseError(
+            error,
+            "Nie udało się pobrać wniosków dotyczących prywatności."
+          ));
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    prepare();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  function updateDraft(requestId, values) {
+    setDrafts((current) => ({
+      ...current,
+      [requestId]: {
+        status: "in_progress",
+        publicMessage: "",
+        internalNote: "",
+        extensionReason: "",
+        ...(current[requestId] || {}),
+        ...values,
+      },
+    }));
+  }
+
+  function getDraft(requestId) {
+    return drafts[requestId] || {
+      status: "in_progress",
+      publicMessage: "",
+      internalNote: "",
+      extensionReason: "",
+    };
+  }
+
+  async function handleTake(requestId) {
+    setBusy(`${requestId}:take`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_take_ideahire_privacy_request",
+        { p_request_id: requestId }
+      );
+
+      if (error) throw error;
+      setMessage("Wniosek został przypisany do Ciebie.");
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się przejąć wniosku."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleUpdate(event, requestId) {
+    event.preventDefault();
+    const draft = getDraft(requestId);
+
+    setBusy(`${requestId}:update`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_update_ideahire_privacy_request",
+        {
+          p_request_id: requestId,
+          p_status: draft.status,
+          p_public_message: draft.publicMessage.trim() || null,
+          p_internal_note: draft.internalNote.trim() || null,
+        }
+      );
+
+      if (error) throw error;
+      setMessage("Status wniosku został zapisany.");
+      setDrafts((current) => ({ ...current, [requestId]: undefined }));
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zaktualizować wniosku."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleExtend(requestId) {
+    const draft = getDraft(requestId);
+
+    if (draft.extensionReason.trim().length < 20) {
+      setMessage("Uzasadnienie przedłużenia musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    setBusy(`${requestId}:extend`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_extend_ideahire_privacy_request",
+        {
+          p_request_id: requestId,
+          p_reason: draft.extensionReason.trim(),
+        }
+      );
+
+      if (error) throw error;
+      setMessage("Termin został przedłużony i użytkownik zobaczy uzasadnienie.");
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się przedłużyć terminu."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  const activeRequests = requests.filter((item) => isPrivacyRequestOpen(item.status));
+  const overdueRequests = activeRequests.filter((item) =>
+    new Date(item.extended_due_at || item.due_at).getTime() < Date.now()
+  );
+  const unassignedRequests = activeRequests.filter((item) => !item.assigned_admin_id);
+
+  const visibleRequests = requests.filter((item) => {
+    if (filter === "all") return true;
+    if (filter === "mine") return item.assigned_admin_id === user.id;
+    if (filter === "unassigned") return isPrivacyRequestOpen(item.status) && !item.assigned_admin_id;
+    if (filter === "completed") return !isPrivacyRequestOpen(item.status);
+    return isPrivacyRequestOpen(item.status);
+  });
+
+  return (
+    <div className="account-page admin-page admin-privacy-page">
+      <AdminNavbar />
+
+      <main className="admin-shell">
+        <header className="admin-page-header">
+          <div>
+            <span className="section-label">Ochrona danych</span>
+            <h1>Wnioski użytkowników</h1>
+            <p>
+              Kontrolowana kolejka wniosków dotyczących dostępu, kopii,
+              sprostowania, sprzeciwu i usunięcia danych.
+            </p>
+          </div>
+          <span className="admin-role-badge">
+            {staffRole === "owner" ? "Właściciel" : "Administrator"}
+          </span>
+        </header>
+
+        {message && <p className="privacy-page-message" role="status">{message}</p>}
+
+        <section className="admin-stats-grid" aria-label="Statystyki wniosków">
+          <article><strong>{activeRequests.length}</strong><span>Aktywne wnioski</span></article>
+          <article><strong>{unassignedRequests.length}</strong><span>Nieprzypisane</span></article>
+          <article><strong>{overdueRequests.length}</strong><span>Po terminie</span></article>
+          <article><strong>{requests.length}</strong><span>Wszystkie</span></article>
+        </section>
+
+        <section className="privacy-admin-queue">
+          <div className="privacy-admin-toolbar">
+            <div>
+              <span className="section-label">Kolejka RODO</span>
+              <h2>Sprawy do obsługi</h2>
+            </div>
+            <div className="disputes-filter-bar is-compact" role="group" aria-label="Filtr wniosków">
+              {[
+                ["active", "Aktywne"],
+                ["unassigned", "Nieprzypisane"],
+                ["mine", "Moje"],
+                ["completed", "Zakończone"],
+                ["all", "Wszystkie"],
+              ].map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  className={filter === value ? "is-active" : ""}
+                  onClick={() => setFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="privacy-empty-state">Ładowanie kolejki...</div>
+          ) : visibleRequests.length === 0 ? (
+            <div className="privacy-empty-state">
+              <strong>Brak wniosków w tym widoku</strong>
+            </div>
+          ) : (
+            <div className="privacy-admin-list">
+              {visibleRequests.map((request) => {
+                const requesterName = getDisputeProfileName(
+                  profiles[request.requester_user_id],
+                  "Użytkownik"
+                );
+                const assignedName = request.assigned_admin_id
+                  ? getDisputeProfileName(profiles[request.assigned_admin_id], "Administrator")
+                  : "Nieprzypisany";
+                const deadline = request.extended_due_at || request.due_at;
+                const isOverdue = isPrivacyRequestOpen(request.status)
+                  && new Date(deadline).getTime() < Date.now();
+                const draft = getDraft(request.id);
+                const events = eventsByRequest[request.id] || [];
+                const canWork = !request.assigned_admin_id
+                  || request.assigned_admin_id === user.id
+                  || staffRole === "owner";
+
+                return (
+                  <article className={`privacy-admin-card${isOverdue ? " is-overdue" : ""}`} key={request.id}>
+                    <div className="privacy-request-topline">
+                      <div>
+                        <span>{formatPrivacyRequestNumber(request.request_number)}</span>
+                        <h3>{getOptionLabel(PRIVACY_REQUEST_TYPES, request.request_type)}</h3>
+                      </div>
+                      <span className={`privacy-status-pill is-${request.status}`}>
+                        {PRIVACY_REQUEST_STATUSES[request.status] || request.status}
+                      </span>
+                    </div>
+
+                    <div className="privacy-admin-owner-row">
+                      <div className="admin-staff-avatar">
+                        {profiles[request.requester_user_id]?.avatar_url ? (
+                          <img src={profiles[request.requester_user_id].avatar_url} alt="" />
+                        ) : requesterName.charAt(0).toUpperCase()}
+                      </div>
+                      <div><small>Użytkownik</small><strong>{requesterName}</strong></div>
+                    </div>
+
+                    <p className="privacy-request-description">{request.description}</p>
+
+                    <dl className="privacy-request-meta">
+                      <div><dt>Złożono</dt><dd>{formatDisputeDate(request.submitted_at)}</dd></div>
+                      <div><dt>Termin</dt><dd className={isOverdue ? "is-overdue" : ""}>{formatDisputeDate(deadline, false)}</dd></div>
+                      <div><dt>Opiekun</dt><dd>{assignedName}</dd></div>
+                    </dl>
+
+                    {!request.assigned_admin_id && isPrivacyRequestOpen(request.status) && (
+                      <button
+                        type="button"
+                        className="privacy-primary-button"
+                        onClick={() => handleTake(request.id)}
+                        disabled={Boolean(busy)}
+                      >
+                        {busy === `${request.id}:take` ? "Przypisywanie..." : "Przejmij wniosek"}
+                      </button>
+                    )}
+
+                    <details className="privacy-admin-details">
+                      <summary>Otwórz historię i narzędzia obsługi</summary>
+
+                      {events.length > 0 && (
+                        <ol className="privacy-admin-timeline">
+                          {events.map((item) => (
+                            <li className={item.visibility === "internal" ? "is-internal" : ""} key={item.id}>
+                              <span>{item.message || item.event_type}</span>
+                              <small>{item.visibility === "internal" ? "Tylko administracja" : "Widoczne dla użytkownika"}</small>
+                              <time>{formatDisputeDate(item.created_at)}</time>
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+
+                      {isPrivacyRequestOpen(request.status) && canWork && (
+                        <form className="privacy-admin-form" onSubmit={(event) => handleUpdate(event, request.id)}>
+                          <label>
+                            Nowy status
+                            <select
+                              value={draft.status}
+                              onChange={(event) => updateDraft(request.id, { status: event.target.value })}
+                              disabled={Boolean(busy)}
+                            >
+                              {Object.entries(PRIVACY_REQUEST_STATUSES)
+                                .filter(([value]) => !["submitted", "withdrawn"].includes(value))
+                                .map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+                            </select>
+                          </label>
+
+                          <label>
+                            Wiadomość dla użytkownika
+                            <textarea
+                              value={draft.publicMessage}
+                              onChange={(event) => updateDraft(request.id, { publicMessage: event.target.value })}
+                              placeholder="Opisz wykonane działanie, potrzebne informacje albo przyczynę decyzji..."
+                              maxLength={5000}
+                              rows={4}
+                            />
+                          </label>
+
+                          <label>
+                            Notatka wewnętrzna
+                            <textarea
+                              value={draft.internalNote}
+                              onChange={(event) => updateDraft(request.id, { internalNote: event.target.value })}
+                              placeholder="Informacja widoczna wyłącznie dla administracji..."
+                              maxLength={5000}
+                              rows={3}
+                            />
+                          </label>
+
+                          <button className="privacy-primary-button" type="submit" disabled={Boolean(busy)}>
+                            {busy === `${request.id}:update` ? "Zapisywanie..." : "Zapisz status i wiadomość"}
+                          </button>
+
+                          {!request.extended_due_at && (
+                            <div className="privacy-extension-form">
+                              <label>
+                                Uzasadnienie przedłużenia terminu
+                                <textarea
+                                  value={draft.extensionReason}
+                                  onChange={(event) => updateDraft(request.id, { extensionReason: event.target.value })}
+                                  placeholder="Wyjaśnij złożoność sprawy lub liczbę obsługiwanych wniosków..."
+                                  maxLength={5000}
+                                  rows={3}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                className="privacy-secondary-button"
+                                onClick={() => handleExtend(request.id)}
+                                disabled={Boolean(busy) || draft.extensionReason.trim().length < 20}
+                              >
+                                {busy === `${request.id}:extend` ? "Przedłużanie..." : "Przedłuż termin maksymalnie o 2 miesiące"}
+                              </button>
+                            </div>
+                          )}
+                        </form>
+                      )}
+                    </details>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}
+
 function AdminPanel() {
   const { user } = useAuth();
   const { staffRole, staffLoading, isStaff, isOwner } = useStaffRole(user?.id);
@@ -14596,6 +15470,17 @@ function Router() {
           />
 
           <Route
+            path="/privacy-center"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute allowLimited>
+                  <PrivacyCenter />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/find-talent"
             element={
               <ProtectedRoute>
@@ -14720,6 +15605,17 @@ function Router() {
               <ProtectedRoute>
                 <StaffOnlyRoute>
                   <AdminEvidenceMessages />
+                </StaffOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/privacy"
+            element={
+              <ProtectedRoute>
+                <StaffOnlyRoute>
+                  <AdminPrivacyRequests />
                 </StaffOnlyRoute>
               </ProtectedRoute>
             }
