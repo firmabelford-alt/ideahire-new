@@ -11287,6 +11287,13 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
   color: #24562d;
 }
 
+.privacy-status-pill.is-requester_closed {
+  border: 1px solid #83b58b;
+  background: #d9f0dd;
+  color: #1e5429;
+  box-shadow: 0 5px 14px rgba(36, 93, 47, 0.1);
+}
+
 .privacy-status-pill.is-rejected,
 .privacy-status-pill.is-withdrawn {
   background: #f1e8e8;
