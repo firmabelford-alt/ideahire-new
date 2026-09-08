@@ -4898,6 +4898,46 @@ function PrivacyCenter() {
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refreshPrivacyCenter = () => {
+      loadPrivacyRequests().catch((error) => {
+        setMessage(cleanSupabaseError(
+          error,
+          "Nie udało się odświeżyć historii sprawy."
+        ));
+      });
+    };
+
+    const channel = supabase
+      .channel(`privacy-center-live-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_privacy_requests",
+          filter: `requester_user_id=eq.${user.id}`,
+        },
+        refreshPrivacyCenter
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_privacy_request_events",
+        },
+        refreshPrivacyCenter
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -4999,25 +5039,31 @@ function PrivacyCenter() {
     }
   }
 
-  async function handleAcceptPrivacyAudit(requestId) {
+  async function handleClosePrivacyReview(requestId, hasApprovedReport) {
     const confirmed = window.confirm(
-      "Czy na pewno chcesz zamknąć sprawę? Raport i historia pozostaną dostępne. Zamknięcie nie oznacza zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
+      hasApprovedReport
+        ? "Czy na pewno chcesz zamknąć analizę? Raport i historia pozostaną dostępne. Zamknięcie nie oznacza zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
+        : "Czy na pewno chcesz zakończyć analizę przed opublikowaniem raportu? Administrator zobaczy, że sprawa została zamknięta przez Ciebie. Historia pozostanie zapisana, ale raport nie zostanie dostarczony w ramach tej sprawy. Nie ogranicza to Twoich praw dotyczących danych."
     );
 
     if (!confirmed) return;
 
-    setBusy(`${requestId}:accept`);
+    setBusy(`${requestId}:close-review`);
     setMessage("");
 
     try {
       const { error } = await supabase.rpc(
-        "accept_my_ideahire_privacy_audit",
+        "close_my_ideahire_privacy_review",
         { p_request_id: requestId }
       );
 
       if (error) throw error;
 
-      setMessage("Sprawa została przez Ciebie zamknięta. Raport i historia pozostają dostępne.");
+      setMessage(
+        hasApprovedReport
+          ? "Analiza została przez Ciebie zamknięta. Raport i historia pozostają dostępne."
+          : "Analiza została przez Ciebie zamknięta. Administrator od razu zobaczy jej nowy status, a historia pozostanie zachowana."
+      );
       await loadPrivacyRequests();
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zamknąć analizy."));
@@ -5220,8 +5266,12 @@ function PrivacyCenter() {
                         <span>{formatPrivacyRequestNumber(request.request_number)}</span>
                         <h3>{getOptionLabel(PRIVACY_REQUEST_TYPES, request.request_type)}</h3>
                       </div>
-                      <span className={`privacy-status-pill is-${request.status}`}>
-                        {PRIVACY_REQUEST_STATUSES[request.status] || request.status}
+                      <span className={`privacy-status-pill is-${
+                        request.requester_closed_at ? "requester_closed" : request.status
+                      }`}>
+                        {request.requester_closed_at
+                          ? "Zamknięta przez Ciebie"
+                          : PRIVACY_REQUEST_STATUSES[request.status] || request.status}
                       </span>
                     </div>
 
@@ -5246,28 +5296,35 @@ function PrivacyCenter() {
                       </p>
                     )}
 
-                    {report && isPrivacyRequestOpen(request.status) && (
+                    {request.request_type === "security_review"
+                      && isPrivacyRequestOpen(request.status) && (
                       <div className="privacy-user-acceptance-panel is-prominent">
                         <div>
-                          <strong>Raport jest opublikowany — Ty zamykasz sprawę</strong>
+                          <strong>
+                            {report
+                              ? "Raport jest opublikowany — decyzja należy do Ciebie"
+                              : "To Ty decydujesz, czy analiza ma trwać dalej"}
+                          </strong>
                           <p>
-                            Możesz najpierw napisać odpowiedź, a później nadal samodzielnie
-                            zamknąć sprawę. Raport i historia nie znikną po zamknięciu.
+                            {report
+                              ? "Możesz najpierw odpowiedzieć administratorowi albo od razu zamknąć analizę. Raport i historia nie znikną."
+                              : "Możesz napisać do administratora albo zakończyć analizę przed publikacją raportu. Administrator od razu zobaczy, że sprawa została zamknięta przez Ciebie."}
                           </p>
                         </div>
                         <button
                           type="button"
                           className="privacy-accept-button"
-                          onClick={() => handleAcceptPrivacyAudit(request.id)}
+                          onClick={() => handleClosePrivacyReview(request.id, Boolean(report))}
                           disabled={Boolean(busy)}
                         >
-                          {busy === `${request.id}:accept`
-                            ? "Zamykanie sprawy..."
-                            : "Zamknij sprawę"}
+                          {busy === `${request.id}:close-review`
+                            ? "Zamykanie analizy..."
+                            : "Zamknij analizę"}
                         </button>
                         <small>
-                          Zamknięcie potwierdza odbiór raportu, ale nie ogranicza Twoich praw
-                          dotyczących danych osobowych i nie jest certyfikatem zgodności IdeaHire.
+                          {report
+                            ? "Zamknięcie potwierdza odbiór raportu, ale nie ogranicza Twoich praw dotyczących danych osobowych i nie jest certyfikatem zgodności IdeaHire."
+                            : "Zamknięcie przed publikacją kończy tę analizę bez raportu. Nie usuwa historii, nie ogranicza Twoich praw i nie uniemożliwia złożenia nowego wniosku w przyszłości."}
                         </small>
                       </div>
                     )}
@@ -5279,7 +5336,9 @@ function PrivacyCenter() {
                           <strong>Sprawa zamknięta przez Ciebie</strong>
                           <p>
                             Zamknięto {formatDisputeDate(request.requester_closed_at)}.
-                            Raport i historia pozostają dostępne na koncie.
+                            {request.status === "withdrawn"
+                              ? " Historia sprawy pozostaje dostępna na koncie."
+                              : " Raport i historia pozostają dostępne na koncie."}
                           </p>
                         </div>
                       </div>
@@ -5436,7 +5495,8 @@ function PrivacyCenter() {
                       </form>
                     )}
 
-                    {isPrivacyRequestOpen(request.status) && !report && (
+                    {isPrivacyRequestOpen(request.status)
+                      && request.request_type !== "security_review" && (
                       <button
                         type="button"
                         className="privacy-withdraw-button"
@@ -15085,6 +15145,55 @@ function AdminPrivacyRequests() {
     };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refreshAdminPrivacyQueue = () => {
+      loadAdminPrivacyRequests().catch((error) => {
+        setMessage(cleanSupabaseError(
+          error,
+          "Nie udało się odświeżyć kolejki wniosków."
+        ));
+      });
+    };
+
+    const channel = supabase
+      .channel(`admin-privacy-live-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "ideahire_privacy_requests",
+        },
+        (payload) => {
+          if (payload.new?.requester_closed_at) {
+            setFilter("requester_closed");
+            setMessage(
+              `Użytkownik zamknął ${formatPrivacyRequestNumber(
+                payload.new.request_number
+              )}. Status kolejki został odświeżony.`
+            );
+          }
+          refreshAdminPrivacyQueue();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "ideahire_privacy_request_events",
+        },
+        refreshAdminPrivacyQueue
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
   function updateDraft(requestId, values) {
     setDrafts((current) => ({
       ...current,
@@ -15682,8 +15791,12 @@ function AdminPrivacyRequests() {
                         <span>{formatPrivacyRequestNumber(request.request_number)}</span>
                         <h3>{getOptionLabel(PRIVACY_REQUEST_TYPES, request.request_type)}</h3>
                       </div>
-                      <span className={`privacy-status-pill is-${request.status}`}>
-                        {PRIVACY_REQUEST_STATUSES[request.status] || request.status}
+                      <span className={`privacy-status-pill is-${
+                        request.requester_closed_at ? "requester_closed" : request.status
+                      }`}>
+                        {request.requester_closed_at
+                          ? "Zamknięta przez użytkownika"
+                          : PRIVACY_REQUEST_STATUSES[request.status] || request.status}
                       </span>
                     </div>
 
@@ -15710,8 +15823,10 @@ function AdminPrivacyRequests() {
                         <div>
                           <strong>Sprawa zamknięta przez użytkownika</strong>
                           <p>
-                            Użytkownik zamknął sprawę {formatDisputeDate(request.requester_closed_at)}.
-                            Raport oraz pełna historia pozostały zachowane.
+                            {request.status === "withdrawn"
+                              ? `Użytkownik zakończył analizę przed publikacją raportu ${formatDisputeDate(request.requester_closed_at)}.`
+                              : `Użytkownik potwierdził odbiór i zamknął analizę ${formatDisputeDate(request.requester_closed_at)}.`}
+                            {" "}Pełna historia sprawy pozostała zachowana.
                           </p>
                         </div>
                       </div>
