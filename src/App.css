@@ -12145,6 +12145,11 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
   background: #edf7ef;
 }
 
+.privacy-user-acceptance-panel.is-prominent {
+  border-width: 2px;
+  box-shadow: 0 12px 28px rgba(44, 88, 55, 0.11);
+}
+
 .privacy-user-acceptance-panel strong {
   color: #294b31;
   font-size: 15px;
@@ -12179,6 +12184,118 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
 .privacy-accept-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.privacy-user-closed-banner,
+.privacy-admin-closed-banner {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin: 15px 0;
+  padding: 15px 16px;
+  border: 1px solid #abd0b1;
+  border-radius: 15px;
+  background: #e9f7ec;
+}
+
+.privacy-user-closed-banner > span,
+.privacy-admin-closed-banner > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #2d6339;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.privacy-user-closed-banner strong,
+.privacy-admin-closed-banner strong {
+  display: block;
+  color: #285033;
+  font-size: 14px;
+}
+
+.privacy-user-closed-banner p,
+.privacy-admin-closed-banner p {
+  margin: 4px 0 0;
+  color: #56725c;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.privacy-admin-latest-reply {
+  display: grid;
+  gap: 10px;
+  margin: 15px 0;
+  padding: 16px;
+  border: 1px solid #d8dfd7;
+  border-left: 4px solid #758779;
+  border-radius: 14px;
+  background: #f7f9f5;
+}
+
+.privacy-admin-latest-reply.needs-attention {
+  border-color: #d8bd83;
+  border-left-color: #b7771f;
+  background: #fff8e9;
+  box-shadow: 0 10px 24px rgba(113, 81, 24, 0.08);
+}
+
+.privacy-admin-latest-reply-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.privacy-admin-latest-reply-heading strong {
+  display: block;
+  margin-top: 4px;
+  color: #303a32;
+  font-size: 13px;
+}
+
+.privacy-admin-latest-reply-heading > span {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #e5ebe4;
+  color: #59675b;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.privacy-admin-latest-reply.needs-attention
+  .privacy-admin-latest-reply-heading > span {
+  background: #f3dfb7;
+  color: #735018;
+}
+
+.privacy-admin-latest-reply > p {
+  margin: 0;
+  color: #48534b;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.privacy-admin-latest-reply > time {
+  color: #7b847b;
+  font-size: 10px;
+}
+
+.privacy-admin-timeline li.is-requester {
+  border-left-color: #4f7658;
+  background: #f0f6f1;
+}
+
+.privacy-admin-timeline li.is-latest {
+  box-shadow: inset 0 0 0 1px #b8cbbb;
 }
 
 .privacy-user-reply-form,
@@ -12580,6 +12697,66 @@ html[data-theme="dark"] .privacy-user-acceptance-panel {
   background: #15231a;
 }
 
+html[data-theme="dark"] .privacy-user-closed-banner,
+html[data-theme="dark"] .privacy-admin-closed-banner {
+  border-color: #365c3e;
+  background: #14251a;
+}
+
+html[data-theme="dark"] .privacy-user-closed-banner > span,
+html[data-theme="dark"] .privacy-admin-closed-banner > span {
+  background: #dcebdc;
+  color: #1b2a1e;
+}
+
+html[data-theme="dark"] .privacy-user-closed-banner strong,
+html[data-theme="dark"] .privacy-admin-closed-banner strong {
+  color: #dcebdc;
+}
+
+html[data-theme="dark"] .privacy-user-closed-banner p,
+html[data-theme="dark"] .privacy-admin-closed-banner p {
+  color: #a9bcac;
+}
+
+html[data-theme="dark"] .privacy-admin-latest-reply {
+  border-color: #384239;
+  border-left-color: #708575;
+  background: #141814;
+}
+
+html[data-theme="dark"] .privacy-admin-latest-reply.needs-attention {
+  border-color: #68542d;
+  border-left-color: #c08a39;
+  background: #251f14;
+}
+
+html[data-theme="dark"] .privacy-admin-latest-reply-heading strong,
+html[data-theme="dark"] .privacy-admin-latest-reply > p {
+  color: #e0e7de;
+}
+
+html[data-theme="dark"] .privacy-admin-latest-reply-heading > span {
+  background: #252d25;
+  color: #b6c2b5;
+}
+
+html[data-theme="dark"]
+  .privacy-admin-latest-reply.needs-attention
+  .privacy-admin-latest-reply-heading > span {
+  background: #493a20;
+  color: #ecd19b;
+}
+
+html[data-theme="dark"] .privacy-admin-latest-reply > time {
+  color: #99a298;
+}
+
+html[data-theme="dark"] .privacy-admin-timeline li.is-requester {
+  border-left-color: #598665;
+  background: #152019;
+}
+
 html[data-theme="dark"] .privacy-user-acceptance-panel strong {
   color: #d9ebdc;
 }
@@ -12769,6 +12946,15 @@ html[data-theme="dark"] .privacy-audit-public-note {
   .privacy-user-reply-form > div {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .privacy-admin-latest-reply-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .privacy-admin-latest-reply-heading > span {
+    align-self: flex-start;
   }
 
   .privacy-accept-button {
