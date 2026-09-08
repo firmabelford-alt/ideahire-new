@@ -4824,7 +4824,7 @@ function PrivacyCenter() {
     const { data, error } = await supabase
       .from("ideahire_privacy_requests")
       .select(
-        "id, request_number, request_type, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, withdrawn_at"
+        "id, request_number, request_type, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, requester_closed_at, withdrawn_at"
       )
       .eq("requester_user_id", user.id)
       .order("submitted_at", { ascending: false });
@@ -5001,7 +5001,7 @@ function PrivacyCenter() {
 
   async function handleAcceptPrivacyAudit(requestId) {
     const confirmed = window.confirm(
-      "Potwierdzasz odbiór raportu i chcesz zamknąć analizę? Nie oznacza to zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
+      "Czy na pewno chcesz zamknąć sprawę? Raport i historia pozostaną dostępne. Zamknięcie nie oznacza zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
     );
 
     if (!confirmed) return;
@@ -5017,7 +5017,7 @@ function PrivacyCenter() {
 
       if (error) throw error;
 
-      setMessage("Potwierdzono odbiór raportu. Analiza została zamknięta.");
+      setMessage("Sprawa została przez Ciebie zamknięta. Raport i historia pozostają dostępne.");
       await loadPrivacyRequests();
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zamknąć analizy."));
@@ -5246,6 +5246,45 @@ function PrivacyCenter() {
                       </p>
                     )}
 
+                    {report && isPrivacyRequestOpen(request.status) && (
+                      <div className="privacy-user-acceptance-panel is-prominent">
+                        <div>
+                          <strong>Raport jest opublikowany — Ty zamykasz sprawę</strong>
+                          <p>
+                            Możesz najpierw napisać odpowiedź, a później nadal samodzielnie
+                            zamknąć sprawę. Raport i historia nie znikną po zamknięciu.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="privacy-accept-button"
+                          onClick={() => handleAcceptPrivacyAudit(request.id)}
+                          disabled={Boolean(busy)}
+                        >
+                          {busy === `${request.id}:accept`
+                            ? "Zamykanie sprawy..."
+                            : "Zamknij sprawę"}
+                        </button>
+                        <small>
+                          Zamknięcie potwierdza odbiór raportu, ale nie ogranicza Twoich praw
+                          dotyczących danych osobowych i nie jest certyfikatem zgodności IdeaHire.
+                        </small>
+                      </div>
+                    )}
+
+                    {request.requester_closed_at && (
+                      <div className="privacy-user-closed-banner" role="status">
+                        <span aria-hidden="true">✓</span>
+                        <div>
+                          <strong>Sprawa zamknięta przez Ciebie</strong>
+                          <p>
+                            Zamknięto {formatDisputeDate(request.requester_closed_at)}.
+                            Raport i historia pozostają dostępne na koncie.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
                     {report && (
                       <section className="privacy-user-audit-report" aria-labelledby={`report-${request.id}`}>
                         <div className="privacy-user-audit-heading">
@@ -5333,32 +5372,6 @@ function PrivacyCenter() {
                       </p>
                     )}
 
-                    {report && request.status === "awaiting_user" && (
-                      <div className="privacy-user-acceptance-panel">
-                        <div>
-                          <strong>To Ty decydujesz o zamknięciu analizy</strong>
-                          <p>
-                            Jeśli raport jest jasny, potwierdź jego odbiór. Jeśli masz pytania
-                            lub zastrzeżenia, napisz do administratora — sprawa pozostanie otwarta.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          className="privacy-accept-button"
-                          onClick={() => handleAcceptPrivacyAudit(request.id)}
-                          disabled={Boolean(busy)}
-                        >
-                          {busy === `${request.id}:accept`
-                            ? "Zamykanie analizy..."
-                            : "Potwierdzam odbiór i zamykam analizę"}
-                        </button>
-                        <small>
-                          Potwierdzenie nie ogranicza Twoich praw dotyczących danych osobowych
-                          i nie jest prawnym certyfikatem zgodności IdeaHire.
-                        </small>
-                      </div>
-                    )}
-
                     {events.length > 0 && (
                       <details className="privacy-timeline">
                         <summary>Pokaż historię sprawy</summary>
@@ -5423,7 +5436,7 @@ function PrivacyCenter() {
                       </form>
                     )}
 
-                    {isPrivacyRequestOpen(request.status) && (
+                    {isPrivacyRequestOpen(request.status) && !report && (
                       <button
                         type="button"
                         className="privacy-withdraw-button"
@@ -15546,6 +15559,7 @@ function AdminPrivacyRequests() {
     if (filter === "all") return true;
     if (filter === "mine") return item.assigned_admin_id === user.id;
     if (filter === "unassigned") return isPrivacyRequestOpen(item.status) && !item.assigned_admin_id;
+    if (filter === "requester_closed") return Boolean(item.requester_closed_at);
     if (filter === "completed") return !isPrivacyRequestOpen(item.status);
     return isPrivacyRequestOpen(item.status);
   });
@@ -15590,6 +15604,7 @@ function AdminPrivacyRequests() {
                 ["unassigned", "Nieprzypisane"],
                 ["mine", "Moje"],
                 ["completed", "Zakończone"],
+                ["requester_closed", "Zamknięte przez użytkownika"],
                 ["all", "Wszystkie"],
               ].map(([value, label]) => (
                 <button
@@ -15625,6 +15640,25 @@ function AdminPrivacyRequests() {
                   && new Date(deadline).getTime() < Date.now();
                 const draft = getDraft(request.id);
                 const events = eventsByRequest[request.id] || [];
+                const requesterMessages = events.filter(
+                  (item) => item.actor_role === "requester" && item.event_type === "message"
+                );
+                const latestRequesterMessage = requesterMessages[
+                  requesterMessages.length - 1
+                ] || null;
+                const latestAdminPublicEvent = [...events].reverse().find(
+                  (item) => ["owner", "admin"].includes(item.actor_role)
+                    && item.visibility !== "internal"
+                ) || null;
+                const requesterReplyNeedsAttention = Boolean(
+                  latestRequesterMessage
+                  && isPrivacyRequestOpen(request.status)
+                  && (
+                    !latestAdminPublicEvent
+                    || new Date(latestRequesterMessage.created_at).getTime()
+                      > new Date(latestAdminPublicEvent.created_at).getTime()
+                  )
+                );
                 const canWork = !request.assigned_admin_id
                   || request.assigned_admin_id === user.id
                   || staffRole === "owner";
@@ -15670,6 +15704,39 @@ function AdminPrivacyRequests() {
                       <div><dt>Opiekun</dt><dd>{assignedName}</dd></div>
                     </dl>
 
+                    {request.requester_closed_at && (
+                      <div className="privacy-admin-closed-banner" role="status">
+                        <span aria-hidden="true">✓</span>
+                        <div>
+                          <strong>Sprawa zamknięta przez użytkownika</strong>
+                          <p>
+                            Użytkownik zamknął sprawę {formatDisputeDate(request.requester_closed_at)}.
+                            Raport oraz pełna historia pozostały zachowane.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {latestRequesterMessage && (
+                      <section className={`privacy-admin-latest-reply${
+                        requesterReplyNeedsAttention ? " needs-attention" : ""
+                      }`}>
+                        <div className="privacy-admin-latest-reply-heading">
+                          <div>
+                            <span className="section-label">Najnowsza odpowiedź użytkownika</span>
+                            <strong>{requesterName}</strong>
+                          </div>
+                          <span>
+                            {requesterReplyNeedsAttention
+                              ? "Wymaga odpowiedzi"
+                              : "Odpowiedź zapisana"}
+                          </span>
+                        </div>
+                        <p>{latestRequesterMessage.message}</p>
+                        <time>{formatDisputeDate(latestRequesterMessage.created_at)}</time>
+                      </section>
+                    )}
+
                     {!request.assigned_admin_id && isPrivacyRequestOpen(request.status) && (
                       <button
                         type="button"
@@ -15687,7 +15754,14 @@ function AdminPrivacyRequests() {
                       {events.length > 0 && (
                         <ol className="privacy-admin-timeline">
                           {events.map((item) => (
-                            <li className={item.visibility === "internal" ? "is-internal" : ""} key={item.id}>
+                            <li
+                              className={[
+                                item.visibility === "internal" ? "is-internal" : "",
+                                item.actor_role === "requester" ? "is-requester" : "",
+                                item.id === latestRequesterMessage?.id ? "is-latest" : "",
+                              ].filter(Boolean).join(" ")}
+                              key={item.id}
+                            >
                               <span>{item.message || item.event_type}</span>
                               <small>
                                 {item.actor_role === "requester"
