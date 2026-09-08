@@ -4782,7 +4782,7 @@ function getSecurityReviewProgress(status) {
   if (status === "in_progress") {
     return {
       title: "Administrator prowadzi analizę",
-      description: "Wewnętrzne ustalenia i dowody nie są publikowane. Po zatwierdzeniu otrzymasz końcowe podsumowanie na swoim koncie.",
+      description: "Po zatwierdzeniu otrzymasz na swoim koncie pełny raport przeznaczony dla Ciebie wraz z wynikiem 12 punktów.",
     };
   }
 
@@ -4796,7 +4796,7 @@ function getSecurityReviewProgress(status) {
   if (status === "completed") {
     return {
       title: "Analiza została zakończona",
-      description: "Zatwierdzone podsumowanie znajduje się w odpowiedzi IdeaHire poniżej.",
+      description: "Zatwierdzony raport i cała historia sprawy pozostają dostępne poniżej.",
     };
   }
 
@@ -4807,6 +4807,8 @@ function PrivacyCenter() {
   const { user } = useAuth();
   const [requests, setRequests] = useState([]);
   const [eventsByRequest, setEventsByRequest] = useState({});
+  const [reportsByRequest, setReportsByRequest] = useState({});
+  const [replyDrafts, setReplyDrafts] = useState({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
@@ -4834,24 +4836,34 @@ function PrivacyCenter() {
 
     if (rows.length === 0) {
       setEventsByRequest({});
+      setReportsByRequest({});
       return;
     }
 
-    const { data: eventRows, error: eventError } = await supabase
-      .from("ideahire_privacy_request_events")
-      .select("id, request_id, event_type, message, created_at")
-      .in("request_id", rows.map((item) => item.id))
-      .order("created_at", { ascending: true });
+    const [eventsResult, reportsResult] = await Promise.all([
+      supabase
+        .from("ideahire_privacy_request_events")
+        .select("id, request_id, actor_role, event_type, message, created_at")
+        .in("request_id", rows.map((item) => item.id))
+        .order("created_at", { ascending: true }),
+      supabase.rpc("get_my_ideahire_privacy_audits"),
+    ]);
 
-    if (eventError) throw eventError;
+    if (eventsResult.error) throw eventsResult.error;
+    if (reportsResult.error) throw reportsResult.error;
 
     setEventsByRequest(
-      (eventRows || []).reduce((result, event) => {
+      (eventsResult.data || []).reduce((result, event) => {
         if (!result[event.request_id]) result[event.request_id] = [];
         result[event.request_id].push(event);
         return result;
       }, {})
     );
+
+    setReportsByRequest(Object.fromEntries(
+      (Array.isArray(reportsResult.data) ? reportsResult.data : [])
+        .map((report) => [report.request_id, report])
+    ));
   }
 
   useEffect(() => {
@@ -4949,6 +4961,66 @@ function PrivacyCenter() {
       setMessage(
         cleanSupabaseError(error, "Nie udało się wycofać wniosku.")
       );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handlePrivacyReply(event, requestId) {
+    event.preventDefault();
+    const reply = (replyDrafts[requestId] || "").trim();
+
+    if (reply.length < 3) {
+      setMessage("Wiadomość musi mieć co najmniej 3 znaki.");
+      return;
+    }
+
+    setBusy(`${requestId}:reply`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "reply_to_my_ideahire_privacy_request",
+        {
+          p_request_id: requestId,
+          p_message: reply,
+        }
+      );
+
+      if (error) throw error;
+
+      setReplyDrafts((current) => ({ ...current, [requestId]: "" }));
+      setMessage("Twoja wiadomość została przekazana administratorowi.");
+      await loadPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się wysłać wiadomości."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleAcceptPrivacyAudit(requestId) {
+    const confirmed = window.confirm(
+      "Potwierdzasz odbiór raportu i chcesz zamknąć analizę? Nie oznacza to zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
+    );
+
+    if (!confirmed) return;
+
+    setBusy(`${requestId}:accept`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "accept_my_ideahire_privacy_audit",
+        { p_request_id: requestId }
+      );
+
+      if (error) throw error;
+
+      setMessage("Potwierdzono odbiór raportu. Analiza została zamknięta.");
+      await loadPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zamknąć analizy."));
     } finally {
       setBusy("");
     }
@@ -5060,7 +5132,8 @@ function PrivacyCenter() {
                   <p>
                     Przypisany administrator sprawdzi 12 obszarów technicznych
                     i organizacyjnych. Wynik zostanie zweryfikowany wewnętrznie,
-                    a zatwierdzone podsumowanie zobaczysz wyłącznie na swoim koncie.
+                    a zatwierdzony raport z wynikiem każdego punktu zobaczysz
+                    wyłącznie na swoim koncie.
                     Ta analiza nie jest certyfikatem ani opinią prawną.
                   </p>
                 </div>
@@ -5127,9 +5200,18 @@ function PrivacyCenter() {
               {requests.map((request) => {
                 const deadline = request.extended_due_at || request.due_at;
                 const events = eventsByRequest[request.id] || [];
-                const securityReviewProgress = request.request_type === "security_review"
-                  ? getSecurityReviewProgress(request.status)
-                  : null;
+                const report = reportsByRequest[request.id] || null;
+                const reportChecksByKey = Object.fromEntries(
+                  (report?.checks || []).map((check) => [check.check_key, check])
+                );
+                const securityReviewProgress = request.request_type !== "security_review"
+                  ? null
+                  : report && request.status === "awaiting_user"
+                    ? {
+                      title: "Raport czeka na Twoją decyzję",
+                      description: "Przeczytaj pełny wynik, odpowiedz administratorowi albo potwierdź odbiór i zamknij analizę.",
+                    }
+                    : getSecurityReviewProgress(request.status);
 
                 return (
                   <article className="privacy-request-card" key={request.id}>
@@ -5164,10 +5246,117 @@ function PrivacyCenter() {
                       </p>
                     )}
 
-                    {request.decision_summary && (
+                    {report && (
+                      <section className="privacy-user-audit-report" aria-labelledby={`report-${request.id}`}>
+                        <div className="privacy-user-audit-heading">
+                          <div>
+                            <span className="section-label">Zatwierdzony raport</span>
+                            <h4 id={`report-${request.id}`}>Analiza ochrony Twoich danych</h4>
+                          </div>
+                          <span className={`privacy-user-risk is-${report.risk_level}`}>
+                            Ryzyko: {getOptionLabel(PRIVACY_AUDIT_RISK_LEVELS, report.risk_level)}
+                          </span>
+                        </div>
+
+                        <div className="privacy-user-report-intro">
+                          <strong>Wniosek końcowy</strong>
+                          <p>{report.summary}</p>
+                          <small>Zatwierdzono: {formatDisputeDate(report.approved_at)}</small>
+                        </div>
+
+                        <div className="privacy-user-report-grid">
+                          <article>
+                            <span>01</span>
+                            <div>
+                              <h5>Zakres analizy</h5>
+                              <p>{report.scope}</p>
+                            </div>
+                          </article>
+                          <article>
+                            <span>02</span>
+                            <div>
+                              <h5>Najważniejsze ustalenia</h5>
+                              <p>{report.findings_summary}</p>
+                            </div>
+                          </article>
+                          <article>
+                            <span>03</span>
+                            <div>
+                              <h5>Działania i zalecenia</h5>
+                              <p>{report.remediation_summary}</p>
+                            </div>
+                          </article>
+                        </div>
+
+                        <div className="privacy-user-checks-heading">
+                          <div>
+                            <span>Pełna checklista</span>
+                            <p>Wynik i wyjaśnienie każdego z 12 sprawdzonych obszarów.</p>
+                          </div>
+                          <strong>12/12</strong>
+                        </div>
+
+                        <ol className="privacy-user-checklist">
+                          {PRIVACY_AUDIT_CHECKS.map((definition, index) => {
+                            const check = reportChecksByKey[definition.key];
+                            const status = check?.status || "pending";
+
+                            return (
+                              <li className={`is-${status}`} key={definition.key}>
+                                <span className="privacy-user-check-number">
+                                  {String(index + 1).padStart(2, "0")}
+                                </span>
+                                <div>
+                                  <div className="privacy-user-check-title">
+                                    <h5>{definition.label}</h5>
+                                    <span>{getOptionLabel(PRIVACY_AUDIT_CHECK_STATUSES, status)}</span>
+                                  </div>
+                                  <p>{check?.note || "Brak opisu punktu."}</p>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ol>
+
+                        <p className="privacy-user-report-boundary">
+                          Raport pokazuje komplet ustaleń przeznaczonych dla Ciebie.
+                          Surowe dane techniczne, informacje o innych osobach i szczegóły,
+                          których ujawnienie mogłoby osłabić bezpieczeństwo, pozostają chronione.
+                          Możesz poprosić administratora o wyjaśnienie każdego punktu poniżej.
+                        </p>
+                      </section>
+                    )}
+
+                    {request.decision_summary && !report && (
                       <p className="privacy-decision-note">
                         <strong>Odpowiedź IdeaHire:</strong> {request.decision_summary}
                       </p>
+                    )}
+
+                    {report && request.status === "awaiting_user" && (
+                      <div className="privacy-user-acceptance-panel">
+                        <div>
+                          <strong>To Ty decydujesz o zamknięciu analizy</strong>
+                          <p>
+                            Jeśli raport jest jasny, potwierdź jego odbiór. Jeśli masz pytania
+                            lub zastrzeżenia, napisz do administratora — sprawa pozostanie otwarta.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="privacy-accept-button"
+                          onClick={() => handleAcceptPrivacyAudit(request.id)}
+                          disabled={Boolean(busy)}
+                        >
+                          {busy === `${request.id}:accept`
+                            ? "Zamykanie analizy..."
+                            : "Potwierdzam odbiór i zamykam analizę"}
+                        </button>
+                        <small>
+                          Potwierdzenie nie ogranicza Twoich praw dotyczących danych osobowych
+                          i nie jest prawnym certyfikatem zgodności IdeaHire.
+                        </small>
+                      </div>
                     )}
 
                     {events.length > 0 && (
@@ -5176,12 +5365,62 @@ function PrivacyCenter() {
                         <ol>
                           {events.map((item) => (
                             <li key={item.id}>
-                              <span>{item.message || "Status został zaktualizowany."}</span>
+                              <div>
+                                <strong>
+                                  {item.actor_role === "requester"
+                                    ? "Ty"
+                                    : ["owner", "admin"].includes(item.actor_role)
+                                      ? "IdeaHire"
+                                      : "System"}
+                                </strong>
+                                <span>{item.message || "Status został zaktualizowany."}</span>
+                              </div>
                               <time>{formatDisputeDate(item.created_at)}</time>
                             </li>
                           ))}
                         </ol>
                       </details>
+                    )}
+
+                    {isPrivacyRequestOpen(request.status) && (
+                      <form
+                        className="privacy-user-reply-form"
+                        onSubmit={(event) => handlePrivacyReply(event, request.id)}
+                      >
+                        <label htmlFor={`privacy-reply-${request.id}`}>
+                          {report ? "Odpowiedz administratorowi" : "Napisz do administratora"}
+                        </label>
+                        <p>
+                          {report
+                            ? "Wskaż punkt raportu, o który pytasz, albo opisz swoje zastrzeżenie. Wysłanie odpowiedzi nie zamyka analizy."
+                            : "Uzupełnij informacje albo poproś o wyjaśnienie. Wiadomość zapisze się w historii sprawy."}
+                        </p>
+                        <textarea
+                          id={`privacy-reply-${request.id}`}
+                          value={replyDrafts[request.id] || ""}
+                          onChange={(event) => setReplyDrafts((current) => ({
+                            ...current,
+                            [request.id]: event.target.value,
+                          }))}
+                          placeholder="Napisz wiadomość..."
+                          minLength={3}
+                          maxLength={5000}
+                          rows={4}
+                          disabled={Boolean(busy)}
+                        />
+                        <div>
+                          <small>{(replyDrafts[request.id] || "").length}/5000</small>
+                          <button
+                            type="submit"
+                            className="privacy-secondary-button"
+                            disabled={Boolean(busy) || (replyDrafts[request.id] || "").trim().length < 3}
+                          >
+                            {busy === `${request.id}:reply`
+                              ? "Wysyłanie..."
+                              : "Wyślij wiadomość"}
+                          </button>
+                        </div>
+                      </form>
                     )}
 
                     {isPrivacyRequestOpen(request.status) && (
@@ -14752,7 +14991,7 @@ function AdminPrivacyRequests() {
 
     const { data: auditRows, error: auditError } = await supabase
       .from("ideahire_privacy_audits")
-      .select("id, request_id, status, risk_level, scope, findings_summary, remediation_summary, public_summary, last_updated_by, submitted_for_approval_by, approved_by, created_at, updated_at, submitted_for_approval_at, approved_at")
+      .select("id, request_id, status, risk_level, scope, findings_summary, remediation_summary, public_scope, public_findings_summary, public_remediation_summary, public_summary, last_updated_by, submitted_for_approval_by, approved_by, created_at, updated_at, submitted_for_approval_at, approved_at")
       .in("request_id", securityReviewIds);
 
     if (auditError) throw auditError;
@@ -14773,7 +15012,7 @@ function AdminPrivacyRequests() {
     const [checksResult, auditEventsResult] = await Promise.all([
       supabase
         .from("ideahire_privacy_audit_checks")
-        .select("id, audit_id, check_key, status, evidence_note, checked_by, checked_at, created_at, updated_at")
+        .select("id, audit_id, check_key, status, evidence_note, public_note, checked_by, checked_at, created_at, updated_at")
         .in("audit_id", auditIds)
         .order("created_at", { ascending: true }),
       supabase
@@ -14841,6 +15080,7 @@ function AdminPrivacyRequests() {
         publicMessage: "",
         internalNote: "",
         extensionReason: "",
+        replyMessage: "",
         ...(current[requestId] || {}),
         ...values,
       },
@@ -14853,6 +15093,7 @@ function AdminPrivacyRequests() {
       publicMessage: "",
       internalNote: "",
       extensionReason: "",
+      replyMessage: "",
     };
   }
 
@@ -14870,6 +15111,9 @@ function AdminPrivacyRequests() {
       scope: audit?.scope || "",
       findingsSummary: audit?.findings_summary || "",
       remediationSummary: audit?.remediation_summary || "",
+      publicScope: audit?.public_scope || "",
+      publicFindingsSummary: audit?.public_findings_summary || "",
+      publicRemediationSummary: audit?.public_remediation_summary || "",
       publicSummary: audit?.public_summary || "",
       returnNote: "",
       checks: Object.fromEntries(
@@ -14880,6 +15124,7 @@ function AdminPrivacyRequests() {
             {
               status: stored?.status || "pending",
               note: stored?.evidence_note || "",
+              publicNote: stored?.public_note || "",
             },
           ];
         })
@@ -14934,6 +15179,9 @@ function AdminPrivacyRequests() {
       [draft.scope, "Zakres analizy"],
       [draft.findingsSummary, "Podsumowanie ustaleń"],
       [draft.remediationSummary, "Plan działań naprawczych"],
+      [draft.publicScope, "Zakres dla użytkownika"],
+      [draft.publicFindingsSummary, "Ustalenia dla użytkownika"],
+      [draft.publicRemediationSummary, "Działania dla użytkownika"],
     ];
 
     const invalidSection = optionalSections.find(
@@ -14953,6 +15201,15 @@ function AdminPrivacyRequests() {
       return `Opisz wykryty problem w punkcie „${issueWithoutNote.label}” w co najmniej 10 znakach.`;
     }
 
+    const invalidPublicNote = PRIVACY_AUDIT_CHECKS.find((definition) => {
+      const publicNote = draft.checks[definition.key]?.publicNote.trim() || "";
+      return publicNote.length > 0 && publicNote.length < 10;
+    });
+
+    if (invalidPublicNote) {
+      return `Wyjaśnienie dla użytkownika w punkcie „${invalidPublicNote.label}” musi mieć co najmniej 10 znaków albo pozostać puste.`;
+    }
+
     return "";
   }
 
@@ -14961,6 +15218,7 @@ function AdminPrivacyRequests() {
       key: definition.key,
       status: draft.checks[definition.key]?.status || "pending",
       note: draft.checks[definition.key]?.note.trim() || null,
+      public_note: draft.checks[definition.key]?.publicNote.trim() || null,
     }));
   }
 
@@ -14979,13 +15237,17 @@ function AdminPrivacyRequests() {
 
     try {
       const { error } = await supabase.rpc(
-        "admin_save_ideahire_privacy_audit",
+        "admin_save_ideahire_privacy_audit_report",
         {
           p_request_id: requestId,
           p_risk_level: draft.riskLevel,
           p_scope: draft.scope.trim() || null,
           p_findings_summary: draft.findingsSummary.trim() || null,
           p_remediation_summary: draft.remediationSummary.trim() || null,
+          p_public_scope: draft.publicScope.trim() || null,
+          p_public_findings_summary: draft.publicFindingsSummary.trim() || null,
+          p_public_remediation_summary: draft.publicRemediationSummary.trim() || null,
+          p_public_summary: draft.publicSummary.trim() || null,
           p_checks: buildAuditChecksPayload(draft),
         }
       );
@@ -15040,7 +15302,25 @@ function AdminPrivacyRequests() {
     }
 
     if (draft.publicSummary.trim().length < 20) {
-      setMessage("Podsumowanie dla użytkownika musi mieć co najmniej 20 znaków.");
+      setMessage("Wniosek końcowy dla użytkownika musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    if (
+      draft.publicScope.trim().length < 20
+      || draft.publicFindingsSummary.trim().length < 20
+      || draft.publicRemediationSummary.trim().length < 20
+    ) {
+      setMessage("Przed publikacją uzupełnij zakres, ustalenia i działania dla użytkownika — każde pole w co najmniej 20 znakach.");
+      return;
+    }
+
+    const missingPublicCheck = PRIVACY_AUDIT_CHECKS.find(
+      (definition) => draft.checks[definition.key]?.publicNote.trim().length < 10
+    );
+
+    if (missingPublicCheck) {
+      setMessage(`Dodaj wyjaśnienie dla użytkownika w punkcie „${missingPublicCheck.label}” — minimum 10 znaków.`);
       return;
     }
 
@@ -15049,13 +15329,17 @@ function AdminPrivacyRequests() {
 
     try {
       const saveResult = await supabase.rpc(
-        "admin_save_ideahire_privacy_audit",
+        "admin_save_ideahire_privacy_audit_report",
         {
           p_request_id: requestId,
           p_risk_level: draft.riskLevel,
           p_scope: draft.scope.trim(),
           p_findings_summary: draft.findingsSummary.trim(),
           p_remediation_summary: draft.remediationSummary.trim() || null,
+          p_public_scope: draft.publicScope.trim(),
+          p_public_findings_summary: draft.publicFindingsSummary.trim(),
+          p_public_remediation_summary: draft.publicRemediationSummary.trim(),
+          p_public_summary: draft.publicSummary.trim(),
           p_checks: buildAuditChecksPayload(draft),
         }
       );
@@ -15084,7 +15368,7 @@ function AdminPrivacyRequests() {
 
   async function handleApproveAudit(requestId) {
     if (!window.confirm(
-      "Czy zatwierdzić analizę i przekazać podsumowanie użytkownikowi?"
+      "Czy zatwierdzić i opublikować pełny raport użytkownikowi? Sprawa pozostanie otwarta do jego odpowiedzi lub potwierdzenia odbioru."
     )) return;
 
     setBusy(`${requestId}:audit-approve`);
@@ -15098,7 +15382,7 @@ function AdminPrivacyRequests() {
 
       if (error) throw error;
 
-      setMessage("Analiza została zatwierdzona, a użytkownik otrzymał podsumowanie.");
+      setMessage("Raport został zatwierdzony i czeka na odpowiedź lub potwierdzenie użytkownika.");
       clearAuditDraft(requestId);
       await loadAdminPrivacyRequests();
     } catch (error) {
@@ -15184,6 +15468,39 @@ function AdminPrivacyRequests() {
       await loadAdminPrivacyRequests();
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zaktualizować wniosku."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleAdminPrivacyReply(event, requestId) {
+    event.preventDefault();
+    const reply = getDraft(requestId).replyMessage.trim();
+
+    if (reply.length < 3) {
+      setMessage("Wiadomość musi mieć co najmniej 3 znaki.");
+      return;
+    }
+
+    setBusy(`${requestId}:admin-reply`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_reply_to_ideahire_privacy_request",
+        {
+          p_request_id: requestId,
+          p_message: reply,
+        }
+      );
+
+      if (error) throw error;
+
+      updateDraft(requestId, { replyMessage: "" });
+      setMessage("Wiadomość została wysłana do użytkownika.");
+      await loadAdminPrivacyRequests();
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się wysłać wiadomości."));
     } finally {
       setBusy("");
     }
@@ -15372,7 +15689,16 @@ function AdminPrivacyRequests() {
                           {events.map((item) => (
                             <li className={item.visibility === "internal" ? "is-internal" : ""} key={item.id}>
                               <span>{item.message || item.event_type}</span>
-                              <small>{item.visibility === "internal" ? "Tylko administracja" : "Widoczne dla użytkownika"}</small>
+                              <small>
+                                {item.actor_role === "requester"
+                                  ? "Autor: użytkownik"
+                                  : ["owner", "admin"].includes(item.actor_role)
+                                    ? "Autor: administracja"
+                                    : "Autor: system"}
+                                {item.visibility === "internal"
+                                  ? " · tylko administracja"
+                                  : " · widoczne dla użytkownika"}
+                              </small>
                               <time>{formatDisputeDate(item.created_at)}</time>
                             </li>
                           ))}
@@ -15459,7 +15785,8 @@ function AdminPrivacyRequests() {
                                   <div>
                                     <span>12 punktów kontrolnych</span>
                                     <small>
-                                      Każdy wykryty problem wymaga notatki zawierającej minimum 10 znaków.
+                                      Każdy punkt wymaga osobnego wyjaśnienia dla użytkownika;
+                                      wykryty problem wymaga również notatki wewnętrznej.
                                     </small>
                                   </div>
                                   <strong>
@@ -15504,7 +15831,7 @@ function AdminPrivacyRequests() {
                                         </label>
 
                                         <label>
-                                          Dowód lub notatka
+                                          Dowód lub notatka wewnętrzna
                                           <textarea
                                             value={check.note}
                                             onChange={(event) => updateAuditCheckDraft(
@@ -15519,6 +15846,26 @@ function AdminPrivacyRequests() {
                                             rows={3}
                                             disabled={Boolean(busy) || auditLocked}
                                           />
+                                        </label>
+
+                                        <label className="privacy-audit-public-note">
+                                          Wyjaśnienie dla użytkownika
+                                          <textarea
+                                            value={check.publicNote}
+                                            onChange={(event) => updateAuditCheckDraft(
+                                              request.id,
+                                              definition.key,
+                                              { publicNote: event.target.value }
+                                            )}
+                                            placeholder="Wyjaśnij prostym językiem, co sprawdzono i jaki jest wynik tego punktu..."
+                                            minLength={check.publicNote ? 10 : undefined}
+                                            maxLength={5000}
+                                            rows={3}
+                                            disabled={Boolean(busy) || auditLocked}
+                                          />
+                                          <small>
+                                            Po zatwierdzeniu tę treść zobaczy użytkownik.
+                                          </small>
                                         </label>
                                       </article>
                                     );
@@ -15553,23 +15900,83 @@ function AdminPrivacyRequests() {
                                   />
                                 </label>
 
-                                <label className="privacy-audit-public-summary">
-                                  Podsumowanie dla użytkownika
-                                  <textarea
-                                    value={auditDraft.publicSummary}
-                                    onChange={(event) => updateAuditDraft(request.id, {
-                                      publicSummary: event.target.value,
-                                    })}
-                                    placeholder="Napisz jasne podsumowanie wyniku, które po zatwierdzeniu zobaczy wyłącznie użytkownik..."
-                                    minLength={20}
-                                    maxLength={5000}
-                                    rows={5}
-                                    disabled={Boolean(busy) || auditLocked}
-                                  />
-                                  <small>
-                                    Treść stanie się widoczna dopiero po zatwierdzeniu przez właściciela technicznego.
-                                  </small>
-                                </label>
+                                <section className="privacy-audit-public-editor">
+                                  <div className="privacy-audit-public-editor-heading">
+                                    <div>
+                                      <span className="section-label">Raport dla użytkownika</span>
+                                      <h5>Pełne wyjaśnienie wyniku</h5>
+                                    </div>
+                                    <strong>Publikacja po zatwierdzeniu</strong>
+                                  </div>
+                                  <p>
+                                    Opisz wynik prostym językiem. Nie kopiuj surowych danych
+                                    innych osób, sekretów technicznych ani informacji, których
+                                    ujawnienie mogłoby obniżyć bezpieczeństwo.
+                                  </p>
+
+                                  <label>
+                                    Zakres widoczny dla użytkownika
+                                    <textarea
+                                      value={auditDraft.publicScope}
+                                      onChange={(event) => updateAuditDraft(request.id, {
+                                        publicScope: event.target.value,
+                                      })}
+                                      placeholder="Wyjaśnij, jakie dane, funkcje, systemy i okres objęto analizą..."
+                                      minLength={auditDraft.publicScope ? 20 : undefined}
+                                      maxLength={5000}
+                                      rows={4}
+                                      disabled={Boolean(busy) || auditLocked}
+                                    />
+                                  </label>
+
+                                  <label>
+                                    Ustalenia widoczne dla użytkownika
+                                    <textarea
+                                      value={auditDraft.publicFindingsSummary}
+                                      onChange={(event) => updateAuditDraft(request.id, {
+                                        publicFindingsSummary: event.target.value,
+                                      })}
+                                      placeholder="Opisz najważniejsze ustalenia oraz ich znaczenie dla danych użytkownika..."
+                                      minLength={auditDraft.publicFindingsSummary ? 20 : undefined}
+                                      maxLength={10000}
+                                      rows={5}
+                                      disabled={Boolean(busy) || auditLocked}
+                                    />
+                                  </label>
+
+                                  <label>
+                                    Działania i zalecenia widoczne dla użytkownika
+                                    <textarea
+                                      value={auditDraft.publicRemediationSummary}
+                                      onChange={(event) => updateAuditDraft(request.id, {
+                                        publicRemediationSummary: event.target.value,
+                                      })}
+                                      placeholder="Opisz wykonane lub planowane działania. Jeżeli nie są potrzebne, wyjaśnij dlaczego..."
+                                      minLength={auditDraft.publicRemediationSummary ? 20 : undefined}
+                                      maxLength={10000}
+                                      rows={5}
+                                      disabled={Boolean(busy) || auditLocked}
+                                    />
+                                  </label>
+
+                                  <label className="privacy-audit-public-summary">
+                                    Wniosek końcowy dla użytkownika
+                                    <textarea
+                                      value={auditDraft.publicSummary}
+                                      onChange={(event) => updateAuditDraft(request.id, {
+                                        publicSummary: event.target.value,
+                                      })}
+                                      placeholder="Napisz jasny wniosek końcowy, który po zatwierdzeniu zobaczy wyłącznie użytkownik..."
+                                      minLength={auditDraft.publicSummary ? 20 : undefined}
+                                      maxLength={5000}
+                                      rows={5}
+                                      disabled={Boolean(busy) || auditLocked}
+                                    />
+                                    <small>
+                                      Raport stanie się widoczny dopiero po zatwierdzeniu przez właściciela technicznego.
+                                    </small>
+                                  </label>
+                                </section>
 
                                 {!auditLocked && isPrivacyRequestOpen(request.status) && canWork && (
                                   <div className="privacy-audit-actions">
@@ -15616,7 +16023,7 @@ function AdminPrivacyRequests() {
                                       >
                                         {busy === `${request.id}:audit-approve`
                                           ? "Zatwierdzanie..."
-                                          : "Zatwierdź i wyślij podsumowanie"}
+                                          : "Zatwierdź i opublikuj pełny raport"}
                                       </button>
 
                                       <label>
@@ -15655,9 +16062,12 @@ function AdminPrivacyRequests() {
 
                               {audit.status === "approved" && (
                                 <div className="privacy-audit-approved-summary">
-                                  <strong>Podsumowanie przekazane użytkownikowi</strong>
+                                  <strong>Pełny raport przekazany użytkownikowi</strong>
                                   <p>{audit.public_summary}</p>
-                                  <small>Zatwierdzono: {formatDisputeDate(audit.approved_at)}</small>
+                                  <small>
+                                    Zatwierdzono: {formatDisputeDate(audit.approved_at)} ·
+                                    sprawę zamyka użytkownik po przeczytaniu raportu.
+                                  </small>
                                 </div>
                               )}
 
@@ -15682,6 +16092,48 @@ function AdminPrivacyRequests() {
                             </>
                           )}
                         </section>
+                      )}
+
+                      {isSecurityReview
+                        && audit
+                        && canWork
+                        && isPrivacyRequestOpen(request.status) && (
+                        <form
+                          className="privacy-admin-reply-form"
+                          onSubmit={(event) => handleAdminPrivacyReply(event, request.id)}
+                        >
+                          <div>
+                            <strong>Odpowiedz użytkownikowi</strong>
+                            <p>
+                              Wiadomość będzie widoczna na koncie użytkownika i ustawi
+                              sprawę jako oczekującą na jego odpowiedź lub potwierdzenie.
+                            </p>
+                          </div>
+                          <label htmlFor={`admin-privacy-reply-${request.id}`}>
+                            Treść wiadomości
+                            <textarea
+                              id={`admin-privacy-reply-${request.id}`}
+                              value={draft.replyMessage}
+                              onChange={(event) => updateDraft(request.id, {
+                                replyMessage: event.target.value,
+                              })}
+                              placeholder="Odpowiedz na pytanie albo wyjaśnij wskazany punkt raportu..."
+                              minLength={3}
+                              maxLength={5000}
+                              rows={4}
+                              disabled={Boolean(busy)}
+                            />
+                          </label>
+                          <button
+                            type="submit"
+                            className="privacy-secondary-button"
+                            disabled={Boolean(busy) || draft.replyMessage.trim().length < 3}
+                          >
+                            {busy === `${request.id}:admin-reply`
+                              ? "Wysyłanie..."
+                              : "Wyślij odpowiedź użytkownikowi"}
+                          </button>
+                        </form>
                       )}
 
                       {isPrivacyRequestOpen(request.status)
