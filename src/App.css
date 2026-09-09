@@ -12,6 +12,768 @@
 }
 
 /* =========================================================
+   ADMIN — KONTROLOWANE USUWANIE DANYCH I KONTA
+========================================================= */
+
+.erasure-account-shell {
+  display: grid;
+  gap: 20px;
+  padding-bottom: 64px;
+}
+
+.erasure-account-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid #d9ded7;
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(238, 245, 239, 0.95), rgba(255, 255, 255, 0.98) 56%),
+    #fff;
+  box-shadow: 0 18px 44px rgba(39, 61, 44, 0.08);
+}
+
+.erasure-account-person {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.erasure-account-avatar {
+  flex: 0 0 auto;
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #ccd9ce;
+  border-radius: 20px;
+  background: #dfeadf;
+  color: #31563a;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.erasure-account-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.erasure-account-person h1 {
+  margin: 5px 0 6px;
+  color: #1f2b22;
+  font-size: clamp(24px, 4vw, 36px);
+  letter-spacing: -0.04em;
+}
+
+.erasure-account-person p {
+  margin: 0;
+  color: #6e786f;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.erasure-account-person code {
+  color: #435147;
+  font-size: 13px;
+}
+
+.erasure-account-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.erasure-lifecycle-pill,
+.erasure-case-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid #c9d8cc;
+  border-radius: 999px;
+  background: #e9f3eb;
+  color: #365b3e;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.erasure-lifecycle-pill.is-data_minimized,
+.erasure-lifecycle-pill.is-closure_pending,
+.erasure-lifecycle-pill.is-closed,
+.erasure-case-status.is-processing,
+.erasure-case-status.is-failed {
+  border-color: #e1b9b5;
+  background: #fff0ef;
+  color: #8b3434;
+}
+
+.erasure-actions-menu {
+  position: relative;
+  z-index: 8;
+}
+
+.erasure-actions-menu > summary {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid #cfd7cf;
+  border-radius: 12px;
+  background: #fff;
+  color: #334038;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.erasure-actions-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.erasure-actions-menu[open] > summary {
+  border-color: #7f9583;
+  box-shadow: 0 0 0 3px rgba(72, 99, 78, 0.1);
+}
+
+.erasure-actions-menu > div {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(310px, calc(100vw - 36px));
+  padding: 8px;
+  border: 1px solid #d6dbd4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 20px 48px rgba(29, 39, 31, 0.18);
+}
+
+.erasure-actions-menu button {
+  width: 100%;
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #263229;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.erasure-actions-menu button:hover:not(:disabled) {
+  background: #f1f5f1;
+}
+
+.erasure-actions-menu button.is-danger {
+  color: #8e3434;
+}
+
+.erasure-actions-menu button.is-danger:hover:not(:disabled) {
+  background: #fff0ef;
+}
+
+.erasure-actions-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.erasure-actions-menu button span {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.erasure-actions-menu button small {
+  color: #788078;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.privacy-admin-account-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin: 2px 0 13px;
+  padding: 7px 12px;
+  border: 1px solid #c9d8cb;
+  border-radius: 10px;
+  background: #edf5ee;
+  color: #31573a;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.privacy-admin-account-link:hover {
+  border-color: #91aa96;
+  background: #e4f0e6;
+}
+
+.erasure-request-selector,
+.erasure-identity-card,
+.erasure-inventory-card,
+.erasure-blockers-card,
+.erasure-case-card,
+.erasure-account-notice {
+  border: 1px solid #d9ded7;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.erasure-request-selector {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+}
+
+.erasure-request-selector h2,
+.erasure-identity-card h2,
+.erasure-card-heading h2,
+.erasure-case-card h2 {
+  margin: 5px 0 0;
+  color: #253029;
+  font-size: 20px;
+}
+
+.erasure-request-selector label,
+.erasure-identity-card label,
+.erasure-owner-approval label,
+.erasure-dialog label {
+  display: grid;
+  gap: 7px;
+  color: #354039;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.erasure-request-selector select,
+.erasure-identity-card select,
+.erasure-identity-card textarea,
+.erasure-owner-approval input,
+.erasure-dialog textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid #ccd5cc;
+  border-radius: 11px;
+  background: #fff;
+  color: #242c26;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.55;
+  outline: none;
+}
+
+.erasure-identity-card textarea,
+.erasure-dialog textarea {
+  resize: vertical;
+}
+
+.erasure-request-selector select:focus,
+.erasure-identity-card select:focus,
+.erasure-identity-card textarea:focus,
+.erasure-owner-approval input:focus,
+.erasure-dialog textarea:focus {
+  border-color: #718b77;
+  box-shadow: 0 0 0 3px rgba(71, 102, 78, 0.11);
+}
+
+.erasure-identity-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(220px, 0.65fr) minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+  padding: 20px;
+  border-color: #d7cda8;
+  background: #fffbef;
+}
+
+.erasure-identity-card p,
+.erasure-account-notice p,
+.erasure-blockers-card p,
+.erasure-inventory-card > p,
+.erasure-owner-approval p,
+.erasure-execute-panel p,
+.erasure-dialog-intro {
+  margin: 6px 0 0;
+  color: #687269;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.erasure-account-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.erasure-inventory-card,
+.erasure-case-card {
+  padding: 20px;
+}
+
+.erasure-inventory-card.is-retained {
+  border-color: #ddd3b3;
+  background: #fffdf5;
+}
+
+.erasure-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.erasure-card-mark {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.erasure-card-mark.is-removable {
+  background: #e7f3e9;
+  color: #315f3b;
+}
+
+.erasure-card-mark.is-retained {
+  background: #f6ecd0;
+  color: #70561c;
+}
+
+.erasure-inventory-card ul,
+.erasure-blockers-card ul {
+  display: grid;
+  gap: 0;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.erasure-inventory-card li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  border-top: 1px solid #e7ebe5;
+  color: #566158;
+  font-size: 14px;
+}
+
+.erasure-inventory-card li strong {
+  min-width: 30px;
+  color: #29332c;
+  text-align: right;
+}
+
+.erasure-blockers-card {
+  padding: 18px 20px;
+  border-color: #e0b4af;
+  background: #fff2f0;
+}
+
+.erasure-blockers-card > div,
+.erasure-completed-banner {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+}
+
+.erasure-blockers-card > div > span,
+.erasure-completed-banner > span {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #9a3939;
+  color: #fff;
+  font-weight: 900;
+}
+
+.erasure-blockers-card strong {
+  color: #7d2f2f;
+  font-size: 16px;
+}
+
+.erasure-blockers-card ul {
+  gap: 7px;
+  margin-left: 53px;
+  color: #7a4441;
+  font-size: 14px;
+}
+
+.erasure-blockers-card li::before {
+  content: "•";
+  margin-right: 8px;
+}
+
+.erasure-account-notice {
+  padding: 16px 18px;
+  background: #f6f8f5;
+}
+
+.erasure-account-notice strong {
+  color: #344039;
+  font-size: 15px;
+}
+
+.erasure-account-notice.is-warning {
+  border-color: #dfd0a5;
+  background: #fff9e9;
+}
+
+.erasure-account-notice.is-danger {
+  border-color: #e0b4af;
+  background: #fff2f0;
+}
+
+.erasure-account-notice.is-danger strong {
+  color: #873636;
+}
+
+.erasure-case-card {
+  display: grid;
+  gap: 18px;
+}
+
+.erasure-assessment-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.erasure-assessment-grid article {
+  padding: 15px;
+  border: 1px solid #e0e5df;
+  border-radius: 13px;
+  background: #f8faf7;
+}
+
+.erasure-assessment-grid strong,
+.erasure-owner-approval strong,
+.erasure-execute-panel strong,
+.erasure-completed-banner strong {
+  color: #2e3931;
+  font-size: 15px;
+}
+
+.erasure-assessment-grid p {
+  margin: 7px 0 0;
+  color: #606b63;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.erasure-owner-approval,
+.erasure-execute-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.7fr) auto;
+  align-items: end;
+  gap: 16px;
+  padding: 17px;
+  border: 1px solid #dfc2bd;
+  border-radius: 15px;
+  background: #fff4f2;
+}
+
+.erasure-execute-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.erasure-danger-button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid #812f2f;
+  border-radius: 11px;
+  background: #963b3b;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.erasure-danger-button:hover:not(:disabled) {
+  background: #7f2e2e;
+}
+
+.erasure-danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.erasure-completed-banner {
+  padding: 17px;
+  border: 1px solid #afd0b5;
+  border-radius: 15px;
+  background: #edf8ef;
+}
+
+.erasure-completed-banner > span {
+  background: #356b40;
+}
+
+.erasure-case-timeline {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.erasure-case-timeline li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid #e4e8e2;
+}
+
+.erasure-case-timeline li > span {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border: 3px solid #dce8de;
+  border-radius: 50%;
+  background: #54765b;
+}
+
+.erasure-case-timeline strong {
+  display: block;
+  color: #3a453d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.erasure-case-timeline time {
+  display: block;
+  margin-top: 5px;
+  color: #7a837b;
+  font-size: 12px;
+}
+
+.erasure-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(14, 18, 15, 0.62);
+  backdrop-filter: blur(5px);
+}
+
+.erasure-dialog {
+  width: min(680px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: clamp(20px, 4vw, 28px);
+  border: 1px solid #d7ddd6;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 30px 80px rgba(13, 20, 15, 0.3);
+}
+
+.erasure-dialog-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.erasure-dialog-heading h2 {
+  margin: 5px 0 0;
+  color: #252f28;
+  font-size: 23px;
+}
+
+.erasure-dialog-heading > button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d3d9d2;
+  border-radius: 11px;
+  background: #f7f9f6;
+  color: #39423b;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.erasure-dialog form {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.erasure-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+html[data-theme="dark"] .erasure-account-header,
+html[data-theme="dark"] .erasure-request-selector,
+html[data-theme="dark"] .erasure-identity-card,
+html[data-theme="dark"] .erasure-inventory-card,
+html[data-theme="dark"] .erasure-case-card,
+html[data-theme="dark"] .erasure-dialog {
+  border-color: #343a33;
+  background: #111410;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] .erasure-account-header {
+  background:
+    linear-gradient(145deg, rgba(27, 38, 29, 0.96), rgba(16, 19, 16, 0.99) 58%),
+    #111410;
+}
+
+html[data-theme="dark"] .erasure-account-person h1,
+html[data-theme="dark"] .erasure-request-selector h2,
+html[data-theme="dark"] .erasure-identity-card h2,
+html[data-theme="dark"] .erasure-card-heading h2,
+html[data-theme="dark"] .erasure-case-card h2,
+html[data-theme="dark"] .erasure-assessment-grid strong,
+html[data-theme="dark"] .erasure-owner-approval strong,
+html[data-theme="dark"] .erasure-execute-panel strong,
+html[data-theme="dark"] .erasure-case-timeline strong {
+  color: #edf2eb;
+}
+
+html[data-theme="dark"] .erasure-account-person p,
+html[data-theme="dark"] .erasure-account-person code,
+html[data-theme="dark"] .erasure-identity-card p,
+html[data-theme="dark"] .erasure-inventory-card li,
+html[data-theme="dark"] .erasure-inventory-card > p,
+html[data-theme="dark"] .erasure-assessment-grid p,
+html[data-theme="dark"] .erasure-dialog-intro {
+  color: #aeb8ae;
+}
+
+html[data-theme="dark"] .erasure-actions-menu > summary,
+html[data-theme="dark"] .erasure-actions-menu > div,
+html[data-theme="dark"] .erasure-actions-menu button,
+html[data-theme="dark"] .erasure-request-selector select,
+html[data-theme="dark"] .erasure-identity-card select,
+html[data-theme="dark"] .erasure-identity-card textarea,
+html[data-theme="dark"] .erasure-owner-approval input,
+html[data-theme="dark"] .erasure-dialog textarea {
+  border-color: #3b433b;
+  background: #0c0f0c;
+  color: #edf2eb;
+}
+
+html[data-theme="dark"] .erasure-inventory-card.is-retained,
+html[data-theme="dark"] .erasure-assessment-grid article {
+  border-color: #4b4431;
+  background: #181811;
+}
+
+html[data-theme="dark"] .erasure-owner-approval,
+html[data-theme="dark"] .erasure-execute-panel,
+html[data-theme="dark"] .erasure-blockers-card,
+html[data-theme="dark"] .erasure-account-notice.is-danger {
+  border-color: #623a37;
+  background: #241514;
+}
+
+html[data-theme="dark"] .erasure-account-notice,
+html[data-theme="dark"] .erasure-account-notice.is-warning,
+html[data-theme="dark"] .erasure-completed-banner {
+  border-color: #39443a;
+  background: #171b16;
+}
+
+@media (max-width: 1050px) {
+  .erasure-identity-card,
+  .erasure-owner-approval {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .erasure-identity-card > div,
+  .erasure-owner-approval > div {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .erasure-account-header,
+  .erasure-request-selector {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .erasure-account-header-actions {
+    justify-content: space-between;
+  }
+
+  .erasure-actions-menu > div {
+    left: 0;
+    right: auto;
+  }
+
+  .erasure-account-grid,
+  .erasure-assessment-grid,
+  .erasure-identity-card,
+  .erasure-owner-approval,
+  .erasure-execute-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .erasure-identity-card > div,
+  .erasure-owner-approval > div {
+    grid-column: auto;
+  }
+
+  .erasure-dialog-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .erasure-dialog-actions button,
+  .erasure-danger-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 500px) {
+  .erasure-account-person {
+    align-items: flex-start;
+  }
+
+  .erasure-account-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+  }
+
+  .erasure-lifecycle-pill {
+    max-width: calc(100% - 54px);
+  }
+
+  .erasure-blockers-card ul {
+    margin-left: 0;
+  }
+}
+
+/* =========================================================
    LEGAL DOCUMENTS / TERMS ACCEPTANCE — BUILD 2026-09-06
 ========================================================= */
 
