@@ -4764,6 +4764,57 @@ function isPrivacyRequestOpen(status) {
   ].includes(status);
 }
 
+const ERASURE_ACTION_LABELS = {
+  minimize_data: "Usuń dane możliwe do usunięcia",
+  close_account: "Zamknij konto użytkownika",
+};
+
+const ERASURE_CASE_STATUS_LABELS = {
+  awaiting_owner: "Oczekuje na zatwierdzenie ownera",
+  authorized: "Zatwierdzona — gotowa do wykonania",
+  processing: "Operacja w toku",
+  completed: "Operacja zakończona",
+  partially_completed: "Operacja wykonana częściowo",
+  rejected: "Operacja odrzucona",
+  failed: "Wymaga interwencji administratora",
+  cancelled: "Operacja anulowana",
+};
+
+const ERASURE_LIFECYCLE_LABELS = {
+  active: "Konto aktywne",
+  erasure_pending: "Analiza usunięcia danych",
+  data_minimized: "Dane zminimalizowane",
+  closure_pending: "Zamykanie konta",
+  closed: "Konto zamknięte",
+};
+
+const ERASURE_INVENTORY_LABELS = {
+  private_profile_rows: "Prywatny profil",
+  public_profile_rows: "Profil publiczny",
+  avatar_objects: "Zdjęcia profilowe",
+  age_profile_rows: "Dane wieku",
+  user_preference_rows: "Ustawienia rozmów",
+  block_rows: "Ustawienia blokad",
+  legal_acceptances: "Potwierdzenia dokumentów prawnych",
+  privacy_requests_open: "Otwarte wnioski RODO",
+  payments_total: "Rekordy płatności",
+  disputes_total: "Sprawy sporne",
+  conversations_total: "Rozmowy związane ze współpracą",
+  messages_total: "Wiadomości związane ze współpracą",
+  agreements_total: "Ustalenia i umowy",
+  job_applications_total: "Zgłoszenia do zleceń",
+  jobs_total: "Opublikowane zlecenia",
+};
+
+const ERASURE_BLOCKER_LABELS = {
+  active_staff_account: "aktywna rola administracyjna",
+  active_payments: "aktywne płatności",
+  active_disputes: "aktywne spory",
+  active_agreements_without_terminal_payment:
+    "aktywne ustalenia bez zamkniętego rozliczenia",
+  connected_stripe_accounts: "połączone konto Stripe",
+};
+
 function getSecurityReviewProgress(status) {
   if (status === "submitted") {
     return {
@@ -12886,6 +12937,12 @@ const ADMIN_AUDIT_LABELS = {
   decision_issued: "Wydano decyzję",
   appeal_submitted: "Złożono odwołanie",
   dispute_closed: "Zamknięto sprawę",
+  erasure_identity_verified: "Potwierdzono tożsamość wnioskodawcy",
+  erasure_case_prepared: "Przygotowano operację usunięcia danych",
+  erasure_case_authorized: "Owner zatwierdził operację usunięcia",
+  erasure_execution_started: "Rozpoczęto operację usunięcia danych",
+  erasure_case_completed: "Zakończono operację usunięcia danych",
+  erasure_case_failed: "Operacja usunięcia wymaga interwencji",
 };
 
 function formatDisputeMoney(value, currency = "PLN") {
@@ -14979,6 +15036,791 @@ function AdminEvidenceMessages() {
   );
 }
 
+function AdminUserPrivacyAccount() {
+  const { user } = useAuth();
+  const { staffRole } = useStaffRole(user?.id);
+  const { userId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const requestedRequestId = new URLSearchParams(location.search).get("request");
+
+  const [profile, setProfile] = useState(null);
+  const [lifecycle, setLifecycle] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [cases, setCases] = useState([]);
+  const [caseEvents, setCaseEvents] = useState([]);
+  const [inventory, setInventory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
+  const [dialogAction, setDialogAction] = useState("");
+  const [identityMethod, setIdentityMethod] = useState("authenticated_session");
+  const [identityNote, setIdentityNote] = useState("");
+  const [legalAssessment, setLegalAssessment] = useState("");
+  const [retentionReason, setRetentionReason] = useState("");
+  const [ownerConfirmation, setOwnerConfirmation] = useState("");
+
+  async function loadAccountData(showLoading = true) {
+    if (!user?.id || !userId) return;
+
+    if (showLoading) setLoading(true);
+
+    try {
+      const [profileResult, lifecycleResult, requestsResult, casesResult] =
+        await Promise.all([
+          supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url, about, specialty_categories, specialization, skills, created_at"
+            )
+            .eq("id", userId)
+            .maybeSingle(),
+          supabase
+            .from("ideahire_account_lifecycle")
+            .select(
+              "user_id, status, erasure_case_id, data_minimized_at, closed_at, created_at, updated_at"
+            )
+            .eq("user_id", userId)
+            .maybeSingle(),
+          supabase
+            .from("ideahire_privacy_requests")
+            .select(
+              "id, request_number, requester_user_id, request_type, description, status, identity_status, assigned_admin_id, submitted_at, due_at, extended_due_at, decision_summary, completed_at"
+            )
+            .eq("requester_user_id", userId)
+            .eq("request_type", "erasure")
+            .order("submitted_at", { ascending: false }),
+          supabase
+            .from("ideahire_erasure_cases")
+            .select("*")
+            .eq("target_user_id", userId)
+            .order("created_at", { ascending: false }),
+        ]);
+
+      if (profileResult.error) throw profileResult.error;
+      if (lifecycleResult.error) throw lifecycleResult.error;
+      if (requestsResult.error) throw requestsResult.error;
+      if (casesResult.error) throw casesResult.error;
+
+      const requestRows = requestsResult.data || [];
+      const caseRows = casesResult.data || [];
+      const selectedRequest = requestRows.find(
+        (item) => item.id === requestedRequestId
+      ) || requestRows[0] || null;
+
+      setProfile(profileResult.data || null);
+      setLifecycle(lifecycleResult.data || null);
+      setRequests(requestRows);
+      setCases(caseRows);
+
+      if (caseRows.length > 0) {
+        const eventResult = await supabase
+          .from("ideahire_erasure_case_events")
+          .select(
+            "id, case_id, actor_role, event_type, visibility, message, details, created_at"
+          )
+          .in("case_id", caseRows.map((item) => item.id))
+          .order("created_at", { ascending: true });
+
+        if (eventResult.error) throw eventResult.error;
+        setCaseEvents(eventResult.data || []);
+      } else {
+        setCaseEvents([]);
+      }
+
+      if (selectedRequest) {
+        const inventoryResult = await supabase.rpc(
+          "admin_get_ideahire_erasure_inventory",
+          { p_request_id: selectedRequest.id }
+        );
+
+        if (inventoryResult.error) {
+          setInventory(null);
+        } else {
+          setInventory(inventoryResult.data || null);
+        }
+      } else {
+        setInventory(null);
+      }
+    } catch (error) {
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się otworzyć administracyjnego widoku konta."
+      ));
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadAccountData(true);
+  }, [user?.id, userId, requestedRequestId]);
+
+  useEffect(() => {
+    if (!user?.id || !userId) return;
+
+    const refresh = () => {
+      loadAccountData(false);
+    };
+
+    const channel = supabase
+      .channel(`admin-erasure-account-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_erasure_cases",
+          filter: `target_user_id=eq.${userId}`,
+        },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "ideahire_privacy_requests",
+          filter: `requester_user_id=eq.${userId}`,
+        },
+        refresh
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, userId, requestedRequestId]);
+
+  const currentRequest = requests.find(
+    (item) => item.id === requestedRequestId
+  ) || requests[0] || null;
+
+  const currentCase = currentRequest
+    ? cases.find((item) => item.privacy_request_id === currentRequest.id) || null
+    : cases[0] || null;
+
+  const currentCaseEvents = currentCase
+    ? caseEvents.filter((item) => item.case_id === currentCase.id)
+    : [];
+
+  const canManage = Boolean(
+    currentRequest
+    && (
+      staffRole === "owner"
+      || currentRequest.assigned_admin_id === user?.id
+    )
+  );
+
+  const activeBlockers = Object.entries(inventory?.blockers || {})
+    .filter(([, value]) => value === true || Number(value) > 0);
+
+  async function handleVerifyIdentity(event) {
+    event.preventDefault();
+    if (!currentRequest) return;
+
+    if (identityNote.trim().length < 20) {
+      setMessage("Notatka weryfikacyjna musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    setBusy("identity");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_verify_ideahire_erasure_identity",
+        {
+          p_request_id: currentRequest.id,
+          p_method: identityMethod,
+          p_note: identityNote.trim(),
+        }
+      );
+
+      if (error) throw error;
+
+      setIdentityNote("");
+      setMessage("Tożsamość użytkownika została potwierdzona i zapisana w historii sprawy.");
+      await loadAccountData(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się potwierdzić tożsamości."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handlePrepareErasure(event) {
+    event.preventDefault();
+    if (!currentRequest || !dialogAction) return;
+
+    if (legalAssessment.trim().length < 50) {
+      setMessage("Ocena prawna musi mieć co najmniej 50 znaków.");
+      return;
+    }
+
+    if (retentionReason.trim().length < 30) {
+      setMessage("Uzasadnienie pozostawienia historii musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    if (dialogAction === "close_account" && inventory?.execution_blocked) {
+      setMessage("Konta nie można teraz zamknąć. Najpierw rozwiąż wskazane aktywne zobowiązania.");
+      return;
+    }
+
+    setBusy("prepare");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_prepare_ideahire_erasure_case",
+        {
+          p_request_id: currentRequest.id,
+          p_action_type: dialogAction,
+          p_legal_assessment: legalAssessment.trim(),
+          p_retention_reason: retentionReason.trim(),
+        }
+      );
+
+      if (error) throw error;
+
+      setDialogAction("");
+      setLegalAssessment("");
+      setRetentionReason("");
+      setMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez ownera.");
+      await loadAccountData(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się przygotować operacji."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleAuthorizeErasure() {
+    if (!currentCase) return;
+
+    if (ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE") {
+      setMessage("Wpisz dokładnie: ZATWIERDZAM USUNIECIE");
+      return;
+    }
+
+    setBusy("authorize");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "owner_authorize_ideahire_erasure_case",
+        {
+          p_case_id: currentCase.id,
+          p_confirmation: ownerConfirmation.trim(),
+        }
+      );
+
+      if (error) throw error;
+
+      setOwnerConfirmation("");
+      setMessage("Owner zatwierdził operację. Można przejść do bezpiecznego wykonania.");
+      await loadAccountData(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zatwierdzić operacji."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleExecuteErasure() {
+    if (!currentCase) return;
+
+    const operationName = ERASURE_ACTION_LABELS[currentCase.action_type]
+      || "wykonanie operacji";
+
+    if (!window.confirm(
+      `Czy na pewno uruchomić: ${operationName}? Operacja zostanie zapisana w historii i nie można jej cofnąć.`
+    )) return;
+
+    setBusy("execute");
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "ideahire-admin-erasure",
+        { body: { caseId: currentCase.id } }
+      );
+
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Operacja nie została zakończona.");
+
+      setMessage(
+        currentCase.action_type === "close_account"
+          ? "Konto zostało zamknięte, a status sprawy zaktualizowany."
+          : "Dane możliwe do usunięcia zostały zminimalizowane."
+      );
+      await loadAccountData(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się dokończyć operacji. Możesz bezpiecznie użyć przycisku ponownie."
+      ));
+      await loadAccountData(false);
+    } finally {
+      setBusy("");
+    }
+  }
+
+  function chooseRequest(requestId) {
+    navigate(`/admin/privacy/users/${userId}?request=${requestId}`, {
+      replace: true,
+    });
+  }
+
+  const lifecycleStatus = lifecycle?.status || "active";
+  const accountName = profile?.name?.trim() || "Użytkownik IdeaHire";
+  const actionDisabled = !canManage
+    || !currentRequest
+    || !isPrivacyRequestOpen(currentRequest.status)
+    || currentRequest.identity_status !== "verified"
+    || Boolean(currentCase);
+
+  return (
+    <div className="account-page admin-page admin-erasure-account-page">
+      <AdminNavbar />
+
+      <main className="admin-shell erasure-account-shell">
+        <Link className="privacy-back-link" to="/admin/privacy">
+          ← Wróć do wniosków RODO
+        </Link>
+
+        {loading ? (
+          <div className="privacy-empty-state">Ładowanie konta użytkownika...</div>
+        ) : (
+          <>
+            <header className="erasure-account-header">
+              <div className="erasure-account-person">
+                <div className="erasure-account-avatar">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" />
+                  ) : accountName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <span className="section-label">Administracyjny widok konta</span>
+                  <h1>{accountName}</h1>
+                  <p>ID użytkownika: <code>{userId}</code></p>
+                </div>
+              </div>
+
+              <div className="erasure-account-header-actions">
+                <span className={`erasure-lifecycle-pill is-${lifecycleStatus}`}>
+                  {ERASURE_LIFECYCLE_LABELS[lifecycleStatus] || lifecycleStatus}
+                </span>
+
+                <details className="erasure-actions-menu">
+                  <summary aria-label="Otwórz działania dotyczące konta">•••</summary>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setDialogAction("minimize_data")}
+                      disabled={actionDisabled}
+                    >
+                      <span>Usuń dane możliwe do usunięcia</span>
+                      <small>Konto nie zostanie usunięte z Auth</small>
+                    </button>
+                    <button
+                      type="button"
+                      className="is-danger"
+                      onClick={() => setDialogAction("close_account")}
+                      disabled={actionDisabled || Boolean(inventory?.execution_blocked)}
+                    >
+                      <span>Zamknij konto użytkownika</span>
+                      <small>Minimalizacja danych i wyłączenie logowania</small>
+                    </button>
+                  </div>
+                </details>
+              </div>
+            </header>
+
+            {message && (
+              <p className="privacy-page-message" role="status">{message}</p>
+            )}
+
+            {requests.length === 0 ? (
+              <section className="erasure-account-notice is-warning">
+                <strong>Brak wniosku o usunięcie danych</strong>
+                <p>
+                  Operację można przygotować dopiero po złożeniu przez użytkownika
+                  wniosku RODO dotyczącego usunięcia danych.
+                </p>
+              </section>
+            ) : (
+              <section className="erasure-request-selector">
+                <div>
+                  <span className="section-label">Podstawa operacji</span>
+                  <h2>{formatPrivacyRequestNumber(currentRequest?.request_number)}</h2>
+                </div>
+                {requests.length > 1 && (
+                  <label>
+                    Wybierz wniosek
+                    <select
+                      value={currentRequest?.id || ""}
+                      onChange={(event) => chooseRequest(event.target.value)}
+                    >
+                      {requests.map((item) => (
+                        <option value={item.id} key={item.id}>
+                          {formatPrivacyRequestNumber(item.request_number)} — {PRIVACY_REQUEST_STATUSES[item.status] || item.status}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </section>
+            )}
+
+            {currentRequest && !canManage && (
+              <section className="erasure-account-notice is-warning">
+                <strong>Brak uprawnienia do wykonania operacji</strong>
+                <p>
+                  Najpierw przejmij wniosek w kolejce. Wgląd i wykonanie ma
+                  prowadzący administrator oraz owner.
+                </p>
+              </section>
+            )}
+
+            {currentRequest
+              && canManage
+              && isPrivacyRequestOpen(currentRequest.status)
+              && currentRequest.identity_status !== "verified" && (
+              <form className="erasure-identity-card" onSubmit={handleVerifyIdentity}>
+                <div>
+                  <span className="section-label">Krok 1</span>
+                  <h2>Potwierdź tożsamość wnioskodawcy</h2>
+                  <p>
+                    Nie zapisuj kopii dokumentu w tym formularzu. Zapisz wyłącznie
+                    metodę oraz krótkie uzasadnienie wyniku weryfikacji.
+                  </p>
+                </div>
+                <label>
+                  Metoda weryfikacji
+                  <select
+                    value={identityMethod}
+                    onChange={(event) => setIdentityMethod(event.target.value)}
+                    disabled={Boolean(busy)}
+                  >
+                    <option value="authenticated_session">Aktywna, uwierzytelniona sesja</option>
+                    <option value="additional_document">Dodatkowy dokument — bez zapisywania kopii</option>
+                    <option value="video_call">Rozmowa weryfikacyjna</option>
+                    <option value="manual_comparison">Ręczne porównanie danych</option>
+                  </select>
+                </label>
+                <label>
+                  Notatka weryfikacyjna
+                  <textarea
+                    value={identityNote}
+                    onChange={(event) => setIdentityNote(event.target.value)}
+                    minLength={20}
+                    maxLength={2000}
+                    rows={4}
+                    placeholder="Opisz, dlaczego potwierdzono, że wniosek złożył właściciel konta..."
+                    disabled={Boolean(busy)}
+                  />
+                </label>
+                <button
+                  className="privacy-primary-button"
+                  type="submit"
+                  disabled={Boolean(busy) || identityNote.trim().length < 20}
+                >
+                  {busy === "identity" ? "Zapisywanie..." : "Potwierdź tożsamość"}
+                </button>
+              </form>
+            )}
+
+            <section className="erasure-account-grid">
+              <article className="erasure-inventory-card">
+                <div className="erasure-card-heading">
+                  <div>
+                    <span className="section-label">Możliwe do usunięcia</span>
+                    <h2>Dane profilu i ustawienia</h2>
+                  </div>
+                  <span className="erasure-card-mark is-removable">Usuń</span>
+                </div>
+                <ul>
+                  {Object.entries(inventory?.erasable_now || {}).map(([key, value]) => (
+                    <li key={key}>
+                      <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
+                      <strong>{Number(value) || 0}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <article className="erasure-inventory-card is-retained">
+                <div className="erasure-card-heading">
+                  <div>
+                    <span className="section-label">Kontrolowana retencja</span>
+                    <h2>Historia prawna i transakcyjna</h2>
+                  </div>
+                  <span className="erasure-card-mark is-retained">Zachowaj</span>
+                </div>
+                <ul>
+                  {Object.entries(
+                    inventory?.retained_for_legal_or_transactional_purposes || {}
+                  ).map(([key, value]) => (
+                    <li key={key}>
+                      <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
+                      <strong>{Number(value) || 0}</strong>
+                    </li>
+                  ))}
+                </ul>
+                <p>
+                  Te rekordy nie są automatycznie kasowane. Administrator musi
+                  podać podstawę i okres retencji do późniejszej kontroli prawnej.
+                </p>
+              </article>
+            </section>
+
+            {activeBlockers.length > 0 && (
+              <section className="erasure-blockers-card" role="alert">
+                <div>
+                  <span aria-hidden="true">!</span>
+                  <div>
+                    <strong>Zamknięcie konta jest obecnie zablokowane</strong>
+                    <p>Najpierw zakończ lub rozlicz poniższe elementy:</p>
+                  </div>
+                </div>
+                <ul>
+                  {activeBlockers.map(([key, value]) => (
+                    <li key={key}>
+                      {ERASURE_BLOCKER_LABELS[key] || key}
+                      {typeof value === "number" ? `: ${value}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {currentCase && (
+              <section className="erasure-case-card">
+                <div className="erasure-card-heading">
+                  <div>
+                    <span className="section-label">Kontrola operacji</span>
+                    <h2>{ERASURE_ACTION_LABELS[currentCase.action_type]}</h2>
+                  </div>
+                  <span className={`erasure-case-status is-${currentCase.status}`}>
+                    {ERASURE_CASE_STATUS_LABELS[currentCase.status] || currentCase.status}
+                  </span>
+                </div>
+
+                <div className="erasure-assessment-grid">
+                  <article>
+                    <strong>Ocena zakresu i podstawy</strong>
+                    <p>{currentCase.legal_assessment}</p>
+                  </article>
+                  <article>
+                    <strong>Uzasadnienie pozostawienia historii</strong>
+                    <p>{currentCase.retention_reason}</p>
+                  </article>
+                </div>
+
+                {currentCase.status === "awaiting_owner" && (
+                  staffRole === "owner" ? (
+                    <div className="erasure-owner-approval">
+                      <div>
+                        <strong>Ostateczne zatwierdzenie ownera</strong>
+                        <p>
+                          Sprawdź zakres, retencję i aktywne zobowiązania. Następnie
+                          wpisz dokładną frazę potwierdzającą.
+                        </p>
+                      </div>
+                      <label>
+                        Fraza potwierdzająca
+                        <input
+                          value={ownerConfirmation}
+                          onChange={(event) => setOwnerConfirmation(event.target.value)}
+                          placeholder="ZATWIERDZAM USUNIECIE"
+                          autoComplete="off"
+                          disabled={Boolean(busy)}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="erasure-danger-button"
+                        onClick={handleAuthorizeErasure}
+                        disabled={Boolean(busy) || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"}
+                      >
+                        {busy === "authorize" ? "Zatwierdzanie..." : "Zatwierdź zakres operacji"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="erasure-account-notice">
+                      <strong>Operacja oczekuje na ownera</strong>
+                      <p>Administrator nie może samodzielnie zatwierdzić nieodwracalnej operacji.</p>
+                    </div>
+                  )
+                )}
+
+                {["authorized", "processing"].includes(currentCase.status) && (
+                  <div className="erasure-execute-panel">
+                    <div>
+                      <strong>
+                        {currentCase.status === "processing"
+                          ? "Dokończ przerwaną operację"
+                          : "Operacja gotowa do wykonania"}
+                      </strong>
+                      <p>
+                        Pliki profilu zostaną usunięte przez Storage API. Przy
+                        zamknięciu konta dostęp Auth zostanie wyłączony po stronie serwera.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="erasure-danger-button"
+                      onClick={handleExecuteErasure}
+                      disabled={Boolean(busy)}
+                    >
+                      {busy === "execute"
+                        ? "Wykonywanie..."
+                        : currentCase.status === "processing"
+                          ? "Ponów i dokończ operację"
+                          : "Wykonaj zatwierdzoną operację"}
+                    </button>
+                  </div>
+                )}
+
+                {currentCase.status === "completed" && (
+                  <div className="erasure-completed-banner" role="status">
+                    <span aria-hidden="true">✓</span>
+                    <div>
+                      <strong>Operacja została zakończona</strong>
+                      <p>
+                        Status użytkownika i wniosku RODO został zaktualizowany,
+                        a historia administracyjna pozostała zachowana.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {currentCase.status === "failed" && (
+                  <div className="erasure-account-notice is-danger">
+                    <strong>Operacja wymaga kontroli</strong>
+                    <p>{currentCase.failure_reason || "Sprawdź historię techniczną operacji."}</p>
+                  </div>
+                )}
+
+                {currentCaseEvents.length > 0 && (
+                  <ol className="erasure-case-timeline">
+                    {currentCaseEvents.map((item) => (
+                      <li key={item.id}>
+                        <span aria-hidden="true" />
+                        <div>
+                          <strong>{item.message}</strong>
+                          <time>{formatDisputeDate(item.created_at)}</time>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </section>
+            )}
+          </>
+        )}
+      </main>
+
+      {dialogAction && (
+        <div
+          className="erasure-dialog-backdrop"
+          role="presentation"
+          onMouseDown={() => !busy && setDialogAction("")}
+        >
+          <section
+            className="erasure-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="erasure-dialog-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="erasure-dialog-heading">
+              <div>
+                <span className="section-label">Operacja kontrolowana</span>
+                <h2 id="erasure-dialog-title">
+                  {ERASURE_ACTION_LABELS[dialogAction]}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDialogAction("")}
+                aria-label="Zamknij okno"
+                disabled={Boolean(busy)}
+              >×</button>
+            </div>
+
+            <p className="erasure-dialog-intro">
+              Ta decyzja nie usuwa historii automatycznie. Opisz zakres danych,
+              podstawę realizacji wniosku oraz dlaczego konkretne rekordy muszą
+              pozostać ograniczone przez określony czas.
+            </p>
+
+            {dialogAction === "close_account" && inventory?.execution_blocked && (
+              <div className="erasure-account-notice is-danger">
+                <strong>Nie można obecnie zamknąć konta</strong>
+                <p>Wróć do panelu i rozwiąż aktywne zobowiązania wskazane na czerwonej liście.</p>
+              </div>
+            )}
+
+            <form onSubmit={handlePrepareErasure}>
+              <label>
+                Ocena zakresu i podstawy realizacji wniosku
+                <textarea
+                  value={legalAssessment}
+                  onChange={(event) => setLegalAssessment(event.target.value)}
+                  minLength={50}
+                  maxLength={5000}
+                  rows={5}
+                  placeholder="Opisz żądanie użytkownika, wynik weryfikacji oraz zakres danych, które można usunąć..."
+                  disabled={Boolean(busy)}
+                />
+              </label>
+
+              <label>
+                Uzasadnienie pozostawienia historii prawnej i transakcyjnej
+                <textarea
+                  value={retentionReason}
+                  onChange={(event) => setRetentionReason(event.target.value)}
+                  minLength={30}
+                  maxLength={5000}
+                  rows={5}
+                  placeholder="Wskaż kategorie zachowywanych rekordów, cel retencji i konieczność późniejszej kontroli okresu przechowywania..."
+                  disabled={Boolean(busy)}
+                />
+              </label>
+
+              <div className="erasure-dialog-actions">
+                <button
+                  type="button"
+                  className="privacy-secondary-button"
+                  onClick={() => setDialogAction("")}
+                  disabled={Boolean(busy)}
+                >
+                  Anuluj
+                </button>
+                <button
+                  type="submit"
+                  className="erasure-danger-button"
+                  disabled={
+                    Boolean(busy)
+                    || legalAssessment.trim().length < 50
+                    || retentionReason.trim().length < 30
+                    || (dialogAction === "close_account" && inventory?.execution_blocked)
+                  }
+                >
+                  {busy === "prepare" ? "Zapisywanie..." : "Przekaż ownerowi do zatwierdzenia"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminPrivacyRequests() {
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
@@ -15808,6 +16650,15 @@ function AdminPrivacyRequests() {
                       </div>
                       <div><small>Użytkownik</small><strong>{requesterName}</strong></div>
                     </div>
+
+                    {request.request_type === "erasure" && (
+                      <Link
+                        className="privacy-admin-account-link"
+                        to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
+                      >
+                        Otwórz konto i kontrolę usunięcia danych →
+                      </Link>
+                    )}
 
                     <p className="privacy-request-description">{request.description}</p>
 
@@ -17095,6 +17946,17 @@ function Router() {
               <ProtectedRoute>
                 <StaffOnlyRoute>
                   <AdminPrivacyRequests />
+                </StaffOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/privacy/users/:userId"
+            element={
+              <ProtectedRoute>
+                <StaffOnlyRoute>
+                  <AdminUserPrivacyAccount />
                 </StaffOnlyRoute>
               </ProtectedRoute>
             }
