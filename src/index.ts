@@ -119,7 +119,11 @@ Deno.serve(async (request) => {
       );
     }
 
-    let requestBody: { caseId?: unknown };
+    let requestBody: {
+      caseId?: unknown;
+      authorizeAndExecute?: unknown;
+      ownerConfirmation?: unknown;
+    };
     try {
       requestBody = await request.json();
     } catch {
@@ -132,6 +136,10 @@ Deno.serve(async (request) => {
 
     const caseId = typeof requestBody.caseId === "string"
       ? requestBody.caseId.trim()
+      : "";
+    const authorizeAndExecute = requestBody.authorizeAndExecute === true;
+    const ownerConfirmation = typeof requestBody.ownerConfirmation === "string"
+      ? requestBody.ownerConfirmation.trim()
       : "";
 
     if (!UUID_PATTERN.test(caseId)) {
@@ -189,6 +197,33 @@ Deno.serve(async (request) => {
         200,
         origin,
       );
+    }
+
+    if (existingCase?.status === "awaiting_owner") {
+      if (
+        !authorizeAndExecute ||
+        ownerConfirmation !== "ZATWIERDZAM USUNIECIE"
+      ) {
+        return jsonResponse(
+          {
+            ok: false,
+            error:
+              "Operacja oczekuje na zatwierdzenie ownera poprawną frazą.",
+          },
+          409,
+          origin,
+        );
+      }
+
+      const { error: authorizationError } = await userClient.rpc(
+        "owner_authorize_ideahire_erasure_case",
+        {
+          p_case_id: caseId,
+          p_confirmation: ownerConfirmation,
+        },
+      );
+
+      if (authorizationError) throw authorizationError;
     }
 
     const { data: beginPayload, error: beginError } = await userClient.rpc(
