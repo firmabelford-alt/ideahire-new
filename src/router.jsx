@@ -305,6 +305,116 @@ function useAuth() {
 }
 
 /* =========================================================
+   ACCOUNT RESTRICTION CONTEXT
+========================================================= */
+
+const AccountRestrictionContext = createContext(null);
+
+function AccountRestrictionProvider({ children }) {
+  const { user, loading: authLoading } = useAuth();
+  const [notice, setNotice] = useState(null);
+  const [appeal, setAppeal] = useState(null);
+  const [restricted, setRestricted] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  async function loadRestriction(requestedUserId = user?.id) {
+    if (!requestedUserId) {
+      setNotice(null);
+      setAppeal(null);
+      setRestricted(false);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_my_ideahire_moderation_status"
+      );
+
+      if (error) throw error;
+      if (requestedUserId !== user?.id) return;
+
+      setNotice(data?.notice || null);
+      setAppeal(data?.appeal || null);
+      setRestricted(Boolean(data?.restricted));
+    } catch (error) {
+      console.error("ACCOUNT RESTRICTION LOAD ERROR:", error);
+      if (requestedUserId !== user?.id) return;
+
+      setNotice(null);
+      setAppeal(null);
+      setRestricted(false);
+    } finally {
+      if (requestedUserId === user?.id) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (authLoading) return;
+    loadRestriction(user?.id);
+  }, [authLoading, user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refresh = () => loadRestriction(user.id);
+    const channel = supabase
+      .channel(`account-restriction-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_moderation_notices",
+          filter: `target_user_id=eq.${user.id}`,
+        },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_moderation_appeals",
+          filter: `target_user_id=eq.${user.id}`,
+        },
+        refresh
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  return (
+    <AccountRestrictionContext.Provider
+      value={{
+        notice,
+        appeal,
+        isRestricted: restricted,
+        loading: authLoading || loading,
+        refreshRestriction: loadRestriction,
+      }}
+    >
+      {children}
+    </AccountRestrictionContext.Provider>
+  );
+}
+
+function useAccountRestriction() {
+  return useContext(AccountRestrictionContext) || {
+    notice: null,
+    appeal: null,
+    isRestricted: false,
+    loading: true,
+    refreshRestriction: async () => {},
+  };
+}
+
+/* =========================================================
    AGE ACCESS
 ========================================================= */
 
@@ -607,9 +717,14 @@ function PublicOnlyRoute({
     staffLoading,
   } = useStaffRole(user?.id);
 
+  const {
+    isRestricted,
+    loading: restrictionLoading,
+  } = useAccountRestriction();
+
   if (
     loading ||
-    (isLoggedIn && staffLoading)
+    (isLoggedIn && (staffLoading || restrictionLoading))
   ) {
     return <LoadingScreen />;
   }
@@ -620,6 +735,8 @@ function PublicOnlyRoute({
         to={
           isStaff
             ? "/admin"
+            : isRestricted
+              ? "/account-status"
             : "/account"
         }
         replace
@@ -634,7 +751,11 @@ function PublicOnlyRoute({
    ACCOUNT MODE ROUTES
 ========================================================= */
 
-function UserOnlyRoute({ children, allowLimited = false }) {
+function UserOnlyRoute({
+  children,
+  allowLimited = false,
+  allowRestricted = false,
+}) {
   const { user } = useAuth();
   const {
     isStaff,
@@ -646,7 +767,12 @@ function UserOnlyRoute({ children, allowLimited = false }) {
     loading: ageLoading,
   } = useAgeAccess();
 
-  if (staffLoading || ageLoading) {
+  const {
+    isRestricted,
+    loading: restrictionLoading,
+  } = useAccountRestriction();
+
+  if (staffLoading || ageLoading || restrictionLoading) {
     return <LoadingScreen />;
   }
 
@@ -654,6 +780,15 @@ function UserOnlyRoute({ children, allowLimited = false }) {
     return (
       <Navigate
         to="/admin"
+        replace
+      />
+    );
+  }
+
+  if (isRestricted && !allowRestricted) {
+    return (
+      <Navigate
+        to="/account-status"
         replace
       />
     );
@@ -1019,6 +1154,66 @@ const PRIVACY_AUDIT_EVENT_LABELS = {
   approved: "Zatwierdzono analizę",
 };
 
+const MODERATION_REASON_LABELS = {
+  fraud_or_scam: "Podejrzenie oszustwa lub wyłudzenia",
+  account_security: "Zagrożenie bezpieczeństwa konta lub serwisu",
+  harassment_or_threats: "Nękanie, groźby lub poważne naruszenie bezpieczeństwa",
+  illegal_content: "Treść potencjalnie niezgodna z prawem",
+  payment_abuse: "Nadużycie związane z płatnością lub rozliczeniem",
+  impersonation: "Podszywanie się pod inną osobę lub podmiot",
+  repeated_terms_breach: "Powtarzające się naruszenia regulaminu",
+  other_terms_breach: "Inne udokumentowane naruszenie regulaminu",
+};
+
+const MODERATION_DECISION_LABELS = {
+  temporary_suspension: "Czasowe zawieszenie konta",
+  indefinite_suspension: "Bezterminowe zawieszenie konta",
+};
+
+const MODERATION_STATUS_LABELS = {
+  scheduled: "Zaplanowana",
+  active: "Aktywna",
+  lifted: "Zdjęta",
+  expired: "Wygasła",
+  cancelled: "Anulowana",
+};
+
+const MODERATION_APPEAL_STATUS_LABELS = {
+  submitted: "Oczekuje na rozpoznanie",
+  in_review: "W analizie",
+  accepted: "Uwzględnione",
+  rejected: "Oddalone",
+  withdrawn: "Wycofane",
+};
+
+const MODERATION_EXCEPTION_OPTIONS = [
+  ["legal_obligation", "Obowiązek prawny wymagający natychmiastowej reakcji"],
+  ["overriding_legal_reason", "Nadrzędny powód wynikający z prawa"],
+  ["repeated_terms_breach", "Wykazane powtarzające się naruszenia regulaminu"],
+  ["urgent_fraud_or_security_risk", "Pilne ryzyko oszustwa lub bezpieczeństwa"],
+];
+
+const MODERATION_DURATION_PRESETS = [1, 3, 7, 14, 30];
+
+const MODERATION_REASON_GUIDANCE = {
+  fraud_or_scam:
+    "Wskaż konkretne zachowanie, identyfikator zlecenia lub wiadomości oraz przesłanki wskazujące na próbę oszustwa. Nie przesądzaj o przestępstwie bez podstaw.",
+  account_security:
+    "Opisz konkretne zagrożenie techniczne, przejęcie konta albo ryzyko dla innych użytkowników oraz pilność działania.",
+  harassment_or_threats:
+    "Opisz treść i kontekst zachowania bez ujawniania użytkownikowi danych osoby zgłaszającej, jeśli nie jest to bezwzględnie konieczne.",
+  illegal_content:
+    "Wskaż konkretną treść i właściwy przepis. Jeżeli nielegalność nie jest oczywista, przekaż sprawę do konsultacji prawnej.",
+  payment_abuse:
+    "Wskaż transakcję lub próbę obejścia rozliczenia oraz sprawdzone fakty. Nie zapisuj pełnych danych karty ani danych zbędnych.",
+  impersonation:
+    "Opisz, kogo konto miało naśladować i jakie elementy zostały zweryfikowane. Zachowaj tylko niezbędny materiał dowodowy.",
+  repeated_terms_breach:
+    "Wymień wcześniejsze udokumentowane naruszenia i daty. Ten powód nie może opierać się na pojedynczym zdarzeniu.",
+  other_terms_breach:
+    "Opisz konkretną treść lub zachowanie oraz dokładnie wskaż naruszony punkt regulaminu.",
+};
+
 function getDisputeStatusLabel(status) {
   return DISPUTE_STATUS_LABELS[status] || "Nieznany status";
 }
@@ -1160,6 +1355,10 @@ function AccountNavbar() {
 
   const { user } =
     useAuth();
+
+  const {
+    notice: moderationNotice,
+  } = useAccountRestriction();
 
   const {
     isLimited,
@@ -1616,6 +1815,21 @@ function AccountNavbar() {
             </NavLink>
           </>
         )}
+
+        {moderationNotice && (
+          <NavLink
+            to="/account-status"
+            className={({ isActive }) =>
+              `notifications-nav-link${isActive ? " is-active" : ""}`
+            }
+          >
+            <span className="account-nav-label-full">Decyzja administracji</span>
+            <span className="account-nav-label-short">Decyzja</span>
+            {["scheduled", "active"].includes(moderationNotice.status) && (
+              <span className="notification-dot" />
+            )}
+          </NavLink>
+        )}
       </nav>
 
       <div className="nav-actions">
@@ -1721,6 +1935,13 @@ function AdminNavbar() {
           className={({ isActive }) => (isActive ? "is-active" : "")}
         >
           Wnioski RODO
+        </NavLink>
+
+        <NavLink
+          to="/admin/moderation"
+          className={({ isActive }) => (isActive ? "is-active" : "")}
+        >
+          Moderacja
         </NavLink>
       </nav>
 
@@ -3114,6 +3335,340 @@ async function resizeAndConvertImage(
 
       image.src = objectUrl;
     }
+  );
+}
+
+function AccountStatus() {
+  const { user } = useAuth();
+  const { refreshRestriction } = useAccountRestriction();
+  const [notice, setNotice] = useState(null);
+  const [appeal, setAppeal] = useState(null);
+  const [appealStatement, setAppealStatement] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function loadAccountStatus(showLoading = true) {
+    if (!user?.id) return;
+    if (showLoading) setLoading(true);
+
+    try {
+      await supabase.rpc("get_my_ideahire_moderation_status");
+
+      const { data: noticeData, error: noticeError } = await supabase
+        .from("ideahire_moderation_notices")
+        .select("*")
+        .eq("target_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (noticeError) throw noticeError;
+      setNotice(noticeData || null);
+
+      if (noticeData?.case_id) {
+        const { data: appealData, error: appealError } = await supabase
+          .from("ideahire_moderation_appeals")
+          .select("*")
+          .eq("case_id", noticeData.case_id)
+          .eq("target_user_id", user.id)
+          .maybeSingle();
+
+        if (appealError) throw appealError;
+        setAppeal(appealData || null);
+      } else {
+        setAppeal(null);
+      }
+
+      await refreshRestriction(user.id);
+    } catch (error) {
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się pobrać decyzji dotyczącej konta."
+      ));
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadAccountStatus(true);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refresh = () => loadAccountStatus(false);
+    const channel = supabase
+      .channel(`account-status-page-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_moderation_notices",
+          filter: `target_user_id=eq.${user.id}`,
+        },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_moderation_appeals",
+          filter: `target_user_id=eq.${user.id}`,
+        },
+        refresh
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  async function handleSubmitAppeal(event) {
+    event.preventDefault();
+    if (!notice?.case_id || busy) return;
+
+    if (appealStatement.trim().length < 30) {
+      setMessage("Odwołanie musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "submit_my_ideahire_moderation_appeal",
+        {
+          p_case_id: notice.case_id,
+          p_statement: appealStatement.trim(),
+        }
+      );
+
+      if (error) throw error;
+      setAppealStatement("");
+      setMessage("Odwołanie zostało zapisane i przekazane do rozpoznania.");
+      await loadAccountStatus(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się złożyć odwołania."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function downloadDecisionNotice() {
+    if (!notice) return;
+
+    const content = [
+      `IdeaHire — zawiadomienie ${notice.notice_number}`,
+      "",
+      `Rodzaj decyzji: ${MODERATION_DECISION_LABELS[notice.decision_type] || notice.decision_type}`,
+      `Status: ${MODERATION_STATUS_LABELS[notice.status] || notice.status}`,
+      `Powód: ${MODERATION_REASON_LABELS[notice.reason_code] || notice.reason_code}`,
+      "Zakres: wykonywanie nowych czynności w serwisie oraz publiczna widoczność profilu i zleceń",
+      ...(notice.source_job_title
+        ? [`Powiązane zlecenie: ${notice.source_job_title} (${notice.source_job_id})`]
+        : []),
+      `Doręczono: ${formatDisputeDate(notice.delivered_at)}`,
+      `Obowiązuje od: ${formatDisputeDate(notice.effective_at)}`,
+      `Obowiązuje do: ${notice.ends_at ? formatDisputeDate(notice.ends_at) : "bezterminowo"}`,
+      `Termin odwołania: ${formatDisputeDate(notice.appeal_available_until)}`,
+      "",
+      "Uzasadnienie:",
+      notice.public_reason,
+      "",
+      "Podstawa regulaminowa:",
+      notice.terms_reference,
+      ...(notice.legal_basis
+        ? ["", "Podstawa prawna:", notice.legal_basis]
+        : []),
+      "",
+      "Decyzja została podjęta po analizie człowieka.",
+    ].join("\n");
+
+    const file = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${notice.notice_number}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const appealDeadlineOpen = notice
+    && new Date(notice.appeal_available_until).getTime() >= Date.now();
+
+  return (
+    <div className="account-page moderation-user-page">
+      <AccountNavbar />
+
+      <main className="app-page moderation-user-shell">
+        <header className="moderation-user-header">
+          <span className="section-label">Bezpieczeństwo i moderacja</span>
+          <h1>Status Twojego konta</h1>
+          <p>
+            Tutaj znajdziesz decyzję administracji, jej podstawę, czas
+            obowiązywania oraz bezpłatną możliwość odwołania.
+          </p>
+        </header>
+
+        {message && <p className="privacy-page-message" role="status">{message}</p>}
+
+        {loading ? (
+          <div className="privacy-empty-state">Ładowanie statusu konta...</div>
+        ) : !notice ? (
+          <section className="moderation-clear-card">
+            <span aria-hidden="true">✓</span>
+            <div>
+              <h2>Brak ograniczeń konta</h2>
+              <p>Na Twoim koncie nie ma decyzji o zawieszeniu.</p>
+              <Link className="privacy-primary-button" to="/account">
+                Wróć do konta
+              </Link>
+            </div>
+          </section>
+        ) : (
+          <>
+            <section className={`moderation-decision-card is-${notice.status}`}>
+              <div className="moderation-decision-topline">
+                <div>
+                  <span className="section-label">{notice.notice_number}</span>
+                  <h2>{MODERATION_DECISION_LABELS[notice.decision_type]}</h2>
+                </div>
+                <span className={`moderation-status-pill is-${notice.status}`}>
+                  {MODERATION_STATUS_LABELS[notice.status] || notice.status}
+                </span>
+              </div>
+
+              <dl className="moderation-decision-meta">
+                <div>
+                  <dt>Powód</dt>
+                  <dd>{MODERATION_REASON_LABELS[notice.reason_code] || notice.reason_code}</dd>
+                </div>
+                <div>
+                  <dt>Zakres</dt>
+                  <dd>Nowe czynności w serwisie oraz publiczna widoczność profilu i zleceń</dd>
+                </div>
+                <div>
+                  <dt>Obowiązuje od</dt>
+                  <dd>{formatDisputeDate(notice.effective_at)}</dd>
+                </div>
+                <div>
+                  <dt>Obowiązuje do</dt>
+                  <dd>{notice.ends_at ? formatDisputeDate(notice.ends_at) : "Bezterminowo"}</dd>
+                </div>
+                <div>
+                  <dt>Decyzja</dt>
+                  <dd>Analiza człowieka — bez decyzji automatycznej</dd>
+                </div>
+              </dl>
+
+              <article className="moderation-reason-block">
+                <h3>Konkretne uzasadnienie</h3>
+                <p>{notice.public_reason}</p>
+              </article>
+
+              {notice.source_job_title && (
+                <article className="moderation-notice-source">
+                  <strong>Decyzja powiązana ze zleceniem</strong>
+                  <p>{notice.source_job_title}</p>
+                  <small>ID zlecenia: {notice.source_job_id}</small>
+                </article>
+              )}
+
+              <div className="moderation-basis-grid">
+                <article>
+                  <h3>Podstawa regulaminowa</h3>
+                  <p>{notice.terms_reference}</p>
+                </article>
+                <article>
+                  <h3>Podstawa prawna</h3>
+                  <p>{notice.legal_basis || "Decyzja opiera się na wskazanym postanowieniu regulaminu."}</p>
+                </article>
+              </div>
+
+              {notice.lift_reason && (
+                <div className="moderation-lift-banner">
+                  <strong>Ograniczenie zostało zdjęte</strong>
+                  <p>{notice.lift_reason}</p>
+                </div>
+              )}
+
+              <div className="moderation-decision-actions">
+                <button
+                  type="button"
+                  className="privacy-secondary-button"
+                  onClick={downloadDecisionNotice}
+                >
+                  Pobierz kopię zawiadomienia
+                </button>
+                <Link className="privacy-secondary-button" to="/privacy-center">
+                  Prywatność i moje dane
+                </Link>
+              </div>
+            </section>
+
+            {appeal ? (
+              <section className="moderation-appeal-card">
+                <div className="moderation-decision-topline">
+                  <div>
+                    <span className="section-label">Twoje odwołanie</span>
+                    <h2>{MODERATION_APPEAL_STATUS_LABELS[appeal.status] || appeal.status}</h2>
+                  </div>
+                  <span className={`moderation-status-pill is-${appeal.status}`}>
+                    {MODERATION_APPEAL_STATUS_LABELS[appeal.status] || appeal.status}
+                  </span>
+                </div>
+                <p>{appeal.user_statement}</p>
+                {appeal.resolution_reason && (
+                  <div className="moderation-reason-block">
+                    <h3>Wynik ponownej analizy</h3>
+                    <p>{appeal.resolution_reason}</p>
+                  </div>
+                )}
+              </section>
+            ) : appealDeadlineOpen ? (
+              <form className="moderation-appeal-card" onSubmit={handleSubmitAppeal}>
+                <span className="section-label">Bezpłatne odwołanie</span>
+                <h2>Wyjaśnij fakty lub wskaż błąd decyzji</h2>
+                <p>
+                  Termin złożenia odwołania: {formatDisputeDate(notice.appeal_available_until)}.
+                  Odwołanie rozpozna inny administrator albo owner.
+                </p>
+                <textarea
+                  value={appealStatement}
+                  onChange={(event) => setAppealStatement(event.target.value)}
+                  minLength={30}
+                  maxLength={5000}
+                  rows={7}
+                  placeholder="Opisz, dlaczego decyzja powinna zostać zmieniona, i wskaż istotne fakty..."
+                  disabled={busy}
+                />
+                <div className="moderation-form-footer">
+                  <small>{appealStatement.length}/5000</small>
+                  <button
+                    type="submit"
+                    className="privacy-primary-button"
+                    disabled={busy || appealStatement.trim().length < 30}
+                  >
+                    {busy ? "Wysyłanie..." : "Złóż odwołanie"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <section className="moderation-appeal-card">
+                <h2>Termin odwołania upłynął</h2>
+                <p>Kopia decyzji pozostaje dostępna w historii konta.</p>
+              </section>
+            )}
+          </>
+        )}
+      </main>
+    </div>
   );
 }
 
@@ -12943,6 +13498,10 @@ const ADMIN_AUDIT_LABELS = {
   erasure_execution_started: "Rozpoczęto operację usunięcia danych",
   erasure_case_completed: "Zakończono operację usunięcia danych",
   erasure_case_failed: "Operacja usunięcia wymaga interwencji",
+  moderation_restriction_imposed: "Nałożono ograniczenie konta",
+  moderation_restriction_lifted: "Zdjęto ograniczenie konta",
+  moderation_appeal_accepted: "Uwzględniono odwołanie od ograniczenia",
+  moderation_appeal_rejected: "Utrzymano decyzję po odwołaniu",
 };
 
 function formatDisputeMoney(value, currency = "PLN") {
@@ -14793,6 +15352,13 @@ function AdminJobs() {
                       <strong>{ownerName}</strong>
                     </div>
                   </div>
+
+                  <Link
+                    className="privacy-admin-account-link"
+                    to={`/admin/moderation?user=${job.user_id}&job=${job.id}`}
+                  >
+                    Przejdź do moderacji konta →
+                  </Link>
                 </article>
               );
             })}
@@ -15031,6 +15597,799 @@ function AdminEvidenceMessages() {
             })}
           </div>
         )}
+      </main>
+    </div>
+  );
+}
+
+function AdminModeration() {
+  const { user } = useAuth();
+  const { staffRole } = useStaffRole(user?.id);
+  const location = useLocation();
+  const moderationParams = new URLSearchParams(location.search);
+  const requestedUserId = moderationParams.get("user");
+  const requestedJobId = moderationParams.get("job");
+
+  const [cases, setCases] = useState([]);
+  const [notices, setNotices] = useState({});
+  const [appeals, setAppeals] = useState([]);
+  const [profiles, setProfiles] = useState({});
+  const [sourceJob, setSourceJob] = useState(null);
+  const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(requestedUserId || "");
+  const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
+  const [appealNotes, setAppealNotes] = useState({});
+  const [form, setForm] = useState({
+    decisionType: "temporary_suspension",
+    durationDays: "7",
+    reasonCode: "fraud_or_scam",
+    publicReason: "",
+    termsReference: "",
+    legalBasis: "",
+    internalNote: "",
+    noticeMode: "immediate",
+    immediateExceptionCode: "",
+    ownerConfirmation: "",
+  });
+
+  async function loadModeration(showLoading = true) {
+    if (!user?.id) return;
+    if (showLoading) setLoading(true);
+
+    try {
+      const { error: refreshError } = await supabase.rpc(
+        "get_my_ideahire_moderation_status"
+      );
+      if (refreshError) throw refreshError;
+
+      const [casesResult, noticesResult, appealsResult] = await Promise.all([
+        supabase
+          .from("ideahire_moderation_cases")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(300),
+        supabase
+          .from("ideahire_moderation_notices")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(300),
+        supabase
+          .from("ideahire_moderation_appeals")
+          .select("*")
+          .order("submitted_at", { ascending: false })
+          .limit(300),
+      ]);
+
+      if (casesResult.error) throw casesResult.error;
+      if (noticesResult.error) throw noticesResult.error;
+      if (appealsResult.error) throw appealsResult.error;
+
+      const caseRows = casesResult.data || [];
+      const noticeRows = noticesResult.data || [];
+      const appealRows = appealsResult.data || [];
+      const profileIds = [...new Set([
+        ...caseRows.map((item) => item.target_user_id),
+        ...(selectedUserId ? [selectedUserId] : []),
+      ].filter(Boolean))];
+
+      let profileMap = {};
+      if (profileIds.length > 0) {
+        const { data: profileRows, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, name, avatar_url, created_at")
+          .in("id", profileIds);
+
+        if (profileError) throw profileError;
+        profileMap = Object.fromEntries(
+          (profileRows || []).map((profile) => [profile.id, profile])
+        );
+      }
+
+      setCases(caseRows);
+      setNotices(Object.fromEntries(
+        noticeRows.map((notice) => [notice.case_id, notice])
+      ));
+      setAppeals(appealRows);
+      setProfiles((current) => ({ ...current, ...profileMap }));
+    } catch (error) {
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się pobrać spraw moderacyjnych."
+      ));
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadModeration(true);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refresh = () => loadModeration(false);
+    const channel = supabase
+      .channel(`admin-moderation-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ideahire_moderation_cases" },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ideahire_moderation_appeals" },
+        refresh
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!requestedUserId) return;
+
+    setSelectedUserId(requestedUserId);
+    supabase
+      .from("profiles")
+      .select("id, name, avatar_url, created_at")
+      .eq("id", requestedUserId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setProfiles((current) => ({ ...current, [data.id]: data }));
+        }
+      });
+  }, [requestedUserId]);
+
+  useEffect(() => {
+    if (!requestedJobId || !requestedUserId) {
+      setSourceJob(null);
+      return;
+    }
+
+    supabase
+      .from("jobs")
+      .select("id, user_id, title, description, category, budget, created_at")
+      .eq("id", requestedJobId)
+      .eq("user_id", requestedUserId)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) {
+          setMessage(cleanSupabaseError(
+            error,
+            "Nie udało się dołączyć zlecenia jako źródła sprawy."
+          ));
+          return;
+        }
+        setSourceJob(data || null);
+      });
+  }, [requestedJobId, requestedUserId]);
+
+  async function handleUserSearch(event) {
+    event.preventDefault();
+    const query = search.trim();
+
+    if (query.length < 2) {
+      setMessage("Wpisz co najmniej 2 znaki nazwy albo pełny UUID użytkownika.");
+      return;
+    }
+
+    setSearching(true);
+    setMessage("");
+
+    try {
+      const isUuid = /^[0-9a-f-]{36}$/i.test(query);
+      let request = supabase
+        .from("profiles")
+        .select("id, name, avatar_url, created_at")
+        .limit(20);
+
+      request = isUuid
+        ? request.eq("id", query)
+        : request.ilike("name", `%${query}%`);
+
+      const { data, error } = await request;
+      if (error) throw error;
+
+      const rows = data || [];
+      setSearchResults(rows);
+      setProfiles((current) => ({
+        ...current,
+        ...Object.fromEntries(rows.map((profile) => [profile.id, profile])),
+      }));
+
+      if (rows.length === 0) setMessage("Nie znaleziono użytkownika.");
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się wyszukać użytkownika."));
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function selectModerationUser(profile) {
+    setSelectedUserId(profile.id);
+    setProfiles((current) => ({ ...current, [profile.id]: profile }));
+    setSearchResults([]);
+    setSearch("");
+    setMessage("");
+  }
+
+  function updateModerationForm(values) {
+    setForm((current) => ({ ...current, ...values }));
+  }
+
+  async function handleImposeRestriction(event) {
+    event.preventDefault();
+    if (!selectedUserId || busy) return;
+
+    if (form.decisionType === "temporary_suspension") {
+      const duration = Number(form.durationDays);
+      const maximum = staffRole === "owner" ? 365 : 30;
+
+      if (!Number.isInteger(duration) || duration < 1 || duration > maximum) {
+        setMessage(`Wybierz pełną liczbę dni od 1 do ${maximum}.`);
+        return;
+      }
+    }
+
+    if (form.publicReason.trim().length < 50) {
+      setMessage("Uzasadnienie dla użytkownika musi mieć co najmniej 50 znaków.");
+      return;
+    }
+
+    if (form.termsReference.trim().length < 10) {
+      setMessage("Wskaż konkretny punkt regulaminu.");
+      return;
+    }
+
+    if (form.internalNote.trim().length < 20) {
+      setMessage("Notatka wewnętrzna musi mieć co najmniej 20 znaków.");
+      return;
+    }
+
+    if (
+      form.decisionType === "indefinite_suspension"
+      && form.ownerConfirmation.trim() !== "ZAWIESZAM KONTO"
+    ) {
+      setMessage("Owner musi wpisać dokładnie: ZAWIESZAM KONTO");
+      return;
+    }
+
+    if (
+      form.decisionType === "indefinite_suspension"
+      && form.noticeMode === "immediate"
+      && !form.immediateExceptionCode
+    ) {
+      setMessage("Natychmiastowa decyzja bezterminowa wymaga wskazania udokumentowanego wyjątku.");
+      return;
+    }
+
+    if (!window.confirm(
+      "Czy potwierdzasz, że przeanalizowano fakty, proporcjonalność decyzji i możliwość zastosowania łagodniejszego środka?"
+    )) return;
+
+    setBusy("impose");
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_impose_ideahire_account_restriction",
+        {
+          p_target_user_id: selectedUserId,
+          p_decision_type: form.decisionType,
+          p_duration_days: form.decisionType === "temporary_suspension"
+            ? Number(form.durationDays)
+            : null,
+          p_reason_code: form.reasonCode,
+          p_public_reason: form.publicReason.trim(),
+          p_terms_reference: form.termsReference.trim(),
+          p_legal_basis: form.legalBasis.trim() || null,
+          p_internal_note: form.internalNote.trim(),
+          p_notice_mode: form.decisionType === "temporary_suspension"
+            ? "immediate"
+            : form.noticeMode,
+          p_immediate_exception_code:
+            form.decisionType === "indefinite_suspension"
+              && form.noticeMode === "immediate"
+              ? form.immediateExceptionCode || null
+              : null,
+          p_owner_confirmation:
+            form.decisionType === "indefinite_suspension"
+              ? form.ownerConfirmation.trim()
+              : null,
+          p_source_job_id: sourceJob?.id || null,
+        }
+      );
+
+      if (error) throw error;
+
+      setForm({
+        decisionType: "temporary_suspension",
+        durationDays: "7",
+        reasonCode: "fraud_or_scam",
+        publicReason: "",
+        termsReference: "",
+        legalBasis: "",
+        internalNote: "",
+        noticeMode: "immediate",
+        immediateExceptionCode: "",
+        ownerConfirmation: "",
+      });
+      setMessage("Decyzja została zapisana, a użytkownik otrzymał zawiadomienie i dostęp do odwołania.");
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się nałożyć ograniczenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleLiftRestriction(caseId) {
+    const reason = window.prompt(
+      "Podaj uzasadnienie zdjęcia ograniczenia — minimum 30 znaków:"
+    );
+
+    if (!reason) return;
+    if (reason.trim().length < 30) {
+      setMessage("Uzasadnienie musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    setBusy(`lift:${caseId}`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_lift_ideahire_account_restriction",
+        { p_case_id: caseId, p_reason: reason.trim() }
+      );
+
+      if (error) throw error;
+      setMessage("Ograniczenie zostało zdjęte i użytkownik zobaczy uzasadnienie.");
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zdjąć ograniczenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  function updateAppealNote(appealId, value) {
+    setAppealNotes((current) => ({ ...current, [appealId]: value }));
+  }
+
+  async function handleResolveAppeal(appeal, resolution) {
+    const reason = String(appealNotes[appeal.id] || "").trim();
+
+    if (reason.length < 30) {
+      setMessage("Uzasadnienie wyniku odwołania musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    setBusy(`appeal:${appeal.id}`);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_resolve_ideahire_moderation_appeal",
+        {
+          p_appeal_id: appeal.id,
+          p_resolution: resolution,
+          p_reason: reason,
+        }
+      );
+
+      if (error) throw error;
+      setAppealNotes((current) => ({ ...current, [appeal.id]: "" }));
+      setMessage(
+        resolution === "lift"
+          ? "Odwołanie uwzględniono, a ograniczenie zdjęto."
+          : "Odwołanie rozpoznano i utrzymano decyzję."
+      );
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się rozpoznać odwołania."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  const selectedProfile = profiles[selectedUserId] || null;
+  const selectedOpenCase = cases.find(
+    (item) => item.target_user_id === selectedUserId
+      && ["scheduled", "active"].includes(item.status)
+      && (!item.ends_at || new Date(item.ends_at).getTime() > Date.now())
+  );
+  const openAppeals = appeals.filter((item) =>
+    ["submitted", "in_review"].includes(item.status)
+  );
+
+  return (
+    <div className="account-page admin-page admin-moderation-page">
+      <AdminNavbar />
+
+      <main className="admin-shell moderation-admin-shell">
+        <header className="admin-page-header">
+          <div>
+            <span className="section-label">Moderacja i bezpieczeństwo</span>
+            <h1>Ograniczenia kont i odwołania</h1>
+            <p>
+              Każda decyzja wymaga faktów, podstawy regulaminowej, określonego
+              czasu oraz ręcznej oceny proporcjonalności.
+            </p>
+          </div>
+          <span className="admin-role-badge">
+            {staffRole === "owner" ? "Owner — pełna kontrola" : "Administrator — do 30 dni"}
+          </span>
+        </header>
+
+        {message && <p className="privacy-page-message" role="status">{message}</p>}
+
+        <section className="moderation-search-card">
+          <div>
+            <span className="section-label">Wybór konta</span>
+            <h2>Znajdź użytkownika</h2>
+            <p>Szukaj po nazwie profilu albo pełnym UUID widocznym w sprawie.</p>
+          </div>
+          <form onSubmit={handleUserSearch}>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Nazwa użytkownika lub UUID..."
+            />
+            <button type="submit" className="privacy-primary-button" disabled={searching}>
+              {searching ? "Szukanie..." : "Szukaj"}
+            </button>
+          </form>
+
+          {searchResults.length > 0 && (
+            <div className="moderation-search-results">
+              {searchResults.map((profile) => (
+                <button
+                  type="button"
+                  key={profile.id}
+                  onClick={() => selectModerationUser(profile)}
+                >
+                  <span className="admin-staff-avatar">
+                    {profile.avatar_url
+                      ? <img src={profile.avatar_url} alt="" />
+                      : (profile.name || "U").charAt(0).toUpperCase()}
+                  </span>
+                  <span><strong>{profile.name || "Użytkownik"}</strong><small>{profile.id}</small></span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {selectedUserId && (
+          <section className="moderation-workbench">
+            <div className="moderation-selected-user">
+              <div className="admin-staff-avatar">
+                {selectedProfile?.avatar_url
+                  ? <img src={selectedProfile.avatar_url} alt="" />
+                  : (selectedProfile?.name || "U").charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <span className="section-label">Wybrane konto</span>
+                <h2>{selectedProfile?.name || "Użytkownik IdeaHire"}</h2>
+                <code>{selectedUserId}</code>
+              </div>
+              {selectedOpenCase && (
+                <span className={`moderation-status-pill is-${selectedOpenCase.status}`}>
+                  {MODERATION_STATUS_LABELS[selectedOpenCase.status]}
+                </span>
+              )}
+            </div>
+
+            {sourceJob && (
+              <article className="moderation-source-job">
+                <div>
+                  <span className="section-label">Materiał źródłowy do ręcznej oceny</span>
+                  <h3>{sourceJob.title}</h3>
+                </div>
+                <p>{sourceJob.description}</p>
+                <small>
+                  ID: {sourceJob.id} · {sourceJob.category || "Bez kategorii"} · {formatDisputeMoney(sourceJob.budget, "PLN")}
+                </small>
+              </article>
+            )}
+
+            {selectedOpenCase ? (
+              <div className="moderation-active-case">
+                <strong>To konto ma już aktywną lub zaplanowaną decyzję</strong>
+                <p>{notices[selectedOpenCase.id]?.public_reason || selectedOpenCase.public_reason}</p>
+                <button
+                  type="button"
+                  className="privacy-secondary-button"
+                  onClick={() => handleLiftRestriction(selectedOpenCase.id)}
+                  disabled={Boolean(busy)}
+                >
+                  {busy === `lift:${selectedOpenCase.id}` ? "Zapisywanie..." : "Zdejmij ograniczenie"}
+                </button>
+              </div>
+            ) : (
+              <form className="moderation-decision-form" onSubmit={handleImposeRestriction}>
+                <div className="moderation-form-grid">
+                  <label>
+                    Rodzaj decyzji
+                    <select
+                      value={form.decisionType}
+                      onChange={(event) => updateModerationForm({
+                        decisionType: event.target.value,
+                        noticeMode: event.target.value === "temporary_suspension"
+                          ? "immediate"
+                          : "thirty_day_notice",
+                        immediateExceptionCode: "",
+                        ownerConfirmation: "",
+                      })}
+                    >
+                      <option value="temporary_suspension">Czasowe zawieszenie</option>
+                      {staffRole === "owner" && (
+                        <option value="indefinite_suspension">Bezterminowe zawieszenie</option>
+                      )}
+                    </select>
+                  </label>
+
+                  {form.decisionType === "temporary_suspension" ? (
+                    <div className="moderation-duration-control">
+                      <label>
+                        Liczba dni
+                        <input
+                          type="number"
+                          min="1"
+                          max={staffRole === "owner" ? "365" : "30"}
+                          value={form.durationDays}
+                          onChange={(event) => updateModerationForm({ durationDays: event.target.value })}
+                        />
+                      </label>
+                      <div className="moderation-duration-presets" aria-label="Szybki wybór okresu">
+                        {[
+                          ...MODERATION_DURATION_PRESETS,
+                          ...(staffRole === "owner" ? [90, 180, 365] : []),
+                        ].map((days) => (
+                          <button
+                            type="button"
+                            className={Number(form.durationDays) === days ? "is-selected" : ""}
+                            onClick={() => updateModerationForm({ durationDays: String(days) })}
+                            key={days}
+                          >
+                            {days} {days === 1 ? "dzień" : "dni"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <label>
+                      Tryb rozpoczęcia
+                      <select
+                        value={form.noticeMode}
+                        onChange={(event) => updateModerationForm({
+                          noticeMode: event.target.value,
+                          immediateExceptionCode: "",
+                        })}
+                      >
+                        <option value="thirty_day_notice">Po 30-dniowym uprzedzeniu</option>
+                        <option value="immediate">Natychmiast — tylko udokumentowany wyjątek</option>
+                      </select>
+                    </label>
+                  )}
+
+                  <label>
+                    Kategoria powodu
+                    <select
+                      value={form.reasonCode}
+                      onChange={(event) => updateModerationForm({ reasonCode: event.target.value })}
+                    >
+                      {Object.entries(MODERATION_REASON_LABELS).map(([value, label]) => (
+                        <option value={value} key={value}>{label}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {form.decisionType === "indefinite_suspension"
+                    && form.noticeMode === "immediate" && (
+                    <label>
+                      Wyjątek pozwalający na natychmiastową decyzję
+                      <select
+                        value={form.immediateExceptionCode}
+                        onChange={(event) => updateModerationForm({
+                          immediateExceptionCode: event.target.value,
+                        })}
+                        required
+                      >
+                        <option value="">Wybierz udokumentowany wyjątek</option>
+                        {MODERATION_EXCEPTION_OPTIONS.map(([value, label]) => (
+                          <option value={value} key={value}>{label}</option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </div>
+
+                <div className="moderation-reason-guidance">
+                  <strong>Co administrator musi ustalić dla wybranej kategorii</strong>
+                  <p>{MODERATION_REASON_GUIDANCE[form.reasonCode]}</p>
+                </div>
+
+                <label>
+                  Jasne uzasadnienie widoczne dla użytkownika
+                  <textarea
+                    value={form.publicReason}
+                    onChange={(event) => updateModerationForm({ publicReason: event.target.value })}
+                    minLength={50}
+                    maxLength={4000}
+                    rows={6}
+                    placeholder="Opisz konkretne fakty, zakres decyzji i dlaczego łagodniejszy środek nie jest wystarczający. Nie ujawniaj danych zgłaszającego."
+                  />
+                </label>
+
+                <div className="moderation-form-grid">
+                  <label>
+                    Konkretny punkt regulaminu
+                    <input
+                      value={form.termsReference}
+                      onChange={(event) => updateModerationForm({ termsReference: event.target.value })}
+                      minLength={10}
+                      maxLength={1000}
+                      placeholder="Np. Regulamin IdeaHire § 8 ust. 3"
+                    />
+                  </label>
+                  <label>
+                    Podstawa prawna — gdy dotyczy
+                    <input
+                      value={form.legalBasis}
+                      onChange={(event) => updateModerationForm({ legalBasis: event.target.value })}
+                      maxLength={1000}
+                      placeholder="Przepis dotyczący zakazanej treści albo pozostaw puste"
+                    />
+                  </label>
+                </div>
+
+                <label>
+                  Wewnętrzna notatka dowodowa
+                  <textarea
+                    value={form.internalNote}
+                    onChange={(event) => updateModerationForm({ internalNote: event.target.value })}
+                    minLength={20}
+                    maxLength={5000}
+                    rows={5}
+                    placeholder="Wskaż przeanalizowane zgłoszenia, dowody i wynik ręcznej kontroli. Ta część nie będzie widoczna dla użytkownika."
+                  />
+                </label>
+
+                {form.decisionType === "indefinite_suspension" && (
+                  <label className="moderation-owner-confirmation">
+                    Potwierdzenie ownera
+                    <input
+                      value={form.ownerConfirmation}
+                      onChange={(event) => updateModerationForm({ ownerConfirmation: event.target.value })}
+                      placeholder="ZAWIESZAM KONTO"
+                      autoComplete="off"
+                    />
+                    <small>Wpisz dokładnie: ZAWIESZAM KONTO</small>
+                  </label>
+                )}
+
+                <div className="moderation-legal-warning">
+                  <strong>Kontrola proporcjonalności</strong>
+                  <p>
+                    Zawieszenie nie usuwa konta ani historii. Użytkownik zachowuje
+                    dostęp do decyzji, odwołania i centrum prywatności.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="erasure-danger-button"
+                  disabled={Boolean(busy)}
+                >
+                  {busy === "impose" ? "Zapisywanie decyzji..." : "Nałóż ograniczenie i zawiadom użytkownika"}
+                </button>
+              </form>
+            )}
+          </section>
+        )}
+
+        <section className="moderation-appeals-admin">
+          <div>
+            <span className="section-label">Ponowna analiza</span>
+            <h2>Odwołania oczekujące</h2>
+          </div>
+
+          {openAppeals.length === 0 ? (
+            <div className="privacy-empty-state">Brak odwołań oczekujących na analizę.</div>
+          ) : (
+            <div className="moderation-appeal-admin-list">
+              {openAppeals.map((appeal) => {
+                const moderationCase = cases.find((item) => item.id === appeal.case_id);
+                const profile = profiles[appeal.target_user_id];
+
+                return (
+                  <article key={appeal.id}>
+                    <div className="moderation-decision-topline">
+                      <div>
+                        <span className="section-label">Odwołanie użytkownika</span>
+                        <h3>{profile?.name || "Użytkownik IdeaHire"}</h3>
+                      </div>
+                      <span className="moderation-status-pill is-submitted">Oczekuje</span>
+                    </div>
+                    <p>{appeal.user_statement}</p>
+                    <small>
+                      Decyzja: {MODERATION_DECISION_LABELS[moderationCase?.decision_type] || "—"}
+                    </small>
+                    <textarea
+                      value={appealNotes[appeal.id] || ""}
+                      onChange={(event) => updateAppealNote(appeal.id, event.target.value)}
+                      minLength={30}
+                      maxLength={3000}
+                      rows={4}
+                      placeholder="Uzasadnij wynik ponownej, ręcznej analizy..."
+                    />
+                    <div className="moderation-appeal-review-actions">
+                      <button
+                        type="button"
+                        className="privacy-secondary-button"
+                        onClick={() => handleResolveAppeal(appeal, "uphold")}
+                        disabled={Boolean(busy)}
+                      >
+                        Utrzymaj decyzję
+                      </button>
+                      <button
+                        type="button"
+                        className="privacy-primary-button"
+                        onClick={() => handleResolveAppeal(appeal, "lift")}
+                        disabled={Boolean(busy)}
+                      >
+                        Uwzględnij i zdejmij ograniczenie
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="moderation-case-register">
+          <div>
+            <span className="section-label">Rejestr decyzji</span>
+            <h2>Historia ograniczeń</h2>
+          </div>
+          {loading ? (
+            <div className="privacy-empty-state">Ładowanie decyzji...</div>
+          ) : cases.length === 0 ? (
+            <div className="privacy-empty-state">Nie wydano jeszcze żadnej decyzji.</div>
+          ) : (
+            <div className="moderation-case-list">
+              {cases.map((item) => {
+                const profile = profiles[item.target_user_id];
+                const notice = notices[item.id];
+                return (
+                  <article key={item.id}>
+                    <div>
+                      <strong>{profile?.name || "Użytkownik IdeaHire"}</strong>
+                      <small>{notice?.notice_number || item.id}</small>
+                    </div>
+                    <span>{MODERATION_REASON_LABELS[item.reason_code] || item.reason_code}</span>
+                    <span>{MODERATION_DECISION_LABELS[item.decision_type]}</span>
+                    <span className={`moderation-status-pill is-${item.status}`}>
+                      {MODERATION_STATUS_LABELS[item.status] || item.status}
+                    </span>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
@@ -15308,21 +16667,32 @@ function AdminUserPrivacyAccount() {
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
-        "owner_authorize_ideahire_erasure_case",
-        {
-          p_case_id: currentCase.id,
-          p_confirmation: ownerConfirmation.trim(),
-        }
+      const actionType = currentCase.action_type;
+      const { data, error } = await supabase.functions.invoke(
+        "ideahire-admin-erasure",
+        { body: {
+          caseId: currentCase.id,
+          authorizeAndExecute: true,
+          ownerConfirmation: ownerConfirmation.trim(),
+        } }
       );
 
       if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Operacja nie została zakończona.");
 
       setOwnerConfirmation("");
-      setMessage("Owner zatwierdził operację. Można przejść do bezpiecznego wykonania.");
+      setMessage(
+        actionType === "close_account"
+          ? "Owner zatwierdził operację. Konto zostało zamknięte, dane zminimalizowane, a sprawa zakończona."
+          : "Owner zatwierdził operację. Dane możliwe do usunięcia zostały zminimalizowane, a sprawa zakończona."
+      );
       await loadAccountData(false);
     } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się zatwierdzić operacji."));
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się dokończyć operacji. Jeśli zatwierdzenie zostało zapisane, pojawi się bezpieczny przycisk ponowienia."
+      ));
+      await loadAccountData(false);
     } finally {
       setBusy("");
     }
@@ -15416,6 +16786,12 @@ function AdminUserPrivacyAccount() {
                 <details className="erasure-actions-menu">
                   <summary aria-label="Otwórz działania dotyczące konta">•••</summary>
                   <div>
+                    <Link
+                      to={`/admin/moderation?user=${userId}`}
+                    >
+                      <span>Moderacja konta</span>
+                      <small>Zawieś konto na czas lub przejrzyj decyzje</small>
+                    </Link>
                     <button
                       type="button"
                       onClick={() => setDialogAction("minimize_data")}
@@ -15626,7 +17002,8 @@ function AdminUserPrivacyAccount() {
                         <strong>Ostateczne zatwierdzenie ownera</strong>
                         <p>
                           Sprawdź zakres, retencję i aktywne zobowiązania. Następnie
-                          wpisz dokładną frazę potwierdzającą.
+                          wpisz dokładną frazę. Zatwierdzenie od razu uruchomi
+                          minimalizację danych i zamknie tę sprawę.
                         </p>
                       </div>
                       <label>
@@ -15645,7 +17022,9 @@ function AdminUserPrivacyAccount() {
                         onClick={handleAuthorizeErasure}
                         disabled={Boolean(busy) || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"}
                       >
-                        {busy === "authorize" ? "Zatwierdzanie..." : "Zatwierdź zakres operacji"}
+                        {busy === "authorize"
+                          ? "Zatwierdzanie i wykonywanie..."
+                          : "Zatwierdź i wykonaj operację"}
                       </button>
                     </div>
                   ) : (
@@ -17642,9 +19021,14 @@ function Home() {
     loading: ageLoading,
   } = useAgeAccess();
 
+  const {
+    isRestricted,
+    loading: restrictionLoading,
+  } = useAccountRestriction();
+
   if (
     loading ||
-    (user?.id && (staffLoading || ageLoading))
+    (user?.id && (staffLoading || ageLoading || restrictionLoading))
   ) {
     return <LoadingScreen />;
   }
@@ -17656,6 +19040,10 @@ function Home() {
         replace
       />
     );
+  }
+
+  if (user?.id && isRestricted) {
+    return <Navigate to="/account-status" replace />;
   }
 
   if (user?.id && (isLimited || ageRequired)) {
@@ -17678,7 +19066,8 @@ function Router() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AgeAccessProvider>
+        <AccountRestrictionProvider>
+          <AgeAccessProvider>
           <Sorts />
 
         <style>{`
@@ -17803,8 +19192,19 @@ function Router() {
             path="/privacy-center"
             element={
               <ProtectedRoute>
-                <UserOnlyRoute allowLimited>
+                <UserOnlyRoute allowLimited allowRestricted>
                   <PrivacyCenter />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/account-status"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute allowLimited allowRestricted>
+                  <AccountStatus />
                 </UserOnlyRoute>
               </ProtectedRoute>
             }
@@ -17963,6 +19363,17 @@ function Router() {
           />
 
           <Route
+            path="/admin/moderation"
+            element={
+              <ProtectedRoute>
+                <StaffOnlyRoute>
+                  <AdminModeration />
+                </StaffOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="*"
             element={
               <Navigate
@@ -17972,7 +19383,8 @@ function Router() {
             }
           />
         </Routes>
-        </AgeAccessProvider>
+          </AgeAccessProvider>
+        </AccountRestrictionProvider>
       </AuthProvider>
     </BrowserRouter>
   );
