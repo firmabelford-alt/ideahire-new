@@ -309,6 +309,8 @@ function useAuth() {
 ========================================================= */
 
 const AccountRestrictionContext = createContext(null);
+const ACCOUNT_RESTRICTION_STATUS_RPC =
+  "get_my_ideahire_moderation_status_stable";
 
 function AccountRestrictionProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
@@ -316,50 +318,125 @@ function AccountRestrictionProvider({ children }) {
   const [appeal, setAppeal] = useState(null);
   const [restricted, setRestricted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+  const activeRestrictionUserIdRef = useRef(user?.id || null);
+  const restrictionRequestIdRef = useRef(0);
+  const restrictionRefreshTimerRef = useRef(null);
+  const restrictionSnapshotRef = useRef("");
 
-  async function loadRestriction(requestedUserId = user?.id) {
+  async function loadRestriction(
+    requestedUserId = user?.id,
+    showLoading = false
+  ) {
+    const requestId = restrictionRequestIdRef.current + 1;
+    restrictionRequestIdRef.current = requestId;
+
     if (!requestedUserId) {
       setNotice(null);
       setAppeal(null);
       setRestricted(false);
+      setErrorMessage("");
+      restrictionSnapshotRef.current = "";
       setLoading(false);
       return;
     }
 
-    setLoading(true);
+    if (showLoading) {
+      setLoading(true);
+      setErrorMessage("");
+    }
 
     try {
       const { data, error } = await supabase.rpc(
-        "get_my_ideahire_moderation_status"
+        ACCOUNT_RESTRICTION_STATUS_RPC
       );
 
       if (error) throw error;
-      if (requestedUserId !== user?.id) return;
+      if (
+        requestedUserId !== activeRestrictionUserIdRef.current
+        || requestId !== restrictionRequestIdRef.current
+      ) {
+        return;
+      }
 
-      setNotice(data?.notice || null);
-      setAppeal(data?.appeal || null);
-      setRestricted(Boolean(data?.restricted));
+      const nextNotice = data?.notice || null;
+      const nextAppeal = data?.appeal || null;
+      const nextRestricted = Boolean(data?.restricted);
+      const nextSnapshot = JSON.stringify({
+        notice: nextNotice,
+        appeal: nextAppeal,
+        restricted: nextRestricted,
+      });
+
+      // Kilka zdarzeń tej samej transakcji nie może powodować kilku
+      // identycznych renderów ekranu statusu.
+      if (nextSnapshot !== restrictionSnapshotRef.current) {
+        restrictionSnapshotRef.current = nextSnapshot;
+        setNotice(nextNotice);
+        setAppeal(nextAppeal);
+        setRestricted(nextRestricted);
+      }
+      setErrorMessage("");
     } catch (error) {
       console.error("ACCOUNT RESTRICTION LOAD ERROR:", error);
-      if (requestedUserId !== user?.id) return;
+      if (
+        requestedUserId !== activeRestrictionUserIdRef.current
+        || requestId !== restrictionRequestIdRef.current
+      ) {
+        return;
+      }
 
-      setNotice(null);
-      setAppeal(null);
-      setRestricted(false);
+      setErrorMessage(
+        "Nie udało się bezpiecznie potwierdzić statusu konta. Odśwież stronę albo spróbuj ponownie za chwilę."
+      );
+
+      // Przy pierwszym odczycie czyścimy niepotwierdzony stan, ale router
+      // nadal pozostaje w bezpiecznym centrum statusu. Odświeżenie Realtime
+      // zachowuje ostatni poprawny wynik, aby błąd sieci nie odblokował konta.
+      if (showLoading) {
+        restrictionSnapshotRef.current = "";
+        setNotice(null);
+        setAppeal(null);
+        setRestricted(false);
+      }
     } finally {
-      if (requestedUserId === user?.id) setLoading(false);
+      if (
+        requestedUserId === activeRestrictionUserIdRef.current
+        && requestId === restrictionRequestIdRef.current
+      ) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
     if (authLoading) return;
-    loadRestriction(user?.id);
+
+    const nextUserId = user?.id || null;
+    activeRestrictionUserIdRef.current = nextUserId;
+    setNotice(null);
+    setAppeal(null);
+    setRestricted(false);
+    setErrorMessage("");
+    restrictionSnapshotRef.current = "";
+    loadRestriction(nextUserId, true);
   }, [authLoading, user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
 
-    const refresh = () => loadRestriction(user.id);
+    // Jedna transakcja administracyjna może wysłać kilka zdarzeń Realtime.
+    // Łączymy je w jeden cichy odczyt, aby nie uruchamiać serii renderów.
+    const refresh = () => {
+      if (restrictionRefreshTimerRef.current) {
+        window.clearTimeout(restrictionRefreshTimerRef.current);
+      }
+
+      restrictionRefreshTimerRef.current = window.setTimeout(() => {
+        restrictionRefreshTimerRef.current = null;
+        loadRestriction(user.id, false);
+      }, 180);
+    };
     const channel = supabase
       .channel(`account-restriction-${user.id}`)
       .on(
@@ -385,9 +462,51 @@ function AccountRestrictionProvider({ children }) {
       .subscribe();
 
     return () => {
+      if (restrictionRefreshTimerRef.current) {
+        window.clearTimeout(restrictionRefreshTimerRef.current);
+        restrictionRefreshTimerRef.current = null;
+      }
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !restricted || !notice?.ends_at) return;
+
+    const endsAt = new Date(notice.ends_at).getTime();
+    if (Number.isNaN(endsAt)) return;
+
+    const maximumTimerDelay = 2147480000;
+    let timerId;
+
+    function scheduleExpiryRefresh() {
+      const remaining = endsAt - Date.now();
+
+      if (remaining <= 0) {
+        timerId = window.setTimeout(
+          () => loadRestriction(user.id, false),
+          1000
+        );
+        return;
+      }
+
+      const delay = Math.min(remaining + 1000, maximumTimerDelay);
+      timerId = window.setTimeout(() => {
+        if (Date.now() < endsAt) {
+          scheduleExpiryRefresh();
+          return;
+        }
+
+        loadRestriction(user.id, false);
+      }, delay);
+    }
+
+    scheduleExpiryRefresh();
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [user?.id, restricted, notice?.ends_at]);
 
   return (
     <AccountRestrictionContext.Provider
@@ -396,6 +515,7 @@ function AccountRestrictionProvider({ children }) {
         appeal,
         isRestricted: restricted,
         loading: authLoading || loading,
+        errorMessage,
         refreshRestriction: loadRestriction,
       }}
     >
@@ -410,6 +530,7 @@ function useAccountRestriction() {
     appeal: null,
     isRestricted: false,
     loading: true,
+    errorMessage: "",
     refreshRestriction: async () => {},
   };
 }
@@ -720,6 +841,7 @@ function PublicOnlyRoute({
   const {
     isRestricted,
     loading: restrictionLoading,
+    errorMessage: restrictionError,
   } = useAccountRestriction();
 
   if (
@@ -735,7 +857,7 @@ function PublicOnlyRoute({
         to={
           isStaff
             ? "/admin"
-            : isRestricted
+            : isRestricted || restrictionError
               ? "/account-status"
             : "/account"
         }
@@ -770,9 +892,10 @@ function UserOnlyRoute({
   const {
     isRestricted,
     loading: restrictionLoading,
+    errorMessage: restrictionError,
   } = useAccountRestriction();
 
-  if (staffLoading || ageLoading || restrictionLoading) {
+  if (staffLoading || restrictionLoading) {
     return <LoadingScreen />;
   }
 
@@ -785,13 +908,36 @@ function UserOnlyRoute({
     );
   }
 
-  if (isRestricted && !allowRestricted) {
-    return (
-      <Navigate
-        to="/account-status"
-        replace
-      />
-    );
+  if (restrictionError) {
+    if (!allowRestricted) {
+      return (
+        <Navigate
+          to="/account-status"
+          replace
+        />
+      );
+    }
+
+    return children;
+  }
+
+  if (isRestricted) {
+    if (!allowRestricted) {
+      return (
+        <Navigate
+          to="/account-status"
+          replace
+        />
+      );
+    }
+
+    // Status bana i centrum prywatności nie zależą od odczytu wieku.
+    // Zapobiega to zmianie całego widoku, gdy niezależny profil wieku się odświeża.
+    return children;
+  }
+
+  if (ageLoading) {
+    return <LoadingScreen />;
   }
 
   if (ageRequired) {
@@ -806,6 +952,29 @@ function UserOnlyRoute({
         state={{ ageRestricted: true }}
       />
     );
+  }
+
+  return children;
+}
+
+function RestrictedAccountRoute({ children }) {
+  const { user } = useAuth();
+  const {
+    isStaff,
+    staffLoading,
+  } = useStaffRole(user?.id);
+  const {
+    isRestricted,
+    loading: restrictionLoading,
+    errorMessage: restrictionError,
+  } = useAccountRestriction();
+
+  if (staffLoading || restrictionLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!isStaff && (isRestricted || restrictionError)) {
+    return <Navigate to="/account-status" replace />;
   }
 
   return children;
@@ -1195,6 +1364,10 @@ const MODERATION_EXCEPTION_OPTIONS = [
 
 const MODERATION_DURATION_PRESETS = [1, 3, 7, 14, 30];
 
+const MODERATION_CONFIRMED_TERMS_REFERENCES = {
+  repeated_terms_breach: "Regulamin IdeaHire § 27 pkt 107",
+};
+
 const MODERATION_REASON_GUIDANCE = {
   fraud_or_scam:
     "Wskaż konkretne zachowanie, identyfikator zlecenia lub wiadomości oraz przesłanki wskazujące na próbę oszustwa. Nie przesądzaj o przestępstwie bez podstaw.",
@@ -1213,6 +1386,23 @@ const MODERATION_REASON_GUIDANCE = {
   other_terms_breach:
     "Opisz konkretną treść lub zachowanie oraz dokładnie wskaż naruszony punkt regulaminu.",
 };
+
+function createEmptyDisputeDecisionForm() {
+  return {
+    outcome: "",
+    amount: "",
+    rationale: "",
+    applyRestriction: false,
+    moderationTargetUserId: "",
+    durationDays: "7",
+    reasonCode: "repeated_terms_breach",
+    publicReason: "",
+    termsReference:
+      MODERATION_CONFIRMED_TERMS_REFERENCES.repeated_terms_breach,
+    legalBasis: "",
+    internalNote: "",
+  };
+}
 
 function getDisputeStatusLabel(status) {
   return DISPUTE_STATUS_LABELS[status] || "Nieznany status";
@@ -1241,6 +1431,85 @@ function formatDisputeDate(value, includeTime = true) {
       ? { hour: "2-digit", minute: "2-digit" }
       : {}),
   });
+}
+
+function formatPolishDays(value) {
+  const days = Math.max(0, Math.trunc(Number(value) || 0));
+  const lastDigit = days % 10;
+  const lastTwoDigits = days % 100;
+
+  if (days === 1) return "1 dzień";
+  if (
+    lastDigit >= 2
+    && lastDigit <= 4
+    && (lastTwoDigits < 12 || lastTwoDigits > 14)
+  ) {
+    return `${days} dni`;
+  }
+
+  return `${days} dni`;
+}
+
+function getModerationDurationDetails(notice) {
+  if (!notice) return null;
+
+  if (
+    notice.decision_type === "indefinite_suspension"
+    || !notice.ends_at
+  ) {
+    return {
+      headline: "Zawieszenie bezterminowe",
+      detail: notice.status === "lifted"
+        ? "Ograniczenie zostało zdjęte przez administrację."
+        : "Decyzja nie ma automatycznej daty zakończenia.",
+    };
+  }
+
+  const effectiveAt = new Date(notice.effective_at).getTime();
+  const endsAt = new Date(notice.ends_at).getTime();
+
+  if (!Number.isFinite(effectiveAt) || !Number.isFinite(endsAt)) {
+    return {
+      headline: "Zawieszenie czasowe",
+      detail: `Koniec: ${formatDisputeDate(notice.ends_at)}.`,
+    };
+  }
+
+  const dayInMilliseconds = 24 * 60 * 60 * 1000;
+  const totalDays = Math.max(
+    1,
+    Math.round((endsAt - effectiveAt) / dayInMilliseconds)
+  );
+  const remainingDays = Math.max(
+    0,
+    Math.ceil((endsAt - Date.now()) / dayInMilliseconds)
+  );
+
+  if (["lifted", "cancelled"].includes(notice.status)) {
+    return {
+      headline: `Zawieszenie było na ${formatPolishDays(totalDays)}`,
+      detail: "Ograniczenie zakończono przed pierwotnym terminem.",
+    };
+  }
+
+  if (notice.status === "expired" || remainingDays === 0) {
+    return {
+      headline: `Zawieszenie było na ${formatPolishDays(totalDays)}`,
+      detail: `Okres zawieszenia zakończył się ${formatDisputeDate(notice.ends_at)}.`,
+    };
+  }
+
+  if (notice.status === "scheduled") {
+    return {
+      headline: `Zawieszenie na ${formatPolishDays(totalDays)}`,
+      detail: `Rozpocznie się ${formatDisputeDate(notice.effective_at)} i zakończy ${formatDisputeDate(notice.ends_at)}.`,
+    };
+  }
+
+  return {
+    headline: `Zawieszenie na ${formatPolishDays(totalDays)}`,
+    detail: `Pozostało ${formatPolishDays(remainingDays)}. Automatyczne odblokowanie: ${formatDisputeDate(notice.ends_at)}.`,
+  };
 }
 
 function cleanSupabaseError(error, fallback) {
@@ -1358,6 +1627,9 @@ function AccountNavbar() {
 
   const {
     notice: moderationNotice,
+    isRestricted,
+    loading: restrictionLoading,
+    errorMessage: restrictionError,
   } = useAccountRestriction();
 
   const {
@@ -1397,7 +1669,12 @@ function AccountNavbar() {
   async function checkNotifications() {
     if (!user?.id) return;
 
-    if (hasRestrictedAgeAccess) {
+    if (
+      restrictionLoading ||
+      isRestricted ||
+      restrictionError ||
+      hasRestrictedAgeAccess
+    ) {
       setHasNotifications(false);
       setHasDisputeNotifications(false);
       return;
@@ -1593,6 +1870,17 @@ function AccountNavbar() {
   }
 
   useEffect(() => {
+    if (
+      !user?.id ||
+      restrictionLoading ||
+      isRestricted ||
+      restrictionError
+    ) {
+      setHasNotifications(false);
+      setHasDisputeNotifications(false);
+      return;
+    }
+
     checkNotifications();
 
     function handleNotificationsRead(
@@ -1668,7 +1956,13 @@ function AccountNavbar() {
         handleDisputeNotificationsRead
       );
     };
-  }, [user?.id, hasRestrictedAgeAccess]);
+  }, [
+    user?.id,
+    hasRestrictedAgeAccess,
+    isRestricted,
+    restrictionError,
+    restrictionLoading,
+  ]);
 
   async function handleLogout() {
     try {
@@ -1694,6 +1988,61 @@ function AccountNavbar() {
         }`
       );
     }
+  }
+
+  if (isRestricted || restrictionError) {
+    return (
+      <header className="navbar account-navbar restricted-account-navbar">
+        <Link
+          className="restricted-navbar-brand"
+          to="/account-status"
+          aria-label="Przejdź do statusu konta"
+        >
+          <span className="logo">
+            Idea<span>Hire</span>
+          </span>
+          <span className="restricted-navbar-badge">
+            {isRestricted
+              ? "Konto zawieszone"
+              : "Status konta wymaga sprawdzenia"}
+          </span>
+        </Link>
+
+        <nav
+          className="nav-links restricted-navbar-links"
+          aria-label="Dostępne funkcje zawieszonego konta"
+        >
+          <NavLink
+            to="/account-status"
+            className={({ isActive }) => (isActive ? "is-active" : "")}
+          >
+            Status konta
+          </NavLink>
+          <NavLink
+            to="/privacy-center"
+            className={({ isActive }) => (isActive ? "is-active" : "")}
+          >
+            Prywatność i dane
+          </NavLink>
+          <NavLink
+            to="/regulamin"
+            className={({ isActive }) => (isActive ? "is-active" : "")}
+          >
+            Regulamin
+          </NavLink>
+        </nav>
+
+        <div className="nav-actions restricted-navbar-actions">
+          <button
+            className="btn btn-dark"
+            type="button"
+            onClick={handleLogout}
+          >
+            Wyloguj się
+          </button>
+        </div>
+      </header>
+    );
   }
 
   return (
@@ -3340,93 +3689,17 @@ async function resizeAndConvertImage(
 
 function AccountStatus() {
   const { user } = useAuth();
-  const { refreshRestriction } = useAccountRestriction();
-  const [notice, setNotice] = useState(null);
-  const [appeal, setAppeal] = useState(null);
+  const {
+    notice,
+    appeal,
+    isRestricted,
+    loading,
+    errorMessage: restrictionError,
+    refreshRestriction,
+  } = useAccountRestriction();
   const [appealStatement, setAppealStatement] = useState("");
-  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-
-  async function loadAccountStatus(showLoading = true) {
-    if (!user?.id) return;
-    if (showLoading) setLoading(true);
-
-    try {
-      await supabase.rpc("get_my_ideahire_moderation_status");
-
-      const { data: noticeData, error: noticeError } = await supabase
-        .from("ideahire_moderation_notices")
-        .select("*")
-        .eq("target_user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (noticeError) throw noticeError;
-      setNotice(noticeData || null);
-
-      if (noticeData?.case_id) {
-        const { data: appealData, error: appealError } = await supabase
-          .from("ideahire_moderation_appeals")
-          .select("*")
-          .eq("case_id", noticeData.case_id)
-          .eq("target_user_id", user.id)
-          .maybeSingle();
-
-        if (appealError) throw appealError;
-        setAppeal(appealData || null);
-      } else {
-        setAppeal(null);
-      }
-
-      await refreshRestriction(user.id);
-    } catch (error) {
-      setMessage(cleanSupabaseError(
-        error,
-        "Nie udało się pobrać decyzji dotyczącej konta."
-      ));
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadAccountStatus(true);
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const refresh = () => loadAccountStatus(false);
-    const channel = supabase
-      .channel(`account-status-page-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ideahire_moderation_notices",
-          filter: `target_user_id=eq.${user.id}`,
-        },
-        refresh
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ideahire_moderation_appeals",
-          filter: `target_user_id=eq.${user.id}`,
-        },
-        refresh
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
 
   async function handleSubmitAppeal(event) {
     event.preventDefault();
@@ -3452,13 +3725,15 @@ function AccountStatus() {
       if (error) throw error;
       setAppealStatement("");
       setMessage("Odwołanie zostało zapisane i przekazane do rozpoznania.");
-      await loadAccountStatus(false);
+      await refreshRestriction(user.id, false);
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się złożyć odwołania."));
     } finally {
       setBusy(false);
     }
   }
+
+  const durationDetails = getModerationDurationDetails(notice);
 
   function downloadDecisionNotice() {
     if (!notice) return;
@@ -3468,6 +3743,7 @@ function AccountStatus() {
       "",
       `Rodzaj decyzji: ${MODERATION_DECISION_LABELS[notice.decision_type] || notice.decision_type}`,
       `Status: ${MODERATION_STATUS_LABELS[notice.status] || notice.status}`,
+      `Okres: ${durationDetails?.headline || "—"}`,
       `Powód: ${MODERATION_REASON_LABELS[notice.reason_code] || notice.reason_code}`,
       "Zakres: wykonywanie nowych czynności w serwisie oraz publiczna widoczność profilu i zleceń",
       ...(notice.source_job_title
@@ -3503,7 +3779,10 @@ function AccountStatus() {
     && new Date(notice.appeal_available_until).getTime() >= Date.now();
 
   return (
-    <div className="account-page moderation-user-page">
+    <div
+      className="account-page moderation-user-page"
+      data-moderation-ui-version="2026-09-11-flicker-fix-v3"
+    >
       <AccountNavbar />
 
       <main className="app-page moderation-user-shell">
@@ -3518,8 +3797,41 @@ function AccountStatus() {
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
+        {restrictionError && notice && (
+          <p className="moderation-status-read-error" role="alert">
+            {restrictionError} Wyświetlamy ostatni poprawnie pobrany stan i nie
+            odblokowujemy pozostałych funkcji konta.
+          </p>
+        )}
+
         {loading ? (
           <div className="privacy-empty-state">Ładowanie statusu konta...</div>
+        ) : restrictionError && !notice ? (
+          <section className="moderation-status-error-card" role="alert">
+            <span aria-hidden="true">!</span>
+            <div>
+              <span className="section-label">Bezpieczny tryb konta</span>
+              <h2>Nie możemy teraz potwierdzić statusu konta</h2>
+              <p>{restrictionError}</p>
+              <p>
+                Do czasu poprawnego odczytu nie udostępniamy czynności na
+                koncie. Możesz ponowić próbę, przejść do centrum prywatności
+                albo się wylogować.
+              </p>
+              <div className="moderation-status-error-actions">
+                <button
+                  type="button"
+                  className="privacy-primary-button"
+                  onClick={() => refreshRestriction(user?.id, false)}
+                >
+                  Spróbuj ponownie
+                </button>
+                <Link className="privacy-secondary-button" to="/privacy-center">
+                  Prywatność i moje dane
+                </Link>
+              </div>
+            </div>
+          </section>
         ) : !notice ? (
           <section className="moderation-clear-card">
             <span aria-hidden="true">✓</span>
@@ -3533,6 +3845,52 @@ function AccountStatus() {
           </section>
         ) : (
           <>
+            {isRestricted && (
+              <section className="restricted-account-lock-card" role="alert">
+                <span className="restricted-account-lock-icon" aria-hidden="true">
+                  !
+                </span>
+                <div>
+                  <span className="section-label">Dostęp do konta ograniczony</span>
+                  <h2>Twoje konto zostało zawieszone</h2>
+                  <p>
+                    W czasie obowiązywania decyzji nie możesz publikować ani
+                    edytować zleceń, aplikować, wysyłać wiadomości ani wykonywać
+                    innych czynności na platformie. Nadal możesz sprawdzić pełną
+                    decyzję, złożyć odwołanie, skorzystać z praw dotyczących danych
+                    i wylogować się.
+                  </p>
+                  {durationDetails && (
+                    <div className="restricted-account-lock-duration">
+                      <span>Czas zawieszenia</span>
+                      <strong>{durationDetails.headline}</strong>
+                      <p>{durationDetails.detail}</p>
+                    </div>
+                  )}
+                  <div className="restricted-account-lock-reason">
+                    <span>Powód zawieszenia</span>
+                    <strong>
+                      {MODERATION_REASON_LABELS[notice.reason_code]
+                        || notice.reason_code}
+                    </strong>
+                    <p>{notice.public_reason}</p>
+                  </div>
+                  {(appeal || appealDeadlineOpen) && (
+                    <div className="restricted-account-lock-actions">
+                      <a
+                        className="privacy-primary-button"
+                        href="#moderation-appeal"
+                      >
+                        {appeal
+                          ? "Sprawdź status odwołania"
+                          : "Złóż bezpłatne odwołanie"}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
             <section className={`moderation-decision-card is-${notice.status}`}>
               <div className="moderation-decision-topline">
                 <div>
@@ -3543,6 +3901,17 @@ function AccountStatus() {
                   {MODERATION_STATUS_LABELS[notice.status] || notice.status}
                 </span>
               </div>
+
+              {durationDetails && (
+                <div
+                  className="moderation-duration-banner"
+                  aria-live="polite"
+                >
+                  <span>Czas obowiązywania decyzji</span>
+                  <strong>{durationDetails.headline}</strong>
+                  <p>{durationDetails.detail}</p>
+                </div>
+              )}
 
               <dl className="moderation-decision-meta">
                 <div>
@@ -3591,6 +3960,16 @@ function AccountStatus() {
                 </article>
               </div>
 
+              {notice.last_adjusted_at && notice.last_adjustment_reason && (
+                <div className="moderation-adjustment-banner">
+                  <strong>Zmieniono czas obowiązywania decyzji</strong>
+                  <p>{notice.last_adjustment_reason}</p>
+                  <small>
+                    Zmieniono: {formatDisputeDate(notice.last_adjusted_at)}
+                  </small>
+                </div>
+              )}
+
               {notice.lift_reason && (
                 <div className="moderation-lift-banner">
                   <strong>Ograniczenie zostało zdjęte</strong>
@@ -3613,7 +3992,11 @@ function AccountStatus() {
             </section>
 
             {appeal ? (
-              <section className="moderation-appeal-card">
+              <section
+                id="moderation-appeal"
+                className="moderation-appeal-card"
+                tabIndex="-1"
+              >
                 <div className="moderation-decision-topline">
                   <div>
                     <span className="section-label">Twoje odwołanie</span>
@@ -3624,6 +4007,22 @@ function AccountStatus() {
                   </span>
                 </div>
                 <p>{appeal.user_statement}</p>
+                <dl className="moderation-appeal-meta">
+                  <div>
+                    <dt>Złożono</dt>
+                    <dd>{formatDisputeDate(appeal.submitted_at)}</dd>
+                  </div>
+                  <div>
+                    <dt>Sposób rozpoznania</dt>
+                    <dd>Analiza przez uprawnionego członka administracji</dd>
+                  </div>
+                  {appeal.resolved_at && (
+                    <div>
+                      <dt>Rozstrzygnięto</dt>
+                      <dd>{formatDisputeDate(appeal.resolved_at)}</dd>
+                    </div>
+                  )}
+                </dl>
                 {appeal.resolution_reason && (
                   <div className="moderation-reason-block">
                     <h3>Wynik ponownej analizy</h3>
@@ -3632,13 +4031,27 @@ function AccountStatus() {
                 )}
               </section>
             ) : appealDeadlineOpen ? (
-              <form className="moderation-appeal-card" onSubmit={handleSubmitAppeal}>
+              <form
+                id="moderation-appeal"
+                className="moderation-appeal-card"
+                onSubmit={handleSubmitAppeal}
+                tabIndex="-1"
+              >
                 <span className="section-label">Bezpłatne odwołanie</span>
                 <h2>Wyjaśnij fakty lub wskaż błąd decyzji</h2>
                 <p>
                   Termin złożenia odwołania: {formatDisputeDate(notice.appeal_available_until)}.
-                  Odwołanie rozpozna inny administrator albo owner.
+                  Odwołanie zostanie rozpoznane przez uprawnionego członka
+                  administracji i nie będzie rozstrzygane wyłącznie automatycznie.
                 </p>
+                <div className="moderation-appeal-guidance" id="appeal-guidance">
+                  <strong>Co warto podać?</strong>
+                  <p>
+                    Wskaż konkretny błąd, istotne fakty, daty lub identyfikator
+                    zlecenia. Nie podawaj hasła, danych karty ani innych danych,
+                    które nie są potrzebne do rozpoznania sprawy.
+                  </p>
+                </div>
                 <textarea
                   value={appealStatement}
                   onChange={(event) => setAppealStatement(event.target.value)}
@@ -3647,6 +4060,7 @@ function AccountStatus() {
                   rows={7}
                   placeholder="Opisz, dlaczego decyzja powinna zostać zmieniona, i wskaż istotne fakty..."
                   disabled={busy}
+                  aria-describedby="appeal-guidance"
                 />
                 <div className="moderation-form-footer">
                   <small>{appealStatement.length}/5000</small>
@@ -3665,6 +4079,21 @@ function AccountStatus() {
                 <p>Kopia decyzji pozostaje dostępna w historii konta.</p>
               </section>
             )}
+
+            <section className="moderation-redress-card">
+              <span className="section-label">Dalsze środki ochrony prawnej</span>
+              <h2>Odwołanie wewnętrzne nie zamyka innych możliwości</h2>
+              <p>
+                Po otrzymaniu uzasadnionego rozstrzygnięcia możesz skorzystać
+                także z innych środków dostępnych na podstawie prawa. Zależnie
+                od przepisów mających zastosowanie do operatora może to obejmować
+                certyfikowany organ pozasądowego rozstrzygania sporów. Prawo do
+                dochodzenia roszczeń przed właściwym sądem pozostaje nienaruszone.
+              </p>
+              <Link className="privacy-secondary-button" to="/regulamin">
+                Sprawdź zasady moderacji i odwołań
+              </Link>
+            </section>
           </>
         )}
       </main>
@@ -5321,7 +5750,14 @@ function isPrivacyRequestOpen(status) {
 
 const ERASURE_ACTION_LABELS = {
   minimize_data: "Usuń dane możliwe do usunięcia",
-  close_account: "Zamknij konto użytkownika",
+  close_account: "Usuń dane i zamknij konto",
+};
+
+const ERASURE_ACTION_DESCRIPTIONS = {
+  minimize_data:
+    "IdeaHire usunie lub zanonimizuje dane, które nie są już potrzebne. Konto Auth nie zostanie zamknięte.",
+  close_account:
+    "IdeaHire usunie lub zanonimizuje możliwe dane i wyłączy możliwość logowania do konta.",
 };
 
 const ERASURE_CASE_STATUS_LABELS = {
@@ -5363,10 +5799,14 @@ const ERASURE_INVENTORY_LABELS = {
 
 const ERASURE_BLOCKER_LABELS = {
   active_staff_account: "aktywna rola administracyjna",
-  active_payments: "aktywne płatności",
+  published_jobs: "opublikowane zlecenia — usuń je z konta",
+  pending_job_applications: "oczekujące zgłoszenia do zleceń",
+  active_payments: "aktywne lub nierozliczone płatności",
   active_disputes: "aktywne spory",
   active_agreements_without_terminal_payment:
     "aktywne ustalenia bez zamkniętego rozliczenia",
+  active_moderation_cases: "aktywne sprawy moderacyjne",
+  other_open_privacy_requests: "inne otwarte wnioski dotyczące prywatności",
   connected_stripe_accounts: "połączone konto Stripe",
 };
 
@@ -5418,10 +5858,14 @@ function PrivacyCenter() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
+  const [erasureEligibility, setErasureEligibility] = useState(null);
+  const [erasureEligibilityLoading, setErasureEligibilityLoading] = useState(false);
+  const [erasureEligibilityError, setErasureEligibilityError] = useState("");
   const [form, setForm] = useState({
     requestType: "access",
     preferredFormat: "electronic",
     description: "",
+    requestedErasureAction: "",
   });
 
   async function loadPrivacyRequests() {
@@ -5430,7 +5874,7 @@ function PrivacyCenter() {
     const { data, error } = await supabase
       .from("ideahire_privacy_requests")
       .select(
-        "id, request_number, request_type, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, requester_closed_at, withdrawn_at"
+        "id, request_number, request_type, requested_erasure_action, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, requester_closed_at, withdrawn_at"
       )
       .eq("requester_user_id", user.id)
       .order("submitted_at", { ascending: false });
@@ -5505,6 +5949,52 @@ function PrivacyCenter() {
   }, [user?.id]);
 
   useEffect(() => {
+    if (!user?.id || form.requestType !== "erasure") {
+      setErasureEligibility(null);
+      setErasureEligibilityError("");
+      setErasureEligibilityLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadErasureEligibility() {
+      setErasureEligibilityLoading(true);
+      setErasureEligibilityError("");
+
+      const { data, error } = await supabase.rpc(
+        "get_my_ideahire_erasure_eligibility"
+      );
+
+      if (!mounted) return;
+
+      if (error) {
+        setErasureEligibility(null);
+        setErasureEligibilityError(cleanSupabaseError(
+          error,
+          "Nie udało się sprawdzić, czy konto może zostać zamknięte."
+        ));
+      } else {
+        setErasureEligibility(data || null);
+
+        if (!data?.can_close_account) {
+          setForm((current) => current.requestedErasureAction === "close_account"
+            ? { ...current, requestedErasureAction: "" }
+            : current);
+        }
+      }
+
+      setErasureEligibilityLoading(false);
+    }
+
+    loadErasureEligibility();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id, form.requestType]);
+
+  useEffect(() => {
     if (!user?.id) return;
 
     const refreshPrivacyCenter = () => {
@@ -5552,6 +6042,25 @@ function PrivacyCenter() {
       return;
     }
 
+    if (
+      form.requestType === "erasure"
+      && !["minimize_data", "close_account"].includes(
+        form.requestedErasureAction
+      )
+    ) {
+      setMessage("Wybierz, czy chcesz usunąć możliwe dane, czy zamknąć całe konto.");
+      return;
+    }
+
+    if (
+      form.requestType === "erasure"
+      && form.requestedErasureAction === "close_account"
+      && erasureEligibility?.can_close_account !== true
+    ) {
+      setMessage("Zamknięcie konta nie jest teraz dostępne. Zakończ wskazane sprawy albo wybierz usunięcie możliwych danych.");
+      return;
+    }
+
     setBusy("submit");
     setMessage("");
 
@@ -5562,6 +6071,10 @@ function PrivacyCenter() {
           p_request_type: form.requestType,
           p_description: form.description.trim(),
           p_preferred_format: form.preferredFormat,
+          p_requested_erasure_action:
+            form.requestType === "erasure"
+              ? form.requestedErasureAction
+              : null,
         }
       );
 
@@ -5571,6 +6084,7 @@ function PrivacyCenter() {
         requestType: "access",
         preferredFormat: "electronic",
         description: "",
+        requestedErasureAction: "",
       });
       setMessage("Wniosek został bezpiecznie zapisany i przekazany administracji IdeaHire.");
       await loadPrivacyRequests();
@@ -5678,6 +6192,22 @@ function PrivacyCenter() {
     }
   }
 
+  const erasureBlockers = Object.entries(
+    erasureEligibility?.blockers || {}
+  ).filter(([, value]) => value === true || Number(value) > 0);
+
+  const erasureEligibilityPending = Boolean(
+    form.requestType === "erasure"
+    && !erasureEligibility
+    && !erasureEligibilityError
+  ) || erasureEligibilityLoading;
+
+  const canSelectAccountClosure = Boolean(
+    !erasureEligibilityPending
+    && !erasureEligibilityError
+    && erasureEligibility?.can_close_account === true
+  );
+
   return (
     <div className="page privacy-center-page">
       <AccountNavbar />
@@ -5728,6 +6258,7 @@ function PrivacyCenter() {
                     setForm((current) => ({
                       ...current,
                       requestType: event.target.value,
+                      requestedErasureAction: "",
                     }))
                   }
                   disabled={Boolean(busy)}
@@ -5778,6 +6309,104 @@ function PrivacyCenter() {
                 <small>{form.description.length}/5000 · minimum 20 znaków</small>
               </label>
 
+              {form.requestType === "erasure" && (
+                <fieldset className="privacy-erasure-choice-fieldset">
+                  <legend>Co dokładnie mamy zrobić?</legend>
+                  <p className="privacy-erasure-choice-intro">
+                    Twój wybór zostanie zapisany we wniosku i administracja nie
+                    będzie mogła samodzielnie zmienić go na inną operację.
+                  </p>
+
+                  <div className="privacy-erasure-choice-grid">
+                    <label className={`privacy-erasure-choice${
+                      form.requestedErasureAction === "minimize_data"
+                        ? " is-selected"
+                        : ""
+                    }`}>
+                      <input
+                        type="radio"
+                        name="requested-erasure-action"
+                        value="minimize_data"
+                        checked={form.requestedErasureAction === "minimize_data"}
+                        onChange={(event) => setForm((current) => ({
+                          ...current,
+                          requestedErasureAction: event.target.value,
+                        }))}
+                        disabled={Boolean(busy)}
+                      />
+                      <span className="privacy-erasure-choice-mark" aria-hidden="true">01</span>
+                      <span>
+                        <strong>Usuń możliwe dane</strong>
+                        <small>{ERASURE_ACTION_DESCRIPTIONS.minimize_data}</small>
+                      </span>
+                    </label>
+
+                    <label className={`privacy-erasure-choice is-danger${
+                      form.requestedErasureAction === "close_account"
+                        ? " is-selected"
+                        : ""
+                    }${!canSelectAccountClosure ? " is-disabled" : ""}`}>
+                      <input
+                        type="radio"
+                        name="requested-erasure-action"
+                        value="close_account"
+                        checked={form.requestedErasureAction === "close_account"}
+                        onChange={(event) => setForm((current) => ({
+                          ...current,
+                          requestedErasureAction: event.target.value,
+                        }))}
+                        disabled={Boolean(busy) || !canSelectAccountClosure}
+                      />
+                      <span className="privacy-erasure-choice-mark" aria-hidden="true">02</span>
+                      <span>
+                        <strong>Usuń dane i zamknij konto</strong>
+                        <small>{ERASURE_ACTION_DESCRIPTIONS.close_account}</small>
+                      </span>
+                    </label>
+                  </div>
+
+                  <div
+                    className={`privacy-erasure-eligibility${
+                      erasureEligibility?.can_close_account
+                        ? " is-ready"
+                        : erasureEligibilityError
+                          ? " is-error"
+                          : " is-blocked"
+                    }`}
+                    aria-live="polite"
+                  >
+                    {erasureEligibilityPending ? (
+                      <p>Sprawdzamy zlecenia, sprawy i rozliczenia konta...</p>
+                    ) : erasureEligibilityError ? (
+                      <>
+                        <strong>Nie można bezpiecznie potwierdzić zamknięcia konta</strong>
+                        <p>{erasureEligibilityError} Możesz nadal wybrać usunięcie możliwych danych.</p>
+                      </>
+                    ) : erasureEligibility?.can_close_account ? (
+                      <>
+                        <strong>Konto spełnia warunki zamknięcia</strong>
+                        <p>Nie znaleźliśmy aktywnych zleceń, spraw ani nierozliczonych transakcji.</p>
+                      </>
+                    ) : (
+                      <>
+                        <strong>Zamknięcie konta jest chwilowo niedostępne</strong>
+                        <p>Najpierw zakończ lub usuń poniższe elementy:</p>
+                        {erasureBlockers.length > 0 && (
+                          <ul>
+                            {erasureBlockers.map(([key, value]) => (
+                              <li key={key}>
+                                {ERASURE_BLOCKER_LABELS[key] || key}
+                                {typeof value === "number" ? `: ${value}` : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </fieldset>
+              )}
+
               {form.requestType === "security_review" ? (
                 <div className="privacy-form-notice is-security-review">
                   <strong>Jak działa analiza ochrony danych</strong>
@@ -5803,7 +6432,20 @@ function PrivacyCenter() {
               <button
                 type="submit"
                 className="privacy-primary-button"
-                disabled={Boolean(busy) || form.description.trim().length < 20}
+                disabled={
+                  Boolean(busy)
+                  || form.description.trim().length < 20
+                  || (
+                    form.requestType === "erasure"
+                    && !["minimize_data", "close_account"].includes(
+                      form.requestedErasureAction
+                    )
+                  )
+                  || (
+                    form.requestedErasureAction === "close_account"
+                    && !canSelectAccountClosure
+                  )
+                }
               >
                 {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek →"}
               </button>
@@ -5882,6 +6524,24 @@ function PrivacyCenter() {
                     </div>
 
                     <p className="privacy-request-description">{request.description}</p>
+
+                    {request.request_type === "erasure" && (
+                      <div className={`privacy-erasure-requested-action is-${
+                        request.requested_erasure_action || "legacy"
+                      }`}>
+                        <span>Wybrana operacja</span>
+                        <strong>
+                          {request.requested_erasure_action
+                            ? ERASURE_ACTION_LABELS[request.requested_erasure_action]
+                            : "Starszy wniosek — wybór nie został zapisany"}
+                        </strong>
+                        <p>
+                          {request.requested_erasure_action
+                            ? ERASURE_ACTION_DESCRIPTIONS[request.requested_erasure_action]
+                            : "Administracja musi potwierdzić zakres na podstawie treści i historii tego wniosku."}
+                        </p>
+                      </div>
+                    )}
 
                     {securityReviewProgress && (
                       <div className="privacy-security-progress">
@@ -13766,11 +14426,10 @@ function DisputeDetails() {
   const [appealBody, setAppealBody] = useState("");
   const [adminNote, setAdminNote] = useState("");
   const [adminNotePublic, setAdminNotePublic] = useState(true);
-  const [decisionForm, setDecisionForm] = useState({
-    outcome: "",
-    amount: "",
-    rationale: "",
-  });
+  const [decisionForm, setDecisionForm] = useState(
+    createEmptyDisputeDecisionForm
+  );
+  const [decisionMessage, setDecisionMessage] = useState("");
 
   const isParticipant = Boolean(
     dispute &&
@@ -14322,15 +14981,18 @@ function DisputeDetails() {
 
   async function handleDecision(event) {
     event.preventDefault();
+    if (busy) return;
+
     const rationale = decisionForm.rationale.trim();
+    setDecisionMessage("");
 
     if (!decisionForm.outcome) {
-      setPageMessage("Wybierz wynik sprawy.");
+      setDecisionMessage("Wybierz wynik sprawy.");
       return;
     }
 
     if (rationale.length < 20) {
-      setPageMessage("Uzasadnienie decyzji musi mieć co najmniej 20 znaków.");
+      setDecisionMessage("Uzasadnienie decyzji musi mieć co najmniej 20 znaków.");
       return;
     }
 
@@ -14344,29 +15006,113 @@ function DisputeDetails() {
         amount <= 0 ||
         amount >= Number(dispute.price_amount_snapshot)
       ) {
-        setPageMessage(
+        setDecisionMessage(
           "Częściowy zwrot musi być większy od 0 i mniejszy od ceny zlecenia."
         );
         return;
       }
     }
 
-    const completed = await runAction(
-      "decision",
-      async () => {
-        const { error } = await supabase.rpc("admin_issue_dispute_decision", {
+    const applyRestriction = Boolean(decisionForm.applyRestriction);
+    const maximumDuration = staffRole === "owner" ? 365 : 30;
+    const durationDays = Number(decisionForm.durationDays);
+
+    if (applyRestriction) {
+      if (![dispute.client_id, dispute.contractor_id].includes(
+        decisionForm.moderationTargetUserId
+      )) {
+        setDecisionMessage("Wybierz stronę sporu, której ma dotyczyć zawieszenie.");
+        return;
+      }
+
+      if (
+        !Number.isInteger(durationDays)
+        || durationDays < 1
+        || durationDays > maximumDuration
+      ) {
+        setDecisionMessage(
+          `Wybierz pełną liczbę dni od 1 do ${maximumDuration}.`
+        );
+        return;
+      }
+
+      if (decisionForm.publicReason.trim().length < 50) {
+        setDecisionMessage(
+          "Uzasadnienie zawieszenia widoczne dla użytkownika musi mieć co najmniej 50 znaków."
+        );
+        return;
+      }
+
+      if (decisionForm.termsReference.trim().length < 10) {
+        setDecisionMessage("Wskaż konkretny punkt regulaminu dla zawieszenia.");
+        return;
+      }
+
+      if (decisionForm.internalNote.trim().length < 20) {
+        setDecisionMessage(
+          "Notatka dowodowa dotycząca zawieszenia musi mieć co najmniej 20 znaków."
+        );
+        return;
+      }
+
+      if (!window.confirm(
+        "Decyzja w sporze i czasowe zawieszenie konta zostaną zapisane razem. Czy potwierdzasz ręczną analizę dowodów i proporcjonalność zawieszenia?"
+      )) return;
+    }
+
+    setBusy("decision");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "admin_issue_dispute_decision_with_moderation",
+        {
           p_dispute_id: id,
           p_outcome: decisionForm.outcome,
           p_rationale: rationale,
           p_amount: amount,
-        });
-        if (error) throw error;
-      },
-      "Decyzja została zapisana i przekazana obu stronom."
-    );
+          p_apply_restriction: applyRestriction,
+          p_moderation_target_user_id: applyRestriction
+            ? decisionForm.moderationTargetUserId
+            : null,
+          p_duration_days: applyRestriction ? durationDays : null,
+          p_reason_code: applyRestriction ? decisionForm.reasonCode : null,
+          p_public_reason: applyRestriction
+            ? decisionForm.publicReason.trim()
+            : null,
+          p_terms_reference: applyRestriction
+            ? decisionForm.termsReference.trim()
+            : null,
+          p_legal_basis: applyRestriction
+            ? decisionForm.legalBasis.trim() || null
+            : null,
+          p_internal_note: applyRestriction
+            ? decisionForm.internalNote.trim()
+            : null,
+        }
+      );
 
-    if (completed) {
-      setDecisionForm({ outcome: "", amount: "", rationale: "" });
+      if (error) throw error;
+      if (!data?.decision_id) {
+        throw new Error("Baza nie potwierdziła utworzenia decyzji.");
+      }
+      if (applyRestriction && !data?.moderation_case_id) {
+        throw new Error("Baza nie potwierdziła utworzenia zawieszenia.");
+      }
+
+      setDecisionForm(createEmptyDisputeDecisionForm());
+      setDecisionMessage(
+        applyRestriction
+          ? "Decyzja została zapisana, konto zawieszone, a użytkownik otrzymał zawiadomienie."
+          : "Decyzja została zapisana i przekazana obu stronom."
+      );
+      await loadCase(false);
+    } catch (error) {
+      setDecisionMessage(cleanSupabaseError(
+        error,
+        "Nie udało się zapisać decyzji. Żadna część operacji nie została wykonana."
+      ));
+    } finally {
+      setBusy("");
     }
   }
 
@@ -15022,17 +15768,287 @@ function DisputeDetails() {
                       maxLength={10000}
                     />
                   </label>
+
+                  <fieldset className="dispute-moderation-box">
+                    <legend>Odpowiedzialność jednej ze stron</legend>
+                    <label className="dispute-check-row dispute-moderation-toggle">
+                      <input
+                        type="checkbox"
+                        checked={decisionForm.applyRestriction}
+                        onChange={(event) =>
+                          setDecisionForm((current) => ({
+                            ...current,
+                            applyRestriction: event.target.checked,
+                            moderationTargetUserId: event.target.checked
+                              ? current.moderationTargetUserId
+                              : "",
+                          }))
+                        }
+                        disabled={Boolean(busy)}
+                      />
+                      <span>
+                        <strong>Dodaj czasowe zawieszenie konta</strong>
+                        <small>
+                          Zaznacz tylko wtedy, gdy przeanalizowane zachowanie
+                          stanowi również naruszenie Regulaminu IdeaHire.
+                        </small>
+                      </span>
+                    </label>
+
+                    {decisionForm.applyRestriction && (
+                      <div className="dispute-moderation-fields">
+                        <div className="moderation-form-grid">
+                          <label>
+                            Zawieszana strona sporu
+                            <select
+                              value={decisionForm.moderationTargetUserId}
+                              onChange={(event) =>
+                                setDecisionForm((current) => ({
+                                  ...current,
+                                  moderationTargetUserId: event.target.value,
+                                }))
+                              }
+                              disabled={Boolean(busy)}
+                            >
+                              <option value="">Wybierz użytkownika</option>
+                              <option value={dispute.client_id}>
+                                Zleceniodawca — {getDisputeProfileName(
+                                  profiles[dispute.client_id],
+                                  "Użytkownik"
+                                )}
+                              </option>
+                              <option value={dispute.contractor_id}>
+                                Wykonawca — {getDisputeProfileName(
+                                  profiles[dispute.contractor_id],
+                                  "Użytkownik"
+                                )}
+                              </option>
+                            </select>
+                          </label>
+
+                          <div className="moderation-duration-control">
+                            <label>
+                              Czas zawieszenia w dniach
+                              <input
+                                type="number"
+                                min="1"
+                                max={staffRole === "owner" ? "365" : "30"}
+                                value={decisionForm.durationDays}
+                                onChange={(event) =>
+                                  setDecisionForm((current) => ({
+                                    ...current,
+                                    durationDays: event.target.value,
+                                  }))
+                                }
+                                disabled={Boolean(busy)}
+                              />
+                            </label>
+                            <div
+                              className="moderation-duration-presets"
+                              aria-label="Szybki wybór czasu zawieszenia"
+                            >
+                              {[
+                                ...MODERATION_DURATION_PRESETS,
+                                ...(staffRole === "owner" ? [90, 180, 365] : []),
+                              ].map((days) => (
+                                <button
+                                  type="button"
+                                  className={
+                                    Number(decisionForm.durationDays) === days
+                                      ? "is-selected"
+                                      : ""
+                                  }
+                                  onClick={() =>
+                                    setDecisionForm((current) => ({
+                                      ...current,
+                                      durationDays: String(days),
+                                    }))
+                                  }
+                                  disabled={Boolean(busy)}
+                                  key={days}
+                                >
+                                  {days} {days === 1 ? "dzień" : "dni"}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <label>
+                            Kategoria naruszenia
+                            <select
+                              value={decisionForm.reasonCode}
+                              onChange={(event) => {
+                                const reasonCode = event.target.value;
+                                const previousSuggestedReference =
+                                  MODERATION_CONFIRMED_TERMS_REFERENCES[
+                                    decisionForm.reasonCode
+                                  ];
+                                const suggestedReference =
+                                  MODERATION_CONFIRMED_TERMS_REFERENCES[reasonCode];
+                                const canReplaceReference =
+                                  !decisionForm.termsReference.trim()
+                                  || decisionForm.termsReference
+                                    === previousSuggestedReference;
+
+                                setDecisionForm((current) => ({
+                                  ...current,
+                                  reasonCode,
+                                  termsReference: canReplaceReference
+                                    ? suggestedReference || ""
+                                    : current.termsReference,
+                                }));
+                              }}
+                              disabled={Boolean(busy)}
+                            >
+                              {Object.entries(MODERATION_REASON_LABELS).map(
+                                ([value, label]) => (
+                                  <option value={value} key={value}>{label}</option>
+                                )
+                              )}
+                            </select>
+                          </label>
+
+                          <label>
+                            Podstawa regulaminowa
+                            <input
+                              value={decisionForm.termsReference}
+                              onChange={(event) =>
+                                setDecisionForm((current) => ({
+                                  ...current,
+                                  termsReference: event.target.value,
+                                }))
+                              }
+                              minLength={10}
+                              maxLength={1000}
+                              placeholder="Np. Regulamin IdeaHire § 27 pkt 107"
+                              disabled={Boolean(busy)}
+                            />
+                          </label>
+                        </div>
+
+                        <div className="moderation-reason-guidance">
+                          <strong>Zakres ręcznej analizy</strong>
+                          <p>
+                            {MODERATION_REASON_GUIDANCE[
+                              decisionForm.reasonCode
+                            ]}
+                          </p>
+                        </div>
+
+                        <label>
+                          Uzasadnienie zawieszenia widoczne dla użytkownika
+                          <textarea
+                            value={decisionForm.publicReason}
+                            onChange={(event) =>
+                              setDecisionForm((current) => ({
+                                ...current,
+                                publicReason: event.target.value,
+                              }))
+                            }
+                            minLength={50}
+                            maxLength={4000}
+                            rows={5}
+                            placeholder="Opisz konkretne zdarzenia, daty, wcześniejsze ostrzeżenia oraz dlaczego łagodniejszy środek jest niewystarczający."
+                            disabled={Boolean(busy)}
+                          />
+                        </label>
+
+                        <div className="moderation-form-grid">
+                          <label>
+                            Podstawa prawna — gdy dotyczy
+                            <input
+                              value={decisionForm.legalBasis}
+                              onChange={(event) =>
+                                setDecisionForm((current) => ({
+                                  ...current,
+                                  legalBasis: event.target.value,
+                                }))
+                              }
+                              maxLength={1000}
+                              placeholder="Pozostaw puste, jeśli decyzja opiera się na regulaminie"
+                              disabled={Boolean(busy)}
+                            />
+                          </label>
+
+                          <label>
+                            Wewnętrzna notatka dowodowa
+                            <textarea
+                              value={decisionForm.internalNote}
+                              onChange={(event) =>
+                                setDecisionForm((current) => ({
+                                  ...current,
+                                  internalNote: event.target.value,
+                                }))
+                              }
+                              minLength={20}
+                              maxLength={5000}
+                              rows={4}
+                              placeholder="Wymień dowody przeanalizowane w tej sprawie."
+                              disabled={Boolean(busy)}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </fieldset>
+
                   <p className="dispute-admin-warning">
-                    Decyzja zostanie zapisana w historii i przekazana obu stronom. Operacje finansowe pozostają wyłączone do czasu podłączenia operatora płatności.
+                    Decyzja zostanie zapisana w historii i przekazana obu stronom.
+                    Zawieszenie jest osobnym środkiem i zostanie dodane tylko po
+                    zaznaczeniu odpowiedniej opcji. Operacje finansowe pozostają
+                    wyłączone do czasu podłączenia operatora płatności.
                   </p>
+                  {decisionMessage && (
+                    <p
+                      className={
+                        "dispute-decision-message "
+                        + (
+                          decisionMessage.startsWith("Decyzja została")
+                            ? "is-success"
+                            : "is-error"
+                        )
+                      }
+                      role="status"
+                    >
+                      {decisionMessage}
+                    </p>
+                  )}
                   <button
                     type="submit"
                     className="dispute-danger-button"
                     disabled={Boolean(busy)}
                   >
-                    {busy === "decision" ? "Zapisywanie decyzji..." : "Wydaj decyzję"}
+                    {busy === "decision"
+                      ? "Zapisywanie decyzji..."
+                      : decisionForm.applyRestriction
+                        ? "Wydaj decyzję i zawieś konto"
+                        : "Wydaj decyzję"}
                   </button>
                 </form>
+
+                <div className="dispute-moderation-management">
+                  <div>
+                    <strong>Zarządzanie ograniczeniami stron</strong>
+                    <p>
+                      Otwórz rejestr moderacji, aby sprawdzić, zmienić albo zdjąć
+                      aktywne zawieszenie konkretnego użytkownika.
+                    </p>
+                  </div>
+                  <div className="dispute-moderation-links">
+                    <Link
+                      className="dispute-secondary-button"
+                      to={"/admin/moderation?user=" + dispute.client_id}
+                    >
+                      Moderacja zleceniodawcy
+                    </Link>
+                    <Link
+                      className="dispute-secondary-button"
+                      to={"/admin/moderation?user=" + dispute.contractor_id}
+                    >
+                      Moderacja wykonawcy
+                    </Link>
+                  </div>
+                </div>
 
                 {dispute.status === "decision_issued" &&
                   dispute.appeal_deadline_at &&
@@ -15623,6 +16639,11 @@ function AdminModeration() {
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [appealNotes, setAppealNotes] = useState({});
+  const [restrictionEditor, setRestrictionEditor] = useState({
+    caseId: "",
+    totalDurationDays: "",
+    reason: "",
+  });
   const [form, setForm] = useState({
     decisionType: "temporary_suspension",
     durationDays: "7",
@@ -15961,6 +16982,87 @@ function AdminModeration() {
     }
   }
 
+  function openRestrictionEditor(moderationCase) {
+    if (
+      moderationCase.decision_type !== "temporary_suspension"
+      || !moderationCase.ends_at
+    ) return;
+
+    const effectiveAt = new Date(moderationCase.effective_at).getTime();
+    const endsAt = new Date(moderationCase.ends_at).getTime();
+    const totalDurationDays = Math.max(
+      1,
+      Math.round((endsAt - effectiveAt) / 86400000)
+    );
+
+    setRestrictionEditor({
+      caseId: moderationCase.id,
+      totalDurationDays: String(totalDurationDays),
+      reason: "",
+    });
+    setMessage("");
+  }
+
+  async function handleUpdateRestriction(event) {
+    event.preventDefault();
+    if (!restrictionEditor.caseId || busy) return;
+
+    const totalDurationDays = Number(restrictionEditor.totalDurationDays);
+    const maximumDuration = staffRole === "owner" ? 365 : 30;
+    const reason = restrictionEditor.reason.trim();
+
+    if (
+      !Number.isInteger(totalDurationDays)
+      || totalDurationDays < 1
+      || totalDurationDays > maximumDuration
+    ) {
+      setMessage(
+        "Łączny okres zawieszenia musi wynosić od 1 do "
+          + maximumDuration
+          + " dni."
+      );
+      return;
+    }
+
+    if (reason.length < 30) {
+      setMessage("Uzasadnienie zmiany musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    setBusy("update:" + restrictionEditor.caseId);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "admin_update_ideahire_temporary_restriction",
+        {
+          p_case_id: restrictionEditor.caseId,
+          p_total_duration_days: totalDurationDays,
+          p_change_reason: reason,
+        }
+      );
+
+      if (error) throw error;
+
+      setRestrictionEditor({
+        caseId: "",
+        totalDurationDays: "",
+        reason: "",
+      });
+      setMessage(
+        "Czas zawieszenia został zmieniony, zapisany w historii i przekazany użytkownikowi."
+      );
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się zmienić czasu zawieszenia."
+      ));
+    } finally {
+      setBusy("");
+    }
+  }
+
   function updateAppealNote(appealId, value) {
     setAppealNotes((current) => ({ ...current, [appealId]: value }));
   }
@@ -16006,6 +17108,13 @@ function AdminModeration() {
     (item) => item.target_user_id === selectedUserId
       && ["scheduled", "active"].includes(item.status)
       && (!item.ends_at || new Date(item.ends_at).getTime() > Date.now())
+  );
+  const canManageSelectedOpenCase = Boolean(
+    selectedOpenCase
+      && (
+        staffRole === "owner"
+        || selectedOpenCase.decided_by === user.id
+      )
   );
   const openAppeals = appeals.filter((item) =>
     ["submitted", "in_review"].includes(item.status)
@@ -16107,14 +17216,108 @@ function AdminModeration() {
               <div className="moderation-active-case">
                 <strong>To konto ma już aktywną lub zaplanowaną decyzję</strong>
                 <p>{notices[selectedOpenCase.id]?.public_reason || selectedOpenCase.public_reason}</p>
-                <button
-                  type="button"
-                  className="privacy-secondary-button"
-                  onClick={() => handleLiftRestriction(selectedOpenCase.id)}
-                  disabled={Boolean(busy)}
-                >
-                  {busy === `lift:${selectedOpenCase.id}` ? "Zapisywanie..." : "Zdejmij ograniczenie"}
-                </button>
+                {selectedOpenCase.decision_type === "temporary_suspension"
+                  && canManageSelectedOpenCase && (
+                  <button
+                    type="button"
+                    className="privacy-secondary-button"
+                    onClick={() => openRestrictionEditor(selectedOpenCase)}
+                    disabled={Boolean(busy)}
+                  >
+                    Zmień czas zawieszenia
+                  </button>
+                )}
+
+                {canManageSelectedOpenCase
+                  && restrictionEditor.caseId === selectedOpenCase.id && (
+                  <form
+                    className="moderation-adjustment-form"
+                    onSubmit={handleUpdateRestriction}
+                  >
+                    <div>
+                      <span className="section-label">
+                        Zmiana istniejącej decyzji
+                      </span>
+                      <strong>Ustaw nowy łączny czas zawieszenia</strong>
+                      <p>
+                        Okres jest liczony od pierwotnego rozpoczęcia decyzji.
+                        Zmiana zostanie pokazana użytkownikowi i zapisana
+                        w historii administracyjnej.
+                      </p>
+                    </div>
+                    <label>
+                      Łączna liczba dni
+                      <input
+                        type="number"
+                        min="1"
+                        max={staffRole === "owner" ? "365" : "30"}
+                        value={restrictionEditor.totalDurationDays}
+                        onChange={(event) =>
+                          setRestrictionEditor((current) => ({
+                            ...current,
+                            totalDurationDays: event.target.value,
+                          }))
+                        }
+                        disabled={Boolean(busy)}
+                      />
+                    </label>
+                    <label>
+                      Uzasadnienie zmiany
+                      <textarea
+                        value={restrictionEditor.reason}
+                        onChange={(event) =>
+                          setRestrictionEditor((current) => ({
+                            ...current,
+                            reason: event.target.value,
+                          }))
+                        }
+                        minLength={30}
+                        maxLength={2000}
+                        rows={4}
+                        placeholder="Wyjaśnij konkretnie, dlaczego okres został skrócony albo wydłużony."
+                        disabled={Boolean(busy)}
+                      />
+                    </label>
+                    <div className="moderation-adjustment-actions">
+                      <button
+                        type="button"
+                        className="privacy-secondary-button"
+                        onClick={() => setRestrictionEditor({
+                          caseId: "",
+                          totalDurationDays: "",
+                          reason: "",
+                        })}
+                        disabled={Boolean(busy)}
+                      >
+                        Anuluj
+                      </button>
+                      <button
+                        type="submit"
+                        className="privacy-primary-button"
+                        disabled={Boolean(busy)}
+                      >
+                        {busy === "update:" + selectedOpenCase.id
+                          ? "Zapisywanie zmiany..."
+                          : "Zapisz nowy czas"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+                {canManageSelectedOpenCase ? (
+                  <button
+                    type="button"
+                    className="privacy-secondary-button"
+                    onClick={() => handleLiftRestriction(selectedOpenCase.id)}
+                    disabled={Boolean(busy)}
+                  >
+                    {busy === `lift:${selectedOpenCase.id}` ? "Zapisywanie..." : "Zdejmij ograniczenie"}
+                  </button>
+                ) : (
+                  <small>
+                    Tę decyzję może zmienić administrator, który ją wydał,
+                    albo owner.
+                  </small>
+                )}
               </div>
             ) : (
               <form className="moderation-decision-form" onSubmit={handleImposeRestriction}>
@@ -16187,7 +17390,22 @@ function AdminModeration() {
                     Kategoria powodu
                     <select
                       value={form.reasonCode}
-                      onChange={(event) => updateModerationForm({ reasonCode: event.target.value })}
+                      onChange={(event) => {
+                        const reasonCode = event.target.value;
+                        const previousSuggestedReference =
+                          MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode];
+                        const suggestedReference =
+                          MODERATION_CONFIRMED_TERMS_REFERENCES[reasonCode];
+                        const canReplaceReference = !form.termsReference.trim()
+                          || form.termsReference === previousSuggestedReference;
+
+                        updateModerationForm({
+                          reasonCode,
+                          termsReference: canReplaceReference
+                            ? suggestedReference || ""
+                            : form.termsReference,
+                        });
+                      }}
                     >
                       {Object.entries(MODERATION_REASON_LABELS).map(([value, label]) => (
                         <option value={value} key={value}>{label}</option>
@@ -16218,6 +17436,33 @@ function AdminModeration() {
                 <div className="moderation-reason-guidance">
                   <strong>Co administrator musi ustalić dla wybranej kategorii</strong>
                   <p>{MODERATION_REASON_GUIDANCE[form.reasonCode]}</p>
+                  {MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode] && (
+                    <div className="moderation-terms-shortcut">
+                      <span>
+                        Potwierdzona podstawa w aktualnym Regulaminie v0.9:
+                        {" "}
+                        <strong>
+                          {MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode]}
+                        </strong>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateModerationForm({
+                          termsReference:
+                            MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode],
+                        })}
+                        disabled={
+                          form.termsReference
+                            === MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode]
+                        }
+                      >
+                        {form.termsReference
+                          === MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode]
+                          ? "Podstawa ustawiona"
+                          : "Wstaw § 27 pkt 107"}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <label>
@@ -16240,7 +17485,7 @@ function AdminModeration() {
                       onChange={(event) => updateModerationForm({ termsReference: event.target.value })}
                       minLength={10}
                       maxLength={1000}
-                      placeholder="Np. Regulamin IdeaHire § 8 ust. 3"
+                      placeholder="Np. Regulamin IdeaHire § 27 pkt 107"
                     />
                   </label>
                   <label>
@@ -16444,7 +17689,7 @@ function AdminUserPrivacyAccount() {
           supabase
             .from("ideahire_privacy_requests")
             .select(
-              "id, request_number, requester_user_id, request_type, description, status, identity_status, assigned_admin_id, submitted_at, due_at, extended_due_at, decision_summary, completed_at"
+              "id, request_number, requester_user_id, request_type, requested_erasure_action, description, status, identity_status, assigned_admin_id, submitted_at, due_at, extended_due_at, decision_summary, completed_at"
             )
             .eq("requester_user_id", userId)
             .eq("request_type", "erasure")
@@ -16612,6 +17857,14 @@ function AdminUserPrivacyAccount() {
     event.preventDefault();
     if (!currentRequest || !dialogAction) return;
 
+    if (
+      currentRequest.requested_erasure_action
+      && currentRequest.requested_erasure_action !== dialogAction
+    ) {
+      setMessage("Operacja musi być zgodna z zakresem wybranym przez użytkownika.");
+      return;
+    }
+
     if (legalAssessment.trim().length < 50) {
       setMessage("Ocena prawna musi mieć co najmniej 50 znaków.");
       return;
@@ -16657,6 +17910,14 @@ function AdminUserPrivacyAccount() {
 
   async function handleAuthorizeErasure() {
     if (!currentCase) return;
+
+    if (
+      currentCase.action_type === "close_account"
+      && inventory?.execution_blocked
+    ) {
+      setMessage("Konta nie można teraz zamknąć. Najpierw zakończ wszystkie przeszkody pokazane w panelu.");
+      return;
+    }
 
     if (ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE") {
       setMessage("Wpisz dokładnie: ZATWIERDZAM USUNIECIE");
@@ -16745,6 +18006,10 @@ function AdminUserPrivacyAccount() {
 
   const lifecycleStatus = lifecycle?.status || "active";
   const accountName = profile?.name?.trim() || "Użytkownik IdeaHire";
+  const requestedErasureAction = currentRequest?.requested_erasure_action || "";
+  const isLegacyErasureRequest = Boolean(
+    currentRequest && !requestedErasureAction
+  );
   const actionDisabled = !canManage
     || !currentRequest
     || !isPrivacyRequestOpen(currentRequest.status)
@@ -16795,7 +18060,10 @@ function AdminUserPrivacyAccount() {
                     <button
                       type="button"
                       onClick={() => setDialogAction("minimize_data")}
-                      disabled={actionDisabled}
+                      disabled={
+                        actionDisabled
+                        || requestedErasureAction === "close_account"
+                      }
                     >
                       <span>Usuń dane możliwe do usunięcia</span>
                       <small>Konto nie zostanie usunięte z Auth</small>
@@ -16804,9 +18072,13 @@ function AdminUserPrivacyAccount() {
                       type="button"
                       className="is-danger"
                       onClick={() => setDialogAction("close_account")}
-                      disabled={actionDisabled || Boolean(inventory?.execution_blocked)}
+                      disabled={
+                        actionDisabled
+                        || requestedErasureAction === "minimize_data"
+                        || Boolean(inventory?.execution_blocked)
+                      }
                     >
-                      <span>Zamknij konto użytkownika</span>
+                      <span>Usuń dane i zamknij konto</span>
                       <small>Minimalizacja danych i wyłączenie logowania</small>
                     </button>
                   </div>
@@ -16831,6 +18103,21 @@ function AdminUserPrivacyAccount() {
                 <div>
                   <span className="section-label">Podstawa operacji</span>
                   <h2>{formatPrivacyRequestNumber(currentRequest?.request_number)}</h2>
+                  <div className={`privacy-erasure-requested-action is-${
+                    requestedErasureAction || "legacy"
+                  }`}>
+                    <span>Użytkownik wybrał</span>
+                    <strong>
+                      {requestedErasureAction
+                        ? ERASURE_ACTION_LABELS[requestedErasureAction]
+                        : "Starszy wniosek — brak zapisanego wyboru"}
+                    </strong>
+                    <p>
+                      {requestedErasureAction
+                        ? "Przygotowana operacja musi być dokładnie zgodna z tym wyborem."
+                        : "Potwierdź zakres na podstawie treści i historii wniosku. Dotyczy to wyłącznie starszych spraw."}
+                    </p>
+                  </div>
                 </div>
                 {requests.length > 1 && (
                   <label>
@@ -16856,6 +18143,17 @@ function AdminUserPrivacyAccount() {
                 <p>
                   Najpierw przejmij wniosek w kolejce. Wgląd i wykonanie ma
                   prowadzący administrator oraz owner.
+                </p>
+              </section>
+            )}
+
+            {isLegacyErasureRequest && canManage && (
+              <section className="erasure-account-notice is-warning">
+                <strong>Starszy wniosek bez technicznie zapisanego zakresu</strong>
+                <p>
+                  Przed przygotowaniem operacji porównaj treść i historię wniosku.
+                  Wszystkie nowe wnioski zapisują już wybór użytkownika i blokują
+                  wykonanie innej operacji.
                 </p>
               </section>
             )}
@@ -17020,7 +18318,14 @@ function AdminUserPrivacyAccount() {
                         type="button"
                         className="erasure-danger-button"
                         onClick={handleAuthorizeErasure}
-                        disabled={Boolean(busy) || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"}
+                        disabled={
+                          Boolean(busy)
+                          || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"
+                          || (
+                            currentCase.action_type === "close_account"
+                            && Boolean(inventory?.execution_blocked)
+                          )
+                        }
                       >
                         {busy === "authorize"
                           ? "Zatwierdzanie i wykonywanie..."
@@ -17135,6 +18440,14 @@ function AdminUserPrivacyAccount() {
               podstawę realizacji wniosku oraz dlaczego konkretne rekordy muszą
               pozostać ograniczone przez określony czas.
             </p>
+
+            {requestedErasureAction && (
+              <div className="privacy-erasure-requested-action is-confirmation">
+                <span>Kontrola zgodności z żądaniem użytkownika</span>
+                <strong>{ERASURE_ACTION_LABELS[requestedErasureAction]}</strong>
+                <p>Ten formularz przygotuje dokładnie operację wybraną we wniosku.</p>
+              </div>
+            )}
 
             {dialogAction === "close_account" && inventory?.execution_blocked && (
               <div className="erasure-account-notice is-danger">
@@ -18031,12 +19344,29 @@ function AdminPrivacyRequests() {
                     </div>
 
                     {request.request_type === "erasure" && (
-                      <Link
-                        className="privacy-admin-account-link"
-                        to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
-                      >
-                        Otwórz konto i kontrolę usunięcia danych →
-                      </Link>
+                      <>
+                        <div className={`privacy-erasure-requested-action is-${
+                          request.requested_erasure_action || "legacy"
+                        }`}>
+                          <span>Żądanie użytkownika</span>
+                          <strong>
+                            {request.requested_erasure_action
+                              ? ERASURE_ACTION_LABELS[request.requested_erasure_action]
+                              : "Starszy wniosek — wybór nie został zapisany"}
+                          </strong>
+                          <p>
+                            {request.requested_erasure_action
+                              ? ERASURE_ACTION_DESCRIPTIONS[request.requested_erasure_action]
+                              : "Przed operacją ustal zakres z treści i historii wniosku."}
+                          </p>
+                        </div>
+                        <Link
+                          className="privacy-admin-account-link"
+                          to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
+                        >
+                          Otwórz konto i kontrolę usunięcia danych →
+                        </Link>
+                      </>
                     )}
 
                     <p className="privacy-request-description">{request.description}</p>
@@ -19024,6 +20354,7 @@ function Home() {
   const {
     isRestricted,
     loading: restrictionLoading,
+    errorMessage: restrictionError,
   } = useAccountRestriction();
 
   if (
@@ -19042,7 +20373,7 @@ function Home() {
     );
   }
 
-  if (user?.id && isRestricted) {
+  if (user?.id && (isRestricted || restrictionError)) {
     return <Navigate to="/account-status" replace />;
   }
 
@@ -19302,7 +20633,9 @@ function Router() {
             path="/disputes/:id"
             element={
               <ProtectedRoute>
-                <DisputeDetails />
+                <RestrictedAccountRoute>
+                  <DisputeDetails />
+                </RestrictedAccountRoute>
               </ProtectedRoute>
             }
           />
