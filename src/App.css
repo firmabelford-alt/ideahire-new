@@ -12,6 +12,285 @@
 }
 
 /* =========================================================
+   RODO — WYBÓR USUNIĘCIA DANYCH LUB ZAMKNIĘCIA KONTA
+========================================================= */
+
+.privacy-erasure-choice-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #d7ddd6;
+  border-radius: 17px;
+  background: #f8faf7;
+}
+
+.privacy-erasure-choice-fieldset legend {
+  padding: 0 7px;
+  color: #29352d;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.privacy-erasure-choice-intro {
+  margin: 0 0 14px;
+  color: #687269;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.privacy-erasure-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.privacy-erasure-choice {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 11px !important;
+  align-items: start;
+  padding: 15px;
+  border: 1px solid #d7ddd6;
+  border-radius: 14px;
+  background: #fff;
+  color: #303a32;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.privacy-erasure-choice:hover:not(.is-disabled) {
+  border-color: #8da393;
+  box-shadow: 0 8px 22px rgba(43, 68, 49, 0.08);
+}
+
+.privacy-erasure-choice.is-selected {
+  border-color: #5f8068;
+  background: #eef6f0;
+  box-shadow: inset 0 0 0 1px #5f8068;
+}
+
+.privacy-erasure-choice.is-danger.is-selected {
+  border-color: #a04c45;
+  background: #fff2f0;
+  box-shadow: inset 0 0 0 1px #a04c45;
+}
+
+.privacy-erasure-choice.is-disabled {
+  background: #f1f2ef;
+  cursor: not-allowed;
+  opacity: 0.64;
+}
+
+.privacy-erasure-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.privacy-erasure-choice-mark {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #e5ece6;
+  color: #496050;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.privacy-erasure-choice.is-danger .privacy-erasure-choice-mark {
+  background: #f3e5e3;
+  color: #8c443e;
+}
+
+.privacy-erasure-choice strong,
+.privacy-erasure-choice small {
+  display: block;
+}
+
+.privacy-erasure-choice strong {
+  margin-bottom: 5px;
+  color: #29332b;
+  font-size: 12px;
+}
+
+.privacy-erasure-choice small {
+  color: #6d766f;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.privacy-erasure-eligibility {
+  margin-top: 12px;
+  padding: 13px 15px;
+  border: 1px solid #dfc985;
+  border-radius: 13px;
+  background: #fff9e8;
+  color: #69561c;
+}
+
+.privacy-erasure-eligibility.is-ready {
+  border-color: #afd0b5;
+  background: #edf8ef;
+  color: #315d39;
+}
+
+.privacy-erasure-eligibility.is-error {
+  border-color: #dfaaa5;
+  background: #fff1ef;
+  color: #7b3934;
+}
+
+.privacy-erasure-eligibility strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.privacy-erasure-eligibility p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.privacy-erasure-eligibility ul {
+  display: grid;
+  gap: 5px;
+  margin: 9px 0 0;
+  padding-left: 18px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.privacy-erasure-requested-action {
+  display: grid;
+  gap: 4px;
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid #bdd2c1;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #eef7f0, #fbfdfb);
+  color: #304c36;
+}
+
+.privacy-erasure-requested-action.is-close_account {
+  border-color: #dfaaa5;
+  background: linear-gradient(135deg, #fff0ee, #fffaf9);
+  color: #71342f;
+}
+
+.privacy-erasure-requested-action.is-legacy {
+  border-color: #dec77e;
+  background: #fff9e7;
+  color: #695719;
+}
+
+.privacy-erasure-requested-action.is-confirmation {
+  border-color: #a9c7af;
+  background: #edf7ef;
+}
+
+.privacy-erasure-requested-action > span {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.privacy-erasure-requested-action > strong {
+  font-size: 13px;
+}
+
+.privacy-erasure-requested-action > p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.erasure-request-selector .privacy-erasure-requested-action {
+  max-width: 620px;
+  margin-bottom: 0;
+}
+
+html[data-theme="dark"] .privacy-erasure-choice-fieldset,
+html[data-theme="dark"] .privacy-erasure-choice,
+html[data-theme="dark"] .privacy-erasure-requested-action {
+  border-color: #3d4940;
+  background: #252d27;
+  color: #dce7de;
+}
+
+html[data-theme="dark"] .privacy-erasure-choice-fieldset legend,
+html[data-theme="dark"] .privacy-erasure-choice strong,
+html[data-theme="dark"] .privacy-erasure-requested-action > strong {
+  color: #edf3ee;
+}
+
+html[data-theme="dark"] .privacy-erasure-choice-intro,
+html[data-theme="dark"] .privacy-erasure-choice small {
+  color: #aeb9b0;
+}
+
+html[data-theme="dark"] .privacy-erasure-choice.is-selected,
+html[data-theme="dark"] .privacy-erasure-requested-action.is-minimize_data,
+html[data-theme="dark"] .privacy-erasure-requested-action.is-confirmation {
+  border-color: #66866e;
+  background: #26372a;
+}
+
+html[data-theme="dark"] .privacy-erasure-choice.is-danger.is-selected,
+html[data-theme="dark"] .privacy-erasure-requested-action.is-close_account {
+  border-color: #8e514b;
+  background: #3b2927;
+}
+
+html[data-theme="dark"] .privacy-erasure-choice.is-disabled {
+  background: #292d2a;
+}
+
+html[data-theme="dark"] .privacy-erasure-eligibility {
+  border-color: #685e36;
+  background: #332f21;
+  color: #e2d8b5;
+}
+
+html[data-theme="dark"] .privacy-erasure-eligibility.is-ready {
+  border-color: #496e50;
+  background: #243629;
+  color: #c6e2cc;
+}
+
+html[data-theme="dark"] .privacy-erasure-eligibility.is-error {
+  border-color: #754641;
+  background: #3a2826;
+  color: #efc5c1;
+}
+
+html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
+  border-color: #685e36;
+  background: #332f21;
+  color: #e2d8b5;
+}
+
+@media (max-width: 720px) {
+  .privacy-erasure-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-erasure-choice-fieldset {
+    padding: 15px;
+  }
+}
+
+/* =========================================================
    ADMIN — KONTROLOWANE USUWANIE DANYCH I KONTA
 ========================================================= */
 
