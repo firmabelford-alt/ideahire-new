@@ -284,124 +284,6 @@ function AuthProvider({ children }) {
     };
   }, []);
 
-  useEffect(() => {
-    const accessToken =
-      session?.access_token;
-
-    const currentUserId =
-      user?.id;
-
-    if (
-      !accessToken ||
-      !currentUserId
-    ) {
-      return undefined;
-    }
-
-    let mounted = true;
-
-    async function synchronizeErasureState() {
-      try {
-        const [
-          freshUserResult,
-          lifecycleResult,
-        ] = await Promise.all([
-          supabase.auth.getUser(
-            accessToken
-          ),
-          supabase
-            .from(
-              "ideahire_account_lifecycle"
-            )
-            .select(
-              "status, data_minimized_at, closed_at"
-            )
-            .eq(
-              "user_id",
-              currentUserId
-            )
-            .maybeSingle(),
-        ]);
-
-        if (!mounted) return;
-
-        const freshUser =
-          freshUserResult
-            ?.data?.user;
-
-        if (
-          freshUser?.id ===
-          currentUserId
-        ) {
-          /*
-           * getSession może zawierać starszą kopię user_metadata.
-           * getUser pobiera bieżący rekord z Auth, dlatego usunięty
-           * avatar nie wraca z lokalnie zapisanego tokenu.
-           */
-          setUser(freshUser);
-        }
-
-        if (
-          lifecycleResult.error ||
-          !lifecycleResult.data
-        ) {
-          if (lifecycleResult.error) {
-            console.error(
-              "ERASURE LIFECYCLE SYNC ERROR:",
-              lifecycleResult.error
-            );
-          }
-
-          return;
-        }
-
-        const minimizedAt =
-          lifecycleResult.data
-            .data_minimized_at || "";
-
-        if (!minimizedAt) return;
-
-        const cleanupMarkerKey =
-          `ideahire_erasure_local_cleanup_${currentUserId}`;
-
-        if (
-          localStorage.getItem(
-            cleanupMarkerKey
-          ) === minimizedAt
-        ) {
-          return;
-        }
-
-        [
-          `ideahire_notifications_${currentUserId}`,
-          `ideahire_read_notifications_${currentUserId}`,
-          `ideahire_dismissed_notifications_${currentUserId}`,
-        ].forEach((key) => {
-          localStorage.removeItem(key);
-        });
-
-        localStorage.setItem(
-          cleanupMarkerKey,
-          minimizedAt
-        );
-      } catch (error) {
-        console.error(
-          "ERASURE SESSION SYNC ERROR:",
-          error
-        );
-      }
-    }
-
-    synchronizeErasureState();
-
-    return () => {
-      mounted = false;
-    };
-  }, [
-    session?.access_token,
-    user?.id,
-  ]);
-
   return (
     <AuthContext.Provider
       value={{
@@ -5873,7 +5755,7 @@ const ERASURE_ACTION_LABELS = {
 
 const ERASURE_ACTION_DESCRIPTIONS = {
   minimize_data:
-    "IdeaHire usunie lub zanonimizuje pełny możliwy zakres danych: dane profilu, zdjęcia, opcjonalne metadane, ustawienia oraz niepowiązane dane operacyjne. Konto logowania pozostanie aktywne.",
+    "IdeaHire usunie lub zanonimizuje dane, które nie są już potrzebne. Konto Auth nie zostanie zamknięte.",
   close_account:
     "IdeaHire usunie lub zanonimizuje możliwe dane i wyłączy możliwość logowania do konta.",
 };
@@ -5904,15 +5786,6 @@ const ERASURE_INVENTORY_LABELS = {
   age_profile_rows: "Dane wieku",
   user_preference_rows: "Ustawienia rozmów",
   block_rows: "Ustawienia blokad",
-  dispute_notifications: "Niepotrzebne powiadomienia o sporach",
-  removable_job_applications: "Niepowiązane zgłoszenia do zleceń",
-  removable_messages: "Wiadomości bez podstawy dalszej retencji",
-  removable_conversations: "Puste rozmowy bez rozliczeń i sporów",
-  removable_jobs: "Zlecenia bez zgłoszeń i współpracy",
-  unused_stripe_rows: "Nieużywane wpisy konfiguracji wypłat",
-  auth_optional_metadata: "Opcjonalne metadane konta",
-  browser_local_preferences: "Dane zapisane lokalnie w przeglądarce",
-  auth_login_account: "Konto i identyfikator logowania",
   legal_acceptances: "Potwierdzenia dokumentów prawnych",
   privacy_requests_open: "Otwarte wnioski RODO",
   payments_total: "Rekordy płatności",
@@ -5923,76 +5796,6 @@ const ERASURE_INVENTORY_LABELS = {
   job_applications_total: "Zgłoszenia do zleceń",
   jobs_total: "Opublikowane zlecenia",
 };
-
-const ERASURE_EXECUTION_RESULT_LABELS = {
-  avatar_objects_removed: "Usunięte pliki zdjęć profilowych",
-  profile_rows_anonymized: "Zanonimizowane profile prywatne",
-  public_profile_rows_anonymized: "Zanonimizowane profile publiczne",
-  age_rows_minimized: "Wyczyszczone rekordy wieku",
-  preference_rows_deleted: "Usunięte ustawienia rozmów",
-  block_rows_deleted: "Usunięte ustawienia blokad",
-  dispute_notifications_deleted: "Usunięte powiadomienia o sporach",
-  job_applications_deleted: "Usunięte niepowiązane zgłoszenia",
-  messages_deleted: "Usunięte wiadomości bez podstawy retencji",
-  conversations_deleted: "Usunięte puste rozmowy",
-  jobs_deleted: "Usunięte niepowiązane zlecenia",
-  unused_stripe_rows_deleted: "Usunięte nieużywane wpisy wypłat",
-};
-
-function buildErasureExecutionRows(executionResult) {
-  if (!executionResult || typeof executionResult !== "object") {
-    return [];
-  }
-
-  const dataResult =
-    executionResult.data_minimization &&
-    typeof executionResult.data_minimization === "object"
-      ? executionResult.data_minimization
-      : {};
-
-  const normalizedResult = {
-    avatar_objects_removed:
-      executionResult.avatar_objects_removed,
-    profile_rows_anonymized:
-      dataResult.profile_rows_anonymized ??
-      dataResult.profile_rows,
-    public_profile_rows_anonymized:
-      dataResult.public_profile_rows_anonymized ??
-      dataResult.public_profile_rows,
-    age_rows_minimized:
-      dataResult.age_rows_minimized ??
-      dataResult.age_rows,
-    preference_rows_deleted:
-      dataResult.preference_rows_deleted,
-    block_rows_deleted:
-      dataResult.block_rows_deleted,
-    dispute_notifications_deleted:
-      dataResult.dispute_notifications_deleted,
-    job_applications_deleted:
-      dataResult.job_applications_deleted,
-    messages_deleted:
-      dataResult.messages_deleted,
-    conversations_deleted:
-      dataResult.conversations_deleted,
-    jobs_deleted:
-      dataResult.jobs_deleted,
-    unused_stripe_rows_deleted:
-      dataResult.unused_stripe_rows_deleted,
-  };
-
-  return Object.entries(normalizedResult)
-    .filter(([, value]) => (
-      value !== null &&
-      value !== undefined &&
-      Number.isFinite(Number(value))
-    ))
-    .map(([key, value]) => ({
-      key,
-      label:
-        ERASURE_EXECUTION_RESULT_LABELS[key] || key,
-      value: Number(value),
-    }));
-}
 
 const ERASURE_BLOCKER_LABELS = {
   active_staff_account: "aktywna rola administracyjna",
@@ -18141,8 +17944,8 @@ function AdminUserPrivacyAccount() {
       setOwnerConfirmation("");
       setMessage(
         actionType === "close_account"
-          ? "Owner zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono."
-          : "Owner zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono."
+          ? "Owner zatwierdził operację. Konto zostało zamknięte, dane zminimalizowane, a sprawa zakończona."
+          : "Owner zatwierdził operację. Dane możliwe do usunięcia zostały zminimalizowane, a sprawa zakończona."
       );
       await loadAccountData(false);
     } catch (error) {
@@ -18181,7 +17984,7 @@ function AdminUserPrivacyAccount() {
       setMessage(
         currentCase.action_type === "close_account"
           ? "Konto zostało zamknięte, a status sprawy zaktualizowany."
-          : "Pełny możliwy zakres danych został usunięty lub zanonimizowany. Konto logowania pozostało aktywne."
+          : "Dane możliwe do usunięcia zostały zminimalizowane."
       );
       await loadAccountData(false);
     } catch (error) {
@@ -18202,32 +18005,7 @@ function AdminUserPrivacyAccount() {
   }
 
   const lifecycleStatus = lifecycle?.status || "active";
-  const completedDataMinimization = Boolean(
-    currentCase?.status === "completed"
-    && currentCase?.action_type === "minimize_data"
-  );
-  const completedAccountClosure = Boolean(
-    currentCase?.status === "completed"
-    && currentCase?.action_type === "close_account"
-  );
-  const accountName = completedDataMinimization
-    ? "Konto aktywne — dane możliwe do usunięcia zostały usunięte"
-    : completedAccountClosure
-      ? "Konto zamknięte"
-      : profile?.name?.trim() || "Użytkownik IdeaHire";
-  const executionRows = buildErasureExecutionRows(
-    currentCase?.execution_result
-  );
-  const retainedAfterExecution =
-    currentCase?.execution_result
-      ?.data_minimization
-      ?.retained_after || {};
-  const retainedAfterRows = Object.entries(
-    retainedAfterExecution
-  ).filter(([, value]) => (
-    Number.isFinite(Number(value))
-    && Number(value) > 0
-  ));
+  const accountName = profile?.name?.trim() || "Użytkownik IdeaHire";
   const requestedErasureAction = currentRequest?.requested_erasure_action || "";
   const isLegacyErasureRequest = Boolean(
     currentRequest && !requestedErasureAction
@@ -18254,9 +18032,7 @@ function AdminUserPrivacyAccount() {
             <header className="erasure-account-header">
               <div className="erasure-account-person">
                 <div className="erasure-account-avatar">
-                  {!completedDataMinimization
-                    && !completedAccountClosure
-                    && profile?.avatar_url ? (
+                  {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="" />
                   ) : accountName.charAt(0).toUpperCase()}
                 </div>
@@ -18264,12 +18040,6 @@ function AdminUserPrivacyAccount() {
                   <span className="section-label">Administracyjny widok konta</span>
                   <h1>{accountName}</h1>
                   <p>ID użytkownika: <code>{userId}</code></p>
-                  {completedDataMinimization && (
-                    <p className="erasure-account-auth-state">
-                      Login pozostaje aktywny. Użytkownik może ponownie
-                      uzupełnić dane wymagane do dalszego korzystania z usługi.
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -18601,59 +18371,12 @@ function AdminUserPrivacyAccount() {
                 {currentCase.status === "completed" && (
                   <div className="erasure-completed-banner" role="status">
                     <span aria-hidden="true">✓</span>
-                    <div className="erasure-completed-content">
+                    <div>
                       <strong>Operacja została zakończona</strong>
                       <p>
-                        {currentCase.action_type === "minimize_data"
-                          ? "Usunięto lub zanonimizowano pełny możliwy zakres danych. Konto logowania pozostaje aktywne."
-                          : "Usunięto lub zanonimizowano możliwe dane i zamknięto konto logowania."}
+                        Status użytkownika i wniosku RODO został zaktualizowany,
+                        a historia administracyjna pozostała zachowana.
                       </p>
-
-                      {executionRows.length > 0 && (
-                        <section className="erasure-execution-report">
-                          <div>
-                            <span className="section-label">Raport wykonania</span>
-                            <h3>Co zostało usunięte lub zanonimizowane</h3>
-                          </div>
-                          <dl>
-                            {executionRows.map((item) => (
-                              <div key={item.key}>
-                                <dt>{item.label}</dt>
-                                <dd>{item.value}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </section>
-                      )}
-
-                      <section className="erasure-retention-report">
-                        <div>
-                          <span className="section-label">Kontrolowana retencja</span>
-                          <h3>Dane pozostawione po operacji</h3>
-                        </div>
-
-                        {retainedAfterRows.length > 0 ? (
-                          <ul>
-                            {retainedAfterRows.map(([key, value]) => (
-                              <li key={key}>
-                                <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
-                                <strong>{Number(value)}</strong>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p>
-                            Zachowano konto i identyfikator logowania, dokumentację
-                            realizacji wniosku oraz niezbędną historię audytową.
-                          </p>
-                        )}
-
-                        <small>
-                          Dane prawne, transakcyjne, sporne lub bezpieczeństwa nie
-                          są publikowane w profilu i podlegają uzasadnieniu oraz
-                          okresowi retencji zapisanym w tej sprawie.
-                        </small>
-                      </section>
                     </div>
                   </div>
                 )}
