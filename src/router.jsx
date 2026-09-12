@@ -660,8 +660,78 @@ function useAccountRestriction() {
 const MIN_ACCOUNT_AGE = 16;
 const FULL_ACCOUNT_AGE = 18;
 const AGE_NOTICE_VERSION = "2026-09-03-v1";
-const LEGAL_TERMS_VERSION = "0.9-prelaunch-2026-09-06";
-const PRIVACY_NOTICE_VERSION = "0.9-prelaunch-2026-09-06";
+const LEGAL_TERMS_VERSION = "0.9-prelaunch-2026-09-12";
+const PRIVACY_NOTICE_VERSION = "0.9-prelaunch-2026-09-12";
+
+const MAX_PORTFOLIO_ITEMS = 8;
+
+function getOAuthErrorFromLocation(location) {
+  const searchParams = new URLSearchParams(
+    location?.search || ""
+  );
+
+  const hashParams = new URLSearchParams(
+    String(location?.hash || "").replace(/^#/, "")
+  );
+
+  const description =
+    searchParams.get("error_description") ||
+    hashParams.get("error_description") ||
+    "";
+
+  return description
+    ? decodeURIComponent(description.replace(/\+/g, " "))
+    : "";
+}
+
+function GoogleLogo() {
+  return (
+    <svg
+      className="google-auth-logo"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        fill="#4285F4"
+        d="M21.6 12.23c0-.71-.06-1.4-.18-2.06H12v3.9h5.38a4.6 4.6 0 0 1-2 3.02v2.53h3.24c1.9-1.75 2.98-4.33 2.98-7.39Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 22c2.7 0 4.98-.9 6.63-2.38l-3.24-2.53c-.9.6-2.05.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.61A10 10 0 0 0 12 22Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M6.39 13.92A6.01 6.01 0 0 1 6.08 12c0-.67.12-1.32.31-1.92V7.47H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.53l3.35-2.61Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.95c1.47 0 2.79.51 3.83 1.5l2.87-2.88A9.65 9.65 0 0 0 12 2a10 10 0 0 0-8.96 5.47l3.35 2.61C7.18 7.71 9.39 5.95 12 5.95Z"
+      />
+    </svg>
+  );
+}
+
+function GoogleAuthButton({
+  onClick,
+  loading,
+}) {
+  return (
+    <button
+      type="button"
+      className="google-auth-button"
+      onClick={onClick}
+      disabled={loading}
+    >
+      <GoogleLogo />
+
+      <span>
+        {loading
+          ? "Łączenie z Google..."
+          : "Kontynuuj przez Google"}
+      </span>
+    </button>
+  );
+}
 
 const AgeAccessContext = createContext(null);
 
@@ -1099,9 +1169,12 @@ function RestrictedAccountRoute({ children }) {
 }
 
 function AgeCompletionScreen() {
+  const { user } = useAuth();
   const { refreshAgeAccess, errorMessage } = useAgeAccess();
   const [birthDate, setBirthDate] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
+  const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -1126,19 +1199,68 @@ function AgeCompletionScreen() {
       return;
     }
 
+    if (!privacyAcknowledged) {
+      setMessage("Potwierdź zapoznanie się z Polityką prywatności.");
+      return;
+    }
+
+    if (!termsAccepted) {
+      setMessage("Zaakceptuj Regulamin IdeaHire, aby kontynuować.");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
 
     try {
+      const acceptedAtClient = new Date().toISOString();
+
       const { error } = await supabase.rpc(
-        "complete_ideahire_age_profile",
+        "complete_my_ideahire_onboarding",
         {
           p_date_of_birth: birthDate,
           p_age_notice_acknowledged: acknowledged,
+          p_age_notice_version: AGE_NOTICE_VERSION,
+          p_privacy_notice_acknowledged: privacyAcknowledged,
+          p_privacy_notice_version: PRIVACY_NOTICE_VERSION,
+          p_terms_accepted: termsAccepted,
+          p_terms_version: LEGAL_TERMS_VERSION,
         }
       );
 
       if (error) throw error;
+
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
+          name:
+            user?.user_metadata?.name ||
+            user?.user_metadata?.full_name ||
+            user?.email?.split("@")[0] ||
+            "Użytkownik",
+          avatar_url:
+            user?.user_metadata?.avatar_url ||
+            user?.user_metadata?.picture ||
+            null,
+          date_of_birth: birthDate,
+          age_notice_acknowledged: true,
+          age_notice_version: AGE_NOTICE_VERSION,
+          privacy_notice_acknowledged: true,
+          privacy_notice_version: PRIVACY_NOTICE_VERSION,
+          privacy_notice_acknowledged_at: acceptedAtClient,
+          terms_accepted: true,
+          terms_version: LEGAL_TERMS_VERSION,
+          terms_accepted_at_client: acceptedAtClient,
+          onboarding_source:
+            user?.app_metadata?.provider === "google"
+              ? "google_oauth"
+              : "account_completion",
+        },
+      });
+
+      if (metadataError) {
+        console.error("ONBOARDING METADATA ERROR:", metadataError);
+      }
+
       await refreshAgeAccess();
     } catch (error) {
       setMessage(
@@ -1213,6 +1335,54 @@ function AgeCompletionScreen() {
               </span>
             </label>
 
+            <div className="registration-privacy-confirmation">
+              <input
+                id="oauth-privacy-notice-acknowledgement"
+                type="checkbox"
+                checked={privacyAcknowledged}
+                onChange={(event) => {
+                  setPrivacyAcknowledged(event.target.checked);
+                  setMessage("");
+                }}
+                required
+              />
+              <div>
+                <label htmlFor="oauth-privacy-notice-acknowledgement">
+                  Zapoznałem się z Polityką prywatności.
+                </label>
+                <small>
+                  Dokument wyjaśnia, jak IdeaHire przetwarza i chroni dane. {" "}
+                  <Link to="/polityka-prywatnosci" target="_blank" rel="noreferrer">
+                    Otwórz Politykę prywatności
+                  </Link>
+                </small>
+              </div>
+            </div>
+
+            <div className="registration-privacy-confirmation registration-terms-confirmation">
+              <input
+                id="oauth-terms-acceptance"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(event) => {
+                  setTermsAccepted(event.target.checked);
+                  setMessage("");
+                }}
+                required
+              />
+              <div>
+                <label htmlFor="oauth-terms-acceptance">
+                  Akceptuję Regulamin IdeaHire.
+                </label>
+                <small>
+                  Akceptacja Regulaminu jest wymagana do aktywowania konta. {" "}
+                  <Link to="/regulamin" target="_blank" rel="noreferrer">
+                    Otwórz Regulamin — wersja 0.9
+                  </Link>
+                </small>
+              </div>
+            </div>
+
             {(message || errorMessage) && (
               <p className="auth-error" role="alert">
                 {message || errorMessage}
@@ -1222,11 +1392,18 @@ function AgeCompletionScreen() {
             <button
               type="submit"
               className="btn btn-dark btn-large"
-              disabled={saving || !validation?.valid || !acknowledged}
+              disabled={
+                saving ||
+                !validation?.valid ||
+                !acknowledged ||
+                !privacyAcknowledged ||
+                !termsAccepted
+              }
             >
               {saving ? "Zapisywanie..." : "Zapisz i kontynuuj →"}
             </button>
           </form>
+
         </section>
       </main>
     </div>
@@ -2461,11 +2638,24 @@ function Login() {
   const [loading, setLoading] =
     useState(false);
 
+  const [googleLoading, setGoogleLoading] =
+    useState(false);
+
   const [message, setMessage] =
     useState("");
 
   const [success, setSuccess] =
     useState(false);
+
+  useEffect(() => {
+    const oauthError = getOAuthErrorFromLocation(location);
+
+    if (oauthError) {
+      setMessage(
+        `Nie udało się zalogować przez Google: ${oauthError}`
+      );
+    }
+  }, [location.search, location.hash]);
 
   useEffect(() => {
     if (
@@ -2575,6 +2765,42 @@ function Login() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGoogleLogin() {
+    if (loading || googleLoading) return;
+
+    setMessage("");
+    setSuccess(false);
+    setGoogleLoading(true);
+
+    try {
+      const redirectUrl = new URL(
+        "/login",
+        window.location.origin
+      );
+
+      redirectUrl.searchParams.set(
+        "oauth",
+        "google"
+      );
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl.toString(),
+        },
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      setMessage(
+        `Nie udało się zalogować przez Google: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+      setGoogleLoading(false);
     }
   }
 
@@ -2761,6 +2987,23 @@ function Login() {
           </p>
         </div>
 
+        <div className="auth-provider-section">
+          <GoogleAuthButton
+            onClick={handleGoogleLogin}
+            loading={googleLoading}
+          />
+
+          <p className="google-auth-notice">
+            Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta.
+            Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po
+            zapisaniu profilu.
+          </p>
+
+          <div className="auth-divider" aria-hidden="true">
+            <span>lub przez e-mail</span>
+          </div>
+        </div>
+
         <form
           className="auth-form"
           onSubmit={handleLogin}
@@ -2820,7 +3063,7 @@ function Login() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading}
+            disabled={loading || googleLoading}
           >
             {loading
               ? "Logowanie..."
@@ -3324,8 +3567,58 @@ function Register() {
   const [loading, setLoading] =
     useState(false);
 
+  const [googleLoading, setGoogleLoading] =
+    useState(false);
+
   const [message, setMessage] =
     useState("");
+
+  const location = useLocation();
+
+  useEffect(() => {
+    const oauthError = getOAuthErrorFromLocation(location);
+
+    if (oauthError) {
+      setMessage(
+        `Nie udało się kontynuować przez Google: ${oauthError}`
+      );
+    }
+  }, [location.search, location.hash]);
+
+  async function handleGoogleRegister() {
+    if (loading || googleLoading) return;
+
+    setMessage("");
+    setGoogleLoading(true);
+
+    try {
+      const redirectUrl = new URL(
+        "/register",
+        window.location.origin
+      );
+
+      redirectUrl.searchParams.set(
+        "oauth",
+        "google"
+      );
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl.toString(),
+        },
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      setMessage(
+        `Nie udało się kontynuować przez Google: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+      setGoogleLoading(false);
+    }
+  }
 
   async function handleRegister(
     event
@@ -3461,6 +3754,24 @@ function Register() {
             Załóż konto i zacznij
             korzystać z IdeaHire.
           </p>
+        </div>
+
+        <div className="auth-provider-section">
+          <GoogleAuthButton
+            onClick={handleGoogleRegister}
+            loading={googleLoading}
+          />
+
+          <p className="google-auth-notice">
+            Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta.
+            Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po
+            zapisaniu profilu. Po pierwszym logowaniu uzupełnisz datę urodzenia
+            i potwierdzisz dokumenty wymagane do aktywowania konta IdeaHire.
+          </p>
+
+          <div className="auth-divider" aria-hidden="true">
+            <span>lub utwórz konto przez e-mail</span>
+          </div>
         </div>
 
         <form
@@ -3639,6 +3950,7 @@ function Register() {
             type="submit"
             disabled={
               loading ||
+              googleLoading ||
               !ageNoticeAcknowledged ||
               !privacyNoticeAcknowledged ||
               !termsAccepted
@@ -3803,6 +4115,109 @@ async function resizeAndConvertImage(
       image.src = objectUrl;
     }
   );
+}
+
+async function resizePortfolioImage(file) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+
+      const sourceWidth = image.naturalWidth;
+      const sourceHeight = image.naturalHeight;
+
+      if (!sourceWidth || !sourceHeight) {
+        reject(new Error("Zdjęcie portfolio ma nieprawidłowe wymiary."));
+        return;
+      }
+
+      const MAX_WIDTH = 1600;
+      const MAX_HEIGHT = 1000;
+      const scale = Math.min(
+        MAX_WIDTH / sourceWidth,
+        MAX_HEIGHT / sourceHeight,
+        1
+      );
+
+      const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
+      const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
+      const canvas = document.createElement("canvas");
+
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        reject(new Error("Przeglądarka nie obsługuje Canvas."));
+        return;
+      }
+
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      context.drawImage(
+        image,
+        0,
+        0,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        targetWidth,
+        targetHeight
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Nie udało się przygotować zdjęcia portfolio."));
+            return;
+          }
+
+          resolve(
+            new File([blob], "portfolio.jpg", {
+              type: "image/jpeg",
+            })
+          );
+        },
+        "image/jpeg",
+        0.84
+      );
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Nie udało się odczytać zdjęcia portfolio."));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function normalizePortfolioUrl(value) {
+  const cleanValue = String(value || "").trim();
+
+  if (!cleanValue) return null;
+
+  const candidate = /^https?:\/\//i.test(cleanValue)
+    ? cleanValue
+    : `https://${cleanValue}`;
+
+  let parsedUrl;
+
+  try {
+    parsedUrl = new URL(candidate);
+  } catch {
+    throw new Error("Wpisz prawidłowy link do projektu.");
+  }
+
+  if (parsedUrl.protocol !== "https:") {
+    throw new Error("Link do projektu musi rozpoczynać się od https://.");
+  }
+
+  return parsedUrl.toString();
 }
 
 function AccountStatus() {
@@ -4358,6 +4773,36 @@ function Account() {
   const [skillDraft, setSkillDraft] =
     useState("");
 
+  const [portfolioItems, setPortfolioItems] =
+    useState([]);
+
+  const [portfolioLoading, setPortfolioLoading] =
+    useState(true);
+
+  const [portfolioBusy, setPortfolioBusy] =
+    useState(false);
+
+  const [portfolioEditingId, setPortfolioEditingId] =
+    useState(null);
+
+  const [portfolioFile, setPortfolioFile] =
+    useState(null);
+
+  const [portfolioRemoveImage, setPortfolioRemoveImage] =
+    useState(false);
+
+  const [portfolioMessage, setPortfolioMessage] =
+    useState("");
+
+  const [portfolioDraft, setPortfolioDraft] =
+    useState({
+      title: "",
+      description: "",
+      projectUrl: "",
+    });
+
+  const portfolioFileInputRef = useRef(null);
+
   const [
     profileDetailsLoading,
     setProfileDetailsLoading,
@@ -4407,12 +4852,14 @@ function Account() {
      */
     setName(
       user.user_metadata?.name ||
+        user.user_metadata?.full_name ||
         user.email?.split("@")[0] ||
         ""
     );
 
     setAvatarUrl(
       user.user_metadata?.avatar_url ||
+        user.user_metadata?.picture ||
         ""
     );
 
@@ -4544,6 +4991,56 @@ function Account() {
     }
 
     loadProfileDetails();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setPortfolioItems([]);
+      setPortfolioLoading(false);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadPortfolio() {
+      setPortfolioLoading(true);
+
+      try {
+        const { data, error } = await supabase
+          .from("ideahire_portfolio_items")
+          .select(
+            "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
+          )
+          .eq("user_id", user.id)
+          .order("display_order", { ascending: true })
+          .order("created_at", { ascending: true });
+
+        if (error) throw error;
+        if (!mounted) return;
+
+        setPortfolioItems(data || []);
+        setPortfolioMessage("");
+      } catch (error) {
+        console.error("PORTFOLIO LOAD ERROR:", error);
+
+        if (mounted) {
+          setPortfolioItems([]);
+          setPortfolioMessage(
+            "Nie udało się pobrać portfolio. Odśwież stronę i spróbuj ponownie."
+          );
+        }
+      } finally {
+        if (mounted) {
+          setPortfolioLoading(false);
+        }
+      }
+    }
+
+    loadPortfolio();
 
     return () => {
       mounted = false;
@@ -5285,6 +5782,305 @@ function Account() {
     );
   }
 
+  function resetPortfolioEditor() {
+    setPortfolioEditingId(null);
+    setPortfolioFile(null);
+    setPortfolioRemoveImage(false);
+    setPortfolioDraft({
+      title: "",
+      description: "",
+      projectUrl: "",
+    });
+
+    if (portfolioFileInputRef.current) {
+      portfolioFileInputRef.current.value = "";
+    }
+  }
+
+  function handlePortfolioFileChange(event) {
+    const file = event.target.files?.[0] || null;
+
+    setPortfolioMessage("");
+
+    if (!file) {
+      setPortfolioFile(null);
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setPortfolioMessage("Wybierz zdjęcie projektu w formacie JPG, PNG lub WEBP.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      setPortfolioMessage("Zdjęcie portfolio może mieć maksymalnie 8 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setPortfolioFile(file);
+    setPortfolioRemoveImage(false);
+  }
+
+  function startPortfolioEdit(item) {
+    setPortfolioEditingId(item.id);
+    setPortfolioFile(null);
+    setPortfolioRemoveImage(false);
+    setPortfolioMessage("");
+    setPortfolioDraft({
+      title: item.title || "",
+      description: item.description || "",
+      projectUrl: item.project_url || "",
+    });
+
+    if (portfolioFileInputRef.current) {
+      portfolioFileInputRef.current.value = "";
+    }
+  }
+
+  async function handlePortfolioSubmit(event) {
+    event.preventDefault();
+
+    if (!user?.id || portfolioBusy) return;
+
+    const cleanTitle = portfolioDraft.title.trim().replace(/\s+/g, " ");
+    const cleanDescription = portfolioDraft.description.trim();
+    const existingItem = portfolioEditingId
+      ? portfolioItems.find((item) => item.id === portfolioEditingId)
+      : null;
+
+    if (cleanTitle.length < 3) {
+      setPortfolioMessage("Tytuł projektu musi mieć co najmniej 3 znaki.");
+      return;
+    }
+
+    if (cleanTitle.length > 120) {
+      setPortfolioMessage("Tytuł projektu może mieć maksymalnie 120 znaków.");
+      return;
+    }
+
+    if (cleanDescription.length > 800) {
+      setPortfolioMessage("Opis projektu może mieć maksymalnie 800 znaków.");
+      return;
+    }
+
+    let cleanProjectUrl = null;
+
+    try {
+      cleanProjectUrl = normalizePortfolioUrl(portfolioDraft.projectUrl);
+    } catch (error) {
+      setPortfolioMessage(error.message);
+      return;
+    }
+
+    const keepsExistingImage = Boolean(
+      existingItem?.image_url && !portfolioRemoveImage
+    );
+
+    if (!cleanProjectUrl && !portfolioFile && !keepsExistingImage) {
+      setPortfolioMessage("Dodaj link do projektu albo zdjęcie realizacji.");
+      return;
+    }
+
+    if (!existingItem && portfolioItems.length >= MAX_PORTFOLIO_ITEMS) {
+      setPortfolioMessage(
+        `Portfolio może zawierać maksymalnie ${MAX_PORTFOLIO_ITEMS} projektów.`
+      );
+      return;
+    }
+
+    setPortfolioBusy(true);
+    setPortfolioMessage("");
+
+    let uploadedImagePath = null;
+
+    try {
+      let nextImagePath = portfolioRemoveImage
+        ? null
+        : existingItem?.image_path || null;
+      let nextImageUrl = portfolioRemoveImage
+        ? null
+        : existingItem?.image_url || null;
+
+      if (portfolioFile) {
+        const convertedFile = await resizePortfolioImage(portfolioFile);
+        const uniquePart = typeof crypto?.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+        uploadedImagePath = `${user.id}/portfolio/project-${uniquePart}.jpg`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(uploadedImagePath, convertedFile, {
+            contentType: "image/jpeg",
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(uploadedImagePath);
+
+        if (!publicUrlData?.publicUrl) {
+          throw new Error("Nie udało się pobrać adresu zdjęcia portfolio.");
+        }
+
+        nextImagePath = uploadedImagePath;
+        nextImageUrl = publicUrlData.publicUrl;
+      }
+
+      const payload = {
+        user_id: user.id,
+        title: cleanTitle,
+        description: cleanDescription || null,
+        project_url: cleanProjectUrl,
+        image_url: nextImageUrl,
+        image_path: nextImagePath,
+      };
+
+      let savedItem;
+
+      if (existingItem) {
+        const { data, error } = await supabase
+          .from("ideahire_portfolio_items")
+          .update(payload)
+          .eq("id", existingItem.id)
+          .eq("user_id", user.id)
+          .select(
+            "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
+          )
+          .single();
+
+        if (error) throw error;
+        savedItem = data;
+
+        setPortfolioItems((current) =>
+          current.map((item) =>
+            item.id === savedItem.id ? savedItem : item
+          )
+        );
+      } else {
+        const nextOrder = portfolioItems.reduce(
+          (highest, item) => Math.max(highest, Number(item.display_order) || 0),
+          -1
+        ) + 1;
+
+        const { data, error } = await supabase
+          .from("ideahire_portfolio_items")
+          .insert({
+            ...payload,
+            display_order: nextOrder,
+          })
+          .select(
+            "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
+          )
+          .single();
+
+        if (error) throw error;
+        savedItem = data;
+
+        setPortfolioItems((current) => [...current, savedItem]);
+      }
+
+      const previousImagePath = existingItem?.image_path || null;
+
+      if (
+        previousImagePath &&
+        previousImagePath !== savedItem.image_path
+      ) {
+        const { error: oldImageError } = await supabase.storage
+          .from("avatars")
+          .remove([previousImagePath]);
+
+        if (oldImageError) {
+          console.error("PORTFOLIO OLD IMAGE DELETE ERROR:", oldImageError);
+        }
+      }
+
+      resetPortfolioEditor();
+      setPortfolioMessage(
+        existingItem
+          ? "Projekt w portfolio został zaktualizowany."
+          : "Projekt został dodany do portfolio."
+      );
+    } catch (error) {
+      console.error("PORTFOLIO SAVE ERROR:", error);
+
+      if (uploadedImagePath) {
+        const { error: cleanupError } = await supabase.storage
+          .from("avatars")
+          .remove([uploadedImagePath]);
+
+        if (cleanupError) {
+          console.error("PORTFOLIO UPLOAD CLEANUP ERROR:", cleanupError);
+        }
+      }
+
+      setPortfolioMessage(
+        `Nie udało się zapisać projektu w portfolio: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setPortfolioBusy(false);
+    }
+  }
+
+  async function handlePortfolioDelete(item) {
+    if (!user?.id || portfolioBusy) return;
+
+    const confirmed = window.confirm(
+      `Usunąć projekt „${item.title}” z portfolio?`
+    );
+
+    if (!confirmed) return;
+
+    setPortfolioBusy(true);
+    setPortfolioMessage("");
+
+    try {
+      const { error } = await supabase
+        .from("ideahire_portfolio_items")
+        .delete()
+        .eq("id", item.id)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setPortfolioItems((current) =>
+        current.filter((portfolioItem) => portfolioItem.id !== item.id)
+      );
+
+      if (item.image_path) {
+        const { error: imageError } = await supabase.storage
+          .from("avatars")
+          .remove([item.image_path]);
+
+        if (imageError) {
+          console.error("PORTFOLIO IMAGE DELETE ERROR:", imageError);
+        }
+      }
+
+      if (portfolioEditingId === item.id) {
+        resetPortfolioEditor();
+      }
+
+      setPortfolioMessage("Projekt został usunięty z portfolio.");
+    } catch (error) {
+      setPortfolioMessage(
+        `Nie udało się usunąć projektu z portfolio: ${
+          error?.message || "Nieznany błąd"
+        }`
+      );
+    } finally {
+      setPortfolioBusy(false);
+    }
+  }
+
   const displayName =
     name ||
     user.email?.split("@")[0] ||
@@ -5752,6 +6548,224 @@ function Account() {
                 : "Zapisz zmiany →"}
             </button>
           </form>
+
+          <section
+            className="profile-portfolio-manager"
+            aria-labelledby="portfolio-manager-title"
+          >
+            <div className="profile-portfolio-heading">
+              <div>
+                <span className="section-label">Twoje realizacje</span>
+                <h2 id="portfolio-manager-title">Portfolio</h2>
+                <p>
+                  Pokaż maksymalnie {MAX_PORTFOLIO_ITEMS} projektów. Każdy wpis
+                  może zawierać bezpieczny link HTTPS, zdjęcie realizacji albo oba
+                  elementy.
+                </p>
+              </div>
+
+              <span className="profile-portfolio-count">
+                {portfolioItems.length}/{MAX_PORTFOLIO_ITEMS}
+              </span>
+            </div>
+
+            <div className="profile-portfolio-legal-note">
+              <strong>Publikuj odpowiedzialnie.</strong>
+              <span>
+                Dodając projekt, potwierdzasz, że masz prawo opublikować jego
+                opis, link i zdjęcie oraz że materiały nie naruszają praw innych
+                osób. Projekt możesz usunąć w każdej chwili. Zobacz także{" "}
+                <Link to="/regulamin">Regulamin IdeaHire</Link>.
+              </span>
+            </div>
+
+            {portfolioLoading ? (
+              <p className="profile-portfolio-empty">Ładowanie portfolio...</p>
+            ) : portfolioItems.length > 0 ? (
+              <div className="profile-portfolio-edit-list">
+                {portfolioItems.map((item) => (
+                  <article className="profile-portfolio-edit-card" key={item.id}>
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={`Projekt: ${item.title}`} />
+                    ) : (
+                      <div className="profile-portfolio-image-placeholder" aria-hidden="true">
+                        ↗
+                      </div>
+                    )}
+
+                    <div className="profile-portfolio-edit-copy">
+                      <strong>{item.title}</strong>
+                      <span>
+                        {item.project_url ? "Link i prezentacja projektu" : "Prezentacja projektu"}
+                      </span>
+                    </div>
+
+                    <div className="profile-portfolio-item-actions">
+                      <button
+                        type="button"
+                        onClick={() => startPortfolioEdit(item)}
+                        disabled={portfolioBusy}
+                      >
+                        Edytuj
+                      </button>
+                      <button
+                        type="button"
+                        className="is-danger"
+                        onClick={() => handlePortfolioDelete(item)}
+                        disabled={portfolioBusy}
+                      >
+                        Usuń
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className="profile-portfolio-empty">
+                Portfolio jest jeszcze puste. Dodaj pierwszą realizację poniżej.
+              </p>
+            )}
+
+            {(portfolioEditingId || portfolioItems.length < MAX_PORTFOLIO_ITEMS) && (
+              <form
+                className="profile-portfolio-editor"
+                onSubmit={handlePortfolioSubmit}
+              >
+                <div className="profile-portfolio-editor-heading">
+                  <div>
+                    <span className="section-label">
+                      {portfolioEditingId ? "Edycja projektu" : "Nowy projekt"}
+                    </span>
+                    <h3>
+                      {portfolioEditingId
+                        ? "Zaktualizuj realizację"
+                        : "Dodaj realizację do portfolio"}
+                    </h3>
+                  </div>
+
+                  {portfolioEditingId && (
+                    <button
+                      type="button"
+                      className="profile-portfolio-cancel"
+                      onClick={resetPortfolioEditor}
+                      disabled={portfolioBusy}
+                    >
+                      Anuluj edycję
+                    </button>
+                  )}
+                </div>
+
+                <label>
+                  Tytuł projektu
+                  <input
+                    type="text"
+                    value={portfolioDraft.title}
+                    onChange={(event) =>
+                      setPortfolioDraft((current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                    minLength={3}
+                    maxLength={120}
+                    placeholder="Np. Identyfikacja wizualna kawiarni"
+                    required
+                    disabled={portfolioBusy}
+                  />
+                </label>
+
+                <label>
+                  Krótki opis
+                  <textarea
+                    rows="4"
+                    value={portfolioDraft.description}
+                    onChange={(event) =>
+                      setPortfolioDraft((current) => ({
+                        ...current,
+                        description: event.target.value,
+                      }))
+                    }
+                    maxLength={800}
+                    placeholder="Opisz swój zakres pracy, rezultat i użyte narzędzia..."
+                    disabled={portfolioBusy}
+                  />
+                  <small>{portfolioDraft.description.length}/800 znaków</small>
+                </label>
+
+                <div className="profile-portfolio-editor-grid">
+                  <label>
+                    Link do projektu
+                    <input
+                      type="url"
+                      inputMode="url"
+                      value={portfolioDraft.projectUrl}
+                      onChange={(event) =>
+                        setPortfolioDraft((current) => ({
+                          ...current,
+                          projectUrl: event.target.value,
+                        }))
+                      }
+                      maxLength={2048}
+                      placeholder="https://twoje-portfolio.pl/projekt"
+                      disabled={portfolioBusy}
+                    />
+                    <small>Wyłącznie bezpieczny adres HTTPS.</small>
+                  </label>
+
+                  <label>
+                    Zdjęcie projektu
+                    <input
+                      ref={portfolioFileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handlePortfolioFileChange}
+                      disabled={portfolioBusy}
+                    />
+                    <small>JPG, PNG lub WEBP, maksymalnie 8 MB.</small>
+                  </label>
+                </div>
+
+                {portfolioEditingId &&
+                  portfolioItems.find((item) => item.id === portfolioEditingId)?.image_url && (
+                    <label className="profile-portfolio-remove-image">
+                      <input
+                        type="checkbox"
+                        checked={portfolioRemoveImage}
+                        onChange={(event) => {
+                          setPortfolioRemoveImage(event.target.checked);
+                          if (event.target.checked) {
+                            setPortfolioFile(null);
+                            if (portfolioFileInputRef.current) {
+                              portfolioFileInputRef.current.value = "";
+                            }
+                          }
+                        }}
+                        disabled={portfolioBusy}
+                      />
+                      <span>Usuń obecne zdjęcie przy zapisie</span>
+                    </label>
+                  )}
+
+                {portfolioMessage && (
+                  <p className="profile-portfolio-message" role="status">
+                    {portfolioMessage}
+                  </p>
+                )}
+
+                <button
+                  className="btn btn-dark profile-portfolio-save"
+                  type="submit"
+                  disabled={portfolioBusy}
+                >
+                  {portfolioBusy
+                    ? "Zapisywanie projektu..."
+                    : portfolioEditingId
+                    ? "Zapisz projekt →"
+                    : "Dodaj do portfolio →"}
+                </button>
+              </form>
+            )}
+          </section>
         </section>
 
         <section className="privacy-entry-card" aria-labelledby="privacy-entry-title">
@@ -5900,7 +6914,9 @@ const ERASURE_LIFECYCLE_LABELS = {
 const ERASURE_INVENTORY_LABELS = {
   private_profile_rows: "Prywatny profil",
   public_profile_rows: "Profil publiczny",
-  avatar_objects: "Zdjęcia profilowe",
+  avatar_objects: "Zdjęcia profilu i portfolio",
+  portfolio_items: "Projekty w portfolio",
+  portfolio_images: "Zdjęcia projektów w portfolio",
   age_profile_rows: "Dane wieku",
   user_preference_rows: "Ustawienia rozmów",
   block_rows: "Ustawienia blokad",
@@ -5925,7 +6941,7 @@ const ERASURE_INVENTORY_LABELS = {
 };
 
 const ERASURE_EXECUTION_RESULT_LABELS = {
-  avatar_objects_removed: "Usunięte pliki zdjęć profilowych",
+  avatar_objects_removed: "Usunięte pliki zdjęć profilu i portfolio",
   profile_rows_anonymized: "Zanonimizowane profile prywatne",
   public_profile_rows_anonymized: "Zanonimizowane profile publiczne",
   age_rows_minimized: "Wyczyszczone rekordy wieku",
@@ -7823,6 +8839,9 @@ function Profile() {
   const [jobs, setJobs] =
     useState([]);
 
+  const [portfolioItems, setPortfolioItems] =
+    useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -7971,6 +8990,23 @@ function Profile() {
           setJobs(
             jobsData || []
           );
+        }
+
+        const {
+          data: portfolioData,
+          error: portfolioError,
+        } = await supabase
+          .from("ideahire_portfolio_items")
+          .select("id, title, description, project_url, image_url, display_order, created_at")
+          .eq("user_id", id)
+          .order("display_order", { ascending: true })
+          .order("created_at", { ascending: true });
+
+        if (portfolioError) {
+          console.error("PROFILE PORTFOLIO ERROR:", portfolioError);
+          setPortfolioItems([]);
+        } else {
+          setPortfolioItems(portfolioData || []);
         }
       } catch (error) {
         setMessage(
@@ -8672,6 +9708,71 @@ function Profile() {
                 </p>
               </div>
             )}
+
+          {!profileHidden && portfolioItems.length > 0 && (
+            <section
+              className="profile-public-portfolio"
+              aria-labelledby="profile-public-portfolio-title"
+            >
+              <div className="profile-public-portfolio-heading">
+                <div>
+                  <span className="profile-expertise-label">Wybrane realizacje</span>
+                  <h2 id="profile-public-portfolio-title">Portfolio</h2>
+                </div>
+
+                <a
+                  className="profile-public-report-link"
+                  href={`mailto:ideahireprywatnosc@gmail.com?subject=${encodeURIComponent(
+                    `Zgłoszenie nielegalnej treści — portfolio ${id}`
+                  )}&body=${encodeURIComponent(
+                    `Link do profilu: ${window.location.href}\nProjekt: wpisz tytuł zgłaszanego projektu\nDane kontaktowe: wpisz, jeżeli są inne niż adres nadawcy\n\nWyjaśnij, dlaczego treść może być nielegalna i podaj znaną Ci podstawę prawną:\n\nOświadczenie: Działam w dobrej wierze i uważam powyższe informacje za dokładne i kompletne.`
+                  )}`}
+                >
+                  Zgłoś treść
+                </a>
+              </div>
+
+              <div className="profile-public-portfolio-grid">
+                {portfolioItems.map((item) => (
+                  <article className="profile-public-portfolio-card" key={item.id}>
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={`Projekt: ${item.title}`} />
+                    ) : (
+                      <div className="profile-portfolio-image-placeholder" aria-hidden="true">
+                        ↗
+                      </div>
+                    )}
+
+                    <div className="profile-public-portfolio-copy">
+                      <h3>{item.title}</h3>
+                      {item.description && <p>{item.description}</p>}
+                      {item.project_url && (
+                        <a
+                          className="profile-public-project-link"
+                          href={item.project_url}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                        >
+                          Otwórz projekt ↗
+                        </a>
+                      )}
+
+                      <a
+                        className="profile-public-item-report"
+                        href={`mailto:ideahireprywatnosc@gmail.com?subject=${encodeURIComponent(
+                          `Zgłoszenie nielegalnej treści — projekt ${item.id}`
+                        )}&body=${encodeURIComponent(
+                          `Link do profilu: ${window.location.href}\nID projektu: ${item.id}\nTytuł projektu: ${item.title}\nDane kontaktowe: wpisz, jeżeli są inne niż adres nadawcy\n\nWyjaśnij, dlaczego treść może być nielegalna i podaj znaną Ci podstawę prawną:\n\nOświadczenie: Działam w dobrej wierze i uważam powyższe informacje za dokładne i kompletne.`
+                        )}`}
+                      >
+                        Zgłoś ten projekt
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
         </section>
 
         {!profileHidden && (
