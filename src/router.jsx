@@ -664,6 +664,25 @@ const LEGAL_TERMS_VERSION = "0.9-prelaunch-2026-09-12";
 const PRIVACY_NOTICE_VERSION = "0.9-prelaunch-2026-09-12";
 
 const MAX_PORTFOLIO_ITEMS = 8;
+const MAX_PORTFOLIO_ALBUM_IMAGES = 12;
+
+const CONTENT_REPORT_REASON_LABELS = {
+  copyright: "Naruszenie praw autorskich",
+  privacy_or_image_rights: "Naruszenie prywatności lub prawa do wizerunku",
+  impersonation: "Podszywanie się pod inną osobę lub firmę",
+  harassment_or_threats: "Nękanie, groźby lub treść krzywdząca",
+  fraud_or_scam: "Oszustwo lub wprowadzanie w błąd",
+  illegal_goods_or_services: "Nielegalne towary lub usługi",
+  other_terms_breach: "Inne naruszenie Regulaminu IdeaHire",
+  other_illegal_content: "Inna potencjalnie nielegalna treść",
+};
+
+const CONTENT_REPORT_STATUS_LABELS = {
+  submitted: "Otrzymane",
+  in_review: "W analizie",
+  resolved_actioned: "Zakończone — podjęto działanie",
+  resolved_no_action: "Zakończone — brak podstaw do działania",
+};
 
 function getOAuthErrorFromLocation(location) {
   const searchParams = new URLSearchParams(
@@ -4133,8 +4152,8 @@ async function resizePortfolioImage(file) {
         return;
       }
 
-      const MAX_WIDTH = 1600;
-      const MAX_HEIGHT = 1000;
+      const MAX_WIDTH = 2400;
+      const MAX_HEIGHT = 1800;
       const scale = Math.min(
         MAX_WIDTH / sourceWidth,
         MAX_HEIGHT / sourceHeight,
@@ -4183,7 +4202,7 @@ async function resizePortfolioImage(file) {
           );
         },
         "image/jpeg",
-        0.84
+        0.9
       );
     };
 
@@ -4218,6 +4237,316 @@ function normalizePortfolioUrl(value) {
   }
 
   return parsedUrl.toString();
+}
+
+function getPortfolioLinkLabel(value) {
+  try {
+    const parsed = new URL(value);
+    return parsed.hostname.replace(/^www\./, "");
+  } catch {
+    return "Otwórz projekt";
+  }
+}
+
+function getPortfolioMedia(item) {
+  if (Array.isArray(item?.media) && item.media.length > 0) {
+    return item.media;
+  }
+
+  if (item?.image_url) {
+    return [{
+      id: `legacy-${item.id}`,
+      portfolio_item_id: item.id,
+      user_id: item.user_id,
+      image_url: item.image_url,
+      image_path: item.image_path || null,
+      alt_text: item.title || "Zdjęcie realizacji",
+      display_order: 0,
+      isLegacyFallback: true,
+    }];
+  }
+
+  return [];
+}
+
+async function fetchPortfolioAlbums(userId) {
+  const { data: items, error: itemsError } = await supabase
+    .from("ideahire_portfolio_items")
+    .select(
+      "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
+    )
+    .eq("user_id", userId)
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  if (itemsError) throw itemsError;
+  if (!items?.length) return [];
+
+  const { data: media, error: mediaError } = await supabase
+    .from("ideahire_portfolio_media")
+    .select(
+      "id, portfolio_item_id, user_id, image_url, image_path, alt_text, display_order, created_at"
+    )
+    .in("portfolio_item_id", items.map((item) => item.id))
+    .order("display_order", { ascending: true });
+
+  if (mediaError) throw mediaError;
+
+  const mediaByItem = (media || []).reduce((groups, mediaItem) => {
+    if (!groups[mediaItem.portfolio_item_id]) {
+      groups[mediaItem.portfolio_item_id] = [];
+    }
+    groups[mediaItem.portfolio_item_id].push(mediaItem);
+    return groups;
+  }, {});
+
+  return items.map((item) => ({
+    ...item,
+    media: mediaByItem[item.id] || getPortfolioMedia(item),
+  }));
+}
+
+function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }) {
+  const media = getPortfolioMedia(album);
+  const [activeIndex, setActiveIndex] = useState(
+    Math.min(Math.max(Number(initialIndex) || 0, 0), Math.max(media.length - 1, 0))
+  );
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") onClose();
+      if (event.key === "ArrowLeft" && media.length > 1) {
+        setActiveIndex((current) => (current - 1 + media.length) % media.length);
+      }
+      if (event.key === "ArrowRight" && media.length > 1) {
+        setActiveIndex((current) => (current + 1) % media.length);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [media.length, onClose]);
+
+  if (!album || media.length === 0) return null;
+
+  const activeMedia = media[activeIndex];
+
+  return (
+    <div className="portfolio-lightbox" role="dialog" aria-modal="true" aria-label={`Album: ${album.title}`}>
+      <button
+        type="button"
+        className="portfolio-lightbox-backdrop"
+        onClick={onClose}
+        aria-label="Zamknij album"
+      />
+
+      <div className="portfolio-lightbox-panel">
+        <header>
+          <div>
+            <span>Portfolio</span>
+            <strong>{album.title}</strong>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Zamknij album">×</button>
+        </header>
+
+        <div className="portfolio-lightbox-stage">
+          <img
+            src={activeMedia.image_url}
+            alt={activeMedia.alt_text || `${album.title} — zdjęcie ${activeIndex + 1}`}
+          />
+
+          {media.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="portfolio-lightbox-arrow is-left"
+                onClick={() => setActiveIndex((activeIndex - 1 + media.length) % media.length)}
+                aria-label="Poprzednie zdjęcie"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="portfolio-lightbox-arrow is-right"
+                onClick={() => setActiveIndex((activeIndex + 1) % media.length)}
+                aria-label="Następne zdjęcie"
+              >
+                ›
+              </button>
+            </>
+          )}
+        </div>
+
+        <footer>
+          <span>{activeIndex + 1} / {media.length}</span>
+          <div className="portfolio-lightbox-thumbnails" aria-label="Zdjęcia w albumie">
+            {media.map((mediaItem, index) => (
+              <button
+                type="button"
+                className={index === activeIndex ? "is-active" : ""}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Pokaż zdjęcie ${index + 1}`}
+                key={mediaItem.id}
+              >
+                <img src={mediaItem.image_url} alt="" />
+              </button>
+            ))}
+          </div>
+          {canReport && (
+            <button
+              type="button"
+              className="portfolio-lightbox-report"
+              onClick={() => onReport(album, activeMedia)}
+            >
+              Zgłoś to zdjęcie
+            </button>
+          )}
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function PortfolioReportDialog({ target, onClose, onSubmitted }) {
+  const [reasonCode, setReasonCode] = useState("copyright");
+  const [explanation, setExplanation] = useState("");
+  const [legalReference, setLegalReference] = useState("");
+  const [goodFaith, setGoodFaith] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !busy) onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [busy, onClose]);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    if (busy) return;
+
+    if (explanation.trim().length < 50) {
+      setMessage("Opisz konkretnie naruszenie — minimum 50 znaków.");
+      return;
+    }
+    if (!goodFaith) {
+      setMessage("Potwierdź oświadczenie o dobrej wierze.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+    try {
+      const { data, error } = await supabase.rpc(
+        "submit_ideahire_portfolio_content_report",
+        {
+          p_portfolio_item_id: target.album.id,
+          p_portfolio_media_id: target.media?.isLegacyFallback
+            ? null
+            : target.media?.id || null,
+          p_reason_code: reasonCode,
+          p_explanation: explanation.trim(),
+          p_legal_reference: legalReference.trim() || null,
+          p_good_faith_confirmed: true,
+        }
+      );
+      if (error) throw error;
+      onSubmitted(data);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się wysłać zgłoszenia."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="portfolio-report-dialog" role="dialog" aria-modal="true" aria-labelledby="portfolio-report-title">
+      <button type="button" className="portfolio-report-backdrop" onClick={onClose} aria-label="Zamknij formularz" />
+      <form className="portfolio-report-panel" onSubmit={handleSubmit}>
+        <header>
+          <div>
+            <span className="section-label">Zgłoszenie treści</span>
+            <h2 id="portfolio-report-title">
+              {target.media ? "Zgłoś zdjęcie" : "Zgłoś album"}
+            </h2>
+          </div>
+          <button type="button" onClick={onClose} disabled={busy} aria-label="Zamknij formularz">×</button>
+        </header>
+
+        <p className="portfolio-report-context">
+          Projekt: <strong>{target.album.title}</strong>. Zgłoszenie trafi do ręcznej analizy administracji — samo wysłanie nie powoduje automatycznej blokady.
+        </p>
+
+        <label>
+          Powód zgłoszenia
+          <select value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} disabled={busy}>
+            {Object.entries(CONTENT_REPORT_REASON_LABELS).map(([value, label]) => (
+              <option value={value} key={value}>{label}</option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Dlaczego treść może być nielegalna?
+          <textarea
+            value={explanation}
+            onChange={(event) => setExplanation(event.target.value)}
+            minLength={50}
+            maxLength={5000}
+            rows={6}
+            placeholder="Wskaż konkretny element zdjęcia lub albumu, okoliczności i osobę albo prawo, którego dotyczy zgłoszenie."
+            disabled={busy}
+            required
+          />
+          <small>{explanation.length}/5000 znaków</small>
+        </label>
+
+        <label>
+          Podstawa prawna — jeśli ją znasz
+          <input
+            type="text"
+            value={legalReference}
+            onChange={(event) => setLegalReference(event.target.value)}
+            maxLength={1500}
+            placeholder="Np. rodzaj prawa autorskiego lub prawa do wizerunku"
+            disabled={busy}
+          />
+        </label>
+
+        <label className="portfolio-report-good-faith">
+          <input
+            type="checkbox"
+            checked={goodFaith}
+            onChange={(event) => setGoodFaith(event.target.checked)}
+            disabled={busy}
+          />
+          <span>Działam w dobrej wierze i uważam podane informacje za dokładne i kompletne.</span>
+        </label>
+
+        {message && <p className="profile-portfolio-message" role="alert">{message}</p>}
+
+        <div className="portfolio-report-actions">
+          <button type="button" className="privacy-secondary-button" onClick={onClose} disabled={busy}>Anuluj</button>
+          <button type="submit" className="privacy-primary-button" disabled={busy}>
+            {busy ? "Wysyłanie..." : "Wyślij zgłoszenie →"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
 
 function AccountStatus() {
@@ -4785,11 +5114,11 @@ function Account() {
   const [portfolioEditingId, setPortfolioEditingId] =
     useState(null);
 
-  const [portfolioFile, setPortfolioFile] =
-    useState(null);
+  const [portfolioFiles, setPortfolioFiles] =
+    useState([]);
 
-  const [portfolioRemoveImage, setPortfolioRemoveImage] =
-    useState(false);
+  const [portfolioRemovedMediaIds, setPortfolioRemovedMediaIds] =
+    useState([]);
 
   const [portfolioMessage, setPortfolioMessage] =
     useState("");
@@ -4802,6 +5131,15 @@ function Account() {
     });
 
   const portfolioFileInputRef = useRef(null);
+
+  const [myContentReports, setMyContentReports] =
+    useState([]);
+
+  const [myContentReportAppeals, setMyContentReportAppeals] =
+    useState([]);
+
+  const [contentReportBusy, setContentReportBusy] =
+    useState("");
 
   const [
     profileDetailsLoading,
@@ -5010,19 +5348,10 @@ function Account() {
       setPortfolioLoading(true);
 
       try {
-        const { data, error } = await supabase
-          .from("ideahire_portfolio_items")
-          .select(
-            "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
-          )
-          .eq("user_id", user.id)
-          .order("display_order", { ascending: true })
-          .order("created_at", { ascending: true });
-
-        if (error) throw error;
+        const data = await fetchPortfolioAlbums(user.id);
         if (!mounted) return;
 
-        setPortfolioItems(data || []);
+        setPortfolioItems(data);
         setPortfolioMessage("");
       } catch (error) {
         console.error("PORTFOLIO LOAD ERROR:", error);
@@ -5044,6 +5373,75 @@ function Account() {
 
     return () => {
       mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setMyContentReports([]);
+      setMyContentReportAppeals([]);
+      return;
+    }
+
+    let mounted = true;
+
+    async function loadMyContentReports() {
+      const [reportsResult, appealsResult] = await Promise.all([
+        supabase
+          .from("ideahire_content_reports")
+          .select("id, report_number, content_type, reason_code, status, content_snapshot, decision_summary, submitted_at, reviewed_at")
+          .eq("reporter_user_id", user.id)
+          .order("submitted_at", { ascending: false })
+          .limit(30),
+        supabase
+          .from("ideahire_content_report_appeals")
+          .select("id, report_id, status, statement, resolution_reason, submitted_at, resolved_at")
+          .eq("appellant_user_id", user.id)
+          .order("submitted_at", { ascending: false }),
+      ]);
+
+      if (!mounted) return;
+      if (reportsResult.error || appealsResult.error) {
+        console.error(
+          "CONTENT REPORT HISTORY ERROR:",
+          reportsResult.error || appealsResult.error
+        );
+        return;
+      }
+
+      setMyContentReports(reportsResult.data || []);
+      setMyContentReportAppeals(appealsResult.data || []);
+    }
+
+    loadMyContentReports();
+
+    const channel = supabase
+      .channel(`my-content-reports-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_content_reports",
+          filter: `reporter_user_id=eq.${user.id}`,
+        },
+        loadMyContentReports
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_content_report_appeals",
+          filter: `appellant_user_id=eq.${user.id}`,
+        },
+        loadMyContentReports
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
@@ -5784,8 +6182,8 @@ function Account() {
 
   function resetPortfolioEditor() {
     setPortfolioEditingId(null);
-    setPortfolioFile(null);
-    setPortfolioRemoveImage(false);
+    setPortfolioFiles([]);
+    setPortfolioRemovedMediaIds([]);
     setPortfolioDraft({
       title: "",
       description: "",
@@ -5798,35 +6196,48 @@ function Account() {
   }
 
   function handlePortfolioFileChange(event) {
-    const file = event.target.files?.[0] || null;
+    const selectedFiles = Array.from(event.target.files || []);
 
     setPortfolioMessage("");
 
-    if (!file) {
-      setPortfolioFile(null);
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      setPortfolioMessage("Wybierz zdjęcie projektu w formacie JPG, PNG lub WEBP.");
+    if (selectedFiles.some((file) => !file.type.startsWith("image/"))) {
+      setPortfolioMessage("Wybierz zdjęcia w formacie JPG, PNG lub WEBP.");
       event.target.value = "";
       return;
     }
 
-    if (file.size > 8 * 1024 * 1024) {
-      setPortfolioMessage("Zdjęcie portfolio może mieć maksymalnie 8 MB.");
+    if (selectedFiles.some((file) => file.size > 12 * 1024 * 1024)) {
+      setPortfolioMessage("Każde zdjęcie portfolio może mieć maksymalnie 12 MB.");
       event.target.value = "";
       return;
     }
 
-    setPortfolioFile(file);
-    setPortfolioRemoveImage(false);
+    const existingItem = portfolioEditingId
+      ? portfolioItems.find((item) => item.id === portfolioEditingId)
+      : null;
+    const keptExistingCount = getPortfolioMedia(existingItem).filter(
+      (mediaItem) => !portfolioRemovedMediaIds.includes(mediaItem.id)
+    ).length;
+
+    if (
+      keptExistingCount + portfolioFiles.length + selectedFiles.length
+      > MAX_PORTFOLIO_ALBUM_IMAGES
+    ) {
+      setPortfolioMessage(
+        `Jeden album może zawierać maksymalnie ${MAX_PORTFOLIO_ALBUM_IMAGES} zdjęć.`
+      );
+      event.target.value = "";
+      return;
+    }
+
+    setPortfolioFiles((current) => [...current, ...selectedFiles]);
+    event.target.value = "";
   }
 
   function startPortfolioEdit(item) {
     setPortfolioEditingId(item.id);
-    setPortfolioFile(null);
-    setPortfolioRemoveImage(false);
+    setPortfolioFiles([]);
+    setPortfolioRemovedMediaIds([]);
     setPortfolioMessage("");
     setPortfolioDraft({
       title: item.title || "",
@@ -5874,12 +6285,13 @@ function Account() {
       return;
     }
 
-    const keepsExistingImage = Boolean(
-      existingItem?.image_url && !portfolioRemoveImage
+    const existingMedia = getPortfolioMedia(existingItem);
+    const keptMedia = existingMedia.filter(
+      (mediaItem) => !portfolioRemovedMediaIds.includes(mediaItem.id)
     );
 
-    if (!cleanProjectUrl && !portfolioFile && !keepsExistingImage) {
-      setPortfolioMessage("Dodaj link do projektu albo zdjęcie realizacji.");
+    if (!cleanProjectUrl && keptMedia.length === 0 && portfolioFiles.length === 0) {
+      setPortfolioMessage("Dodaj link do projektu albo co najmniej jedno zdjęcie realizacji.");
       return;
     }
 
@@ -5893,23 +6305,16 @@ function Account() {
     setPortfolioBusy(true);
     setPortfolioMessage("");
 
-    let uploadedImagePath = null;
+    const uploadedMedia = [];
 
     try {
-      let nextImagePath = portfolioRemoveImage
-        ? null
-        : existingItem?.image_path || null;
-      let nextImageUrl = portfolioRemoveImage
-        ? null
-        : existingItem?.image_url || null;
-
-      if (portfolioFile) {
-        const convertedFile = await resizePortfolioImage(portfolioFile);
+      for (const file of portfolioFiles) {
+        const convertedFile = await resizePortfolioImage(file);
         const uniquePart = typeof crypto?.randomUUID === "function"
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-        uploadedImagePath = `${user.id}/portfolio/project-${uniquePart}.jpg`;
+        const uploadedImagePath = `${user.id}/portfolio/project-${uniquePart}.jpg`;
 
         const { error: uploadError } = await supabase.storage
           .from("avatars")
@@ -5929,77 +6334,51 @@ function Account() {
           throw new Error("Nie udało się pobrać adresu zdjęcia portfolio.");
         }
 
-        nextImagePath = uploadedImagePath;
-        nextImageUrl = publicUrlData.publicUrl;
+        uploadedMedia.push({
+          image_path: uploadedImagePath,
+          image_url: publicUrlData.publicUrl,
+          alt_text: cleanTitle,
+        });
       }
 
-      const payload = {
-        user_id: user.id,
-        title: cleanTitle,
-        description: cleanDescription || null,
-        project_url: cleanProjectUrl,
-        image_url: nextImageUrl,
-        image_path: nextImagePath,
-      };
+      const mediaPayload = [
+        ...keptMedia.map((mediaItem) => ({
+          image_path: mediaItem.image_path,
+          image_url: mediaItem.image_url,
+          alt_text: cleanTitle,
+        })),
+        ...uploadedMedia,
+      ];
 
-      let savedItem;
+      const { error } = await supabase.rpc(
+        "save_my_ideahire_portfolio_album",
+        {
+          p_item_id: existingItem?.id || null,
+          p_title: cleanTitle,
+          p_description: cleanDescription || null,
+          p_project_url: cleanProjectUrl,
+          p_media: mediaPayload,
+        }
+      );
 
-      if (existingItem) {
-        const { data, error } = await supabase
-          .from("ideahire_portfolio_items")
-          .update(payload)
-          .eq("id", existingItem.id)
-          .eq("user_id", user.id)
-          .select(
-            "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
-          )
-          .single();
+      if (error) throw error;
 
-        if (error) throw error;
-        savedItem = data;
+      const pathsToRemove = existingMedia
+        .filter((mediaItem) => portfolioRemovedMediaIds.includes(mediaItem.id))
+        .map((mediaItem) => mediaItem.image_path)
+        .filter(Boolean);
 
-        setPortfolioItems((current) =>
-          current.map((item) =>
-            item.id === savedItem.id ? savedItem : item
-          )
-        );
-      } else {
-        const nextOrder = portfolioItems.reduce(
-          (highest, item) => Math.max(highest, Number(item.display_order) || 0),
-          -1
-        ) + 1;
-
-        const { data, error } = await supabase
-          .from("ideahire_portfolio_items")
-          .insert({
-            ...payload,
-            display_order: nextOrder,
-          })
-          .select(
-            "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
-          )
-          .single();
-
-        if (error) throw error;
-        savedItem = data;
-
-        setPortfolioItems((current) => [...current, savedItem]);
-      }
-
-      const previousImagePath = existingItem?.image_path || null;
-
-      if (
-        previousImagePath &&
-        previousImagePath !== savedItem.image_path
-      ) {
+      if (pathsToRemove.length > 0) {
         const { error: oldImageError } = await supabase.storage
           .from("avatars")
-          .remove([previousImagePath]);
+          .remove([...new Set(pathsToRemove)]);
 
         if (oldImageError) {
-          console.error("PORTFOLIO OLD IMAGE DELETE ERROR:", oldImageError);
+          console.error("PORTFOLIO OLD IMAGES DELETE ERROR:", oldImageError);
         }
       }
+
+      setPortfolioItems(await fetchPortfolioAlbums(user.id));
 
       resetPortfolioEditor();
       setPortfolioMessage(
@@ -6010,10 +6389,10 @@ function Account() {
     } catch (error) {
       console.error("PORTFOLIO SAVE ERROR:", error);
 
-      if (uploadedImagePath) {
+      if (uploadedMedia.length > 0) {
         const { error: cleanupError } = await supabase.storage
           .from("avatars")
-          .remove([uploadedImagePath]);
+          .remove(uploadedMedia.map((mediaItem) => mediaItem.image_path));
 
         if (cleanupError) {
           console.error("PORTFOLIO UPLOAD CLEANUP ERROR:", cleanupError);
@@ -6030,6 +6409,20 @@ function Account() {
     }
   }
 
+  function toggleExistingPortfolioMedia(mediaId) {
+    setPortfolioRemovedMediaIds((current) =>
+      current.includes(mediaId)
+        ? current.filter((id) => id !== mediaId)
+        : [...current, mediaId]
+    );
+  }
+
+  function removePendingPortfolioFile(indexToRemove) {
+    setPortfolioFiles((current) =>
+      current.filter((_, index) => index !== indexToRemove)
+    );
+  }
+
   async function handlePortfolioDelete(item) {
     if (!user?.id || portfolioBusy) return;
 
@@ -6043,6 +6436,10 @@ function Account() {
     setPortfolioMessage("");
 
     try {
+      const imagePaths = getPortfolioMedia(item)
+        .map((mediaItem) => mediaItem.image_path)
+        .filter(Boolean);
+
       const { error } = await supabase
         .from("ideahire_portfolio_items")
         .delete()
@@ -6055,10 +6452,10 @@ function Account() {
         current.filter((portfolioItem) => portfolioItem.id !== item.id)
       );
 
-      if (item.image_path) {
+      if (imagePaths.length > 0) {
         const { error: imageError } = await supabase.storage
           .from("avatars")
-          .remove([item.image_path]);
+          .remove([...new Set(imagePaths)]);
 
         if (imageError) {
           console.error("PORTFOLIO IMAGE DELETE ERROR:", imageError);
@@ -6078,6 +6475,51 @@ function Account() {
       );
     } finally {
       setPortfolioBusy(false);
+    }
+  }
+
+  async function handleContentReportAppeal(report) {
+    if (contentReportBusy) return;
+
+    const statement = window.prompt(
+      "Wyjaśnij, dlaczego zgłoszenie powinno zostać przeanalizowane ponownie (minimum 30 znaków):"
+    );
+
+    if (!statement) return;
+    if (statement.trim().length < 30) {
+      setPortfolioMessage("Uzasadnienie odwołania musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    setContentReportBusy(report.id);
+    setPortfolioMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "submit_my_ideahire_content_report_appeal",
+        {
+          p_report_id: report.id,
+          p_statement: statement.trim(),
+        }
+      );
+      if (error) throw error;
+
+      const { data: appeals, error: appealsError } = await supabase
+        .from("ideahire_content_report_appeals")
+        .select("id, report_id, status, statement, resolution_reason, submitted_at, resolved_at")
+        .eq("appellant_user_id", user.id)
+        .order("submitted_at", { ascending: false });
+      if (appealsError) throw appealsError;
+
+      setMyContentReportAppeals(appeals || []);
+      setPortfolioMessage("Odwołanie zostało zapisane i przekazane do ponownej analizy.");
+    } catch (error) {
+      setPortfolioMessage(cleanSupabaseError(
+        error,
+        "Nie udało się złożyć odwołania."
+      ));
+    } finally {
+      setContentReportBusy("");
     }
   }
 
@@ -6558,9 +7000,9 @@ function Account() {
                 <span className="section-label">Twoje realizacje</span>
                 <h2 id="portfolio-manager-title">Portfolio</h2>
                 <p>
-                  Pokaż maksymalnie {MAX_PORTFOLIO_ITEMS} projektów. Każdy wpis
-                  może zawierać bezpieczny link HTTPS, zdjęcie realizacji albo oba
-                  elementy.
+                  Pokaż maksymalnie {MAX_PORTFOLIO_ITEMS} projektów. Każdy projekt
+                  jest osobnym albumem z maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
+                  zdjęciami oraz opcjonalnym linkiem HTTPS.
                 </p>
               </div>
 
@@ -6573,7 +7015,7 @@ function Account() {
               <strong>Publikuj odpowiedzialnie.</strong>
               <span>
                 Dodając projekt, potwierdzasz, że masz prawo opublikować jego
-                opis, link i zdjęcie oraz że materiały nie naruszają praw innych
+                opis, link i zdjęcia oraz że materiały nie naruszają praw innych
                 osób. Projekt możesz usunąć w każdej chwili. Zobacz także{" "}
                 <Link to="/regulamin">Regulamin IdeaHire</Link>.
               </span>
@@ -6585,8 +7027,14 @@ function Account() {
               <div className="profile-portfolio-edit-list">
                 {portfolioItems.map((item) => (
                   <article className="profile-portfolio-edit-card" key={item.id}>
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={`Projekt: ${item.title}`} />
+                    {getPortfolioMedia(item)[0]?.image_url ? (
+                      <div className="profile-portfolio-edit-cover">
+                        <img
+                          src={getPortfolioMedia(item)[0].image_url}
+                          alt={`Projekt: ${item.title}`}
+                        />
+                        <span>{getPortfolioMedia(item).length} zdj.</span>
+                      </div>
                     ) : (
                       <div className="profile-portfolio-image-placeholder" aria-hidden="true">
                         ↗
@@ -6596,7 +7044,9 @@ function Account() {
                     <div className="profile-portfolio-edit-copy">
                       <strong>{item.title}</strong>
                       <span>
-                        {item.project_url ? "Link i prezentacja projektu" : "Prezentacja projektu"}
+                        {getPortfolioMedia(item).length > 0
+                          ? `Album · ${getPortfolioMedia(item).length} ${getPortfolioMedia(item).length === 1 ? "zdjęcie" : "zdjęć"}`
+                          : "Projekt z linkiem"}
                       </span>
                     </div>
 
@@ -6694,7 +7144,7 @@ function Account() {
 
                 <div className="profile-portfolio-editor-grid">
                   <label>
-                    Link do projektu
+                    Link do projektu <span className="profile-portfolio-optional">(opcjonalnie)</span>
                     <input
                       type="url"
                       inputMode="url"
@@ -6713,38 +7163,71 @@ function Account() {
                   </label>
 
                   <label>
-                    Zdjęcie projektu
+                    Zdjęcia do albumu
                     <input
                       ref={portfolioFileInputRef}
                       type="file"
                       accept="image/jpeg,image/png,image/webp"
+                      multiple
                       onChange={handlePortfolioFileChange}
                       disabled={portfolioBusy}
                     />
-                    <small>JPG, PNG lub WEBP, maksymalnie 8 MB.</small>
+                    <small>
+                      Wybierz kilka zdjęć naraz. Maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
+                      zdjęć w albumie i 12 MB na plik.
+                    </small>
                   </label>
                 </div>
 
-                {portfolioEditingId &&
-                  portfolioItems.find((item) => item.id === portfolioEditingId)?.image_url && (
-                    <label className="profile-portfolio-remove-image">
-                      <input
-                        type="checkbox"
-                        checked={portfolioRemoveImage}
-                        onChange={(event) => {
-                          setPortfolioRemoveImage(event.target.checked);
-                          if (event.target.checked) {
-                            setPortfolioFile(null);
-                            if (portfolioFileInputRef.current) {
-                              portfolioFileInputRef.current.value = "";
-                            }
-                          }
-                        }}
-                        disabled={portfolioBusy}
-                      />
-                      <span>Usuń obecne zdjęcie przy zapisie</span>
-                    </label>
-                  )}
+                {portfolioEditingId && getPortfolioMedia(
+                  portfolioItems.find((item) => item.id === portfolioEditingId)
+                ).length > 0 && (
+                  <div className="profile-portfolio-media-editor">
+                    <strong>Zdjęcia zapisane w albumie</strong>
+                    <div>
+                      {getPortfolioMedia(
+                        portfolioItems.find((item) => item.id === portfolioEditingId)
+                      ).map((mediaItem, index) => {
+                        const removed = portfolioRemovedMediaIds.includes(mediaItem.id);
+                        return (
+                          <button
+                            type="button"
+                            className={removed ? "is-removed" : ""}
+                            onClick={() => toggleExistingPortfolioMedia(mediaItem.id)}
+                            disabled={portfolioBusy}
+                            aria-label={removed ? `Przywróć zdjęcie ${index + 1}` : `Usuń zdjęcie ${index + 1}`}
+                            key={mediaItem.id}
+                          >
+                            <img src={mediaItem.image_url} alt="" />
+                            <span>{removed ? "Przywróć" : "Usuń"}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <small>Zmiany zostaną wykonane dopiero po zapisaniu albumu.</small>
+                  </div>
+                )}
+
+                {portfolioFiles.length > 0 && (
+                  <div className="profile-portfolio-new-files">
+                    <strong>Nowe zdjęcia ({portfolioFiles.length})</strong>
+                    <div>
+                      {portfolioFiles.map((file, index) => (
+                        <span key={`${file.name}-${file.lastModified}-${index}`}>
+                          <span>{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removePendingPortfolioFile(index)}
+                            disabled={portfolioBusy}
+                            aria-label={`Usuń plik ${file.name}`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {portfolioMessage && (
                   <p className="profile-portfolio-message" role="status">
@@ -6758,10 +7241,10 @@ function Account() {
                   disabled={portfolioBusy}
                 >
                   {portfolioBusy
-                    ? "Zapisywanie projektu..."
+                    ? "Zapisywanie albumu..."
                     : portfolioEditingId
-                    ? "Zapisz projekt →"
-                    : "Dodaj do portfolio →"}
+                    ? "Zapisz album →"
+                    : "Dodaj album do portfolio →"}
                 </button>
               </form>
             )}
@@ -6782,6 +7265,70 @@ function Account() {
             Otwórz centrum prywatności →
           </Link>
         </section>
+
+        {myContentReports.length > 0 && (
+          <section className="account-card profile-content-report-history" aria-labelledby="my-content-reports-title">
+            <div className="profile-content-report-history-heading">
+              <div>
+                <span className="section-label">Bezpieczeństwo treści</span>
+                <h2 id="my-content-reports-title">Moje zgłoszenia portfolio</h2>
+              </div>
+              <span>{myContentReports.length}</span>
+            </div>
+
+            <div className="profile-content-report-list">
+              {myContentReports.map((report) => {
+                const reportAppeal = myContentReportAppeals.find(
+                  (appeal) => appeal.report_id === report.id
+                );
+                const canAppeal = report.status === "resolved_no_action"
+                  && !reportAppeal;
+
+                return (
+                  <article key={report.id}>
+                    <div>
+                      <strong>{report.content_snapshot?.title || "Zgłoszona treść portfolio"}</strong>
+                      <small>{report.report_number} · {formatDisputeDate(report.submitted_at)}</small>
+                    </div>
+                    <span className={`content-report-status is-${report.status}`}>
+                      {CONTENT_REPORT_STATUS_LABELS[report.status] || report.status}
+                    </span>
+                    <p>{CONTENT_REPORT_REASON_LABELS[report.reason_code] || report.reason_code}</p>
+                    {report.decision_summary && (
+                      <div className="profile-content-report-decision">
+                        <strong>Wynik analizy</strong>
+                        <p>{report.decision_summary}</p>
+                      </div>
+                    )}
+                    {reportAppeal ? (
+                      <small className="profile-content-report-appeal-status">
+                        Odwołanie: {reportAppeal.status === "submitted"
+                          ? "oczekuje na ponowną analizę"
+                          : reportAppeal.status === "accepted"
+                          ? "uwzględnione"
+                          : "oddalone"}
+                        {reportAppeal.resolution_reason
+                          ? ` — ${reportAppeal.resolution_reason}`
+                          : ""}
+                      </small>
+                    ) : canAppeal ? (
+                      <button
+                        type="button"
+                        className="privacy-secondary-button"
+                        onClick={() => handleContentReportAppeal(report)}
+                        disabled={Boolean(contentReportBusy)}
+                      >
+                        {contentReportBusy === report.id
+                          ? "Wysyłanie..."
+                          : "Poproś o ponowną analizę"}
+                      </button>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <section className="account-card my-jobs-section">
           <span className="section-label">
@@ -8860,6 +9407,15 @@ function Profile() {
   const [blockMessage, setBlockMessage] =
     useState("");
 
+  const [portfolioViewer, setPortfolioViewer] =
+    useState(null);
+
+  const [portfolioReportTarget, setPortfolioReportTarget] =
+    useState(null);
+
+  const [portfolioReportMessage, setPortfolioReportMessage] =
+    useState("");
+
   useEffect(() => {
     if (!id) return;
 
@@ -8992,21 +9548,12 @@ function Profile() {
           );
         }
 
-        const {
-          data: portfolioData,
-          error: portfolioError,
-        } = await supabase
-          .from("ideahire_portfolio_items")
-          .select("id, title, description, project_url, image_url, display_order, created_at")
-          .eq("user_id", id)
-          .order("display_order", { ascending: true })
-          .order("created_at", { ascending: true });
-
-        if (portfolioError) {
+        try {
+          const portfolioData = await fetchPortfolioAlbums(id);
+          setPortfolioItems(portfolioData);
+        } catch (portfolioError) {
           console.error("PROFILE PORTFOLIO ERROR:", portfolioError);
           setPortfolioItems([]);
-        } else {
-          setPortfolioItems(portfolioData || []);
         }
       } catch (error) {
         setMessage(
@@ -9719,57 +10266,75 @@ function Profile() {
                   <span className="profile-expertise-label">Wybrane realizacje</span>
                   <h2 id="profile-public-portfolio-title">Portfolio</h2>
                 </div>
-
-                <a
-                  className="profile-public-report-link"
-                  href={`mailto:ideahireprywatnosc@gmail.com?subject=${encodeURIComponent(
-                    `Zgłoszenie nielegalnej treści — portfolio ${id}`
-                  )}&body=${encodeURIComponent(
-                    `Link do profilu: ${window.location.href}\nProjekt: wpisz tytuł zgłaszanego projektu\nDane kontaktowe: wpisz, jeżeli są inne niż adres nadawcy\n\nWyjaśnij, dlaczego treść może być nielegalna i podaj znaną Ci podstawę prawną:\n\nOświadczenie: Działam w dobrej wierze i uważam powyższe informacje za dokładne i kompletne.`
-                  )}`}
-                >
-                  Zgłoś treść
-                </a>
+                <span className="profile-public-portfolio-count">
+                  {portfolioItems.length} {portfolioItems.length === 1 ? "album" : "albumów"}
+                </span>
               </div>
 
-              <div className="profile-public-portfolio-grid">
-                {portfolioItems.map((item) => (
-                  <article className="profile-public-portfolio-card" key={item.id}>
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={`Projekt: ${item.title}`} />
-                    ) : (
-                      <div className="profile-portfolio-image-placeholder" aria-hidden="true">
-                        ↗
-                      </div>
-                    )}
+              {portfolioReportMessage && (
+                <p className="profile-public-report-message" role="status">
+                  {portfolioReportMessage}
+                </p>
+              )}
 
-                    <div className="profile-public-portfolio-copy">
-                      <h3>{item.title}</h3>
-                      {item.description && <p>{item.description}</p>}
-                      {item.project_url && (
-                        <a
-                          className="profile-public-project-link"
-                          href={item.project_url}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
+              <div className="profile-public-portfolio-grid">
+                {portfolioItems.map((item) => {
+                  const media = getPortfolioMedia(item);
+                  const cover = media[0];
+
+                  return (
+                    <article
+                      className="profile-public-portfolio-card"
+                      id={`portfolio-${item.id}`}
+                      key={item.id}
+                    >
+                      {cover ? (
+                        <button
+                          type="button"
+                          className="profile-public-album-cover"
+                          onClick={() => setPortfolioViewer({ album: item, index: 0 })}
+                          aria-label={`Otwórz album ${item.title}, ${media.length} zdjęć`}
                         >
-                          Otwórz projekt ↗
-                        </a>
+                          <img src={cover.image_url} alt={`Projekt: ${item.title}`} />
+                          <span className="profile-public-album-count">
+                            <strong>{media.length}</strong>
+                            {media.length === 1 ? "zdjęcie" : "zdjęć"}
+                          </span>
+                          <span className="profile-public-album-open">Otwórz album</span>
+                        </button>
+                      ) : (
+                        <div className="profile-portfolio-image-placeholder" aria-hidden="true">
+                          ↗
+                        </div>
                       )}
 
-                      <a
-                        className="profile-public-item-report"
-                        href={`mailto:ideahireprywatnosc@gmail.com?subject=${encodeURIComponent(
-                          `Zgłoszenie nielegalnej treści — projekt ${item.id}`
-                        )}&body=${encodeURIComponent(
-                          `Link do profilu: ${window.location.href}\nID projektu: ${item.id}\nTytuł projektu: ${item.title}\nDane kontaktowe: wpisz, jeżeli są inne niż adres nadawcy\n\nWyjaśnij, dlaczego treść może być nielegalna i podaj znaną Ci podstawę prawną:\n\nOświadczenie: Działam w dobrej wierze i uważam powyższe informacje za dokładne i kompletne.`
-                        )}`}
-                      >
-                        Zgłoś ten projekt
-                      </a>
-                    </div>
-                  </article>
-                ))}
+                      <div className="profile-public-portfolio-copy">
+                        <h3>{item.title}</h3>
+                        {item.description && <p>{item.description}</p>}
+                        {item.project_url && (
+                          <a
+                            className="profile-public-project-link"
+                            href={item.project_url}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                          >
+                            {getPortfolioLinkLabel(item.project_url)} ↗
+                          </a>
+                        )}
+
+                        {user?.id !== id && (
+                          <button
+                            type="button"
+                            className="profile-public-item-report"
+                            onClick={() => setPortfolioReportTarget({ album: item, media: null })}
+                          >
+                            Zgłoś album
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -9838,6 +10403,32 @@ function Profile() {
           </section>
         )}
       </main>
+
+      {portfolioViewer && (
+        <PortfolioLightbox
+          album={portfolioViewer.album}
+          initialIndex={portfolioViewer.index}
+          canReport={user?.id !== id}
+          onClose={() => setPortfolioViewer(null)}
+          onReport={(album, media) => {
+            setPortfolioViewer(null);
+            setPortfolioReportTarget({ album, media });
+          }}
+        />
+      )}
+
+      {portfolioReportTarget && (
+        <PortfolioReportDialog
+          target={portfolioReportTarget}
+          onClose={() => setPortfolioReportTarget(null)}
+          onSubmitted={(result) => {
+            setPortfolioReportTarget(null);
+            setPortfolioReportMessage(
+              `Zgłoszenie ${result?.report_number || ""} zostało zapisane. Status i wynik analizy znajdziesz na swoim koncie.`
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -15771,6 +16362,10 @@ function DisputeDetails() {
   const [messageEvidence, setMessageEvidence] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [appeals, setAppeals] = useState([]);
+  const [contentReports, setContentReports] = useState([]);
+  const [contentReportAppeals, setContentReportAppeals] = useState([]);
+  const [activeContentReport, setActiveContentReport] = useState(null);
+  const [contentAppealNotes, setContentAppealNotes] = useState({});
   const [chatMessages, setChatMessages] = useState([]);
   const [adminChatMessages, setAdminChatMessages] = useState([]);
   const [adminAgreements, setAdminAgreements] = useState([]);
@@ -18026,7 +18621,13 @@ function AdminModeration() {
       );
       if (refreshError) throw refreshError;
 
-      const [casesResult, noticesResult, appealsResult] = await Promise.all([
+      const [
+        casesResult,
+        noticesResult,
+        appealsResult,
+        contentReportsResult,
+        contentReportAppealsResult,
+      ] = await Promise.all([
         supabase
           .from("ideahire_moderation_cases")
           .select("*")
@@ -18042,17 +18643,32 @@ function AdminModeration() {
           .select("*")
           .order("submitted_at", { ascending: false })
           .limit(300),
+        supabase
+          .from("ideahire_content_reports")
+          .select("*")
+          .order("submitted_at", { ascending: true })
+          .limit(300),
+        supabase
+          .from("ideahire_content_report_appeals")
+          .select("*")
+          .order("submitted_at", { ascending: true })
+          .limit(300),
       ]);
 
       if (casesResult.error) throw casesResult.error;
       if (noticesResult.error) throw noticesResult.error;
       if (appealsResult.error) throw appealsResult.error;
+      if (contentReportsResult.error) throw contentReportsResult.error;
+      if (contentReportAppealsResult.error) throw contentReportAppealsResult.error;
 
       const caseRows = casesResult.data || [];
       const noticeRows = noticesResult.data || [];
       const appealRows = appealsResult.data || [];
+      const contentReportRows = contentReportsResult.data || [];
+      const contentReportAppealRows = contentReportAppealsResult.data || [];
       const profileIds = [...new Set([
         ...caseRows.map((item) => item.target_user_id),
+        ...contentReportRows.map((item) => item.reported_user_id),
         ...(selectedUserId ? [selectedUserId] : []),
       ].filter(Boolean))];
 
@@ -18074,6 +18690,8 @@ function AdminModeration() {
         noticeRows.map((notice) => [notice.case_id, notice])
       ));
       setAppeals(appealRows);
+      setContentReports(contentReportRows);
+      setContentReportAppeals(contentReportAppealRows);
       setProfiles((current) => ({ ...current, ...profileMap }));
     } catch (error) {
       setMessage(cleanSupabaseError(
@@ -18103,6 +18721,16 @@ function AdminModeration() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "ideahire_moderation_appeals" },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ideahire_content_reports" },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ideahire_content_report_appeals" },
         refresh
       )
       .subscribe();
@@ -18205,6 +18833,124 @@ function AdminModeration() {
     setForm((current) => ({ ...current, ...values }));
   }
 
+  async function handleOpenContentReport(report) {
+    if (busy) return;
+    setBusy(`report:${report.id}`);
+    setMessage("");
+
+    try {
+      if (report.status === "submitted") {
+        const { error } = await supabase.rpc(
+          "admin_review_ideahire_content_report",
+          {
+            p_report_id: report.id,
+            p_action: "start_review",
+            p_decision_summary: null,
+            p_legal_assessment: null,
+          }
+        );
+        if (error) throw error;
+      }
+
+      const reasonMap = {
+        copyright: "illegal_content",
+        privacy_or_image_rights: "illegal_content",
+        impersonation: "impersonation",
+        harassment_or_threats: "harassment_or_threats",
+        fraud_or_scam: "fraud_or_scam",
+        illegal_goods_or_services: "illegal_content",
+        other_terms_breach: "other_terms_breach",
+        other_illegal_content: "illegal_content",
+      };
+
+      setActiveContentReport({ ...report, status: "in_review" });
+      setSelectedUserId(report.reported_user_id || "");
+      setForm((current) => ({
+        ...current,
+        reasonCode: reasonMap[report.reason_code] || "illegal_content",
+        termsReference: "Regulamin IdeaHire § 21 — nielegalne treści i moderacja",
+        internalNote: `Zgłoszenie ${report.report_number}: ${report.explanation}`.slice(0, 5000),
+      }));
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się rozpocząć analizy zgłoszenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleResolveContentReportNoAction(report) {
+    if (busy) return;
+    const decisionSummary = window.prompt(
+      "Podaj jasne uzasadnienie decyzji dla zgłaszającego (minimum 50 znaków):"
+    );
+    if (!decisionSummary) return;
+    if (decisionSummary.trim().length < 50) {
+      setMessage("Uzasadnienie decyzji musi mieć co najmniej 50 znaków.");
+      return;
+    }
+
+    const legalAssessment = window.prompt(
+      "Opcjonalnie wpisz podstawę prawną lub wynik oceny prawnej. Możesz pozostawić puste."
+    );
+
+    setBusy(`report-resolve:${report.id}`);
+    setMessage("");
+    try {
+      const { error } = await supabase.rpc(
+        "admin_review_ideahire_content_report",
+        {
+          p_report_id: report.id,
+          p_action: "resolve_no_action",
+          p_decision_summary: decisionSummary.trim(),
+          p_legal_assessment: legalAssessment?.trim() || null,
+        }
+      );
+      if (error) throw error;
+      setActiveContentReport(null);
+      setMessage("Zgłoszenie zakończono. Zgłaszający zobaczy uzasadnienie i możliwość ponownej analizy.");
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się zakończyć zgłoszenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleResolveContentReportAppeal(appeal, resolution) {
+    if (busy) return;
+    const note = String(contentAppealNotes[appeal.id] || "").trim();
+    if (note.length < 30) {
+      setMessage("Uzasadnienie wyniku odwołania musi mieć co najmniej 30 znaków.");
+      return;
+    }
+
+    setBusy(`content-appeal:${appeal.id}`);
+    setMessage("");
+    try {
+      const { error } = await supabase.rpc(
+        "admin_resolve_ideahire_content_report_appeal",
+        {
+          p_appeal_id: appeal.id,
+          p_resolution: resolution,
+          p_reason: note,
+        }
+      );
+      if (error) throw error;
+      setContentAppealNotes((current) => ({ ...current, [appeal.id]: "" }));
+      setMessage(
+        resolution === "accepted"
+          ? "Odwołanie uwzględniono, a zgłoszenie wróciło do ponownej analizy."
+          : "Odwołanie oddalono wraz z uzasadnieniem."
+      );
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(cleanSupabaseError(error, "Nie udało się rozpoznać odwołania do zgłoszenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
   async function handleImposeRestriction(event) {
     event.preventDefault();
     if (!selectedUserId || busy) return;
@@ -18259,9 +19005,10 @@ function AdminModeration() {
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
-        "admin_impose_ideahire_account_restriction",
-        {
+      const rpcName = activeContentReport
+        ? "admin_impose_ideahire_report_restriction"
+        : "admin_impose_ideahire_account_restriction";
+      const rpcPayload = {
           p_target_user_id: selectedUserId,
           p_decision_type: form.decisionType,
           p_duration_days: form.decisionType === "temporary_suspension"
@@ -18285,8 +19032,15 @@ function AdminModeration() {
               ? form.ownerConfirmation.trim()
               : null,
           p_source_job_id: sourceJob?.id || null,
-        }
-      );
+      };
+
+      if (activeContentReport) {
+        delete rpcPayload.p_target_user_id;
+        delete rpcPayload.p_source_job_id;
+        rpcPayload.p_report_id = activeContentReport.id;
+      }
+
+      const { error } = await supabase.rpc(rpcName, rpcPayload);
 
       if (error) throw error;
 
@@ -18302,6 +19056,7 @@ function AdminModeration() {
         immediateExceptionCode: "",
         ownerConfirmation: "",
       });
+      setActiveContentReport(null);
       setMessage("Decyzja została zapisana, a użytkownik otrzymał zawiadomienie i dostęp do odwołania.");
       await loadModeration(false);
     } catch (error) {
@@ -18478,6 +19233,12 @@ function AdminModeration() {
   const openAppeals = appeals.filter((item) =>
     ["submitted", "in_review"].includes(item.status)
   );
+  const openContentReports = contentReports.filter((item) =>
+    ["submitted", "in_review"].includes(item.status)
+  );
+  const openContentReportAppeals = contentReportAppeals.filter(
+    (item) => item.status === "submitted"
+  );
 
   return (
     <div className="account-page admin-page admin-moderation-page">
@@ -18499,6 +19260,134 @@ function AdminModeration() {
         </header>
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
+
+        <section className="moderation-content-reports">
+          <div className="moderation-content-reports-heading">
+            <div>
+              <span className="section-label">Zgłoszenia treści portfolio</span>
+              <h2>Kolejka do ręcznej analizy</h2>
+              <p>
+                Zgłoszenie nie nakłada sankcji automatycznie. Otwórz materiał,
+                oceń kontekst i wybierz brak naruszenia albo proporcjonalne ograniczenie.
+              </p>
+            </div>
+            <span>{openContentReports.length}</span>
+          </div>
+
+          {openContentReports.length === 0 ? (
+            <div className="privacy-empty-state">Brak nowych zgłoszeń treści.</div>
+          ) : (
+            <div className="moderation-content-report-list">
+              {openContentReports.map((report) => (
+                <article
+                  className={activeContentReport?.id === report.id ? "is-active" : ""}
+                  key={report.id}
+                >
+                  {report.content_snapshot?.reported_image_url
+                    || report.content_snapshot?.legacy_cover_url ? (
+                    <img
+                      src={report.content_snapshot.reported_image_url
+                        || report.content_snapshot.legacy_cover_url}
+                      alt="Zgłoszony materiał portfolio"
+                    />
+                  ) : (
+                    <div className="moderation-content-report-placeholder">TREŚĆ</div>
+                  )}
+                  <div>
+                    <span className={`content-report-status is-${report.status}`}>
+                      {CONTENT_REPORT_STATUS_LABELS[report.status] || report.status}
+                    </span>
+                    <h3>{report.content_snapshot?.title || "Projekt portfolio"}</h3>
+                    <small>{report.report_number} · {formatDisputeDate(report.submitted_at)}</small>
+                    <strong>{CONTENT_REPORT_REASON_LABELS[report.reason_code] || report.reason_code}</strong>
+                    <p>{report.explanation}</p>
+                    {report.legal_reference && (
+                      <p><b>Wskazana podstawa:</b> {report.legal_reference}</p>
+                    )}
+                    <div className="moderation-content-report-actions">
+                      <a
+                        href={report.content_location}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Otwórz lokalizację ↗
+                      </a>
+                      <button
+                        type="button"
+                        className="privacy-primary-button"
+                        onClick={() => handleOpenContentReport(report)}
+                        disabled={Boolean(busy)}
+                      >
+                        {busy === `report:${report.id}`
+                          ? "Otwieranie..."
+                          : report.status === "submitted"
+                          ? "Rozpocznij analizę"
+                          : "Kontynuuj analizę"}
+                      </button>
+                      <button
+                        type="button"
+                        className="privacy-secondary-button"
+                        onClick={() => handleResolveContentReportNoAction(report)}
+                        disabled={Boolean(busy)}
+                      >
+                        Brak podstaw do działania
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {openContentReportAppeals.length > 0 && (
+          <section className="moderation-content-report-appeals">
+            <div>
+              <span className="section-label">Ponowna analiza zgłoszeń</span>
+              <h2>Odwołania zgłaszających</h2>
+            </div>
+            <div className="moderation-content-report-appeal-list">
+              {openContentReportAppeals.map((appeal) => {
+                const report = contentReports.find((item) => item.id === appeal.report_id);
+                return (
+                  <article key={appeal.id}>
+                    <strong>{report?.report_number || "Zgłoszenie treści"}</strong>
+                    <p>{appeal.statement}</p>
+                    <textarea
+                      value={contentAppealNotes[appeal.id] || ""}
+                      onChange={(event) => setContentAppealNotes((current) => ({
+                        ...current,
+                        [appeal.id]: event.target.value,
+                      }))}
+                      minLength={30}
+                      maxLength={3000}
+                      rows={4}
+                      placeholder="Uzasadnij wynik ponownej, ręcznej analizy..."
+                    />
+                    <div>
+                      <button
+                        type="button"
+                        className="privacy-secondary-button"
+                        onClick={() => handleResolveContentReportAppeal(appeal, "rejected")}
+                        disabled={Boolean(busy)}
+                      >
+                        Oddal odwołanie
+                      </button>
+                      <button
+                        type="button"
+                        className="privacy-primary-button"
+                        onClick={() => handleResolveContentReportAppeal(appeal, "accepted")}
+                        disabled={Boolean(busy)}
+                      >
+                        Uwzględnij i otwórz ponownie
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <section className="moderation-search-card">
           <div>
@@ -18557,6 +19446,28 @@ function AdminModeration() {
                 </span>
               )}
             </div>
+
+            {activeContentReport && (
+              <article className="moderation-active-content-report">
+                <div>
+                  <span className="section-label">Źródło przygotowywanej decyzji</span>
+                  <h3>{activeContentReport.report_number}</h3>
+                </div>
+                <p>{activeContentReport.explanation}</p>
+                <small>
+                  Decyzja musi wynikać z samodzielnej analizy administratora.
+                  Dane zgłaszającego nie będą pokazane właścicielowi treści.
+                </small>
+                <button
+                  type="button"
+                  className="privacy-secondary-button"
+                  onClick={() => setActiveContentReport(null)}
+                  disabled={Boolean(busy)}
+                >
+                  Odłącz zgłoszenie od decyzji
+                </button>
+              </article>
+            )}
 
             {sourceJob && (
               <article className="moderation-source-job">
