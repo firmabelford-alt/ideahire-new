@@ -170,6 +170,88 @@
   line-height: 1.5;
 }
 
+.erasure-blocker-list {
+  display: grid !important;
+  gap: 8px !important;
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.erasure-blocker-list li {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid rgba(151, 80, 71, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.erasure-blocker-list li::before {
+  content: none !important;
+}
+
+.erasure-blocker-list li > span:last-child {
+  min-width: 0;
+}
+
+.erasure-blocker-list strong,
+.erasure-blocker-list small {
+  display: block;
+}
+
+.erasure-blocker-list strong {
+  margin: 0 0 3px;
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.erasure-blocker-list small {
+  color: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  opacity: 0.88;
+}
+
+.erasure-blocker-count {
+  width: 28px;
+  height: 28px;
+  display: grid !important;
+  place-items: center;
+  border-radius: 9px;
+  background: #f2d9d5;
+  color: #7c342e;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.privacy-eligibility-refresh {
+  min-height: 34px;
+  margin-top: 12px;
+  padding: 7px 11px;
+  border: 1px solid currentColor;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.privacy-eligibility-refresh:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.privacy-eligibility-refresh:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 .privacy-erasure-requested-action {
   display: grid;
   gap: 4px;
@@ -355,6 +437,19 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
   color: #6e786f;
   font-size: 14px;
   overflow-wrap: anywhere;
+}
+
+.erasure-account-person .erasure-account-auth-state {
+  max-width: 720px;
+  margin-top: 9px;
+  padding: 9px 11px;
+  border: 1px solid #bad4bf;
+  border-radius: 10px;
+  background: #edf7ef;
+  color: #315b3a;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.5;
 }
 
 .erasure-account-person code {
@@ -1807,6 +1902,23 @@ html[data-theme="dark"] .moderation-appeal-admin-list textarea {
   font-size: 14px;
 }
 
+.erasure-blockers-card .erasure-blocker-list {
+  margin-left: 53px !important;
+}
+
+.erasure-blockers-card .erasure-blocker-list strong {
+  font-size: 13px;
+}
+
+.erasure-blockers-card .erasure-blocker-list small {
+  font-size: 12px;
+}
+
+.erasure-blockers-card > .privacy-eligibility-refresh {
+  margin-left: 53px;
+  color: #7d2f2f;
+}
+
 .erasure-blockers-card li::before {
   content: "•";
   margin-right: 8px;
@@ -1920,6 +2032,106 @@ html[data-theme="dark"] .moderation-appeal-admin-list textarea {
   background: #356b40;
 }
 
+.erasure-completed-content {
+  min-width: 0;
+}
+
+.erasure-completed-content > p {
+  margin: 6px 0 0;
+  color: #4e6553;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.erasure-execution-report,
+.erasure-retention-report {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 15px;
+  border: 1px solid #c9decd;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.erasure-execution-report h3,
+.erasure-retention-report h3 {
+  margin: 4px 0 0;
+  color: #2d4132;
+  font-size: 15px;
+}
+
+.erasure-execution-report dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.erasure-execution-report dl > div,
+.erasure-retention-report li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid #dbe7dd;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.erasure-execution-report dt,
+.erasure-retention-report li > span {
+  min-width: 0;
+  color: #526058;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.erasure-execution-report dd,
+.erasure-retention-report li > strong {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #2e5d38;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.erasure-retention-report {
+  border-color: #e1d4ae;
+  background: #fffaf0;
+}
+
+.erasure-retention-report ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.erasure-retention-report li {
+  border-color: #e8dfc5;
+}
+
+.erasure-retention-report li > strong {
+  color: #725a22;
+}
+
+.erasure-retention-report > p,
+.erasure-retention-report > small {
+  margin: 0;
+  color: #6d654f;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.erasure-retention-report > small {
+  padding-top: 10px;
+  border-top: 1px dashed #dfd3b3;
+}
+
 .erasure-case-timeline {
   display: grid;
   gap: 0;
@@ -2011,6 +2223,40 @@ html[data-theme="dark"] .moderation-appeal-admin-list textarea {
   margin-top: 18px;
 }
 
+.erasure-dialog label > small {
+  color: #8a5550;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.erasure-dialog label > small.is-ready {
+  color: #3d7148;
+}
+
+.erasure-dialog-blockers {
+  margin-top: 14px;
+}
+
+.erasure-dialog-blockers .erasure-blocker-list strong {
+  font-size: 12px;
+}
+
+.erasure-dialog-blockers .erasure-blocker-list small {
+  font-size: 11px;
+}
+
+.erasure-dialog-message {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #dfa9a4;
+  border-radius: 11px;
+  background: #fff0ee;
+  color: #7d302b;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+
 .erasure-dialog-actions {
   display: flex;
   justify-content: flex-end;
@@ -2056,6 +2302,14 @@ html[data-theme="dark"] .erasure-dialog-intro {
   color: #aeb8ae;
 }
 
+html[data-theme="dark"]
+  .erasure-account-person
+  .erasure-account-auth-state {
+  border-color: #3d6045;
+  background: #18261b;
+  color: #b9d9bf;
+}
+
 html[data-theme="dark"] .erasure-actions-menu > summary,
 html[data-theme="dark"] .erasure-actions-menu > div,
 html[data-theme="dark"] .erasure-actions-menu button,
@@ -2083,11 +2337,63 @@ html[data-theme="dark"] .erasure-account-notice.is-danger {
   background: #241514;
 }
 
+html[data-theme="dark"] .erasure-blocker-list li,
+html[data-theme="dark"] .erasure-dialog-message {
+  border-color: #623a37;
+  background: #291817;
+  color: #efc5c1;
+}
+
+html[data-theme="dark"] .erasure-blocker-count {
+  background: #4a2926;
+  color: #f0c4bf;
+}
+
+html[data-theme="dark"] .erasure-dialog label > small {
+  color: #d5a4a0;
+}
+
+html[data-theme="dark"] .erasure-dialog label > small.is-ready {
+  color: #a9d1b0;
+}
+
 html[data-theme="dark"] .erasure-account-notice,
 html[data-theme="dark"] .erasure-account-notice.is-warning,
 html[data-theme="dark"] .erasure-completed-banner {
   border-color: #39443a;
   background: #171b16;
+}
+
+html[data-theme="dark"] .erasure-completed-content > p {
+  color: #b8c7ba;
+}
+
+html[data-theme="dark"] .erasure-execution-report {
+  border-color: #354d3a;
+  background: #121a13;
+}
+
+html[data-theme="dark"] .erasure-retention-report {
+  border-color: #574d31;
+  background: #1f1c12;
+}
+
+html[data-theme="dark"] .erasure-execution-report h3,
+html[data-theme="dark"] .erasure-retention-report h3 {
+  color: #e3ebe2;
+}
+
+html[data-theme="dark"] .erasure-execution-report dl > div,
+html[data-theme="dark"] .erasure-retention-report li {
+  border-color: #354037;
+  background: #0d110e;
+}
+
+html[data-theme="dark"] .erasure-execution-report dt,
+html[data-theme="dark"] .erasure-retention-report li > span,
+html[data-theme="dark"] .erasure-retention-report > p,
+html[data-theme="dark"] .erasure-retention-report > small {
+  color: #aeb8ae;
 }
 
 @media (max-width: 1050px) {
@@ -2139,6 +2445,15 @@ html[data-theme="dark"] .erasure-completed-banner {
   .erasure-dialog-actions button,
   .erasure-danger-button {
     width: 100%;
+  }
+
+  .erasure-blockers-card .erasure-blocker-list,
+  .erasure-blockers-card > .privacy-eligibility-refresh {
+    margin-left: 0 !important;
+  }
+
+  .erasure-execution-report dl {
+    grid-template-columns: 1fr;
   }
 }
 
