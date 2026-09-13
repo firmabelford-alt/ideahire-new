@@ -18273,14 +18273,12 @@ function DisputeDetails() {
 
 function AdminJobs() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [profiles, setProfiles] = useState({});
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Wszystkie");
-  const [openingModerationJobId, setOpeningModerationJobId] = useState("");
 
   async function loadAdminJobs() {
     if (!user?.id) return;
@@ -18354,79 +18352,6 @@ function AdminJobs() {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
-
-  async function handleOpenJobModeration(job) {
-    if (openingModerationJobId) return;
-
-    if (!job?.id || !job?.user_id) {
-      setMessage(
-        "Nie można otworzyć moderacji, ponieważ zlecenie nie ma prawidłowego identyfikatora autora."
-      );
-      return;
-    }
-
-    setOpeningModerationJobId(job.id);
-    setMessage("");
-
-    try {
-      const { data, error } = await supabase.rpc(
-        "admin_get_ideahire_moderation_subject",
-        {
-          p_user_id: job.user_id,
-        }
-      );
-
-      if (error) throw error;
-
-      const subject = typeof data === "string"
-        ? JSON.parse(data)
-        : data;
-
-      if (!subject?.account_exists) {
-        throw new Error(
-          "Konto autora tego zlecenia nie istnieje już w systemie Auth."
-        );
-      }
-
-      const moderationSubject = {
-        id: job.user_id,
-        name: subject.name || "Użytkownik IdeaHire",
-        avatar_url: subject.avatar_url || null,
-        created_at: subject.created_at || null,
-        profile_exists: subject.profile_exists !== false,
-        lifecycle_status: subject.lifecycle_status || "active",
-        age_access_status: subject.age_access_status || "unknown",
-        active_moderation_restriction:
-          subject.active_moderation_restriction === true,
-      };
-
-      navigate(
-        {
-          pathname: "/admin/moderation",
-          search: new URLSearchParams({
-            user: job.user_id,
-            job: job.id,
-          }).toString(),
-        },
-        {
-          state: {
-            openedFromAdminJobs: true,
-            moderationSubject,
-            sourceJob: job,
-          },
-        }
-      );
-    } catch (error) {
-      setMessage(
-        cleanSupabaseError(
-          error,
-          "Nie udało się otworzyć moderacji konta."
-        )
-      );
-    } finally {
-      setOpeningModerationJobId("");
-    }
-  }
 
   const normalizedSearch = search.trim().toLowerCase();
   const visibleJobs = jobs.filter((job) => {
@@ -18533,16 +18458,12 @@ function AdminJobs() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
+                  <a
                     className="privacy-admin-account-link"
-                    onClick={() => handleOpenJobModeration(job)}
-                    disabled={Boolean(openingModerationJobId)}
+                    href={`/admin/moderation/job/${encodeURIComponent(job.id)}`}
                   >
-                    {openingModerationJobId === job.id
-                      ? "Otwieranie moderacji..."
-                      : "Przejdź do moderacji konta →"}
-                  </button>
+                    Przejdź do moderacji konta →
+                  </a>
                 </article>
               );
             })}
@@ -18790,9 +18711,10 @@ function AdminModeration() {
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
   const location = useLocation();
+  const { moderationJobId } = useParams();
   const moderationParams = new URLSearchParams(location.search);
   const requestedUserId = moderationParams.get("user");
-  const requestedJobId = moderationParams.get("job");
+  const requestedJobId = moderationJobId || moderationParams.get("job");
   const routedModerationSubject =
     location.state?.moderationSubject?.id === requestedUserId
       ? location.state.moderationSubject
@@ -18817,6 +18739,10 @@ function AdminModeration() {
   const [selectedUserId, setSelectedUserId] = useState(requestedUserId || "");
   const [selectedSubjectLoading, setSelectedSubjectLoading] = useState(false);
   const [selectedSubjectError, setSelectedSubjectError] = useState("");
+  const [jobModerationLoading, setJobModerationLoading] = useState(
+    Boolean(moderationJobId)
+  );
+  const [jobModerationError, setJobModerationError] = useState("");
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [busy, setBusy] = useState("");
@@ -18970,7 +18896,79 @@ function AdminModeration() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!requestedUserId) return;
+    if (!moderationJobId) return;
+
+    let mounted = true;
+
+    async function openModerationFromJob() {
+      setJobModerationLoading(true);
+      setJobModerationError("");
+      setSelectedSubjectError("");
+
+      try {
+        const { data, error } = await supabase.rpc(
+          "admin_open_ideahire_job_moderation",
+          {
+            p_job_id: moderationJobId,
+          }
+        );
+
+        if (error) throw error;
+        if (!mounted) return;
+
+        const payload = typeof data === "string"
+          ? JSON.parse(data)
+          : data;
+
+        if (!payload?.job?.id || !payload?.subject?.id) {
+          throw new Error(
+            "Supabase nie zwrócił kompletnego zlecenia i konta autora."
+          );
+        }
+
+        const subject = {
+          id: payload.subject.id,
+          name: payload.subject.name || "Użytkownik IdeaHire",
+          avatar_url: payload.subject.avatar_url || null,
+          created_at: payload.subject.created_at || null,
+          profile_exists: payload.subject.profile_exists !== false,
+          lifecycle_status: payload.subject.lifecycle_status || "active",
+          age_access_status: payload.subject.age_access_status || "unknown",
+          active_moderation_restriction:
+            payload.subject.active_moderation_restriction === true,
+        };
+
+        setSelectedUserId(subject.id);
+        setProfiles((current) => ({
+          ...current,
+          [subject.id]: subject,
+        }));
+        setSourceJob(payload.job);
+      } catch (error) {
+        if (!mounted) return;
+
+        setJobModerationError(
+          cleanSupabaseError(
+            error,
+            "Nie udało się otworzyć konta autora tego zlecenia."
+          )
+        );
+      } finally {
+        if (mounted) {
+          setJobModerationLoading(false);
+        }
+      }
+    }
+
+    openModerationFromJob();
+
+    return () => {
+      mounted = false;
+    };
+  }, [moderationJobId]);
+
+  useEffect(() => {
+    if (!requestedUserId || moderationJobId) return;
 
     setSelectedUserId(requestedUserId);
     setSelectedSubjectError("");
@@ -19047,9 +19045,11 @@ function AdminModeration() {
     return () => {
       mounted = false;
     };
-  }, [requestedUserId]);
+  }, [requestedUserId, moderationJobId, location.key]);
 
   useEffect(() => {
+    if (moderationJobId) return;
+
     if (!requestedJobId || !requestedUserId) {
       setSourceJob(null);
       return;
@@ -19071,7 +19071,7 @@ function AdminModeration() {
         }
         setSourceJob(data || null);
       });
-  }, [requestedJobId, requestedUserId]);
+  }, [moderationJobId, requestedJobId, requestedUserId]);
 
   async function handleUserSearch(event) {
     event.preventDefault();
@@ -19535,8 +19535,9 @@ function AdminModeration() {
 
   useEffect(() => {
     if (
-      !requestedUserId
+      (!requestedUserId && !moderationJobId)
       || selectedSubjectLoading
+      || jobModerationLoading
       || (!selectedProfile && !selectedSubjectError)
     ) {
       return undefined;
@@ -19554,7 +19555,9 @@ function AdminModeration() {
     };
   }, [
     requestedUserId,
+    moderationJobId,
     selectedSubjectLoading,
+    jobModerationLoading,
     selectedSubjectError,
     selectedProfile?.id,
   ]);
@@ -19579,6 +19582,25 @@ function AdminModeration() {
         </header>
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
+
+        {jobModerationLoading && (
+          <div className="moderation-job-opening" role="status">
+            <span className="section-label">Otwieranie sprawy</span>
+            <h2>Ładowanie konta autora zlecenia…</h2>
+            <p>Sprawdzamy zlecenie i przypisujemy właściwe konto do moderacji.</p>
+          </div>
+        )}
+
+        {jobModerationError && (
+          <div className="moderation-job-opening is-error" role="alert">
+            <span className="section-label">Nie udało się otworzyć konta</span>
+            <h2>Moderacja zlecenia nie została uruchomiona</h2>
+            <p>{jobModerationError}</p>
+            <Link className="privacy-secondary-button" to="/admin/jobs">
+              Wróć do listy zleceń
+            </Link>
+          </div>
+        )}
 
         <section className="moderation-content-reports">
           <div className="moderation-content-reports-heading">
@@ -23514,6 +23536,17 @@ function Router() {
               <ProtectedRoute>
                 <StaffOnlyRoute>
                   <AdminUserPrivacyAccount />
+                </StaffOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/moderation/job/:moderationJobId"
+            element={
+              <ProtectedRoute>
+                <StaffOnlyRoute>
+                  <AdminModeration />
                 </StaffOnlyRoute>
               </ProtectedRoute>
             }
