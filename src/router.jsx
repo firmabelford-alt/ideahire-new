@@ -18273,12 +18273,14 @@ function DisputeDetails() {
 
 function AdminJobs() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [profiles, setProfiles] = useState({});
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Wszystkie");
+  const [openingModerationJobId, setOpeningModerationJobId] = useState("");
 
   async function loadAdminJobs() {
     if (!user?.id) return;
@@ -18352,6 +18354,79 @@ function AdminJobs() {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
+  async function handleOpenJobModeration(job) {
+    if (openingModerationJobId) return;
+
+    if (!job?.id || !job?.user_id) {
+      setMessage(
+        "Nie można otworzyć moderacji, ponieważ zlecenie nie ma prawidłowego identyfikatora autora."
+      );
+      return;
+    }
+
+    setOpeningModerationJobId(job.id);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "admin_get_ideahire_moderation_subject",
+        {
+          p_user_id: job.user_id,
+        }
+      );
+
+      if (error) throw error;
+
+      const subject = typeof data === "string"
+        ? JSON.parse(data)
+        : data;
+
+      if (!subject?.account_exists) {
+        throw new Error(
+          "Konto autora tego zlecenia nie istnieje już w systemie Auth."
+        );
+      }
+
+      const moderationSubject = {
+        id: job.user_id,
+        name: subject.name || "Użytkownik IdeaHire",
+        avatar_url: subject.avatar_url || null,
+        created_at: subject.created_at || null,
+        profile_exists: subject.profile_exists !== false,
+        lifecycle_status: subject.lifecycle_status || "active",
+        age_access_status: subject.age_access_status || "unknown",
+        active_moderation_restriction:
+          subject.active_moderation_restriction === true,
+      };
+
+      navigate(
+        {
+          pathname: "/admin/moderation",
+          search: new URLSearchParams({
+            user: job.user_id,
+            job: job.id,
+          }).toString(),
+        },
+        {
+          state: {
+            openedFromAdminJobs: true,
+            moderationSubject,
+            sourceJob: job,
+          },
+        }
+      );
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(
+          error,
+          "Nie udało się otworzyć moderacji konta."
+        )
+      );
+    } finally {
+      setOpeningModerationJobId("");
+    }
+  }
 
   const normalizedSearch = search.trim().toLowerCase();
   const visibleJobs = jobs.filter((job) => {
@@ -18458,12 +18533,16 @@ function AdminJobs() {
                     </div>
                   </div>
 
-                  <Link
+                  <button
+                    type="button"
                     className="privacy-admin-account-link"
-                    to={`/admin/moderation?user=${job.user_id}&job=${job.id}`}
+                    onClick={() => handleOpenJobModeration(job)}
+                    disabled={Boolean(openingModerationJobId)}
                   >
-                    Przejdź do moderacji konta →
-                  </Link>
+                    {openingModerationJobId === job.id
+                      ? "Otwieranie moderacji..."
+                      : "Przejdź do moderacji konta →"}
+                  </button>
                 </article>
               );
             })}
@@ -18714,12 +18793,25 @@ function AdminModeration() {
   const moderationParams = new URLSearchParams(location.search);
   const requestedUserId = moderationParams.get("user");
   const requestedJobId = moderationParams.get("job");
+  const routedModerationSubject =
+    location.state?.moderationSubject?.id === requestedUserId
+      ? location.state.moderationSubject
+      : null;
+  const routedSourceJob =
+    location.state?.sourceJob?.id === requestedJobId
+      ? location.state.sourceJob
+      : null;
+  const moderationWorkbenchRef = useRef(null);
 
   const [cases, setCases] = useState([]);
   const [notices, setNotices] = useState({});
   const [appeals, setAppeals] = useState([]);
-  const [profiles, setProfiles] = useState({});
-  const [sourceJob, setSourceJob] = useState(null);
+  const [profiles, setProfiles] = useState(() =>
+    routedModerationSubject
+      ? { [routedModerationSubject.id]: routedModerationSubject }
+      : {}
+  );
+  const [sourceJob, setSourceJob] = useState(routedSourceJob);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(requestedUserId || "");
@@ -18881,8 +18973,23 @@ function AdminModeration() {
     if (!requestedUserId) return;
 
     setSelectedUserId(requestedUserId);
-    setSelectedSubjectLoading(true);
     setSelectedSubjectError("");
+
+    const navigationSubject =
+      location.state?.moderationSubject?.id === requestedUserId
+        ? location.state.moderationSubject
+        : null;
+
+    if (navigationSubject) {
+      setProfiles((current) => ({
+        ...current,
+        [requestedUserId]: navigationSubject,
+      }));
+      setSelectedSubjectLoading(false);
+      return;
+    }
+
+    setSelectedSubjectLoading(true);
 
     let mounted = true;
 
@@ -19426,6 +19533,32 @@ function AdminModeration() {
     (item) => item.status === "submitted"
   );
 
+  useEffect(() => {
+    if (
+      !requestedUserId
+      || selectedSubjectLoading
+      || (!selectedProfile && !selectedSubjectError)
+    ) {
+      return undefined;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      moderationWorkbenchRef.current?.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [
+    requestedUserId,
+    selectedSubjectLoading,
+    selectedSubjectError,
+    selectedProfile?.id,
+  ]);
+
   return (
     <div className="account-page admin-page admin-moderation-page">
       <AdminNavbar />
@@ -19614,7 +19747,10 @@ function AdminModeration() {
         </section>
 
         {selectedUserId && (
-          <section className="moderation-workbench">
+          <section
+            className="moderation-workbench"
+            ref={moderationWorkbenchRef}
+          >
             <div className="moderation-selected-user">
               <div className="admin-staff-avatar">
                 {selectedProfile?.avatar_url
