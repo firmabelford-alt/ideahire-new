@@ -1178,6 +1178,59 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
   margin: 3px 0;
 }
 
+.moderation-subject-state {
+  margin: -7px 0 18px;
+  padding: 13px 15px;
+  border: 1px solid #d9e1da;
+  border-radius: 13px;
+  background: #f5f8f5;
+  color: #526057;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.moderation-subject-state.is-error {
+  border-color: #e4b4af;
+  background: #fff1f0;
+  color: #8a3434;
+}
+
+.moderation-subject-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -7px 0 20px;
+  padding: 14px 16px;
+  border: 1px solid #dce4dd;
+  border-radius: 14px;
+  background: #f7faf7;
+}
+
+.moderation-subject-summary > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.moderation-subject-summary span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 1px solid #d6dfd7;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #59645c;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.moderation-subject-summary > a {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .moderation-decision-form {
   display: grid;
   gap: 17px;
@@ -1585,6 +1638,25 @@ html[data-theme="dark"] .moderation-reason-guidance {
   background: #302d21;
 }
 
+html[data-theme="dark"] .moderation-subject-state,
+html[data-theme="dark"] .moderation-subject-summary {
+  border-color: #3e4941;
+  background: #29312b;
+  color: #c7d0c9;
+}
+
+html[data-theme="dark"] .moderation-subject-state.is-error {
+  border-color: #704843;
+  background: #372725;
+  color: #f1c9c5;
+}
+
+html[data-theme="dark"] .moderation-subject-summary span {
+  border-color: #465249;
+  background: #202622;
+  color: #d7ded8;
+}
+
 html[data-theme="dark"] .moderation-source-job p,
 html[data-theme="dark"] .moderation-source-job small,
 html[data-theme="dark"] .moderation-reason-guidance p,
@@ -1676,6 +1748,16 @@ html[data-theme="dark"] .moderation-appeal-admin-list textarea {
   .moderation-adjustment-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .moderation-subject-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .moderation-subject-summary > a {
+    width: 100%;
+    white-space: normal;
   }
 
   .moderation-adjustment-actions button {
