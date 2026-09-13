@@ -1501,6 +1501,54 @@ function StaffOnlyRoute({ children }) {
   return children;
 }
 
+class AdminModerationErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+    };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error(
+      "ADMIN MODERATION RENDER ERROR:",
+      error,
+      errorInfo
+    );
+  }
+
+  render() {
+    if (!this.state.error) {
+      return this.props.children;
+    }
+
+    return (
+      <div className="account-page admin-page admin-moderation-page">
+        <main className="admin-shell moderation-admin-shell">
+          <div className="moderation-job-opening is-error" role="alert">
+            <span className="section-label">Błąd panelu moderacji</span>
+            <h2>Panel nie mógł zostać wyświetlony</h2>
+            <p>
+              Wystąpił błąd interfejsu. Dane i decyzje moderacyjne nie zostały
+              przez ten błąd zmienione.
+            </p>
+            <p>
+              Szczegóły techniczne: {this.state.error?.message || "Nieznany błąd"}
+            </p>
+            <a className="privacy-secondary-button" href="/admin/jobs">
+              Wróć do listy zleceń
+            </a>
+          </div>
+        </main>
+      </div>
+    );
+  }
+}
+
 /* =========================================================
    JOB CATEGORIES
 ========================================================= */
@@ -16497,10 +16545,6 @@ function DisputeDetails() {
   const [messageEvidence, setMessageEvidence] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [appeals, setAppeals] = useState([]);
-  const [contentReports, setContentReports] = useState([]);
-  const [contentReportAppeals, setContentReportAppeals] = useState([]);
-  const [activeContentReport, setActiveContentReport] = useState(null);
-  const [contentAppealNotes, setContentAppealNotes] = useState({});
   const [chatMessages, setChatMessages] = useState([]);
   const [adminChatMessages, setAdminChatMessages] = useState([]);
   const [adminAgreements, setAdminAgreements] = useState([]);
@@ -18728,6 +18772,10 @@ function AdminModeration() {
   const [cases, setCases] = useState([]);
   const [notices, setNotices] = useState({});
   const [appeals, setAppeals] = useState([]);
+  const [contentReports, setContentReports] = useState([]);
+  const [contentReportAppeals, setContentReportAppeals] = useState([]);
+  const [activeContentReport, setActiveContentReport] = useState(null);
+  const [contentAppealNotes, setContentAppealNotes] = useState({});
   const [profiles, setProfiles] = useState(() =>
     routedModerationSubject
       ? { [routedModerationSubject.id]: routedModerationSubject }
@@ -23546,7 +23594,9 @@ function Router() {
             element={
               <ProtectedRoute>
                 <StaffOnlyRoute>
-                  <AdminModeration />
+                  <AdminModerationErrorBoundary>
+                    <AdminModeration />
+                  </AdminModerationErrorBoundary>
                 </StaffOnlyRoute>
               </ProtectedRoute>
             }
@@ -23557,7 +23607,9 @@ function Router() {
             element={
               <ProtectedRoute>
                 <StaffOnlyRoute>
-                  <AdminModeration />
+                  <AdminModerationErrorBoundary>
+                    <AdminModeration />
+                  </AdminModerationErrorBoundary>
                 </StaffOnlyRoute>
               </ProtectedRoute>
             }
