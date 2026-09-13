@@ -305,6 +305,7 @@ function AuthProvider({ children }) {
         const [
           freshUserResult,
           lifecycleResult,
+          profileResult,
         ] = await Promise.all([
           supabase.auth.getUser(
             accessToken
@@ -320,6 +321,13 @@ function AuthProvider({ children }) {
               "user_id",
               currentUserId
             )
+            .maybeSingle(),
+          supabase
+            .from("profiles")
+            .select(
+              "id, name, avatar_url, about"
+            )
+            .eq("id", currentUserId)
             .maybeSingle(),
         ]);
 
@@ -338,7 +346,48 @@ function AuthProvider({ children }) {
            * getUser pobiera bieżący rekord z Auth, dlatego usunięty
            * avatar nie wraca z lokalnie zapisanego tokenu.
            */
-          setUser(freshUser);
+          const profileData =
+            profileResult.error
+              ? null
+              : profileResult.data;
+
+          if (profileResult.error) {
+            console.error(
+              "AUTH PROFILE HYDRATION ERROR:",
+              profileResult.error
+            );
+          }
+
+          const hydratedUser = profileData
+            ? {
+                ...freshUser,
+                user_metadata: {
+                  ...(freshUser.user_metadata || {}),
+                  name:
+                    profileData.name ||
+                    freshUser.user_metadata?.name ||
+                    freshUser.user_metadata?.full_name ||
+                    freshUser.email?.split("@")[0] ||
+                    "Użytkownik",
+                  avatar_url:
+                    profileData.avatar_url ||
+                    null,
+                  about:
+                    profileData.about ||
+                    null,
+                },
+              }
+            : freshUser;
+
+          setUser(hydratedUser);
+          setSession((currentSession) =>
+            currentSession?.user?.id === hydratedUser.id
+              ? {
+                  ...currentSession,
+                  user: hydratedUser,
+                }
+              : currentSession
+          );
         }
 
         if (
@@ -5291,7 +5340,7 @@ function Account() {
           await supabase
             .from("profiles")
             .select(
-              "specialty_categories, specialization, skills"
+              "name, avatar_url, about, specialty_categories, specialization, skills"
             )
             .eq("id", user.id)
             .maybeSingle();
@@ -5305,6 +5354,22 @@ function Account() {
         }
 
         if (!mounted) return;
+
+        if (data) {
+          setName(
+            data.name ||
+              user.user_metadata?.name ||
+              user.user_metadata?.full_name ||
+              user.email?.split("@")[0] ||
+              ""
+          );
+          setAvatarUrl(
+            data.avatar_url || ""
+          );
+          setAbout(
+            data.about || ""
+          );
+        }
 
         const storedCategories =
           Array.isArray(
@@ -5695,49 +5760,13 @@ function Account() {
       }
 
       const {
-        data: updatedUser,
-        error:
-          metadataError,
-      } =
-        await supabase.auth.updateUser(
-          {
-            data: {
-              avatar_url:
-                publicUrl,
-            },
-          }
-        );
-
-      if (metadataError) {
-        setMessage(
-          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
-        );
-
-        return;
-      }
-
-      const {
         error: profileError,
-      } = await supabase
-        .from("profiles")
-        .upsert(
-          {
-            id: user.id,
-            name:
-              name.trim() ||
-              user.user_metadata?.name ||
-              user.email?.split("@")[0] ||
-              "Użytkownik",
-            avatar_url: publicUrl,
-            about:
-              about.trim() ||
-              user.user_metadata?.about ||
-              null,
-          },
-          {
-            onConflict: "id",
-          }
-        );
+      } = await supabase.rpc(
+        "save_my_ideahire_profile_avatar",
+        {
+          p_avatar_url: publicUrl,
+        }
+      );
 
       if (profileError) {
         console.error(
@@ -5745,11 +5774,39 @@ function Account() {
           profileError
         );
 
+        const { error: cleanupError } =
+          await supabase.storage
+            .from("avatars")
+            .remove([filePath]);
+
+        if (cleanupError) {
+          console.error(
+            "PROFILE AVATAR CLEANUP ERROR:",
+            cleanupError
+          );
+        }
+
         setMessage(
-          `Zdjęcie zostało przesłane, ale nie udało się zaktualizować profilu publicznego: ${profileError.message}`
+          `Nie udało się trwale zapisać zdjęcia profilowego: ${profileError.message}`
         );
 
         return;
+      }
+
+      const {
+        data: updatedUser,
+        error: metadataError,
+      } = await supabase.auth.updateUser({
+        data: {
+          avatar_url: publicUrl,
+        },
+      });
+
+      if (metadataError) {
+        console.error(
+          "PROFILE AVATAR AUTH METADATA ERROR:",
+          metadataError
+        );
       }
 
       setAvatarUrl(
@@ -18666,6 +18723,8 @@ function AdminModeration() {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(requestedUserId || "");
+  const [selectedSubjectLoading, setSelectedSubjectLoading] = useState(false);
+  const [selectedSubjectError, setSelectedSubjectError] = useState("");
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [busy, setBusy] = useState("");
@@ -18822,16 +18881,65 @@ function AdminModeration() {
     if (!requestedUserId) return;
 
     setSelectedUserId(requestedUserId);
-    supabase
-      .from("profiles")
-      .select("id, name, avatar_url, created_at")
-      .eq("id", requestedUserId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          setProfiles((current) => ({ ...current, [data.id]: data }));
+    setSelectedSubjectLoading(true);
+    setSelectedSubjectError("");
+
+    let mounted = true;
+
+    async function loadRequestedModerationSubject() {
+      try {
+        const { data, error } = await supabase.rpc(
+          "admin_get_ideahire_moderation_subject",
+          {
+            p_user_id: requestedUserId,
+          }
+        );
+
+        if (error) throw error;
+        if (!mounted) return;
+
+        if (!data?.account_exists) {
+          setSelectedSubjectError(
+            "Konto powiązane ze zleceniem nie istnieje już w systemie Auth."
+          );
+          return;
         }
-      });
+
+        setProfiles((current) => ({
+          ...current,
+          [requestedUserId]: {
+            id: requestedUserId,
+            name: data.name || "Użytkownik IdeaHire",
+            avatar_url: data.avatar_url || null,
+            created_at: data.created_at || null,
+            profile_exists: data.profile_exists !== false,
+            lifecycle_status: data.lifecycle_status || "active",
+            age_access_status: data.age_access_status || "unknown",
+            active_moderation_restriction:
+              data.active_moderation_restriction === true,
+          },
+        }));
+      } catch (error) {
+        if (!mounted) return;
+
+        setSelectedSubjectError(
+          cleanSupabaseError(
+            error,
+            "Nie udało się otworzyć konta wskazanego w zleceniu."
+          )
+        );
+      } finally {
+        if (mounted) {
+          setSelectedSubjectLoading(false);
+        }
+      }
+    }
+
+    loadRequestedModerationSubject();
+
+    return () => {
+      mounted = false;
+    };
   }, [requestedUserId]);
 
   useEffect(() => {
@@ -19524,6 +19632,42 @@ function AdminModeration() {
                 </span>
               )}
             </div>
+
+            {selectedSubjectLoading && (
+              <p className="moderation-subject-state" role="status">
+                Ładowanie danych konta powiązanego ze zleceniem...
+              </p>
+            )}
+
+            {selectedSubjectError && (
+              <p className="moderation-subject-state is-error" role="alert">
+                {selectedSubjectError}
+              </p>
+            )}
+
+            {selectedProfile && !selectedSubjectLoading && !selectedSubjectError && (
+              <div className="moderation-subject-summary">
+                <div>
+                  <span>
+                    Profil: {selectedProfile.profile_exists === false
+                      ? "brak profilu publicznego"
+                      : "dostępny"}
+                  </span>
+                  <span>
+                    Cykl konta: {selectedProfile.lifecycle_status || "active"}
+                  </span>
+                  <span>
+                    Dostęp wieku: {selectedProfile.age_access_status || "—"}
+                  </span>
+                </div>
+                <Link
+                  className="privacy-secondary-button"
+                  to={`/admin/privacy/users/${selectedUserId}`}
+                >
+                  Otwórz administracyjny widok konta →
+                </Link>
+              </div>
+            )}
 
             {activeContentReport && (
               <article className="moderation-active-content-report">
