@@ -4242,7 +4242,12 @@ function normalizePortfolioUrl(value) {
 function getPortfolioLinkLabel(value) {
   try {
     const parsed = new URL(value);
-    return parsed.hostname.replace(/^www\./, "");
+    const hostname = parsed.hostname.replace(/^www\./, "");
+    const pathname = parsed.pathname === "/"
+      ? ""
+      : parsed.pathname.replace(/\/$/, "");
+
+    return `${hostname}${pathname}`;
   } catch {
     return "Otwórz projekt";
   }
@@ -4480,14 +4485,22 @@ function PortfolioReportDialog({ target, onClose, onSubmitted }) {
           <div>
             <span className="section-label">Zgłoszenie treści</span>
             <h2 id="portfolio-report-title">
-              {target.media ? "Zgłoś zdjęcie" : "Zgłoś album"}
+              {target.media
+                ? "Zgłoś zdjęcie"
+                : target.kind === "link"
+                ? "Zgłoś link"
+                : "Zgłoś album"}
             </h2>
           </div>
           <button type="button" onClick={onClose} disabled={busy} aria-label="Zamknij formularz">×</button>
         </header>
 
         <p className="portfolio-report-context">
-          Projekt: <strong>{target.album.title}</strong>. Zgłoszenie trafi do ręcznej analizy administracji — samo wysłanie nie powoduje automatycznej blokady.
+          {target.kind === "link" ? "Link w projekcie" : "Projekt"}: <strong>{target.album.title}</strong>.
+          {target.kind === "link" && target.album.project_url && (
+            <> Adres: <span>{getPortfolioLinkLabel(target.album.project_url)}</span>.</>
+          )}{" "}
+          Zgłoszenie trafi do ręcznej analizy administracji — samo wysłanie nie powoduje automatycznej blokady.
         </p>
 
         <label>
@@ -4507,7 +4520,9 @@ function PortfolioReportDialog({ target, onClose, onSubmitted }) {
             minLength={50}
             maxLength={5000}
             rows={6}
-            placeholder="Wskaż konkretny element zdjęcia lub albumu, okoliczności i osobę albo prawo, którego dotyczy zgłoszenie."
+            placeholder={target.kind === "link"
+              ? "Wskaż, co znajduje się pod linkiem, na czym polega możliwe naruszenie oraz jakiego prawa lub osoby dotyczy."
+              : "Wskaż konkretny element zdjęcia lub albumu, okoliczności i osobę albo prawo, którego dotyczy zgłoszenie."}
             disabled={busy}
             required
           />
@@ -9747,6 +9762,16 @@ function Profile() {
     visibleSpecialtyCategories.length > 0 ||
     visibleSkills.length > 0;
 
+  const portfolioAlbums =
+    portfolioItems.filter(
+      (item) => getPortfolioMedia(item).length > 0
+    );
+
+  const portfolioLinks =
+    portfolioItems.filter(
+      (item) => !!item.project_url
+    );
+
   return (
     <div className="page">
       <AccountNavbar />
@@ -10267,7 +10292,7 @@ function Profile() {
                   <h2 id="profile-public-portfolio-title">Portfolio</h2>
                 </div>
                 <span className="profile-public-portfolio-count">
-                  {portfolioItems.length} {portfolioItems.length === 1 ? "album" : "albumów"}
+                  {portfolioItems.length} {portfolioItems.length === 1 ? "realizacja" : "realizacji"}
                 </span>
               </div>
 
@@ -10277,65 +10302,118 @@ function Profile() {
                 </p>
               )}
 
-              <div className="profile-public-portfolio-grid">
-                {portfolioItems.map((item) => {
-                  const media = getPortfolioMedia(item);
-                  const cover = media[0];
+              {portfolioAlbums.length > 0 && (
+                <div className="profile-public-portfolio-group">
+                  <div className="profile-public-portfolio-subheading">
+                    <div>
+                      <h3>Albumy ze zdjęciami</h3>
+                      <p>Otwórz album, aby zobaczyć każde zdjęcie w pełnych proporcjach.</p>
+                    </div>
+                    <span>{portfolioAlbums.length}</span>
+                  </div>
 
-                  return (
-                    <article
-                      className="profile-public-portfolio-card"
-                      id={`portfolio-${item.id}`}
-                      key={item.id}
-                    >
-                      {cover ? (
-                        <button
-                          type="button"
-                          className="profile-public-album-cover"
-                          onClick={() => setPortfolioViewer({ album: item, index: 0 })}
-                          aria-label={`Otwórz album ${item.title}, ${media.length} zdjęć`}
+                  <div className="profile-public-portfolio-grid">
+                    {portfolioAlbums.map((item) => {
+                      const media = getPortfolioMedia(item);
+                      const cover = media[0];
+
+                      return (
+                        <article
+                          className="profile-public-portfolio-card"
+                          id={`portfolio-${item.id}`}
+                          key={item.id}
                         >
-                          <img src={cover.image_url} alt={`Projekt: ${item.title}`} />
-                          <span className="profile-public-album-count">
-                            <strong>{media.length}</strong>
-                            {media.length === 1 ? "zdjęcie" : "zdjęć"}
-                          </span>
-                          <span className="profile-public-album-open">Otwórz album</span>
-                        </button>
-                      ) : (
-                        <div className="profile-portfolio-image-placeholder" aria-hidden="true">
-                          ↗
-                        </div>
-                      )}
+                          <button
+                            type="button"
+                            className="profile-public-album-cover"
+                            onClick={() => setPortfolioViewer({ album: item, index: 0 })}
+                            aria-label={`Otwórz album ${item.title}, ${media.length} zdjęć`}
+                          >
+                            <img
+                              className="profile-public-album-cover-backdrop"
+                              src={cover.image_url}
+                              alt=""
+                              aria-hidden="true"
+                            />
+                            <img
+                              className="profile-public-album-cover-image"
+                              src={cover.image_url}
+                              alt={`Projekt: ${item.title}`}
+                            />
+                            <span className="profile-public-album-count">
+                              <strong>{media.length}</strong>
+                              {media.length === 1 ? "zdjęcie" : "zdjęć"}
+                            </span>
+                            <span className="profile-public-album-open">Otwórz album</span>
+                          </button>
 
-                      <div className="profile-public-portfolio-copy">
-                        <h3>{item.title}</h3>
-                        {item.description && <p>{item.description}</p>}
-                        {item.project_url && (
+                          <div className="profile-public-portfolio-copy">
+                            <span className="profile-public-album-label">Album</span>
+                            <h3>{item.title}</h3>
+                            {item.description && <p>{item.description}</p>}
+
+                            {user?.id !== id && (
+                              <button
+                                type="button"
+                                className="profile-public-item-report"
+                                onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "album" })}
+                              >
+                                Zgłoś album
+                              </button>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {portfolioLinks.length > 0 && (
+                <div className="profile-public-portfolio-group profile-public-links-group">
+                  <div className="profile-public-portfolio-subheading">
+                    <div>
+                      <h3>Linki do projektów</h3>
+                      <p>Zewnętrzne realizacje i materiały powiązane z portfolio.</p>
+                    </div>
+                    <span>{portfolioLinks.length}</span>
+                  </div>
+
+                  <div className="profile-public-project-links">
+                    {portfolioLinks.map((item, index) => (
+                      <article className="profile-public-project-link-row" key={item.id}>
+                        <span className="profile-public-project-link-index" aria-hidden="true">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <div className="profile-public-project-link-copy">
+                          <strong>{item.title}</strong>
+                          {item.description && <p>{item.description}</p>}
                           <a
                             className="profile-public-project-link"
                             href={item.project_url}
                             target="_blank"
                             rel="noopener noreferrer nofollow"
+                            title={item.project_url}
                           >
-                            {getPortfolioLinkLabel(item.project_url)} ↗
+                            <span>{getPortfolioLinkLabel(item.project_url)}</span>
+                            <span aria-hidden="true">↗</span>
                           </a>
-                        )}
+                        </div>
 
                         {user?.id !== id && (
                           <button
                             type="button"
                             className="profile-public-item-report"
-                            onClick={() => setPortfolioReportTarget({ album: item, media: null })}
+                            onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "link" })}
                           >
-                            Zgłoś album
+                            Zgłoś link
                           </button>
                         )}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
           )}
         </section>
