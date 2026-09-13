@@ -284,173 +284,6 @@ function AuthProvider({ children }) {
     };
   }, []);
 
-  useEffect(() => {
-    const accessToken =
-      session?.access_token;
-
-    const currentUserId =
-      user?.id;
-
-    if (
-      !accessToken ||
-      !currentUserId
-    ) {
-      return undefined;
-    }
-
-    let mounted = true;
-
-    async function synchronizeErasureState() {
-      try {
-        const [
-          freshUserResult,
-          lifecycleResult,
-          profileResult,
-        ] = await Promise.all([
-          supabase.auth.getUser(
-            accessToken
-          ),
-          supabase
-            .from(
-              "ideahire_account_lifecycle"
-            )
-            .select(
-              "status, data_minimized_at, closed_at"
-            )
-            .eq(
-              "user_id",
-              currentUserId
-            )
-            .maybeSingle(),
-          supabase
-            .from("profiles")
-            .select(
-              "id, name, avatar_url, about"
-            )
-            .eq("id", currentUserId)
-            .maybeSingle(),
-        ]);
-
-        if (!mounted) return;
-
-        const freshUser =
-          freshUserResult
-            ?.data?.user;
-
-        if (
-          freshUser?.id ===
-          currentUserId
-        ) {
-          /*
-           * getSession może zawierać starszą kopię user_metadata.
-           * getUser pobiera bieżący rekord z Auth, dlatego usunięty
-           * avatar nie wraca z lokalnie zapisanego tokenu.
-           */
-          const profileData =
-            profileResult.error
-              ? null
-              : profileResult.data;
-
-          if (profileResult.error) {
-            console.error(
-              "AUTH PROFILE HYDRATION ERROR:",
-              profileResult.error
-            );
-          }
-
-          const hydratedUser = profileData
-            ? {
-                ...freshUser,
-                user_metadata: {
-                  ...(freshUser.user_metadata || {}),
-                  name:
-                    profileData.name ||
-                    freshUser.user_metadata?.name ||
-                    freshUser.user_metadata?.full_name ||
-                    freshUser.email?.split("@")[0] ||
-                    "Użytkownik",
-                  avatar_url:
-                    profileData.avatar_url ||
-                    null,
-                  about:
-                    profileData.about ||
-                    null,
-                },
-              }
-            : freshUser;
-
-          setUser(hydratedUser);
-          setSession((currentSession) =>
-            currentSession?.user?.id === hydratedUser.id
-              ? {
-                  ...currentSession,
-                  user: hydratedUser,
-                }
-              : currentSession
-          );
-        }
-
-        if (
-          lifecycleResult.error ||
-          !lifecycleResult.data
-        ) {
-          if (lifecycleResult.error) {
-            console.error(
-              "ERASURE LIFECYCLE SYNC ERROR:",
-              lifecycleResult.error
-            );
-          }
-
-          return;
-        }
-
-        const minimizedAt =
-          lifecycleResult.data
-            .data_minimized_at || "";
-
-        if (!minimizedAt) return;
-
-        const cleanupMarkerKey =
-          `ideahire_erasure_local_cleanup_${currentUserId}`;
-
-        if (
-          localStorage.getItem(
-            cleanupMarkerKey
-          ) === minimizedAt
-        ) {
-          return;
-        }
-
-        [
-          `ideahire_notifications_${currentUserId}`,
-          `ideahire_read_notifications_${currentUserId}`,
-          `ideahire_dismissed_notifications_${currentUserId}`,
-        ].forEach((key) => {
-          localStorage.removeItem(key);
-        });
-
-        localStorage.setItem(
-          cleanupMarkerKey,
-          minimizedAt
-        );
-      } catch (error) {
-        console.error(
-          "ERASURE SESSION SYNC ERROR:",
-          error
-        );
-      }
-    }
-
-    synchronizeErasureState();
-
-    return () => {
-      mounted = false;
-    };
-  }, [
-    session?.access_token,
-    user?.id,
-  ]);
-
   return (
     <AuthContext.Provider
       value={{
@@ -476,8 +309,6 @@ function useAuth() {
 ========================================================= */
 
 const AccountRestrictionContext = createContext(null);
-const ACCOUNT_RESTRICTION_STATUS_RPC =
-  "get_my_ideahire_moderation_status_stable";
 
 function AccountRestrictionProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
@@ -485,125 +316,50 @@ function AccountRestrictionProvider({ children }) {
   const [appeal, setAppeal] = useState(null);
   const [restricted, setRestricted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
-  const activeRestrictionUserIdRef = useRef(user?.id || null);
-  const restrictionRequestIdRef = useRef(0);
-  const restrictionRefreshTimerRef = useRef(null);
-  const restrictionSnapshotRef = useRef("");
 
-  async function loadRestriction(
-    requestedUserId = user?.id,
-    showLoading = false
-  ) {
-    const requestId = restrictionRequestIdRef.current + 1;
-    restrictionRequestIdRef.current = requestId;
-
+  async function loadRestriction(requestedUserId = user?.id) {
     if (!requestedUserId) {
       setNotice(null);
       setAppeal(null);
       setRestricted(false);
-      setErrorMessage("");
-      restrictionSnapshotRef.current = "";
       setLoading(false);
       return;
     }
 
-    if (showLoading) {
-      setLoading(true);
-      setErrorMessage("");
-    }
+    setLoading(true);
 
     try {
       const { data, error } = await supabase.rpc(
-        ACCOUNT_RESTRICTION_STATUS_RPC
+        "get_my_ideahire_moderation_status"
       );
 
       if (error) throw error;
-      if (
-        requestedUserId !== activeRestrictionUserIdRef.current
-        || requestId !== restrictionRequestIdRef.current
-      ) {
-        return;
-      }
+      if (requestedUserId !== user?.id) return;
 
-      const nextNotice = data?.notice || null;
-      const nextAppeal = data?.appeal || null;
-      const nextRestricted = Boolean(data?.restricted);
-      const nextSnapshot = JSON.stringify({
-        notice: nextNotice,
-        appeal: nextAppeal,
-        restricted: nextRestricted,
-      });
-
-      // Kilka zdarzeń tej samej transakcji nie może powodować kilku
-      // identycznych renderów ekranu statusu.
-      if (nextSnapshot !== restrictionSnapshotRef.current) {
-        restrictionSnapshotRef.current = nextSnapshot;
-        setNotice(nextNotice);
-        setAppeal(nextAppeal);
-        setRestricted(nextRestricted);
-      }
-      setErrorMessage("");
+      setNotice(data?.notice || null);
+      setAppeal(data?.appeal || null);
+      setRestricted(Boolean(data?.restricted));
     } catch (error) {
       console.error("ACCOUNT RESTRICTION LOAD ERROR:", error);
-      if (
-        requestedUserId !== activeRestrictionUserIdRef.current
-        || requestId !== restrictionRequestIdRef.current
-      ) {
-        return;
-      }
+      if (requestedUserId !== user?.id) return;
 
-      setErrorMessage(
-        "Nie udało się bezpiecznie potwierdzić statusu konta. Odśwież stronę albo spróbuj ponownie za chwilę."
-      );
-
-      // Przy pierwszym odczycie czyścimy niepotwierdzony stan, ale router
-      // nadal pozostaje w bezpiecznym centrum statusu. Odświeżenie Realtime
-      // zachowuje ostatni poprawny wynik, aby błąd sieci nie odblokował konta.
-      if (showLoading) {
-        restrictionSnapshotRef.current = "";
-        setNotice(null);
-        setAppeal(null);
-        setRestricted(false);
-      }
+      setNotice(null);
+      setAppeal(null);
+      setRestricted(false);
     } finally {
-      if (
-        requestedUserId === activeRestrictionUserIdRef.current
-        && requestId === restrictionRequestIdRef.current
-      ) {
-        setLoading(false);
-      }
+      if (requestedUserId === user?.id) setLoading(false);
     }
   }
 
   useEffect(() => {
     if (authLoading) return;
-
-    const nextUserId = user?.id || null;
-    activeRestrictionUserIdRef.current = nextUserId;
-    setNotice(null);
-    setAppeal(null);
-    setRestricted(false);
-    setErrorMessage("");
-    restrictionSnapshotRef.current = "";
-    loadRestriction(nextUserId, true);
+    loadRestriction(user?.id);
   }, [authLoading, user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
 
-    // Jedna transakcja administracyjna może wysłać kilka zdarzeń Realtime.
-    // Łączymy je w jeden cichy odczyt, aby nie uruchamiać serii renderów.
-    const refresh = () => {
-      if (restrictionRefreshTimerRef.current) {
-        window.clearTimeout(restrictionRefreshTimerRef.current);
-      }
-
-      restrictionRefreshTimerRef.current = window.setTimeout(() => {
-        restrictionRefreshTimerRef.current = null;
-        loadRestriction(user.id, false);
-      }, 180);
-    };
+    const refresh = () => loadRestriction(user.id);
     const channel = supabase
       .channel(`account-restriction-${user.id}`)
       .on(
@@ -629,51 +385,9 @@ function AccountRestrictionProvider({ children }) {
       .subscribe();
 
     return () => {
-      if (restrictionRefreshTimerRef.current) {
-        window.clearTimeout(restrictionRefreshTimerRef.current);
-        restrictionRefreshTimerRef.current = null;
-      }
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
-
-  useEffect(() => {
-    if (!user?.id || !restricted || !notice?.ends_at) return;
-
-    const endsAt = new Date(notice.ends_at).getTime();
-    if (Number.isNaN(endsAt)) return;
-
-    const maximumTimerDelay = 2147480000;
-    let timerId;
-
-    function scheduleExpiryRefresh() {
-      const remaining = endsAt - Date.now();
-
-      if (remaining <= 0) {
-        timerId = window.setTimeout(
-          () => loadRestriction(user.id, false),
-          1000
-        );
-        return;
-      }
-
-      const delay = Math.min(remaining + 1000, maximumTimerDelay);
-      timerId = window.setTimeout(() => {
-        if (Date.now() < endsAt) {
-          scheduleExpiryRefresh();
-          return;
-        }
-
-        loadRestriction(user.id, false);
-      }, delay);
-    }
-
-    scheduleExpiryRefresh();
-
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, [user?.id, restricted, notice?.ends_at]);
 
   return (
     <AccountRestrictionContext.Provider
@@ -682,7 +396,6 @@ function AccountRestrictionProvider({ children }) {
         appeal,
         isRestricted: restricted,
         loading: authLoading || loading,
-        errorMessage,
         refreshRestriction: loadRestriction,
       }}
     >
@@ -697,7 +410,6 @@ function useAccountRestriction() {
     appeal: null,
     isRestricted: false,
     loading: true,
-    errorMessage: "",
     refreshRestriction: async () => {},
   };
 }
@@ -709,97 +421,8 @@ function useAccountRestriction() {
 const MIN_ACCOUNT_AGE = 16;
 const FULL_ACCOUNT_AGE = 18;
 const AGE_NOTICE_VERSION = "2026-09-03-v1";
-const LEGAL_TERMS_VERSION = "0.9-prelaunch-2026-09-12";
-const PRIVACY_NOTICE_VERSION = "0.9-prelaunch-2026-09-12";
-
-const MAX_PORTFOLIO_ITEMS = 8;
-const MAX_PORTFOLIO_ALBUM_IMAGES = 12;
-
-const CONTENT_REPORT_REASON_LABELS = {
-  copyright: "Naruszenie praw autorskich",
-  privacy_or_image_rights: "Naruszenie prywatności lub prawa do wizerunku",
-  impersonation: "Podszywanie się pod inną osobę lub firmę",
-  harassment_or_threats: "Nękanie, groźby lub treść krzywdząca",
-  fraud_or_scam: "Oszustwo lub wprowadzanie w błąd",
-  illegal_goods_or_services: "Nielegalne towary lub usługi",
-  other_terms_breach: "Inne naruszenie Regulaminu IdeaHire",
-  other_illegal_content: "Inna potencjalnie nielegalna treść",
-};
-
-const CONTENT_REPORT_STATUS_LABELS = {
-  submitted: "Otrzymane",
-  in_review: "W analizie",
-  resolved_actioned: "Zakończone — podjęto działanie",
-  resolved_no_action: "Zakończone — brak podstaw do działania",
-};
-
-function getOAuthErrorFromLocation(location) {
-  const searchParams = new URLSearchParams(
-    location?.search || ""
-  );
-
-  const hashParams = new URLSearchParams(
-    String(location?.hash || "").replace(/^#/, "")
-  );
-
-  const description =
-    searchParams.get("error_description") ||
-    hashParams.get("error_description") ||
-    "";
-
-  return description
-    ? decodeURIComponent(description.replace(/\+/g, " "))
-    : "";
-}
-
-function GoogleLogo() {
-  return (
-    <svg
-      className="google-auth-logo"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        fill="#4285F4"
-        d="M21.6 12.23c0-.71-.06-1.4-.18-2.06H12v3.9h5.38a4.6 4.6 0 0 1-2 3.02v2.53h3.24c1.9-1.75 2.98-4.33 2.98-7.39Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 22c2.7 0 4.98-.9 6.63-2.38l-3.24-2.53c-.9.6-2.05.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.61A10 10 0 0 0 12 22Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M6.39 13.92A6.01 6.01 0 0 1 6.08 12c0-.67.12-1.32.31-1.92V7.47H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.53l3.35-2.61Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 5.95c1.47 0 2.79.51 3.83 1.5l2.87-2.88A9.65 9.65 0 0 0 12 2a10 10 0 0 0-8.96 5.47l3.35 2.61C7.18 7.71 9.39 5.95 12 5.95Z"
-      />
-    </svg>
-  );
-}
-
-function GoogleAuthButton({
-  onClick,
-  loading,
-}) {
-  return (
-    <button
-      type="button"
-      className="google-auth-button"
-      onClick={onClick}
-      disabled={loading}
-    >
-      <GoogleLogo />
-
-      <span>
-        {loading
-          ? "Łączenie z Google..."
-          : "Kontynuuj przez Google"}
-      </span>
-    </button>
-  );
-}
+const LEGAL_TERMS_VERSION = "0.9-prelaunch-2026-09-06";
+const PRIVACY_NOTICE_VERSION = "0.9-prelaunch-2026-09-06";
 
 const AgeAccessContext = createContext(null);
 
@@ -1097,7 +720,6 @@ function PublicOnlyRoute({
   const {
     isRestricted,
     loading: restrictionLoading,
-    errorMessage: restrictionError,
   } = useAccountRestriction();
 
   if (
@@ -1113,7 +735,7 @@ function PublicOnlyRoute({
         to={
           isStaff
             ? "/admin"
-            : isRestricted || restrictionError
+            : isRestricted
               ? "/account-status"
             : "/account"
         }
@@ -1148,10 +770,9 @@ function UserOnlyRoute({
   const {
     isRestricted,
     loading: restrictionLoading,
-    errorMessage: restrictionError,
   } = useAccountRestriction();
 
-  if (staffLoading || restrictionLoading) {
+  if (staffLoading || ageLoading || restrictionLoading) {
     return <LoadingScreen />;
   }
 
@@ -1164,36 +785,13 @@ function UserOnlyRoute({
     );
   }
 
-  if (restrictionError) {
-    if (!allowRestricted) {
-      return (
-        <Navigate
-          to="/account-status"
-          replace
-        />
-      );
-    }
-
-    return children;
-  }
-
-  if (isRestricted) {
-    if (!allowRestricted) {
-      return (
-        <Navigate
-          to="/account-status"
-          replace
-        />
-      );
-    }
-
-    // Status bana i centrum prywatności nie zależą od odczytu wieku.
-    // Zapobiega to zmianie całego widoku, gdy niezależny profil wieku się odświeża.
-    return children;
-  }
-
-  if (ageLoading) {
-    return <LoadingScreen />;
+  if (isRestricted && !allowRestricted) {
+    return (
+      <Navigate
+        to="/account-status"
+        replace
+      />
+    );
   }
 
   if (ageRequired) {
@@ -1213,36 +811,10 @@ function UserOnlyRoute({
   return children;
 }
 
-function RestrictedAccountRoute({ children }) {
-  const { user } = useAuth();
-  const {
-    isStaff,
-    staffLoading,
-  } = useStaffRole(user?.id);
-  const {
-    isRestricted,
-    loading: restrictionLoading,
-    errorMessage: restrictionError,
-  } = useAccountRestriction();
-
-  if (staffLoading || restrictionLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (!isStaff && (isRestricted || restrictionError)) {
-    return <Navigate to="/account-status" replace />;
-  }
-
-  return children;
-}
-
 function AgeCompletionScreen() {
-  const { user } = useAuth();
   const { refreshAgeAccess, errorMessage } = useAgeAccess();
   const [birthDate, setBirthDate] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
-  const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -1267,68 +839,19 @@ function AgeCompletionScreen() {
       return;
     }
 
-    if (!privacyAcknowledged) {
-      setMessage("Potwierdź zapoznanie się z Polityką prywatności.");
-      return;
-    }
-
-    if (!termsAccepted) {
-      setMessage("Zaakceptuj Regulamin IdeaHire, aby kontynuować.");
-      return;
-    }
-
     setSaving(true);
     setMessage("");
 
     try {
-      const acceptedAtClient = new Date().toISOString();
-
       const { error } = await supabase.rpc(
-        "complete_my_ideahire_onboarding",
+        "complete_ideahire_age_profile",
         {
           p_date_of_birth: birthDate,
           p_age_notice_acknowledged: acknowledged,
-          p_age_notice_version: AGE_NOTICE_VERSION,
-          p_privacy_notice_acknowledged: privacyAcknowledged,
-          p_privacy_notice_version: PRIVACY_NOTICE_VERSION,
-          p_terms_accepted: termsAccepted,
-          p_terms_version: LEGAL_TERMS_VERSION,
         }
       );
 
       if (error) throw error;
-
-      const { error: metadataError } = await supabase.auth.updateUser({
-        data: {
-          name:
-            user?.user_metadata?.name ||
-            user?.user_metadata?.full_name ||
-            user?.email?.split("@")[0] ||
-            "Użytkownik",
-          avatar_url:
-            user?.user_metadata?.avatar_url ||
-            user?.user_metadata?.picture ||
-            null,
-          date_of_birth: birthDate,
-          age_notice_acknowledged: true,
-          age_notice_version: AGE_NOTICE_VERSION,
-          privacy_notice_acknowledged: true,
-          privacy_notice_version: PRIVACY_NOTICE_VERSION,
-          privacy_notice_acknowledged_at: acceptedAtClient,
-          terms_accepted: true,
-          terms_version: LEGAL_TERMS_VERSION,
-          terms_accepted_at_client: acceptedAtClient,
-          onboarding_source:
-            user?.app_metadata?.provider === "google"
-              ? "google_oauth"
-              : "account_completion",
-        },
-      });
-
-      if (metadataError) {
-        console.error("ONBOARDING METADATA ERROR:", metadataError);
-      }
-
       await refreshAgeAccess();
     } catch (error) {
       setMessage(
@@ -1403,54 +926,6 @@ function AgeCompletionScreen() {
               </span>
             </label>
 
-            <div className="registration-privacy-confirmation">
-              <input
-                id="oauth-privacy-notice-acknowledgement"
-                type="checkbox"
-                checked={privacyAcknowledged}
-                onChange={(event) => {
-                  setPrivacyAcknowledged(event.target.checked);
-                  setMessage("");
-                }}
-                required
-              />
-              <div>
-                <label htmlFor="oauth-privacy-notice-acknowledgement">
-                  Zapoznałem się z Polityką prywatności.
-                </label>
-                <small>
-                  Dokument wyjaśnia, jak IdeaHire przetwarza i chroni dane. {" "}
-                  <Link to="/polityka-prywatnosci" target="_blank" rel="noreferrer">
-                    Otwórz Politykę prywatności
-                  </Link>
-                </small>
-              </div>
-            </div>
-
-            <div className="registration-privacy-confirmation registration-terms-confirmation">
-              <input
-                id="oauth-terms-acceptance"
-                type="checkbox"
-                checked={termsAccepted}
-                onChange={(event) => {
-                  setTermsAccepted(event.target.checked);
-                  setMessage("");
-                }}
-                required
-              />
-              <div>
-                <label htmlFor="oauth-terms-acceptance">
-                  Akceptuję Regulamin IdeaHire.
-                </label>
-                <small>
-                  Akceptacja Regulaminu jest wymagana do aktywowania konta. {" "}
-                  <Link to="/regulamin" target="_blank" rel="noreferrer">
-                    Otwórz Regulamin — wersja 0.9
-                  </Link>
-                </small>
-              </div>
-            </div>
-
             {(message || errorMessage) && (
               <p className="auth-error" role="alert">
                 {message || errorMessage}
@@ -1460,18 +935,11 @@ function AgeCompletionScreen() {
             <button
               type="submit"
               className="btn btn-dark btn-large"
-              disabled={
-                saving ||
-                !validation?.valid ||
-                !acknowledged ||
-                !privacyAcknowledged ||
-                !termsAccepted
-              }
+              disabled={saving || !validation?.valid || !acknowledged}
             >
               {saving ? "Zapisywanie..." : "Zapisz i kontynuuj →"}
             </button>
           </form>
-
         </section>
       </main>
     </div>
@@ -1499,54 +967,6 @@ function StaffOnlyRoute({ children }) {
   }
 
   return children;
-}
-
-class AdminModerationErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      error: null,
-    };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error(
-      "ADMIN MODERATION RENDER ERROR:",
-      error,
-      errorInfo
-    );
-  }
-
-  render() {
-    if (!this.state.error) {
-      return this.props.children;
-    }
-
-    return (
-      <div className="account-page admin-page admin-moderation-page">
-        <main className="admin-shell moderation-admin-shell">
-          <div className="moderation-job-opening is-error" role="alert">
-            <span className="section-label">Błąd panelu moderacji</span>
-            <h2>Panel nie mógł zostać wyświetlony</h2>
-            <p>
-              Wystąpił błąd interfejsu. Dane i decyzje moderacyjne nie zostały
-              przez ten błąd zmienione.
-            </p>
-            <p>
-              Szczegóły techniczne: {this.state.error?.message || "Nieznany błąd"}
-            </p>
-            <a className="privacy-secondary-button" href="/admin/jobs">
-              Wróć do listy zleceń
-            </a>
-          </div>
-        </main>
-      </div>
-    );
-  }
 }
 
 /* =========================================================
@@ -1775,10 +1195,6 @@ const MODERATION_EXCEPTION_OPTIONS = [
 
 const MODERATION_DURATION_PRESETS = [1, 3, 7, 14, 30];
 
-const MODERATION_CONFIRMED_TERMS_REFERENCES = {
-  repeated_terms_breach: "Regulamin IdeaHire § 27 pkt 107",
-};
-
 const MODERATION_REASON_GUIDANCE = {
   fraud_or_scam:
     "Wskaż konkretne zachowanie, identyfikator zlecenia lub wiadomości oraz przesłanki wskazujące na próbę oszustwa. Nie przesądzaj o przestępstwie bez podstaw.",
@@ -1797,23 +1213,6 @@ const MODERATION_REASON_GUIDANCE = {
   other_terms_breach:
     "Opisz konkretną treść lub zachowanie oraz dokładnie wskaż naruszony punkt regulaminu.",
 };
-
-function createEmptyDisputeDecisionForm() {
-  return {
-    outcome: "",
-    amount: "",
-    rationale: "",
-    applyRestriction: false,
-    moderationTargetUserId: "",
-    durationDays: "7",
-    reasonCode: "repeated_terms_breach",
-    publicReason: "",
-    termsReference:
-      MODERATION_CONFIRMED_TERMS_REFERENCES.repeated_terms_breach,
-    legalBasis: "",
-    internalNote: "",
-  };
-}
 
 function getDisputeStatusLabel(status) {
   return DISPUTE_STATUS_LABELS[status] || "Nieznany status";
@@ -1842,85 +1241,6 @@ function formatDisputeDate(value, includeTime = true) {
       ? { hour: "2-digit", minute: "2-digit" }
       : {}),
   });
-}
-
-function formatPolishDays(value) {
-  const days = Math.max(0, Math.trunc(Number(value) || 0));
-  const lastDigit = days % 10;
-  const lastTwoDigits = days % 100;
-
-  if (days === 1) return "1 dzień";
-  if (
-    lastDigit >= 2
-    && lastDigit <= 4
-    && (lastTwoDigits < 12 || lastTwoDigits > 14)
-  ) {
-    return `${days} dni`;
-  }
-
-  return `${days} dni`;
-}
-
-function getModerationDurationDetails(notice) {
-  if (!notice) return null;
-
-  if (
-    notice.decision_type === "indefinite_suspension"
-    || !notice.ends_at
-  ) {
-    return {
-      headline: "Zawieszenie bezterminowe",
-      detail: notice.status === "lifted"
-        ? "Ograniczenie zostało zdjęte przez administrację."
-        : "Decyzja nie ma automatycznej daty zakończenia.",
-    };
-  }
-
-  const effectiveAt = new Date(notice.effective_at).getTime();
-  const endsAt = new Date(notice.ends_at).getTime();
-
-  if (!Number.isFinite(effectiveAt) || !Number.isFinite(endsAt)) {
-    return {
-      headline: "Zawieszenie czasowe",
-      detail: `Koniec: ${formatDisputeDate(notice.ends_at)}.`,
-    };
-  }
-
-  const dayInMilliseconds = 24 * 60 * 60 * 1000;
-  const totalDays = Math.max(
-    1,
-    Math.round((endsAt - effectiveAt) / dayInMilliseconds)
-  );
-  const remainingDays = Math.max(
-    0,
-    Math.ceil((endsAt - Date.now()) / dayInMilliseconds)
-  );
-
-  if (["lifted", "cancelled"].includes(notice.status)) {
-    return {
-      headline: `Zawieszenie było na ${formatPolishDays(totalDays)}`,
-      detail: "Ograniczenie zakończono przed pierwotnym terminem.",
-    };
-  }
-
-  if (notice.status === "expired" || remainingDays === 0) {
-    return {
-      headline: `Zawieszenie było na ${formatPolishDays(totalDays)}`,
-      detail: `Okres zawieszenia zakończył się ${formatDisputeDate(notice.ends_at)}.`,
-    };
-  }
-
-  if (notice.status === "scheduled") {
-    return {
-      headline: `Zawieszenie na ${formatPolishDays(totalDays)}`,
-      detail: `Rozpocznie się ${formatDisputeDate(notice.effective_at)} i zakończy ${formatDisputeDate(notice.ends_at)}.`,
-    };
-  }
-
-  return {
-    headline: `Zawieszenie na ${formatPolishDays(totalDays)}`,
-    detail: `Pozostało ${formatPolishDays(remainingDays)}. Automatyczne odblokowanie: ${formatDisputeDate(notice.ends_at)}.`,
-  };
 }
 
 function cleanSupabaseError(error, fallback) {
@@ -2038,9 +1358,6 @@ function AccountNavbar() {
 
   const {
     notice: moderationNotice,
-    isRestricted,
-    loading: restrictionLoading,
-    errorMessage: restrictionError,
   } = useAccountRestriction();
 
   const {
@@ -2080,12 +1397,7 @@ function AccountNavbar() {
   async function checkNotifications() {
     if (!user?.id) return;
 
-    if (
-      restrictionLoading ||
-      isRestricted ||
-      restrictionError ||
-      hasRestrictedAgeAccess
-    ) {
+    if (hasRestrictedAgeAccess) {
       setHasNotifications(false);
       setHasDisputeNotifications(false);
       return;
@@ -2281,17 +1593,6 @@ function AccountNavbar() {
   }
 
   useEffect(() => {
-    if (
-      !user?.id ||
-      restrictionLoading ||
-      isRestricted ||
-      restrictionError
-    ) {
-      setHasNotifications(false);
-      setHasDisputeNotifications(false);
-      return;
-    }
-
     checkNotifications();
 
     function handleNotificationsRead(
@@ -2367,13 +1668,7 @@ function AccountNavbar() {
         handleDisputeNotificationsRead
       );
     };
-  }, [
-    user?.id,
-    hasRestrictedAgeAccess,
-    isRestricted,
-    restrictionError,
-    restrictionLoading,
-  ]);
+  }, [user?.id, hasRestrictedAgeAccess]);
 
   async function handleLogout() {
     try {
@@ -2399,61 +1694,6 @@ function AccountNavbar() {
         }`
       );
     }
-  }
-
-  if (isRestricted || restrictionError) {
-    return (
-      <header className="navbar account-navbar restricted-account-navbar">
-        <Link
-          className="restricted-navbar-brand"
-          to="/account-status"
-          aria-label="Przejdź do statusu konta"
-        >
-          <span className="logo">
-            Idea<span>Hire</span>
-          </span>
-          <span className="restricted-navbar-badge">
-            {isRestricted
-              ? "Konto zawieszone"
-              : "Status konta wymaga sprawdzenia"}
-          </span>
-        </Link>
-
-        <nav
-          className="nav-links restricted-navbar-links"
-          aria-label="Dostępne funkcje zawieszonego konta"
-        >
-          <NavLink
-            to="/account-status"
-            className={({ isActive }) => (isActive ? "is-active" : "")}
-          >
-            Status konta
-          </NavLink>
-          <NavLink
-            to="/privacy-center"
-            className={({ isActive }) => (isActive ? "is-active" : "")}
-          >
-            Prywatność i dane
-          </NavLink>
-          <NavLink
-            to="/regulamin"
-            className={({ isActive }) => (isActive ? "is-active" : "")}
-          >
-            Regulamin
-          </NavLink>
-        </nav>
-
-        <div className="nav-actions restricted-navbar-actions">
-          <button
-            className="btn btn-dark"
-            type="button"
-            onClick={handleLogout}
-          >
-            Wyloguj się
-          </button>
-        </div>
-      </header>
-    );
   }
 
   return (
@@ -2754,24 +1994,11 @@ function Login() {
   const [loading, setLoading] =
     useState(false);
 
-  const [googleLoading, setGoogleLoading] =
-    useState(false);
-
   const [message, setMessage] =
     useState("");
 
   const [success, setSuccess] =
     useState(false);
-
-  useEffect(() => {
-    const oauthError = getOAuthErrorFromLocation(location);
-
-    if (oauthError) {
-      setMessage(
-        `Nie udało się zalogować przez Google: ${oauthError}`
-      );
-    }
-  }, [location.search, location.hash]);
 
   useEffect(() => {
     if (
@@ -2881,42 +2108,6 @@ function Login() {
       );
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleGoogleLogin() {
-    if (loading || googleLoading) return;
-
-    setMessage("");
-    setSuccess(false);
-    setGoogleLoading(true);
-
-    try {
-      const redirectUrl = new URL(
-        "/login",
-        window.location.origin
-      );
-
-      redirectUrl.searchParams.set(
-        "oauth",
-        "google"
-      );
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: redirectUrl.toString(),
-        },
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      setMessage(
-        `Nie udało się zalogować przez Google: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-      setGoogleLoading(false);
     }
   }
 
@@ -3103,23 +2294,6 @@ function Login() {
           </p>
         </div>
 
-        <div className="auth-provider-section">
-          <GoogleAuthButton
-            onClick={handleGoogleLogin}
-            loading={googleLoading}
-          />
-
-          <p className="google-auth-notice">
-            Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta.
-            Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po
-            zapisaniu profilu.
-          </p>
-
-          <div className="auth-divider" aria-hidden="true">
-            <span>lub przez e-mail</span>
-          </div>
-        </div>
-
         <form
           className="auth-form"
           onSubmit={handleLogin}
@@ -3179,7 +2353,7 @@ function Login() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading || googleLoading}
+            disabled={loading}
           >
             {loading
               ? "Logowanie..."
@@ -3683,58 +2857,8 @@ function Register() {
   const [loading, setLoading] =
     useState(false);
 
-  const [googleLoading, setGoogleLoading] =
-    useState(false);
-
   const [message, setMessage] =
     useState("");
-
-  const location = useLocation();
-
-  useEffect(() => {
-    const oauthError = getOAuthErrorFromLocation(location);
-
-    if (oauthError) {
-      setMessage(
-        `Nie udało się kontynuować przez Google: ${oauthError}`
-      );
-    }
-  }, [location.search, location.hash]);
-
-  async function handleGoogleRegister() {
-    if (loading || googleLoading) return;
-
-    setMessage("");
-    setGoogleLoading(true);
-
-    try {
-      const redirectUrl = new URL(
-        "/register",
-        window.location.origin
-      );
-
-      redirectUrl.searchParams.set(
-        "oauth",
-        "google"
-      );
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: redirectUrl.toString(),
-        },
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      setMessage(
-        `Nie udało się kontynuować przez Google: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-      setGoogleLoading(false);
-    }
-  }
 
   async function handleRegister(
     event
@@ -3870,24 +2994,6 @@ function Register() {
             Załóż konto i zacznij
             korzystać z IdeaHire.
           </p>
-        </div>
-
-        <div className="auth-provider-section">
-          <GoogleAuthButton
-            onClick={handleGoogleRegister}
-            loading={googleLoading}
-          />
-
-          <p className="google-auth-notice">
-            Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta.
-            Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po
-            zapisaniu profilu. Po pierwszym logowaniu uzupełnisz datę urodzenia
-            i potwierdzisz dokumenty wymagane do aktywowania konta IdeaHire.
-          </p>
-
-          <div className="auth-divider" aria-hidden="true">
-            <span>lub utwórz konto przez e-mail</span>
-          </div>
         </div>
 
         <form
@@ -4066,7 +3172,6 @@ function Register() {
             type="submit"
             disabled={
               loading ||
-              googleLoading ||
               !ageNoticeAcknowledged ||
               !privacyNoticeAcknowledged ||
               !termsAccepted
@@ -4233,447 +3338,95 @@ async function resizeAndConvertImage(
   );
 }
 
-async function resizePortfolioImage(file) {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    const objectUrl = URL.createObjectURL(file);
-
-    image.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-
-      const sourceWidth = image.naturalWidth;
-      const sourceHeight = image.naturalHeight;
-
-      if (!sourceWidth || !sourceHeight) {
-        reject(new Error("Zdjęcie portfolio ma nieprawidłowe wymiary."));
-        return;
-      }
-
-      const MAX_WIDTH = 2400;
-      const MAX_HEIGHT = 1800;
-      const scale = Math.min(
-        MAX_WIDTH / sourceWidth,
-        MAX_HEIGHT / sourceHeight,
-        1
-      );
-
-      const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
-      const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
-      const canvas = document.createElement("canvas");
-
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-
-      const context = canvas.getContext("2d");
-
-      if (!context) {
-        reject(new Error("Przeglądarka nie obsługuje Canvas."));
-        return;
-      }
-
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = "high";
-      context.drawImage(
-        image,
-        0,
-        0,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        targetWidth,
-        targetHeight
-      );
-
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(new Error("Nie udało się przygotować zdjęcia portfolio."));
-            return;
-          }
-
-          resolve(
-            new File([blob], "portfolio.jpg", {
-              type: "image/jpeg",
-            })
-          );
-        },
-        "image/jpeg",
-        0.9
-      );
-    };
-
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      reject(new Error("Nie udało się odczytać zdjęcia portfolio."));
-    };
-
-    image.src = objectUrl;
-  });
-}
-
-function normalizePortfolioUrl(value) {
-  const cleanValue = String(value || "").trim();
-
-  if (!cleanValue) return null;
-
-  const candidate = /^https?:\/\//i.test(cleanValue)
-    ? cleanValue
-    : `https://${cleanValue}`;
-
-  let parsedUrl;
-
-  try {
-    parsedUrl = new URL(candidate);
-  } catch {
-    throw new Error("Wpisz prawidłowy link do projektu.");
-  }
-
-  if (parsedUrl.protocol !== "https:") {
-    throw new Error("Link do projektu musi rozpoczynać się od https://.");
-  }
-
-  return parsedUrl.toString();
-}
-
-function getPortfolioLinkLabel(value) {
-  try {
-    const parsed = new URL(value);
-    const hostname = parsed.hostname.replace(/^www\./, "");
-    const pathname = parsed.pathname === "/"
-      ? ""
-      : parsed.pathname.replace(/\/$/, "");
-
-    return `${hostname}${pathname}`;
-  } catch {
-    return "Otwórz projekt";
-  }
-}
-
-function getPortfolioMedia(item) {
-  if (Array.isArray(item?.media) && item.media.length > 0) {
-    return item.media;
-  }
-
-  if (item?.image_url) {
-    return [{
-      id: `legacy-${item.id}`,
-      portfolio_item_id: item.id,
-      user_id: item.user_id,
-      image_url: item.image_url,
-      image_path: item.image_path || null,
-      alt_text: item.title || "Zdjęcie realizacji",
-      display_order: 0,
-      isLegacyFallback: true,
-    }];
-  }
-
-  return [];
-}
-
-async function fetchPortfolioAlbums(userId) {
-  const { data: items, error: itemsError } = await supabase
-    .from("ideahire_portfolio_items")
-    .select(
-      "id, user_id, title, description, project_url, image_url, image_path, display_order, created_at, updated_at"
-    )
-    .eq("user_id", userId)
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: true });
-
-  if (itemsError) throw itemsError;
-  if (!items?.length) return [];
-
-  const { data: media, error: mediaError } = await supabase
-    .from("ideahire_portfolio_media")
-    .select(
-      "id, portfolio_item_id, user_id, image_url, image_path, alt_text, display_order, created_at"
-    )
-    .in("portfolio_item_id", items.map((item) => item.id))
-    .order("display_order", { ascending: true });
-
-  if (mediaError) throw mediaError;
-
-  const mediaByItem = (media || []).reduce((groups, mediaItem) => {
-    if (!groups[mediaItem.portfolio_item_id]) {
-      groups[mediaItem.portfolio_item_id] = [];
-    }
-    groups[mediaItem.portfolio_item_id].push(mediaItem);
-    return groups;
-  }, {});
-
-  return items.map((item) => ({
-    ...item,
-    media: mediaByItem[item.id] || getPortfolioMedia(item),
-  }));
-}
-
-function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }) {
-  const media = getPortfolioMedia(album);
-  const [activeIndex, setActiveIndex] = useState(
-    Math.min(Math.max(Number(initialIndex) || 0, 0), Math.max(media.length - 1, 0))
-  );
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    function handleKeyDown(event) {
-      if (event.key === "Escape") onClose();
-      if (event.key === "ArrowLeft" && media.length > 1) {
-        setActiveIndex((current) => (current - 1 + media.length) % media.length);
-      }
-      if (event.key === "ArrowRight" && media.length > 1) {
-        setActiveIndex((current) => (current + 1) % media.length);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [media.length, onClose]);
-
-  if (!album || media.length === 0) return null;
-
-  const activeMedia = media[activeIndex];
-
-  return (
-    <div className="portfolio-lightbox" role="dialog" aria-modal="true" aria-label={`Album: ${album.title}`}>
-      <button
-        type="button"
-        className="portfolio-lightbox-backdrop"
-        onClick={onClose}
-        aria-label="Zamknij album"
-      />
-
-      <div className="portfolio-lightbox-panel">
-        <header>
-          <div>
-            <span>Portfolio</span>
-            <strong>{album.title}</strong>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Zamknij album">×</button>
-        </header>
-
-        <div className="portfolio-lightbox-stage">
-          <img
-            src={activeMedia.image_url}
-            alt={activeMedia.alt_text || `${album.title} — zdjęcie ${activeIndex + 1}`}
-          />
-
-          {media.length > 1 && (
-            <>
-              <button
-                type="button"
-                className="portfolio-lightbox-arrow is-left"
-                onClick={() => setActiveIndex((activeIndex - 1 + media.length) % media.length)}
-                aria-label="Poprzednie zdjęcie"
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                className="portfolio-lightbox-arrow is-right"
-                onClick={() => setActiveIndex((activeIndex + 1) % media.length)}
-                aria-label="Następne zdjęcie"
-              >
-                ›
-              </button>
-            </>
-          )}
-        </div>
-
-        <footer>
-          <span>{activeIndex + 1} / {media.length}</span>
-          <div className="portfolio-lightbox-thumbnails" aria-label="Zdjęcia w albumie">
-            {media.map((mediaItem, index) => (
-              <button
-                type="button"
-                className={index === activeIndex ? "is-active" : ""}
-                onClick={() => setActiveIndex(index)}
-                aria-label={`Pokaż zdjęcie ${index + 1}`}
-                key={mediaItem.id}
-              >
-                <img src={mediaItem.image_url} alt="" />
-              </button>
-            ))}
-          </div>
-          {canReport && (
-            <button
-              type="button"
-              className="portfolio-lightbox-report"
-              onClick={() => onReport(album, activeMedia)}
-            >
-              Zgłoś to zdjęcie
-            </button>
-          )}
-        </footer>
-      </div>
-    </div>
-  );
-}
-
-function PortfolioReportDialog({ target, onClose, onSubmitted }) {
-  const [reasonCode, setReasonCode] = useState("copyright");
-  const [explanation, setExplanation] = useState("");
-  const [legalReference, setLegalReference] = useState("");
-  const [goodFaith, setGoodFaith] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape" && !busy) onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [busy, onClose]);
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    if (busy) return;
-
-    if (explanation.trim().length < 50) {
-      setMessage("Opisz konkretnie naruszenie — minimum 50 znaków.");
-      return;
-    }
-    if (!goodFaith) {
-      setMessage("Potwierdź oświadczenie o dobrej wierze.");
-      return;
-    }
-
-    setBusy(true);
-    setMessage("");
-    try {
-      const { data, error } = await supabase.rpc(
-        "submit_ideahire_portfolio_content_report",
-        {
-          p_portfolio_item_id: target.album.id,
-          p_portfolio_media_id: target.media?.isLegacyFallback
-            ? null
-            : target.media?.id || null,
-          p_reason_code: reasonCode,
-          p_explanation: explanation.trim(),
-          p_legal_reference: legalReference.trim() || null,
-          p_good_faith_confirmed: true,
-        }
-      );
-      if (error) throw error;
-      onSubmitted(data);
-    } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się wysłać zgłoszenia."));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="portfolio-report-dialog" role="dialog" aria-modal="true" aria-labelledby="portfolio-report-title">
-      <button type="button" className="portfolio-report-backdrop" onClick={onClose} aria-label="Zamknij formularz" />
-      <form className="portfolio-report-panel" onSubmit={handleSubmit}>
-        <header>
-          <div>
-            <span className="section-label">Zgłoszenie treści</span>
-            <h2 id="portfolio-report-title">
-              {target.media
-                ? "Zgłoś zdjęcie"
-                : target.kind === "link"
-                ? "Zgłoś link"
-                : "Zgłoś album"}
-            </h2>
-          </div>
-          <button type="button" onClick={onClose} disabled={busy} aria-label="Zamknij formularz">×</button>
-        </header>
-
-        <p className="portfolio-report-context">
-          {target.kind === "link" ? "Link w projekcie" : "Projekt"}: <strong>{target.album.title}</strong>.
-          {target.kind === "link" && target.album.project_url && (
-            <> Adres: <span>{getPortfolioLinkLabel(target.album.project_url)}</span>.</>
-          )}{" "}
-          Zgłoszenie trafi do ręcznej analizy administracji — samo wysłanie nie powoduje automatycznej blokady.
-        </p>
-
-        <label>
-          Powód zgłoszenia
-          <select value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} disabled={busy}>
-            {Object.entries(CONTENT_REPORT_REASON_LABELS).map(([value, label]) => (
-              <option value={value} key={value}>{label}</option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Dlaczego treść może być nielegalna?
-          <textarea
-            value={explanation}
-            onChange={(event) => setExplanation(event.target.value)}
-            minLength={50}
-            maxLength={5000}
-            rows={6}
-            placeholder={target.kind === "link"
-              ? "Wskaż, co znajduje się pod linkiem, na czym polega możliwe naruszenie oraz jakiego prawa lub osoby dotyczy."
-              : "Wskaż konkretny element zdjęcia lub albumu, okoliczności i osobę albo prawo, którego dotyczy zgłoszenie."}
-            disabled={busy}
-            required
-          />
-          <small>{explanation.length}/5000 znaków</small>
-        </label>
-
-        <label>
-          Podstawa prawna — jeśli ją znasz
-          <input
-            type="text"
-            value={legalReference}
-            onChange={(event) => setLegalReference(event.target.value)}
-            maxLength={1500}
-            placeholder="Np. rodzaj prawa autorskiego lub prawa do wizerunku"
-            disabled={busy}
-          />
-        </label>
-
-        <label className="portfolio-report-good-faith">
-          <input
-            type="checkbox"
-            checked={goodFaith}
-            onChange={(event) => setGoodFaith(event.target.checked)}
-            disabled={busy}
-          />
-          <span>Działam w dobrej wierze i uważam podane informacje za dokładne i kompletne.</span>
-        </label>
-
-        {message && <p className="profile-portfolio-message" role="alert">{message}</p>}
-
-        <div className="portfolio-report-actions">
-          <button type="button" className="privacy-secondary-button" onClick={onClose} disabled={busy}>Anuluj</button>
-          <button type="submit" className="privacy-primary-button" disabled={busy}>
-            {busy ? "Wysyłanie..." : "Wyślij zgłoszenie →"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
 function AccountStatus() {
   const { user } = useAuth();
-  const {
-    notice,
-    appeal,
-    isRestricted,
-    loading,
-    errorMessage: restrictionError,
-    refreshRestriction,
-  } = useAccountRestriction();
+  const { refreshRestriction } = useAccountRestriction();
+  const [notice, setNotice] = useState(null);
+  const [appeal, setAppeal] = useState(null);
   const [appealStatement, setAppealStatement] = useState("");
+  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+
+  async function loadAccountStatus(showLoading = true) {
+    if (!user?.id) return;
+    if (showLoading) setLoading(true);
+
+    try {
+      await supabase.rpc("get_my_ideahire_moderation_status");
+
+      const { data: noticeData, error: noticeError } = await supabase
+        .from("ideahire_moderation_notices")
+        .select("*")
+        .eq("target_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (noticeError) throw noticeError;
+      setNotice(noticeData || null);
+
+      if (noticeData?.case_id) {
+        const { data: appealData, error: appealError } = await supabase
+          .from("ideahire_moderation_appeals")
+          .select("*")
+          .eq("case_id", noticeData.case_id)
+          .eq("target_user_id", user.id)
+          .maybeSingle();
+
+        if (appealError) throw appealError;
+        setAppeal(appealData || null);
+      } else {
+        setAppeal(null);
+      }
+
+      await refreshRestriction(user.id);
+    } catch (error) {
+      setMessage(cleanSupabaseError(
+        error,
+        "Nie udało się pobrać decyzji dotyczącej konta."
+      ));
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadAccountStatus(true);
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const refresh = () => loadAccountStatus(false);
+    const channel = supabase
+      .channel(`account-status-page-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_moderation_notices",
+          filter: `target_user_id=eq.${user.id}`,
+        },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_moderation_appeals",
+          filter: `target_user_id=eq.${user.id}`,
+        },
+        refresh
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   async function handleSubmitAppeal(event) {
     event.preventDefault();
@@ -4699,15 +3452,13 @@ function AccountStatus() {
       if (error) throw error;
       setAppealStatement("");
       setMessage("Odwołanie zostało zapisane i przekazane do rozpoznania.");
-      await refreshRestriction(user.id, false);
+      await loadAccountStatus(false);
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się złożyć odwołania."));
     } finally {
       setBusy(false);
     }
   }
-
-  const durationDetails = getModerationDurationDetails(notice);
 
   function downloadDecisionNotice() {
     if (!notice) return;
@@ -4717,7 +3468,6 @@ function AccountStatus() {
       "",
       `Rodzaj decyzji: ${MODERATION_DECISION_LABELS[notice.decision_type] || notice.decision_type}`,
       `Status: ${MODERATION_STATUS_LABELS[notice.status] || notice.status}`,
-      `Okres: ${durationDetails?.headline || "—"}`,
       `Powód: ${MODERATION_REASON_LABELS[notice.reason_code] || notice.reason_code}`,
       "Zakres: wykonywanie nowych czynności w serwisie oraz publiczna widoczność profilu i zleceń",
       ...(notice.source_job_title
@@ -4753,10 +3503,7 @@ function AccountStatus() {
     && new Date(notice.appeal_available_until).getTime() >= Date.now();
 
   return (
-    <div
-      className="account-page moderation-user-page"
-      data-moderation-ui-version="2026-09-11-flicker-fix-v3"
-    >
+    <div className="account-page moderation-user-page">
       <AccountNavbar />
 
       <main className="app-page moderation-user-shell">
@@ -4771,41 +3518,8 @@ function AccountStatus() {
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
-        {restrictionError && notice && (
-          <p className="moderation-status-read-error" role="alert">
-            {restrictionError} Wyświetlamy ostatni poprawnie pobrany stan i nie
-            odblokowujemy pozostałych funkcji konta.
-          </p>
-        )}
-
         {loading ? (
           <div className="privacy-empty-state">Ładowanie statusu konta...</div>
-        ) : restrictionError && !notice ? (
-          <section className="moderation-status-error-card" role="alert">
-            <span aria-hidden="true">!</span>
-            <div>
-              <span className="section-label">Bezpieczny tryb konta</span>
-              <h2>Nie możemy teraz potwierdzić statusu konta</h2>
-              <p>{restrictionError}</p>
-              <p>
-                Do czasu poprawnego odczytu nie udostępniamy czynności na
-                koncie. Możesz ponowić próbę, przejść do centrum prywatności
-                albo się wylogować.
-              </p>
-              <div className="moderation-status-error-actions">
-                <button
-                  type="button"
-                  className="privacy-primary-button"
-                  onClick={() => refreshRestriction(user?.id, false)}
-                >
-                  Spróbuj ponownie
-                </button>
-                <Link className="privacy-secondary-button" to="/privacy-center">
-                  Prywatność i moje dane
-                </Link>
-              </div>
-            </div>
-          </section>
         ) : !notice ? (
           <section className="moderation-clear-card">
             <span aria-hidden="true">✓</span>
@@ -4819,52 +3533,6 @@ function AccountStatus() {
           </section>
         ) : (
           <>
-            {isRestricted && (
-              <section className="restricted-account-lock-card" role="alert">
-                <span className="restricted-account-lock-icon" aria-hidden="true">
-                  !
-                </span>
-                <div>
-                  <span className="section-label">Dostęp do konta ograniczony</span>
-                  <h2>Twoje konto zostało zawieszone</h2>
-                  <p>
-                    W czasie obowiązywania decyzji nie możesz publikować ani
-                    edytować zleceń, aplikować, wysyłać wiadomości ani wykonywać
-                    innych czynności na platformie. Nadal możesz sprawdzić pełną
-                    decyzję, złożyć odwołanie, skorzystać z praw dotyczących danych
-                    i wylogować się.
-                  </p>
-                  {durationDetails && (
-                    <div className="restricted-account-lock-duration">
-                      <span>Czas zawieszenia</span>
-                      <strong>{durationDetails.headline}</strong>
-                      <p>{durationDetails.detail}</p>
-                    </div>
-                  )}
-                  <div className="restricted-account-lock-reason">
-                    <span>Powód zawieszenia</span>
-                    <strong>
-                      {MODERATION_REASON_LABELS[notice.reason_code]
-                        || notice.reason_code}
-                    </strong>
-                    <p>{notice.public_reason}</p>
-                  </div>
-                  {(appeal || appealDeadlineOpen) && (
-                    <div className="restricted-account-lock-actions">
-                      <a
-                        className="privacy-primary-button"
-                        href="#moderation-appeal"
-                      >
-                        {appeal
-                          ? "Sprawdź status odwołania"
-                          : "Złóż bezpłatne odwołanie"}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
             <section className={`moderation-decision-card is-${notice.status}`}>
               <div className="moderation-decision-topline">
                 <div>
@@ -4875,17 +3543,6 @@ function AccountStatus() {
                   {MODERATION_STATUS_LABELS[notice.status] || notice.status}
                 </span>
               </div>
-
-              {durationDetails && (
-                <div
-                  className="moderation-duration-banner"
-                  aria-live="polite"
-                >
-                  <span>Czas obowiązywania decyzji</span>
-                  <strong>{durationDetails.headline}</strong>
-                  <p>{durationDetails.detail}</p>
-                </div>
-              )}
 
               <dl className="moderation-decision-meta">
                 <div>
@@ -4934,16 +3591,6 @@ function AccountStatus() {
                 </article>
               </div>
 
-              {notice.last_adjusted_at && notice.last_adjustment_reason && (
-                <div className="moderation-adjustment-banner">
-                  <strong>Zmieniono czas obowiązywania decyzji</strong>
-                  <p>{notice.last_adjustment_reason}</p>
-                  <small>
-                    Zmieniono: {formatDisputeDate(notice.last_adjusted_at)}
-                  </small>
-                </div>
-              )}
-
               {notice.lift_reason && (
                 <div className="moderation-lift-banner">
                   <strong>Ograniczenie zostało zdjęte</strong>
@@ -4966,11 +3613,7 @@ function AccountStatus() {
             </section>
 
             {appeal ? (
-              <section
-                id="moderation-appeal"
-                className="moderation-appeal-card"
-                tabIndex="-1"
-              >
+              <section className="moderation-appeal-card">
                 <div className="moderation-decision-topline">
                   <div>
                     <span className="section-label">Twoje odwołanie</span>
@@ -4981,22 +3624,6 @@ function AccountStatus() {
                   </span>
                 </div>
                 <p>{appeal.user_statement}</p>
-                <dl className="moderation-appeal-meta">
-                  <div>
-                    <dt>Złożono</dt>
-                    <dd>{formatDisputeDate(appeal.submitted_at)}</dd>
-                  </div>
-                  <div>
-                    <dt>Sposób rozpoznania</dt>
-                    <dd>Analiza przez uprawnionego członka administracji</dd>
-                  </div>
-                  {appeal.resolved_at && (
-                    <div>
-                      <dt>Rozstrzygnięto</dt>
-                      <dd>{formatDisputeDate(appeal.resolved_at)}</dd>
-                    </div>
-                  )}
-                </dl>
                 {appeal.resolution_reason && (
                   <div className="moderation-reason-block">
                     <h3>Wynik ponownej analizy</h3>
@@ -5005,27 +3632,13 @@ function AccountStatus() {
                 )}
               </section>
             ) : appealDeadlineOpen ? (
-              <form
-                id="moderation-appeal"
-                className="moderation-appeal-card"
-                onSubmit={handleSubmitAppeal}
-                tabIndex="-1"
-              >
+              <form className="moderation-appeal-card" onSubmit={handleSubmitAppeal}>
                 <span className="section-label">Bezpłatne odwołanie</span>
                 <h2>Wyjaśnij fakty lub wskaż błąd decyzji</h2>
                 <p>
                   Termin złożenia odwołania: {formatDisputeDate(notice.appeal_available_until)}.
-                  Odwołanie zostanie rozpoznane przez uprawnionego członka
-                  administracji i nie będzie rozstrzygane wyłącznie automatycznie.
+                  Odwołanie rozpozna inny administrator albo owner.
                 </p>
-                <div className="moderation-appeal-guidance" id="appeal-guidance">
-                  <strong>Co warto podać?</strong>
-                  <p>
-                    Wskaż konkretny błąd, istotne fakty, daty lub identyfikator
-                    zlecenia. Nie podawaj hasła, danych karty ani innych danych,
-                    które nie są potrzebne do rozpoznania sprawy.
-                  </p>
-                </div>
                 <textarea
                   value={appealStatement}
                   onChange={(event) => setAppealStatement(event.target.value)}
@@ -5034,7 +3647,6 @@ function AccountStatus() {
                   rows={7}
                   placeholder="Opisz, dlaczego decyzja powinna zostać zmieniona, i wskaż istotne fakty..."
                   disabled={busy}
-                  aria-describedby="appeal-guidance"
                 />
                 <div className="moderation-form-footer">
                   <small>{appealStatement.length}/5000</small>
@@ -5053,21 +3665,6 @@ function AccountStatus() {
                 <p>Kopia decyzji pozostaje dostępna w historii konta.</p>
               </section>
             )}
-
-            <section className="moderation-redress-card">
-              <span className="section-label">Dalsze środki ochrony prawnej</span>
-              <h2>Odwołanie wewnętrzne nie zamyka innych możliwości</h2>
-              <p>
-                Po otrzymaniu uzasadnionego rozstrzygnięcia możesz skorzystać
-                także z innych środków dostępnych na podstawie prawa. Zależnie
-                od przepisów mających zastosowanie do operatora może to obejmować
-                certyfikowany organ pozasądowego rozstrzygania sporów. Prawo do
-                dochodzenia roszczeń przed właściwym sądem pozostaje nienaruszone.
-              </p>
-              <Link className="privacy-secondary-button" to="/regulamin">
-                Sprawdź zasady moderacji i odwołań
-              </Link>
-            </section>
           </>
         )}
       </main>
@@ -5214,45 +3811,6 @@ function Account() {
   const [skillDraft, setSkillDraft] =
     useState("");
 
-  const [portfolioItems, setPortfolioItems] =
-    useState([]);
-
-  const [portfolioLoading, setPortfolioLoading] =
-    useState(true);
-
-  const [portfolioBusy, setPortfolioBusy] =
-    useState(false);
-
-  const [portfolioEditingId, setPortfolioEditingId] =
-    useState(null);
-
-  const [portfolioFiles, setPortfolioFiles] =
-    useState([]);
-
-  const [portfolioRemovedMediaIds, setPortfolioRemovedMediaIds] =
-    useState([]);
-
-  const [portfolioMessage, setPortfolioMessage] =
-    useState("");
-
-  const [portfolioDraft, setPortfolioDraft] =
-    useState({
-      title: "",
-      description: "",
-      projectUrl: "",
-    });
-
-  const portfolioFileInputRef = useRef(null);
-
-  const [myContentReports, setMyContentReports] =
-    useState([]);
-
-  const [myContentReportAppeals, setMyContentReportAppeals] =
-    useState([]);
-
-  const [contentReportBusy, setContentReportBusy] =
-    useState("");
-
   const [
     profileDetailsLoading,
     setProfileDetailsLoading,
@@ -5302,14 +3860,12 @@ function Account() {
      */
     setName(
       user.user_metadata?.name ||
-        user.user_metadata?.full_name ||
         user.email?.split("@")[0] ||
         ""
     );
 
     setAvatarUrl(
       user.user_metadata?.avatar_url ||
-        user.user_metadata?.picture ||
         ""
     );
 
@@ -5388,7 +3944,7 @@ function Account() {
           await supabase
             .from("profiles")
             .select(
-              "name, avatar_url, about, specialty_categories, specialization, skills"
+              "specialty_categories, specialization, skills"
             )
             .eq("id", user.id)
             .maybeSingle();
@@ -5402,22 +3958,6 @@ function Account() {
         }
 
         if (!mounted) return;
-
-        if (data) {
-          setName(
-            data.name ||
-              user.user_metadata?.name ||
-              user.user_metadata?.full_name ||
-              user.email?.split("@")[0] ||
-              ""
-          );
-          setAvatarUrl(
-            data.avatar_url || ""
-          );
-          setAbout(
-            data.about || ""
-          );
-        }
 
         const storedCategories =
           Array.isArray(
@@ -5460,116 +4000,6 @@ function Account() {
 
     return () => {
       mounted = false;
-    };
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (!user?.id) {
-      setPortfolioItems([]);
-      setPortfolioLoading(false);
-      return;
-    }
-
-    let mounted = true;
-
-    async function loadPortfolio() {
-      setPortfolioLoading(true);
-
-      try {
-        const data = await fetchPortfolioAlbums(user.id);
-        if (!mounted) return;
-
-        setPortfolioItems(data);
-        setPortfolioMessage("");
-      } catch (error) {
-        console.error("PORTFOLIO LOAD ERROR:", error);
-
-        if (mounted) {
-          setPortfolioItems([]);
-          setPortfolioMessage(
-            "Nie udało się pobrać portfolio. Odśwież stronę i spróbuj ponownie."
-          );
-        }
-      } finally {
-        if (mounted) {
-          setPortfolioLoading(false);
-        }
-      }
-    }
-
-    loadPortfolio();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (!user?.id) {
-      setMyContentReports([]);
-      setMyContentReportAppeals([]);
-      return;
-    }
-
-    let mounted = true;
-
-    async function loadMyContentReports() {
-      const [reportsResult, appealsResult] = await Promise.all([
-        supabase
-          .from("ideahire_content_reports")
-          .select("id, report_number, content_type, reason_code, status, content_snapshot, decision_summary, submitted_at, reviewed_at")
-          .eq("reporter_user_id", user.id)
-          .order("submitted_at", { ascending: false })
-          .limit(30),
-        supabase
-          .from("ideahire_content_report_appeals")
-          .select("id, report_id, status, statement, resolution_reason, submitted_at, resolved_at")
-          .eq("appellant_user_id", user.id)
-          .order("submitted_at", { ascending: false }),
-      ]);
-
-      if (!mounted) return;
-      if (reportsResult.error || appealsResult.error) {
-        console.error(
-          "CONTENT REPORT HISTORY ERROR:",
-          reportsResult.error || appealsResult.error
-        );
-        return;
-      }
-
-      setMyContentReports(reportsResult.data || []);
-      setMyContentReportAppeals(appealsResult.data || []);
-    }
-
-    loadMyContentReports();
-
-    const channel = supabase
-      .channel(`my-content-reports-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ideahire_content_reports",
-          filter: `reporter_user_id=eq.${user.id}`,
-        },
-        loadMyContentReports
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ideahire_content_report_appeals",
-          filter: `appellant_user_id=eq.${user.id}`,
-        },
-        loadMyContentReports
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
     };
   }, [user?.id]);
 
@@ -5808,13 +4238,49 @@ function Account() {
       }
 
       const {
+        data: updatedUser,
+        error:
+          metadataError,
+      } =
+        await supabase.auth.updateUser(
+          {
+            data: {
+              avatar_url:
+                publicUrl,
+            },
+          }
+        );
+
+      if (metadataError) {
+        setMessage(
+          `Zdjęcie przesłane, ale nie udało się zapisać profilu: ${metadataError.message}`
+        );
+
+        return;
+      }
+
+      const {
         error: profileError,
-      } = await supabase.rpc(
-        "save_my_ideahire_profile_avatar",
-        {
-          p_avatar_url: publicUrl,
-        }
-      );
+      } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            name:
+              name.trim() ||
+              user.user_metadata?.name ||
+              user.email?.split("@")[0] ||
+              "Użytkownik",
+            avatar_url: publicUrl,
+            about:
+              about.trim() ||
+              user.user_metadata?.about ||
+              null,
+          },
+          {
+            onConflict: "id",
+          }
+        );
 
       if (profileError) {
         console.error(
@@ -5822,39 +4288,11 @@ function Account() {
           profileError
         );
 
-        const { error: cleanupError } =
-          await supabase.storage
-            .from("avatars")
-            .remove([filePath]);
-
-        if (cleanupError) {
-          console.error(
-            "PROFILE AVATAR CLEANUP ERROR:",
-            cleanupError
-          );
-        }
-
         setMessage(
-          `Nie udało się trwale zapisać zdjęcia profilowego: ${profileError.message}`
+          `Zdjęcie zostało przesłane, ale nie udało się zaktualizować profilu publicznego: ${profileError.message}`
         );
 
         return;
-      }
-
-      const {
-        data: updatedUser,
-        error: metadataError,
-      } = await supabase.auth.updateUser({
-        data: {
-          avatar_url: publicUrl,
-        },
-      });
-
-      if (metadataError) {
-        console.error(
-          "PROFILE AVATAR AUTH METADATA ERROR:",
-          metadataError
-        );
       }
 
       setAvatarUrl(
@@ -6298,349 +4736,6 @@ function Account() {
             skill !== skillToRemove
         )
     );
-  }
-
-  function resetPortfolioEditor() {
-    setPortfolioEditingId(null);
-    setPortfolioFiles([]);
-    setPortfolioRemovedMediaIds([]);
-    setPortfolioDraft({
-      title: "",
-      description: "",
-      projectUrl: "",
-    });
-
-    if (portfolioFileInputRef.current) {
-      portfolioFileInputRef.current.value = "";
-    }
-  }
-
-  function handlePortfolioFileChange(event) {
-    const selectedFiles = Array.from(event.target.files || []);
-
-    setPortfolioMessage("");
-
-    if (selectedFiles.some((file) => !file.type.startsWith("image/"))) {
-      setPortfolioMessage("Wybierz zdjęcia w formacie JPG, PNG lub WEBP.");
-      event.target.value = "";
-      return;
-    }
-
-    if (selectedFiles.some((file) => file.size > 12 * 1024 * 1024)) {
-      setPortfolioMessage("Każde zdjęcie portfolio może mieć maksymalnie 12 MB.");
-      event.target.value = "";
-      return;
-    }
-
-    const existingItem = portfolioEditingId
-      ? portfolioItems.find((item) => item.id === portfolioEditingId)
-      : null;
-    const keptExistingCount = getPortfolioMedia(existingItem).filter(
-      (mediaItem) => !portfolioRemovedMediaIds.includes(mediaItem.id)
-    ).length;
-
-    if (
-      keptExistingCount + portfolioFiles.length + selectedFiles.length
-      > MAX_PORTFOLIO_ALBUM_IMAGES
-    ) {
-      setPortfolioMessage(
-        `Jeden album może zawierać maksymalnie ${MAX_PORTFOLIO_ALBUM_IMAGES} zdjęć.`
-      );
-      event.target.value = "";
-      return;
-    }
-
-    setPortfolioFiles((current) => [...current, ...selectedFiles]);
-    event.target.value = "";
-  }
-
-  function startPortfolioEdit(item) {
-    setPortfolioEditingId(item.id);
-    setPortfolioFiles([]);
-    setPortfolioRemovedMediaIds([]);
-    setPortfolioMessage("");
-    setPortfolioDraft({
-      title: item.title || "",
-      description: item.description || "",
-      projectUrl: item.project_url || "",
-    });
-
-    if (portfolioFileInputRef.current) {
-      portfolioFileInputRef.current.value = "";
-    }
-  }
-
-  async function handlePortfolioSubmit(event) {
-    event.preventDefault();
-
-    if (!user?.id || portfolioBusy) return;
-
-    const cleanTitle = portfolioDraft.title.trim().replace(/\s+/g, " ");
-    const cleanDescription = portfolioDraft.description.trim();
-    const existingItem = portfolioEditingId
-      ? portfolioItems.find((item) => item.id === portfolioEditingId)
-      : null;
-
-    if (cleanTitle.length < 3) {
-      setPortfolioMessage("Tytuł projektu musi mieć co najmniej 3 znaki.");
-      return;
-    }
-
-    if (cleanTitle.length > 120) {
-      setPortfolioMessage("Tytuł projektu może mieć maksymalnie 120 znaków.");
-      return;
-    }
-
-    if (cleanDescription.length > 800) {
-      setPortfolioMessage("Opis projektu może mieć maksymalnie 800 znaków.");
-      return;
-    }
-
-    let cleanProjectUrl = null;
-
-    try {
-      cleanProjectUrl = normalizePortfolioUrl(portfolioDraft.projectUrl);
-    } catch (error) {
-      setPortfolioMessage(error.message);
-      return;
-    }
-
-    const existingMedia = getPortfolioMedia(existingItem);
-    const keptMedia = existingMedia.filter(
-      (mediaItem) => !portfolioRemovedMediaIds.includes(mediaItem.id)
-    );
-
-    if (!cleanProjectUrl && keptMedia.length === 0 && portfolioFiles.length === 0) {
-      setPortfolioMessage("Dodaj link do projektu albo co najmniej jedno zdjęcie realizacji.");
-      return;
-    }
-
-    if (!existingItem && portfolioItems.length >= MAX_PORTFOLIO_ITEMS) {
-      setPortfolioMessage(
-        `Portfolio może zawierać maksymalnie ${MAX_PORTFOLIO_ITEMS} projektów.`
-      );
-      return;
-    }
-
-    setPortfolioBusy(true);
-    setPortfolioMessage("");
-
-    const uploadedMedia = [];
-
-    try {
-      for (const file of portfolioFiles) {
-        const convertedFile = await resizePortfolioImage(file);
-        const uniquePart = typeof crypto?.randomUUID === "function"
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-        const uploadedImagePath = `${user.id}/portfolio/project-${uniquePart}.jpg`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("avatars")
-          .upload(uploadedImagePath, convertedFile, {
-            contentType: "image/jpeg",
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrlData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(uploadedImagePath);
-
-        if (!publicUrlData?.publicUrl) {
-          throw new Error("Nie udało się pobrać adresu zdjęcia portfolio.");
-        }
-
-        uploadedMedia.push({
-          image_path: uploadedImagePath,
-          image_url: publicUrlData.publicUrl,
-          alt_text: cleanTitle,
-        });
-      }
-
-      const mediaPayload = [
-        ...keptMedia.map((mediaItem) => ({
-          image_path: mediaItem.image_path,
-          image_url: mediaItem.image_url,
-          alt_text: cleanTitle,
-        })),
-        ...uploadedMedia,
-      ];
-
-      const { error } = await supabase.rpc(
-        "save_my_ideahire_portfolio_album",
-        {
-          p_item_id: existingItem?.id || null,
-          p_title: cleanTitle,
-          p_description: cleanDescription || null,
-          p_project_url: cleanProjectUrl,
-          p_media: mediaPayload,
-        }
-      );
-
-      if (error) throw error;
-
-      const pathsToRemove = existingMedia
-        .filter((mediaItem) => portfolioRemovedMediaIds.includes(mediaItem.id))
-        .map((mediaItem) => mediaItem.image_path)
-        .filter(Boolean);
-
-      if (pathsToRemove.length > 0) {
-        const { error: oldImageError } = await supabase.storage
-          .from("avatars")
-          .remove([...new Set(pathsToRemove)]);
-
-        if (oldImageError) {
-          console.error("PORTFOLIO OLD IMAGES DELETE ERROR:", oldImageError);
-        }
-      }
-
-      setPortfolioItems(await fetchPortfolioAlbums(user.id));
-
-      resetPortfolioEditor();
-      setPortfolioMessage(
-        existingItem
-          ? "Projekt w portfolio został zaktualizowany."
-          : "Projekt został dodany do portfolio."
-      );
-    } catch (error) {
-      console.error("PORTFOLIO SAVE ERROR:", error);
-
-      if (uploadedMedia.length > 0) {
-        const { error: cleanupError } = await supabase.storage
-          .from("avatars")
-          .remove(uploadedMedia.map((mediaItem) => mediaItem.image_path));
-
-        if (cleanupError) {
-          console.error("PORTFOLIO UPLOAD CLEANUP ERROR:", cleanupError);
-        }
-      }
-
-      setPortfolioMessage(
-        `Nie udało się zapisać projektu w portfolio: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setPortfolioBusy(false);
-    }
-  }
-
-  function toggleExistingPortfolioMedia(mediaId) {
-    setPortfolioRemovedMediaIds((current) =>
-      current.includes(mediaId)
-        ? current.filter((id) => id !== mediaId)
-        : [...current, mediaId]
-    );
-  }
-
-  function removePendingPortfolioFile(indexToRemove) {
-    setPortfolioFiles((current) =>
-      current.filter((_, index) => index !== indexToRemove)
-    );
-  }
-
-  async function handlePortfolioDelete(item) {
-    if (!user?.id || portfolioBusy) return;
-
-    const confirmed = window.confirm(
-      `Usunąć projekt „${item.title}” z portfolio?`
-    );
-
-    if (!confirmed) return;
-
-    setPortfolioBusy(true);
-    setPortfolioMessage("");
-
-    try {
-      const imagePaths = getPortfolioMedia(item)
-        .map((mediaItem) => mediaItem.image_path)
-        .filter(Boolean);
-
-      const { error } = await supabase
-        .from("ideahire_portfolio_items")
-        .delete()
-        .eq("id", item.id)
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-
-      setPortfolioItems((current) =>
-        current.filter((portfolioItem) => portfolioItem.id !== item.id)
-      );
-
-      if (imagePaths.length > 0) {
-        const { error: imageError } = await supabase.storage
-          .from("avatars")
-          .remove([...new Set(imagePaths)]);
-
-        if (imageError) {
-          console.error("PORTFOLIO IMAGE DELETE ERROR:", imageError);
-        }
-      }
-
-      if (portfolioEditingId === item.id) {
-        resetPortfolioEditor();
-      }
-
-      setPortfolioMessage("Projekt został usunięty z portfolio.");
-    } catch (error) {
-      setPortfolioMessage(
-        `Nie udało się usunąć projektu z portfolio: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-    } finally {
-      setPortfolioBusy(false);
-    }
-  }
-
-  async function handleContentReportAppeal(report) {
-    if (contentReportBusy) return;
-
-    const statement = window.prompt(
-      "Wyjaśnij, dlaczego zgłoszenie powinno zostać przeanalizowane ponownie (minimum 30 znaków):"
-    );
-
-    if (!statement) return;
-    if (statement.trim().length < 30) {
-      setPortfolioMessage("Uzasadnienie odwołania musi mieć co najmniej 30 znaków.");
-      return;
-    }
-
-    setContentReportBusy(report.id);
-    setPortfolioMessage("");
-
-    try {
-      const { error } = await supabase.rpc(
-        "submit_my_ideahire_content_report_appeal",
-        {
-          p_report_id: report.id,
-          p_statement: statement.trim(),
-        }
-      );
-      if (error) throw error;
-
-      const { data: appeals, error: appealsError } = await supabase
-        .from("ideahire_content_report_appeals")
-        .select("id, report_id, status, statement, resolution_reason, submitted_at, resolved_at")
-        .eq("appellant_user_id", user.id)
-        .order("submitted_at", { ascending: false });
-      if (appealsError) throw appealsError;
-
-      setMyContentReportAppeals(appeals || []);
-      setPortfolioMessage("Odwołanie zostało zapisane i przekazane do ponownej analizy.");
-    } catch (error) {
-      setPortfolioMessage(cleanSupabaseError(
-        error,
-        "Nie udało się złożyć odwołania."
-      ));
-    } finally {
-      setContentReportBusy("");
-    }
   }
 
   const displayName =
@@ -7110,265 +5205,6 @@ function Account() {
                 : "Zapisz zmiany →"}
             </button>
           </form>
-
-          <section
-            className="profile-portfolio-manager"
-            aria-labelledby="portfolio-manager-title"
-          >
-            <div className="profile-portfolio-heading">
-              <div>
-                <span className="section-label">Twoje realizacje</span>
-                <h2 id="portfolio-manager-title">Portfolio</h2>
-                <p>
-                  Pokaż maksymalnie {MAX_PORTFOLIO_ITEMS} projektów. Każdy projekt
-                  jest osobnym albumem z maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
-                  zdjęciami oraz opcjonalnym linkiem HTTPS.
-                </p>
-              </div>
-
-              <span className="profile-portfolio-count">
-                {portfolioItems.length}/{MAX_PORTFOLIO_ITEMS}
-              </span>
-            </div>
-
-            <div className="profile-portfolio-legal-note">
-              <strong>Publikuj odpowiedzialnie.</strong>
-              <span>
-                Dodając projekt, potwierdzasz, że masz prawo opublikować jego
-                opis, link i zdjęcia oraz że materiały nie naruszają praw innych
-                osób. Projekt możesz usunąć w każdej chwili. Zobacz także{" "}
-                <Link to="/regulamin">Regulamin IdeaHire</Link>.
-              </span>
-            </div>
-
-            {portfolioLoading ? (
-              <p className="profile-portfolio-empty">Ładowanie portfolio...</p>
-            ) : portfolioItems.length > 0 ? (
-              <div className="profile-portfolio-edit-list">
-                {portfolioItems.map((item) => (
-                  <article className="profile-portfolio-edit-card" key={item.id}>
-                    {getPortfolioMedia(item)[0]?.image_url ? (
-                      <div className="profile-portfolio-edit-cover">
-                        <img
-                          src={getPortfolioMedia(item)[0].image_url}
-                          alt={`Projekt: ${item.title}`}
-                        />
-                        <span>{getPortfolioMedia(item).length} zdj.</span>
-                      </div>
-                    ) : (
-                      <div className="profile-portfolio-image-placeholder" aria-hidden="true">
-                        ↗
-                      </div>
-                    )}
-
-                    <div className="profile-portfolio-edit-copy">
-                      <strong>{item.title}</strong>
-                      <span>
-                        {getPortfolioMedia(item).length > 0
-                          ? `Album · ${getPortfolioMedia(item).length} ${getPortfolioMedia(item).length === 1 ? "zdjęcie" : "zdjęć"}`
-                          : "Projekt z linkiem"}
-                      </span>
-                    </div>
-
-                    <div className="profile-portfolio-item-actions">
-                      <button
-                        type="button"
-                        onClick={() => startPortfolioEdit(item)}
-                        disabled={portfolioBusy}
-                      >
-                        Edytuj
-                      </button>
-                      <button
-                        type="button"
-                        className="is-danger"
-                        onClick={() => handlePortfolioDelete(item)}
-                        disabled={portfolioBusy}
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className="profile-portfolio-empty">
-                Portfolio jest jeszcze puste. Dodaj pierwszą realizację poniżej.
-              </p>
-            )}
-
-            {(portfolioEditingId || portfolioItems.length < MAX_PORTFOLIO_ITEMS) && (
-              <form
-                className="profile-portfolio-editor"
-                onSubmit={handlePortfolioSubmit}
-              >
-                <div className="profile-portfolio-editor-heading">
-                  <div>
-                    <span className="section-label">
-                      {portfolioEditingId ? "Edycja projektu" : "Nowy projekt"}
-                    </span>
-                    <h3>
-                      {portfolioEditingId
-                        ? "Zaktualizuj realizację"
-                        : "Dodaj realizację do portfolio"}
-                    </h3>
-                  </div>
-
-                  {portfolioEditingId && (
-                    <button
-                      type="button"
-                      className="profile-portfolio-cancel"
-                      onClick={resetPortfolioEditor}
-                      disabled={portfolioBusy}
-                    >
-                      Anuluj edycję
-                    </button>
-                  )}
-                </div>
-
-                <label>
-                  Tytuł projektu
-                  <input
-                    type="text"
-                    value={portfolioDraft.title}
-                    onChange={(event) =>
-                      setPortfolioDraft((current) => ({
-                        ...current,
-                        title: event.target.value,
-                      }))
-                    }
-                    minLength={3}
-                    maxLength={120}
-                    placeholder="Np. Identyfikacja wizualna kawiarni"
-                    required
-                    disabled={portfolioBusy}
-                  />
-                </label>
-
-                <label>
-                  Krótki opis
-                  <textarea
-                    rows="4"
-                    value={portfolioDraft.description}
-                    onChange={(event) =>
-                      setPortfolioDraft((current) => ({
-                        ...current,
-                        description: event.target.value,
-                      }))
-                    }
-                    maxLength={800}
-                    placeholder="Opisz swój zakres pracy, rezultat i użyte narzędzia..."
-                    disabled={portfolioBusy}
-                  />
-                  <small>{portfolioDraft.description.length}/800 znaków</small>
-                </label>
-
-                <div className="profile-portfolio-editor-grid">
-                  <label>
-                    Link do projektu <span className="profile-portfolio-optional">(opcjonalnie)</span>
-                    <input
-                      type="url"
-                      inputMode="url"
-                      value={portfolioDraft.projectUrl}
-                      onChange={(event) =>
-                        setPortfolioDraft((current) => ({
-                          ...current,
-                          projectUrl: event.target.value,
-                        }))
-                      }
-                      maxLength={2048}
-                      placeholder="https://twoje-portfolio.pl/projekt"
-                      disabled={portfolioBusy}
-                    />
-                    <small>Wyłącznie bezpieczny adres HTTPS.</small>
-                  </label>
-
-                  <label>
-                    Zdjęcia do albumu
-                    <input
-                      ref={portfolioFileInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      multiple
-                      onChange={handlePortfolioFileChange}
-                      disabled={portfolioBusy}
-                    />
-                    <small>
-                      Wybierz kilka zdjęć naraz. Maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
-                      zdjęć w albumie i 12 MB na plik.
-                    </small>
-                  </label>
-                </div>
-
-                {portfolioEditingId && getPortfolioMedia(
-                  portfolioItems.find((item) => item.id === portfolioEditingId)
-                ).length > 0 && (
-                  <div className="profile-portfolio-media-editor">
-                    <strong>Zdjęcia zapisane w albumie</strong>
-                    <div>
-                      {getPortfolioMedia(
-                        portfolioItems.find((item) => item.id === portfolioEditingId)
-                      ).map((mediaItem, index) => {
-                        const removed = portfolioRemovedMediaIds.includes(mediaItem.id);
-                        return (
-                          <button
-                            type="button"
-                            className={removed ? "is-removed" : ""}
-                            onClick={() => toggleExistingPortfolioMedia(mediaItem.id)}
-                            disabled={portfolioBusy}
-                            aria-label={removed ? `Przywróć zdjęcie ${index + 1}` : `Usuń zdjęcie ${index + 1}`}
-                            key={mediaItem.id}
-                          >
-                            <img src={mediaItem.image_url} alt="" />
-                            <span>{removed ? "Przywróć" : "Usuń"}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <small>Zmiany zostaną wykonane dopiero po zapisaniu albumu.</small>
-                  </div>
-                )}
-
-                {portfolioFiles.length > 0 && (
-                  <div className="profile-portfolio-new-files">
-                    <strong>Nowe zdjęcia ({portfolioFiles.length})</strong>
-                    <div>
-                      {portfolioFiles.map((file, index) => (
-                        <span key={`${file.name}-${file.lastModified}-${index}`}>
-                          <span>{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removePendingPortfolioFile(index)}
-                            disabled={portfolioBusy}
-                            aria-label={`Usuń plik ${file.name}`}
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {portfolioMessage && (
-                  <p className="profile-portfolio-message" role="status">
-                    {portfolioMessage}
-                  </p>
-                )}
-
-                <button
-                  className="btn btn-dark profile-portfolio-save"
-                  type="submit"
-                  disabled={portfolioBusy}
-                >
-                  {portfolioBusy
-                    ? "Zapisywanie albumu..."
-                    : portfolioEditingId
-                    ? "Zapisz album →"
-                    : "Dodaj album do portfolio →"}
-                </button>
-              </form>
-            )}
-          </section>
         </section>
 
         <section className="privacy-entry-card" aria-labelledby="privacy-entry-title">
@@ -7385,70 +5221,6 @@ function Account() {
             Otwórz centrum prywatności →
           </Link>
         </section>
-
-        {myContentReports.length > 0 && (
-          <section className="account-card profile-content-report-history" aria-labelledby="my-content-reports-title">
-            <div className="profile-content-report-history-heading">
-              <div>
-                <span className="section-label">Bezpieczeństwo treści</span>
-                <h2 id="my-content-reports-title">Moje zgłoszenia portfolio</h2>
-              </div>
-              <span>{myContentReports.length}</span>
-            </div>
-
-            <div className="profile-content-report-list">
-              {myContentReports.map((report) => {
-                const reportAppeal = myContentReportAppeals.find(
-                  (appeal) => appeal.report_id === report.id
-                );
-                const canAppeal = report.status === "resolved_no_action"
-                  && !reportAppeal;
-
-                return (
-                  <article key={report.id}>
-                    <div>
-                      <strong>{report.content_snapshot?.title || "Zgłoszona treść portfolio"}</strong>
-                      <small>{report.report_number} · {formatDisputeDate(report.submitted_at)}</small>
-                    </div>
-                    <span className={`content-report-status is-${report.status}`}>
-                      {CONTENT_REPORT_STATUS_LABELS[report.status] || report.status}
-                    </span>
-                    <p>{CONTENT_REPORT_REASON_LABELS[report.reason_code] || report.reason_code}</p>
-                    {report.decision_summary && (
-                      <div className="profile-content-report-decision">
-                        <strong>Wynik analizy</strong>
-                        <p>{report.decision_summary}</p>
-                      </div>
-                    )}
-                    {reportAppeal ? (
-                      <small className="profile-content-report-appeal-status">
-                        Odwołanie: {reportAppeal.status === "submitted"
-                          ? "oczekuje na ponowną analizę"
-                          : reportAppeal.status === "accepted"
-                          ? "uwzględnione"
-                          : "oddalone"}
-                        {reportAppeal.resolution_reason
-                          ? ` — ${reportAppeal.resolution_reason}`
-                          : ""}
-                      </small>
-                    ) : canAppeal ? (
-                      <button
-                        type="button"
-                        className="privacy-secondary-button"
-                        onClick={() => handleContentReportAppeal(report)}
-                        disabled={Boolean(contentReportBusy)}
-                      >
-                        {contentReportBusy === report.id
-                          ? "Wysyłanie..."
-                          : "Poproś o ponowną analizę"}
-                      </button>
-                    ) : null}
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
         <section className="account-card my-jobs-section">
           <span className="section-label">
@@ -7549,14 +5321,7 @@ function isPrivacyRequestOpen(status) {
 
 const ERASURE_ACTION_LABELS = {
   minimize_data: "Usuń dane możliwe do usunięcia",
-  close_account: "Usuń dane i zamknij konto",
-};
-
-const ERASURE_ACTION_DESCRIPTIONS = {
-  minimize_data:
-    "IdeaHire usunie lub zanonimizuje pełny możliwy zakres danych: dane profilu, zdjęcia, opcjonalne metadane, ustawienia oraz niepowiązane dane operacyjne. Konto logowania pozostanie aktywne.",
-  close_account:
-    "IdeaHire usunie lub zanonimizuje możliwe dane i wyłączy możliwość logowania do konta.",
+  close_account: "Zamknij konto użytkownika",
 };
 
 const ERASURE_CASE_STATUS_LABELS = {
@@ -7581,21 +5346,10 @@ const ERASURE_LIFECYCLE_LABELS = {
 const ERASURE_INVENTORY_LABELS = {
   private_profile_rows: "Prywatny profil",
   public_profile_rows: "Profil publiczny",
-  avatar_objects: "Zdjęcia profilu i portfolio",
-  portfolio_items: "Projekty w portfolio",
-  portfolio_images: "Zdjęcia projektów w portfolio",
+  avatar_objects: "Zdjęcia profilowe",
   age_profile_rows: "Dane wieku",
   user_preference_rows: "Ustawienia rozmów",
   block_rows: "Ustawienia blokad",
-  dispute_notifications: "Niepotrzebne powiadomienia o sporach",
-  removable_job_applications: "Niepowiązane zgłoszenia do zleceń",
-  removable_messages: "Wiadomości bez podstawy dalszej retencji",
-  removable_conversations: "Puste rozmowy bez rozliczeń i sporów",
-  removable_jobs: "Zlecenia bez zgłoszeń i współpracy",
-  unused_stripe_rows: "Nieużywane wpisy konfiguracji wypłat",
-  auth_optional_metadata: "Opcjonalne metadane konta",
-  browser_local_preferences: "Dane zapisane lokalnie w przeglądarce",
-  auth_login_account: "Konto i identyfikator logowania",
   legal_acceptances: "Potwierdzenia dokumentów prawnych",
   privacy_requests_open: "Otwarte wnioski RODO",
   payments_total: "Rekordy płatności",
@@ -7607,132 +5361,14 @@ const ERASURE_INVENTORY_LABELS = {
   jobs_total: "Opublikowane zlecenia",
 };
 
-const ERASURE_EXECUTION_RESULT_LABELS = {
-  avatar_objects_removed: "Usunięte pliki zdjęć profilu i portfolio",
-  profile_rows_anonymized: "Zanonimizowane profile prywatne",
-  public_profile_rows_anonymized: "Zanonimizowane profile publiczne",
-  age_rows_minimized: "Wyczyszczone rekordy wieku",
-  preference_rows_deleted: "Usunięte ustawienia rozmów",
-  block_rows_deleted: "Usunięte ustawienia blokad",
-  dispute_notifications_deleted: "Usunięte powiadomienia o sporach",
-  job_applications_deleted: "Usunięte niepowiązane zgłoszenia",
-  messages_deleted: "Usunięte wiadomości bez podstawy retencji",
-  conversations_deleted: "Usunięte puste rozmowy",
-  jobs_deleted: "Usunięte niepowiązane zlecenia",
-  unused_stripe_rows_deleted: "Usunięte nieużywane wpisy wypłat",
-};
-
-function buildErasureExecutionRows(executionResult) {
-  if (!executionResult || typeof executionResult !== "object") {
-    return [];
-  }
-
-  const dataResult =
-    executionResult.data_minimization &&
-    typeof executionResult.data_minimization === "object"
-      ? executionResult.data_minimization
-      : {};
-
-  const normalizedResult = {
-    avatar_objects_removed:
-      executionResult.avatar_objects_removed,
-    profile_rows_anonymized:
-      dataResult.profile_rows_anonymized ??
-      dataResult.profile_rows,
-    public_profile_rows_anonymized:
-      dataResult.public_profile_rows_anonymized ??
-      dataResult.public_profile_rows,
-    age_rows_minimized:
-      dataResult.age_rows_minimized ??
-      dataResult.age_rows,
-    preference_rows_deleted:
-      dataResult.preference_rows_deleted,
-    block_rows_deleted:
-      dataResult.block_rows_deleted,
-    dispute_notifications_deleted:
-      dataResult.dispute_notifications_deleted,
-    job_applications_deleted:
-      dataResult.job_applications_deleted,
-    messages_deleted:
-      dataResult.messages_deleted,
-    conversations_deleted:
-      dataResult.conversations_deleted,
-    jobs_deleted:
-      dataResult.jobs_deleted,
-    unused_stripe_rows_deleted:
-      dataResult.unused_stripe_rows_deleted,
-  };
-
-  return Object.entries(normalizedResult)
-    .filter(([, value]) => (
-      value !== null &&
-      value !== undefined &&
-      Number.isFinite(Number(value))
-    ))
-    .map(([key, value]) => ({
-      key,
-      label:
-        ERASURE_EXECUTION_RESULT_LABELS[key] || key,
-      value: Number(value),
-    }));
-}
-
 const ERASURE_BLOCKER_LABELS = {
-  active_staff_account: "Aktywna rola administracyjna",
-  published_jobs: "Opublikowane zlecenia",
-  pending_job_applications: "Oczekujące zgłoszenia do zleceń",
-  active_payments: "Aktywne lub nierozliczone płatności",
-  active_disputes: "Aktywne spory",
+  active_staff_account: "aktywna rola administracyjna",
+  active_payments: "aktywne płatności",
+  active_disputes: "aktywne spory",
   active_agreements_without_terminal_payment:
-    "Aktywne ustalenia bez zamkniętego rozliczenia",
-  active_moderation_cases: "Aktywne sprawy moderacyjne",
-  other_open_privacy_requests: "Inne otwarte wnioski dotyczące prywatności",
-  connected_stripe_accounts: "Połączone konto Stripe",
+    "aktywne ustalenia bez zamkniętego rozliczenia",
+  connected_stripe_accounts: "połączone konto Stripe",
 };
-
-const ERASURE_BLOCKER_GUIDANCE = {
-  active_staff_account:
-    "Owner musi najpierw bezpiecznie odebrać rolę administracyjną i przekazać prowadzone sprawy.",
-  published_jobs:
-    "Zakończ albo usuń opublikowane zlecenia, które nie są już potrzebne.",
-  pending_job_applications:
-    "Wycofaj oczekujące zgłoszenia albo poczekaj na ich rozstrzygnięcie.",
-  active_payments:
-    "Poczekaj na zakończenie, zwrot lub pełne rozliczenie każdej płatności.",
-  active_disputes:
-    "Najpierw zakończ aktywne postępowania sporne.",
-  active_agreements_without_terminal_payment:
-    "Zakończ współpracę i rozliczenie powiązane z zaakceptowanymi ustaleniami.",
-  active_moderation_cases:
-    "Poczekaj na zakończenie sprawy moderacyjnej lub rozstrzygnięcie odwołania.",
-  other_open_privacy_requests:
-    "Zakończ albo wycofaj pozostałe otwarte wnioski w sekcji „Twoje wnioski”.",
-  connected_stripe_accounts:
-    "Dokończ rozliczenia i odłącz konto wypłat Stripe.",
-};
-
-function ErasureBlockerList({ blockers }) {
-  if (!Array.isArray(blockers) || blockers.length === 0) return null;
-
-  return (
-    <ul className="erasure-blocker-list">
-      {blockers.map(([key, value]) => (
-        <li key={key}>
-          <span className="erasure-blocker-count" aria-label="Liczba przeszkód">
-            {typeof value === "number" ? value : "!"}
-          </span>
-          <span>
-            <strong>{ERASURE_BLOCKER_LABELS[key] || "Inna aktywna sprawa"}</strong>
-            <small>
-              {ERASURE_BLOCKER_GUIDANCE[key]
-                || "Skontaktuj się z administracją, aby ustalić sposób zakończenia tej sprawy."}
-            </small>
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 function getSecurityReviewProgress(status) {
   if (status === "submitted") {
@@ -7782,15 +5418,10 @@ function PrivacyCenter() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
-  const [erasureEligibility, setErasureEligibility] = useState(null);
-  const [erasureEligibilityLoading, setErasureEligibilityLoading] = useState(false);
-  const [erasureEligibilityError, setErasureEligibilityError] = useState("");
-  const [erasureEligibilityRefresh, setErasureEligibilityRefresh] = useState(0);
   const [form, setForm] = useState({
     requestType: "access",
     preferredFormat: "electronic",
     description: "",
-    requestedErasureAction: "",
   });
 
   async function loadPrivacyRequests() {
@@ -7799,7 +5430,7 @@ function PrivacyCenter() {
     const { data, error } = await supabase
       .from("ideahire_privacy_requests")
       .select(
-        "id, request_number, request_type, requested_erasure_action, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, requester_closed_at, withdrawn_at"
+        "id, request_number, request_type, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, requester_closed_at, withdrawn_at"
       )
       .eq("requester_user_id", user.id)
       .order("submitted_at", { ascending: false });
@@ -7874,52 +5505,6 @@ function PrivacyCenter() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!user?.id || form.requestType !== "erasure") {
-      setErasureEligibility(null);
-      setErasureEligibilityError("");
-      setErasureEligibilityLoading(false);
-      return;
-    }
-
-    let mounted = true;
-
-    async function loadErasureEligibility() {
-      setErasureEligibilityLoading(true);
-      setErasureEligibilityError("");
-
-      const { data, error } = await supabase.rpc(
-        "get_my_ideahire_erasure_eligibility"
-      );
-
-      if (!mounted) return;
-
-      if (error) {
-        console.error("ERASURE ELIGIBILITY ERROR:", error);
-        setErasureEligibility(null);
-        setErasureEligibilityError(
-          "Nie udało się teraz sprawdzić warunków zamknięcia konta."
-        );
-      } else {
-        setErasureEligibility(data || null);
-
-        if (!data?.can_close_account) {
-          setForm((current) => current.requestedErasureAction === "close_account"
-            ? { ...current, requestedErasureAction: "" }
-            : current);
-        }
-      }
-
-      setErasureEligibilityLoading(false);
-    }
-
-    loadErasureEligibility();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user?.id, form.requestType, erasureEligibilityRefresh]);
-
-  useEffect(() => {
     if (!user?.id) return;
 
     const refreshPrivacyCenter = () => {
@@ -7967,25 +5552,6 @@ function PrivacyCenter() {
       return;
     }
 
-    if (
-      form.requestType === "erasure"
-      && !["minimize_data", "close_account"].includes(
-        form.requestedErasureAction
-      )
-    ) {
-      setMessage("Wybierz, czy chcesz usunąć możliwe dane, czy zamknąć całe konto.");
-      return;
-    }
-
-    if (
-      form.requestType === "erasure"
-      && form.requestedErasureAction === "close_account"
-      && erasureEligibility?.can_close_account !== true
-    ) {
-      setMessage("Zamknięcie konta nie jest teraz dostępne. Zakończ wskazane sprawy albo wybierz usunięcie możliwych danych.");
-      return;
-    }
-
     setBusy("submit");
     setMessage("");
 
@@ -7996,10 +5562,6 @@ function PrivacyCenter() {
           p_request_type: form.requestType,
           p_description: form.description.trim(),
           p_preferred_format: form.preferredFormat,
-          p_requested_erasure_action:
-            form.requestType === "erasure"
-              ? form.requestedErasureAction
-              : null,
         }
       );
 
@@ -8009,7 +5571,6 @@ function PrivacyCenter() {
         requestType: "access",
         preferredFormat: "electronic",
         description: "",
-        requestedErasureAction: "",
       });
       setMessage("Wniosek został bezpiecznie zapisany i przekazany administracji IdeaHire.");
       await loadPrivacyRequests();
@@ -8117,22 +5678,6 @@ function PrivacyCenter() {
     }
   }
 
-  const erasureBlockers = Object.entries(
-    erasureEligibility?.blockers || {}
-  ).filter(([, value]) => value === true || Number(value) > 0);
-
-  const erasureEligibilityPending = Boolean(
-    form.requestType === "erasure"
-    && !erasureEligibility
-    && !erasureEligibilityError
-  ) || erasureEligibilityLoading;
-
-  const canSelectAccountClosure = Boolean(
-    !erasureEligibilityPending
-    && !erasureEligibilityError
-    && erasureEligibility?.can_close_account === true
-  );
-
   return (
     <div className="page privacy-center-page">
       <AccountNavbar />
@@ -8183,7 +5728,6 @@ function PrivacyCenter() {
                     setForm((current) => ({
                       ...current,
                       requestType: event.target.value,
-                      requestedErasureAction: "",
                     }))
                   }
                   disabled={Boolean(busy)}
@@ -8234,120 +5778,6 @@ function PrivacyCenter() {
                 <small>{form.description.length}/5000 · minimum 20 znaków</small>
               </label>
 
-              {form.requestType === "erasure" && (
-                <fieldset className="privacy-erasure-choice-fieldset">
-                  <legend>Co dokładnie mamy zrobić?</legend>
-                  <p className="privacy-erasure-choice-intro">
-                    Twój wybór zostanie zapisany we wniosku i administracja nie
-                    będzie mogła samodzielnie zmienić go na inną operację.
-                  </p>
-
-                  <div className="privacy-erasure-choice-grid">
-                    <label className={`privacy-erasure-choice${
-                      form.requestedErasureAction === "minimize_data"
-                        ? " is-selected"
-                        : ""
-                    }`}>
-                      <input
-                        type="radio"
-                        name="requested-erasure-action"
-                        value="minimize_data"
-                        checked={form.requestedErasureAction === "minimize_data"}
-                        onChange={(event) => setForm((current) => ({
-                          ...current,
-                          requestedErasureAction: event.target.value,
-                        }))}
-                        disabled={Boolean(busy)}
-                      />
-                      <span className="privacy-erasure-choice-mark" aria-hidden="true">01</span>
-                      <span>
-                        <strong>Usuń możliwe dane</strong>
-                        <small>{ERASURE_ACTION_DESCRIPTIONS.minimize_data}</small>
-                      </span>
-                    </label>
-
-                    <label className={`privacy-erasure-choice is-danger${
-                      form.requestedErasureAction === "close_account"
-                        ? " is-selected"
-                        : ""
-                    }${!canSelectAccountClosure ? " is-disabled" : ""}`}>
-                      <input
-                        type="radio"
-                        name="requested-erasure-action"
-                        value="close_account"
-                        checked={form.requestedErasureAction === "close_account"}
-                        onChange={(event) => setForm((current) => ({
-                          ...current,
-                          requestedErasureAction: event.target.value,
-                        }))}
-                        disabled={Boolean(busy) || !canSelectAccountClosure}
-                      />
-                      <span className="privacy-erasure-choice-mark" aria-hidden="true">02</span>
-                      <span>
-                        <strong>Usuń dane i zamknij konto</strong>
-                        <small>{ERASURE_ACTION_DESCRIPTIONS.close_account}</small>
-                      </span>
-                    </label>
-                  </div>
-
-                  <div
-                    className={`privacy-erasure-eligibility${
-                      erasureEligibility?.can_close_account
-                        ? " is-ready"
-                        : erasureEligibilityError
-                          ? " is-error"
-                          : " is-blocked"
-                    }`}
-                    aria-live="polite"
-                  >
-                    {erasureEligibilityPending ? (
-                      <p>Sprawdzamy zlecenia, sprawy i rozliczenia konta...</p>
-                    ) : erasureEligibilityError ? (
-                      <>
-                        <strong>Nie można teraz sprawdzić warunków zamknięcia konta</strong>
-                        <p>
-                          Nie wysłaliśmy żądania zamknięcia konta. Spróbuj ponownie
-                          albo wybierz usunięcie możliwych danych — konto logowania
-                          pozostanie wtedy aktywne.
-                        </p>
-                        <button
-                          type="button"
-                          className="privacy-eligibility-refresh"
-                          onClick={() => setErasureEligibilityRefresh((value) => value + 1)}
-                          disabled={erasureEligibilityLoading || Boolean(busy)}
-                        >
-                          Sprawdź ponownie
-                        </button>
-                      </>
-                    ) : erasureEligibility?.can_close_account ? (
-                      <>
-                        <strong>Konto spełnia warunki zamknięcia</strong>
-                        <p>Nie znaleźliśmy aktywnych zleceń, spraw ani nierozliczonych transakcji.</p>
-                      </>
-                    ) : (
-                      <>
-                        <strong>Konta nie można jeszcze zamknąć</strong>
-                        <p>
-                          To zabezpiecza trwające współprace, rozliczenia oraz prawa
-                          innych użytkowników. Zamknięcie stanie się dostępne po
-                          rozwiązaniu poniższych spraw. Nadal możesz wybrać usunięcie
-                          możliwych danych bez zamykania konta.
-                        </p>
-                        <ErasureBlockerList blockers={erasureBlockers} />
-                        <button
-                          type="button"
-                          className="privacy-eligibility-refresh"
-                          onClick={() => setErasureEligibilityRefresh((value) => value + 1)}
-                          disabled={erasureEligibilityLoading || Boolean(busy)}
-                        >
-                          Sprawdź ponownie po rozwiązaniu spraw
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </fieldset>
-              )}
-
               {form.requestType === "security_review" ? (
                 <div className="privacy-form-notice is-security-review">
                   <strong>Jak działa analiza ochrony danych</strong>
@@ -8373,20 +5803,7 @@ function PrivacyCenter() {
               <button
                 type="submit"
                 className="privacy-primary-button"
-                disabled={
-                  Boolean(busy)
-                  || form.description.trim().length < 20
-                  || (
-                    form.requestType === "erasure"
-                    && !["minimize_data", "close_account"].includes(
-                      form.requestedErasureAction
-                    )
-                  )
-                  || (
-                    form.requestedErasureAction === "close_account"
-                    && !canSelectAccountClosure
-                  )
-                }
+                disabled={Boolean(busy) || form.description.trim().length < 20}
               >
                 {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek →"}
               </button>
@@ -8465,24 +5882,6 @@ function PrivacyCenter() {
                     </div>
 
                     <p className="privacy-request-description">{request.description}</p>
-
-                    {request.request_type === "erasure" && (
-                      <div className={`privacy-erasure-requested-action is-${
-                        request.requested_erasure_action || "legacy"
-                      }`}>
-                        <span>Wybrana operacja</span>
-                        <strong>
-                          {request.requested_erasure_action
-                            ? ERASURE_ACTION_LABELS[request.requested_erasure_action]
-                            : "Starszy wniosek — wybór nie został zapisany"}
-                        </strong>
-                        <p>
-                          {request.requested_erasure_action
-                            ? ERASURE_ACTION_DESCRIPTIONS[request.requested_erasure_action]
-                            : "Administracja musi potwierdzić zakres na podstawie treści i historii tego wniosku."}
-                        </p>
-                      </div>
-                    )}
 
                     {securityReviewProgress && (
                       <div className="privacy-security-progress">
@@ -9506,9 +6905,6 @@ function Profile() {
   const [jobs, setJobs] =
     useState([]);
 
-  const [portfolioItems, setPortfolioItems] =
-    useState([]);
-
   const [loading, setLoading] =
     useState(true);
 
@@ -9525,15 +6921,6 @@ function Profile() {
     useState(false);
 
   const [blockMessage, setBlockMessage] =
-    useState("");
-
-  const [portfolioViewer, setPortfolioViewer] =
-    useState(null);
-
-  const [portfolioReportTarget, setPortfolioReportTarget] =
-    useState(null);
-
-  const [portfolioReportMessage, setPortfolioReportMessage] =
     useState("");
 
   useEffect(() => {
@@ -9666,14 +7053,6 @@ function Profile() {
           setJobs(
             jobsData || []
           );
-        }
-
-        try {
-          const portfolioData = await fetchPortfolioAlbums(id);
-          setPortfolioItems(portfolioData);
-        } catch (portfolioError) {
-          console.error("PROFILE PORTFOLIO ERROR:", portfolioError);
-          setPortfolioItems([]);
         }
       } catch (error) {
         setMessage(
@@ -9866,16 +7245,6 @@ function Profile() {
   const hasExpertiseDetails =
     visibleSpecialtyCategories.length > 0 ||
     visibleSkills.length > 0;
-
-  const portfolioAlbums =
-    portfolioItems.filter(
-      (item) => getPortfolioMedia(item).length > 0
-    );
-
-  const portfolioLinks =
-    portfolioItems.filter(
-      (item) => !!item.project_url
-    );
 
   return (
     <div className="page">
@@ -10385,142 +7754,6 @@ function Profile() {
                 </p>
               </div>
             )}
-
-          {!profileHidden && portfolioItems.length > 0 && (
-            <section
-              className="profile-public-portfolio"
-              aria-labelledby="profile-public-portfolio-title"
-            >
-              <div className="profile-public-portfolio-heading">
-                <div>
-                  <span className="profile-expertise-label">Wybrane realizacje</span>
-                  <h2 id="profile-public-portfolio-title">Portfolio</h2>
-                </div>
-                <span className="profile-public-portfolio-count">
-                  {portfolioItems.length} {portfolioItems.length === 1 ? "realizacja" : "realizacji"}
-                </span>
-              </div>
-
-              {portfolioReportMessage && (
-                <p className="profile-public-report-message" role="status">
-                  {portfolioReportMessage}
-                </p>
-              )}
-
-              {portfolioAlbums.length > 0 && (
-                <div className="profile-public-portfolio-group">
-                  <div className="profile-public-portfolio-subheading">
-                    <div>
-                      <h3>Albumy ze zdjęciami</h3>
-                      <p>Otwórz album, aby zobaczyć każde zdjęcie w pełnych proporcjach.</p>
-                    </div>
-                    <span>{portfolioAlbums.length}</span>
-                  </div>
-
-                  <div className="profile-public-portfolio-grid">
-                    {portfolioAlbums.map((item) => {
-                      const media = getPortfolioMedia(item);
-                      const cover = media[0];
-
-                      return (
-                        <article
-                          className="profile-public-portfolio-card"
-                          id={`portfolio-${item.id}`}
-                          key={item.id}
-                        >
-                          <button
-                            type="button"
-                            className="profile-public-album-cover"
-                            onClick={() => setPortfolioViewer({ album: item, index: 0 })}
-                            aria-label={`Otwórz album ${item.title}, ${media.length} zdjęć`}
-                          >
-                            <img
-                              className="profile-public-album-cover-backdrop"
-                              src={cover.image_url}
-                              alt=""
-                              aria-hidden="true"
-                            />
-                            <img
-                              className="profile-public-album-cover-image"
-                              src={cover.image_url}
-                              alt={`Projekt: ${item.title}`}
-                            />
-                            <span className="profile-public-album-count">
-                              <strong>{media.length}</strong>
-                              {media.length === 1 ? "zdjęcie" : "zdjęć"}
-                            </span>
-                            <span className="profile-public-album-open">Otwórz album</span>
-                          </button>
-
-                          <div className="profile-public-portfolio-copy">
-                            <span className="profile-public-album-label">Album</span>
-                            <h3>{item.title}</h3>
-                            {item.description && <p>{item.description}</p>}
-
-                            {user?.id !== id && (
-                              <button
-                                type="button"
-                                className="profile-public-item-report"
-                                onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "album" })}
-                              >
-                                Zgłoś album
-                              </button>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {portfolioLinks.length > 0 && (
-                <div className="profile-public-portfolio-group profile-public-links-group">
-                  <div className="profile-public-portfolio-subheading">
-                    <div>
-                      <h3>Linki do projektów</h3>
-                      <p>Zewnętrzne realizacje i materiały powiązane z portfolio.</p>
-                    </div>
-                    <span>{portfolioLinks.length}</span>
-                  </div>
-
-                  <div className="profile-public-project-links">
-                    {portfolioLinks.map((item, index) => (
-                      <article className="profile-public-project-link-row" key={item.id}>
-                        <span className="profile-public-project-link-index" aria-hidden="true">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <div className="profile-public-project-link-copy">
-                          <strong>{item.title}</strong>
-                          {item.description && <p>{item.description}</p>}
-                          <a
-                            className="profile-public-project-link"
-                            href={item.project_url}
-                            target="_blank"
-                            rel="noopener noreferrer nofollow"
-                            title={item.project_url}
-                          >
-                            <span>{getPortfolioLinkLabel(item.project_url)}</span>
-                            <span aria-hidden="true">↗</span>
-                          </a>
-                        </div>
-
-                        {user?.id !== id && (
-                          <button
-                            type="button"
-                            className="profile-public-item-report"
-                            onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "link" })}
-                          >
-                            Zgłoś link
-                          </button>
-                        )}
-                      </article>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
         </section>
 
         {!profileHidden && (
@@ -10586,32 +7819,6 @@ function Profile() {
           </section>
         )}
       </main>
-
-      {portfolioViewer && (
-        <PortfolioLightbox
-          album={portfolioViewer.album}
-          initialIndex={portfolioViewer.index}
-          canReport={user?.id !== id}
-          onClose={() => setPortfolioViewer(null)}
-          onReport={(album, media) => {
-            setPortfolioViewer(null);
-            setPortfolioReportTarget({ album, media });
-          }}
-        />
-      )}
-
-      {portfolioReportTarget && (
-        <PortfolioReportDialog
-          target={portfolioReportTarget}
-          onClose={() => setPortfolioReportTarget(null)}
-          onSubmitted={(result) => {
-            setPortfolioReportTarget(null);
-            setPortfolioReportMessage(
-              `Zgłoszenie ${result?.report_number || ""} zostało zapisane. Status i wynik analizy znajdziesz na swoim koncie.`
-            );
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -16559,10 +13766,11 @@ function DisputeDetails() {
   const [appealBody, setAppealBody] = useState("");
   const [adminNote, setAdminNote] = useState("");
   const [adminNotePublic, setAdminNotePublic] = useState(true);
-  const [decisionForm, setDecisionForm] = useState(
-    createEmptyDisputeDecisionForm
-  );
-  const [decisionMessage, setDecisionMessage] = useState("");
+  const [decisionForm, setDecisionForm] = useState({
+    outcome: "",
+    amount: "",
+    rationale: "",
+  });
 
   const isParticipant = Boolean(
     dispute &&
@@ -17114,18 +14322,15 @@ function DisputeDetails() {
 
   async function handleDecision(event) {
     event.preventDefault();
-    if (busy) return;
-
     const rationale = decisionForm.rationale.trim();
-    setDecisionMessage("");
 
     if (!decisionForm.outcome) {
-      setDecisionMessage("Wybierz wynik sprawy.");
+      setPageMessage("Wybierz wynik sprawy.");
       return;
     }
 
     if (rationale.length < 20) {
-      setDecisionMessage("Uzasadnienie decyzji musi mieć co najmniej 20 znaków.");
+      setPageMessage("Uzasadnienie decyzji musi mieć co najmniej 20 znaków.");
       return;
     }
 
@@ -17139,113 +14344,29 @@ function DisputeDetails() {
         amount <= 0 ||
         amount >= Number(dispute.price_amount_snapshot)
       ) {
-        setDecisionMessage(
+        setPageMessage(
           "Częściowy zwrot musi być większy od 0 i mniejszy od ceny zlecenia."
         );
         return;
       }
     }
 
-    const applyRestriction = Boolean(decisionForm.applyRestriction);
-    const maximumDuration = staffRole === "owner" ? 365 : 30;
-    const durationDays = Number(decisionForm.durationDays);
-
-    if (applyRestriction) {
-      if (![dispute.client_id, dispute.contractor_id].includes(
-        decisionForm.moderationTargetUserId
-      )) {
-        setDecisionMessage("Wybierz stronę sporu, której ma dotyczyć zawieszenie.");
-        return;
-      }
-
-      if (
-        !Number.isInteger(durationDays)
-        || durationDays < 1
-        || durationDays > maximumDuration
-      ) {
-        setDecisionMessage(
-          `Wybierz pełną liczbę dni od 1 do ${maximumDuration}.`
-        );
-        return;
-      }
-
-      if (decisionForm.publicReason.trim().length < 50) {
-        setDecisionMessage(
-          "Uzasadnienie zawieszenia widoczne dla użytkownika musi mieć co najmniej 50 znaków."
-        );
-        return;
-      }
-
-      if (decisionForm.termsReference.trim().length < 10) {
-        setDecisionMessage("Wskaż konkretny punkt regulaminu dla zawieszenia.");
-        return;
-      }
-
-      if (decisionForm.internalNote.trim().length < 20) {
-        setDecisionMessage(
-          "Notatka dowodowa dotycząca zawieszenia musi mieć co najmniej 20 znaków."
-        );
-        return;
-      }
-
-      if (!window.confirm(
-        "Decyzja w sporze i czasowe zawieszenie konta zostaną zapisane razem. Czy potwierdzasz ręczną analizę dowodów i proporcjonalność zawieszenia?"
-      )) return;
-    }
-
-    setBusy("decision");
-
-    try {
-      const { data, error } = await supabase.rpc(
-        "admin_issue_dispute_decision_with_moderation",
-        {
+    const completed = await runAction(
+      "decision",
+      async () => {
+        const { error } = await supabase.rpc("admin_issue_dispute_decision", {
           p_dispute_id: id,
           p_outcome: decisionForm.outcome,
           p_rationale: rationale,
           p_amount: amount,
-          p_apply_restriction: applyRestriction,
-          p_moderation_target_user_id: applyRestriction
-            ? decisionForm.moderationTargetUserId
-            : null,
-          p_duration_days: applyRestriction ? durationDays : null,
-          p_reason_code: applyRestriction ? decisionForm.reasonCode : null,
-          p_public_reason: applyRestriction
-            ? decisionForm.publicReason.trim()
-            : null,
-          p_terms_reference: applyRestriction
-            ? decisionForm.termsReference.trim()
-            : null,
-          p_legal_basis: applyRestriction
-            ? decisionForm.legalBasis.trim() || null
-            : null,
-          p_internal_note: applyRestriction
-            ? decisionForm.internalNote.trim()
-            : null,
-        }
-      );
+        });
+        if (error) throw error;
+      },
+      "Decyzja została zapisana i przekazana obu stronom."
+    );
 
-      if (error) throw error;
-      if (!data?.decision_id) {
-        throw new Error("Baza nie potwierdziła utworzenia decyzji.");
-      }
-      if (applyRestriction && !data?.moderation_case_id) {
-        throw new Error("Baza nie potwierdziła utworzenia zawieszenia.");
-      }
-
-      setDecisionForm(createEmptyDisputeDecisionForm());
-      setDecisionMessage(
-        applyRestriction
-          ? "Decyzja została zapisana, konto zawieszone, a użytkownik otrzymał zawiadomienie."
-          : "Decyzja została zapisana i przekazana obu stronom."
-      );
-      await loadCase(false);
-    } catch (error) {
-      setDecisionMessage(cleanSupabaseError(
-        error,
-        "Nie udało się zapisać decyzji. Żadna część operacji nie została wykonana."
-      ));
-    } finally {
-      setBusy("");
+    if (completed) {
+      setDecisionForm({ outcome: "", amount: "", rationale: "" });
     }
   }
 
@@ -17901,287 +15022,17 @@ function DisputeDetails() {
                       maxLength={10000}
                     />
                   </label>
-
-                  <fieldset className="dispute-moderation-box">
-                    <legend>Odpowiedzialność jednej ze stron</legend>
-                    <label className="dispute-check-row dispute-moderation-toggle">
-                      <input
-                        type="checkbox"
-                        checked={decisionForm.applyRestriction}
-                        onChange={(event) =>
-                          setDecisionForm((current) => ({
-                            ...current,
-                            applyRestriction: event.target.checked,
-                            moderationTargetUserId: event.target.checked
-                              ? current.moderationTargetUserId
-                              : "",
-                          }))
-                        }
-                        disabled={Boolean(busy)}
-                      />
-                      <span>
-                        <strong>Dodaj czasowe zawieszenie konta</strong>
-                        <small>
-                          Zaznacz tylko wtedy, gdy przeanalizowane zachowanie
-                          stanowi również naruszenie Regulaminu IdeaHire.
-                        </small>
-                      </span>
-                    </label>
-
-                    {decisionForm.applyRestriction && (
-                      <div className="dispute-moderation-fields">
-                        <div className="moderation-form-grid">
-                          <label>
-                            Zawieszana strona sporu
-                            <select
-                              value={decisionForm.moderationTargetUserId}
-                              onChange={(event) =>
-                                setDecisionForm((current) => ({
-                                  ...current,
-                                  moderationTargetUserId: event.target.value,
-                                }))
-                              }
-                              disabled={Boolean(busy)}
-                            >
-                              <option value="">Wybierz użytkownika</option>
-                              <option value={dispute.client_id}>
-                                Zleceniodawca — {getDisputeProfileName(
-                                  profiles[dispute.client_id],
-                                  "Użytkownik"
-                                )}
-                              </option>
-                              <option value={dispute.contractor_id}>
-                                Wykonawca — {getDisputeProfileName(
-                                  profiles[dispute.contractor_id],
-                                  "Użytkownik"
-                                )}
-                              </option>
-                            </select>
-                          </label>
-
-                          <div className="moderation-duration-control">
-                            <label>
-                              Czas zawieszenia w dniach
-                              <input
-                                type="number"
-                                min="1"
-                                max={staffRole === "owner" ? "365" : "30"}
-                                value={decisionForm.durationDays}
-                                onChange={(event) =>
-                                  setDecisionForm((current) => ({
-                                    ...current,
-                                    durationDays: event.target.value,
-                                  }))
-                                }
-                                disabled={Boolean(busy)}
-                              />
-                            </label>
-                            <div
-                              className="moderation-duration-presets"
-                              aria-label="Szybki wybór czasu zawieszenia"
-                            >
-                              {[
-                                ...MODERATION_DURATION_PRESETS,
-                                ...(staffRole === "owner" ? [90, 180, 365] : []),
-                              ].map((days) => (
-                                <button
-                                  type="button"
-                                  className={
-                                    Number(decisionForm.durationDays) === days
-                                      ? "is-selected"
-                                      : ""
-                                  }
-                                  onClick={() =>
-                                    setDecisionForm((current) => ({
-                                      ...current,
-                                      durationDays: String(days),
-                                    }))
-                                  }
-                                  disabled={Boolean(busy)}
-                                  key={days}
-                                >
-                                  {days} {days === 1 ? "dzień" : "dni"}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <label>
-                            Kategoria naruszenia
-                            <select
-                              value={decisionForm.reasonCode}
-                              onChange={(event) => {
-                                const reasonCode = event.target.value;
-                                const previousSuggestedReference =
-                                  MODERATION_CONFIRMED_TERMS_REFERENCES[
-                                    decisionForm.reasonCode
-                                  ];
-                                const suggestedReference =
-                                  MODERATION_CONFIRMED_TERMS_REFERENCES[reasonCode];
-                                const canReplaceReference =
-                                  !decisionForm.termsReference.trim()
-                                  || decisionForm.termsReference
-                                    === previousSuggestedReference;
-
-                                setDecisionForm((current) => ({
-                                  ...current,
-                                  reasonCode,
-                                  termsReference: canReplaceReference
-                                    ? suggestedReference || ""
-                                    : current.termsReference,
-                                }));
-                              }}
-                              disabled={Boolean(busy)}
-                            >
-                              {Object.entries(MODERATION_REASON_LABELS).map(
-                                ([value, label]) => (
-                                  <option value={value} key={value}>{label}</option>
-                                )
-                              )}
-                            </select>
-                          </label>
-
-                          <label>
-                            Podstawa regulaminowa
-                            <input
-                              value={decisionForm.termsReference}
-                              onChange={(event) =>
-                                setDecisionForm((current) => ({
-                                  ...current,
-                                  termsReference: event.target.value,
-                                }))
-                              }
-                              minLength={10}
-                              maxLength={1000}
-                              placeholder="Np. Regulamin IdeaHire § 27 pkt 107"
-                              disabled={Boolean(busy)}
-                            />
-                          </label>
-                        </div>
-
-                        <div className="moderation-reason-guidance">
-                          <strong>Zakres ręcznej analizy</strong>
-                          <p>
-                            {MODERATION_REASON_GUIDANCE[
-                              decisionForm.reasonCode
-                            ]}
-                          </p>
-                        </div>
-
-                        <label>
-                          Uzasadnienie zawieszenia widoczne dla użytkownika
-                          <textarea
-                            value={decisionForm.publicReason}
-                            onChange={(event) =>
-                              setDecisionForm((current) => ({
-                                ...current,
-                                publicReason: event.target.value,
-                              }))
-                            }
-                            minLength={50}
-                            maxLength={4000}
-                            rows={5}
-                            placeholder="Opisz konkretne zdarzenia, daty, wcześniejsze ostrzeżenia oraz dlaczego łagodniejszy środek jest niewystarczający."
-                            disabled={Boolean(busy)}
-                          />
-                        </label>
-
-                        <div className="moderation-form-grid">
-                          <label>
-                            Podstawa prawna — gdy dotyczy
-                            <input
-                              value={decisionForm.legalBasis}
-                              onChange={(event) =>
-                                setDecisionForm((current) => ({
-                                  ...current,
-                                  legalBasis: event.target.value,
-                                }))
-                              }
-                              maxLength={1000}
-                              placeholder="Pozostaw puste, jeśli decyzja opiera się na regulaminie"
-                              disabled={Boolean(busy)}
-                            />
-                          </label>
-
-                          <label>
-                            Wewnętrzna notatka dowodowa
-                            <textarea
-                              value={decisionForm.internalNote}
-                              onChange={(event) =>
-                                setDecisionForm((current) => ({
-                                  ...current,
-                                  internalNote: event.target.value,
-                                }))
-                              }
-                              minLength={20}
-                              maxLength={5000}
-                              rows={4}
-                              placeholder="Wymień dowody przeanalizowane w tej sprawie."
-                              disabled={Boolean(busy)}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </fieldset>
-
                   <p className="dispute-admin-warning">
-                    Decyzja zostanie zapisana w historii i przekazana obu stronom.
-                    Zawieszenie jest osobnym środkiem i zostanie dodane tylko po
-                    zaznaczeniu odpowiedniej opcji. Operacje finansowe pozostają
-                    wyłączone do czasu podłączenia operatora płatności.
+                    Decyzja zostanie zapisana w historii i przekazana obu stronom. Operacje finansowe pozostają wyłączone do czasu podłączenia operatora płatności.
                   </p>
-                  {decisionMessage && (
-                    <p
-                      className={
-                        "dispute-decision-message "
-                        + (
-                          decisionMessage.startsWith("Decyzja została")
-                            ? "is-success"
-                            : "is-error"
-                        )
-                      }
-                      role="status"
-                    >
-                      {decisionMessage}
-                    </p>
-                  )}
                   <button
                     type="submit"
                     className="dispute-danger-button"
                     disabled={Boolean(busy)}
                   >
-                    {busy === "decision"
-                      ? "Zapisywanie decyzji..."
-                      : decisionForm.applyRestriction
-                        ? "Wydaj decyzję i zawieś konto"
-                        : "Wydaj decyzję"}
+                    {busy === "decision" ? "Zapisywanie decyzji..." : "Wydaj decyzję"}
                   </button>
                 </form>
-
-                <div className="dispute-moderation-management">
-                  <div>
-                    <strong>Zarządzanie ograniczeniami stron</strong>
-                    <p>
-                      Otwórz rejestr moderacji, aby sprawdzić, zmienić albo zdjąć
-                      aktywne zawieszenie konkretnego użytkownika.
-                    </p>
-                  </div>
-                  <div className="dispute-moderation-links">
-                    <Link
-                      className="dispute-secondary-button"
-                      to={"/admin/moderation?user=" + dispute.client_id}
-                    >
-                      Moderacja zleceniodawcy
-                    </Link>
-                    <Link
-                      className="dispute-secondary-button"
-                      to={"/admin/moderation?user=" + dispute.contractor_id}
-                    >
-                      Moderacja wykonawcy
-                    </Link>
-                  </div>
-                </div>
 
                 {dispute.status === "decision_issued" &&
                   dispute.appeal_deadline_at &&
@@ -18502,12 +15353,12 @@ function AdminJobs() {
                     </div>
                   </div>
 
-                  <a
+                  <Link
                     className="privacy-admin-account-link"
-                    href={`/admin/moderation/job/${encodeURIComponent(job.id)}`}
+                    to={`/admin/moderation?user=${job.user_id}&job=${job.id}`}
                   >
                     Przejdź do moderacji konta →
-                  </a>
+                  </Link>
                 </article>
               );
             })}
@@ -18755,52 +15606,23 @@ function AdminModeration() {
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
   const location = useLocation();
-  const { moderationJobId } = useParams();
   const moderationParams = new URLSearchParams(location.search);
   const requestedUserId = moderationParams.get("user");
-  const requestedJobId = moderationJobId || moderationParams.get("job");
-  const routedModerationSubject =
-    location.state?.moderationSubject?.id === requestedUserId
-      ? location.state.moderationSubject
-      : null;
-  const routedSourceJob =
-    location.state?.sourceJob?.id === requestedJobId
-      ? location.state.sourceJob
-      : null;
-  const moderationWorkbenchRef = useRef(null);
+  const requestedJobId = moderationParams.get("job");
 
   const [cases, setCases] = useState([]);
   const [notices, setNotices] = useState({});
   const [appeals, setAppeals] = useState([]);
-  const [contentReports, setContentReports] = useState([]);
-  const [contentReportAppeals, setContentReportAppeals] = useState([]);
-  const [activeContentReport, setActiveContentReport] = useState(null);
-  const [contentAppealNotes, setContentAppealNotes] = useState({});
-  const [profiles, setProfiles] = useState(() =>
-    routedModerationSubject
-      ? { [routedModerationSubject.id]: routedModerationSubject }
-      : {}
-  );
-  const [sourceJob, setSourceJob] = useState(routedSourceJob);
+  const [profiles, setProfiles] = useState({});
+  const [sourceJob, setSourceJob] = useState(null);
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(requestedUserId || "");
-  const [selectedSubjectLoading, setSelectedSubjectLoading] = useState(false);
-  const [selectedSubjectError, setSelectedSubjectError] = useState("");
-  const [jobModerationLoading, setJobModerationLoading] = useState(
-    Boolean(moderationJobId)
-  );
-  const [jobModerationError, setJobModerationError] = useState("");
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [appealNotes, setAppealNotes] = useState({});
-  const [restrictionEditor, setRestrictionEditor] = useState({
-    caseId: "",
-    totalDurationDays: "",
-    reason: "",
-  });
   const [form, setForm] = useState({
     decisionType: "temporary_suspension",
     durationDays: "7",
@@ -18824,13 +15646,7 @@ function AdminModeration() {
       );
       if (refreshError) throw refreshError;
 
-      const [
-        casesResult,
-        noticesResult,
-        appealsResult,
-        contentReportsResult,
-        contentReportAppealsResult,
-      ] = await Promise.all([
+      const [casesResult, noticesResult, appealsResult] = await Promise.all([
         supabase
           .from("ideahire_moderation_cases")
           .select("*")
@@ -18846,32 +15662,17 @@ function AdminModeration() {
           .select("*")
           .order("submitted_at", { ascending: false })
           .limit(300),
-        supabase
-          .from("ideahire_content_reports")
-          .select("*")
-          .order("submitted_at", { ascending: true })
-          .limit(300),
-        supabase
-          .from("ideahire_content_report_appeals")
-          .select("*")
-          .order("submitted_at", { ascending: true })
-          .limit(300),
       ]);
 
       if (casesResult.error) throw casesResult.error;
       if (noticesResult.error) throw noticesResult.error;
       if (appealsResult.error) throw appealsResult.error;
-      if (contentReportsResult.error) throw contentReportsResult.error;
-      if (contentReportAppealsResult.error) throw contentReportAppealsResult.error;
 
       const caseRows = casesResult.data || [];
       const noticeRows = noticesResult.data || [];
       const appealRows = appealsResult.data || [];
-      const contentReportRows = contentReportsResult.data || [];
-      const contentReportAppealRows = contentReportAppealsResult.data || [];
       const profileIds = [...new Set([
         ...caseRows.map((item) => item.target_user_id),
-        ...contentReportRows.map((item) => item.reported_user_id),
         ...(selectedUserId ? [selectedUserId] : []),
       ].filter(Boolean))];
 
@@ -18893,8 +15694,6 @@ function AdminModeration() {
         noticeRows.map((notice) => [notice.case_id, notice])
       ));
       setAppeals(appealRows);
-      setContentReports(contentReportRows);
-      setContentReportAppeals(contentReportAppealRows);
       setProfiles((current) => ({ ...current, ...profileMap }));
     } catch (error) {
       setMessage(cleanSupabaseError(
@@ -18926,16 +15725,6 @@ function AdminModeration() {
         { event: "*", schema: "public", table: "ideahire_moderation_appeals" },
         refresh
       )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "ideahire_content_reports" },
-        refresh
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "ideahire_content_report_appeals" },
-        refresh
-      )
       .subscribe();
 
     return () => {
@@ -18944,160 +15733,22 @@ function AdminModeration() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!moderationJobId) return;
-
-    let mounted = true;
-
-    async function openModerationFromJob() {
-      setJobModerationLoading(true);
-      setJobModerationError("");
-      setSelectedSubjectError("");
-
-      try {
-        const { data, error } = await supabase.rpc(
-          "admin_open_ideahire_job_moderation",
-          {
-            p_job_id: moderationJobId,
-          }
-        );
-
-        if (error) throw error;
-        if (!mounted) return;
-
-        const payload = typeof data === "string"
-          ? JSON.parse(data)
-          : data;
-
-        if (!payload?.job?.id || !payload?.subject?.id) {
-          throw new Error(
-            "Supabase nie zwrócił kompletnego zlecenia i konta autora."
-          );
-        }
-
-        const subject = {
-          id: payload.subject.id,
-          name: payload.subject.name || "Użytkownik IdeaHire",
-          avatar_url: payload.subject.avatar_url || null,
-          created_at: payload.subject.created_at || null,
-          profile_exists: payload.subject.profile_exists !== false,
-          lifecycle_status: payload.subject.lifecycle_status || "active",
-          age_access_status: payload.subject.age_access_status || "unknown",
-          active_moderation_restriction:
-            payload.subject.active_moderation_restriction === true,
-        };
-
-        setSelectedUserId(subject.id);
-        setProfiles((current) => ({
-          ...current,
-          [subject.id]: subject,
-        }));
-        setSourceJob(payload.job);
-      } catch (error) {
-        if (!mounted) return;
-
-        setJobModerationError(
-          cleanSupabaseError(
-            error,
-            "Nie udało się otworzyć konta autora tego zlecenia."
-          )
-        );
-      } finally {
-        if (mounted) {
-          setJobModerationLoading(false);
-        }
-      }
-    }
-
-    openModerationFromJob();
-
-    return () => {
-      mounted = false;
-    };
-  }, [moderationJobId]);
-
-  useEffect(() => {
-    if (!requestedUserId || moderationJobId) return;
+    if (!requestedUserId) return;
 
     setSelectedUserId(requestedUserId);
-    setSelectedSubjectError("");
-
-    const navigationSubject =
-      location.state?.moderationSubject?.id === requestedUserId
-        ? location.state.moderationSubject
-        : null;
-
-    if (navigationSubject) {
-      setProfiles((current) => ({
-        ...current,
-        [requestedUserId]: navigationSubject,
-      }));
-      setSelectedSubjectLoading(false);
-      return;
-    }
-
-    setSelectedSubjectLoading(true);
-
-    let mounted = true;
-
-    async function loadRequestedModerationSubject() {
-      try {
-        const { data, error } = await supabase.rpc(
-          "admin_get_ideahire_moderation_subject",
-          {
-            p_user_id: requestedUserId,
-          }
-        );
-
-        if (error) throw error;
-        if (!mounted) return;
-
-        if (!data?.account_exists) {
-          setSelectedSubjectError(
-            "Konto powiązane ze zleceniem nie istnieje już w systemie Auth."
-          );
-          return;
+    supabase
+      .from("profiles")
+      .select("id, name, avatar_url, created_at")
+      .eq("id", requestedUserId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setProfiles((current) => ({ ...current, [data.id]: data }));
         }
-
-        setProfiles((current) => ({
-          ...current,
-          [requestedUserId]: {
-            id: requestedUserId,
-            name: data.name || "Użytkownik IdeaHire",
-            avatar_url: data.avatar_url || null,
-            created_at: data.created_at || null,
-            profile_exists: data.profile_exists !== false,
-            lifecycle_status: data.lifecycle_status || "active",
-            age_access_status: data.age_access_status || "unknown",
-            active_moderation_restriction:
-              data.active_moderation_restriction === true,
-          },
-        }));
-      } catch (error) {
-        if (!mounted) return;
-
-        setSelectedSubjectError(
-          cleanSupabaseError(
-            error,
-            "Nie udało się otworzyć konta wskazanego w zleceniu."
-          )
-        );
-      } finally {
-        if (mounted) {
-          setSelectedSubjectLoading(false);
-        }
-      }
-    }
-
-    loadRequestedModerationSubject();
-
-    return () => {
-      mounted = false;
-    };
-  }, [requestedUserId, moderationJobId, location.key]);
+      });
+  }, [requestedUserId]);
 
   useEffect(() => {
-    if (moderationJobId) return;
-
     if (!requestedJobId || !requestedUserId) {
       setSourceJob(null);
       return;
@@ -19119,7 +15770,7 @@ function AdminModeration() {
         }
         setSourceJob(data || null);
       });
-  }, [moderationJobId, requestedJobId, requestedUserId]);
+  }, [requestedJobId, requestedUserId]);
 
   async function handleUserSearch(event) {
     event.preventDefault();
@@ -19172,124 +15823,6 @@ function AdminModeration() {
 
   function updateModerationForm(values) {
     setForm((current) => ({ ...current, ...values }));
-  }
-
-  async function handleOpenContentReport(report) {
-    if (busy) return;
-    setBusy(`report:${report.id}`);
-    setMessage("");
-
-    try {
-      if (report.status === "submitted") {
-        const { error } = await supabase.rpc(
-          "admin_review_ideahire_content_report",
-          {
-            p_report_id: report.id,
-            p_action: "start_review",
-            p_decision_summary: null,
-            p_legal_assessment: null,
-          }
-        );
-        if (error) throw error;
-      }
-
-      const reasonMap = {
-        copyright: "illegal_content",
-        privacy_or_image_rights: "illegal_content",
-        impersonation: "impersonation",
-        harassment_or_threats: "harassment_or_threats",
-        fraud_or_scam: "fraud_or_scam",
-        illegal_goods_or_services: "illegal_content",
-        other_terms_breach: "other_terms_breach",
-        other_illegal_content: "illegal_content",
-      };
-
-      setActiveContentReport({ ...report, status: "in_review" });
-      setSelectedUserId(report.reported_user_id || "");
-      setForm((current) => ({
-        ...current,
-        reasonCode: reasonMap[report.reason_code] || "illegal_content",
-        termsReference: "Regulamin IdeaHire § 21 — nielegalne treści i moderacja",
-        internalNote: `Zgłoszenie ${report.report_number}: ${report.explanation}`.slice(0, 5000),
-      }));
-      await loadModeration(false);
-    } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się rozpocząć analizy zgłoszenia."));
-    } finally {
-      setBusy("");
-    }
-  }
-
-  async function handleResolveContentReportNoAction(report) {
-    if (busy) return;
-    const decisionSummary = window.prompt(
-      "Podaj jasne uzasadnienie decyzji dla zgłaszającego (minimum 50 znaków):"
-    );
-    if (!decisionSummary) return;
-    if (decisionSummary.trim().length < 50) {
-      setMessage("Uzasadnienie decyzji musi mieć co najmniej 50 znaków.");
-      return;
-    }
-
-    const legalAssessment = window.prompt(
-      "Opcjonalnie wpisz podstawę prawną lub wynik oceny prawnej. Możesz pozostawić puste."
-    );
-
-    setBusy(`report-resolve:${report.id}`);
-    setMessage("");
-    try {
-      const { error } = await supabase.rpc(
-        "admin_review_ideahire_content_report",
-        {
-          p_report_id: report.id,
-          p_action: "resolve_no_action",
-          p_decision_summary: decisionSummary.trim(),
-          p_legal_assessment: legalAssessment?.trim() || null,
-        }
-      );
-      if (error) throw error;
-      setActiveContentReport(null);
-      setMessage("Zgłoszenie zakończono. Zgłaszający zobaczy uzasadnienie i możliwość ponownej analizy.");
-      await loadModeration(false);
-    } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się zakończyć zgłoszenia."));
-    } finally {
-      setBusy("");
-    }
-  }
-
-  async function handleResolveContentReportAppeal(appeal, resolution) {
-    if (busy) return;
-    const note = String(contentAppealNotes[appeal.id] || "").trim();
-    if (note.length < 30) {
-      setMessage("Uzasadnienie wyniku odwołania musi mieć co najmniej 30 znaków.");
-      return;
-    }
-
-    setBusy(`content-appeal:${appeal.id}`);
-    setMessage("");
-    try {
-      const { error } = await supabase.rpc(
-        "admin_resolve_ideahire_content_report_appeal",
-        {
-          p_appeal_id: appeal.id,
-          p_resolution: resolution,
-          p_reason: note,
-        }
-      );
-      if (error) throw error;
-      setContentAppealNotes((current) => ({ ...current, [appeal.id]: "" }));
-      setMessage(
-        resolution === "accepted"
-          ? "Odwołanie uwzględniono, a zgłoszenie wróciło do ponownej analizy."
-          : "Odwołanie oddalono wraz z uzasadnieniem."
-      );
-      await loadModeration(false);
-    } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się rozpoznać odwołania do zgłoszenia."));
-    } finally {
-      setBusy("");
-    }
   }
 
   async function handleImposeRestriction(event) {
@@ -19346,10 +15879,9 @@ function AdminModeration() {
     setMessage("");
 
     try {
-      const rpcName = activeContentReport
-        ? "admin_impose_ideahire_report_restriction"
-        : "admin_impose_ideahire_account_restriction";
-      const rpcPayload = {
+      const { error } = await supabase.rpc(
+        "admin_impose_ideahire_account_restriction",
+        {
           p_target_user_id: selectedUserId,
           p_decision_type: form.decisionType,
           p_duration_days: form.decisionType === "temporary_suspension"
@@ -19373,15 +15905,8 @@ function AdminModeration() {
               ? form.ownerConfirmation.trim()
               : null,
           p_source_job_id: sourceJob?.id || null,
-      };
-
-      if (activeContentReport) {
-        delete rpcPayload.p_target_user_id;
-        delete rpcPayload.p_source_job_id;
-        rpcPayload.p_report_id = activeContentReport.id;
-      }
-
-      const { error } = await supabase.rpc(rpcName, rpcPayload);
+        }
+      );
 
       if (error) throw error;
 
@@ -19397,7 +15922,6 @@ function AdminModeration() {
         immediateExceptionCode: "",
         ownerConfirmation: "",
       });
-      setActiveContentReport(null);
       setMessage("Decyzja została zapisana, a użytkownik otrzymał zawiadomienie i dostęp do odwołania.");
       await loadModeration(false);
     } catch (error) {
@@ -19432,87 +15956,6 @@ function AdminModeration() {
       await loadModeration(false);
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zdjąć ograniczenia."));
-    } finally {
-      setBusy("");
-    }
-  }
-
-  function openRestrictionEditor(moderationCase) {
-    if (
-      moderationCase.decision_type !== "temporary_suspension"
-      || !moderationCase.ends_at
-    ) return;
-
-    const effectiveAt = new Date(moderationCase.effective_at).getTime();
-    const endsAt = new Date(moderationCase.ends_at).getTime();
-    const totalDurationDays = Math.max(
-      1,
-      Math.round((endsAt - effectiveAt) / 86400000)
-    );
-
-    setRestrictionEditor({
-      caseId: moderationCase.id,
-      totalDurationDays: String(totalDurationDays),
-      reason: "",
-    });
-    setMessage("");
-  }
-
-  async function handleUpdateRestriction(event) {
-    event.preventDefault();
-    if (!restrictionEditor.caseId || busy) return;
-
-    const totalDurationDays = Number(restrictionEditor.totalDurationDays);
-    const maximumDuration = staffRole === "owner" ? 365 : 30;
-    const reason = restrictionEditor.reason.trim();
-
-    if (
-      !Number.isInteger(totalDurationDays)
-      || totalDurationDays < 1
-      || totalDurationDays > maximumDuration
-    ) {
-      setMessage(
-        "Łączny okres zawieszenia musi wynosić od 1 do "
-          + maximumDuration
-          + " dni."
-      );
-      return;
-    }
-
-    if (reason.length < 30) {
-      setMessage("Uzasadnienie zmiany musi mieć co najmniej 30 znaków.");
-      return;
-    }
-
-    setBusy("update:" + restrictionEditor.caseId);
-    setMessage("");
-
-    try {
-      const { error } = await supabase.rpc(
-        "admin_update_ideahire_temporary_restriction",
-        {
-          p_case_id: restrictionEditor.caseId,
-          p_total_duration_days: totalDurationDays,
-          p_change_reason: reason,
-        }
-      );
-
-      if (error) throw error;
-
-      setRestrictionEditor({
-        caseId: "",
-        totalDurationDays: "",
-        reason: "",
-      });
-      setMessage(
-        "Czas zawieszenia został zmieniony, zapisany w historii i przekazany użytkownikowi."
-      );
-      await loadModeration(false);
-    } catch (error) {
-      setMessage(cleanSupabaseError(
-        error,
-        "Nie udało się zmienić czasu zawieszenia."
-      ));
     } finally {
       setBusy("");
     }
@@ -19564,51 +16007,9 @@ function AdminModeration() {
       && ["scheduled", "active"].includes(item.status)
       && (!item.ends_at || new Date(item.ends_at).getTime() > Date.now())
   );
-  const canManageSelectedOpenCase = Boolean(
-    selectedOpenCase
-      && (
-        staffRole === "owner"
-        || selectedOpenCase.decided_by === user.id
-      )
-  );
   const openAppeals = appeals.filter((item) =>
     ["submitted", "in_review"].includes(item.status)
   );
-  const openContentReports = contentReports.filter((item) =>
-    ["submitted", "in_review"].includes(item.status)
-  );
-  const openContentReportAppeals = contentReportAppeals.filter(
-    (item) => item.status === "submitted"
-  );
-
-  useEffect(() => {
-    if (
-      (!requestedUserId && !moderationJobId)
-      || selectedSubjectLoading
-      || jobModerationLoading
-      || (!selectedProfile && !selectedSubjectError)
-    ) {
-      return undefined;
-    }
-
-    const frameId = window.requestAnimationFrame(() => {
-      moderationWorkbenchRef.current?.scrollIntoView({
-        behavior: "auto",
-        block: "start",
-      });
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-    };
-  }, [
-    requestedUserId,
-    moderationJobId,
-    selectedSubjectLoading,
-    jobModerationLoading,
-    selectedSubjectError,
-    selectedProfile?.id,
-  ]);
 
   return (
     <div className="account-page admin-page admin-moderation-page">
@@ -19630,153 +16031,6 @@ function AdminModeration() {
         </header>
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
-
-        {jobModerationLoading && (
-          <div className="moderation-job-opening" role="status">
-            <span className="section-label">Otwieranie sprawy</span>
-            <h2>Ładowanie konta autora zlecenia…</h2>
-            <p>Sprawdzamy zlecenie i przypisujemy właściwe konto do moderacji.</p>
-          </div>
-        )}
-
-        {jobModerationError && (
-          <div className="moderation-job-opening is-error" role="alert">
-            <span className="section-label">Nie udało się otworzyć konta</span>
-            <h2>Moderacja zlecenia nie została uruchomiona</h2>
-            <p>{jobModerationError}</p>
-            <Link className="privacy-secondary-button" to="/admin/jobs">
-              Wróć do listy zleceń
-            </Link>
-          </div>
-        )}
-
-        <section className="moderation-content-reports">
-          <div className="moderation-content-reports-heading">
-            <div>
-              <span className="section-label">Zgłoszenia treści portfolio</span>
-              <h2>Kolejka do ręcznej analizy</h2>
-              <p>
-                Zgłoszenie nie nakłada sankcji automatycznie. Otwórz materiał,
-                oceń kontekst i wybierz brak naruszenia albo proporcjonalne ograniczenie.
-              </p>
-            </div>
-            <span>{openContentReports.length}</span>
-          </div>
-
-          {openContentReports.length === 0 ? (
-            <div className="privacy-empty-state">Brak nowych zgłoszeń treści.</div>
-          ) : (
-            <div className="moderation-content-report-list">
-              {openContentReports.map((report) => (
-                <article
-                  className={activeContentReport?.id === report.id ? "is-active" : ""}
-                  key={report.id}
-                >
-                  {report.content_snapshot?.reported_image_url
-                    || report.content_snapshot?.legacy_cover_url ? (
-                    <img
-                      src={report.content_snapshot.reported_image_url
-                        || report.content_snapshot.legacy_cover_url}
-                      alt="Zgłoszony materiał portfolio"
-                    />
-                  ) : (
-                    <div className="moderation-content-report-placeholder">TREŚĆ</div>
-                  )}
-                  <div>
-                    <span className={`content-report-status is-${report.status}`}>
-                      {CONTENT_REPORT_STATUS_LABELS[report.status] || report.status}
-                    </span>
-                    <h3>{report.content_snapshot?.title || "Projekt portfolio"}</h3>
-                    <small>{report.report_number} · {formatDisputeDate(report.submitted_at)}</small>
-                    <strong>{CONTENT_REPORT_REASON_LABELS[report.reason_code] || report.reason_code}</strong>
-                    <p>{report.explanation}</p>
-                    {report.legal_reference && (
-                      <p><b>Wskazana podstawa:</b> {report.legal_reference}</p>
-                    )}
-                    <div className="moderation-content-report-actions">
-                      <a
-                        href={report.content_location}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Otwórz lokalizację ↗
-                      </a>
-                      <button
-                        type="button"
-                        className="privacy-primary-button"
-                        onClick={() => handleOpenContentReport(report)}
-                        disabled={Boolean(busy)}
-                      >
-                        {busy === `report:${report.id}`
-                          ? "Otwieranie..."
-                          : report.status === "submitted"
-                          ? "Rozpocznij analizę"
-                          : "Kontynuuj analizę"}
-                      </button>
-                      <button
-                        type="button"
-                        className="privacy-secondary-button"
-                        onClick={() => handleResolveContentReportNoAction(report)}
-                        disabled={Boolean(busy)}
-                      >
-                        Brak podstaw do działania
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {openContentReportAppeals.length > 0 && (
-          <section className="moderation-content-report-appeals">
-            <div>
-              <span className="section-label">Ponowna analiza zgłoszeń</span>
-              <h2>Odwołania zgłaszających</h2>
-            </div>
-            <div className="moderation-content-report-appeal-list">
-              {openContentReportAppeals.map((appeal) => {
-                const report = contentReports.find((item) => item.id === appeal.report_id);
-                return (
-                  <article key={appeal.id}>
-                    <strong>{report?.report_number || "Zgłoszenie treści"}</strong>
-                    <p>{appeal.statement}</p>
-                    <textarea
-                      value={contentAppealNotes[appeal.id] || ""}
-                      onChange={(event) => setContentAppealNotes((current) => ({
-                        ...current,
-                        [appeal.id]: event.target.value,
-                      }))}
-                      minLength={30}
-                      maxLength={3000}
-                      rows={4}
-                      placeholder="Uzasadnij wynik ponownej, ręcznej analizy..."
-                    />
-                    <div>
-                      <button
-                        type="button"
-                        className="privacy-secondary-button"
-                        onClick={() => handleResolveContentReportAppeal(appeal, "rejected")}
-                        disabled={Boolean(busy)}
-                      >
-                        Oddal odwołanie
-                      </button>
-                      <button
-                        type="button"
-                        className="privacy-primary-button"
-                        onClick={() => handleResolveContentReportAppeal(appeal, "accepted")}
-                        disabled={Boolean(busy)}
-                      >
-                        Uwzględnij i otwórz ponownie
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
         <section className="moderation-search-card">
           <div>
@@ -19817,10 +16071,7 @@ function AdminModeration() {
         </section>
 
         {selectedUserId && (
-          <section
-            className="moderation-workbench"
-            ref={moderationWorkbenchRef}
-          >
+          <section className="moderation-workbench">
             <div className="moderation-selected-user">
               <div className="admin-staff-avatar">
                 {selectedProfile?.avatar_url
@@ -19839,64 +16090,6 @@ function AdminModeration() {
               )}
             </div>
 
-            {selectedSubjectLoading && (
-              <p className="moderation-subject-state" role="status">
-                Ładowanie danych konta powiązanego ze zleceniem...
-              </p>
-            )}
-
-            {selectedSubjectError && (
-              <p className="moderation-subject-state is-error" role="alert">
-                {selectedSubjectError}
-              </p>
-            )}
-
-            {selectedProfile && !selectedSubjectLoading && !selectedSubjectError && (
-              <div className="moderation-subject-summary">
-                <div>
-                  <span>
-                    Profil: {selectedProfile.profile_exists === false
-                      ? "brak profilu publicznego"
-                      : "dostępny"}
-                  </span>
-                  <span>
-                    Cykl konta: {selectedProfile.lifecycle_status || "active"}
-                  </span>
-                  <span>
-                    Dostęp wieku: {selectedProfile.age_access_status || "—"}
-                  </span>
-                </div>
-                <Link
-                  className="privacy-secondary-button"
-                  to={`/admin/privacy/users/${selectedUserId}`}
-                >
-                  Otwórz administracyjny widok konta →
-                </Link>
-              </div>
-            )}
-
-            {activeContentReport && (
-              <article className="moderation-active-content-report">
-                <div>
-                  <span className="section-label">Źródło przygotowywanej decyzji</span>
-                  <h3>{activeContentReport.report_number}</h3>
-                </div>
-                <p>{activeContentReport.explanation}</p>
-                <small>
-                  Decyzja musi wynikać z samodzielnej analizy administratora.
-                  Dane zgłaszającego nie będą pokazane właścicielowi treści.
-                </small>
-                <button
-                  type="button"
-                  className="privacy-secondary-button"
-                  onClick={() => setActiveContentReport(null)}
-                  disabled={Boolean(busy)}
-                >
-                  Odłącz zgłoszenie od decyzji
-                </button>
-              </article>
-            )}
-
             {sourceJob && (
               <article className="moderation-source-job">
                 <div>
@@ -19914,108 +16107,14 @@ function AdminModeration() {
               <div className="moderation-active-case">
                 <strong>To konto ma już aktywną lub zaplanowaną decyzję</strong>
                 <p>{notices[selectedOpenCase.id]?.public_reason || selectedOpenCase.public_reason}</p>
-                {selectedOpenCase.decision_type === "temporary_suspension"
-                  && canManageSelectedOpenCase && (
-                  <button
-                    type="button"
-                    className="privacy-secondary-button"
-                    onClick={() => openRestrictionEditor(selectedOpenCase)}
-                    disabled={Boolean(busy)}
-                  >
-                    Zmień czas zawieszenia
-                  </button>
-                )}
-
-                {canManageSelectedOpenCase
-                  && restrictionEditor.caseId === selectedOpenCase.id && (
-                  <form
-                    className="moderation-adjustment-form"
-                    onSubmit={handleUpdateRestriction}
-                  >
-                    <div>
-                      <span className="section-label">
-                        Zmiana istniejącej decyzji
-                      </span>
-                      <strong>Ustaw nowy łączny czas zawieszenia</strong>
-                      <p>
-                        Okres jest liczony od pierwotnego rozpoczęcia decyzji.
-                        Zmiana zostanie pokazana użytkownikowi i zapisana
-                        w historii administracyjnej.
-                      </p>
-                    </div>
-                    <label>
-                      Łączna liczba dni
-                      <input
-                        type="number"
-                        min="1"
-                        max={staffRole === "owner" ? "365" : "30"}
-                        value={restrictionEditor.totalDurationDays}
-                        onChange={(event) =>
-                          setRestrictionEditor((current) => ({
-                            ...current,
-                            totalDurationDays: event.target.value,
-                          }))
-                        }
-                        disabled={Boolean(busy)}
-                      />
-                    </label>
-                    <label>
-                      Uzasadnienie zmiany
-                      <textarea
-                        value={restrictionEditor.reason}
-                        onChange={(event) =>
-                          setRestrictionEditor((current) => ({
-                            ...current,
-                            reason: event.target.value,
-                          }))
-                        }
-                        minLength={30}
-                        maxLength={2000}
-                        rows={4}
-                        placeholder="Wyjaśnij konkretnie, dlaczego okres został skrócony albo wydłużony."
-                        disabled={Boolean(busy)}
-                      />
-                    </label>
-                    <div className="moderation-adjustment-actions">
-                      <button
-                        type="button"
-                        className="privacy-secondary-button"
-                        onClick={() => setRestrictionEditor({
-                          caseId: "",
-                          totalDurationDays: "",
-                          reason: "",
-                        })}
-                        disabled={Boolean(busy)}
-                      >
-                        Anuluj
-                      </button>
-                      <button
-                        type="submit"
-                        className="privacy-primary-button"
-                        disabled={Boolean(busy)}
-                      >
-                        {busy === "update:" + selectedOpenCase.id
-                          ? "Zapisywanie zmiany..."
-                          : "Zapisz nowy czas"}
-                      </button>
-                    </div>
-                  </form>
-                )}
-                {canManageSelectedOpenCase ? (
-                  <button
-                    type="button"
-                    className="privacy-secondary-button"
-                    onClick={() => handleLiftRestriction(selectedOpenCase.id)}
-                    disabled={Boolean(busy)}
-                  >
-                    {busy === `lift:${selectedOpenCase.id}` ? "Zapisywanie..." : "Zdejmij ograniczenie"}
-                  </button>
-                ) : (
-                  <small>
-                    Tę decyzję może zmienić administrator, który ją wydał,
-                    albo owner.
-                  </small>
-                )}
+                <button
+                  type="button"
+                  className="privacy-secondary-button"
+                  onClick={() => handleLiftRestriction(selectedOpenCase.id)}
+                  disabled={Boolean(busy)}
+                >
+                  {busy === `lift:${selectedOpenCase.id}` ? "Zapisywanie..." : "Zdejmij ograniczenie"}
+                </button>
               </div>
             ) : (
               <form className="moderation-decision-form" onSubmit={handleImposeRestriction}>
@@ -20088,22 +16187,7 @@ function AdminModeration() {
                     Kategoria powodu
                     <select
                       value={form.reasonCode}
-                      onChange={(event) => {
-                        const reasonCode = event.target.value;
-                        const previousSuggestedReference =
-                          MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode];
-                        const suggestedReference =
-                          MODERATION_CONFIRMED_TERMS_REFERENCES[reasonCode];
-                        const canReplaceReference = !form.termsReference.trim()
-                          || form.termsReference === previousSuggestedReference;
-
-                        updateModerationForm({
-                          reasonCode,
-                          termsReference: canReplaceReference
-                            ? suggestedReference || ""
-                            : form.termsReference,
-                        });
-                      }}
+                      onChange={(event) => updateModerationForm({ reasonCode: event.target.value })}
                     >
                       {Object.entries(MODERATION_REASON_LABELS).map(([value, label]) => (
                         <option value={value} key={value}>{label}</option>
@@ -20134,33 +16218,6 @@ function AdminModeration() {
                 <div className="moderation-reason-guidance">
                   <strong>Co administrator musi ustalić dla wybranej kategorii</strong>
                   <p>{MODERATION_REASON_GUIDANCE[form.reasonCode]}</p>
-                  {MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode] && (
-                    <div className="moderation-terms-shortcut">
-                      <span>
-                        Potwierdzona podstawa w aktualnym Regulaminie v0.9:
-                        {" "}
-                        <strong>
-                          {MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode]}
-                        </strong>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => updateModerationForm({
-                          termsReference:
-                            MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode],
-                        })}
-                        disabled={
-                          form.termsReference
-                            === MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode]
-                        }
-                      >
-                        {form.termsReference
-                          === MODERATION_CONFIRMED_TERMS_REFERENCES[form.reasonCode]
-                          ? "Podstawa ustawiona"
-                          : "Wstaw § 27 pkt 107"}
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 <label>
@@ -20183,7 +16240,7 @@ function AdminModeration() {
                       onChange={(event) => updateModerationForm({ termsReference: event.target.value })}
                       minLength={10}
                       maxLength={1000}
-                      placeholder="Np. Regulamin IdeaHire § 27 pkt 107"
+                      placeholder="Np. Regulamin IdeaHire § 8 ust. 3"
                     />
                   </label>
                   <label>
@@ -20356,8 +16413,6 @@ function AdminUserPrivacyAccount() {
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [dialogAction, setDialogAction] = useState("");
-  const [dialogMessage, setDialogMessage] = useState("");
-  const [inventoryError, setInventoryError] = useState("");
   const [identityMethod, setIdentityMethod] = useState("authenticated_session");
   const [identityNote, setIdentityNote] = useState("");
   const [legalAssessment, setLegalAssessment] = useState("");
@@ -20389,7 +16444,7 @@ function AdminUserPrivacyAccount() {
           supabase
             .from("ideahire_privacy_requests")
             .select(
-              "id, request_number, requester_user_id, request_type, requested_erasure_action, description, status, identity_status, assigned_admin_id, submitted_at, due_at, extended_due_at, decision_summary, completed_at"
+              "id, request_number, requester_user_id, request_type, description, status, identity_status, assigned_admin_id, submitted_at, due_at, extended_due_at, decision_summary, completed_at"
             )
             .eq("requester_user_id", userId)
             .eq("request_type", "erasure")
@@ -20439,18 +16494,12 @@ function AdminUserPrivacyAccount() {
         );
 
         if (inventoryResult.error) {
-          console.error("ADMIN ERASURE INVENTORY ERROR:", inventoryResult.error);
           setInventory(null);
-          setInventoryError(
-            "Nie udało się odświeżyć warunków tej operacji. Spróbuj ponownie."
-          );
         } else {
           setInventory(inventoryResult.data || null);
-          setInventoryError("");
         }
       } else {
         setInventory(null);
-        setInventoryError("");
       }
     } catch (error) {
       setMessage(cleanSupabaseError(
@@ -20525,18 +16574,6 @@ function AdminUserPrivacyAccount() {
   const activeBlockers = Object.entries(inventory?.blockers || {})
     .filter(([, value]) => value === true || Number(value) > 0);
 
-  function openErasureDialog(action) {
-    setMessage("");
-    setDialogMessage("");
-    setDialogAction(action);
-  }
-
-  function closeErasureDialog() {
-    if (busy) return;
-    setDialogAction("");
-    setDialogMessage("");
-  }
-
   async function handleVerifyIdentity(event) {
     event.preventDefault();
     if (!currentRequest) return;
@@ -20575,44 +16612,26 @@ function AdminUserPrivacyAccount() {
     event.preventDefault();
     if (!currentRequest || !dialogAction) return;
 
-    if (
-      currentRequest.requested_erasure_action
-      && currentRequest.requested_erasure_action !== dialogAction
-    ) {
-      setDialogMessage("Operacja musi być zgodna z zakresem wybranym przez użytkownika.");
-      return;
-    }
-
     if (legalAssessment.trim().length < 50) {
-      setDialogMessage("Uzupełnij ocenę zakresu — wpisz co najmniej 50 znaków.");
+      setMessage("Ocena prawna musi mieć co najmniej 50 znaków.");
       return;
     }
 
     if (retentionReason.trim().length < 30) {
-      setDialogMessage("Uzupełnij uzasadnienie retencji — wpisz co najmniej 30 znaków.");
-      return;
-    }
-
-    if (!inventory || inventoryError) {
-      setDialogMessage(
-        "Nie możemy teraz bezpiecznie potwierdzić zakresu operacji. Zamknij okno, odśwież dane i spróbuj ponownie."
-      );
+      setMessage("Uzasadnienie pozostawienia historii musi mieć co najmniej 30 znaków.");
       return;
     }
 
     if (dialogAction === "close_account" && inventory?.execution_blocked) {
-      setDialogMessage(
-        "Nie przekazano operacji ownerowi, ponieważ konto ma aktywne sprawy. Rozwiąż pozycje pokazane poniżej i sprawdź warunki ponownie."
-      );
+      setMessage("Konta nie można teraz zamknąć. Najpierw rozwiąż wskazane aktywne zobowiązania.");
       return;
     }
 
     setBusy("prepare");
     setMessage("");
-    setDialogMessage("");
 
     try {
-      const { data: preparedCaseId, error } = await supabase.rpc(
+      const { error } = await supabase.rpc(
         "admin_prepare_ideahire_erasure_case",
         {
           p_request_id: currentRequest.id,
@@ -20623,55 +16642,14 @@ function AdminUserPrivacyAccount() {
       );
 
       if (error) throw error;
-      if (!preparedCaseId) {
-        throw new Error("Nie otrzymano potwierdzenia utworzenia sprawy.");
-      }
 
       setDialogAction("");
-      setDialogMessage("");
       setLegalAssessment("");
       setRetentionReason("");
       setMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez ownera.");
       await loadAccountData(false);
     } catch (error) {
-      console.error("ADMIN PREPARE ERASURE ERROR:", error);
-
-      const { data: existingCase, error: existingCaseError } = await supabase
-        .from("ideahire_erasure_cases")
-        .select("id, status")
-        .eq("privacy_request_id", currentRequest.id)
-        .maybeSingle();
-
-      if (!existingCaseError && existingCase?.id) {
-        setDialogAction("");
-        setDialogMessage("");
-        setLegalAssessment("");
-        setRetentionReason("");
-        setMessage(
-          "Operacja została zapisana i oczekuje na zatwierdzenie ownera. Widok został odświeżony."
-        );
-        await loadAccountData(false);
-        return;
-      }
-
-      const errorText = String(error?.message || "").toLowerCase();
-      if (errorText.includes("przypisana") || errorText.includes("uprawnie")) {
-        setDialogMessage(
-          "Nie przekazano operacji. Ten wniosek musi najpierw przejąć zalogowany administrator albo owner."
-        );
-      } else if (errorText.includes("tożsamo")) {
-        setDialogMessage(
-          "Nie przekazano operacji. Najpierw potwierdź tożsamość wnioskodawcy w kroku 1."
-        );
-      } else if (errorText.includes("istnieje już")) {
-        setDialogMessage(
-          "Dla tego wniosku istnieje już przygotowana operacja. Zamknij okno i odśwież widok."
-        );
-      } else {
-        setDialogMessage(
-          "Nie udało się przekazać operacji ownerowi. Niczego nie usunięto. Odśwież widok i spróbuj ponownie."
-        );
-      }
+      setMessage(cleanSupabaseError(error, "Nie udało się przygotować operacji."));
     } finally {
       setBusy("");
     }
@@ -20679,14 +16657,6 @@ function AdminUserPrivacyAccount() {
 
   async function handleAuthorizeErasure() {
     if (!currentCase) return;
-
-    if (
-      currentCase.action_type === "close_account"
-      && inventory?.execution_blocked
-    ) {
-      setMessage("Konta nie można teraz zamknąć. Najpierw zakończ wszystkie przeszkody pokazane w panelu.");
-      return;
-    }
 
     if (ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE") {
       setMessage("Wpisz dokładnie: ZATWIERDZAM USUNIECIE");
@@ -20713,8 +16683,8 @@ function AdminUserPrivacyAccount() {
       setOwnerConfirmation("");
       setMessage(
         actionType === "close_account"
-          ? "Owner zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono."
-          : "Owner zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono."
+          ? "Owner zatwierdził operację. Konto zostało zamknięte, dane zminimalizowane, a sprawa zakończona."
+          : "Owner zatwierdził operację. Dane możliwe do usunięcia zostały zminimalizowane, a sprawa zakończona."
       );
       await loadAccountData(false);
     } catch (error) {
@@ -20753,7 +16723,7 @@ function AdminUserPrivacyAccount() {
       setMessage(
         currentCase.action_type === "close_account"
           ? "Konto zostało zamknięte, a status sprawy zaktualizowany."
-          : "Pełny możliwy zakres danych został usunięty lub zanonimizowany. Konto logowania pozostało aktywne."
+          : "Dane możliwe do usunięcia zostały zminimalizowane."
       );
       await loadAccountData(false);
     } catch (error) {
@@ -20774,36 +16744,7 @@ function AdminUserPrivacyAccount() {
   }
 
   const lifecycleStatus = lifecycle?.status || "active";
-  const completedDataMinimization = Boolean(
-    currentCase?.status === "completed"
-    && currentCase?.action_type === "minimize_data"
-  );
-  const completedAccountClosure = Boolean(
-    currentCase?.status === "completed"
-    && currentCase?.action_type === "close_account"
-  );
-  const accountName = completedDataMinimization
-    ? "Konto aktywne — dane możliwe do usunięcia zostały usunięte"
-    : completedAccountClosure
-      ? "Konto zamknięte"
-      : profile?.name?.trim() || "Użytkownik IdeaHire";
-  const executionRows = buildErasureExecutionRows(
-    currentCase?.execution_result
-  );
-  const retainedAfterExecution =
-    currentCase?.execution_result
-      ?.data_minimization
-      ?.retained_after || {};
-  const retainedAfterRows = Object.entries(
-    retainedAfterExecution
-  ).filter(([, value]) => (
-    Number.isFinite(Number(value))
-    && Number(value) > 0
-  ));
-  const requestedErasureAction = currentRequest?.requested_erasure_action || "";
-  const isLegacyErasureRequest = Boolean(
-    currentRequest && !requestedErasureAction
-  );
+  const accountName = profile?.name?.trim() || "Użytkownik IdeaHire";
   const actionDisabled = !canManage
     || !currentRequest
     || !isPrivacyRequestOpen(currentRequest.status)
@@ -20826,9 +16767,7 @@ function AdminUserPrivacyAccount() {
             <header className="erasure-account-header">
               <div className="erasure-account-person">
                 <div className="erasure-account-avatar">
-                  {!completedDataMinimization
-                    && !completedAccountClosure
-                    && profile?.avatar_url ? (
+                  {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt="" />
                   ) : accountName.charAt(0).toUpperCase()}
                 </div>
@@ -20836,12 +16775,6 @@ function AdminUserPrivacyAccount() {
                   <span className="section-label">Administracyjny widok konta</span>
                   <h1>{accountName}</h1>
                   <p>ID użytkownika: <code>{userId}</code></p>
-                  {completedDataMinimization && (
-                    <p className="erasure-account-auth-state">
-                      Login pozostaje aktywny. Użytkownik może ponownie
-                      uzupełnić dane wymagane do dalszego korzystania z usługi.
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -20861,11 +16794,8 @@ function AdminUserPrivacyAccount() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => openErasureDialog("minimize_data")}
-                      disabled={
-                        actionDisabled
-                        || requestedErasureAction === "close_account"
-                      }
+                      onClick={() => setDialogAction("minimize_data")}
+                      disabled={actionDisabled}
                     >
                       <span>Usuń dane możliwe do usunięcia</span>
                       <small>Konto nie zostanie usunięte z Auth</small>
@@ -20873,13 +16803,10 @@ function AdminUserPrivacyAccount() {
                     <button
                       type="button"
                       className="is-danger"
-                      onClick={() => openErasureDialog("close_account")}
-                      disabled={
-                        actionDisabled
-                        || requestedErasureAction === "minimize_data"
-                      }
+                      onClick={() => setDialogAction("close_account")}
+                      disabled={actionDisabled || Boolean(inventory?.execution_blocked)}
                     >
-                      <span>Usuń dane i zamknij konto</span>
+                      <span>Zamknij konto użytkownika</span>
                       <small>Minimalizacja danych i wyłączenie logowania</small>
                     </button>
                   </div>
@@ -20904,21 +16831,6 @@ function AdminUserPrivacyAccount() {
                 <div>
                   <span className="section-label">Podstawa operacji</span>
                   <h2>{formatPrivacyRequestNumber(currentRequest?.request_number)}</h2>
-                  <div className={`privacy-erasure-requested-action is-${
-                    requestedErasureAction || "legacy"
-                  }`}>
-                    <span>Użytkownik wybrał</span>
-                    <strong>
-                      {requestedErasureAction
-                        ? ERASURE_ACTION_LABELS[requestedErasureAction]
-                        : "Starszy wniosek — brak zapisanego wyboru"}
-                    </strong>
-                    <p>
-                      {requestedErasureAction
-                        ? "Przygotowana operacja musi być dokładnie zgodna z tym wyborem."
-                        : "Potwierdź zakres na podstawie treści i historii wniosku. Dotyczy to wyłącznie starszych spraw."}
-                    </p>
-                  </div>
                 </div>
                 {requests.length > 1 && (
                   <label>
@@ -20944,17 +16856,6 @@ function AdminUserPrivacyAccount() {
                 <p>
                   Najpierw przejmij wniosek w kolejce. Wgląd i wykonanie ma
                   prowadzący administrator oraz owner.
-                </p>
-              </section>
-            )}
-
-            {isLegacyErasureRequest && canManage && (
-              <section className="erasure-account-notice is-warning">
-                <strong>Starszy wniosek bez technicznie zapisanego zakresu</strong>
-                <p>
-                  Przed przygotowaniem operacji porównaj treść i historię wniosku.
-                  Wszystkie nowe wnioski zapisują już wybór użytkownika i blokują
-                  wykonanie innej operacji.
                 </p>
               </section>
             )}
@@ -21007,72 +16908,49 @@ function AdminUserPrivacyAccount() {
               </form>
             )}
 
-            {inventoryError ? (
-              <section className="erasure-account-notice is-danger" role="alert">
-                <strong>Nie udało się pobrać zakresu danych</strong>
-                <p>
-                  Operacja nie może zostać przygotowana bez aktualnego inwentarza.
-                  Nic nie zostało usunięte ani przekazane ownerowi.
-                </p>
-                <button
-                  type="button"
-                  className="privacy-eligibility-refresh"
-                  onClick={() => loadAccountData(false)}
-                  disabled={Boolean(busy)}
-                >
-                  Pobierz zakres ponownie
-                </button>
-              </section>
-            ) : inventory ? (
-              <section className="erasure-account-grid">
-                <article className="erasure-inventory-card">
-                  <div className="erasure-card-heading">
-                    <div>
-                      <span className="section-label">Możliwe do usunięcia</span>
-                      <h2>Dane profilu i ustawienia</h2>
-                    </div>
-                    <span className="erasure-card-mark is-removable">Usuń</span>
+            <section className="erasure-account-grid">
+              <article className="erasure-inventory-card">
+                <div className="erasure-card-heading">
+                  <div>
+                    <span className="section-label">Możliwe do usunięcia</span>
+                    <h2>Dane profilu i ustawienia</h2>
                   </div>
-                  <ul>
-                    {Object.entries(inventory.erasable_now || {}).map(([key, value]) => (
-                      <li key={key}>
-                        <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
-                        <strong>{Number(value) || 0}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
+                  <span className="erasure-card-mark is-removable">Usuń</span>
+                </div>
+                <ul>
+                  {Object.entries(inventory?.erasable_now || {}).map(([key, value]) => (
+                    <li key={key}>
+                      <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
+                      <strong>{Number(value) || 0}</strong>
+                    </li>
+                  ))}
+                </ul>
+              </article>
 
-                <article className="erasure-inventory-card is-retained">
-                  <div className="erasure-card-heading">
-                    <div>
-                      <span className="section-label">Kontrolowana retencja</span>
-                      <h2>Historia prawna i transakcyjna</h2>
-                    </div>
-                    <span className="erasure-card-mark is-retained">Zachowaj</span>
+              <article className="erasure-inventory-card is-retained">
+                <div className="erasure-card-heading">
+                  <div>
+                    <span className="section-label">Kontrolowana retencja</span>
+                    <h2>Historia prawna i transakcyjna</h2>
                   </div>
-                  <ul>
-                    {Object.entries(
-                      inventory.retained_for_legal_or_transactional_purposes || {}
-                    ).map(([key, value]) => (
-                      <li key={key}>
-                        <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
-                        <strong>{Number(value) || 0}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                  <p>
-                    Te rekordy nie są automatycznie kasowane. Administrator musi
-                    podać podstawę i okres retencji do późniejszej kontroli prawnej.
-                  </p>
-                </article>
-              </section>
-            ) : currentRequest ? (
-              <section className="erasure-account-notice">
-                <strong>Pobieramy aktualny zakres danych</strong>
-                <p>Za chwilę zobaczysz dane możliwe do usunięcia oraz dane objęte retencją.</p>
-              </section>
-            ) : null}
+                  <span className="erasure-card-mark is-retained">Zachowaj</span>
+                </div>
+                <ul>
+                  {Object.entries(
+                    inventory?.retained_for_legal_or_transactional_purposes || {}
+                  ).map(([key, value]) => (
+                    <li key={key}>
+                      <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
+                      <strong>{Number(value) || 0}</strong>
+                    </li>
+                  ))}
+                </ul>
+                <p>
+                  Te rekordy nie są automatycznie kasowane. Administrator musi
+                  podać podstawę i okres retencji do późniejszej kontroli prawnej.
+                </p>
+              </article>
+            </section>
 
             {activeBlockers.length > 0 && (
               <section className="erasure-blockers-card" role="alert">
@@ -21083,15 +16961,14 @@ function AdminUserPrivacyAccount() {
                     <p>Najpierw zakończ lub rozlicz poniższe elementy:</p>
                   </div>
                 </div>
-                <ErasureBlockerList blockers={activeBlockers} />
-                <button
-                  type="button"
-                  className="privacy-eligibility-refresh"
-                  onClick={() => loadAccountData(false)}
-                  disabled={Boolean(busy)}
-                >
-                  Sprawdź ponownie po rozwiązaniu spraw
-                </button>
+                <ul>
+                  {activeBlockers.map(([key, value]) => (
+                    <li key={key}>
+                      {ERASURE_BLOCKER_LABELS[key] || key}
+                      {typeof value === "number" ? `: ${value}` : ""}
+                    </li>
+                  ))}
+                </ul>
               </section>
             )}
 
@@ -21143,14 +17020,7 @@ function AdminUserPrivacyAccount() {
                         type="button"
                         className="erasure-danger-button"
                         onClick={handleAuthorizeErasure}
-                        disabled={
-                          Boolean(busy)
-                          || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"
-                          || (
-                            currentCase.action_type === "close_account"
-                            && Boolean(inventory?.execution_blocked)
-                          )
-                        }
+                        disabled={Boolean(busy) || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"}
                       >
                         {busy === "authorize"
                           ? "Zatwierdzanie i wykonywanie..."
@@ -21196,59 +17066,12 @@ function AdminUserPrivacyAccount() {
                 {currentCase.status === "completed" && (
                   <div className="erasure-completed-banner" role="status">
                     <span aria-hidden="true">✓</span>
-                    <div className="erasure-completed-content">
+                    <div>
                       <strong>Operacja została zakończona</strong>
                       <p>
-                        {currentCase.action_type === "minimize_data"
-                          ? "Usunięto lub zanonimizowano pełny możliwy zakres danych. Konto logowania pozostaje aktywne."
-                          : "Usunięto lub zanonimizowano możliwe dane i zamknięto konto logowania."}
+                        Status użytkownika i wniosku RODO został zaktualizowany,
+                        a historia administracyjna pozostała zachowana.
                       </p>
-
-                      {executionRows.length > 0 && (
-                        <section className="erasure-execution-report">
-                          <div>
-                            <span className="section-label">Raport wykonania</span>
-                            <h3>Co zostało usunięte lub zanonimizowane</h3>
-                          </div>
-                          <dl>
-                            {executionRows.map((item) => (
-                              <div key={item.key}>
-                                <dt>{item.label}</dt>
-                                <dd>{item.value}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </section>
-                      )}
-
-                      <section className="erasure-retention-report">
-                        <div>
-                          <span className="section-label">Kontrolowana retencja</span>
-                          <h3>Dane pozostawione po operacji</h3>
-                        </div>
-
-                        {retainedAfterRows.length > 0 ? (
-                          <ul>
-                            {retainedAfterRows.map(([key, value]) => (
-                              <li key={key}>
-                                <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
-                                <strong>{Number(value)}</strong>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p>
-                            Zachowano konto i identyfikator logowania, dokumentację
-                            realizacji wniosku oraz niezbędną historię audytową.
-                          </p>
-                        )}
-
-                        <small>
-                          Dane prawne, transakcyjne, sporne lub bezpieczeństwa nie
-                          są publikowane w profilu i podlegają uzasadnieniu oraz
-                          okresowi retencji zapisanym w tej sprawie.
-                        </small>
-                      </section>
                     </div>
                   </div>
                 )}
@@ -21283,7 +17106,7 @@ function AdminUserPrivacyAccount() {
         <div
           className="erasure-dialog-backdrop"
           role="presentation"
-          onMouseDown={closeErasureDialog}
+          onMouseDown={() => !busy && setDialogAction("")}
         >
           <section
             className="erasure-dialog"
@@ -21301,7 +17124,7 @@ function AdminUserPrivacyAccount() {
               </div>
               <button
                 type="button"
-                onClick={closeErasureDialog}
+                onClick={() => setDialogAction("")}
                 aria-label="Zamknij okno"
                 disabled={Boolean(busy)}
               >×</button>
@@ -21313,33 +17136,14 @@ function AdminUserPrivacyAccount() {
               pozostać ograniczone przez określony czas.
             </p>
 
-            {requestedErasureAction && (
-              <div className="privacy-erasure-requested-action is-confirmation">
-                <span>Kontrola zgodności z żądaniem użytkownika</span>
-                <strong>{ERASURE_ACTION_LABELS[requestedErasureAction]}</strong>
-                <p>Ten formularz przygotuje dokładnie operację wybraną we wniosku.</p>
-              </div>
-            )}
-
             {dialogAction === "close_account" && inventory?.execution_blocked && (
-              <div className="erasure-dialog-blockers erasure-account-notice is-danger">
-                <strong>Nie można jeszcze przekazać zamknięcia konta</strong>
-                <p>
-                  Owner nie powinien zatwierdzać zamknięcia, dopóki poniższe sprawy
-                  nie zostaną zakończone. Możesz kliknąć przycisk na dole, aby
-                  zobaczyć jednoznaczne potwierdzenie blokady.
-                </p>
-                <ErasureBlockerList blockers={activeBlockers} />
+              <div className="erasure-account-notice is-danger">
+                <strong>Nie można obecnie zamknąć konta</strong>
+                <p>Wróć do panelu i rozwiąż aktywne zobowiązania wskazane na czerwonej liście.</p>
               </div>
             )}
 
-            {inventoryError && (
-              <p className="erasure-dialog-message is-error" role="alert">
-                {inventoryError}
-              </p>
-            )}
-
-            <form onSubmit={handlePrepareErasure} noValidate>
+            <form onSubmit={handlePrepareErasure}>
               <label>
                 Ocena zakresu i podstawy realizacji wniosku
                 <textarea
@@ -21351,9 +17155,6 @@ function AdminUserPrivacyAccount() {
                   placeholder="Opisz żądanie użytkownika, wynik weryfikacji oraz zakres danych, które można usunąć..."
                   disabled={Boolean(busy)}
                 />
-                <small className={legalAssessment.trim().length < 50 ? "is-short" : "is-ready"}>
-                  {legalAssessment.trim().length}/5000 · minimum 50 znaków
-                </small>
               </label>
 
               <label>
@@ -21367,22 +17168,13 @@ function AdminUserPrivacyAccount() {
                   placeholder="Wskaż kategorie zachowywanych rekordów, cel retencji i konieczność późniejszej kontroli okresu przechowywania..."
                   disabled={Boolean(busy)}
                 />
-                <small className={retentionReason.trim().length < 30 ? "is-short" : "is-ready"}>
-                  {retentionReason.trim().length}/5000 · minimum 30 znaków
-                </small>
               </label>
-
-              {dialogMessage && (
-                <p className="erasure-dialog-message is-error" role="alert" aria-live="assertive">
-                  {dialogMessage}
-                </p>
-              )}
 
               <div className="erasure-dialog-actions">
                 <button
                   type="button"
                   className="privacy-secondary-button"
-                  onClick={closeErasureDialog}
+                  onClick={() => setDialogAction("")}
                   disabled={Boolean(busy)}
                 >
                   Anuluj
@@ -21390,13 +17182,14 @@ function AdminUserPrivacyAccount() {
                 <button
                   type="submit"
                   className="erasure-danger-button"
-                  disabled={Boolean(busy)}
+                  disabled={
+                    Boolean(busy)
+                    || legalAssessment.trim().length < 50
+                    || retentionReason.trim().length < 30
+                    || (dialogAction === "close_account" && inventory?.execution_blocked)
+                  }
                 >
-                  {busy === "prepare"
-                    ? "Przekazywanie..."
-                    : dialogAction === "close_account" && inventory?.execution_blocked
-                      ? "Sprawdź, co blokuje przekazanie"
-                      : "Przekaż ownerowi do zatwierdzenia"}
+                  {busy === "prepare" ? "Zapisywanie..." : "Przekaż ownerowi do zatwierdzenia"}
                 </button>
               </div>
             </form>
@@ -22238,29 +18031,12 @@ function AdminPrivacyRequests() {
                     </div>
 
                     {request.request_type === "erasure" && (
-                      <>
-                        <div className={`privacy-erasure-requested-action is-${
-                          request.requested_erasure_action || "legacy"
-                        }`}>
-                          <span>Żądanie użytkownika</span>
-                          <strong>
-                            {request.requested_erasure_action
-                              ? ERASURE_ACTION_LABELS[request.requested_erasure_action]
-                              : "Starszy wniosek — wybór nie został zapisany"}
-                          </strong>
-                          <p>
-                            {request.requested_erasure_action
-                              ? ERASURE_ACTION_DESCRIPTIONS[request.requested_erasure_action]
-                              : "Przed operacją ustal zakres z treści i historii wniosku."}
-                          </p>
-                        </div>
-                        <Link
-                          className="privacy-admin-account-link"
-                          to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
-                        >
-                          Otwórz konto i kontrolę usunięcia danych →
-                        </Link>
-                      </>
+                      <Link
+                        className="privacy-admin-account-link"
+                        to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
+                      >
+                        Otwórz konto i kontrolę usunięcia danych →
+                      </Link>
                     )}
 
                     <p className="privacy-request-description">{request.description}</p>
@@ -23248,7 +19024,6 @@ function Home() {
   const {
     isRestricted,
     loading: restrictionLoading,
-    errorMessage: restrictionError,
   } = useAccountRestriction();
 
   if (
@@ -23267,7 +19042,7 @@ function Home() {
     );
   }
 
-  if (user?.id && (isRestricted || restrictionError)) {
+  if (user?.id && isRestricted) {
     return <Navigate to="/account-status" replace />;
   }
 
@@ -23527,9 +19302,7 @@ function Router() {
             path="/disputes/:id"
             element={
               <ProtectedRoute>
-                <RestrictedAccountRoute>
-                  <DisputeDetails />
-                </RestrictedAccountRoute>
+                <DisputeDetails />
               </ProtectedRoute>
             }
           />
@@ -23590,26 +19363,11 @@ function Router() {
           />
 
           <Route
-            path="/admin/moderation/job/:moderationJobId"
-            element={
-              <ProtectedRoute>
-                <StaffOnlyRoute>
-                  <AdminModerationErrorBoundary>
-                    <AdminModeration />
-                  </AdminModerationErrorBoundary>
-                </StaffOnlyRoute>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
             path="/admin/moderation"
             element={
               <ProtectedRoute>
                 <StaffOnlyRoute>
-                  <AdminModerationErrorBoundary>
-                    <AdminModeration />
-                  </AdminModerationErrorBoundary>
+                  <AdminModeration />
                 </StaffOnlyRoute>
               </ProtectedRoute>
             }
