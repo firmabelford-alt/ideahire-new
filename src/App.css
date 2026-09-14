@@ -19325,3 +19325,141 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
     scroll-behavior: auto !important;
   }
 }
+
+/* =========================================================
+   IDEA HIRE — MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
+========================================================= */
+
+.discovery-onboarding-shell button,
+.discovery-onboarding-footer,
+.discovery-onboarding-content {
+  pointer-events: auto;
+}
+
+.discovery-onboarding-shell button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 600px) {
+  .discovery-onboarding-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    width: 100%;
+    height: var(--discovery-mobile-viewport-height, 100dvh);
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .discovery-onboarding-shell {
+    width: 100%;
+    height: var(--discovery-mobile-viewport-height, 100dvh);
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    grid-template-rows: auto 4px minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .discovery-onboarding-header {
+    position: relative;
+    z-index: 20;
+    min-height: calc(64px + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    flex: 0 0 auto;
+    background: rgba(255, 255, 252, 0.98);
+  }
+
+  .discovery-progress {
+    position: relative;
+    z-index: 21;
+  }
+
+  .discovery-onboarding-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-height: 0;
+    max-height: none;
+    align-self: stretch;
+    justify-self: stretch;
+    padding-bottom: 32px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .discovery-onboarding-footer {
+    position: relative;
+    bottom: auto;
+    z-index: 30;
+    width: 100%;
+    min-height: calc(76px + env(safe-area-inset-bottom, 0px));
+    flex: 0 0 auto;
+    padding: 12px 17px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow: visible;
+    background: rgba(250, 250, 247, 0.99);
+    box-shadow: 0 -12px 28px rgba(20, 20, 18, 0.08);
+  }
+
+  .discovery-onboarding-footer > div,
+  .discovery-onboarding-footer button {
+    position: relative;
+    z-index: 31;
+  }
+
+  .discovery-primary-button,
+  .discovery-text-button {
+    min-height: 50px;
+    cursor: pointer;
+    pointer-events: auto !important;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .discovery-primary-button {
+    min-width: 148px;
+  }
+
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card {
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  html[data-theme="dark"] .discovery-onboarding-header,
+  html[data-theme="dark"] .discovery-onboarding-footer {
+    background: rgba(24, 24, 22, 0.99);
+  }
+}
+
+@media (max-width: 360px) {
+  .discovery-onboarding-footer {
+    gap: 8px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .discovery-primary-button {
+    min-width: 132px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .discovery-text-button {
+    font-size: 11px;
+  }
+}
