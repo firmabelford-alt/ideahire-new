@@ -1224,6 +1224,7 @@ function DiscoveryOnboarding({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const titleRef = useRef(null);
+  const backdropRef = useRef(null);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -1231,6 +1232,33 @@ function DiscoveryOnboarding({
 
     return () => {
       document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    const viewport = window.visualViewport;
+
+    function updateMobileViewportHeight() {
+      const height = Math.round(viewport?.height || window.innerHeight);
+
+      backdropRef.current?.style.setProperty(
+        "--discovery-mobile-viewport-height",
+        `${height}px`
+      );
+    }
+
+    updateMobileViewportHeight();
+    viewport?.addEventListener("resize", updateMobileViewportHeight);
+    window.addEventListener("resize", updateMobileViewportHeight);
+    window.addEventListener("orientationchange", updateMobileViewportHeight);
+
+    return () => {
+      viewport?.removeEventListener("resize", updateMobileViewportHeight);
+      window.removeEventListener("resize", updateMobileViewportHeight);
+      window.removeEventListener(
+        "orientationchange",
+        updateMobileViewportHeight
+      );
     };
   }, []);
 
@@ -1295,12 +1323,17 @@ function DiscoveryOnboarding({
   );
 
   return (
-    <div className="discovery-onboarding-backdrop">
+    <div
+      className="discovery-onboarding-backdrop"
+      ref={backdropRef}
+      data-step={step}
+    >
       <section
         className="discovery-onboarding-shell"
         role="dialog"
         aria-modal="true"
         aria-labelledby="discovery-onboarding-title"
+        aria-busy={saving}
       >
         <div className="discovery-onboarding-ambient" aria-hidden="true">
           <span />
