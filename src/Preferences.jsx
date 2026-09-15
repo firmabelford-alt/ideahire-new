@@ -1,7 +1,12 @@
+/* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
+
 import React, { useEffect, useState } from "react";
 
 const THEME_KEY = "ideahire_theme";
 const LANGUAGE_KEY = "ideahire_language";
+const COOKIE_NOTICE_KEY = "ideahire_cookie_notice_v1";
+const COOKIE_NOTICE_VERSION = "2026-09-06-v2";
+const COOKIE_NOTICE_LIFETIME = 365 * 24 * 60 * 60 * 1000;
 
 const originalTextByNode = new WeakMap();
 const translatedTextByNode = new WeakMap();
@@ -9,6 +14,325 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Kontynuuj przez Google": "Continue with Google",
+  "Łączenie z Google...": "Connecting to Google...",
+  "lub przez e-mail": "or use email",
+  "lub utwórz konto przez e-mail": "or create an account with email",
+  "lub użyj adresu e-mail": "or use your email address",
+  "Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta. Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po zapisaniu profilu.": "Google will share your email address, account name and account image with IdeaHire. Your name will populate the profile; the image will only become public after you save the profile.",
+  "Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta. Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po zapisaniu profilu. Po pierwszym logowaniu uzupełnisz datę urodzenia i potwierdzisz dokumenty wymagane do aktywowania konta IdeaHire.": "Google will share your email address, account name and account image with IdeaHire. Your name will populate the profile; the image will only become public after you save the profile. After your first sign-in, you will enter your date of birth and confirm the documents required to activate the IdeaHire account.",
+  "Po pierwszym logowaniu uzupełnisz datę urodzenia i zaakceptujesz dokumenty IdeaHire.": "After your first sign-in, you will enter your date of birth and accept the IdeaHire documents.",
+  "Zaakceptuj Regulamin IdeaHire, aby kontynuować.": "Accept the IdeaHire Terms to continue.",
+  "Akceptacja Regulaminu jest wymagana do aktywowania konta.": "Accepting the Terms is required to activate the account.",
+  "Twoje realizacje": "Your work",
+  "Portfolio": "Portfolio",
+  "Publikuj odpowiedzialnie.": "Publish responsibly.",
+  "Dodając projekt, potwierdzasz, że masz prawo opublikować jego opis, link i zdjęcia oraz że materiały nie naruszają praw innych osób. Projekt możesz usunąć w każdej chwili. Zobacz także": "By adding a project, you confirm that you have the right to publish its description, link and images and that the materials do not infringe the rights of others. You can remove the project at any time. See also",
+  "Zdjęcia do albumu": "Album images",
+  "Zdjęcia zapisane w albumie": "Images saved in the album",
+  "Zmiany zostaną wykonane dopiero po zapisaniu albumu.": "Changes will be applied only after you save the album.",
+  "Nowe zdjęcia": "New images",
+  "Przywróć": "Restore",
+  "Zapisywanie albumu...": "Saving album...",
+  "Zapisz album →": "Save album →",
+  "Dodaj album do portfolio →": "Add album to portfolio →",
+  "Projekt z linkiem": "Linked project",
+  "Otwórz album": "Open album",
+  "Zgłoś album": "Report album",
+  "Zgłoś to zdjęcie": "Report this image",
+  "Zamknij album": "Close album",
+  "Poprzednie zdjęcie": "Previous image",
+  "Następne zdjęcie": "Next image",
+  "Zgłoszenie treści": "Content report",
+  "Zgłoś zdjęcie": "Report image",
+  "Powód zgłoszenia": "Reason for report",
+  "Dlaczego treść może być nielegalna?": "Why might this content be illegal?",
+  "Podstawa prawna — gdy jest znana": "Legal basis — if known",
+  "Działam w dobrej wierze i uważam podane informacje za dokładne i kompletne.": "I am acting in good faith and believe the information provided is accurate and complete.",
+  "Wyślij zgłoszenie →": "Submit report →",
+  "Moje zgłoszenia portfolio": "My portfolio reports",
+  "Bezpieczeństwo treści": "Content safety",
+  "Wynik analizy": "Review outcome",
+  "Poproś o ponowną analizę": "Request another review",
+  "Zgłoszenia treści portfolio": "Portfolio content reports",
+  "Kolejka do ręcznej analizy": "Manual review queue",
+  "Brak nowych zgłoszeń treści.": "No new content reports.",
+  "Rozpocznij analizę": "Start review",
+  "Kontynuuj analizę": "Continue review",
+  "Brak podstaw do działania": "No grounds for action",
+  "Otwórz lokalizację ↗": "Open location ↗",
+  "Ponowna analiza zgłoszeń": "Review of report decisions",
+  "Odwołania zgłaszających": "Reporter appeals",
+  "Oddal odwołanie": "Reject appeal",
+  "Uwzględnij i otwórz ponownie": "Accept and reopen",
+  "Źródło przygotowywanej decyzji": "Source for the proposed decision",
+  "Odłącz zgłoszenie od decyzji": "Detach report from decision",
+  "Otrzymane": "Received",
+  "W analizie": "Under review",
+  "Zakończone — podjęto działanie": "Closed — action taken",
+  "Zakończone — brak podstaw do działania": "Closed — no action",
+  "Inne naruszenie Regulaminu IdeaHire": "Other breach of the IdeaHire Terms",
+  "Dodając projekt, potwierdzasz, że masz prawo opublikować jego opis, link i zdjęcie oraz że materiały nie naruszają praw innych osób. Projekt możesz usunąć w każdej chwili. Zobacz także": "By adding a project, you confirm that you have the right to publish its description, link and image and that the materials do not infringe the rights of others. You can remove the project at any time. See also",
+  "Regulamin IdeaHire": "IdeaHire Terms",
+  "Ładowanie portfolio...": "Loading portfolio...",
+  "Portfolio jest jeszcze puste. Dodaj pierwszą realizację poniżej.": "Your portfolio is empty. Add your first project below.",
+  "Link i prezentacja projektu": "Project link and showcase",
+  "Prezentacja projektu": "Project showcase",
+  "Edycja projektu": "Edit project",
+  "Nowy projekt": "New project",
+  "Zaktualizuj realizację": "Update project",
+  "Dodaj realizację do portfolio": "Add a project to your portfolio",
+  "Anuluj edycję": "Cancel editing",
+  "Tytuł projektu": "Project title",
+  "Np. Identyfikacja wizualna kawiarni": "e.g. Café visual identity",
+  "Krótki opis": "Short description",
+  "Opisz swój zakres pracy, rezultat i użyte narzędzia...": "Describe your work, the result and the tools used...",
+  "Link do projektu": "Project link",
+  "https://twoje-portfolio.pl/projekt": "https://your-portfolio.com/project",
+  "Wyłącznie bezpieczny adres HTTPS.": "A secure HTTPS address only.",
+  "Zdjęcie projektu": "Project image",
+  "JPG, PNG lub WEBP, maksymalnie 8 MB.": "JPG, PNG or WEBP, up to 8 MB.",
+  "Usuń obecne zdjęcie przy zapisie": "Remove the current image when saving",
+  "Zapisywanie projektu...": "Saving project...",
+  "Zapisz projekt →": "Save project →",
+  "Dodaj do portfolio →": "Add to portfolio →",
+  "Projekt w portfolio został zaktualizowany.": "The portfolio project has been updated.",
+  "Projekt został dodany do portfolio.": "The project has been added to your portfolio.",
+  "Projekt został usunięty z portfolio.": "The project has been removed from your portfolio.",
+  "Wybierz zdjęcie projektu w formacie JPG, PNG lub WEBP.": "Choose a project image in JPG, PNG or WEBP format.",
+  "Zdjęcie portfolio może mieć maksymalnie 8 MB.": "A portfolio image may be up to 8 MB.",
+  "Tytuł projektu musi mieć co najmniej 3 znaki.": "The project title must contain at least 3 characters.",
+  "Tytuł projektu może mieć maksymalnie 120 znaków.": "The project title may contain up to 120 characters.",
+  "Opis projektu może mieć maksymalnie 800 znaków.": "The project description may contain up to 800 characters.",
+  "Dodaj link do projektu albo zdjęcie realizacji.": "Add a project link or an image of the work.",
+  "Link do projektu musi prowadzić do bezpiecznego adresu HTTPS.": "The project link must use a secure HTTPS address.",
+  "Nie udało się pobrać portfolio. Odśwież stronę i spróbuj ponownie.": "The portfolio could not be loaded. Refresh the page and try again.",
+  "Nie udało się pobrać adresu zdjęcia portfolio.": "The portfolio image address could not be retrieved.",
+  "Wybrane realizacje": "Selected work",
+  "Zgłoś treść": "Report content",
+  "Zgłoś ten projekt": "Report this project",
+  "Otwórz projekt ↗": "Open project ↗",
+  "Projekty w portfolio": "Portfolio projects",
+  "Zdjęcia projektów w portfolio": "Portfolio project images",
+  "Zdjęcia profilu i portfolio": "Profile and portfolio images",
+  "Usunięte pliki zdjęć profilu i portfolio": "Removed profile and portfolio image files",
+  "Prywatność i moje dane": "Privacy and my data",
+  "Centrum prywatności": "Privacy Center",
+  "Wyślij wniosek dotyczący swoich danych i śledź jego realizację bezpośrednio na koncie IdeaHire.": "Submit a request concerning your data and track its progress directly in your IdeaHire account.",
+  "← Wróć do konta": "← Back to account",
+  "Bezpieczna obsługa wniosku": "Secure request handling",
+  "Wniosek jest przypisany do zalogowanego konta. Możemy poprosić o dodatkową weryfikację wyłącznie wtedy, gdy pojawią się uzasadnione wątpliwości dotyczące tożsamości.": "The request is linked to the signed-in account. We may ask for additional verification only when there are reasonable doubts about identity.",
+  "Złóż nowy wniosek": "Submit a new request",
+  "Opisz dokładnie, czego potrzebujesz. Standardowy termin odpowiedzi wynosi jeden miesiąc od otrzymania wniosku.": "Describe exactly what you need. The standard response period is one month from receipt of the request.",
+  "Rodzaj wniosku": "Request type",
+  "Preferowany format odpowiedzi": "Preferred response format",
+  "Opis wniosku": "Request description",
+  "Napisz, jakich danych lub działań dotyczy Twój wniosek...": "Describe which data or actions your request concerns...",
+  "Ważne przy usuwaniu danych": "Important information about data erasure",
+  "Złożenie wniosku nie powoduje natychmiastowego skasowania konta. Najpierw sprawdzimy obowiązki dotyczące rozliczeń, sporów, bezpieczeństwa i przechowywania wymaganych prawem danych.": "Submitting a request does not immediately delete the account. We first review obligations concerning settlements, disputes, security and data retention required by law.",
+  "Co dokładnie mamy zrobić?": "What exactly should we do?",
+  "Twój wybór zostanie zapisany we wniosku i administracja nie będzie mogła samodzielnie zmienić go na inną operację.": "Your choice will be recorded in the request and the administration will not be able to change it to a different operation.",
+  "Usuń możliwe dane": "Erase eligible data",
+  "Usuń dane możliwe do usunięcia": "Erase eligible data",
+  "Usuń dane i zamknij konto": "Erase data and close the account",
+  "IdeaHire usunie lub zanonimizuje dane, które nie są już potrzebne. Konto Auth nie zostanie zamknięte.": "IdeaHire will erase or anonymise data that is no longer needed. The Auth account will remain open.",
+  "IdeaHire usunie lub zanonimizuje pełny możliwy zakres danych: dane profilu, zdjęcia, opcjonalne metadane, ustawienia oraz niepowiązane dane operacyjne. Konto logowania pozostanie aktywne.": "IdeaHire will erase or anonymise the full eligible scope of data: profile data, images, optional metadata, settings and unrelated operational data. The sign-in account will remain active.",
+  "IdeaHire usunie lub zanonimizuje możliwe dane i wyłączy możliwość logowania do konta.": "IdeaHire will erase or anonymise eligible data and disable sign-in to the account.",
+  "Sprawdzamy zlecenia, sprawy i rozliczenia konta...": "Checking jobs, cases and account settlements...",
+  "Nie można bezpiecznie potwierdzić zamknięcia konta": "Account closure cannot be safely confirmed",
+  "Nie można teraz sprawdzić warunków zamknięcia konta": "The account closure conditions cannot be checked right now",
+  "Nie wysłaliśmy żądania zamknięcia konta. Spróbuj ponownie albo wybierz usunięcie możliwych danych — konto logowania pozostanie wtedy aktywne.": "We did not submit an account closure request. Try again or choose to erase eligible data — the sign-in account will then remain active.",
+  "Możesz nadal wybrać usunięcie możliwych danych.": "You can still choose to erase eligible data.",
+  "Sprawdź ponownie": "Check again",
+  "Konto spełnia warunki zamknięcia": "The account meets the closure conditions",
+  "Nie znaleźliśmy aktywnych zleceń, spraw ani nierozliczonych transakcji.": "We found no active jobs, cases or unsettled transactions.",
+  "Zamknięcie konta jest chwilowo niedostępne": "Account closure is temporarily unavailable",
+  "Konta nie można jeszcze zamknąć": "The account cannot be closed yet",
+  "To zabezpiecza trwające współprace, rozliczenia oraz prawa innych użytkowników. Zamknięcie stanie się dostępne po rozwiązaniu poniższych spraw. Nadal możesz wybrać usunięcie możliwych danych bez zamykania konta.": "This protects ongoing work, settlements and the rights of other users. Account closure will become available after the matters below are resolved. You can still choose to erase eligible data without closing the account.",
+  "Sprawdź ponownie po rozwiązaniu spraw": "Check again after resolving the matters",
+  "Najpierw zakończ lub usuń poniższe elementy:": "First resolve or remove the following items:",
+  "opublikowane zlecenia — usuń je z konta": "published jobs — remove them from the account",
+  "oczekujące zgłoszenia do zleceń": "pending job applications",
+  "aktywne lub nierozliczone płatności": "active or unsettled payments",
+  "aktywne spory": "active disputes",
+  "aktywne ustalenia bez zamkniętego rozliczenia": "active agreements without a completed settlement",
+  "aktywne sprawy moderacyjne": "active moderation cases",
+  "inne otwarte wnioski dotyczące prywatności": "other open privacy requests",
+  "połączone konto Stripe": "connected Stripe account",
+  "aktywna rola administracyjna": "active administration role",
+  "Aktywna rola administracyjna": "Active administration role",
+  "Opublikowane zlecenia": "Published jobs",
+  "Oczekujące zgłoszenia do zleceń": "Pending job applications",
+  "Aktywne lub nierozliczone płatności": "Active or unsettled payments",
+  "Aktywne spory": "Active disputes",
+  "Aktywne ustalenia bez zamkniętego rozliczenia": "Active agreements without a completed settlement",
+  "Aktywne sprawy moderacyjne": "Active moderation cases",
+  "Inne otwarte wnioski dotyczące prywatności": "Other open privacy requests",
+  "Połączone konto Stripe": "Connected Stripe account",
+  "Owner musi najpierw bezpiecznie odebrać rolę administracyjną i przekazać prowadzone sprawy.": "The owner must first safely remove the administration role and reassign ongoing cases.",
+  "Zakończ albo usuń opublikowane zlecenia, które nie są już potrzebne.": "Complete or remove published jobs that are no longer needed.",
+  "Wycofaj oczekujące zgłoszenia albo poczekaj na ich rozstrzygnięcie.": "Withdraw pending applications or wait for them to be resolved.",
+  "Poczekaj na zakończenie, zwrot lub pełne rozliczenie każdej płatności.": "Wait for every payment to be completed, refunded or fully settled.",
+  "Najpierw zakończ aktywne postępowania sporne.": "Resolve active dispute proceedings first.",
+  "Zakończ współpracę i rozliczenie powiązane z zaakceptowanymi ustaleniami.": "Complete the engagement and settlement linked to accepted arrangements.",
+  "Poczekaj na zakończenie sprawy moderacyjnej lub rozstrzygnięcie odwołania.": "Wait for the moderation case or appeal to be resolved.",
+  "Zakończ albo wycofaj pozostałe otwarte wnioski w sekcji „Twoje wnioski”.": "Complete or withdraw the remaining open requests in the ‘Your requests’ section.",
+  "Dokończ rozliczenia i odłącz konto wypłat Stripe.": "Complete settlements and disconnect the Stripe payout account.",
+  "Inna aktywna sprawa": "Another active matter",
+  "Skontaktuj się z administracją, aby ustalić sposób zakończenia tej sprawy.": "Contact the administration to determine how to resolve this matter.",
+  "Liczba przeszkód": "Number of blockers",
+  "Wybierz, czy chcesz usunąć możliwe dane, czy zamknąć całe konto.": "Choose whether you want to erase eligible data or close the entire account.",
+  "Zamknięcie konta nie jest teraz dostępne. Zakończ wskazane sprawy albo wybierz usunięcie możliwych danych.": "Account closure is not currently available. Resolve the indicated matters or choose to erase eligible data.",
+  "Wybrana operacja": "Selected operation",
+  "Starszy wniosek — wybór nie został zapisany": "Legacy request — the choice was not recorded",
+  "Administracja musi potwierdzić zakres na podstawie treści i historii tego wniosku.": "The administration must confirm the scope based on the content and history of this request.",
+  "Żądanie użytkownika": "User request",
+  "Przed operacją ustal zakres z treści i historii wniosku.": "Before proceeding, determine the scope from the request content and history.",
+  "Użytkownik wybrał": "The user selected",
+  "Przygotowana operacja musi być dokładnie zgodna z tym wyborem.": "The prepared operation must exactly match this choice.",
+  "Starszy wniosek — brak zapisanego wyboru": "Legacy request — no recorded choice",
+  "Potwierdź zakres na podstawie treści i historii wniosku. Dotyczy to wyłącznie starszych spraw.": "Confirm the scope based on the request content and history. This applies only to legacy cases.",
+  "Starszy wniosek bez technicznie zapisanego zakresu": "Legacy request without a technically recorded scope",
+  "Przed przygotowaniem operacji porównaj treść i historię wniosku. Wszystkie nowe wnioski zapisują już wybór użytkownika i blokują wykonanie innej operacji.": "Before preparing the operation, compare the request content and history. All new requests now record the user's choice and prevent a different operation.",
+  "Kontrola zgodności z żądaniem użytkownika": "User-request consistency check",
+  "Ten formularz przygotuje dokładnie operację wybraną we wniosku.": "This form will prepare exactly the operation selected in the request.",
+  "Operacja musi być zgodna z zakresem wybranym przez użytkownika.": "The operation must match the scope selected by the user.",
+  "Uzupełnij ocenę zakresu — wpisz co najmniej 50 znaków.": "Complete the scope assessment — enter at least 50 characters.",
+  "Uzupełnij uzasadnienie retencji — wpisz co najmniej 30 znaków.": "Complete the retention justification — enter at least 30 characters.",
+  "Nie możemy teraz bezpiecznie potwierdzić zakresu operacji. Zamknij okno, odśwież dane i spróbuj ponownie.": "We cannot safely confirm the scope of the operation right now. Close the window, refresh the data and try again.",
+  "Nie przekazano operacji ownerowi, ponieważ konto ma aktywne sprawy. Rozwiąż pozycje pokazane poniżej i sprawdź warunki ponownie.": "The operation was not submitted to the owner because the account has active matters. Resolve the items shown below and check the conditions again.",
+  "Operacja została zapisana i oczekuje na zatwierdzenie ownera. Widok został odświeżony.": "The operation has been saved and is awaiting owner approval. The view has been refreshed.",
+  "Nie przekazano operacji. Ten wniosek musi najpierw przejąć zalogowany administrator albo owner.": "The operation was not submitted. This request must first be taken by the signed-in administrator or owner.",
+  "Nie przekazano operacji. Najpierw potwierdź tożsamość wnioskodawcy w kroku 1.": "The operation was not submitted. First verify the requester's identity in step 1.",
+  "Dla tego wniosku istnieje już przygotowana operacja. Zamknij okno i odśwież widok.": "A prepared operation already exists for this request. Close the window and refresh the view.",
+  "Nie udało się przekazać operacji ownerowi. Niczego nie usunięto. Odśwież widok i spróbuj ponownie.": "The operation could not be submitted to the owner. Nothing was erased. Refresh the view and try again.",
+  "Nie udało się odświeżyć warunków tej operacji. Spróbuj ponownie.": "The conditions for this operation could not be refreshed. Try again.",
+  "Nie udało się pobrać zakresu danych": "The data scope could not be loaded",
+  "Operacja nie może zostać przygotowana bez aktualnego inwentarza. Nic nie zostało usunięte ani przekazane ownerowi.": "The operation cannot be prepared without a current inventory. Nothing was erased or submitted to the owner.",
+  "Pobierz zakres ponownie": "Load the scope again",
+  "Pobieramy aktualny zakres danych": "Loading the current data scope",
+  "Za chwilę zobaczysz dane możliwe do usunięcia oraz dane objęte retencją.": "You will shortly see the data eligible for erasure and the data subject to retention.",
+  "Nie można jeszcze przekazać zamknięcia konta": "Account closure cannot be submitted yet",
+  "Owner nie powinien zatwierdzać zamknięcia, dopóki poniższe sprawy nie zostaną zakończone. Możesz kliknąć przycisk na dole, aby zobaczyć jednoznaczne potwierdzenie blokady.": "The owner should not approve account closure until the matters below are resolved. You can use the button below to see an explicit confirmation of the blocker.",
+  "Sprawdź, co blokuje przekazanie": "Check what blocks submission",
+  "Przekazywanie...": "Submitting...",
+  "Konta nie można teraz zamknąć. Najpierw zakończ wszystkie przeszkody pokazane w panelu.": "The account cannot be closed now. Resolve all blockers shown in the panel first.",
+  "Niepotrzebne powiadomienia o sporach": "Unnecessary dispute notifications",
+  "Niepowiązane zgłoszenia do zleceń": "Unrelated job applications",
+  "Wiadomości bez podstawy dalszej retencji": "Messages without grounds for further retention",
+  "Puste rozmowy bez rozliczeń i sporów": "Empty conversations without settlements or disputes",
+  "Zlecenia bez zgłoszeń i współpracy": "Jobs without applications or collaboration",
+  "Nieużywane wpisy konfiguracji wypłat": "Unused payout configuration records",
+  "Opcjonalne metadane konta": "Optional account metadata",
+  "Dane zapisane lokalnie w przeglądarce": "Data stored locally in the browser",
+  "Konto i identyfikator logowania": "Account and sign-in identifier",
+  "Konto aktywne — dane możliwe do usunięcia zostały usunięte": "Active account — eligible data has been erased",
+  "Konto zamknięte": "Account closed",
+  "Login pozostaje aktywny. Użytkownik może ponownie uzupełnić dane wymagane do dalszego korzystania z usługi.": "Sign-in remains active. The user may provide the data required to continue using the service again.",
+  "Usunięte pliki zdjęć profilowych": "Deleted profile image files",
+  "Zanonimizowane profile prywatne": "Anonymised private profiles",
+  "Zanonimizowane profile publiczne": "Anonymised public profiles",
+  "Wyczyszczone rekordy wieku": "Cleared age records",
+  "Usunięte ustawienia rozmów": "Deleted conversation settings",
+  "Usunięte ustawienia blokad": "Deleted blocking settings",
+  "Usunięte powiadomienia o sporach": "Deleted dispute notifications",
+  "Usunięte niepowiązane zgłoszenia": "Deleted unrelated applications",
+  "Usunięte wiadomości bez podstawy retencji": "Deleted messages without retention grounds",
+  "Usunięte puste rozmowy": "Deleted empty conversations",
+  "Usunięte niepowiązane zlecenia": "Deleted unrelated jobs",
+  "Usunięte nieużywane wpisy wypłat": "Deleted unused payout records",
+  "Raport wykonania": "Execution report",
+  "Co zostało usunięte lub zanonimizowane": "What was erased or anonymised",
+  "Kontrolowana retencja": "Controlled retention",
+  "Dane pozostawione po operacji": "Data retained after the operation",
+  "Usunięto lub zanonimizowano pełny możliwy zakres danych. Konto logowania pozostaje aktywne.": "The full eligible scope of data was erased or anonymised. The sign-in account remains active.",
+  "Usunięto lub zanonimizowano możliwe dane i zamknięto konto logowania.": "Eligible data was erased or anonymised and the sign-in account was closed.",
+  "Zachowano konto i identyfikator logowania, dokumentację realizacji wniosku oraz niezbędną historię audytową.": "The account and sign-in identifier, request handling documentation and necessary audit history were retained.",
+  "Dane prawne, transakcyjne, sporne lub bezpieczeństwa nie są publikowane w profilu i podlegają uzasadnieniu oraz okresowi retencji zapisanym w tej sprawie.": "Legal, transactional, dispute or security data is not published on the profile and is subject to the justification and retention period recorded in this case.",
+  "Owner zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono.": "The owner approved the operation. Eligible data was erased or anonymised, the account was closed and the case was completed.",
+  "Owner zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono.": "The owner approved the operation. The full eligible scope of data was erased or anonymised, the account remained active and the case was completed.",
+  "Pełny możliwy zakres danych został usunięty lub zanonimizowany. Konto logowania pozostało aktywne.": "The full eligible scope of data was erased or anonymised. The sign-in account remained active.",
+  "Wyślij bezpieczny wniosek →": "Submit secure request →",
+  "Twoje prawa": "Your rights",
+  "Dostęp i kopia": "Access and copy",
+  "Sprawdź, jakie dane przetwarzamy.": "See what data we process.",
+  "Sprostowanie": "Rectification",
+  "Popraw dane nieprawidłowe lub nieaktualne.": "Correct inaccurate or outdated data.",
+  "Usunięcie": "Erasure",
+  "Poproś o usunięcie danych, gdy zachodzą podstawy.": "Request data erasure where the relevant grounds apply.",
+  "Ograniczenie i sprzeciw": "Restriction and objection",
+  "Zażądaj ograniczenia albo zgłoś sprzeciw.": "Request restriction or submit an objection.",
+  "Przenoszenie": "Portability",
+  "Odbierz właściwe dane w ustrukturyzowanym formacie.": "Receive eligible data in a structured format.",
+  "Przeczytaj Politykę prywatności →": "Read the Privacy Policy →",
+  "Możesz również napisać na ideahireprywatnosc@gmail.com.": "You can also contact ideahireprywatnosc@gmail.com.",
+  "Historia": "History",
+  "Twoje wnioski": "Your requests",
+  "Ładowanie wniosków...": "Loading requests...",
+  "Nie masz jeszcze żadnych wniosków": "You do not have any requests yet",
+  "Po wysłaniu pierwszego wniosku jego status pojawi się tutaj.": "After submitting your first request, its status will appear here.",
+  "Wysłano": "Submitted",
+  "Termin odpowiedzi": "Response deadline",
+  "Format": "Format",
+  "Przedłużenie terminu:": "Deadline extension:",
+  "Odpowiedź IdeaHire:": "IdeaHire response:",
+  "Pokaż historię sprawy": "Show case history",
+  "Status został zaktualizowany.": "The status has been updated.",
+  "Wycofaj wniosek": "Withdraw request",
+  "Dostęp do danych": "Access to data",
+  "Kopia przetwarzanych danych": "Copy of processed data",
+  "Sprostowanie danych": "Data rectification",
+  "Usunięcie danych lub konta": "Erasure of data or account",
+  "Ograniczenie przetwarzania": "Restriction of processing",
+  "Sprzeciw wobec przetwarzania": "Objection to processing",
+  "Przeniesienie danych": "Data portability",
+  "Inna sprawa dotycząca prywatności": "Another privacy matter",
+  "Odpowiedź elektroniczna": "Electronic response",
+  "Dane w formacie JSON": "Data in JSON format",
+  "Dane tabelaryczne CSV": "Tabular CSV data",
+  "Dokument PDF": "PDF document",
+  "Otrzymany": "Received",
+  "Weryfikacja tożsamości": "Identity verification",
+  "W realizacji": "In progress",
+  "Oczekiwanie na odpowiedź użytkownika": "Awaiting user response",
+  "Zrealizowany": "Completed",
+  "Zrealizowany częściowo": "Partially completed",
+  "Odmowa realizacji": "Refused",
+  "Wycofany": "Withdrawn",
+  "Twoje dane w IdeaHire": "Your data at IdeaHire",
+  "Sprawdź swoje prawa albo wyślij bezpieczny wniosek dotyczący dostępu, kopii, poprawienia, ograniczenia lub usunięcia danych.": "Review your rights or submit a secure request for access, a copy, rectification, restriction or erasure of your data.",
+  "Otwórz centrum prywatności →": "Open Privacy Center →",
+  "Wnioski RODO": "GDPR requests",
+  "Ochrona danych": "Data protection",
+  "Wnioski użytkowników": "User requests",
+  "Kontrolowana kolejka wniosków dotyczących dostępu, kopii, sprostowania, sprzeciwu i usunięcia danych.": "A controlled queue of requests concerning access, copies, rectification, objections and data erasure.",
+  "Aktywne wnioski": "Active requests",
+  "Po terminie": "Overdue",
+  "Kolejka RODO": "GDPR queue",
+  "Sprawy do obsługi": "Requests to handle",
+  "Ładowanie kolejki...": "Loading queue...",
+  "Brak wniosków w tym widoku": "No requests in this view",
+  "Złożono": "Submitted",
+  "Termin": "Deadline",
+  "Opiekun": "Assigned administrator",
+  "Nieprzypisany": "Unassigned",
+  "Przejmij wniosek": "Take request",
+  "Otwórz historię i narzędzia obsługi": "Open history and handling tools",
+  "Widoczne dla użytkownika": "Visible to user",
+  "Nowy status": "New status",
+  "Wiadomość dla użytkownika": "Message to user",
+  "Opisz wykonane działanie, potrzebne informacje albo przyczynę decyzji...": "Describe the action taken, required information or reason for the decision...",
+  "Notatka wewnętrzna": "Internal note",
+  "Informacja widoczna wyłącznie dla administracji...": "Information visible only to the administration...",
+  "Zapisz status i wiadomość": "Save status and message",
+  "Uzasadnienie przedłużenia terminu": "Reason for deadline extension",
+  "Wyjaśnij złożoność sprawy lub liczbę obsługiwanych wniosków...": "Explain the complexity of the case or the number of requests being handled...",
+  "Przedłuż termin maksymalnie o 2 miesiące": "Extend deadline by up to 2 months",
+  "Wniosek został bezpiecznie zapisany i przekazany administracji IdeaHire.": "The request has been securely recorded and sent to IdeaHire administration.",
+  "Wniosek został wycofany.": "The request has been withdrawn.",
+  "Wniosek został przypisany do Ciebie.": "The request has been assigned to you.",
+  "Status wniosku został zapisany.": "The request status has been saved.",
+  "Termin został przedłużony i użytkownik zobaczy uzasadnienie.": "The deadline has been extended and the user will see the reason.",
   "Akceptuj wykonawcę": "Accept contractor",
   "Akceptowanie...": "Accepting...",
   "Aktywne": "Active",
@@ -51,6 +375,14 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Konto niedostępne": "Account unavailable",
   "Potwierdź prawidłowość podanej daty urodzenia.": "Confirm that the date of birth you entered is correct.",
   "Potwierdzam prawidłowość daty urodzenia.": "I confirm that my date of birth is correct.",
+  "Potwierdź zapoznanie się z Polityką prywatności.": "Confirm that you have read the Privacy Policy.",
+  "Zapoznałem się z Polityką prywatności.": "I have read the Privacy Policy.",
+  "Zaakceptuj Regulamin IdeaHire, aby utworzyć konto.": "Accept the IdeaHire Terms to create an account.",
+  "Akceptuję Regulamin IdeaHire.": "I accept the IdeaHire Terms.",
+  "Akceptacja Regulaminu jest wymagana do utworzenia konta.": "Accepting the Terms is required to create an account.",
+  "Otwórz Regulamin — wersja 0.9": "Open the Terms — version 0.9",
+  "Dokument wyjaśnia, jak IdeaHire przetwarza i chroni dane.": "This document explains how IdeaHire processes and protects data.",
+  "Otwórz Politykę prywatności": "Open the Privacy Policy",
   "Osoby w wieku 16–17 lat otrzymują konto ograniczone. Pełne funkcje płatnych zleceń są dostępne od 18 lat.": "Users aged 16–17 receive a limited account. Full paid-job features are available from age 18.",
   "Uzupełnij datę urodzenia": "Enter your date of birth",
   "Potrzebujemy jej wyłącznie do przyznania właściwych uprawnień konta. Data nie będzie widoczna na Twoim profilu.": "We need it only to assign the correct account permissions. The date will not be visible on your profile.",
@@ -75,6 +407,39 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Twoja data urodzenia pozostaje prywatna": "Your date of birth remains private",
   "Nie wyświetlamy jej na profilu ani innym użytkownikom. Jeżeli została podana błędnie, korektę przeprowadzi pomoc IdeaHire.": "We do not display it on your profile or to other users. If it was entered incorrectly, IdeaHire support can correct it.",
   "Pełne konto · 18+": "Full account · 18+",
+  "Wypłaty dla wykonawcy": "Contractor payouts",
+  "Sprawdzamy połączenie ze Stripe...": "Checking your Stripe connection...",
+  "Sprawdzanie": "Checking",
+  "Pobieramy aktualny status konfiguracji wypłat.": "Retrieving the current payout setup status.",
+  "Niepołączone": "Not connected",
+  "Skonfiguruj bezpieczne wypłaty": "Set up secure payouts",
+  "Połącz konto ze Stripe, aby w przyszłości otrzymywać pieniądze za zrealizowane zlecenia.": "Connect your Stripe account to receive payouts for completed jobs in the future.",
+  "Połącz konto Stripe": "Connect Stripe account",
+  "Do dokończenia": "Setup incomplete",
+  "Dokończ konfigurację wypłat": "Complete payout setup",
+  "Konto zostało utworzone. Uzupełnij informacje wymagane przez Stripe.": "Your account has been created. Complete the information required by Stripe.",
+  "Dokończ konfigurację": "Complete setup",
+  "Wymaga działania": "Action required",
+  "Uzupełnij dane konta Stripe": "Complete your Stripe account details",
+  "Stripe wymaga uzupełnienia lub poprawienia informacji przed uruchomieniem wypłat.": "Stripe requires additional or corrected information before payouts can be enabled.",
+  "Uzupełnij dane": "Complete details",
+  "Gotowe": "Ready",
+  "Konto Stripe jest połączone": "Stripe account connected",
+  "Twoje konto przeszło konfigurację i jest gotowe do otrzymywania wypłat.": "Your account has completed setup and is ready to receive payouts.",
+  "Konto połączone": "Account connected",
+  "Wyłączone": "Disabled",
+  "Wypłaty są niedostępne": "Payouts unavailable",
+  "Konto Stripe zostało wyłączone. Skontaktuj się z pomocą IdeaHire.": "The Stripe account has been disabled. Contact IdeaHire support.",
+  "Wypłaty niedostępne": "Payouts unavailable",
+  "Formularz otworzy się na bezpiecznej stronie Stripe. IdeaHire nie przechowuje danych Twojego rachunku bankowego.": "The form will open on Stripe's secure website. IdeaHire does not store your bank account details.",
+  "Łączenie ze Stripe...": "Connecting to Stripe...",
+  "Konto Stripe jest połączone i gotowe do otrzymywania wypłat.": "Your Stripe account is connected and ready to receive payouts.",
+  "Konfiguracja Stripe nie jest jeszcze kompletna. Możesz ją teraz dokończyć.": "Your Stripe setup is not complete yet. You can finish it now.",
+  "Dokończ dane wymagane przez Stripe.": "Complete the information required by Stripe.",
+  "Nie udało się pobrać statusu konta Stripe.": "The Stripe account status could not be retrieved.",
+  "Nie udało się połączyć ze Stripe.": "Could not connect to Stripe.",
+  "Nie udało się przygotować konfiguracji Stripe.": "Could not prepare the Stripe setup.",
+  "Twoja sesja wygasła. Zaloguj się ponownie.": "Your session has expired. Sign in again.",
   "Przeglądanie dostępne": "Browsing available",
   "Na koncie ograniczonym możesz oglądać zlecenia i profile. Zgłaszanie się do płatnych zleceń zostanie odblokowane po ukończeniu 18 lat.": "With a limited account you can view jobs and profiles. Applying for paid jobs will be unlocked after you turn 18.",
   "Zgłaszanie się do płatnych zleceń jest dostępne od 18 lat.": "Applying for paid jobs is available from age 18.",
@@ -169,6 +534,10 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Potrzebuję nowoczesnej": "I need a modern",
   "Potrzebuję spójnego logo oraz podstawowych materiałów graficznych.": "I need a consistent logo and essential brand materials.",
   "Powiadomienia": "Notifications",
+  "Polityka cookies": "Cookies policy",
+  "Polityka prywatności": "Privacy Policy",
+  "Regulamin": "Terms",
+  "Zgłoś nielegalną treść": "Report illegal content",
   "Powiedz nam, czego potrzebujesz i określ podstawowe szczegóły projektu.": "Tell us what you need and provide the basic project details.",
   "Powtórz nowe hasło": "Repeat new password",
   "Pozytywne:": "Positive:",
@@ -752,6 +1121,91 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Czat użytkowników": "User chat",
   "Pełna rozmowa użytkowników": "Full user conversation",
   "Pelny kontekst jest dostepny tylko dla administratora przypisanego do sprawy.": "Full context is available only to the administrator assigned to the case.",
+  "Krok 1 z 4": "Step 1 of 4",
+  "Krok 2 z 4": "Step 2 of 4",
+  "Krok 3 z 4": "Step 3 of 4",
+  "Krok 4 z 4": "Step 4 of 4",
+  "Zacznij po swojemu": "Start your way",
+  "Jak chcesz rozpocząć korzystanie z IdeaHire?": "How would you like to start using IdeaHire?",
+  "Ten wybór służy tylko do dopasowania początku. Nadal możesz zarówno zlecać pracę, jak i realizować projekty.": "This choice only personalizes your starting point. You can still both hire people and complete projects.",
+  "Chcę realizować projekty": "I want to complete projects",
+  "Znajdź zlecenia": "Find jobs",
+  "Na początku pokażemy wyżej projekty z kategorii, które Cię interesują.": "We will initially place projects from your chosen categories higher.",
+  "Chcę zlecać pracę": "I want to hire people",
+  "Znajdź wykonawców": "Find contractors",
+  "Ułatwimy Ci rozpoczęcie projektu i wybór odpowiedniej kategorii.": "We will make it easier to start a project and choose the right category.",
+  "Chcę korzystać z obu możliwości": "I want to use both options",
+  "Pełna swoboda": "Full flexibility",
+  "Dopasujemy początek, ale wszystkie funkcje konta pozostaną dostępne.": "We will personalize your start while keeping all account features available.",
+  "Obie możliwości": "Both options",
+  "Twoje zainteresowania": "Your interests",
+  "Co najbardziej Cię interesuje?": "What interests you most?",
+  "Wybierz do trzech kategorii. Możesz też przejść dalej bez zaznaczania żadnej z nich.": "Choose up to three categories. You can also continue without selecting any.",
+  "Aplikacje, strony i automatyzacje": "Apps, websites and automation",
+  "Identyfikacja, UI i materiały wizualne": "Brand identity, UI and visual assets",
+  "Kampanie, strategia i social media": "Campaigns, strategy and social media",
+  "Teksty, opisy i komunikacja marki": "Copy, descriptions and brand communication",
+  "Montaż, animacja i materiały wideo": "Editing, animation and video content",
+  "Sesje, retusz i obróbka zdjęć": "Shoots, retouching and photo editing",
+  "Wybrano 0 z 3": "Selected 0 of 3",
+  "Wybrano 1 z 3": "Selected 1 of 3",
+  "Wybrano 2 z 3": "Selected 2 of 3",
+  "Wybrano 3 z 3": "Selected 3 of 3",
+  "Możesz wybrać maksymalnie 3 kategorie.": "You can select up to 3 categories.",
+  "Ty decydujesz": "You decide",
+  "Jak ułożyć wyniki na początku?": "How should results be ordered initially?",
+  "Dopasowanie zmienia wyłącznie kolejność. Nie ukrywamy innych kategorii i zawsze możesz przełączyć widok na najnowsze.": "Personalization only changes the order. Other categories remain visible, and you can always switch to the latest view.",
+  "Dopasowane dla Ciebie": "Matched for you",
+  "Wybrane kategorie pojawią się wyżej, a w każdej z nich zachowamy kolejność od najnowszych.": "Selected categories will appear higher, with newest items first within each group.",
+  "Tylko najnowsze": "Latest only",
+  "Wyniki będą domyślnie uporządkowane wyłącznie według daty publikacji.": "Results will be ordered only by publication date by default.",
+  "Preferencje możesz zmienić albo usunąć w każdej chwili na swoim koncie. Nie wpływają na uprawnienia ani moderację.": "You can change or remove preferences at any time in your account. They do not affect permissions or moderation.",
+  "Twój start w IdeaHire": "Your start in IdeaHire",
+  "Sprawdź podsumowanie. Wszystkie ustawienia zmienisz później, bez zakładania nowego konta.": "Review the summary. You can change every setting later without creating a new account.",
+  "Na początek": "Starting point",
+  "Wybrane kategorie": "Selected categories",
+  "Wszystkie kategorie": "All categories",
+  "Domyślna kolejność": "Default order",
+  "Najnowsze": "Latest",
+  "Pomiń na razie": "Skip for now",
+  "Dalej →": "Continue →",
+  "← Wstecz": "← Back",
+  "Przejdź do IdeaHire →": "Go to IdeaHire →",
+  "Zamknij ustawienia preferencji": "Close preference settings",
+  "Dopasowanie": "Personalization",
+  "Ładowanie preferencji...": "Loading preferences...",
+  "Twój sposób korzystania": "How you use IdeaHire",
+  "Preferowany początek": "Preferred starting point",
+  "Kolejność wyników": "Result order",
+  "To ustawienie nie ogranicza funkcji konta. Nadal możesz zlecać pracę i realizować projekty.": "This setting does not limit account features. You can still hire people and complete projects.",
+  "Zmień preferencje": "Change preferences",
+  "Po zakończeniu zawieszenia": "After the suspension ends",
+  "Sprawdź zlecenia przed ponowną publikacją": "Review jobs before republishing",
+  "Po dłuższej przerwie termin, budżet lub opis mogą być nieaktualne. Otwórz zlecenie, popraw je w razie potrzeby i potwierdź publikację.": "After a longer break, the deadline, budget or description may be outdated. Open the job, update it if needed and confirm publication.",
+  "Sprawdź i edytuj": "Review and edit",
+  "Dostępne po zakończeniu": "Available after suspension",
+  "Publikowanie...": "Publishing...",
+  "Potwierdź i opublikuj →": "Confirm and publish →",
+  "Zlecenie zostało ponownie opublikowane.": "The job has been republished.",
+  "Dla zleceniodawców": "For clients",
+  "Przeglądaj profile, specjalizacje i portfolio. Dopasowanie zmienia jedynie kolejność — żaden profil nie jest przez nie ukrywany.": "Browse profiles, specialties and portfolios. Matching only changes the order — it does not hide any profile.",
+  "Imię, umiejętność lub specjalizacja": "Name, skill or specialty",
+  "Szukaj wykonawców": "Search contractors",
+  "Kolejność profili": "Profile order",
+  "Najpierw zgodne z wybranymi kategoriami": "Selected categories first",
+  "Najpierw ostatnio utworzone profile": "Newest profiles first",
+  "Dopasowane": "Matched",
+  "Ładowanie profili...": "Loading profiles...",
+  "Brak profili pasujących do filtrów": "No profiles match the filters",
+  "Zmień kategorię albo wpisz inne hasło.": "Change the category or try another search term.",
+  "Profile wykonawców": "Contractor profiles",
+  "Użytkownik IdeaHire": "IdeaHire user",
+  "Profil wykonawcy": "Contractor profile",
+  "Dopasowany": "Matched",
+  "Otwórz profil, aby zobaczyć szczegóły doświadczenia i portfolio.": "Open the profile to view experience details and portfolio.",
+  "realizacji": "completed",
+  "opinii": "reviews",
+  "O kolejności decyduje zgodność kategorii wybranych w ustawieniach, a następnie data utworzenia profilu. Możesz przełączyć widok na „Najnowsze” lub zmienić preferencje w zakładce „Moje konto”.": "Profiles matching the categories selected in your settings come first, followed by profile creation date. You can switch to ‘Latest’ or change preferences under ‘My account’.",
   "Anuluj": "Cancel",
 });
 
@@ -803,6 +1257,15 @@ const COUNTRY_TRANSLATIONS = Object.freeze({
 });
 
 const PREFIX_TRANSLATIONS = Object.freeze([
+  ["Postęp konfiguracji: krok ", "Setup progress: step "],
+  ["Nie udało się pobrać profili:", "Profiles could not be loaded:"],
+  ["Nie udało się zalogować przez Google:", "Google sign-in failed:"],
+  ["Nie udało się kontynuować przez Google:", "Could not continue with Google:"],
+  ["Nie udało się zapisać projektu w portfolio:", "The portfolio project could not be saved:"],
+  ["Nie udało się usunąć projektu z portfolio:", "The portfolio project could not be removed:"],
+  ["Portfolio może zawierać maksymalnie ", "A portfolio may contain up to "],
+  ["Usunąć projekt „", "Remove project ‘"],
+  ["Projekt: ", "Project: "],
   ["Pełny dostęp od ", "Full access from "],
   ["Nie udało się zalogować:", "Sign-in failed:"],
   ["Nie udało się utworzyć konta:", "Account creation failed:"],
@@ -1046,6 +1509,25 @@ function getStoredLanguage() {
     : "pl";
 }
 
+function shouldShowCookieNotice() {
+  try {
+    const stored = JSON.parse(
+      localStorage.getItem(COOKIE_NOTICE_KEY) || "null"
+    );
+
+    const acknowledgedAt = Number(stored?.acknowledgedAt || 0);
+    const isCurrentVersion =
+      stored?.version === COOKIE_NOTICE_VERSION;
+    const isStillValid =
+      acknowledgedAt > 0 &&
+      Date.now() - acknowledgedAt < COOKIE_NOTICE_LIFETIME;
+
+    return !(isCurrentVersion && isStillValid);
+  } catch {
+    return true;
+  }
+}
+
 export default function Preferences({
   children,
 }) {
@@ -1057,6 +1539,25 @@ export default function Preferences({
 
   const [mobilePanelOpen, setMobilePanelOpen] =
     useState(false);
+
+  const [cookieNoticeVisible, setCookieNoticeVisible] =
+    useState(shouldShowCookieNotice);
+
+  function acknowledgeCookieNotice() {
+    setCookieNoticeVisible(false);
+
+    try {
+      localStorage.setItem(
+        COOKIE_NOTICE_KEY,
+        JSON.stringify({
+          version: COOKIE_NOTICE_VERSION,
+          acknowledgedAt: Date.now(),
+        })
+      );
+    } catch {
+      /* Informacja pozostanie zamknięta do końca bieżącej wizyty. */
+    }
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme =
@@ -1282,6 +1783,49 @@ export default function Preferences({
         </div>
         </div>
       </aside>
+
+      {cookieNoticeVisible && (
+        <section
+          className="cookie-notice"
+          data-no-translate="true"
+          aria-label={
+            language === "en"
+              ? "Information about browser storage"
+              : "Informacja o pamięci przeglądarki"
+          }
+        >
+          <div className="cookie-notice-mark" aria-hidden="true">
+            <span>i</span>
+          </div>
+
+          <div className="cookie-notice-copy">
+            <strong>
+              {language === "en"
+                ? "Your privacy at IdeaHire"
+                : "Twoja prywatność w IdeaHire"}
+            </strong>
+            <p>
+              {language === "en"
+                ? "IdeaHire uses technologies necessary for sign-in, security and remembering settings selected by you. We currently do not use advertising or analytics cookies."
+                : "IdeaHire korzysta z technologii niezbędnych do logowania, bezpieczeństwa oraz zapamiętywania wybranych przez Ciebie ustawień. Obecnie nie używamy cookies reklamowych ani analitycznych."}
+            </p>
+          </div>
+
+          <div className="cookie-notice-actions">
+            <div className="cookie-notice-links">
+              <a href="/polityka-cookies">
+                {language === "en" ? "Cookies" : "Cookies"}
+              </a>
+              <a href="/polityka-prywatnosci">
+                {language === "en" ? "Privacy" : "Prywatność"}
+              </a>
+            </div>
+            <button type="button" onClick={acknowledgeCookieNotice}>
+              {language === "en" ? "Got it" : "Rozumiem"}
+            </button>
+          </div>
+        </section>
+      )}
     </>
   );
 }
