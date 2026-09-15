@@ -40,6 +40,15 @@ import {
   getPasswordRecoveryRedirectUrl,
   normalizeEmail,
 } from "./auth";
+import {
+  containsCredentialLikeText,
+  MessageText,
+  PrivateMessageMaterials,
+  PrivateReportDialog,
+  PrivateSharePanel,
+  usePrivateWork,
+  WorkDeliveryPanel,
+} from "./PrivateWork";
 
 /* =========================================================
    AUTH CONTEXT
@@ -732,6 +741,19 @@ const CONTENT_REPORT_STATUS_LABELS = {
   resolved_actioned: "Zakończone — podjęto działanie",
   resolved_no_action: "Zakończone — brak podstaw do działania",
 };
+
+const PRIVATE_CONTENT_REPORT_TYPES = new Set([
+  "private_message",
+  "private_file",
+  "private_link",
+  "work_delivery",
+]);
+
+function isPrivateContentReport(report) {
+  return PRIVATE_CONTENT_REPORT_TYPES.has(
+    report?.content_type
+  );
+}
 
 function getOAuthErrorFromLocation(location) {
   const searchParams = new URLSearchParams(
@@ -16124,6 +16146,12 @@ function Chat() {
   const [agreementForm, setAgreementForm] =
     useState(EMPTY_AGREEMENT_FORM);
 
+  const privateWork = usePrivateWork(
+    id,
+    user?.id,
+    Boolean(conversation)
+  );
+
   async function loadAgreement(
     conversationData,
     fallbackTitle = "",
@@ -16254,7 +16282,7 @@ function Chat() {
     } = await supabase
       .from("messages")
       .select(
-        "id, conversation_id, sender_id, content, created_at, read_at"
+        "id, conversation_id, sender_id, content, created_at, read_at, moderation_status, hidden_at"
       )
       .eq(
         "conversation_id",
@@ -16888,6 +16916,15 @@ function Chat() {
       return;
     }
 
+    if (
+      containsCredentialLikeText(content) &&
+      !window.confirm(
+        "Ta wiadomość może zawierać hasło, token, klucz API albo kod dostępu. IdeaHire nie jest menedżerem haseł. Dla bezpieczeństwa usuń sekret i udostępnij go narzędziem z dostępem czasowym. Jeśli wykrycie jest błędne, możesz świadomie kontynuować."
+      )
+    ) {
+      return;
+    }
+
     setSending(true);
     setErrorMessage("");
 
@@ -16903,7 +16940,7 @@ function Chat() {
           content,
         })
         .select(
-          "id, conversation_id, sender_id, content, created_at, read_at"
+          "id, conversation_id, sender_id, content, created_at, read_at, moderation_status, hidden_at"
         )
         .single();
 
@@ -17501,6 +17538,26 @@ function Chat() {
                 conversation={conversation}
               />
 
+              <WorkDeliveryPanel
+                deliveries={privateWork.deliveries}
+                events={privateWork.events}
+                conversation={conversation}
+                userId={user?.id}
+                disabled={messagingBlocked}
+                onComplete={async () => {
+                  await Promise.all([
+                    privateWork.reload(),
+                    loadMessages(),
+                  ]);
+                }}
+                onReport={(type, targetId) =>
+                  privateWork.setReportTarget({
+                    type,
+                    id: targetId,
+                  })
+                }
+              />
+
               {agreementsRequired &&
                 !agreementAccepted && (
                   <p className="agreement-negotiation-banner">
@@ -17529,11 +17586,48 @@ function Chat() {
                               : "is-theirs"
                           }`}
                         >
-                          <p>
-                            {
-                              message.content
+                          <MessageText
+                            text={message.content}
+                          />
+
+                          <PrivateMessageMaterials
+                            items={
+                              privateWork.itemsByMessage[
+                                message.id
+                              ] || []
                             }
-                          </p>
+                            signedUrls={
+                              privateWork.signedUrls
+                            }
+                            ownMessage={
+                              message.sender_id ===
+                              user.id
+                            }
+                            onReport={(type, targetId) =>
+                              privateWork.setReportTarget({
+                                type,
+                                id: targetId,
+                              })
+                            }
+                          />
+
+                          {message.sender_id !==
+                            user.id &&
+                            message.moderation_status !==
+                              "hidden" && (
+                              <button
+                                type="button"
+                                className="private-work-report-link"
+                                onClick={() =>
+                                  privateWork.setReportTarget({
+                                    type: "message",
+                                    id: message.id,
+                                  })
+                                }
+                              >
+                                Zgłoś wiadomość
+                              </button>
+                            )}
 
                           <time>
                             {new Date(
@@ -17575,6 +17669,31 @@ function Chat() {
                     : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
                 </p>
               )}
+
+              {privateWork.error && (
+                <p className="chat-error">
+                  {privateWork.error}
+                </p>
+              )}
+
+              <PrivateSharePanel
+                conversationId={id}
+                userId={user?.id}
+                disabled={
+                  messagingBlocked ||
+                  privateWork.loading
+                }
+                agreementAccepted={
+                  agreement?.status === "accepted"
+                }
+                isContractor={!isClient}
+                onComplete={async () => {
+                  await Promise.all([
+                    privateWork.reload(),
+                    loadMessages(),
+                  ]);
+                }}
+              />
 
               <form
                 className="chat-form"
@@ -17623,6 +17742,14 @@ function Chat() {
                     : "Wyślij"}
                 </button>
               </form>
+
+              <PrivateReportDialog
+                target={privateWork.reportTarget}
+                onClose={() =>
+                  privateWork.setReportTarget(null)
+                }
+                onSubmitted={privateWork.reload}
+              />
             </>
           )}
         </div>
@@ -17681,6 +17808,9 @@ const ADMIN_AUDIT_LABELS = {
   moderation_restriction_lifted: "Zdjęto ograniczenie konta",
   moderation_appeal_accepted: "Uwzględniono odwołanie od ograniczenia",
   moderation_appeal_rejected: "Utrzymano decyzję po odwołaniu",
+  private_report_evidence_opened: "Otwarto prywatny dowód zgłoszenia",
+  private_content_removed_without_account_restriction:
+    "Usunięto prywatną treść bez ograniczenia konta",
 };
 
 function formatDisputeMoney(value, currency = "PLN") {
@@ -20161,6 +20291,7 @@ function AdminModeration() {
   const [contentReports, setContentReports] = useState([]);
   const [contentReportAppeals, setContentReportAppeals] = useState([]);
   const [activeContentReport, setActiveContentReport] = useState(null);
+  const [privateReportEvidence, setPrivateReportEvidence] = useState({});
   const [contentAppealNotes, setContentAppealNotes] = useState({});
   const [profiles, setProfiles] = useState(() =>
     routedModerationSubject
@@ -20579,6 +20710,15 @@ function AdminModeration() {
         if (error) throw error;
       }
 
+      if (isPrivateContentReport(report)) {
+        const { error: accessError } =
+          await supabase.rpc(
+            "admin_record_ideahire_private_report_access",
+            { p_report_id: report.id }
+          );
+        if (accessError) throw accessError;
+      }
+
       const reasonMap = {
         copyright: "illegal_content",
         privacy_or_image_rights: "illegal_content",
@@ -20601,6 +20741,162 @@ function AdminModeration() {
       await loadModeration(false);
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się rozpocząć analizy zgłoszenia."));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleOpenPrivateReportEvidence(report) {
+    if (busy || !isPrivateContentReport(report)) return;
+
+    setBusy(`report-evidence:${report.id}`);
+    setMessage("");
+
+    try {
+      if (report.status === "submitted") {
+        const { error: reviewError } = await supabase.rpc(
+          "admin_review_ideahire_content_report",
+          {
+            p_report_id: report.id,
+            p_action: "start_review",
+            p_decision_summary: null,
+            p_legal_assessment: null,
+          }
+        );
+        if (reviewError) throw reviewError;
+      }
+
+      const { data: accessData, error: accessError } =
+        await supabase.rpc(
+          "admin_record_ideahire_private_report_access",
+          { p_report_id: report.id }
+        );
+      if (accessError) throw accessError;
+
+      const snapshot =
+        accessData?.content_snapshot ||
+        report.content_snapshot ||
+        {};
+      const evidenceItems = Array.isArray(snapshot.items)
+        ? snapshot.items
+        : snapshot.storage_path || snapshot.external_url
+        ? [snapshot]
+        : [];
+      const storedItems = evidenceItems.filter(
+        (item) => item?.storage_path
+      );
+      let signedUrlMap = {};
+
+      if (storedItems.length) {
+        const { data: signedRows, error: signedError } =
+          await supabase.storage
+            .from("ideahire-private-work")
+            .createSignedUrls(
+              storedItems.map(
+                (item) => item.storage_path
+              ),
+              300
+            );
+        if (signedError) {
+          throw signedError ||
+            new Error(
+              "Nie udało się utworzyć czasowego podglądu."
+            );
+        }
+        signedUrlMap = Object.fromEntries(
+          storedItems.map((item, index) => [
+            item.storage_path,
+            signedRows?.[index]?.signedUrl || "",
+          ])
+        );
+      }
+
+      setPrivateReportEvidence((current) => ({
+        ...current,
+        [report.id]: {
+          snapshot,
+          items: evidenceItems,
+          signedUrls: signedUrlMap,
+        },
+      }));
+      setMessage(
+        "Prywatny dowód otwarto na 5 minut. Dostęp został zapisany w audycie."
+      );
+
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(
+          error,
+          "Nie udało się otworzyć prywatnego dowodu."
+        )
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function handleRemovePrivateContent(report) {
+    if (busy || !isPrivateContentReport(report)) return;
+
+    const decisionSummary = window.prompt(
+      "Podaj uzasadnienie usunięcia treści dla użytkownika (minimum 50 znaków). Konto nie zostanie zawieszone:"
+    );
+    if (!decisionSummary) return;
+    if (decisionSummary.trim().length < 50) {
+      setMessage(
+        "Uzasadnienie decyzji musi mieć co najmniej 50 znaków."
+      );
+      return;
+    }
+
+    const legalAssessment = window.prompt(
+      "Opcjonalnie wpisz podstawę prawną lub ocenę zgodności."
+    );
+    if (!window.confirm(
+      "Treść zostanie ukryta po ręcznej analizie, ale konto nie zostanie zawieszone. Potwierdzasz proporcjonalność tej decyzji?"
+    )) return;
+
+    setBusy(`report-remove:${report.id}`);
+    setMessage("");
+    try {
+      if (report.status === "submitted") {
+        const { error: reviewError } = await supabase.rpc(
+          "admin_review_ideahire_content_report",
+          {
+            p_report_id: report.id,
+            p_action: "start_review",
+            p_decision_summary: null,
+            p_legal_assessment: null,
+          }
+        );
+        if (reviewError) throw reviewError;
+      }
+
+      const { error } = await supabase.rpc(
+        "admin_remove_ideahire_reported_private_content",
+        {
+          p_report_id: report.id,
+          p_decision_summary:
+            decisionSummary.trim(),
+          p_legal_assessment:
+            legalAssessment?.trim() || null,
+        }
+      );
+      if (error) throw error;
+
+      setActiveContentReport(null);
+      setMessage(
+        "Treść ukryto bez zawieszania konta. Decyzja, uzasadnienie i prawo do odwołania zostały zachowane."
+      );
+      await loadModeration(false);
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(
+          error,
+          "Nie udało się ukryć treści."
+        )
+      );
     } finally {
       setBusy("");
     }
@@ -21039,11 +21335,13 @@ function AdminModeration() {
         <section className="moderation-content-reports">
           <div className="moderation-content-reports-heading">
             <div>
-              <span className="section-label">Zgłoszenia treści portfolio</span>
+              <span className="section-label">Zgłoszenia treści i materiałów</span>
               <h2>Kolejka do ręcznej analizy</h2>
               <p>
-                Zgłoszenie nie nakłada sankcji automatycznie. Otwórz materiał,
-                oceń kontekst i wybierz brak naruszenia albo proporcjonalne ograniczenie.
+                Zgłoszenie nie nakłada sankcji automatycznie. Dostęp do
+                prywatnego dowodu jest czasowy i zapisywany w audycie. Oceń
+                kontekst, a następnie wybierz brak naruszenia, usunięcie samej
+                treści albo proporcjonalne ograniczenie konta.
               </p>
             </div>
             <span>{openContentReports.length}</span>
@@ -21066,27 +21364,141 @@ function AdminModeration() {
                       alt="Zgłoszony materiał portfolio"
                     />
                   ) : (
-                    <div className="moderation-content-report-placeholder">TREŚĆ</div>
+                    <div className="moderation-content-report-placeholder">
+                      {isPrivateContentReport(report)
+                        ? "PRYWATNY DOWÓD"
+                        : "TREŚĆ"}
+                    </div>
                   )}
                   <div>
                     <span className={`content-report-status is-${report.status}`}>
                       {CONTENT_REPORT_STATUS_LABELS[report.status] || report.status}
                     </span>
-                    <h3>{report.content_snapshot?.title || "Projekt portfolio"}</h3>
+                    <h3>
+                      {report.content_snapshot?.title ||
+                        report.content_snapshot?.display_name ||
+                        (report.content_type === "private_message"
+                          ? "Prywatna wiadomość"
+                          : report.content_type === "work_delivery"
+                          ? `Przekazanie pracy — wersja ${report.content_snapshot?.version || "—"}`
+                          : isPrivateContentReport(report)
+                          ? "Prywatny materiał"
+                          : "Projekt portfolio")}
+                    </h3>
                     <small>{report.report_number} · {formatDisputeDate(report.submitted_at)}</small>
                     <strong>{CONTENT_REPORT_REASON_LABELS[report.reason_code] || report.reason_code}</strong>
                     <p>{report.explanation}</p>
                     {report.legal_reference && (
                       <p><b>Wskazana podstawa:</b> {report.legal_reference}</p>
                     )}
+                    {privateReportEvidence[report.id] && (
+                      <div className="moderation-private-evidence">
+                        <div>
+                          <strong>
+                            Dowód prywatny · dostęp czasowy
+                          </strong>
+                          <small>
+                            Każde otwarcie jest zapisywane w audycie
+                          </small>
+                        </div>
+                        {privateReportEvidence[report.id]
+                          .snapshot?.message_content && (
+                          <blockquote>
+                            {
+                              privateReportEvidence[
+                                report.id
+                              ].snapshot.message_content
+                            }
+                          </blockquote>
+                        )}
+                        {privateReportEvidence[report.id]
+                          .snapshot?.summary && (
+                          <blockquote>
+                            {
+                              privateReportEvidence[
+                                report.id
+                              ].snapshot.summary
+                            }
+                          </blockquote>
+                        )}
+                        {privateReportEvidence[report.id]
+                          .items?.length > 0 && (
+                          <div className="moderation-private-evidence-items">
+                            {privateReportEvidence[
+                              report.id
+                            ].items.map((item, index) => {
+                              const evidenceUrl =
+                                item.external_url ||
+                                privateReportEvidence[
+                                  report.id
+                                ].signedUrls[
+                                  item.storage_path
+                                ];
+                              return (
+                                <a
+                                  key={
+                                    item.id ||
+                                    item.storage_path ||
+                                    `${report.id}-${index}`
+                                  }
+                                  href={evidenceUrl || undefined}
+                                  target="_blank"
+                                  rel="noopener noreferrer nofollow"
+                                >
+                                  {item.mime_type?.startsWith(
+                                    "image/"
+                                  ) && evidenceUrl ? (
+                                    <img
+                                      src={evidenceUrl}
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <span aria-hidden="true">
+                                      {item.external_url
+                                        ? "↗"
+                                        : item.mime_type ===
+                                          "application/pdf"
+                                        ? "PDF"
+                                        : "PLIK"}
+                                    </span>
+                                  )}
+                                  <b>
+                                    {item.display_name ||
+                                      "Materiał dowodowy"}
+                                  </b>
+                                </a>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="moderation-content-report-actions">
-                      <a
-                        href={report.content_location}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Otwórz lokalizację ↗
-                      </a>
+                      {isPrivateContentReport(report) ? (
+                        <button
+                          type="button"
+                          className="privacy-secondary-button"
+                          onClick={() =>
+                            handleOpenPrivateReportEvidence(
+                              report
+                            )
+                          }
+                          disabled={Boolean(busy)}
+                        >
+                          {busy ===
+                          `report-evidence:${report.id}`
+                            ? "Otwieranie…"
+                            : "Otwórz dowód i zapisz dostęp"}
+                        </button>
+                      ) : (
+                        <a
+                          href={report.content_location}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Otwórz lokalizację ↗
+                        </a>
+                      )}
                       <button
                         type="button"
                         className="privacy-primary-button"
@@ -21107,6 +21519,20 @@ function AdminModeration() {
                       >
                         Brak podstaw do działania
                       </button>
+                      {isPrivateContentReport(report) && (
+                        <button
+                          type="button"
+                          className="privacy-secondary-button"
+                          onClick={() =>
+                            handleRemovePrivateContent(
+                              report
+                            )
+                          }
+                          disabled={Boolean(busy)}
+                        >
+                          Usuń treść bez zawieszenia
+                        </button>
+                      )}
                     </div>
                   </div>
                 </article>
