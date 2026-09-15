@@ -15044,6 +15044,8 @@ const EMPTY_DISPUTE_FORM = {
 function ChatDisputePanel({
   agreement,
   conversation,
+  openRequest = 0,
+  launcherHidden = false,
 }) {
   const navigate = useNavigate();
   const [dispute, setDispute] = useState(null);
@@ -15098,6 +15100,29 @@ function ChatDisputePanel({
       mounted = false;
     };
   }, [agreement?.id, agreement?.status]);
+
+  useEffect(() => {
+    if (
+      !openRequest ||
+      !agreement?.id ||
+      agreement.status !== "accepted"
+    ) {
+      return;
+    }
+
+    if (dispute?.id) {
+      navigate(`/disputes/${dispute.id}`);
+      return;
+    }
+
+    setFormOpen(true);
+    setMessage("");
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById("chat-dispute-panel")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [agreement?.id, agreement?.status, dispute?.id, navigate, openRequest]);
 
   if (
     !conversation?.id ||
@@ -15204,6 +15229,9 @@ function ChatDisputePanel({
   }
 
   if (loading) {
+    if (launcherHidden && !openRequest) {
+      return null;
+    }
     return (
       <section className="chat-dispute-card is-loading">
         Sprawdzanie centrum sporu...
@@ -15237,8 +15265,12 @@ function ChatDisputePanel({
     );
   }
 
+  if (launcherHidden && !formOpen) {
+    return null;
+  }
+
   return (
-    <section className="chat-dispute-card">
+    <section className="chat-dispute-card" id="chat-dispute-panel">
       {!formOpen ? (
         <>
           <div className="chat-dispute-copy">
@@ -16110,8 +16142,11 @@ function Chat() {
   const [sending, setSending] =
     useState(false);
 
-  const [deleting, setDeleting] =
+  const [hidingConversation, setHidingConversation] =
     useState(false);
+
+  const [disputeOpenRequest, setDisputeOpenRequest] =
+    useState(0);
 
   const [blockedByMe, setBlockedByMe] =
     useState(false);
@@ -16975,43 +17010,30 @@ function Chat() {
     }
   }
 
-  async function handleDeleteConversation() {
+  async function handleHideConversation() {
     if (
       !user?.id ||
       !id ||
-      deleting
+      hidingConversation
     ) {
       return;
     }
 
     const confirmed =
       window.confirm(
-        "Usunąć tę rozmowę z Twojej listy? Druga osoba nadal zachowa historię wiadomości."
+        "Ukryć tę rozmowę tylko na Twojej liście? Nie usunie to wiadomości ani materiałów, a nowa wiadomość może ponownie pokazać wątek."
       );
 
     if (!confirmed) return;
 
-    setDeleting(true);
+    setHidingConversation(true);
     setErrorMessage("");
 
     try {
-      const { error } =
-        await supabase
-          .from(
-            "conversation_user_state"
-          )
-          .upsert(
-            {
-              conversation_id: id,
-              user_id: user.id,
-              hidden_at:
-                new Date().toISOString(),
-            },
-            {
-              onConflict:
-                "conversation_id,user_id",
-            }
-          );
+      const { error } = await supabase.rpc(
+        "hide_my_ideahire_conversation",
+        { p_conversation_id: id }
+      );
 
       if (error) {
         throw error;
@@ -17025,13 +17047,13 @@ function Chat() {
       );
     } catch (error) {
       setErrorMessage(
-        `Nie udało się usunąć rozmowy: ${
+        `Nie udało się ukryć rozmowy: ${
           error?.message ||
           "Nieznany błąd"
         }`
       );
     } finally {
-      setDeleting(false);
+      setHidingConversation(false);
     }
   }
 
@@ -17441,7 +17463,8 @@ function Chat() {
                     )
                   }
                 >
-                  ← Wróć
+                  <span aria-hidden="true">←</span>
+                  <b>Wróć</b>
                 </button>
 
                 {messagingBlocked ? (
@@ -17497,18 +17520,49 @@ function Chat() {
                 )}
 
                 <div className="chat-header-actions">
-                  <button
-                    type="button"
-                    className="chat-delete-button"
-                    onClick={
-                      handleDeleteConversation
-                    }
-                    disabled={deleting}
-                  >
-                    {deleting
-                      ? "Usuwanie..."
-                      : "Usuń rozmowę"}
-                  </button>
+                  <details className="chat-actions-menu">
+                    <summary aria-label="Więcej opcji rozmowy" title="Więcej opcji">
+                      <span aria-hidden="true">•••</span>
+                    </summary>
+                    <div className="chat-actions-popover">
+                      <button
+                        type="button"
+                        disabled={!agreement?.id || agreement.status !== "accepted"}
+                        onClick={(event) => {
+                          event.currentTarget.closest("details")?.removeAttribute("open");
+                          setDisputeOpenRequest((value) => value + 1);
+                        }}
+                      >
+                        <span aria-hidden="true">!</span>
+                        <span>
+                          <b>Zgłoś problem ze współpracą</b>
+                          <small>{agreement?.status === "accepted" ? "Otwórz sprawę do ręcznego rozpatrzenia" : "Dostępne po zaakceptowaniu warunków"}</small>
+                        </span>
+                      </button>
+                      <Link to="/privacy-center" onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}>
+                        <span aria-hidden="true">i</span>
+                        <span>
+                          <b>Prywatność i dane konta</b>
+                          <small>Wnioski o dostęp, usunięcie danych lub zamknięcie konta</small>
+                        </span>
+                      </Link>
+                      <button
+                        type="button"
+                        className="is-danger"
+                        onClick={(event) => {
+                          event.currentTarget.closest("details")?.removeAttribute("open");
+                          handleHideConversation();
+                        }}
+                        disabled={hidingConversation}
+                      >
+                        <span aria-hidden="true">−</span>
+                        <span>
+                          <b>{hidingConversation ? "Ukrywanie…" : "Ukryj rozmowę z listy"}</b>
+                          <small>Nie usuwa historii drugiej stronie</small>
+                        </span>
+                      </button>
+                    </div>
+                  </details>
                 </div>
               </header>
 
@@ -17536,6 +17590,8 @@ function Chat() {
               <ChatDisputePanel
                 agreement={agreement}
                 conversation={conversation}
+                openRequest={disputeOpenRequest}
+                launcherHidden
               />
 
               <WorkDeliveryPanel
@@ -17615,18 +17671,21 @@ function Chat() {
                             user.id &&
                             message.moderation_status !==
                               "hidden" && (
-                              <button
-                                type="button"
-                                className="private-work-report-link"
-                                onClick={() =>
-                                  privateWork.setReportTarget({
-                                    type: "message",
-                                    id: message.id,
-                                  })
-                                }
-                              >
-                                Zgłoś wiadomość
-                              </button>
+                              <details className="chat-message-actions">
+                                <summary aria-label="Opcje wiadomości" title="Opcje wiadomości">•••</summary>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.currentTarget.closest("details")?.removeAttribute("open");
+                                    privateWork.setReportTarget({
+                                      type: "message",
+                                      id: message.id,
+                                    });
+                                  }}
+                                >
+                                  Zgłoś wiadomość
+                                </button>
+                              </details>
                             )}
 
                           <time>
