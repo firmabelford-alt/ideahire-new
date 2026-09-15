@@ -3433,6 +3433,797 @@ html[data-theme="dark"] .stripe-connect-feedback.is-info {
 }
 
 /* =========================================================
+   CHAT WORKSPACE V1.1 — clean desktop/mobile composition
+========================================================= */
+
+.account-page .chat-page {
+  width: min(1080px, calc(100% - 40px));
+  margin: 24px auto 48px;
+}
+
+.account-page .chat-shell {
+  min-height: min(760px, calc(100dvh - 112px));
+  border-color: rgba(28, 28, 25, .1);
+  border-radius: 20px;
+  box-shadow: 0 18px 54px rgba(28, 28, 25, .075);
+}
+
+.account-page .chat-header {
+  position: relative;
+  z-index: 20;
+  flex-wrap: nowrap;
+  gap: 12px;
+  padding: 13px 16px;
+  background: rgba(255, 255, 252, .96);
+  backdrop-filter: blur(18px);
+}
+
+.account-page .chat-back {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.account-page .chat-back:hover {
+  background: #efefea;
+  color: #171715;
+}
+
+.account-page .chat-profile-link {
+  flex: 1;
+  width: auto;
+}
+
+.account-page .chat-avatar {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+}
+
+.account-page .chat-person strong {
+  font-size: 14px;
+}
+
+.account-page .chat-person span {
+  margin-top: 1px;
+  font-size: 10px;
+}
+
+.account-page .chat-header-actions {
+  position: relative;
+  width: auto;
+  margin-left: auto;
+}
+
+.chat-actions-menu {
+  position: relative;
+}
+
+.chat-actions-menu > summary {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #deded8;
+  border-radius: 12px;
+  background: #fff;
+  color: #343431;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.chat-actions-menu > summary::-webkit-details-marker,
+.chat-message-actions > summary::-webkit-details-marker {
+  display: none;
+}
+
+.chat-actions-menu > summary:hover,
+.chat-actions-menu[open] > summary {
+  border-color: #bdbdb6;
+  background: #f5f5f1;
+}
+
+.chat-actions-menu > summary span {
+  letter-spacing: 2px;
+  transform: translateY(-2px);
+}
+
+.chat-actions-popover {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(340px, calc(100vw - 28px));
+  display: grid;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid #deded8;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 18px 52px rgba(20, 20, 18, .18);
+}
+
+.chat-actions-popover > button,
+.chat-actions-popover > a {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #242421;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.chat-actions-popover > button:hover,
+.chat-actions-popover > a:hover {
+  background: #f2f2ee;
+}
+
+.chat-actions-popover > button:disabled {
+  cursor: not-allowed;
+  opacity: .46;
+}
+
+.chat-actions-popover > button > span:first-child,
+.chat-actions-popover > a > span:first-child {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #ededE8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.chat-actions-popover > button > span:last-child,
+.chat-actions-popover > a > span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.chat-actions-popover b {
+  font-size: 12px;
+}
+
+.chat-actions-popover small {
+  color: #777772;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.chat-actions-popover .is-danger {
+  color: #92392f;
+}
+
+.chat-actions-popover .is-danger > span:first-child {
+  background: #fff0ed;
+}
+
+.account-page .chat-messages {
+  min-height: 390px;
+  max-height: 58vh;
+  gap: 7px;
+  padding: 24px clamp(16px, 4vw, 42px);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(215, 210, 187, .16), transparent 28%),
+    #f7f7f3;
+  scrollbar-color: #c8c8c0 transparent;
+  scrollbar-width: thin;
+}
+
+.account-page .chat-message {
+  position: relative;
+  max-width: min(74%, 660px);
+  padding: 10px 13px 7px;
+  border: 1px solid rgba(30, 30, 27, .07);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(20, 20, 18, .035);
+}
+
+.account-page .chat-message.is-mine {
+  border-color: #1a1a18;
+  background: #1a1a18;
+}
+
+.account-page .chat-message.is-theirs {
+  background: rgba(255, 255, 252, .98);
+}
+
+.account-page .chat-message p {
+  font-size: 13px;
+  line-height: 1.48;
+}
+
+.account-page .chat-message time {
+  margin-top: 4px;
+  font-size: 9px;
+}
+
+.chat-message-actions {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  z-index: 4;
+}
+
+.chat-message-actions > summary {
+  width: 26px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #777772;
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  list-style: none;
+  opacity: 0;
+}
+
+.chat-message:hover .chat-message-actions > summary,
+.chat-message-actions[open] > summary,
+.chat-message-actions > summary:focus-visible {
+  background: #efefea;
+  opacity: 1;
+}
+
+.chat-message-actions > button {
+  position: absolute;
+  top: 25px;
+  right: 0;
+  width: max-content;
+  padding: 8px 10px;
+  border: 1px solid #ddddD6;
+  border-radius: 9px;
+  background: #fff;
+  color: #8e392f;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 780;
+  box-shadow: 0 10px 28px rgba(20, 20, 18, .16);
+  cursor: pointer;
+}
+
+.account-page .chat-form {
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: #fff;
+}
+
+.account-page .chat-form textarea {
+  min-height: 44px;
+  max-height: 128px;
+  padding: 11px 13px;
+  border-radius: 13px;
+  resize: none;
+  font-size: 13px;
+}
+
+.account-page .chat-send {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.private-work-share {
+  display: flex;
+  justify-content: flex-start;
+  padding: 7px 12px 0;
+  border-top: 1px solid rgba(20, 20, 20, .07);
+}
+
+.private-work-share-toggle {
+  width: auto;
+  min-height: 36px;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid #deded8;
+  border-radius: 11px;
+  background: #fafaf7;
+}
+
+.private-work-share-toggle:hover {
+  border-color: #bfbfb8;
+  background: #f2f2ee;
+}
+
+.private-work-share-toggle span {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+}
+
+.private-work-share-toggle b {
+  font-size: 11px;
+}
+
+.private-work-share-toggle small {
+  color: #777772;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.private-work-share-backdrop {
+  position: fixed;
+  z-index: 9900;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(12, 12, 11, .64);
+  backdrop-filter: blur(5px);
+}
+
+.private-work-share-form {
+  width: min(720px, 100%);
+  max-height: min(860px, calc(100dvh - 48px));
+  display: grid;
+  gap: 13px;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #deded8;
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: 0 28px 90px rgba(10, 10, 9, .28);
+}
+
+.private-work-share-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.private-work-share-heading h2 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  letter-spacing: -.02em;
+}
+
+.private-work-share-heading > button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 0;
+  border-radius: 11px;
+  background: #efefeb;
+  color: #353532;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+.private-work-field input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #d9d9d3;
+  border-radius: 11px;
+  outline: 0;
+  background: #fafaf7;
+  color: #171717;
+  font: inherit;
+}
+
+.private-work-field input:focus {
+  border-color: #70706b;
+  box-shadow: 0 0 0 3px rgba(30, 30, 28, .07);
+}
+
+.private-work-album-name-field small {
+  color: #777772;
+  font-size: 10px;
+  font-weight: 550;
+}
+
+.private-work-materials {
+  width: min(570px, 100%);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.private-work-albums {
+  display: grid;
+  gap: 8px;
+}
+
+.private-work-album-card {
+  overflow: hidden;
+  border: 1px solid rgba(25, 25, 22, .11);
+  border-radius: 14px;
+  background: #f8f8f4;
+}
+
+.private-work-album-heading {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+}
+
+.private-work-album-heading > span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #e9e9e3;
+  color: #555550;
+  font-size: 13px;
+}
+
+.private-work-album-heading > div {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.private-work-album-heading small {
+  color: #85857f;
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.private-work-album-heading strong {
+  overflow: hidden;
+  color: #252522;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.private-work-album-heading > b {
+  color: #777772;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.private-work-album {
+  width: 100%;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 0;
+  background: #e4e4df;
+}
+
+.private-work-album button,
+.private-work-album.count-1 button {
+  height: clamp(150px, 24vw, 250px);
+  border-radius: 7px;
+  background: #efefeb;
+}
+
+.private-work-album.count-1 button {
+  height: clamp(220px, 34vw, 390px);
+}
+
+.private-work-album img {
+  object-fit: contain;
+}
+
+.private-work-material-group {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(25, 25, 22, .1);
+  border-radius: 12px;
+  background: rgba(255, 255, 252, .74);
+}
+
+.private-work-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 4px;
+}
+
+.private-work-section-title strong {
+  color: #555550;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.private-work-section-title span {
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #ecece7;
+  color: #6b6b66;
+  font-size: 8px;
+  text-align: center;
+}
+
+.private-work-files,
+.private-work-links {
+  display: grid;
+  gap: 3px;
+}
+
+.private-work-link-row {
+  gap: 7px;
+}
+
+.private-work-link-row > a {
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+}
+
+.private-work-link-row > a:hover {
+  background: #f0f0eb;
+}
+
+.private-work-links .private-work-link-row > a b {
+  color: #285d91;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.private-work-lightbox figure {
+  max-width: 1500px;
+  max-height: 100%;
+  margin: auto;
+}
+
+html[data-theme="dark"] .account-page .chat-header,
+html[data-theme="dark"] .account-page .chat-form {
+  background: rgba(29, 29, 27, .97);
+}
+
+html[data-theme="dark"] .account-page .chat-messages {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(175, 158, 104, .08), transparent 28%),
+    #171716;
+}
+
+html[data-theme="dark"] .account-page .chat-message.is-theirs {
+  border-color: #393936;
+  background: #252523;
+}
+
+html[data-theme="dark"] .account-page .chat-message.is-mine {
+  border-color: #e8e8e1;
+  background: #e8e8e1;
+  color: #171716;
+}
+
+html[data-theme="dark"] .account-page .chat-message.is-mine time {
+  color: #686863;
+}
+
+html[data-theme="dark"] .chat-actions-menu > summary,
+html[data-theme="dark"] .chat-actions-popover,
+html[data-theme="dark"] .chat-message-actions > button,
+html[data-theme="dark"] .private-work-share-form,
+html[data-theme="dark"] .private-work-material-group {
+  border-color: #42423e;
+  background: #242422;
+  color: #f2f2ed;
+}
+
+html[data-theme="dark"] .chat-actions-menu > summary:hover,
+html[data-theme="dark"] .chat-actions-menu[open] > summary,
+html[data-theme="dark"] .chat-actions-popover > button:hover,
+html[data-theme="dark"] .chat-actions-popover > a:hover,
+html[data-theme="dark"] .chat-message-actions > summary,
+html[data-theme="dark"] .private-work-link-row > a:hover {
+  background: #333330;
+}
+
+html[data-theme="dark"] .chat-actions-popover > button,
+html[data-theme="dark"] .chat-actions-popover > a {
+  color: #f2f2ed;
+}
+
+html[data-theme="dark"] .chat-actions-popover > button > span:first-child,
+html[data-theme="dark"] .chat-actions-popover > a > span:first-child,
+html[data-theme="dark"] .private-work-album-heading > span,
+html[data-theme="dark"] .private-work-section-title span {
+  background: #393936;
+}
+
+html[data-theme="dark"] .chat-actions-popover .is-danger,
+html[data-theme="dark"] .chat-message-actions > button {
+  color: #f0a49c;
+}
+
+html[data-theme="dark"] .private-work-share {
+  border-color: #363633;
+  background: #1c1c1a;
+}
+
+html[data-theme="dark"] .private-work-share-toggle {
+  border-color: #44443f;
+  background: #292927;
+}
+
+html[data-theme="dark"] .private-work-share-heading > button,
+html[data-theme="dark"] .private-work-field input {
+  border-color: #44443f;
+  background: #30302d;
+  color: #f2f2ed;
+}
+
+html[data-theme="dark"] .private-work-album-card {
+  border-color: #41413d;
+  background: #292927;
+}
+
+html[data-theme="dark"] .private-work-album-heading strong {
+  color: #f0f0eb;
+}
+
+html[data-theme="dark"] .private-work-album {
+  background: #171716;
+}
+
+html[data-theme="dark"] .private-work-album button {
+  background: #20201e;
+}
+
+html[data-theme="dark"] .private-work-link-row > a {
+  background: transparent;
+}
+
+html[data-theme="dark"] .private-work-links .private-work-link-row > a b {
+  color: #8bbdec;
+}
+
+@media (max-width: 700px) {
+  .account-page .chat-page {
+    width: 100%;
+    margin: 0;
+  }
+
+  .account-page .chat-shell {
+    min-height: calc(100dvh - 62px);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .account-page .chat-header {
+    flex-wrap: nowrap;
+    gap: 7px;
+    padding: 9px 10px;
+  }
+
+  .account-page .chat-back {
+    width: 36px;
+    justify-content: center;
+    padding: 7px 8px;
+  }
+
+  .account-page .chat-back b {
+    display: none;
+  }
+
+  .account-page .chat-avatar {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+
+  .account-page .chat-person span {
+    display: none;
+  }
+
+  .account-page .chat-header-actions {
+    width: auto;
+  }
+
+  .chat-actions-menu > summary {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chat-actions-popover {
+    position: fixed;
+    top: 58px;
+    right: 10px;
+  }
+
+  .account-page .chat-messages {
+    min-height: 310px;
+    max-height: none;
+    padding: 16px 10px;
+  }
+
+  .account-page .chat-message {
+    max-width: 88%;
+    padding: 9px 11px 6px;
+  }
+
+  .chat-message-actions > summary {
+    opacity: .72;
+  }
+
+  .account-page .chat-form {
+    position: sticky;
+    bottom: 0;
+    padding: 8px 9px calc(9px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .account-page .chat-form textarea {
+    min-height: 42px;
+  }
+
+  .private-work-share {
+    padding: 6px 9px 0;
+  }
+
+  .private-work-share-toggle small {
+    display: none;
+  }
+
+  .private-work-share-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .private-work-share-form {
+    width: 100%;
+    max-height: 92dvh;
+    gap: 12px;
+    padding: 17px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-radius: 20px 20px 0 0;
+  }
+
+  .private-work-share-heading h2 {
+    font-size: 18px;
+  }
+
+  .private-work-materials {
+    width: min(100%, 82vw);
+  }
+
+  .private-work-album-heading {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .private-work-album-heading > b {
+    display: none;
+  }
+
+  .private-work-album button,
+  .private-work-album.count-1 button {
+    height: min(42vw, 190px);
+  }
+
+  .private-work-album.count-1 button {
+    height: min(64vw, 330px);
+  }
+
+  .private-work-lightbox figcaption {
+    padding: 0 64px;
+    white-space: normal;
+  }
+}
+
+/* =========================================================
    ADMIN — FULL DISPUTE CONTEXT
 ========================================================= */
 
@@ -20320,5 +21111,101 @@ html[data-theme="dark"] .private-work-link-row > a {
     max-height: 92dvh;
     padding: 22px 16px calc(18px + env(safe-area-inset-bottom, 0px));
     border-radius: 20px 20px 0 0;
+  }
+}
+
+/* Final cascade for the V1.1 chat workspace. */
+.private-work-share {
+  display: flex;
+  justify-content: flex-start;
+  padding: 7px 12px 0;
+}
+
+.private-work-share-toggle {
+  width: auto;
+  min-height: 36px;
+  justify-content: flex-start;
+  padding: 5px 9px 5px 6px;
+  border: 1px solid #deded8;
+  border-radius: 11px;
+  background: #fafaf7;
+}
+
+.private-work-share-form {
+  width: min(720px, 100%);
+  max-height: min(860px, calc(100dvh - 48px));
+  gap: 13px;
+  padding: 20px;
+}
+
+.private-work-album {
+  width: 100%;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 0;
+}
+
+.private-work-album button,
+.private-work-album.count-1 button {
+  height: clamp(150px, 24vw, 250px);
+  border-radius: 7px;
+}
+
+.private-work-album.count-1 button {
+  height: clamp(220px, 34vw, 390px);
+}
+
+.private-work-album img {
+  object-fit: contain;
+}
+
+.private-work-link-row > a {
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+}
+
+html[data-theme="dark"] .private-work-share-toggle,
+html[data-theme="dark"] .private-work-share-form,
+html[data-theme="dark"] .private-work-material-group {
+  border-color: #42423e;
+  background: #242422;
+  color: #f2f2ed;
+}
+
+html[data-theme="dark"] .private-work-link-row > a {
+  border: 0;
+  background: transparent;
+}
+
+html[data-theme="dark"] .account-page .chat-message.is-mine p,
+html[data-theme="dark"] .account-page .chat-message.is-mine a {
+  color: #171716;
+}
+
+@media (max-width: 700px) {
+  .private-work-share {
+    padding: 6px 9px 0;
+  }
+
+  .private-work-share-form {
+    width: 100%;
+    max-height: 92dvh;
+    gap: 12px;
+    padding: 17px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .private-work-album {
+    width: 100%;
+  }
+
+  .private-work-album button,
+  .private-work-album.count-1 button {
+    height: min(42vw, 190px);
+  }
+
+  .private-work-album.count-1 button {
+    height: min(64vw, 330px);
   }
 }
