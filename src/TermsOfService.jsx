@@ -37,6 +37,36 @@ const PRIVACY_MATCHING_SUPPLEMENT = `
   <blockquote><p><strong>Status uzupełnienia:</strong> opis odzwierciedla mechanizm wdrożony do testów 14 września 2026 r. Przed wersją 1.0 należy udokumentować ocenę równowagi, zweryfikować ochronę osób małoletnich i włączyć treść do właściwych części Polityki.</p></blockquote>
 `;
 
+const TERMS_WORK_DELIVERY_SUPPLEMENT = `
+  <hr />
+  <h1 id="uzupelnienie-prywatne-materialy-i-odbior-pracy">Uzupełnienie funkcjonalne do audytu — prywatne materiały i odbiór pracy</h1>
+  <ol>
+    <li><p>Pełnoletnie strony aktywnej rozmowy mogą przekazywać w jej obrębie prywatne zdjęcia, albumy zdjęć, pliki PDF lub TXT oraz publiczne linki HTTPS. Materiały nie są publikowane w profilu ani katalogu. Dostęp mają strony rozmowy, a upoważniony administrator wyłącznie w zakresie przypisanego sporu, zgłoszenia treści, bezpieczeństwa albo obowiązku prawnego. Dostęp administracyjny do dowodu ze zgłoszenia jest rejestrowany.</p></li>
+    <li><p>Limit pojedynczego pliku wynosi 20 MB, a jednej przesyłki 12 materiałów. Platforma weryfikuje deklarowany format i podstawową sygnaturę zawartości, lecz nie gwarantuje wykrycia każdego złośliwego pliku. Użytkownik powinien aktualizować urządzenie, zachować ostrożność i nie uruchamiać nieoczekiwanego kodu.</p></li>
+    <li><p>Nie wolno przesyłać haseł, kodów uwierzytelniających, kluczy API, danych kart, złośliwego kodu ani danych osób trzecich bez podstawy i właściwego zakresu. Sekrety powinny być przekazywane przez przeznaczony do tego menedżer z ograniczonym czasowo dostępem. Platforma może ostrzegać o treści przypominającej dane logowania, lecz Użytkownik pozostaje odpowiedzialny za ich ochronę.</p></li>
+    <li><p>Wykonawca może użyć funkcji „Przekaż pracę” dopiero po akceptacji tej samej wersji Formularza współpracy. Wraz z przekazaniem wskazuje rezultat i potwierdza, że ma prawa lub wymagane zgody do materiałów oraz że nie dołącza świadomie treści szkodliwych ani danych, których nie wolno mu ujawniać.</p></li>
+    <li><p>Zleceniodawca może zaakceptować przekazaną wersję albo zażądać konkretnych poprawek w granicach liczby uzgodnionej w Formularzu. Akceptacja zapisuje wersję, osobę i czas oraz oznacza techniczne zakończenie odbioru w Platformie. Nie wyłącza bezwzględnie obowiązujących praw, odpowiedzialności za wadę ukrytą, oszustwo, naruszenie praw osób trzecich, reklamacji ani procedury sporu.</p></li>
+    <li><p>Przekazanie pliku nie przenosi automatycznie autorskich praw majątkowych ani nie udziela licencji szerszej niż wynika to z zaakceptowanego Formularza i prawa. Pola eksploatacji, zakres licencji, chwila przejścia praw oraz zależność od zapłaty powinny wynikać z umowy stron.</p></li>
+    <li><p>Odbiorca może zgłosić wiadomość, plik, link albo całe przekazanie pracy. Zgłoszenie nie powoduje automatycznej sankcji. Po indywidualnej analizie Operator może nie podjąć działania, ukryć samą treść albo zastosować proporcjonalne ograniczenie Konta. Decyzja zawiera uzasadnienie oraz dostępny w Platformie tryb odwołania zgodny z zasadami moderacji.</p></li>
+    <li><p>Materiały związane z przyjętym Formularzem, płatnością, zgłoszeniem lub sporem mogą zostać zachowane przez czas potrzebny do wykonania umowy, rozpatrzenia sprawy, obowiązku prawnego albo obrony roszczeń. Pozostałe materiały podlegają usunięciu lub anonimizacji zgodnie z Polityką prywatności i technicznie wdrożonym zakresem realizacji żądania.</p></li>
+  </ol>
+  <blockquote><p><strong>Status uzupełnienia:</strong> opis odzwierciedla moduł przygotowany do testów 14 września 2026 r. Nie jest obietnicą pełnej ochrony antywirusowej. Przed wersją 1.0 prawnik powinien połączyć postanowienia z właściwymi paragrafami Regulaminu, sprawdzić model odbioru i płatności oraz zatwierdzić retencję.</p></blockquote>
+`;
+
+const PRIVACY_WORK_DELIVERY_SUPPLEMENT = `
+  <hr />
+  <h1 id="uzupelnienie-dane-prywatnych-materialow">Uzupełnienie funkcjonalne do audytu — dane prywatnych materiałów i odbioru pracy</h1>
+  <ol>
+    <li><p>W ramach prywatnej rozmowy Administrator przetwarza treść wiadomości, przesłane pliki i obrazy, adresy oraz etykiety linków, nazwy i rozmiary plików, typ MIME, identyfikatory rozmowy, stron i Formularza, potwierdzenia Wykonawcy, kolejne wersje pracy, żądania poprawek, decyzję o odbiorze oraz znaczniki czasu.</p></li>
+    <li><p>Celem jest dostarczenie funkcji żądanej przez Użytkownika, wykonanie umowy o korzystanie z Platformy i obsługa współpracy stron — art. 6 ust. 1 lit. b RODO. Bezpieczeństwo, zapobieganie nadużyciom, dowodzenie zdarzeń i obrona roszczeń mogą opierać się na art. 6 ust. 1 lit. f RODO po udokumentowanej ocenie równowagi. Obsługa nielegalnych treści, organów i innych obowiązków prawnych może opierać się na art. 6 ust. 1 lit. c RODO.</p></li>
+    <li><p>Materiały są przechowywane w prywatnej pamięci Supabase i udostępniane stronom rozmowy za pomocą czasowych adresów. Upoważniony administrator uzyskuje dostęp wyłącznie w związku z przypisanym zgłoszeniem, sporem, bezpieczeństwem lub obowiązkiem prawnym; otwarcie dowodu ze zgłoszenia jest zapisywane w dzienniku audytowym.</p></li>
+    <li><p>Zwykłe materiały niezwiązane z Formularzem, płatnością, sporem ani zgłoszeniem usuwa się, gdy przestają być potrzebne, w ramach skutecznego żądania lub zamknięcia Konta. Materiały stanowiące dowód wykonania umowy, płatności, sporu, moderacji albo roszczeń mogą być ograniczone i zachowane do upływu właściwego okresu zamiast natychmiastowego usunięcia. Kopie zapasowe podlegają harmonogramowi wskazanemu w głównej Polityce.</p></li>
+    <li><p>Użytkownik nie powinien przekazywać danych szczególnych kategorii, danych karnych, dokumentów tożsamości ani nadmiarowych danych osób trzecich, chyba że jest to rzeczywiście konieczne i istnieje właściwa podstawa. Platforma nie prosi o hasła, kody 2FA, klucze API ani dane kart w wiadomościach.</p></li>
+    <li><p>Zgłoszenie treści utrwala kopię dowodową materiału, dane zgłaszającego, wskazany powód, opis i decyzję. Jest to potrzebne do ręcznej analizy, przekazania uzasadnienia, odwołania, przeciwdziałania nadużyciom oraz wykazania prawidłowości procesu. Zakres i okres retencji zgłoszeń muszą zostać ostatecznie zatwierdzone w harmonogramie przed uruchomieniem produkcyjnym.</p></li>
+  </ol>
+  <blockquote><p><strong>Status uzupełnienia:</strong> przed wersją 1.0 należy zatwierdzić ocenę skutków i ryzyka plików, ocenę równowagi, rzeczywisty region danych, umowy z dostawcami, procedurę incydentów oraz harmonogram automatycznego usuwania.</p></blockquote>
+`;
+
 const DOCUMENT_LABELS = {
   terms: {
     eyebrow: "Dokumenty IdeaHire",
@@ -62,9 +92,9 @@ function LegalDocument({ kind, html }) {
   const labels = DOCUMENT_LABELS[kind] || DOCUMENT_LABELS.terms;
   const matchingSupplement =
     kind === "terms"
-      ? TERMS_MATCHING_SUPPLEMENT
+      ? `${TERMS_MATCHING_SUPPLEMENT}${TERMS_WORK_DELIVERY_SUPPLEMENT}`
       : kind === "privacy"
-      ? PRIVACY_MATCHING_SUPPLEMENT
+      ? `${PRIVACY_MATCHING_SUPPLEMENT}${PRIVACY_WORK_DELIVERY_SUPPLEMENT}`
       : "";
 
   return (
