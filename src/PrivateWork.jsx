@@ -211,7 +211,7 @@ export function usePrivateWork(conversationId, userId, enabled = true) {
   };
 }
 
-function PrivateImageViewer({ images, activeId, signedUrls, onClose, onSelect, ownMessage, onReport }) {
+function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose, onSelect, ownMessage, onReport }) {
   const index = Math.max(0, images.findIndex((item) => item.id === activeId));
   const item = images[index];
   const previous = images[(index - 1 + images.length) % images.length];
@@ -239,7 +239,7 @@ function PrivateImageViewer({ images, activeId, signedUrls, onClose, onSelect, o
       <figure>
         <img src={signedUrls[item.storage_path]} alt={item.display_name} />
         <figcaption>
-          <span>{item.display_name} · {index + 1}/{images.length}</span>
+          <span>{albumTitle ? `${albumTitle} · ` : ""}{item.display_name} · {index + 1}/{images.length}</span>
           {!ownMessage && (
             <button type="button" onClick={() => {
               onClose();
@@ -264,24 +264,56 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
   const images = visible.filter((item) => item.item_type === "image" && signedUrls[item.storage_path]);
   const files = visible.filter((item) => item.item_type === "file");
   const links = visible.filter((item) => item.item_type === "link");
+  const imageAlbums = useMemo(() => {
+    const groups = new Map();
+    images.forEach((item) => {
+      const key = item.batch_id || item.id;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(item);
+    });
+    return [...groups.entries()].map(([id, albumImages]) => ({
+      id,
+      title: albumImages.find((item) => item.album_title)?.album_title || "Album zdjęć",
+      images: albumImages,
+    }));
+  }, [images]);
+  const previewAlbum = imageAlbums.find((album) =>
+    album.images.some((item) => item.id === previewId)
+  );
 
   if (!items.length) return null;
 
   return (
     <div className="private-work-materials">
-      {images.length > 0 && (
-        <div className={`private-work-album count-${Math.min(images.length, 4)}`}>
-          {images.slice(0, 4).map((item, index) => (
-            <button type="button" key={item.id} onClick={() => setPreviewId(item.id)}>
-              <img src={signedUrls[item.storage_path]} alt={item.display_name} loading="lazy" />
-              {index === 3 && images.length > 4 && <span>+{images.length - 4}</span>}
-            </button>
+      {imageAlbums.length > 0 && (
+        <div className="private-work-albums">
+          {imageAlbums.map((album) => (
+            <section className="private-work-album-card" key={album.id}>
+              <div className="private-work-album-heading">
+                <span aria-hidden="true">▣</span>
+                <div>
+                  <small>Album zdjęć</small>
+                  <strong>{album.title}</strong>
+                </div>
+                <b>{album.images.length} {album.images.length === 1 ? "zdjęcie" : album.images.length < 5 ? "zdjęcia" : "zdjęć"}</b>
+              </div>
+              <div className={`private-work-album count-${Math.min(album.images.length, 4)}`}>
+                {album.images.slice(0, 4).map((item, index) => (
+                  <button type="button" key={item.id} onClick={() => setPreviewId(item.id)} aria-label={`Otwórz zdjęcie ${index + 1} z albumu ${album.title}`}>
+                    <img src={signedUrls[item.storage_path]} alt={item.display_name} loading="lazy" />
+                    {index === 3 && album.images.length > 4 && <span>+{album.images.length - 4}</span>}
+                  </button>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
 
-      {(files.length > 0 || links.length > 0) && (
-        <div className="private-work-links">
+      {files.length > 0 && (
+        <section className="private-work-material-group">
+          <div className="private-work-section-title"><strong>Pliki</strong><span>{files.length}</span></div>
+          <div className="private-work-files">
           {files.map((item) => (
             <div className="private-work-link-row" key={item.id}>
               <a href={signedUrls[item.storage_path] || undefined} target="_blank" rel="noopener noreferrer" aria-disabled={!signedUrls[item.storage_path]}>
@@ -292,6 +324,14 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
               {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
             </div>
           ))}
+          </div>
+        </section>
+      )}
+
+      {links.length > 0 && (
+        <section className="private-work-material-group">
+          <div className="private-work-section-title"><strong>Linki</strong><span>{links.length}</span></div>
+          <div className="private-work-links">
           {links.map((item) => (
             <div className="private-work-link-row" key={item.id}>
               <a href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">
@@ -302,7 +342,8 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
               {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
             </div>
           ))}
-        </div>
+          </div>
+        </section>
       )}
 
       {hidden.length > 0 && (
@@ -310,8 +351,9 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
       )}
 
       <PrivateImageViewer
-        images={images}
+        images={previewAlbum?.images || []}
         activeId={previewId}
+        albumTitle={previewAlbum?.title || ""}
         signedUrls={signedUrls}
         onClose={() => setPreviewId(null)}
         onSelect={setPreviewId}
@@ -335,11 +377,27 @@ export function PrivateSharePanel({
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([{ url: "", label: "" }]);
   const [caption, setCaption] = useState("");
+  const [albumTitle, setAlbumTitle] = useState("");
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [safetyConfirmed, setSafetyConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
+  const imageCount = files.filter((file) => file.type.startsWith("image/")).length;
+
+  useEffect(() => {
+    if (!open) return undefined;
+    function closeOnEscape(event) {
+      if (event.key === "Escape" && !busy) setOpen(false);
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [busy, open]);
 
   function handleFiles(event) {
     const next = Array.from(event.target.files || []);
@@ -447,6 +505,7 @@ export function PrivateSharePanel({
         summary: mode === "delivery" ? caption.trim() : undefined,
         rightsConfirmed: mode === "delivery" ? rightsConfirmed : undefined,
         safetyConfirmed: mode === "delivery" ? safetyConfirmed : undefined,
+        albumTitle: imageCount ? albumTitle.trim() || "Album zdjęć" : undefined,
         files: uploaded,
         links: preparedLinks.map((link) => ({
           id: crypto.randomUUID(),
@@ -463,6 +522,7 @@ export function PrivateSharePanel({
       setFiles([]);
       setLinks([{ url: "", label: "" }]);
       setCaption("");
+      setAlbumTitle("");
       setRightsConfirmed(false);
       setSafetyConfirmed(false);
       setMessage(mode === "delivery" ? "Praca została przekazana do odbioru." : "Materiały zostały bezpiecznie przekazane.");
@@ -482,10 +542,21 @@ export function PrivateSharePanel({
     <section className={`private-work-share ${open ? "is-open" : ""}`}>
       <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled}>
         <span aria-hidden="true">＋</span>
-        Dodaj materiały lub przekaż pracę
+        <b>Dodaj</b>
+        <small>zdjęcia, pliki lub linki</small>
       </button>
       {open && (
-        <form onSubmit={submit} className="private-work-share-form">
+        <div className="private-work-share-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget && !busy) setOpen(false);
+        }}>
+        <form onSubmit={submit} className="private-work-share-form" role="dialog" aria-modal="true" aria-labelledby="private-work-share-title">
+          <div className="private-work-share-heading">
+            <div>
+              <span className="section-label">Prywatna przestrzeń pracy</span>
+              <h2 id="private-work-share-title">Dodaj materiały do rozmowy</h2>
+            </div>
+            <button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="Zamknij okno dodawania materiałów">×</button>
+          </div>
           <div className="private-work-tabs" role="tablist" aria-label="Sposób wysyłki">
             <button type="button" className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")}>Materiały do rozmowy</button>
             <button
@@ -526,6 +597,14 @@ export function PrivateSharePanel({
             </div>
           )}
 
+          {imageCount > 0 && (
+            <div className="private-work-field private-work-album-name-field">
+              <label htmlFor="private-work-album-title">Nazwa albumu</label>
+              <input id="private-work-album-title" type="text" value={albumTitle} onChange={(event) => setAlbumTitle(event.target.value)} maxLength={120} placeholder="Np. Grafiki na Instagram — wersja finalna" />
+              <small>{imageCount} {imageCount === 1 ? "zdjęcie" : imageCount < 5 ? "zdjęcia" : "zdjęć"} zostanie połączonych w jeden album.</small>
+            </div>
+          )}
+
           <div className="private-work-link-inputs">
             {links.map((link, index) => (
               <div key={index}>
@@ -557,6 +636,7 @@ export function PrivateSharePanel({
             </button>
           </div>
         </form>
+        </div>
       )}
     </section>
   );
