@@ -21209,3 +21209,182 @@ html[data-theme="dark"] .account-page .chat-message.is-mine a {
     height: min(64vw, 330px);
   }
 }
+
+/* =========================================================
+   FINAL VISUAL AUDIT — shared application polish
+========================================================= */
+
+:is(.hero h1, .app-page-header h1, .auth-header h1, .job-card h2, .profile-preview h2) {
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+:is(.job-card, .account-card, .project-form, .auth-card) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.project-form {
+  width: min(820px, 100%);
+  max-width: 820px;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.045);
+}
+
+.project-form :is(input, textarea, select),
+.auth-form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  box-sizing: border-box;
+  border: 1px solid #ddddda;
+  border-radius: 14px;
+  background-color: #fff;
+  color: #171717;
+  padding: 14px 16px;
+  outline: none;
+  font: inherit;
+  line-height: 1.35;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.project-form select,
+.auth-form select {
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.project-form :is(input, textarea, select):focus,
+.auth-form select:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06);
+}
+
+:is(.auth-form, .profile-upload, .account-form, .private-work-file-picker) input[type="file"] {
+  min-height: 52px;
+  box-sizing: border-box;
+  color: #5f5f5a;
+  line-height: 1.4;
+}
+
+:is(.auth-form, .profile-upload, .account-form, .private-work-file-picker) input[type="file"]::file-selector-button {
+  min-height: 36px;
+  margin: -5px 12px -5px -5px;
+  padding: 8px 13px;
+  border: 1px solid #d8d8d2;
+  border-radius: 10px;
+  background: #f1f1ed;
+  color: #171717;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+:is(.auth-form, .profile-upload, .account-form, .private-work-file-picker) input[type="file"]::file-selector-button:hover {
+  border-color: #bcbcb5;
+  background: #e8e8e2;
+}
+
+.job-card {
+  overflow: hidden;
+}
+
+.job-card :is(p, a, span, strong, small),
+.profile-preview :is(h2, p),
+.account-card :is(h1, h2, h3, p, a) {
+  overflow-wrap: anywhere;
+}
+
+.job-card-top,
+.job-actions,
+.job-details-actions {
+  min-width: 0;
+}
+
+.job-actions .btn,
+.job-details-actions .btn {
+  padding-inline: 14px;
+}
+
+:is(a, button, input, textarea, select):focus-visible {
+  outline: 3px solid rgba(30, 99, 255, 0.5);
+  outline-offset: 3px;
+}
+
+html[data-theme="dark"] .hero h1 span {
+  color: #a5a59f;
+}
+
+html[data-theme="dark"] .project-form {
+  border-color: #30302d;
+  background: #171716;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .project-form :is(input, textarea, select),
+html[data-theme="dark"] .auth-form select {
+  border-color: #3a3a36;
+  background-color: #10100f;
+  color: #f4f4f1;
+}
+
+html[data-theme="dark"] .project-form :is(input, textarea, select):focus,
+html[data-theme="dark"] .auth-form select:focus {
+  border-color: #a5a59f;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] :is(.auth-form, .profile-upload, .account-form, .private-work-file-picker) input[type="file"] {
+  color: #b8b8b1;
+}
+
+html[data-theme="dark"] :is(.auth-form, .profile-upload, .account-form, .private-work-file-picker) input[type="file"]::file-selector-button {
+  border-color: #464641;
+  background: #292927;
+  color: #f2f2ed;
+}
+
+html[data-theme="dark"] :is(.auth-form, .profile-upload, .account-form, .private-work-file-picker) input[type="file"]::file-selector-button:hover {
+  border-color: #5b5b55;
+  background: #343431;
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 24px 12px 48px;
+  }
+
+  .app-page-header {
+    margin-bottom: 30px;
+  }
+
+  .app-page-header h1 {
+    letter-spacing: -2px;
+  }
+
+  :is(.project-form, .auth-card, .account-card, .job-card) {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .project-form {
+    gap: 20px;
+  }
+
+  .job-actions,
+  .job-details-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
