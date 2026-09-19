@@ -646,7 +646,65 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
   const [changes, setChanges] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [reviewState, setReviewState] = useState({
+    loading: false,
+    canReview: false,
+    alreadyReviewed: false,
+    review: null,
+  });
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState("");
   const latest = deliveries[0];
+
+  const loadReviewState = useCallback(async () => {
+    if (!conversation?.id || !userId || latest?.status !== "accepted") {
+      setReviewState({
+        loading: false,
+        canReview: false,
+        alreadyReviewed: false,
+        review: null,
+      });
+      return;
+    }
+
+    setReviewState((current) => ({ ...current, loading: true }));
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_my_ideahire_review_state",
+        { p_conversation_id: conversation.id }
+      );
+      if (error) throw error;
+
+      const payload = data || {};
+      setReviewState({
+        loading: false,
+        canReview: payload.can_review === true,
+        alreadyReviewed: payload.already_reviewed === true,
+        review: payload.review || null,
+      });
+    } catch (reviewStateError) {
+      setReviewState({
+        loading: false,
+        canReview: false,
+        alreadyReviewed: false,
+        review: null,
+      });
+      setReviewMessage(
+        readableError(
+          reviewStateError,
+          "Nie udało się sprawdzić możliwości wystawienia opinii."
+        )
+      );
+    }
+  }, [conversation?.id, latest?.status, userId]);
+
+  useEffect(() => {
+    loadReviewState();
+  }, [loadReviewState]);
+
   if (!latest) return null;
   const isClient = conversation?.client_id === userId;
   const history = events.filter((event) => event.delivery_id === latest.id);
@@ -677,6 +735,49 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
     }
   }
 
+  async function submitReview(event) {
+    event.preventDefault();
+    if (reviewBusy || disabled || !reviewState.canReview) return;
+
+    if (!Number.isInteger(reviewRating) || reviewRating < 1 || reviewRating > 5) {
+      setReviewMessage("Wybierz ocenę od 1 do 5 gwiazdek.");
+      return;
+    }
+
+    if (reviewText.trim().length < 10) {
+      setReviewMessage("Napisz opinię zawierającą co najmniej 10 znaków.");
+      return;
+    }
+
+    setReviewBusy(true);
+    setReviewMessage("");
+
+    try {
+      const { error } = await supabase.rpc(
+        "submit_ideahire_job_review",
+        {
+          p_conversation_id: conversation.id,
+          p_rating: reviewRating,
+          p_review_text: reviewText.trim(),
+        }
+      );
+      if (error) throw error;
+
+      setReviewMessage("Opinia została opublikowana na profilu wykonawcy.");
+      setReviewText("");
+      await loadReviewState();
+    } catch (reviewError) {
+      setReviewMessage(
+        readableError(reviewError, "Nie udało się opublikować opinii.")
+      );
+    } finally {
+      setReviewBusy(false);
+    }
+  }
+
+  const savedReview = reviewState.review;
+  const savedRating = Math.max(0, Math.min(5, Number(savedReview?.rating) || 0));
+
   return (
     <section className={`private-work-delivery is-${latest.status}`}>
       <div className="private-work-delivery-heading">
@@ -697,8 +798,79 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
           </div>
         </div>
       )}
+      {latest.status === "accepted" && (
+        <div className="private-work-completion" role="status">
+          <span aria-hidden="true">✓</span>
+          <div>
+            <strong>Zlecenie zakończone</strong>
+            <p>Współpraca została zapisana jako wykonana na profilu wykonawcy.</p>
+          </div>
+        </div>
+      )}
+      {latest.status === "accepted" && reviewState.loading && (
+        <p className="private-work-review-status">Sprawdzanie opinii…</p>
+      )}
+      {latest.status === "accepted" && savedReview && (
+        <div className="private-work-saved-review">
+          <div className="private-work-saved-review-heading">
+            <strong>Zweryfikowana opinia</strong>
+            <span aria-label={`${savedRating} z 5 gwiazdek`}>
+              {Array.from({ length: 5 }, (_, index) => (
+                <b className={index < savedRating ? "is-active" : ""} key={index}>★</b>
+              ))}
+            </span>
+          </div>
+          <p>{savedReview.review_text}</p>
+        </div>
+      )}
+      {latest.status === "accepted" && isClient && reviewState.canReview && !savedReview && (
+        <form className="private-work-review-form" onSubmit={submitReview}>
+          <div>
+            <span className="section-label">Opinia po zakończeniu</span>
+            <h3>Oceń wykonawcę</h3>
+            <p>Opinię można wystawić tylko raz dla tej współpracy.</p>
+          </div>
+          <div className="private-work-review-stars" role="radiogroup" aria-label="Ocena wykonawcy">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                type="button"
+                key={value}
+                className={reviewRating >= value ? "is-active" : ""}
+                onClick={() => setReviewRating(value)}
+                role="radio"
+                aria-checked={reviewRating === value}
+                aria-label={`${value} ${value === 1 ? "gwiazdka" : value < 5 ? "gwiazdki" : "gwiazdek"}`}
+                disabled={reviewBusy || disabled}
+              >
+                ★
+              </button>
+            ))}
+            <span>{reviewRating ? `${reviewRating}/5` : "Wybierz ocenę"}</span>
+          </div>
+          <label htmlFor={`ideahire-review-${conversation.id}`}>Twoja opinia</label>
+          <textarea
+            id={`ideahire-review-${conversation.id}`}
+            value={reviewText}
+            onChange={(event) => setReviewText(event.target.value)}
+            minLength={10}
+            maxLength={2000}
+            rows={4}
+            placeholder="Napisz, jak przebiegła współpraca i jak oceniasz rezultat…"
+            disabled={reviewBusy || disabled}
+          />
+          <button type="submit" className="is-primary" disabled={reviewBusy || disabled || reviewRating < 1}>
+            {reviewBusy ? "Publikowanie…" : "Opublikuj opinię"}
+          </button>
+        </form>
+      )}
+      {latest.status === "accepted" && !isClient && !savedReview && !reviewState.loading && (
+        <p className="private-work-review-status">
+          Zleceniodawca może teraz wystawić opinię na Twoim profilu.
+        </p>
+      )}
       {userId !== latest.submitted_by && <button type="button" className="private-work-report-link" onClick={() => onReport("work_delivery", latest.id)}>Zgłoś przekazaną pracę</button>}
       {message && <p className="private-work-form-message" role="status">{message}</p>}
+      {reviewMessage && <p className="private-work-form-message" role="status">{reviewMessage}</p>}
     </section>
   );
 }
