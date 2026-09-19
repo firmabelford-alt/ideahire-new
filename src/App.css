@@ -1,4 +1,4 @@
-/* IDEA HIRE â NAVY PROFESSIONAL UI V5 â RELEASE 2026-09-19 */
+/* IDEA HIRE â NAVY PROFESSIONAL UI V5.1 â RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/App.css */
 
 /* IDEA HIRE â STRIPE CONNECT STYLES â BUILD 2026-09-05 */
@@ -28759,5 +28759,169 @@ html[data-theme="dark"] .footer .logo span {
   .final-cta::after,
   .app > .footer::before {
     animation: none !important;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â V5.1 WIDTH / STATIC NAV / RESULTS FIX
+========================================================= */
+
+:root {
+  --ih-release: 20260919-4;
+  --ih-shell-width: 1240px;
+  --ih-shell-gutter: 32px;
+}
+
+/* The application navigation and the account section index scroll away
+   naturally with the document. They never overlap the page content. */
+
+.navbar.account-navbar,
+.navbar.admin-navbar,
+.navbar.restricted-account-navbar {
+  position: relative !important;
+  top: auto !important;
+}
+
+.account-section-nav {
+  position: relative !important;
+  top: auto !important;
+  z-index: 2;
+}
+
+.account-section-nav a {
+  min-width: 0;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.account-section-nav a span {
+  flex: 0 0 23px;
+}
+
+/* Search result summary keeps the count and action on one shared baseline. */
+
+.page .jobs-results-header {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-sizing: border-box;
+  margin: 16px 0 12px;
+  padding: 11px 13px 11px 16px;
+  border: 1px solid var(--ih-line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: var(--ih-shadow-sm);
+}
+
+.jobs-results-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.jobs-results-copy > span {
+  color: #858d98;
+  font-size: 8px;
+  font-weight: 820;
+  letter-spacing: 1.05px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.jobs-results-copy > strong {
+  color: var(--ih-ink);
+  font-size: 15px;
+  font-weight: 780;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.page .jobs-clear-filters {
+  min-width: 142px;
+  min-height: 42px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 9px 14px;
+  border: 1px solid var(--ih-line-strong);
+  border-radius: 9px;
+  background: #f5f7fa;
+  color: var(--ih-navy-800);
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 740;
+}
+
+.page .jobs-clear-filters::before {
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: #e5e9ef;
+  color: var(--ih-navy-800);
+  font-size: 13px;
+}
+
+.page .jobs-clear-filters:hover {
+  border-color: #b7c0cb;
+  background: #edf1f5;
+  color: var(--ih-navy-950);
+  box-shadow: none;
+  transform: none;
+}
+
+html[data-theme="dark"] .page .jobs-results-header {
+  border-color: var(--ih-line);
+  background: var(--ih-surface);
+}
+
+html[data-theme="dark"] .page .jobs-clear-filters {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface-soft) !important;
+  color: #e1e6ed !important;
+}
+
+html[data-theme="dark"] .page .jobs-clear-filters::before {
+  background: #26313e;
+  color: #e1e6ed;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --ih-shell-gutter: 18px;
+  }
+
+  .account-section-nav {
+    grid-template-columns: repeat(5, minmax(112px, 1fr));
+  }
+
+  .account-section-nav a {
+    min-width: 112px;
+  }
+
+  .page .jobs-results-header {
+    min-height: 62px;
+    gap: 10px;
+    padding: 9px 10px 9px 13px;
+  }
+
+  .page .jobs-clear-filters {
+    min-width: 126px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 390px) {
+  .page .jobs-results-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page .jobs-clear-filters {
+    width: 100%;
   }
 }
