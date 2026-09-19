@@ -1,3 +1,6 @@
+/* IDEA HIRE — COMPLETE UI V3 PACKAGE — RELEASE 2026-09-19 */
+/* Full file for direct replacement: src/router.jsx */
+
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
 
 import React, {
@@ -2970,6 +2973,9 @@ function AccountNavbar() {
     setHasDisputeNotifications,
   ] = useState(false);
 
+  const accountMenuRef =
+    useRef(null);
+
   const userName =
     user?.user_metadata?.name ||
     user?.email?.split("@")[0] ||
@@ -3282,6 +3288,53 @@ function AccountNavbar() {
     restrictionLoading,
   ]);
 
+  useEffect(() => {
+    function closeMenuFromOutside(event) {
+      const menu = accountMenuRef.current;
+
+      if (
+        menu?.open &&
+        !menu.contains(event.target)
+      ) {
+        menu.removeAttribute("open");
+      }
+    }
+
+    function closeMenuWithKeyboard(event) {
+      const menu = accountMenuRef.current;
+
+      if (
+        event.key === "Escape" &&
+        menu?.open
+      ) {
+        menu.removeAttribute("open");
+        menu
+          .querySelector("summary")
+          ?.focus();
+      }
+    }
+
+    document.addEventListener(
+      "pointerdown",
+      closeMenuFromOutside
+    );
+    document.addEventListener(
+      "keydown",
+      closeMenuWithKeyboard
+    );
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        closeMenuFromOutside
+      );
+      document.removeEventListener(
+        "keydown",
+        closeMenuWithKeyboard
+      );
+    };
+  }, []);
+
   async function handleLogout() {
     try {
       const { error } =
@@ -3310,7 +3363,10 @@ function AccountNavbar() {
 
   if (isRestricted || restrictionError) {
     return (
-      <header className="navbar account-navbar restricted-account-navbar">
+      <header
+        className="navbar account-navbar restricted-account-navbar"
+        data-ui-release="ideahire-v3-20260919"
+      >
         <Link
           className="restricted-navbar-brand"
           to="/account-status"
@@ -3363,8 +3419,17 @@ function AccountNavbar() {
     );
   }
 
+  function closeAccountMenu(event) {
+    event.currentTarget
+      .closest("details")
+      ?.removeAttribute("open");
+  }
+
   return (
-    <header className="navbar account-navbar">
+    <header
+      className="navbar account-navbar"
+      data-ui-release="ideahire-v3-20260919"
+    >
       <div className="account-navbar-brand">
         <Link
           className="navbar-home-back"
@@ -3383,7 +3448,10 @@ function AccountNavbar() {
         </Link>
       </div>
 
-      <nav className="nav-links">
+      <nav
+        className="nav-links account-primary-nav"
+        aria-label="Główna nawigacja konta"
+      >
         <NavLink
           to="/account"
           end
@@ -3395,25 +3463,9 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">Moje konto</span>
-          <span className="account-nav-label-short">Moje konto</span>
+          <span className="account-nav-label-full">Konto</span>
+          <span className="account-nav-label-short">Konto</span>
         </NavLink>
-
-        {!hasRestrictedAgeAccess && (
-          <NavLink
-            to="/find-talent"
-            className={({
-              isActive,
-            }) =>
-              isActive
-                ? "is-active"
-                : ""
-            }
-          >
-            <span className="account-nav-label-full">Dodaj zlecenie</span>
-            <span className="account-nav-label-short">Dodaj</span>
-          </NavLink>
-        )}
 
         <NavLink
           to="/jobs"
@@ -3425,7 +3477,7 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">Znajdź zlecenie</span>
+          <span className="account-nav-label-full">Zlecenia</span>
           <span className="account-nav-label-short">Zlecenia</span>
         </NavLink>
 
@@ -3439,110 +3491,172 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">Znajdź wykonawcę</span>
+          <span className="account-nav-label-full">Wykonawcy</span>
           <span className="account-nav-label-short">Wykonawcy</span>
         </NavLink>
 
         {!hasRestrictedAgeAccess && (
-          <>
-            <NavLink
-              to="/messages"
-              className={({
-                isActive,
-              }) =>
-                isActive
-                  ? "is-active"
-                  : ""
-              }
-            >
-              <span className="account-nav-label-full">Wiadomości</span>
-              <span className="account-nav-label-short">Wiadomości</span>
-            </NavLink>
-
-            <NavLink
-              to="/disputes"
-              className={({ isActive }) =>
-                `notifications-nav-link${
-                  isActive ? " is-active" : ""
-                }`
-              }
-            >
-              <span className="account-nav-label-full">Spory</span>
-              <span className="account-nav-label-short">Spory</span>
-
-              {hasDisputeNotifications && (
-                <span className="notification-dot" />
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/notifications"
-              className={({
-                isActive,
-              }) =>
-                `notifications-nav-link${
-                  isActive
-                    ? " is-active"
-                    : ""
-                }`
-              }
-            >
-              <span className="account-nav-label-full">Powiadomienia</span>
-              <span className="account-nav-label-short">Powiadomienia</span>
-
-              {hasNotifications && (
-                <span className="notification-dot" />
-              )}
-            </NavLink>
-          </>
-        )}
-
-        {moderationNotice && (
           <NavLink
-            to="/account-status"
-            className={({ isActive }) =>
-              `notifications-nav-link${isActive ? " is-active" : ""}`
+            to="/messages"
+            className={({
+              isActive,
+            }) =>
+              isActive
+                ? "is-active"
+                : ""
             }
           >
-            <span className="account-nav-label-full">Decyzja administracji</span>
-            <span className="account-nav-label-short">Decyzja</span>
-            {["scheduled", "active"].includes(moderationNotice.status) && (
-              <span className="notification-dot" />
-            )}
+            <span className="account-nav-label-full">Wiadomości</span>
+            <span className="account-nav-label-short">Wiadomości</span>
           </NavLink>
         )}
       </nav>
 
-      <div className="nav-actions">
-        <Link
-          className="account-mini"
-          to="/account"
-        >
-          <span className="account-mini-avatar">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt=""
-              />
-            ) : (
-              initial
+      <div className="nav-actions account-navbar-actions">
+        {!hasRestrictedAgeAccess && (
+          <NavLink
+            to="/find-talent"
+            className={({ isActive }) =>
+              `account-create-job-button${isActive ? " is-active" : ""}`
+            }
+          >
+            <span aria-hidden="true">+</span>
+            <span className="account-create-job-label">Dodaj zlecenie</span>
+          </NavLink>
+        )}
+
+        {!hasRestrictedAgeAccess && (
+          <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              `account-notification-button${isActive ? " is-active" : ""}`
+            }
+            aria-label="Powiadomienia"
+            title="Powiadomienia"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+              <path d="M10 21h4" />
+            </svg>
+
+            {hasNotifications && (
+              <span className="notification-dot" />
             )}
-          </span>
+          </NavLink>
+        )}
 
-          <span className="account-mini-name">
-            {userName}
-          </span>
-        </Link>
-
-        <button
-          className="btn btn-dark"
-          type="button"
-          onClick={
-            handleLogout
-          }
+        <details
+          className="account-menu"
+          ref={accountMenuRef}
         >
-          Wyloguj się
-        </button>
+          <summary
+            className="account-mini"
+            aria-label="Otwórz menu konta"
+          >
+            <span className="account-mini-avatar">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                />
+              ) : (
+                initial
+              )}
+            </span>
+
+            <span className="account-mini-name">
+              {userName}
+            </span>
+
+            <span
+              className="account-menu-caret"
+              aria-hidden="true"
+            >
+              ⌄
+            </span>
+
+            {(hasDisputeNotifications ||
+              (moderationNotice &&
+                ["scheduled", "active"].includes(
+                  moderationNotice.status
+                ))) && (
+              <span className="account-menu-alert-dot" />
+            )}
+          </summary>
+
+          <div className="account-menu-dropdown">
+            <div className="account-menu-identity">
+              <strong>{userName}</strong>
+              <span>{user?.email || "Konto IdeaHire"}</span>
+            </div>
+
+            <NavLink
+              to="/account"
+              onClick={closeAccountMenu}
+              className={({ isActive }) =>
+                isActive ? "is-active" : ""
+              }
+            >
+              Moje konto
+            </NavLink>
+
+            {!hasRestrictedAgeAccess && (
+              <NavLink
+                to="/disputes"
+                onClick={closeAccountMenu}
+                className={({ isActive }) =>
+                  `account-menu-notice-link${isActive ? " is-active" : ""}`
+                }
+              >
+                <span>Spory</span>
+                {hasDisputeNotifications && (
+                  <span className="notification-dot" />
+                )}
+              </NavLink>
+            )}
+
+            {moderationNotice && (
+              <NavLink
+                to="/account-status"
+                onClick={closeAccountMenu}
+                className={({ isActive }) =>
+                  `account-menu-notice-link${isActive ? " is-active" : ""}`
+                }
+              >
+                <span>Decyzja administracji</span>
+                {["scheduled", "active"].includes(
+                  moderationNotice.status
+                ) && (
+                  <span className="notification-dot" />
+                )}
+              </NavLink>
+            )}
+
+            <NavLink
+              to="/privacy-center"
+              onClick={closeAccountMenu}
+              className={({ isActive }) =>
+                isActive ? "is-active" : ""
+              }
+            >
+              Prywatność i dane
+            </NavLink>
+
+            <div className="account-menu-divider" />
+
+            <button
+              className="account-menu-logout"
+              type="button"
+              onClick={handleLogout}
+            >
+              Wyloguj się
+            </button>
+          </div>
+        </details>
       </div>
     </header>
   );
@@ -3576,7 +3690,10 @@ function AdminNavbar() {
   }
 
   return (
-    <header className="navbar admin-navbar">
+    <header
+      className="navbar admin-navbar"
+      data-ui-release="ideahire-v3-20260919"
+    >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
           Idea<span>Hire</span>
