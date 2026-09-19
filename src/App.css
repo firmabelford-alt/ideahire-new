@@ -1,4 +1,4 @@
-/* IDEA HIRE â COMPLETE UI V3 PACKAGE â RELEASE 2026-09-19 */
+/* IDEA HIRE â COMPLETE UI V4 PACKAGE â RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/App.css */
 
 /* IDEA HIRE â STRIPE CONNECT STYLES â BUILD 2026-09-05 */
@@ -25377,6 +25377,1497 @@ html[data-theme="dark"] .site-preferences {
   .how .step,
   .split-card,
   .final-cta {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â PROFESSIONAL UI V4
+   ACCOUNT WORKSPACE / STABLE FILTERS / LOWER HOME MOTION
+   RELEASE 2026-09-19
+========================================================= */
+
+:root {
+  --ih-release: 20260919-2;
+  --ih-v4-surface: #ffffff;
+  --ih-v4-surface-muted: #f8f9f6;
+  --ih-v4-line: #e2e5de;
+  --ih-v4-line-strong: #d5d9d0;
+  --ih-v4-ink: #191b18;
+  --ih-v4-copy: #656a62;
+  --ih-v4-violet: #6c5ce7;
+  --ih-v4-violet-soft: #f1efff;
+  --ih-v4-mint: #53d5b3;
+  --ih-v4-shadow: 0 18px 55px rgba(25, 27, 23, 0.07);
+}
+
+/* ---------- CONSISTENT APPLICATION CANVAS ---------- */
+
+.page > .app-page,
+.account-page > .app-page,
+.account-page > .messages-page {
+  width: min(1180px, calc(100% - 40px));
+  box-sizing: border-box;
+  margin-inline: auto;
+}
+
+.page > .app-page,
+.account-page > .app-page {
+  padding-bottom: 92px;
+}
+
+.app-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 390px);
+  align-items: end;
+  gap: 32px;
+  max-width: none;
+  margin-bottom: 30px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid var(--ih-v4-line);
+}
+
+.app-page-header > .section-label,
+.app-page-header > h1 {
+  grid-column: 1;
+}
+
+.app-page-header > h1 {
+  margin-bottom: 0;
+}
+
+.app-page-header > p {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  margin: 0 0 5px;
+  padding-left: 25px;
+  border-left: 1px solid var(--ih-v4-line);
+  line-height: 1.72;
+}
+
+.account-page-heading {
+  margin-bottom: 18px;
+}
+
+:is(
+  .account-card,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card
+) {
+  border-color: var(--ih-v4-line);
+}
+
+:is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid rgba(108, 92, 231, 0.22);
+  outline-offset: 3px;
+}
+
+/* ---------- ACCOUNT: SECTIONED, SCANNABLE WORKSPACE ---------- */
+
+.account-section-nav {
+  position: sticky;
+  z-index: 35;
+  top: 84px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 18px;
+  padding: 7px;
+  border: 1px solid rgba(218, 221, 213, 0.92);
+  border-radius: 17px;
+  background: rgba(255, 255, 253, 0.88);
+  box-shadow: 0 14px 38px rgba(25, 27, 23, 0.075);
+  backdrop-filter: blur(20px) saturate(145%);
+}
+
+.account-section-nav a {
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: #555a52;
+  font-size: 12px;
+  font-weight: 720;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.account-section-nav a span {
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #f0f1ed;
+  color: #7b8077;
+  font-size: 8px;
+  letter-spacing: 0.4px;
+}
+
+.account-section-nav a:hover {
+  border-color: rgba(108, 92, 231, 0.14);
+  background: var(--ih-v4-violet-soft);
+  color: #4f43ae;
+}
+
+.account-section-nav a:hover span {
+  background: #fff;
+  color: var(--ih-v4-violet);
+}
+
+.account-profile-workspace {
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.account-profile-workspace::before {
+  display: none;
+}
+
+.account-profile-workspace > .profile-preview {
+  position: relative;
+  min-height: 142px;
+  box-sizing: border-box;
+  margin: 0 0 16px;
+  padding: 27px 30px;
+  overflow: hidden;
+  border: 1px solid rgba(108, 92, 231, 0.13);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 91% 8%, rgba(83, 213, 179, 0.22), transparent 27%),
+    radial-gradient(circle at 70% 110%, rgba(108, 92, 231, 0.2), transparent 33%),
+    linear-gradient(145deg, #faf9ff, #f3fbf8);
+  box-shadow: var(--ih-v4-shadow);
+}
+
+.account-profile-workspace > .profile-preview::after {
+  content: "PROFIL";
+  position: absolute;
+  right: 31px;
+  bottom: -13px;
+  color: rgba(71, 64, 126, 0.055);
+  font-size: clamp(58px, 9vw, 108px);
+  font-weight: 900;
+  letter-spacing: -6px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.account-profile-workspace .profile-avatar {
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 13px 32px rgba(57, 52, 95, 0.17);
+}
+
+.account-profile-workspace .profile-info {
+  position: relative;
+  z-index: 1;
+}
+
+.account-profile-workspace .profile-info h2 {
+  font-size: clamp(23px, 3vw, 32px);
+  letter-spacing: -1px;
+}
+
+.account-profile-workspace > .stripe-connect-panel {
+  margin: 0 0 16px;
+  border-radius: 19px;
+  box-shadow: 0 13px 38px rgba(24, 26, 22, 0.055);
+}
+
+.account-profile-workspace > .account-form {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.account-form-section {
+  scroll-margin-top: 158px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  box-sizing: border-box;
+  padding: 26px;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 21px;
+  background: rgba(255, 255, 253, 0.96);
+  box-shadow: 0 13px 38px rgba(25, 27, 23, 0.045);
+}
+
+.account-form-section-heading {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 43px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  margin-bottom: 4px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--ih-v4-line);
+}
+
+.account-form-section-heading > span {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(108, 92, 231, 0.14);
+  border-radius: 13px;
+  background: var(--ih-v4-violet-soft);
+  color: #584cbd;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.7px;
+}
+
+.account-form-section-heading p,
+.account-form-section-heading h2,
+.account-form-section-heading small {
+  margin: 0;
+}
+
+.account-form-section-heading p {
+  margin-bottom: 3px;
+  color: var(--ih-v4-violet);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.account-form-section-heading h2 {
+  color: var(--ih-v4-ink);
+  font-size: 21px;
+  line-height: 1.2;
+  letter-spacing: -0.55px;
+}
+
+.account-form-section-heading small {
+  display: block;
+  margin-top: 5px;
+  color: #7a7f76;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.account-form-section > label,
+.account-form-section > fieldset {
+  min-width: 0;
+  margin: 0;
+}
+
+.account-form-section > label {
+  align-content: start;
+  padding: 0;
+}
+
+.account-form-section-identity > label:nth-of-type(3),
+.account-form-section-expertise > *,
+.account-form-section > .profile-specialties-field,
+.account-form-section > .profile-skills-field {
+  grid-column: 1 / -1;
+}
+
+.account-form-section :is(input, textarea, select) {
+  width: 100%;
+  box-sizing: border-box;
+  border-color: #dfe2dc;
+  background: #fafbf8;
+}
+
+.account-form-section input[type="file"] {
+  min-height: 58px;
+  padding: 10px;
+}
+
+.account-form-section :is(input, textarea, select):hover:not(:disabled) {
+  border-color: #ccd0c7;
+}
+
+.account-form-section :is(input, textarea, select):focus {
+  border-color: rgba(108, 92, 231, 0.55);
+  background: #fff;
+}
+
+.account-form-section input:disabled {
+  color: #7a7e76;
+  background: #f1f2ee;
+}
+
+.account-form-section .profile-specialties-field,
+.account-form-section .profile-skills-field {
+  padding: 20px;
+  border-color: #e1e4dd;
+  border-radius: 16px;
+  background: #fafbf8;
+}
+
+.profile-category-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-category-option {
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  box-sizing: border-box;
+  padding: 10px 13px;
+  border: 1px solid #dfe2dc;
+  border-radius: 12px;
+  background: #fff;
+  color: #4f544c;
+  font-size: 11px;
+  font-weight: 690;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.profile-category-option > span {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #f0f1ed;
+  color: #777c73;
+  font-size: 12px;
+}
+
+.profile-category-option:hover,
+.profile-category-option.is-selected {
+  border-color: rgba(108, 92, 231, 0.44);
+  background: #fff;
+  color: #4c41a5;
+  box-shadow: inset 0 0 0 1px rgba(108, 92, 231, 0.08);
+  transform: none;
+}
+
+.profile-category-option.is-selected > span {
+  background: var(--ih-v4-violet-soft);
+  color: var(--ih-v4-violet);
+}
+
+.profile-skill-entry {
+  align-items: stretch;
+}
+
+.profile-skill-entry .profile-add-skill {
+  min-width: 104px;
+  border-radius: 11px;
+  background: #232520;
+}
+
+.account-form-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 19px 20px;
+  border: 1px solid rgba(108, 92, 231, 0.15);
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(83, 213, 179, 0.13), transparent 30%),
+    #f7f5ff;
+}
+
+.account-form-save-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.account-form-save-copy strong {
+  color: var(--ih-v4-ink);
+  font-size: 13px;
+}
+
+.account-form-save-copy span {
+  color: #747970;
+  font-size: 11px;
+}
+
+.account-form-actions .auth-message {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0;
+}
+
+.account-form-actions .btn {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 190px;
+  margin: 0;
+}
+
+.account-profile-workspace > .profile-portfolio-manager {
+  scroll-margin-top: 158px;
+  margin-top: 28px;
+  padding: 28px;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--ih-v4-shadow);
+}
+
+.profile-portfolio-heading {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--ih-v4-line);
+}
+
+.profile-portfolio-edit-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-portfolio-edit-card {
+  min-height: 112px;
+  border-radius: 15px;
+  background: #fafbf8;
+}
+
+.profile-portfolio-editor {
+  border-radius: 18px;
+  background: #f7f8f5;
+}
+
+.account-dashboard-block,
+.my-jobs-section,
+.privacy-entry-card,
+.profile-content-report-history,
+.job-republication-panel {
+  scroll-margin-top: 158px;
+  margin-top: 18px;
+}
+
+.account-dashboard-block > .account-card {
+  margin: 0;
+}
+
+.discovery-settings-card,
+.job-republication-panel,
+.my-jobs-section,
+.profile-content-report-history {
+  padding: 28px;
+}
+
+.privacy-entry-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 27px;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 20px;
+  box-shadow: 0 13px 38px rgba(25, 27, 23, 0.045);
+}
+
+.privacy-entry-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--ih-v4-violet-soft);
+  color: var(--ih-v4-violet);
+}
+
+.privacy-entry-copy h2 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+  letter-spacing: -0.6px;
+}
+
+.privacy-entry-copy p {
+  max-width: 700px;
+  margin: 0;
+  color: var(--ih-v4-copy);
+  font-size: 12px;
+}
+
+.privacy-entry-link {
+  min-height: 43px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 11px;
+  background: #fff;
+  color: #343730;
+  font-size: 11px;
+  font-weight: 760;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ---------- SEARCH AND CATEGORY FILTERS: ZERO LAYOUT SHIFT ---------- */
+
+.page .jobs-search,
+.page .talent-controls {
+  margin-bottom: 24px;
+  padding: 17px;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 19px;
+  background: rgba(255, 255, 253, 0.96);
+  box-shadow: 0 13px 38px rgba(25, 27, 23, 0.045);
+}
+
+.page .jobs-search-box,
+.page .talent-search-box {
+  min-height: 56px;
+  box-sizing: border-box;
+  border: 1px solid #dfe2dc;
+  border-radius: 13px;
+  background: #f8f9f6;
+}
+
+.page .jobs-search-box input,
+.page .talent-search-box input {
+  min-height: 54px;
+  font-size: 14px;
+}
+
+.page .jobs-filter-row,
+.page .talent-category-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 7px;
+  margin-top: 13px;
+  overflow: visible;
+}
+
+.page .jobs-filter,
+.page .talent-category-row button {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 8px 9px;
+  border: 1px solid #dfe2dc;
+  border-radius: 11px;
+  background: #fff;
+  color: #666b63;
+  font-size: 10px;
+  font-weight: 720;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  transition: border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.page .jobs-filter:hover,
+.page .talent-category-row button:hover {
+  border-color: #c8ccc3;
+  background: #fff;
+  color: #262824;
+  transform: none;
+}
+
+.page .jobs-filter.active,
+.page .jobs-filter.active:hover,
+.page .talent-category-row button.is-active,
+.page .talent-category-row button.is-active:hover {
+  border-color: rgba(108, 92, 231, 0.52);
+  background: #fff;
+  color: #5145b0;
+  box-shadow: inset 0 -3px 0 rgba(108, 92, 231, 0.75);
+}
+
+.talent-order-row,
+.jobs-order-panel {
+  min-height: 68px;
+  box-sizing: border-box;
+  margin-top: 11px;
+  padding: 11px 12px;
+  border: 1px solid #e4e6e0;
+  border-radius: 13px;
+  background: #fafbf8;
+}
+
+.jobs-order-switch {
+  flex: 0 0 auto;
+  min-width: 220px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.jobs-order-switch button {
+  min-width: 0;
+  min-height: 39px;
+}
+
+.jobs-list {
+  gap: 12px;
+}
+
+.job-card {
+  min-height: 196px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 25px 26px 24px 29px;
+  border-radius: 18px;
+}
+
+.job-card h2 {
+  margin-top: 15px;
+  font-size: clamp(21px, 2.5vw, 28px);
+  line-height: 1.12;
+  letter-spacing: -0.8px;
+}
+
+.job-card > .btn,
+.job-card-actions,
+.job-card-footer {
+  margin-top: auto;
+}
+
+.talent-grid {
+  align-items: stretch;
+  gap: 12px;
+}
+
+.talent-card {
+  min-height: 355px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 23px;
+  border-radius: 18px;
+}
+
+.talent-card-topline {
+  min-height: 66px;
+}
+
+.talent-identity {
+  min-width: 0;
+}
+
+.talent-identity h2,
+.talent-identity p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.talent-about {
+  min-height: 66px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.talent-tag-list {
+  min-height: 64px;
+  align-content: start;
+}
+
+.talent-card-footer {
+  margin-top: auto;
+}
+
+.talent-ranking-note {
+  max-width: 760px;
+  margin: 24px auto 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #eef0eb;
+  color: #73786f;
+  font-size: 10px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* ---------- MESSAGES AND CHAT ---------- */
+
+.account-page > .messages-page {
+  margin-top: 0;
+  padding-top: clamp(50px, 6vw, 76px);
+  padding-bottom: 82px;
+}
+
+.account-page .messages-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 28px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--ih-v4-line);
+}
+
+.account-page .messages-heading .messages-heading-copy h1 {
+  margin: 7px 0 9px;
+  color: var(--ih-v4-ink);
+  font-size: clamp(42px, 6.4vw, 68px);
+  line-height: 0.98;
+  letter-spacing: -3.7px;
+}
+
+.account-page .messages-heading .messages-heading-copy p {
+  max-width: 620px;
+  margin: 0;
+  color: var(--ih-v4-copy);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.account-page .messages-overview {
+  min-width: 110px;
+  min-height: 77px;
+  display: grid;
+  place-content: center;
+  gap: 1px;
+  box-sizing: border-box;
+  padding: 12px 18px;
+  border: 1px solid rgba(108, 92, 231, 0.14);
+  border-radius: 17px;
+  background: linear-gradient(145deg, #f5f3ff, #eefaf6);
+  text-align: center;
+}
+
+.account-page .messages-overview strong {
+  color: #5145b0;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.account-page .messages-overview span {
+  color: #747970;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.65px;
+  text-transform: uppercase;
+}
+
+.account-page .messages-list {
+  overflow: hidden;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: var(--ih-v4-shadow);
+}
+
+.account-page .messages-list-header {
+  min-height: 39px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 0 20px 0 89px;
+  border-bottom: 1px solid var(--ih-v4-line);
+  background: #f7f8f5;
+  color: #8a8f86;
+  font-size: 8px;
+  font-weight: 820;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.account-page .messages-row {
+  min-height: 91px;
+  grid-template-columns: 54px minmax(0, 1fr) 92px;
+  gap: 16px;
+  box-sizing: border-box;
+  padding: 17px 20px;
+  border-bottom: 1px solid #eaebe6;
+  background: #fff;
+  transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.account-page .messages-row:hover {
+  border-color: #eaebe6;
+  background: #faf9ff;
+  box-shadow: inset 3px 0 0 var(--ih-v4-violet);
+  transform: none;
+}
+
+.account-page .messages-avatar {
+  border-radius: 16px;
+  background: linear-gradient(145deg, #efedff, #eaf9f4);
+  color: #554ab5;
+  box-shadow: inset 0 0 0 1px rgba(108, 92, 231, 0.08);
+}
+
+.account-page .messages-name {
+  color: var(--ih-v4-ink);
+  font-size: 13px;
+}
+
+.account-page .messages-job {
+  color: #83887f;
+  font-size: 10px;
+}
+
+.account-page .messages-preview {
+  color: #585d55;
+  font-size: 12px;
+}
+
+.account-page .messages-date {
+  align-self: center;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #f1f2ee;
+  color: #757a71;
+  font-size: 9px;
+  text-align: center;
+}
+
+.account-page .messages-empty {
+  padding: 72px 24px;
+  border: 1px solid var(--ih-v4-line);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(108, 92, 231, 0.1), transparent 33%),
+    #fff;
+  box-shadow: var(--ih-v4-shadow);
+}
+
+.chat-shell {
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+.chat-header {
+  min-height: 78px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--ih-v4-line);
+  background: #fff;
+}
+
+.chat-messages {
+  min-height: 460px;
+  padding: 26px;
+  background:
+    linear-gradient(rgba(108, 92, 231, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 92, 231, 0.025) 1px, transparent 1px),
+    #f8f9f6;
+  background-size: 24px 24px;
+}
+
+.chat-message {
+  border-radius: 15px;
+}
+
+.chat-form {
+  padding: 16px;
+  border-top: 1px solid var(--ih-v4-line);
+  background: #fff;
+}
+
+/* ---------- REMAINING USER VIEWS ---------- */
+
+.notifications-list,
+.privacy-request-list,
+.dispute-list,
+.profile-reviews-list,
+.job-republication-list {
+  gap: 10px;
+}
+
+:is(
+  .notification-decision-card,
+  .notification-accepted-card,
+  .notification-block-card,
+  .privacy-request-card,
+  .profile-review-card,
+  .job-republication-list article
+) {
+  border-radius: 16px;
+  border-color: var(--ih-v4-line);
+  background: #fff;
+  box-shadow: none;
+}
+
+:is(
+  .notification-decision-card,
+  .notification-accepted-card,
+  .notification-block-card,
+  .privacy-request-card,
+  .profile-review-card,
+  .job-republication-list article
+):hover {
+  border-color: var(--ih-v4-line-strong);
+  box-shadow: 0 13px 34px rgba(25, 27, 23, 0.055);
+}
+
+.profile-header,
+.profile-about,
+.profile-jobs-section,
+.profile-reviews-section,
+.profile-public-portfolio {
+  border-radius: 20px;
+}
+
+.profile-stat-card {
+  min-height: 105px;
+  border-radius: 15px;
+}
+
+.profile-public-album-cover {
+  border-radius: 17px;
+}
+
+/* ---------- LOWER HOMEPAGE: POLISHED AMBIENT MOTION ---------- */
+
+@keyframes ih-v4-process-rings {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    opacity: 0.72;
+  }
+
+  50% {
+    transform: translate3d(-24px, 18px, 0) rotate(9deg) scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes ih-v4-path-glow {
+  0% {
+    background-position: -180% 0;
+  }
+
+  100% {
+    background-position: 280% 0;
+  }
+}
+
+@keyframes ih-v4-orbit {
+  0%,
+  100% {
+    transform: rotate(-18deg) translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: rotate(-8deg) translate3d(-17px, -12px, 0) scale(1.05);
+  }
+}
+
+@keyframes ih-v4-cta-orbit-left {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(28px, 17px, 0) scale(1.08);
+  }
+}
+
+@keyframes ih-v4-cta-orbit-right {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-34px, -21px, 0) scale(0.94);
+  }
+}
+
+@keyframes ih-v4-card-breathe {
+  0%,
+  100% {
+    box-shadow: 0 25px 70px rgba(24, 24, 29, 0.13);
+  }
+
+  50% {
+    box-shadow: 0 31px 82px rgba(61, 49, 148, 0.19);
+  }
+}
+
+.app > main > .how.section::before {
+  animation: ih-v4-process-rings 12s ease-in-out infinite;
+}
+
+.how .steps::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(169, 157, 255, 0.18) 18%,
+    rgba(255, 255, 255, 0.9) 42%,
+    rgba(83, 213, 179, 0.72) 55%,
+    rgba(169, 157, 255, 0.18) 82%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: ih-v4-path-glow 7s linear infinite;
+}
+
+.how .step:nth-child(2) {
+  animation-delay: -1.8s;
+}
+
+.how .step:nth-child(3) {
+  animation-delay: -3.6s;
+}
+
+.split-card {
+  animation: ih-v4-card-breathe 8s ease-in-out infinite;
+}
+
+.split-card.light {
+  animation-delay: -4s;
+}
+
+.split-card::after {
+  animation: ih-v4-orbit 11s ease-in-out infinite;
+}
+
+.split-card.light::after {
+  animation-delay: -5.5s;
+}
+
+.split-card:hover::after {
+  animation-duration: 5s;
+}
+
+.final-cta::before {
+  animation: ih-v4-cta-orbit-left 13s ease-in-out infinite;
+}
+
+.final-cta::after {
+  animation: ih-v4-cta-orbit-right 15s ease-in-out infinite;
+}
+
+.final-cta .btn {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.final-cta .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.24);
+}
+
+.app > .footer {
+  position: relative;
+  overflow: hidden;
+}
+
+.app > .footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -32%;
+  width: 32%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ih-v4-violet), var(--ih-v4-mint), transparent);
+  animation: ih-v4-footer-line 8s ease-in-out infinite;
+}
+
+@keyframes ih-v4-footer-line {
+  0% {
+    left: -32%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+/* ---------- DARK MODE FOR THE NEW WORKSPACE ---------- */
+
+html[data-theme="dark"] {
+  --ih-v4-surface: #191a18;
+  --ih-v4-surface-muted: #121310;
+  --ih-v4-line: #343730;
+  --ih-v4-line-strong: #454940;
+  --ih-v4-ink: #f1f2ed;
+  --ih-v4-copy: #adb1a8;
+  --ih-v4-violet-soft: rgba(108, 92, 231, 0.15);
+  --ih-v4-shadow: 0 18px 55px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .account-section-nav {
+  border-color: #383b34;
+  background: rgba(22, 23, 20, 0.88);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.24);
+}
+
+html[data-theme="dark"] .account-section-nav a {
+  color: #b9bdb4;
+}
+
+html[data-theme="dark"] .account-section-nav a span {
+  background: #292b27;
+  color: #a6aaa1;
+}
+
+html[data-theme="dark"] .account-section-nav a:hover {
+  border-color: rgba(169, 157, 255, 0.2);
+  background: rgba(108, 92, 231, 0.14);
+  color: #c7c0ff;
+}
+
+html[data-theme="dark"] .account-profile-workspace {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-theme="dark"] .account-profile-workspace > .profile-preview {
+  border-color: rgba(169, 157, 255, 0.18);
+  background:
+    radial-gradient(circle at 91% 8%, rgba(83, 213, 179, 0.14), transparent 27%),
+    radial-gradient(circle at 70% 110%, rgba(108, 92, 231, 0.2), transparent 33%),
+    #191a1d;
+}
+
+html[data-theme="dark"] :is(
+  .account-form-section,
+  .account-profile-workspace > .profile-portfolio-manager,
+  .account-page .messages-list,
+  .account-page .messages-row,
+  .account-page .messages-empty,
+  .privacy-entry-card
+) {
+  border-color: var(--ih-v4-line) !important;
+  background: #191a18 !important;
+}
+
+html[data-theme="dark"] .account-form-section .profile-specialties-field,
+html[data-theme="dark"] .account-form-section .profile-skills-field,
+html[data-theme="dark"] .profile-portfolio-editor,
+html[data-theme="dark"] .profile-portfolio-edit-card,
+html[data-theme="dark"] .talent-order-row,
+html[data-theme="dark"] .jobs-order-panel {
+  border-color: #383b34;
+  background: #121310;
+}
+
+html[data-theme="dark"] .account-form-section :is(input, textarea, select),
+html[data-theme="dark"] .profile-category-option,
+html[data-theme="dark"] .page .jobs-filter,
+html[data-theme="dark"] .page .talent-category-row button {
+  border-color: #3b3e37;
+  background: #171815;
+  color: #c3c7bd;
+}
+
+html[data-theme="dark"] .profile-category-option:hover,
+html[data-theme="dark"] .profile-category-option.is-selected,
+html[data-theme="dark"] .page .jobs-filter.active,
+html[data-theme="dark"] .page .talent-category-row button.is-active {
+  border-color: rgba(169, 157, 255, 0.45);
+  background: #171815;
+  color: #c7c0ff;
+}
+
+html[data-theme="dark"] .account-form-actions {
+  border-color: rgba(169, 157, 255, 0.18);
+  background: rgba(108, 92, 231, 0.1);
+}
+
+html[data-theme="dark"] .account-page .messages-list-header,
+html[data-theme="dark"] .account-page .messages-date {
+  border-color: #343730;
+  background: #22241f;
+  color: #a3a79e;
+}
+
+html[data-theme="dark"] .account-page .messages-row:hover {
+  background: rgba(108, 92, 231, 0.1) !important;
+}
+
+html[data-theme="dark"] .account-page .messages-overview {
+  border-color: rgba(169, 157, 255, 0.18);
+  background: linear-gradient(145deg, rgba(108, 92, 231, 0.14), rgba(83, 213, 179, 0.08));
+}
+
+html[data-theme="dark"] .account-page .messages-overview strong {
+  color: #b7afff;
+}
+
+html[data-theme="dark"] .privacy-entry-link {
+  border-color: #3b3e37;
+  background: #22241f;
+  color: #d8dad4;
+}
+
+/* ---------- RESPONSIVE WORKSPACE ---------- */
+
+@media (max-width: 980px) {
+  .app-page-header {
+    grid-template-columns: minmax(0, 1fr) minmax(210px, 320px);
+  }
+
+  .account-section-nav {
+    top: 76px;
+  }
+
+  .account-section-nav a {
+    flex-direction: column;
+    gap: 4px;
+    min-height: 55px;
+    padding: 7px 4px;
+    font-size: 9px;
+  }
+
+  .account-section-nav a span {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+    font-size: 7px;
+  }
+
+  .page .jobs-filter-row,
+  .page .talent-category-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .profile-portfolio-edit-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .page > .app-page,
+  .account-page > .app-page,
+  .account-page > .messages-page {
+    width: calc(100% - 20px);
+  }
+
+  .app-page-header {
+    display: block;
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+  }
+
+  .app-page-header > p {
+    margin-top: 13px;
+    padding-left: 0;
+    border-left: 0;
+    font-size: 13px;
+  }
+
+  .account-section-nav {
+    top: 68px;
+    grid-template-columns: repeat(5, minmax(68px, 1fr));
+    margin-inline: -2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .account-section-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .account-section-nav a {
+    min-width: 68px;
+  }
+
+  .account-profile-workspace > .profile-preview {
+    min-height: 126px;
+    padding: 22px 19px;
+    border-radius: 18px;
+  }
+
+  .account-profile-workspace > .profile-preview::after {
+    display: none;
+  }
+
+  .account-form-section {
+    grid-template-columns: 1fr;
+    gap: 17px;
+    padding: 19px 16px;
+    border-radius: 17px;
+  }
+
+  .account-form-section-heading {
+    grid-column: 1;
+  }
+
+  .account-form-section-identity > label:nth-of-type(3),
+  .account-form-section-expertise > *,
+  .account-form-section > .profile-specialties-field,
+  .account-form-section > .profile-skills-field {
+    grid-column: 1;
+  }
+
+  .profile-category-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .account-form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .account-form-actions .btn,
+  .account-form-actions .auth-message {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+  }
+
+  .account-profile-workspace > .profile-portfolio-manager,
+  .discovery-settings-card,
+  .job-republication-panel,
+  .my-jobs-section,
+  .profile-content-report-history {
+    padding: 20px 16px;
+    border-radius: 17px;
+  }
+
+  .privacy-entry-card {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 14px;
+    padding: 19px 16px;
+  }
+
+  .privacy-entry-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .privacy-entry-link {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .page .jobs-filter-row,
+  .page .talent-category-row {
+    grid-template-columns: repeat(7, minmax(112px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .page .jobs-filter-row::-webkit-scrollbar,
+  .page .talent-category-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page .jobs-filter,
+  .page .talent-category-row button {
+    min-width: 112px;
+    min-height: 45px;
+    scroll-snap-align: start;
+  }
+
+  .talent-order-row,
+  .jobs-order-panel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .jobs-order-switch {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .talent-card {
+    min-height: 0;
+  }
+
+  .talent-about,
+  .talent-tag-list {
+    min-height: 0;
+  }
+
+  .account-page .messages-heading {
+    grid-template-columns: minmax(0, 1fr) 78px;
+    gap: 12px;
+  }
+
+  .account-page .messages-heading .messages-heading-copy h1 {
+    font-size: clamp(38px, 12vw, 52px);
+    letter-spacing: -2.5px;
+  }
+
+  .account-page .messages-overview {
+    min-width: 78px;
+    min-height: 68px;
+    padding: 8px;
+  }
+
+  .account-page .messages-list-header {
+    display: none;
+  }
+
+  .account-page .messages-row {
+    min-height: 82px;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 12px;
+  }
+
+  .account-page .messages-row .messages-date {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 4px;
+    padding: 4px 7px;
+  }
+
+  .account-page .messages-avatar {
+    border-radius: 14px;
+  }
+
+  .chat-messages {
+    min-height: 390px;
+    padding: 17px 12px;
+  }
+}
+
+@media (max-width: 430px) {
+  .profile-category-options {
+    grid-template-columns: 1fr;
+  }
+
+  .account-page .messages-heading {
+    grid-template-columns: 1fr;
+  }
+
+  .account-page .messages-overview {
+    width: 100%;
+    min-height: 56px;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-content: start;
+    gap: 8px;
+    padding-inline: 15px;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app > main > .how.section::before,
+  .how .steps::before,
+  .split-card,
+  .split-card::after,
+  .final-cta::before,
+  .final-cta::after,
+  .app > .footer::before {
     animation: none !important;
   }
 }
