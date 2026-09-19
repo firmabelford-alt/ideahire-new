@@ -1,4 +1,4 @@
-/* IDEA HIRE — NAVY PROFESSIONAL UI V5.2 — RELEASE 2026-09-19 */
+/* IDEA HIRE — NAVY PROFESSIONAL UI V5.3 — RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/router.jsx */
 
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
@@ -10,6 +10,8 @@ import React, {
   createContext,
   useRef,
 } from "react";
+
+import { flushSync } from "react-dom";
 
 import {
   BrowserRouter,
@@ -3383,7 +3385,7 @@ function AccountNavbar() {
     return (
       <header
         className="navbar account-navbar restricted-account-navbar"
-        data-ui-release="ideahire-v5-2-20260919"
+        data-ui-release="ideahire-v5-3-20260919"
       >
         <Link
           className="restricted-navbar-brand"
@@ -3446,7 +3448,7 @@ function AccountNavbar() {
   return (
     <header
       className="navbar account-navbar"
-      data-ui-release="ideahire-v5-2-20260919"
+      data-ui-release="ideahire-v5-3-20260919"
     >
       <div className="account-navbar-brand">
         <Link
@@ -3710,7 +3712,7 @@ function AdminNavbar() {
   return (
     <header
       className="navbar admin-navbar"
-      data-ui-release="ideahire-v5-2-20260919"
+      data-ui-release="ideahire-v5-3-20260919"
     >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
@@ -15435,6 +15437,7 @@ function ChatDisputePanel({
   const [dispute, setDispute] = useState(null);
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [panelExpanded, setPanelExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [form, setForm] = useState(EMPTY_DISPUTE_FORM);
@@ -15446,6 +15449,7 @@ function ChatDisputePanel({
     ) {
       setDispute(null);
       setFormOpen(false);
+      setPanelExpanded(false);
       return;
     }
 
@@ -15500,6 +15504,7 @@ function ChatDisputePanel({
     }
 
     setFormOpen(true);
+    setPanelExpanded(true);
     setMessage("");
     window.requestAnimationFrame(() => {
       document
@@ -15625,27 +15630,52 @@ function ChatDisputePanel({
 
   if (dispute) {
     return (
-      <section className="chat-dispute-card has-dispute">
-        <div className="chat-dispute-copy">
-          <span className="dispute-eyebrow">
-            Centrum sporu
+      <details
+        className="chat-collapsible-panel chat-dispute-disclosure has-dispute"
+        open={panelExpanded}
+        onToggle={(event) =>
+          setPanelExpanded(event.currentTarget.open)
+        }
+      >
+        <summary className="chat-collapsible-summary">
+          <span className="chat-collapsible-icon is-dispute" aria-hidden="true">
+            !
           </span>
-          <strong>
-            {formatDisputeNumber(dispute.case_number)}
-          </strong>
-          <small>
-            {getDisputeStatusLabel(dispute.status)}
-          </small>
-        </div>
+          <span className="chat-collapsible-copy">
+            <strong>
+              Spór {formatDisputeNumber(dispute.case_number)}
+            </strong>
+            <small>
+              {getDisputeStatusLabel(dispute.status)} · rozwiń szczegóły
+            </small>
+          </span>
+          <span className="chat-collapsible-chevron" aria-hidden="true" />
+        </summary>
 
-        <button
-          type="button"
-          className="dispute-secondary-button"
-          onClick={() => navigate(`/disputes/${dispute.id}`)}
-        >
-          Otwórz sprawę
-        </button>
-      </section>
+        <div className="chat-collapsible-body">
+          <section className="chat-dispute-card has-dispute">
+            <div className="chat-dispute-copy">
+              <span className="dispute-eyebrow">
+                Centrum sporu
+              </span>
+              <strong>
+                {formatDisputeNumber(dispute.case_number)}
+              </strong>
+              <small>
+                {getDisputeStatusLabel(dispute.status)}
+              </small>
+            </div>
+
+            <button
+              type="button"
+              className="dispute-secondary-button"
+              onClick={() => navigate(`/disputes/${dispute.id}`)}
+            >
+              Otwórz sprawę
+            </button>
+          </section>
+        </div>
+      </details>
     );
   }
 
@@ -15654,7 +15684,31 @@ function ChatDisputePanel({
   }
 
   return (
-    <section className="chat-dispute-card" id="chat-dispute-panel">
+    <details
+      className="chat-collapsible-panel chat-dispute-disclosure"
+      id="chat-dispute-panel"
+      open={panelExpanded}
+      onToggle={(event) =>
+        setPanelExpanded(event.currentTarget.open)
+      }
+    >
+      <summary className="chat-collapsible-summary">
+        <span className="chat-collapsible-icon is-dispute" aria-hidden="true">
+          !
+        </span>
+        <span className="chat-collapsible-copy">
+          <strong>Centrum sporu</strong>
+          <small>
+            {formOpen
+              ? "Formularz zgłoszenia · możesz go zwinąć"
+              : "Problem ze współpracą? Rozwiń panel"}
+          </small>
+        </span>
+        <span className="chat-collapsible-chevron" aria-hidden="true" />
+      </summary>
+
+      <div className="chat-collapsible-body">
+      <section className="chat-dispute-card">
       {!formOpen ? (
         <>
           <div className="chat-dispute-copy">
@@ -15864,7 +15918,9 @@ function ChatDisputePanel({
       {!formOpen && message && (
         <p className="dispute-inline-message is-error">{message}</p>
       )}
-    </section>
+      </section>
+      </div>
+    </details>
   );
 }
 
@@ -16072,12 +16128,17 @@ function AgreementPanel({
     useState(false);
 
   const [expanded, setExpanded] =
-    useState(true);
+    useState(false);
 
   useEffect(() => {
     setConfirmed(false);
-    setExpanded(true);
   }, [mode, agreement?.id]);
+
+  useEffect(() => {
+    if (mode === "form") {
+      setExpanded(true);
+    }
+  }, [mode]);
 
   if (!required) return null;
 
@@ -25539,12 +25600,136 @@ function Home() {
 }
 
 /* =========================================================
+   SMOOTH ROUTE TRANSITIONS
+========================================================= */
+
+function SmoothRouteTransitions() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const activeTransitionRef = useRef(null);
+
+  useEffect(() => {
+    function handleInternalLink(event) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const anchor =
+        event.target?.closest?.("a[href]");
+
+      if (
+        !anchor ||
+        anchor.hasAttribute("download") ||
+        anchor.hasAttribute("data-no-route-transition")
+      ) {
+        return;
+      }
+
+      const target =
+        anchor.getAttribute("target");
+
+      if (target && target !== "_self") {
+        return;
+      }
+
+      const nextUrl = new URL(
+        anchor.href,
+        window.location.href
+      );
+
+      if (
+        nextUrl.origin !== window.location.origin ||
+        nextUrl.protocol !== window.location.protocol
+      ) {
+        return;
+      }
+
+      const currentAddress =
+        `${location.pathname}${location.search}${location.hash}`;
+
+      const nextAddress =
+        `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+
+      if (
+        nextAddress === currentAddress ||
+        (
+          nextUrl.pathname === location.pathname &&
+          nextUrl.search === location.search
+        )
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const changeRoute = () => {
+        flushSync(() => {
+          navigate(nextAddress);
+        });
+      };
+
+      if (
+        typeof document.startViewTransition !== "function" ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        changeRoute();
+        return;
+      }
+
+      activeTransitionRef.current?.skipTransition?.();
+
+      const transition =
+        document.startViewTransition(changeRoute);
+
+      activeTransitionRef.current = transition;
+
+      transition.finished
+        .catch(() => {})
+        .finally(() => {
+          if (activeTransitionRef.current === transition) {
+            activeTransitionRef.current = null;
+          }
+        });
+    }
+
+    document.addEventListener(
+      "click",
+      handleInternalLink,
+      true
+    );
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        handleInternalLink,
+        true
+      );
+    };
+  }, [
+    location.hash,
+    location.pathname,
+    location.search,
+    navigate,
+  ]);
+
+  return null;
+}
+
+/* =========================================================
    ROUTER
 ========================================================= */
 
 function Router() {
   return (
     <BrowserRouter>
+      <SmoothRouteTransitions />
       <AuthProvider>
         <AccountRestrictionProvider>
           <AgeAccessProvider>
