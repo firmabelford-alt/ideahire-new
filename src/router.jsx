@@ -1,17 +1,16 @@
-/* IDEA HIRE — NAVY PROFESSIONAL UI V5.3 — RELEASE 2026-09-19 */
+/* IDEA HIRE — NAVY PROFESSIONAL UI V5.4 — RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/router.jsx */
 
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
 
 import React, {
+  useCallback,
   useEffect,
   useState,
   useContext,
   createContext,
   useRef,
 } from "react";
-
-import { flushSync } from "react-dom";
 
 import {
   BrowserRouter,
@@ -21,7 +20,7 @@ import {
   Link,
   NavLink,
   useLocation,
-  useNavigate,
+  useNavigate as useRouterNavigate,
   useParams,
 } from "react-router-dom";
 
@@ -54,6 +53,149 @@ import {
   usePrivateWork,
   WorkDeliveryPanel,
 } from "./PrivateWork";
+
+/* =========================================================
+   FLUID NAVIGATION ENGINE
+========================================================= */
+
+const ROUTE_LOADING_SELECTOR =
+  "[data-route-loading='true']";
+
+let activeRouteTransition = null;
+
+function waitForRouteContent(
+  maximumWait = 2200
+) {
+  return new Promise((resolve) => {
+    const root =
+      document.getElementById("root");
+
+    if (!root) {
+      resolve();
+      return;
+    }
+
+    let finished = false;
+    let animationFrame = 0;
+    let stableFrames = 0;
+
+    const observer =
+      new MutationObserver(checkReadiness);
+
+    const timeout =
+      window.setTimeout(
+        finish,
+        maximumWait
+      );
+
+    function finish() {
+      if (finished) return;
+
+      finished = true;
+      observer.disconnect();
+      window.clearTimeout(timeout);
+      window.cancelAnimationFrame(
+        animationFrame
+      );
+      resolve();
+    }
+
+    function checkReadiness() {
+      window.cancelAnimationFrame(
+        animationFrame
+      );
+
+      animationFrame =
+        window.requestAnimationFrame(
+          () => {
+            if (
+              document.querySelector(
+                ROUTE_LOADING_SELECTOR
+              )
+            ) {
+              stableFrames = 0;
+              return;
+            }
+
+            stableFrames += 1;
+
+            if (stableFrames >= 2) {
+              finish();
+              return;
+            }
+
+            checkReadiness();
+          }
+        );
+    }
+
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [
+        "data-route-loading",
+      ],
+    });
+
+    checkReadiness();
+  });
+}
+
+function startFluidRouteTransition(
+  updateRoute
+) {
+  const prefersReducedMotion =
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+  if (
+    typeof document.startViewTransition !== "function" ||
+    prefersReducedMotion
+  ) {
+    return updateRoute();
+  }
+
+  activeRouteTransition?.skipTransition?.();
+
+  const transition =
+    document.startViewTransition(
+      async () => {
+        await updateRoute();
+        await waitForRouteContent();
+      }
+    );
+
+  activeRouteTransition = transition;
+
+  transition.finished
+    .catch(() => {})
+    .finally(() => {
+      if (
+        activeRouteTransition === transition
+      ) {
+        activeRouteTransition = null;
+      }
+    });
+
+  return transition;
+}
+
+function useNavigate() {
+  const navigate = useRouterNavigate();
+
+  return useCallback(
+    (destination, options) =>
+      startFluidRouteTransition(
+        () => navigate(
+          destination,
+          options
+        )
+      ),
+    [navigate]
+  );
+}
 
 /* =========================================================
    AUTH CONTEXT
@@ -1725,7 +1867,10 @@ function DiscoveryPreferencesCard() {
     return (
       <section className="account-card discovery-settings-card">
         <span className="section-label">Dopasowanie</span>
-        <p>Ładowanie preferencji...</p>
+        <InlineRouteLoader
+          className="embedded-route-loader"
+          rows={2}
+        />
       </section>
     );
   }
@@ -1940,14 +2085,32 @@ function JobRepublicationPanel() {
 
 function LoadingScreen() {
   return (
-    <div className="page">
-      <div className="auth-card">
-        <div className="logo">
-          Idea<span>Hire</span>
-        </div>
+    <div
+      className="route-loading-canvas"
+      data-route-loading="true"
+      aria-busy="true"
+      aria-label="Przygotowywanie widoku"
+    />
+  );
+}
 
-        <p>Ładowanie...</p>
-      </div>
+function InlineRouteLoader({
+  className = "",
+  rows = 3,
+}) {
+  return (
+    <div
+      className={`route-inline-loader ${className}`.trim()}
+      data-route-loading="true"
+      aria-busy="true"
+      aria-label="Przygotowywanie zawartości"
+    >
+      {Array.from(
+        { length: rows },
+        (_, index) => (
+          <span key={index} />
+        )
+      )}
     </div>
   );
 }
@@ -2012,11 +2175,15 @@ function PublicOnlyRoute({
     errorMessage: restrictionError,
   } = useAccountRestriction();
 
-  if (
-    loading ||
-    (isLoggedIn && (staffLoading || restrictionLoading))
-  ) {
+  if (loading) {
     return <LoadingScreen />;
+  }
+
+  if (
+    isLoggedIn &&
+    (staffLoading || restrictionLoading)
+  ) {
+    return children;
   }
 
   if (isLoggedIn) {
@@ -2857,21 +3024,38 @@ function cleanSupabaseError(error, fallback) {
   return error?.message || fallback;
 }
 
-function useStaffRole(userId) {
+const StaffRoleContext = createContext(null);
+
+function StaffRoleProvider({ children }) {
+  const {
+    user,
+    loading: authLoading,
+  } = useAuth();
+
   const [staffRole, setStaffRole] = useState(null);
   const [staffLoading, setStaffLoading] = useState(true);
+  const [resolvedUserId, setResolvedUserId] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    const userId = user?.id || null;
+
     if (!userId) {
       setStaffRole(null);
+      setResolvedUserId(null);
       setStaffLoading(false);
       return;
     }
 
     let mounted = true;
 
-    async function loadStaffRole() {
-      setStaffLoading(true);
+    async function loadStaffRole(
+      showLoading = false
+    ) {
+      if (showLoading) {
+        setStaffLoading(true);
+      }
 
       const { data, error } = await supabase
         .from("ideahire_staff")
@@ -2884,27 +3068,117 @@ function useStaffRole(userId) {
 
       if (error) {
         console.error("STAFF ROLE ERROR:", error);
-        setStaffRole(null);
+
+        if (showLoading) {
+          setStaffRole(null);
+        }
       } else {
         setStaffRole(data?.role || null);
       }
 
-      setStaffLoading(false);
+      if (showLoading) {
+        setResolvedUserId(userId);
+        setStaffLoading(false);
+      }
     }
 
-    loadStaffRole();
+    loadStaffRole(true);
+
+    const channel = supabase
+      .channel(`staff-role-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_staff",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => loadStaffRole(false)
+      )
+      .subscribe();
+
+    const interval = window.setInterval(
+      () => loadStaffRole(false),
+      30000
+    );
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        loadStaffRole(false);
+      }
+    }
+
+    document.addEventListener(
+      "visibilitychange",
+      refreshWhenVisible
+    );
 
     return () => {
       mounted = false;
+      window.clearInterval(interval);
+      document.removeEventListener(
+        "visibilitychange",
+        refreshWhenVisible
+      );
+      supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [authLoading, user?.id]);
 
-  return {
-    staffRole,
-    staffLoading,
-    isStaff: staffRole === "owner" || staffRole === "admin",
-    isOwner: staffRole === "owner",
+  const roleReady =
+    !user?.id ||
+    resolvedUserId === user.id;
+
+  const value = {
+    userId: user?.id || null,
+    staffRole:
+      roleReady ? staffRole : null,
+    staffLoading:
+      authLoading ||
+      staffLoading ||
+      !roleReady,
+    isStaff:
+      roleReady &&
+      (staffRole === "owner" ||
+        staffRole === "admin"),
+    isOwner:
+      roleReady &&
+      staffRole === "owner",
   };
+
+  return (
+    <StaffRoleContext.Provider value={value}>
+      {children}
+    </StaffRoleContext.Provider>
+  );
+}
+
+function useStaffRole(userId) {
+  const value =
+    useContext(StaffRoleContext);
+
+  if (!value) {
+    return {
+      staffRole: null,
+      staffLoading: true,
+      isStaff: false,
+      isOwner: false,
+    };
+  }
+
+  if (
+    userId &&
+    value.userId !== userId
+  ) {
+    return {
+      staffRole: null,
+      staffLoading: true,
+      isStaff: false,
+      isOwner: false,
+    };
+  }
+
+  return value;
 }
 
 function getStoredNotificationIds(
@@ -3385,7 +3659,7 @@ function AccountNavbar() {
     return (
       <header
         className="navbar account-navbar restricted-account-navbar"
-        data-ui-release="ideahire-v5-3-20260919"
+        data-ui-release="ideahire-v5-4-20260919"
       >
         <Link
           className="restricted-navbar-brand"
@@ -3448,7 +3722,7 @@ function AccountNavbar() {
   return (
     <header
       className="navbar account-navbar"
-      data-ui-release="ideahire-v5-3-20260919"
+      data-ui-release="ideahire-v5-4-20260919"
     >
       <div className="account-navbar-brand">
         <Link
@@ -3712,7 +3986,7 @@ function AdminNavbar() {
   return (
     <header
       className="navbar admin-navbar"
-      data-ui-release="ideahire-v5-3-20260919"
+      data-ui-release="ideahire-v5-4-20260919"
     >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
@@ -4036,10 +4310,7 @@ function Login() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -4581,7 +4852,11 @@ function ResetPassword() {
     }
   }
 
-  if (loading) {
+  if (
+    loading &&
+    !recoveryReady &&
+    !message
+  ) {
     return <LoadingScreen />;
   }
 
@@ -4898,10 +5173,7 @@ function Register() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -5837,7 +6109,10 @@ function AccountStatus() {
         )}
 
         {loading ? (
-          <div className="privacy-empty-state">Ładowanie statusu konta...</div>
+          <InlineRouteLoader
+            className="status-route-loader"
+            rows={3}
+          />
         ) : restrictionError && !notice ? (
           <section className="moderation-status-error-card" role="alert">
             <span aria-hidden="true">!</span>
@@ -8279,7 +8554,10 @@ function Account() {
             </div>
 
             {portfolioLoading ? (
-              <p className="profile-portfolio-empty">Ładowanie portfolio...</p>
+              <InlineRouteLoader
+                className="embedded-route-loader"
+                rows={3}
+              />
             ) : portfolioItems.length > 0 ? (
               <div className="profile-portfolio-edit-list">
                 {portfolioItems.map((item) => (
@@ -8604,9 +8882,10 @@ function Account() {
           </h2>
 
           {jobsLoading ? (
-            <p>
-              Ładowanie zleceń...
-            </p>
+            <InlineRouteLoader
+              className="embedded-route-loader"
+              rows={3}
+            />
           ) : myJobs.length ===
             0 ? (
             <p>
@@ -9567,7 +9846,10 @@ function PrivacyCenter() {
           </div>
 
           {loading ? (
-            <div className="privacy-empty-state">Ładowanie wniosków...</div>
+            <InlineRouteLoader
+              className="privacy-route-loader"
+              rows={4}
+            />
           ) : requests.length === 0 ? (
             <div className="privacy-empty-state">
               <strong>Nie masz jeszcze żadnych wniosków</strong>
@@ -12760,9 +13042,10 @@ function Jobs() {
           )}
 
         {loading && (
-          <p>
-            Ładowanie zleceń...
-          </p>
+          <InlineRouteLoader
+            className="jobs-route-loader"
+            rows={4}
+          />
         )}
 
         {!loading &&
@@ -13258,10 +13541,10 @@ function Talent() {
         {message && <p className="auth-error">{message}</p>}
 
         {loading ? (
-          <section className="talent-empty-state" aria-live="polite">
-            <div className="loading-spinner" />
-            <p>Ładowanie profili...</p>
-          </section>
+          <InlineRouteLoader
+            className="talent-route-loader"
+            rows={4}
+          />
         ) : displayedProfiles.length === 0 ? (
           <section className="talent-empty-state">
             <span aria-hidden="true">◎</span>
@@ -14154,9 +14437,10 @@ function Notifications() {
         </div>
 
         {loading && (
-          <p>
-            Ładowanie powiadomień...
-          </p>
+          <InlineRouteLoader
+            className="notifications-route-loader"
+            rows={3}
+          />
         )}
 
         {!loading &&
@@ -15313,7 +15597,10 @@ function Messages() {
         </div>
 
         {loading ? (
-          <p>Ładowanie rozmów...</p>
+          <InlineRouteLoader
+            className="messages-route-loader"
+            rows={4}
+          />
         ) : errorMessage ? (
           <p className="auth-error">
             {errorMessage}
@@ -15622,9 +15909,10 @@ function ChatDisputePanel({
       return null;
     }
     return (
-      <section className="chat-dispute-card is-loading">
-        Sprawdzanie centrum sporu...
-      </section>
+      <InlineRouteLoader
+        className="chat-compact-route-loader"
+        rows={1}
+      />
     );
   }
 
@@ -16144,12 +16432,10 @@ function AgreementPanel({
 
   if (loading) {
     return (
-      <section className="agreement-gate agreement-loading">
-        <span className="agreement-lock-icon">
-          ◌
-        </span>
-        <p>Ładowanie warunków współpracy...</p>
-      </section>
+      <InlineRouteLoader
+        className="chat-compact-route-loader"
+        rows={1}
+      />
     );
   }
 
@@ -17888,9 +18174,10 @@ function Chat() {
 
         <div className="chat-shell">
           {loading ? (
-            <div className="chat-empty">
-              Ładowanie rozmowy...
-            </div>
+            <InlineRouteLoader
+              className="chat-route-loader"
+              rows={5}
+            />
           ) : errorMessage &&
             !conversation ? (
             <div className="chat-empty">
@@ -18519,7 +18806,10 @@ function Disputes() {
         </div>
 
         {loading ? (
-          <div className="dispute-state-card">Ładowanie spraw...</div>
+          <InlineRouteLoader
+            className="disputes-route-loader"
+            rows={4}
+          />
         ) : errorMessage ? (
           <div className="dispute-state-card is-error">{errorMessage}</div>
         ) : visibleDisputes.length === 0 ? (
@@ -19291,7 +19581,10 @@ function DisputeDetails() {
       <div className="account-page disputes-page">
         {isStaff ? <AdminNavbar /> : <AccountNavbar />}
         <main className="disputes-shell">
-          <div className="dispute-state-card">Ładowanie szczegółów sprawy...</div>
+          <InlineRouteLoader
+            className="disputes-route-loader"
+            rows={5}
+          />
         </main>
       </div>
     );
@@ -20475,7 +20768,10 @@ function AdminJobs() {
         </section>
 
         {loading ? (
-          <div className="dispute-state-card">Ładowanie zleceń...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         ) : message ? (
           <div className="dispute-state-card is-error">{message}</div>
         ) : visibleJobs.length === 0 ? (
@@ -20712,7 +21008,10 @@ function AdminEvidenceMessages() {
         </div>
 
         {loading ? (
-          <div className="dispute-state-card">Ładowanie wiadomości dowodowych...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         ) : message ? (
           <div className="dispute-state-card is-error">{message}</div>
         ) : visibleItems.length === 0 ? (
@@ -22624,7 +22923,10 @@ function AdminModeration() {
             <h2>Historia ograniczeń</h2>
           </div>
           {loading ? (
-            <div className="privacy-empty-state">Ładowanie decyzji...</div>
+            <InlineRouteLoader
+              className="admin-route-loader"
+              rows={4}
+            />
           ) : cases.length === 0 ? (
             <div className="privacy-empty-state">Nie wydano jeszcze żadnej decyzji.</div>
           ) : (
@@ -23136,7 +23438,10 @@ function AdminUserPrivacyAccount() {
         </Link>
 
         {loading ? (
-          <div className="privacy-empty-state">Ładowanie konta użytkownika...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         ) : (
           <>
             <header className="erasure-account-header">
@@ -24473,7 +24778,10 @@ function AdminPrivacyRequests() {
           </div>
 
           {loading ? (
-            <div className="privacy-empty-state">Ładowanie kolejki...</div>
+            <InlineRouteLoader
+              className="admin-route-loader"
+              rows={5}
+            />
           ) : visibleRequests.length === 0 ? (
             <div className="privacy-empty-state">
               <strong>Brak wniosków w tym widoku</strong>
@@ -25329,7 +25637,10 @@ function AdminPanel() {
       <div className="account-page admin-page">
         <AdminNavbar />
         <main className="admin-shell">
-          <div className="dispute-state-card">Ładowanie panelu administratora...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         </main>
       </div>
     );
@@ -25604,9 +25915,8 @@ function Home() {
 ========================================================= */
 
 function SmoothRouteTransitions() {
-  const navigate = useNavigate();
+  const navigate = useRouterNavigate();
   const location = useLocation();
-  const activeTransitionRef = useRef(null);
 
   useEffect(() => {
     function handleInternalLink(event) {
@@ -25669,34 +25979,9 @@ function SmoothRouteTransitions() {
 
       event.preventDefault();
 
-      const changeRoute = () => {
-        flushSync(() => {
-          navigate(nextAddress);
-        });
-      };
-
-      if (
-        typeof document.startViewTransition !== "function" ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ) {
-        changeRoute();
-        return;
-      }
-
-      activeTransitionRef.current?.skipTransition?.();
-
-      const transition =
-        document.startViewTransition(changeRoute);
-
-      activeTransitionRef.current = transition;
-
-      transition.finished
-        .catch(() => {})
-        .finally(() => {
-          if (activeTransitionRef.current === transition) {
-            activeTransitionRef.current = null;
-          }
-        });
+      startFluidRouteTransition(
+        () => navigate(nextAddress)
+      );
     }
 
     document.addEventListener(
@@ -25731,10 +26016,11 @@ function Router() {
     <BrowserRouter>
       <SmoothRouteTransitions />
       <AuthProvider>
-        <AccountRestrictionProvider>
-          <AgeAccessProvider>
-          <DiscoveryPreferencesProvider>
-          <Sorts />
+        <StaffRoleProvider>
+          <AccountRestrictionProvider>
+            <AgeAccessProvider>
+            <DiscoveryPreferencesProvider>
+            <Sorts />
 
         <DiscoveryOnboardingLayer />
 
@@ -26079,9 +26365,10 @@ function Router() {
             }
           />
         </Routes>
-          </DiscoveryPreferencesProvider>
-          </AgeAccessProvider>
-        </AccountRestrictionProvider>
+            </DiscoveryPreferencesProvider>
+            </AgeAccessProvider>
+          </AccountRestrictionProvider>
+        </StaffRoleProvider>
       </AuthProvider>
     </BrowserRouter>
   );
