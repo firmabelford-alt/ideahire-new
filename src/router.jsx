@@ -10453,6 +10453,9 @@ function Profile() {
   const [jobs, setJobs] =
     useState([]);
 
+  const [reviews, setReviews] =
+    useState([]);
+
   const [portfolioItems, setPortfolioItems] =
     useState([]);
 
@@ -10515,6 +10518,33 @@ function Profile() {
         setProfile(
           profileData
         );
+
+        const {
+          data: reviewsData,
+          error: reviewsError,
+        } = await supabase
+          .from("ideahire_job_reviews")
+          .select(
+            "id, contractor_id, rating, review_text, job_title_snapshot, created_at"
+          )
+          .eq("contractor_id", id)
+          .order("created_at", {
+            ascending: false,
+          });
+
+        if (reviewsError) {
+          console.error(
+            "PROFILE REVIEWS ERROR:",
+            reviewsError
+          );
+          setReviews([]);
+        } else {
+          setReviews(
+            Array.isArray(reviewsData)
+              ? reviewsData
+              : []
+          );
+        }
 
         if (
           user?.id &&
@@ -10809,6 +10839,21 @@ function Profile() {
     positiveReviews +
     neutralReviews +
     negativeReviews;
+
+  const averageRating =
+    reviews.length > 0
+      ? reviews.reduce(
+          (sum, review) =>
+            sum + Math.max(
+              1,
+              Math.min(
+                5,
+                Number(review.rating) || 0
+              )
+            ),
+          0
+        ) / reviews.length
+      : 0;
 
   const hasExpertiseDetails =
     visibleSpecialtyCategories.length > 0 ||
@@ -11258,6 +11303,127 @@ function Profile() {
                 </div>
               </div>
             </div>
+          )}
+
+          {!profileHidden && (
+            <section className="profile-reviews-section">
+              <div className="profile-reviews-heading">
+                <div>
+                  <span className="profile-expertise-label">
+                    Zweryfikowane współprace
+                  </span>
+                  <h2>Opinie zleceniodawców</h2>
+                </div>
+
+                {reviews.length > 0 && (
+                  <div className="profile-rating-summary">
+                    <strong>
+                      {averageRating.toLocaleString(
+                        "pl-PL",
+                        {
+                          minimumFractionDigits: 1,
+                          maximumFractionDigits: 1,
+                        }
+                      )}
+                    </strong>
+                    <span aria-label={`${averageRating.toFixed(1)} z 5 gwiazdek`}>
+                      {Array.from(
+                        { length: 5 },
+                        (_, index) => (
+                          <b
+                            className={
+                              index < Math.round(averageRating)
+                                ? "is-active"
+                                : ""
+                            }
+                            key={index}
+                          >
+                            ★
+                          </b>
+                        )
+                      )}
+                    </span>
+                    <small>
+                      {reviews.length} {reviews.length === 1
+                        ? "opinia"
+                        : reviews.length < 5
+                        ? "opinie"
+                        : "opinii"}
+                    </small>
+                  </div>
+                )}
+              </div>
+
+              {reviews.length === 0 ? (
+                <p className="profile-reviews-empty">
+                  Ten wykonawca nie otrzymał jeszcze opinii po zakończonym zleceniu.
+                </p>
+              ) : (
+                <div className="profile-reviews-list">
+                  {reviews.map((review) => {
+                    const rating = Math.max(
+                      1,
+                      Math.min(
+                        5,
+                        Number(review.rating) || 0
+                      )
+                    );
+
+                    return (
+                      <article
+                        className="profile-review-card"
+                        key={review.id}
+                      >
+                        <div className="profile-review-card-top">
+                          <div>
+                            <strong>
+                              {review.job_title_snapshot ||
+                                "Zakończone zlecenie"}
+                            </strong>
+                            <small>
+                              Zweryfikowana opinia po zakończeniu współpracy
+                            </small>
+                          </div>
+
+                          <span aria-label={`${rating} z 5 gwiazdek`}>
+                            {Array.from(
+                              { length: 5 },
+                              (_, index) => (
+                                <b
+                                  className={
+                                    index < rating
+                                      ? "is-active"
+                                      : ""
+                                  }
+                                  key={index}
+                                >
+                                  ★
+                                </b>
+                              )
+                            )}
+                          </span>
+                        </div>
+
+                        <p>{review.review_text}</p>
+
+                        <time dateTime={review.created_at}>
+                          {new Date(
+                            review.created_at
+                          ).toLocaleDateString(
+                            "pl-PL",
+                            {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )}
+                        </time>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           )}
 
           {!profileHidden &&
