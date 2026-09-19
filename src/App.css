@@ -1,4 +1,4 @@
-/* IDEA HIRE â NAVY PROFESSIONAL UI V5.2 â RELEASE 2026-09-19 */
+/* IDEA HIRE â NAVY PROFESSIONAL UI V5.3 â RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/App.css */
 
 /* IDEA HIRE â STRIPE CONNECT STYLES â BUILD 2026-09-05 */
@@ -28997,5 +28997,282 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
   .app > main > .how.section,
   .app > main > .final-cta {
     border-radius: 18px;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
+========================================================= */
+
+:root {
+  --ih-release: 20260919-6;
+}
+
+/* A route is animated once as a complete frame. The older per-section
+   entrance animation caused the visible white flash and small jump. */
+
+.page > main,
+.account-page > main,
+.app > main > section,
+.privacy-center-shell,
+.disputes-shell,
+.admin-shell {
+  animation: none !important;
+}
+
+@keyframes ih-v53-route-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ih-v53-route-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+::view-transition-old(root) {
+  animation: ih-v53-route-out 180ms ease-out both;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: ih-v53-route-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  mix-blend-mode: normal;
+}
+
+::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+
+/* Messages and chat use the same outer geometry as jobs and talent.
+   This removes the last horizontal jump on narrower desktop screens. */
+
+.account-page:has(> .messages-page),
+.account-page:has(> .chat-page) {
+  box-sizing: border-box;
+  padding: 1px 20px 76px;
+}
+
+.account-page > .messages-page,
+.account-page > .chat-page {
+  margin-top: 0 !important;
+  padding-top: 48px !important;
+}
+
+/* Compact, legible disclosure bars inside a conversation. */
+
+.account-page .agreement-workspace,
+.account-page .agreement-summary,
+.account-page .chat-collapsible-panel {
+  flex: 0 0 auto;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--ih-line) !important;
+  border-radius: 0;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink);
+  box-shadow: none;
+}
+
+.account-page .agreement-workspace-toggle,
+.account-page .agreement-summary > summary,
+.account-page .chat-collapsible-summary {
+  width: 100%;
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  padding: 11px 17px;
+  border: 0;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink);
+  list-style: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.account-page .agreement-workspace-toggle:hover,
+.account-page .agreement-summary > summary:hover,
+.account-page .chat-collapsible-summary:hover {
+  background: var(--ih-surface-soft) !important;
+}
+
+.account-page .agreement-summary > summary::-webkit-details-marker,
+.account-page .chat-collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.account-page .agreement-workspace-toggle > span:first-child,
+.account-page .agreement-summary-copy,
+.account-page .chat-collapsible-copy {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 3px;
+}
+
+.account-page .agreement-workspace-toggle strong,
+.account-page .agreement-summary-copy strong,
+.account-page .chat-collapsible-copy strong {
+  color: var(--ih-ink) !important;
+  font-size: 12px;
+  font-weight: 780;
+  line-height: 1.35;
+}
+
+.account-page .agreement-workspace-toggle small,
+.account-page .agreement-summary-copy small,
+.account-page .chat-collapsible-copy small {
+  overflow: hidden;
+  color: var(--ih-copy) !important;
+  font-size: 10px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-page .agreement-workspace-toggle b,
+.account-page .agreement-status-icon,
+.account-page .chat-collapsible-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid var(--ih-line);
+  border-radius: 9px;
+  background: var(--ih-surface-soft);
+  color: var(--ih-navy-700);
+  font-size: 16px;
+  font-weight: 760;
+}
+
+.account-page .agreement-workspace-toggle b {
+  order: 2;
+  margin-left: auto;
+}
+
+.account-page .chat-collapsible-icon.is-dispute {
+  background: #fff4f2;
+  color: #9c3e35;
+}
+
+.account-page .chat-collapsible-chevron {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  margin: 0 5px 4px 4px;
+  border-right: 2px solid var(--ih-muted);
+  border-bottom: 2px solid var(--ih-muted);
+  transform: rotate(45deg);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), margin 180ms ease;
+}
+
+.account-page .chat-collapsible-panel[open] .chat-collapsible-chevron {
+  margin-top: 5px;
+  margin-bottom: 0;
+  transform: rotate(225deg);
+}
+
+.account-page .chat-collapsible-body {
+  max-height: min(68vh, 760px);
+  overflow: auto;
+  border-top: 1px solid var(--ih-line);
+  background: var(--ih-surface-soft);
+}
+
+.account-page .chat-collapsible-body > .chat-dispute-card {
+  border: 0;
+  background: transparent !important;
+}
+
+.account-page .chat-dispute-card.has-dispute {
+  min-height: 72px;
+}
+
+.account-page .agreement-summary-action {
+  color: var(--ih-navy-700);
+  font-size: 10px;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.account-page .agreement-summary[open] .agreement-summary-action {
+  font-size: 0;
+}
+
+.account-page .agreement-summary[open] .agreement-summary-action::after {
+  content: "Ukryj ustalenia";
+  font-size: 10px;
+}
+
+.account-page .agreement-summary-body {
+  max-height: min(62vh, 680px);
+  overflow: auto;
+  border-top: 1px solid var(--ih-line);
+  background: var(--ih-surface-soft);
+}
+
+html[data-theme="dark"] .account-page .chat-collapsible-icon.is-dispute {
+  border-color: #50302f;
+  background: #291a1b;
+  color: #f0a39b;
+}
+
+@media (max-width: 720px) {
+  .account-page:has(> .messages-page),
+  .account-page:has(> .chat-page) {
+    padding: 1px 10px 62px;
+  }
+
+  .account-page > .messages-page,
+  .account-page > .chat-page {
+    padding-top: 34px !important;
+  }
+
+  .account-page .agreement-workspace-toggle,
+  .account-page .agreement-summary > summary,
+  .account-page .chat-collapsible-summary {
+    min-height: 58px;
+    padding: 9px 12px;
+  }
+
+  .account-page .agreement-workspace-toggle small,
+  .account-page .agreement-summary-copy small,
+  .account-page .chat-collapsible-copy small {
+    white-space: normal;
+  }
+
+  .account-page .agreement-summary-action {
+    display: none;
+  }
+
+  .account-page .chat-collapsible-body,
+  .account-page .agreement-summary-body {
+    max-height: 64vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms !important;
+  }
+
+  .account-page .chat-collapsible-chevron {
+    transition: none;
   }
 }
