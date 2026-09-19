@@ -1,4 +1,4 @@
-/* IDEA HIRE — COMPLETE UI V3 PACKAGE — RELEASE 2026-09-19 */
+/* IDEA HIRE — COMPLETE UI V4 PACKAGE — RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/router.jsx */
 
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
@@ -3365,7 +3365,7 @@ function AccountNavbar() {
     return (
       <header
         className="navbar account-navbar restricted-account-navbar"
-        data-ui-release="ideahire-v3-20260919"
+        data-ui-release="ideahire-v4-20260919"
       >
         <Link
           className="restricted-navbar-brand"
@@ -3428,7 +3428,7 @@ function AccountNavbar() {
   return (
     <header
       className="navbar account-navbar"
-      data-ui-release="ideahire-v3-20260919"
+      data-ui-release="ideahire-v4-20260919"
     >
       <div className="account-navbar-brand">
         <Link
@@ -3692,7 +3692,7 @@ function AdminNavbar() {
   return (
     <header
       className="navbar admin-navbar"
-      data-ui-release="ideahire-v3-20260919"
+      data-ui-release="ideahire-v4-20260919"
     >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
@@ -6140,7 +6140,7 @@ function LimitedAccount() {
       <AccountNavbar />
 
       <main className="app-page limited-account-shell">
-        <div className="app-page-header">
+        <div className="app-page-header account-page-heading">
           <span className="section-label">Twoje konto</span>
           <h1>Konto ograniczone</h1>
           <p>
@@ -7744,16 +7744,39 @@ function Account() {
           </span>
 
           <h1>
-            Mój profil
+            Centrum profilu
           </h1>
 
           <p>
-            Zarządzaj swoim
-            profilem IdeaHire.
+            Uporządkuj dane, specjalizacje, portfolio i ustawienia konta
+            w jednym miejscu.
           </p>
         </div>
 
-        <section className="account-card">
+        <nav className="account-section-nav" aria-label="Sekcje konta">
+          <a href="#account-profile-data">
+            <span aria-hidden="true">01</span>
+            Dane profilu
+          </a>
+          <a href="#account-expertise">
+            <span aria-hidden="true">02</span>
+            Specjalizacja
+          </a>
+          <a href="#account-portfolio">
+            <span aria-hidden="true">03</span>
+            Portfolio
+          </a>
+          <a href="#account-jobs">
+            <span aria-hidden="true">04</span>
+            Zlecenia
+          </a>
+          <a href="#account-preferences">
+            <span aria-hidden="true">05</span>
+            Ustawienia
+          </a>
+        </nav>
+
+        <section className="account-card account-profile-workspace">
           <div className="profile-preview">
             <div className="profile-avatar-wrapper">
               {avatarUrl ? (
@@ -7872,6 +7895,20 @@ function Account() {
             className="auth-form account-form"
             onSubmit={handleSave}
           >
+            <section
+              className="account-form-section account-form-section-identity"
+              id="account-profile-data"
+              aria-labelledby="account-profile-data-title"
+            >
+              <header className="account-form-section-heading">
+                <span aria-hidden="true">01</span>
+                <div>
+                  <p>Podstawowe dane</p>
+                  <h2 id="account-profile-data-title">Jak widzą Cię inni</h2>
+                  <small>Zdjęcie, nazwa i krótki opis Twojego profilu.</small>
+                </div>
+              </header>
+
             <label>
               Zdjęcie profilowe
 
@@ -7932,6 +7969,22 @@ function Account() {
                 na Twoim profilu.
               </small>
             </label>
+
+            </section>
+
+            <section
+              className="account-form-section account-form-section-expertise"
+              id="account-expertise"
+              aria-labelledby="account-expertise-title"
+            >
+              <header className="account-form-section-heading">
+                <span aria-hidden="true">02</span>
+                <div>
+                  <p>Oferta i doświadczenie</p>
+                  <h2 id="account-expertise-title">Twoja specjalizacja</h2>
+                  <small>Wybierz dziedziny i pokaż konkretne umiejętności.</small>
+                </div>
+              </header>
 
             <fieldset className="profile-specialties-field">
               <legend>
@@ -8093,6 +8146,22 @@ function Account() {
               </small>
             </label>
 
+            </section>
+
+            <section
+              className="account-form-section account-form-section-contact"
+              id="account-contact"
+              aria-labelledby="account-contact-title"
+            >
+              <header className="account-form-section-heading">
+                <span aria-hidden="true">03</span>
+                <div>
+                  <p>Konto i lokalizacja</p>
+                  <h2 id="account-contact-title">Dane kontaktowe</h2>
+                  <small>Adres logowania jest chroniony, a kraj widoczny na profilu.</small>
+                </div>
+              </header>
+
             <label>
               E-mail
 
@@ -8128,29 +8197,39 @@ function Account() {
               </small>
             </label>
 
-            {message && (
-              <p className="auth-message">
-                {message}
-              </p>
-            )}
+            </section>
 
-            <button
-              className="btn btn-dark btn-large"
-              type="submit"
-              disabled={
-                saving ||
-                uploading ||
-                profileDetailsLoading
-              }
-            >
-              {saving
-                ? "Zapisywanie..."
-                : "Zapisz zmiany →"}
-            </button>
+            <div className="account-form-actions">
+              <div className="account-form-save-copy">
+                <strong>Gotowe?</strong>
+                <span>Zapisz wszystkie zmiany wprowadzone w profilu.</span>
+              </div>
+
+              {message && (
+                <p className="auth-message">
+                  {message}
+                </p>
+              )}
+
+              <button
+                className="btn btn-dark btn-large"
+                type="submit"
+                disabled={
+                  saving ||
+                  uploading ||
+                  profileDetailsLoading
+                }
+              >
+                {saving
+                  ? "Zapisywanie..."
+                  : "Zapisz zmiany →"}
+              </button>
+            </div>
           </form>
 
           <section
             className="profile-portfolio-manager"
+            id="account-portfolio"
             aria-labelledby="portfolio-manager-title"
           >
             <div className="profile-portfolio-heading">
@@ -8409,9 +8488,11 @@ function Account() {
           </section>
         </section>
 
-        <DiscoveryPreferencesCard />
+        <div className="account-dashboard-block" id="account-preferences">
+          <DiscoveryPreferencesCard />
+        </div>
 
-        <section className="privacy-entry-card" aria-labelledby="privacy-entry-title">
+        <section className="privacy-entry-card" id="account-privacy" aria-labelledby="privacy-entry-title">
           <div className="privacy-entry-icon" aria-hidden="true">◉</div>
           <div className="privacy-entry-copy">
             <span className="section-label">Prywatność</span>
@@ -8492,7 +8573,7 @@ function Account() {
 
         <JobRepublicationPanel />
 
-        <section className="account-card my-jobs-section">
+        <section className="account-card my-jobs-section" id="account-jobs">
           <span className="section-label">
             Moje zlecenia
           </span>
@@ -15202,16 +15283,23 @@ function Messages() {
         `}</style>
 
         <div className="messages-heading">
-          <span className="section-label">
-            Twoje rozmowy
-          </span>
+          <div className="messages-heading-copy">
+            <span className="section-label">
+              Twoje rozmowy
+            </span>
 
-          <h1>Wiadomości</h1>
+            <h1>Wiadomości</h1>
 
-          <p>
-            Tutaj znajdziesz wszystkie rozmowy
-            rozpoczęte po zaakceptowaniu wykonawcy.
-          </p>
+            <p>
+              Wszystkie rozmowy dotyczące aktywnych i zakończonych
+              współprac w jednym, uporządkowanym miejscu.
+            </p>
+          </div>
+
+          <div className="messages-overview" aria-label="Liczba rozmów">
+            <strong>{conversations.length}</strong>
+            <span>{conversations.length === 1 ? "rozmowa" : "rozmów"}</span>
+          </div>
         </div>
 
         {loading ? (
@@ -15233,6 +15321,11 @@ function Messages() {
           </section>
         ) : (
           <div className="messages-list">
+            <div className="messages-list-header" aria-hidden="true">
+              <span>Ostatnie rozmowy</span>
+              <span>Ostatnia aktywność</span>
+            </div>
+
             {conversations.map(
               (conversation) => {
                 const profile =
