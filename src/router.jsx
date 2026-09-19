@@ -1,4 +1,4 @@
-/* IDEA HIRE — NAVY PROFESSIONAL UI V5 — RELEASE 2026-09-19 */
+/* IDEA HIRE — NAVY PROFESSIONAL UI V5.1 — RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/router.jsx */
 
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
@@ -2771,6 +2771,24 @@ function formatPolishDays(value) {
   return `${days} dni`;
 }
 
+function formatPolishJobsCount(value) {
+  const count = Math.max(0, Math.trunc(Number(value) || 0));
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+
+  if (count === 1) return "1 zlecenie";
+
+  if (
+    lastDigit >= 2
+    && lastDigit <= 4
+    && (lastTwoDigits < 12 || lastTwoDigits > 14)
+  ) {
+    return `${count} zlecenia`;
+  }
+
+  return `${count} zleceń`;
+}
+
 function getModerationDurationDetails(notice) {
   if (!notice) return null;
 
@@ -3365,7 +3383,7 @@ function AccountNavbar() {
     return (
       <header
         className="navbar account-navbar restricted-account-navbar"
-        data-ui-release="ideahire-v5-20260919"
+        data-ui-release="ideahire-v5-1-20260919"
       >
         <Link
           className="restricted-navbar-brand"
@@ -3428,7 +3446,7 @@ function AccountNavbar() {
   return (
     <header
       className="navbar account-navbar"
-      data-ui-release="ideahire-v5-20260919"
+      data-ui-release="ideahire-v5-1-20260919"
     >
       <div className="account-navbar-brand">
         <Link
@@ -3692,7 +3710,7 @@ function AdminNavbar() {
   return (
     <header
       className="navbar admin-navbar"
-      data-ui-release="ideahire-v5-20260919"
+      data-ui-release="ideahire-v5-1-20260919"
     >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
@@ -12718,21 +12736,11 @@ function Jobs() {
           !message &&
           jobs.length > 0 && (
             <div className="jobs-results-header">
-              <div>
+              <div className="jobs-results-copy">
+                <span>Wyniki wyszukiwania</span>
                 <strong>
-                  {
-                    filteredJobs.length
-                  }
-                </strong>{" "}
-                {filteredJobs.length ===
-                1
-                  ? "zlecenie"
-                  : filteredJobs.length >=
-                      2 &&
-                    filteredJobs.length <=
-                      4
-                  ? "zlecenia"
-                  : "zleceń"}
+                  {formatPolishJobsCount(filteredJobs.length)}
+                </strong>
               </div>
 
               {hasFilters && (
