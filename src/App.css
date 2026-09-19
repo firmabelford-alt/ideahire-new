@@ -21388,3 +21388,369 @@ html[data-theme="dark"] :is(.auth-form, .profile-upload, .account-form, .private
     animation-iteration-count: 1 !important;
   }
 }
+
+/* =========================================================
+   COMPLETED JOBS & VERIFIED REVIEWS
+========================================================= */
+
+.private-work-completion {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #b9dfc8;
+  border-radius: 15px;
+  background: #effaf3;
+  color: #174d2d;
+}
+
+.private-work-completion > span {
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: #267748;
+  color: #fff;
+  font-weight: 900;
+}
+
+.private-work-completion strong,
+.private-work-completion p {
+  display: block;
+  margin: 0;
+}
+
+.private-work-completion p {
+  margin-top: 3px;
+  color: #38684a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.private-work-review-form,
+.private-work-saved-review {
+  display: grid;
+  gap: 13px;
+  padding: 18px;
+  border: 1px solid #deded8;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.private-work-review-form h3,
+.private-work-review-form p,
+.private-work-saved-review p {
+  margin: 0;
+}
+
+.private-work-review-form h3 {
+  margin-top: 4px;
+  font-size: 20px;
+  letter-spacing: -0.4px;
+}
+
+.private-work-review-form > div:first-child > p,
+.private-work-review-status {
+  color: #676761;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.private-work-review-form label {
+  color: #343431;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.private-work-review-form textarea {
+  width: 100%;
+  min-height: 112px;
+  resize: vertical;
+  box-sizing: border-box;
+  border: 1px solid #d5d5cf;
+  border-radius: 13px;
+  background: #fff;
+  color: #171717;
+  padding: 13px 14px;
+  outline: none;
+  font: inherit;
+  line-height: 1.55;
+}
+
+.private-work-review-form textarea:focus {
+  border-color: #a68a35;
+  box-shadow: 0 0 0 4px rgba(191, 157, 51, 0.13);
+}
+
+.private-work-review-form > button.is-primary {
+  justify-self: start;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: #151515;
+  color: #fff;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.private-work-review-form > button.is-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.private-work-review-stars {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.private-work-review-stars button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #deded8;
+  border-radius: 11px;
+  background: #f7f7f4;
+  color: #c7c7c0;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.private-work-review-stars button:hover,
+.private-work-review-stars button.is-active {
+  border-color: #d0ac37;
+  background: #fff9e8;
+  color: #d5a400;
+}
+
+.private-work-review-stars > span {
+  margin-left: 8px;
+  color: #696963;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.private-work-saved-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.private-work-saved-review-heading > span,
+.profile-rating-summary > span,
+.profile-review-card-top > span {
+  display: inline-flex;
+  gap: 1px;
+  color: #d2d2cb;
+  font-size: 18px;
+  letter-spacing: -1px;
+}
+
+.private-work-saved-review-heading b,
+.profile-rating-summary b,
+.profile-review-card-top b {
+  color: inherit;
+}
+
+.private-work-saved-review-heading b.is-active,
+.profile-rating-summary b.is-active,
+.profile-review-card-top b.is-active {
+  color: #d5a400;
+}
+
+.private-work-review-status {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f3f3ef;
+}
+
+.profile-reviews-section {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid #e1e1db;
+  border-radius: 22px;
+  background: #fff;
+}
+
+.profile-reviews-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.profile-reviews-heading h2 {
+  margin: 5px 0 0;
+  color: #171717;
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -1px;
+}
+
+.profile-rating-summary {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-items: end;
+  column-gap: 9px;
+}
+
+.profile-rating-summary > strong {
+  color: #171717;
+  font-size: 25px;
+  letter-spacing: -0.8px;
+}
+
+.profile-rating-summary > small {
+  grid-column: 1 / -1;
+  color: #72726c;
+  font-size: 11px;
+}
+
+.profile-reviews-list {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-review-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #e5e5df;
+  border-radius: 17px;
+  background: #fafaf8;
+}
+
+.profile-review-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profile-review-card-top > div {
+  display: grid;
+  gap: 3px;
+}
+
+.profile-review-card-top strong {
+  color: #20201e;
+  overflow-wrap: anywhere;
+}
+
+.profile-review-card-top small,
+.profile-review-card time {
+  color: #777771;
+  font-size: 10px;
+}
+
+.profile-review-card > p,
+.profile-reviews-empty {
+  margin: 0;
+  color: #4d4d48;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.profile-reviews-empty {
+  padding: 18px;
+  border-radius: 15px;
+  background: #f5f5f1;
+  text-align: center;
+}
+
+html[data-theme="dark"] .private-work-completion {
+  border-color: #2f6745;
+  background: #17271d;
+  color: #9fe0b7;
+}
+
+html[data-theme="dark"] .private-work-completion p {
+  color: #9bc3a8;
+}
+
+html[data-theme="dark"] :is(.private-work-review-form, .private-work-saved-review, .profile-reviews-section) {
+  border-color: #373733;
+  background: #191918;
+}
+
+html[data-theme="dark"] .private-work-review-form h3,
+html[data-theme="dark"] .private-work-review-form label,
+html[data-theme="dark"] .profile-reviews-heading h2,
+html[data-theme="dark"] .profile-rating-summary > strong,
+html[data-theme="dark"] .profile-review-card-top strong {
+  color: #f2f2ee;
+}
+
+html[data-theme="dark"] .private-work-review-form textarea {
+  border-color: #41413c;
+  background: #10100f;
+  color: #f1f1ec;
+}
+
+html[data-theme="dark"] .private-work-review-stars button {
+  border-color: #41413c;
+  background: #252523;
+  color: #60605a;
+}
+
+html[data-theme="dark"] .private-work-review-stars button:hover,
+html[data-theme="dark"] .private-work-review-stars button.is-active {
+  border-color: #8f7426;
+  background: #2d2717;
+  color: #e0b321;
+}
+
+html[data-theme="dark"] .private-work-review-status,
+html[data-theme="dark"] .profile-reviews-empty {
+  background: #242422;
+  color: #bdbdb6;
+}
+
+html[data-theme="dark"] .profile-review-card {
+  border-color: #343431;
+  background: #141413;
+}
+
+html[data-theme="dark"] .profile-review-card > p {
+  color: #ccccC5;
+}
+
+@media (max-width: 700px) {
+  .private-work-review-form,
+  .private-work-saved-review,
+  .profile-reviews-section {
+    padding: 16px;
+  }
+
+  .profile-reviews-heading,
+  .profile-review-card-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profile-rating-summary {
+    justify-items: start;
+  }
+
+  .private-work-review-stars button {
+    width: 39px;
+    height: 39px;
+  }
+
+  .private-work-review-stars > span {
+    flex-basis: 100%;
+    margin: 5px 0 0;
+  }
+}
