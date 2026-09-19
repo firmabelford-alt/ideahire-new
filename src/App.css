@@ -1,4 +1,4 @@
-/* IDEA HIRE â NAVY PROFESSIONAL UI V5.1 â RELEASE 2026-09-19 */
+/* IDEA HIRE â NAVY PROFESSIONAL UI V5.2 â RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/App.css */
 
 /* IDEA HIRE â STRIPE CONNECT STYLES â BUILD 2026-09-05 */
@@ -28923,5 +28923,79 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 
   .page .jobs-clear-filters {
     width: 100%;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â V5.2 WIDER CANVAS / HERO PROPORTIONS
+========================================================= */
+
+:root {
+  --ih-release: 20260919-5;
+  --ih-shell-width: 1320px;
+  --ih-shell-gutter: 24px;
+}
+
+.account-profile-workspace > .profile-preview::after {
+  content: none !important;
+  display: none !important;
+}
+
+.app > main > .hero {
+  min-height: 610px;
+  grid-template-columns: minmax(0, 1.08fr) minmax(410px, 0.92fr);
+  padding: 58px 64px;
+  border-radius: 27px;
+}
+
+.hero-content {
+  max-width: 650px;
+}
+
+.hero-visual {
+  min-height: 470px;
+}
+
+.app > main > .how.section,
+.app > main > .final-cta {
+  border-radius: 25px;
+}
+
+@media (max-width: 1120px) {
+  :root {
+    --ih-shell-gutter: 24px;
+  }
+
+  .app > main > .hero {
+    grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.96fr);
+    padding-inline: 44px;
+  }
+}
+
+@media (max-width: 820px) {
+  .app > main > .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --ih-shell-gutter: 18px;
+  }
+
+  .app > main > .hero {
+    min-height: 0;
+    padding: 44px 20px 26px;
+    border-radius: 18px;
+  }
+
+  .hero-visual {
+    min-height: 400px;
+  }
+
+  .app > main > .how.section,
+  .app > main > .final-cta {
+    border-radius: 18px;
   }
 }
