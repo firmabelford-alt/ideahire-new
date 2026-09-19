@@ -1,4 +1,4 @@
-/* IDEA HIRE — COMPLETE UI V4 PACKAGE — RELEASE 2026-09-19 */
+/* IDEA HIRE — NAVY PROFESSIONAL UI V5 — RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/router.jsx */
 
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
@@ -3365,7 +3365,7 @@ function AccountNavbar() {
     return (
       <header
         className="navbar account-navbar restricted-account-navbar"
-        data-ui-release="ideahire-v4-20260919"
+        data-ui-release="ideahire-v5-20260919"
       >
         <Link
           className="restricted-navbar-brand"
@@ -3428,7 +3428,7 @@ function AccountNavbar() {
   return (
     <header
       className="navbar account-navbar"
-      data-ui-release="ideahire-v4-20260919"
+      data-ui-release="ideahire-v5-20260919"
     >
       <div className="account-navbar-brand">
         <Link
@@ -3692,7 +3692,7 @@ function AdminNavbar() {
   return (
     <header
       className="navbar admin-navbar"
-      data-ui-release="ideahire-v4-20260919"
+      data-ui-release="ideahire-v5-20260919"
     >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
