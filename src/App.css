@@ -1,4 +1,4 @@
-/* IDEA HIRE â NAVY PROFESSIONAL UI V5.5 â RELEASE 2026-09-19 */
+/* IDEA HIRE â NAVY PROFESSIONAL UI V5.5.1 â RELEASE 2026-09-19 */
 /* Full file for direct replacement: src/App.css */
 
 /* IDEA HIRE â STRIPE CONNECT STYLES â BUILD 2026-09-05 */
@@ -11129,6 +11129,27 @@ html[data-theme="dark"] :is(
 @media (prefers-reduced-motion: reduce) {
   .rotating-job-card {
     animation: none;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â V5.5.1 MESSAGES VERTICAL ALIGNMENT
+========================================================= */
+
+:root {
+  --ih-release: 20260919-9;
+}
+
+/* The messages title includes its description in the same left column,
+   which made its visual baseline sit slightly above other page titles. */
+
+.account-page > .messages-page {
+  padding-top: 60px !important;
+}
+
+@media (max-width: 720px) {
+  .account-page > .messages-page {
+    padding-top: 46px !important;
   }
 }
 
