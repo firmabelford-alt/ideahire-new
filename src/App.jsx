@@ -234,15 +234,43 @@ function App({ session, loading }) {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
+          const element = entry.target;
 
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
+          if (entry.isIntersecting) {
+            element.classList.add("is-visible");
+            element.classList.remove(
+              "is-above",
+              "is-below"
+            );
+            return;
+          }
+
+          element.classList.remove("is-visible");
+
+          const viewportTop =
+            entry.rootBounds?.top || 0;
+          const viewportBottom =
+            entry.rootBounds?.bottom ||
+            window.innerHeight;
+
+          if (
+            entry.boundingClientRect.bottom <=
+            viewportTop
+          ) {
+            element.classList.add("is-above");
+            element.classList.remove("is-below");
+          } else if (
+            entry.boundingClientRect.top >=
+            viewportBottom
+          ) {
+            element.classList.add("is-below");
+            element.classList.remove("is-above");
+          }
         });
       },
       {
-        threshold: 0.14,
-        rootMargin: "0px 0px -8% 0px",
+        threshold: [0, 0.08, 0.18],
+        rootMargin: "-5% 0px -5% 0px",
       }
     );
 
