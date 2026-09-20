@@ -11554,17 +11554,19 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE â V7.4 FULL-BLEED HOMEPAGE CANVAS
-   Continuous edge-to-edge colour, seamless section transition
-   and an edge-to-edge navigation bar on every route.
+   IDEA HIRE â V7.5 CONTINUOUS ATMOSPHERE
+   One shared background spans hero and categories. The colour
+   darkens softly at both viewport edges and has no section seam.
 ========================================================= */
 
 :root {
-  --ih-release: 20260920-7;
+  --ih-release: 20260920-8;
 }
 
 html {
   scrollbar-gutter: stable !important;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body,
@@ -11579,6 +11581,11 @@ body,
   width: 100%;
 }
 
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 .app.app {
   position: relative;
   isolation: isolate;
@@ -11588,19 +11595,50 @@ body,
 .app.app > main {
   position: relative;
   isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: auto;
+}
+
+.app.app > main::before {
+  content: "";
+  position: relative;
+  z-index: 0;
+  grid-column: 1;
+  grid-row: 1 / 3;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  justify-self: stretch;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    radial-gradient(ellipse 48% 70% at -6% 18%, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.62) 46%, transparent 100%),
+    radial-gradient(ellipse 48% 70% at 106% 18%, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.62) 46%, transparent 100%),
+    radial-gradient(ellipse 72% 42% at 73% 11%, rgba(57, 111, 183, 0.48) 0%, rgba(29, 70, 121, 0.2) 48%, transparent 78%),
+    linear-gradient(
+      180deg,
+      #020711 0%,
+      #061529 38%,
+      #0d2d4d 53%,
+      #1d5078 63%,
+      #66849f 73%,
+      #b7c6d3 83%,
+      #e5ebf1 93%,
+      #f4f6f9 100%
+    );
+  background-size: 36px 36px, 36px 36px, auto, auto, auto, auto;
+  pointer-events: none;
 }
 
 .app.app > main > .hero {
+  grid-column: 1;
+  grid-row: 1;
   z-index: 2;
   overflow: visible;
   border: 0 !important;
-  background:
-    radial-gradient(circle at 88% 10%, rgba(95, 146, 224, 0.13), transparent 31%),
-    linear-gradient(145deg, rgba(4, 14, 27, 0.42), rgba(17, 43, 77, 0.2)) !important;
-  background-size: auto, auto !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.035),
-    0 30px 90px rgba(3, 13, 27, 0.13);
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app.app > main > .hero::after {
@@ -11626,9 +11664,26 @@ body,
 }
 
 .app.app > main > .categories.section {
+  grid-column: 1;
+  grid-row: 2;
   position: relative;
   z-index: 1;
   isolation: isolate;
+}
+
+.app.app > main > .how.section {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.app.app > main > .split-section.section {
+  grid-column: 1;
+  grid-row: 4;
+}
+
+.app.app > main > .final-cta {
+  grid-column: 1;
+  grid-row: 5;
 }
 
 .app.app > main > .categories.section::before {
@@ -11686,17 +11741,42 @@ html[data-theme="dark"] .app.app > main > .categories.section::before {
     );
 }
 
+.app.app > main > .hero::after,
+.app.app > main > .categories.section::before {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-theme="dark"] .app.app > main::before {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.016) 1px, transparent 1px),
+    radial-gradient(ellipse 48% 70% at -6% 18%, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.68) 46%, transparent 100%),
+    radial-gradient(ellipse 48% 70% at 106% 18%, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.68) 46%, transparent 100%),
+    radial-gradient(ellipse 72% 42% at 73% 11%, rgba(47, 94, 160, 0.4) 0%, rgba(22, 55, 97, 0.18) 48%, transparent 78%),
+    linear-gradient(
+      180deg,
+      #010409 0%,
+      #04101e 38%,
+      #092039 56%,
+      #0d243b 70%,
+      #0b1826 84%,
+      #070b11 100%
+    );
+  background-size: 36px 36px, 36px 36px, auto, auto, auto, auto;
+}
+
 html body .navbar.navbar.home-navbar,
 html body .navbar.navbar.account-navbar,
 html body .navbar.navbar.admin-navbar,
 html body .navbar.navbar.restricted-navbar,
 html body .navbar.navbar.restricted-account-navbar {
   top: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
   margin-top: 0 !important;
-  margin-right: 0 !important;
-  margin-left: 0 !important;
+  margin-right: calc(50% - 50vw) !important;
+  margin-left: calc(50% - 50vw) !important;
   border-right: 0 !important;
   border-left: 0 !important;
   border-radius: 0 !important;
@@ -11722,9 +11802,7 @@ html:not([data-theme="dark"]) body .navbar.navbar.restricted-account-navbar {
 
 @media (max-width: 720px) {
   .app.app > main > .hero {
-    background:
-      radial-gradient(circle at 78% 8%, rgba(95, 146, 224, 0.12), transparent 34%),
-      linear-gradient(155deg, rgba(4, 14, 27, 0.38), rgba(17, 43, 77, 0.16)) !important;
+    background: transparent !important;
   }
 
   .app.app > main > .hero::after {
