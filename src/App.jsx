@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import "./App.css";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
@@ -184,6 +184,77 @@ function App({ session, loading }) {
       window.clearInterval(interval);
     };
   }, [recentJobs.length]);
+
+  useLayoutEffect(() => {
+    const root = document.querySelector(".app");
+
+    if (!root) return undefined;
+
+    const revealElements = Array.from(
+      root.querySelectorAll(".home-reveal")
+    );
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    root.classList.add("home-motion-ready");
+
+    revealElements.forEach((element) => {
+      const group = element.parentElement;
+      const groupedElements = group
+        ? Array.from(group.children).filter((child) =>
+            child.classList.contains("home-reveal")
+          )
+        : [];
+      const position = Math.max(
+        0,
+        groupedElements.indexOf(element)
+      );
+
+      element.style.setProperty(
+        "--home-reveal-delay",
+        `${Math.min(position, 5) * 75}ms`
+      );
+    });
+
+    if (
+      prefersReducedMotion ||
+      !("IntersectionObserver" in window)
+    ) {
+      revealElements.forEach((element) => {
+        element.classList.add("is-visible");
+      });
+
+      return () => {
+        root.classList.remove("home-motion-ready");
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.14,
+        rootMargin: "0px 0px -8% 0px",
+      }
+    );
+
+    revealElements.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => {
+      observer.disconnect();
+      root.classList.remove("home-motion-ready");
+    };
+  }, []);
 
   async function checkNotifications(currentSession) {
     const userId = currentSession?.user?.id;
@@ -571,7 +642,7 @@ function App({ session, loading }) {
           className="categories section"
           id="categories"
         >
-          <div className="section-heading">
+          <div className="section-heading home-reveal">
             <div>
               <span className="section-label">Kategorie</span>
 
@@ -591,7 +662,7 @@ function App({ session, loading }) {
           <div className="category-grid">
             {categories.map((category, index) => (
               <button
-                className="category-card"
+                className="category-card home-reveal"
                 key={category}
                 type="button"
                 onClick={() =>
@@ -621,7 +692,7 @@ function App({ session, loading }) {
           className="how section"
           id="how-it-works"
         >
-          <div className="section-heading centered">
+          <div className="section-heading centered home-reveal">
             <span className="section-label">
               Jak to działa
             </span>
@@ -634,7 +705,7 @@ function App({ session, loading }) {
           </div>
 
           <div className="steps">
-            <article className="step">
+            <article className="step home-reveal">
               <span>01</span>
 
               <h3>Opisz potrzebę</h3>
@@ -645,7 +716,7 @@ function App({ session, loading }) {
               </p>
             </article>
 
-            <article className="step">
+            <article className="step home-reveal">
               <span>02</span>
 
               <h3>Wybierz osobę</h3>
@@ -656,7 +727,7 @@ function App({ session, loading }) {
               </p>
             </article>
 
-            <article className="step">
+            <article className="step home-reveal">
               <span>03</span>
 
               <h3>Zrealizuj projekt</h3>
@@ -670,7 +741,7 @@ function App({ session, loading }) {
         </section>
 
         <section
-          className="split-section section"
+          className="split-section section home-reveal"
           id="for-users"
         >
           <div className="split-card">
@@ -714,7 +785,7 @@ function App({ session, loading }) {
           </div>
         </section>
 
-        <section className="final-cta">
+        <section className="final-cta home-reveal">
           <span className="section-label">IdeaHire</span>
 
           <h2>
@@ -734,7 +805,7 @@ function App({ session, loading }) {
         </section>
       </main>
 
-      <footer className="footer">
+      <footer className="footer home-reveal">
         <div>
           <Link className="logo" to="/">
             Idea<span>Hire</span>
