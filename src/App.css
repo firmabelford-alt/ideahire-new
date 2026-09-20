@@ -11554,14 +11554,29 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE â V7.3 SEAMLESS HOMEPAGE CANVAS
-   The navigation keeps its V7.2 geometry. Only the landing
-   background, hero surface and the hero-to-content transition
-   are changed here.
+   IDEA HIRE â V7.4 FULL-BLEED HOMEPAGE CANVAS
+   Continuous edge-to-edge colour, seamless section transition
+   and an edge-to-edge navigation bar on every route.
 ========================================================= */
 
 :root {
-  --ih-release: 20260920-6;
+  --ih-release: 20260920-7;
+}
+
+html {
+  scrollbar-gutter: stable !important;
+}
+
+body,
+#root,
+.app.app,
+.page,
+.account-page,
+.privacy-center-page,
+.disputes-page,
+.admin-page,
+.moderation-user-page {
+  width: 100%;
 }
 
 .app.app {
@@ -11578,7 +11593,7 @@ html[data-theme="dark"] .app .split-card.light {
 .app.app > main > .hero {
   z-index: 2;
   overflow: visible;
-  border-color: rgba(255, 255, 255, 0.07);
+  border: 0 !important;
   background:
     radial-gradient(circle at 88% 10%, rgba(95, 146, 224, 0.13), transparent 31%),
     linear-gradient(145deg, rgba(4, 14, 27, 0.42), rgba(17, 43, 77, 0.2)) !important;
@@ -11591,7 +11606,7 @@ html[data-theme="dark"] .app .split-card.light {
 .app.app > main > .hero::after {
   content: "";
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   top: -132px;
   right: auto;
   bottom: 0;
@@ -11619,11 +11634,11 @@ html[data-theme="dark"] .app .split-card.light {
 .app.app > main > .categories.section::before {
   content: "";
   position: absolute;
-  z-index: -1;
-  top: 0;
+  z-index: 0;
+  top: -2px;
   left: 50%;
   width: 100vw;
-  height: min(560px, 78%);
+  height: calc(100% + 4px);
   transform: translateX(-50%);
   background:
     radial-gradient(circle at 86% 8%, rgba(89, 135, 197, 0.22), transparent 31%),
@@ -11633,10 +11648,16 @@ html[data-theme="dark"] .app .split-card.light {
       #1d3f60 18%,
       #6f8ba4 42%,
       #cbd7e2 68%,
-      rgba(241, 244, 248, 0.78) 86%,
-      rgba(244, 246, 249, 0) 100%
+      #e7edf3 86%,
+      #f4f6f9 100%
     );
   pointer-events: none;
+}
+
+.app.app > main > .categories.section > .section-heading,
+.app.app > main > .categories.section > .category-grid {
+  position: relative;
+  z-index: 1;
 }
 
 .app.app > main > .categories .section-heading h2 {
@@ -11660,9 +11681,33 @@ html[data-theme="dark"] .app.app > main > .categories.section::before {
       #102b4d 0%,
       #173653 22%,
       #101e2d 58%,
-      rgba(7, 11, 17, 0.9) 82%,
-      rgba(7, 11, 17, 0) 100%
+      #0a111a 82%,
+      #070b11 100%
     );
+}
+
+html body .navbar.navbar.home-navbar,
+html body .navbar.navbar.account-navbar,
+html body .navbar.navbar.admin-navbar,
+html body .navbar.navbar.restricted-navbar,
+html body .navbar.navbar.restricted-account-navbar {
+  top: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin-top: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  border-right: 0 !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+}
+
+html:not([data-theme="dark"]) body .navbar.navbar.home-navbar,
+html:not([data-theme="dark"]) body .navbar.navbar.account-navbar,
+html:not([data-theme="dark"]) body .navbar.navbar.admin-navbar,
+html:not([data-theme="dark"]) body .navbar.navbar.restricted-navbar,
+html:not([data-theme="dark"]) body .navbar.navbar.restricted-account-navbar {
+  background: rgba(255, 255, 255, 0.97) !important;
 }
 
 @media (max-width: 900px) {
@@ -11671,13 +11716,12 @@ html[data-theme="dark"] .app.app > main > .categories.section::before {
   }
 
   .app.app > main > .categories.section::before {
-    height: min(500px, 54%);
+    height: calc(100% + 4px);
   }
 }
 
 @media (max-width: 720px) {
   .app.app > main > .hero {
-    border-color: rgba(255, 255, 255, 0.055);
     background:
       radial-gradient(circle at 78% 8%, rgba(95, 146, 224, 0.12), transparent 34%),
       linear-gradient(155deg, rgba(4, 14, 27, 0.38), rgba(17, 43, 77, 0.16)) !important;
@@ -11689,7 +11733,7 @@ html[data-theme="dark"] .app.app > main > .categories.section::before {
   }
 
   .app.app > main > .categories.section::before {
-    height: min(430px, 36%);
+    height: calc(100% + 4px);
     background:
       radial-gradient(circle at 88% 6%, rgba(89, 135, 197, 0.2), transparent 34%),
       linear-gradient(
@@ -11698,7 +11742,7 @@ html[data-theme="dark"] .app.app > main > .categories.section::before {
         #244866 20%,
         #8fa5b9 46%,
         #dce5ed 72%,
-        rgba(244, 246, 249, 0) 100%
+        #f4f6f9 100%
       );
   }
 
