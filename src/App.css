@@ -11133,6 +11133,427 @@ html[data-theme="dark"] :is(
 }
 
 /* =========================================================
+   IDEA HIRE â V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
+   Only navigation spans the viewport. Content returns to 1320px.
+========================================================= */
+
+:root {
+  --ih-release: 20260920-4;
+  --ih-shell-width: 1320px;
+  --ih-shell-gutter: 24px;
+}
+
+/* The only near-edge-to-edge component is the top navigation. */
+
+.navbar.home-navbar,
+.navbar.account-navbar,
+.navbar.admin-navbar,
+.navbar.restricted-navbar,
+.navbar.restricted-account-navbar {
+  width: calc(100% - 12px) !important;
+  max-width: none !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+/* All page content returns to the previous readable width. */
+
+.app > main > .hero,
+.app > main > .section,
+.app > main > .how.section,
+.app > main > .split-section.section,
+.app > main > .final-cta,
+.app > .footer,
+.page > .app-page,
+.account-page > .app-page,
+.account-page > .messages-page,
+.account-page > .chat-page,
+.privacy-center-shell,
+.disputes-shell,
+.age-access-shell,
+.admin-shell,
+.moderation-user-shell,
+.limited-account-shell {
+  width: min(1320px, calc(100% - 24px)) !important;
+  max-width: 1320px !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.cookie-policy-shell,
+.legal-document-shell {
+  width: min(1080px, calc(100% - 40px)) !important;
+  max-width: 1080px !important;
+}
+
+@media (min-width: 1121px) {
+  .app .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar {
+    min-height: 86px;
+    padding: 12px 16px 12px 24px;
+    border-radius: 23px;
+  }
+
+  .navbar .logo,
+  .home-navbar .logo,
+  .account-navbar .logo,
+  .admin-navbar .logo {
+    font-size: 25px;
+  }
+
+  .home-navbar .nav-links a,
+  .home-navbar .nav-links.home-nav-links a,
+  .account-navbar .nav-links.account-primary-nav a,
+  .admin-nav-links a,
+  .restricted-navbar-links a {
+    min-height: 52px;
+    border-radius: 13px;
+    font-size: 12px;
+  }
+
+  .account-navbar .nav-links.account-primary-nav {
+    grid-auto-columns: 108px;
+  }
+
+  .account-navbar .nav-links.account-primary-nav a {
+    width: 108px;
+  }
+
+  .home-navbar .nav-actions > .btn-ghost,
+  .home-navbar .home-account-cluster .btn-ghost,
+  .home-navbar .home-account-cluster .auth-user,
+  .account-create-job-button,
+  .account-notification-button,
+  .account-navbar .account-menu .account-mini {
+    min-height: 52px;
+  }
+}
+
+/* Restore compact, readable page geometry instead of stretched panels. */
+
+.page > .app-page,
+.account-page > .app-page,
+.account-page > .messages-page,
+.account-page > .chat-page,
+.privacy-center-shell,
+.disputes-shell,
+.age-access-shell,
+.admin-shell,
+.moderation-user-shell,
+.limited-account-shell {
+  padding-top: 48px;
+  padding-bottom: 88px;
+}
+
+.app-page-header,
+.privacy-center-header,
+.disputes-page-header,
+.admin-page-header,
+.account-page .messages-heading {
+  min-height: 142px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 36px;
+  padding: 16px 0 25px;
+}
+
+.app-page-header h1,
+.privacy-center-header h1,
+.disputes-page-header h1,
+.admin-page-header h1,
+.account-page .messages-heading h1 {
+  font-size: clamp(38px, 5vw, 52px) !important;
+}
+
+.app-page-header p,
+.privacy-center-header p,
+.disputes-page-header p,
+.admin-page-header p,
+.account-page .messages-heading p {
+  max-width: 390px;
+  font-size: 13px !important;
+  line-height: 1.65;
+}
+
+.page .jobs-search,
+.page .talent-controls {
+  padding: 17px;
+  border-radius: 19px;
+}
+
+.page .jobs-search-box,
+.page .talent-search-box {
+  min-height: 56px;
+  border-radius: 13px;
+}
+
+.page .jobs-filter,
+.page .talent-category-row button {
+  min-height: 46px;
+  border-radius: 11px;
+  font-size: 10px;
+}
+
+.jobs-order-panel,
+.talent-order-row {
+  min-height: 68px;
+  border-radius: 13px;
+}
+
+.page .jobs-results-header {
+  min-height: 68px;
+  border-radius: 12px;
+}
+
+.account-page .messages-row {
+  min-height: 86px;
+  padding: 15px 18px;
+}
+
+@media (min-width: 1500px) {
+  .jobs-list {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .jobs-list .job-card {
+    min-height: 196px;
+  }
+
+  .talent-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .privacy-center-grid,
+  .admin-grid {
+    gap: 12px;
+  }
+}
+
+/* Homepage proportions return to the accepted pre-full-width version. */
+
+.app > main > .hero {
+  min-height: 690px;
+  grid-template-columns: minmax(0, 1.02fr) minmax(430px, 0.98fr);
+  gap: clamp(28px, 4vw, 70px);
+  padding: clamp(66px, 6.4vw, 94px) clamp(48px, 6.6vw, 88px);
+  border-radius: 42px 42px 94px 42px;
+}
+
+.app .hero-content,
+.app .hero h1 {
+  max-width: 720px;
+}
+
+.app .hero h1 {
+  font-size: clamp(58px, 6.45vw, 88px);
+}
+
+.app .hero-text {
+  max-width: 590px;
+  font-size: 17px;
+}
+
+.app .hero-visual {
+  min-height: 535px;
+}
+
+.app .hero-visual .visual-glow {
+  width: min(31vw, 425px);
+  height: min(31vw, 425px);
+}
+
+.app .hero-visual .card-main {
+  width: min(420px, 84%);
+  padding: 32px;
+}
+
+.app .hero-visual .card-small {
+  width: 245px;
+  min-height: 78px;
+}
+
+.app > main > .section {
+  padding-top: 112px;
+  padding-bottom: 112px;
+}
+
+.app > main > .section .section-heading {
+  gap: initial;
+}
+
+.app > main > .section .section-heading p {
+  max-width: 440px;
+  font-size: 16px;
+}
+
+.app .category-card,
+.app .category-card:nth-child(n) {
+  min-height: 164px;
+  padding: 28px;
+}
+
+.app .how .step {
+  min-height: 270px;
+  padding: 29px;
+}
+
+.app .how .step h3 {
+  font-size: 25px;
+}
+
+.app .split-card,
+.app .split-card.light,
+html[data-theme="dark"] .app .split-card.light {
+  min-height: 430px;
+}
+
+.app > main > .final-cta {
+  padding-top: 102px;
+  padding-bottom: 102px;
+}
+
+@media (max-width: 1120px) {
+  .app > main > .hero {
+    min-height: 650px;
+    grid-template-columns: minmax(0, 1fr) minmax(365px, 0.9fr);
+    gap: clamp(28px, 4vw, 70px);
+    padding-inline: 48px;
+  }
+
+  .app .hero h1 {
+    font-size: clamp(54px, 7vw, 76px);
+  }
+
+  .app .hero-visual {
+    min-height: 535px;
+  }
+
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .account-page .messages-heading {
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app > main > .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 68px 48px 38px;
+  }
+
+  .app .hero-visual {
+    width: min(650px, 100%);
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --ih-shell-gutter: 18px;
+  }
+
+  .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar {
+    width: calc(100% - 10px) !important;
+    min-height: 64px;
+  }
+
+  .app > main > .hero,
+  .app > main > .section,
+  .app > main > .how.section,
+  .app > main > .split-section.section,
+  .app > main > .final-cta,
+  .app > .footer,
+  .page > .app-page,
+  .account-page > .app-page,
+  .account-page > .messages-page,
+  .account-page > .chat-page,
+  .privacy-center-shell,
+  .disputes-shell,
+  .age-access-shell,
+  .admin-shell,
+  .moderation-user-shell,
+  .limited-account-shell {
+    width: calc(100% - 18px) !important;
+  }
+
+  .page > .app-page,
+  .account-page > .app-page,
+  .account-page > .messages-page,
+  .account-page > .chat-page,
+  .privacy-center-shell,
+  .disputes-shell,
+  .age-access-shell,
+  .admin-shell,
+  .moderation-user-shell,
+  .limited-account-shell {
+    padding-top: 34px;
+    padding-bottom: 64px;
+  }
+
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .account-page .messages-heading {
+    min-height: 0;
+    display: block;
+    padding: 8px 0 18px;
+  }
+
+  .app > main > .hero {
+    min-height: 0;
+    padding: 52px 22px 28px;
+  }
+
+  .app .hero h1 {
+    font-size: clamp(42px, 13vw, 60px);
+  }
+
+  .app .hero-visual {
+    min-height: 430px;
+  }
+
+  .app > main > .section {
+    padding-top: 82px;
+    padding-bottom: 82px;
+  }
+
+  .app .category-card,
+  .app .category-card:nth-child(n) {
+    min-height: 124px;
+    padding: 22px;
+  }
+
+  .app .how .step {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .app .split-card,
+  .app .split-card.light,
+  html[data-theme="dark"] .app .split-card.light {
+    min-height: 360px;
+  }
+
+  .app > main > .final-cta {
+    padding-top: 74px;
+    padding-bottom: 74px;
+  }
+}
+
+/* =========================================================
    IDEA HIRE â V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
    RELEASE 2026-09-20
 ========================================================= */
@@ -31143,5 +31564,418 @@ html[data-theme="dark"] .app .split-card.light {
   .app .final-cta::before,
   .app .final-cta::after {
     animation: none !important;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â V7.2 FINAL BALANCE LOCK
+   Full-width navigation, restrained 1320px content.
+========================================================= */
+
+:root {
+  --ih-release: 20260920-5;
+  --ih-shell-width: 1320px;
+  --ih-shell-gutter: 24px;
+}
+
+.navbar.home-navbar,
+.navbar.account-navbar,
+.navbar.admin-navbar,
+.navbar.restricted-navbar,
+.navbar.restricted-account-navbar {
+  width: calc(100% - 12px) !important;
+  max-width: none !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.app > main > .hero,
+.app > main > .section,
+.app > main > .how.section,
+.app > main > .split-section.section,
+.app > main > .final-cta,
+.app > .footer,
+.page > .app-page,
+.account-page > .app-page,
+.account-page > .messages-page,
+.account-page > .chat-page,
+.privacy-center-shell,
+.disputes-shell,
+.age-access-shell,
+.admin-shell,
+.moderation-user-shell,
+.limited-account-shell {
+  width: min(1320px, calc(100% - 24px)) !important;
+  max-width: 1320px !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.cookie-policy-shell,
+.legal-document-shell {
+  width: min(1080px, calc(100% - 40px)) !important;
+  max-width: 1080px !important;
+}
+
+@media (min-width: 1121px) {
+  .app .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar {
+    min-height: 86px;
+    padding: 12px 16px 12px 24px;
+    border-radius: 23px;
+  }
+
+  .navbar .logo,
+  .home-navbar .logo,
+  .account-navbar .logo,
+  .admin-navbar .logo {
+    font-size: 25px;
+  }
+
+  .home-navbar .nav-links a,
+  .home-navbar .nav-links.home-nav-links a,
+  .account-navbar .nav-links.account-primary-nav a,
+  .admin-nav-links a,
+  .restricted-navbar-links a {
+    min-height: 52px;
+    border-radius: 13px;
+    font-size: 12px;
+  }
+
+  .account-navbar .nav-links.account-primary-nav {
+    grid-auto-columns: 108px;
+  }
+
+  .account-navbar .nav-links.account-primary-nav a {
+    width: 108px;
+  }
+
+  .home-navbar .nav-actions > .btn-ghost,
+  .home-navbar .home-account-cluster .btn-ghost,
+  .home-navbar .home-account-cluster .auth-user,
+  .account-create-job-button,
+  .account-notification-button,
+  .account-navbar .account-menu .account-mini {
+    min-height: 52px;
+  }
+}
+
+.page > .app-page,
+.account-page > .app-page,
+.account-page > .messages-page,
+.account-page > .chat-page,
+.privacy-center-shell,
+.disputes-shell,
+.age-access-shell,
+.admin-shell,
+.moderation-user-shell,
+.limited-account-shell {
+  padding-top: 48px;
+  padding-bottom: 88px;
+}
+
+.app-page-header,
+.privacy-center-header,
+.disputes-page-header,
+.admin-page-header,
+.account-page .messages-heading {
+  min-height: 142px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 36px;
+  padding: 16px 0 25px;
+}
+
+.app-page-header h1,
+.privacy-center-header h1,
+.disputes-page-header h1,
+.admin-page-header h1,
+.account-page .messages-heading h1 {
+  font-size: clamp(38px, 5vw, 52px) !important;
+}
+
+.app-page-header p,
+.privacy-center-header p,
+.disputes-page-header p,
+.admin-page-header p,
+.account-page .messages-heading p {
+  max-width: 390px;
+  font-size: 13px !important;
+  line-height: 1.65;
+}
+
+.page .jobs-search,
+.page .talent-controls {
+  padding: 17px;
+  border-radius: 19px;
+}
+
+.page .jobs-search-box,
+.page .talent-search-box {
+  min-height: 56px;
+  border-radius: 13px;
+}
+
+.page .jobs-filter,
+.page .talent-category-row button {
+  min-height: 46px;
+  border-radius: 11px;
+  font-size: 10px;
+}
+
+.jobs-order-panel,
+.talent-order-row {
+  min-height: 68px;
+  border-radius: 13px;
+}
+
+.page .jobs-results-header {
+  min-height: 68px;
+  border-radius: 12px;
+}
+
+.account-page .messages-row {
+  min-height: 86px;
+  padding: 15px 18px;
+}
+
+@media (min-width: 1500px) {
+  .jobs-list {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .jobs-list .job-card {
+    min-height: 196px;
+  }
+
+  .talent-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .privacy-center-grid,
+  .admin-grid {
+    gap: 12px;
+  }
+}
+
+.app > main > .hero {
+  min-height: 690px;
+  grid-template-columns: minmax(0, 1.02fr) minmax(430px, 0.98fr);
+  gap: clamp(28px, 4vw, 70px);
+  padding: clamp(66px, 6.4vw, 94px) clamp(48px, 6.6vw, 88px);
+  border-radius: 42px 42px 94px 42px;
+}
+
+.app .hero-content,
+.app .hero h1 {
+  max-width: 720px;
+}
+
+.app .hero h1 {
+  font-size: clamp(58px, 6.45vw, 88px);
+}
+
+.app .hero-text {
+  max-width: 590px;
+  font-size: 17px;
+}
+
+.app .hero-visual {
+  min-height: 535px;
+}
+
+.app .hero-visual .visual-glow {
+  width: min(31vw, 425px);
+  height: min(31vw, 425px);
+}
+
+.app .hero-visual .card-main {
+  width: min(420px, 84%);
+  padding: 32px;
+}
+
+.app .hero-visual .card-small {
+  width: 245px;
+  min-height: 78px;
+}
+
+.app > main > .section {
+  padding-top: 112px;
+  padding-bottom: 112px;
+}
+
+.app > main > .section .section-heading {
+  gap: initial;
+}
+
+.app > main > .section .section-heading p {
+  max-width: 440px;
+  font-size: 16px;
+}
+
+.app .category-card,
+.app .category-card:nth-child(n) {
+  min-height: 164px;
+  padding: 28px;
+}
+
+.app .how .step {
+  min-height: 270px;
+  padding: 29px;
+}
+
+.app .how .step h3 {
+  font-size: 25px;
+}
+
+.app .split-card,
+.app .split-card.light,
+html[data-theme="dark"] .app .split-card.light {
+  min-height: 430px;
+}
+
+.app > main > .final-cta {
+  padding-top: 102px;
+  padding-bottom: 102px;
+}
+
+@media (max-width: 1120px) {
+  .app > main > .hero {
+    min-height: 650px;
+    grid-template-columns: minmax(0, 1fr) minmax(365px, 0.9fr);
+    gap: clamp(28px, 4vw, 70px);
+    padding-inline: 48px;
+  }
+
+  .app .hero h1 {
+    font-size: clamp(54px, 7vw, 76px);
+  }
+
+  .app .hero-visual {
+    min-height: 535px;
+  }
+
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .account-page .messages-heading {
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app > main > .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 68px 48px 38px;
+  }
+
+  .app .hero-visual {
+    width: min(650px, 100%);
+    min-height: 500px;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --ih-shell-gutter: 18px;
+  }
+
+  .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar {
+    width: calc(100% - 10px) !important;
+    min-height: 64px;
+  }
+
+  .app > main > .hero,
+  .app > main > .section,
+  .app > main > .how.section,
+  .app > main > .split-section.section,
+  .app > main > .final-cta,
+  .app > .footer,
+  .page > .app-page,
+  .account-page > .app-page,
+  .account-page > .messages-page,
+  .account-page > .chat-page,
+  .privacy-center-shell,
+  .disputes-shell,
+  .age-access-shell,
+  .admin-shell,
+  .moderation-user-shell,
+  .limited-account-shell {
+    width: calc(100% - 18px) !important;
+  }
+
+  .page > .app-page,
+  .account-page > .app-page,
+  .account-page > .messages-page,
+  .account-page > .chat-page,
+  .privacy-center-shell,
+  .disputes-shell,
+  .age-access-shell,
+  .admin-shell,
+  .moderation-user-shell,
+  .limited-account-shell {
+    padding-top: 34px;
+    padding-bottom: 64px;
+  }
+
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .account-page .messages-heading {
+    min-height: 0;
+    display: block;
+    padding: 8px 0 18px;
+  }
+
+  .app > main > .hero {
+    min-height: 0;
+    padding: 52px 22px 28px;
+  }
+
+  .app .hero h1 {
+    font-size: clamp(42px, 13vw, 60px);
+  }
+
+  .app .hero-visual {
+    min-height: 430px;
+  }
+
+  .app > main > .section {
+    padding-top: 82px;
+    padding-bottom: 82px;
+  }
+
+  .app .category-card,
+  .app .category-card:nth-child(n) {
+    min-height: 124px;
+    padding: 22px;
+  }
+
+  .app .how .step {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .app .split-card,
+  .app .split-card.light,
+  html[data-theme="dark"] .app .split-card.light {
+    min-height: 360px;
+  }
+
+  .app > main > .final-cta {
+    padding-top: 74px;
+    padding-bottom: 74px;
   }
 }
