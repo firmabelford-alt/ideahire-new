@@ -1,7 +1,7 @@
-/* IDEA HIRE Ă˘ÂÂ PROFESSIONAL HOMEPAGE V6 Ă˘ÂÂ RELEASE 2026-09-20 */
+/* IDEA HIRE ÄËĂÂĂÂ PROFESSIONAL HOMEPAGE V6 ÄËĂÂĂÂ RELEASE 2026-09-20 */
 /* Full file for direct replacement: src/App.css */
 
-/* IDEA HIRE Ă˘ÂÂ STRIPE CONNECT STYLES Ă˘ÂÂ BUILD 2026-09-05 */
+/* IDEA HIRE ÄËĂÂĂÂ STRIPE CONNECT STYLES ÄËĂÂĂÂ BUILD 2026-09-05 */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
@@ -14,7 +14,7 @@
 }
 
 /* =========================================================
-   RODO Ă˘ÂÂ WYBÄÂR USUNIĂÂCIA DANYCH LUB ZAMKNIĂÂCIA KONTA
+   RODO ÄËĂÂĂÂ WYBĂÂĂÂR USUNIÄÂĂÂCIA DANYCH LUB ZAMKNIÄÂĂÂCIA KONTA
 ========================================================= */
 
 .privacy-erasure-choice-fieldset {
@@ -375,7 +375,7 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
 }
 
 /* =========================================================
-   ADMIN Ă˘ÂÂ KONTROLOWANE USUWANIE DANYCH I KONTA
+   ADMIN ÄËĂÂĂÂ KONTROLOWANE USUWANIE DANYCH I KONTA
 ========================================================= */
 
 .erasure-account-shell {
@@ -581,7 +581,7 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
 }
 
 /* =========================================================
-   MODERACJA KONT I ODWOÄšÂANIA
+   MODERACJA KONT I ODWOĂĹĄĂÂANIA
 ========================================================= */
 
 .moderation-user-shell,
@@ -2079,7 +2079,7 @@ button.privacy-admin-account-link {
 }
 
 .erasure-blockers-card li::before {
-  content: "Ă˘ÂË";
+  content: "ÄËĂÂĂÂ";
   margin-right: 8px;
 }
 
@@ -2637,7 +2637,7 @@ html[data-theme="dark"] .erasure-retention-report > small {
 }
 
 /* =========================================================
-   LEGAL DOCUMENTS / TERMS ACCEPTANCE Ă˘ÂÂ BUILD 2026-09-06
+   LEGAL DOCUMENTS / TERMS ACCEPTANCE ÄËĂÂĂÂ BUILD 2026-09-06
 ========================================================= */
 
 .registration-terms-confirmation {
@@ -3128,7 +3128,7 @@ html[data-theme="dark"] .legal-document-footer nav a {
 }
 
 /* =========================================================
-   STRIPE CONNECT / WYPÄšÂATY W PANELU KONTA
+   STRIPE CONNECT / WYPĂĹĄĂÂATY W PANELU KONTA
 ========================================================= */
 
 .stripe-connect-panel {
@@ -3435,7 +3435,7 @@ html[data-theme="dark"] .stripe-connect-feedback.is-info {
 }
 
 /* =========================================================
-   CHAT WORKSPACE V1.1 Ă˘ÂÂ clean desktop/mobile composition
+   CHAT WORKSPACE V1.1 ÄËĂÂĂÂ clean desktop/mobile composition
 ========================================================= */
 
 .account-page .chat-page {
@@ -4226,7 +4226,7 @@ html[data-theme="dark"] .private-work-links .private-work-link-row > a b {
 }
 
 /* =========================================================
-   ADMIN Ă˘ÂÂ FULL DISPUTE CONTEXT
+   ADMIN ÄËĂÂĂÂ FULL DISPUTE CONTEXT
 ========================================================= */
 
 .admin-case-context-panel > .dispute-panel-heading {
@@ -5444,7 +5444,7 @@ img {
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.055);
 }
 
-/* GÄĹrny podglĂÂd profilu */
+/* GĂÂÄšÂrny podglÄÂĂÂd profilu */
 
 .profile-preview {
   display: flex;
@@ -5456,8 +5456,8 @@ img {
 }
 
 /*
-  WAÄšĹĽNE:
-  ZdjĂÂcie nigdy nie moÄšĹşe przejĂÂĂÂ naturalnego rozmiaru
+  WAĂĹĄÄšÄ˝NE:
+  ZdjÄÂĂÂcie nigdy nie moĂĹĄÄšĹe przejÄÂĂÂÄÂĂÂ naturalnego rozmiaru
   pliku. Tutaj wymuszamy konkretny rozmiar.
 */
 
@@ -5477,7 +5477,7 @@ img {
     0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* Placeholder z pierwszĂÂ literĂÂ */
+/* Placeholder z pierwszÄÂĂÂ literÄÂĂÂ */
 
 .profile-avatar-placeholder {
   display: grid;
@@ -5489,7 +5489,7 @@ img {
   text-transform: uppercase;
 }
 
-/* Nazwa i e-mail obok zdjĂÂcia */
+/* Nazwa i e-mail obok zdjÄÂĂÂcia */
 
 .profile-preview h2 {
   margin: 0 0 6px;
@@ -5503,7 +5503,7 @@ img {
   font-size: 14px;
 }
 
-/* Pole wyboru zdjĂÂcia */
+/* Pole wyboru zdjÄÂĂÂcia */
 
 .profile-upload {
   display: grid;
@@ -5536,7 +5536,7 @@ img {
   line-height: 1.5;
 }
 
-/* PodglĂÂd nowo wybranego zdjĂÂcia */
+/* PodglÄÂĂÂd nowo wybranego zdjÄÂĂÂcia */
 
 .profile-upload-preview {
   width: 72px;
@@ -5924,7 +5924,7 @@ img {
 }
 
 /* =========================================================
-   DARK MODE Ă˘ÂÂ FINAL CONTRAST LAYER
+   DARK MODE ÄËĂÂĂÂ FINAL CONTRAST LAYER
    Kept at the end so it also overrides component styles.
 ========================================================= */
 
@@ -7237,7 +7237,7 @@ html[data-theme="dark"] .dispute-parties-card > .dispute-party-row {
 }
 
 /* =========================================================
-   DARK MODE Ă˘ÂÂ ONLY COLORS, NO LAYOUT CHANGES
+   DARK MODE ÄËĂÂĂÂ ONLY COLORS, NO LAYOUT CHANGES
 ========================================================= */
 
 html[data-theme="dark"] {
@@ -7574,7 +7574,7 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
 }
 
 /* =========================================================
-   FINAL SLIM NAVIGATION Ă˘ÂÂ HOME + USER ACCOUNT
+   FINAL SLIM NAVIGATION ÄËĂÂĂÂ HOME + USER ACCOUNT
 ========================================================= */
 
 .account-nav-label-short {
@@ -9286,7 +9286,7 @@ html[data-theme="dark"] .privacy-policy-footer nav a {
 }
 
 /* =========================================================
-   AGE ACCESS / LIMITED ACCOUNT 16Ă˘ÂÂ17
+   AGE ACCESS / LIMITED ACCOUNT 16ÄËĂÂĂÂ17
 ========================================================= */
 
 .registration-age-result,
@@ -9944,7 +9944,7 @@ html[data-theme="dark"] .limited-account-route-message {
 }
 
 /* =========================================================
-   CHAT AGREEMENTS Ă˘ÂÂ WARUNKI WSPÄÂÄšÂPRACY
+   CHAT AGREEMENTS ÄËĂÂĂÂ WARUNKI WSPĂÂĂÂĂĹĄĂÂPRACY
 ========================================================= */
 
 .agreement-workspace {
@@ -11001,7 +11001,7 @@ html[data-theme="dark"] .agreement-waiting-card p {
 }
 
 .jobs-clear-filters::before {
-  content: "ÄÂ";
+  content: "ĂÂĂÂ";
   font-size: 17px;
   font-weight: 400;
   line-height: 1;
@@ -11133,7 +11133,7 @@ html[data-theme="dark"] :is(
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
+   IDEA HIRE ÄËĂÂĂÂ V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
    Only navigation spans the viewport. Content returns to 1320px.
 ========================================================= */
 
@@ -11554,7 +11554,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7.5 CONTINUOUS ATMOSPHERE
+   IDEA HIRE ÄËĂÂĂÂ V7.5 CONTINUOUS ATMOSPHERE
    One shared background spans hero and categories. The colour
    darkens softly at both viewport edges and has no section seam.
 ========================================================= */
@@ -11830,7 +11830,7 @@ html:not([data-theme="dark"]) body .navbar.navbar.restricted-account-navbar {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
+   IDEA HIRE ÄËĂÂĂÂ V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
    RELEASE 2026-09-20
 ========================================================= */
 
@@ -12632,7 +12632,7 @@ html[data-theme="dark"] .app .category-card:nth-child(n) {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.5.1 MESSAGES VERTICAL ALIGNMENT
+   IDEA HIRE ÄËĂÂĂÂ V5.5.1 MESSAGES VERTICAL ALIGNMENT
 ========================================================= */
 
 :root {
@@ -12653,7 +12653,7 @@ html[data-theme="dark"] .app .category-card:nth-child(n) {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ KATALOG WYKONAWCÄÂW I DWUKIERUNKOWY START V2.2
+   IDEA HIRE ÄËĂÂĂÂ KATALOG WYKONAWCĂÂĂÂW I DWUKIERUNKOWY START V2.2
 ========================================================= */
 
 .discovery-settings-actions {
@@ -13385,7 +13385,7 @@ html[data-theme="dark"] .home-navbar .nav-links a:hover {
 }
 
 /* =========================================================
-   CLEAN HOME HOUSING Ă˘ÂÂ ORIGINAL LAYOUT PRESERVED
+   CLEAN HOME HOUSING ÄËĂÂĂÂ ORIGINAL LAYOUT PRESERVED
 ========================================================= */
 
 .home-navbar .nav-links {
@@ -13578,7 +13578,7 @@ html[data-theme="dark"] .home-account-avatar-link {
 }
 
 /* =========================================================
-   MOBILE-ONLY LAYOUT Ă˘ÂÂ DESKTOP STAYS UNCHANGED
+   MOBILE-ONLY LAYOUT ÄËĂÂĂÂ DESKTOP STAYS UNCHANGED
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -13742,7 +13742,7 @@ html[data-theme="dark"] .home-account-avatar-link {
 }
 
 /* =========================================================
-   MOBILE LIGHT THEME Ă˘ÂÂ WHITE NAVIGATION HOUSING
+   MOBILE LIGHT THEME ÄËĂÂĂÂ WHITE NAVIGATION HOUSING
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -15348,7 +15348,7 @@ html[data-theme="dark"] .how .step p {
   line-height: 1.4;
 }
 
-/* Dark version Ă˘ÂÂ the layout remains unchanged */
+/* Dark version ÄËĂÂĂÂ the layout remains unchanged */
 
 html[data-theme="dark"] .disputes-page,
 html[data-theme="dark"] .admin-page {
@@ -16121,7 +16121,7 @@ html[data-theme="dark"] .dispute-transparency-banner {
 }
 
 /* =========================================================
-   FINAL HEADER REFINEMENT Ă˘ÂÂ HOME + ACCOUNT
+   FINAL HEADER REFINEMENT ÄËĂÂĂÂ HOME + ACCOUNT
    One authoritative layer for spacing, contrast and mobile fit.
 ========================================================= */
 
@@ -16496,7 +16496,7 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
 }
 
 /* =========================================================
-   PRIVACY RIGHTS CENTER Ă˘ÂÂ BUILD 2026-09-07
+   PRIVACY RIGHTS CENTER ÄËĂÂĂÂ BUILD 2026-09-07
 ========================================================= */
 
 .privacy-center-page {
@@ -17559,7 +17559,7 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
   line-height: 1.55;
 }
 
-/* PeÄšÂny, zatwierdzony raport widoczny na koncie uÄšĹşytkownika. */
+/* PeĂĹĄĂÂny, zatwierdzony raport widoczny na koncie uĂĹĄÄšĹytkownika. */
 .privacy-user-audit-report {
   margin: 20px 0 16px;
   padding: clamp(18px, 3vw, 28px);
@@ -18615,7 +18615,7 @@ html[data-theme="dark"] .privacy-audit-public-note {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ GOOGLE AUTH + PORTFOLIO Ă˘ÂÂ V1.4
+   IDEA HIRE ÄËĂÂĂÂ GOOGLE AUTH + PORTFOLIO ÄËĂÂĂÂ V1.4
 ========================================================= */
 
 .auth-provider-section {
@@ -19155,7 +19155,7 @@ html[data-theme="dark"] .profile-portfolio-item-actions button.is-danger {
 }
 
 /* =========================================================
-   PORTFOLIO ALBUMS + CONTENT REPORTS Ă˘ÂÂ V1.6
+   PORTFOLIO ALBUMS + CONTENT REPORTS ÄËĂÂĂÂ V1.6
 ========================================================= */
 
 .profile-portfolio-edit-cover {
@@ -20402,7 +20402,7 @@ html[data-theme="dark"] a.profile-public-project-link:hover {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ POMOCNY ONBOARDING I DOPASOWANIE V2.2
+   IDEA HIRE ÄËĂÂĂÂ POMOCNY ONBOARDING I DOPASOWANIE V2.2
 ========================================================= */
 
 .discovery-onboarding-backdrop {
@@ -21640,7 +21640,7 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
+   IDEA HIRE ÄËĂÂĂÂ MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
 ========================================================= */
 
 .discovery-onboarding-shell button,
@@ -21778,7 +21778,7 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
 }
 
 /* =========================================================
-   PRIVATE WORKSPACE Ă˘ÂÂ attachments, albums and work delivery
+   PRIVATE WORKSPACE ÄËĂÂĂÂ attachments, albums and work delivery
 ========================================================= */
 
 .private-work-message-text a {
@@ -22733,7 +22733,7 @@ html[data-theme="dark"] .account-page .chat-message.is-mine a {
 }
 
 /* =========================================================
-   FINAL VISUAL AUDIT Ă˘ÂÂ shared application polish
+   FINAL VISUAL AUDIT ÄËĂÂĂÂ shared application polish
 ========================================================= */
 
 :is(.hero h1, .app-page-header h1, .auth-header h1, .job-card h2, .profile-preview h2) {
@@ -23278,7 +23278,7 @@ html[data-theme="dark"] .profile-review-card > p {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ COHESIVE UI REFRESH 2026-09
+   IDEA HIRE ÄËĂÂĂÂ COHESIVE UI REFRESH 2026-09
    Final, reversible presentation layer. No business logic.
 ========================================================= */
 
@@ -23344,7 +23344,7 @@ body {
   outline-offset: 3px;
 }
 
-/* Public header Ă˘ÂÂ one calm surface instead of nested dark pills */
+/* Public header ÄËĂÂĂÂ one calm surface instead of nested dark pills */
 
 .navbar.home-navbar,
 .navbar.account-navbar {
@@ -23455,7 +23455,7 @@ body {
   display: none;
 }
 
-/* Account header Ă˘ÂÂ four primary destinations and one utility menu */
+/* Account header ÄËĂÂĂÂ four primary destinations and one utility menu */
 
 .navbar.account-navbar {
   display: grid;
@@ -23790,7 +23790,7 @@ body {
   color: #87342f;
 }
 
-/* Appearance and language Ă˘ÂÂ compact, horizontal and out of the way */
+/* Appearance and language ÄËĂÂĂÂ compact, horizontal and out of the way */
 
 .site-preferences,
 .site-preferences.is-open {
@@ -23957,7 +23957,7 @@ body {
   padding: 34px 0 46px;
 }
 
-/* Application pages Ă˘ÂÂ quieter surfaces and consistent spacing */
+/* Application pages ÄËĂÂĂÂ quieter surfaces and consistent spacing */
 
 .page {
   min-height: 100vh;
@@ -24104,7 +24104,7 @@ body {
   box-shadow: var(--ih-shadow-sm);
 }
 
-/* Authentication Ă˘ÂÂ shorter, clearer and less card-heavy */
+/* Authentication ÄËĂÂĂÂ shorter, clearer and less card-heavy */
 
 .auth-card {
   width: min(520px, 100%);
@@ -24185,7 +24185,7 @@ body {
   background: #fafbf8;
 }
 
-/* Messages, notifications, disputes and privacy Ă˘ÂÂ consistent information density */
+/* Messages, notifications, disputes and privacy ÄËĂÂĂÂ consistent information density */
 
 :is(.messages-row, .notification-decision-card, .notification-accepted-card, .notification-block-card) {
   border-color: var(--ih-line);
@@ -24908,7 +24908,7 @@ html[data-theme="dark"] .restricted-account-navbar .restricted-navbar-links a {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V3 TOTAL VISUAL REDESIGN
+   IDEA HIRE ÄËĂÂĂÂ V3 TOTAL VISUAL REDESIGN
    Authoritative final layer. Presentation only.
 ========================================================= */
 
@@ -26902,7 +26902,7 @@ html[data-theme="dark"] .site-preferences {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ PROFESSIONAL UI V4
+   IDEA HIRE ÄËĂÂĂÂ PROFESSIONAL UI V4
    ACCOUNT WORKSPACE / STABLE FILTERS / LOWER HOME MOTION
    RELEASE 2026-09-19
 ========================================================= */
@@ -28393,7 +28393,7 @@ html[data-theme="dark"] .privacy-entry-link {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ NAVY PROFESSIONAL SYSTEM V5
+   IDEA HIRE ÄËĂÂĂÂ NAVY PROFESSIONAL SYSTEM V5
    ONE SHELL / ONE BACKGROUND / ZERO HORIZONTAL SHIFT
    RELEASE 2026-09-19
 ========================================================= */
@@ -30283,7 +30283,7 @@ html[data-theme="dark"] .footer .logo span {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.1 WIDTH / STATIC NAV / RESULTS FIX
+   IDEA HIRE ÄËĂÂĂÂ V5.1 WIDTH / STATIC NAV / RESULTS FIX
 ========================================================= */
 
 :root {
@@ -30447,7 +30447,7 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.2 WIDER CANVAS / HERO PROPORTIONS
+   IDEA HIRE ÄËĂÂĂÂ V5.2 WIDER CANVAS / HERO PROPORTIONS
 ========================================================= */
 
 :root {
@@ -30521,7 +30521,7 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
+   IDEA HIRE ÄËĂÂĂÂ V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
 ========================================================= */
 
 :root {
@@ -30798,7 +30798,7 @@ html[data-theme="dark"] .account-page .chat-collapsible-icon.is-dispute {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.4 ZERO-FLASH NAVIGATION
+   IDEA HIRE ÄËĂÂĂÂ V5.4 ZERO-FLASH NAVIGATION
 ========================================================= */
 
 :root {
@@ -31048,7 +31048,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.5 INSTANT BUTTER TRANSITIONS
+   IDEA HIRE ÄËĂÂĂÂ V5.5 INSTANT BUTTER TRANSITIONS
 ========================================================= */
 
 :root {
@@ -31140,7 +31140,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V6.1 FINAL HOMEPAGE GEOMETRY LOCK
+   IDEA HIRE ÄËĂÂĂÂ V6.1 FINAL HOMEPAGE GEOMETRY LOCK
    Keeps the new landing-page proportions above legacy layers.
 ========================================================= */
 
@@ -31266,7 +31266,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7 FULL-WIDTH PRODUCT SHELL / BIDIRECTIONAL MOTION
+   IDEA HIRE ÄËĂÂĂÂ V7 FULL-WIDTH PRODUCT SHELL / BIDIRECTIONAL MOTION
    RELEASE 2026-09-20
 ========================================================= */
 
@@ -31844,7 +31844,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7.2 FINAL BALANCE LOCK
+   IDEA HIRE ÄËĂÂĂÂ V7.2 FINAL BALANCE LOCK
    Full-width navigation, restrained 1320px content.
 ========================================================= */
 
@@ -31855,7 +31855,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE â MOBILE REPAIR + ACCOUNT TABS â 2026-09-21
+   IDEA HIRE Ă˘ÂÂ MOBILE REPAIR + ACCOUNT TABS Ă˘ÂÂ 2026-09-21
    Layered over the last accepted V7.2 desktop release.
 ========================================================= */
 
@@ -31999,6 +31999,70 @@ html[data-theme="dark"] .account-tab-intro p {
   color: #a9b2bc;
 }
 
+/* Dark theme contrast guard: colors only, no desktop geometry changes. */
+html[data-theme="dark"] #root .app .hero h1,
+html[data-theme="dark"] #root .app .hero h1 > span {
+  color: #f7f9fc !important;
+  -webkit-text-fill-color: #f7f9fc !important;
+}
+
+html[data-theme="dark"] #root .app .hero h1 > span {
+  background: none !important;
+  background-image: none !important;
+  color: #8fb3ff !important;
+  -webkit-text-fill-color: #8fb3ff !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] #root .home-navbar .nav-actions > .btn-ghost,
+html[data-theme="dark"] #root .home-navbar .home-account-cluster .btn-ghost {
+  border-color: #33445a !important;
+  background: #121c29 !important;
+  color: #f2f6fb !important;
+}
+
+html[data-theme="dark"] #root .home-navbar .nav-actions > .btn-dark,
+html[data-theme="dark"] #root :is(
+  .page,
+  .account-page,
+  .privacy-center-shell,
+  .disputes-shell
+) .btn-dark {
+  border-color: #f1f5fa !important;
+  background: #f1f5fa !important;
+  color: #091421 !important;
+}
+
+html[data-theme="dark"] #root :is(
+  .page,
+  .account-page,
+  .privacy-center-shell,
+  .disputes-shell
+) .btn-outline {
+  border-color: #36485e !important;
+  background: #121c29 !important;
+  color: #edf3fa !important;
+}
+
+html[data-theme="dark"] #root :is(
+  .app-page-header,
+  .messages-heading,
+  .privacy-center-header,
+  .disputes-page-header,
+  .account-tab-intro,
+  .account-form-section,
+  .account-card,
+  .job-card,
+  .talent-card
+) :is(h1, h2, h3, strong) {
+  color: #f2f6fb !important;
+}
+
+html[data-theme="dark"] #root :is(input, textarea, select)::placeholder {
+  color: #8995a4 !important;
+  opacity: 1;
+}
+
 @media (max-width: 720px) {
   html,
   body,
@@ -32032,14 +32096,39 @@ html[data-theme="dark"] .account-tab-intro p {
 
   #root .app .navbar.home-navbar {
     grid-template-columns: auto minmax(0, 1fr) !important;
-    gap: 8px !important;
+    grid-template-rows: 42px 42px !important;
+    gap: 6px 8px !important;
+    min-height: 104px !important;
   }
 
   #root .home-navbar .nav-links.home-nav-links {
-    display: none !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    overflow: visible !important;
+    border: 1px solid rgba(31, 64, 106, 0.11) !important;
+    border-radius: 11px !important;
+    background: #f2f5f8 !important;
+  }
+
+  #root .home-navbar .nav-links.home-nav-links a {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 34px !important;
+    padding: 6px 4px !important;
+    border-radius: 8px !important;
+    font-size: 9px !important;
+    white-space: nowrap;
   }
 
   #root .home-navbar .nav-actions {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
     min-width: 0;
     justify-content: flex-end;
     gap: 6px !important;
@@ -32067,8 +32156,9 @@ html[data-theme="dark"] .account-tab-intro p {
 
   #root .navbar.account-navbar {
     grid-template-columns: minmax(0, 1fr) auto !important;
-    grid-template-rows: 1fr !important;
-    gap: 8px !important;
+    grid-template-rows: 42px 42px !important;
+    gap: 6px 8px !important;
+    min-height: 104px !important;
   }
 
   #root .account-navbar-brand {
@@ -32077,7 +32167,35 @@ html[data-theme="dark"] .account-tab-intro p {
   }
 
   #root .account-navbar .nav-links.account-primary-nav {
-    display: none !important;
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    display: grid !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: minmax(0, 1fr) !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    overflow: visible !important;
+    border: 1px solid rgba(31, 64, 106, 0.11) !important;
+    border-radius: 11px !important;
+    background: #f2f5f8 !important;
+  }
+
+  #root .account-navbar .nav-links.account-primary-nav a {
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 34px !important;
+    padding: 5px 3px !important;
+    border-radius: 8px !important;
+    font-size: 9px !important;
+    white-space: nowrap;
+  }
+
+  #root .account-navbar .nav-links.account-primary-nav a.is-active {
+    background: #0b1d34 !important;
+    color: #fff !important;
   }
 
   #root .account-navbar .nav-actions.account-navbar-actions {
@@ -32111,28 +32229,22 @@ html[data-theme="dark"] .account-tab-intro p {
   }
 
   #root .account-menu-mobile-nav {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px !important;
-    margin: 4px 0 8px !important;
-    padding: 8px !important;
-    border-radius: 12px !important;
-    background: #f2f5f8;
+    display: none !important;
   }
 
-  #root .account-menu-mobile-nav a {
-    min-height: 42px !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    padding: 7px 9px !important;
-    border: 1px solid #e0e6ed !important;
-    border-radius: 9px !important;
-    background: #fff;
-    color: #24364d;
-    font-size: 10px !important;
-    font-weight: 760;
-    text-align: center;
+  html[data-theme="dark"] #root :is(
+    .home-navbar .nav-links.home-nav-links,
+    .account-navbar .nav-links.account-primary-nav
+  ) {
+    border-color: #2c3c4f !important;
+    background: #101923 !important;
+  }
+
+  html[data-theme="dark"] #root :is(
+    .home-navbar .nav-links.home-nav-links a,
+    .account-navbar .nav-links.account-primary-nav a
+  ) {
+    color: #dce5ef !important;
   }
 
   #root .app > main > .hero,
@@ -32201,9 +32313,9 @@ html[data-theme="dark"] .account-tab-intro p {
   }
 
   #root .account-section-nav {
-    position: sticky !important;
-    z-index: 32 !important;
-    top: 68px !important;
+    position: static !important;
+    z-index: auto !important;
+    top: auto !important;
     display: flex !important;
     gap: 5px !important;
     margin: 0 -2px 10px !important;
@@ -32616,9 +32728,22 @@ html[data-theme="dark"] .account-tab-intro p {
   #root .app .split-card,
   #root .app .split-card.light,
   html[data-theme="dark"] #root .app .split-card.light {
-    min-height: 270px !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
     padding: 24px 20px !important;
     border-radius: 18px !important;
+  }
+
+  #root .app .split-card .btn {
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    flex: 0 0 auto !important;
+    align-self: flex-start !important;
+    margin: 24px 0 0 !important;
   }
 
   #root .app > main > .final-cta {
