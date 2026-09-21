@@ -1,6 +1,10 @@
+/* IDEA HIRE — NAVY PROFESSIONAL UI V5.5 — RELEASE 2026-09-19 */
+/* Full file for direct replacement: src/router.jsx */
+
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
 
 import React, {
+  useCallback,
   useEffect,
   useState,
   useContext,
@@ -16,7 +20,7 @@ import {
   Link,
   NavLink,
   useLocation,
-  useNavigate,
+  useNavigate as useRouterNavigate,
   useParams,
 } from "react-router-dom";
 
@@ -49,6 +53,149 @@ import {
   usePrivateWork,
   WorkDeliveryPanel,
 } from "./PrivateWork";
+
+/* =========================================================
+   FLUID NAVIGATION ENGINE
+========================================================= */
+
+const ROUTE_LOADING_SELECTOR =
+  "[data-route-loading='true']";
+
+let activeRouteTransition = null;
+
+function waitForRouteContent(
+  maximumWait = 72
+) {
+  return new Promise((resolve) => {
+    const root =
+      document.getElementById("root");
+
+    if (!root) {
+      resolve();
+      return;
+    }
+
+    let finished = false;
+    let animationFrame = 0;
+    let stableFrames = 0;
+
+    const observer =
+      new MutationObserver(checkReadiness);
+
+    const timeout =
+      window.setTimeout(
+        finish,
+        maximumWait
+      );
+
+    function finish() {
+      if (finished) return;
+
+      finished = true;
+      observer.disconnect();
+      window.clearTimeout(timeout);
+      window.cancelAnimationFrame(
+        animationFrame
+      );
+      resolve();
+    }
+
+    function checkReadiness() {
+      window.cancelAnimationFrame(
+        animationFrame
+      );
+
+      animationFrame =
+        window.requestAnimationFrame(
+          () => {
+            if (
+              document.querySelector(
+                ROUTE_LOADING_SELECTOR
+              )
+            ) {
+              stableFrames = 0;
+              return;
+            }
+
+            stableFrames += 1;
+
+            if (stableFrames >= 2) {
+              finish();
+              return;
+            }
+
+            checkReadiness();
+          }
+        );
+    }
+
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: [
+        "data-route-loading",
+      ],
+    });
+
+    checkReadiness();
+  });
+}
+
+function startFluidRouteTransition(
+  updateRoute
+) {
+  const prefersReducedMotion =
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+  if (
+    typeof document.startViewTransition !== "function" ||
+    prefersReducedMotion
+  ) {
+    return updateRoute();
+  }
+
+  activeRouteTransition?.skipTransition?.();
+
+  const transition =
+    document.startViewTransition(
+      async () => {
+        await updateRoute();
+        await waitForRouteContent();
+      }
+    );
+
+  activeRouteTransition = transition;
+
+  transition.finished
+    .catch(() => {})
+    .finally(() => {
+      if (
+        activeRouteTransition === transition
+      ) {
+        activeRouteTransition = null;
+      }
+    });
+
+  return transition;
+}
+
+function useNavigate() {
+  const navigate = useRouterNavigate();
+
+  return useCallback(
+    (destination, options) =>
+      startFluidRouteTransition(
+        () => navigate(
+          destination,
+          options
+        )
+      ),
+    [navigate]
+  );
+}
 
 /* =========================================================
    AUTH CONTEXT
@@ -1720,7 +1867,10 @@ function DiscoveryPreferencesCard() {
     return (
       <section className="account-card discovery-settings-card">
         <span className="section-label">Dopasowanie</span>
-        <p>Ładowanie preferencji...</p>
+        <InlineRouteLoader
+          className="embedded-route-loader"
+          rows={2}
+        />
       </section>
     );
   }
@@ -1935,14 +2085,32 @@ function JobRepublicationPanel() {
 
 function LoadingScreen() {
   return (
-    <div className="page">
-      <div className="auth-card">
-        <div className="logo">
-          Idea<span>Hire</span>
-        </div>
+    <div
+      className="route-loading-canvas"
+      data-route-loading="true"
+      aria-busy="true"
+      aria-label="Przygotowywanie widoku"
+    />
+  );
+}
 
-        <p>Ładowanie...</p>
-      </div>
+function InlineRouteLoader({
+  className = "",
+  rows = 3,
+}) {
+  return (
+    <div
+      className={`route-inline-loader ${className}`.trim()}
+      data-route-loading="true"
+      aria-busy="true"
+      aria-label="Przygotowywanie zawartości"
+    >
+      {Array.from(
+        { length: rows },
+        (_, index) => (
+          <span key={index} />
+        )
+      )}
     </div>
   );
 }
@@ -2007,11 +2175,15 @@ function PublicOnlyRoute({
     errorMessage: restrictionError,
   } = useAccountRestriction();
 
-  if (
-    loading ||
-    (isLoggedIn && (staffLoading || restrictionLoading))
-  ) {
+  if (loading) {
     return <LoadingScreen />;
+  }
+
+  if (
+    isLoggedIn &&
+    (staffLoading || restrictionLoading)
+  ) {
+    return children;
   }
 
   if (isLoggedIn) {
@@ -2768,6 +2940,24 @@ function formatPolishDays(value) {
   return `${days} dni`;
 }
 
+function formatPolishJobsCount(value) {
+  const count = Math.max(0, Math.trunc(Number(value) || 0));
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+
+  if (count === 1) return "1 zlecenie";
+
+  if (
+    lastDigit >= 2
+    && lastDigit <= 4
+    && (lastTwoDigits < 12 || lastTwoDigits > 14)
+  ) {
+    return `${count} zlecenia`;
+  }
+
+  return `${count} zleceń`;
+}
+
 function getModerationDurationDetails(notice) {
   if (!notice) return null;
 
@@ -2834,21 +3024,38 @@ function cleanSupabaseError(error, fallback) {
   return error?.message || fallback;
 }
 
-function useStaffRole(userId) {
+const StaffRoleContext = createContext(null);
+
+function StaffRoleProvider({ children }) {
+  const {
+    user,
+    loading: authLoading,
+  } = useAuth();
+
   const [staffRole, setStaffRole] = useState(null);
   const [staffLoading, setStaffLoading] = useState(true);
+  const [resolvedUserId, setResolvedUserId] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    const userId = user?.id || null;
+
     if (!userId) {
       setStaffRole(null);
+      setResolvedUserId(null);
       setStaffLoading(false);
       return;
     }
 
     let mounted = true;
 
-    async function loadStaffRole() {
-      setStaffLoading(true);
+    async function loadStaffRole(
+      showLoading = false
+    ) {
+      if (showLoading) {
+        setStaffLoading(true);
+      }
 
       const { data, error } = await supabase
         .from("ideahire_staff")
@@ -2861,27 +3068,117 @@ function useStaffRole(userId) {
 
       if (error) {
         console.error("STAFF ROLE ERROR:", error);
-        setStaffRole(null);
+
+        if (showLoading) {
+          setStaffRole(null);
+        }
       } else {
         setStaffRole(data?.role || null);
       }
 
-      setStaffLoading(false);
+      if (showLoading) {
+        setResolvedUserId(userId);
+        setStaffLoading(false);
+      }
     }
 
-    loadStaffRole();
+    loadStaffRole(true);
+
+    const channel = supabase
+      .channel(`staff-role-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ideahire_staff",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => loadStaffRole(false)
+      )
+      .subscribe();
+
+    const interval = window.setInterval(
+      () => loadStaffRole(false),
+      30000
+    );
+
+    function refreshWhenVisible() {
+      if (document.visibilityState === "visible") {
+        loadStaffRole(false);
+      }
+    }
+
+    document.addEventListener(
+      "visibilitychange",
+      refreshWhenVisible
+    );
 
     return () => {
       mounted = false;
+      window.clearInterval(interval);
+      document.removeEventListener(
+        "visibilitychange",
+        refreshWhenVisible
+      );
+      supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [authLoading, user?.id]);
 
-  return {
-    staffRole,
-    staffLoading,
-    isStaff: staffRole === "owner" || staffRole === "admin",
-    isOwner: staffRole === "owner",
+  const roleReady =
+    !user?.id ||
+    resolvedUserId === user.id;
+
+  const value = {
+    userId: user?.id || null,
+    staffRole:
+      roleReady ? staffRole : null,
+    staffLoading:
+      authLoading ||
+      staffLoading ||
+      !roleReady,
+    isStaff:
+      roleReady &&
+      (staffRole === "owner" ||
+        staffRole === "admin"),
+    isOwner:
+      roleReady &&
+      staffRole === "owner",
   };
+
+  return (
+    <StaffRoleContext.Provider value={value}>
+      {children}
+    </StaffRoleContext.Provider>
+  );
+}
+
+function useStaffRole(userId) {
+  const value =
+    useContext(StaffRoleContext);
+
+  if (!value) {
+    return {
+      staffRole: null,
+      staffLoading: true,
+      isStaff: false,
+      isOwner: false,
+    };
+  }
+
+  if (
+    userId &&
+    value.userId !== userId
+  ) {
+    return {
+      staffRole: null,
+      staffLoading: true,
+      isStaff: false,
+      isOwner: false,
+    };
+  }
+
+  return value;
 }
 
 function getStoredNotificationIds(
@@ -2969,6 +3266,9 @@ function AccountNavbar() {
     hasDisputeNotifications,
     setHasDisputeNotifications,
   ] = useState(false);
+
+  const accountMenuRef =
+    useRef(null);
 
   const userName =
     user?.user_metadata?.name ||
@@ -3282,6 +3582,53 @@ function AccountNavbar() {
     restrictionLoading,
   ]);
 
+  useEffect(() => {
+    function closeMenuFromOutside(event) {
+      const menu = accountMenuRef.current;
+
+      if (
+        menu?.open &&
+        !menu.contains(event.target)
+      ) {
+        menu.removeAttribute("open");
+      }
+    }
+
+    function closeMenuWithKeyboard(event) {
+      const menu = accountMenuRef.current;
+
+      if (
+        event.key === "Escape" &&
+        menu?.open
+      ) {
+        menu.removeAttribute("open");
+        menu
+          .querySelector("summary")
+          ?.focus();
+      }
+    }
+
+    document.addEventListener(
+      "pointerdown",
+      closeMenuFromOutside
+    );
+    document.addEventListener(
+      "keydown",
+      closeMenuWithKeyboard
+    );
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        closeMenuFromOutside
+      );
+      document.removeEventListener(
+        "keydown",
+        closeMenuWithKeyboard
+      );
+    };
+  }, []);
+
   async function handleLogout() {
     try {
       const { error } =
@@ -3310,7 +3657,10 @@ function AccountNavbar() {
 
   if (isRestricted || restrictionError) {
     return (
-      <header className="navbar account-navbar restricted-account-navbar">
+      <header
+        className="navbar account-navbar restricted-account-navbar"
+        data-ui-release="ideahire-v5-5-20260919"
+      >
         <Link
           className="restricted-navbar-brand"
           to="/account-status"
@@ -3363,8 +3713,17 @@ function AccountNavbar() {
     );
   }
 
+  function closeAccountMenu(event) {
+    event.currentTarget
+      .closest("details")
+      ?.removeAttribute("open");
+  }
+
   return (
-    <header className="navbar account-navbar">
+    <header
+      className="navbar account-navbar"
+      data-ui-release="ideahire-v5-5-20260919"
+    >
       <div className="account-navbar-brand">
         <Link
           className="navbar-home-back"
@@ -3383,7 +3742,10 @@ function AccountNavbar() {
         </Link>
       </div>
 
-      <nav className="nav-links">
+      <nav
+        className="nav-links account-primary-nav"
+        aria-label="Główna nawigacja konta"
+      >
         <NavLink
           to="/account"
           end
@@ -3395,25 +3757,9 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">Moje konto</span>
-          <span className="account-nav-label-short">Moje konto</span>
+          <span className="account-nav-label-full">Konto</span>
+          <span className="account-nav-label-short">Konto</span>
         </NavLink>
-
-        {!hasRestrictedAgeAccess && (
-          <NavLink
-            to="/find-talent"
-            className={({
-              isActive,
-            }) =>
-              isActive
-                ? "is-active"
-                : ""
-            }
-          >
-            <span className="account-nav-label-full">Dodaj zlecenie</span>
-            <span className="account-nav-label-short">Dodaj</span>
-          </NavLink>
-        )}
 
         <NavLink
           to="/jobs"
@@ -3425,7 +3771,7 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">Znajdź zlecenie</span>
+          <span className="account-nav-label-full">Zlecenia</span>
           <span className="account-nav-label-short">Zlecenia</span>
         </NavLink>
 
@@ -3439,110 +3785,194 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">Znajdź wykonawcę</span>
+          <span className="account-nav-label-full">Wykonawcy</span>
           <span className="account-nav-label-short">Wykonawcy</span>
         </NavLink>
 
         {!hasRestrictedAgeAccess && (
-          <>
-            <NavLink
-              to="/messages"
-              className={({
-                isActive,
-              }) =>
-                isActive
-                  ? "is-active"
-                  : ""
-              }
-            >
-              <span className="account-nav-label-full">Wiadomości</span>
-              <span className="account-nav-label-short">Wiadomości</span>
-            </NavLink>
-
-            <NavLink
-              to="/disputes"
-              className={({ isActive }) =>
-                `notifications-nav-link${
-                  isActive ? " is-active" : ""
-                }`
-              }
-            >
-              <span className="account-nav-label-full">Spory</span>
-              <span className="account-nav-label-short">Spory</span>
-
-              {hasDisputeNotifications && (
-                <span className="notification-dot" />
-              )}
-            </NavLink>
-
-            <NavLink
-              to="/notifications"
-              className={({
-                isActive,
-              }) =>
-                `notifications-nav-link${
-                  isActive
-                    ? " is-active"
-                    : ""
-                }`
-              }
-            >
-              <span className="account-nav-label-full">Powiadomienia</span>
-              <span className="account-nav-label-short">Powiadomienia</span>
-
-              {hasNotifications && (
-                <span className="notification-dot" />
-              )}
-            </NavLink>
-          </>
-        )}
-
-        {moderationNotice && (
           <NavLink
-            to="/account-status"
-            className={({ isActive }) =>
-              `notifications-nav-link${isActive ? " is-active" : ""}`
+            to="/messages"
+            className={({
+              isActive,
+            }) =>
+              isActive
+                ? "is-active"
+                : ""
             }
           >
-            <span className="account-nav-label-full">Decyzja administracji</span>
-            <span className="account-nav-label-short">Decyzja</span>
-            {["scheduled", "active"].includes(moderationNotice.status) && (
-              <span className="notification-dot" />
-            )}
+            <span className="account-nav-label-full">Wiadomości</span>
+            <span className="account-nav-label-short">Wiadomości</span>
           </NavLink>
         )}
       </nav>
 
-      <div className="nav-actions">
-        <Link
-          className="account-mini"
-          to="/account"
-        >
-          <span className="account-mini-avatar">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt=""
-              />
-            ) : (
-              initial
+      <div className="nav-actions account-navbar-actions">
+        {!hasRestrictedAgeAccess && (
+          <NavLink
+            to="/find-talent"
+            className={({ isActive }) =>
+              `account-create-job-button${isActive ? " is-active" : ""}`
+            }
+          >
+            <span aria-hidden="true">+</span>
+            <span className="account-create-job-label">Dodaj zlecenie</span>
+          </NavLink>
+        )}
+
+        {!hasRestrictedAgeAccess && (
+          <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              `account-notification-button${isActive ? " is-active" : ""}`
+            }
+            aria-label="Powiadomienia"
+            title="Powiadomienia"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+              <path d="M10 21h4" />
+            </svg>
+
+            {hasNotifications && (
+              <span className="notification-dot" />
             )}
-          </span>
+          </NavLink>
+        )}
 
-          <span className="account-mini-name">
-            {userName}
-          </span>
-        </Link>
-
-        <button
-          className="btn btn-dark"
-          type="button"
-          onClick={
-            handleLogout
-          }
+        <details
+          className="account-menu"
+          ref={accountMenuRef}
         >
-          Wyloguj się
-        </button>
+          <summary
+            className="account-mini"
+            aria-label="Otwórz menu konta"
+          >
+            <span className="account-mini-avatar">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                />
+              ) : (
+                initial
+              )}
+            </span>
+
+            <span className="account-mini-name">
+              {userName}
+            </span>
+
+            <span
+              className="account-menu-caret"
+              aria-hidden="true"
+            >
+              ⌄
+            </span>
+
+            {(hasDisputeNotifications ||
+              (moderationNotice &&
+                ["scheduled", "active"].includes(
+                  moderationNotice.status
+                ))) && (
+              <span className="account-menu-alert-dot" />
+            )}
+          </summary>
+
+          <div className="account-menu-dropdown">
+            <div className="account-menu-identity">
+              <strong>{userName}</strong>
+              <span>{user?.email || "Konto IdeaHire"}</span>
+            </div>
+
+            <nav
+              className="account-menu-mobile-nav"
+              aria-label="Nawigacja mobilna"
+            >
+              <NavLink to="/jobs" onClick={closeAccountMenu}>
+                Zlecenia
+              </NavLink>
+              <NavLink to="/talent" onClick={closeAccountMenu}>
+                Wykonawcy
+              </NavLink>
+              {!hasRestrictedAgeAccess && (
+                <NavLink to="/messages" onClick={closeAccountMenu}>
+                  Wiadomości
+                </NavLink>
+              )}
+              {!hasRestrictedAgeAccess && (
+                <NavLink to="/find-talent" onClick={closeAccountMenu}>
+                  Dodaj zlecenie
+                </NavLink>
+              )}
+            </nav>
+
+            <NavLink
+              to="/account"
+              onClick={closeAccountMenu}
+              className={({ isActive }) =>
+                isActive ? "is-active" : ""
+              }
+            >
+              Moje konto
+            </NavLink>
+
+            {!hasRestrictedAgeAccess && (
+              <NavLink
+                to="/disputes"
+                onClick={closeAccountMenu}
+                className={({ isActive }) =>
+                  `account-menu-notice-link${isActive ? " is-active" : ""}`
+                }
+              >
+                <span>Spory</span>
+                {hasDisputeNotifications && (
+                  <span className="notification-dot" />
+                )}
+              </NavLink>
+            )}
+
+            {moderationNotice && (
+              <NavLink
+                to="/account-status"
+                onClick={closeAccountMenu}
+                className={({ isActive }) =>
+                  `account-menu-notice-link${isActive ? " is-active" : ""}`
+                }
+              >
+                <span>Decyzja administracji</span>
+                {["scheduled", "active"].includes(
+                  moderationNotice.status
+                ) && (
+                  <span className="notification-dot" />
+                )}
+              </NavLink>
+            )}
+
+            <NavLink
+              to="/privacy-center"
+              onClick={closeAccountMenu}
+              className={({ isActive }) =>
+                isActive ? "is-active" : ""
+              }
+            >
+              Prywatność i dane
+            </NavLink>
+
+            <div className="account-menu-divider" />
+
+            <button
+              className="account-menu-logout"
+              type="button"
+              onClick={handleLogout}
+            >
+              Wyloguj się
+            </button>
+          </div>
+        </details>
       </div>
     </header>
   );
@@ -3576,7 +4006,10 @@ function AdminNavbar() {
   }
 
   return (
-    <header className="navbar admin-navbar">
+    <header
+      className="navbar admin-navbar"
+      data-ui-release="ideahire-v5-5-20260919"
+    >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
           Idea<span>Hire</span>
@@ -3899,10 +4332,7 @@ function Login() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -4444,7 +4874,11 @@ function ResetPassword() {
     }
   }
 
-  if (loading) {
+  if (
+    loading &&
+    !recoveryReady &&
+    !message
+  ) {
     return <LoadingScreen />;
   }
 
@@ -4761,10 +5195,7 @@ function Register() {
     }
   }
 
-  if (
-    authLoading ||
-    isLoggedIn
-  ) {
+  if (authLoading) {
     return <LoadingScreen />;
   }
 
@@ -5700,7 +6131,10 @@ function AccountStatus() {
         )}
 
         {loading ? (
-          <div className="privacy-empty-state">Ładowanie statusu konta...</div>
+          <InlineRouteLoader
+            className="status-route-loader"
+            rows={3}
+          />
         ) : restrictionError && !notice ? (
           <section className="moderation-status-error-card" role="alert">
             <span aria-hidden="true">!</span>
@@ -6023,7 +6457,7 @@ function LimitedAccount() {
       <AccountNavbar />
 
       <main className="app-page limited-account-shell">
-        <div className="app-page-header">
+        <div className="app-page-header account-page-heading">
           <span className="section-label">Twoje konto</span>
           <h1>Konto ograniczone</h1>
           <p>
@@ -6096,6 +6530,75 @@ function LimitedAccount() {
    ACCOUNT
 ========================================================= */
 
+const ACCOUNT_WORKSPACE_SECTIONS = [
+  {
+    key: "profile",
+    number: "01",
+    label: "Dane profilu",
+    hash: "account-profile-data",
+    eyebrow: "Profil publiczny",
+    title: "Podstawowe dane",
+    description:
+      "Ustaw zdjęcie, nazwę, opis i kraj widoczny dla innych użytkowników.",
+  },
+  {
+    key: "expertise",
+    number: "02",
+    label: "Specjalizacja",
+    hash: "account-expertise",
+    eyebrow: "Oferta wykonawcy",
+    title: "Specjalizacja i umiejętności",
+    description:
+      "Wybierz dziedziny i opisz doświadczenie, z którym chcesz być kojarzony.",
+  },
+  {
+    key: "portfolio",
+    number: "03",
+    label: "Portfolio",
+    hash: "account-portfolio",
+    eyebrow: "Twoje realizacje",
+    title: "Projekty w portfolio",
+    description:
+      "Dodawaj i porządkuj realizacje, które najlepiej pokazują jakość Twojej pracy.",
+  },
+  {
+    key: "jobs",
+    number: "04",
+    label: "Zlecenia",
+    hash: "account-jobs",
+    eyebrow: "Twoja aktywność",
+    title: "Opublikowane zlecenia",
+    description:
+      "Zarządzaj własnymi ogłoszeniami i sprawdzaj zlecenia gotowe do ponownej publikacji.",
+  },
+  {
+    key: "preferences",
+    number: "05",
+    label: "Ustawienia",
+    hash: "account-preferences",
+    eyebrow: "Konto i prywatność",
+    title: "Sposób korzystania z IdeaHire",
+    description:
+      "Dopasuj rekomendacje oraz przejdź do ustawień prywatności i swoich zgłoszeń.",
+  },
+];
+
+function getAccountWorkspaceSection(hash = "") {
+  const normalizedHash = hash.replace(/^#/, "");
+
+  if (normalizedHash === "account-expertise") return "expertise";
+  if (normalizedHash === "account-portfolio") return "portfolio";
+  if (normalizedHash === "account-jobs") return "jobs";
+  if (
+    normalizedHash === "account-preferences" ||
+    normalizedHash === "account-privacy"
+  ) {
+    return "preferences";
+  }
+
+  return "profile";
+}
+
 function Account() {
   const {
     user,
@@ -6106,6 +6609,11 @@ function Account() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const navigateAccountWorkspace = useRouterNavigate();
+
+  const [activeAccountSection, setActiveAccountSection] = useState(() =>
+    getAccountWorkspaceSection(location.hash)
+  );
 
   const connectReturnHandledRef =
     useRef("");
@@ -6211,6 +6719,12 @@ function Account() {
 
   const [connectFeedback, setConnectFeedback] =
     useState(null);
+
+  useEffect(() => {
+    setActiveAccountSection(
+      getAccountWorkspaceSection(location.hash)
+    );
+  }, [location.hash]);
 
   useEffect(() => {
     if (!user) return;
@@ -7616,28 +8130,99 @@ function Account() {
     connectCopy[connectStatus] ||
     connectCopy.not_started;
 
+  const activeAccountSectionCopy =
+    ACCOUNT_WORKSPACE_SECTIONS.find(
+      (section) => section.key === activeAccountSection
+    ) || ACCOUNT_WORKSPACE_SECTIONS[0];
+
+  function openAccountSection(section) {
+    setActiveAccountSection(section.key);
+    navigateAccountWorkspace(
+      {
+        pathname: location.pathname,
+        search: location.search,
+        hash: `#${section.hash}`,
+      },
+      { replace: true }
+    );
+  }
+
   return (
     <div className="page">
       <AccountNavbar />
 
-      <main className="app-page">
+      <main
+        className="app-page account-workspace-page"
+        data-account-section={activeAccountSection}
+      >
         <div className="app-page-header">
           <span className="section-label">
             Twoje konto
           </span>
 
           <h1>
-            Mój profil
+            Centrum profilu
           </h1>
 
           <p>
-            Zarządzaj swoim
-            profilem IdeaHire.
+            Uporządkuj dane, specjalizacje, portfolio i ustawienia konta
+            w jednym miejscu.
           </p>
         </div>
 
-        <section className="account-card">
-          <div className="profile-preview">
+        <nav
+          className="account-section-nav"
+          aria-label="Sekcje konta"
+          role="tablist"
+        >
+          {ACCOUNT_WORKSPACE_SECTIONS.map((section) => {
+            const isActive = activeAccountSection === section.key;
+
+            return (
+              <button
+                key={section.key}
+                id={`account-tab-${section.key}`}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-controls="account-tab-panel"
+                className={isActive ? "is-active" : ""}
+                onClick={() => openAccountSection(section)}
+              >
+                <span aria-hidden="true">{section.number}</span>
+                {section.label}
+              </button>
+            );
+          })}
+        </nav>
+
+        <section className="account-tab-intro" aria-live="polite">
+          <div>
+            <span className="section-label">
+              {activeAccountSectionCopy.eyebrow}
+            </span>
+            <h2>{activeAccountSectionCopy.title}</h2>
+          </div>
+          <p>{activeAccountSectionCopy.description}</p>
+        </section>
+
+        <div
+          className="account-tab-stage"
+          id="account-tab-panel"
+          role="tabpanel"
+          aria-labelledby={`account-tab-${activeAccountSection}`}
+          tabIndex="0"
+          key={activeAccountSection}
+        >
+
+        <section
+          className="account-card account-profile-workspace"
+          hidden={activeAccountSection === "jobs" || activeAccountSection === "preferences"}
+        >
+          <div
+            className="profile-preview"
+            hidden={activeAccountSection !== "profile"}
+          >
             <div className="profile-avatar-wrapper">
               {avatarUrl ? (
                 <img
@@ -7673,7 +8258,7 @@ function Account() {
             </div>
           </div>
 
-          {isAdult && (
+          {isAdult && activeAccountSection === "profile" && (
             <section
               className={`stripe-connect-panel is-${connectStatus}`}
               aria-labelledby="stripe-connect-title"
@@ -7754,7 +8339,26 @@ function Account() {
           <form
             className="auth-form account-form"
             onSubmit={handleSave}
+            hidden={
+              activeAccountSection !== "profile" &&
+              activeAccountSection !== "expertise"
+            }
           >
+            <section
+              className="account-form-section account-form-section-identity"
+              id="account-profile-data"
+              aria-labelledby="account-profile-data-title"
+              hidden={activeAccountSection !== "profile"}
+            >
+              <header className="account-form-section-heading">
+                <span aria-hidden="true">01</span>
+                <div>
+                  <p>Podstawowe dane</p>
+                  <h2 id="account-profile-data-title">Jak widzą Cię inni</h2>
+                  <small>Zdjęcie, nazwa i krótki opis Twojego profilu.</small>
+                </div>
+              </header>
+
             <label>
               Zdjęcie profilowe
 
@@ -7815,6 +8419,23 @@ function Account() {
                 na Twoim profilu.
               </small>
             </label>
+
+            </section>
+
+            <section
+              className="account-form-section account-form-section-expertise"
+              id="account-expertise"
+              aria-labelledby="account-expertise-title"
+              hidden={activeAccountSection !== "expertise"}
+            >
+              <header className="account-form-section-heading">
+                <span aria-hidden="true">02</span>
+                <div>
+                  <p>Oferta i doświadczenie</p>
+                  <h2 id="account-expertise-title">Twoja specjalizacja</h2>
+                  <small>Wybierz dziedziny i pokaż konkretne umiejętności.</small>
+                </div>
+              </header>
 
             <fieldset className="profile-specialties-field">
               <legend>
@@ -7976,6 +8597,23 @@ function Account() {
               </small>
             </label>
 
+            </section>
+
+            <section
+              className="account-form-section account-form-section-contact"
+              id="account-contact"
+              aria-labelledby="account-contact-title"
+              hidden={activeAccountSection !== "profile"}
+            >
+              <header className="account-form-section-heading">
+                <span aria-hidden="true">03</span>
+                <div>
+                  <p>Konto i lokalizacja</p>
+                  <h2 id="account-contact-title">Dane kontaktowe</h2>
+                  <small>Adres logowania jest chroniony, a kraj widoczny na profilu.</small>
+                </div>
+              </header>
+
             <label>
               E-mail
 
@@ -8011,30 +8649,41 @@ function Account() {
               </small>
             </label>
 
-            {message && (
-              <p className="auth-message">
-                {message}
-              </p>
-            )}
+            </section>
 
-            <button
-              className="btn btn-dark btn-large"
-              type="submit"
-              disabled={
-                saving ||
-                uploading ||
-                profileDetailsLoading
-              }
-            >
-              {saving
-                ? "Zapisywanie..."
-                : "Zapisz zmiany →"}
-            </button>
+            <div className="account-form-actions">
+              <div className="account-form-save-copy">
+                <strong>Gotowe?</strong>
+                <span>Zapisz wszystkie zmiany wprowadzone w profilu.</span>
+              </div>
+
+              {message && (
+                <p className="auth-message">
+                  {message}
+                </p>
+              )}
+
+              <button
+                className="btn btn-dark btn-large"
+                type="submit"
+                disabled={
+                  saving ||
+                  uploading ||
+                  profileDetailsLoading
+                }
+              >
+                {saving
+                  ? "Zapisywanie..."
+                  : "Zapisz zmiany →"}
+              </button>
+            </div>
           </form>
 
           <section
             className="profile-portfolio-manager"
+            id="account-portfolio"
             aria-labelledby="portfolio-manager-title"
+            hidden={activeAccountSection !== "portfolio"}
           >
             <div className="profile-portfolio-heading">
               <div>
@@ -8063,7 +8712,10 @@ function Account() {
             </div>
 
             {portfolioLoading ? (
-              <p className="profile-portfolio-empty">Ładowanie portfolio...</p>
+              <InlineRouteLoader
+                className="embedded-route-loader"
+                rows={3}
+              />
             ) : portfolioItems.length > 0 ? (
               <div className="profile-portfolio-edit-list">
                 {portfolioItems.map((item) => (
@@ -8292,9 +8944,20 @@ function Account() {
           </section>
         </section>
 
-        <DiscoveryPreferencesCard />
+        <div
+          className="account-dashboard-block"
+          id="account-preferences"
+          hidden={activeAccountSection !== "preferences"}
+        >
+          <DiscoveryPreferencesCard />
+        </div>
 
-        <section className="privacy-entry-card" aria-labelledby="privacy-entry-title">
+        <section
+          className="privacy-entry-card"
+          id="account-privacy"
+          aria-labelledby="privacy-entry-title"
+          hidden={activeAccountSection !== "preferences"}
+        >
           <div className="privacy-entry-icon" aria-hidden="true">◉</div>
           <div className="privacy-entry-copy">
             <span className="section-label">Prywatność</span>
@@ -8310,7 +8973,11 @@ function Account() {
         </section>
 
         {myContentReports.length > 0 && (
-          <section className="account-card profile-content-report-history" aria-labelledby="my-content-reports-title">
+          <section
+            className="account-card profile-content-report-history"
+            aria-labelledby="my-content-reports-title"
+            hidden={activeAccountSection !== "preferences"}
+          >
             <div className="profile-content-report-history-heading">
               <div>
                 <span className="section-label">Bezpieczeństwo treści</span>
@@ -8373,9 +9040,18 @@ function Account() {
           </section>
         )}
 
-        <JobRepublicationPanel />
+        <div
+          className="account-jobs-republication"
+          hidden={activeAccountSection !== "jobs"}
+        >
+          <JobRepublicationPanel />
+        </div>
 
-        <section className="account-card my-jobs-section">
+        <section
+          className="account-card my-jobs-section"
+          id="account-jobs"
+          hidden={activeAccountSection !== "jobs"}
+        >
           <span className="section-label">
             Moje zlecenia
           </span>
@@ -8386,9 +9062,10 @@ function Account() {
           </h2>
 
           {jobsLoading ? (
-            <p>
-              Ładowanie zleceń...
-            </p>
+            <InlineRouteLoader
+              className="embedded-route-loader"
+              rows={3}
+            />
           ) : myJobs.length ===
             0 ? (
             <p>
@@ -8450,6 +9127,7 @@ function Account() {
             </div>
           )}
         </section>
+        </div>
       </main>
     </div>
   );
@@ -9349,7 +10027,10 @@ function PrivacyCenter() {
           </div>
 
           {loading ? (
-            <div className="privacy-empty-state">Ładowanie wniosków...</div>
+            <InlineRouteLoader
+              className="privacy-route-loader"
+              rows={4}
+            />
           ) : requests.length === 0 ? (
             <div className="privacy-empty-state">
               <strong>Nie masz jeszcze żadnych wniosków</strong>
@@ -12520,21 +13201,11 @@ function Jobs() {
           !message &&
           jobs.length > 0 && (
             <div className="jobs-results-header">
-              <div>
+              <div className="jobs-results-copy">
+                <span>Wyniki wyszukiwania</span>
                 <strong>
-                  {
-                    filteredJobs.length
-                  }
-                </strong>{" "}
-                {filteredJobs.length ===
-                1
-                  ? "zlecenie"
-                  : filteredJobs.length >=
-                      2 &&
-                    filteredJobs.length <=
-                      4
-                  ? "zlecenia"
-                  : "zleceń"}
+                  {formatPolishJobsCount(filteredJobs.length)}
+                </strong>
               </div>
 
               {hasFilters && (
@@ -12552,9 +13223,10 @@ function Jobs() {
           )}
 
         {loading && (
-          <p>
-            Ładowanie zleceń...
-          </p>
+          <InlineRouteLoader
+            className="jobs-route-loader"
+            rows={4}
+          />
         )}
 
         {!loading &&
@@ -13050,10 +13722,10 @@ function Talent() {
         {message && <p className="auth-error">{message}</p>}
 
         {loading ? (
-          <section className="talent-empty-state" aria-live="polite">
-            <div className="loading-spinner" />
-            <p>Ładowanie profili...</p>
-          </section>
+          <InlineRouteLoader
+            className="talent-route-loader"
+            rows={4}
+          />
         ) : displayedProfiles.length === 0 ? (
           <section className="talent-empty-state">
             <span aria-hidden="true">◎</span>
@@ -13946,9 +14618,10 @@ function Notifications() {
         </div>
 
         {loading && (
-          <p>
-            Ładowanie powiadomień...
-          </p>
+          <InlineRouteLoader
+            className="notifications-route-loader"
+            rows={3}
+          />
         )}
 
         {!loading &&
@@ -15085,20 +15758,30 @@ function Messages() {
         `}</style>
 
         <div className="messages-heading">
-          <span className="section-label">
-            Twoje rozmowy
-          </span>
+          <div className="messages-heading-copy">
+            <span className="section-label">
+              Twoje rozmowy
+            </span>
 
-          <h1>Wiadomości</h1>
+            <h1>Wiadomości</h1>
 
-          <p>
-            Tutaj znajdziesz wszystkie rozmowy
-            rozpoczęte po zaakceptowaniu wykonawcy.
-          </p>
+            <p>
+              Wszystkie rozmowy dotyczące aktywnych i zakończonych
+              współprac w jednym, uporządkowanym miejscu.
+            </p>
+          </div>
+
+          <div className="messages-overview" aria-label="Liczba rozmów">
+            <strong>{conversations.length}</strong>
+            <span>{conversations.length === 1 ? "rozmowa" : "rozmów"}</span>
+          </div>
         </div>
 
         {loading ? (
-          <p>Ładowanie rozmów...</p>
+          <InlineRouteLoader
+            className="messages-route-loader"
+            rows={4}
+          />
         ) : errorMessage ? (
           <p className="auth-error">
             {errorMessage}
@@ -15116,6 +15799,11 @@ function Messages() {
           </section>
         ) : (
           <div className="messages-list">
+            <div className="messages-list-header" aria-hidden="true">
+              <span>Ostatnie rozmowy</span>
+              <span>Ostatnia aktywność</span>
+            </div>
+
             {conversations.map(
               (conversation) => {
                 const profile =
@@ -15217,6 +15905,7 @@ function ChatDisputePanel({
   const [dispute, setDispute] = useState(null);
   const [loading, setLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [panelExpanded, setPanelExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [form, setForm] = useState(EMPTY_DISPUTE_FORM);
@@ -15228,6 +15917,7 @@ function ChatDisputePanel({
     ) {
       setDispute(null);
       setFormOpen(false);
+      setPanelExpanded(false);
       return;
     }
 
@@ -15282,6 +15972,7 @@ function ChatDisputePanel({
     }
 
     setFormOpen(true);
+    setPanelExpanded(true);
     setMessage("");
     window.requestAnimationFrame(() => {
       document
@@ -15399,35 +16090,61 @@ function ChatDisputePanel({
       return null;
     }
     return (
-      <section className="chat-dispute-card is-loading">
-        Sprawdzanie centrum sporu...
-      </section>
+      <InlineRouteLoader
+        className="chat-compact-route-loader"
+        rows={1}
+      />
     );
   }
 
   if (dispute) {
     return (
-      <section className="chat-dispute-card has-dispute">
-        <div className="chat-dispute-copy">
-          <span className="dispute-eyebrow">
-            Centrum sporu
+      <details
+        className="chat-collapsible-panel chat-dispute-disclosure has-dispute"
+        open={panelExpanded}
+        onToggle={(event) =>
+          setPanelExpanded(event.currentTarget.open)
+        }
+      >
+        <summary className="chat-collapsible-summary">
+          <span className="chat-collapsible-icon is-dispute" aria-hidden="true">
+            !
           </span>
-          <strong>
-            {formatDisputeNumber(dispute.case_number)}
-          </strong>
-          <small>
-            {getDisputeStatusLabel(dispute.status)}
-          </small>
-        </div>
+          <span className="chat-collapsible-copy">
+            <strong>
+              Spór {formatDisputeNumber(dispute.case_number)}
+            </strong>
+            <small>
+              {getDisputeStatusLabel(dispute.status)} · rozwiń szczegóły
+            </small>
+          </span>
+          <span className="chat-collapsible-chevron" aria-hidden="true" />
+        </summary>
 
-        <button
-          type="button"
-          className="dispute-secondary-button"
-          onClick={() => navigate(`/disputes/${dispute.id}`)}
-        >
-          Otwórz sprawę
-        </button>
-      </section>
+        <div className="chat-collapsible-body">
+          <section className="chat-dispute-card has-dispute">
+            <div className="chat-dispute-copy">
+              <span className="dispute-eyebrow">
+                Centrum sporu
+              </span>
+              <strong>
+                {formatDisputeNumber(dispute.case_number)}
+              </strong>
+              <small>
+                {getDisputeStatusLabel(dispute.status)}
+              </small>
+            </div>
+
+            <button
+              type="button"
+              className="dispute-secondary-button"
+              onClick={() => navigate(`/disputes/${dispute.id}`)}
+            >
+              Otwórz sprawę
+            </button>
+          </section>
+        </div>
+      </details>
     );
   }
 
@@ -15436,7 +16153,31 @@ function ChatDisputePanel({
   }
 
   return (
-    <section className="chat-dispute-card" id="chat-dispute-panel">
+    <details
+      className="chat-collapsible-panel chat-dispute-disclosure"
+      id="chat-dispute-panel"
+      open={panelExpanded}
+      onToggle={(event) =>
+        setPanelExpanded(event.currentTarget.open)
+      }
+    >
+      <summary className="chat-collapsible-summary">
+        <span className="chat-collapsible-icon is-dispute" aria-hidden="true">
+          !
+        </span>
+        <span className="chat-collapsible-copy">
+          <strong>Centrum sporu</strong>
+          <small>
+            {formOpen
+              ? "Formularz zgłoszenia · możesz go zwinąć"
+              : "Problem ze współpracą? Rozwiń panel"}
+          </small>
+        </span>
+        <span className="chat-collapsible-chevron" aria-hidden="true" />
+      </summary>
+
+      <div className="chat-collapsible-body">
+      <section className="chat-dispute-card">
       {!formOpen ? (
         <>
           <div className="chat-dispute-copy">
@@ -15646,7 +16387,9 @@ function ChatDisputePanel({
       {!formOpen && message && (
         <p className="dispute-inline-message is-error">{message}</p>
       )}
-    </section>
+      </section>
+      </div>
+    </details>
   );
 }
 
@@ -15854,23 +16597,26 @@ function AgreementPanel({
     useState(false);
 
   const [expanded, setExpanded] =
-    useState(true);
+    useState(false);
 
   useEffect(() => {
     setConfirmed(false);
-    setExpanded(true);
   }, [mode, agreement?.id]);
+
+  useEffect(() => {
+    if (mode === "form") {
+      setExpanded(true);
+    }
+  }, [mode]);
 
   if (!required) return null;
 
   if (loading) {
     return (
-      <section className="agreement-gate agreement-loading">
-        <span className="agreement-lock-icon">
-          ◌
-        </span>
-        <p>Ładowanie warunków współpracy...</p>
-      </section>
+      <InlineRouteLoader
+        className="chat-compact-route-loader"
+        rows={1}
+      />
     );
   }
 
@@ -17609,9 +18355,10 @@ function Chat() {
 
         <div className="chat-shell">
           {loading ? (
-            <div className="chat-empty">
-              Ładowanie rozmowy...
-            </div>
+            <InlineRouteLoader
+              className="chat-route-loader"
+              rows={5}
+            />
           ) : errorMessage &&
             !conversation ? (
             <div className="chat-empty">
@@ -18240,7 +18987,10 @@ function Disputes() {
         </div>
 
         {loading ? (
-          <div className="dispute-state-card">Ładowanie spraw...</div>
+          <InlineRouteLoader
+            className="disputes-route-loader"
+            rows={4}
+          />
         ) : errorMessage ? (
           <div className="dispute-state-card is-error">{errorMessage}</div>
         ) : visibleDisputes.length === 0 ? (
@@ -19012,7 +19762,10 @@ function DisputeDetails() {
       <div className="account-page disputes-page">
         {isStaff ? <AdminNavbar /> : <AccountNavbar />}
         <main className="disputes-shell">
-          <div className="dispute-state-card">Ładowanie szczegółów sprawy...</div>
+          <InlineRouteLoader
+            className="disputes-route-loader"
+            rows={5}
+          />
         </main>
       </div>
     );
@@ -20196,7 +20949,10 @@ function AdminJobs() {
         </section>
 
         {loading ? (
-          <div className="dispute-state-card">Ładowanie zleceń...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         ) : message ? (
           <div className="dispute-state-card is-error">{message}</div>
         ) : visibleJobs.length === 0 ? (
@@ -20433,7 +21189,10 @@ function AdminEvidenceMessages() {
         </div>
 
         {loading ? (
-          <div className="dispute-state-card">Ładowanie wiadomości dowodowych...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         ) : message ? (
           <div className="dispute-state-card is-error">{message}</div>
         ) : visibleItems.length === 0 ? (
@@ -22345,7 +23104,10 @@ function AdminModeration() {
             <h2>Historia ograniczeń</h2>
           </div>
           {loading ? (
-            <div className="privacy-empty-state">Ładowanie decyzji...</div>
+            <InlineRouteLoader
+              className="admin-route-loader"
+              rows={4}
+            />
           ) : cases.length === 0 ? (
             <div className="privacy-empty-state">Nie wydano jeszcze żadnej decyzji.</div>
           ) : (
@@ -22857,7 +23619,10 @@ function AdminUserPrivacyAccount() {
         </Link>
 
         {loading ? (
-          <div className="privacy-empty-state">Ładowanie konta użytkownika...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         ) : (
           <>
             <header className="erasure-account-header">
@@ -24194,7 +24959,10 @@ function AdminPrivacyRequests() {
           </div>
 
           {loading ? (
-            <div className="privacy-empty-state">Ładowanie kolejki...</div>
+            <InlineRouteLoader
+              className="admin-route-loader"
+              rows={5}
+            />
           ) : visibleRequests.length === 0 ? (
             <div className="privacy-empty-state">
               <strong>Brak wniosków w tym widoku</strong>
@@ -25050,7 +25818,10 @@ function AdminPanel() {
       <div className="account-page admin-page">
         <AdminNavbar />
         <main className="admin-shell">
-          <div className="dispute-state-card">Ładowanie panelu administratora...</div>
+          <InlineRouteLoader
+            className="admin-route-loader"
+            rows={5}
+          />
         </main>
       </div>
     );
@@ -25321,17 +26092,116 @@ function Home() {
 }
 
 /* =========================================================
+   SMOOTH ROUTE TRANSITIONS
+========================================================= */
+
+function SmoothRouteTransitions() {
+  const navigate = useRouterNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    function handleInternalLink(event) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const anchor =
+        event.target?.closest?.("a[href]");
+
+      if (
+        !anchor ||
+        anchor.hasAttribute("download") ||
+        anchor.hasAttribute("data-no-route-transition")
+      ) {
+        return;
+      }
+
+      const target =
+        anchor.getAttribute("target");
+
+      if (target && target !== "_self") {
+        return;
+      }
+
+      const nextUrl = new URL(
+        anchor.href,
+        window.location.href
+      );
+
+      if (
+        nextUrl.origin !== window.location.origin ||
+        nextUrl.protocol !== window.location.protocol
+      ) {
+        return;
+      }
+
+      const currentAddress =
+        `${location.pathname}${location.search}${location.hash}`;
+
+      const nextAddress =
+        `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+
+      if (
+        nextAddress === currentAddress ||
+        (
+          nextUrl.pathname === location.pathname &&
+          nextUrl.search === location.search
+        )
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+
+      startFluidRouteTransition(
+        () => navigate(nextAddress)
+      );
+    }
+
+    document.addEventListener(
+      "click",
+      handleInternalLink,
+      true
+    );
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        handleInternalLink,
+        true
+      );
+    };
+  }, [
+    location.hash,
+    location.pathname,
+    location.search,
+    navigate,
+  ]);
+
+  return null;
+}
+
+/* =========================================================
    ROUTER
 ========================================================= */
 
 function Router() {
   return (
     <BrowserRouter>
+      <SmoothRouteTransitions />
       <AuthProvider>
-        <AccountRestrictionProvider>
-          <AgeAccessProvider>
-          <DiscoveryPreferencesProvider>
-          <Sorts />
+        <StaffRoleProvider>
+          <AccountRestrictionProvider>
+            <AgeAccessProvider>
+            <DiscoveryPreferencesProvider>
+            <Sorts />
 
         <DiscoveryOnboardingLayer />
 
@@ -25676,9 +26546,10 @@ function Router() {
             }
           />
         </Routes>
-          </DiscoveryPreferencesProvider>
-          </AgeAccessProvider>
-        </AccountRestrictionProvider>
+            </DiscoveryPreferencesProvider>
+            </AgeAccessProvider>
+          </AccountRestrictionProvider>
+        </StaffRoleProvider>
       </AuthProvider>
     </BrowserRouter>
   );
