@@ -2646,6 +2646,103 @@ const MAX_JOB_BUDGET = 15000;
 const MAX_JOB_BUDGET_MESSAGE =
   "Nie możesz wpisać wyższej ceny. Maksymalny budżet jednego zlecenia to 15 000 zł.";
 
+const JOB_LISTING_DURATION_OPTIONS = [
+  {
+    days: 7,
+    label: "7 dni",
+    description: "Krótka, pilna rekrutacja",
+  },
+  {
+    days: 14,
+    label: "14 dni",
+    description: "Najlepszy wybór dla większości zleceń",
+  },
+  {
+    days: 30,
+    label: "30 dni",
+    description: "Więcej czasu na znalezienie wykonawcy",
+  },
+];
+
+function getJobExpiryInfo(expiresAt) {
+  const expiryTime = new Date(expiresAt || "").getTime();
+
+  if (!Number.isFinite(expiryTime)) {
+    return {
+      expired: false,
+      label: "Aktywne ogłoszenie",
+    };
+  }
+
+  const remainingMilliseconds = expiryTime - Date.now();
+
+  if (remainingMilliseconds <= 0) {
+    return {
+      expired: true,
+      label: "Ogłoszenie wygasło",
+    };
+  }
+
+  const remainingHours = Math.ceil(
+    remainingMilliseconds / (60 * 60 * 1000)
+  );
+
+  if (remainingHours <= 24) {
+    return {
+      expired: false,
+      label:
+        remainingHours === 1
+          ? "Wygasa za godzinę"
+          : `Wygasa za ${remainingHours} godz.`,
+    };
+  }
+
+  const remainingDays = Math.ceil(remainingHours / 24);
+
+  return {
+    expired: false,
+    label: `Wygasa za ${remainingDays} dni`,
+  };
+}
+
+function JobListingMeta({ job, compact = false }) {
+  const expiry = getJobExpiryInfo(job?.expires_at);
+  const negotiable = job?.budget_negotiable === true;
+
+  return (
+    <div
+      className={`job-listing-meta${compact ? " is-compact" : ""}`}
+      aria-label="Warunki publikacji zlecenia"
+    >
+      <span
+        className={`job-listing-pill job-listing-expiry${
+          expiry.expired ? " is-expired" : ""
+        }`}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3v3M17 3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+        </svg>
+        {expiry.label}
+      </span>
+
+      <span
+        className={`job-listing-pill job-listing-price${
+          negotiable ? " is-negotiable" : " is-fixed"
+        }`}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          {negotiable ? (
+            <path d="M7 8h10M7 8l3-3M7 8l3 3M17 16H7m10 0-3-3m3 3-3 3" />
+          ) : (
+            <path d="M8 10V8a4 4 0 0 1 8 0v2m-9 0h10a2 2 0 0 1 2 2v7H5v-7a2 2 0 0 1 2-2Z" />
+          )}
+        </svg>
+        {negotiable ? "Do negocjacji" : "Cena ustalona"}
+      </span>
+    </div>
+  );
+}
+
 const DISPUTE_STATUS_LABELS = {
   awaiting_response: "Oczekiwanie na odpowiedź",
   evidence_collection: "Zbieranie wyjaśnień",
@@ -7020,7 +7117,7 @@ function Account() {
       } = await supabase
         .from("jobs")
         .select(
-          "id, user_id, title, description, category, budget, created_at"
+          "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
         )
         .eq(
           "user_id",
@@ -9088,6 +9185,8 @@ function Account() {
                       {job.title}
                     </h2>
 
+                    <JobListingMeta job={job} compact />
+
                     <p>
                       Budżet:{" "}
                       <strong>
@@ -10360,6 +10459,12 @@ function FindTalent() {
   const [budget, setBudget] =
     useState("");
 
+  const [budgetNegotiable, setBudgetNegotiable] =
+    useState(true);
+
+  const [listingDurationDays, setListingDurationDays] =
+    useState(14);
+
   const [saving, setSaving] =
     useState(false);
 
@@ -10525,6 +10630,10 @@ function FindTalent() {
             category,
             budget:
               numericBudget,
+            budget_negotiable:
+              budgetNegotiable,
+            listing_duration_days:
+              listingDurationDays,
           });
 
       if (error) {
@@ -10558,6 +10667,8 @@ function FindTalent() {
           JOB_CATEGORIES[0]
       );
       setBudget("");
+      setBudgetNegotiable(true);
+      setListingDurationDays(14);
 
       setTimeout(() => {
         navigate("/jobs");
@@ -10777,11 +10888,100 @@ function FindTalent() {
                 </strong>
 
                 <small>
-                  Wyższej kwoty nie można wpisać ani opublikować. Cena po publikacji pozostaje zablokowana.
+                  Wyższej kwoty nie można wpisać ani opublikować. W kolejnym
+                  kroku zdecydujesz, czy budżet będzie stały, czy negocjowalny.
                 </small>
               </span>
             </div>
           </label>
+
+          <fieldset className="job-option-fieldset">
+            <legend>Charakter budżetu</legend>
+
+            <p className="job-option-intro">
+              Określ, czy podana kwota jest ostateczna, czy może zostać
+              doprecyzowana przed rozpoczęciem współpracy.
+            </p>
+
+            <div className="job-option-grid job-budget-options">
+              <label
+                className={`job-option-card${
+                  budgetNegotiable ? " is-selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="budget-negotiable"
+                  checked={budgetNegotiable}
+                  onChange={() => setBudgetNegotiable(true)}
+                />
+                <span className="job-option-mark" aria-hidden="true">↔</span>
+                <span>
+                  <strong>Do negocjacji</strong>
+                  <small>
+                    Ostateczną cenę ustalicie w warunkach współpracy.
+                  </small>
+                </span>
+              </label>
+
+              <label
+                className={`job-option-card${
+                  !budgetNegotiable ? " is-selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="budget-negotiable"
+                  checked={!budgetNegotiable}
+                  onChange={() => setBudgetNegotiable(false)}
+                />
+                <span className="job-option-mark" aria-hidden="true">●</span>
+                <span>
+                  <strong>Cena ustalona</strong>
+                  <small>
+                    Podana kwota pozostanie stała w ustaleniach.
+                  </small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset className="job-option-fieldset">
+            <legend>Czas publikacji</legend>
+
+            <p className="job-option-intro">
+              Po tym czasie zlecenie automatycznie zniknie z publicznej
+              wyszukiwarki.
+            </p>
+
+            <div className="job-option-grid job-duration-options">
+              {JOB_LISTING_DURATION_OPTIONS.map((option) => (
+                <label
+                  className={`job-option-card${
+                    listingDurationDays === option.days
+                      ? " is-selected"
+                      : ""
+                  }`}
+                  key={option.days}
+                >
+                  <input
+                    type="radio"
+                    name="listing-duration"
+                    value={option.days}
+                    checked={listingDurationDays === option.days}
+                    onChange={() => setListingDurationDays(option.days)}
+                  />
+                  <span className="job-option-duration" aria-hidden="true">
+                    {option.days}
+                  </span>
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
 
           {message && (
             <p
@@ -10866,7 +11066,7 @@ function EditJob() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, budget, created_at"
+            "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
           )
           .eq("id", id)
           .eq(
@@ -11086,10 +11286,18 @@ function EditJob() {
             <br />
 
             <small>
-              Cena została
-              ustalona przy
-              publikacji i nie
-              może być edytowana.
+              {job.budget_negotiable
+                ? "To budżet orientacyjny. Ostateczną cenę ustalicie przed rozpoczęciem współpracy."
+                : "Cena została ustalona przy publikacji i nie może być edytowana."}
+            </small>
+          </div>
+
+          <div className="job-edit-publication-summary">
+            <span className="section-label">Warunki publikacji</span>
+            <JobListingMeta job={job} />
+            <small>
+              Wybrany czas publikacji i charakter budżetu są zapisywane w
+              chwili dodania zlecenia.
             </small>
           </div>
 
@@ -11302,11 +11510,15 @@ function Profile() {
           await supabase
             .from("jobs")
             .select(
-              "id, user_id, title, description, category, budget, created_at"
+              "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
             )
             .eq(
               "user_id",
               id
+            )
+            .gt(
+              "expires_at",
+              new Date().toISOString()
             )
             .order(
               "created_at",
@@ -12352,6 +12564,8 @@ function Profile() {
                       {job.title}
                     </h2>
 
+                    <JobListingMeta job={job} compact />
+
                     <p>
                       Budżet:{" "}
                       <strong>
@@ -12367,9 +12581,9 @@ function Profile() {
 
                     <p>
                       <small>
-                        Cena została
-                        ustalona przy
-                        publikacji.
+                        {job.budget_negotiable
+                          ? "Budżet orientacyjny — szczegóły ustalicie przed rozpoczęciem."
+                          : "Cena została ustalona przy publikacji."}
                       </small>
                     </p>
                   </article>
@@ -12539,7 +12753,11 @@ function Jobs() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, budget, created_at"
+            "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+          )
+          .gt(
+            "expires_at",
+            new Date().toISOString()
           )
           .order(
             "created_at",
@@ -13333,6 +13551,8 @@ function Jobs() {
                   <h2>
                     {job.title}
                   </h2>
+
+                  <JobListingMeta job={job} />
 
                   <p>
                     <strong>
@@ -16584,6 +16804,7 @@ function AgreementPanel({
   mode,
   form,
   message,
+  priceNegotiable,
   currentUserAccepted,
   otherUserAccepted,
   blocked,
@@ -16780,16 +17001,29 @@ function AgreementPanel({
                 <input
                   type="text"
                   value={form.priceAmount}
-                  disabled
-                  readOnly
-                  aria-label="Cena ustalona przy publikacji zlecenia"
+                  disabled={!priceNegotiable}
+                  readOnly={!priceNegotiable}
+                  inputMode="decimal"
+                  onChange={(event) =>
+                    onFieldChange(
+                      "priceAmount",
+                      event.target.value
+                    )
+                  }
+                  aria-label={
+                    priceNegotiable
+                      ? "Negocjowana cena zlecenia"
+                      : "Cena ustalona przy publikacji zlecenia"
+                  }
                 />
                 <span className="agreement-price-currency">
                   PLN
                 </span>
               </div>
               <small className="agreement-fixed-price-note">
-                Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie.
+                {priceNegotiable
+                  ? "Budżet został oznaczony jako negocjowalny. Wpiszcie ostateczną kwotę, którą zaakceptują obie strony."
+                  : "Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie."}
               </small>
             </label>
 
@@ -17075,6 +17309,9 @@ function Chat() {
   const [jobBudget, setJobBudget] =
     useState("");
 
+  const [jobBudgetNegotiable, setJobBudgetNegotiable] =
+    useState(false);
+
   const [agreement, setAgreement] =
     useState(null);
 
@@ -17336,7 +17573,7 @@ function Chat() {
 
           supabase
             .from("jobs")
-            .select("title, budget")
+            .select("title, budget, budget_negotiable")
             .eq(
               "id",
               conversationData.job_id
@@ -17384,12 +17621,19 @@ function Chat() {
         const loadedJobBudget =
           jobResult.data?.budget ?? "";
 
+        const loadedJobBudgetNegotiable =
+          jobResult.data?.budget_negotiable === true;
+
         setJobTitle(
           loadedJobTitle
         );
 
         setJobBudget(
           loadedJobBudget
+        );
+
+        setJobBudgetNegotiable(
+          loadedJobBudgetNegotiable
         );
 
         if (mounted) {
@@ -17590,17 +17834,20 @@ function Chat() {
 
   function openAgreementForm() {
     setAgreementMessage("");
+    const nextForm = agreementToForm(
+      agreement,
+      jobTitle,
+      jobBudget
+    );
+
     setAgreementForm({
-      ...agreementToForm(
-        agreement,
-        jobTitle,
-        jobBudget
-      ),
-      priceAmount:
-        jobBudget === null ||
-        jobBudget === undefined
-          ? ""
-          : String(jobBudget),
+      ...nextForm,
+      priceAmount: jobBudgetNegotiable
+        ? nextForm.priceAmount
+        : jobBudget === null ||
+          jobBudget === undefined
+        ? ""
+        : String(jobBudget),
       priceCurrency: "PLN",
     });
     setAgreementMode("form");
@@ -17633,7 +17880,9 @@ function Chat() {
 
     const price =
       parseAgreementPrice(
-        agreementForm.priceAmount
+        jobBudgetNegotiable
+          ? agreementForm.priceAmount
+          : jobBudget
       );
 
     const revisions = Number(
@@ -18487,6 +18736,7 @@ function Chat() {
                 mode={agreementMode}
                 form={agreementForm}
                 message={agreementMessage}
+                priceNegotiable={jobBudgetNegotiable}
                 currentUserAccepted={currentUserAccepted}
                 otherUserAccepted={otherUserAccepted}
                 blocked={messagingBlocked}
