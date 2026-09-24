@@ -14,6 +14,394 @@
 }
 
 /* =========================================================
+   JOB LISTING TERMS V1 â EXPIRY + NEGOTIABLE BUDGET
+   Scoped additions only; existing page geometry stays intact.
+========================================================= */
+
+.job-option-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 22px;
+  border: 1px solid rgba(20, 35, 70, 0.12);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(247, 249, 255, 0.96), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 14px 34px rgba(15, 31, 67, 0.055);
+}
+
+.job-option-fieldset legend {
+  padding: 0 8px 0 0;
+  color: #101b34;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.job-option-intro {
+  max-width: 690px;
+  margin: 0 0 16px;
+  color: #65708a;
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.55;
+}
+
+.job-option-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.job-budget-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.job-duration-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.project-form .job-option-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 86px;
+  margin: 0;
+  padding: 15px;
+  overflow: hidden;
+  border: 1px solid #dfe4ef;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #17233f;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.project-form .job-option-card::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #c4ccdc;
+  border-radius: 50%;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.project-form .job-option-card:hover {
+  border-color: #aab8d4;
+  background: #ffffff;
+  box-shadow: 0 12px 24px rgba(20, 40, 82, 0.08);
+  transform: translateY(-1px);
+}
+
+.project-form .job-option-card.is-selected {
+  border-color: #315da9;
+  background:
+    linear-gradient(145deg, rgba(235, 242, 255, 0.98), rgba(250, 252, 255, 0.98));
+  box-shadow:
+    0 0 0 3px rgba(49, 93, 169, 0.1),
+    0 14px 28px rgba(20, 46, 93, 0.09);
+}
+
+.project-form .job-option-card.is-selected::after {
+  border-color: #315da9;
+  background: #315da9;
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.project-form .job-option-card:focus-within {
+  outline: 3px solid rgba(49, 93, 169, 0.24);
+  outline-offset: 2px;
+}
+
+.project-form .job-option-card input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.project-form .job-option-card > span:last-child {
+  min-width: 0;
+  padding-right: 12px;
+}
+
+.project-form .job-option-card strong,
+.project-form .job-option-card small {
+  display: block;
+}
+
+.project-form .job-option-card strong {
+  color: #14213d;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.project-form .job-option-card small {
+  margin-top: 5px;
+  color: #66718a;
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.45;
+}
+
+.job-option-mark,
+.job-option-duration {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d7dfed;
+  border-radius: 13px;
+  background: #f4f7fc;
+  color: #315da9;
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.job-option-duration {
+  font-size: 14px;
+}
+
+.job-option-card.is-selected .job-option-mark,
+.job-option-card.is-selected .job-option-duration {
+  border-color: rgba(49, 93, 169, 0.2);
+  background: #315da9;
+  color: #fff;
+}
+
+.job-listing-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 13px 0 15px;
+}
+
+.job-listing-meta.is-compact {
+  margin: 10px 0 13px;
+}
+
+.job-listing-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 31px;
+  padding: 6px 10px;
+  border: 1px solid rgba(36, 65, 116, 0.13);
+  border-radius: 999px;
+  background: #f1f5fc;
+  color: #315281;
+  font-size: 11.5px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.job-listing-pill svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.job-listing-price.is-negotiable {
+  border-color: rgba(24, 111, 125, 0.15);
+  background: #edf8f8;
+  color: #176b78;
+}
+
+.job-listing-price.is-fixed {
+  border-color: rgba(77, 86, 108, 0.13);
+  background: #f3f4f7;
+  color: #586174;
+}
+
+.job-listing-expiry.is-expired {
+  border-color: rgba(144, 74, 74, 0.14);
+  background: #f9eeee;
+  color: #925050;
+}
+
+.job-edit-publication-summary {
+  display: grid;
+  gap: 7px;
+  padding: 18px;
+  border: 1px solid rgba(26, 52, 96, 0.12);
+  border-radius: 17px;
+  background: #f8faff;
+}
+
+.job-edit-publication-summary .job-listing-meta {
+  margin: 3px 0 2px;
+}
+
+.job-edit-publication-summary > small {
+  color: #6d7690;
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.agreement-price-input input:not(:disabled) {
+  border-color: #829dcc;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(49, 93, 169, 0.08);
+}
+
+html[data-theme="dark"] .job-option-fieldset {
+  border-color: rgba(142, 166, 213, 0.2);
+  background:
+    linear-gradient(145deg, rgba(19, 27, 44, 0.98), rgba(14, 20, 33, 0.98));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] .job-option-fieldset legend,
+html[data-theme="dark"] .project-form .job-option-card strong {
+  color: #f2f5fb !important;
+}
+
+html[data-theme="dark"] .job-option-intro,
+html[data-theme="dark"] .project-form .job-option-card small,
+html[data-theme="dark"] .job-edit-publication-summary > small {
+  color: #aab4c8 !important;
+}
+
+html[data-theme="dark"] .project-form .job-option-card {
+  border-color: #2e3a51;
+  background: #151d2b;
+  color: #edf2fb;
+}
+
+html[data-theme="dark"] .project-form .job-option-card:hover {
+  border-color: #52698f;
+  background: #192334;
+}
+
+html[data-theme="dark"] .project-form .job-option-card.is-selected {
+  border-color: #7295d2;
+  background:
+    linear-gradient(145deg, rgba(34, 53, 84, 0.98), rgba(22, 33, 52, 0.98));
+  box-shadow: 0 0 0 3px rgba(105, 145, 211, 0.13);
+}
+
+html[data-theme="dark"] .project-form .job-option-card::after {
+  border-color: #596981;
+  background: #111827;
+}
+
+html[data-theme="dark"] .project-form .job-option-card.is-selected::after {
+  border-color: #8aabe1;
+  background: #8aabe1;
+  box-shadow: inset 0 0 0 2px #162238;
+}
+
+html[data-theme="dark"] .job-option-mark,
+html[data-theme="dark"] .job-option-duration {
+  border-color: #34425b;
+  background: #1c283b;
+  color: #a9c3f0;
+}
+
+html[data-theme="dark"] .job-option-card.is-selected .job-option-mark,
+html[data-theme="dark"] .job-option-card.is-selected .job-option-duration {
+  border-color: #7194cf;
+  background: #6f93d0;
+  color: #101827;
+}
+
+html[data-theme="dark"] .job-listing-pill {
+  border-color: rgba(134, 166, 220, 0.2);
+  background: #19263b;
+  color: #a9c6f2;
+}
+
+html[data-theme="dark"] .job-listing-price.is-negotiable {
+  border-color: rgba(94, 191, 196, 0.22);
+  background: #123038;
+  color: #83d1d4;
+}
+
+html[data-theme="dark"] .job-listing-price.is-fixed {
+  border-color: rgba(168, 179, 201, 0.18);
+  background: #242b38;
+  color: #c1c9d8;
+}
+
+html[data-theme="dark"] .job-listing-expiry.is-expired {
+  border-color: rgba(216, 137, 137, 0.2);
+  background: #382225;
+  color: #e3a5a8;
+}
+
+html[data-theme="dark"] .job-edit-publication-summary {
+  border-color: rgba(135, 161, 207, 0.19);
+  background: #141d2d;
+}
+
+html[data-theme="dark"] .agreement-price-input input:not(:disabled) {
+  border-color: #7295d2;
+  background: #111a29;
+  color: #f1f5fb;
+  box-shadow: 0 0 0 3px rgba(112, 150, 215, 0.12);
+}
+
+@media (max-width: 760px) {
+  .job-option-fieldset {
+    padding: 17px;
+    border-radius: 18px;
+  }
+
+  .job-budget-options,
+  .job-duration-options {
+    grid-template-columns: 1fr;
+  }
+
+  .project-form .job-option-card {
+    min-height: 78px;
+    padding: 13px;
+  }
+
+  .job-listing-meta {
+    gap: 7px;
+    margin: 11px 0 13px;
+  }
+
+  .job-listing-pill {
+    min-height: 30px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 390px) {
+  .job-listing-meta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .job-listing-pill {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================================
    RODO ÄËĂÂĂÂ WYBĂÂĂÂR USUNIÄÂĂÂCIA DANYCH LUB ZAMKNIÄÂĂÂCIA KONTA
 ========================================================= */
 
