@@ -3326,6 +3326,36 @@ function announceNotificationsRead(
   );
 }
 
+function markConversationSeen(
+  userId,
+  conversationId
+) {
+  if (!userId || !conversationId) return;
+
+  const key =
+    `ideahire_seen_conversations_${userId}`;
+
+  saveNotificationIds(
+    key,
+    [
+      ...getStoredNotificationIds(key),
+      String(conversationId),
+    ]
+  );
+
+  window.dispatchEvent(
+    new CustomEvent(
+      "ideahire:messages-read",
+      {
+        detail: {
+          userId,
+          conversationId,
+        },
+      }
+    )
+  );
+}
+
 /* =========================================================
    NAVBAR
 ========================================================= */
@@ -3364,6 +3394,11 @@ function AccountNavbar() {
     setHasDisputeNotifications,
   ] = useState(false);
 
+  const [
+    hasMessageNotifications,
+    setHasMessageNotifications,
+  ] = useState(false);
+
   const accountMenuRef =
     useRef(null);
 
@@ -3392,6 +3427,7 @@ function AccountNavbar() {
     ) {
       setHasNotifications(false);
       setHasDisputeNotifications(false);
+      setHasMessageNotifications(false);
       return;
     }
 
@@ -3538,6 +3574,116 @@ function AccountNavbar() {
           readKey
         );
 
+      const {
+        data: conversationRows,
+        error: conversationsError,
+      } = await supabase
+        .from("conversations")
+        .select("id, created_at")
+        .or(
+          `client_id.eq.${user.id},contractor_id.eq.${user.id}`
+        )
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (conversationsError) {
+        console.error(
+          "NAVBAR CONVERSATIONS NOTIFICATION ERROR:",
+          conversationsError
+        );
+      }
+
+      const conversations =
+        conversationsError
+          ? []
+          : conversationRows || [];
+
+      const conversationIds =
+        conversations.map(
+          (conversation) =>
+            conversation.id
+        );
+
+      let unreadMessages = [];
+
+      if (conversationIds.length > 0) {
+        const {
+          data: messageRows,
+          error: messagesError,
+        } = await supabase
+          .from("messages")
+          .select(
+            "id, conversation_id, sender_id, read_at, created_at"
+          )
+          .in(
+            "conversation_id",
+            conversationIds
+          )
+          .neq("sender_id", user.id)
+          .is("read_at", null)
+          .order("created_at", {
+            ascending: false,
+          })
+          .limit(100);
+
+        if (messagesError) {
+          console.error(
+            "NAVBAR MESSAGES NOTIFICATION ERROR:",
+            messagesError
+          );
+        } else {
+          const latestUnreadByConversation =
+            new Map();
+
+          for (
+            const messageItem of
+            messageRows || []
+          ) {
+            if (
+              !latestUnreadByConversation.has(
+                messageItem.conversation_id
+              )
+            ) {
+              latestUnreadByConversation.set(
+                messageItem.conversation_id,
+                messageItem
+              );
+            }
+          }
+
+          unreadMessages = [
+            ...latestUnreadByConversation.values(),
+          ];
+        }
+      }
+
+      const seenConversationIds =
+        getStoredNotificationIds(
+          `ideahire_seen_conversations_${user.id}`
+        );
+
+      const recentConversationThreshold =
+        Date.now() -
+        7 * 24 * 60 * 60 * 1000;
+
+      const newConversations =
+        conversations.filter(
+          (conversation) =>
+            new Date(
+              conversation.created_at || 0
+            ).getTime() >=
+              recentConversationThreshold &&
+            !seenConversationIds.includes(
+              String(conversation.id)
+            )
+        );
+
+      setHasMessageNotifications(
+        unreadMessages.length > 0 ||
+        newConversations.length > 0
+      );
+
       const unreadIncoming =
         (applications || []).some(
           (application) =>
@@ -3570,11 +3716,34 @@ function AccountNavbar() {
             )
         );
 
+      const unreadMessageNotification =
+        unreadMessages.some(
+          (message) =>
+            !readIds.includes(
+              `message:${message.id}`
+            )
+        );
+
+      const unreadConversationNotification =
+        newConversations.some(
+          (conversation) =>
+            !readIds.includes(
+              `conversation:${conversation.id}`
+            )
+        );
+
+      const unreadDispute =
+        !disputeNotificationsError &&
+        (disputeNotifications || []).length > 0;
+
       setHasNotifications(
         unreadIncoming ||
         unreadRejected ||
         unreadAccepted ||
-        unreadBlock
+        unreadBlock ||
+        unreadMessageNotification ||
+        unreadConversationNotification ||
+        unreadDispute
       );
     } catch (error) {
       console.error(
@@ -3593,6 +3762,7 @@ function AccountNavbar() {
     ) {
       setHasNotifications(false);
       setHasDisputeNotifications(false);
+      setHasMessageNotifications(false);
       return;
     }
 
@@ -3630,6 +3800,16 @@ function AccountNavbar() {
       }
     }
 
+    function handleMessagesRead(event) {
+      if (
+        !event?.detail?.userId ||
+        event.detail.userId === user?.id
+      ) {
+        setHasMessageNotifications(false);
+        checkNotifications();
+      }
+    }
+
     window.addEventListener(
       "ideahire:notifications-read",
       handleNotificationsRead
@@ -3645,6 +3825,55 @@ function AccountNavbar() {
       handleDisputeNotificationsRead
     );
 
+    window.addEventListener(
+      "ideahire:messages-read",
+      handleMessagesRead
+    );
+
+    const liveNotifications =
+      supabase
+        .channel(
+          `navbar-notifications:${user.id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "job_applications",
+          },
+          checkNotifications
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "conversations",
+          },
+          checkNotifications
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "messages",
+          },
+          checkNotifications
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "dispute_notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          checkNotifications
+        )
+        .subscribe();
+
     const interval =
       setInterval(
         checkNotifications,
@@ -3654,6 +3883,10 @@ function AccountNavbar() {
     return () => {
       clearInterval(
         interval
+      );
+
+      supabase.removeChannel(
+        liveNotifications
       );
 
       window.removeEventListener(
@@ -3669,6 +3902,11 @@ function AccountNavbar() {
       window.removeEventListener(
         "ideahire:dispute-notifications-read",
         handleDisputeNotificationsRead
+      );
+
+      window.removeEventListener(
+        "ideahire:messages-read",
+        handleMessagesRead
       );
     };
   }, [
@@ -3899,6 +4137,12 @@ function AccountNavbar() {
           >
             <span className="account-nav-label-full">Wiadomości</span>
             <span className="account-nav-label-short">Wiadomości</span>
+            {hasMessageNotifications && (
+              <span
+                className="notification-dot messages-nav-dot"
+                aria-label="Nowa rozmowa lub wiadomość"
+              />
+            )}
           </NavLink>
         )}
       </nav>
@@ -3996,8 +4240,15 @@ function AccountNavbar() {
                 Wykonawcy
               </NavLink>
               {!hasRestrictedAgeAccess && (
-                <NavLink to="/messages" onClick={closeAccountMenu}>
-                  Wiadomości
+                <NavLink
+                  to="/messages"
+                  onClick={closeAccountMenu}
+                  className="account-menu-notice-link"
+                >
+                  <span>Wiadomości</span>
+                  {hasMessageNotifications && (
+                    <span className="notification-dot" />
+                  )}
                 </NavLink>
               )}
               {!hasRestrictedAgeAccess && (
@@ -14087,6 +14338,11 @@ function Notifications() {
     setBlockNotifications,
   ] = useState([]);
 
+  const [
+    messageNotifications,
+    setMessageNotifications,
+  ] = useState([]);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -14543,6 +14799,221 @@ function Notifications() {
       );
 
       /*
+       * 5. Nowe wiadomości. Pokazujemy najwyżej jedną, najnowszą
+       * wiadomość z każdej rozmowy, żeby skrzynka nie zamieniała się
+       * w kopię całego czatu.
+       */
+      const {
+        data: notificationConversations,
+        error: notificationConversationsError,
+      } = await supabase
+        .from("conversations")
+        .select(
+          "id, job_id, client_id, contractor_id, created_at"
+        )
+        .or(
+          `client_id.eq.${user.id},contractor_id.eq.${user.id}`
+        )
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (notificationConversationsError) {
+        console.error(
+          "NOTIFICATION CONVERSATIONS ERROR:",
+          notificationConversationsError
+        );
+      }
+
+      const visibleConversations =
+        notificationConversationsError
+          ? []
+          : notificationConversations || [];
+
+      let messageResult = [];
+
+      if (visibleConversations.length > 0) {
+        const conversationIds =
+          visibleConversations.map(
+            (conversation) =>
+              conversation.id
+          );
+
+        const {
+          data: unreadMessageRows,
+          error: unreadMessagesError,
+        } = await supabase
+          .from("messages")
+          .select(
+            "id, conversation_id, sender_id, content, created_at, read_at"
+          )
+          .in(
+            "conversation_id",
+            conversationIds
+          )
+          .neq("sender_id", user.id)
+          .is("read_at", null)
+          .order("created_at", {
+            ascending: false,
+          })
+          .limit(200);
+
+        if (unreadMessagesError) {
+          console.error(
+            "NOTIFICATION MESSAGES ERROR:",
+            unreadMessagesError
+          );
+        } else {
+          const latestMessageByConversation =
+            new Map();
+
+          const handledConversationIds =
+            new Set();
+
+          for (
+            const messageItem of
+            unreadMessageRows || []
+          ) {
+            if (
+              handledConversationIds.has(
+                messageItem.conversation_id
+              )
+            ) {
+              continue;
+            }
+
+            handledConversationIds.add(
+              messageItem.conversation_id
+            );
+
+            if (
+              !dismissedIds.includes(
+                `message:${messageItem.id}`
+              )
+            ) {
+              latestMessageByConversation.set(
+                messageItem.conversation_id,
+                messageItem
+              );
+            }
+          }
+
+          const conversationMap =
+            new Map(
+              visibleConversations.map(
+                (conversation) => [
+                  conversation.id,
+                  conversation,
+                ]
+              )
+            );
+
+          const messageRows = [
+            ...latestMessageByConversation.values(),
+          ];
+
+          const otherUserIds = [
+            ...new Set(
+              messageRows.map((messageItem) => {
+                const conversation =
+                  conversationMap.get(
+                    messageItem.conversation_id
+                  );
+
+                return conversation?.client_id === user.id
+                  ? conversation?.contractor_id
+                  : conversation?.client_id;
+              }).filter(Boolean)
+            ),
+          ];
+
+          const messageJobIds = [
+            ...new Set(
+              messageRows.map(
+                (messageItem) =>
+                  conversationMap.get(
+                    messageItem.conversation_id
+                  )?.job_id
+              ).filter(Boolean)
+            ),
+          ];
+
+          const [
+            messageProfilesResult,
+            messageJobsResult,
+          ] = await Promise.all([
+            otherUserIds.length > 0
+              ? supabase
+                  .from("profiles")
+                  .select("id, name, avatar_url")
+                  .in("id", otherUserIds)
+              : Promise.resolve({ data: [], error: null }),
+            messageJobIds.length > 0
+              ? supabase
+                  .from("jobs")
+                  .select("id, title")
+                  .in("id", messageJobIds)
+              : Promise.resolve({ data: [], error: null }),
+          ]);
+
+          if (messageProfilesResult.error) {
+            console.error(
+              "NOTIFICATION MESSAGE PROFILES ERROR:",
+              messageProfilesResult.error
+            );
+          }
+
+          if (messageJobsResult.error) {
+            console.error(
+              "NOTIFICATION MESSAGE JOBS ERROR:",
+              messageJobsResult.error
+            );
+          }
+
+          const profileMap = new Map(
+            (messageProfilesResult.data || []).map(
+              (profile) => [profile.id, profile]
+            )
+          );
+
+          const messageJobMap = new Map(
+            (messageJobsResult.data || []).map(
+              (job) => [job.id, job]
+            )
+          );
+
+          messageResult = messageRows.map(
+            (messageItem) => {
+              const conversation =
+                conversationMap.get(
+                  messageItem.conversation_id
+                );
+
+              const otherUserId =
+                conversation?.client_id === user.id
+                  ? conversation?.contractor_id
+                  : conversation?.client_id;
+
+              return {
+                ...messageItem,
+                conversation,
+                otherProfile:
+                  profileMap.get(otherUserId),
+                job:
+                  messageJobMap.get(
+                    conversation?.job_id
+                  ),
+              };
+            }
+          );
+        }
+      }
+
+      setMessageNotifications(
+        messageResult
+      );
+
+      /*
        * Po otwarciu skrzynki zaznaczamy aktualne elementy
        * jako przeczytane dla kropki w navbarze.
        */
@@ -14565,6 +15036,14 @@ function Notifications() {
         ...blockResult.map(
           (item) =>
             `blocked:${item.id}`
+        ),
+        ...messageResult.map(
+          (item) =>
+            `message:${item.id}`
+        ),
+        ...visibleConversations.map(
+          (item) =>
+            `conversation:${item.id}`
         ),
       ];
 
@@ -14595,7 +15074,48 @@ function Notifications() {
   }
 
   useEffect(() => {
+    if (!user?.id) return;
+
     loadNotifications();
+
+    const liveInbox = supabase
+      .channel(
+        `notifications-inbox:${user.id}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "job_applications",
+        },
+        loadNotifications
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "conversations",
+        },
+        loadNotifications
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        loadNotifications
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(
+        liveInbox
+      );
+    };
   }, [user?.id]);
 
   function handleClearNotifications() {
@@ -14613,6 +15133,10 @@ function Notifications() {
       ...blockNotifications.map(
         (item) =>
           `blocked:${item.id}`
+      ),
+      ...messageNotifications.map(
+        (item) =>
+          `message:${item.id}`
       ),
     ];
 
@@ -14649,6 +15173,7 @@ function Notifications() {
     setRejectedDecisions([]);
     setAcceptedDecisions([]);
     setBlockNotifications([]);
+    setMessageNotifications([]);
 
     announceNotificationsRead(
       user.id
@@ -14813,7 +15338,8 @@ function Notifications() {
     notifications.length === 0 &&
     rejectedDecisions.length === 0 &&
     acceptedDecisions.length === 0 &&
-    blockNotifications.length === 0;
+    blockNotifications.length === 0 &&
+    messageNotifications.length === 0;
 
   return (
     <div className="page">
@@ -15148,7 +15674,8 @@ function Notifications() {
           !message &&
           (rejectedDecisions.length > 0 ||
             acceptedDecisions.length > 0 ||
-            blockNotifications.length > 0) && (
+            blockNotifications.length > 0 ||
+            messageNotifications.length > 0) && (
             <div className="notification-toolbar">
               <button
                 type="button"
@@ -15321,6 +15848,65 @@ function Notifications() {
                           to={`/profile/${block.blocker_id}`}
                         >
                           Zobacz profil →
+                        </Link>
+                      </article>
+                    );
+                  }
+                )}
+              </div>
+            </>
+          )}
+
+        {!loading &&
+          !message &&
+          messageNotifications.length >
+            0 && (
+            <>
+              <div className="notification-section-title">
+                <span className="section-label">
+                  Nowe wiadomości
+                </span>
+              </div>
+
+              <div className="jobs-list">
+                {messageNotifications.map(
+                  (messageItem) => {
+                    const senderName =
+                      messageItem.otherProfile?.name ||
+                      "Użytkownik";
+
+                    return (
+                      <article
+                        className="job-card notification-message-card"
+                        key={`message-${messageItem.id}`}
+                      >
+                        <div className="notification-message-icon" aria-hidden="true">
+                          ↗
+                        </div>
+
+                        <span className="section-label">
+                          Nowa wiadomość
+                        </span>
+
+                        <h2>
+                          {senderName} napisał w sprawie zlecenia
+                        </h2>
+
+                        <div className="notification-decision-job">
+                          <strong>Zlecenie:</strong>{" "}
+                          {messageItem.job?.title ||
+                            "Rozmowa dotycząca zlecenia"}
+                        </div>
+
+                        <p className="notification-message-preview">
+                          {messageItem.content}
+                        </p>
+
+                        <Link
+                          className="btn btn-dark notification-chat-button"
+                          to={`/chat/${messageItem.conversation_id}`}
+                        >
+                          Otwórz rozmowę →
                         </Link>
                       </article>
                     );
@@ -15656,6 +16242,15 @@ function Messages() {
             )
           );
 
+        const seenConversationIds =
+          getStoredNotificationIds(
+            `ideahire_seen_conversations_${user.id}`
+          );
+
+        const recentConversationThreshold =
+          Date.now() -
+          7 * 24 * 60 * 60 * 1000;
+
         for (
           const message of
           messagesResult.data || []
@@ -15725,6 +16320,22 @@ function Messages() {
                 sortDate:
                   lastMessage?.created_at ||
                   conversation.created_at,
+                isUnread:
+                  (
+                    lastMessage?.sender_id &&
+                    lastMessage.sender_id !== user.id &&
+                    !lastMessage.read_at
+                  ) ||
+                  (
+                    !lastMessage &&
+                    new Date(
+                      conversation.created_at || 0
+                    ).getTime() >=
+                      recentConversationThreshold &&
+                    !seenConversationIds.includes(
+                      String(conversation.id)
+                    )
+                  ),
               };
             })
             .sort(
@@ -15769,6 +16380,17 @@ function Messages() {
             event: "INSERT",
             schema: "public",
             table: "messages",
+          },
+          () => {
+            loadConversations();
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "conversations",
           },
           () => {
             loadConversations();
@@ -16046,7 +16668,11 @@ function Messages() {
                     key={
                       conversation.id
                     }
-                    className="messages-row"
+                    className={`messages-row${
+                      conversation.isUnread
+                        ? " is-unread"
+                        : ""
+                    }`}
                     to={`/chat/${conversation.id}`}
                   >
                     <div className="messages-avatar">
@@ -16067,6 +16693,13 @@ function Messages() {
                         <span className="messages-name">
                           {name}
                         </span>
+
+                        {conversation.isUnread && (
+                          <span
+                            className="messages-unread-dot"
+                            aria-label="Nowa rozmowa lub wiadomość"
+                          />
+                        )}
                       </div>
 
                       <div className="messages-job">
@@ -16082,6 +16715,8 @@ function Messages() {
                                 ? "Ty: "
                                 : ""
                             }${lastMessage.content}`
+                          : conversation.isUnread
+                          ? "Nowa rozmowa — ustalcie warunki współpracy."
                           : "Rozmowa została otwarta — napisz pierwszą wiadomość."}
                       </div>
                     </div>
@@ -16712,6 +17347,79 @@ function agreementToForm(
     additionalTerms:
       agreement.additional_terms || "",
   };
+}
+
+function getAgreementSaveMismatches(
+  agreement,
+  expected
+) {
+  if (!agreement) {
+    return ["cała propozycja"];
+  }
+
+  const mismatches = [];
+  const compareText = (
+    key,
+    label,
+    expectedValue
+  ) => {
+    if (
+      String(agreement[key] || "").trim() !==
+      String(expectedValue || "").trim()
+    ) {
+      mismatches.push(label);
+    }
+  };
+
+  compareText("title", "nazwa", expected.title);
+  compareText("scope", "zakres", expected.scope);
+  compareText(
+    "deliverables",
+    "rezultat końcowy",
+    expected.deliverables
+  );
+  compareText("deadline", "termin", expected.deadline);
+  compareText(
+    "delivery_format",
+    "format przekazania",
+    expected.deliveryFormat
+  );
+  compareText(
+    "acceptance_method",
+    "sposób odbioru",
+    expected.acceptanceMethod
+  );
+  compareText(
+    "cancellation_terms",
+    "warunki anulowania",
+    expected.cancellationTerms
+  );
+  compareText(
+    "additional_terms",
+    "dodatkowe ustalenia",
+    expected.additionalTerms
+  );
+
+  if (
+    Number(agreement.revisions) !==
+    Number(expected.revisions)
+  ) {
+    mismatches.push("liczba poprawek");
+  }
+
+  if (
+    !Number.isFinite(
+      Number(agreement.price_amount)
+    ) ||
+    Math.abs(
+        Number(agreement.price_amount) -
+          Number(expected.priceAmount)
+      ) > 0.009
+  ) {
+    mismatches.push("cena");
+  }
+
+  return mismatches;
 }
 
 function AgreementDetails({ agreement }) {
@@ -17657,6 +18365,11 @@ function Chat() {
         );
 
         await loadMessages();
+
+        markConversationSeen(
+          user.id,
+          id
+        );
       } catch (error) {
         if (!mounted) return;
 
@@ -17999,7 +18712,7 @@ function Chat() {
     try {
       const { error } =
         await supabase.rpc(
-          "propose_conversation_agreement",
+          "propose_conversation_agreement_v2",
           {
             p_conversation_id: id,
             p_title:
@@ -18029,11 +18742,35 @@ function Chat() {
         throw error;
       }
 
-      await loadAgreement(
+      const savedAgreement = await loadAgreement(
         conversation,
         jobTitle,
         jobBudget
       );
+
+      const mismatches = getAgreementSaveMismatches(
+        savedAgreement,
+        {
+          title: agreementForm.title,
+          scope: agreementForm.scope,
+          deliverables: agreementForm.deliverables,
+          priceAmount: price,
+          deadline: agreementForm.deadline,
+          revisions,
+          deliveryFormat: agreementForm.deliveryFormat,
+          acceptanceMethod: agreementForm.acceptanceMethod,
+          cancellationTerms: agreementForm.cancellationTerms,
+          additionalTerms: agreementForm.additionalTerms,
+        }
+      );
+
+      if (mismatches.length > 0) {
+        throw new Error(
+          `Baza nie potwierdziła poprawnego zapisu: ${mismatches.join(
+            ", "
+          )}. Odśwież rozmowę i spróbuj ponownie.`
+        );
+      }
 
       setAgreementMessage(
         "Propozycja została wysłana. Możecie dalej omawiać ją na czacie."
