@@ -25,6 +25,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import { useSitePreferences } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
 import TermsOfService from "./TermsOfService";
@@ -6878,6 +6879,98 @@ function LimitedAccount() {
    ACCOUNT
 ========================================================= */
 
+const SITE_TEMPLATE_OPTIONS = [
+  {
+    value: "current",
+    eyebrow: "Aktualny",
+    title: "Nowoczesny granat",
+    description:
+      "Obecna szata IdeaHire z granatowymi akcentami, miękkimi przejściami i animacjami.",
+  },
+  {
+    value: "classic",
+    eyebrow: "Klasyczny",
+    title: "Czerń i biel",
+    description:
+      "Dawna, spokojna szata czarno-biała nałożona na aktualny interfejs i wszystkie jego funkcje.",
+  },
+];
+
+function AccountTemplatesCard() {
+  const { template, setTemplate } = useSitePreferences();
+
+  return (
+    <section
+      className="account-card account-template-card"
+      aria-labelledby="account-template-title"
+    >
+      <div className="account-template-heading">
+        <div>
+          <span className="section-label">Wygląd interfejsu</span>
+          <h2 id="account-template-title">Szablon strony</h2>
+        </div>
+        <p>
+          Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani
+          funkcji IdeaHire.
+        </p>
+      </div>
+
+      <div className="account-template-options" role="radiogroup" aria-label="Szablon strony">
+        {SITE_TEMPLATE_OPTIONS.map((option) => {
+          const selected = template === option.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              className={`account-template-option is-${option.value}${selected ? " is-selected" : ""}`}
+              onClick={() => setTemplate(option.value)}
+            >
+              <span className="account-template-preview" aria-hidden="true">
+                <span className="account-template-preview-nav">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="account-template-preview-hero">
+                  <span>
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <b />
+                </span>
+                <span className="account-template-preview-cards">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              </span>
+
+              <span className="account-template-option-copy">
+                <small>{option.eyebrow}</small>
+                <strong>{option.title}</strong>
+                <span>{option.description}</span>
+              </span>
+
+              <span className="account-template-option-action">
+                <i aria-hidden="true" />
+                {selected ? "Wybrany szablon" : "Użyj tego szablonu"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="account-template-note">
+        Zmiana jest zapisywana na tym urządzeniu i działa od razu na całej stronie.
+      </p>
+    </section>
+  );
+}
+
 const ACCOUNT_WORKSPACE_SECTIONS = [
   {
     key: "profile",
@@ -6929,6 +7022,16 @@ const ACCOUNT_WORKSPACE_SECTIONS = [
     description:
       "Dopasuj rekomendacje oraz przejdź do ustawień prywatności i swoich zgłoszeń.",
   },
+  {
+    key: "templates",
+    number: "06",
+    label: "Szablony",
+    hash: "account-templates",
+    eyebrow: "Wygląd interfejsu",
+    title: "Wybierz szatę IdeaHire",
+    description:
+      "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.",
+  },
 ];
 
 function getAccountWorkspaceSection(hash = "") {
@@ -6943,6 +7046,7 @@ function getAccountWorkspaceSection(hash = "") {
   ) {
     return "preferences";
   }
+  if (normalizedHash === "account-templates") return "templates";
 
   return "profile";
 }
@@ -8565,7 +8669,11 @@ function Account() {
 
         <section
           className="account-card account-profile-workspace"
-          hidden={activeAccountSection === "jobs" || activeAccountSection === "preferences"}
+          hidden={
+            activeAccountSection === "jobs" ||
+            activeAccountSection === "preferences" ||
+            activeAccountSection === "templates"
+          }
         >
           <div
             className="profile-preview"
@@ -9298,6 +9406,14 @@ function Account() {
           hidden={activeAccountSection !== "preferences"}
         >
           <DiscoveryPreferencesCard />
+        </div>
+
+        <div
+          className="account-dashboard-block account-templates-block"
+          id="account-templates"
+          hidden={activeAccountSection !== "templates"}
+        >
+          <AccountTemplatesCard />
         </div>
 
         <section
@@ -18800,7 +18916,7 @@ function Chat() {
     try {
       const { error } =
         await supabase.rpc(
-          "accept_conversation_agreement",
+          "accept_conversation_agreement_v2",
           {
             p_agreement_id:
               agreement.id,
