@@ -1,7 +1,7 @@
-/* IDEA HIRE ÄËĂÂĂÂ PROFESSIONAL HOMEPAGE V6 ÄËĂÂĂÂ RELEASE 2026-09-20 */
+/* IDEA HIRE Ă˘ÂÂ PROFESSIONAL HOMEPAGE V6 Ă˘ÂÂ RELEASE 2026-09-20 */
 /* Full file for direct replacement: src/App.css */
 
-/* IDEA HIRE ÄËĂÂĂÂ STRIPE CONNECT STYLES ÄËĂÂĂÂ BUILD 2026-09-05 */
+/* IDEA HIRE Ă˘ÂÂ STRIPE CONNECT STYLES Ă˘ÂÂ BUILD 2026-09-05 */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
@@ -14,7 +14,7 @@
 }
 
 /* =========================================================
-   JOB LISTING TERMS V1 â EXPIRY + NEGOTIABLE BUDGET
+   JOB LISTING TERMS V1 — EXPIRY + NEGOTIABLE BUDGET
    Scoped additions only; existing page geometry stays intact.
 ========================================================= */
 
@@ -402,7 +402,7 @@ html[data-theme="dark"] .agreement-price-input input:not(:disabled) {
 }
 
 /* =========================================================
-   RODO ÄËĂÂĂÂ WYBĂÂĂÂR USUNIÄÂĂÂCIA DANYCH LUB ZAMKNIÄÂĂÂCIA KONTA
+   RODO Ă˘ÂÂ WYBÄÂR USUNIĂÂCIA DANYCH LUB ZAMKNIĂÂCIA KONTA
 ========================================================= */
 
 .privacy-erasure-choice-fieldset {
@@ -763,7 +763,7 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
 }
 
 /* =========================================================
-   ADMIN ÄËĂÂĂÂ KONTROLOWANE USUWANIE DANYCH I KONTA
+   ADMIN Ă˘ÂÂ KONTROLOWANE USUWANIE DANYCH I KONTA
 ========================================================= */
 
 .erasure-account-shell {
@@ -969,7 +969,7 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
 }
 
 /* =========================================================
-   MODERACJA KONT I ODWOĂĹĄĂÂANIA
+   MODERACJA KONT I ODWOÄšÂANIA
 ========================================================= */
 
 .moderation-user-shell,
@@ -2467,7 +2467,7 @@ button.privacy-admin-account-link {
 }
 
 .erasure-blockers-card li::before {
-  content: "ÄËĂÂĂÂ";
+  content: "Ă˘ÂË";
   margin-right: 8px;
 }
 
@@ -3025,7 +3025,7 @@ html[data-theme="dark"] .erasure-retention-report > small {
 }
 
 /* =========================================================
-   LEGAL DOCUMENTS / TERMS ACCEPTANCE ÄËĂÂĂÂ BUILD 2026-09-06
+   LEGAL DOCUMENTS / TERMS ACCEPTANCE Ă˘ÂÂ BUILD 2026-09-06
 ========================================================= */
 
 .registration-terms-confirmation {
@@ -3516,7 +3516,7 @@ html[data-theme="dark"] .legal-document-footer nav a {
 }
 
 /* =========================================================
-   STRIPE CONNECT / WYPĂĹĄĂÂATY W PANELU KONTA
+   STRIPE CONNECT / WYPÄšÂATY W PANELU KONTA
 ========================================================= */
 
 .stripe-connect-panel {
@@ -3823,7 +3823,7 @@ html[data-theme="dark"] .stripe-connect-feedback.is-info {
 }
 
 /* =========================================================
-   CHAT WORKSPACE V1.1 ÄËĂÂĂÂ clean desktop/mobile composition
+   CHAT WORKSPACE V1.1 Ă˘ÂÂ clean desktop/mobile composition
 ========================================================= */
 
 .account-page .chat-page {
@@ -4614,7 +4614,7 @@ html[data-theme="dark"] .private-work-links .private-work-link-row > a b {
 }
 
 /* =========================================================
-   ADMIN ÄËĂÂĂÂ FULL DISPUTE CONTEXT
+   ADMIN Ă˘ÂÂ FULL DISPUTE CONTEXT
 ========================================================= */
 
 .admin-case-context-panel > .dispute-panel-heading {
@@ -5832,7 +5832,7 @@ img {
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.055);
 }
 
-/* GĂÂÄšÂrny podglÄÂĂÂd profilu */
+/* GÄĹrny podglĂÂd profilu */
 
 .profile-preview {
   display: flex;
@@ -5844,8 +5844,8 @@ img {
 }
 
 /*
-  WAĂĹĄÄšÄ˝NE:
-  ZdjÄÂĂÂcie nigdy nie moĂĹĄÄšĹe przejÄÂĂÂÄÂĂÂ naturalnego rozmiaru
+  WAÄšĹĽNE:
+  ZdjĂÂcie nigdy nie moÄšĹşe przejĂÂĂÂ naturalnego rozmiaru
   pliku. Tutaj wymuszamy konkretny rozmiar.
 */
 
@@ -5865,7 +5865,7 @@ img {
     0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* Placeholder z pierwszÄÂĂÂ literÄÂĂÂ */
+/* Placeholder z pierwszĂÂ literĂÂ */
 
 .profile-avatar-placeholder {
   display: grid;
@@ -5877,7 +5877,7 @@ img {
   text-transform: uppercase;
 }
 
-/* Nazwa i e-mail obok zdjÄÂĂÂcia */
+/* Nazwa i e-mail obok zdjĂÂcia */
 
 .profile-preview h2 {
   margin: 0 0 6px;
@@ -5891,7 +5891,7 @@ img {
   font-size: 14px;
 }
 
-/* Pole wyboru zdjÄÂĂÂcia */
+/* Pole wyboru zdjĂÂcia */
 
 .profile-upload {
   display: grid;
@@ -5924,7 +5924,7 @@ img {
   line-height: 1.5;
 }
 
-/* PodglÄÂĂÂd nowo wybranego zdjÄÂĂÂcia */
+/* PodglĂÂd nowo wybranego zdjĂÂcia */
 
 .profile-upload-preview {
   width: 72px;
@@ -6312,7 +6312,7 @@ img {
 }
 
 /* =========================================================
-   DARK MODE ÄËĂÂĂÂ FINAL CONTRAST LAYER
+   DARK MODE Ă˘ÂÂ FINAL CONTRAST LAYER
    Kept at the end so it also overrides component styles.
 ========================================================= */
 
@@ -7625,7 +7625,7 @@ html[data-theme="dark"] .dispute-parties-card > .dispute-party-row {
 }
 
 /* =========================================================
-   DARK MODE ÄËĂÂĂÂ ONLY COLORS, NO LAYOUT CHANGES
+   DARK MODE Ă˘ÂÂ ONLY COLORS, NO LAYOUT CHANGES
 ========================================================= */
 
 html[data-theme="dark"] {
@@ -7962,7 +7962,7 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
 }
 
 /* =========================================================
-   FINAL SLIM NAVIGATION ÄËĂÂĂÂ HOME + USER ACCOUNT
+   FINAL SLIM NAVIGATION Ă˘ÂÂ HOME + USER ACCOUNT
 ========================================================= */
 
 .account-nav-label-short {
@@ -9674,7 +9674,7 @@ html[data-theme="dark"] .privacy-policy-footer nav a {
 }
 
 /* =========================================================
-   AGE ACCESS / LIMITED ACCOUNT 16ÄËĂÂĂÂ17
+   AGE ACCESS / LIMITED ACCOUNT 16Ă˘ÂÂ17
 ========================================================= */
 
 .registration-age-result,
@@ -10332,7 +10332,7 @@ html[data-theme="dark"] .limited-account-route-message {
 }
 
 /* =========================================================
-   CHAT AGREEMENTS ÄËĂÂĂÂ WARUNKI WSPĂÂĂÂĂĹĄĂÂPRACY
+   CHAT AGREEMENTS Ă˘ÂÂ WARUNKI WSPÄÂÄšÂPRACY
 ========================================================= */
 
 .agreement-workspace {
@@ -11389,7 +11389,7 @@ html[data-theme="dark"] .agreement-waiting-card p {
 }
 
 .jobs-clear-filters::before {
-  content: "ĂÂĂÂ";
+  content: "ÄÂ";
   font-size: 17px;
   font-weight: 400;
   line-height: 1;
@@ -11521,7 +11521,7 @@ html[data-theme="dark"] :is(
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
+   IDEA HIRE Ă˘ÂÂ V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
    Only navigation spans the viewport. Content returns to 1320px.
 ========================================================= */
 
@@ -11942,7 +11942,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE â CHAT ATTACHMENTS + IMAGE VIEWER â 2026-09-25
+   IDEA HIRE — CHAT ATTACHMENTS + IMAGE VIEWER — 2026-09-25
 ========================================================= */
 
 #root .private-work-image-set,
@@ -12436,7 +12436,7 @@ html[data-theme="dark"] #root .private-work-file-action {
 }
 
 /* =========================================================
-   IDEA HIRE â SWITCHABLE INTERFACE TEMPLATES â 2026-09-25
+   IDEA HIRE — SWITCHABLE INTERFACE TEMPLATES — 2026-09-25
    The template changes presentation only. Current structure and logic stay intact.
 ========================================================= */
 
@@ -13597,7 +13597,7 @@ html[data-template="classic"][data-theme="dark"] #root :is(.site-theme-toggle, .
 }
 
 /* =========================================================
-   V9 â RELIABLE NOTIFICATION SIGNALS
+   V9 — RELIABLE NOTIFICATION SIGNALS
 ========================================================= */
 
 #root .account-notification-button .notification-dot {
@@ -13748,7 +13748,7 @@ html[data-theme="dark"] .notification-message-preview {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V7.5 CONTINUOUS ATMOSPHERE
+   IDEA HIRE Ă˘ÂÂ V7.5 CONTINUOUS ATMOSPHERE
    One shared background spans hero and categories. The colour
    darkens softly at both viewport edges and has no section seam.
 ========================================================= */
@@ -14024,7 +14024,7 @@ html:not([data-theme="dark"]) body .navbar.navbar.restricted-account-navbar {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
+   IDEA HIRE Ă˘ÂÂ V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
    RELEASE 2026-09-20
 ========================================================= */
 
@@ -14826,7 +14826,7 @@ html[data-theme="dark"] .app .category-card:nth-child(n) {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V5.5.1 MESSAGES VERTICAL ALIGNMENT
+   IDEA HIRE Ă˘ÂÂ V5.5.1 MESSAGES VERTICAL ALIGNMENT
 ========================================================= */
 
 :root {
@@ -14847,7 +14847,7 @@ html[data-theme="dark"] .app .category-card:nth-child(n) {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ KATALOG WYKONAWCĂÂĂÂW I DWUKIERUNKOWY START V2.2
+   IDEA HIRE Ă˘ÂÂ KATALOG WYKONAWCÄÂW I DWUKIERUNKOWY START V2.2
 ========================================================= */
 
 .discovery-settings-actions {
@@ -15579,7 +15579,7 @@ html[data-theme="dark"] .home-navbar .nav-links a:hover {
 }
 
 /* =========================================================
-   CLEAN HOME HOUSING ÄËĂÂĂÂ ORIGINAL LAYOUT PRESERVED
+   CLEAN HOME HOUSING Ă˘ÂÂ ORIGINAL LAYOUT PRESERVED
 ========================================================= */
 
 .home-navbar .nav-links {
@@ -15772,7 +15772,7 @@ html[data-theme="dark"] .home-account-avatar-link {
 }
 
 /* =========================================================
-   MOBILE-ONLY LAYOUT ÄËĂÂĂÂ DESKTOP STAYS UNCHANGED
+   MOBILE-ONLY LAYOUT Ă˘ÂÂ DESKTOP STAYS UNCHANGED
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -15936,7 +15936,7 @@ html[data-theme="dark"] .home-account-avatar-link {
 }
 
 /* =========================================================
-   MOBILE LIGHT THEME ÄËĂÂĂÂ WHITE NAVIGATION HOUSING
+   MOBILE LIGHT THEME Ă˘ÂÂ WHITE NAVIGATION HOUSING
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -17542,7 +17542,7 @@ html[data-theme="dark"] .how .step p {
   line-height: 1.4;
 }
 
-/* Dark version ÄËĂÂĂÂ the layout remains unchanged */
+/* Dark version Ă˘ÂÂ the layout remains unchanged */
 
 html[data-theme="dark"] .disputes-page,
 html[data-theme="dark"] .admin-page {
@@ -18315,7 +18315,7 @@ html[data-theme="dark"] .dispute-transparency-banner {
 }
 
 /* =========================================================
-   FINAL HEADER REFINEMENT ÄËĂÂĂÂ HOME + ACCOUNT
+   FINAL HEADER REFINEMENT Ă˘ÂÂ HOME + ACCOUNT
    One authoritative layer for spacing, contrast and mobile fit.
 ========================================================= */
 
@@ -18690,7 +18690,7 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
 }
 
 /* =========================================================
-   PRIVACY RIGHTS CENTER ÄËĂÂĂÂ BUILD 2026-09-07
+   PRIVACY RIGHTS CENTER Ă˘ÂÂ BUILD 2026-09-07
 ========================================================= */
 
 .privacy-center-page {
@@ -19753,7 +19753,7 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
   line-height: 1.55;
 }
 
-/* PeĂĹĄĂÂny, zatwierdzony raport widoczny na koncie uĂĹĄÄšĹytkownika. */
+/* PeÄšÂny, zatwierdzony raport widoczny na koncie uÄšĹşytkownika. */
 .privacy-user-audit-report {
   margin: 20px 0 16px;
   padding: clamp(18px, 3vw, 28px);
@@ -20809,7 +20809,7 @@ html[data-theme="dark"] .privacy-audit-public-note {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ GOOGLE AUTH + PORTFOLIO ÄËĂÂĂÂ V1.4
+   IDEA HIRE Ă˘ÂÂ GOOGLE AUTH + PORTFOLIO Ă˘ÂÂ V1.4
 ========================================================= */
 
 .auth-provider-section {
@@ -21349,7 +21349,7 @@ html[data-theme="dark"] .profile-portfolio-item-actions button.is-danger {
 }
 
 /* =========================================================
-   PORTFOLIO ALBUMS + CONTENT REPORTS ÄËĂÂĂÂ V1.6
+   PORTFOLIO ALBUMS + CONTENT REPORTS Ă˘ÂÂ V1.6
 ========================================================= */
 
 .profile-portfolio-edit-cover {
@@ -22596,7 +22596,7 @@ html[data-theme="dark"] a.profile-public-project-link:hover {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ POMOCNY ONBOARDING I DOPASOWANIE V2.2
+   IDEA HIRE Ă˘ÂÂ POMOCNY ONBOARDING I DOPASOWANIE V2.2
 ========================================================= */
 
 .discovery-onboarding-backdrop {
@@ -23834,7 +23834,7 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
+   IDEA HIRE Ă˘ÂÂ MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
 ========================================================= */
 
 .discovery-onboarding-shell button,
@@ -23972,7 +23972,7 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
 }
 
 /* =========================================================
-   PRIVATE WORKSPACE ÄËĂÂĂÂ attachments, albums and work delivery
+   PRIVATE WORKSPACE Ă˘ÂÂ attachments, albums and work delivery
 ========================================================= */
 
 .private-work-message-text a {
@@ -24927,7 +24927,7 @@ html[data-theme="dark"] .account-page .chat-message.is-mine a {
 }
 
 /* =========================================================
-   FINAL VISUAL AUDIT ÄËĂÂĂÂ shared application polish
+   FINAL VISUAL AUDIT Ă˘ÂÂ shared application polish
 ========================================================= */
 
 :is(.hero h1, .app-page-header h1, .auth-header h1, .job-card h2, .profile-preview h2) {
@@ -25472,7 +25472,7 @@ html[data-theme="dark"] .profile-review-card > p {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ COHESIVE UI REFRESH 2026-09
+   IDEA HIRE Ă˘ÂÂ COHESIVE UI REFRESH 2026-09
    Final, reversible presentation layer. No business logic.
 ========================================================= */
 
@@ -25538,7 +25538,7 @@ body {
   outline-offset: 3px;
 }
 
-/* Public header ÄËĂÂĂÂ one calm surface instead of nested dark pills */
+/* Public header Ă˘ÂÂ one calm surface instead of nested dark pills */
 
 .navbar.home-navbar,
 .navbar.account-navbar {
@@ -25649,7 +25649,7 @@ body {
   display: none;
 }
 
-/* Account header ÄËĂÂĂÂ four primary destinations and one utility menu */
+/* Account header Ă˘ÂÂ four primary destinations and one utility menu */
 
 .navbar.account-navbar {
   display: grid;
@@ -25984,7 +25984,7 @@ body {
   color: #87342f;
 }
 
-/* Appearance and language ÄËĂÂĂÂ compact, horizontal and out of the way */
+/* Appearance and language Ă˘ÂÂ compact, horizontal and out of the way */
 
 .site-preferences,
 .site-preferences.is-open {
@@ -26151,7 +26151,7 @@ body {
   padding: 34px 0 46px;
 }
 
-/* Application pages ÄËĂÂĂÂ quieter surfaces and consistent spacing */
+/* Application pages Ă˘ÂÂ quieter surfaces and consistent spacing */
 
 .page {
   min-height: 100vh;
@@ -26298,7 +26298,7 @@ body {
   box-shadow: var(--ih-shadow-sm);
 }
 
-/* Authentication ÄËĂÂĂÂ shorter, clearer and less card-heavy */
+/* Authentication Ă˘ÂÂ shorter, clearer and less card-heavy */
 
 .auth-card {
   width: min(520px, 100%);
@@ -26379,7 +26379,7 @@ body {
   background: #fafbf8;
 }
 
-/* Messages, notifications, disputes and privacy ÄËĂÂĂÂ consistent information density */
+/* Messages, notifications, disputes and privacy Ă˘ÂÂ consistent information density */
 
 :is(.messages-row, .notification-decision-card, .notification-accepted-card, .notification-block-card) {
   border-color: var(--ih-line);
@@ -27102,7 +27102,7 @@ html[data-theme="dark"] .restricted-account-navbar .restricted-navbar-links a {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V3 TOTAL VISUAL REDESIGN
+   IDEA HIRE Ă˘ÂÂ V3 TOTAL VISUAL REDESIGN
    Authoritative final layer. Presentation only.
 ========================================================= */
 
@@ -29096,7 +29096,7 @@ html[data-theme="dark"] .site-preferences {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ PROFESSIONAL UI V4
+   IDEA HIRE Ă˘ÂÂ PROFESSIONAL UI V4
    ACCOUNT WORKSPACE / STABLE FILTERS / LOWER HOME MOTION
    RELEASE 2026-09-19
 ========================================================= */
@@ -30587,7 +30587,7 @@ html[data-theme="dark"] .privacy-entry-link {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ NAVY PROFESSIONAL SYSTEM V5
+   IDEA HIRE Ă˘ÂÂ NAVY PROFESSIONAL SYSTEM V5
    ONE SHELL / ONE BACKGROUND / ZERO HORIZONTAL SHIFT
    RELEASE 2026-09-19
 ========================================================= */
@@ -32477,7 +32477,7 @@ html[data-theme="dark"] .footer .logo span {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V5.1 WIDTH / STATIC NAV / RESULTS FIX
+   IDEA HIRE Ă˘ÂÂ V5.1 WIDTH / STATIC NAV / RESULTS FIX
 ========================================================= */
 
 :root {
@@ -32641,7 +32641,7 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V5.2 WIDER CANVAS / HERO PROPORTIONS
+   IDEA HIRE Ă˘ÂÂ V5.2 WIDER CANVAS / HERO PROPORTIONS
 ========================================================= */
 
 :root {
@@ -32715,7 +32715,7 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
+   IDEA HIRE Ă˘ÂÂ V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
 ========================================================= */
 
 :root {
@@ -32992,7 +32992,7 @@ html[data-theme="dark"] .account-page .chat-collapsible-icon.is-dispute {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V5.4 ZERO-FLASH NAVIGATION
+   IDEA HIRE Ă˘ÂÂ V5.4 ZERO-FLASH NAVIGATION
 ========================================================= */
 
 :root {
@@ -33242,7 +33242,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V5.5 INSTANT BUTTER TRANSITIONS
+   IDEA HIRE Ă˘ÂÂ V5.5 INSTANT BUTTER TRANSITIONS
 ========================================================= */
 
 :root {
@@ -33334,7 +33334,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V6.1 FINAL HOMEPAGE GEOMETRY LOCK
+   IDEA HIRE Ă˘ÂÂ V6.1 FINAL HOMEPAGE GEOMETRY LOCK
    Keeps the new landing-page proportions above legacy layers.
 ========================================================= */
 
@@ -33460,7 +33460,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V7 FULL-WIDTH PRODUCT SHELL / BIDIRECTIONAL MOTION
+   IDEA HIRE Ă˘ÂÂ V7 FULL-WIDTH PRODUCT SHELL / BIDIRECTIONAL MOTION
    RELEASE 2026-09-20
 ========================================================= */
 
@@ -34038,7 +34038,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE ÄËĂÂĂÂ V7.2 FINAL BALANCE LOCK
+   IDEA HIRE Ă˘ÂÂ V7.2 FINAL BALANCE LOCK
    Full-width navigation, restrained 1320px content.
 ========================================================= */
 
@@ -34049,7 +34049,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ MOBILE REPAIR + ACCOUNT TABS Ă˘ÂÂ 2026-09-21
+   IDEA HIRE â MOBILE REPAIR + ACCOUNT TABS â 2026-09-21
    Layered over the last accepted V7.2 desktop release.
 ========================================================= */
 
