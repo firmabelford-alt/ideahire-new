@@ -6,6 +6,7 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useState,
   useContext,
   createContext,
@@ -65,7 +66,7 @@ const ROUTE_LOADING_SELECTOR =
 let activeRouteTransition = null;
 
 function waitForRouteContent(
-  maximumWait = 72
+  maximumWait = 32
 ) {
   return new Promise((resolve) => {
     const root =
@@ -27291,6 +27292,40 @@ function SmoothRouteTransitions() {
   return null;
 }
 
+function RouteScrollManager() {
+  const location = useLocation();
+
+  useLayoutEffect(() => {
+    if (location.hash) {
+      const targetId = decodeURIComponent(
+        location.hash.slice(1)
+      );
+
+      window.requestAnimationFrame(() => {
+        document
+          .getElementById(targetId)
+          ?.scrollIntoView({
+            block: "start",
+            behavior: "auto",
+          });
+      });
+      return;
+    }
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+  }, [
+    location.hash,
+    location.pathname,
+    location.search,
+  ]);
+
+  return null;
+}
+
 /* =========================================================
    ROUTER
 ========================================================= */
@@ -27299,6 +27334,7 @@ function Router() {
   return (
     <BrowserRouter>
       <SmoothRouteTransitions />
+      <RouteScrollManager />
       <AuthProvider>
         <StaffRoleProvider>
           <AccountRestrictionProvider>
