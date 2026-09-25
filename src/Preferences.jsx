@@ -1770,7 +1770,7 @@ export default function Preferences({
           }
         >
           <span aria-hidden="true">
-            {mobilePanelOpen ? "›" : "‹"}
+            {mobilePanelOpen ? "×" : "Aa"}
           </span>
         </button>
 
