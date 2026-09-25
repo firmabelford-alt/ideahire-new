@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
@@ -62,6 +62,36 @@ function formatBytes(value) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function getFilePresentation(item) {
+  const name = String(item?.display_name || "Plik");
+  const extension = name.includes(".")
+    ? name.split(".").pop().toUpperCase().slice(0, 5)
+    : "PLIK";
+  const mimeType = String(item?.mime_type || "").toLowerCase();
+
+  if (mimeType === "application/pdf" || extension === "PDF") {
+    return { badge: "PDF", label: "Dokument PDF", action: "Otwórz" };
+  }
+  if (mimeType === "text/plain" || extension === "TXT") {
+    return { badge: "TXT", label: "Plik tekstowy", action: "Otwórz" };
+  }
+  if (["ZIP", "RAR", "7Z"].includes(extension)) {
+    return { badge: extension, label: "Archiwum", action: "Pobierz" };
+  }
+  if (["DOC", "DOCX", "ODT"].includes(extension)) {
+    return { badge: extension, label: "Dokument", action: "Pobierz" };
+  }
+  if (["XLS", "XLSX", "ODS", "CSV"].includes(extension)) {
+    return { badge: extension, label: "Arkusz", action: "Pobierz" };
+  }
+
+  return {
+    badge: extension || "PLIK",
+    label: mimeType || "Załącznik",
+    action: "Pobierz",
+  };
 }
 
 function normalizeLink(value) {
@@ -216,6 +246,47 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
   const item = images[index];
   const previous = images[(index - 1 + images.length) % images.length];
   const next = images[(index + 1) % images.length];
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const stageRef = useRef(null);
+  const imageRef = useRef(null);
+  const pointersRef = useRef(new Map());
+  const gestureRef = useRef(null);
+
+  const clampPan = useCallback((position, zoomLevel) => {
+    const stage = stageRef.current;
+    const image = imageRef.current;
+    if (!stage || !image || zoomLevel <= 1) return { x: 0, y: 0 };
+
+    const maxX = Math.max(0, (image.clientWidth * zoomLevel - stage.clientWidth) / 2);
+    const maxY = Math.max(0, (image.clientHeight * zoomLevel - stage.clientHeight) / 2);
+    return {
+      x: Math.max(-maxX, Math.min(maxX, position.x)),
+      y: Math.max(-maxY, Math.min(maxY, position.y)),
+    };
+  }, []);
+
+  const applyZoom = useCallback((value) => {
+    const nextZoom = Math.max(1, Math.min(4, Number(value.toFixed(2))));
+    setZoom(nextZoom);
+    setPan((current) => clampPan(current, nextZoom));
+  }, [clampPan]);
+
+  useEffect(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+    pointersRef.current.clear();
+    gestureRef.current = null;
+  }, [activeId]);
+
+  useEffect(() => {
+    if (!activeId || !item) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [activeId, item]);
 
   useEffect(() => {
     if (!activeId || !item) return undefined;
@@ -223,23 +294,127 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft" && images.length > 1) onSelect(previous.id);
       if (event.key === "ArrowRight" && images.length > 1) onSelect(next.id);
+      if (["+", "="].includes(event.key)) applyZoom(zoom + 0.25);
+      if (event.key === "-") applyZoom(zoom - 0.25);
+      if (event.key === "0") applyZoom(1);
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeId, images.length, item, next?.id, onClose, onSelect, previous?.id]);
+  }, [activeId, applyZoom, images.length, item, next?.id, onClose, onSelect, previous?.id, zoom]);
+
+  function handlePointerDown(event) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    const points = [...pointersRef.current.values()];
+    if (points.length === 1) {
+      gestureRef.current = {
+        type: "pan",
+        startX: event.clientX,
+        startY: event.clientY,
+        panX: pan.x,
+        panY: pan.y,
+      };
+    } else if (points.length === 2) {
+      gestureRef.current = {
+        type: "pinch",
+        distance: Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y),
+        zoom,
+      };
+    }
+  }
+
+  function handlePointerMove(event) {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const points = [...pointersRef.current.values()];
+    const gesture = gestureRef.current;
+
+    if (points.length >= 2 && gesture?.type === "pinch") {
+      const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+      applyZoom(gesture.zoom * (distance / Math.max(gesture.distance, 1)));
+      return;
+    }
+
+    if (points.length === 1 && gesture?.type === "pan" && zoom > 1) {
+      setPan(clampPan({
+        x: gesture.panX + event.clientX - gesture.startX,
+        y: gesture.panY + event.clientY - gesture.startY,
+      }, zoom));
+    }
+  }
+
+  function handlePointerEnd(event) {
+    pointersRef.current.delete(event.pointerId);
+    const remaining = [...pointersRef.current.values()];
+    if (remaining.length === 1) {
+      gestureRef.current = {
+        type: "pan",
+        startX: remaining[0].x,
+        startY: remaining[0].y,
+        panX: pan.x,
+        panY: pan.y,
+      };
+    } else if (remaining.length === 0) {
+      gestureRef.current = null;
+    }
+  }
 
   if (!activeId || !item) return null;
 
+  const source = signedUrls[item.storage_path];
+
   return (
-    <div className="private-work-lightbox" role="dialog" aria-modal="true" aria-label="Podgląd zdjęcia">
-      <button type="button" className="private-work-lightbox-close" onClick={onClose} aria-label="Zamknij">×</button>
+    <div
+      className="private-work-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Podgląd zdjęcia"
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <header className="private-work-viewer-toolbar">
+        <div className="private-work-viewer-title">
+          <strong>{item.display_name}</strong>
+          <span>{images.length > 1 ? `${index + 1} z ${images.length}` : "Zdjęcie"}</span>
+        </div>
+        <div className="private-work-viewer-controls" aria-label="Powiększenie zdjęcia">
+          <button type="button" onClick={() => applyZoom(zoom - 0.25)} disabled={zoom <= 1} aria-label="Oddal">−</button>
+          <button type="button" className="private-work-viewer-zoom-value" onClick={() => applyZoom(1)} aria-label="Przywróć rozmiar 100%">{Math.round(zoom * 100)}%</button>
+          <button type="button" onClick={() => applyZoom(zoom + 0.25)} disabled={zoom >= 4} aria-label="Przybliż">+</button>
+          <a href={source} target="_blank" rel="noopener noreferrer" download={item.display_name} aria-label="Pobierz zdjęcie">↓</a>
+          <button type="button" className="private-work-lightbox-close" onClick={onClose} aria-label="Zamknij">×</button>
+        </div>
+      </header>
       {images.length > 1 && (
         <button type="button" className="private-work-lightbox-arrow is-left" onClick={() => onSelect(previous.id)} aria-label="Poprzednie zdjęcie">‹</button>
       )}
-      <figure>
-        <img src={signedUrls[item.storage_path]} alt={item.display_name} />
+      <figure className={zoom > 1 ? "is-zoomed" : ""}>
+        <div
+          ref={stageRef}
+          className="private-work-viewer-stage"
+          onWheel={(event) => {
+            event.preventDefault();
+            applyZoom(zoom + (event.deltaY < 0 ? 0.25 : -0.25));
+          }}
+          onDoubleClick={() => applyZoom(zoom > 1 ? 1 : 2)}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
+        >
+          <img
+            ref={imageRef}
+            src={source}
+            alt={item.display_name}
+            draggable="false"
+            style={{
+              transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+            }}
+          />
+        </div>
         <figcaption>
-          <span>{albumTitle ? `${albumTitle} · ` : ""}{item.display_name} · {index + 1}/{images.length}</span>
+          <span>{images.length > 1 && albumTitle ? albumTitle : "Dwuklik lub kółko myszy zmienia powiększenie"}</span>
           {!ownMessage && (
             <button type="button" onClick={() => {
               onClose();
@@ -287,26 +462,27 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
     <div className="private-work-materials">
       {imageAlbums.length > 0 && (
         <div className="private-work-albums">
-          {imageAlbums.map((album) => (
-            <section className="private-work-album-card" key={album.id}>
-              <div className="private-work-album-heading">
-                <span aria-hidden="true">▣</span>
-                <div>
-                  <small>Album zdjęć</small>
-                  <strong>{album.title}</strong>
+          {imageAlbums.map((album) => {
+            const isSingleImage = album.images.length === 1;
+            const displayTitle = album.title === "Album zdjęć" ? "Zdjęcia" : album.title;
+            return (
+            <section className={`private-work-image-set ${isSingleImage ? "is-single" : "is-gallery"}`} key={album.id}>
+              {!isSingleImage && (
+                <div className="private-work-image-set-heading">
+                  <strong>{displayTitle}</strong>
+                  <span>{album.images.length} {album.images.length < 5 ? "zdjęcia" : "zdjęć"}</span>
                 </div>
-                <b>{album.images.length} {album.images.length === 1 ? "zdjęcie" : album.images.length < 5 ? "zdjęcia" : "zdjęć"}</b>
-              </div>
-              <div className={`private-work-album count-${Math.min(album.images.length, 4)}`}>
+              )}
+              <div className={`private-work-image-grid count-${Math.min(album.images.length, 4)}`}>
                 {album.images.slice(0, 4).map((item, index) => (
-                  <button type="button" key={item.id} onClick={() => setPreviewId(item.id)} aria-label={`Otwórz zdjęcie ${index + 1} z albumu ${album.title}`}>
+                  <button className="private-work-image-thumb" type="button" key={item.id} onClick={() => setPreviewId(item.id)} aria-label={isSingleImage ? `Otwórz zdjęcie ${item.display_name}` : `Otwórz zdjęcie ${index + 1} z zestawu ${displayTitle}`}>
                     <img src={signedUrls[item.storage_path]} alt={item.display_name} loading="lazy" />
                     {index === 3 && album.images.length > 4 && <span>+{album.images.length - 4}</span>}
                   </button>
                 ))}
               </div>
             </section>
-          ))}
+          );})}
         </div>
       )}
 
@@ -314,16 +490,21 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
         <section className="private-work-material-group">
           <div className="private-work-section-title"><strong>Pliki</strong><span>{files.length}</span></div>
           <div className="private-work-files">
-          {files.map((item) => (
-            <div className="private-work-link-row" key={item.id}>
-              <a href={signedUrls[item.storage_path] || undefined} target="_blank" rel="noopener noreferrer" aria-disabled={!signedUrls[item.storage_path]}>
-                <span aria-hidden="true">{item.mime_type === "application/pdf" ? "PDF" : "TXT"}</span>
-                <b>{item.display_name}</b>
-                <small>{formatBytes(item.byte_size)}</small>
+          {files.map((item) => {
+            const presentation = getFilePresentation(item);
+            return (
+            <div className="private-work-link-row private-work-file-row" key={item.id}>
+              <a href={signedUrls[item.storage_path] || undefined} target="_blank" rel="noopener noreferrer" download={item.display_name} aria-disabled={!signedUrls[item.storage_path]}>
+                <span className="private-work-file-badge" aria-hidden="true">{presentation.badge}</span>
+                <span className="private-work-file-copy">
+                  <b>{item.display_name}</b>
+                  <small>{presentation.label} · {formatBytes(item.byte_size)}</small>
+                </span>
+                <span className="private-work-file-action" aria-hidden="true">{presentation.action} ↓</span>
               </a>
               {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
             </div>
-          ))}
+          );})}
           </div>
         </section>
       )}
@@ -505,7 +686,7 @@ export function PrivateSharePanel({
         summary: mode === "delivery" ? caption.trim() : undefined,
         rightsConfirmed: mode === "delivery" ? rightsConfirmed : undefined,
         safetyConfirmed: mode === "delivery" ? safetyConfirmed : undefined,
-        albumTitle: imageCount ? albumTitle.trim() || "Album zdjęć" : undefined,
+        albumTitle: imageCount > 1 ? albumTitle.trim() || "Zdjęcia" : undefined,
         files: uploaded,
         links: preparedLinks.map((link) => ({
           id: crypto.randomUUID(),
@@ -597,11 +778,11 @@ export function PrivateSharePanel({
             </div>
           )}
 
-          {imageCount > 0 && (
+          {imageCount > 1 && (
             <div className="private-work-field private-work-album-name-field">
-              <label htmlFor="private-work-album-title">Nazwa albumu</label>
+              <label htmlFor="private-work-album-title">Nazwa zestawu zdjęć (opcjonalnie)</label>
               <input id="private-work-album-title" type="text" value={albumTitle} onChange={(event) => setAlbumTitle(event.target.value)} maxLength={120} placeholder="Np. Grafiki na Instagram — wersja finalna" />
-              <small>{imageCount} {imageCount === 1 ? "zdjęcie" : imageCount < 5 ? "zdjęcia" : "zdjęć"} zostanie połączonych w jeden album.</small>
+              <small>{imageCount} {imageCount < 5 ? "zdjęcia" : "zdjęć"} zostanie pokazanych jako jedna schludna galeria.</small>
             </div>
           )}
 
