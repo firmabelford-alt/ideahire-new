@@ -36101,3 +36101,704 @@ html[data-template="classic"][data-theme="dark"] #root .app :is(.floating-card, 
   }
 }
 
+/* =========================================================
+   IDEA HIRE — V10.2 UI REPAIR SEAL — 2026-09-25
+   Final, reversible corrections for navigation, both templates,
+   mobile layouts, chat media and the administration workspace.
+========================================================= */
+
+:root {
+  --ih-release: 20260925-102;
+}
+
+/* Fast route change: keep the old frame solid and move the new one in.
+   There is deliberately no opacity fade, blur or white loading frame. */
+
+@keyframes ih-v102-route-in {
+  from { transform: translateY(4px); }
+  to { transform: translateY(0); }
+}
+
+::view-transition-group(root) {
+  animation-duration: 160ms !important;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+::view-transition-old(root) {
+  opacity: 1 !important;
+  animation: none !important;
+  mix-blend-mode: normal !important;
+}
+
+::view-transition-new(root) {
+  opacity: 1 !important;
+  animation: ih-v102-route-in 160ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  mix-blend-mode: normal !important;
+}
+
+::view-transition-image-pair(root) {
+  isolation: isolate;
+}
+
+.page > main,
+.account-page > main,
+.app > main > section,
+.privacy-center-shell,
+.disputes-shell,
+.admin-shell,
+.chat-messages {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Home motion stays reversible but no longer blurs or scales entire layers. */
+
+.app.home-motion-ready .home-reveal,
+.app.home-motion-ready .home-reveal.is-below {
+  opacity: 0;
+  translate: 0 22px;
+  scale: 1;
+  filter: none !important;
+  will-change: auto;
+  transition:
+    opacity 360ms ease,
+    translate 430ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: min(var(--home-reveal-delay, 0ms), 90ms);
+}
+
+.app.home-motion-ready .home-reveal.is-above {
+  opacity: 0;
+  translate: 0 -16px;
+  scale: 1;
+  filter: none !important;
+}
+
+.app.home-motion-ready .home-reveal.is-visible {
+  opacity: 1;
+  translate: 0;
+  scale: 1;
+  filter: none !important;
+}
+
+.app.home-motion-ready .category-card.home-reveal:nth-child(n):not(.is-visible):not(.is-above) {
+  translate: 0 22px;
+}
+
+.app.home-motion-ready .split-section.home-reveal .split-card {
+  transition: transform 430ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease;
+}
+
+.app.home-motion-ready .split-section.home-reveal:not(.is-visible) .split-card:first-child {
+  opacity: 0.9;
+  transform: translateX(-18px);
+}
+
+.app.home-motion-ready .split-section.home-reveal:not(.is-visible) .split-card:last-child {
+  opacity: 0.9;
+  transform: translateX(18px);
+}
+
+/* Messages/chat share the exact desktop axis used by the other account pages. */
+
+@media (min-width: 721px) {
+  #root .account-page > .messages-page,
+  #root .account-page > .chat-page {
+    width: min(1284px, calc(100% - 64px)) !important;
+    max-width: 1284px !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+}
+
+/* Appearance controls are collapsed until requested and never cover content. */
+
+.site-preferences,
+.site-preferences.is-open {
+  position: fixed !important;
+  z-index: 9000 !important;
+  top: auto !important;
+  right: max(12px, env(safe-area-inset-right)) !important;
+  bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  width: 44px !important;
+  height: 44px !important;
+  display: block !important;
+  padding: 0 !important;
+  border: 1px solid rgba(16, 36, 61, 0.14) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 253, 0.96) !important;
+  box-shadow: 0 10px 30px rgba(8, 19, 33, 0.12) !important;
+  transform: none !important;
+  backdrop-filter: blur(14px) !important;
+}
+
+.site-preferences-handle {
+  position: relative;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid !important;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--ih-navy-900);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: -0.35px;
+  cursor: pointer;
+}
+
+.site-preferences.is-open .site-preferences-handle {
+  background: var(--ih-navy-900);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.site-preferences-panel {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: calc(100% + 9px) !important;
+  width: max-content !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 5px !important;
+  border: 1px solid rgba(16, 36, 61, 0.14) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 253, 0.98) !important;
+  box-shadow: 0 16px 42px rgba(8, 19, 33, 0.15) !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(7px) scale(0.97);
+  transform-origin: bottom right;
+  transition: opacity 150ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1), visibility 150ms;
+  backdrop-filter: blur(16px) !important;
+}
+
+.site-preferences.is-open .site-preferences-panel {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.site-preferences .site-language-toggle {
+  display: flex !important;
+  padding: 0 0 0 4px !important;
+  border-top: 0 !important;
+  border-left: 1px solid var(--ih-line) !important;
+}
+
+.site-preferences .site-theme-toggle,
+.site-preferences .site-language-toggle button {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+}
+
+html[data-theme="dark"] .site-preferences,
+html[data-theme="dark"] .site-preferences.is-open,
+html[data-theme="dark"] .site-preferences-panel {
+  border-color: #34465b !important;
+  background: rgba(12, 21, 31, 0.97) !important;
+  color: #f2f6fb !important;
+}
+
+html[data-theme="dark"] .site-preferences-handle {
+  color: #f2f6fb;
+}
+
+/* Current dark mode: restore visible navigation and logout controls. */
+
+html[data-theme="dark"] #root .home-navbar .nav-links.home-nav-links a,
+html[data-theme="dark"] #root .account-navbar .nav-links.account-primary-nav a,
+html[data-theme="dark"] #root .admin-nav-links a {
+  color: #d7e1ec !important;
+}
+
+html[data-theme="dark"] #root .home-navbar .nav-links.home-nav-links a:hover,
+html[data-theme="dark"] #root .account-navbar .nav-links.account-primary-nav a:hover,
+html[data-theme="dark"] #root .admin-nav-links a:hover {
+  background: #1c2b3c !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="dark"] #root .account-menu-logout {
+  background: transparent !important;
+  color: #ffaaa2 !important;
+}
+
+html[data-theme="dark"] #root .account-menu-logout:hover {
+  background: #351f22 !important;
+  color: #ffd0cc !important;
+}
+
+/* Image viewer is portalled to body so it cannot be clipped by chat scroll. */
+
+body > .private-work-lightbox {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
+  overflow: hidden !important;
+  background: rgba(3, 7, 13, 0.94) !important;
+  color: #fff !important;
+  backdrop-filter: blur(12px) saturate(112%) !important;
+}
+
+body > .private-work-lightbox .private-work-viewer-toolbar {
+  width: min(1240px, 100%);
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 auto;
+}
+
+body > .private-work-lightbox .private-work-viewer-title {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+body > .private-work-lightbox .private-work-viewer-title strong,
+body > .private-work-lightbox .private-work-viewer-title span {
+  overflow: hidden;
+  color: #fff !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body > .private-work-lightbox .private-work-viewer-title strong { font-size: 12px; }
+body > .private-work-lightbox .private-work-viewer-title span { color: rgba(255, 255, 255, 0.58) !important; font-size: 9px; }
+
+body > .private-work-lightbox .private-work-viewer-controls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+body > .private-work-lightbox .private-work-viewer-controls button,
+body > .private-work-lightbox .private-work-viewer-controls a,
+body > .private-work-lightbox .private-work-lightbox-close {
+  position: static !important;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent !important;
+  color: #fff !important;
+  font: inherit;
+  font-size: 17px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+body > .private-work-lightbox .private-work-viewer-controls button:hover,
+body > .private-work-lightbox .private-work-viewer-controls a:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body > .private-work-lightbox .private-work-viewer-controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+body > .private-work-lightbox .private-work-viewer-controls .private-work-viewer-zoom-value {
+  width: 58px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+body > .private-work-lightbox .private-work-viewer-controls .private-work-lightbox-close {
+  margin-left: 2px;
+  background: rgba(255, 255, 255, 0.11) !important;
+  font-size: 21px;
+}
+
+body > .private-work-lightbox figure {
+  width: min(1240px, 100%) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto !important;
+  gap: 8px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body > .private-work-lightbox .private-work-viewer-stage {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: transparent !important;
+  cursor: zoom-in;
+  touch-action: none;
+  user-select: none;
+}
+
+body > .private-work-lightbox figure.is-zoomed .private-work-viewer-stage { cursor: grab; }
+body > .private-work-lightbox figure.is-zoomed .private-work-viewer-stage:active { cursor: grabbing; }
+
+body > .private-work-lightbox .private-work-viewer-stage img {
+  width: auto !important;
+  max-width: min(100%, 1100px) !important;
+  height: auto !important;
+  max-height: min(76dvh, 800px) !important;
+  display: block;
+  object-fit: contain;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  pointer-events: none;
+  transform-origin: center;
+  transition: transform 90ms ease-out;
+}
+
+body > .private-work-lightbox figcaption {
+  min-height: 30px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.62) !important;
+  font-size: 9px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+body > .private-work-lightbox figcaption button {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+body > .private-work-lightbox .private-work-lightbox-arrow {
+  position: fixed !important;
+  z-index: 2;
+  top: 50%;
+  width: 44px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  font-size: 30px;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+body > .private-work-lightbox .private-work-lightbox-arrow.is-left { left: 16px; }
+body > .private-work-lightbox .private-work-lightbox-arrow.is-right { right: 16px; }
+
+/* Classic is implemented with actual component colours, not a costly
+   full-screen grayscale compositing layer. */
+
+html[data-template="classic"] body::after {
+  content: none !important;
+  display: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-template="classic"] #root .account-navbar .account-primary-nav a.is-active {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .admin-nav-links {
+  border-color: #111111 !important;
+  background: #111111 !important;
+}
+
+html[data-template="classic"] #root .admin-nav-links a {
+  color: #e8e8e3 !important;
+}
+
+html[data-template="classic"] #root .admin-nav-links a:hover,
+html[data-template="classic"] #root .admin-nav-links a.is-active {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root .messages-avatar {
+  border: 1px solid #d5d5cf !important;
+  background: #ecece8 !important;
+  color: #111111 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .messages-avatar img {
+  filter: none !important;
+}
+
+html[data-template="classic"] #root .chat-message.is-mine {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .chat-message:not(.is-mine) {
+  border-color: #deded8 !important;
+  background: #f0f0ec !important;
+  color: #161616 !important;
+}
+
+html[data-template="classic"] #root .chat-message :is(
+  .private-work-materials,
+  .private-work-albums,
+  .private-work-image-set,
+  .private-work-image-grid,
+  .private-work-files,
+  .private-work-links,
+  .private-work-material-group
+) {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root .chat-message .private-work-file-row > a {
+  border-color: currentColor !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root svg [fill]:not([fill="none"]) {
+  stroke: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .jobs-filter.active,
+  .jobs-filter.is-active,
+  .talent-category-row button.active,
+  .talent-category-row button.is-active,
+  .disputes-filter-bar button.active,
+  .disputes-filter-bar button.is-active,
+  .account-section-nav button.is-active,
+  .account-section-nav a.is-active
+) {
+  border-color: #f2f2ee !important;
+  background: #f2f2ee !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-navbar .account-primary-nav a.is-active {
+  border-color: #f2f2ee !important;
+  background: #f2f2ee !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .hero-visual .floating-card .card-meta span {
+  border-color: #444440 !important;
+  background: #292927 !important;
+  color: #f2f2ee !important;
+}
+
+/* Compact form and card polish shared by both templates. */
+
+#root .account-form input[type="file"]::file-selector-button {
+  margin: -4px 12px -4px -4px;
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--ih-navy-900);
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+#root :is(.notification-decision-card, .notification-accepted-card, .notification-block-card) {
+  min-height: 0 !important;
+  padding: clamp(16px, 2vw, 24px) !important;
+}
+
+/* Administration: long labels remain usable instead of becoming tiny. */
+
+@media (max-width: 1040px) {
+  #root .admin-navbar .admin-nav-links {
+    display: flex !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--ih-line-strong) transparent !important;
+  }
+
+  #root .admin-navbar .admin-nav-links::-webkit-scrollbar {
+    display: block !important;
+    height: 4px !important;
+  }
+
+  #root .admin-navbar .admin-nav-links a {
+    min-width: max-content !important;
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #root :is(.page, .account-page, .app) :is(a, button) {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  #root .account-page > .messages-page,
+  #root .account-page > .chat-page {
+    width: calc(100% - 18px) !important;
+    max-width: none !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+
+  #root .account-section-nav {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+  }
+
+  #root .admin-navbar {
+    align-items: stretch !important;
+  }
+
+  #root .admin-navbar .admin-nav-links {
+    padding-bottom: 5px !important;
+  }
+
+  #root .admin-navbar .admin-nav-links a {
+    min-width: 112px !important;
+    min-height: 38px !important;
+    padding: 7px 10px !important;
+    font-size: 10px !important;
+  }
+
+  #root :is(.disputes-filter-bar, .admin-filter-bar, .admin-queue-filters) {
+    overflow-x: auto !important;
+    scrollbar-width: thin !important;
+  }
+
+  body > .private-work-lightbox {
+    gap: 6px !important;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+  }
+
+  body > .private-work-lightbox .private-work-viewer-toolbar {
+    min-height: 42px;
+    gap: 8px;
+  }
+
+  body > .private-work-lightbox .private-work-viewer-title {
+    max-width: 30vw;
+  }
+
+  body > .private-work-lightbox .private-work-viewer-controls {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  body > .private-work-lightbox .private-work-viewer-controls button,
+  body > .private-work-lightbox .private-work-viewer-controls a {
+    width: 32px;
+    height: 32px;
+  }
+
+  body > .private-work-lightbox .private-work-viewer-controls .private-work-viewer-zoom-value {
+    width: 47px;
+  }
+
+  body > .private-work-lightbox .private-work-viewer-stage img {
+    max-width: 100% !important;
+    max-height: 78dvh !important;
+  }
+
+  body > .private-work-lightbox figcaption > span {
+    display: none;
+  }
+
+  body > .private-work-lightbox .private-work-lightbox-arrow {
+    top: auto !important;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 25px;
+    transform: none;
+  }
+
+  .site-preferences,
+  .site-preferences.is-open {
+    right: max(9px, env(safe-area-inset-right)) !important;
+    bottom: max(9px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (max-width: 360px) {
+  #root .account-navbar .nav-links.account-primary-nav {
+    display: flex !important;
+    overflow-x: auto !important;
+    scrollbar-width: thin !important;
+  }
+
+  #root .account-navbar .nav-links.account-primary-nav a {
+    min-width: 82px !important;
+    flex: 0 0 82px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms !important;
+    animation: none !important;
+  }
+
+  .site-preferences-panel,
+  .app.home-motion-ready .home-reveal,
+  .app.home-motion-ready .split-section.home-reveal .split-card {
+    transition: none !important;
+  }
+}
