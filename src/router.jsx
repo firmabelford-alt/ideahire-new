@@ -6892,7 +6892,7 @@ const SITE_TEMPLATE_OPTIONS = [
     eyebrow: "Klasyczny",
     title: "Czerń i biel",
     description:
-      "Dawna, spokojna szata czarno-biała nałożona na aktualny interfejs i wszystkie jego funkcje.",
+      "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.",
   },
 ];
 
