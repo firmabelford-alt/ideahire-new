@@ -1,12 +1,25 @@
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
-import React, { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 
 const THEME_KEY = "ideahire_theme";
+const TEMPLATE_KEY = "ideahire_template";
 const LANGUAGE_KEY = "ideahire_language";
 const COOKIE_NOTICE_KEY = "ideahire_cookie_notice_v1";
 const COOKIE_NOTICE_VERSION = "2026-09-06-v2";
 const COOKIE_NOTICE_LIFETIME = 365 * 24 * 60 * 60 * 1000;
+
+const SitePreferencesContext = createContext(null);
+
+export function useSitePreferences() {
+  const context = useContext(SitePreferencesContext);
+
+  if (!context) {
+    throw new Error("useSitePreferences musi działać wewnątrz komponentu Preferences.");
+  }
+
+  return context;
+}
 
 const originalTextByNode = new WeakMap();
 const translatedTextByNode = new WeakMap();
@@ -14,6 +27,21 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Szablony": "Templates",
+  "Wygląd interfejsu": "Interface appearance",
+  "Wybierz szatę IdeaHire": "Choose your IdeaHire style",
+  "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.": "Switch the appearance of the entire site without changing its current layout, data or features.",
+  "Szablon strony": "Site template",
+  "Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani funkcji IdeaHire.": "Compare two visual styles without changing the IdeaHire layout or features.",
+  "Aktualny": "Current",
+  "Nowoczesny granat": "Modern navy",
+  "Obecna szata IdeaHire z granatowymi akcentami, miękkimi przejściami i animacjami.": "The current IdeaHire style with navy accents, soft transitions and animations.",
+  "Klasyczny": "Classic",
+  "Czerń i biel": "Black and white",
+  "Dawna, spokojna szata czarno-biała nałożona na aktualny interfejs i wszystkie jego funkcje.": "The former calm black-and-white style applied to the current interface and all its features.",
+  "Wybrany szablon": "Selected template",
+  "Użyj tego szablonu": "Use this template",
+  "Zmiana jest zapisywana na tym urządzeniu i działa od razu na całej stronie.": "The change is saved on this device and applies immediately across the site.",
   "Kontynuuj przez Google": "Continue with Google",
   "Łączenie z Google...": "Connecting to Google...",
   "lub przez e-mail": "or use email",
@@ -1518,6 +1546,12 @@ function getStoredTheme() {
     : "light";
 }
 
+function getStoredTemplate() {
+  return localStorage.getItem(TEMPLATE_KEY) === "classic"
+    ? "classic"
+    : "current";
+}
+
 function getStoredLanguage() {
   return localStorage.getItem(
     LANGUAGE_KEY
@@ -1550,6 +1584,9 @@ export default function Preferences({
 }) {
   const [theme, setTheme] =
     useState(getStoredTheme);
+
+  const [template, setTemplate] =
+    useState(getStoredTemplate);
 
   const [language, setLanguage] =
     useState(getStoredLanguage);
@@ -1586,6 +1623,15 @@ export default function Preferences({
       theme
     );
   }, [theme]);
+
+  useLayoutEffect(() => {
+    document.documentElement.dataset.template =
+      template;
+    localStorage.setItem(
+      TEMPLATE_KEY,
+      template
+    );
+  }, [template]);
 
   useEffect(() => {
     document.documentElement.lang =
@@ -1680,6 +1726,16 @@ export default function Preferences({
   }, [language]);
 
   return (
+    <SitePreferencesContext.Provider
+      value={{
+        theme,
+        setTheme,
+        language,
+        setLanguage,
+        template,
+        setTemplate,
+      }}
+    >
     <>
       {children}
 
@@ -1844,5 +1900,6 @@ export default function Preferences({
         </section>
       )}
     </>
+    </SitePreferencesContext.Provider>
   );
 }
