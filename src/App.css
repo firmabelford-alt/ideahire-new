@@ -35405,3 +35405,699 @@ html[data-theme="dark"] .app .split-card.light {
     padding-bottom: 74px;
   }
 }
+
+
+/* =========================================================
+   V10.1 — TOTAL CLASSIC BLACK & WHITE
+   Final cascade seal. This block intentionally lives at the
+   absolute end of the stylesheet so later feature releases can
+   never reintroduce navy/blue into the classic template.
+========================================================= */
+
+html[data-template="classic"] {
+  --ih-page: #f7f7f5;
+  --ih-canvas: #f7f7f5;
+  --ih-surface: #ffffff;
+  --ih-surface-soft: #f3f3f1;
+  --ih-dark-surface: #111111;
+  --ih-line: #deded8;
+  --ih-line-strong: #c7c7c0;
+  --ih-ink: #161616;
+  --ih-ink-soft: #383835;
+  --ih-copy: #666660;
+  --ih-muted: #777771;
+  --ih-navy-950: #080808;
+  --ih-navy-900: #111111;
+  --ih-navy-850: #171717;
+  --ih-navy-800: #20201e;
+  --ih-navy-700: #333330;
+  --ih-blue-600: #111111;
+  --ih-blue-100: #ecece7;
+  --ih-blue-soft: #f1f1ed;
+  --ih-violet: #111111;
+  --ih-violet-deep: #000000;
+  --ih-violet-soft: #efefeb;
+  --ih-mint: #555550;
+  --ih-mint-soft: #efefeb;
+  --ih-sun: #666660;
+  --ih-sun-soft: #f1f1ed;
+  --ih-rose-soft: #f0f0ec;
+  --ih-focus: rgba(17, 17, 17, 0.2);
+  --ih-shadow-sm: 0 8px 24px rgba(20, 20, 18, 0.045);
+  --ih-shadow-md: 0 16px 42px rgba(20, 20, 18, 0.065);
+  --ih-shadow-lg: 0 28px 74px rgba(20, 20, 18, 0.08);
+  --ih-v3-page: #f7f7f5;
+  --ih-v3-surface: #ffffff;
+  --ih-v3-line: #deded8;
+  --ih-v3-ink: #161616;
+  --ih-v3-copy: #666660;
+  --ih-v3-shadow: 0 16px 44px rgba(20, 20, 18, 0.06);
+  --ih-v4-surface: #ffffff;
+  --ih-v4-surface-muted: #f3f3f1;
+  --ih-v4-line: #deded8;
+  --ih-v4-line-strong: #c7c7c0;
+  --ih-v4-ink: #161616;
+  --ih-v4-copy: #666660;
+  --ih-v4-violet: #111111;
+  --ih-v4-violet-soft: #efefeb;
+  --ih-v4-mint: #666660;
+  --ih-v4-shadow: 0 16px 44px rgba(20, 20, 18, 0.06);
+  color: #161616;
+  background: #f7f7f5;
+  color-scheme: light;
+}
+
+/* Chrome/Safari/Firefox safety layer: every remaining hard-coded
+   feature colour is desaturated without changing layout or events. */
+html[data-template="classic"] body::after {
+  content: "";
+  position: fixed;
+  z-index: 2147483646;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.001);
+  -webkit-backdrop-filter: grayscale(1);
+  backdrop-filter: grayscale(1);
+}
+
+html[data-template="classic"] body,
+html[data-template="classic"] #root,
+html[data-template="classic"] #root > *,
+html[data-template="classic"] #root :is(
+  .app,
+  .page,
+  .account-page,
+  .privacy-center-page,
+  .disputes-page,
+  .admin-page,
+  .moderation-user-page,
+  .age-access-page
+) {
+  background-color: #f7f7f5 !important;
+  color: #161616;
+}
+
+html[data-template="classic"] #root .app.app > main::before {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(0, 0, 0, 0.035), transparent 31%),
+    linear-gradient(180deg, #ffffff 0%, #f7f7f5 58%, #f3f3f1 100%) !important;
+  background-size: auto !important;
+}
+
+html[data-template="classic"] #root .app.app > main > .hero {
+  border: 0 !important;
+  background: transparent !important;
+  color: #161616 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app.app > main > .hero::before,
+html[data-template="classic"] #root .app.app > main > .hero::after,
+html[data-template="classic"] #root .app.app > main > .categories.section::before {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+html[data-template="classic"] #root .app :is(.hero h1, .hero h1 span, .hero-text, .eyebrow) {
+  color: #161616 !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app .hero h1 span,
+html[data-template="classic"] #root .app .hero-text {
+  color: #777771 !important;
+}
+
+html[data-template="classic"] #root .app :is(.eyebrow-dot, .live-dot) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #111111 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app :is(.visual-glow, .hero-visual .visual-glow) {
+  border: 1px solid #deded8 !important;
+  background: #eeeeea !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html[data-template="classic"] #root .app :is(.floating-card, .hero-visual .floating-card) {
+  border-color: #e1e1dc !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #161616 !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.09) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+html[data-template="classic"] #root .app .hero-visual .card-main::before {
+  background: #111111 !important;
+}
+
+html[data-template="classic"] #root .app :is(.floating-card, .hero-stats) :is(h2, h3, strong, p, span) {
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root .app > main > .categories.section {
+  background: #f7f7f5 !important;
+}
+
+html[data-template="classic"] #root .app > main > .categories :is(.section-label, h2, p) {
+  color: #161616 !important;
+  text-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .categories .section-label,
+html[data-template="classic"] #root .app > main > .categories .section-heading p {
+  color: #777771 !important;
+}
+
+html[data-template="classic"] #root .app .category-card {
+  border-color: #deded8 !important;
+  background: #ffffff !important;
+  color: #161616 !important;
+  box-shadow: 0 12px 34px rgba(20, 20, 18, 0.045) !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover :is(*) {
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section,
+html[data-template="classic"] #root .app .split-card:not(.light) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app .how :is(.section-label, h2, p, span, strong),
+html[data-template="classic"] #root .app .split-card:not(.light) :is(.section-label, h2, p, span, strong) {
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app .how .step {
+  border-color: #373734 !important;
+  background: #1b1b1a !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app :is(.split-card.light, .final-cta) {
+  border-color: #deded8 !important;
+  background: #ffffff !important;
+  color: #161616 !important;
+  box-shadow: 0 16px 44px rgba(20, 20, 18, 0.06) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar
+) {
+  border-color: #deded8 !important;
+  background: rgba(255, 255, 253, 0.97) !important;
+  color: #161616 !important;
+  box-shadow: 0 10px 34px rgba(18, 18, 16, 0.055) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .logo,
+  .account-navbar-brand,
+  .admin-navbar-brand,
+  .home-nav-links a,
+  .account-primary-nav a,
+  .admin-nav-links a,
+  .restricted-navbar-links a
+) {
+  color: #161616 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-nav-links a,
+  .account-primary-nav a,
+  .admin-nav-links a,
+  .restricted-navbar-links a
+):hover,
+html[data-template="classic"] #root :is(.account-primary-nav a.active, .admin-nav-links a.active) {
+  background: #ededE8 !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-dark,
+  .btn-primary,
+  .discovery-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button,
+  .chat-send,
+  .notification-chat-button,
+  .privacy-primary-button,
+  button[class*="primary-button"]
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-dark,
+  .btn-primary,
+  .discovery-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button,
+  .chat-send,
+  .notification-chat-button,
+  .privacy-primary-button,
+  button[class*="primary-button"]
+):hover {
+  border-color: #333330 !important;
+  background: #333330 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-ghost,
+  .btn-outline,
+  .btn-light,
+  .agreement-secondary-button,
+  .dispute-secondary-button,
+  button[class*="secondary-button"]
+) {
+  border-color: #cecec7 !important;
+  background: #ffffff !important;
+  color: #20201e !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(a, button, input, textarea, select):focus-visible {
+  outline-color: #111111 !important;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.08) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .app-page-header,
+  .account-tab-intro,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .messages-heading
+) :is(h1, h2, h3, p, span) {
+  color: #161616 !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card,
+  .dispute-list-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .age-access-card,
+  .legal-document-shell,
+  .cookie-policy-shell,
+  .account-form-section,
+  .profile-portfolio-manager,
+  .discovery-settings-card,
+  .job-republication-panel,
+  .notification-message-card
+) {
+  border-color: #deded8 !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #161616 !important;
+  box-shadow: 0 14px 42px rgba(20, 20, 18, 0.055) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card,
+  .dispute-list-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .age-access-card,
+  .notification-message-card
+) :is(h1, h2, h3, h4, strong) {
+  color: #161616 !important;
+}
+
+html[data-template="classic"] #root :is(input, textarea, select) {
+  border-color: #d5d5cf !important;
+  background: #ffffff !important;
+  color: #161616 !important;
+  accent-color: #111111 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(input, textarea, select):focus {
+  border-color: #111111 !important;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.07) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .jobs-search-box,
+  .talent-search-box,
+  .jobs-order-panel,
+  .talent-order-row,
+  .jobs-results-header,
+  .account-section-nav,
+  .account-tab-intro
+) {
+  border-color: #deded8 !important;
+  background: #ffffff !important;
+  color: #161616 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .jobs-filter,
+  .talent-category-row button,
+  .disputes-filter-bar button,
+  .job-listing-pill,
+  .profile-specialty-chip,
+  .profile-edit-skill-chip,
+  .talent-tag-list span,
+  .content-report-status
+) {
+  border-color: #d6d6d0 !important;
+  background: #f1f1ed !important;
+  color: #555550 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .jobs-filter.active,
+  .jobs-filter.is-active,
+  .talent-category-row button.active,
+  .talent-category-row button.is-active,
+  .disputes-filter-bar button.active,
+  .disputes-filter-bar button.is-active,
+  .account-section-nav button.is-active
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace > .profile-preview {
+  border-color: #111111 !important;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(145deg, #0c0c0c, #2a2a28) !important;
+  background-size: 28px 28px, auto !important;
+  color: #ffffff !important;
+  box-shadow: 0 18px 48px rgba(20, 20, 18, 0.12) !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace > .profile-preview :is(*) {
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root :is(.messages-row, .notification-item, .dispute-list-card) {
+  border-color: #e0e0da !important;
+  background: #ffffff !important;
+  color: #161616 !important;
+}
+
+html[data-template="classic"] #root :is(.messages-row, .notification-item, .dispute-list-card):hover,
+html[data-template="classic"] #root .messages-row.is-unread,
+html[data-template="classic"] #root .messages-row.is-unread:hover {
+  border-color: #bfbfb8 !important;
+  background: #f2f2ee !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-notification-button .notification-dot,
+  .account-primary-nav .messages-nav-dot,
+  .messages-unread-dot
+) {
+  border-color: #ffffff !important;
+  background: #111111 !important;
+  box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.12) !important;
+}
+
+html[data-template="classic"] #root .notification-message-icon {
+  border-color: #d7d7d0 !important;
+  background: #ededE8 !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root .chat-message.is-mine :is(.chat-message-bubble, div) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .chat-message:not(.is-mine) :is(.chat-message-bubble, div) {
+  border-color: #deded8 !important;
+  background: #f0f0ec !important;
+  color: #161616 !important;
+}
+
+html[data-template="classic"] #root :is(.chat-collapsible-panel, .agreement-workspace, .chat-dispute-card) {
+  border-color: #d9d9d2 !important;
+  background: #f6f6f3 !important;
+  color: #161616 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(.site-preferences-panel, .cookie-notice) {
+  border-color: #d0d0c9 !important;
+  background: rgba(255, 255, 253, 0.98) !important;
+  color: #161616 !important;
+  box-shadow: 0 16px 48px rgba(20, 20, 18, 0.12) !important;
+}
+
+html[data-template="classic"] #root :is(.site-theme-toggle, .site-language-toggle button, .cookie-notice button) {
+  border-color: #d0d0c9 !important;
+  background: #efefeb !important;
+  color: #161616 !important;
+}
+
+html[data-template="classic"] #root :is(svg, svg *, .job-listing-pill svg) {
+  color: currentColor;
+  stroke: currentColor;
+}
+
+/* Total classic dark remains monochrome as well. */
+html[data-template="classic"][data-theme="dark"] {
+  --ih-page: #0d0d0c;
+  --ih-canvas: #0d0d0c;
+  --ih-surface: #191918;
+  --ih-surface-soft: #232321;
+  --ih-line: #343431;
+  --ih-line-strong: #484844;
+  --ih-ink: #f2f2ee;
+  --ih-ink-soft: #d2d2cc;
+  --ih-copy: #aaaAa3;
+  --ih-muted: #969690;
+  --ih-v3-page: #0d0d0c;
+  --ih-v3-surface: #191918;
+  --ih-v3-line: #343431;
+  --ih-v3-ink: #f2f2ee;
+  --ih-v3-copy: #aaaAa3;
+  --ih-v4-surface: #191918;
+  --ih-v4-surface-muted: #121211;
+  --ih-v4-line: #343431;
+  --ih-v4-line-strong: #484844;
+  --ih-v4-ink: #f2f2ee;
+  --ih-v4-copy: #aaaAa3;
+  --ih-v4-violet-soft: #252523;
+  color: #f2f2ee;
+  background: #0d0d0c;
+  color-scheme: dark;
+}
+
+html[data-template="classic"][data-theme="dark"] body,
+html[data-template="classic"][data-theme="dark"] #root,
+html[data-template="classic"][data-theme="dark"] #root > *,
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .app,
+  .page,
+  .account-page,
+  .privacy-center-page,
+  .disputes-page,
+  .admin-page,
+  .moderation-user-page,
+  .age-access-page
+) {
+  background-color: #0d0d0c !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app.app > main::before {
+  background:
+    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.035), transparent 31%),
+    linear-gradient(180deg, #090909 0%, #111110 58%, #0d0d0c 100%) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app.app > main > .hero,
+html[data-template="classic"][data-theme="dark"] #root .app > main > .categories.section {
+  background: transparent !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app :is(
+  .hero h1,
+  .hero h1 span,
+  .hero-text,
+  .eyebrow,
+  .categories .section-label,
+  .categories h2,
+  .categories p
+) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar,
+  .account-card,
+  .auth-card,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card,
+  .dispute-list-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .age-access-card,
+  .legal-document-shell,
+  .cookie-policy-shell,
+  .account-form-section,
+  .profile-portfolio-manager,
+  .discovery-settings-card,
+  .job-republication-panel,
+  .notification-message-card,
+  .jobs-search-box,
+  .talent-search-box,
+  .jobs-order-panel,
+  .talent-order-row,
+  .jobs-results-header,
+  .account-section-nav,
+  .account-tab-intro,
+  .site-preferences-panel,
+  .cookie-notice
+) {
+  border-color: #343431 !important;
+  background-color: #191918 !important;
+  background-image: none !important;
+  color: #f2f2ee !important;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card,
+  .dispute-list-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .age-access-card,
+  .notification-message-card,
+  .account-tab-intro,
+  .messages-heading
+) :is(h1, h2, h3, h4, strong, p, span) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(input, textarea, select) {
+  border-color: #41413d !important;
+  background: #111110 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .jobs-filter,
+  .talent-category-row button,
+  .disputes-filter-bar button,
+  .job-listing-pill,
+  .profile-specialty-chip,
+  .profile-edit-skill-chip,
+  .talent-tag-list span,
+  .content-report-status,
+  .site-theme-toggle,
+  .site-language-toggle button,
+  .cookie-notice button
+) {
+  border-color: #41413d !important;
+  background: #242422 !important;
+  color: #d0d0ca !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.messages-row, .notification-item, .dispute-list-card),
+html[data-template="classic"][data-theme="dark"] #root .messages-row.is-unread,
+html[data-template="classic"][data-theme="dark"] #root :is(.chat-collapsible-panel, .agreement-workspace, .chat-dispute-card) {
+  border-color: #363633 !important;
+  background: #1c1c1b !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app :is(.floating-card, .category-card, .split-card.light, .final-cta) {
+  border-color: #3a3a37 !important;
+  background: #191918 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app :is(.floating-card, .category-card, .split-card.light, .final-cta) :is(*) {
+  color: #f2f2ee !important;
+}
+
+@media print {
+  html[data-template="classic"] body::after {
+    display: none !important;
+  }
+}
+
