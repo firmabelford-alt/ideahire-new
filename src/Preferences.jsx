@@ -38,7 +38,7 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Obecna szata IdeaHire z granatowymi akcentami, miękkimi przejściami i animacjami.": "The current IdeaHire style with navy accents, soft transitions and animations.",
   "Klasyczny": "Classic",
   "Czerń i biel": "Black and white",
-  "Dawna, spokojna szata czarno-biała nałożona na aktualny interfejs i wszystkie jego funkcje.": "The former calm black-and-white style applied to the current interface and all its features.",
+  "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.": "The complete former IdeaHire look: only black, white and neutral greys, with no blue accents.",
   "Wybrany szablon": "Selected template",
   "Użyj tego szablonu": "Use this template",
   "Zmiana jest zapisywana na tym urządzeniu i działa od razu na całej stronie.": "The change is saved on this device and applies immediately across the site.",
