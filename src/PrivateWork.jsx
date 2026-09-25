@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "./supabase";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
@@ -365,7 +366,7 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
 
   const source = signedUrls[item.storage_path];
 
-  return (
+  return createPortal((
     <div
       className="private-work-lightbox"
       role="dialog"
@@ -429,7 +430,7 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
         <button type="button" className="private-work-lightbox-arrow is-right" onClick={() => onSelect(next.id)} aria-label="Następne zdjęcie">›</button>
       )}
     </div>
-  );
+  ), document.body);
 }
 
 export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, onReport }) {
