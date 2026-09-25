@@ -11942,6 +11942,1661 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
+   IDEA HIRE â CHAT ATTACHMENTS + IMAGE VIEWER â 2026-09-25
+========================================================= */
+
+#root .private-work-image-set,
+#root .private-work-image-grid,
+#root .private-work-image-thumb {
+  box-sizing: border-box;
+}
+
+#root .private-work-image-set {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#root .private-work-image-set-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: inherit;
+  font-size: 11px;
+}
+
+#root .private-work-image-set-heading strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#root .private-work-image-set-heading span {
+  flex: 0 0 auto;
+  color: #77808d;
+}
+
+#root .private-work-image-grid {
+  width: min(440px, 70vw);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 15px;
+  background: transparent;
+}
+
+#root .private-work-image-set.is-single .private-work-image-grid {
+  width: min(360px, 70vw);
+  display: block;
+  overflow: visible;
+  border-radius: 0;
+}
+
+#root .private-work-image-thumb {
+  position: relative;
+  width: 100%;
+  height: 148px;
+  display: block;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #e9edf2;
+  cursor: zoom-in;
+}
+
+#root .private-work-image-set.is-single .private-work-image-thumb {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  min-height: 0;
+  display: inline-block;
+  overflow: hidden;
+  border-radius: 15px;
+  background: transparent;
+  vertical-align: top;
+}
+
+#root .private-work-image-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+#root .private-work-image-set.is-single .private-work-image-thumb img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 390px;
+  object-fit: contain;
+}
+
+#root .private-work-image-thumb:hover img {
+  transform: scale(1.018);
+}
+
+#root .private-work-image-thumb > span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 13, 25, 0.66);
+  color: #fff;
+  font-size: 23px;
+  font-weight: 800;
+  backdrop-filter: blur(2px);
+}
+
+#root .private-work-image-grid.count-1,
+#root .private-work-image-grid.count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#root .private-work-image-grid.count-1 {
+  grid-template-columns: 1fr;
+}
+
+#root .private-work-image-grid.count-3 .private-work-image-thumb:first-child {
+  grid-row: span 2;
+  height: 299px;
+}
+
+#root .private-work-file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+#root .private-work-file-row > a {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 11px;
+  border: 1px solid #dfe4eb;
+  border-radius: 13px;
+  background: #f8f9fb;
+  color: #13233a;
+  text-decoration: none;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+#root .private-work-file-row > a:hover {
+  border-color: #aeb9c8;
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+#root .private-work-file-badge {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #0b1d34;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+#root .private-work-file-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+#root .private-work-file-copy b,
+#root .private-work-file-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#root .private-work-file-copy b {
+  color: inherit;
+  font-size: 12px;
+}
+
+#root .private-work-file-copy small {
+  color: #77808d;
+  font-size: 9px;
+}
+
+#root .private-work-file-action {
+  color: #536071;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+#root .private-work-lightbox {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  box-sizing: border-box;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: rgba(3, 7, 13, 0.95);
+  color: #fff;
+  backdrop-filter: blur(16px) saturate(115%);
+}
+
+#root .private-work-viewer-toolbar {
+  width: min(1240px, 100%);
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 auto;
+}
+
+#root .private-work-viewer-title {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+#root .private-work-viewer-title strong,
+#root .private-work-viewer-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#root .private-work-viewer-title strong {
+  font-size: 12px;
+}
+
+#root .private-work-viewer-title span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 9px;
+}
+
+#root .private-work-viewer-controls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+#root .private-work-viewer-controls button,
+#root .private-work-viewer-controls a,
+#root .private-work-lightbox-close {
+  position: static !important;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#root .private-work-viewer-controls button:hover,
+#root .private-work-viewer-controls a:hover {
+  background: rgba(255, 255, 255, 0.11);
+}
+
+#root .private-work-viewer-controls button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+#root .private-work-viewer-controls .private-work-viewer-zoom-value {
+  width: 58px;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+#root .private-work-viewer-controls .private-work-lightbox-close {
+  margin-left: 2px;
+  background: rgba(255, 255, 255, 0.11);
+  font-size: 21px;
+}
+
+#root .private-work-lightbox figure {
+  width: min(1240px, 100%);
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#root .private-work-viewer-stage {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: zoom-in;
+  touch-action: none;
+  user-select: none;
+}
+
+#root .private-work-lightbox figure.is-zoomed .private-work-viewer-stage {
+  cursor: grab;
+}
+
+#root .private-work-lightbox figure.is-zoomed .private-work-viewer-stage:active {
+  cursor: grabbing;
+}
+
+#root .private-work-viewer-stage img {
+  width: auto !important;
+  max-width: min(100%, 1100px) !important;
+  height: auto !important;
+  max-height: min(76dvh, 800px) !important;
+  display: block;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+  transform-origin: center;
+  transition: transform 90ms ease-out;
+}
+
+#root .private-work-lightbox figcaption {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 9px;
+  text-align: center;
+}
+
+#root .private-work-lightbox figcaption button {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+#root .private-work-lightbox-arrow {
+  position: fixed;
+  z-index: 2;
+  top: 50%;
+  width: 44px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 30px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  backdrop-filter: blur(10px);
+}
+
+#root .private-work-lightbox-arrow.is-left {
+  left: 16px;
+}
+
+#root .private-work-lightbox-arrow.is-right {
+  right: 16px;
+}
+
+html[data-theme="dark"] #root .private-work-file-row > a {
+  border-color: #303b49;
+  background: #151b23;
+  color: #f3f6f9;
+}
+
+html[data-theme="dark"] #root .private-work-file-copy small,
+html[data-theme="dark"] #root .private-work-file-action {
+  color: #a6afbb;
+}
+
+@media (max-width: 700px) {
+  #root .private-work-image-grid,
+  #root .private-work-image-set.is-single .private-work-image-grid {
+    width: min(76vw, 340px);
+  }
+
+  #root .private-work-image-thumb {
+    height: 122px;
+  }
+
+  #root .private-work-image-grid.count-3 .private-work-image-thumb:first-child {
+    height: 247px;
+  }
+
+  #root .private-work-image-set.is-single .private-work-image-thumb {
+    height: auto;
+  }
+
+  #root .private-work-image-set.is-single .private-work-image-thumb img {
+    max-height: 54dvh;
+  }
+
+  #root .private-work-file-row > a {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  #root .private-work-file-action {
+    display: none;
+  }
+
+  #root .private-work-lightbox {
+    gap: 6px;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  #root .private-work-viewer-toolbar {
+    min-height: 42px;
+    gap: 8px;
+  }
+
+  #root .private-work-viewer-title {
+    max-width: 31vw;
+  }
+
+  #root .private-work-viewer-controls {
+    gap: 1px;
+    padding: 3px;
+  }
+
+  #root .private-work-viewer-controls button,
+  #root .private-work-viewer-controls a {
+    width: 32px;
+    height: 32px;
+  }
+
+  #root .private-work-viewer-controls .private-work-viewer-zoom-value {
+    width: 48px;
+  }
+
+  #root .private-work-viewer-stage img {
+    max-width: 100% !important;
+    max-height: 78dvh !important;
+  }
+
+  #root .private-work-lightbox figcaption > span {
+    display: none;
+  }
+
+  #root .private-work-lightbox-arrow {
+    top: auto;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    font-size: 25px;
+    transform: none;
+  }
+}
+
+/* =========================================================
+   IDEA HIRE â SWITCHABLE INTERFACE TEMPLATES â 2026-09-25
+   The template changes presentation only. Current structure and logic stay intact.
+========================================================= */
+
+@media (min-width: 721px) {
+  #root .account-section-nav {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+#root .account-template-card {
+  padding: clamp(22px, 3vw, 38px);
+  overflow: hidden;
+  border: 1px solid #dfe4eb;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 94% 0%, rgba(73, 126, 204, 0.11), transparent 31%),
+    #fff;
+  box-shadow: 0 18px 54px rgba(9, 25, 47, 0.07);
+}
+
+#root .account-template-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 430px);
+  align-items: end;
+  gap: 28px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #e4e8ee;
+}
+
+#root .account-template-heading h2,
+#root .account-template-heading p {
+  margin: 0;
+}
+
+#root .account-template-heading h2 {
+  margin-top: 6px;
+  color: #0d1b2f;
+  font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: -1px;
+}
+
+#root .account-template-heading p {
+  color: #687383;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+#root .account-template-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+#root .account-template-option {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 15px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid #dfe4eb;
+  border-radius: 18px;
+  background: #f9fafc;
+  color: #152237;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+#root .account-template-option:hover {
+  border-color: #a8b5c7;
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(12, 31, 57, 0.08);
+}
+
+#root .account-template-option.is-selected {
+  border-color: #244f8c;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(36, 79, 140, 0.1), 0 18px 38px rgba(12, 31, 57, 0.09);
+}
+
+#root .account-template-preview {
+  position: relative;
+  min-height: 205px;
+  display: grid;
+  grid-template-rows: 27px 1fr auto;
+  gap: 8px;
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 82% 28%, rgba(72, 128, 219, 0.5), transparent 24%),
+    linear-gradient(145deg, #091525, #183a65);
+}
+
+#root .account-template-preview-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 7px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+#root .account-template-preview-nav i:first-child {
+  width: 36px;
+  margin-right: auto;
+  background: #0c1d33;
+}
+
+#root .account-template-preview-nav i {
+  width: 22px;
+  height: 4px;
+  display: block;
+  border-radius: 10px;
+  background: #9ca9ba;
+}
+
+#root .account-template-preview-hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 10px 10px 22px 10px;
+  background: rgba(255, 255, 255, 0.97);
+}
+
+#root .account-template-preview-hero > span {
+  display: grid;
+  gap: 7px;
+}
+
+#root .account-template-preview-hero i {
+  width: 84%;
+  height: 7px;
+  display: block;
+  border-radius: 10px;
+  background: #0c1d33;
+}
+
+#root .account-template-preview-hero i:nth-child(2) {
+  width: 62%;
+}
+
+#root .account-template-preview-hero i:nth-child(3) {
+  width: 42%;
+  height: 17px;
+  margin-top: 4px;
+  background: #244f8c;
+}
+
+#root .account-template-preview-hero b {
+  width: 62px;
+  height: 62px;
+  justify-self: center;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #183a65, #587eb6);
+  transform: rotate(7deg);
+}
+
+#root .account-template-preview-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+#root .account-template-preview-cards i {
+  height: 28px;
+  display: block;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#root .account-template-option.is-classic .account-template-preview {
+  border-color: #d8d8d2;
+  background: #efefeb;
+}
+
+#root .account-template-option.is-classic .account-template-preview-nav {
+  border: 1px solid #deded8;
+  background: #fff;
+}
+
+#root .account-template-option.is-classic .account-template-preview-nav i:first-child,
+#root .account-template-option.is-classic .account-template-preview-hero i {
+  background: #161616;
+}
+
+#root .account-template-option.is-classic .account-template-preview-nav i {
+  background: #aaa9a3;
+}
+
+#root .account-template-option.is-classic .account-template-preview-hero {
+  border: 1px solid #deded8;
+  background: #fff;
+}
+
+#root .account-template-option.is-classic .account-template-preview-hero i:nth-child(3),
+#root .account-template-option.is-classic .account-template-preview-hero b {
+  background: #161616;
+}
+
+#root .account-template-option.is-classic .account-template-preview-hero b {
+  border-radius: 10px;
+  transform: none;
+}
+
+#root .account-template-option.is-classic .account-template-preview-cards i {
+  border-color: #d5d5cf;
+  background: #fff;
+}
+
+#root .account-template-option-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 0 5px;
+}
+
+#root .account-template-option-copy small {
+  color: #6c7888;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+#root .account-template-option-copy strong {
+  color: inherit;
+  font-size: 18px;
+  letter-spacing: -0.4px;
+}
+
+#root .account-template-option-copy > span {
+  color: #697482;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+#root .account-template-option-action {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #e9edf3;
+  color: #455267;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+#root .account-template-option-action i {
+  width: 10px;
+  height: 10px;
+  display: block;
+  box-sizing: border-box;
+  border: 2px solid #8290a2;
+  border-radius: 50%;
+}
+
+#root .account-template-option.is-selected .account-template-option-action {
+  background: #0b1d34;
+  color: #fff;
+}
+
+#root .account-template-option.is-selected .account-template-option-action i {
+  border-color: #fff;
+  background: #fff;
+  box-shadow: inset 0 0 0 2px #0b1d34;
+}
+
+#root .account-template-note {
+  margin: 16px 3px 0;
+  color: #7a8491;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] #root .account-template-card {
+  border-color: #303b49;
+  background: radial-gradient(circle at 94% 0%, rgba(73, 126, 204, 0.16), transparent 31%), #151a20;
+}
+
+html[data-theme="dark"] #root .account-template-heading {
+  border-color: #303b49;
+}
+
+html[data-theme="dark"] #root .account-template-heading h2 {
+  color: #f2f6fb;
+}
+
+html[data-theme="dark"] #root .account-template-heading p,
+html[data-theme="dark"] #root .account-template-option-copy > span,
+html[data-theme="dark"] #root .account-template-note {
+  color: #a9b2bc;
+}
+
+html[data-theme="dark"] #root .account-template-option {
+  border-color: #303b49;
+  background: #11171f;
+  color: #f2f6fb;
+}
+
+html[data-theme="dark"] #root .account-template-option.is-selected {
+  border-color: #5378a8;
+  background: #171f29;
+}
+
+html[data-theme="dark"] #root .account-template-option-action {
+  background: #252e39;
+  color: #c7d0da;
+}
+
+/* ---------- CLASSIC BLACK & WHITE SKIN ---------- */
+
+html[data-template="classic"] {
+  --ih-page: #f4f4f1;
+  --ih-canvas: #f4f4f1;
+  --ih-surface: #ffffff;
+  --ih-surface-soft: #f0f0ec;
+  --ih-line: #deded8;
+  --ih-line-strong: #c9c9c2;
+  --ih-ink: #171717;
+  --ih-ink-soft: #393936;
+  --ih-copy: #666660;
+  --ih-muted: #777770;
+  --ih-navy-950: #080808;
+  --ih-navy-900: #121212;
+  --ih-navy-850: #171717;
+  --ih-navy-800: #202020;
+  --ih-navy-700: #31312f;
+  --ih-blue-600: #171717;
+  --ih-blue-100: #ecece8;
+  --ih-blue-soft: #efefeb;
+  --ih-violet: #171717;
+  --ih-violet-deep: #0b0b0b;
+  --ih-violet-soft: #efefeb;
+  --ih-mint: #666660;
+  --ih-mint-soft: #efefeb;
+  --ih-sun: #555550;
+  --ih-sun-soft: #f1f1ed;
+  --ih-rose-soft: #f0f0ec;
+  --ih-focus: rgba(17, 17, 17, 0.2);
+  --ih-shadow-sm: 0 8px 24px rgba(20, 20, 18, 0.045);
+  --ih-shadow-md: 0 16px 42px rgba(20, 20, 18, 0.065);
+  --ih-shadow-lg: 0 28px 74px rgba(20, 20, 18, 0.08);
+  --ih-v4-surface: #fff;
+  --ih-v4-surface-muted: #f3f3ef;
+  --ih-v4-line: #deded8;
+  --ih-v4-line-strong: #c9c9c2;
+  --ih-v4-ink: #171717;
+  --ih-v4-copy: #666660;
+  --ih-v4-violet: #171717;
+  --ih-v4-violet-soft: #efefeb;
+  --ih-v4-mint: #777770;
+  --ih-v4-shadow: 0 16px 44px rgba(20, 20, 18, 0.06);
+  color: #171717;
+  background: #f4f4f1;
+  color-scheme: light;
+}
+
+html[data-template="classic"] body,
+html[data-template="classic"] #root,
+html[data-template="classic"] #root > *,
+html[data-template="classic"] #root .app,
+html[data-template="classic"] #root .page,
+html[data-template="classic"] #root .account-page,
+html[data-template="classic"] #root .admin-page,
+html[data-template="classic"] #root .disputes-page,
+html[data-template="classic"] #root .age-access-page {
+  background-color: #f4f4f1;
+  color: #171717;
+}
+
+html[data-template="classic"] #root :is(.navbar.home-navbar, .navbar.account-navbar, .navbar.admin-navbar, .navbar.restricted-navbar, .navbar.restricted-account-navbar) {
+  border-color: rgba(210, 210, 203, 0.95) !important;
+  background: rgba(255, 255, 253, 0.96) !important;
+  box-shadow: 0 10px 34px rgba(18, 18, 16, 0.055) !important;
+  backdrop-filter: blur(18px) saturate(110%);
+}
+
+html[data-template="classic"] #root :is(.navbar, .footer) .logo,
+html[data-template="classic"] #root :is(.account-navbar-brand, .admin-navbar-brand) {
+  color: #111 !important;
+}
+
+html[data-template="classic"] #root .logo span {
+  color: #777770 !important;
+}
+
+html[data-template="classic"] #root :is(.home-nav-links a, .account-primary-nav a, .admin-nav-links a, .restricted-navbar-links a) {
+  color: #5f5f59 !important;
+}
+
+html[data-template="classic"] #root :is(.home-nav-links a, .account-primary-nav a, .admin-nav-links a, .restricted-navbar-links a):hover,
+html[data-template="classic"] #root :is(.account-primary-nav a.active, .admin-nav-links a.active) {
+  background: #ededE8 !important;
+  color: #111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-dark,
+  .discovery-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button,
+  .chat-send,
+  .notification-chat-button,
+  .privacy-primary-button
+) {
+  border-color: #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-dark,
+  .discovery-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button,
+  .chat-send,
+  .notification-chat-button,
+  .privacy-primary-button
+):hover {
+  border-color: #333 !important;
+  background: #333 !important;
+  transform: translateY(-1px);
+}
+
+html[data-template="classic"] #root :is(.btn-ghost, .btn-outline, .agreement-secondary-button, .dispute-secondary-button) {
+  border-color: #cecec7 !important;
+  background: #fff !important;
+  color: #20201e !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(.btn-ghost, .btn-outline, .agreement-secondary-button, .dispute-secondary-button):hover {
+  border-color: #999991 !important;
+  background: #efefeb !important;
+}
+
+html[data-template="classic"] #root :is(a, button, input, textarea, select):focus-visible {
+  outline-color: rgba(17, 17, 17, 0.34) !important;
+}
+
+html[data-template="classic"] #root .app > main > .hero {
+  border: 1px solid #d9d9d2 !important;
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.98), rgba(239, 239, 234, 0.98)) !important;
+  color: #171717 !important;
+  box-shadow: 0 24px 70px rgba(20, 20, 18, 0.075) !important;
+}
+
+html[data-template="classic"] #root .app .hero::before,
+html[data-template="classic"] #root .app .hero::after {
+  opacity: 0.3 !important;
+  filter: grayscale(1);
+}
+
+html[data-template="classic"] #root .app .hero :is(h1, h1 > span, .hero-text, .eyebrow) {
+  color: #171717 !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+}
+
+html[data-template="classic"] #root .app .hero h1 > span {
+  color: #73736d !important;
+}
+
+html[data-template="classic"] #root .app .eyebrow-dot,
+html[data-template="classic"] #root .app .live-dot {
+  background: #171717 !important;
+  color: #171717 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app .hero-stats {
+  border-color: #d6d6cf !important;
+}
+
+html[data-template="classic"] #root .app .hero-stats :is(strong, span) {
+  color: #343431 !important;
+}
+
+html[data-template="classic"] #root .app .visual-glow {
+  background: radial-gradient(circle, rgba(95, 95, 90, 0.24), transparent 68%) !important;
+  filter: blur(8px) grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .app .floating-card {
+  border-color: #d8d8d1 !important;
+  background: rgba(255, 255, 253, 0.97) !important;
+  color: #171717 !important;
+  box-shadow: 0 22px 55px rgba(18, 18, 16, 0.1) !important;
+}
+
+html[data-template="classic"] #root .app .floating-card :is(h3, strong, p, span) {
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root .app .floating-card .card-meta span,
+html[data-template="classic"] #root .app :is(.mini-icon, .check-icon) {
+  border-color: #d3d3cc !important;
+  background: #ededE8 !important;
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .app > main > :is(.categories.section, .split-section.section) {
+  background: transparent !important;
+}
+
+html[data-template="classic"] #root .section-label,
+html[data-template="classic"] #root .app .category-number {
+  color: #777770 !important;
+}
+
+html[data-template="classic"] #root .app .section-heading :is(h2, p) {
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .app .category-card {
+  border-color: #dcdcd5 !important;
+  background: #fff !important;
+  color: #171717 !important;
+  box-shadow: 0 12px 34px rgba(20, 20, 18, 0.045) !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover {
+  border-color: #171717 !important;
+  background: #171717 !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover :is(.category-name, .category-number, .category-arrow) {
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section {
+  border: 1px solid #282826 !important;
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app .how :is(.section-label, h2, .section-heading > p) {
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .app .how .step {
+  border-color: #333330 !important;
+  background: #1b1b1a !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .app .how .step :is(span, h3, p) {
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root .app .split-card {
+  border-color: #242422 !important;
+  background: #111 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app .split-card.light {
+  border-color: #d9d9d2 !important;
+  background: #fff !important;
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .app .split-card :is(h2, p, .section-label) {
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta {
+  border: 1px solid #d8d8d1 !important;
+  background: #fff !important;
+  color: #171717 !important;
+  box-shadow: 0 20px 60px rgba(20, 20, 18, 0.06) !important;
+}
+
+html[data-template="classic"] #root .app .final-cta :is(h2, p) {
+  color: inherit !important;
+}
+
+html[data-template="classic"] #root .app > .footer {
+  border-color: #d7d7d0 !important;
+  color: #555550 !important;
+}
+
+html[data-template="classic"] #root .app > .footer a {
+  color: #333330 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .messages-heading
+) :is(h1, h2, p) {
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card,
+  .dispute-list-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .age-access-card,
+  .legal-document-shell,
+  .cookie-policy-shell
+) {
+  border-color: #deded8 !important;
+  background-color: #fff !important;
+  background-image: none !important;
+  color: #171717 !important;
+  box-shadow: 0 14px 42px rgba(20, 20, 18, 0.055) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-list-card,
+  .age-access-card
+) :is(h1, h2, h3, h4, strong) {
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-list-card,
+  .age-access-card
+) :is(p, small) {
+  color: #696963 !important;
+}
+
+html[data-template="classic"] #root :is(input, textarea, select) {
+  border-color: #d5d5cf !important;
+  background-color: #fff !important;
+  color: #171717 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(input, textarea, select):focus {
+  border-color: #171717 !important;
+  box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.07) !important;
+}
+
+html[data-template="classic"] #root :is(.jobs-search-box, .talent-search-box, .jobs-order-panel, .talent-order-row, .jobs-results-header) {
+  border-color: #deded8 !important;
+  background: #fff !important;
+  color: #171717 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(.jobs-filter, .talent-category-row button, .disputes-filter-bar button) {
+  border-color: #d6d6d0 !important;
+  background: #f1f1ed !important;
+  color: #555550 !important;
+}
+
+html[data-template="classic"] #root :is(.jobs-filter, .talent-category-row button, .disputes-filter-bar button).active,
+html[data-template="classic"] #root :is(.jobs-filter, .talent-category-row button, .disputes-filter-bar button).is-active {
+  border-color: #171717 !important;
+  background: #171717 !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root :is(.job-listing-pill, .profile-specialty-chip, .profile-edit-skill-chip, .talent-tag-list span, .content-report-status) {
+  border-color: #d5d5cf !important;
+  background: #efefeb !important;
+  color: #3f3f3b !important;
+}
+
+html[data-template="classic"] #root .job-listing-pill svg {
+  color: #333330 !important;
+  stroke: currentColor !important;
+}
+
+html[data-template="classic"] #root .account-section-nav {
+  border-color: #d8d8d1 !important;
+  background: rgba(255, 255, 253, 0.95) !important;
+  box-shadow: 0 10px 32px rgba(20, 20, 18, 0.05) !important;
+}
+
+html[data-template="classic"] #root .account-section-nav button {
+  color: #5d5d57 !important;
+}
+
+html[data-template="classic"] #root .account-section-nav button > span {
+  background: #ededE8 !important;
+  color: #777770 !important;
+}
+
+html[data-template="classic"] #root .account-section-nav button:hover {
+  border-color: #d0d0c9 !important;
+  background: #efefeb !important;
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .account-section-nav button.is-active {
+  border-color: #171717 !important;
+  background: #171717 !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .account-section-nav button.is-active > span {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .account-tab-intro {
+  border-color: #deded8 !important;
+  background: #fff !important;
+  box-shadow: 0 10px 32px rgba(20, 20, 18, 0.045) !important;
+}
+
+html[data-template="classic"] #root .account-tab-intro :is(h2, p) {
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace > .profile-preview {
+  border-color: #282826 !important;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(145deg, #101010, #2c2c2a) !important;
+  background-size: 28px 28px, auto !important;
+  box-shadow: 0 18px 48px rgba(20, 20, 18, 0.12) !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace > .profile-preview :is(h2, p, span, strong) {
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root :is(.account-form-section, .profile-portfolio-manager, .discovery-settings-card, .job-republication-panel) {
+  border-color: #deded8 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .project-form .job-option-card,
+html[data-template="classic"] #root .discovery-category-grid button,
+html[data-template="classic"] #root .discovery-usage-grid button,
+html[data-template="classic"] #root .discovery-order-grid button {
+  border-color: #d8d8d2 !important;
+  background: #f7f7f4 !important;
+  color: #333330 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .project-form .job-option-card.is-selected,
+html[data-template="classic"] #root .discovery-category-grid button.is-selected,
+html[data-template="classic"] #root .discovery-usage-grid button.is-selected,
+html[data-template="classic"] #root .discovery-order-grid button.is-selected {
+  border-color: #171717 !important;
+  background: #ededE8 !important;
+  color: #171717 !important;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.07) !important;
+}
+
+html[data-template="classic"] #root .project-form .job-option-card.is-selected::after {
+  border-color: #171717 !important;
+  background: #171717 !important;
+}
+
+html[data-template="classic"] #root :is(.messages-row, .notification-item, .dispute-list-card) {
+  border-color: #e0e0da !important;
+  background: #fff !important;
+}
+
+html[data-template="classic"] #root :is(.messages-row, .notification-item, .dispute-list-card):hover {
+  border-color: #bfbfb8 !important;
+  background: #f5f5f1 !important;
+}
+
+html[data-template="classic"] #root .chat-message.is-mine .chat-message-bubble,
+html[data-template="classic"] #root .chat-message.is-mine > div {
+  border-color: #171717 !important;
+  background: #171717 !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .chat-message:not(.is-mine) .chat-message-bubble,
+html[data-template="classic"] #root .chat-message:not(.is-mine) > div {
+  border-color: #deded8 !important;
+  background: #f0f0ec !important;
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root :is(.chat-collapsible-panel, .agreement-workspace, .chat-dispute-card) {
+  border-color: #d9d9d2 !important;
+  background: #f6f6f3 !important;
+  color: #171717 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .account-template-card {
+  border-color: #deded8 !important;
+  background: #fff !important;
+  box-shadow: 0 16px 44px rgba(20, 20, 18, 0.06) !important;
+}
+
+html[data-template="classic"] #root .account-template-heading {
+  border-color: #deded8 !important;
+}
+
+html[data-template="classic"] #root .account-template-heading :is(h2, p) {
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .account-template-option {
+  border-color: #d8d8d1 !important;
+  background: #f5f5f1 !important;
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .account-template-option.is-selected {
+  border-color: #171717 !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.07) !important;
+}
+
+html[data-template="classic"] #root .account-template-option-copy > span,
+html[data-template="classic"] #root .account-template-note {
+  color: #696963 !important;
+}
+
+html[data-template="classic"] #root .account-template-option-action {
+  background: #e9e9e4 !important;
+  color: #444440 !important;
+}
+
+html[data-template="classic"] #root .account-template-option.is-selected .account-template-option-action {
+  background: #171717 !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root :is(.site-preferences-panel, .cookie-notice) {
+  border-color: #d0d0c9 !important;
+  background: rgba(255, 255, 253, 0.97) !important;
+  color: #171717 !important;
+  box-shadow: 0 16px 48px rgba(20, 20, 18, 0.12) !important;
+}
+
+html[data-template="classic"] #root :is(.site-theme-toggle, .site-language-toggle button, .cookie-notice button) {
+  border-color: #d0d0c9 !important;
+  background: #efefeb !important;
+  color: #171717 !important;
+}
+
+html[data-template="classic"] #root .site-language-toggle button.is-active,
+html[data-template="classic"] #root .cookie-notice-actions > button {
+  border-color: #171717 !important;
+  background: #171717 !important;
+  color: #fff !important;
+}
+
+html[data-template="classic"] #root .private-work-file-badge {
+  background: #171717 !important;
+}
+
+/* ---------- CLASSIC DARK VARIANT ---------- */
+
+html[data-template="classic"][data-theme="dark"] {
+  --ih-page: #0f0f0e;
+  --ih-canvas: #0f0f0e;
+  --ih-surface: #191918;
+  --ih-surface-soft: #222220;
+  --ih-line: #333330;
+  --ih-line-strong: #474743;
+  --ih-ink: #f2f2ee;
+  --ih-ink-soft: #d2d2cc;
+  --ih-copy: #ababA4;
+  --ih-muted: #969690;
+  --ih-v4-surface: #191918;
+  --ih-v4-surface-muted: #121211;
+  --ih-v4-line: #343431;
+  --ih-v4-line-strong: #474743;
+  --ih-v4-ink: #f2f2ee;
+  --ih-v4-copy: #ababA4;
+  --ih-v4-violet-soft: #252523;
+  color: #f2f2ee;
+  background: #0f0f0e;
+  color-scheme: dark;
+}
+
+html[data-template="classic"][data-theme="dark"] body,
+html[data-template="classic"][data-theme="dark"] #root,
+html[data-template="classic"][data-theme="dark"] #root > *,
+html[data-template="classic"][data-theme="dark"] #root :is(.app, .page, .account-page, .admin-page, .disputes-page, .age-access-page) {
+  background-color: #0f0f0e !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.navbar.home-navbar, .navbar.account-navbar, .navbar.admin-navbar, .navbar.restricted-navbar, .navbar.restricted-account-navbar) {
+  border-color: #343431 !important;
+  background: rgba(20, 20, 19, 0.96) !important;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.22) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.navbar, .footer) .logo,
+html[data-template="classic"][data-theme="dark"] #root :is(.account-navbar-brand, .admin-navbar-brand),
+html[data-template="classic"][data-theme="dark"] #root :is(.home-nav-links a, .account-primary-nav a, .admin-nav-links a, .restricted-navbar-links a) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.home-nav-links a, .account-primary-nav a, .admin-nav-links a, .restricted-navbar-links a):hover {
+  background: #2a2a28 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.btn-ghost, .btn-outline, .agreement-secondary-button, .dispute-secondary-button) {
+  border-color: #444440 !important;
+  background: #1b1b1a !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .hero {
+  border-color: #343431 !important;
+  background: linear-gradient(115deg, #181817, #292927) !important;
+  color: #f2f2ee !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .hero :is(h1, .hero-text, .eyebrow),
+html[data-template="classic"][data-theme="dark"] #root .app .hero h1 > span,
+html[data-template="classic"][data-theme="dark"] #root .app .hero-stats :is(strong, span) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .hero h1 > span {
+  color: #aaaAa3 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .floating-card,
+html[data-template="classic"][data-theme="dark"] #root .app .category-card,
+html[data-template="classic"][data-theme="dark"] #root .app .split-card.light,
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta {
+  border-color: #3a3a37 !important;
+  background: #1b1b1a !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app :is(.floating-card, .category-card, .split-card.light, .final-cta) :is(h2, h3, strong, p, span) {
+  color: inherit !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .messages-heading
+) :is(h1, h2, p) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-state-card,
+  .dispute-list-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .age-access-card,
+  .legal-document-shell,
+  .cookie-policy-shell,
+  .account-form-section,
+  .profile-portfolio-manager,
+  .discovery-settings-card,
+  .job-republication-panel
+) {
+  border-color: #343431 !important;
+  background-color: #191918 !important;
+  background-image: none !important;
+  color: #f2f2ee !important;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-list-card,
+  .age-access-card
+) :is(h1, h2, h3, h4, strong) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .privacy-entry-card,
+  .dispute-panel,
+  .dispute-list-card,
+  .age-access-card
+) :is(p, small) {
+  color: #aaaAa3 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(input, textarea, select) {
+  border-color: #41413d !important;
+  background-color: #111110 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.jobs-search-box, .talent-search-box, .jobs-order-panel, .talent-order-row, .jobs-results-header) {
+  border-color: #343431 !important;
+  background: #191918 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.jobs-filter, .talent-category-row button, .disputes-filter-bar button, .job-listing-pill, .profile-specialty-chip, .profile-edit-skill-chip, .talent-tag-list span) {
+  border-color: #41413d !important;
+  background: #242422 !important;
+  color: #d0d0ca !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-section-nav,
+html[data-template="classic"][data-theme="dark"] #root .account-tab-intro {
+  border-color: #343431 !important;
+  background: #191918 !important;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-tab-intro :is(h2, p) {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.messages-row, .notification-item, .dispute-list-card),
+html[data-template="classic"][data-theme="dark"] #root :is(.chat-collapsible-panel, .agreement-workspace, .chat-dispute-card) {
+  border-color: #363633 !important;
+  background: #1c1c1b !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .chat-message:not(.is-mine) .chat-message-bubble,
+html[data-template="classic"][data-theme="dark"] #root .chat-message:not(.is-mine) > div {
+  border-color: #3b3b38 !important;
+  background: #282826 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-template-card,
+html[data-template="classic"][data-theme="dark"] #root .account-template-option {
+  border-color: #3a3a37 !important;
+  background: #191918 !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-template-heading {
+  border-color: #343431 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-template-heading :is(h2, p),
+html[data-template="classic"][data-theme="dark"] #root .account-template-option-copy > span,
+html[data-template="classic"][data-theme="dark"] #root .account-template-note {
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.site-preferences-panel, .cookie-notice) {
+  border-color: #41413d !important;
+  background: rgba(25, 25, 24, 0.98) !important;
+  color: #f2f2ee !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.site-theme-toggle, .site-language-toggle button) {
+  border-color: #444440 !important;
+  background: #272725 !important;
+  color: #f2f2ee !important;
+}
+
+@media (max-width: 720px) {
+  #root .account-template-card {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+
+  #root .account-template-heading {
+    display: block;
+    padding-bottom: 17px;
+  }
+
+  #root .account-template-heading h2 {
+    font-size: 24px;
+  }
+
+  #root .account-template-heading p {
+    margin-top: 8px;
+  }
+
+  #root .account-template-options {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  #root .account-template-preview {
+    min-height: 175px;
+  }
+}
+
+/* =========================================================
    V9 â RELIABLE NOTIFICATION SIGNALS
 ========================================================= */
 
