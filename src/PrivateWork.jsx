@@ -3,15 +3,23 @@ import { createPortal } from "react-dom";
 import { supabase } from "./supabase";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
-const MAX_ITEMS = 12;
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
-const ALLOWED_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-  "text/plain",
+const MAX_ITEMS = 24;
+const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_BATCH_BYTES = 150 * 1024 * 1024;
+const ALLOWED_EXTENSIONS = new Set([
+  "jpg", "jpeg", "png", "webp", "psd", "pdf", "txt", "md", "csv",
+  "json", "xml", "html", "htm", "css", "js", "jsx", "ts", "tsx",
+  "py", "java", "php", "sql", "zip", "rar", "7z", "doc", "docx",
+  "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "mp4", "webm",
+  "mov", "mp3", "wav", "ogg",
 ]);
+const FILE_ACCEPT = [...ALLOWED_EXTENSIONS].map((extension) => `.${extension}`).join(",");
+const ACCEPTANCE_TERMS_VERSION = "IH-WORK-ACCEPTANCE-2026-09-26-V1";
+
+function fileExtension(name) {
+  const value = String(name || "");
+  return value.includes(".") ? value.split(".").pop().toLowerCase() : "";
+}
 
 const REPORT_REASONS = [
   ["copyright", "Naruszenie praw autorskich"],
@@ -440,6 +448,8 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
   const images = visible.filter((item) => item.item_type === "image" && signedUrls[item.storage_path]);
   const files = visible.filter((item) => item.item_type === "file");
   const links = visible.filter((item) => item.item_type === "link");
+  const writtenItems = visible.filter((item) => item.item_type === "text");
+  const accessItems = visible.filter((item) => item.item_type === "access");
   const imageAlbums = useMemo(() => {
     const groups = new Map();
     images.forEach((item) => {
@@ -528,6 +538,42 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
         </section>
       )}
 
+      {writtenItems.length > 0 && (
+        <section className="private-work-material-group private-work-written-group">
+          <div className="private-work-section-title"><strong>Treść przekazanej pracy</strong><span>{writtenItems.length}</span></div>
+          {writtenItems.map((item) => (
+            <article className="private-work-written-item" key={item.id}>
+              <div><b>{item.display_name}</b><small>Tekst zapisany w tej wersji przekazania</small></div>
+              <p>{item.text_content}</p>
+              {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
+            </article>
+          ))}
+        </section>
+      )}
+
+      {accessItems.length > 0 && (
+        <section className="private-work-material-group private-work-access-group">
+          <div className="private-work-section-title"><strong>Dane dostępowe</strong><span>{accessItems.length}</span></div>
+          {accessItems.map((item) => {
+            const metadata = item.metadata || {};
+            return (
+              <article className="private-work-access-item" key={item.id}>
+                <div className="private-work-access-heading">
+                  <span aria-hidden="true">⌁</span>
+                  <div><b>{item.display_name}</b><small>Hasło nie jest przechowywane w czacie IdeaHire</small></div>
+                </div>
+                {metadata.service_url && <a href={metadata.service_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz stronę logowania ↗</a>}
+                {metadata.login_identifier && <p><span>Login lub e-mail</span><code>{metadata.login_identifier}</code></p>}
+                {metadata.instructions && <p><span>Instrukcja</span>{metadata.instructions}</p>}
+                {metadata.expires_at && <small>Link zadeklarowany jako ważny do: {new Date(metadata.expires_at).toLocaleString("pl-PL")}</small>}
+                <a className="private-work-secure-access-button" href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz bezpieczny link do sekretu →</a>
+                {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
+              </article>
+            );
+          })}
+        </section>
+      )}
+
       {hidden.length > 0 && (
         <p className="private-work-hidden">{hidden.length === 1 ? "Jeden materiał został ukryty po analizie zgłoszenia." : `${hidden.length} materiały zostały ukryte po analizie zgłoszenia.`}</p>
       )}
@@ -560,12 +606,17 @@ export function PrivateSharePanel({
   const [links, setLinks] = useState([{ url: "", label: "" }]);
   const [caption, setCaption] = useState("");
   const [albumTitle, setAlbumTitle] = useState("");
+  const [writtenTitle, setWrittenTitle] = useState("");
+  const [writtenText, setWrittenText] = useState("");
+  const [accessEntries, setAccessEntries] = useState([
+    { label: "", serviceUrl: "", login: "", secureUrl: "", expiresAt: "", instructions: "" },
+  ]);
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [safetyConfirmed, setSafetyConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
-  const imageCount = files.filter((file) => file.type.startsWith("image/")).length;
+  const imageCount = files.filter((file) => ["jpg", "jpeg", "png", "webp"].includes(fileExtension(file.name))).length;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -585,12 +636,12 @@ export function PrivateSharePanel({
     const next = Array.from(event.target.files || []);
     const valid = [];
     for (const file of next) {
-      if (!ALLOWED_MIME_TYPES.has(file.type)) {
+      if (!ALLOWED_EXTENSIONS.has(fileExtension(file.name))) {
         setMessage(`Plik „${file.name}” ma niedozwolony format.`);
         continue;
       }
       if (file.size < 1 || file.size > MAX_FILE_BYTES) {
-        setMessage(`Plik „${file.name}” musi mieć maksymalnie 20 MB.`);
+        setMessage(`Plik „${file.name}” musi mieć maksymalnie 50 MB.`);
         continue;
       }
       valid.push(file);
@@ -603,9 +654,11 @@ export function PrivateSharePanel({
     event.preventDefault();
     if (busy || disabled) return;
     const preparedLinks = links.filter((link) => link.url.trim());
-    const total = files.length + preparedLinks.length;
+    const preparedAccess = accessEntries.filter((entry) => entry.secureUrl.trim());
+    const hasWrittenText = writtenText.trim().length > 0;
+    const total = files.length + preparedLinks.length + preparedAccess.length + (hasWrittenText ? 1 : 0);
     if (total < 1 || total > MAX_ITEMS) {
-      setMessage("Dodaj od 1 do 12 plików, zdjęć albo linków.");
+      setMessage("Dodaj od 1 do 24 materiałów: plików, linków, tekstów lub danych dostępowych.");
       return;
     }
     if (mode === "delivery" && caption.trim().length < 20) {
@@ -628,9 +681,9 @@ export function PrivateSharePanel({
         (sum, file) => sum + file.size,
         0
       );
-      if (totalFileBytes > 60 * 1024 * 1024) {
+      if (totalFileBytes > MAX_BATCH_BYTES) {
         throw new Error(
-          "Łączny rozmiar jednej paczki plików nie może przekroczyć 60 MB."
+          "Łączny rozmiar jednej paczki plików nie może przekroczyć 150 MB."
         );
       }
 
@@ -667,7 +720,7 @@ export function PrivateSharePanel({
             prepared.token,
             file,
             {
-              contentType: file.type,
+              contentType: prepared.mimeType,
               cacheControl: "3600",
             }
           );
@@ -688,12 +741,23 @@ export function PrivateSharePanel({
         rightsConfirmed: mode === "delivery" ? rightsConfirmed : undefined,
         safetyConfirmed: mode === "delivery" ? safetyConfirmed : undefined,
         albumTitle: imageCount > 1 ? albumTitle.trim() || "Zdjęcia" : undefined,
+        writtenTitle: writtenTitle.trim() || undefined,
+        writtenText: hasWrittenText ? writtenText.trim() : undefined,
         files: uploaded,
         links: preparedLinks.map((link) => ({
           id: crypto.randomUUID(),
           batchId,
           url: normalizeLink(link.url),
           label: link.label.trim() || new URL(normalizeLink(link.url)).hostname,
+          materialKind: link.materialKind || "link",
+        })),
+        accessEntries: preparedAccess.map((entry) => ({
+          label: entry.label.trim() || "Dane dostępowe",
+          serviceUrl: entry.serviceUrl.trim() ? normalizeLink(entry.serviceUrl) : "",
+          login: entry.login.trim(),
+          secureUrl: normalizeLink(entry.secureUrl),
+          expiresAt: entry.expiresAt ? new Date(entry.expiresAt).toISOString() : "",
+          instructions: entry.instructions.trim(),
         })),
       };
 
@@ -705,9 +769,17 @@ export function PrivateSharePanel({
       setLinks([{ url: "", label: "" }]);
       setCaption("");
       setAlbumTitle("");
+      setWrittenTitle("");
+      setWrittenText("");
+      setAccessEntries([{ label: "", serviceUrl: "", login: "", secureUrl: "", expiresAt: "", instructions: "" }]);
       setRightsConfirmed(false);
       setSafetyConfirmed(false);
       setMessage(mode === "delivery" ? "Praca została przekazana do odbioru." : "Materiały zostały bezpiecznie przekazane.");
+      if (mode === "delivery") {
+        window.dispatchEvent(new CustomEvent("ideahire:payment-updated", {
+          detail: { conversationId, status: "work_submitted" },
+        }));
+      }
       await onComplete?.();
       window.setTimeout(() => setOpen(false), 650);
     } catch (submitError) {
@@ -725,7 +797,7 @@ export function PrivateSharePanel({
       <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled}>
         <span aria-hidden="true">＋</span>
         <b>Dodaj</b>
-        <small>zdjęcia, pliki lub linki</small>
+        <small>pliki, tekst, linki lub dostęp</small>
       </button>
       {open && (
         <div className="private-work-share-backdrop" role="presentation" onMouseDown={(event) => {
@@ -759,9 +831,9 @@ export function PrivateSharePanel({
 
           <div className="private-work-picker-row">
             <label className="private-work-file-picker">
-              <input type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf,text/plain" onChange={handleFiles} />
-              <span>Dodaj zdjęcia lub pliki</span>
-              <small>JPG, PNG, WEBP, PDF lub TXT · do 20 MB</small>
+              <input type="file" multiple accept={FILE_ACCEPT} onChange={handleFiles} />
+              <span>Dodaj pliki gotowej pracy</span>
+              <small>Obrazy, dokumenty, kod, ZIP, audio lub wideo · do 50 MB</small>
             </label>
             <button type="button" className="private-work-add-link" onClick={() => setLinks((current) => current.length + files.length < MAX_ITEMS ? [...current, { url: "", label: "" }] : current)}>
               + Dodaj kolejny link
@@ -792,10 +864,43 @@ export function PrivateSharePanel({
               <div key={index}>
                 <input type="url" value={link.url} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item))} placeholder="https://link-do-pracy.pl" />
                 <input type="text" value={link.label} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item))} placeholder="Nazwa linku (opcjonalnie)" maxLength={180} />
+                <select value={link.materialKind || "link"} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, materialKind: event.target.value } : item))} aria-label="Rodzaj linku">
+                  <option value="link">Link do materiału</option>
+                  <option value="preview">Podgląd lub wersja testowa</option>
+                  <option value="repository">Repozytorium kodu</option>
+                </select>
                 {links.length > 1 && <button type="button" onClick={() => setLinks((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Usuń link">×</button>}
               </div>
             ))}
           </div>
+
+          <details className="private-work-extra-section" open={mode === "delivery"}>
+            <summary>Praca pisemna lub tekst bez osobnego pliku</summary>
+            <div className="private-work-extra-body">
+              <input type="text" value={writtenTitle} onChange={(event) => setWrittenTitle(event.target.value)} maxLength={180} placeholder="Tytuł, np. Tekst na stronę główną" />
+              <textarea value={writtenText} onChange={(event) => setWrittenText(event.target.value)} maxLength={20000} rows={7} placeholder="Wklej tutaj gotowy tekst, opis, copywriting albo instrukcję…" />
+              <small>{writtenText.length}/20 000 znaków</small>
+            </div>
+          </details>
+
+          <details className="private-work-extra-section">
+            <summary>Bezpieczne przekazanie dostępu</summary>
+            <div className="private-work-extra-body">
+              <p>Wpisz login, ale hasło umieść w jednorazowym lub wygasającym linku z menedżera haseł. Nie zapisujemy jawnego hasła w czacie.</p>
+              {accessEntries.map((entry, index) => (
+                <div className="private-work-access-editor" key={index}>
+                  <input type="text" value={entry.label} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item))} maxLength={180} placeholder="Nazwa dostępu, np. Panel WordPress" />
+                  <input type="url" value={entry.serviceUrl} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, serviceUrl: event.target.value } : item))} placeholder="https://adres-logowania.pl" />
+                  <input type="text" value={entry.login} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, login: event.target.value } : item))} maxLength={320} placeholder="Login lub e-mail" />
+                  <input type="url" value={entry.secureUrl} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, secureUrl: event.target.value } : item))} placeholder="https://bezpieczny-link-do-hasla…" />
+                  <label>Link ważny do<input type="datetime-local" value={entry.expiresAt} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, expiresAt: event.target.value } : item))} /></label>
+                  <textarea value={entry.instructions} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, instructions: event.target.value } : item))} maxLength={2000} rows={3} placeholder="Instrukcja logowania bez hasła, tokenu i kodu 2FA" />
+                  {accessEntries.length > 1 && <button type="button" onClick={() => setAccessEntries((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Usuń ten dostęp</button>}
+                </div>
+              ))}
+              <button type="button" className="private-work-add-link" onClick={() => setAccessEntries((current) => current.length < 5 ? [...current, { label: "", serviceUrl: "", login: "", secureUrl: "", expiresAt: "", instructions: "" }] : current)}>+ Dodaj kolejny dostęp</button>
+            </div>
+          </details>
 
           <aside className="private-work-security-note">
             <b>Nie wysyłaj haseł, kodów 2FA, kluczy API ani danych kart.</b>
@@ -838,6 +943,11 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
   const [reviewText, setReviewText] = useState("");
   const [reviewBusy, setReviewBusy] = useState(false);
   const [reviewMessage, setReviewMessage] = useState("");
+  const [releaseOpen, setReleaseOpen] = useState(false);
+  const [releaseSummary, setReleaseSummary] = useState(null);
+  const [releaseLoading, setReleaseLoading] = useState(false);
+  const [reviewedWork, setReviewedWork] = useState(false);
+  const [confirmRelease, setConfirmRelease] = useState(false);
   const latest = deliveries[0];
 
   const loadReviewState = useCallback(async () => {
@@ -897,7 +1007,6 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
       setMessage("Opisz wymagane poprawki w co najmniej 20 znakach.");
       return;
     }
-    if (action === "accept" && !window.confirm("Akceptujesz tę wersję pracy i oznaczasz współpracę jako zakończoną. Kontynuować?")) return;
     setBusy(true);
     setMessage("");
     try {
@@ -908,10 +1017,71 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
       });
       if (error) throw error;
       setChanges("");
-      setMessage(action === "accept" ? "Praca została zaakceptowana." : "Wykonawca otrzymał listę poprawek.");
+      setMessage("Wykonawca otrzymał listę poprawek.");
       await onComplete?.();
     } catch (responseError) {
       setMessage(readableError(responseError, "Nie udało się zapisać decyzji."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openReleaseConfirmation() {
+    if (busy || disabled || !conversation?.id) return;
+    setReleaseLoading(true);
+    setMessage("");
+    try {
+      const { data, error } = await supabase.rpc("get_ideahire_payment_summary", {
+        p_conversation_id: conversation.id,
+      });
+      if (error) throw error;
+      const summary = data?.[0];
+      if (!summary || !["work_submitted", "release_pending", "release_failed"].includes(summary.payment_status)) {
+        throw new Error("Płatność nie jest gotowa do zwolnienia po odbiorze pracy.");
+      }
+      setReleaseSummary(summary);
+      setReviewedWork(false);
+      setConfirmRelease(false);
+      setReleaseOpen(true);
+    } catch (releaseError) {
+      setMessage(readableError(releaseError, "Nie udało się przygotować odbioru pracy."));
+    } finally {
+      setReleaseLoading(false);
+    }
+  }
+
+  async function acceptAndRelease() {
+    if (busy || disabled || !reviewedWork || !confirmRelease || !latest?.id) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const { data, error } = await supabase.functions.invoke("accept-work-release", {
+        body: {
+          delivery_id: latest.id,
+          reviewed_work: true,
+          confirm_release: true,
+          terms_version: ACCEPTANCE_TERMS_VERSION,
+        },
+      });
+      if (error) {
+        let serverMessage = "";
+        try {
+          const payload = await error.context?.json?.();
+          serverMessage = String(payload?.error || "");
+        } catch {
+          serverMessage = "";
+        }
+        throw new Error(serverMessage || error.message);
+      }
+      if (!data?.ok) throw new Error(data?.error || "Stripe nie potwierdził zwolnienia środków.");
+      setReleaseOpen(false);
+      setMessage(data.message || "Praca została zaakceptowana, a wynagrodzenie przekazane wykonawcy.");
+      window.dispatchEvent(new CustomEvent("ideahire:payment-updated", {
+        detail: { conversationId: conversation.id, status: "released" },
+      }));
+      await onComplete?.();
+    } catch (releaseError) {
+      setMessage(readableError(releaseError, "Nie udało się zwolnić środków. Operację można bezpiecznie ponowić."));
     } finally {
       setBusy(false);
     }
@@ -976,8 +1146,29 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
           <textarea value={changes} onChange={(event) => setChanges(event.target.value)} minLength={20} maxLength={4000} rows={3} placeholder="Jeśli potrzebujesz zmian, opisz je konkretnie…" />
           <div>
             <button type="button" onClick={() => respond("request_changes")} disabled={busy || disabled}>Poproś o poprawki</button>
-            <button type="button" className="is-primary" onClick={() => respond("accept")} disabled={busy || disabled}>Zaakceptuj i zakończ</button>
+            <button type="button" className="is-primary" onClick={openReleaseConfirmation} disabled={busy || disabled || releaseLoading}>{releaseLoading ? "Sprawdzanie płatności…" : "Zaakceptuj i zwolnij środki"}</button>
           </div>
+        </div>
+      )}
+      {releaseOpen && (
+        <div className="private-work-release-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !busy && setReleaseOpen(false)}>
+          <section className="private-work-release-dialog" role="dialog" aria-modal="true" aria-labelledby="private-work-release-title">
+            <button type="button" className="private-work-report-close" onClick={() => setReleaseOpen(false)} disabled={busy} aria-label="Zamknij">×</button>
+            <span className="section-label">Ostateczny odbiór · wersja {latest.version}</span>
+            <h2 id="private-work-release-title">Zaakceptuj rezultat i wypłać wykonawcę</h2>
+            <p>Po potwierdzeniu IdeaHire zleci Stripe przekazanie pełnego wynagrodzenia na saldo połączonego konta wykonawcy.</p>
+            <div className="private-work-release-amount">
+              <span>Kwota dla wykonawcy</span>
+              <strong>{new Intl.NumberFormat("pl-PL", { style: "currency", currency: releaseSummary?.currency || "PLN" }).format(Number(releaseSummary?.contractor_amount || 0))}</strong>
+            </div>
+            <label><input type="checkbox" checked={reviewedWork} onChange={(event) => setReviewedWork(event.target.checked)} /> Przejrzałem najnowszą wersję, otworzyłem potrzebne materiały i wynik odpowiada ustaleniom.</label>
+            <label><input type="checkbox" checked={confirmRelease} onChange={(event) => setConfirmRelease(event.target.checked)} /> Akceptuję pracę i zlecam przekazanie wskazanej kwoty wykonawcy przez Stripe.</label>
+            <small>Akceptacja dotyczy odbioru rezultatu i wypłaty. Zakres praw autorskich wynika z ustaleń stron; sam przycisk nie zastępuje wymaganej prawem formy pisemnej przeniesienia praw.</small>
+            <div className="private-work-form-actions">
+              <button type="button" onClick={() => setReleaseOpen(false)} disabled={busy}>Wróć do sprawdzania</button>
+              <button type="button" className="is-primary" onClick={acceptAndRelease} disabled={busy || !reviewedWork || !confirmRelease}>{busy ? "Stripe przekazuje środki…" : "Potwierdź odbiór i wypłatę →"}</button>
+            </div>
+          </section>
         </div>
       )}
       {latest.status === "accepted" && (
@@ -985,7 +1176,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
           <span aria-hidden="true">✓</span>
           <div>
             <strong>Zlecenie zakończone</strong>
-            <p>Współpraca została zapisana jako wykonana na profilu wykonawcy.</p>
+            <p>Współpraca została zapisana jako wykonana, a wynagrodzenie przekazane na saldo Stripe wykonawcy.</p>
           </div>
         </div>
       )}
