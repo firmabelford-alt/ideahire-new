@@ -12925,6 +12925,321 @@ html[data-theme="dark"] #root .private-work-file-action {
   }
 }
 
+/* =========================================================
+   STRIPE CHECKOUT — CHAT PAYMENT PANEL V1
+========================================================= */
+
+#root .chat-payment-panel {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border-bottom: 1px solid rgba(29, 53, 96, 0.12);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(83, 126, 211, 0.12), transparent 34%),
+    linear-gradient(145deg, #f7faff, #ffffff 66%);
+  color: #12203d;
+}
+
+#root .chat-payment-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+#root .chat-payment-heading h2 {
+  margin: 4px 0 0;
+  color: inherit;
+  font-size: clamp(18px, 3vw, 23px);
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+#root .chat-payment-eyebrow {
+  display: block;
+  color: #607095;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+#root .chat-payment-status {
+  flex: 0 0 auto;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 11px;
+  border: 1px solid #cfd9ee;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #38568e;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.2;
+  text-align: center;
+}
+
+#root .chat-payment-status.is-success {
+  border-color: #b8ddc6;
+  background: #ecf8f0;
+  color: #24633d;
+}
+
+#root .chat-payment-status.is-warning {
+  border-color: #ead9a7;
+  background: #fff8e6;
+  color: #765b14;
+}
+
+#root .chat-payment-status.is-error {
+  border-color: #ebc0c0;
+  background: #fff0f0;
+  color: #8c3232;
+}
+
+#root .chat-payment-breakdown {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#root .chat-payment-breakdown > div {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid #dfe6f3;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 8px 20px rgba(25, 52, 101, 0.04);
+}
+
+#root .chat-payment-breakdown > div.is-total {
+  border-color: #bdcdef;
+  background: #edf3ff;
+}
+
+#root .chat-payment-breakdown span,
+#root .chat-payment-breakdown strong,
+#root .chat-payment-breakdown small {
+  display: block;
+}
+
+#root .chat-payment-breakdown span {
+  color: #687694;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+#root .chat-payment-breakdown strong {
+  margin-top: 5px;
+  color: #17284c;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+#root .chat-payment-breakdown small {
+  margin-top: 5px;
+  color: #8792aa;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+#root .chat-payment-explainer {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  color: #596783;
+}
+
+#root .chat-payment-explainer > span {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dce8ff;
+  color: #284d91;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+#root .chat-payment-explainer p,
+#root .chat-payment-empty,
+#root .chat-payment-message {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+#root .chat-payment-button {
+  width: 100%;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border: 1px solid #173461;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #132846, #244f8e);
+  color: #ffffff;
+  box-shadow: 0 13px 28px rgba(24, 55, 103, 0.19);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+#root .chat-payment-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 17px 34px rgba(24, 55, 103, 0.24);
+}
+
+#root .chat-payment-button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+#root .chat-payment-message {
+  padding: 10px 12px;
+  border: 1px solid #d6dfef;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #4d5d7c;
+}
+
+html[data-template="classic"] #root .chat-payment-panel {
+  border-color: #deded8;
+  background: #ffffff;
+  color: #171717;
+}
+
+html[data-template="classic"] #root .chat-payment-eyebrow,
+html[data-template="classic"] #root .chat-payment-breakdown span,
+html[data-template="classic"] #root .chat-payment-breakdown small,
+html[data-template="classic"] #root .chat-payment-explainer,
+html[data-template="classic"] #root .chat-payment-message {
+  color: #666660;
+}
+
+html[data-template="classic"] #root .chat-payment-breakdown > div,
+html[data-template="classic"] #root .chat-payment-message {
+  border-color: #deded8;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+html[data-template="classic"] #root .chat-payment-breakdown > div.is-total,
+html[data-template="classic"] #root .chat-payment-status,
+html[data-template="classic"] #root .chat-payment-explainer > span {
+  border-color: #c9c9c2;
+  background: #efefeb;
+  color: #171717;
+}
+
+html[data-template="classic"] #root .chat-payment-breakdown strong {
+  color: #171717;
+}
+
+html[data-template="classic"] #root .chat-payment-button {
+  border-color: #080808;
+  background: #121212;
+  color: #ffffff;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+}
+
+html[data-theme="dark"] #root .chat-payment-panel {
+  border-color: rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(83, 126, 211, 0.13), transparent 34%),
+    #101722;
+  color: #edf2fb;
+}
+
+html[data-theme="dark"] #root .chat-payment-breakdown > div,
+html[data-theme="dark"] #root .chat-payment-message {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+html[data-theme="dark"] #root .chat-payment-breakdown > div.is-total {
+  border-color: rgba(116, 157, 235, 0.35);
+  background: rgba(72, 111, 187, 0.14);
+}
+
+html[data-theme="dark"] #root .chat-payment-breakdown strong {
+  color: #f2f6ff;
+}
+
+html[data-theme="dark"] #root .chat-payment-breakdown span,
+html[data-theme="dark"] #root .chat-payment-breakdown small,
+html[data-theme="dark"] #root .chat-payment-explainer,
+html[data-theme="dark"] #root .chat-payment-message,
+html[data-theme="dark"] #root .chat-payment-eyebrow {
+  color: #aebbd2;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .chat-payment-panel {
+  background: #121212;
+  color: #f4f4f1;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .chat-payment-breakdown > div,
+html[data-template="classic"][data-theme="dark"] #root .chat-payment-breakdown > div.is-total,
+html[data-template="classic"][data-theme="dark"] #root .chat-payment-message {
+  border-color: #3c3c39;
+  background: #1b1b1a;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .chat-payment-breakdown strong {
+  color: #ffffff;
+}
+
+@media (max-width: 720px) {
+  #root .chat-payment-panel {
+    gap: 14px;
+    padding: 16px 14px;
+  }
+
+  #root .chat-payment-heading {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  #root .chat-payment-status {
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  #root .chat-payment-breakdown {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  #root .chat-payment-breakdown > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 4px 12px;
+    padding: 11px 12px;
+  }
+
+  #root .chat-payment-breakdown strong {
+    margin: 0;
+    text-align: right;
+  }
+
+  #root .chat-payment-breakdown small {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+}
+
 #root .account-template-card {
   padding: clamp(22px, 3vw, 38px);
   overflow: hidden;
