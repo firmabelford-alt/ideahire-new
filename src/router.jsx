@@ -18085,6 +18085,310 @@ function AgreementPanel({
   );
 }
 
+const PAYMENT_STATUS_COPY = {
+  awaiting_payment: {
+    label: "Oczekuje na płatność",
+    tone: "pending",
+  },
+  checkout_open: {
+    label: "Płatność rozpoczęta",
+    tone: "pending",
+  },
+  processing: {
+    label: "Stripe potwierdza płatność",
+    tone: "pending",
+  },
+  funds_secured: {
+    label: "Płatność potwierdzona",
+    tone: "success",
+  },
+  work_submitted: {
+    label: "Praca przekazana",
+    tone: "success",
+  },
+  release_pending: {
+    label: "Wypłata przygotowywana",
+    tone: "success",
+  },
+  released: {
+    label: "Wypłacono wykonawcy",
+    tone: "success",
+  },
+  refund_pending: {
+    label: "Zwrot przygotowywany",
+    tone: "warning",
+  },
+  partially_refunded: {
+    label: "Częściowy zwrot",
+    tone: "warning",
+  },
+  refunded: {
+    label: "Płatność zwrócona",
+    tone: "warning",
+  },
+  disputed: {
+    label: "Płatność wstrzymana",
+    tone: "warning",
+  },
+  failed: {
+    label: "Płatność nieudana",
+    tone: "error",
+  },
+  cancelled: {
+    label: "Płatność anulowana",
+    tone: "error",
+  },
+};
+
+const PAYMENT_WORK_ENABLED_STATUSES = new Set([
+  "funds_secured",
+  "work_submitted",
+  "release_pending",
+  "released",
+]);
+
+function formatPaymentMoney(value, currency = "PLN") {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "—";
+
+  return new Intl.NumberFormat("pl-PL", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+function ChatPaymentPanel({
+  agreement,
+  conversation,
+  userId,
+  blocked,
+  onStatusChange,
+}) {
+  const location = useLocation();
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const isClient = conversation?.client_id === userId;
+  const paymentReturn = new URLSearchParams(location.search).get("payment");
+
+  const loadSummary = useCallback(async () => {
+    if (!conversation?.id || agreement?.status !== "accepted") {
+      setSummary(null);
+      setLoading(false);
+      onStatusChange?.("");
+      return null;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.rpc(
+        "get_ideahire_payment_summary",
+        { p_conversation_id: conversation.id }
+      );
+
+      if (error) throw error;
+
+      const nextSummary = data?.[0] || null;
+      setSummary(nextSummary);
+      onStatusChange?.(nextSummary?.payment_status || "");
+      return nextSummary;
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(
+          error,
+          "Nie udało się pobrać statusu płatności."
+        )
+      );
+      onStatusChange?.("");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [agreement?.id, agreement?.status, conversation?.id, onStatusChange]);
+
+  useEffect(() => {
+    loadSummary();
+  }, [loadSummary]);
+
+  useEffect(() => {
+    if (paymentReturn === "success") {
+      setMessage(
+        "Płatność została wysłana do potwierdzenia. Czekamy na bezpieczny komunikat ze Stripe."
+      );
+    } else if (paymentReturn === "cancelled") {
+      setMessage(
+        "Płatność została przerwana. Nie pobraliśmy nowej opłaty — możesz spróbować ponownie."
+      );
+    }
+  }, [paymentReturn]);
+
+  useEffect(() => {
+    const shouldPoll =
+      paymentReturn === "success" ||
+      ["checkout_open", "processing"].includes(summary?.payment_status);
+
+    if (!shouldPoll) return undefined;
+
+    let attempts = 0;
+    const interval = window.setInterval(async () => {
+      attempts += 1;
+      const nextSummary = await loadSummary();
+
+      if (
+        PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status) ||
+        ["failed", "cancelled", "refunded", "disputed"].includes(
+          nextSummary?.payment_status
+        ) ||
+        attempts >= 15
+      ) {
+        window.clearInterval(interval);
+      }
+    }, 2000);
+
+    return () => window.clearInterval(interval);
+  }, [paymentReturn, summary?.payment_status, loadSummary]);
+
+  async function handleCheckout() {
+    if (!agreement?.id || paying || blocked) return;
+
+    setPaying(true);
+    setMessage("");
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "create-checkout-session",
+        { body: { agreement_id: agreement.id } }
+      );
+
+      if (error) {
+        let functionMessage = "";
+        try {
+          const payload = await error.context?.json?.();
+          functionMessage = payload?.error || "";
+        } catch {
+          functionMessage = "";
+        }
+        throw new Error(functionMessage || error.message);
+      }
+
+      const checkoutUrl = String(data?.url || "");
+      const parsedUrl = new URL(checkoutUrl);
+
+      if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== "checkout.stripe.com") {
+        throw new Error("Serwer zwrócił nieprawidłowy adres płatności.");
+      }
+
+      window.location.assign(checkoutUrl);
+    } catch (error) {
+      setMessage(
+        cleanSupabaseError(
+          error,
+          "Nie udało się otworzyć bezpiecznej płatności Stripe."
+        )
+      );
+      setPaying(false);
+      await loadSummary();
+    }
+  }
+
+  if (agreement?.status !== "accepted") return null;
+
+  const status = PAYMENT_STATUS_COPY[summary?.payment_status] || {
+    label: summary?.payment_status || "Przygotowywanie płatności",
+    tone: "pending",
+  };
+  const workEnabled = PAYMENT_WORK_ENABLED_STATUSES.has(
+    summary?.payment_status
+  );
+
+  return (
+    <section className={`chat-payment-panel is-${status.tone}`}>
+      <div className="chat-payment-heading">
+        <div>
+          <span className="chat-payment-eyebrow">Bezpieczne rozliczenie</span>
+          <h2>{isClient ? "Opłać zlecenie" : "Płatność za zlecenie"}</h2>
+        </div>
+        <span className={`chat-payment-status is-${status.tone}`}>
+          {status.label}
+        </span>
+      </div>
+
+      {loading && !summary ? (
+        <InlineRouteLoader className="chat-compact-route-loader" rows={1} />
+      ) : summary ? (
+        <>
+          <div className="chat-payment-breakdown">
+            <div>
+              <span>Wynagrodzenie wykonawcy</span>
+              <strong>
+                {formatPaymentMoney(summary.work_amount, summary.currency)}
+              </strong>
+            </div>
+            <div>
+              <span>Opłata IdeaHire</span>
+              <strong>
+                {formatPaymentMoney(summary.platform_fee, summary.currency)}
+              </strong>
+              <small>7% · minimum 20 zł · maksimum 300 zł</small>
+            </div>
+            <div className="is-total">
+              <span>{isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</span>
+              <strong>
+                {formatPaymentMoney(summary.total_amount, summary.currency)}
+              </strong>
+            </div>
+          </div>
+
+          <div className="chat-payment-explainer">
+            <span aria-hidden="true">✓</span>
+            <p>
+              {workEnabled
+                ? "Stripe potwierdził środki. Realizacja zlecenia może się rozpocząć."
+                : isClient
+                ? "Wykonawca otrzyma pełne wynagrodzenie wskazane w ustaleniach. Koszt Stripe pokrywa IdeaHire ze swojej opłaty."
+                : "Realizacja rozpocznie się dopiero po potwierdzeniu płatności przez Stripe. Otrzymasz pełną kwotę ustaloną za pracę."}
+            </p>
+          </div>
+
+          {isClient && !workEnabled && ![
+            "refunded",
+            "partially_refunded",
+            "disputed",
+          ].includes(summary.payment_status) && (
+            <button
+              type="button"
+              className="chat-payment-button"
+              onClick={handleCheckout}
+              disabled={paying || blocked || summary.payment_status === "processing"}
+            >
+              {paying
+                ? "Otwieranie Stripe…"
+                : summary.payment_status === "processing"
+                ? "Stripe potwierdza płatność…"
+                : "Przejdź do bezpiecznej płatności →"}
+            </button>
+          )}
+        </>
+      ) : (
+        <p className="chat-payment-empty">
+          Płatność jest przygotowywana. Odśwież status za chwilę.
+        </p>
+      )}
+
+      {message && (
+        <p className="chat-payment-message" role="status">
+          {message}
+        </p>
+      )}
+    </section>
+  );
+}
+
 function Chat() {
   const { user } =
     useAuth();
@@ -18150,6 +18454,9 @@ function Chat() {
     useState("view");
 
   const [agreementMessage, setAgreementMessage] =
+    useState("");
+
+  const [paymentStatus, setPaymentStatus] =
     useState("");
 
   const [agreementForm, setAgreementForm] =
@@ -18935,7 +19242,7 @@ function Chat() {
       );
 
       setAgreementMessage(
-        "Warunki zostały zaakceptowane i zablokowane. Zlecenie może rozpocząć realizację."
+        "Warunki zostały zaakceptowane i zablokowane. Zleceniodawca może teraz opłacić zlecenie."
       );
     } catch (error) {
       setAgreementMessage(
@@ -19100,6 +19407,10 @@ function Chat() {
   const agreementAccepted =
     !agreementsRequired ||
     agreement?.status === "accepted";
+
+  const paymentConfirmed =
+    !agreementsRequired ||
+    PAYMENT_WORK_ENABLED_STATUSES.has(paymentStatus);
 
   const isClient =
     conversation?.client_id ===
@@ -19604,6 +19915,14 @@ function Chat() {
                 onAccept={handleAgreementAccept}
               />
 
+              <ChatPaymentPanel
+                agreement={agreement}
+                conversation={conversation}
+                userId={user?.id}
+                blocked={messagingBlocked}
+                onStatusChange={setPaymentStatus}
+              />
+
               <ChatDisputePanel
                 agreement={agreement}
                 conversation={conversation}
@@ -19611,25 +19930,27 @@ function Chat() {
                 launcherHidden
               />
 
-              <WorkDeliveryPanel
-                deliveries={privateWork.deliveries}
-                events={privateWork.events}
-                conversation={conversation}
-                userId={user?.id}
-                disabled={messagingBlocked}
-                onComplete={async () => {
-                  await Promise.all([
-                    privateWork.reload(),
-                    loadMessages(),
-                  ]);
-                }}
-                onReport={(type, targetId) =>
-                  privateWork.setReportTarget({
-                    type,
-                    id: targetId,
-                  })
-                }
-              />
+              {paymentConfirmed && (
+                <WorkDeliveryPanel
+                  deliveries={privateWork.deliveries}
+                  events={privateWork.events}
+                  conversation={conversation}
+                  userId={user?.id}
+                  disabled={messagingBlocked}
+                  onComplete={async () => {
+                    await Promise.all([
+                      privateWork.reload(),
+                      loadMessages(),
+                    ]);
+                  }}
+                  onReport={(type, targetId) =>
+                    privateWork.setReportTarget({
+                      type,
+                      id: targetId,
+                    })
+                  }
+                />
+              )}
 
               {agreementsRequired &&
                 !agreementAccepted && (
