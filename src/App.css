@@ -2467,7 +2467,7 @@ button.privacy-admin-account-link {
 }
 
 .erasure-blockers-card li::before {
-  content: "Ă˘ÂË";
+  content: "•";
   margin-right: 8px;
 }
 
@@ -11389,7 +11389,7 @@ html[data-theme="dark"] .agreement-waiting-card p {
 }
 
 .jobs-clear-filters::before {
-  content: "ÄÂ";
+  content: "×";
   font-size: 17px;
   font-weight: 400;
   line-height: 1;
@@ -37573,4 +37573,645 @@ html[data-template="classic"] #root .google-auth-logo path:nth-of-type(4) { fill
 
 html[data-template="classic"] #root :is(.ideahire-country-flag, .ideahire-country-option-flag, .ideahire-country-badge-flag, .ideahire-flag-emoji) {
   filter: none !important;
+}
+
+/* =========================================================
+   V10.4 — VISUAL RELIABILITY PASS
+   Separate desktop/mobile locks for the classic skin.
+========================================================= */
+
+:root {
+  --ih-release: 20260926-104;
+}
+
+/* Never render the damaged legacy glyph next to "Wyczyść filtry". */
+
+#root .jobs-clear-filters::before,
+#root .page .jobs-clear-filters::before {
+  content: "×" !important;
+  width: 20px !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+/* The password recovery control is a real IdeaHire action, not a browser-default button. */
+
+#root .forgot-password-row {
+  display: flex !important;
+  justify-content: flex-end !important;
+  margin-top: -3px !important;
+}
+
+#root .auth-link-button {
+  appearance: none !important;
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 12px !important;
+  border: 1px solid var(--ih-line-strong) !important;
+  border-radius: 10px !important;
+  background: var(--ih-surface-soft) !important;
+  color: var(--ih-ink) !important;
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 780 !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, transform 160ms ease !important;
+}
+
+#root .auth-link-button:hover {
+  border-color: var(--ih-ink) !important;
+  background: var(--ih-ink) !important;
+  color: var(--ih-surface) !important;
+  transform: translateY(-1px) !important;
+}
+
+#root .auth-link-button:focus-visible {
+  outline: 3px solid var(--ih-focus) !important;
+  outline-offset: 2px !important;
+}
+
+/* Classic means genuinely monochrome: cover every variable used by older layers. */
+
+html[data-template="classic"] {
+  --ih-blue-600: #171717;
+  --ih-blue-100: #ecece8;
+  --ih-blue-soft: #f3f3ef;
+  --ih-violet: #171717;
+  --ih-violet-deep: #050505;
+  --ih-violet-soft: #efefeb;
+  --ih-mint: #5c5c57;
+  --ih-mint-soft: #efefeb;
+  --ih-v3-ink: #171717;
+  --ih-v3-copy: #5f5f5a;
+  --ih-v3-line: #deded8;
+  --ih-v3-surface: #ffffff;
+  --ih-v3-page: #ffffff;
+  --ih-v4-violet: #171717;
+  --ih-v4-violet-soft: #efefeb;
+  --ih-v4-mint: #5c5c57;
+  --ih-focus: rgba(17, 17, 17, 0.25);
+}
+
+html[data-template="classic"][data-theme="dark"] {
+  --ih-blue-600: #f2f2ee;
+  --ih-blue-100: #2b2b29;
+  --ih-blue-soft: #222220;
+  --ih-violet: #f2f2ee;
+  --ih-violet-deep: #ffffff;
+  --ih-violet-soft: #252523;
+  --ih-mint: #c9c9c2;
+  --ih-mint-soft: #252523;
+  --ih-v3-ink: #f2f2ee;
+  --ih-v3-copy: #b5b5ae;
+  --ih-v3-line: #3b3b38;
+  --ih-v3-surface: #191918;
+  --ih-v3-page: #0f0f0e;
+  --ih-v4-violet: #f2f2ee;
+  --ih-v4-violet-soft: #252523;
+  --ih-v4-mint: #c9c9c2;
+  --ih-focus: rgba(242, 242, 238, 0.3);
+}
+
+/* Remove decorative grids from authentication and conversation backgrounds. */
+
+html[data-template="classic"] #root .page:has(> .auth-card) {
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .page:has(> .auth-card)::before,
+html[data-template="classic"] #root .page:has(> .auth-card)::after {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-template="classic"] #root .page > .auth-card,
+html[data-template="classic"] #root .page > .auth-card::before {
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .account-page .chat-messages,
+html[data-template="classic"] #root .chat-messages {
+  background-image: none !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .page:has(> .auth-card) {
+  background-color: #f5f5f2 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .page > .auth-card {
+  border-color: #cfcfc9 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 22px 64px rgba(18, 18, 16, 0.11) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .page:has(> .auth-card) {
+  background-color: #0f0f0e !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .page > .auth-card {
+  border-color: #3c3c38 !important;
+  background-color: #191918 !important;
+  box-shadow: 0 24px 68px rgba(0, 0, 0, 0.34) !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .auth-link-button {
+  border-color: #111111 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .auth-link-button:hover {
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .auth-link-button {
+  border-color: #777770 !important;
+  background: #191918 !important;
+  color: #f7f7f3 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .auth-link-button:hover {
+  border-color: #f7f7f3 !important;
+  background: #f7f7f3 !important;
+  color: #111111 !important;
+}
+
+/* Logo contrast in both classic variants. */
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(
+  .logo,
+  .logo span,
+  .account-navbar-brand,
+  .admin-navbar-brand,
+  .cookie-policy-logo,
+  .cookie-policy-logo span
+) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .logo,
+  .logo span,
+  .account-navbar-brand,
+  .admin-navbar-brand,
+  .cookie-policy-logo,
+  .cookie-policy-logo span
+) {
+  color: #f7f7f3 !important;
+  -webkit-text-fill-color: #f7f7f3 !important;
+  opacity: 1 !important;
+}
+
+/* Visible arrows and predictable pressed/selected states in category controls. */
+
+html[data-template="classic"] #root .app .category-arrow {
+  display: grid !important;
+  place-items: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+html[data-template="classic"] #root .app .category-card::before {
+  background-image: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .app .category-card:is(:hover, :focus-visible, :active) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  outline-color: #111111 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .app .category-card:is(:hover, :focus-visible, :active) :is(
+  .category-number,
+  .category-name,
+  .category-arrow
+) {
+  border-color: #555550 !important;
+  background: #222220 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .category-card:is(:hover, :focus-visible, :active) {
+  border-color: #f2f2ee !important;
+  background: #f2f2ee !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .category-card:is(:hover, :focus-visible, :active) :is(
+  .category-number,
+  .category-name,
+  .category-arrow
+) {
+  border-color: #c8c8c2 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(
+  .jobs-filter.active,
+  .jobs-filter.is-active,
+  .talent-category-row button.active,
+  .talent-category-row button.is-active,
+  .discovery-category-card.is-selected,
+  .profile-category-option.is-selected,
+  .account-template-option.is-selected,
+  .project-form .job-option-card.is-selected,
+  .account-section-nav button.is-active
+) {
+  border-color: #111111 !important;
+  background-color: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.11) !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(
+  .discovery-category-card.is-selected,
+  .profile-category-option.is-selected,
+  .account-template-option.is-selected,
+  .project-form .job-option-card.is-selected,
+  .account-section-nav button.is-active
+) :is(span, strong, small, i) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .jobs-filter.active,
+  .jobs-filter.is-active,
+  .talent-category-row button.active,
+  .talent-category-row button.is-active,
+  .discovery-category-card.is-selected,
+  .profile-category-option.is-selected,
+  .account-template-option.is-selected,
+  .project-form .job-option-card.is-selected,
+  .account-section-nav button.is-active
+) {
+  border-color: #f2f2ee !important;
+  background-color: #f2f2ee !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  box-shadow: 0 0 0 3px rgba(242, 242, 238, 0.12) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-category-card.is-selected,
+  .profile-category-option.is-selected,
+  .account-template-option.is-selected,
+  .project-form .job-option-card.is-selected,
+  .account-section-nav button.is-active
+) :is(span, strong, small, i) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(
+  .project-form .job-option-card.is-selected .job-option-mark,
+  .project-form .job-option-card.is-selected .job-option-duration,
+  .discovery-category-card.is-selected i,
+  .profile-category-option.is-selected > span,
+  .account-template-option.is-selected .account-template-option-action
+) {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .project-form .job-option-card.is-selected::after {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 2px #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .project-form .job-option-card.is-selected .job-option-mark,
+  .project-form .job-option-card.is-selected .job-option-duration,
+  .discovery-category-card.is-selected i,
+  .profile-category-option.is-selected > span,
+  .account-template-option.is-selected .account-template-option-action
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .project-form .job-option-card.is-selected::after {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  box-shadow: inset 0 0 0 2px #ffffff !important;
+}
+
+/* Adult status must stay readable inside the dark profile preview. */
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .account-profile-workspace .profile-info .account-age-status {
+  border-color: rgba(255, 255, 255, 0.78) !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-profile-workspace .profile-info .account-age-status {
+  border-color: #555550 !important;
+  background: #2b2b29 !important;
+  color: #f7f7f3 !important;
+  -webkit-text-fill-color: #f7f7f3 !important;
+  opacity: 1 !important;
+}
+
+/* Conversation surface: no grid and no broad rule painting every nested div. */
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .account-page .chat-messages {
+  background-color: #f3f3f0 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .account-page .chat-message.is-mine {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .account-page .chat-message.is-theirs {
+  border-color: #cfcfc9 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  box-shadow: 0 5px 18px rgba(18, 18, 16, 0.07) !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .account-page .chat-message.is-theirs :is(
+  .private-work-message-text,
+  .private-work-message-text a,
+  time
+) {
+  color: #171717 !important;
+  -webkit-text-fill-color: #171717 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-page .chat-messages {
+  background-color: #10100f !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-page .chat-message.is-mine {
+  border-color: #f2f2ee !important;
+  background: #f2f2ee !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-page .chat-message.is-mine :is(
+  .private-work-message-text,
+  .private-work-message-text a,
+  time
+) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-page .chat-message.is-theirs {
+  border-color: #474743 !important;
+  background: #242422 !important;
+  color: #f7f7f3 !important;
+}
+
+/* Restore intended surfaces inside message attachments after legacy > div rules. */
+
+html[data-template="classic"] #root .account-page .chat-message .private-work-materials,
+html[data-template="classic"] #root .account-page .chat-message .private-work-albums,
+html[data-template="classic"] #root .account-page .chat-message .private-work-image-grid,
+html[data-template="classic"] #root .account-page .chat-message .private-work-files,
+html[data-template="classic"] #root .account-page .chat-message .private-work-links {
+  border-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Legal and cookie pages: stable width, no clipping, mobile tables remain scrollable. */
+
+#root :is(.legal-document-page, .cookie-policy-page) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+#root :is(.legal-document-shell, .cookie-policy-shell) {
+  width: min(1080px, calc(100% - 40px)) !important;
+  max-width: 1080px !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+
+#root :is(
+  .legal-document-hero,
+  .legal-document-warning,
+  .legal-document-tabs,
+  .legal-document-content,
+  .legal-document-footer,
+  .cookie-policy-nav,
+  .cookie-policy-hero,
+  .cookie-policy-highlight,
+  .cookie-policy-section,
+  .cookie-policy-inventory,
+  .cookie-policy-footer
+) {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#root .legal-document-content table {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overscroll-behavior-inline: contain !important;
+}
+
+#root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) :is(p, li, a, code, td, th) {
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+/* ------------------------- MOBILE ONLY ------------------------- */
+
+@media (max-width: 720px) {
+  /* A real circular flag: fixed geometry, centered emoji and no baseline drift. */
+
+  #root .profile-info .ideahire-country-badge {
+    width: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    align-self: center !important;
+    padding: 2px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255, 255, 255, 0.68) !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16) !important;
+    line-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  #root .profile-info .ideahire-country-badge-flag,
+  #root :is(.ideahire-country-flag, .ideahire-country-option-flag) {
+    position: relative !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    clip-path: circle(50% at 50% 50%) !important;
+    line-height: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+
+  #root :is(.ideahire-country-flag, .ideahire-country-option-flag, .ideahire-country-badge-flag) .ideahire-flag-emoji {
+    position: absolute !important;
+    inset: 50% auto auto 50% !important;
+    width: 30px !important;
+    height: 30px !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+    transform: translate(-50%, -50%) scale(1.18) !important;
+    transform-origin: 50% 50% !important;
+  }
+
+  /* Two-digit counts stay horizontal. */
+
+  #root .account-page .messages-heading {
+    grid-template-columns: minmax(0, 1fr) 82px !important;
+  }
+
+  #root .account-page .messages-overview {
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+    justify-items: center !important;
+    overflow: hidden !important;
+  }
+
+  #root .account-page .messages-overview strong,
+  #root .account-page .messages-overview span {
+    min-width: max-content !important;
+    display: block !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    white-space: nowrap !important;
+  }
+
+  #root .account-page .messages-overview strong {
+    min-width: 2ch !important;
+    font-variant-numeric: tabular-nums !important;
+  }
+
+  #root .jobs-clear-filters {
+    gap: 6px !important;
+    overflow: visible !important;
+  }
+
+  #root :is(.legal-document-page, .cookie-policy-page) {
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+  }
+
+  #root :is(.legal-document-shell, .cookie-policy-shell) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #root :is(.legal-document-hero, .cookie-policy-hero) {
+    padding: 28px 18px !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  #root .legal-document-warning,
+  #root .cookie-policy-highlight {
+    padding: 15px !important;
+    border-radius: 15px !important;
+  }
+
+  #root .legal-document-tabs {
+    position: static !important;
+    top: auto !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: column !important;
+    grid-auto-columns: minmax(128px, 1fr) !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+
+  #root .legal-document-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) {
+    width: 100% !important;
+    padding: 20px 16px !important;
+    overflow: visible !important;
+    border-radius: 17px !important;
+  }
+
+  #root :is(.legal-document-footer, .cookie-policy-footer) {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding-right: 4px !important;
+    padding-left: 4px !important;
+  }
+}
+
+/* ------------------------- DESKTOP ONLY ------------------------- */
+
+@media (min-width: 721px) {
+  #root .account-page .messages-overview strong,
+  #root .account-page .messages-overview span {
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    white-space: nowrap !important;
+  }
+
+  #root :is(.legal-document-shell, .cookie-policy-shell) {
+    min-width: 0 !important;
+  }
 }
