@@ -18110,6 +18110,10 @@ const PAYMENT_STATUS_COPY = {
     label: "Wypłata przygotowywana",
     tone: "success",
   },
+  release_failed: {
+    label: "Wypłata wymaga ponowienia",
+    tone: "error",
+  },
   released: {
     label: "Wypłacono wykonawcy",
     tone: "success",
@@ -18144,6 +18148,7 @@ const PAYMENT_WORK_ENABLED_STATUSES = new Set([
   "funds_secured",
   "work_submitted",
   "release_pending",
+  "release_failed",
   "released",
 ]);
 
@@ -18216,6 +18221,16 @@ function ChatPaymentPanel({
   }, [loadSummary]);
 
   useEffect(() => {
+    function handlePaymentUpdate(event) {
+      if (!event?.detail?.conversationId || event.detail.conversationId === conversation?.id) {
+        loadSummary();
+      }
+    }
+    window.addEventListener("ideahire:payment-updated", handlePaymentUpdate);
+    return () => window.removeEventListener("ideahire:payment-updated", handlePaymentUpdate);
+  }, [conversation?.id, loadSummary]);
+
+  useEffect(() => {
     if (paymentReturn === "success") {
       setMessage(
         "Płatność została wysłana do potwierdzenia. Czekamy na bezpieczny komunikat ze Stripe."
@@ -18230,7 +18245,7 @@ function ChatPaymentPanel({
   useEffect(() => {
     const shouldPoll =
       paymentReturn === "success" ||
-      ["checkout_open", "processing"].includes(summary?.payment_status);
+      ["checkout_open", "processing", "release_pending"].includes(summary?.payment_status);
 
     if (!shouldPoll) return undefined;
 
@@ -18241,7 +18256,7 @@ function ChatPaymentPanel({
 
       if (
         PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status) ||
-        ["failed", "cancelled", "refunded", "disputed"].includes(
+        ["failed", "cancelled", "refunded", "disputed", "release_failed"].includes(
           nextSummary?.payment_status
         ) ||
         attempts >= 15
