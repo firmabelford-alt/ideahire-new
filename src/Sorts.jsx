@@ -356,10 +356,12 @@ function Sorts({ children }) {
           justify-content: center;
           flex: 0 0 30px;
           border-radius: 999px;
-          background: #f4f4f1;
+          overflow: hidden;
+          background: #fff;
           box-shadow: inset 0 0 0 1px rgba(20,20,20,.06);
-          font-size: 19px;
+          font-size: 32px;
           line-height: 1;
+          clip-path: circle(50% at 50% 50%);
         }
 
         .ideahire-flag-shell {
@@ -394,9 +396,15 @@ function Sorts({ children }) {
         }
 
         .ideahire-flag-emoji {
-          display: inline;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           font-size: inherit;
           line-height: 1;
+          transform: scale(1.28);
+          transform-origin: center;
         }
 
         .ideahire-country-selected-name {
@@ -517,8 +525,8 @@ function Sorts({ children }) {
           width: 26px;
           height: 26px;
           flex: 0 0 26px;
-          font-size: 17px;
-          background: transparent;
+          font-size: 29px;
+          background: #fff;
           border: 1px solid rgba(20,20,20,.06);
         }
 
@@ -616,12 +624,9 @@ function Sorts({ children }) {
           }
 
 
-          .ideahire-flag-image {
-            display: none;
-          }
-
+          .ideahire-flag-image,
           .ideahire-flag-emoji {
-            display: inline;
+            display: flex;
           }
           .ideahire-country-list {
             max-height: 260px;
