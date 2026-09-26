@@ -38530,3 +38530,368 @@ html[data-template="classic"] #root .account-page .chat-message .private-work-li
     min-width: 0 !important;
   }
 }
+/* ================================================================
+   IDEA HIRE — WORK DELIVERY + STRIPE RELEASE V1 (2026-09-26)
+   ================================================================ */
+
+.private-work-link-inputs > div {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(150px, .7fr) auto;
+}
+
+.private-work-link-inputs select,
+.private-work-extra-body input,
+.private-work-extra-body textarea,
+.private-work-access-editor input,
+.private-work-access-editor textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(15, 30, 54, .14);
+  border-radius: 12px;
+  background: #fff;
+  color: #101b2d;
+  font: inherit;
+  outline: none;
+}
+
+.private-work-link-inputs select,
+.private-work-extra-body input,
+.private-work-access-editor input {
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.private-work-extra-body textarea,
+.private-work-access-editor textarea {
+  padding: 12px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.private-work-link-inputs select:focus,
+.private-work-extra-body input:focus,
+.private-work-extra-body textarea:focus,
+.private-work-access-editor input:focus,
+.private-work-access-editor textarea:focus {
+  border-color: #174aa6;
+  box-shadow: 0 0 0 3px rgba(23, 74, 166, .1);
+}
+
+.private-work-extra-section {
+  overflow: hidden;
+  border: 1px solid rgba(15, 30, 54, .11);
+  border-radius: 16px;
+  background: #fbfcff;
+}
+
+.private-work-extra-section + .private-work-extra-section {
+  margin-top: 10px;
+}
+
+.private-work-extra-section > summary {
+  padding: 15px 17px;
+  color: #17243a;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  list-style-position: inside;
+}
+
+.private-work-extra-body {
+  display: grid;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.private-work-extra-body > p,
+.private-work-extra-body > small {
+  margin: 0;
+  color: #687386;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.private-work-access-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid rgba(15, 30, 54, .1);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.private-work-access-editor label,
+.private-work-access-editor textarea,
+.private-work-access-editor > button {
+  grid-column: 1 / -1;
+}
+
+.private-work-access-editor label {
+  display: grid;
+  gap: 6px;
+  color: #58657a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.private-work-written-item,
+.private-work-access-item {
+  position: relative;
+  display: grid;
+  gap: 11px;
+  padding: 15px;
+  border: 1px solid rgba(15, 30, 54, .11);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.private-work-written-item + .private-work-written-item,
+.private-work-access-item + .private-work-access-item {
+  margin-top: 9px;
+}
+
+.private-work-written-item > div,
+.private-work-access-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.private-work-written-item b,
+.private-work-access-heading b,
+.private-work-written-item small,
+.private-work-access-heading small {
+  display: block;
+}
+
+.private-work-written-item small,
+.private-work-access-heading small,
+.private-work-access-item > small {
+  margin-top: 2px;
+  color: #778194;
+  font-size: 10px;
+}
+
+.private-work-written-item > p {
+  max-height: 420px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #26344a;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.private-work-access-heading > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  border-radius: 11px;
+  background: #eaf1ff;
+  color: #174aa6;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.private-work-access-item > p {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 10px;
+  margin: 0;
+  color: #354258;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.private-work-access-item > p span {
+  color: #778194;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.private-work-access-item code {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: #f0f3f8;
+  color: #162238;
+  overflow-wrap: anywhere;
+}
+
+.private-work-secure-access-button {
+  width: fit-content;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: #10264c;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.private-work-release-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 12, 24, .67);
+  backdrop-filter: blur(9px);
+}
+
+.private-work-release-dialog {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(760px, calc(100vh - 32px));
+  overflow: auto;
+  display: grid;
+  gap: 15px;
+  padding: 26px;
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 24px;
+  background: #fff;
+  color: #101b2d;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+}
+
+.private-work-release-dialog h2,
+.private-work-release-dialog p,
+.private-work-release-dialog > small {
+  margin: 0;
+}
+
+.private-work-release-dialog h2 {
+  padding-right: 30px;
+  font-size: clamp(22px, 4vw, 30px);
+  line-height: 1.12;
+}
+
+.private-work-release-dialog > p,
+.private-work-release-dialog > small {
+  color: #687386;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.private-work-release-dialog > label {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 13px;
+  border: 1px solid rgba(15, 30, 54, .1);
+  border-radius: 14px;
+  background: #f8faff;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.private-work-release-dialog > label input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #174aa6;
+}
+
+.private-work-release-amount {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #10264c, #174a8f);
+  color: #fff;
+}
+
+.private-work-release-amount span {
+  font-size: 11px;
+  opacity: .75;
+}
+
+.private-work-release-amount strong {
+  font-size: clamp(22px, 5vw, 30px);
+  white-space: nowrap;
+}
+
+html[data-theme="dark"] .private-work-extra-section,
+html[data-theme="dark"] .private-work-access-editor,
+html[data-theme="dark"] .private-work-written-item,
+html[data-theme="dark"] .private-work-access-item,
+html[data-theme="dark"] .private-work-release-dialog {
+  border-color: rgba(255, 255, 255, .11);
+  background: #151a22;
+  color: #f5f7fb;
+}
+
+html[data-theme="dark"] .private-work-link-inputs select,
+html[data-theme="dark"] .private-work-extra-body input,
+html[data-theme="dark"] .private-work-extra-body textarea,
+html[data-theme="dark"] .private-work-access-editor input,
+html[data-theme="dark"] .private-work-access-editor textarea {
+  border-color: rgba(255, 255, 255, .13);
+  background: #0f141b;
+  color: #f5f7fb;
+}
+
+html[data-theme="dark"] .private-work-extra-section > summary,
+html[data-theme="dark"] .private-work-written-item > p,
+html[data-theme="dark"] .private-work-access-item > p {
+  color: #e8ecf4;
+}
+
+html[data-theme="dark"] .private-work-release-dialog > label {
+  border-color: rgba(255, 255, 255, .11);
+  background: #0f141b;
+}
+
+html[data-theme="dark"] .private-work-access-item code {
+  background: #0b1017;
+  color: #f4f6fb;
+}
+
+@media (max-width: 720px) {
+  .private-work-link-inputs > div,
+  .private-work-access-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .private-work-access-editor label,
+  .private-work-access-editor textarea,
+  .private-work-access-editor > button {
+    grid-column: 1;
+  }
+
+  .private-work-access-item > p {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .private-work-release-backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .private-work-release-dialog {
+    width: 100%;
+    max-height: 92vh;
+    padding: 22px 17px max(22px, env(safe-area-inset-bottom));
+    border-radius: 24px 24px 0 0;
+  }
+
+  .private-work-release-amount {
+    align-items: start;
+    flex-direction: column;
+  }
+}
