@@ -16732,7 +16732,7 @@ function Messages() {
 
           <div className="messages-overview" aria-label="Liczba rozmów">
             <strong>{conversations.length}</strong>
-            <span>{conversations.length === 1 ? "rozmowa" : "rozmów"}</span>
+            <span>Rozmowy</span>
           </div>
         </div>
 
