@@ -42528,6 +42528,1216 @@ html[data-template="classic"] #root .admin-page :is(
   -webkit-text-fill-color: #ffffff !important;
 }
 
+/* =========================================================
+   IDEAHIRE V14 — 22 DIRECT UI FIXES — RELEASE 2026-09-27
+   Final component-level rules. Keep this block at EOF.
+========================================================= */
+
+:root {
+  --ih-release: 20260927-140;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/* 07 — pure wordmark: no dot, badge or pseudo-element anywhere. */
+#root :is(.logo, .logo-clean, .cookie-policy-logo)::before,
+#root :is(.logo, .logo-clean, .cookie-policy-logo)::after,
+#root :is(.logo, .logo-clean) > span::before,
+#root :is(.logo, .logo-clean) > span::after {
+  content: none !important;
+  display: none !important;
+}
+
+#root :is(.logo, .logo-clean) {
+  position: relative !important;
+  padding-right: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+}
+
+#root :is(.logo, .logo-clean) > span {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 01 + 12 — country without flags or overlapping glyphs. */
+#root :is(
+  .ideahire-country-flag,
+  .ideahire-country-option-flag,
+  .ideahire-country-badge-flag,
+  .ideahire-flag-shell,
+  .ideahire-flag-emoji
+) {
+  display: none !important;
+}
+
+#root .ideahire-country-picker,
+#root .ideahire-country-trigger,
+#root .ideahire-country-selected,
+#root .ideahire-country-menu,
+#root .ideahire-country-search,
+#root .ideahire-country-list,
+#root .ideahire-country-option {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .ideahire-country-trigger {
+  min-height: 52px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 7px 12px 7px 15px !important;
+  overflow: visible !important;
+}
+
+#root .ideahire-country-selected,
+#root .ideahire-country-option {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 32px !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+#root .ideahire-country-search {
+  display: block !important;
+  padding: 10px !important;
+}
+
+#root .ideahire-country-search > span {
+  display: none !important;
+}
+
+#root .ideahire-country-search input {
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 0 13px !important;
+  border: 1px solid currentColor !important;
+  border-radius: 11px !important;
+  background: transparent !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+#root :is(
+  .ideahire-country-selected-code,
+  .ideahire-country-option-code,
+  .ideahire-country-badge-code
+) {
+  width: 30px !important;
+  min-width: 30px !important;
+  max-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(20, 20, 20, .18) !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  color: #171717 !important;
+  -webkit-text-fill-color: #171717 !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: .04em !important;
+  text-align: center !important;
+}
+
+#root .ideahire-country-badge {
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 3px 4px 3px 12px !important;
+  overflow: visible !important;
+  border-radius: 999px !important;
+}
+
+#root .ideahire-country-badge-name {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* 02 — legal/footer links stay readable without becoming loud. */
+#root .footer-links a,
+#root .auth-footer a,
+#root .legal-document-footer a,
+#root .cookie-policy-footer a,
+#root .privacy-policy-footer a {
+  color: rgba(24, 24, 22, .72) !important;
+  -webkit-text-fill-color: rgba(24, 24, 22, .72) !important;
+  opacity: 1 !important;
+  text-decoration-color: rgba(24, 24, 22, .26) !important;
+}
+
+#root .footer-links a:hover,
+#root .auth-footer a:hover,
+#root .legal-document-footer a:hover,
+#root .cookie-policy-footer a:hover,
+#root .privacy-policy-footer a:hover {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] #root :is(
+  .footer-links a,
+  .auth-footer a,
+  .legal-document-footer a,
+  .cookie-policy-footer a,
+  .privacy-policy-footer a
+) {
+  color: rgba(245, 245, 241, .76) !important;
+  -webkit-text-fill-color: rgba(245, 245, 241, .76) !important;
+}
+
+html[data-theme="dark"] #root :is(
+  .footer-links a:hover,
+  .auth-footer a:hover,
+  .legal-document-footer a:hover,
+  .cookie-policy-footer a:hover,
+  .privacy-policy-footer a:hover
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* 03 + 20 — account header fits and clearly says “Moje konto”. */
+#root .navbar.account-navbar {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(330px, 1fr) auto !important;
+  align-items: center !important;
+  gap: clamp(12px, 2vw, 30px) !important;
+  padding: 13px clamp(18px, 3vw, 48px) !important;
+  overflow: visible !important;
+}
+
+#root .account-navbar-brand,
+#root .account-navbar-actions,
+#root .account-primary-nav,
+#root .account-menu,
+#root .account-mini {
+  min-width: 0 !important;
+}
+
+#root .account-navbar .account-primary-nav {
+  width: 100% !important;
+  max-width: 660px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  justify-self: center !important;
+  gap: 4px !important;
+  padding: 4px !important;
+}
+
+#root .account-navbar .account-primary-nav a {
+  min-width: 0 !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 10px !important;
+  overflow: hidden !important;
+  color: #242424 !important;
+  -webkit-text-fill-color: #242424 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* 08 — active navigation text can never disappear. */
+#root .account-navbar .account-primary-nav a.is-active,
+#root .account-navbar .account-primary-nav a.is-active:hover,
+#root .account-navbar .account-primary-nav a.is-active:focus-visible {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root .account-navbar .account-primary-nav a.is-active :is(span, b, strong) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+#root .account-navbar-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+}
+
+#root .account-navbar .account-menu .account-mini {
+  min-height: 46px !important;
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 5px 9px 5px 6px !important;
+}
+
+#root .account-mini-copy {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+}
+
+#root .account-mini-label {
+  display: block !important;
+  color: #171717 !important;
+  -webkit-text-fill-color: #171717 !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  letter-spacing: .01em !important;
+  white-space: nowrap !important;
+}
+
+#root .account-mini-name {
+  display: block !important;
+  overflow: hidden !important;
+  color: #6b6b66 !important;
+  -webkit-text-fill-color: #6b6b66 !important;
+  font-size: 9px !important;
+  font-weight: 650 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] #root :is(.account-mini-label, .account-navbar .account-primary-nav a) {
+  color: #f4f4f0 !important;
+  -webkit-text-fill-color: #f4f4f0 !important;
+}
+
+html[data-theme="dark"] #root .account-mini-name {
+  color: #b8b8b1 !important;
+  -webkit-text-fill-color: #b8b8b1 !important;
+}
+
+#root .home-account-avatar-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+#root .home-account-avatar-label {
+  display: inline-block !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+/* 04 + 11 + 21 — explicit contrast states for every shared control. */
+#root :is(.btn-dark, .account-create-job-button, .chat-send),
+#root :is(.btn-dark, .account-create-job-button, .chat-send):hover,
+#root :is(.btn-dark, .account-create-job-button, .chat-send):focus-visible {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root :is(.btn-dark, .account-create-job-button, .chat-send) :is(span, b, strong) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+#root :is(.btn-light, .btn-outline, .btn-ghost),
+#root :is(.btn-light, .btn-outline, .btn-ghost):hover,
+#root :is(.btn-light, .btn-outline, .btn-ghost):focus-visible {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+#root :is(.btn-light, .btn-outline, .btn-ghost) :is(span, b, strong) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+}
+
+#root .btn-light,
+#root .btn-light:hover,
+#root .btn-light:focus-visible {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+#root .btn-outline,
+#root .btn-outline:hover,
+#root .btn-outline:focus-visible,
+#root .btn-ghost:hover,
+#root .btn-ghost:focus-visible {
+  border-color: rgba(20, 20, 20, .24) !important;
+  background: #f5f5f1 !important;
+}
+
+#root button:disabled,
+#root a[aria-disabled="true"] {
+  opacity: .58 !important;
+}
+
+#root :is(button, a, summary, input, textarea, select):focus-visible {
+  outline: 2px solid currentColor !important;
+  outline-offset: 2px !important;
+}
+
+/* 09 — remove line, dot and decorative marker from rotating job preview. */
+#root .hero-visual :is(.live-dot, .mini-icon, .check-icon) {
+  display: none !important;
+}
+
+#root .hero-visual :is(.card-main, .card-header, .floating-card)::before,
+#root .hero-visual :is(.card-main, .card-header, .floating-card)::after {
+  content: none !important;
+  display: none !important;
+}
+
+#root .hero-visual .card-header {
+  border: 0 !important;
+  background: transparent !important;
+}
+
+#root .hero-visual .card-small {
+  display: block !important;
+}
+
+#root .hero-visual .card-small > div {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+/* 14 + 15 — compact, aligned homepage rhythm. */
+#root .app > main > .hero {
+  width: min(1320px, calc(100% - 40px)) !important;
+  max-width: 1320px !important;
+  min-height: clamp(580px, 72vh, 790px) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(360px, .92fr) !important;
+  align-items: center !important;
+  gap: clamp(42px, 7vw, 110px) !important;
+  margin: 18px auto 0 !important;
+  padding: clamp(72px, 8vw, 112px) clamp(38px, 6vw, 88px) !important;
+  overflow: hidden !important;
+}
+
+#root .app .hero-content,
+#root .app .hero-visual {
+  min-width: 0 !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+#root .app .hero-content h1 {
+  max-width: 760px !important;
+  margin: 32px 0 24px !important;
+  overflow-wrap: normal !important;
+}
+
+#root .app > main > :is(.categories, .how, .split-section).section {
+  width: min(1240px, calc(100% - 40px)) !important;
+  max-width: 1240px !important;
+  margin: clamp(54px, 7vw, 92px) auto 0 !important;
+  padding: 0 !important;
+}
+
+#root .app > main > .categories.section + .how.section {
+  margin-top: clamp(58px, 7vw, 94px) !important;
+}
+
+#root .app .categories .section-heading {
+  margin-bottom: 30px !important;
+}
+
+#root .app .category-grid {
+  gap: 14px !important;
+}
+
+/* 16 + 17 — small hover motion and one horizontal arrow everywhere. */
+#root .app .category-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  transform: none !important;
+  transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease !important;
+}
+
+#root .app .category-card:hover,
+#root .app .category-card:focus-visible {
+  transform: none !important;
+  box-shadow: 0 12px 30px rgba(20, 20, 20, .08) !important;
+}
+
+#root .app .category-card::before,
+#root .app .category-card::after {
+  transition: none !important;
+  transform: none !important;
+}
+
+#root .app .category-arrow {
+  width: 42px !important;
+  height: 42px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 42px !important;
+  border-radius: 50% !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 19px !important;
+  line-height: 1 !important;
+  transition: transform .16s ease !important;
+}
+
+#root .app .category-card:hover .category-arrow,
+#root .app .category-card:focus-visible .category-arrow {
+  transform: translateX(4px) !important;
+}
+
+/* 06 — natural notification spacing. */
+#root .notifications-page .notification-job {
+  margin: 22px 0 0 !important;
+}
+
+#root .notifications-page .notification-decision-job {
+  margin: 22px 0 0 !important;
+  padding-bottom: 2px !important;
+}
+
+#root .notifications-page .notification-job :is(h2, p, small) {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+#root .notifications-page .notification-card-actions,
+#root .notifications-page .notification-chat-button {
+  margin-top: 22px !important;
+}
+
+/* 18 — complete, organized and privacy-safe public profile. */
+#root .public-profile-meta-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 9px !important;
+}
+
+#root .public-profile-meta-row .ideahire-country-badge {
+  margin: 0 !important;
+}
+
+#root .public-profile-meta-row .account-age-status,
+#root .public-profile-meta-placeholder {
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 13px !important;
+  border: 1px solid rgba(20, 20, 20, .12) !important;
+  border-radius: 999px !important;
+  background: #f3f3ef !important;
+  color: #31312e !important;
+  -webkit-text-fill-color: #31312e !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+#root .public-profile-meta-row .account-age-status.is-private {
+  color: #6c6c66 !important;
+  -webkit-text-fill-color: #6c6c66 !important;
+  font-weight: 650 !important;
+}
+
+#root .profile-content-card,
+#root .profile-expertise,
+#root .profile-reviews-section,
+#root .profile-public-portfolio,
+#root .profile-jobs-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root :is(.profile-empty-copy, .profile-portfolio-empty) {
+  margin: 0 !important;
+  color: #74746e !important;
+  -webkit-text-fill-color: #74746e !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+}
+
+#root .profile-portfolio-empty {
+  padding: 24px !important;
+  border: 1px dashed rgba(20, 20, 20, .18) !important;
+  border-radius: 16px !important;
+  background: #fafaf7 !important;
+}
+
+/* 19 — chat and attachment bars always stay inside the shell. */
+#root .chat-shell,
+#root .chat-messages,
+#root .private-work-share,
+#root .private-work-share-toggle,
+#root .chat-form {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .chat-shell {
+  overflow: hidden !important;
+}
+
+#root .private-work-share {
+  display: block !important;
+  padding: 8px 12px 0 !important;
+  overflow: hidden !important;
+}
+
+#root .private-work-share-toggle {
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  padding: 7px 10px !important;
+  overflow: hidden !important;
+}
+
+#root .private-work-share-toggle :is(b, small) {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#root .chat-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 9px !important;
+  padding: 10px 12px 12px !important;
+  overflow: hidden !important;
+}
+
+#root .chat-form textarea {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+#root .chat-form .chat-send {
+  min-width: 92px !important;
+}
+
+/* 22 — account eyebrow belongs to the heading, not to empty space. */
+#root .account-workspace-page > .app-page-header {
+  display: grid !important;
+  gap: 8px !important;
+  padding-top: clamp(34px, 5vw, 66px) !important;
+  padding-bottom: 28px !important;
+}
+
+#root .account-workspace-page > .app-page-header .section-label {
+  margin: 0 0 4px !important;
+  color: #60605b !important;
+  -webkit-text-fill-color: #60605b !important;
+  font-size: 11px !important;
+  letter-spacing: .1em !important;
+}
+
+#root .account-workspace-page > .app-page-header h1 {
+  max-width: 100% !important;
+  margin: 0 !important;
+  overflow-wrap: anywhere !important;
+  font-size: clamp(42px, 7vw, 82px) !important;
+  line-height: .96 !important;
+  letter-spacing: -.055em !important;
+}
+
+#root .account-workspace-page > .app-page-header p {
+  max-width: 680px !important;
+  margin: 10px 0 0 !important;
+}
+
+/* 05 + 10 — classic means strictly black, white and neutral grey. */
+html[data-template="classic"] {
+  --ih-classic-ink: #111111;
+  --ih-classic-paper: #ffffff;
+  --ih-classic-muted: #696965;
+  --ih-classic-line: #d8d8d3;
+  --ih-classic-soft: #f3f3ef;
+}
+
+html[data-template="classic"] #root :is(
+  .app,
+  .page,
+  .account-page,
+  .auth-page,
+  .legal-document-page,
+  .cookie-policy-page
+) {
+  background: var(--ih-classic-paper) !important;
+  color: var(--ih-classic-ink) !important;
+}
+
+html[data-template="classic"] #root .app > main > .hero,
+html[data-template="classic"] #root .app > main > .how,
+html[data-template="classic"] #root .app > main > .final-cta {
+  background: #111111 !important;
+  color: #ffffff !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app > main > :is(.categories, .split-section),
+html[data-template="classic"] #root .app > .footer {
+  background: #ffffff !important;
+  color: #111111 !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .hero :is(h1, h1 span, p, strong),
+html[data-template="classic"] #root .app > main > .how :is(h2, h3, p, span),
+html[data-template="classic"] #root .app > main > .final-cta :is(h2, p, span) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app :is(
+  .hero,
+  .categories,
+  .how,
+  .split-section,
+  .final-cta,
+  .category-card,
+  .step,
+  .floating-card
+)::before,
+html[data-template="classic"] #root .app :is(
+  .hero,
+  .categories,
+  .how,
+  .split-section,
+  .final-cta,
+  .category-card,
+  .step,
+  .floating-card
+)::after {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app :is(.visual-glow, .steps::before) {
+  display: none !important;
+}
+
+html[data-template="classic"] #root .app .floating-card {
+  border-color: #444440 !important;
+  background: #1c1c1a !important;
+  color: #ffffff !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app .floating-card :is(h3, p, span, strong) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app .category-card {
+  border-color: #d8d8d3 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover,
+html[data-template="classic"] #root .app .category-card:focus-visible {
+  border-color: #111111 !important;
+  background: #f3f3ef !important;
+}
+
+html[data-template="classic"] #root .app .category-card :is(.category-number, .category-arrow) {
+  border-color: #d1d1cc !important;
+  background: #f3f3ef !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root .app .step {
+  border-color: #444440 !important;
+  background: #1c1c1a !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app .step > span {
+  border-color: #f2f2ee !important;
+  background: #f2f2ee !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .job-option-card.is-selected,
+  .job-option-mark,
+  .job-option-duration,
+  .job-listing-pill,
+  .account-age-status,
+  .stripe-connect-status,
+  .profile-specialty-chip,
+  .talent-tag-list span,
+  .section-label,
+  .eyebrow
+) {
+  border-color: #bdbdb8 !important;
+  background: #f1f1ed !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .notification-message-icon,
+  .notification-accepted-icon,
+  .notification-decision-icon,
+  .notification-dot,
+  .messages-unread-dot
+) {
+  border-color: #bdbdb8 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .navbar,
+  .account-card,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .notification-message-card,
+  .profile-content-card,
+  .profile-expertise-card,
+  .profile-reviews-section,
+  .profile-public-portfolio,
+  .account-section-nav,
+  .account-tab-intro,
+  .project-form,
+  .jobs-search,
+  .talent-controls
+) {
+  border-color: #d8d8d3 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .site-preferences-handle,
+  .site-preferences button.is-active,
+  .account-notification-button.is-active
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Classic dark uses the same neutral system, inverted. */
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .app,
+  .page,
+  .account-page,
+  .auth-page,
+  .legal-document-page,
+  .cookie-policy-page,
+  .app > main > .categories,
+  .app > main > .split-section,
+  .app > .footer
+) {
+  background: #111111 !important;
+  color: #f4f4f0 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .navbar,
+  .account-card,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .notification-message-card,
+  .profile-content-card,
+  .profile-expertise-card,
+  .profile-reviews-section,
+  .profile-public-portfolio,
+  .account-section-nav,
+  .account-tab-intro,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .category-card
+) {
+  border-color: #41413d !important;
+  background: #1b1b19 !important;
+  color: #f4f4f0 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .navbar,
+  .account-card,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .chat-shell,
+  .notification-message-card,
+  .profile-content-card,
+  .profile-expertise-card,
+  .profile-reviews-section,
+  .profile-public-portfolio,
+  .account-section-nav,
+  .account-tab-intro,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .category-card
+) :is(h1, h2, h3, h4, p, span, strong, small, label, a) {
+  color: #f4f4f0 !important;
+  -webkit-text-fill-color: #f4f4f0 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app .category-card :is(.category-number, .category-arrow),
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .job-listing-pill,
+  .account-age-status,
+  .profile-specialty-chip,
+  .section-label
+) {
+  border-color: #50504b !important;
+  background: #292927 !important;
+  color: #f4f4f0 !important;
+  -webkit-text-fill-color: #f4f4f0 !important;
+}
+
+/* Dark surfaces and form fields keep real contrast in both templates. */
+html[data-theme="dark"] #root :is(input, textarea, select, .ideahire-country-trigger, .ideahire-country-menu) {
+  border-color: #4a4a45 !important;
+  background: #20201e !important;
+  color: #f4f4f0 !important;
+  -webkit-text-fill-color: #f4f4f0 !important;
+}
+
+html[data-theme="dark"] #root :is(input, textarea)::placeholder {
+  color: #aaa9a2 !important;
+  -webkit-text-fill-color: #aaa9a2 !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] #root :is(.profile-empty-copy, .profile-portfolio-empty) {
+  color: #b6b6ae !important;
+  -webkit-text-fill-color: #b6b6ae !important;
+}
+
+html[data-theme="dark"] #root .profile-portfolio-empty {
+  border-color: #464641 !important;
+  background: #20201e !important;
+}
+
+/* Full legal pages — never clipped on desktop or mobile. */
+#root :is(.cookie-policy-page, .legal-document-page) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh !important;
+  height: auto !important;
+  padding-bottom: 96px !important;
+  overflow: visible !important;
+  clip-path: none !important;
+}
+
+#root :is(.cookie-policy-shell, .legal-document-shell),
+#root :is(.cookie-policy-hero, .legal-document-hero),
+#root :is(.cookie-policy-section, .cookie-policy-inventory, .legal-document-content) {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 1240px) {
+  #root .navbar.account-navbar {
+    grid-template-columns: auto minmax(310px, 1fr) auto !important;
+    gap: 12px !important;
+    padding-right: 18px !important;
+    padding-left: 18px !important;
+  }
+
+  #root .account-navbar .account-primary-nav a {
+    padding: 0 7px !important;
+    font-size: 11px !important;
+  }
+
+  #root .account-create-job-button {
+    min-width: 42px !important;
+    padding: 0 11px !important;
+  }
+
+  #root .account-navbar .account-menu .account-mini {
+    grid-template-columns: 34px auto !important;
+  }
+
+  #root .account-navbar .account-mini-name,
+  #root .account-navbar .account-menu-caret {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1020px) {
+  #root .navbar.account-navbar {
+    grid-template-columns: auto 1fr auto !important;
+  }
+
+  #root .account-create-job-label {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    white-space: nowrap !important;
+  }
+
+  #root .account-navbar .account-primary-nav a {
+    font-size: 10px !important;
+  }
+
+  #root .app > main > .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, .78fr) !important;
+    gap: 34px !important;
+    padding: 64px 38px !important;
+  }
+}
+
+@media (max-width: 820px) {
+  #root .navbar.account-navbar {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "brand actions"
+      "nav nav" !important;
+    gap: 9px 12px !important;
+    padding: 10px 12px !important;
+  }
+
+  #root .account-navbar-brand { grid-area: brand !important; }
+  #root .account-navbar-actions { grid-area: actions !important; }
+  #root .account-navbar .account-primary-nav {
+    grid-area: nav !important;
+    max-width: none !important;
+  }
+
+  #root .account-navbar .account-primary-nav a {
+    min-height: 40px !important;
+    font-size: 10px !important;
+  }
+
+  #root .app > main > .hero {
+    grid-template-columns: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    padding: 54px 34px !important;
+  }
+
+  #root .app .hero-visual {
+    width: 100% !important;
+    max-width: 560px !important;
+    min-height: 390px !important;
+    justify-self: center !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #root .home-navbar {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+
+  #root .home-account-cluster,
+  #root .home-navbar .nav-actions > .btn-dark {
+    display: none !important;
+  }
+
+  #root .home-account-avatar-link {
+    padding: 5px 7px 5px 10px !important;
+    border: 1px solid rgba(20, 20, 20, .15) !important;
+    border-radius: 999px !important;
+  }
+
+  #root .home-account-avatar-label {
+    display: inline-block !important;
+    font-size: 10px !important;
+  }
+
+  #root .app > main > .hero {
+    width: calc(100% - 16px) !important;
+    margin-top: 10px !important;
+    padding: 48px 20px 34px !important;
+    border-radius: 24px !important;
+  }
+
+  #root .app .hero-content h1 {
+    margin: 26px 0 20px !important;
+    font-size: clamp(48px, 14vw, 72px) !important;
+    line-height: .96 !important;
+  }
+
+  #root .app .hero-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root .app .hero-actions .btn {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #root .app .hero-visual {
+    min-height: 310px !important;
+  }
+
+  #root .app > main > :is(.categories, .how, .split-section).section {
+    width: calc(100% - 24px) !important;
+    margin-top: 52px !important;
+  }
+
+  #root .app .category-card {
+    grid-template-columns: 40px minmax(0, 1fr) 40px !important;
+    min-height: 68px !important;
+    padding: 10px 12px !important;
+  }
+
+  #root .app .category-name {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #root .public-profile-meta-row {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  #root .public-profile-meta-row :is(
+    .ideahire-country-badge,
+    .account-age-status,
+    .public-profile-meta-placeholder
+  ) {
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  #root .chat-form {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root .chat-form .chat-send {
+    width: 100% !important;
+  }
+
+  #root .private-work-share-toggle small {
+    display: none !important;
+  }
+
+  #root :is(.cookie-policy-page, .legal-document-page) {
+    padding: 10px 8px 78px !important;
+  }
+
+  #root :is(.cookie-policy-hero, .legal-document-hero) {
+    padding: 34px 20px !important;
+    border-radius: 20px !important;
+  }
+
+  #root .account-workspace-page > .app-page-header {
+    padding-top: 30px !important;
+    padding-bottom: 22px !important;
+  }
+
+  #root .account-workspace-page > .app-page-header h1 {
+    font-size: clamp(40px, 13vw, 58px) !important;
+  }
+}
+
+@media (max-width: 470px) {
+  #root .account-navbar-brand .logo {
+    font-size: 19px !important;
+  }
+
+  #root .account-navbar .navbar-home-back,
+  #root .account-navbar .account-notification-button,
+  #root .account-navbar .account-menu .account-mini-avatar {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+  }
+
+  #root .account-navbar .account-primary-nav {
+    overflow-x: auto !important;
+    grid-template-columns: repeat(4, minmax(86px, 1fr)) !important;
+    justify-content: start !important;
+    scrollbar-width: none !important;
+  }
+
+  #root .account-navbar .account-primary-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #root .account-navbar .account-mini-copy,
+  #root .account-navbar .account-menu-caret {
+    display: none !important;
+  }
+
+  #root .account-navbar .account-menu .account-mini {
+    display: block !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  #root .app .hero-content h1 {
+    font-size: clamp(42px, 13.5vw, 60px) !important;
+  }
+}
+
 html[data-template="classic"][data-theme="dark"] #root .admin-page :is(
   .admin-primary-button,
   .dispute-primary-button,
