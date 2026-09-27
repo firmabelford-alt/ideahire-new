@@ -27,6 +27,8 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Konto": "Account",
+  "Wykonawcy": "Contractors",
   "Szablony": "Templates",
   "Wygląd interfejsu": "Interface appearance",
   "Wybierz szatę IdeaHire": "Choose your IdeaHire style",
