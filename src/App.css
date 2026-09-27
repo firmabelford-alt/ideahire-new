@@ -38895,3 +38895,629 @@ html[data-theme="dark"] .private-work-access-item code {
     flex-direction: column;
   }
 }
+
+/* ================================================================
+   IDEA HIRE — V11 FINAL UI LOCK — 2026-09-27
+   Final visual layer. It intentionally changes presentation only.
+   Payment, work-delivery, moderation and privacy logic stay untouched.
+   ================================================================ */
+
+:root {
+  --ih-release: 20260927-110;
+  --ih-final-content: 1320px;
+  --ih-final-document: 1080px;
+  --ih-final-gutter: 24px;
+  --ih-final-radius-sm: 12px;
+  --ih-final-radius-md: 18px;
+  --ih-final-radius-lg: 24px;
+  --ih-final-control: 48px;
+  --ih-final-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 112px;
+  scrollbar-gutter: stable;
+}
+
+body,
+#root {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+#categories,
+#how-it-works,
+#for-users,
+#account-profile-data,
+#account-expertise,
+#account-portfolio,
+#account-jobs,
+#account-templates,
+#account-preferences {
+  scroll-margin-top: 112px;
+}
+
+/* Clear, consistent keyboard focus in every skin. */
+
+#root :where(a, button, input, textarea, select, summary):focus-visible,
+body > .private-work-lightbox :where(a, button):focus-visible {
+  outline: 3px solid var(--ih-focus, rgba(71, 119, 255, 0.34)) !important;
+  outline-offset: 3px !important;
+}
+
+/* One stable horizontal axis for all signed-in and public workspaces. */
+
+@media (min-width: 721px) {
+  #root :is(
+    .page > .app-page,
+    .account-page > .app-page,
+    .account-page > .messages-page,
+    .account-page > .chat-page,
+    .privacy-center-shell,
+    .disputes-shell,
+    .age-access-shell,
+    .admin-shell,
+    .moderation-user-shell,
+    .limited-account-shell
+  ) {
+    width: min(var(--ih-final-content), calc(100% - (var(--ih-final-gutter) * 2))) !important;
+    max-width: var(--ih-final-content) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+  }
+
+  #root :is(.legal-document-shell, .cookie-policy-shell) {
+    width: min(var(--ih-final-document), calc(100% - (var(--ih-final-gutter) * 2))) !important;
+    max-width: var(--ih-final-document) !important;
+  }
+}
+
+/* The navigation owns the full upper band; content below remains restrained. */
+
+#root :is(
+  .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar
+) {
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 721px) {
+  #root :is(
+    .navbar.home-navbar,
+    .navbar.account-navbar,
+    .navbar.admin-navbar,
+    .navbar.restricted-navbar,
+    .navbar.restricted-account-navbar
+  ) {
+    width: calc(100% - 24px) !important;
+    max-width: none !important;
+    min-height: 86px !important;
+    margin: 10px auto 0 !important;
+    padding: 12px 16px 12px 24px !important;
+    border-radius: 23px !important;
+  }
+
+  #root :is(
+    .home-navbar .nav-links a,
+    .account-navbar .nav-links.account-primary-nav a,
+    .admin-navbar .admin-nav-links a
+  ) {
+    min-height: 52px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 13px !important;
+  }
+
+  #root :is(
+    .home-navbar .nav-actions .btn,
+    .account-create-job-button,
+    .account-notification-button,
+    .account-navbar .account-menu .account-mini
+  ) {
+    min-height: 52px !important;
+  }
+}
+
+/* Authentication: no checkerboard in either template or colour mode. */
+
+#root .page:has(> .auth-card),
+html[data-theme="dark"] #root .page:has(> .auth-card) {
+  background-color: #07111d !important;
+  background-image:
+    radial-gradient(circle at 10% 12%, rgba(77, 125, 215, 0.18), transparent 31%),
+    radial-gradient(circle at 92% 88%, rgba(57, 146, 165, 0.14), transparent 30%),
+    linear-gradient(145deg, #050b13 0%, #0a1726 55%, #07111d 100%) !important;
+  background-size: auto !important;
+}
+
+#root .page:has(> .auth-card)::before,
+#root .page:has(> .auth-card)::after {
+  border: 0 !important;
+  background: radial-gradient(circle, rgba(110, 151, 224, 0.12), transparent 68%) !important;
+  box-shadow: none !important;
+  filter: blur(8px);
+  opacity: 0.78;
+}
+
+#root .page > .auth-card {
+  width: min(540px, 100%) !important;
+  border-radius: var(--ih-final-radius-lg) !important;
+}
+
+#root .page > .auth-card:has(input[type="date"]) {
+  width: min(620px, 100%) !important;
+}
+
+#root .auth-link-button {
+  min-height: 40px !important;
+  padding-inline: 14px !important;
+  border-radius: 11px !important;
+  font-size: 12px !important;
+}
+
+html[data-template="classic"] #root .page:has(> .auth-card)::before,
+html[data-template="classic"] #root .page:has(> .auth-card)::after {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .page:has(> .auth-card) {
+  background: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .page:has(> .auth-card) {
+  background: #0f0f0e !important;
+}
+
+/* Same-document navigation must never land on an invisible reveal state. */
+
+#root .app :is(#categories, #how-it-works, #for-users):target .home-reveal,
+#root .app :is(#categories, #how-it-works, #for-users).is-visible,
+#root .app :is(#categories, #how-it-works, #for-users):target {
+  opacity: 1 !important;
+  translate: 0 !important;
+  scale: 1 !important;
+  filter: none !important;
+}
+
+#root .app :is(#categories, #how-it-works, #for-users):target .split-card {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Home cards stay calm and readable instead of looking like stacked boxes. */
+
+#root .app .category-card,
+#root .app .how .step,
+#root .app .split-card,
+#root .app .final-cta {
+  overflow: hidden;
+}
+
+#root .app .category-card,
+#root .app .how .step {
+  border-radius: 20px !important;
+}
+
+#root .app .split-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+
+#root .app .split-card > .btn {
+  position: static !important;
+  inset: auto !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin-top: auto !important;
+  flex: 0 0 auto !important;
+}
+
+#root .app .category-name,
+#root .app .category-number,
+#root .app .category-arrow {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+/* Account sections scroll normally and never become an obstructing sticky bar. */
+
+#root .account-section-nav {
+  position: static !important;
+  top: auto !important;
+  z-index: auto !important;
+}
+
+#root .account-section-nav button,
+#root .account-section-nav a {
+  min-height: 48px !important;
+}
+
+#root .account-tab-intro,
+#root .account-form-section,
+#root .account-card,
+#root .profile-portfolio-manager,
+#root .discovery-settings-card,
+#root .job-republication-panel {
+  scroll-margin-top: 28px;
+}
+
+/* Search summaries keep the count and action on one baseline. */
+
+#root .jobs-results-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px 16px !important;
+}
+
+#root .jobs-results-header > :first-child,
+#root .jobs-results-count,
+#root .jobs-clear-filters {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  white-space: nowrap !important;
+}
+
+#root .jobs-clear-filters {
+  min-height: 42px !important;
+  border-radius: 11px !important;
+}
+
+/* Messages use the same header geometry and badge numerals never stack. */
+
+#root .account-page .messages-heading {
+  align-items: end !important;
+}
+
+#root .account-page .messages-overview,
+#root .account-page .messages-overview strong,
+#root .account-page .messages-overview span,
+#root :is(.messages-unread-count, .account-notification-dot, .notification-count) {
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+#root .account-page .chat-collapsible,
+#root .account-page .agreement-summary-card,
+#root .account-page .dispute-panel {
+  overflow: hidden !important;
+  border-radius: var(--ih-final-radius-md) !important;
+}
+
+/* New work delivery controls follow both visual templates. */
+
+html[data-template="classic"] #root :is(
+  .private-work-extra-section,
+  .private-work-access-editor,
+  .private-work-written-item,
+  .private-work-access-item,
+  .private-work-release-dialog
+) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .private-work-link-inputs select,
+  .private-work-extra-body input,
+  .private-work-extra-body textarea,
+  .private-work-access-editor input,
+  .private-work-access-editor textarea
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .private-work-secure-access-button,
+  .private-work-release-amount
+) {
+  border-color: var(--ih-ink) !important;
+  background: var(--ih-ink) !important;
+  color: var(--ih-surface) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .private-work-secure-access-button,
+  .private-work-release-amount
+) {
+  background: #f2f2ee !important;
+  color: #111111 !important;
+}
+
+/* Legal pages remain centered while large tables scroll inside their card. */
+
+#root .legal-document-content table {
+  width: 100% !important;
+  display: table;
+}
+
+#root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) {
+  min-width: 0 !important;
+}
+
+/* Admin and evidence tables stay usable instead of compressing labels. */
+
+#root :is(
+  .admin-content-grid,
+  .admin-queue-panel,
+  .moderation-workbench,
+  .profile-content-report-history,
+  .dispute-panel
+) {
+  min-width: 0 !important;
+}
+
+#root :is(
+  .admin-table-wrap,
+  .admin-audit-table-wrap,
+  .moderation-table-wrap,
+  .profile-content-report-table-wrap
+) {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overscroll-behavior-inline: contain;
+}
+
+/* ------------------------- MOBILE FINAL ------------------------- */
+
+@media (max-width: 720px) {
+  :root {
+    --ih-final-gutter: 10px;
+  }
+
+  html {
+    scroll-padding-top: 12px;
+    scrollbar-gutter: auto;
+  }
+
+  #categories,
+  #how-it-works,
+  #for-users {
+    scroll-margin-top: 12px;
+  }
+
+  #root :is(.page, .account-page, .app) :is(a, button, label, strong, small) {
+    word-break: normal !important;
+    hyphens: none !important;
+  }
+
+  #root :is(
+    .navbar.home-navbar,
+    .navbar.account-navbar,
+    .navbar.admin-navbar,
+    .navbar.restricted-navbar,
+    .navbar.restricted-account-navbar
+  ) {
+    width: calc(100% - 8px) !important;
+    margin: 4px auto 0 !important;
+  }
+
+  #root .home-navbar .nav-links.home-nav-links a,
+  #root .account-navbar .nav-links.account-primary-nav a {
+    min-height: 36px !important;
+    font-size: 9.5px !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.12px !important;
+  }
+
+  #root .home-navbar .nav-actions > .btn {
+    min-height: 40px !important;
+    font-size: 10.5px !important;
+  }
+
+  #root .app > main > .hero {
+    padding-right: 18px !important;
+    padding-left: 18px !important;
+    border-radius: 0 0 24px 24px !important;
+  }
+
+  #root .app .hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+  }
+
+  #root .app .hero-actions .btn {
+    width: 100% !important;
+    min-height: 50px !important;
+  }
+
+  #root .app .category-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  #root .app .category-card,
+  #root .app .category-card:nth-child(n) {
+    min-height: 72px !important;
+    grid-template-columns: 30px minmax(0, 1fr) 32px !important;
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  #root .app .category-name {
+    display: block !important;
+    overflow: hidden !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #root .app .split-card,
+  #root .app .split-card.light,
+  html[data-theme="dark"] #root .app .split-card.light {
+    min-height: 330px !important;
+    padding: 26px 22px !important;
+    border-radius: 20px !important;
+  }
+
+  #root .app .split-card > .btn {
+    width: 100% !important;
+    min-height: 48px !important;
+    justify-content: center !important;
+  }
+
+  #root .page > .auth-card {
+    width: 100% !important;
+    padding: 24px 18px !important;
+    border-radius: 20px !important;
+  }
+
+  #root .auth-card .logo {
+    margin-bottom: 26px !important;
+  }
+
+  #root .auth-header h1 {
+    font-size: clamp(38px, 12vw, 50px) !important;
+    letter-spacing: -2.2px !important;
+  }
+
+  #root .account-section-nav {
+    margin-bottom: 12px !important;
+    padding: 6px !important;
+    scroll-padding-inline: 6px;
+  }
+
+  #root .account-section-nav button,
+  #root .account-section-nav a {
+    min-width: 118px !important;
+    min-height: 44px !important;
+    flex: 0 0 118px !important;
+    font-size: 10px !important;
+  }
+
+  #root .profile-category-options {
+    grid-template-columns: 1fr !important;
+  }
+
+  #root .profile-category-option {
+    min-height: 48px !important;
+  }
+
+  #root .jobs-results-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  #root .jobs-clear-filters {
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+  }
+
+  #root .account-page .messages-heading {
+    grid-template-columns: minmax(0, 1fr) 82px !important;
+    align-items: end !important;
+  }
+
+  #root .account-page .messages-overview {
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+  }
+
+  #root .account-page .messages-row {
+    grid-template-columns: 46px minmax(0, 1fr) !important;
+  }
+
+  #root .account-page .messages-row :is(h2, h3, strong, p, span) {
+    min-width: 0 !important;
+  }
+
+  #root .chat-message {
+    max-width: 88% !important;
+  }
+
+  #root .legal-document-content table {
+    display: block !important;
+    overflow-x: auto !important;
+    white-space: normal !important;
+  }
+
+  #root .legal-document-content table :is(th, td) {
+    min-width: 140px;
+  }
+
+  #root :is(.legal-document-nav, .cookie-policy-nav) {
+    align-items: stretch !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  #root :is(.legal-document-nav, .cookie-policy-nav) :is(a, button) {
+    width: 100% !important;
+    min-height: 44px !important;
+    justify-content: center !important;
+  }
+
+  .private-work-release-dialog {
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  .private-work-release-dialog h2 {
+    font-size: 25px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #root .home-navbar .nav-links.home-nav-links a,
+  #root .account-navbar .nav-links.account-primary-nav a {
+    font-size: 9px !important;
+  }
+
+  #root .home-navbar .nav-actions > .btn {
+    padding-inline: 9px !important;
+    font-size: 9.5px !important;
+  }
+
+  #root .app .hero h1 {
+    font-size: clamp(39px, 12.5vw, 52px) !important;
+  }
+
+  #root .jobs-results-header {
+    grid-template-columns: 1fr !important;
+  }
+
+  #root .jobs-clear-filters {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* Motion is polished but never allowed to hide content for reduced-motion users. */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  #root .app .home-reveal,
+  #root .app .home-reveal.is-above,
+  #root .app .home-reveal.is-below,
+  #root .app .home-reveal.is-visible {
+    opacity: 1 !important;
+    translate: 0 !important;
+    scale: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
