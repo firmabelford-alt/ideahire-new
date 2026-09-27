@@ -525,6 +525,9 @@ function App({ session, loading }) {
                 to="/account"
                 aria-label="Moje konto"
               >
+                <span className="home-account-avatar-label">
+                  Moje konto
+                </span>
                 <span className="account-mini-avatar">
                   {avatarUrl ? (
                     <img
@@ -627,7 +630,6 @@ function App({ session, loading }) {
             >
               <div className="card-header">
                 <span>Aktualne zlecenie</span>
-                <span className="live-dot">●</span>
               </div>
 
               <h3>{activeJob.title}</h3>
@@ -645,8 +647,6 @@ function App({ session, loading }) {
             </div>
 
             <div className="floating-card card-small card-top">
-              <span className="mini-icon">✦</span>
-
               <div>
                 <strong>Najnowsze zlecenia</strong>
                 <span>{nextJob.title}</span>
@@ -654,8 +654,6 @@ function App({ session, loading }) {
             </div>
 
             <div className="floating-card card-small card-bottom">
-              <span className="check-icon">↗</span>
-
               <div>
                 <strong>Kolejne zlecenie</strong>
                 <span>{followingJob.title}</span>
@@ -710,7 +708,7 @@ function App({ session, loading }) {
                   {category}
                 </span>
 
-                <span className="category-arrow">↗</span>
+                <span className="category-arrow">→</span>
               </button>
             ))}
           </div>
