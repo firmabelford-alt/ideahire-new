@@ -11519,7 +11519,6 @@ html[data-theme="dark"] :is(
     animation: none;
   }
 }
-
 /* =========================================================
    IDEA HIRE — V10.3 CLASSIC + MOBILE REPAIR — 2026-09-25
    Pure white classic skin, circular profile flags and readable
@@ -39520,4 +39519,1461 @@ html[data-template="classic"][data-theme="dark"] #root :is(
     filter: none !important;
     transition: none !important;
   }
+}
+
+/* ================================================================
+   IDEA HIRE — V12 SCREENSHOT REPAIR — 2026-09-27
+   Authoritative visual corrections based on the supplied desktop and
+   mobile screenshots. No payment, data, moderation or routing logic.
+   ================================================================ */
+
+:root {
+  --ih-release: 20260927-120;
+}
+
+html,
+body,
+#root,
+#root > *,
+#root :is(.app, .page, .account-page, .admin-page) {
+  max-width: 100%;
+}
+
+html,
+body,
+#root {
+  overflow-x: clip !important;
+}
+
+#root *,
+#root *::before,
+#root *::after {
+  box-sizing: border-box;
+}
+
+#root :is(
+  .app-page,
+  .messages-page,
+  .chat-page,
+  .account-card,
+  .job-card,
+  .messages-heading,
+  .messages-heading-copy,
+  .messages-list,
+  .messages-row,
+  .profile-preview,
+  .profile-info,
+  .legal-document-page,
+  .legal-document-shell,
+  .legal-document-content,
+  .cookie-policy-page,
+  .cookie-policy-shell
+) {
+  min-width: 0 !important;
+}
+
+/* The decorative logo dot is removed in both templates and themes. */
+
+#root .logo::after,
+#root .cookie-policy-logo::after,
+#root .admin-navbar-brand::after,
+#root .restricted-navbar-brand::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Country presentation: text + ISO code only. Flags are intentionally absent. */
+
+#root :is(
+  .ideahire-country-flag,
+  .ideahire-country-option-flag,
+  .ideahire-country-badge-flag,
+  .ideahire-flag-shell,
+  .ideahire-flag-emoji
+) {
+  display: none !important;
+}
+
+#root .ideahire-country-selected {
+  width: 100%;
+  min-width: 0;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center;
+  gap: 12px !important;
+}
+
+#root .ideahire-country-selected-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#root :is(.ideahire-country-selected-code, .ideahire-country-option-code) {
+  min-width: 34px;
+  display: inline-grid;
+  place-items: center;
+  padding: 5px 8px;
+  border: 1px solid rgba(15, 30, 54, 0.11);
+  border-radius: 8px;
+  background: rgba(15, 30, 54, 0.055);
+  color: #526075;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+#root .ideahire-country-option {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 12px !important;
+  min-height: 46px;
+  padding: 8px 10px !important;
+}
+
+#root .ideahire-country-menu {
+  max-width: 100%;
+}
+
+#root .ideahire-country-badge {
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  line-height: 1.2 !important;
+}
+
+#root .ideahire-country-badge-name {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  overflow: hidden !important;
+  clip: auto !important;
+  color: inherit !important;
+  font-size: 11px !important;
+  font-weight: 760 !important;
+  line-height: 1.2 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
+}
+
+/* Profile header: stable geometry, equal country/age pills and readable data. */
+
+#root .account-profile-workspace > .profile-preview {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 20px !important;
+}
+
+#root .account-profile-workspace .profile-info {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 0 10px !important;
+}
+
+#root .account-profile-workspace .profile-info :is(h2, p) {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+#root .account-profile-workspace .profile-info p {
+  margin-bottom: 11px !important;
+}
+
+#root .account-profile-workspace .profile-info :is(
+  .ideahire-country-badge,
+  .account-age-status
+) {
+  min-height: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.11) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  font-size: 11px !important;
+  font-weight: 760 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+#root .app-page > .account-card > .profile-preview {
+  max-width: 100%;
+}
+
+#root .app-page > .account-card > .profile-preview .profile-info {
+  min-width: 0;
+}
+
+#root .app-page > .account-card > .profile-preview .profile-info :is(h1, h2, p) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Conversation heading and rows: the count never splits or leaves the viewport. */
+
+#root .account-page > .messages-page {
+  width: min(1120px, calc(100% - 24px)) !important;
+  max-width: 1120px !important;
+}
+
+#root .account-page .messages-heading {
+  width: 100% !important;
+  max-width: 100% !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+}
+
+#root .account-page .messages-heading-copy {
+  min-width: 0 !important;
+}
+
+#root .account-page .messages-overview {
+  width: 104px !important;
+  min-width: 104px !important;
+  max-width: 104px !important;
+  min-height: 76px !important;
+  display: grid !important;
+  place-content: center !important;
+  gap: 5px !important;
+  padding: 11px 10px !important;
+  overflow: hidden !important;
+  border-radius: 15px !important;
+}
+
+#root .account-page .messages-overview strong {
+  min-width: 2ch !important;
+  display: block !important;
+  font-size: 30px !important;
+  line-height: 0.92 !important;
+  text-align: center !important;
+}
+
+#root .account-page .messages-overview span {
+  display: block !important;
+  font-size: 9px !important;
+  font-weight: 820 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.09em !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+}
+
+#root .account-page :is(.messages-list, .messages-row) {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#root .account-page .messages-row {
+  overflow: hidden !important;
+}
+
+#root .account-page .messages-content {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .account-page :is(.messages-name, .messages-job, .messages-preview) {
+  max-width: 100% !important;
+}
+
+/* Notification inbox: complete cards and a natural bottom edge. */
+
+#root .page > .app-page {
+  padding-bottom: clamp(82px, 8vw, 124px) !important;
+}
+
+#root .page .jobs-list,
+#root .page .jobs-list > *,
+#root .page :is(
+  .notification-message-card,
+  .notification-accepted-card,
+  .notification-decision-card,
+  .notification-block-card
+) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+#root .page :is(
+  .notification-message-card,
+  .notification-accepted-card,
+  .notification-decision-card,
+  .notification-block-card
+) {
+  overflow: hidden !important;
+}
+
+#root .page :is(
+  .notification-message-card,
+  .notification-accepted-card,
+  .notification-decision-card,
+  .notification-block-card
+) :is(h2, p, strong, span) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Legal documents: normal centered pages without cut edges. */
+
+#root :is(.legal-document-page, .cookie-policy-page) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh !important;
+  padding: 28px clamp(18px, 3vw, 42px) 84px !important;
+  overflow-x: clip !important;
+}
+
+#root :is(.legal-document-shell, .cookie-policy-shell) {
+  width: min(1120px, 100%) !important;
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+
+#root :is(.legal-document-nav-actions, .cookie-policy-nav) {
+  min-width: 0 !important;
+  flex-wrap: wrap !important;
+}
+
+#root :is(
+  .legal-document-hero,
+  .cookie-policy-hero,
+  .legal-document-warning,
+  .cookie-policy-highlight,
+  .legal-document-content,
+  .cookie-policy-section,
+  .cookie-policy-inventory
+) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+#root :is(.legal-document-hero, .cookie-policy-hero) {
+  padding: clamp(38px, 6vw, 68px) !important;
+  border-radius: 26px !important;
+}
+
+#root .legal-document-tabs {
+  position: static !important;
+  top: auto !important;
+}
+
+#root .legal-document-content table {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  overflow-x: auto !important;
+}
+
+#root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) :is(
+  h1,
+  h2,
+  h3,
+  p,
+  li,
+  a,
+  code,
+  td,
+  th
+) {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* File inputs always have a visible action, label and filename. */
+
+#root input[type="file"] {
+  max-width: 100% !important;
+  min-height: 54px !important;
+  color: var(--ih-ink, #172033) !important;
+}
+
+#root input[type="file"]::file-selector-button {
+  min-height: 36px !important;
+  margin-right: 12px !important;
+  padding: 0 13px !important;
+  border: 1px solid #10264c !important;
+  border-radius: 9px !important;
+  background: #10264c !important;
+  color: #ffffff !important;
+  font: inherit !important;
+  font-size: 11px !important;
+  font-weight: 760 !important;
+}
+
+/* Home closing section: no giant cropped copy and no invisible CTA. */
+
+#root .app > main > .final-cta {
+  width: min(1320px, calc(100% - 24px)) !important;
+  max-width: 1320px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#root .app > main > .final-cta h2 {
+  max-width: 920px !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+#root .app > main > .final-cta .btn-light {
+  position: relative !important;
+  z-index: 3 !important;
+  border: 1px solid #ffffff !important;
+  background: #ffffff !important;
+  color: #0d1728 !important;
+  -webkit-text-fill-color: #0d1728 !important;
+}
+
+#root .app > main > .final-cta .btn-light * {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* =================================================================
+   CLASSIC TEMPLATE — STRICT BLACK / WHITE / GREY, NO BLUE LEAKAGE
+   ================================================================= */
+
+html[data-template="classic"] {
+  --ih-page: #ffffff;
+  --ih-canvas: #ffffff;
+  --ih-surface: #ffffff;
+  --ih-surface-soft: #f5f5f5;
+  --ih-line: #dedede;
+  --ih-line-strong: #bcbcbc;
+  --ih-ink: #101010;
+  --ih-ink-soft: #2d2d2d;
+  --ih-copy: #4f4f4f;
+  --ih-muted: #6b6b6b;
+  --ih-navy-950: #050505;
+  --ih-navy-900: #101010;
+  --ih-navy-850: #171717;
+  --ih-navy-800: #222222;
+  --ih-navy-700: #343434;
+  --ih-blue-600: #111111;
+  --ih-blue-100: #eeeeee;
+  --ih-blue-soft: #f6f6f6;
+  --ih-violet: #111111;
+  --ih-violet-deep: #000000;
+  --ih-violet-soft: #eeeeee;
+  --ih-mint: #555555;
+  --ih-mint-soft: #eeeeee;
+  --ih-sun: #555555;
+  --ih-sun-soft: #f2f2f2;
+  --ih-rose-soft: #f2f2f2;
+  --ih-focus: rgba(17, 17, 17, 0.28);
+}
+
+html[data-template="classic"][data-theme="dark"] {
+  --ih-page: #0d0d0d;
+  --ih-canvas: #0d0d0d;
+  --ih-surface: #191919;
+  --ih-surface-soft: #222222;
+  --ih-line: #393939;
+  --ih-line-strong: #525252;
+  --ih-ink: #f5f5f2;
+  --ih-ink-soft: #ddddda;
+  --ih-copy: #b7b7b2;
+  --ih-muted: #999994;
+  --ih-blue-600: #f5f5f2;
+  --ih-blue-100: #292929;
+  --ih-blue-soft: #222222;
+  --ih-violet: #f5f5f2;
+  --ih-violet-deep: #ffffff;
+  --ih-violet-soft: #292929;
+  --ih-mint: #c9c9c4;
+  --ih-mint-soft: #292929;
+  --ih-sun: #c9c9c4;
+  --ih-sun-soft: #292929;
+  --ih-rose-soft: #292929;
+  --ih-focus: rgba(255, 255, 255, 0.3);
+}
+
+html[data-template="classic"] #root :is(
+  .app,
+  .page,
+  .account-page,
+  .admin-page,
+  .privacy-center-page,
+  .disputes-page,
+  .age-access-page,
+  .legal-document-page,
+  .cookie-policy-page
+) {
+  background-color: var(--ih-page) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .navbar.home-navbar,
+  .navbar.account-navbar,
+  .navbar.admin-navbar,
+  .navbar.restricted-navbar,
+  .navbar.restricted-account-navbar,
+  .account-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .account-form-section,
+  .profile-portfolio-manager,
+  .discovery-settings-card,
+  .job-republication-panel,
+  .privacy-entry-card,
+  .dispute-panel,
+  .admin-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .legal-document-content,
+  .cookie-policy-section,
+  .cookie-policy-inventory
+) {
+  border-color: var(--ih-line) !important;
+  background-color: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .jobs-search,
+  .talent-controls,
+  .jobs-search-box,
+  .talent-search-box,
+  .jobs-order-panel,
+  .talent-order-row,
+  .jobs-results-header,
+  .messages-list-header,
+  .account-tab-intro,
+  .account-section-nav,
+  .profile-specialties-field,
+  .profile-skills-field,
+  .profile-portfolio-editor,
+  .profile-portfolio-edit-card,
+  .chat-collapsible-panel,
+  .agreement-workspace,
+  .chat-dispute-card
+) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface-soft) !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .stripe-connect-icon,
+  .stripe-connect-status,
+  .discovery-settings-icon,
+  .privacy-entry-icon,
+  .notification-message-icon,
+  .notification-accepted-icon,
+  .notification-decision-icon,
+  .notification-block-icon,
+  .jobs-order-icon,
+  .jobs-search-icon,
+  .agreement-status-icon,
+  .agreement-version-pill,
+  .agreement-pending-pill,
+  .agreement-waiting-icon,
+  .job-active-badge,
+  .talent-match-badge,
+  .job-listing-pill,
+  .profile-specialty-chip,
+  .profile-edit-skill-chip,
+  .talent-tag-list span,
+  .content-report-status
+) {
+  border-color: var(--ih-line-strong) !important;
+  background-color: var(--ih-surface-soft) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .section-label,
+  .app-page-kicker,
+  .account-tab-kicker,
+  .stripe-connect-eyebrow,
+  .agreement-eyebrow,
+  .dispute-eyebrow
+) {
+  color: var(--ih-copy) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-dark,
+  .discovery-primary-button,
+  .privacy-primary-button,
+  .agreement-primary-button,
+  .dispute-primary-button,
+  .chat-send,
+  .notification-chat-button,
+  .account-create-job-button
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-outline,
+  .btn-ghost,
+  .privacy-secondary-button,
+  .agreement-secondary-button,
+  .dispute-secondary-button
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .btn-dark,
+  .discovery-primary-button,
+  .privacy-primary-button,
+  .agreement-primary-button,
+  .dispute-primary-button,
+  .chat-send,
+  .notification-chat-button,
+  .account-create-job-button
+) {
+  border-color: #f3f3ef !important;
+  background: #f3f3ef !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(input, textarea, select) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root input[type="file"]::file-selector-button {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root input[type="file"]::file-selector-button {
+  border-color: #f3f3ef !important;
+  background: #f3f3ef !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root .app > main::before,
+html[data-template="classic"] #root .app > main > .hero,
+html[data-template="classic"] #root .app > main > .categories.section,
+html[data-template="classic"] #root .app > main > .split-section.section,
+html[data-template="classic"] #root .app > .footer {
+  background-color: var(--ih-page) !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .hero {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .app .hero::before,
+html[data-template="classic"] #root .app .hero::after,
+html[data-template="classic"] #root .app .visual-glow {
+  background: rgba(110, 110, 110, 0.16) !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .app .hero :is(h1, h1 span, .hero-text, .eyebrow) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  background: none !important;
+}
+
+html[data-template="classic"] #root .app :is(.category-card, .floating-card, .split-card.light) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app :is(.how.section, .split-card:not(.light)) {
+  border-color: #2d2d2d !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app :is(.how.section, .split-card:not(.light)) :is(*) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html[data-template="classic"] #root .app .category-card :is(.category-number, .category-arrow) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface-soft) !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app .category-card:hover :is(*) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta :is(h2, p, .section-label) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta .btn-light {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta {
+  border-color: #393939 !important;
+  background: #171717 !important;
+  color: #f5f5f2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta :is(h2, p, .section-label) {
+  color: #f5f5f2 !important;
+  -webkit-text-fill-color: #f5f5f2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta .btn-light {
+  border-color: #f5f5f2 !important;
+  background: #f5f5f2 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace > .profile-preview {
+  border-color: #2e2e2e !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace > .profile-preview :is(h2, p) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .account-profile-workspace .profile-info :is(
+  .ideahire-country-badge,
+  .account-age-status
+) {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: #262626 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .account-page .messages-overview {
+  border-color: #111111 !important;
+  background: #111111 !important;
+}
+
+html[data-template="classic"] #root .account-page .messages-overview :is(strong, span) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-page .messages-overview {
+  border-color: #f3f3ef !important;
+  background: #f3f3ef !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .account-page .messages-overview :is(strong, span) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(.legal-document-hero, .cookie-policy-hero) {
+  border: 1px solid #2f2f2f !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root :is(.legal-document-hero, .cookie-policy-hero) :is(*) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root :is(.legal-document-warning, .cookie-policy-highlight) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface-soft) !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(.legal-document-warning, .cookie-policy-highlight) > span,
+html[data-template="classic"] #root .cookie-policy-highlight-icon {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+/* Discovery/onboarding must keep readable contrast in every classic mode. */
+
+html[data-template="classic"] #root .discovery-onboarding-backdrop {
+  background: rgba(0, 0, 0, 0.64) !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .discovery-onboarding-shell {
+  border-color: #d8d8d8 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-template="classic"] #root :is(.discovery-onboarding-header, .discovery-onboarding-footer) {
+  border-color: #dedede !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root .discovery-progress {
+  background: #e5e5e5 !important;
+}
+
+html[data-template="classic"] #root .discovery-progress > span {
+  background: #111111 !important;
+}
+
+html[data-template="classic"] #root .discovery-copy :is(h1, p, .section-label),
+html[data-template="classic"] #root .discovery-step-count {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) {
+  border-color: #d6d6d6 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) :is(strong, small, span, p) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) :is(strong, small, span, i) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .discovery-onboarding-shell,
+html[data-template="classic"][data-theme="dark"] #root :is(.discovery-onboarding-header, .discovery-onboarding-footer) {
+  border-color: #3b3b3b !important;
+  background: #151515 !important;
+  color: #f5f5f2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .discovery-copy :is(h1, p, .section-label),
+html[data-template="classic"][data-theme="dark"] #root .discovery-step-count {
+  color: #f5f5f2 !important;
+  -webkit-text-fill-color: #f5f5f2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) {
+  border-color: #3f3f3f !important;
+  background: #202020 !important;
+  color: #f5f5f2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) :is(strong, small, span, p) {
+  color: #f5f5f2 !important;
+  -webkit-text-fill-color: #f5f5f2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) {
+  border-color: #f5f5f2 !important;
+  background: #f5f5f2 !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) :is(strong, small, span, i) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+/* --------------------------- MOBILE --------------------------- */
+
+@media (max-width: 720px) {
+  #root :is(
+    .page > .app-page,
+    .account-page > .app-page,
+    .account-page > .messages-page,
+    .account-page > .chat-page,
+    .privacy-center-shell,
+    .disputes-shell,
+    .admin-shell
+  ) {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+  }
+
+  #root .account-profile-workspace > .profile-preview,
+  #root .app-page > .account-card > .profile-preview {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-columns: 68px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 18px 16px !important;
+    overflow: hidden !important;
+    border-radius: 18px !important;
+  }
+
+  #root :is(
+    .account-profile-workspace > .profile-preview,
+    .app-page > .account-card > .profile-preview
+  ) .profile-avatar-wrapper {
+    width: 68px !important;
+    min-width: 68px !important;
+    max-width: 68px !important;
+    height: 68px !important;
+    min-height: 68px !important;
+    max-height: 68px !important;
+    flex: 0 0 68px !important;
+    padding: 3px !important;
+  }
+
+  #root :is(
+    .account-profile-workspace > .profile-preview,
+    .app-page > .account-card > .profile-preview
+  ) .profile-avatar {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex-basis: auto !important;
+  }
+
+  #root :is(
+    .account-profile-workspace > .profile-preview,
+    .app-page > .account-card > .profile-preview
+  ) .profile-info {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 7px !important;
+  }
+
+  #root :is(
+    .account-profile-workspace > .profile-preview,
+    .app-page > .account-card > .profile-preview
+  ) .profile-info :is(h1, h2, p) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #root :is(
+    .account-profile-workspace > .profile-preview,
+    .app-page > .account-card > .profile-preview
+  ) .profile-info :is(h1, h2) {
+    font-size: clamp(21px, 6vw, 27px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.8px !important;
+  }
+
+  #root :is(
+    .account-profile-workspace > .profile-preview,
+    .app-page > .account-card > .profile-preview
+  ) .profile-info p {
+    font-size: 11px !important;
+  }
+
+  #root .account-profile-workspace .profile-info :is(
+    .ideahire-country-badge,
+    .account-age-status
+  ) {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 9px !important;
+  }
+
+  #root .profile-info .ideahire-country-badge-name {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    clip: auto !important;
+    font-size: 9px !important;
+  }
+
+  #root .account-page > .messages-page {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    padding-top: 28px !important;
+    padding-bottom: 84px !important;
+  }
+
+  #root .account-page .messages-heading {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 90px !important;
+    align-items: end !important;
+    gap: 12px !important;
+    margin: 0 0 16px !important;
+    padding: 0 0 17px !important;
+  }
+
+  #root .account-page .messages-heading h1 {
+    max-width: 100% !important;
+    margin: 5px 0 7px !important;
+    overflow: hidden !important;
+    font-size: clamp(34px, 10vw, 44px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -2px !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #root .account-page .messages-heading p {
+    display: none !important;
+  }
+
+  #root .account-page .messages-overview {
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+    min-height: 68px !important;
+    border-radius: 14px !important;
+  }
+
+  #root .account-page .messages-overview strong {
+    font-size: 28px !important;
+  }
+
+  #root .account-page .messages-overview span {
+    font-size: 8px !important;
+  }
+
+  #root .account-page .messages-list {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 16px !important;
+  }
+
+  #root .account-page .messages-list-header {
+    display: none !important;
+  }
+
+  #root .account-page .messages-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 78px !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  #root .account-page .messages-avatar {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    border-radius: 12px !important;
+  }
+
+  #root .account-page .messages-date {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    align-self: center !important;
+    justify-self: end !important;
+    margin: 0 !important;
+    padding: 5px 7px !important;
+    font-size: 9px !important;
+    white-space: nowrap !important;
+  }
+
+  #root .account-page .messages-name {
+    font-size: 12px !important;
+  }
+
+  #root .account-page .messages-job {
+    font-size: 9px !important;
+  }
+
+  #root .account-page .messages-preview {
+    margin-top: 4px !important;
+    font-size: 11px !important;
+  }
+
+  #root .page .jobs-list {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    overflow: visible !important;
+  }
+
+  #root .page :is(
+    .notification-message-card,
+    .notification-accepted-card,
+    .notification-decision-card,
+    .notification-block-card
+  ) {
+    width: 100% !important;
+    padding: 20px 16px !important;
+    border-radius: 17px !important;
+  }
+
+  #root .page :is(
+    .notification-message-card,
+    .notification-accepted-card,
+    .notification-decision-card,
+    .notification-block-card
+  ) h2 {
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+  }
+
+  #root .page .notification-chat-button {
+    width: 100% !important;
+    min-height: 46px !important;
+    justify-content: center !important;
+  }
+
+  #root :is(.legal-document-page, .cookie-policy-page) {
+    padding: 12px 8px 58px !important;
+  }
+
+  #root :is(.legal-document-shell, .cookie-policy-shell) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #root :is(.legal-document-nav-actions, .cookie-policy-nav) {
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+
+  #root :is(.legal-document-nav-actions, .cookie-policy-nav) :is(a, button) {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: 1 1 140px !important;
+  }
+
+  #root :is(.legal-document-hero, .cookie-policy-hero) {
+    padding: 30px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  #root :is(.legal-document-hero, .cookie-policy-hero) h1 {
+    max-width: 100% !important;
+    font-size: clamp(34px, 11vw, 50px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  #root :is(.legal-document-warning, .cookie-policy-highlight) {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 15px !important;
+    border-radius: 15px !important;
+  }
+
+  #root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) {
+    padding: 21px 16px !important;
+    border-radius: 17px !important;
+  }
+
+  #root .app > main > .final-cta {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    min-height: 0 !important;
+    padding: 54px 20px !important;
+    border-radius: 21px !important;
+  }
+
+  #root .app > main > .final-cta h2 {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto 24px !important;
+    overflow: visible !important;
+    font-size: clamp(36px, 11vw, 52px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.05em !important;
+    text-align: center !important;
+  }
+
+  #root .app > main > .final-cta .btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 52px !important;
+    justify-content: center !important;
+  }
+
+  #root .site-preferences {
+    right: 10px !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    max-width: calc(100% - 20px) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #root .account-page .messages-heading {
+    grid-template-columns: minmax(0, 1fr) 82px !important;
+  }
+
+  #root .account-page .messages-overview {
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+  }
+
+  #root .account-page .messages-row {
+    grid-template-columns: 42px minmax(0, 1fr) !important;
+  }
+
+  #root .account-page .messages-date {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: start !important;
+    margin-top: 3px !important;
+  }
+}
+
+/* Final monochrome lock for navigation, menus and floating preferences. */
+
+html[data-template="classic"] #root :is(
+  .home-nav-links,
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-dropdown,
+  .account-menu-mobile-nav,
+  .site-preferences-panel,
+  .site-language-toggle
+) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-nav-links,
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-dropdown,
+  .account-menu-mobile-nav,
+  .site-preferences-panel,
+  .site-language-toggle
+) :is(a, button, span, strong, small) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-nav-links a:hover,
+  .home-nav-links a.is-active,
+  .account-primary-nav a:hover,
+  .account-primary-nav a.is-active,
+  .admin-nav-links a:hover,
+  .admin-nav-links a.is-active,
+  .site-language-toggle button:hover,
+  .site-language-toggle button.is-active
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .home-nav-links a:hover,
+  .home-nav-links a.is-active,
+  .account-primary-nav a:hover,
+  .account-primary-nav a.is-active,
+  .admin-nav-links a:hover,
+  .admin-nav-links a.is-active,
+  .site-language-toggle button:hover,
+  .site-language-toggle button.is-active
+) {
+  border-color: #f3f3ef !important;
+  background: #f3f3ef !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .site-preferences-handle,
+  .site-theme-toggle,
+  .account-menu > summary,
+  .home-account-avatar-link,
+  .account-mini-avatar
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-notifications-dot,
+  .messages-nav-dot,
+  .account-menu-alert-dot,
+  .notification-dot
+) {
+  border-color: var(--ih-surface) !important;
+  background: var(--ih-ink) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .ideahire-country-trigger,
+  .ideahire-country-menu,
+  .ideahire-country-search,
+  .ideahire-country-option
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .ideahire-country-selected-name,
+  .ideahire-country-option-name,
+  .ideahire-country-placeholder,
+  .ideahire-country-chevron
+) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .ideahire-country-selected-code,
+  .ideahire-country-option-code
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface-soft) !important;
+  color: var(--ih-copy) !important;
+  -webkit-text-fill-color: var(--ih-copy) !important;
 }
