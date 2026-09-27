@@ -27588,12 +27588,36 @@ function SmoothRouteTransitions() {
       const nextAddress =
         `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
 
+      const isSameDocument =
+        nextUrl.pathname === location.pathname &&
+        nextUrl.search === location.search;
+
+      if (isSameDocument && nextUrl.hash) {
+        event.preventDefault();
+
+        const targetId = decodeURIComponent(
+          nextUrl.hash.slice(1)
+        );
+
+        if (nextAddress !== currentAddress) {
+          navigate(nextAddress);
+        }
+
+        window.requestAnimationFrame(() => {
+          document
+            .getElementById(targetId)
+            ?.scrollIntoView({
+              block: "start",
+              behavior: "smooth",
+            });
+        });
+
+        return;
+      }
+
       if (
         nextAddress === currentAddress ||
-        (
-          nextUrl.pathname === location.pathname &&
-          nextUrl.search === location.search
-        )
+        isSameDocument
       ) {
         return;
       }
