@@ -482,7 +482,7 @@ function App({ session, loading }) {
   return (
     <div className="app">
       <header className="navbar home-navbar">
-        <Link className="logo" to="/">
+        <Link className="logo logo-clean" to="/">
           Idea<span>Hire</span>
         </Link>
 
@@ -703,7 +703,7 @@ function App({ session, loading }) {
                 aria-label={`Pokaż zlecenia: ${category}`}
               >
                 <span className="category-number">
-                  0{index + 1}
+                  {String(index + 1).padStart(2, "0")}
                 </span>
 
                 <span className="category-name">
@@ -816,10 +816,9 @@ function App({ session, loading }) {
         <section className="final-cta home-reveal">
           <span className="section-label">IdeaHire</span>
 
-          <h2>
-            Twój następny projekt
-            <br />
-            zaczyna się tutaj.
+          <h2 className="final-cta-title">
+            <span>Twój następny projekt</span>
+            <span>zaczyna się tutaj.</span>
           </h2>
 
           <Link
@@ -835,7 +834,7 @@ function App({ session, loading }) {
 
       <footer className="footer home-reveal">
         <div>
-          <Link className="logo" to="/">
+          <Link className="logo logo-clean" to="/">
             Idea<span>Hire</span>
           </Link>
 
