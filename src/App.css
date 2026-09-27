@@ -40977,3 +40977,1577 @@ html[data-template="classic"] #root :is(
   color: var(--ih-copy) !important;
   -webkit-text-fill-color: var(--ih-copy) !important;
 }
+
+/* ================================================================
+   IDEA HIRE — V13 DIRECT COMPONENT REPAIR — 2026-09-27
+   This pass targets the real component structure visible in the
+   supplied screenshots. It intentionally overrides legacy layers.
+   ================================================================ */
+
+:root {
+  --ih-release: 20260927-130;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden !important;
+}
+
+#root .logo-clean::after,
+#root .logo::after,
+#root .cookie-policy-logo::after,
+#root .admin-navbar-brand::after,
+#root .restricted-navbar-brand::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- COUNTRY: NO FLAGS, ONLY NAME + ISO CODE ---------- */
+
+#root :is(
+  .ideahire-country-flag,
+  .ideahire-country-option-flag,
+  .ideahire-country-badge-flag,
+  .ideahire-flag-shell,
+  .ideahire-flag-emoji
+) {
+  display: none !important;
+}
+
+#root .ideahire-country-picker,
+#root .ideahire-country-trigger,
+#root .ideahire-country-selected,
+#root .ideahire-country-menu,
+#root .ideahire-country-list,
+#root .ideahire-country-option {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .ideahire-country-trigger {
+  min-height: 52px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 12px 8px 15px !important;
+  overflow: hidden !important;
+  border-radius: 13px !important;
+}
+
+#root .ideahire-country-selected,
+#root .ideahire-country-option {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+#root .ideahire-country-option {
+  min-height: 48px !important;
+  padding: 8px 10px 8px 13px !important;
+  border-radius: 10px !important;
+}
+
+#root :is(.ideahire-country-selected-name, .ideahire-country-option-name) {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  font-size: 13px !important;
+  font-weight: 760 !important;
+  text-align: left !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#root :is(
+  .ideahire-country-selected-code,
+  .ideahire-country-option-code,
+  .ideahire-country-badge-code
+) {
+  min-width: 34px !important;
+  min-height: 27px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  padding: 5px 8px !important;
+  border: 1px solid currentColor !important;
+  border-radius: 8px !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.1em !important;
+  opacity: 0.72 !important;
+}
+
+#root .ideahire-country-menu {
+  z-index: 80 !important;
+  margin-top: 8px !important;
+  overflow: hidden !important;
+  border-radius: 15px !important;
+}
+
+#root .ideahire-country-badge {
+  width: auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 4px 8px 4px 13px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+}
+
+#root .ideahire-country-badge-name {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  clip: auto !important;
+  font-size: 10px !important;
+  font-weight: 780 !important;
+  line-height: 1.1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* ---------- OWN PROFILE: FIXED SUMMARY + SEPARATE EQUAL PILLS ---------- */
+
+#root .account-profile-workspace > .account-profile-preview {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 170px !important;
+  display: grid !important;
+  grid-template-columns: 112px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 24px !important;
+  padding: 28px !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+}
+
+#root .account-profile-preview .profile-avatar-wrapper {
+  width: 112px !important;
+  min-width: 112px !important;
+  max-width: 112px !important;
+  height: 112px !important;
+  min-height: 112px !important;
+  max-height: 112px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+}
+
+#root .account-profile-preview .profile-avatar {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+#root .account-profile-preview .profile-info {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+}
+
+#root .account-profile-preview .profile-info :is(h2, p) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#root .account-profile-preview .profile-meta-row {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-top: 12px !important;
+}
+
+#root .account-profile-preview .profile-meta-row > :is(
+  .ideahire-country-badge,
+  .account-age-status
+) {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.13) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+#root .account-profile-preview .profile-meta-row .ideahire-country-badge {
+  gap: 7px !important;
+  padding-right: 7px !important;
+}
+
+#root .account-profile-preview .profile-meta-row .ideahire-country-badge-code {
+  min-width: 30px !important;
+  min-height: 24px !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* ---------- PUBLIC PROFILE: REMOVE THE MOBILE OVERFLOW COMPLETELY ---------- */
+
+#root .account-card > .public-profile-preview {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: 104px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 22px !important;
+  padding: 26px !important;
+  overflow: hidden !important;
+  border-radius: 22px !important;
+}
+
+#root .public-profile-preview .profile-avatar-wrapper {
+  width: 104px !important;
+  min-width: 104px !important;
+  max-width: 104px !important;
+  height: 104px !important;
+  min-height: 104px !important;
+  max-height: 104px !important;
+  margin: 0 !important;
+  padding: 4px !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+}
+
+#root .public-profile-preview .profile-avatar {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+#root .public-profile-preview .public-profile-info {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  flex-direction: column !important;
+  gap: 11px !important;
+  overflow: hidden !important;
+}
+
+#root .public-profile-preview .public-profile-info h1 {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  font-size: clamp(30px, 5vw, 48px) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.04em !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* ---------- MESSAGES: TITLE + COUNT ARE ONE RESPONSIVE UNIT ---------- */
+
+#root .account-page > .messages-page {
+  width: min(1080px, calc(100% - 32px)) !important;
+  max-width: 1080px !important;
+  min-width: 0 !important;
+  margin: 32px auto 80px !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+#root .account-page .messages-heading {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+  margin: 0 0 18px !important;
+  padding: 0 0 18px !important;
+}
+
+#root .account-page .messages-heading-copy {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .account-page .messages-title-row {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+}
+
+#root .account-page .messages-title-row h1 {
+  min-width: 0 !important;
+  margin: 6px 0 0 !important;
+}
+
+#root .account-page .messages-overview {
+  width: auto !important;
+  min-width: 122px !important;
+  max-width: 160px !important;
+  min-height: 46px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  padding: 9px 13px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+}
+
+#root .account-page .messages-overview strong {
+  min-width: 2ch !important;
+  display: block !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+
+#root .account-page .messages-overview span {
+  display: block !important;
+  overflow: visible !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.08em !important;
+  text-align: left !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+#root .account-page .messages-list,
+#root .account-page .messages-row {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  transform: none !important;
+}
+
+#root .account-page .messages-row {
+  display: grid !important;
+  grid-template-columns: 52px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px !important;
+  overflow: hidden !important;
+}
+
+#root .account-page .messages-content,
+#root .account-page .messages-topline,
+#root .account-page :is(.messages-name, .messages-job, .messages-preview) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#root .account-page :is(.messages-name, .messages-job, .messages-preview) {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#root .account-page .messages-date {
+  position: static !important;
+  inset: auto !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+/* ---------- NOTIFICATION INBOX: CARDS NEVER END UNDER THE VIEWPORT ---------- */
+
+#root .page > .notifications-page {
+  width: min(1080px, calc(100% - 32px)) !important;
+  max-width: 1080px !important;
+  min-width: 0 !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  padding-bottom: 128px !important;
+  overflow: visible !important;
+}
+
+#root .notifications-page .jobs-list {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 14px !important;
+  overflow: visible !important;
+}
+
+#root .notifications-page .job-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: block !important;
+  padding: 24px !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+}
+
+#root .notifications-page .job-card :is(h2, h3, p, span, strong) {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+#root .notifications-page .notification-chat-button {
+  width: 100% !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 18px !important;
+}
+
+/* ---------- LEGAL DOCUMENTS: NORMAL FULL PAGE, NO CUT CONTENT ---------- */
+
+#root .cookie-policy-page.legal-document-page,
+#root :is(.cookie-policy-page, .legal-document-page) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 28px 24px 96px !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+#root .cookie-policy-shell.legal-document-shell,
+#root :is(.cookie-policy-shell, .legal-document-shell) {
+  width: min(1160px, 100%) !important;
+  max-width: 1160px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+#root .cookie-policy-nav {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  margin: 0 0 20px !important;
+}
+
+#root .legal-document-nav-actions {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+#root :is(.cookie-policy-hero, .legal-document-hero) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: clamp(42px, 6vw, 72px) !important;
+  overflow: hidden !important;
+  border-radius: 28px !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+#root :is(.cookie-policy-hero, .legal-document-hero) h1 {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-right: 0 !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+}
+
+#root :is(
+  .legal-document-warning,
+  .cookie-policy-highlight,
+  .legal-document-tabs,
+  .legal-document-content,
+  .cookie-policy-section,
+  .cookie-policy-inventory,
+  .legal-document-footer,
+  .cookie-policy-footer
+) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  transform: none !important;
+}
+
+#root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) {
+  padding: clamp(24px, 4vw, 46px) !important;
+  overflow: visible !important;
+  border-radius: 22px !important;
+}
+
+#root .legal-document-content :is(table, pre) {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  overflow-x: auto !important;
+}
+
+#root .legal-document-content :is(h1, h2, h3, p, li, td, th, a, code),
+#root :is(.cookie-policy-section, .cookie-policy-inventory) :is(h1, h2, h3, p, li, td, th, a, code) {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* ---------- HOME: CATEGORIES + FINAL CTA HAVE STABLE GEOMETRY ---------- */
+
+#root .app .category-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+#root .app .category-number,
+#root .app .category-name,
+#root .app .category-arrow {
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
+  word-break: normal !important;
+}
+
+#root .app .category-name {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#root .app > main > .final-cta {
+  width: min(1280px, calc(100% - 32px)) !important;
+  max-width: 1280px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+  padding: clamp(62px, 8vw, 104px) clamp(28px, 6vw, 86px) !important;
+  overflow: hidden !important;
+  border-radius: 30px !important;
+  transform: none !important;
+}
+
+#root .app > main > .final-cta .final-cta-title {
+  width: 100% !important;
+  max-width: 900px !important;
+  margin: 0 auto 32px !important;
+  overflow: visible !important;
+  font-size: clamp(44px, 6vw, 82px) !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.055em !important;
+  text-align: center !important;
+}
+
+#root .app > main > .final-cta .final-cta-title span {
+  display: block !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+#root .app > main > .final-cta .btn {
+  position: relative !important;
+  z-index: 5 !important;
+  width: min(360px, 100%) !important;
+  min-height: 54px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* ---------- FORM CONTROLS: HIGH CONTRAST IN EVERY THEME ---------- */
+
+#root input[type="file"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 54px !important;
+  overflow: hidden !important;
+  font-size: 11px !important;
+}
+
+#root input[type="file"]::file-selector-button {
+  min-height: 38px !important;
+  margin: 7px 12px 7px 7px !important;
+  padding: 0 14px !important;
+  border: 1px solid #111111 !important;
+  border-radius: 9px !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font: inherit !important;
+  font-size: 10px !important;
+  font-weight: 820 !important;
+}
+
+/* ---------- CLASSIC = ACTUAL BLACK / WHITE / NEUTRAL GREY ---------- */
+
+html[data-template="classic"] {
+  --ih-page: #ffffff;
+  --ih-canvas: #ffffff;
+  --ih-surface: #ffffff;
+  --ih-surface-soft: #f4f4f2;
+  --ih-line: #dededb;
+  --ih-line-strong: #b9b9b5;
+  --ih-ink: #101010;
+  --ih-ink-soft: #2c2c2a;
+  --ih-copy: #50504d;
+  --ih-muted: #6b6b67;
+  --ih-blue-600: #111111;
+  --ih-blue-100: #eeeeeb;
+  --ih-blue-soft: #f4f4f2;
+  --ih-violet: #111111;
+  --ih-violet-deep: #000000;
+  --ih-violet-soft: #eeeeeb;
+  --ih-mint: #595955;
+  --ih-mint-soft: #eeeeeb;
+  --ih-sun: #595955;
+  --ih-sun-soft: #eeeeeb;
+  --ih-rose-soft: #eeeeeb;
+  --ih-focus: rgba(17, 17, 17, 0.28);
+}
+
+html[data-template="classic"][data-theme="dark"] {
+  --ih-page: #0d0d0c;
+  --ih-canvas: #0d0d0c;
+  --ih-surface: #181817;
+  --ih-surface-soft: #222220;
+  --ih-line: #393936;
+  --ih-line-strong: #565651;
+  --ih-ink: #f5f5f1;
+  --ih-ink-soft: #deded8;
+  --ih-copy: #b9b9b2;
+  --ih-muted: #989891;
+  --ih-blue-600: #f5f5f1;
+  --ih-blue-100: #292927;
+  --ih-blue-soft: #222220;
+  --ih-violet: #f5f5f1;
+  --ih-violet-deep: #ffffff;
+  --ih-violet-soft: #292927;
+  --ih-mint: #c9c9c2;
+  --ih-mint-soft: #292927;
+  --ih-sun: #c9c9c2;
+  --ih-sun-soft: #292927;
+  --ih-rose-soft: #292927;
+  --ih-focus: rgba(255, 255, 255, 0.28);
+}
+
+html[data-template="classic"] #root :is(
+  .app,
+  .page,
+  .account-page,
+  .admin-page,
+  .privacy-center-page,
+  .disputes-page,
+  .age-access-page,
+  .legal-document-page,
+  .cookie-policy-page
+) {
+  background: var(--ih-page) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .navbar,
+  .home-nav-links,
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-dropdown,
+  .account-menu-mobile-nav,
+  .site-preferences-panel,
+  .site-language-toggle,
+  .account-card,
+  .auth-card,
+  .project-form,
+  .jobs-search,
+  .talent-controls,
+  .job-card,
+  .talent-card,
+  .messages-list,
+  .messages-empty,
+  .chat-shell,
+  .account-form-section,
+  .profile-portfolio-manager,
+  .discovery-settings-card,
+  .privacy-entry-card,
+  .dispute-panel,
+  .admin-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .legal-document-content,
+  .cookie-policy-section,
+  .cookie-policy-inventory
+) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-nav-links,
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-dropdown,
+  .account-menu-mobile-nav,
+  .site-preferences-panel,
+  .site-language-toggle,
+  .jobs-search-box,
+  .talent-search-box,
+  .jobs-order-panel,
+  .talent-order-row,
+  .jobs-results-header,
+  .messages-list-header,
+  .account-tab-intro,
+  .account-section-nav,
+  .chat-collapsible-panel,
+  .agreement-workspace,
+  .chat-dispute-card
+) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface-soft) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-nav-links,
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-dropdown,
+  .account-menu-mobile-nav,
+  .site-preferences-panel,
+  .site-language-toggle
+) :is(a, button, span, strong, small) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-nav-links a:hover,
+  .home-nav-links a.is-active,
+  .account-primary-nav a:hover,
+  .account-primary-nav a.is-active,
+  .admin-nav-links a:hover,
+  .admin-nav-links a.is-active,
+  .site-language-toggle button:hover,
+  .site-language-toggle button.is-active,
+  .btn-dark,
+  .notification-chat-button,
+  .chat-send
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .home-nav-links a:hover,
+  .home-nav-links a.is-active,
+  .account-primary-nav a:hover,
+  .account-primary-nav a.is-active,
+  .admin-nav-links a:hover,
+  .admin-nav-links a.is-active,
+  .site-language-toggle button:hover,
+  .site-language-toggle button.is-active,
+  .btn-dark,
+  .notification-chat-button,
+  .chat-send
+) {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .btn-outline,
+  .btn-ghost,
+  .site-preferences-handle,
+  .site-theme-toggle,
+  .home-account-avatar-link,
+  .account-mini-avatar,
+  input,
+  textarea,
+  select,
+  .ideahire-country-trigger,
+  .ideahire-country-menu,
+  .ideahire-country-option
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .account-profile-preview,
+html[data-template="classic"] #root .public-profile-preview,
+html[data-template="classic"] #root :is(.cookie-policy-hero, .legal-document-hero) {
+  border-color: #30302e !important;
+  background: #111110 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .account-profile-preview,
+  .public-profile-preview,
+  .cookie-policy-hero,
+  .legal-document-hero
+) :is(h1, h2, h3, p, span, strong, small) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .account-profile-preview .profile-meta-row > :is(
+  .ideahire-country-badge,
+  .account-age-status
+),
+html[data-template="classic"] #root .public-profile-preview .ideahire-country-badge {
+  border-color: #5a5a55 !important;
+  background: #272725 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .messages-overview {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .messages-overview :is(strong, span) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .messages-overview {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .messages-overview :is(strong, span) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta :is(.final-cta-title, .section-label) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .app > main > .final-cta .btn-light {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta {
+  border-color: #393936 !important;
+  background: #181817 !important;
+  color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta :is(.final-cta-title, .section-label) {
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .app > main > .final-cta .btn-light {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root input[type="file"]::file-selector-button {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root input[type="file"]::file-selector-button {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+}
+
+/* Admin and onboarding must not become white-on-white. */
+
+html[data-template="classic"] #root :is(
+  .admin-page,
+  .admin-shell,
+  .admin-card,
+  .admin-queue-panel,
+  .admin-content-grid,
+  .discovery-onboarding-shell,
+  .discovery-onboarding-header,
+  .discovery-onboarding-footer
+) :is(h1, h2, h3, h4, p, span, strong, small, label, button) {
+  opacity: 1 !important;
+}
+
+html[data-template="classic"] #root .discovery-onboarding-backdrop {
+  background: rgba(0, 0, 0, 0.68) !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .discovery-onboarding-shell,
+html[data-template="classic"] #root :is(.discovery-onboarding-header, .discovery-onboarding-footer) {
+  border-color: #d7d7d3 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) {
+  border-color: #d7d7d3 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) :is(h1, h2, h3, p, span, strong, small) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) :is(p, span, strong, small, i) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .discovery-onboarding-shell,
+html[data-template="classic"][data-theme="dark"] #root :is(.discovery-onboarding-header, .discovery-onboarding-footer) {
+  border-color: #3e3e3a !important;
+  background: #181817 !important;
+  color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) {
+  border-color: #43433f !important;
+  background: #232321 !important;
+  color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card,
+  .discovery-category-card,
+  .discovery-order-card,
+  .discovery-summary-card,
+  .discovery-privacy-note
+) :is(h1, h2, h3, p, span, strong, small) {
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .discovery-usage-card.is-selected,
+  .discovery-category-card.is-selected,
+  .discovery-order-card.is-selected
+) :is(p, span, strong, small, i) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+/* ---------- MOBILE DIRECT REPAIR ---------- */
+
+@media (max-width: 720px) {
+  #root :is(
+    .page > .app-page,
+    .account-page > .app-page,
+    .privacy-center-shell,
+    .disputes-shell,
+    .admin-shell
+  ) {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    min-width: 0 !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+    transform: none !important;
+  }
+
+  #root .account-profile-workspace > .account-profile-preview,
+  #root .account-card > .public-profile-preview {
+    min-height: 0 !important;
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    gap: 13px !important;
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+
+  #root :is(.account-profile-preview, .public-profile-preview) .profile-avatar-wrapper {
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    margin: 0 !important;
+    padding: 3px !important;
+  }
+
+  #root .account-profile-preview .profile-info :is(h2, p),
+  #root .public-profile-preview .public-profile-info h1 {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #root .account-profile-preview .profile-info h2,
+  #root .public-profile-preview .public-profile-info h1 {
+    font-size: clamp(20px, 6vw, 26px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.035em !important;
+  }
+
+  #root .account-profile-preview .profile-info p {
+    margin: 5px 0 0 !important;
+    font-size: 10px !important;
+  }
+
+  #root .account-profile-preview .profile-meta-row {
+    gap: 6px !important;
+    margin-top: 9px !important;
+  }
+
+  #root .account-profile-preview .profile-meta-row > :is(
+    .ideahire-country-badge,
+    .account-age-status
+  ),
+  #root .public-profile-preview .ideahire-country-badge {
+    width: auto !important;
+    max-width: 100% !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 9px !important;
+    font-size: 8px !important;
+  }
+
+  #root .account-profile-preview .profile-meta-row .ideahire-country-badge,
+  #root .public-profile-preview .ideahire-country-badge {
+    gap: 5px !important;
+    padding-right: 5px !important;
+  }
+
+  #root :is(.account-profile-preview, .public-profile-preview) .ideahire-country-badge-name {
+    font-size: 8px !important;
+  }
+
+  #root :is(.account-profile-preview, .public-profile-preview) .ideahire-country-badge-code {
+    min-width: 26px !important;
+    min-height: 21px !important;
+    padding: 4px 5px !important;
+    font-size: 7px !important;
+  }
+
+  #root .account-page > .messages-page {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    margin: 22px auto 84px !important;
+  }
+
+  #root .account-page .messages-heading {
+    margin-bottom: 12px !important;
+    padding-bottom: 14px !important;
+  }
+
+  #root .account-page .messages-heading p {
+    display: none !important;
+  }
+
+  #root .account-page .messages-title-row {
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  #root .account-page .messages-title-row h1 {
+    margin: 6px 0 0 !important;
+    overflow: hidden !important;
+    font-size: clamp(30px, 9vw, 39px) !important;
+    line-height: 1 !important;
+    letter-spacing: -0.055em !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #root .account-page .messages-overview {
+    min-width: 91px !important;
+    max-width: 104px !important;
+    min-height: 38px !important;
+    gap: 5px !important;
+    padding: 7px 9px !important;
+  }
+
+  #root .account-page .messages-overview strong {
+    font-size: 17px !important;
+  }
+
+  #root .account-page .messages-overview span {
+    font-size: 7px !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  #root .account-page .messages-list {
+    overflow: hidden !important;
+    border-radius: 16px !important;
+  }
+
+  #root .account-page .messages-list-header {
+    display: none !important;
+  }
+
+  #root .account-page .messages-row {
+    grid-template-columns: 43px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    min-height: 86px !important;
+    padding: 12px !important;
+  }
+
+  #root .account-page .messages-avatar {
+    width: 43px !important;
+    min-width: 43px !important;
+    max-width: 43px !important;
+    height: 43px !important;
+    min-height: 43px !important;
+    max-height: 43px !important;
+    border-radius: 12px !important;
+  }
+
+  #root .account-page .messages-date {
+    grid-column: 2 !important;
+    justify-self: start !important;
+    margin-top: 5px !important;
+    padding: 4px 7px !important;
+    font-size: 8px !important;
+  }
+
+  #root .account-page .messages-name {
+    font-size: 11px !important;
+  }
+
+  #root .account-page .messages-job {
+    font-size: 8px !important;
+  }
+
+  #root .account-page .messages-preview {
+    margin-top: 3px !important;
+    font-size: 10px !important;
+  }
+
+  #root .page > .notifications-page {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    padding-bottom: 116px !important;
+  }
+
+  #root .notifications-page .job-card {
+    padding: 18px 15px !important;
+    border-radius: 17px !important;
+  }
+
+  #root .notifications-page .job-card h2 {
+    font-size: 21px !important;
+    line-height: 1.14 !important;
+  }
+
+  #root :is(.cookie-policy-page, .legal-document-page) {
+    padding: 10px 8px 68px !important;
+  }
+
+  #root .cookie-policy-nav {
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  #root .cookie-policy-logo {
+    width: 100% !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  #root .legal-document-nav-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .legal-document-nav-actions :is(a, button) {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+  }
+
+  #root :is(.cookie-policy-hero, .legal-document-hero) {
+    padding: 31px 19px !important;
+    border-radius: 18px !important;
+  }
+
+  #root :is(.cookie-policy-hero, .legal-document-hero) h1 {
+    font-size: clamp(33px, 11vw, 47px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.05em !important;
+  }
+
+  #root :is(.legal-document-content, .cookie-policy-section, .cookie-policy-inventory) {
+    padding: 20px 15px !important;
+    border-radius: 16px !important;
+  }
+
+  #root .app .category-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 9px !important;
+  }
+
+  #root .app .category-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 64px !important;
+    display: grid !important;
+    grid-template-columns: 42px minmax(0, 1fr) 38px !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    overflow: hidden !important;
+  }
+
+  #root .app .category-number,
+  #root .app .category-arrow {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    display: grid !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+  }
+
+  #root .app .category-name {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+  }
+
+  #root .app > main > .final-cta {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
+    min-height: 0 !important;
+    padding: 52px 18px !important;
+    border-radius: 21px !important;
+  }
+
+  #root .app > main > .final-cta .final-cta-title {
+    max-width: 100% !important;
+    margin-bottom: 25px !important;
+    font-size: clamp(34px, 10.5vw, 48px) !important;
+    line-height: 1 !important;
+    letter-spacing: -0.055em !important;
+  }
+
+  #root .app > main > .final-cta .btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 52px !important;
+  }
+
+  #root .site-preferences {
+    right: 9px !important;
+    bottom: max(9px, env(safe-area-inset-bottom)) !important;
+    max-width: calc(100% - 18px) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  #root .account-page .messages-title-row {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  #root .account-page .messages-overview {
+    min-width: 0 !important;
+  }
+
+  #root .account-profile-workspace > .account-profile-preview,
+  #root .account-card > .public-profile-preview {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    gap: 11px !important;
+    padding: 14px !important;
+  }
+
+  #root :is(.account-profile-preview, .public-profile-preview) .profile-avatar-wrapper {
+    width: 56px !important;
+    min-width: 56px !important;
+    max-width: 56px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+  }
+}
+
+/* Final visibility guards for the exact screens reported in the screenshots. */
+
+html[data-template="classic"] #root :is(.auth-page, .chat-page, .chat-shell, .chat-messages) {
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .auth-page::before,
+  .auth-page::after,
+  .chat-shell::before,
+  .chat-shell::after,
+  .chat-messages::before,
+  .chat-messages::after
+) {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+html[data-template="classic"] #root .google-auth-logo {
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"] #root .google-auth-logo path:nth-of-type(1) { fill: #4285f4 !important; }
+html[data-template="classic"] #root .google-auth-logo path:nth-of-type(2) { fill: #34a853 !important; }
+html[data-template="classic"] #root .google-auth-logo path:nth-of-type(3) { fill: #fbbc05 !important; }
+html[data-template="classic"] #root .google-auth-logo path:nth-of-type(4) { fill: #ea4335 !important; }
+
+html[data-template="classic"] #root :is(
+  .messages-unread-count,
+  .account-notification-dot,
+  .notification-count
+) {
+  min-width: 20px !important;
+  width: auto !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 6px !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .admin-page :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  strong,
+  small,
+  label,
+  legend,
+  a
+) {
+  color: #171717 !important;
+  -webkit-text-fill-color: #171717 !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .admin-page :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  strong,
+  small,
+  label,
+  legend,
+  a
+) {
+  color: #f1f1ed !important;
+  -webkit-text-fill-color: #f1f1ed !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html[data-template="classic"] #root .admin-page :is(button, input, textarea, select) {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html[data-template="classic"] #root .admin-page :is(
+  .admin-primary-button,
+  .dispute-primary-button,
+  button[type="submit"]
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .admin-page :is(
+  .admin-primary-button,
+  .dispute-primary-button,
+  button[type="submit"]
+) {
+  border-color: #f1f1ed !important;
+  background: #f1f1ed !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root .discovery-copy :is(h1, h2, h3, p, span),
+html[data-template="classic"] #root .discovery-step-count {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .discovery-copy :is(h1, h2, h3, p, span),
+html[data-template="classic"][data-theme="dark"] #root .discovery-step-count {
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
