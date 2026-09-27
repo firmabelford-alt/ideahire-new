@@ -8677,7 +8677,7 @@ function Account() {
           }
         >
           <div
-            className="profile-preview"
+            className="profile-preview account-profile-preview"
             hidden={activeAccountSection !== "profile"}
           >
             <div className="profile-avatar-wrapper">
@@ -8703,15 +8703,17 @@ function Account() {
                 {user.email}
               </p>
 
-              {countryCode && (
-                <CountryBadge
-                  countryCode={countryCode}
-                />
-              )}
+              <div className="profile-meta-row">
+                {countryCode && (
+                  <CountryBadge
+                    countryCode={countryCode}
+                  />
+                )}
 
-              {isAdult && (
-                <span className="account-age-status">Pełne konto · 18+</span>
-              )}
+                {isAdult && (
+                  <span className="account-age-status">Pełne konto · 18+</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -12448,7 +12450,7 @@ function Profile() {
             </details>
           )}
 
-          <div className="profile-preview">
+          <div className="profile-preview public-profile-preview">
             <div className="profile-avatar-wrapper">
               {profileHidden ? (
                 <div
@@ -12472,7 +12474,7 @@ function Profile() {
               )}
             </div>
 
-            <div className={`profile-info ${
+            <div className={`profile-info public-profile-info ${
               profileHidden
                 ? "profile-hidden-copy"
                 : ""
@@ -15462,7 +15464,7 @@ function Notifications() {
     <div className="page">
       <AccountNavbar />
 
-      <main className="app-page">
+      <main className="app-page notifications-page">
         <div className="app-page-header">
           <span className="section-label">
             Skrzynka odbiorcza
@@ -16722,17 +16724,19 @@ function Messages() {
               Twoje rozmowy
             </span>
 
-            <h1>Wiadomości</h1>
+            <div className="messages-title-row">
+              <h1>Wiadomości</h1>
+
+              <div className="messages-overview" aria-label={`${conversations.length} rozmów`}>
+                <strong>{conversations.length}</strong>
+                <span>Rozmowy</span>
+              </div>
+            </div>
 
             <p>
               Wszystkie rozmowy dotyczące aktywnych i zakończonych
               współprac w jednym, uporządkowanym miejscu.
             </p>
-          </div>
-
-          <div className="messages-overview" aria-label="Liczba rozmów">
-            <strong>{conversations.length}</strong>
-            <span>Rozmowy</span>
           </div>
         </div>
 
