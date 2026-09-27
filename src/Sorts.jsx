@@ -136,7 +136,6 @@ export function CountryPicker({ value, onChange, disabled = false }) {
       {open && (
         <div className="ideahire-country-menu">
           <div className="ideahire-country-search">
-            <span>⌕</span>
             <input
               type="text"
               value={search}
@@ -412,10 +411,21 @@ function Sorts({ children }) {
         .ideahire-country-selected-code,
         .ideahire-country-option-code,
         .ideahire-country-badge-code {
-          color: #8d8d8d;
+          min-width: 30px;
+          height: 30px;
+          display: inline-grid;
+          place-items: center;
+          flex: 0 0 30px;
+          padding: 0;
+          border: 1px solid rgba(20,20,20,.14);
+          border-radius: 50%;
+          background: #fff;
+          color: #343434;
           font-size: 12px;
           font-weight: 700;
           letter-spacing: .06em;
+          line-height: 1;
+          box-sizing: border-box;
         }
 
         .ideahire-country-placeholder {
@@ -441,9 +451,8 @@ function Sorts({ children }) {
         }
 
         .ideahire-country-search {
-          display: flex;
+          display: block;
           align-items: center;
-          gap: 10px;
           padding: 12px;
           border-bottom: 1px solid rgba(20,20,20,.08);
         }
@@ -466,7 +475,7 @@ function Sorts({ children }) {
         .ideahire-country-option {
           width: 100%;
           display: grid;
-          grid-template-columns: 34px 1fr auto;
+          grid-template-columns: minmax(0, 1fr) auto;
           align-items: center;
           gap: 10px;
           padding: 9px 11px;
@@ -505,7 +514,7 @@ function Sorts({ children }) {
           width: fit-content;
           max-width: 100%;
           margin: 8px 0 0;
-          padding: 5px 11px 5px 6px;
+          padding: 5px 6px 5px 12px;
           border: 1px solid rgba(20,20,20,.07);
           border-radius: 999px;
           background: #f7f7f4;
