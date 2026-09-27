@@ -123,7 +123,6 @@ export function CountryPicker({ value, onChange, disabled = false }) {
         <span className="ideahire-country-selected">
           {selected ? (
             <>
-              <CountryFlag country={selected} className="ideahire-country-flag" />
               <span className="ideahire-country-selected-name">{selected.name}</span>
               <span className="ideahire-country-selected-code">{selected.code}</span>
             </>
@@ -160,7 +159,6 @@ export function CountryPicker({ value, onChange, disabled = false }) {
                     setSearch("");
                   }}
                 >
-                  <CountryFlag country={country} className="ideahire-country-option-flag" />
                   <span className="ideahire-country-option-name">{country.name}</span>
                   <span className="ideahire-country-option-code">{country.code}</span>
                 </button>
@@ -181,17 +179,14 @@ export function CountryBadge({ countryCode, countryName }) {
 
   return (
     <span className="ideahire-country-badge">
-      {country ? (
-        <CountryFlag
-          country={country}
-          className="ideahire-country-badge-flag"
-        />
-      ) : (
-        <span className="ideahire-country-badge-flag">🌍</span>
-      )}
       <span className="ideahire-country-badge-name">
         {country?.name || countryName}
       </span>
+      {country?.code && (
+        <span className="ideahire-country-badge-code">
+          {country.code}
+        </span>
+      )}
     </span>
   );
 }
