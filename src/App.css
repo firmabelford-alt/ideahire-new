@@ -43048,6 +43048,338 @@ html[data-template="classic"] #root .google-auth-logo {
   }
 }
 
+/* ============================================================================
+   IDEAHIRE — BATCH 02 / TALENT PAGE, NAV CONTRAST AND COUNTRY SEARCH
+   2026-09-28
+   ============================================================================ */
+
+/* ---------- TALENT PAGE HEADER: COMPACT, ALIGNED, WITHOUT THE LONG RULE ---------- */
+
+#root .page .app-page.talent-page .app-page-header.talent-page-header {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 410px) !important;
+  grid-template-rows: auto auto !important;
+  grid-template-areas:
+    "talent-label talent-copy"
+    "talent-title talent-copy" !important;
+  align-items: end !important;
+  column-gap: clamp(28px, 4vw, 58px) !important;
+  row-gap: 7px !important;
+  box-sizing: border-box !important;
+  margin: 0 0 22px !important;
+  padding: 12px 0 22px !important;
+  border: 0 !important;
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#root .page .app-page.talent-page .talent-page-header > .section-label {
+  grid-area: talent-label !important;
+  align-self: end !important;
+  justify-self: start !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: clamp(11px, 0.85vw, 13px) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.12em !important;
+}
+
+#root .page .app-page.talent-page .talent-page-header > h1 {
+  grid-area: talent-title !important;
+  align-self: start !important;
+  max-width: 760px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(38px, 4.2vw, 56px) !important;
+  font-weight: 790 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.045em !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+#root .page .app-page.talent-page .talent-page-header > p {
+  grid-area: talent-copy !important;
+  align-self: end !important;
+  width: 100% !important;
+  max-width: 410px !important;
+  min-height: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 2px 0 2px 24px !important;
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 1px solid var(--ih-line, #deded9) !important;
+  font-size: 13px !important;
+  line-height: 1.62 !important;
+}
+
+/* ---------- TALENT SEARCH: MAGNIFIER STAYS, FIELD USES THE FULL WIDTH ---------- */
+
+#root .page .app-page.talent-page .talent-controls {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+#root .page .app-page.talent-page .talent-search-box {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  gap: 11px !important;
+  padding: 0 15px !important;
+}
+
+#root .page .app-page.talent-page .talent-search-box > span[aria-hidden="true"] {
+  width: 22px !important;
+  height: 22px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--ih-copy, #6b6b66) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+
+#root .page .app-page.talent-page .talent-search-box > input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding-right: 4px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ---------- PROFILE ORDER: CLEAN TWO-PART CONTROL ---------- */
+
+#root .page .app-page.talent-page .talent-order-row {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  gap: 18px !important;
+  margin: 13px 0 0 !important;
+  padding: 14px 15px !important;
+  border: 1px solid var(--ih-line, #deded9) !important;
+  border-radius: 14px !important;
+  background: var(--ih-surface-soft, #f3f3f0) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root .page .app-page.talent-page .talent-order-row > .jobs-order-copy {
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  align-content: center !important;
+  align-items: start !important;
+  gap: 3px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#root .page .app-page.talent-page .talent-order-row > .jobs-order-copy > strong {
+  display: block !important;
+  margin: 0 !important;
+  color: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.04em !important;
+}
+
+#root .page .app-page.talent-page .talent-order-row > .jobs-order-copy > span {
+  display: block !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  color: var(--ih-copy, #5f5f5a) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 13px !important;
+  font-weight: 560 !important;
+  line-height: 1.42 !important;
+  letter-spacing: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+#root .page .app-page.talent-page .talent-order-row > .jobs-order-switch {
+  width: auto !important;
+  min-width: 220px !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  box-sizing: border-box !important;
+  gap: 3px !important;
+  margin: 0 !important;
+  padding: 3px !important;
+  border: 1px solid var(--ih-line, #deded9) !important;
+  border-radius: 11px !important;
+  background: var(--ih-surface, #ffffff) !important;
+  box-shadow: none !important;
+}
+
+#root .page .app-page.talent-page .talent-order-row > .jobs-order-switch > button {
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 38px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+/* ---------- CLASSIC NAV: ACTIVE LABEL MUST CONTRAST WITH ITS BACKGROUND ---------- */
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active,
+html[data-template="classic"]:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active:is(:hover, :focus-visible),
+html[data-template="classic"]:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active > :is(span, strong, small) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active,
+html[data-template="classic"][data-theme="dark"] #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active:is(:hover, :focus-visible),
+html[data-template="classic"][data-theme="dark"] #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active > :is(span, strong, small) {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+/* The notification dot remains visible independently of the active label. */
+html[data-template="classic"] #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active > .messages-nav-dot {
+  border-color: var(--ih-surface, #ffffff) !important;
+  background: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+/* ---------- COUNTRY PICKER: SEARCH WITHOUT A REDUNDANT MAGNIFIER ---------- */
+
+#root .ideahire-country-menu .ideahire-country-search {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 12px !important;
+}
+
+#root .ideahire-country-menu .ideahire-country-search > span {
+  display: none !important;
+}
+
+#root .ideahire-country-menu .ideahire-country-search > input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 46px !important;
+  display: block !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 10px 13px !important;
+  border: 1px solid var(--ih-line-strong, #b8b8b2) !important;
+  border-radius: 10px !important;
+  background: var(--ih-surface, #ffffff) !important;
+  background-image: none !important;
+  color: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+}
+
+#root .ideahire-country-menu .ideahire-country-search > input:focus {
+  border-color: var(--ih-ink, #111111) !important;
+  outline: 0 !important;
+  box-shadow: 0 0 0 3px var(--ih-focus, rgba(17, 17, 17, 0.12)) !important;
+}
+
+@media (max-width: 900px) {
+  #root .page .app-page.talent-page .app-page-header.talent-page-header {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto auto auto !important;
+    grid-template-areas:
+      "talent-label"
+      "talent-title"
+      "talent-copy" !important;
+    row-gap: 7px !important;
+    padding-bottom: 18px !important;
+  }
+
+  #root .page .app-page.talent-page .talent-page-header > p {
+    max-width: 680px !important;
+    margin-top: 7px !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+}
+
+@media (max-width: 680px) {
+  #root .page .app-page.talent-page .app-page-header.talent-page-header {
+    margin-bottom: 16px !important;
+    padding: 6px 0 14px !important;
+  }
+
+  #root .page .app-page.talent-page .talent-page-header > .section-label {
+    font-size: 10px !important;
+  }
+
+  #root .page .app-page.talent-page .talent-page-header > h1 {
+    font-size: clamp(34px, 10.5vw, 44px) !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  #root .page .app-page.talent-page .talent-order-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 13px !important;
+  }
+
+  #root .page .app-page.talent-page .talent-order-row > .jobs-order-switch {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 @media (max-width: 420px) {
   #root .legal-document-page .legal-document-nav-actions {
     grid-template-columns: minmax(0, 1fr) !important;
