@@ -43890,90 +43890,14 @@ html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 03 / CLEAN UI, ZERO DECORATIVE BARS, ARROWS AND MAGNIFIERS
+   IDEAHIRE - TARGETED UI FIXES ONLY
+   Restores original separators and removes only unwanted icons/label strips.
    2026-09-28
    ============================================================================ */
 
-/* ---------- REMOVE DECORATIVE LINES WITHOUT REMOVING USEFUL CARD BORDERS ---------- */
+/* Remove the decorative arrows and magnifiers requested earlier. */
 
-#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .messages-list-header,
-  .account-tab-intro,
-  .jobs-results-header,
-  .talent-results-header
-) {
-  border-top: 0 !important;
-  border-right: 0 !important;
-  border-bottom: 0 !important;
-  border-left: 0 !important;
-  box-shadow: none !important;
-  background-image: none !important;
-}
-
-#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .account-tab-intro,
-  .jobs-results-header,
-  .talent-results-header
-) > p,
-#root .messages-heading-copy > p,
-#root .privacy-trust-panel {
-  padding-left: 0 !important;
-  border-left: 0 !important;
-}
-
-#root :is(
-  .job-card,
-  .account-card,
-  .project-form,
-  .notification-message-card,
-  .notification-item,
-  .messages-row,
-  .profile-preview,
-  .account-form-section,
-  .privacy-entry-card,
-  .dispute-list-card
-)::before,
-#root :is(
-  .job-card,
-  .account-card,
-  .project-form,
-  .notification-message-card,
-  .notification-item,
-  .messages-row,
-  .profile-preview,
-  .account-form-section,
-  .privacy-entry-card,
-  .dispute-list-card
-)::after {
-  content: none !important;
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-}
-
-#root .account-page .messages-row,
-#root .account-page .messages-row:hover,
-#root .account-page .messages-row.is-unread,
-#root .account-page .messages-row.is-unread:hover {
-  box-shadow: none !important;
-}
-
-/* ---------- REMOVE EVERY DECORATIVE ARROW / MAGNIFIER ICON ---------- */
-
-#root :is(
+#root#root :is(
   .notification-message-icon,
   .category-arrow,
   .check-icon,
@@ -43993,17 +43917,17 @@ html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal
   display: none !important;
 }
 
-#root :is(a, button) > span[aria-hidden="true"]:empty,
+#root#root :is(a, button) > span[aria-hidden="true"]:empty,
 body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
   display: none !important;
 }
 
-#root :is(
+#root#root :is(
   .jobs-search-box,
   .talent-search-box,
   .ideahire-country-search
 ) > span[aria-hidden="true"],
-#root :is(
+#root#root :is(
   .jobs-search-box,
   .talent-search-box,
   .ideahire-country-search
@@ -44011,11 +43935,11 @@ body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
   display: none !important;
 }
 
-#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) {
+#root#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) {
   grid-template-columns: minmax(0, 1fr) !important;
 }
 
-#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) > input {
+#root#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) > input {
   width: 100% !important;
   min-width: 0 !important;
   max-width: none !important;
@@ -44024,37 +43948,15 @@ body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
   padding-left: 14px !important;
 }
 
-/* Functional gallery controls remain usable, but use words instead of arrows. */
+/* Keep the light navigation readable without a large black hover tile. */
 
-#root .portfolio-lightbox-arrow,
-body > .private-work-lightbox .private-work-lightbox-arrow {
-  width: auto !important;
-  min-width: 0 !important;
-  height: 38px !important;
-  padding: 0 12px !important;
-  border-radius: 10px !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-}
-
-body > .private-work-lightbox .private-work-viewer-controls > a[download] {
-  width: auto !important;
-  min-width: 0 !important;
-  padding: 0 10px !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-}
-
-/* ---------- LIGHT MODE NAV: NO LARGE BLACK HOVER BLOCK ---------- */
-
-html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active),
-html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active) > :is(span, strong, small) {
+html:not([data-theme="dark"]) #root#root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active),
+html:not([data-theme="dark"]) #root#root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active) > :is(span, strong, small) {
   color: var(--ih-ink, #111111) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active):is(:hover, :focus-visible) {
+html:not([data-theme="dark"]) #root#root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active):is(:hover, :focus-visible) {
   border-color: var(--ih-line, #deded9) !important;
   background: var(--ih-surface-soft, #f2f2ef) !important;
   background-image: none !important;
@@ -44065,16 +43967,24 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
   transform: none !important;
 }
 
-/* ---------- COMPACT, NATURAL ACCOUNT CONTROL ---------- */
+/* Compact, neutral profile control in the upper-right corner. */
 
-#root .navbar.account-navbar .account-menu {
+#root#root .navbar.account-navbar .account-menu {
   width: auto !important;
   min-width: 0 !important;
   max-width: min(220px, 32vw) !important;
   justify-self: end !important;
+  border: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
-#root .navbar.account-navbar .account-menu > summary.account-mini {
+#root#root .navbar.account-navbar .account-menu > summary.account-mini,
+#root#root .navbar.account-navbar .account-menu > summary.account-mini:hover,
+#root#root .navbar.account-navbar .account-menu > summary.account-mini:focus-visible,
+#root#root .navbar.account-navbar .account-menu[open] > summary.account-mini {
   width: auto !important;
   min-width: 0 !important;
   max-width: min(220px, 32vw) !important;
@@ -44085,19 +43995,27 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
   gap: 8px !important;
   box-sizing: border-box !important;
   padding: 4px 10px 4px 5px !important;
+  border: 0 !important;
+  border-color: transparent !important;
   border-radius: 12px !important;
+  background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
   box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
 }
 
-#root .navbar.account-navbar .account-mini-avatar {
+#root#root .navbar.account-navbar .account-mini-avatar {
   width: 32px !important;
   height: 32px !important;
   flex: 0 0 32px !important;
   border-radius: 9px !important;
 }
 
-#root .navbar.account-navbar .account-mini-name {
+#root#root .navbar.account-navbar .account-mini-name {
   width: auto !important;
   max-width: 120px !important;
   min-width: 0 !important;
@@ -44111,148 +44029,52 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
 }
 
 @media (max-width: 760px) {
-  #root .navbar.account-navbar .account-menu,
-  #root .navbar.account-navbar .account-menu > summary.account-mini {
+  #root#root .navbar.account-navbar .account-menu,
+  #root#root .navbar.account-navbar .account-menu > summary.account-mini {
     max-width: 48px !important;
   }
 
-  #root .navbar.account-navbar .account-menu > summary.account-mini {
+  #root#root .navbar.account-navbar .account-menu > summary.account-mini {
     width: 42px !important;
     min-width: 42px !important;
     padding: 4px !important;
     justify-content: center !important;
   }
 
-  #root .navbar.account-navbar .account-mini-name {
+  #root#root .navbar.account-navbar .account-mini-name {
     display: none !important;
   }
 }
 
-/* ============================================================================
-   IDEAHIRE — BATCH 03.1 / FINAL INTERNAL-LINE AND ACCOUNT-CONTROL CLEANUP
-   2026-09-28
-   ============================================================================ */
+/*
+  Remove only the photographed long strips. Their source was the block-level
+  .section-label background, not the original card borders or separators.
+*/
 
-/* Keep the profile control compact and neutral in every template/theme/state. */
-
-#root .navbar.account-navbar .account-menu {
+#root#root .section-label,
+html[data-template="classic"] #root#root .section-label,
+html[data-template="classic"][data-theme="dark"] #root#root .section-label {
+  position: relative !important;
+  inset: auto !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
   background-color: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
   filter: none !important;
+  clip-path: none !important;
 }
 
-#root .navbar.account-navbar .account-menu > summary.account-mini,
-#root .navbar.account-navbar .account-menu > summary.account-mini:hover,
-#root .navbar.account-navbar .account-menu > summary.account-mini:focus-visible,
-#root .navbar.account-navbar .account-menu[open] > summary.account-mini,
-html[data-template="classic"] #root .navbar.account-navbar .account-menu > summary.account-mini,
-html[data-template="classic"] #root .navbar.account-navbar .account-menu > summary.account-mini:hover,
-html[data-template="classic"] #root .navbar.account-navbar .account-menu[open] > summary.account-mini {
-  border: 0 !important;
-  border-color: transparent !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  color: var(--ih-ink) !important;
-  -webkit-text-fill-color: currentColor !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-html[data-theme="dark"] #root .navbar.account-navbar .account-menu > summary.account-mini,
-html[data-theme="dark"] #root .navbar.account-navbar .account-menu > summary.account-mini:hover,
-html[data-theme="dark"] #root .navbar.account-navbar .account-menu[open] > summary.account-mini {
-  color: var(--ih-ink, #f5f5f1) !important;
-}
-
-/* Remove only internal/decorative separators; outer card and input borders stay. */
-
-#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .messages-list-header,
-  .messages-row,
-  .account-tab-intro,
-  .account-form-section-heading,
-  .account-template-heading,
-  .profile-portfolio-heading,
-  .jobs-results-header,
-  .talent-results-header,
-  .job-details,
-  .talent-order-row,
-  .talent-card-footer,
-  .chat-header,
-  .chat-form,
-  .chat-dispute-card,
-  .agreement-workspace,
-  .agreement-summary,
-  .agreement-summary-body,
-  .chat-collapsible-panel,
-  .chat-collapsible-body,
-  .profile-public-portfolio,
-  .profile-public-album-cover,
-  .profile-public-project-links
-) {
-  border-top-color: transparent !important;
-  border-bottom-color: transparent !important;
-  box-shadow: none !important;
-}
-
-#root .account-page .messages-list-header,
-#root .account-page .messages-row,
-#root .account-page .messages-row:hover,
-#root .account-page .messages-row.is-unread,
-#root .account-page .messages-row.is-unread:hover {
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-}
-
-#root .profile-public-portfolio-group + .profile-public-portfolio-group,
-#root .profile-public-project-link-row + .profile-public-project-link-row {
-  border-top: 0 !important;
-}
-
-/* Remove the accent strips generated on cards in all routes and templates. */
-
-#root .page .jobs-list > .job-card::before,
-#root .page .jobs-list > .job-card::after,
-#root .account-page .jobs-list > .job-card::before,
-#root .account-page .jobs-list > .job-card::after,
-#root :is(
-  .job-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .account-card,
-  .project-form,
-  .messages-row,
-  .account-form-section,
-  .profile-preview,
-  .talent-card
-)::before,
-#root :is(
-  .job-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .account-card,
-  .project-form,
-  .messages-row,
-  .account-form-section,
-  .profile-preview,
-  .talent-card
-)::after {
+#root#root .section-label::before,
+#root#root .section-label::after {
   content: none !important;
   display: none !important;
   width: 0 !important;
@@ -44262,12 +44084,274 @@ html[data-theme="dark"] #root .navbar.account-navbar .account-menu[open] > summa
   box-shadow: none !important;
 }
 
-/* Active filters remain readable without an underline/accent strip. */
+/* ============================================================================
+   IDEAHIRE — BATCH 04 / FIVE SCREEN-BASED REPAIRS — 2026-09-28
 
-#root :is(
-  .jobs-filter.active,
-  .talent-category-row button.is-active,
-  .profile-category-option.is-selected
-) {
+   This block deliberately changes only the five photographed areas:
+   account step markers, account back affordance, the light hero preview,
+   home category actions and dark footer contrast.
+   ============================================================================ */
+
+/* 1. Account steps: full, centred markers instead of tiny clipped fragments. */
+
+html[data-theme="dark"] #root#root .account-section-nav {
+  overflow-y: visible !important;
+}
+
+html[data-theme="dark"] #root#root .account-section-nav > :is(button, a) {
+  min-height: 56px !important;
+  gap: 10px !important;
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+  overflow: visible !important;
+}
+
+html[data-theme="dark"] #root#root .account-section-nav > :is(button, a) > span:first-child {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  flex: 0 0 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--ih-line-strong, rgba(255, 255, 255, 0.2)) !important;
+  border-radius: 10px !important;
+  background: var(--ih-surface-soft, rgba(255, 255, 255, 0.08)) !important;
+  background-image: none !important;
+  color: var(--ih-ink, #f5f5f1) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  clip-path: none !important;
   box-shadow: none !important;
+  transform: none !important;
+}
+
+html[data-theme="dark"] #root#root .account-section-nav > :is(button, a).is-active > span:first-child {
+  border-color: currentColor !important;
+  background: rgba(255, 255, 255, 0.13) !important;
+  color: inherit !important;
+}
+
+@media (max-width: 720px) {
+  html[data-theme="dark"] #root#root .account-section-nav > :is(button, a) {
+    min-width: 122px !important;
+    min-height: 50px !important;
+    flex-basis: 122px !important;
+    overflow: visible !important;
+  }
+
+  html[data-theme="dark"] #root#root .account-section-nav > :is(button, a) > span:first-child {
+    width: 27px !important;
+    min-width: 27px !important;
+    height: 27px !important;
+    min-height: 27px !important;
+    flex-basis: 27px !important;
+  }
+}
+
+/* 2. A clear home arrow beside the IdeaHire brand on every account screen. */
+
+#root#root .navbar.account-navbar .navbar-home-back {
+  width: 38px !important;
+  min-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  flex: 0 0 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 1px solid var(--ih-line-strong, #cfd5dd) !important;
+  border-radius: 11px !important;
+  background: var(--ih-surface, #ffffff) !important;
+  background-image: none !important;
+  color: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+#root#root .navbar.account-navbar .navbar-home-back::before {
+  content: "\2190" !important;
+  display: block !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 21px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  transform: translateY(-1px) !important;
+}
+
+#root#root .navbar.account-navbar .navbar-home-back:is(:hover, :focus-visible) {
+  border-color: var(--ih-ink, #111111) !important;
+  background: var(--ih-surface-soft, #f1f3f6) !important;
+  color: var(--ih-ink, #111111) !important;
+}
+
+@media (max-width: 720px) {
+  #root#root .navbar.account-navbar .navbar-home-back {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    flex-basis: 36px !important;
+  }
+}
+
+/* 3. Light mode: remove the stray black rule and dot from the job preview. */
+
+html:not([data-theme="dark"]) #root#root .app .hero-visual .card-main::before {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) #root#root .app .hero-visual .live-dot {
+  display: none !important;
+}
+
+html:not([data-theme="dark"]) #root#root .app .hero-visual :is(.floating-card, .card-main, .card-small) {
+  overflow: hidden !important;
+}
+
+/* 4. Category cards: restore a visible diagonal action arrow in every palette. */
+
+#root#root .app .category-card .category-arrow {
+  width: 38px !important;
+  min-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border: 1px solid var(--ih-line-strong, rgba(16, 36, 61, 0.18)) !important;
+  border-radius: 12px !important;
+  background: var(--ih-surface-soft, rgba(255, 255, 255, 0.9)) !important;
+  background-image: none !important;
+  color: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+  clip-path: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease !important;
+}
+
+#root#root .app .category-card .category-arrow::before {
+  content: "\2197" !important;
+  display: block !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+}
+
+#root#root .app .category-card:is(:hover, :focus-visible, :active) .category-arrow {
+  transform: translate(2px, -2px) !important;
+}
+
+html[data-theme="dark"] #root#root .app .category-card .category-arrow {
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root#root .app .category-card .category-arrow {
+  border-color: #b8b8b2 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root .app .category-card .category-arrow {
+  border-color: #575751 !important;
+  background: #242422 !important;
+  color: #f5f5f1 !important;
+}
+
+html[data-theme="dark"] #root#root .app .category-card:is(:hover, :focus-visible, :active) .category-arrow,
+html[data-template="classic"][data-theme="dark"] #root#root .app .category-card:is(:hover, :focus-visible, :active) .category-arrow {
+  border-color: #111111 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+@media (max-width: 720px) {
+  #root#root .app .category-card .category-arrow {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  #root#root .app .category-card .category-arrow::before {
+    font-size: 18px !important;
+  }
+}
+
+/* 5. Dark footer: legal and privacy links must remain plainly readable. */
+
+html[data-theme="dark"] #root#root .app > .footer,
+html[data-theme="dark"] #root#root .app > .footer > span,
+html[data-theme="dark"] #root#root .app > .footer > div > p {
+  color: #c8ced8 !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] #root#root .app > .footer .footer-links > a {
+  color: #d8dee8 !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-weight: 650 !important;
+  opacity: 1 !important;
+  text-decoration-color: currentColor !important;
+}
+
+html[data-theme="dark"] #root#root .app > .footer .footer-links > a:is(
+  [href="/regulamin"],
+  [href="/polityka-prywatnosci"],
+  [href="/polityka-cookies"]
+) {
+  color: #f3f6fb !important;
+  font-weight: 780 !important;
+}
+
+html[data-theme="dark"] #root#root .app > .footer .footer-links > a:is(:hover, :focus-visible) {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root .app > .footer .footer-links > a {
+  color: #d7d7d0 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root .app > .footer .footer-links > a:is(
+  [href="/regulamin"],
+  [href="/polityka-prywatnosci"],
+  [href="/polityka-cookies"]
+) {
+  color: #ffffff !important;
 }
