@@ -12146,14 +12146,14 @@ function Profile() {
       : 0;
 
   /*
-   * Nie pokazujemy daty urodzenia ani dokładnego wieku. Publiczny status 18+
-   * można potwierdzić dla właściciela konta lub na podstawie wykonanej,
-   * płatnej aktywności, która jest dostępna wyłącznie dla pełnych kont.
+   * Publicznie pokazujemy wyłącznie status pełnego konta 18+, nigdy datę
+   * urodzenia ani dokładny wiek. Płatne zlecenia są dostępne tylko dla
+   * pełnych kont, dlatego zakończona lub opublikowana praca potwierdza
+   * uprawnienie bez ujawniania prywatnych danych.
    */
   const publicAdultConfirmed =
     (user?.id === id && signedInUserIsAdult) ||
     completedJobs > 0 ||
-    totalReviews > 0 ||
     Math.max(0, Number(profile.posted_jobs) || 0) > 0;
 
   const portfolioAlbums =
@@ -12624,7 +12624,7 @@ function Profile() {
                   <span className="profile-expertise-label">
                     Zweryfikowane współprace
                   </span>
-                  <h2>Opinie zleceniodawców</h2>
+                  <h2>Opinie po współpracy</h2>
                 </div>
 
                 {reviews.length > 0 && (
@@ -12668,7 +12668,7 @@ function Profile() {
 
               {reviews.length === 0 ? (
                 <p className="profile-reviews-empty">
-                  Ten wykonawca nie otrzymał jeszcze opinii po zakończonym zleceniu.
+                  Ten użytkownik nie otrzymał jeszcze opinii po zakończonej współpracy.
                 </p>
               ) : (
                 <div className="profile-reviews-list">
@@ -12805,15 +12805,15 @@ function Profile() {
               </div>
             )}
 
-          {!profileHidden &&
-            profile.specialization?.trim() && (
+          {!profileHidden && (
               <div className="profile-expertise-card profile-specialization-card">
                 <span className="profile-expertise-label">
                   W czym się specjalizuję
                 </span>
 
                 <p className="profile-specialization-copy">
-                  {profile.specialization}
+                  {profile.specialization?.trim() ||
+                    "Ten użytkownik nie dodał jeszcze opisu specjalizacji."}
                 </p>
               </div>
             )}
