@@ -44127,3 +44127,147 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
     display: none !important;
   }
 }
+
+/* ============================================================================
+   IDEAHIRE — BATCH 03.1 / FINAL INTERNAL-LINE AND ACCOUNT-CONTROL CLEANUP
+   2026-09-28
+   ============================================================================ */
+
+/* Keep the profile control compact and neutral in every template/theme/state. */
+
+#root .navbar.account-navbar .account-menu {
+  border: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+#root .navbar.account-navbar .account-menu > summary.account-mini,
+#root .navbar.account-navbar .account-menu > summary.account-mini:hover,
+#root .navbar.account-navbar .account-menu > summary.account-mini:focus-visible,
+#root .navbar.account-navbar .account-menu[open] > summary.account-mini,
+html[data-template="classic"] #root .navbar.account-navbar .account-menu > summary.account-mini,
+html[data-template="classic"] #root .navbar.account-navbar .account-menu > summary.account-mini:hover,
+html[data-template="classic"] #root .navbar.account-navbar .account-menu[open] > summary.account-mini {
+  border: 0 !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html[data-theme="dark"] #root .navbar.account-navbar .account-menu > summary.account-mini,
+html[data-theme="dark"] #root .navbar.account-navbar .account-menu > summary.account-mini:hover,
+html[data-theme="dark"] #root .navbar.account-navbar .account-menu[open] > summary.account-mini {
+  color: var(--ih-ink, #f5f5f1) !important;
+}
+
+/* Remove only internal/decorative separators; outer card and input borders stay. */
+
+#root :is(
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .messages-heading,
+  .messages-list-header,
+  .messages-row,
+  .account-tab-intro,
+  .account-form-section-heading,
+  .account-template-heading,
+  .profile-portfolio-heading,
+  .jobs-results-header,
+  .talent-results-header,
+  .job-details,
+  .talent-order-row,
+  .talent-card-footer,
+  .chat-header,
+  .chat-form,
+  .chat-dispute-card,
+  .agreement-workspace,
+  .agreement-summary,
+  .agreement-summary-body,
+  .chat-collapsible-panel,
+  .chat-collapsible-body,
+  .profile-public-portfolio,
+  .profile-public-album-cover,
+  .profile-public-project-links
+) {
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
+
+#root .account-page .messages-list-header,
+#root .account-page .messages-row,
+#root .account-page .messages-row:hover,
+#root .account-page .messages-row.is-unread,
+#root .account-page .messages-row.is-unread:hover {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+#root .profile-public-portfolio-group + .profile-public-portfolio-group,
+#root .profile-public-project-link-row + .profile-public-project-link-row {
+  border-top: 0 !important;
+}
+
+/* Remove the accent strips generated on cards in all routes and templates. */
+
+#root .page .jobs-list > .job-card::before,
+#root .page .jobs-list > .job-card::after,
+#root .account-page .jobs-list > .job-card::before,
+#root .account-page .jobs-list > .job-card::after,
+#root :is(
+  .job-card,
+  .notification-message-card,
+  .notification-decision-card,
+  .notification-accepted-card,
+  .notification-block-card,
+  .notification-card,
+  .account-card,
+  .project-form,
+  .messages-row,
+  .account-form-section,
+  .profile-preview,
+  .talent-card
+)::before,
+#root :is(
+  .job-card,
+  .notification-message-card,
+  .notification-decision-card,
+  .notification-accepted-card,
+  .notification-block-card,
+  .notification-card,
+  .account-card,
+  .project-form,
+  .messages-row,
+  .account-form-section,
+  .profile-preview,
+  .talent-card
+)::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Active filters remain readable without an underline/accent strip. */
+
+#root :is(
+  .jobs-filter.active,
+  .talent-category-row button.is-active,
+  .profile-category-option.is-selected
+) {
+  box-shadow: none !important;
+}
