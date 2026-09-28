@@ -411,21 +411,22 @@ function Sorts({ children }) {
         .ideahire-country-selected-code,
         .ideahire-country-option-code,
         .ideahire-country-badge-code {
+          width: 30px;
           min-width: 30px;
           height: 30px;
           display: inline-grid;
           place-items: center;
-          flex: 0 0 30px;
           padding: 0;
-          border: 1px solid rgba(20,20,20,.14);
+          overflow: hidden;
+          border: 1px solid rgba(20,20,20,.18);
           border-radius: 50%;
           background: #fff;
           color: #343434;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: .06em;
+          font-size: 9px;
+          font-weight: 800;
           line-height: 1;
-          box-sizing: border-box;
+          letter-spacing: .04em;
+          text-align: center;
         }
 
         .ideahire-country-placeholder {
@@ -452,7 +453,6 @@ function Sorts({ children }) {
 
         .ideahire-country-search {
           display: block;
-          align-items: center;
           padding: 12px;
           border-bottom: 1px solid rgba(20,20,20,.08);
         }
@@ -475,7 +475,7 @@ function Sorts({ children }) {
         .ideahire-country-option {
           width: 100%;
           display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
+          grid-template-columns: minmax(0, 1fr) 30px;
           align-items: center;
           gap: 10px;
           padding: 9px 11px;
@@ -514,7 +514,7 @@ function Sorts({ children }) {
           width: fit-content;
           max-width: 100%;
           margin: 8px 0 0;
-          padding: 5px 6px 5px 12px;
+          padding: 5px 11px 5px 6px;
           border: 1px solid rgba(20,20,20,.07);
           border-radius: 999px;
           background: #f7f7f4;
@@ -637,7 +637,7 @@ function Sorts({ children }) {
           }
 
           .ideahire-country-selected-code {
-            display: none;
+            display: inline-grid;
           }
         }
       `}</style>
