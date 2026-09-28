@@ -42551,3 +42551,509 @@ html[data-template="classic"][data-theme="dark"] #root .discovery-step-count {
   color: #f5f5f1 !important;
   -webkit-text-fill-color: #f5f5f1 !important;
 }
+
+/* ============================================================================
+   IDEAHIRE — BATCH 01 / 2026-09-28
+   1. Visible "Dodaj zlecenie" CTA in the classic template.
+   2. Strictly neutral classic-template interface in both colour modes.
+   3. Stable, centred legal-document geometry on desktop and mobile.
+   ============================================================================ */
+
+/* ---------- 1. CLASSIC HOME CTA: WHITE BUTTON, DARK LEGIBLE LABEL ---------- */
+
+html[data-template="classic"] #root .app .split-section .split-card:not(.light) > .btn.btn-light {
+  position: relative !important;
+  z-index: 3 !important;
+  border: 1px solid #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app .split-section .split-card:not(.light) > .btn.btn-light :is(span, strong) {
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root .app .split-section .split-card:not(.light) > .btn.btn-light:is(:hover, :focus-visible) {
+  border-color: #deded8 !important;
+  background: #ecece8 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+/* ---------- 2. CLASSIC TEMPLATE: ONE NEUTRAL COLOUR SYSTEM ---------- */
+
+html[data-template="classic"] {
+  color-scheme: light;
+  --ih-page: #ffffff;
+  --ih-canvas: #ffffff;
+  --ih-surface: #ffffff;
+  --ih-surface-soft: #f3f3f0;
+  --ih-line: #deded9;
+  --ih-line-strong: #b8b8b2;
+  --ih-ink: #111111;
+  --ih-ink-soft: #2d2d2b;
+  --ih-copy: #50504d;
+  --ih-muted: #6b6b66;
+  --ih-navy-950: #050505;
+  --ih-navy-900: #111111;
+  --ih-navy-850: #181818;
+  --ih-navy-800: #222222;
+  --ih-navy-700: #3a3a38;
+  --ih-blue-600: #111111;
+  --ih-blue-100: #e9e9e5;
+  --ih-blue-soft: #f3f3f0;
+  --ih-violet: #111111;
+  --ih-violet-deep: #000000;
+  --ih-violet-soft: #e9e9e5;
+  --ih-mint: #5e5e59;
+  --ih-mint-soft: #eeeeea;
+  --ih-sun: #5e5e59;
+  --ih-sun-soft: #eeeeea;
+  --ih-rose-soft: #eeeeea;
+  --ih-focus: rgba(17, 17, 17, 0.3);
+  --ih-dark-surface: #111111;
+  --ih-v3-page: #ffffff;
+  --ih-v3-surface: #ffffff;
+  --ih-v3-line: #deded9;
+  --ih-v3-ink: #111111;
+  --ih-v3-copy: #5f5f5a;
+  --ih-v3-shadow: none;
+  --ih-v4-surface: #ffffff;
+  --ih-v4-surface-muted: #f3f3f0;
+  --ih-v4-line: #deded9;
+  --ih-v4-line-strong: #b8b8b2;
+  --ih-v4-ink: #111111;
+  --ih-v4-copy: #5f5f5a;
+  --ih-v4-violet: #111111;
+  --ih-v4-violet-soft: #e9e9e5;
+  --ih-v4-mint: #5e5e59;
+  --ih-v4-shadow: none;
+}
+
+html[data-template="classic"][data-theme="dark"] {
+  color-scheme: dark;
+  --ih-page: #0d0d0c;
+  --ih-canvas: #0d0d0c;
+  --ih-surface: #191918;
+  --ih-surface-soft: #232321;
+  --ih-line: #3b3b37;
+  --ih-line-strong: #575751;
+  --ih-ink: #f5f5f1;
+  --ih-ink-soft: #dfdfd9;
+  --ih-copy: #b9b9b2;
+  --ih-muted: #999992;
+  --ih-navy-950: #080808;
+  --ih-navy-900: #111111;
+  --ih-navy-850: #181818;
+  --ih-navy-800: #222222;
+  --ih-navy-700: #3b3b38;
+  --ih-blue-600: #f5f5f1;
+  --ih-blue-100: #292927;
+  --ih-blue-soft: #232321;
+  --ih-violet: #f5f5f1;
+  --ih-violet-deep: #ffffff;
+  --ih-violet-soft: #292927;
+  --ih-mint: #c9c9c2;
+  --ih-mint-soft: #292927;
+  --ih-sun: #c9c9c2;
+  --ih-sun-soft: #292927;
+  --ih-rose-soft: #292927;
+  --ih-focus: rgba(255, 255, 255, 0.3);
+  --ih-dark-surface: #191918;
+  --ih-v3-page: #0d0d0c;
+  --ih-v3-surface: #191918;
+  --ih-v3-line: #3b3b37;
+  --ih-v3-ink: #f5f5f1;
+  --ih-v3-copy: #b9b9b2;
+  --ih-v3-shadow: none;
+  --ih-v4-surface: #191918;
+  --ih-v4-surface-muted: #232321;
+  --ih-v4-line: #3b3b37;
+  --ih-v4-line-strong: #575751;
+  --ih-v4-ink: #f5f5f1;
+  --ih-v4-copy: #b9b9b2;
+  --ih-v4-violet: #f5f5f1;
+  --ih-v4-violet-soft: #292927;
+  --ih-v4-mint: #c9c9c2;
+  --ih-v4-shadow: none;
+}
+
+html[data-template="classic"] #root :is(.app, .page, .account-page, .admin-page, .auth-page) {
+  background-color: var(--ih-page) !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .home-navbar .nav-actions > .btn.btn-ghost,
+html[data-template="classic"] #root :is(
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-mobile-nav,
+  .jobs-filter-row,
+  .talent-category-row,
+  .legal-document-tabs
+) :is(a, button).is-active,
+html[data-template="classic"] #root :is(
+  .site-language-toggle button.is-active,
+  .account-notification-button,
+  .account-create-job-button,
+  .notification-chat-button,
+  .chat-send,
+  .privacy-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .home-navbar .nav-actions > .btn.btn-ghost,
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-mobile-nav,
+  .jobs-filter-row,
+  .talent-category-row,
+  .legal-document-tabs
+) :is(a, button).is-active,
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .site-language-toggle button.is-active,
+  .account-notification-button,
+  .account-create-job-button,
+  .notification-chat-button,
+  .chat-send,
+  .privacy-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button
+) {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .home-navbar,
+  .home-nav-links,
+  .site-preferences-panel,
+  .site-language-toggle,
+  .account-primary-nav,
+  .admin-nav-links,
+  .account-menu-dropdown,
+  .account-menu-mobile-nav,
+  .jobs-search,
+  .talent-controls,
+  .jobs-order-panel,
+  .talent-order-row,
+  .messages-list,
+  .messages-list-header,
+  .account-card,
+  .auth-card,
+  .project-form,
+  .job-card,
+  .talent-card,
+  .privacy-entry-card,
+  .dispute-panel,
+  .admin-card
+) {
+  border-color: var(--ih-line) !important;
+  background-color: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .site-preferences-handle,
+  .site-theme-toggle,
+  .btn-outline,
+  .privacy-secondary-button,
+  .dispute-secondary-button,
+  .agreement-secondary-button,
+  .ideahire-country-trigger,
+  .ideahire-country-menu,
+  .ideahire-country-option
+) {
+  border-color: var(--ih-line-strong) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .section-label,
+  .eyebrow-dot,
+  .live-dot,
+  .mini-icon,
+  .check-icon,
+  .category-number,
+  .category-arrow,
+  .step > span,
+  .jobs-order-icon,
+  .jobs-search-icon,
+  .stripe-connect-icon,
+  .discovery-settings-icon,
+  .privacy-entry-icon,
+  .agreement-status-icon,
+  .notification-message-icon,
+  .notification-accepted-icon,
+  .notification-decision-icon,
+  .notification-block-icon,
+  .job-active-badge,
+  .talent-match-badge,
+  .job-listing-pill,
+  .profile-specialty-chip,
+  .profile-edit-skill-chip,
+  .content-report-status
+) {
+  border-color: var(--ih-line-strong) !important;
+  background-color: var(--ih-surface-soft) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root :is(
+  .hero::before,
+  .hero::after,
+  .how::before,
+  .how::after,
+  .split-card::before,
+  .split-card::after,
+  .final-cta::before,
+  .final-cta::after,
+  .category-card::before,
+  .category-card::after,
+  .visual-glow
+) {
+  border-color: var(--ih-line) !important;
+  background: rgba(110, 110, 105, 0.14) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root :is(button, input, textarea, select) {
+  accent-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(button, a, input, textarea, select):focus-visible {
+  outline-color: var(--ih-ink) !important;
+  box-shadow: 0 0 0 3px var(--ih-focus) !important;
+}
+
+/* Keep third-party identity artwork intact; monochrome applies to IdeaHire UI. */
+html[data-template="classic"] #root .google-auth-logo {
+  filter: none !important;
+}
+
+/* ---------- 3. LEGAL DOCUMENTS: CENTRED, BOXED AND NEVER CROPPED ---------- */
+
+#root > .cookie-policy-page.legal-document-page {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  min-width: 0 !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 28px max(20px, env(safe-area-inset-right)) 96px max(20px, env(safe-area-inset-left)) !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  clip-path: none !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+  position: relative !important;
+  inset: auto !important;
+  box-sizing: border-box !important;
+  width: min(1160px, 100%) !important;
+  max-width: 1160px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+#root .legal-document-page :is(
+  .cookie-policy-nav,
+  .legal-document-hero,
+  .legal-document-warning,
+  .legal-document-tabs,
+  .legal-document-content,
+  .legal-document-footer
+) {
+  position: relative !important;
+  right: auto !important;
+  left: auto !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  clip-path: none !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+#root .legal-document-page .cookie-policy-nav {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 12px 20px !important;
+  margin-bottom: 20px !important;
+}
+
+#root .legal-document-page .legal-document-nav-actions {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+}
+
+#root .legal-document-page .legal-document-hero {
+  isolation: isolate !important;
+  min-height: 0 !important;
+  padding: clamp(42px, 6vw, 72px) !important;
+  overflow: hidden !important;
+  border-radius: 28px !important;
+}
+
+#root .legal-document-page .legal-document-hero::after {
+  right: clamp(-96px, -6vw, -54px) !important;
+  left: auto !important;
+  max-width: 52% !important;
+  transform: none !important;
+}
+
+#root .legal-document-page .legal-document-hero :is(
+  .cookie-policy-eyebrow,
+  h1,
+  p,
+  .cookie-policy-meta
+) {
+  position: relative !important;
+  z-index: 2 !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+#root .legal-document-page .legal-document-hero h1 {
+  width: auto !important;
+  overflow: visible !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+#root .legal-document-page .cookie-policy-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+#root .legal-document-page .legal-document-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  overflow: hidden !important;
+}
+
+#root .legal-document-page .legal-document-tabs > a {
+  min-width: 0 !important;
+  text-align: center !important;
+  white-space: normal !important;
+}
+
+@media (max-width: 760px) {
+  #root > .cookie-policy-page.legal-document-page {
+    padding: 12px max(10px, env(safe-area-inset-right)) 76px max(10px, env(safe-area-inset-left)) !important;
+  }
+
+  #root .legal-document-page .cookie-policy-nav {
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  #root .legal-document-page .cookie-policy-logo {
+    width: 100% !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  #root .legal-document-page .legal-document-nav-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root .legal-document-page .legal-document-nav-actions :is(a, button) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 9px 10px !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  #root .legal-document-page .legal-document-hero {
+    padding: 32px 20px !important;
+    border-radius: 20px !important;
+  }
+
+  #root .legal-document-page .legal-document-hero h1 {
+    font-size: clamp(34px, 11vw, 48px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.05em !important;
+  }
+
+  #root .legal-document-page .cookie-policy-meta {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root .legal-document-page .legal-document-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  #root .legal-document-page .legal-document-tabs > a {
+    padding: 12px 6px !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #root .legal-document-page .legal-document-nav-actions {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root .legal-document-page .legal-document-hero {
+    padding: 28px 17px !important;
+  }
+}
