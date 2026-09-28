@@ -27,8 +27,6 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
-  "Konto": "Account",
-  "Wykonawcy": "Contractors",
   "Szablony": "Templates",
   "Wygląd interfejsu": "Interface appearance",
   "Wybierz szatę IdeaHire": "Choose your IdeaHire style",
@@ -516,6 +514,7 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Masz pomysł.": "You have an idea.",
   "Miejsce, gdzie pomysły spotykają ludzi": "Where ideas meet people",
   "Moje konto": "My account",
+  "Konto": "Account",
   "Moje zlecenia": "My jobs",
   "Możesz dodać maksymalnie 12 umiejętności.": "You can add up to 12 skills.",
   "Możesz wybrać maksymalnie 3 kategorie specjalizacji.": "You can select up to 3 specialization categories.",
@@ -633,6 +632,7 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "W czym się specjalizujesz?": "What do you specialize in?",
   "W czym się specjalizuję": "What I specialize in",
   "Wiadomości": "Messages",
+  "Wykonawcy": "Contractors",
   "Więcej opcji": "More options",
   "Więcej opcji profilu": "More profile options",
   "Wpisz hasło ponownie": "Enter the password again",
