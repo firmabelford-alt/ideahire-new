@@ -43890,90 +43890,14 @@ html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal
 }
 
 /* ============================================================================
-   IDEAHIRE â BATCH 03 / CLEAN UI, ZERO DECORATIVE BARS, ARROWS AND MAGNIFIERS
+   IDEAHIRE - TARGETED UI FIXES ONLY
+   Restores original separators and removes only unwanted icons/label strips.
    2026-09-28
    ============================================================================ */
 
-/* ---------- REMOVE DECORATIVE LINES WITHOUT REMOVING USEFUL CARD BORDERS ---------- */
+/* Remove the decorative arrows and magnifiers requested earlier. */
 
-#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .messages-list-header,
-  .account-tab-intro,
-  .jobs-results-header,
-  .talent-results-header
-) {
-  border-top: 0 !important;
-  border-right: 0 !important;
-  border-bottom: 0 !important;
-  border-left: 0 !important;
-  box-shadow: none !important;
-  background-image: none !important;
-}
-
-#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .account-tab-intro,
-  .jobs-results-header,
-  .talent-results-header
-) > p,
-#root .messages-heading-copy > p,
-#root .privacy-trust-panel {
-  padding-left: 0 !important;
-  border-left: 0 !important;
-}
-
-#root :is(
-  .job-card,
-  .account-card,
-  .project-form,
-  .notification-message-card,
-  .notification-item,
-  .messages-row,
-  .profile-preview,
-  .account-form-section,
-  .privacy-entry-card,
-  .dispute-list-card
-)::before,
-#root :is(
-  .job-card,
-  .account-card,
-  .project-form,
-  .notification-message-card,
-  .notification-item,
-  .messages-row,
-  .profile-preview,
-  .account-form-section,
-  .privacy-entry-card,
-  .dispute-list-card
-)::after {
-  content: none !important;
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-}
-
-#root .account-page .messages-row,
-#root .account-page .messages-row:hover,
-#root .account-page .messages-row.is-unread,
-#root .account-page .messages-row.is-unread:hover {
-  box-shadow: none !important;
-}
-
-/* ---------- REMOVE EVERY DECORATIVE ARROW / MAGNIFIER ICON ---------- */
-
-#root :is(
+#root#root :is(
   .notification-message-icon,
   .category-arrow,
   .check-icon,
@@ -43993,17 +43917,17 @@ html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal
   display: none !important;
 }
 
-#root :is(a, button) > span[aria-hidden="true"]:empty,
+#root#root :is(a, button) > span[aria-hidden="true"]:empty,
 body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
   display: none !important;
 }
 
-#root :is(
+#root#root :is(
   .jobs-search-box,
   .talent-search-box,
   .ideahire-country-search
 ) > span[aria-hidden="true"],
-#root :is(
+#root#root :is(
   .jobs-search-box,
   .talent-search-box,
   .ideahire-country-search
@@ -44011,11 +43935,11 @@ body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
   display: none !important;
 }
 
-#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) {
+#root#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) {
   grid-template-columns: minmax(0, 1fr) !important;
 }
 
-#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) > input {
+#root#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) > input {
   width: 100% !important;
   min-width: 0 !important;
   max-width: none !important;
@@ -44024,37 +43948,15 @@ body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
   padding-left: 14px !important;
 }
 
-/* Functional gallery controls remain usable, but use words instead of arrows. */
+/* Keep the light navigation readable without a large black hover tile. */
 
-#root .portfolio-lightbox-arrow,
-body > .private-work-lightbox .private-work-lightbox-arrow {
-  width: auto !important;
-  min-width: 0 !important;
-  height: 38px !important;
-  padding: 0 12px !important;
-  border-radius: 10px !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  line-height: 1 !important;
-}
-
-body > .private-work-lightbox .private-work-viewer-controls > a[download] {
-  width: auto !important;
-  min-width: 0 !important;
-  padding: 0 10px !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-}
-
-/* ---------- LIGHT MODE NAV: NO LARGE BLACK HOVER BLOCK ---------- */
-
-html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active),
-html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active) > :is(span, strong, small) {
+html:not([data-theme="dark"]) #root#root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active),
+html:not([data-theme="dark"]) #root#root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active) > :is(span, strong, small) {
   color: var(--ih-ink, #111111) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active):is(:hover, :focus-visible) {
+html:not([data-theme="dark"]) #root#root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active):is(:hover, :focus-visible) {
   border-color: var(--ih-line, #deded9) !important;
   background: var(--ih-surface-soft, #f2f2ef) !important;
   background-image: none !important;
@@ -44065,16 +43967,24 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
   transform: none !important;
 }
 
-/* ---------- COMPACT, NATURAL ACCOUNT CONTROL ---------- */
+/* Compact, neutral profile control in the upper-right corner. */
 
-#root .navbar.account-navbar .account-menu {
+#root#root .navbar.account-navbar .account-menu {
   width: auto !important;
   min-width: 0 !important;
   max-width: min(220px, 32vw) !important;
   justify-self: end !important;
+  border: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
-#root .navbar.account-navbar .account-menu > summary.account-mini {
+#root#root .navbar.account-navbar .account-menu > summary.account-mini,
+#root#root .navbar.account-navbar .account-menu > summary.account-mini:hover,
+#root#root .navbar.account-navbar .account-menu > summary.account-mini:focus-visible,
+#root#root .navbar.account-navbar .account-menu[open] > summary.account-mini {
   width: auto !important;
   min-width: 0 !important;
   max-width: min(220px, 32vw) !important;
@@ -44085,19 +43995,27 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
   gap: 8px !important;
   box-sizing: border-box !important;
   padding: 4px 10px 4px 5px !important;
+  border: 0 !important;
+  border-color: transparent !important;
   border-radius: 12px !important;
+  background: transparent !important;
+  background-color: transparent !important;
   background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
   box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
 }
 
-#root .navbar.account-navbar .account-mini-avatar {
+#root#root .navbar.account-navbar .account-mini-avatar {
   width: 32px !important;
   height: 32px !important;
   flex: 0 0 32px !important;
   border-radius: 9px !important;
 }
 
-#root .navbar.account-navbar .account-mini-name {
+#root#root .navbar.account-navbar .account-mini-name {
   width: auto !important;
   max-width: 120px !important;
   min-width: 0 !important;
@@ -44111,374 +44029,52 @@ html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-pr
 }
 
 @media (max-width: 760px) {
-  #root .navbar.account-navbar .account-menu,
-  #root .navbar.account-navbar .account-menu > summary.account-mini {
+  #root#root .navbar.account-navbar .account-menu,
+  #root#root .navbar.account-navbar .account-menu > summary.account-mini {
     max-width: 48px !important;
   }
 
-  #root .navbar.account-navbar .account-menu > summary.account-mini {
+  #root#root .navbar.account-navbar .account-menu > summary.account-mini {
     width: 42px !important;
     min-width: 42px !important;
     padding: 4px !important;
     justify-content: center !important;
   }
 
-  #root .navbar.account-navbar .account-mini-name {
+  #root#root .navbar.account-navbar .account-mini-name {
     display: none !important;
   }
 }
 
-/* ============================================================================
-   IDEAHIRE â BATCH 03.1 / FINAL INTERNAL-LINE AND ACCOUNT-CONTROL CLEANUP
-   2026-09-28
-   ============================================================================ */
-
-/* Keep the profile control compact and neutral in every template/theme/state. */
-
-#root .navbar.account-navbar .account-menu {
-  border: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-
-#root .navbar.account-navbar .account-menu > summary.account-mini,
-#root .navbar.account-navbar .account-menu > summary.account-mini:hover,
-#root .navbar.account-navbar .account-menu > summary.account-mini:focus-visible,
-#root .navbar.account-navbar .account-menu[open] > summary.account-mini,
-html[data-template="classic"] #root .navbar.account-navbar .account-menu > summary.account-mini,
-html[data-template="classic"] #root .navbar.account-navbar .account-menu > summary.account-mini:hover,
-html[data-template="classic"] #root .navbar.account-navbar .account-menu[open] > summary.account-mini {
-  border: 0 !important;
-  border-color: transparent !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  background-image: none !important;
-  color: var(--ih-ink) !important;
-  -webkit-text-fill-color: currentColor !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-html[data-theme="dark"] #root .navbar.account-navbar .account-menu > summary.account-mini,
-html[data-theme="dark"] #root .navbar.account-navbar .account-menu > summary.account-mini:hover,
-html[data-theme="dark"] #root .navbar.account-navbar .account-menu[open] > summary.account-mini {
-  color: var(--ih-ink, #f5f5f1) !important;
-}
-
-/* Remove only internal/decorative separators; outer card and input borders stay. */
-
-#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .messages-list-header,
-  .messages-row,
-  .account-tab-intro,
-  .account-form-section-heading,
-  .account-template-heading,
-  .profile-portfolio-heading,
-  .jobs-results-header,
-  .talent-results-header,
-  .job-details,
-  .talent-order-row,
-  .talent-card-footer,
-  .chat-header,
-  .chat-form,
-  .chat-dispute-card,
-  .agreement-workspace,
-  .agreement-summary,
-  .agreement-summary-body,
-  .chat-collapsible-panel,
-  .chat-collapsible-body,
-  .profile-public-portfolio,
-  .profile-public-album-cover,
-  .profile-public-project-links
-) {
-  border-top-color: transparent !important;
-  border-bottom-color: transparent !important;
-  box-shadow: none !important;
-}
-
-#root .account-page .messages-list-header,
-#root .account-page .messages-row,
-#root .account-page .messages-row:hover,
-#root .account-page .messages-row.is-unread,
-#root .account-page .messages-row.is-unread:hover {
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-}
-
-#root .profile-public-portfolio-group + .profile-public-portfolio-group,
-#root .profile-public-project-link-row + .profile-public-project-link-row {
-  border-top: 0 !important;
-}
-
-/* Remove the accent strips generated on cards in all routes and templates. */
-
-#root .page .jobs-list > .job-card::before,
-#root .page .jobs-list > .job-card::after,
-#root .account-page .jobs-list > .job-card::before,
-#root .account-page .jobs-list > .job-card::after,
-#root :is(
-  .job-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .account-card,
-  .project-form,
-  .messages-row,
-  .account-form-section,
-  .profile-preview,
-  .talent-card
-)::before,
-#root :is(
-  .job-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .account-card,
-  .project-form,
-  .messages-row,
-  .account-form-section,
-  .profile-preview,
-  .talent-card
-)::after {
-  content: none !important;
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-}
-
-/* Active filters remain readable without an underline/accent strip. */
-
-#root :is(
-  .jobs-filter.active,
-  .talent-category-row button.is-active,
-  .profile-category-option.is-selected
-) {
-  box-shadow: none !important;
-}
-
-/* ============================================================================
-   IDEAHIRE â BATCH 03.2 / REMOVE THE ACTUAL CONTAINER STRIPS
-   2026-09-28
-   ============================================================================ */
-
 /*
-  The remaining "bars" were physical container borders, not pseudo-elements.
-  Remove them from the large application surfaces only. Form fields, buttons,
-  pills and accessibility focus outlines keep their own borders.
+  Remove only the photographed long strips. Their source was the block-level
+  .section-label background, not the original card borders or separators.
 */
 
-#root#root :is(
-  .navbar.home-navbar,
-  .navbar.account-navbar,
-  .navbar.admin-navbar,
-  .home-nav-links,
-  .account-primary-nav,
-  .admin-nav-links,
-  .account-card,
-  .project-form,
-  .jobs-search,
-  .talent-controls,
-  .job-card,
-  .talent-card,
-  .messages-list,
-  .messages-empty,
-  .chat-shell,
-  .account-form-section,
-  .profile-portfolio-manager,
-  .profile-portfolio-editor,
-  .profile-portfolio-edit-card,
-  .discovery-settings-card,
-  .privacy-entry-card,
-  .dispute-panel,
-  .dispute-state-card,
-  .dispute-list-card,
-  .account-profile-preview,
-  .public-profile-preview,
-  .profile-preview,
-  .jobs-order-panel,
-  .talent-order-row,
-  .jobs-results-header,
-  .talent-results-header,
-  .account-tab-intro,
-  .account-section-nav,
-  .messages-list-header,
-  .messages-row,
-  .chat-collapsible-panel,
-  .agreement-workspace,
-  .agreement-summary,
-  .chat-dispute-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .profile-content-report-history,
-  .job-republication-panel,
-  .my-jobs-section
-) {
+#root#root .section-label,
+html[data-template="classic"] #root#root .section-label,
+html[data-template="classic"][data-theme="dark"] #root#root .section-label {
+  position: relative !important;
+  inset: auto !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 !important;
   border: 0 !important;
-  border-width: 0 !important;
-  border-color: transparent !important;
-}
-
-/* Keep separate cards readable after removing their outlines. */
-
-#root#root :is(
-  .account-card,
-  .project-form,
-  .jobs-search,
-  .talent-controls,
-  .job-card,
-  .talent-card,
-  .messages-list,
-  .messages-empty,
-  .chat-shell,
-  .account-form-section,
-  .profile-portfolio-manager,
-  .profile-portfolio-editor,
-  .profile-portfolio-edit-card,
-  .discovery-settings-card,
-  .privacy-entry-card,
-  .dispute-panel,
-  .dispute-state-card,
-  .dispute-list-card,
-  .account-profile-preview,
-  .public-profile-preview,
-  .profile-preview,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card
-) {
-  box-shadow: 0 10px 28px rgba(15, 18, 24, 0.07) !important;
-}
-
-html[data-theme="dark"] #root#root :is(
-  .account-card,
-  .project-form,
-  .jobs-search,
-  .talent-controls,
-  .job-card,
-  .talent-card,
-  .messages-list,
-  .messages-empty,
-  .chat-shell,
-  .account-form-section,
-  .profile-portfolio-manager,
-  .profile-portfolio-editor,
-  .profile-portfolio-edit-card,
-  .discovery-settings-card,
-  .privacy-entry-card,
-  .dispute-panel,
-  .dispute-state-card,
-  .dispute-list-card,
-  .account-profile-preview,
-  .public-profile-preview,
-  .profile-preview,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card
-) {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24) !important;
-}
-
-/* Remove every internal separator on jobs, account/profile and inbox routes. */
-
-#root#root :is(
-  .app-page-header,
-  .privacy-center-header,
-  .disputes-page-header,
-  .admin-page-header,
-  .messages-heading,
-  .account-form-section-heading,
-  .account-template-heading,
-  .profile-portfolio-heading,
-  .job-details,
-  .talent-card-footer,
-  .chat-header,
-  .chat-form,
-  .chat-collapsible-body,
-  .agreement-summary-body,
-  .profile-public-portfolio,
-  .profile-public-album-cover,
-  .profile-public-project-links,
-  .account-menu-identity,
-  .account-menu-divider
-) {
-  border-top: 0 !important;
-  border-right: 0 !important;
-  border-bottom: 0 !important;
-  border-left: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
   box-shadow: none !important;
+  filter: none !important;
+  clip-path: none !important;
 }
 
-#root#root .profile-public-portfolio-group + .profile-public-portfolio-group,
-#root#root .profile-public-project-link-row + .profile-public-project-link-row,
-#root#root .messages-list > .messages-row,
-#root#root .messages-list > .messages-row:hover,
-#root#root .messages-list > .messages-row.is-unread,
-#root#root .messages-list > .messages-row.is-unread:hover {
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-/* The thin vertical accent was attached to card families in several themes. */
-
-#root#root :is(
-  .jobs-list,
-  .job-card,
-  .talent-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .account-card,
-  .project-form,
-  .messages-list,
-  .messages-row,
-  .account-form-section,
-  .profile-preview,
-  .account-profile-preview,
-  .public-profile-preview
-)::before,
-#root#root :is(
-  .jobs-list,
-  .job-card,
-  .talent-card,
-  .notification-message-card,
-  .notification-decision-card,
-  .notification-accepted-card,
-  .notification-block-card,
-  .notification-card,
-  .account-card,
-  .project-form,
-  .messages-list,
-  .messages-row,
-  .account-form-section,
-  .profile-preview,
-  .account-profile-preview,
-  .public-profile-preview
-)::after {
+#root#root .section-label::before,
+#root#root .section-label::after {
   content: none !important;
   display: none !important;
   width: 0 !important;
