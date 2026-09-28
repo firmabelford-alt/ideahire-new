@@ -130,13 +130,13 @@ export function CountryPicker({ value, onChange, disabled = false }) {
             <span className="ideahire-country-placeholder">Wybierz kraj</span>
           )}
         </span>
-        <span className="ideahire-country-chevron">{open ? "⌃" : "⌄"}</span>
+        <span className="ideahire-country-chevron">{open ? "" : ""}</span>
       </button>
 
       {open && (
         <div className="ideahire-country-menu">
           <div className="ideahire-country-search">
-            <span>⌕</span>
+            <span></span>
             <input
               type="text"
               value={search}
