@@ -111,7 +111,7 @@ function LegalDocument({ kind, html }) {
               Drukuj / zapisz PDF
             </button>
             <Link className="cookie-policy-back" to="/">
-              ← Wróć na stronę
+               Wróć na stronę
             </Link>
           </div>
         </nav>
