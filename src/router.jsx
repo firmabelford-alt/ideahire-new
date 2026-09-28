@@ -1206,7 +1206,7 @@ const DISCOVERY_USAGE_OPTIONS = [
     title: "Znajdź zlecenia",
     description:
       "Na początku pokażemy wyżej projekty z kategorii, które Cię interesują.",
-    icon: "↗",
+    icon: "",
   },
   {
     value: "hire_talent",
@@ -1675,7 +1675,7 @@ function DiscoveryOnboarding({
                   onClick={() => setPersonalizationEnabled(false)}
                   aria-pressed={!personalizationEnabled}
                 >
-                  <span aria-hidden="true">↓</span>
+                  <span aria-hidden="true">02</span>
                   <strong>Tylko najnowsze</strong>
                   <small>
                     Wyniki będą domyślnie uporządkowane wyłącznie według daty
@@ -1762,7 +1762,7 @@ function DiscoveryOnboarding({
                 onClick={goBack}
                 disabled={saving}
               >
-                ← Wstecz
+                 Wstecz
               </button>
             ) : (
               <button
@@ -1782,7 +1782,7 @@ function DiscoveryOnboarding({
               className="btn btn-dark discovery-primary-button"
               onClick={goForward}
             >
-              Dalej →
+              Dalej 
             </button>
           ) : (
             <button
@@ -1791,7 +1791,7 @@ function DiscoveryOnboarding({
               onClick={() => finish("complete")}
               disabled={saving}
             >
-              {saving ? "Zapisywanie..." : "Przejdź do IdeaHire →"}
+              {saving ? "Zapisywanie..." : "Przejdź do IdeaHire "}
             </button>
           )}
         </footer>
@@ -1930,7 +1930,7 @@ function DiscoveryPreferencesCard() {
 
             <div className="discovery-settings-actions">
               <Link className="btn btn-dark" to="/talent">
-                Znajdź wykonawcę →
+                Znajdź wykonawcę 
               </Link>
               <Link className="btn btn-outline" to="/jobs">
                 Znajdź zlecenie
@@ -2071,7 +2071,7 @@ function JobRepublicationPanel() {
                   ? "Dostępne po zakończeniu"
                   : busyJobId === item.job_id
                   ? "Publikowanie..."
-                  : "Potwierdź i opublikuj →"}
+                  : "Potwierdź i opublikuj "}
               </button>
             </div>
           </article>
@@ -2549,7 +2549,7 @@ function AgeCompletionScreen() {
                 !termsAccepted
               }
             >
-              {saving ? "Zapisywanie..." : "Zapisz i kontynuuj →"}
+              {saving ? "Zapisywanie..." : "Zapisz i kontynuuj "}
             </button>
           </form>
 
@@ -4068,7 +4068,7 @@ function AccountNavbar() {
           aria-label="Wróć na stronę główną"
           title="Wróć na stronę główną"
         >
-          ←
+          
         </Link>
 
         <Link
@@ -4213,7 +4213,7 @@ function AccountNavbar() {
               className="account-menu-caret"
               aria-hidden="true"
             >
-              ⌄
+              
             </span>
 
             {(hasDisputeNotifications ||
@@ -4757,7 +4757,7 @@ function Login() {
             >
               {loading
                 ? "Wysyłanie..."
-                : "Wyślij link →"}
+                : "Wyślij link "}
             </button>
           </form>
 
@@ -4884,7 +4884,7 @@ function Login() {
           >
             {loading
               ? "Logowanie..."
-              : "Zaloguj się →"}
+              : "Zaloguj się "}
           </button>
         </form>
 
@@ -5337,7 +5337,7 @@ function ResetPassword() {
               >
                 {loading
                   ? "Zapisywanie..."
-                  : "Ustaw nowe hasło →"}
+                  : "Ustaw nowe hasło "}
               </button>
             </form>
 
@@ -5776,7 +5776,7 @@ function Register() {
           >
             {loading
               ? "Tworzenie konta..."
-              : "Utwórz konto →"}
+              : "Utwórz konto "}
           </button>
         </form>
 
@@ -6173,7 +6173,7 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
                 onClick={() => setActiveIndex((activeIndex - 1 + media.length) % media.length)}
                 aria-label="Poprzednie zdjęcie"
               >
-                ‹
+                Poprzednie
               </button>
               <button
                 type="button"
@@ -6181,7 +6181,7 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
                 onClick={() => setActiveIndex((activeIndex + 1) % media.length)}
                 aria-label="Następne zdjęcie"
               >
-                ›
+                Następne
               </button>
             </>
           )}
@@ -6355,7 +6355,7 @@ function PortfolioReportDialog({ target, onClose, onSubmitted }) {
         <div className="portfolio-report-actions">
           <button type="button" className="privacy-secondary-button" onClick={onClose} disabled={busy}>Anuluj</button>
           <button type="submit" className="privacy-primary-button" disabled={busy}>
-            {busy ? "Wysyłanie..." : "Wyślij zgłoszenie →"}
+            {busy ? "Wysyłanie..." : "Wyślij zgłoszenie "}
           </button>
         </div>
       </form>
@@ -6846,7 +6846,7 @@ function LimitedAccount() {
               <li>ustawienia języka i wyglądu strony.</li>
             </ul>
             <Link className="btn btn-dark" to="/jobs">
-              Przeglądaj zlecenia →
+              Przeglądaj zlecenia 
             </Link>
           </section>
 
@@ -6868,7 +6868,7 @@ function LimitedAccount() {
             została podana błędnie, korektę przeprowadzi pomoc IdeaHire.
           </p>
           <Link className="privacy-entry-link" to="/privacy-center">
-            Prywatność i moje dane →
+            Prywatność i moje dane 
           </Link>
         </section>
       </main>
@@ -8723,7 +8723,7 @@ function Account() {
               aria-labelledby="stripe-connect-title"
             >
               <div className="stripe-connect-icon" aria-hidden="true">
-                <span>→</span>
+                <span></span>
               </div>
 
               <div className="stripe-connect-content">
@@ -8782,7 +8782,7 @@ function Account() {
 
                     {connectStatus !== "ready" &&
                       connectStatus !== "disabled" && (
-                        <span aria-hidden="true">↗</span>
+                        <span aria-hidden="true"></span>
                       )}
                   </button>
 
@@ -9133,7 +9133,7 @@ function Account() {
               >
                 {saving
                   ? "Zapisywanie..."
-                  : "Zapisz zmiany →"}
+                  : "Zapisz zmiany "}
               </button>
             </div>
           </form>
@@ -9189,7 +9189,7 @@ function Account() {
                       </div>
                     ) : (
                       <div className="profile-portfolio-image-placeholder" aria-hidden="true">
-                        ↗
+                        
                       </div>
                     )}
 
@@ -9395,8 +9395,8 @@ function Account() {
                   {portfolioBusy
                     ? "Zapisywanie albumu..."
                     : portfolioEditingId
-                    ? "Zapisz album →"
-                    : "Dodaj album do portfolio →"}
+                    ? "Zapisz album "
+                    : "Dodaj album do portfolio "}
                 </button>
               </form>
             )}
@@ -9435,7 +9435,7 @@ function Account() {
             </p>
           </div>
           <Link className="privacy-entry-link" to="/privacy-center">
-            Otwórz centrum prywatności →
+            Otwórz centrum prywatności 
           </Link>
         </section>
 
@@ -10220,7 +10220,7 @@ function PrivacyCenter() {
             </p>
           </div>
           <Link className="privacy-back-link" to="/account">
-            ← Wróć do konta
+             Wróć do konta
           </Link>
         </header>
 
@@ -10460,7 +10460,7 @@ function PrivacyCenter() {
                   )
                 }
               >
-                {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek →"}
+                {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek "}
               </button>
             </form>
           </section>
@@ -10475,7 +10475,7 @@ function PrivacyCenter() {
               <li><strong>Ograniczenie i sprzeciw</strong><span>Zażądaj ograniczenia albo zgłoś sprzeciw.</span></li>
               <li><strong>Przenoszenie</strong><span>Odbierz właściwe dane w ustrukturyzowanym formacie.</span></li>
             </ul>
-            <a href="/polityka-prywatnosci">Przeczytaj Politykę prywatności →</a>
+            <a href="/polityka-prywatnosci">Przeczytaj Politykę prywatności </a>
             <small>
               Możesz również napisać na ideahireprywatnosc@gmail.com.
             </small>
@@ -11285,7 +11285,7 @@ function FindTalent() {
                   checked={budgetNegotiable}
                   onChange={() => setBudgetNegotiable(true)}
                 />
-                <span className="job-option-mark" aria-hidden="true">↔</span>
+                <span className="job-option-mark" aria-hidden="true">01</span>
                 <span>
                   <strong>Do negocjacji</strong>
                   <small>
@@ -11377,7 +11377,7 @@ function FindTalent() {
           >
             {saving
               ? "Publikowanie..."
-              : "Opublikuj zlecenie →"}
+              : "Opublikuj zlecenie "}
           </button>
         </form>
       </main>
@@ -11684,7 +11684,7 @@ function EditJob() {
           >
             {saving
               ? "Zapisywanie..."
-              : "Zapisz zmiany →"}
+              : "Zapisz zmiany "}
           </button>
         </form>
       </main>
@@ -12877,7 +12877,7 @@ function Profile() {
                             title={item.project_url}
                           >
                             <span>{getPortfolioLinkLabel(item.project_url)}</span>
-                            <span aria-hidden="true">↗</span>
+                            <span aria-hidden="true"></span>
                           </a>
                         </div>
 
@@ -13667,7 +13667,7 @@ function Jobs() {
               className="jobs-search-icon"
               aria-hidden="true"
             >
-              ⌕
+              
             </span>
 
             <input
@@ -13873,7 +13873,7 @@ function Jobs() {
                   clearFilters
                 }
               >
-                Wyczyść wyszukiwanie →
+                Wyczyść wyszukiwanie 
               </button>
             </section>
           )}
@@ -13955,7 +13955,7 @@ function Jobs() {
                           to={`/profile/${job.user_id}`}
                           className="btn btn-outline"
                         >
-                          Zobacz profil zleceniodawcy →
+                          Zobacz profil zleceniodawcy 
                         </Link>
 
                         {!isOwner && (
@@ -13981,7 +13981,7 @@ function Jobs() {
                               : applyingJobId ===
                                   job.id
                               ? "Wysyłanie..."
-                              : "Zgłoś się do zlecenia →"}
+                              : "Zgłoś się do zlecenia "}
                           </button>
                         )}
 
@@ -13994,7 +13994,7 @@ function Jobs() {
                             )
                           }
                         >
-                          Ukryj szczegóły ↑
+                          Ukryj szczegóły
                         </button>
                       </div>
 
@@ -14022,7 +14022,7 @@ function Jobs() {
                         )
                       }
                     >
-                      Zobacz zlecenie →
+                      Zobacz zlecenie 
                     </button>
 
                     {!isOwner && (
@@ -14048,7 +14048,7 @@ function Jobs() {
                             : applyingJobId ===
                                 job.id
                             ? "Wysyłanie..."
-                            : "Zgłoś się do zlecenia →"}
+                            : "Zgłoś się do zlecenia "}
                         </button>
                       )}
                     </div>
@@ -14248,7 +14248,7 @@ function Talent() {
 
         <section className="talent-controls" aria-label="Wyszukiwanie wykonawców">
           <div className="talent-search-box">
-            <span aria-hidden="true">⌕</span>
+            <span aria-hidden="true"></span>
             <input
               type="search"
               value={search}
@@ -14407,7 +14407,7 @@ function Talent() {
                       </span>
                     </div>
                     <Link className="btn btn-dark" to={`/profile/${profile.id}`}>
-                      Zobacz profil →
+                      Zobacz profil 
                     </Link>
                   </div>
                 </article>
@@ -15900,7 +15900,7 @@ function Notifications() {
                             className="btn btn-outline"
                             to={`/profile/${notification.applicant_id}`}
                           >
-                            Zobacz profil →
+                            Zobacz profil 
                           </Link>
 
                           <ApplicationActions
@@ -15966,7 +15966,7 @@ function Notifications() {
                           className="btn btn-outline notification-chat-button"
                           to={`/profile/${block.blocker_id}`}
                         >
-                          Zobacz profil →
+                          Zobacz profil 
                         </Link>
                       </article>
                     );
@@ -16000,7 +16000,7 @@ function Notifications() {
                         key={`message-${messageItem.id}`}
                       >
                         <div className="notification-message-icon" aria-hidden="true">
-                          ↗
+                          
                         </div>
 
                         <span className="section-label">
@@ -16025,7 +16025,7 @@ function Notifications() {
                           className="btn btn-dark notification-chat-button"
                           to={`/chat/${messageItem.conversation_id}`}
                         >
-                          Otwórz rozmowę →
+                          Otwórz rozmowę 
                         </Link>
                       </article>
                     );
@@ -16084,7 +16084,7 @@ function Notifications() {
                           className="btn btn-dark notification-chat-button"
                           to={`/chat/${decision.conversation.id}`}
                         >
-                          Przejdź do rozmowy →
+                          Przejdź do rozmowy 
                         </Link>
                       ) : (
                         <p
@@ -18389,7 +18389,7 @@ function ChatPaymentPanel({
                 ? "Otwieranie Stripe…"
                 : summary.payment_status === "processing"
                 ? "Stripe potwierdza płatność…"
-                : "Przejdź do bezpiecznej płatności →"}
+                : "Przejdź do bezpiecznej płatności "}
             </button>
           )}
         </>
@@ -19809,7 +19809,7 @@ function Chat() {
                     )
                   }
                 >
-                  <span aria-hidden="true">←</span>
+                  <span aria-hidden="true"></span>
                   <b>Wróć</b>
                 </button>
 
@@ -20290,7 +20290,7 @@ function DisputeListCard({ dispute, userId, adminView = false }) {
       </div>
 
       <span className="dispute-card-arrow" aria-hidden="true">
-        →
+        
       </span>
     </Link>
   );
@@ -21277,7 +21277,7 @@ function DisputeDetails() {
       <main className="disputes-shell dispute-details-shell">
         <div className="dispute-back-row">
           <Link to={isStaff ? "/admin" : "/disputes"}>
-            ← {isStaff ? "Panel administratora" : "Centrum sporów"}
+             {isStaff ? "Panel administratora" : "Centrum sporów"}
           </Link>
         </div>
 
@@ -21588,7 +21588,7 @@ function DisputeDetails() {
                 <div className="dispute-evidence-list">
                   {evidence.map((item) => (
                     <article className="dispute-evidence-item" key={item.id}>
-                      <span className="dispute-evidence-icon" aria-hidden="true">↗</span>
+                      <span className="dispute-evidence-icon" aria-hidden="true"></span>
                       <div>
                         <strong>{item.original_file_name}</strong>
                         <small>
@@ -22447,7 +22447,7 @@ function AdminJobs() {
                     className="privacy-admin-account-link"
                     href={`/admin/moderation/job/${encodeURIComponent(job.id)}`}
                   >
-                    Przejdź do moderacji konta →
+                    Przejdź do moderacji konta 
                   </a>
                 </article>
               );
@@ -23883,7 +23883,7 @@ function AdminModeration() {
                                   ) : (
                                     <span aria-hidden="true">
                                       {item.external_url
-                                        ? "↗"
+                                        ? ""
                                         : item.mime_type ===
                                           "application/pdf"
                                         ? "PDF"
@@ -23924,7 +23924,7 @@ function AdminModeration() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Otwórz lokalizację ↗
+                          Otwórz lokalizację 
                         </a>
                       )}
                       <button
@@ -24110,7 +24110,7 @@ function AdminModeration() {
                   className="privacy-secondary-button"
                   to={`/admin/privacy/users/${selectedUserId}`}
                 >
-                  Otwórz administracyjny widok konta →
+                  Otwórz administracyjny widok konta 
                 </Link>
               </div>
             )}
@@ -25059,7 +25059,7 @@ function AdminUserPrivacyAccount() {
 
       <main className="admin-shell erasure-account-shell">
         <Link className="privacy-back-link" to="/admin/privacy">
-          ← Wróć do wniosków RODO
+           Wróć do wniosków RODO
         </Link>
 
         {loading ? (
@@ -26507,7 +26507,7 @@ function AdminPrivacyRequests() {
                           className="privacy-admin-account-link"
                           to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
                         >
-                          Otwórz konto i kontrolę usunięcia danych →
+                          Otwórz konto i kontrolę usunięcia danych 
                         </Link>
                       </>
                     )}
