@@ -3366,29 +3366,6 @@ function AccountNavbar() {
   const navigate =
     useNavigate();
 
-  const { language } =
-    useSitePreferences();
-
-  const navCopy = language === "en"
-    ? {
-        account: "Account",
-        jobs: "Jobs",
-        talent: "Contractors",
-        messages: "Messages",
-        notifications: "Notifications",
-        createJob: "Post a job",
-        myAccount: "My account",
-      }
-    : {
-        account: "Konto",
-        jobs: "Zlecenia",
-        talent: "Wykonawcy",
-        messages: "Wiadomości",
-        notifications: "Powiadomienia",
-        createJob: "Dodaj zlecenie",
-        myAccount: "Moje konto",
-      };
-
   const { user } =
     useAuth();
 
@@ -4026,7 +4003,7 @@ function AccountNavbar() {
           to="/account-status"
           aria-label="Przejdź do statusu konta"
         >
-          <span className="logo logo-clean">
+          <span className="logo">
             Idea<span>Hire</span>
           </span>
           <span className="restricted-navbar-badge">
@@ -4095,7 +4072,7 @@ function AccountNavbar() {
         </Link>
 
         <Link
-          className="logo logo-clean"
+          className="logo"
           to="/"
         >
           Idea<span>Hire</span>
@@ -4117,8 +4094,8 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">{navCopy.account}</span>
-          <span className="account-nav-label-short">{navCopy.account}</span>
+          <span className="account-nav-label-full">Konto</span>
+          <span className="account-nav-label-short">Konto</span>
         </NavLink>
 
         <NavLink
@@ -4131,8 +4108,8 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">{navCopy.jobs}</span>
-          <span className="account-nav-label-short">{navCopy.jobs}</span>
+          <span className="account-nav-label-full">Zlecenia</span>
+          <span className="account-nav-label-short">Zlecenia</span>
         </NavLink>
 
         <NavLink
@@ -4145,8 +4122,8 @@ function AccountNavbar() {
               : ""
           }
         >
-          <span className="account-nav-label-full">{navCopy.talent}</span>
-          <span className="account-nav-label-short">{navCopy.talent}</span>
+          <span className="account-nav-label-full">Wykonawcy</span>
+          <span className="account-nav-label-short">Wykonawcy</span>
         </NavLink>
 
         {!hasRestrictedAgeAccess && (
@@ -4160,8 +4137,8 @@ function AccountNavbar() {
                 : ""
             }
           >
-            <span className="account-nav-label-full">{navCopy.messages}</span>
-            <span className="account-nav-label-short">{navCopy.messages}</span>
+            <span className="account-nav-label-full">Wiadomości</span>
+            <span className="account-nav-label-short">Wiadomości</span>
             {hasMessageNotifications && (
               <span
                 className="notification-dot messages-nav-dot"
@@ -4181,7 +4158,7 @@ function AccountNavbar() {
             }
           >
             <span aria-hidden="true">+</span>
-            <span className="account-create-job-label">{navCopy.createJob}</span>
+            <span className="account-create-job-label">Dodaj zlecenie</span>
           </NavLink>
         )}
 
@@ -4191,8 +4168,8 @@ function AccountNavbar() {
             className={({ isActive }) =>
               `account-notification-button${isActive ? " is-active" : ""}`
             }
-            aria-label={navCopy.notifications}
-            title={navCopy.notifications}
+            aria-label="Powiadomienia"
+            title="Powiadomienia"
           >
             <svg
               viewBox="0 0 24 24"
@@ -4228,9 +4205,8 @@ function AccountNavbar() {
               )}
             </span>
 
-            <span className="account-mini-copy">
-              <span className="account-mini-label">{navCopy.myAccount}</span>
-              <span className="account-mini-name">{userName}</span>
+            <span className="account-mini-name">
+              {userName}
             </span>
 
             <span
@@ -11727,9 +11703,6 @@ function Profile() {
   const { user } =
     useAuth();
 
-  const { isAdult: signedInUserIsAdult } =
-    useAgeAccess();
-
   const [profile, setProfile] =
     useState(null);
 
@@ -12145,16 +12118,9 @@ function Profile() {
         ) / reviews.length
       : 0;
 
-  /*
-   * Publicznie pokazujemy wyłącznie status pełnego konta 18+, nigdy datę
-   * urodzenia ani dokładny wiek. Płatne zlecenia są dostępne tylko dla
-   * pełnych kont, dlatego zakończona lub opublikowana praca potwierdza
-   * uprawnienie bez ujawniania prywatnych danych.
-   */
-  const publicAdultConfirmed =
-    (user?.id === id && signedInUserIsAdult) ||
-    completedJobs > 0 ||
-    Math.max(0, Number(profile.posted_jobs) || 0) > 0;
+  const hasExpertiseDetails =
+    visibleSpecialtyCategories.length > 0 ||
+    visibleSkills.length > 0;
 
   const portfolioAlbums =
     portfolioItems.filter(
@@ -12519,26 +12485,11 @@ function Profile() {
                   : name}
               </h1>
 
-              {!profileHidden && (
-                <div className="public-profile-meta-row">
-                  {countryCode ? (
-                    <CountryBadge
-                      countryCode={countryCode}
-                    />
-                  ) : (
-                    <span className="public-profile-meta-placeholder">
-                      Kraj nie został podany
-                    </span>
-                  )}
-
-                  <span className={`account-age-status ${
-                    publicAdultConfirmed ? "is-confirmed" : "is-private"
-                  }`}>
-                    {publicAdultConfirmed
-                      ? "Pełne konto · 18+"
-                      : "Status 18+ nieudostępniony"}
-                  </span>
-                </div>
+              {!profileHidden &&
+                countryCode && (
+                <CountryBadge
+                  countryCode={countryCode}
+                />
               )}
 
               {profileHidden && (
@@ -12624,7 +12575,7 @@ function Profile() {
                   <span className="profile-expertise-label">
                     Zweryfikowane współprace
                   </span>
-                  <h2>Opinie po współpracy</h2>
+                  <h2>Opinie zleceniodawców</h2>
                 </div>
 
                 {reviews.length > 0 && (
@@ -12668,7 +12619,7 @@ function Profile() {
 
               {reviews.length === 0 ? (
                 <p className="profile-reviews-empty">
-                  Ten użytkownik nie otrzymał jeszcze opinii po zakończonej współpracy.
+                  Ten wykonawca nie otrzymał jeszcze opinii po zakończonym zleceniu.
                 </p>
               ) : (
                 <div className="profile-reviews-list">
@@ -12738,27 +12689,28 @@ function Profile() {
             </section>
           )}
 
-          {!profileHidden && (
+          {!profileHidden &&
+            profile.about?.trim() && (
               <div className="profile-content-card">
                 <span className="profile-expertise-label">
                   O mnie
                 </span>
 
                 <p className="profile-about-copy">
-                  {profile.about?.trim() ||
-                    "Ten użytkownik nie dodał jeszcze publicznego opisu."}
+                  {profile.about}
                 </p>
               </div>
             )}
 
-          {!profileHidden && (
+          {!profileHidden &&
+            hasExpertiseDetails && (
               <div className="profile-expertise">
-                <div className="profile-expertise-card">
-                  <span className="profile-expertise-label">
-                    Kategorie specjalizacji
-                  </span>
+                {visibleSpecialtyCategories.length > 0 && (
+                  <div className="profile-expertise-card">
+                    <span className="profile-expertise-label">
+                      Kategorie specjalizacji
+                    </span>
 
-                  {visibleSpecialtyCategories.length > 0 ? (
                     <div className="profile-specialty-chips">
                       {visibleSpecialtyCategories.map(
                         (category) => (
@@ -12771,19 +12723,15 @@ function Profile() {
                         )
                       )}
                     </div>
-                  ) : (
-                    <p className="profile-empty-copy">
-                      Nie dodano jeszcze kategorii specjalizacji.
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                <div className="profile-expertise-card">
-                  <span className="profile-expertise-label">
-                    Umiejętności
-                  </span>
+                {visibleSkills.length > 0 && (
+                  <div className="profile-expertise-card">
+                    <span className="profile-expertise-label">
+                      Umiejętności
+                    </span>
 
-                  {visibleSkills.length > 0 ? (
                     <div className="profile-specialty-chips">
                       {visibleSkills.map(
                         (skill) => (
@@ -12796,29 +12744,25 @@ function Profile() {
                         )
                       )}
                     </div>
-                  ) : (
-                    <p className="profile-empty-copy">
-                      Nie dodano jeszcze umiejętności.
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 
-          {!profileHidden && (
+          {!profileHidden &&
+            profile.specialization?.trim() && (
               <div className="profile-expertise-card profile-specialization-card">
                 <span className="profile-expertise-label">
                   W czym się specjalizuję
                 </span>
 
                 <p className="profile-specialization-copy">
-                  {profile.specialization?.trim() ||
-                    "Ten użytkownik nie dodał jeszcze opisu specjalizacji."}
+                  {profile.specialization}
                 </p>
               </div>
             )}
 
-          {!profileHidden && (
+          {!profileHidden && portfolioItems.length > 0 && (
             <section
               className="profile-public-portfolio"
               aria-labelledby="profile-public-portfolio-title"
@@ -12832,12 +12776,6 @@ function Profile() {
                   {portfolioItems.length} {portfolioItems.length === 1 ? "realizacja" : "realizacji"}
                 </span>
               </div>
-
-              {portfolioItems.length === 0 && (
-                <p className="profile-portfolio-empty">
-                  Ten użytkownik nie dodał jeszcze realizacji do portfolio.
-                </p>
-              )}
 
               {portfolioReportMessage && (
                 <p className="profile-public-report-message" role="status">
