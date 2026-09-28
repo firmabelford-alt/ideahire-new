@@ -43888,3 +43888,242 @@ html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal
     border-radius: 20px !important;
   }
 }
+
+/* ============================================================================
+   IDEAHIRE — BATCH 03 / CLEAN UI, ZERO DECORATIVE BARS, ARROWS AND MAGNIFIERS
+   2026-09-28
+   ============================================================================ */
+
+/* ---------- REMOVE DECORATIVE LINES WITHOUT REMOVING USEFUL CARD BORDERS ---------- */
+
+#root :is(
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .messages-heading,
+  .messages-list-header,
+  .account-tab-intro,
+  .jobs-results-header,
+  .talent-results-header
+) {
+  border-top: 0 !important;
+  border-right: 0 !important;
+  border-bottom: 0 !important;
+  border-left: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+#root :is(
+  .app-page-header,
+  .privacy-center-header,
+  .disputes-page-header,
+  .admin-page-header,
+  .messages-heading,
+  .account-tab-intro,
+  .jobs-results-header,
+  .talent-results-header
+) > p,
+#root .messages-heading-copy > p,
+#root .privacy-trust-panel {
+  padding-left: 0 !important;
+  border-left: 0 !important;
+}
+
+#root :is(
+  .job-card,
+  .account-card,
+  .project-form,
+  .notification-message-card,
+  .notification-item,
+  .messages-row,
+  .profile-preview,
+  .account-form-section,
+  .privacy-entry-card,
+  .dispute-list-card
+)::before,
+#root :is(
+  .job-card,
+  .account-card,
+  .project-form,
+  .notification-message-card,
+  .notification-item,
+  .messages-row,
+  .profile-preview,
+  .account-form-section,
+  .privacy-entry-card,
+  .dispute-list-card
+)::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#root .account-page .messages-row,
+#root .account-page .messages-row:hover,
+#root .account-page .messages-row.is-unread,
+#root .account-page .messages-row.is-unread:hover {
+  box-shadow: none !important;
+}
+
+/* ---------- REMOVE EVERY DECORATIVE ARROW / MAGNIFIER ICON ---------- */
+
+#root :is(
+  .notification-message-icon,
+  .category-arrow,
+  .check-icon,
+  .dispute-evidence-icon,
+  .jobs-search-icon,
+  .account-menu-caret,
+  .ideahire-country-chevron,
+  .navbar-home-back,
+  .chat-collapsible-chevron,
+  .dispute-card-arrow,
+  .hero-actions .btn > span:empty,
+  .stripe-connect-button > span:empty,
+  .profile-public-project-link > span:last-child:empty,
+  .chat-back > span:empty,
+  .job-option-mark:empty
+) {
+  display: none !important;
+}
+
+#root :is(a, button) > span[aria-hidden="true"]:empty,
+body > .private-work-lightbox :is(a, button) > span[aria-hidden="true"]:empty {
+  display: none !important;
+}
+
+#root :is(
+  .jobs-search-box,
+  .talent-search-box,
+  .ideahire-country-search
+) > span[aria-hidden="true"],
+#root :is(
+  .jobs-search-box,
+  .talent-search-box,
+  .ideahire-country-search
+) > span:first-child {
+  display: none !important;
+}
+
+#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#root :is(.jobs-search-box, .talent-search-box, .ideahire-country-search) > input {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding-right: 14px !important;
+  padding-left: 14px !important;
+}
+
+/* Functional gallery controls remain usable, but use words instead of arrows. */
+
+#root .portfolio-lightbox-arrow,
+body > .private-work-lightbox .private-work-lightbox-arrow {
+  width: auto !important;
+  min-width: 0 !important;
+  height: 38px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+}
+
+body > .private-work-lightbox .private-work-viewer-controls > a[download] {
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 10px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+}
+
+/* ---------- LIGHT MODE NAV: NO LARGE BLACK HOVER BLOCK ---------- */
+
+html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active),
+html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active) > :is(span, strong, small) {
+  color: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html:not([data-theme="dark"]) #root .navbar.account-navbar .nav-links.account-primary-nav > a:not(.is-active):is(:hover, :focus-visible) {
+  border-color: var(--ih-line, #deded9) !important;
+  background: var(--ih-surface-soft, #f2f2ef) !important;
+  background-image: none !important;
+  color: var(--ih-ink, #111111) !important;
+  -webkit-text-fill-color: #111111 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* ---------- COMPACT, NATURAL ACCOUNT CONTROL ---------- */
+
+#root .navbar.account-navbar .account-menu {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(220px, 32vw) !important;
+  justify-self: end !important;
+}
+
+#root .navbar.account-navbar .account-menu > summary.account-mini {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: min(220px, 32vw) !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  padding: 4px 10px 4px 5px !important;
+  border-radius: 12px !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root .navbar.account-navbar .account-mini-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  border-radius: 9px !important;
+}
+
+#root .navbar.account-navbar .account-mini-name {
+  width: auto !important;
+  max-width: 120px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: inherit !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 760px) {
+  #root .navbar.account-navbar .account-menu,
+  #root .navbar.account-navbar .account-menu > summary.account-mini {
+    max-width: 48px !important;
+  }
+
+  #root .navbar.account-navbar .account-menu > summary.account-mini {
+    width: 42px !important;
+    min-width: 42px !important;
+    padding: 4px !important;
+    justify-content: center !important;
+  }
+
+  #root .navbar.account-navbar .account-mini-name {
+    display: none !important;
+  }
+}
