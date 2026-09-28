@@ -43057,3 +43057,502 @@ html[data-template="classic"] #root .google-auth-logo {
     padding: 28px 17px !important;
   }
 }
+
+/* ============================================================================
+   IDEAHIRE — BATCH 01 V2 / SCREENSHOT-PROVEN CONTRAST SEAL — 2026-09-28
+   The selectors below intentionally match the exact components visible in the
+   second screenshot set. They outrank legacy component rules instead of relying
+   on inherited colours.
+   ============================================================================ */
+
+/* ---------- CLASSIC HOME: PURE BLACK / WHITE, NO NAVY OR BLUE ---------- */
+
+html[data-template="classic"] #root .app > main > .hero,
+html[data-template="classic"] #root .app > main > .categories.section,
+html[data-template="classic"] #root .app > main > .split-section.section {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-page) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section {
+  border: 1px solid #30302d !important;
+  background: #111110 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section::before,
+html[data-template="classic"] #root .app > main > .how.section::after {
+  border-color: #3d3d39 !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .section-heading.centered > .section-label {
+  width: auto !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #d2d2cc !important;
+  -webkit-text-fill-color: #d2d2cc !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .section-heading.centered > h2 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .section-heading.centered > p {
+  color: #c3c3bd !important;
+  -webkit-text-fill-color: #c3c3bd !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .steps::before {
+  background: #555550 !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .steps > .step {
+  border: 1px solid #3d3d39 !important;
+  background: #1b1b1a !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .steps > .step:is(:hover, :focus-within) {
+  border-color: #777770 !important;
+  background: #242422 !important;
+  transform: translateY(-2px) !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .steps > .step > span {
+  border: 1px solid #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .steps > .step > h3 {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app > main > .how.section .steps > .step > p {
+  color: #c3c3bd !important;
+  -webkit-text-fill-color: #c3c3bd !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card:not(.light) {
+  border: 1px solid #30302d !important;
+  background: #111110 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card:not(.light)::after {
+  border-color: #444440 !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: 0 0 0 38px rgba(255, 255, 255, 0.025) !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card:not(.light) > .section-label {
+  width: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #d2d2cc !important;
+  -webkit-text-fill-color: #d2d2cc !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card:not(.light) > :is(h2, p) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card:not(.light) > p {
+  color: #c3c3bd !important;
+  -webkit-text-fill-color: #c3c3bd !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card:not(.light) > .btn.btn-light {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card.light {
+  border: 1px solid var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card.light > :is(.section-label, h2, p) {
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .app > main > .split-section.section > .split-card.light > .btn.btn-outline {
+  border-color: var(--ih-ink) !important;
+  background: var(--ih-ink) !important;
+  background-image: none !important;
+  color: var(--ih-page) !important;
+  -webkit-text-fill-color: var(--ih-page) !important;
+}
+
+/* ---------- CLASSIC NAVIGATION: EXPLICIT NEUTRAL STATES ---------- */
+
+html[data-template="classic"] #root .navbar.home-navbar,
+html[data-template="classic"] #root .navbar.account-navbar {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .navbar.home-navbar :is(.home-nav-links, .home-account-cluster),
+html[data-template="classic"] #root .navbar.account-navbar .nav-links.account-primary-nav {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface-soft) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .navbar.home-navbar .nav-actions > .btn.btn-ghost,
+html[data-template="classic"] #root .navbar.home-navbar .home-account-cluster > .btn.btn-ghost,
+html[data-template="classic"] #root .navbar.account-navbar .account-navbar-actions > :is(.account-notification-button, .account-mini),
+html[data-template="classic"] #root .navbar.account-navbar .account-menu > .account-mini {
+  border: 1px solid var(--ih-line-strong) !important;
+  background: var(--ih-surface-soft) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  -webkit-text-fill-color: var(--ih-ink) !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .navbar.home-navbar .nav-actions > .btn.btn-dark,
+html[data-template="classic"] #root .navbar.account-navbar .account-navbar-actions > .account-create-job-button {
+  border: 1px solid #111111 !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"] #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .navbar.home-navbar .nav-actions > .btn.btn-dark,
+html[data-template="classic"][data-theme="dark"] #root .navbar.account-navbar .account-navbar-actions > .account-create-job-button,
+html[data-template="classic"][data-theme="dark"] #root .navbar.account-navbar .nav-links.account-primary-nav > a.is-active {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"] #root :is(.home-notifications-dot, .notification-dot, .messages-nav-dot) {
+  border-color: var(--ih-surface) !important;
+  background: var(--ih-ink) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(.home-notifications-dot, .notification-dot, .messages-nav-dot) {
+  background: #ffffff !important;
+}
+
+/* ---------- CLASSIC CONTROLS: PREVENT EVERY WHITE-ON-WHITE STATE ---------- */
+
+html[data-template="classic"] #root :is(.btn, button, a)[class*="btn"] > :is(span, strong, small) {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(
+  .btn-dark,
+  .account-create-job-button,
+  .chat-send,
+  .notification-chat-button,
+  .privacy-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button
+) {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(
+  .btn-light,
+  .btn-outline,
+  .btn-ghost,
+  .privacy-secondary-button,
+  .dispute-secondary-button,
+  .agreement-secondary-button
+) {
+  border-color: #b8b8b2 !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .btn-dark,
+  .btn-light,
+  .account-create-job-button,
+  .chat-send,
+  .notification-chat-button,
+  .privacy-primary-button,
+  .dispute-primary-button,
+  .agreement-primary-button
+) {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(
+  .btn-outline,
+  .btn-ghost,
+  .privacy-secondary-button,
+  .dispute-secondary-button,
+  .agreement-secondary-button
+) {
+  border-color: #575751 !important;
+  background: #191918 !important;
+  background-image: none !important;
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(input, textarea, select, option) {
+  border-color: #b8b8b2 !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root :is(input, textarea)::placeholder {
+  color: #6b6b66 !important;
+  -webkit-text-fill-color: #6b6b66 !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(input, textarea, select, option) {
+  border-color: #575751 !important;
+  background-color: #191918 !important;
+  background-image: none !important;
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root :is(input, textarea)::placeholder {
+  color: #999992 !important;
+  -webkit-text-fill-color: #999992 !important;
+  opacity: 1 !important;
+}
+
+html[data-template="classic"] #root :is(
+  .site-preferences-panel,
+  .site-preferences-handle,
+  .site-theme-toggle,
+  .site-language-toggle,
+  .jobs-filter-row,
+  .talent-category-row,
+  .account-section-nav,
+  .job-option-grid,
+  .job-listing-meta
+) {
+  filter: grayscale(1) !important;
+}
+
+/* ---------- LEGAL PAGES: CLEAN TOP EDGE, NO CROPPED DECORATION ---------- */
+
+#root > .cookie-policy-page.legal-document-page {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-top: 24px !important;
+  overflow-x: clip !important;
+}
+
+#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+  box-sizing: border-box !important;
+  width: min(1160px, 100%) !important;
+  max-width: 1160px !important;
+  margin: 0 auto !important;
+}
+
+#root .cookie-policy-page.legal-document-page .cookie-policy-nav {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  margin: 0 0 14px !important;
+  padding: 14px 16px !important;
+  border: 1px solid var(--ih-line) !important;
+  border-radius: 18px !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root .cookie-policy-page.legal-document-page .legal-document-hero {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: clamp(46px, 6vw, 76px) !important;
+  overflow: hidden !important;
+  border-radius: 28px !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+
+#root .cookie-policy-page.legal-document-page .legal-document-hero::before,
+#root .cookie-policy-page.legal-document-page .legal-document-hero::after {
+  content: none !important;
+  display: none !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#root .cookie-policy-page.legal-document-page .legal-document-hero :is(.cookie-policy-eyebrow, h1, p, .cookie-policy-meta) {
+  position: relative !important;
+  z-index: 1 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  overflow: visible !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+}
+
+html[data-template="classic"] #root > .cookie-policy-page.legal-document-page {
+  background: var(--ih-page) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+}
+
+html[data-template="classic"] #root .cookie-policy-page.legal-document-page :is(
+  .cookie-policy-nav,
+  .legal-document-warning,
+  .legal-document-tabs,
+  .legal-document-content,
+  .legal-document-footer
+) {
+  border-color: var(--ih-line) !important;
+  background: var(--ih-surface) !important;
+  background-image: none !important;
+  color: var(--ih-ink) !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .cookie-policy-page.legal-document-page .legal-document-hero {
+  border: 1px solid #30302d !important;
+  background: #111110 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  filter: grayscale(1) !important;
+}
+
+html[data-template="classic"] #root .cookie-policy-page.legal-document-page .legal-document-hero :is(
+  .cookie-policy-eyebrow,
+  h1,
+  p,
+  .cookie-policy-meta,
+  .cookie-policy-meta > span
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"] #root .cookie-policy-page.legal-document-page .cookie-policy-meta > span {
+  border-color: #555550 !important;
+  background: #242422 !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .cookie-policy-page.legal-document-page .legal-document-tabs > a {
+  border-color: #deded9 !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root .cookie-policy-page.legal-document-page .legal-document-tabs > a.is-active {
+  border-color: #111111 !important;
+  background: #111111 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal-document-page .legal-document-tabs > a {
+  border-color: #3b3b37 !important;
+  background: #191918 !important;
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root .cookie-policy-page.legal-document-page .legal-document-tabs > a.is-active {
+  border-color: #f5f5f1 !important;
+  background: #f5f5f1 !important;
+  color: #111111 !important;
+  -webkit-text-fill-color: #111111 !important;
+}
+
+@media (max-width: 760px) {
+  #root > .cookie-policy-page.legal-document-page {
+    padding-top: 10px !important;
+  }
+
+  #root .cookie-policy-page.legal-document-page .cookie-policy-nav {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  #root .cookie-policy-page.legal-document-page .legal-document-hero {
+    padding: 34px 20px !important;
+    border-radius: 20px !important;
+  }
+}
