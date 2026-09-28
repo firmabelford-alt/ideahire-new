@@ -1,6 +1,7 @@
 
 import { useEffect, useLayoutEffect, useState } from "react";
 import "./App.css";
+import "./v15.css";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
