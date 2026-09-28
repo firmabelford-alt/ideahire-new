@@ -391,12 +391,12 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
           <button type="button" onClick={() => applyZoom(zoom - 0.25)} disabled={zoom <= 1} aria-label="Oddal">−</button>
           <button type="button" className="private-work-viewer-zoom-value" onClick={() => applyZoom(1)} aria-label="Przywróć rozmiar 100%">{Math.round(zoom * 100)}%</button>
           <button type="button" onClick={() => applyZoom(zoom + 0.25)} disabled={zoom >= 4} aria-label="Przybliż">+</button>
-          <a href={source} target="_blank" rel="noopener noreferrer" download={item.display_name} aria-label="Pobierz zdjęcie">↓</a>
+          <a href={source} target="_blank" rel="noopener noreferrer" download={item.display_name} aria-label="Pobierz zdjęcie">Pobierz</a>
           <button type="button" className="private-work-lightbox-close" onClick={onClose} aria-label="Zamknij">×</button>
         </div>
       </header>
       {images.length > 1 && (
-        <button type="button" className="private-work-lightbox-arrow is-left" onClick={() => onSelect(previous.id)} aria-label="Poprzednie zdjęcie">‹</button>
+        <button type="button" className="private-work-lightbox-arrow is-left" onClick={() => onSelect(previous.id)} aria-label="Poprzednie zdjęcie">Poprzednie</button>
       )}
       <figure className={zoom > 1 ? "is-zoomed" : ""}>
         <div
@@ -435,7 +435,7 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
         </figcaption>
       </figure>
       {images.length > 1 && (
-        <button type="button" className="private-work-lightbox-arrow is-right" onClick={() => onSelect(next.id)} aria-label="Następne zdjęcie">›</button>
+        <button type="button" className="private-work-lightbox-arrow is-right" onClick={() => onSelect(next.id)} aria-label="Następne zdjęcie">Następne</button>
       )}
     </div>
   ), document.body);
@@ -511,7 +511,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
                   <b>{item.display_name}</b>
                   <small>{presentation.label} · {formatBytes(item.byte_size)}</small>
                 </span>
-                <span className="private-work-file-action" aria-hidden="true">{presentation.action} ↓</span>
+                <span className="private-work-file-action" aria-hidden="true">{presentation.action}</span>
               </a>
               {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
             </div>
@@ -527,7 +527,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
           {links.map((item) => (
             <div className="private-work-link-row" key={item.id}>
               <a href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">
-                <span aria-hidden="true">↗</span>
+                <span aria-hidden="true"></span>
                 <b>{item.display_name}</b>
                 <small>{new URL(item.external_url).hostname}</small>
               </a>
@@ -562,11 +562,11 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
                   <span aria-hidden="true">⌁</span>
                   <div><b>{item.display_name}</b><small>Hasło nie jest przechowywane w czacie IdeaHire</small></div>
                 </div>
-                {metadata.service_url && <a href={metadata.service_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz stronę logowania ↗</a>}
+                {metadata.service_url && <a href={metadata.service_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz stronę logowania </a>}
                 {metadata.login_identifier && <p><span>Login lub e-mail</span><code>{metadata.login_identifier}</code></p>}
                 {metadata.instructions && <p><span>Instrukcja</span>{metadata.instructions}</p>}
                 {metadata.expires_at && <small>Link zadeklarowany jako ważny do: {new Date(metadata.expires_at).toLocaleString("pl-PL")}</small>}
-                <a className="private-work-secure-access-button" href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz bezpieczny link do sekretu →</a>
+                <a className="private-work-secure-access-button" href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz bezpieczny link do sekretu </a>
                 {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
               </article>
             );
@@ -1166,7 +1166,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
             <small>Akceptacja dotyczy odbioru rezultatu i wypłaty. Zakres praw autorskich wynika z ustaleń stron; sam przycisk nie zastępuje wymaganej prawem formy pisemnej przeniesienia praw.</small>
             <div className="private-work-form-actions">
               <button type="button" onClick={() => setReleaseOpen(false)} disabled={busy}>Wróć do sprawdzania</button>
-              <button type="button" className="is-primary" onClick={acceptAndRelease} disabled={busy || !reviewedWork || !confirmRelease}>{busy ? "Stripe przekazuje środki…" : "Potwierdź odbiór i wypłatę →"}</button>
+              <button type="button" className="is-primary" onClick={acceptAndRelease} disabled={busy || !reviewedWork || !confirmRelease}>{busy ? "Stripe przekazuje środki…" : "Potwierdź odbiór i wypłatę "}</button>
             </div>
           </section>
         </div>
