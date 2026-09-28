@@ -591,7 +591,7 @@ function App({ session, loading }) {
                 className="btn btn-dark btn-large"
                 to="/find-talent"
               >
-                Znajdź wykonawcę <span>→</span>
+                Znajdź wykonawcę <span></span>
               </Link>
 
               <Link
@@ -654,7 +654,7 @@ function App({ session, loading }) {
             </div>
 
             <div className="floating-card card-small card-bottom">
-              <span className="check-icon">↗</span>
+              <span className="check-icon"></span>
 
               <div>
                 <strong>Kolejne zlecenie</strong>
@@ -710,7 +710,7 @@ function App({ session, loading }) {
                   {category}
                 </span>
 
-                <span className="category-arrow">↗</span>
+                <span className="category-arrow"></span>
               </button>
             ))}
           </div>
@@ -788,7 +788,7 @@ function App({ session, loading }) {
               className="btn btn-light"
               to="/find-talent"
             >
-              Dodaj zlecenie →
+              Dodaj zlecenie 
             </Link>
           </div>
 
@@ -808,7 +808,7 @@ function App({ session, loading }) {
               className="btn btn-outline"
               to="/jobs"
             >
-              Znajdź zlecenia →
+              Znajdź zlecenia 
             </Link>
           </div>
         </section>
@@ -826,8 +826,8 @@ function App({ session, loading }) {
             to={session ? "/account" : "/register"}
           >
             {session
-              ? "Przejdź do konta →"
-              : "Zacznij teraz →"}
+              ? "Przejdź do konta "
+              : "Zacznij teraz "}
           </Link>
         </section>
       </main>
