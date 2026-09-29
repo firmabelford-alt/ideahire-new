@@ -6883,10 +6883,10 @@ function LimitedAccount() {
 const SITE_TEMPLATE_OPTIONS = [
   {
     value: "current",
-    eyebrow: "Aktualny",
+    eyebrow: "Granatowy szablon",
     title: "Nowoczesny granat",
     description:
-      "Obecna szata IdeaHire z granatowymi akcentami, miękkimi przejściami i animacjami.",
+      "Spójny granatowy motyw IdeaHire z czytelnym kontrastem, subtelnymi przejściami i dopracowanymi animacjami.",
   },
   {
     value: "classic",
@@ -13749,10 +13749,10 @@ function Jobs() {
           <div className="jobs-order-copy">
             <span className="jobs-order-icon" aria-hidden="true">✦</span>
             <div>
-              <strong>Ułóż wyniki po swojemu</strong>
+              <strong>Dopasowanie do Twoich kategorii</strong>
               <small>
-                Dopasowanie zmienia tylko kolejność i nie ukrywa pozostałych
-                zleceń.
+                Najpierw pokazujemy zlecenia zgodne z kategoriami wybranymi
+                na Twoim koncie. Pozostałe oferty nadal są widoczne.
               </small>
             </div>
           </div>
@@ -13769,7 +13769,7 @@ function Jobs() {
                   : "Wybierz kategorie w ustawieniach konta"
               }
             >
-              Dopasowane
+              Dopasowane do mnie
             </button>
             <button
               type="button"
@@ -13913,8 +13913,14 @@ function Jobs() {
                       {job.category}
                     </span>
 
-                    <span className="job-active-badge">
-                      {isMatched ? "Dopasowane" : "Aktywne"}
+                    <span
+                      className={`job-active-badge ${
+                        isMatched ? "is-matched" : "is-active"
+                      }`}
+                    >
+                      {isMatched
+                        ? "Pasuje do Twoich kategorii"
+                        : "Otwarte na zgłoszenia"}
                     </span>
                   </div>
 
@@ -13924,23 +13930,29 @@ function Jobs() {
 
                   <JobListingMeta job={job} />
 
-                  <p>
-                    <strong>
-                      Budżet:
-                    </strong>{" "}
-                    {formatBudget(
-                      job.budget
-                    )}
+                  <p className="job-card-summary">
+                    {job.description || "Brak opisu zlecenia."}
                   </p>
 
-                  <p>
-                    <small>
-                      Opublikowano:{" "}
-                      {formatDate(
-                        job.created_at
-                      )}
-                    </small>
-                  </p>
+                  <div className="job-card-facts">
+                    <div>
+                      <span>Budżet</span>
+                      <strong>{formatBudget(job.budget)}</strong>
+                    </div>
+
+                    <div>
+                      <span>Opublikowano</span>
+                      <strong>{formatDate(job.created_at)}</strong>
+                    </div>
+
+                    <div>
+                      <span>Okres publikacji</span>
+                      <strong>
+                        {job.listing_duration_days || "—"}
+                        {job.listing_duration_days && <small> dni</small>}
+                      </strong>
+                    </div>
+                  </div>
 
                   {isOpen && (
                     <div className="job-details">
@@ -14011,23 +14023,25 @@ function Jobs() {
 
                   {!isOpen && (
                     <div className="job-actions">
-                    <button
-                      className="btn btn-dark"
-                      type="button"
-                      onClick={() =>
-                        setOpenJobId(
-                          isOpen
-                            ? null
-                            : job.id
-                        )
-                      }
-                    >
-                      Zobacz zlecenie 
-                    </button>
+                      <button
+                        className="btn btn-outline"
+                        type="button"
+                        aria-expanded={isOpen}
+                        onClick={() => setOpenJobId(job.id)}
+                      >
+                        Pokaż pełny opis
+                      </button>
 
-                    {!isOwner && (
+                      <Link
+                        to={`/profile/${job.user_id}`}
+                        className="btn btn-outline"
+                      >
+                        Profil zleceniodawcy
+                      </Link>
+
+                      {!isOwner && (
                         <button
-                          className="btn btn-outline"
+                          className="btn btn-dark"
                           type="button"
                           disabled={
                             !canTransact ||
