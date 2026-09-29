@@ -46312,3 +46312,128 @@ html[data-theme="dark"] #root#root .account-page :is(
     padding: 10px 0 20px !important;
   }
 }
+
+/* ============================================================================
+   IDEAHIRE — BATCH 04.5 / LIGHT MODE: REMOVE GLOBAL SHADED RECTANGLES
+   2026-09-29
+
+   The large pale blocks were not content cards. They came from structural
+   pseudo-elements, section backgrounds and compositing filters stretched over
+   several screen rows. Disable those decorative layers in both light
+   templates while leaving real cards, forms, buttons and dark mode untouched.
+   ============================================================================ */
+
+/* ---------- 1. REMOVE STRUCTURAL DECORATION LAYERS ON EVERY LIGHT ROUTE ---------- */
+
+html:not([data-theme="dark"]) #root#root .app > main::before,
+html:not([data-theme="dark"]) #root#root .app > main::after,
+html:not([data-theme="dark"]) #root#root .app > main > .categories.section::before,
+html:not([data-theme="dark"]) #root#root .app > main > .categories.section::after,
+html:not([data-theme="dark"]) #root#root .page::before,
+html:not([data-theme="dark"]) #root#root .page::after,
+html:not([data-theme="dark"]) #root#root .account-page::before,
+html:not([data-theme="dark"]) #root#root .account-page::after,
+html:not([data-theme="dark"]) #root#root .page > .app-page::before,
+html:not([data-theme="dark"]) #root#root .page > .app-page::after,
+html:not([data-theme="dark"]) #root#root .account-page > .app-page::before,
+html:not([data-theme="dark"]) #root#root .account-page > .app-page::after,
+html:not([data-theme="dark"]) #root#root .account-page > .messages-page::before,
+html:not([data-theme="dark"]) #root#root .account-page > .messages-page::after,
+html:not([data-theme="dark"]) #root#root .account-page > .chat-page::before,
+html:not([data-theme="dark"]) #root#root .account-page > .chat-page::after,
+html:not([data-theme="dark"]) #root#root .app-page-header::before,
+html:not([data-theme="dark"]) #root#root .app-page-header::after,
+html:not([data-theme="dark"]) #root#root .account-workspace-page::before,
+html:not([data-theme="dark"]) #root#root .account-workspace-page::after,
+html:not([data-theme="dark"]) #root#root .privacy-center-shell::before,
+html:not([data-theme="dark"]) #root#root .privacy-center-shell::after,
+html:not([data-theme="dark"]) #root#root .disputes-shell::before,
+html:not([data-theme="dark"]) #root#root .disputes-shell::after,
+html:not([data-theme="dark"]) #root#root .admin-shell::before,
+html:not([data-theme="dark"]) #root#root .admin-shell::after,
+html:not([data-theme="dark"]) #root#root .moderation-user-shell::before,
+html:not([data-theme="dark"]) #root#root .moderation-user-shell::after,
+html:not([data-theme="dark"]) #root#root .limited-account-shell::before,
+html:not([data-theme="dark"]) #root#root .limited-account-shell::after {
+  content: none !important;
+  position: static !important;
+  inset: auto !important;
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  border: 0 !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  mask: none !important;
+  filter: none !important;
+  opacity: 0 !important;
+  transform: none !important;
+}
+
+/* ---------- 2. STRUCTURAL CANVASES ARE FLAT; REAL COMPONENTS STAY INTACT ---------- */
+
+html:not([data-theme="dark"]) #root#root :is(
+  .app,
+  .page,
+  .account-page,
+  .privacy-center-page,
+  .disputes-page,
+  .admin-page,
+  .moderation-user-page,
+  .age-access-page
+) {
+  background-color: var(--ih-page, var(--ih-canvas, #ffffff)) !important;
+  background-image: none !important;
+}
+
+html:not([data-theme="dark"]) #root#root .app > main,
+html:not([data-theme="dark"]) #root#root .app > main > .categories.section,
+html:not([data-theme="dark"]) #root#root .app > main > .split-section.section,
+html:not([data-theme="dark"]) #root#root .page > .app-page,
+html:not([data-theme="dark"]) #root#root .account-page > .app-page,
+html:not([data-theme="dark"]) #root#root .account-page > .messages-page,
+html:not([data-theme="dark"]) #root#root .account-page > .chat-page,
+html:not([data-theme="dark"]) #root#root .account-workspace-page,
+html:not([data-theme="dark"]) #root#root .app-page-header,
+html:not([data-theme="dark"]) #root#root .privacy-center-shell,
+html:not([data-theme="dark"]) #root#root .disputes-shell,
+html:not([data-theme="dark"]) #root#root .admin-shell,
+html:not([data-theme="dark"]) #root#root .moderation-user-shell,
+html:not([data-theme="dark"]) #root#root .limited-account-shell {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ---------- 3. PREVENT BLUR / COMPOSITOR TILES FROM RETURNING WHILE SCROLLING ---------- */
+
+html:not([data-theme="dark"]) #root#root .app .home-reveal,
+html:not([data-theme="dark"]) #root#root .app .home-reveal.is-visible,
+html:not([data-theme="dark"]) #root#root :is(
+  .page > main,
+  .account-page > main,
+  .page > .app-page,
+  .account-page > .app-page,
+  .account-page > .messages-page,
+  .account-page > .chat-page,
+  .app-page-header,
+  .account-workspace-page
+) {
+  filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* The designed hero and its content card remain, but their light-mode blur is
+   removed so the browser cannot paint another rectangular compositor tile. */
+html:not([data-theme="dark"]) #root#root .app > main > .hero,
+html:not([data-theme="dark"]) #root#root .app > main > .hero .hero-content {
+  filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
