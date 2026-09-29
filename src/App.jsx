@@ -490,6 +490,24 @@ function App({ session, loading }) {
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
+
+          {session && (
+            <>
+              <Link
+                className="home-notifications-link"
+                to="/notifications"
+              >
+                Powiadomienia
+                {hasNotifications && (
+                  <span className="home-notifications-dot" />
+                )}
+              </Link>
+
+              <Link to="/account">
+                Moje konto
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="nav-actions">
@@ -497,28 +515,9 @@ function App({ session, loading }) {
             <span>Ładowanie...</span>
           ) : session ? (
             <>
-              <div className="home-account-cluster">
-                <span className="auth-user">
-                  Cześć, {userName}
-                </span>
-
-                <Link
-                  className="home-notifications-link btn btn-ghost"
-                  to="/notifications"
-                >
-                  Powiadomienia
-                  {hasNotifications && (
-                    <span className="home-notifications-dot" />
-                  )}
-                </Link>
-
-                <Link
-                  className="btn btn-ghost"
-                  to="/account"
-                >
-                  Moje konto
-                </Link>
-              </div>
+              <span className="auth-user home-auth-user">
+                Cześć, {userName}
+              </span>
 
               <Link
                 className="home-account-avatar-link"
