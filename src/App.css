@@ -1,7 +1,7 @@
-/* IDEA HIRE Ă˘ÂÂ PROFESSIONAL HOMEPAGE V6 Ă˘ÂÂ RELEASE 2026-09-20 */
+/* IDEA HIRE ÄËĂÂĂÂ PROFESSIONAL HOMEPAGE V6 ÄËĂÂĂÂ RELEASE 2026-09-20 */
 /* Full file for direct replacement: src/App.css */
 
-/* IDEA HIRE Ă˘ÂÂ STRIPE CONNECT STYLES Ă˘ÂÂ BUILD 2026-09-05 */
+/* IDEA HIRE ÄËĂÂĂÂ STRIPE CONNECT STYLES ÄËĂÂĂÂ BUILD 2026-09-05 */
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
@@ -14,7 +14,7 @@
 }
 
 /* =========================================================
-   JOB LISTING TERMS V1 — EXPIRY + NEGOTIABLE BUDGET
+   JOB LISTING TERMS V1 â EXPIRY + NEGOTIABLE BUDGET
    Scoped additions only; existing page geometry stays intact.
 ========================================================= */
 
@@ -402,7 +402,7 @@ html[data-theme="dark"] .agreement-price-input input:not(:disabled) {
 }
 
 /* =========================================================
-   RODO Ă˘ÂÂ WYBÄÂR USUNIĂÂCIA DANYCH LUB ZAMKNIĂÂCIA KONTA
+   RODO ÄËĂÂĂÂ WYBĂÂĂÂR USUNIÄÂĂÂCIA DANYCH LUB ZAMKNIÄÂĂÂCIA KONTA
 ========================================================= */
 
 .privacy-erasure-choice-fieldset {
@@ -763,7 +763,7 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
 }
 
 /* =========================================================
-   ADMIN Ă˘ÂÂ KONTROLOWANE USUWANIE DANYCH I KONTA
+   ADMIN ÄËĂÂĂÂ KONTROLOWANE USUWANIE DANYCH I KONTA
 ========================================================= */
 
 .erasure-account-shell {
@@ -969,7 +969,7 @@ html[data-theme="dark"] .privacy-erasure-requested-action.is-legacy {
 }
 
 /* =========================================================
-   MODERACJA KONT I ODWOÄšÂANIA
+   MODERACJA KONT I ODWOĂĹĄĂÂANIA
 ========================================================= */
 
 .moderation-user-shell,
@@ -2467,7 +2467,7 @@ button.privacy-admin-account-link {
 }
 
 .erasure-blockers-card li::before {
-  content: "•";
+  content: "â˘";
   margin-right: 8px;
 }
 
@@ -3025,7 +3025,7 @@ html[data-theme="dark"] .erasure-retention-report > small {
 }
 
 /* =========================================================
-   LEGAL DOCUMENTS / TERMS ACCEPTANCE Ă˘ÂÂ BUILD 2026-09-06
+   LEGAL DOCUMENTS / TERMS ACCEPTANCE ÄËĂÂĂÂ BUILD 2026-09-06
 ========================================================= */
 
 .registration-terms-confirmation {
@@ -3516,7 +3516,7 @@ html[data-theme="dark"] .legal-document-footer nav a {
 }
 
 /* =========================================================
-   STRIPE CONNECT / WYPÄšÂATY W PANELU KONTA
+   STRIPE CONNECT / WYPĂĹĄĂÂATY W PANELU KONTA
 ========================================================= */
 
 .stripe-connect-panel {
@@ -3823,7 +3823,7 @@ html[data-theme="dark"] .stripe-connect-feedback.is-info {
 }
 
 /* =========================================================
-   CHAT WORKSPACE V1.1 Ă˘ÂÂ clean desktop/mobile composition
+   CHAT WORKSPACE V1.1 ÄËĂÂĂÂ clean desktop/mobile composition
 ========================================================= */
 
 .account-page .chat-page {
@@ -4614,7 +4614,7 @@ html[data-theme="dark"] .private-work-links .private-work-link-row > a b {
 }
 
 /* =========================================================
-   ADMIN Ă˘ÂÂ FULL DISPUTE CONTEXT
+   ADMIN ÄËĂÂĂÂ FULL DISPUTE CONTEXT
 ========================================================= */
 
 .admin-case-context-panel > .dispute-panel-heading {
@@ -5832,7 +5832,7 @@ img {
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.055);
 }
 
-/* GÄĹrny podglĂÂd profilu */
+/* GĂÂÄšÂrny podglÄÂĂÂd profilu */
 
 .profile-preview {
   display: flex;
@@ -5844,8 +5844,8 @@ img {
 }
 
 /*
-  WAÄšĹĽNE:
-  ZdjĂÂcie nigdy nie moÄšĹşe przejĂÂĂÂ naturalnego rozmiaru
+  WAĂĹĄÄšÄ˝NE:
+  ZdjÄÂĂÂcie nigdy nie moĂĹĄÄšĹe przejÄÂĂÂÄÂĂÂ naturalnego rozmiaru
   pliku. Tutaj wymuszamy konkretny rozmiar.
 */
 
@@ -5865,7 +5865,7 @@ img {
     0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
-/* Placeholder z pierwszĂÂ literĂÂ */
+/* Placeholder z pierwszÄÂĂÂ literÄÂĂÂ */
 
 .profile-avatar-placeholder {
   display: grid;
@@ -5877,7 +5877,7 @@ img {
   text-transform: uppercase;
 }
 
-/* Nazwa i e-mail obok zdjĂÂcia */
+/* Nazwa i e-mail obok zdjÄÂĂÂcia */
 
 .profile-preview h2 {
   margin: 0 0 6px;
@@ -5891,7 +5891,7 @@ img {
   font-size: 14px;
 }
 
-/* Pole wyboru zdjĂÂcia */
+/* Pole wyboru zdjÄÂĂÂcia */
 
 .profile-upload {
   display: grid;
@@ -5924,7 +5924,7 @@ img {
   line-height: 1.5;
 }
 
-/* PodglĂÂd nowo wybranego zdjĂÂcia */
+/* PodglÄÂĂÂd nowo wybranego zdjÄÂĂÂcia */
 
 .profile-upload-preview {
   width: 72px;
@@ -6312,7 +6312,7 @@ img {
 }
 
 /* =========================================================
-   DARK MODE Ă˘ÂÂ FINAL CONTRAST LAYER
+   DARK MODE ÄËĂÂĂÂ FINAL CONTRAST LAYER
    Kept at the end so it also overrides component styles.
 ========================================================= */
 
@@ -7625,7 +7625,7 @@ html[data-theme="dark"] .dispute-parties-card > .dispute-party-row {
 }
 
 /* =========================================================
-   DARK MODE Ă˘ÂÂ ONLY COLORS, NO LAYOUT CHANGES
+   DARK MODE ÄËĂÂĂÂ ONLY COLORS, NO LAYOUT CHANGES
 ========================================================= */
 
 html[data-theme="dark"] {
@@ -7962,7 +7962,7 @@ html[data-theme="dark"] .site-language-toggle button.is-active {
 }
 
 /* =========================================================
-   FINAL SLIM NAVIGATION Ă˘ÂÂ HOME + USER ACCOUNT
+   FINAL SLIM NAVIGATION ÄËĂÂĂÂ HOME + USER ACCOUNT
 ========================================================= */
 
 .account-nav-label-short {
@@ -9674,7 +9674,7 @@ html[data-theme="dark"] .privacy-policy-footer nav a {
 }
 
 /* =========================================================
-   AGE ACCESS / LIMITED ACCOUNT 16Ă˘ÂÂ17
+   AGE ACCESS / LIMITED ACCOUNT 16ÄËĂÂĂÂ17
 ========================================================= */
 
 .registration-age-result,
@@ -10332,7 +10332,7 @@ html[data-theme="dark"] .limited-account-route-message {
 }
 
 /* =========================================================
-   CHAT AGREEMENTS Ă˘ÂÂ WARUNKI WSPÄÂÄšÂPRACY
+   CHAT AGREEMENTS ÄËĂÂĂÂ WARUNKI WSPĂÂĂÂĂĹĄĂÂPRACY
 ========================================================= */
 
 .agreement-workspace {
@@ -11389,7 +11389,7 @@ html[data-theme="dark"] .agreement-waiting-card p {
 }
 
 .jobs-clear-filters::before {
-  content: "×";
+  content: "Ă";
   font-size: 17px;
   font-weight: 400;
   line-height: 1;
@@ -11520,7 +11520,7 @@ html[data-theme="dark"] :is(
   }
 }
 /* =========================================================
-   IDEA HIRE — V10.3 CLASSIC + MOBILE REPAIR — 2026-09-25
+   IDEA HIRE â V10.3 CLASSIC + MOBILE REPAIR â 2026-09-25
    Pure white classic skin, circular profile flags and readable
    mobile category cards. Kept at the absolute end on purpose.
 ========================================================= */
@@ -11999,7 +11999,7 @@ html[data-template="classic"] #root :is(
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
+   IDEA HIRE ÄËĂÂĂÂ V7.1 BALANCED CONTENT / FULL-WIDTH TOP BAR
    Only navigation spans the viewport. Content returns to 1320px.
 ========================================================= */
 
@@ -12420,7 +12420,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE — CHAT ATTACHMENTS + IMAGE VIEWER — 2026-09-25
+   IDEA HIRE â CHAT ATTACHMENTS + IMAGE VIEWER â 2026-09-25
 ========================================================= */
 
 #root .private-work-image-set,
@@ -12914,7 +12914,7 @@ html[data-theme="dark"] #root .private-work-file-action {
 }
 
 /* =========================================================
-   IDEA HIRE — SWITCHABLE INTERFACE TEMPLATES — 2026-09-25
+   IDEA HIRE â SWITCHABLE INTERFACE TEMPLATES â 2026-09-25
    The template changes presentation only. Current structure and logic stay intact.
 ========================================================= */
 
@@ -12925,7 +12925,7 @@ html[data-theme="dark"] #root .private-work-file-action {
 }
 
 /* =========================================================
-   STRIPE CHECKOUT — CHAT PAYMENT PANEL V1
+   STRIPE CHECKOUT â CHAT PAYMENT PANEL V1
 ========================================================= */
 
 #root .chat-payment-panel {
@@ -14390,7 +14390,7 @@ html[data-template="classic"][data-theme="dark"] #root :is(.site-theme-toggle, .
 }
 
 /* =========================================================
-   V9 — RELIABLE NOTIFICATION SIGNALS
+   V9 â RELIABLE NOTIFICATION SIGNALS
 ========================================================= */
 
 #root .account-notification-button .notification-dot {
@@ -14541,7 +14541,7 @@ html[data-theme="dark"] .notification-message-preview {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7.5 CONTINUOUS ATMOSPHERE
+   IDEA HIRE ÄËĂÂĂÂ V7.5 CONTINUOUS ATMOSPHERE
    One shared background spans hero and categories. The colour
    darkens softly at both viewport edges and has no section seam.
 ========================================================= */
@@ -14817,7 +14817,7 @@ html:not([data-theme="dark"]) body .navbar.navbar.restricted-account-navbar {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
+   IDEA HIRE ÄËĂÂĂÂ V6 HOMEPAGE SCALE / SHAPES / LIVE MOTION
    RELEASE 2026-09-20
 ========================================================= */
 
@@ -15619,7 +15619,7 @@ html[data-theme="dark"] .app .category-card:nth-child(n) {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.5.1 MESSAGES VERTICAL ALIGNMENT
+   IDEA HIRE ÄËĂÂĂÂ V5.5.1 MESSAGES VERTICAL ALIGNMENT
 ========================================================= */
 
 :root {
@@ -15640,7 +15640,7 @@ html[data-theme="dark"] .app .category-card:nth-child(n) {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ KATALOG WYKONAWCÄÂW I DWUKIERUNKOWY START V2.2
+   IDEA HIRE ÄËĂÂĂÂ KATALOG WYKONAWCĂÂĂÂW I DWUKIERUNKOWY START V2.2
 ========================================================= */
 
 .discovery-settings-actions {
@@ -16372,7 +16372,7 @@ html[data-theme="dark"] .home-navbar .nav-links a:hover {
 }
 
 /* =========================================================
-   CLEAN HOME HOUSING Ă˘ÂÂ ORIGINAL LAYOUT PRESERVED
+   CLEAN HOME HOUSING ÄËĂÂĂÂ ORIGINAL LAYOUT PRESERVED
 ========================================================= */
 
 .home-navbar .nav-links {
@@ -16565,7 +16565,7 @@ html[data-theme="dark"] .home-account-avatar-link {
 }
 
 /* =========================================================
-   MOBILE-ONLY LAYOUT Ă˘ÂÂ DESKTOP STAYS UNCHANGED
+   MOBILE-ONLY LAYOUT ÄËĂÂĂÂ DESKTOP STAYS UNCHANGED
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -16729,7 +16729,7 @@ html[data-theme="dark"] .home-account-avatar-link {
 }
 
 /* =========================================================
-   MOBILE LIGHT THEME Ă˘ÂÂ WHITE NAVIGATION HOUSING
+   MOBILE LIGHT THEME ÄËĂÂĂÂ WHITE NAVIGATION HOUSING
 ========================================================= */
 
 @media (max-width: 700px) {
@@ -18335,7 +18335,7 @@ html[data-theme="dark"] .how .step p {
   line-height: 1.4;
 }
 
-/* Dark version Ă˘ÂÂ the layout remains unchanged */
+/* Dark version ÄËĂÂĂÂ the layout remains unchanged */
 
 html[data-theme="dark"] .disputes-page,
 html[data-theme="dark"] .admin-page {
@@ -19108,7 +19108,7 @@ html[data-theme="dark"] .dispute-transparency-banner {
 }
 
 /* =========================================================
-   FINAL HEADER REFINEMENT Ă˘ÂÂ HOME + ACCOUNT
+   FINAL HEADER REFINEMENT ÄËĂÂĂÂ HOME + ACCOUNT
    One authoritative layer for spacing, contrast and mobile fit.
 ========================================================= */
 
@@ -19483,7 +19483,7 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
 }
 
 /* =========================================================
-   PRIVACY RIGHTS CENTER Ă˘ÂÂ BUILD 2026-09-07
+   PRIVACY RIGHTS CENTER ÄËĂÂĂÂ BUILD 2026-09-07
 ========================================================= */
 
 .privacy-center-page {
@@ -20546,7 +20546,7 @@ html[data-theme="dark"] .auth-form .registration-terms-confirmation {
   line-height: 1.55;
 }
 
-/* PeÄšÂny, zatwierdzony raport widoczny na koncie uÄšĹşytkownika. */
+/* PeĂĹĄĂÂny, zatwierdzony raport widoczny na koncie uĂĹĄÄšĹytkownika. */
 .privacy-user-audit-report {
   margin: 20px 0 16px;
   padding: clamp(18px, 3vw, 28px);
@@ -21602,7 +21602,7 @@ html[data-theme="dark"] .privacy-audit-public-note {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ GOOGLE AUTH + PORTFOLIO Ă˘ÂÂ V1.4
+   IDEA HIRE ÄËĂÂĂÂ GOOGLE AUTH + PORTFOLIO ÄËĂÂĂÂ V1.4
 ========================================================= */
 
 .auth-provider-section {
@@ -22142,7 +22142,7 @@ html[data-theme="dark"] .profile-portfolio-item-actions button.is-danger {
 }
 
 /* =========================================================
-   PORTFOLIO ALBUMS + CONTENT REPORTS Ă˘ÂÂ V1.6
+   PORTFOLIO ALBUMS + CONTENT REPORTS ÄËĂÂĂÂ V1.6
 ========================================================= */
 
 .profile-portfolio-edit-cover {
@@ -23389,7 +23389,7 @@ html[data-theme="dark"] a.profile-public-project-link:hover {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ POMOCNY ONBOARDING I DOPASOWANIE V2.2
+   IDEA HIRE ÄËĂÂĂÂ POMOCNY ONBOARDING I DOPASOWANIE V2.2
 ========================================================= */
 
 .discovery-onboarding-backdrop {
@@ -24627,7 +24627,7 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
+   IDEA HIRE ÄËĂÂĂÂ MOBILNY WYWIAD: STABILNY VIEWPORT I PRZYCISKI V2.2.1
 ========================================================= */
 
 .discovery-onboarding-shell button,
@@ -24765,7 +24765,7 @@ html[data-theme="dark"] .discovery-onboarding-backdrop {
 }
 
 /* =========================================================
-   PRIVATE WORKSPACE Ă˘ÂÂ attachments, albums and work delivery
+   PRIVATE WORKSPACE ÄËĂÂĂÂ attachments, albums and work delivery
 ========================================================= */
 
 .private-work-message-text a {
@@ -25720,7 +25720,7 @@ html[data-theme="dark"] .account-page .chat-message.is-mine a {
 }
 
 /* =========================================================
-   FINAL VISUAL AUDIT Ă˘ÂÂ shared application polish
+   FINAL VISUAL AUDIT ÄËĂÂĂÂ shared application polish
 ========================================================= */
 
 :is(.hero h1, .app-page-header h1, .auth-header h1, .job-card h2, .profile-preview h2) {
@@ -26265,7 +26265,7 @@ html[data-theme="dark"] .profile-review-card > p {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ COHESIVE UI REFRESH 2026-09
+   IDEA HIRE ÄËĂÂĂÂ COHESIVE UI REFRESH 2026-09
    Final, reversible presentation layer. No business logic.
 ========================================================= */
 
@@ -26331,7 +26331,7 @@ body {
   outline-offset: 3px;
 }
 
-/* Public header Ă˘ÂÂ one calm surface instead of nested dark pills */
+/* Public header ÄËĂÂĂÂ one calm surface instead of nested dark pills */
 
 .navbar.home-navbar,
 .navbar.account-navbar {
@@ -26442,7 +26442,7 @@ body {
   display: none;
 }
 
-/* Account header Ă˘ÂÂ four primary destinations and one utility menu */
+/* Account header ÄËĂÂĂÂ four primary destinations and one utility menu */
 
 .navbar.account-navbar {
   display: grid;
@@ -26777,7 +26777,7 @@ body {
   color: #87342f;
 }
 
-/* Appearance and language Ă˘ÂÂ compact, horizontal and out of the way */
+/* Appearance and language ÄËĂÂĂÂ compact, horizontal and out of the way */
 
 .site-preferences,
 .site-preferences.is-open {
@@ -26944,7 +26944,7 @@ body {
   padding: 34px 0 46px;
 }
 
-/* Application pages Ă˘ÂÂ quieter surfaces and consistent spacing */
+/* Application pages ÄËĂÂĂÂ quieter surfaces and consistent spacing */
 
 .page {
   min-height: 100vh;
@@ -27091,7 +27091,7 @@ body {
   box-shadow: var(--ih-shadow-sm);
 }
 
-/* Authentication Ă˘ÂÂ shorter, clearer and less card-heavy */
+/* Authentication ÄËĂÂĂÂ shorter, clearer and less card-heavy */
 
 .auth-card {
   width: min(520px, 100%);
@@ -27172,7 +27172,7 @@ body {
   background: #fafbf8;
 }
 
-/* Messages, notifications, disputes and privacy Ă˘ÂÂ consistent information density */
+/* Messages, notifications, disputes and privacy ÄËĂÂĂÂ consistent information density */
 
 :is(.messages-row, .notification-decision-card, .notification-accepted-card, .notification-block-card) {
   border-color: var(--ih-line);
@@ -27895,7 +27895,7 @@ html[data-theme="dark"] .restricted-account-navbar .restricted-navbar-links a {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V3 TOTAL VISUAL REDESIGN
+   IDEA HIRE ÄËĂÂĂÂ V3 TOTAL VISUAL REDESIGN
    Authoritative final layer. Presentation only.
 ========================================================= */
 
@@ -29889,7 +29889,7 @@ html[data-theme="dark"] .site-preferences {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ PROFESSIONAL UI V4
+   IDEA HIRE ÄËĂÂĂÂ PROFESSIONAL UI V4
    ACCOUNT WORKSPACE / STABLE FILTERS / LOWER HOME MOTION
    RELEASE 2026-09-19
 ========================================================= */
@@ -31380,7 +31380,7 @@ html[data-theme="dark"] .privacy-entry-link {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ NAVY PROFESSIONAL SYSTEM V5
+   IDEA HIRE ÄËĂÂĂÂ NAVY PROFESSIONAL SYSTEM V5
    ONE SHELL / ONE BACKGROUND / ZERO HORIZONTAL SHIFT
    RELEASE 2026-09-19
 ========================================================= */
@@ -33270,7 +33270,7 @@ html[data-theme="dark"] .footer .logo span {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.1 WIDTH / STATIC NAV / RESULTS FIX
+   IDEA HIRE ÄËĂÂĂÂ V5.1 WIDTH / STATIC NAV / RESULTS FIX
 ========================================================= */
 
 :root {
@@ -33434,7 +33434,7 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.2 WIDER CANVAS / HERO PROPORTIONS
+   IDEA HIRE ÄËĂÂĂÂ V5.2 WIDER CANVAS / HERO PROPORTIONS
 ========================================================= */
 
 :root {
@@ -33508,7 +33508,7 @@ html[data-theme="dark"] .page .jobs-clear-filters::before {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
+   IDEA HIRE ÄËĂÂĂÂ V5.3 FLUID ROUTES / ALIGNED MESSAGES / COMPACT CHAT
 ========================================================= */
 
 :root {
@@ -33785,7 +33785,7 @@ html[data-theme="dark"] .account-page .chat-collapsible-icon.is-dispute {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.4 ZERO-FLASH NAVIGATION
+   IDEA HIRE ÄËĂÂĂÂ V5.4 ZERO-FLASH NAVIGATION
 ========================================================= */
 
 :root {
@@ -34035,7 +34035,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V5.5 INSTANT BUTTER TRANSITIONS
+   IDEA HIRE ÄËĂÂĂÂ V5.5 INSTANT BUTTER TRANSITIONS
 ========================================================= */
 
 :root {
@@ -34127,7 +34127,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V6.1 FINAL HOMEPAGE GEOMETRY LOCK
+   IDEA HIRE ÄËĂÂĂÂ V6.1 FINAL HOMEPAGE GEOMETRY LOCK
    Keeps the new landing-page proportions above legacy layers.
 ========================================================= */
 
@@ -34253,7 +34253,7 @@ html[data-theme="dark"] .route-inline-loader > span::after {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7 FULL-WIDTH PRODUCT SHELL / BIDIRECTIONAL MOTION
+   IDEA HIRE ÄËĂÂĂÂ V7 FULL-WIDTH PRODUCT SHELL / BIDIRECTIONAL MOTION
    RELEASE 2026-09-20
 ========================================================= */
 
@@ -34831,7 +34831,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE Ă˘ÂÂ V7.2 FINAL BALANCE LOCK
+   IDEA HIRE ÄËĂÂĂÂ V7.2 FINAL BALANCE LOCK
    Full-width navigation, restrained 1320px content.
 ========================================================= */
 
@@ -34842,7 +34842,7 @@ html[data-theme="dark"] .app .split-card.light {
 }
 
 /* =========================================================
-   IDEA HIRE â MOBILE REPAIR + ACCOUNT TABS â 2026-09-21
+   IDEA HIRE Ă˘ÂÂ MOBILE REPAIR + ACCOUNT TABS Ă˘ÂÂ 2026-09-21
    Layered over the last accepted V7.2 desktop release.
 ========================================================= */
 
@@ -36201,7 +36201,7 @@ html[data-theme="dark"] .app .split-card.light {
 
 
 /* =========================================================
-   V10.1 — TOTAL CLASSIC BLACK & WHITE
+   V10.1 â TOTAL CLASSIC BLACK & WHITE
    Final cascade seal. This block intentionally lives at the
    absolute end of the stylesheet so later feature releases can
    never reintroduce navy/blue into the classic template.
@@ -36895,7 +36895,7 @@ html[data-template="classic"][data-theme="dark"] #root .app :is(.floating-card, 
 }
 
 /* =========================================================
-   IDEA HIRE — V10.2 UI REPAIR SEAL — 2026-09-25
+   IDEA HIRE â V10.2 UI REPAIR SEAL â 2026-09-25
    Final, reversible corrections for navigation, both templates,
    mobile layouts, chat media and the administration workspace.
 ========================================================= */
@@ -37597,7 +37597,7 @@ html[data-template="classic"][data-theme="dark"] #root .app .hero-visual .floati
 }
 
 /* =========================================================
-   V10.3 — FINAL CASCADE LOCK
+   V10.3 â FINAL CASCADE LOCK
 ========================================================= */
 
 :root { --ih-release: 20260925-103; }
@@ -37890,7 +37890,7 @@ html[data-template="classic"] #root :is(.ideahire-country-flag, .ideahire-countr
 }
 
 /* =========================================================
-   V10.4 — VISUAL RELIABILITY PASS
+   V10.4 â VISUAL RELIABILITY PASS
    Separate desktop/mobile locks for the classic skin.
 ========================================================= */
 
@@ -37898,11 +37898,11 @@ html[data-template="classic"] #root :is(.ideahire-country-flag, .ideahire-countr
   --ih-release: 20260926-104;
 }
 
-/* Never render the damaged legacy glyph next to "Wyczyść filtry". */
+/* Never render the damaged legacy glyph next to "WyczyĹÄ filtry". */
 
 #root .jobs-clear-filters::before,
 #root .page .jobs-clear-filters::before {
-  content: "×" !important;
+  content: "Ă" !important;
   width: 20px !important;
   min-width: 20px !important;
   height: 20px !important;
@@ -38530,7 +38530,7 @@ html[data-template="classic"] #root .account-page .chat-message .private-work-li
   }
 }
 /* ================================================================
-   IDEA HIRE — WORK DELIVERY + STRIPE RELEASE V1 (2026-09-26)
+   IDEA HIRE â WORK DELIVERY + STRIPE RELEASE V1 (2026-09-26)
    ================================================================ */
 
 .private-work-link-inputs > div {
@@ -38896,7 +38896,7 @@ html[data-theme="dark"] .private-work-access-item code {
 }
 
 /* ================================================================
-   IDEA HIRE — V11 FINAL UI LOCK — 2026-09-27
+   IDEA HIRE â V11 FINAL UI LOCK â 2026-09-27
    Final visual layer. It intentionally changes presentation only.
    Payment, work-delivery, moderation and privacy logic stay untouched.
    ================================================================ */
@@ -39522,7 +39522,7 @@ html[data-template="classic"][data-theme="dark"] #root :is(
 }
 
 /* ================================================================
-   IDEA HIRE — V12 SCREENSHOT REPAIR — 2026-09-27
+   IDEA HIRE â V12 SCREENSHOT REPAIR â 2026-09-27
    Authoritative visual corrections based on the supplied desktop and
    mobile screenshots. No payment, data, moderation or routing logic.
    ================================================================ */
@@ -39954,7 +39954,7 @@ body,
 }
 
 /* =================================================================
-   CLASSIC TEMPLATE — STRICT BLACK / WHITE / GREY, NO BLUE LEAKAGE
+   CLASSIC TEMPLATE â STRICT BLACK / WHITE / GREY, NO BLUE LEAKAGE
    ================================================================= */
 
 html[data-template="classic"] {
@@ -40979,7 +40979,7 @@ html[data-template="classic"] #root :is(
 }
 
 /* ================================================================
-   IDEA HIRE — V13 DIRECT COMPONENT REPAIR — 2026-09-27
+   IDEA HIRE â V13 DIRECT COMPONENT REPAIR â 2026-09-27
    This pass targets the real component structure visible in the
    supplied screenshots. It intentionally overrides legacy layers.
    ================================================================ */
@@ -42553,7 +42553,7 @@ html[data-template="classic"][data-theme="dark"] #root .discovery-step-count {
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 01 / 2026-09-28
+   IDEAHIRE â BATCH 01 / 2026-09-28
    1. Visible "Dodaj zlecenie" CTA in the classic template.
    2. Strictly neutral classic-template interface in both colour modes.
    3. Stable, centred legal-document geometry on desktop and mobile.
@@ -43049,7 +43049,7 @@ html[data-template="classic"] #root .google-auth-logo {
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 02 / TALENT PAGE, NAV CONTRAST AND COUNTRY SEARCH
+   IDEAHIRE â BATCH 02 / TALENT PAGE, NAV CONTRAST AND COUNTRY SEARCH
    2026-09-28
    ============================================================================ */
 
@@ -43391,7 +43391,7 @@ html[data-template="classic"] #root .navbar.account-navbar .nav-links.account-pr
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 01 V2 / SCREENSHOT-PROVEN CONTRAST SEAL — 2026-09-28
+   IDEAHIRE â BATCH 01 V2 / SCREENSHOT-PROVEN CONTRAST SEAL â 2026-09-28
    The selectors below intentionally match the exact components visible in the
    second screenshot set. They outrank legacy component rules instead of relying
    on inherited colours.
@@ -44083,7 +44083,7 @@ html[data-template="classic"][data-theme="dark"] #root#root .section-label {
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 04 / FIVE SCREEN-BASED REPAIRS — 2026-09-28
+   IDEAHIRE â BATCH 04 / FIVE SCREEN-BASED REPAIRS â 2026-09-28
 
    This block deliberately changes only the five photographed areas:
    account step markers, account back affordance, the light hero preview,
@@ -44355,7 +44355,7 @@ html[data-template="classic"][data-theme="dark"] #root#root .app > .footer .foot
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 04.1 / THREE EXACT SCREEN REPAIRS — 2026-09-29
+   IDEAHIRE â BATCH 04.1 / THREE EXACT SCREEN REPAIRS â 2026-09-29
 
    1. Category tiles have no decorative stripe/blob and use one real arrow.
    2. The account navbar keeps one complete, consistent frame at every width.
@@ -44676,7 +44676,7 @@ html[data-template="classic"][data-theme="dark"] #root#root .app .category-card:
   }
 }
 
-/* ---------- 3. ACCOUNT TITLE: LABEL DIRECTLY ABOVE “CENTRUM PROFILU” ---------- */
+/* ---------- 3. ACCOUNT TITLE: LABEL DIRECTLY ABOVE âCENTRUM PROFILUâ ---------- */
 
 #root#root .account-workspace-page > .app-page-header {
   grid-template-rows: auto auto !important;
@@ -44721,7 +44721,7 @@ html[data-template="classic"][data-theme="dark"] #root#root .app .category-card:
 }
 
 /* ============================================================================
-   IDEAHIRE — BATCH 04.2 / RESPONSIVE NAVS, ARROW MOTION AND HERO DEPTH
+   IDEAHIRE â BATCH 04.2 / RESPONSIVE NAVS, ARROW MOTION AND HERO DEPTH
    2026-09-29
 
    These rules are intentionally final in the cascade and cover both templates,
@@ -45152,5 +45152,823 @@ html[data-template="classic"][data-theme="dark"] #root#root .app > main > .hero 
 @media (prefers-reduced-motion: reduce) {
   #root#root .app .category-card .category-arrow::before {
     transition: none !important;
+  }
+}
+
+/* ============================================================================
+   IDEAHIRE â BATCH 04.3 / FINAL LEGAL SHEET, WORKING ARROWS, CLEAN DARK PAGES
+   2026-09-29
+
+   Final overrides for the four photographed problems.  They deliberately sit
+   at the end of the cascade so older experimental rules cannot reintroduce
+   clipped corners, decorative cut-outs or oversized header gaps.
+   ============================================================================ */
+
+/* ---------- 1. LEGAL DOCUMENTS: ONE NATURAL, ROUNDED SHEET ---------- */
+
+#root#root > .cookie-policy-page.legal-document-page {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: clamp(14px, 2.4vw, 30px) max(12px, env(safe-area-inset-right)) 72px max(12px, env(safe-area-inset-left)) !important;
+  overflow-x: hidden !important;
+  background: #edf2f7 !important;
+  background-image: none !important;
+  clip-path: none !important;
+  mask: none !important;
+  transform: none !important;
+}
+
+#root#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+  position: relative !important;
+  inset: auto !important;
+  box-sizing: border-box !important;
+  width: min(1160px, 100%) !important;
+  max-width: 1160px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  padding: clamp(10px, 1.5vw, 18px) !important;
+  overflow: visible !important;
+  border: 1px solid #cbd6e1 !important;
+  border-radius: 32px !important;
+  background: #f8fafc !important;
+  background-image: none !important;
+  box-shadow: 0 22px 54px rgba(12, 31, 51, 0.11) !important;
+  clip-path: none !important;
+  mask: none !important;
+  transform: none !important;
+}
+
+#root#root .legal-document-page :is(
+  .cookie-policy-nav,
+  .legal-document-hero,
+  .legal-document-warning,
+  .legal-document-tabs,
+  .legal-document-content,
+  .legal-document-footer
+) {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  right: auto !important;
+  left: auto !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  clip-path: none !important;
+  mask: none !important;
+  transform: none !important;
+}
+
+#root#root .legal-document-page :is(
+  .cookie-policy-nav,
+  .legal-document-hero,
+  .legal-document-warning,
+  .legal-document-tabs,
+  .legal-document-content,
+  .legal-document-footer
+)::before,
+#root#root .legal-document-page :is(
+  .cookie-policy-nav,
+  .legal-document-hero,
+  .legal-document-warning,
+  .legal-document-tabs,
+  .legal-document-content,
+  .legal-document-footer
+)::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .legal-document-page .cookie-policy-nav {
+  min-height: 68px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 12px 18px !important;
+  margin: 0 0 12px !important;
+  padding: 12px 14px !important;
+  border: 1px solid #d5dee7 !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root#root .legal-document-page .cookie-policy-logo {
+  min-width: 0 !important;
+  color: #10243c !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+#root#root .legal-document-page .legal-document-nav-actions {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+#root#root .legal-document-page .legal-document-nav-actions :is(a, button) {
+  box-sizing: border-box !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 9px 14px !important;
+  border: 1px solid #cbd6e1 !important;
+  border-radius: 13px !important;
+  background: #f8fafc !important;
+  background-image: none !important;
+  color: #1d334b !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .legal-document-page .legal-document-hero {
+  isolation: isolate !important;
+  min-height: 0 !important;
+  margin: 0 0 12px !important;
+  padding: clamp(40px, 6vw, 72px) !important;
+  overflow: hidden !important;
+  border: 1px solid #24486f !important;
+  border-radius: 26px !important;
+  background: linear-gradient(135deg, #102844 0%, #183f68 100%) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .legal-document-page .legal-document-hero :is(
+  .cookie-policy-eyebrow,
+  h1,
+  p,
+  .cookie-policy-meta,
+  .cookie-policy-meta > span
+) {
+  position: relative !important;
+  z-index: 1 !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+  clip-path: none !important;
+  mask: none !important;
+  transform: none !important;
+}
+
+#root#root .legal-document-page .legal-document-hero h1 {
+  width: auto !important;
+  overflow: visible !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  hyphens: none !important;
+}
+
+#root#root .legal-document-page .cookie-policy-meta {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+#root#root .legal-document-page .cookie-policy-meta > span {
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.09) !important;
+  background-image: none !important;
+}
+
+#root#root .legal-document-page .legal-document-warning {
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  margin: 0 0 12px !important;
+  padding: 18px !important;
+  overflow: hidden !important;
+  border: 1px solid #d4be82 !important;
+  border-left-width: 1px !important;
+  border-radius: 20px !important;
+  background: #fff9e8 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root#root .legal-document-page .legal-document-warning > span {
+  width: 44px !important;
+  height: 44px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 13px !important;
+  background: #6d571b !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root#root .legal-document-page .legal-document-warning :is(strong, p) {
+  max-width: 100% !important;
+  color: #54451d !important;
+  -webkit-text-fill-color: currentColor !important;
+  overflow-wrap: anywhere !important;
+}
+
+#root#root .legal-document-page .legal-document-tabs {
+  position: sticky !important;
+  z-index: 20 !important;
+  top: 8px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin: 0 0 12px !important;
+  padding: 6px !important;
+  overflow: hidden !important;
+  border: 1px solid #d5dee7 !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  background-image: none !important;
+  box-shadow: 0 9px 24px rgba(18, 38, 60, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+#root#root .legal-document-page .legal-document-tabs > a {
+  min-width: 0 !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 9px 10px !important;
+  overflow: hidden !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: #536579 !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  clip-path: none !important;
+}
+
+#root#root .legal-document-page .legal-document-tabs > a.is-active {
+  border-color: #10243c !important;
+  background: #10243c !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+#root#root .legal-document-page .legal-document-content {
+  margin: 0 !important;
+  padding: clamp(24px, 4.8vw, 54px) !important;
+  overflow: hidden !important;
+  border: 1px solid #d5dee7 !important;
+  border-radius: 26px !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #4f5f70 !important;
+  box-shadow: none !important;
+}
+
+#root#root .legal-document-page .legal-document-content :is(h1, h2, h3, p, li, a, strong, code, td, th) {
+  max-width: 100% !important;
+  overflow-wrap: anywhere !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .legal-document-page .legal-document-content blockquote {
+  margin: 24px 0 !important;
+  padding: 18px 20px !important;
+  overflow: hidden !important;
+  border: 1px solid #d4be82 !important;
+  border-left-width: 1px !important;
+  border-radius: 18px !important;
+  background: #fff9e8 !important;
+  background-image: none !important;
+  color: #66572d !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .legal-document-page .legal-document-content :is(table, pre) {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  border-radius: 16px !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .legal-document-page .legal-document-footer {
+  min-height: 66px !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+  margin: 12px 0 0 !important;
+  padding: 16px 18px !important;
+  overflow: hidden !important;
+  border: 1px solid #d5dee7 !important;
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+#root#root .legal-document-page .legal-document-footer nav {
+  justify-content: center !important;
+}
+
+/* Dark navy and classic black legal sheets use the same geometry. */
+
+html[data-theme="dark"] #root#root > .cookie-policy-page.legal-document-page {
+  background: #08131f !important;
+  background-image: none !important;
+}
+
+html[data-theme="dark"] #root#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+  border-color: #314357 !important;
+  background: #0f1d2b !important;
+  background-image: none !important;
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.28) !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page :is(.cookie-policy-nav, .legal-document-tabs, .legal-document-content, .legal-document-footer) {
+  border-color: #314357 !important;
+  background: #142434 !important;
+  background-image: none !important;
+  color: #c8d3df !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .cookie-policy-logo,
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-footer :is(a, span) {
+  color: #f5f8fb !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-nav-actions :is(a, button) {
+  border-color: #41566c !important;
+  background: #1a2c3e !important;
+  color: #f5f8fb !important;
+  -webkit-text-fill-color: #f5f8fb !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-warning,
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-content blockquote {
+  border-color: #70613a !important;
+  border-left-width: 1px !important;
+  background: #282414 !important;
+  color: #ddd1aa !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-warning :is(strong, p),
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-content blockquote :is(strong, p) {
+  color: #eee2bb !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-content :is(h1, h2, h3, strong) {
+  color: #f5f8fb !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-content a {
+  color: #d9e8f7 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-tabs > a {
+  color: #c8d3df !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html[data-theme="dark"] #root#root .legal-document-page .legal-document-tabs > a.is-active {
+  border-color: #f5f8fb !important;
+  background: #f5f8fb !important;
+  color: #102033 !important;
+  -webkit-text-fill-color: #102033 !important;
+}
+
+html[data-template="classic"] #root#root > .cookie-policy-page.legal-document-page {
+  background: #eeeeea !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"] #root#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+  border-color: #d2d2cc !important;
+  background: #f8f8f5 !important;
+  background-image: none !important;
+  box-shadow: 0 22px 52px rgba(17, 17, 17, 0.09) !important;
+}
+
+html[data-template="classic"] #root#root .legal-document-page .legal-document-hero {
+  border-color: #30302d !important;
+  background: #111110 !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  filter: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root > .cookie-policy-page.legal-document-page {
+  background: #080808 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+  border-color: #3b3b37 !important;
+  background: #141413 !important;
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root .legal-document-page :is(.cookie-policy-nav, .legal-document-tabs, .legal-document-content, .legal-document-footer) {
+  border-color: #3b3b37 !important;
+  background: #1b1b1a !important;
+  color: #c9c9c2 !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root .legal-document-page .legal-document-nav-actions :is(a, button) {
+  border-color: #50504b !important;
+  background: #242422 !important;
+  color: #f5f5f1 !important;
+  -webkit-text-fill-color: #f5f5f1 !important;
+}
+
+/* ---------- 2. CATEGORY ARROWS: RIGHT BY DEFAULT, DIAGONAL ON INTERACTION ---------- */
+
+#root#root .app .category-card .category-arrow,
+html[data-template="classic"] #root#root .app .category-card .category-arrow {
+  position: relative !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  max-height: 40px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  justify-self: end !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border: 1px solid #aeb9c7 !important;
+  border-radius: 12px !important;
+  background: #e9eef4 !important;
+  background-image: none !important;
+  color: #10233d !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-size: 0 !important;
+  line-height: 1 !important;
+  box-shadow: 0 5px 14px rgba(14, 31, 52, 0.1) !important;
+  clip-path: none !important;
+  mask: none !important;
+  transform: none !important;
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease, box-shadow 180ms ease !important;
+  touch-action: manipulation !important;
+}
+
+#root#root .app .category-card .category-arrow::before,
+html[data-template="classic"] #root#root .app .category-card .category-arrow::before {
+  content: "\2192" !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 21px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  transform: translate(0, 0) rotate(0deg) !important;
+  transform-origin: 50% 50% !important;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+#root#root .app .category-card:is(:hover, :focus, :focus-visible, :focus-within, :active) .category-arrow {
+  border-color: #173b68 !important;
+  background: #173b68 !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(17, 51, 91, 0.22) !important;
+}
+
+#root#root .app .category-card:is(:hover, :focus, :focus-visible, :focus-within, :active) .category-arrow::before {
+  transform: translate(1px, -1px) rotate(-45deg) !important;
+}
+
+html[data-theme="dark"] #root#root .app .category-card .category-arrow,
+html[data-template="classic"][data-theme="dark"] #root#root .app .category-card .category-arrow {
+  border-color: #697789 !important;
+  background: #263548 !important;
+  color: #ffffff !important;
+}
+
+html[data-template="classic"]:not([data-theme="dark"]) #root#root .app .category-card .category-arrow {
+  border-color: #a9aaa5 !important;
+  background: #eeeeea !important;
+  color: #111111 !important;
+}
+
+html[data-template="classic"] #root#root .app .category-card:is(:hover, :focus, :focus-visible, :focus-within, :active) .category-arrow,
+html[data-theme="dark"] #root#root .app .category-card:is(:hover, :focus, :focus-visible, :focus-within, :active) .category-arrow {
+  border-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+/* ---------- 3. DARK APP PAGES: REMOVE EVERY DECORATIVE CUT-OUT ---------- */
+
+html[data-theme="dark"] #root#root .page {
+  background-color: #091624 !important;
+  background-image: none !important;
+}
+
+html[data-template="classic"][data-theme="dark"] #root#root .page {
+  background-color: #0d0d0c !important;
+  background-image: none !important;
+}
+
+html[data-theme="dark"] #root#root .page :is(
+  .app-page,
+  .app-page-header,
+  .jobs-search,
+  .talent-controls,
+  .jobs-order-panel,
+  .talent-order-row
+) {
+  background-image: none !important;
+  clip-path: none !important;
+  mask: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+html[data-theme="dark"] #root#root .page :is(.app-page, .app-page-header)::before,
+html[data-theme="dark"] #root#root .page :is(.app-page, .app-page-header)::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+/* ---------- 4. JOBS HEADER: LABEL DIRECTLY ABOVE âZNAJDĹš ZLECENIEâ ---------- */
+
+#root#root .page > .app-page:has(.jobs-search) > .app-page-header {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 390px) !important;
+  grid-template-rows: auto auto !important;
+  grid-template-areas:
+    "jobs-label jobs-copy"
+    "jobs-title jobs-copy" !important;
+  align-items: end !important;
+  column-gap: clamp(28px, 4vw, 54px) !important;
+  row-gap: 7px !important;
+  margin: 0 0 26px !important;
+  padding: 18px 0 24px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--ih-line, rgba(255, 255, 255, 0.14)) !important;
+  background: transparent !important;
+  background-image: none !important;
+  clip-path: none !important;
+  mask: none !important;
+}
+
+#root#root .page > .app-page:has(.jobs-search) > .app-page-header > .section-label {
+  grid-area: jobs-label !important;
+  align-self: end !important;
+  justify-self: start !important;
+  margin: 0 0 5px !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+#root#root .page > .app-page:has(.jobs-search) > .app-page-header > h1 {
+  grid-area: jobs-title !important;
+  align-self: start !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#root#root .page > .app-page:has(.jobs-search) > .app-page-header > p {
+  grid-area: jobs-copy !important;
+  align-self: end !important;
+  margin: 0 0 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+@media (max-width: 760px) {
+  #root#root > .cookie-policy-page.legal-document-page {
+    padding: 8px max(7px, env(safe-area-inset-right)) 54px max(7px, env(safe-area-inset-left)) !important;
+  }
+
+  #root#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+    padding: 7px !important;
+    border-radius: 22px !important;
+  }
+
+  #root#root .legal-document-page .cookie-policy-nav {
+    min-height: 0 !important;
+    align-items: stretch !important;
+    gap: 9px !important;
+    padding: 10px !important;
+    border-radius: 17px !important;
+  }
+
+  #root#root .legal-document-page .cookie-policy-logo {
+    width: 100% !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  #root#root .legal-document-page .legal-document-nav-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #root#root .legal-document-page .legal-document-nav-actions :is(a, button) {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    padding: 8px !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+
+  #root#root .legal-document-page .legal-document-hero {
+    padding: 30px 18px !important;
+    border-radius: 19px !important;
+  }
+
+  #root#root .legal-document-page .legal-document-hero h1 {
+    font-size: clamp(32px, 11vw, 46px) !important;
+    line-height: 0.98 !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  #root#root .legal-document-page .cookie-policy-meta {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  #root#root .legal-document-page .legal-document-warning {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 11px !important;
+    padding: 14px !important;
+    border-radius: 17px !important;
+  }
+
+  #root#root .legal-document-page .legal-document-warning > span {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 11px !important;
+  }
+
+  #root#root .legal-document-page .legal-document-tabs {
+    top: 6px !important;
+    gap: 4px !important;
+    padding: 5px !important;
+    border-radius: 16px !important;
+  }
+
+  #root#root .legal-document-page .legal-document-tabs > a {
+    min-height: 40px !important;
+    padding: 8px 4px !important;
+    border-radius: 10px !important;
+    font-size: 9.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  #root#root .legal-document-page .legal-document-content {
+    padding: 22px 15px !important;
+    border-radius: 19px !important;
+    font-size: 13px !important;
+    line-height: 1.68 !important;
+  }
+
+  #root#root .legal-document-page .legal-document-content h1 {
+    margin-top: 34px !important;
+    padding-top: 21px !important;
+    font-size: 21px !important;
+    letter-spacing: -0.025em !important;
+  }
+
+  #root#root .legal-document-page .legal-document-content blockquote {
+    margin: 19px 0 !important;
+    padding: 15px !important;
+    border-radius: 15px !important;
+  }
+
+  #root#root .legal-document-page .legal-document-footer {
+    min-height: 0 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 11px !important;
+    padding: 14px !important;
+    border-radius: 17px !important;
+  }
+
+  #root#root .legal-document-page .legal-document-footer nav {
+    justify-content: flex-start !important;
+  }
+
+  #root#root .app .category-card .category-arrow,
+  html[data-template="classic"] #root#root .app .category-card .category-arrow {
+    width: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    border-radius: 10px !important;
+  }
+
+  #root#root .app .category-card .category-arrow::before,
+  html[data-template="classic"] #root#root .app .category-card .category-arrow::before {
+    font-size: 19px !important;
+  }
+
+  #root#root .page > .app-page:has(.jobs-search) > .app-page-header {
+    display: block !important;
+    margin-bottom: 20px !important;
+    padding: 16px 0 20px !important;
+  }
+
+  #root#root .page > .app-page:has(.jobs-search) > .app-page-header > .section-label {
+    display: inline-flex !important;
+    margin: 0 0 8px !important;
+  }
+
+  #root#root .page > .app-page:has(.jobs-search) > .app-page-header > h1 {
+    margin: 0 !important;
+    font-size: clamp(38px, 13vw, 54px) !important;
+    line-height: 0.98 !important;
+  }
+
+  #root#root .page > .app-page:has(.jobs-search) > .app-page-header > p {
+    max-width: 36rem !important;
+    margin: 12px 0 0 !important;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  #root#root .app .category-card:active .category-arrow::before {
+    transform: translate(1px, -1px) rotate(-45deg) !important;
+    transition-duration: 70ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root#root .app .category-card .category-arrow,
+  #root#root .app .category-card .category-arrow::before {
+    transition-duration: 1ms !important;
+  }
+}
+
+@media print {
+  #root#root > .cookie-policy-page.legal-document-page {
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  #root#root > .cookie-policy-page.legal-document-page > .cookie-policy-shell.legal-document-shell {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  #root#root .legal-document-page :is(.cookie-policy-nav, .legal-document-tabs, .legal-document-footer) {
+    display: none !important;
   }
 }
