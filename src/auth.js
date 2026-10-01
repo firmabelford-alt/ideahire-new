@@ -5,7 +5,10 @@ export function normalizeEmail(value) {
 }
 
 export function getPasswordRecoveryRedirectUrl(origin) {
-  const url = new URL("/reset-password", origin);
+  // The root route handles the recovery marker before rendering Home.
+  // Keeping the callback on the SPA entry point also works on hosts without
+  // a configured history fallback for direct /reset-password requests.
+  const url = new URL("/", origin);
 
   url.searchParams.set("recovery", "1");
 
