@@ -97,6 +97,22 @@ function LegalDocument({ kind, html }) {
       : kind === "privacy"
       ? `${PRIVACY_MATCHING_SUPPLEMENT}${PRIVACY_WORK_DELIVERY_SUPPLEMENT}`
       : "";
+  const combinedHtml = `${html}${matchingSupplement}`;
+  const renderedHtml =
+    kind === "terms"
+      ? combinedHtml
+          .replaceAll("7,5%", "7%")
+          .replaceAll("75,00 zł", "70,00 zł")
+          .replaceAll("1 075,00 zł", "1 070,00 zł")
+          .replace(
+            "Limit pojedynczego pliku wynosi 20 MB, a jednej przesyłki 12 materiałów.",
+            "Limit pojedynczego pliku wynosi 50 MB, jednej przesyłki 24 materiały, a łączny rozmiar plików w paczce 150 MB."
+          )
+          .replace(
+            "Platforma weryfikuje deklarowany format i podstawową sygnaturę zawartości, lecz nie gwarantuje wykrycia każdego złośliwego pliku.",
+            "Platforma sprawdza dopuszczalny format, deklarowany typ i rozmiar przed przygotowaniem przesyłki, lecz nie gwarantuje wykrycia każdego złośliwego pliku; przed startem produkcyjnym wymagane są serwerowa walidacja zawartości, kwarantanna i skanowanie bezpieczeństwa."
+          )
+      : combinedHtml;
 
   return (
     <main className={`cookie-policy-page legal-document-page legal-document-${kind}`} data-no-translate="true">
@@ -151,7 +167,7 @@ function LegalDocument({ kind, html }) {
 
         <article
           className="legal-document-content"
-          dangerouslySetInnerHTML={{ __html: `${html}${matchingSupplement}` }}
+          dangerouslySetInnerHTML={{ __html: renderedHtml }}
         />
 
         <footer className="cookie-policy-footer legal-document-footer">
