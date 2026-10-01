@@ -5,13 +5,25 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
 const categories = [
-  "Programowanie",
-  "Grafika i design",
-  "Marketing",
-  "Copywriting",
-  "Video",
-  "Fotografia",
+  { value: "Programowanie", label: "Strony, aplikacje i IT" },
+  { value: "Grafika i design", label: "Grafika, UX i 3D" },
+  { value: "Marketing", label: "Marketing i sprzedaż" },
+  { value: "Copywriting", label: "Teksty i tłumaczenia" },
+  { value: "Video", label: "Wideo, animacja i audio" },
+  { value: "Fotografia", label: "Fotografia i obróbka zdjęć" },
+  { value: "AI i automatyzacje", label: "AI i automatyzacje" },
+  { value: "Dane, analizy i research", label: "Dane, analizy i research" },
+  { value: "Biznes i e-commerce", label: "Biznes i e-commerce" },
+  { value: "Architektura, wnętrza i CAD", label: "Architektura, wnętrza i CAD" },
 ];
+
+const categoryLabels = Object.fromEntries(
+  categories.map((category) => [category.value, category.label])
+);
+
+function getCategoryLabel(category) {
+  return categoryLabels[category] || category || "Inna kategoria";
+}
 
 const fallbackJobs = [
   {
@@ -639,7 +651,7 @@ function App({ session, loading }) {
                 <span>
                   {formatBudget(activeJob.budget)}
                 </span>
-                <span>{activeJob.category}</span>
+                <span>{getCategoryLabel(activeJob.category)}</span>
               </div>
             </div>
 
@@ -690,23 +702,23 @@ function App({ session, loading }) {
             {categories.map((category, index) => (
               <button
                 className="category-card home-reveal"
-                key={category}
+                key={category.value}
                 type="button"
                 onClick={() =>
                   navigate(
                     `/jobs?category=${encodeURIComponent(
-                      category
+                      category.value
                     )}`
                   )
                 }
-                aria-label={`Pokaż zlecenia: ${category}`}
+                aria-label={`Pokaż zlecenia: ${category.label}`}
               >
                 <span className="category-number">
                   {String(index + 1).padStart(2, "0")}
                 </span>
 
                 <span className="category-name">
-                  {category}
+                  {category.label}
                 </span>
 
                 <span className="category-arrow"></span>
