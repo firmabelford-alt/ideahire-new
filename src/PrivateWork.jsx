@@ -592,6 +592,109 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
   );
 }
 
+export function ProjectFilesPanel({
+  items = [],
+  signedUrls = {},
+  userId,
+  loading = false,
+  error = "",
+  onReport,
+}) {
+  const activeItems = items.filter((item) => item.moderation_status === "active");
+  const groups = useMemo(() => {
+    const grouped = new Map();
+
+    activeItems.forEach((item) => {
+      const key = item.batch_id || item.message_id || item.delivery_id || item.id;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push(item);
+    });
+
+    return [...grouped.entries()]
+      .map(([id, groupItems]) => ({
+        id,
+        items: groupItems,
+        senderId: groupItems[0]?.sender_id || null,
+        createdAt: groupItems[0]?.created_at || null,
+      }))
+      .sort((first, second) =>
+        String(second.createdAt || "").localeCompare(String(first.createdAt || ""))
+      );
+  }, [activeItems]);
+
+  const counts = activeItems.reduce(
+    (result, item) => {
+      if (item.item_type === "image") result.images += 1;
+      else if (item.item_type === "link" || item.item_type === "access") result.links += 1;
+      else result.files += 1;
+      return result;
+    },
+    { files: 0, images: 0, links: 0 }
+  );
+
+  if (loading && !items.length) {
+    return <p className="project-files-state">Pobieranie prywatnych materiałów…</p>;
+  }
+
+  if (!groups.length) {
+    return (
+      <div className="project-files-empty">
+        <span aria-hidden="true">+</span>
+        <div>
+          <h3>Materiały projektu w jednym miejscu</h3>
+          <p>
+            Dodaj pliki, linki, tekst lub bezpieczny link dostępu. Materiały są
+            widoczne wyłącznie dla stron tej współpracy.
+          </p>
+        </div>
+        {error && <small role="alert">{error}</small>}
+      </div>
+    );
+  }
+
+  return (
+    <section className="project-files-library" aria-label="Materiały projektu">
+      <header className="project-files-library-header">
+        <div>
+          <span className="section-label">Prywatna biblioteka</span>
+          <h3>Wszystkie materiały projektu</h3>
+        </div>
+        <div className="project-files-counts" aria-label="Podsumowanie materiałów">
+          <span>{counts.files} plików</span>
+          <span>{counts.images} zdjęć</span>
+          <span>{counts.links} linków</span>
+        </div>
+      </header>
+
+      {error && <p className="project-files-state" role="alert">{error}</p>}
+
+      <div className="project-files-groups">
+        {groups.map((group) => {
+          const ownGroup = group.senderId === userId;
+          return (
+            <article className="project-files-group" key={group.id}>
+              <div className="project-files-group-meta">
+                <strong>{ownGroup ? "Materiały dodane przez Ciebie" : "Materiały drugiej strony"}</strong>
+                {group.createdAt && (
+                  <time dateTime={group.createdAt}>
+                    {new Date(group.createdAt).toLocaleString("pl-PL")}
+                  </time>
+                )}
+              </div>
+              <PrivateMessageMaterials
+                items={group.items}
+                signedUrls={signedUrls}
+                ownMessage={ownGroup}
+                onReport={onReport}
+              />
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function PrivateSharePanel({
   conversationId,
   userId,
