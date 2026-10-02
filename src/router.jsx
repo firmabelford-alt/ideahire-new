@@ -52,10 +52,10 @@ import {
   PrivateMessageMaterials,
   PrivateReportDialog,
   PrivateSharePanel,
-  ProjectFilesPanel,
   usePrivateWork,
   WorkDeliveryPanel,
 } from "./PrivateWork";
+import ServiceMarketplace from "./ServiceMarketplace";
 
 /* =========================================================
    FLUID NAVIGATION ENGINE
@@ -1207,7 +1207,7 @@ const DISCOVERY_USAGE_OPTIONS = [
     title: "Znajdź zlecenia",
     description:
       "Na początku pokażemy wyżej projekty z kategorii, które Cię interesują.",
-    icon: "",
+    icon: "↗",
   },
   {
     value: "hire_talent",
@@ -1228,16 +1228,12 @@ const DISCOVERY_USAGE_OPTIONS = [
 ];
 
 const DISCOVERY_CATEGORY_DETAILS = {
-  Programowanie: "Strony, sklepy, aplikacje i integracje",
-  "Grafika i design": "Marka, UX, materiały wizualne i 3D",
-  Marketing: "Kampanie, SEO, sprzedaż i social media",
-  Copywriting: "Teksty, redakcja, tłumaczenia i lokalizacja",
-  Video: "Montaż, animacja, podcasty i dźwięk",
-  Fotografia: "Sesje, e-commerce, retusz i obróbka",
-  "AI i automatyzacje": "Agenci, chatboty i automatyzacje",
-  "Dane, analizy i research": "Excel, dashboardy, analizy i research",
-  "Biznes i e-commerce": "E-commerce, CRM, dokumenty i operacje",
-  "Architektura, wnętrza i CAD": "Wnętrza, wizualizacje, CAD i modele 3D",
+  Programowanie: "Aplikacje, strony i automatyzacje",
+  "Grafika i design": "Identyfikacja, UI i materiały wizualne",
+  Marketing: "Kampanie, strategia i social media",
+  Copywriting: "Teksty, opisy i komunikacja marki",
+  Video: "Montaż, animacja i materiały wideo",
+  Fotografia: "Sesje, retusz i obróbka zdjęć",
 };
 
 function getDiscoveryUsageLabel(value) {
@@ -1624,7 +1620,7 @@ function DiscoveryOnboarding({
                       <span className="discovery-category-number">
                         {String(index + 1).padStart(2, "0")}
                       </span>
-                      <strong>{getJobCategoryLabel(category)}</strong>
+                      <strong>{category}</strong>
                       <small>{DISCOVERY_CATEGORY_DETAILS[category]}</small>
                       <i aria-hidden="true">{selected ? "✓" : "+"}</i>
                     </button>
@@ -1680,7 +1676,7 @@ function DiscoveryOnboarding({
                   onClick={() => setPersonalizationEnabled(false)}
                   aria-pressed={!personalizationEnabled}
                 >
-                  <span aria-hidden="true">02</span>
+                  <span aria-hidden="true">↓</span>
                   <strong>Tylko najnowsze</strong>
                   <small>
                     Wyniki będą domyślnie uporządkowane wyłącznie według daty
@@ -1731,7 +1727,7 @@ function DiscoveryOnboarding({
                   <div className="discovery-summary-tags">
                     {preferredCategories.length > 0 ? (
                       preferredCategories.map((category) => (
-                        <strong key={category}>{getJobCategoryLabel(category)}</strong>
+                        <strong key={category}>{category}</strong>
                       ))
                     ) : (
                       <strong>Wszystkie kategorie</strong>
@@ -1767,7 +1763,7 @@ function DiscoveryOnboarding({
                 onClick={goBack}
                 disabled={saving}
               >
-                 Wstecz
+                ← Wstecz
               </button>
             ) : (
               <button
@@ -1787,7 +1783,7 @@ function DiscoveryOnboarding({
               className="btn btn-dark discovery-primary-button"
               onClick={goForward}
             >
-              Dalej 
+              Dalej →
             </button>
           ) : (
             <button
@@ -1796,7 +1792,7 @@ function DiscoveryOnboarding({
               onClick={() => finish("complete")}
               disabled={saving}
             >
-              {saving ? "Zapisywanie..." : "Przejdź do IdeaHire "}
+              {saving ? "Zapisywanie..." : "Przejdź do IdeaHire →"}
             </button>
           )}
         </footer>
@@ -1921,7 +1917,7 @@ function DiscoveryPreferencesCard() {
             <div className="discovery-settings-tags">
               {(preferences?.preferredCategories || []).length > 0 ? (
                 preferences.preferredCategories.map((category) => (
-                  <span key={category}>{getJobCategoryLabel(category)}</span>
+                  <span key={category}>{category}</span>
                 ))
               ) : (
                 <span>Wszystkie kategorie</span>
@@ -1935,7 +1931,7 @@ function DiscoveryPreferencesCard() {
 
             <div className="discovery-settings-actions">
               <Link className="btn btn-dark" to="/talent">
-                Znajdź wykonawcę 
+                Znajdź wykonawcę →
               </Link>
               <Link className="btn btn-outline" to="/jobs">
                 Znajdź zlecenie
@@ -2055,7 +2051,7 @@ function JobRepublicationPanel() {
         {items.map((item) => (
           <article key={item.hold_id}>
             <div>
-              <span>{getJobCategoryLabel(item.category)}</span>
+              <span>{item.category}</span>
               <h3>{item.title}</h3>
               <small>
                 Budżet: {Number(item.budget || 0).toLocaleString("pl-PL")} zł
@@ -2076,7 +2072,7 @@ function JobRepublicationPanel() {
                   ? "Dostępne po zakończeniu"
                   : busyJobId === item.job_id
                   ? "Publikowanie..."
-                  : "Potwierdź i opublikuj "}
+                  : "Potwierdź i opublikuj →"}
               </button>
             </div>
           </article>
@@ -2554,7 +2550,7 @@ function AgeCompletionScreen() {
                 !termsAccepted
               }
             >
-              {saving ? "Zapisywanie..." : "Zapisz i kontynuuj "}
+              {saving ? "Zapisywanie..." : "Zapisz i kontynuuj →"}
             </button>
           </form>
 
@@ -2646,567 +2642,7 @@ const JOB_CATEGORIES = [
   "Copywriting",
   "Video",
   "Fotografia",
-  "AI i automatyzacje",
-  "Dane, analizy i research",
-  "Biznes i e-commerce",
-  "Architektura, wnętrza i CAD",
 ];
-
-const JOB_CATEGORY_LABELS = {
-  Programowanie: "Strony, aplikacje i IT",
-  "Grafika i design": "Grafika, UX i 3D",
-  Marketing: "Marketing i sprzedaż",
-  Copywriting: "Teksty i tłumaczenia",
-  Video: "Wideo, animacja i audio",
-  Fotografia: "Fotografia i obróbka zdjęć",
-  "AI i automatyzacje": "AI i automatyzacje",
-  "Dane, analizy i research": "Dane, analizy i research",
-  "Biznes i e-commerce": "Biznes i e-commerce",
-  "Architektura, wnętrza i CAD": "Architektura, wnętrza i CAD",
-};
-
-function getJobCategoryLabel(category) {
-  return JOB_CATEGORY_LABELS[category] || category || "Inna kategoria";
-}
-
-const JOB_SUBCATEGORIES = {
-  Programowanie: [
-    "Landing page",
-    "Strona firmowa",
-    "Sklep internetowy",
-    "Aplikacja webowa",
-    "Aplikacja mobilna",
-    "WordPress, Webflow i no-code",
-    "Integracja API",
-    "Naprawa błędów",
-    "Audyt szybkości lub bezpieczeństwa",
-    "Migracja strony albo serwera",
-  ],
-  "Grafika i design": [
-    "Logo",
-    "Identyfikacja wizualna",
-    "Projekt UI/UX",
-    "Grafiki reklamowe",
-    "Pakiet grafik do social mediów",
-    "Materiały do druku",
-    "Opakowanie lub etykieta",
-    "Prezentacja",
-    "Ilustracja",
-    "Szablony Canva",
-    "Model 3D",
-    "Wizualizacja produktu",
-  ],
-  Marketing: [
-    "Strategia marketingowa",
-    "Audyt SEO",
-    "Optymalizacja wskazanych podstron",
-    "Konfiguracja Google Ads",
-    "Konfiguracja Meta Ads",
-    "Konfiguracja TikTok Ads",
-    "Pakiet postów do social mediów",
-    "Kampania e-mail",
-    "Konfiguracja analityki",
-    "Przygotowanie bazy leadów",
-    "Materiały sprzedażowe",
-    "Koncepcja kampanii UGC lub influencerskiej",
-  ],
-  Copywriting: [
-    "Teksty na stronę",
-    "Artykuły",
-    "Opisy produktów",
-    "Teksty SEO",
-    "Teksty reklamowe",
-    "Pakiet postów",
-    "Newsletter",
-    "Scenariusz",
-    "Korekta i redakcja",
-    "Poprawa treści wygenerowanej przez AI",
-    "Tłumaczenie",
-    "Lokalizacja strony lub aplikacji",
-    "Transkrypcja",
-    "Przygotowanie napisów",
-  ],
-  Video: [
-    "Montaż filmu",
-    "Pakiet rolek, Shorts lub TikToków",
-    "Film na YouTube",
-    "Reklama wideo",
-    "Film produktowy",
-    "Animacja",
-    "Motion design",
-    "Wideo generowane przez AI",
-    "Napisy i lokalizacja",
-    "Montaż podcastu",
-    "Obróbka dźwięku",
-    "Nagranie lektorskie",
-    "Jingle lub muzyka",
-    "Sound design",
-  ],
-  Fotografia: [
-    "Fotografia produktowa",
-    "Fotografia wizerunkowa",
-    "Fotografia wydarzenia",
-    "Fotografia nieruchomości",
-    "Fotografia motoryzacyjna",
-    "Portret",
-    "Zdjęcia do sklepu internetowego",
-    "Fotografia 360°",
-    "Retusz",
-    "Usuwanie tła",
-    "Renowacja zdjęć",
-  ],
-  "AI i automatyzacje": [
-    "Chatbot dla firmy",
-    "Agent AI",
-    "Automatyzacja n8n, Make lub Zapier",
-    "Integracja AI ze stroną lub systemem",
-    "Baza wiedzy i RAG",
-    "Asystent głosowy AI",
-    "Automatyzacja dokumentów",
-    "Automatyzacja obsługi klienta",
-    "Audyt procesów pod AI",
-    "Przygotowanie danych dla AI",
-    "System promptów dla firmy",
-  ],
-  "Dane, analizy i research": [
-    "Czyszczenie danych",
-    "Porządkowanie arkusza Excel",
-    "Konwersja PDF do Excel",
-    "Wprowadzanie danych",
-    "Web scraping",
-    "Dashboard Power BI lub Looker",
-    "Analiza danych",
-    "Wizualizacja danych",
-    "Badanie rynku",
-    "Analiza ankiety",
-    "Porządkowanie lub migracja bazy",
-    "Anotacja danych dla AI",
-  ],
-  "Biznes i e-commerce": [
-    "Dodanie produktów do sklepu",
-    "Przygotowanie opisów i parametrów produktów",
-    "Konfiguracja konta marketplace",
-    "Porządkowanie katalogu produktów",
-    "Konfiguracja lub uporządkowanie CRM",
-    "Przygotowanie bazy klientów",
-    "Research konkurencji",
-    "Prezentacja biznesowa",
-    "Dokumentacja i procedury",
-    "Plan realizacji projektu",
-    "Pakiet materiałów rekrutacyjnych",
-    "Jednorazowy pakiet administracyjny",
-    "Audyt sklepu internetowego",
-  ],
-  "Architektura, wnętrza i CAD": [
-    "Projekt wnętrza",
-    "Układ funkcjonalny pomieszczenia",
-    "Wizualizacja 3D",
-    "Rysunek 2D",
-    "Model CAD",
-    "Projekt mebla",
-    "Model do druku 3D",
-    "Dokumentacja produkcyjna",
-    "Aranżacja lokalu",
-    "Wizualizacja nieruchomości",
-  ],
-};
-
-const JOB_CATEGORY_FIELDS = {
-  Programowanie: [
-    {
-      key: "project_type",
-      label: "Rodzaj rozwiązania",
-      placeholder: "Np. nowa strona, rozbudowa aplikacji lub naprawa błędu",
-    },
-    {
-      key: "key_features",
-      label: "Najważniejsze funkcje",
-      placeholder: "Np. logowanie, płatności, panel administratora",
-    },
-    {
-      key: "technology",
-      label: "Technologia — jeśli ma znaczenie",
-      placeholder: "Np. React, WordPress lub bez preferencji",
-    },
-    {
-      key: "existing_code",
-      label: "Co już istnieje?",
-      placeholder: "Np. projekt graficzny, repozytorium, domena lub nic",
-    },
-  ],
-  "Grafika i design": [
-    {
-      key: "asset_type",
-      label: "Rodzaj materiału",
-      placeholder: "Np. logo, widoki aplikacji, banery",
-    },
-    {
-      key: "format_size",
-      label: "Format lub wymiary",
-      placeholder: "Np. A4, 1080 × 1080 px, SVG i PNG",
-    },
-    {
-      key: "visual_style",
-      label: "Styl i kierunek wizualny",
-      placeholder: "Np. minimalistyczny, premium, dynamiczny",
-    },
-    {
-      key: "variants",
-      label: "Liczba wersji lub materiałów",
-      placeholder: "Np. 3 propozycje logo i 2 rundy poprawek",
-    },
-  ],
-  Marketing: [
-    {
-      key: "campaign_goal",
-      label: "Cel działań",
-      placeholder: "Np. sprzedaż, pozyskanie kontaktów, rozpoznawalność",
-    },
-    {
-      key: "channels",
-      label: "Kanały marketingowe",
-      placeholder: "Np. Google Ads, Meta, TikTok, SEO",
-    },
-    {
-      key: "target_group",
-      label: "Grupa odbiorców",
-      placeholder: "Kto ma zobaczyć kampanię?",
-    },
-    {
-      key: "advertising_budget",
-      label: "Osobny budżet reklamowy",
-      placeholder: "Np. 2000 zł miesięcznie lub do ustalenia",
-    },
-  ],
-  Copywriting: [
-    {
-      key: "text_type",
-      label: "Rodzaj tekstu",
-      placeholder: "Np. artykuł, opis produktu, treść strony",
-    },
-    {
-      key: "text_volume",
-      label: "Liczba tekstów lub objętość",
-      placeholder: "Np. 5 artykułów po około 5000 znaków",
-    },
-    {
-      key: "language_tone",
-      label: "Język i styl komunikacji",
-      placeholder: "Np. polski, profesjonalny i prosty",
-    },
-    {
-      key: "seo_requirements",
-      label: "Wymagania SEO",
-      placeholder: "Np. lista słów kluczowych lub brak wymagań",
-    },
-  ],
-  Video: [
-    {
-      key: "video_type",
-      label: "Rodzaj materiału",
-      placeholder: "Np. reklama, rolka, film na YouTube",
-    },
-    {
-      key: "duration",
-      label: "Docelowa długość",
-      placeholder: "Np. 30 sekund lub 8–10 minut",
-    },
-    {
-      key: "video_format",
-      label: "Format publikacji",
-      placeholder: "Np. pion 9:16, poziom 16:9, 4K",
-    },
-    {
-      key: "source_materials",
-      label: "Dostępne nagrania",
-      placeholder: "Np. 40 GB nagrań, muzyka i logo",
-    },
-  ],
-  Fotografia: [
-    {
-      key: "session_type",
-      label: "Rodzaj sesji",
-      placeholder: "Np. produkty, wydarzenie, portret",
-    },
-    {
-      key: "session_location",
-      label: "Miejsce wykonania",
-      placeholder: "Np. Szczecin, studio wykonawcy lub zdalny retusz",
-    },
-    {
-      key: "photo_count",
-      label: "Liczba gotowych zdjęć",
-      placeholder: "Np. 30 zdjęć po retuszu",
-    },
-    {
-      key: "retouch_scope",
-      label: "Zakres obróbki",
-      placeholder: "Np. korekcja kolorów i dokładny retusz produktu",
-    },
-  ],
-  "AI i automatyzacje": [
-    {
-      key: "solution_goal",
-      label: "Cel rozwiązania",
-      placeholder: "Np. szybsza obsługa zapytań lub automatyczne przygotowanie ofert",
-    },
-    {
-      key: "business_process",
-      label: "Proces do usprawnienia",
-      placeholder: "Opisz krótko, jak praca wygląda dzisiaj",
-    },
-    {
-      key: "current_tools",
-      label: "Obecne narzędzia",
-      placeholder: "Np. Gmail, Notion, CRM, sklep lub brak narzędzi",
-    },
-    {
-      key: "integration_requirements",
-      label: "Wymagane integracje",
-      placeholder: "Np. API sklepu, kalendarz, formularz lub do ustalenia",
-    },
-  ],
-  "Dane, analizy i research": [
-    {
-      key: "data_source",
-      label: "Źródło danych",
-      placeholder: "Np. Excel, CSV, ankieta, baza SQL lub strony internetowe",
-    },
-    {
-      key: "data_volume",
-      label: "Wielkość materiału",
-      placeholder: "Np. 8 plików i około 40 000 rekordów",
-    },
-    {
-      key: "expected_analysis",
-      label: "Oczekiwany wynik analizy",
-      placeholder: "Np. wnioski, porównanie, prognoza albo uporządkowana baza",
-    },
-    {
-      key: "output_format",
-      label: "Format rezultatu",
-      placeholder: "Np. Excel, prezentacja, dashboard lub raport PDF",
-    },
-  ],
-  "Biznes i e-commerce": [
-    {
-      key: "business_task",
-      label: "Zadanie biznesowe",
-      placeholder: "Np. uporządkowanie CRM lub przygotowanie katalogu produktów",
-    },
-    {
-      key: "item_volume",
-      label: "Liczba pozycji lub dokumentów",
-      placeholder: "Np. 250 produktów, 3 procedury lub 120 kontaktów",
-    },
-    {
-      key: "platforms",
-      label: "Platformy i narzędzia",
-      placeholder: "Np. Shopify, WooCommerce, Allegro, HubSpot lub Excel",
-    },
-    {
-      key: "access_materials",
-      label: "Dostępne materiały i dostępy",
-      placeholder: "Wymień pliki, konta testowe i instrukcje, które przekażesz",
-    },
-  ],
-  "Architektura, wnętrza i CAD": [
-    {
-      key: "space_or_object",
-      label: "Przestrzeń lub obiekt",
-      placeholder: "Np. salon, lokal usługowy, mebel lub część techniczna",
-    },
-    {
-      key: "dimensions",
-      label: "Wymiary i skala",
-      placeholder: "Np. 42 m², model 1:10 lub wymiary kluczowych elementów",
-    },
-    {
-      key: "source_materials",
-      label: "Materiały wejściowe",
-      placeholder: "Np. rzut, pomiary, zdjęcia, DWG lub szkic",
-    },
-    {
-      key: "deliverable_format",
-      label: "Format opracowania",
-      placeholder: "Np. PDF, DWG, STEP, STL albo render 4K",
-    },
-  ],
-};
-
-const JOB_PROJECT_STAGES = [
-  { value: "idea", label: "Mam pomysł" },
-  { value: "started", label: "Projekt rozpoczęty" },
-  { value: "improvement", label: "Potrzebuję poprawek" },
-  { value: "continuation", label: "Szukam kontynuacji" },
-];
-
-const JOB_WORK_MODES = [
-  { value: "remote", label: "Zdalnie" },
-  { value: "onsite", label: "Stacjonarnie" },
-  { value: "hybrid", label: "Hybrydowo" },
-];
-
-const JOB_EXPERIENCE_LEVELS = [
-  { value: "any", label: "Bez znaczenia" },
-  { value: "beginner", label: "Początkujący" },
-  { value: "intermediate", label: "Średniozaawansowany" },
-  { value: "expert", label: "Ekspert" },
-];
-
-const JOB_FORM_STEPS = [
-  { number: "01", label: "Podstawy" },
-  { number: "02", label: "Zakres" },
-  { number: "03", label: "Budżet i termin" },
-  { number: "04", label: "Podsumowanie" },
-];
-
-const COLLABORATION_REVISION_OPTIONS = [
-  { value: "1", label: "1 runda" },
-  { value: "2", label: "2 rundy" },
-  { value: "3", label: "3 rundy" },
-  { value: "flexible", label: "Do ustalenia" },
-];
-
-const COLLABORATION_APPROVAL_OPTIONS = [
-  { value: "each_stage", label: "Po każdym etapie" },
-  { value: "final", label: "Po zakończeniu całości" },
-  { value: "individual", label: "Ustalimy przed startem" },
-];
-
-const COLLABORATION_CONTACT_OPTIONS = [
-  { value: "ongoing", label: "Na bieżąco" },
-  { value: "weekly", label: "Raz w tygodniu" },
-  { value: "after_stage", label: "Po każdym etapie" },
-  { value: "as_needed", label: "W razie potrzeby" },
-];
-
-const COLLABORATION_FEEDBACK_OPTIONS = [
-  { value: "24h", label: "Do 24 godzin" },
-  { value: "48h", label: "Do 48 godzin" },
-  { value: "3d", label: "Do 3 dni" },
-  { value: "individual", label: "Do ustalenia" },
-];
-
-const COLLABORATION_CHANGE_OPTIONS = [
-  {
-    value: "new_quote",
-    label: "Nowa wycena i termin",
-    description: "Dodatkowe zadania wymagają wcześniejszej akceptacji ceny i terminu.",
-  },
-  {
-    value: "minor_included",
-    label: "Drobne zmiany w poprawkach",
-    description: "Niewielkie zmiany obejmują ustalone rundy poprawek.",
-  },
-  {
-    value: "individual",
-    label: "Ustalenie indywidualne",
-    description: "Strony wspólnie określą wpływ zmiany na projekt.",
-  },
-];
-
-const COLLABORATION_APPLICATION_REQUIREMENTS = [
-  { value: "price", label: "Proponowana cena" },
-  { value: "timeline", label: "Przewidywany termin" },
-  { value: "approach", label: "Krótki plan realizacji" },
-  { value: "similar_work", label: "Podobna realizacja" },
-];
-
-const DEFAULT_COLLABORATION_PLAN = {
-  enabled: false,
-  milestones: ["", "", ""],
-  revisionRounds: "2",
-  approvalMode: "each_stage",
-  contactFrequency: "after_stage",
-  feedbackTime: "48h",
-  changePolicy: "new_quote",
-  completionCriteria: ["", "", ""],
-  clientResponsibilities: "",
-  contractorResponsibilities: "",
-  applicationRequirements: ["price", "timeline", "approach"],
-  screeningQuestions: ["", "", ""],
-};
-
-function createDefaultCollaborationPlan() {
-  return {
-    ...DEFAULT_COLLABORATION_PLAN,
-    milestones: [...DEFAULT_COLLABORATION_PLAN.milestones],
-    completionCriteria: [...DEFAULT_COLLABORATION_PLAN.completionCriteria],
-    applicationRequirements: [
-      ...DEFAULT_COLLABORATION_PLAN.applicationRequirements,
-    ],
-    screeningQuestions: [...DEFAULT_COLLABORATION_PLAN.screeningQuestions],
-  };
-}
-
-function cleanCollaborationList(values, limit = 3, itemLimit = 240) {
-  return (Array.isArray(values) ? values : [])
-    .map((value) => String(value || "").trim().slice(0, itemLimit))
-    .filter(Boolean)
-    .slice(0, limit);
-}
-
-function prepareCollaborationPlan(plan) {
-  if (!plan?.enabled) return {};
-
-  return {
-    version: 1,
-    milestones: cleanCollaborationList(plan.milestones, 3, 160),
-    revision_rounds: plan.revisionRounds,
-    approval_mode: plan.approvalMode,
-    contact_frequency: plan.contactFrequency,
-    feedback_time: plan.feedbackTime,
-    change_policy: plan.changePolicy,
-    completion_criteria: cleanCollaborationList(
-      plan.completionCriteria,
-      3,
-      240
-    ),
-    client_responsibilities: String(
-      plan.clientResponsibilities || ""
-    ).trim().slice(0, 600),
-    contractor_responsibilities: String(
-      plan.contractorResponsibilities || ""
-    ).trim().slice(0, 600),
-    application_requirements: COLLABORATION_APPLICATION_REQUIREMENTS
-      .map((option) => option.value)
-      .filter((value) => plan.applicationRequirements?.includes(value)),
-    screening_questions: cleanCollaborationList(
-      plan.screeningQuestions,
-      3,
-      240
-    ),
-  };
-}
-
-function hasCollaborationPlan(plan) {
-  return Boolean(
-    plan &&
-      typeof plan === "object" &&
-      !Array.isArray(plan) &&
-      Object.keys(plan).length > 0
-  );
-}
-
-function getJobOptionLabel(options, value, fallback = "Do ustalenia") {
-  return options.find((option) => option.value === value)?.label || fallback;
-}
-
-function getJobCategoryFieldLabel(category, key) {
-  return JOB_CATEGORY_FIELDS[category]?.find((field) => field.key === key)?.label || key;
-}
-
-function getSafeJobReferenceUrl(value) {
-  if (!value) return "";
-
-  try {
-    const url = new URL(String(value).trim());
-    return ["http:", "https:"].includes(url.protocol) ? url.toString() : "";
-  } catch {
-    return "";
-  }
-}
 
 const MAX_JOB_BUDGET = 15000;
 
@@ -4008,7 +3444,8 @@ function AccountNavbar() {
         .eq(
           "user_id",
           user.id
-        );
+        )
+        .eq("visibility", "public");
 
       if (jobsError) {
         console.error(
@@ -4633,7 +4070,7 @@ function AccountNavbar() {
           aria-label="Wróć na stronę główną"
           title="Wróć na stronę główną"
         >
-          
+          ←
         </Link>
 
         <Link
@@ -4689,6 +4126,20 @@ function AccountNavbar() {
         >
           <span className="account-nav-label-full">Wykonawcy</span>
           <span className="account-nav-label-short">Wykonawcy</span>
+        </NavLink>
+
+        <NavLink
+          to="/services"
+          className={({
+            isActive,
+          }) =>
+            isActive
+              ? "is-active"
+              : ""
+          }
+        >
+          <span className="account-nav-label-full">Usługi</span>
+          <span className="account-nav-label-short">Usługi</span>
         </NavLink>
 
         {!hasRestrictedAgeAccess && (
@@ -4778,7 +4229,7 @@ function AccountNavbar() {
               className="account-menu-caret"
               aria-hidden="true"
             >
-              
+              ⌄
             </span>
 
             {(hasDisputeNotifications ||
@@ -4805,6 +4256,9 @@ function AccountNavbar() {
               </NavLink>
               <NavLink to="/talent" onClick={closeAccountMenu}>
                 Wykonawcy
+              </NavLink>
+              <NavLink to="/services" onClick={closeAccountMenu}>
+                Usługi
               </NavLink>
               {!hasRestrictedAgeAccess && (
                 <NavLink
@@ -5322,7 +4776,7 @@ function Login() {
             >
               {loading
                 ? "Wysyłanie..."
-                : "Wyślij link "}
+                : "Wyślij link →"}
             </button>
           </form>
 
@@ -5449,7 +4903,7 @@ function Login() {
           >
             {loading
               ? "Logowanie..."
-              : "Zaloguj się "}
+              : "Zaloguj się →"}
           </button>
         </form>
 
@@ -5902,7 +5356,7 @@ function ResetPassword() {
               >
                 {loading
                   ? "Zapisywanie..."
-                  : "Ustaw nowe hasło "}
+                  : "Ustaw nowe hasło →"}
               </button>
             </form>
 
@@ -6341,7 +5795,7 @@ function Register() {
           >
             {loading
               ? "Tworzenie konta..."
-              : "Utwórz konto "}
+              : "Utwórz konto →"}
           </button>
         </form>
 
@@ -6738,7 +6192,7 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
                 onClick={() => setActiveIndex((activeIndex - 1 + media.length) % media.length)}
                 aria-label="Poprzednie zdjęcie"
               >
-                Poprzednie
+                ‹
               </button>
               <button
                 type="button"
@@ -6746,7 +6200,7 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
                 onClick={() => setActiveIndex((activeIndex + 1) % media.length)}
                 aria-label="Następne zdjęcie"
               >
-                Następne
+                ›
               </button>
             </>
           )}
@@ -6920,7 +6374,7 @@ function PortfolioReportDialog({ target, onClose, onSubmitted }) {
         <div className="portfolio-report-actions">
           <button type="button" className="privacy-secondary-button" onClick={onClose} disabled={busy}>Anuluj</button>
           <button type="submit" className="privacy-primary-button" disabled={busy}>
-            {busy ? "Wysyłanie..." : "Wyślij zgłoszenie "}
+            {busy ? "Wysyłanie..." : "Wyślij zgłoszenie →"}
           </button>
         </div>
       </form>
@@ -7411,7 +6865,7 @@ function LimitedAccount() {
               <li>ustawienia języka i wyglądu strony.</li>
             </ul>
             <Link className="btn btn-dark" to="/jobs">
-              Przeglądaj zlecenia 
+              Przeglądaj zlecenia →
             </Link>
           </section>
 
@@ -7433,7 +6887,7 @@ function LimitedAccount() {
             została podana błędnie, korektę przeprowadzi pomoc IdeaHire.
           </p>
           <Link className="privacy-entry-link" to="/privacy-center">
-            Prywatność i moje dane 
+            Prywatność i moje dane →
           </Link>
         </section>
       </main>
@@ -7448,10 +6902,10 @@ function LimitedAccount() {
 const SITE_TEMPLATE_OPTIONS = [
   {
     value: "current",
-    eyebrow: "Granatowy szablon",
+    eyebrow: "Aktualny",
     title: "Nowoczesny granat",
     description:
-      "Spójny granatowy motyw IdeaHire z czytelnym kontrastem, subtelnymi przejściami i dopracowanymi animacjami.",
+      "Obecna szata IdeaHire z granatowymi akcentami, miękkimi przejściami i animacjami.",
   },
   {
     value: "classic",
@@ -8044,6 +7498,7 @@ function Account() {
           "user_id",
           user.id
         )
+        .eq("visibility", "public")
         .order(
           "created_at",
           {
@@ -9242,7 +8697,7 @@ function Account() {
           }
         >
           <div
-            className="profile-preview account-profile-preview"
+            className="profile-preview"
             hidden={activeAccountSection !== "profile"}
           >
             <div className="profile-avatar-wrapper">
@@ -9268,17 +8723,15 @@ function Account() {
                 {user.email}
               </p>
 
-              <div className="profile-meta-row">
-                {countryCode && (
-                  <CountryBadge
-                    countryCode={countryCode}
-                  />
-                )}
+              {countryCode && (
+                <CountryBadge
+                  countryCode={countryCode}
+                />
+              )}
 
-                {isAdult && (
-                  <span className="account-age-status">Pełne konto · 18+</span>
-                )}
-              </div>
+              {isAdult && (
+                <span className="account-age-status">Pełne konto · 18+</span>
+              )}
             </div>
           </div>
 
@@ -9288,7 +8741,7 @@ function Account() {
               aria-labelledby="stripe-connect-title"
             >
               <div className="stripe-connect-icon" aria-hidden="true">
-                <span></span>
+                <span>→</span>
               </div>
 
               <div className="stripe-connect-content">
@@ -9347,7 +8800,7 @@ function Account() {
 
                     {connectStatus !== "ready" &&
                       connectStatus !== "disabled" && (
-                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true">↗</span>
                       )}
                   </button>
 
@@ -9505,7 +8958,7 @@ function Account() {
                             : "+"}
                         </span>
 
-                        {getJobCategoryLabel(category)}
+                        {category}
                       </button>
                     );
                   }
@@ -9698,7 +9151,7 @@ function Account() {
               >
                 {saving
                   ? "Zapisywanie..."
-                  : "Zapisz zmiany "}
+                  : "Zapisz zmiany →"}
               </button>
             </div>
           </form>
@@ -9754,7 +9207,7 @@ function Account() {
                       </div>
                     ) : (
                       <div className="profile-portfolio-image-placeholder" aria-hidden="true">
-                        
+                        ↗
                       </div>
                     )}
 
@@ -9960,8 +9413,8 @@ function Account() {
                   {portfolioBusy
                     ? "Zapisywanie albumu..."
                     : portfolioEditingId
-                    ? "Zapisz album "
-                    : "Dodaj album do portfolio "}
+                    ? "Zapisz album →"
+                    : "Dodaj album do portfolio →"}
                 </button>
               </form>
             )}
@@ -10000,7 +9453,7 @@ function Account() {
             </p>
           </div>
           <Link className="privacy-entry-link" to="/privacy-center">
-            Otwórz centrum prywatności 
+            Otwórz centrum prywatności →
           </Link>
         </section>
 
@@ -10113,7 +9566,7 @@ function Account() {
                     key={job.id}
                   >
                     <span className="section-label">
-                      {getJobCategoryLabel(job.category)}
+                      {job.category}
                     </span>
 
                     <h2>
@@ -10785,7 +10238,7 @@ function PrivacyCenter() {
             </p>
           </div>
           <Link className="privacy-back-link" to="/account">
-             Wróć do konta
+            ← Wróć do konta
           </Link>
         </header>
 
@@ -11025,7 +10478,7 @@ function PrivacyCenter() {
                   )
                 }
               >
-                {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek "}
+                {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek →"}
               </button>
             </form>
           </section>
@@ -11040,7 +10493,7 @@ function PrivacyCenter() {
               <li><strong>Ograniczenie i sprzeciw</strong><span>Zażądaj ograniczenia albo zgłoś sprzeciw.</span></li>
               <li><strong>Przenoszenie</strong><span>Odbierz właściwe dane w ustrukturyzowanym formacie.</span></li>
             </ul>
-            <a href="/polityka-prywatnosci">Przeczytaj Politykę prywatności </a>
+            <a href="/polityka-prywatnosci">Przeczytaj Politykę prywatności →</a>
             <small>
               Możesz również napisać na ideahireprywatnosc@gmail.com.
             </small>
@@ -11391,57 +10844,6 @@ function FindTalent() {
       JOB_CATEGORIES[0]
     );
 
-  const [subcategory, setSubcategory] =
-    useState(JOB_SUBCATEGORIES[JOB_CATEGORIES[0]][0]);
-
-  const [projectStage, setProjectStage] =
-    useState("idea");
-
-  const [expectedOutcome, setExpectedOutcome] =
-    useState("");
-
-  const [clientMaterials, setClientMaterials] =
-    useState("");
-
-  const [categoryDetails, setCategoryDetails] =
-    useState({});
-
-  const [workMode, setWorkMode] =
-    useState("remote");
-
-  const [locationValue, setLocationValue] =
-    useState("");
-
-  const [experienceLevel, setExperienceLevel] =
-    useState("any");
-
-  const [requiredSkills, setRequiredSkills] =
-    useState("");
-
-  const [requiresPortfolio, setRequiresPortfolio] =
-    useState(false);
-
-  const [referenceUrl, setReferenceUrl] =
-    useState("");
-
-  const [projectDeadline, setProjectDeadline] =
-    useState("");
-
-  const [plannedStartDate, setPlannedStartDate] =
-    useState("");
-
-  const [collaborationPlanOpen, setCollaborationPlanOpen] =
-    useState(false);
-
-  const [collaborationPlan, setCollaborationPlan] =
-    useState(createDefaultCollaborationPlan);
-
-  const [formStep, setFormStep] =
-    useState(1);
-
-  const [maxStepReached, setMaxStepReached] =
-    useState(1);
-
   const [budget, setBudget] =
     useState("");
 
@@ -11460,18 +10862,6 @@ function FindTalent() {
   const [success, setSuccess] =
     useState(false);
 
-  const categoryFields =
-    JOB_CATEGORY_FIELDS[category] || [];
-
-  const subcategories =
-    JOB_SUBCATEGORIES[category] || [];
-
-  const todayDate =
-    new Date().toISOString().slice(0, 10);
-
-  const collaborationPlanPreview =
-    prepareCollaborationPlan(collaborationPlan);
-
   useEffect(() => {
     const preferredCategory =
       preferences?.preferredCategories?.[0];
@@ -11484,163 +10874,11 @@ function FindTalent() {
       !budget
     ) {
       setCategory(preferredCategory);
-      setSubcategory(
-        JOB_SUBCATEGORIES[preferredCategory]?.[0] || ""
-      );
     }
   }, [
     preferences?.updatedAt,
     preferences?.preferredCategories?.[0],
   ]);
-
-  function handleCategoryChange(event) {
-    const nextCategory = event.target.value;
-
-    setCategory(nextCategory);
-    setSubcategory(JOB_SUBCATEGORIES[nextCategory]?.[0] || "");
-    setCategoryDetails({});
-  }
-
-  function updateCategoryDetail(key, value) {
-    setCategoryDetails((current) => ({
-      ...current,
-      [key]: value,
-    }));
-  }
-
-  function updateCollaborationPlan(key, value) {
-    setCollaborationPlan((current) => ({
-      ...current,
-      enabled: true,
-      [key]: value,
-    }));
-  }
-
-  function updateCollaborationListItem(key, index, value) {
-    setCollaborationPlan((current) => {
-      const nextItems = [...(current[key] || [])];
-      nextItems[index] = value;
-
-      return {
-        ...current,
-        enabled: true,
-        [key]: nextItems,
-      };
-    });
-  }
-
-  function toggleApplicationRequirement(value) {
-    setCollaborationPlan((current) => {
-      const selected = current.applicationRequirements || [];
-      const nextSelected = selected.includes(value)
-        ? selected.filter((item) => item !== value)
-        : [...selected, value];
-
-      return {
-        ...current,
-        enabled: true,
-        applicationRequirements: nextSelected,
-      };
-    });
-  }
-
-  function openCollaborationPlan() {
-    setCollaborationPlan((current) => ({
-      ...current,
-      enabled: true,
-    }));
-    setCollaborationPlanOpen(true);
-  }
-
-  function removeCollaborationPlan() {
-    setCollaborationPlan(createDefaultCollaborationPlan());
-    setCollaborationPlanOpen(false);
-  }
-
-  function validateStep(step) {
-    setMessage("");
-    setSuccess(false);
-
-    if (step === 1) {
-      if (!title.trim()) {
-        setMessage("Wpisz nazwę zlecenia.");
-        return false;
-      }
-
-      if (!subcategory) {
-        setMessage("Wybierz podkategorię zlecenia.");
-        return false;
-      }
-
-      if (!description.trim()) {
-        setMessage("Opisz krótko swoje zlecenie.");
-        return false;
-      }
-    }
-
-    if (step === 2) {
-      if (!expectedOutcome.trim()) {
-        setMessage("Napisz, jaki rezultat ma przekazać wykonawca.");
-        return false;
-      }
-
-      if (workMode !== "remote" && !locationValue.trim()) {
-        setMessage("Podaj lokalizację współpracy.");
-        return false;
-      }
-
-      if (referenceUrl.trim() && !getSafeJobReferenceUrl(referenceUrl)) {
-        setMessage("Link do materiałów musi zaczynać się od http:// lub https://.");
-        return false;
-      }
-    }
-
-    if (step === 3) {
-      const numericBudget = Number(budget);
-
-      if (!budget || !Number.isInteger(numericBudget) || numericBudget <= 0) {
-        setMessage("Budżet musi być większy od 0.");
-        return false;
-      }
-
-      if (numericBudget > MAX_JOB_BUDGET) {
-        setMessage(MAX_JOB_BUDGET_MESSAGE);
-        return false;
-      }
-
-      if (!projectDeadline) {
-        setMessage("Wybierz termin wykonania projektu.");
-        return false;
-      }
-
-      if (projectDeadline < todayDate) {
-        setMessage("Termin wykonania nie może być datą z przeszłości.");
-        return false;
-      }
-
-      if (plannedStartDate && plannedStartDate > projectDeadline) {
-        setMessage("Data rozpoczęcia nie może być późniejsza niż termin wykonania.");
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  function goToNextStep() {
-    if (!validateStep(formStep)) return;
-
-    const nextStep = Math.min(formStep + 1, JOB_FORM_STEPS.length);
-    setFormStep(nextStep);
-    setMaxStepReached((current) => Math.max(current, nextStep));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function goToPreviousStep() {
-    setMessage("");
-    setFormStep((current) => Math.max(1, current - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
 
   function handleBudgetChange(
     event
@@ -11699,10 +10937,6 @@ function FindTalent() {
     setMessage("");
     setSuccess(false);
 
-    if (![1, 2, 3].every((step) => validateStep(step))) {
-      return;
-    }
-
     const cleanTitle =
       title.trim();
 
@@ -11712,20 +10946,46 @@ function FindTalent() {
     const numericBudget =
       Number(budget);
 
-    const skills = requiredSkills
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .slice(0, 6);
+    if (!cleanTitle) {
+      setMessage(
+        "Wpisz nazwę zlecenia."
+      );
 
-    const cleanCategoryDetails = Object.fromEntries(
-      Object.entries(categoryDetails)
-        .map(([key, value]) => [key, String(value || "").trim()])
-        .filter(([, value]) => Boolean(value))
-    );
+      return;
+    }
 
-    const cleanCollaborationPlan =
-      prepareCollaborationPlan(collaborationPlan);
+    if (!cleanDescription) {
+      setMessage(
+        "Opisz krótko swoje zlecenie."
+      );
+
+      return;
+    }
+
+    if (
+      !budget ||
+      !Number.isInteger(
+        numericBudget
+      ) ||
+      numericBudget <= 0
+    ) {
+      setMessage(
+        "Budżet musi być większy od 0."
+      );
+
+      return;
+    }
+
+    if (
+      numericBudget >
+      MAX_JOB_BUDGET
+    ) {
+      setMessage(
+        MAX_JOB_BUDGET_MESSAGE
+      );
+
+      return;
+    }
 
     if (!user?.id) {
       setMessage(
@@ -11756,35 +11016,6 @@ function FindTalent() {
             description:
               cleanDescription,
             category,
-            subcategory,
-            project_stage:
-              projectStage,
-            expected_outcome:
-              expectedOutcome.trim(),
-            client_materials:
-              clientMaterials.trim() || null,
-            category_details:
-              cleanCategoryDetails,
-            work_mode:
-              workMode,
-            location:
-              workMode === "remote"
-                ? null
-                : locationValue.trim(),
-            experience_level:
-              experienceLevel,
-            required_skills:
-              skills,
-            requires_portfolio:
-              requiresPortfolio,
-            reference_url:
-              getSafeJobReferenceUrl(referenceUrl) || null,
-            project_deadline:
-              projectDeadline,
-            planned_start_date:
-              plannedStartDate || null,
-            collaboration_plan:
-              cleanCollaborationPlan,
             budget:
               numericBudget,
             budget_negotiable:
@@ -11823,30 +11054,9 @@ function FindTalent() {
         preferences?.preferredCategories?.[0] ||
           JOB_CATEGORIES[0]
       );
-      setSubcategory(
-        JOB_SUBCATEGORIES[
-          preferences?.preferredCategories?.[0] || JOB_CATEGORIES[0]
-        ]?.[0] || ""
-      );
-      setProjectStage("idea");
-      setExpectedOutcome("");
-      setClientMaterials("");
-      setCategoryDetails({});
-      setWorkMode("remote");
-      setLocationValue("");
-      setExperienceLevel("any");
-      setRequiredSkills("");
-      setRequiresPortfolio(false);
-      setReferenceUrl("");
-      setProjectDeadline("");
-      setPlannedStartDate("");
-      setCollaborationPlan(createDefaultCollaborationPlan());
-      setCollaborationPlanOpen(false);
       setBudget("");
       setBudgetNegotiable(true);
       setListingDurationDays(14);
-      setFormStep(1);
-      setMaxStepReached(1);
 
       setTimeout(() => {
         navigate("/jobs");
@@ -11967,892 +11177,226 @@ function FindTalent() {
           </p>
         </div>
 
-        <ol className="job-create-progress" aria-label="Postęp dodawania zlecenia">
-          {JOB_FORM_STEPS.map((item, index) => {
-            const stepNumber = index + 1;
-            const isActive = formStep === stepNumber;
-            const isDone = formStep > stepNumber;
-
-            return (
-              <li
-                className={`${isActive ? "is-active" : ""}${isDone ? " is-done" : ""}`}
-                key={item.number}
-              >
-                <button
-                  type="button"
-                  disabled={stepNumber > maxStepReached}
-                  onClick={() => {
-                    setMessage("");
-                    setFormStep(stepNumber);
-                  }}
-                  aria-current={isActive ? "step" : undefined}
-                >
-                  <span>{isDone ? "✓" : item.number}</span>
-                  <strong>{item.label}</strong>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-
         <form
-          className="project-form job-create-form"
+          className="project-form"
           onSubmit={handleSubmit}
-          noValidate
         >
-          {formStep === 1 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-1-title">
-              <div className="job-create-step-heading">
-                <span>01</span>
-                <div>
-                  <h2 id="job-step-1-title">Podstawowe informacje</h2>
-                  <p>Najpierw pokaż wykonawcom, czego dotyczy projekt.</p>
-                </div>
-              </div>
+          <label>
+            Czego potrzebujesz?
 
-              <div className="job-form-grid">
-                <label className="is-wide">
-                  Czego potrzebujesz?
-                  <textarea
-                    className="ideahire-multiline-field ideahire-title-field"
-                    rows="2"
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                    placeholder="Np. projekt i wykonanie strony dla restauracji"
-                    maxLength={120}
-                  />
-                  <small>{title.length}/120</small>
-                </label>
+            <textarea
+              className="ideahire-multiline-field ideahire-title-field"
+              rows="2"
+              value={title}
+              onChange={(event) =>
+                setTitle(
+                  event.target.value
+                )
+              }
+              maxLength={120}
+              required
+            />
+          </label>
 
-                <label>
-                  Kategoria
-                  <select value={category} onChange={handleCategoryChange}>
-                    {JOB_CATEGORIES.map((item) => (
-                      <option key={item} value={item}>{getJobCategoryLabel(item)}</option>
-                    ))}
-                  </select>
-                </label>
+          <label>
+            Kategoria
 
-                <label>
-                  Podkategoria
-                  <select
-                    value={subcategory}
-                    onChange={(event) => setSubcategory(event.target.value)}
+            <select
+              value={category}
+              onChange={(event) =>
+                setCategory(
+                  event.target.value
+                )
+              }
+              required
+            >
+              {JOB_CATEGORIES.map(
+                (item) => (
+                  <option
+                    key={item}
+                    value={item}
                   >
-                    {subcategories.map((item) => (
-                      <option key={item} value={item}>{item}</option>
-                    ))}
-                  </select>
-                </label>
+                    {item}
+                  </option>
+                )
+              )}
+            </select>
+          </label>
 
-                <fieldset className="job-compact-fieldset is-wide">
-                  <legend>Na jakim etapie jest projekt?</legend>
-                  <div className="job-choice-grid is-four">
-                    {JOB_PROJECT_STAGES.map((option) => (
-                      <label
-                        className={`job-choice-card${projectStage === option.value ? " is-selected" : ""}`}
-                        key={option.value}
-                      >
-                        <input
-                          type="radio"
-                          name="project-stage"
-                          checked={projectStage === option.value}
-                          onChange={() => setProjectStage(option.value)}
-                        />
-                        <span>{option.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
+          <label>
+            Opisz swój projekt
 
-                <label className="is-wide">
-                  Opisz swój projekt
-                  <textarea
-                    className="ideahire-multiline-field ideahire-description-field"
-                    rows="7"
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    placeholder="Opisz cel, najważniejsze założenia i czego oczekujesz od wykonawcy."
-                    maxLength={2000}
-                  />
-                  <small>{description.length}/2000</small>
-                </label>
-              </div>
-            </section>
-          )}
+            <textarea
+              className="ideahire-multiline-field ideahire-description-field"
+              rows="6"
+              value={description}
+              onChange={(event) =>
+                setDescription(
+                  event.target.value
+                )
+              }
+              maxLength={2000}
+              required
+            />
+          </label>
 
-          {formStep === 2 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-2-title">
-              <div className="job-create-step-heading">
-                <span>02</span>
-                <div>
-                  <h2 id="job-step-2-title">Zakres i wymagania</h2>
-                  <p>Wyświetlamy tylko pytania potrzebne w wybranej kategorii.</p>
-                </div>
-              </div>
+          <label>
+            Budżet (zł)
 
-              <div className="job-form-grid">
-                <label className="is-wide">
-                  Jaki rezultat ma przekazać wykonawca?
-                  <textarea
-                    rows="4"
-                    value={expectedOutcome}
-                    onChange={(event) => setExpectedOutcome(event.target.value)}
-                    placeholder="Np. gotowa responsywna strona, kod źródłowy i wdrożenie na serwerze."
-                    maxLength={1000}
-                  />
-                  <small>{expectedOutcome.length}/1000</small>
-                </label>
+            <input
+              type="text"
+              value={budget}
+              onChange={
+                handleBudgetChange
+              }
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="Np. 3000"
+              maxLength={5}
+              aria-describedby="job-budget-help"
+              aria-label="Budżet zlecenia, maksymalnie 15 000 zł"
+              required
+            />
 
-                <label className="is-wide">
-                  Co zapewniasz wykonawcy? <em>Opcjonalnie</em>
-                  <textarea
-                    rows="3"
-                    value={clientMaterials}
-                    onChange={(event) => setClientMaterials(event.target.value)}
-                    placeholder="Np. logo, teksty, zdjęcia, dostęp do obecnej strony lub nagrania."
-                    maxLength={800}
-                  />
-                </label>
+            <div
+              className="job-budget-limit-note"
+              id="job-budget-help"
+              role="note"
+            >
+              <i
+                className="job-budget-limit-icon"
+                aria-hidden="true"
+              >
+                i
+              </i>
 
-                <div className="job-category-questions is-wide">
-                  <div className="job-category-questions-heading">
-                    <span className="section-label">{getJobCategoryLabel(category)}</span>
-                    <h3>Szczegóły potrzebne do dobrej wyceny</h3>
-                  </div>
-                  <div className="job-form-grid">
-                    {categoryFields.map((field) => (
-                      <label key={field.key}>
-                        {field.label}
-                        <input
-                          type="text"
-                          value={categoryDetails[field.key] || ""}
-                          onChange={(event) => updateCategoryDetail(field.key, event.target.value)}
-                          placeholder={field.placeholder}
-                          maxLength={300}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </div>
+              <span className="job-budget-limit-copy">
+                <strong>
+                  Maksymalnie 15 000 zł
+                </strong>
 
-                <fieldset className="job-compact-fieldset is-wide">
-                  <legend>Tryb współpracy</legend>
-                  <div className="job-choice-grid is-three">
-                    {JOB_WORK_MODES.map((option) => (
-                      <label
-                        className={`job-choice-card${workMode === option.value ? " is-selected" : ""}`}
-                        key={option.value}
-                      >
-                        <input
-                          type="radio"
-                          name="work-mode"
-                          checked={workMode === option.value}
-                          onChange={() => setWorkMode(option.value)}
-                        />
-                        <span>{option.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
+                <small>
+                  Wyższej kwoty nie można wpisać ani opublikować. W kolejnym
+                  kroku zdecydujesz, czy budżet będzie stały, czy negocjowalny.
+                </small>
+              </span>
+            </div>
+          </label>
 
-                {workMode !== "remote" && (
-                  <label>
-                    Lokalizacja
-                    <input
-                      type="text"
-                      value={locationValue}
-                      onChange={(event) => setLocationValue(event.target.value)}
-                      placeholder="Np. Szczecin"
-                      maxLength={160}
-                    />
-                  </label>
-                )}
+          <fieldset className="job-option-fieldset">
+            <legend>Charakter budżetu</legend>
 
-                <label>
-                  Poziom doświadczenia
-                  <select
-                    value={experienceLevel}
-                    onChange={(event) => setExperienceLevel(event.target.value)}
-                  >
-                    {JOB_EXPERIENCE_LEVELS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
+            <p className="job-option-intro">
+              Określ, czy podana kwota jest ostateczna, czy może zostać
+              doprecyzowana przed rozpoczęciem współpracy.
+            </p>
 
-                <label>
-                  Najważniejsze umiejętności <em>Opcjonalnie</em>
+            <div className="job-option-grid job-budget-options">
+              <label
+                className={`job-option-card${
+                  budgetNegotiable ? " is-selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="budget-negotiable"
+                  checked={budgetNegotiable}
+                  onChange={() => setBudgetNegotiable(true)}
+                />
+                <span className="job-option-mark" aria-hidden="true">↔</span>
+                <span>
+                  <strong>Do negocjacji</strong>
+                  <small>
+                    Ostateczną cenę ustalicie w warunkach współpracy.
+                  </small>
+                </span>
+              </label>
+
+              <label
+                className={`job-option-card${
+                  !budgetNegotiable ? " is-selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="budget-negotiable"
+                  checked={!budgetNegotiable}
+                  onChange={() => setBudgetNegotiable(false)}
+                />
+                <span className="job-option-mark" aria-hidden="true">●</span>
+                <span>
+                  <strong>Cena ustalona</strong>
+                  <small>
+                    Podana kwota pozostanie stała w ustaleniach.
+                  </small>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset className="job-option-fieldset">
+            <legend>Czas publikacji</legend>
+
+            <p className="job-option-intro">
+              Po tym czasie zlecenie automatycznie zniknie z publicznej
+              wyszukiwarki.
+            </p>
+
+            <div className="job-option-grid job-duration-options">
+              {JOB_LISTING_DURATION_OPTIONS.map((option) => (
+                <label
+                  className={`job-option-card${
+                    listingDurationDays === option.days
+                      ? " is-selected"
+                      : ""
+                  }`}
+                  key={option.days}
+                >
                   <input
-                    type="text"
-                    value={requiredSkills}
-                    onChange={(event) => setRequiredSkills(event.target.value)}
-                    placeholder="Np. React, Figma, SEO — oddziel przecinkami"
-                    maxLength={260}
+                    type="radio"
+                    name="listing-duration"
+                    value={option.days}
+                    checked={listingDurationDays === option.days}
+                    onChange={() => setListingDurationDays(option.days)}
                   />
-                </label>
-
-                <label>
-                  Link do materiałów lub inspiracji <em>Opcjonalnie</em>
-                  <input
-                    type="url"
-                    value={referenceUrl}
-                    onChange={(event) => setReferenceUrl(event.target.value)}
-                    placeholder="https://..."
-                    maxLength={600}
-                  />
-                </label>
-
-                <label className="job-portfolio-toggle is-wide">
-                  <input
-                    type="checkbox"
-                    checked={requiresPortfolio}
-                    onChange={(event) => setRequiresPortfolio(event.target.checked)}
-                  />
+                  <span className="job-option-duration" aria-hidden="true">
+                    {option.days}
+                  </span>
                   <span>
-                    <strong>Wymagaj portfolio</strong>
-                    <small>Wykonawca powinien pokazać wcześniejsze realizacje.</small>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
                   </span>
                 </label>
-
-                <div className="collaboration-plan-builder is-wide">
-                  {!collaborationPlanOpen ? (
-                    <button
-                      type="button"
-                      className={`collaboration-plan-launch${
-                        collaborationPlan.enabled ? " has-plan" : ""
-                      }`}
-                      onClick={openCollaborationPlan}
-                      aria-expanded="false"
-                    >
-                      <span className="collaboration-plan-launch-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                          <path d="M8 12.5 10.5 15 16 9.5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
-                        </svg>
-                      </span>
-
-                      <span className="collaboration-plan-launch-copy">
-                        <strong>
-                          {collaborationPlan.enabled
-                            ? "Edytuj plan współpracy"
-                            : "Ustal plan współpracy"}
-                        </strong>
-                        <small>
-                          Uporządkuj etapy, poprawki, odbiór i sposób kontaktu bez wydłużania głównego opisu.
-                        </small>
-                      </span>
-
-                      <span className="collaboration-plan-launch-action" aria-hidden="true">
-                        {collaborationPlan.enabled ? "Edytuj" : "Dodaj"}
-                        <svg viewBox="0 0 24 24">
-                          <path d="m9 5 7 7-7 7" />
-                        </svg>
-                      </span>
-                    </button>
-                  ) : (
-                    <section
-                      className="collaboration-plan-editor"
-                      aria-labelledby="collaboration-plan-editor-title"
-                    >
-                      <header className="collaboration-plan-editor-header">
-                        <div>
-                          <span className="section-label">Opcjonalne ustalenia</span>
-                          <h3 id="collaboration-plan-editor-title">Plan współpracy</h3>
-                          <p>
-                            Dodaj tylko informacje, które naprawdę pomogą obu stronom rozpocząć projekt bez niedomówień.
-                          </p>
-                        </div>
-
-                        <div className="collaboration-plan-editor-actions">
-                          <button
-                            type="button"
-                            className="collaboration-plan-text-button"
-                            onClick={() => setCollaborationPlanOpen(false)}
-                          >
-                            Zwiń
-                          </button>
-                          <button
-                            type="button"
-                            className="collaboration-plan-text-button is-danger"
-                            onClick={removeCollaborationPlan}
-                          >
-                            Usuń plan
-                          </button>
-                        </div>
-                      </header>
-
-                      <div className="collaboration-plan-editor-grid">
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
-                            <span>01</span>
-                            <div>
-                              <h4>Przebieg projektu</h4>
-                              <p>Najważniejsze punkty kontrolne i sposób komunikacji.</p>
-                            </div>
-                          </div>
-
-                          <div className="collaboration-plan-fields">
-                            <fieldset className="collaboration-plan-fieldset">
-                              <legend>Etapy projektu <em>maks. 3</em></legend>
-                              {collaborationPlan.milestones.map((milestone, index) => (
-                                <label key={`milestone-${index}`}>
-                                  <span>Etap {index + 1}</span>
-                                  <input
-                                    type="text"
-                                    value={milestone}
-                                    onChange={(event) =>
-                                      updateCollaborationListItem(
-                                        "milestones",
-                                        index,
-                                        event.target.value
-                                      )
-                                    }
-                                    placeholder={
-                                      index === 0
-                                        ? "Np. pierwsza wersja projektu"
-                                        : index === 1
-                                        ? "Np. poprawki po konsultacji"
-                                        : "Np. przekazanie gotowych plików"
-                                    }
-                                    maxLength={160}
-                                  />
-                                </label>
-                              ))}
-                            </fieldset>
-
-                            <label>
-                              Sposób zatwierdzania
-                              <select
-                                value={collaborationPlan.approvalMode}
-                                onChange={(event) =>
-                                  updateCollaborationPlan("approvalMode", event.target.value)
-                                }
-                              >
-                                {COLLABORATION_APPROVAL_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            <label>
-                              Częstotliwość kontaktu
-                              <select
-                                value={collaborationPlan.contactFrequency}
-                                onChange={(event) =>
-                                  updateCollaborationPlan(
-                                    "contactFrequency",
-                                    event.target.value
-                                  )
-                                }
-                              >
-                                {COLLABORATION_CONTACT_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            <label>
-                              Czas na przekazanie uwag
-                              <select
-                                value={collaborationPlan.feedbackTime}
-                                onChange={(event) =>
-                                  updateCollaborationPlan("feedbackTime", event.target.value)
-                                }
-                              >
-                                {COLLABORATION_FEEDBACK_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                          </div>
-                        </section>
-
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
-                            <span>02</span>
-                            <div>
-                              <h4>Odbiór i poprawki</h4>
-                              <p>Jasne zasady pomagają uniknąć różnych interpretacji.</p>
-                            </div>
-                          </div>
-
-                          <div className="collaboration-plan-fields">
-                            <label>
-                              Liczba rund poprawek
-                              <select
-                                value={collaborationPlan.revisionRounds}
-                                onChange={(event) =>
-                                  updateCollaborationPlan("revisionRounds", event.target.value)
-                                }
-                              >
-                                {COLLABORATION_REVISION_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            <fieldset className="collaboration-plan-fieldset">
-                              <legend>Kiedy zlecenie jest ukończone? <em>maks. 3</em></legend>
-                              {collaborationPlan.completionCriteria.map((criterion, index) => (
-                                <label key={`criterion-${index}`}>
-                                  <span>Warunek {index + 1}</span>
-                                  <input
-                                    type="text"
-                                    value={criterion}
-                                    onChange={(event) =>
-                                      updateCollaborationListItem(
-                                        "completionCriteria",
-                                        index,
-                                        event.target.value
-                                      )
-                                    }
-                                    placeholder={
-                                      index === 0
-                                        ? "Np. działa prawidłowo na telefonie i komputerze"
-                                        : index === 1
-                                        ? "Np. przekazane są pliki źródłowe"
-                                        : "Np. wykonane są wszystkie opisane elementy"
-                                    }
-                                    maxLength={240}
-                                  />
-                                </label>
-                              ))}
-                            </fieldset>
-
-                            <fieldset className="collaboration-plan-fieldset">
-                              <legend>Zmiany poza ustalonym zakresem</legend>
-                              <div className="collaboration-plan-radio-list">
-                                {COLLABORATION_CHANGE_OPTIONS.map((option) => (
-                                  <label
-                                    className={
-                                      collaborationPlan.changePolicy === option.value
-                                        ? "is-selected"
-                                        : ""
-                                    }
-                                    key={option.value}
-                                  >
-                                    <input
-                                      type="radio"
-                                      name="collaboration-change-policy"
-                                      checked={collaborationPlan.changePolicy === option.value}
-                                      onChange={() =>
-                                        updateCollaborationPlan("changePolicy", option.value)
-                                      }
-                                    />
-                                    <span>
-                                      <strong>{option.label}</strong>
-                                      <small>{option.description}</small>
-                                    </span>
-                                  </label>
-                                ))}
-                              </div>
-                            </fieldset>
-                          </div>
-                        </section>
-
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
-                            <span>03</span>
-                            <div>
-                              <h4>Obowiązki obu stron</h4>
-                              <p>Krótko określ, za co odpowiada każda osoba.</p>
-                            </div>
-                          </div>
-
-                          <div className="collaboration-plan-fields">
-                            <label>
-                              Zleceniodawca dostarczy
-                              <textarea
-                                rows="4"
-                                value={collaborationPlan.clientResponsibilities}
-                                onChange={(event) =>
-                                  updateCollaborationPlan(
-                                    "clientResponsibilities",
-                                    event.target.value
-                                  )
-                                }
-                                placeholder="Np. materiały, dostęp do kont i uwagi do 48 godzin."
-                                maxLength={600}
-                              />
-                              <small>{collaborationPlan.clientResponsibilities.length}/600</small>
-                            </label>
-
-                            <label>
-                              Wykonawca dostarczy
-                              <textarea
-                                rows="4"
-                                value={collaborationPlan.contractorResponsibilities}
-                                onChange={(event) =>
-                                  updateCollaborationPlan(
-                                    "contractorResponsibilities",
-                                    event.target.value
-                                  )
-                                }
-                                placeholder="Np. gotowy rezultat, pliki źródłowe i krótką instrukcję."
-                                maxLength={600}
-                              />
-                              <small>{collaborationPlan.contractorResponsibilities.length}/600</small>
-                            </label>
-                          </div>
-                        </section>
-
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
-                            <span>04</span>
-                            <div>
-                              <h4>Odpowiedź wykonawcy</h4>
-                              <p>Wybierz informacje potrzebne do porównania zgłoszeń.</p>
-                            </div>
-                          </div>
-
-                          <div className="collaboration-plan-fields">
-                            <fieldset className="collaboration-plan-fieldset">
-                              <legend>W zgłoszeniu poproś o</legend>
-                              <div className="collaboration-plan-check-grid">
-                                {COLLABORATION_APPLICATION_REQUIREMENTS.map((option) => (
-                                  <label
-                                    className={
-                                      collaborationPlan.applicationRequirements.includes(
-                                        option.value
-                                      )
-                                        ? "is-selected"
-                                        : ""
-                                    }
-                                    key={option.value}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={collaborationPlan.applicationRequirements.includes(
-                                        option.value
-                                      )}
-                                      onChange={() =>
-                                        toggleApplicationRequirement(option.value)
-                                      }
-                                    />
-                                    <span>{option.label}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </fieldset>
-
-                            <fieldset className="collaboration-plan-fieldset">
-                              <legend>Pytania do wykonawcy <em>maks. 3</em></legend>
-                              {collaborationPlan.screeningQuestions.map((question, index) => (
-                                <label key={`question-${index}`}>
-                                  <span>Pytanie {index + 1}</span>
-                                  <input
-                                    type="text"
-                                    value={question}
-                                    onChange={(event) =>
-                                      updateCollaborationListItem(
-                                        "screeningQuestions",
-                                        index,
-                                        event.target.value
-                                      )
-                                    }
-                                    placeholder={
-                                      index === 0
-                                        ? "Np. kiedy możesz rozpocząć?"
-                                        : index === 1
-                                        ? "Np. czy realizowałeś podobny projekt?"
-                                        : "Np. jak zaplanowałbyś pracę?"
-                                    }
-                                    maxLength={240}
-                                  />
-                                </label>
-                              ))}
-                            </fieldset>
-                          </div>
-                        </section>
-                      </div>
-
-                      <footer className="collaboration-plan-editor-footer">
-                        <span>
-                          Plan jest opcjonalny. Zapiszemy go razem ze zleceniem i pokażemy wykonawcom w czytelnym podsumowaniu.
-                        </span>
-                        <button
-                          type="button"
-                          className="btn btn-dark"
-                          onClick={() => setCollaborationPlanOpen(false)}
-                        >
-                          Zapisz plan
-                        </button>
-                      </footer>
-                    </section>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {formStep === 3 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-3-title">
-              <div className="job-create-step-heading">
-                <span>03</span>
-                <div>
-                  <h2 id="job-step-3-title">Budżet i terminy</h2>
-                  <p>Termin realizacji jest niezależny od czasu wyświetlania ogłoszenia.</p>
-                </div>
-              </div>
-
-              <div className="job-form-grid">
-                <label className="is-wide">
-                  Budżet (zł)
-                  <input
-                    type="text"
-                    value={budget}
-                    onChange={handleBudgetChange}
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="Np. 3000"
-                    maxLength={5}
-                    aria-describedby="job-budget-help"
-                    aria-label="Budżet zlecenia, maksymalnie 15 000 zł"
-                  />
-
-                  <div className="job-budget-limit-note" id="job-budget-help" role="note">
-                    <i className="job-budget-limit-icon" aria-hidden="true">i</i>
-                    <span className="job-budget-limit-copy">
-                      <strong>Maksymalnie 15 000 zł</strong>
-                      <small>Podaj wynagrodzenie wykonawcy. Dodatkowe koszty, np. reklamy, opisz w zakresie projektu.</small>
-                    </span>
-                  </div>
-                </label>
-
-                <fieldset className="job-option-fieldset is-wide">
-                  <legend>Charakter budżetu</legend>
-                  <p className="job-option-intro">Czy kwota jest ostateczna, czy będzie ustalana przed współpracą?</p>
-                  <div className="job-option-grid job-budget-options">
-                    <label className={`job-option-card${budgetNegotiable ? " is-selected" : ""}`}>
-                      <input
-                        type="radio"
-                        name="budget-negotiable"
-                        checked={budgetNegotiable}
-                        onChange={() => setBudgetNegotiable(true)}
-                      />
-                      <span className="job-option-mark" aria-hidden="true">01</span>
-                      <span>
-                        <strong>Do negocjacji</strong>
-                        <small>Ostateczną cenę ustalicie w warunkach współpracy.</small>
-                      </span>
-                    </label>
-
-                    <label className={`job-option-card${!budgetNegotiable ? " is-selected" : ""}`}>
-                      <input
-                        type="radio"
-                        name="budget-negotiable"
-                        checked={!budgetNegotiable}
-                        onChange={() => setBudgetNegotiable(false)}
-                      />
-                      <span className="job-option-mark" aria-hidden="true">●</span>
-                      <span>
-                        <strong>Cena ustalona</strong>
-                        <small>Podana kwota pozostanie stała w ustaleniach.</small>
-                      </span>
-                    </label>
-                  </div>
-                </fieldset>
-
-                <label>
-                  Planowany start <em>Opcjonalnie</em>
-                  <input
-                    type="date"
-                    min={todayDate}
-                    value={plannedStartDate}
-                    onChange={(event) => setPlannedStartDate(event.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Termin wykonania
-                  <input
-                    type="date"
-                    min={todayDate}
-                    value={projectDeadline}
-                    onChange={(event) => setProjectDeadline(event.target.value)}
-                  />
-                </label>
-
-                <fieldset className="job-option-fieldset is-wide">
-                  <legend>Czas publikacji ogłoszenia</legend>
-                  <p className="job-option-intro">Po tym czasie zlecenie zniknie z publicznej wyszukiwarki.</p>
-                  <div className="job-option-grid job-duration-options">
-                    {JOB_LISTING_DURATION_OPTIONS.map((option) => (
-                      <label
-                        className={`job-option-card${listingDurationDays === option.days ? " is-selected" : ""}`}
-                        key={option.days}
-                      >
-                        <input
-                          type="radio"
-                          name="listing-duration"
-                          value={option.days}
-                          checked={listingDurationDays === option.days}
-                          onChange={() => setListingDurationDays(option.days)}
-                        />
-                        <span className="job-option-duration" aria-hidden="true">{option.days}</span>
-                        <span>
-                          <strong>{option.label}</strong>
-                          <small>{option.description}</small>
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              </div>
-            </section>
-          )}
-
-          {formStep === 4 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-4-title">
-              <div className="job-create-step-heading">
-                <span>04</span>
-                <div>
-                  <h2 id="job-step-4-title">Sprawdź przed publikacją</h2>
-                  <p>Tak najważniejsze informacje zobaczy potencjalny wykonawca.</p>
-                </div>
-              </div>
-
-              <div className="job-create-summary">
-                <article className="is-wide">
-                  <span className="section-label">{getJobCategoryLabel(category)} · {subcategory}</span>
-                  <h3>{title || "Bez tytułu"}</h3>
-                  <p>{description || "Brak opisu."}</p>
-                </article>
-
-                <article>
-                  <span>Oczekiwany rezultat</span>
-                  <strong>{expectedOutcome || "Do uzupełnienia"}</strong>
-                </article>
-
-                <article>
-                  <span>Budżet</span>
-                  <strong>
-                    {budget ? `${Number(budget).toLocaleString("pl-PL")} zł` : "Do uzupełnienia"}
-                    {budget && (budgetNegotiable ? " · do negocjacji" : " · cena ustalona")}
-                  </strong>
-                </article>
-
-                <article>
-                  <span>Realizacja</span>
-                  <strong>{getJobOptionLabel(JOB_WORK_MODES, workMode)}{locationValue ? ` · ${locationValue}` : ""}</strong>
-                  <small>Termin: {projectDeadline || "do uzupełnienia"}</small>
-                </article>
-
-                <article>
-                  <span>Wymagania</span>
-                  <strong>{getJobOptionLabel(JOB_EXPERIENCE_LEVELS, experienceLevel)}</strong>
-                  <small>{requiresPortfolio ? "Portfolio wymagane" : "Portfolio niewymagane"}</small>
-                </article>
-
-                {Object.keys(categoryDetails).length > 0 && (
-                  <article className="is-wide job-create-summary-details">
-                    <span>Szczegóły kategorii</span>
-                    <dl>
-                      {Object.entries(categoryDetails)
-                        .filter(([, value]) => String(value || "").trim())
-                        .map(([key, value]) => (
-                          <div key={key}>
-                            <dt>{getJobCategoryFieldLabel(category, key)}</dt>
-                            <dd>{value}</dd>
-                          </div>
-                        ))}
-                    </dl>
-                  </article>
-                )}
-
-                {collaborationPlan.enabled && (
-                  <article className="is-wide job-create-summary-details collaboration-summary-card">
-                    <span>Plan współpracy</span>
-                    <dl>
-                      <div>
-                        <dt>Etapy</dt>
-                        <dd>
-                          {collaborationPlanPreview.milestones.length > 0
-                            ? (
-                                <>
-                                  {collaborationPlanPreview.milestones.length}{" "}
-                                  <span>
-                                    {collaborationPlanPreview.milestones.length === 1
-                                      ? "etap"
-                                      : "etapy"}
-                                  </span>
-                                </>
-                              )
-                            : "Do ustalenia przed startem"}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Poprawki</dt>
-                        <dd>
-                          {getJobOptionLabel(
-                            COLLABORATION_REVISION_OPTIONS,
-                            collaborationPlan.revisionRounds
-                          )}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Akceptacja</dt>
-                        <dd>
-                          {getJobOptionLabel(
-                            COLLABORATION_APPROVAL_OPTIONS,
-                            collaborationPlan.approvalMode
-                          )}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt>Kontakt</dt>
-                        <dd>
-                          {getJobOptionLabel(
-                            COLLABORATION_CONTACT_OPTIONS,
-                            collaborationPlan.contactFrequency
-                          )}
-                        </dd>
-                      </div>
-                    </dl>
-                  </article>
-                )}
-              </div>
-
-              <p className="job-create-publish-note">
-                Po publikacji zlecenie będzie widoczne przez {listingDurationDays} dni. Termin wykonania projektu pozostaje osobną informacją.
-              </p>
-            </section>
-          )}
+              ))}
+            </div>
+          </fieldset>
 
           {message && (
             <p
-              className={success ? "auth-message" : "auth-error"}
-              role={success ? "status" : "alert"}
+              className={
+                success
+                  ? "auth-message"
+                  : "auth-error"
+              }
+              role={
+                success
+                  ? "status"
+                  : "alert"
+              }
             >
               {message}
             </p>
           )}
 
-          <div className="job-create-navigation">
-            {formStep > 1 && (
-              <button className="btn btn-outline" type="button" onClick={goToPreviousStep} disabled={saving}>
-                Wstecz
-              </button>
-            )}
-
-            {formStep < JOB_FORM_STEPS.length ? (
-              <button className="btn btn-dark" type="button" onClick={goToNextStep}>
-                Dalej
-              </button>
-            ) : (
-              <button className="btn btn-dark" type="submit" disabled={saving}>
-                {saving ? "Publikowanie..." : "Opublikuj zlecenie"}
-              </button>
-            )}
-          </div>
+          <button
+            className="btn btn-dark btn-large"
+            type="submit"
+            disabled={saving}
+          >
+            {saving
+              ? "Publikowanie..."
+              : "Opublikuj zlecenie →"}
+          </button>
         </form>
       </main>
     </div>
@@ -12910,13 +11454,14 @@ function EditJob() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+            "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
           )
           .eq("id", id)
           .eq(
             "user_id",
             user.id
           )
+          .eq("visibility", "public")
           .single();
 
       if (error) {
@@ -13092,7 +11637,7 @@ function EditJob() {
                     key={item}
                     value={item}
                   >
-                    {getJobCategoryLabel(item)}
+                    {item}
                   </option>
                 )
               )}
@@ -13158,7 +11703,7 @@ function EditJob() {
           >
             {saving
               ? "Zapisywanie..."
-              : "Zapisz zmiany "}
+              : "Zapisz zmiany →"}
           </button>
         </form>
       </main>
@@ -13354,12 +11899,13 @@ function Profile() {
           await supabase
             .from("jobs")
             .select(
-              "id, user_id, title, description, category, subcategory, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+              "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
             )
             .eq(
               "user_id",
               id
             )
+            .eq("visibility", "public")
             .gt(
               "expires_at",
               new Date().toISOString()
@@ -13924,7 +12470,7 @@ function Profile() {
             </details>
           )}
 
-          <div className="profile-preview public-profile-preview">
+          <div className="profile-preview">
             <div className="profile-avatar-wrapper">
               {profileHidden ? (
                 <div
@@ -13948,7 +12494,7 @@ function Profile() {
               )}
             </div>
 
-            <div className={`profile-info public-profile-info ${
+            <div className={`profile-info ${
               profileHidden
                 ? "profile-hidden-copy"
                 : ""
@@ -14192,7 +12738,7 @@ function Profile() {
                             className="profile-specialty-chip"
                             key={category}
                           >
-                            {getJobCategoryLabel(category)}
+                            {category}
                           </span>
                         )
                       )}
@@ -14351,7 +12897,7 @@ function Profile() {
                             title={item.project_url}
                           >
                             <span>{getPortfolioLinkLabel(item.project_url)}</span>
-                            <span aria-hidden="true"></span>
+                            <span aria-hidden="true">↗</span>
                           </a>
                         </div>
 
@@ -14401,8 +12947,7 @@ function Profile() {
                     key={job.id}
                   >
                     <span className="section-label">
-                      {getJobCategoryLabel(job.category)}
-                      {job.subcategory ? ` · ${job.subcategory}` : ""}
+                      {job.category}
                     </span>
 
                     <h2>
@@ -14598,8 +13143,9 @@ function Jobs() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+            "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
           )
+          .eq("visibility", "public")
           .gt(
             "expires_at",
             new Date().toISOString()
@@ -14890,16 +13436,6 @@ function Jobs() {
               ""
           ).toLowerCase();
 
-        const subcategory =
-          String(job.subcategory || "").toLowerCase();
-
-        const expectedOutcome =
-          String(job.expected_outcome || "").toLowerCase();
-
-        const skills = Array.isArray(job.required_skills)
-          ? job.required_skills.join(" ").toLowerCase()
-          : "";
-
         return (
           title.includes(
             normalizedSearch
@@ -14909,10 +13445,7 @@ function Jobs() {
           ) ||
           category.includes(
             normalizedSearch
-          ) ||
-          subcategory.includes(normalizedSearch) ||
-          expectedOutcome.includes(normalizedSearch) ||
-          skills.includes(normalizedSearch)
+          )
         );
       }
     );
@@ -15155,7 +13688,7 @@ function Jobs() {
               className="jobs-search-icon"
               aria-hidden="true"
             >
-              
+              ⌕
             </span>
 
             <input
@@ -15223,7 +13756,7 @@ function Jobs() {
                     )
                   }
                 >
-                  {getJobCategoryLabel(category)}
+                  {category}
                 </button>
               )
             )}
@@ -15237,10 +13770,10 @@ function Jobs() {
           <div className="jobs-order-copy">
             <span className="jobs-order-icon" aria-hidden="true">✦</span>
             <div>
-              <strong>Dopasowanie do Twoich kategorii</strong>
+              <strong>Ułóż wyniki po swojemu</strong>
               <small>
-                Najpierw pokazujemy zlecenia zgodne z kategoriami wybranymi
-                na Twoim koncie. Pozostałe oferty nadal są widoczne.
+                Dopasowanie zmienia tylko kolejność i nie ukrywa pozostałych
+                zleceń.
               </small>
             </div>
           </div>
@@ -15257,7 +13790,7 @@ function Jobs() {
                   : "Wybierz kategorie w ustawieniach konta"
               }
             >
-              Dopasowane do mnie
+              Dopasowane
             </button>
             <button
               type="button"
@@ -15361,7 +13894,7 @@ function Jobs() {
                   clearFilters
                 }
               >
-                Wyczyść wyszukiwanie 
+                Wyczyść wyszukiwanie →
               </button>
             </section>
           )}
@@ -15391,43 +13924,6 @@ function Jobs() {
                 canUseMatchedOrder &&
                 preferredJobCategories.includes(job.category);
 
-              const safeReferenceUrl =
-                getSafeJobReferenceUrl(job.reference_url);
-
-              const collaborationPlanData = hasCollaborationPlan(
-                job.collaboration_plan
-              )
-                ? job.collaboration_plan
-                : null;
-
-              const collaborationMilestones = cleanCollaborationList(
-                collaborationPlanData?.milestones,
-                3,
-                160
-              );
-
-              const collaborationCriteria = cleanCollaborationList(
-                collaborationPlanData?.completion_criteria,
-                3,
-                240
-              );
-
-              const collaborationQuestions = cleanCollaborationList(
-                collaborationPlanData?.screening_questions,
-                3,
-                240
-              );
-
-              const collaborationRequirements = Array.isArray(
-                collaborationPlanData?.application_requirements
-              )
-                ? collaborationPlanData.application_requirements.filter((value) =>
-                    COLLABORATION_APPLICATION_REQUIREMENTS.some(
-                      (option) => option.value === value
-                    )
-                  )
-                : [];
-
               return (
                 <article
                   className="job-card"
@@ -15435,18 +13931,11 @@ function Jobs() {
                 >
                   <div className="job-card-top">
                     <span className="section-label">
-                      {getJobCategoryLabel(job.category)}
-                      {job.subcategory ? ` · ${job.subcategory}` : ""}
+                      {job.category}
                     </span>
 
-                    <span
-                      className={`job-active-badge ${
-                        isMatched ? "is-matched" : "is-active"
-                      }`}
-                    >
-                      {isMatched
-                        ? "Pasuje do Twoich kategorii"
-                        : "Otwarte na zgłoszenia"}
+                    <span className="job-active-badge">
+                      {isMatched ? "Dopasowane" : "Aktywne"}
                     </span>
                   </div>
 
@@ -15456,281 +13945,38 @@ function Jobs() {
 
                   <JobListingMeta job={job} />
 
-                  <p className="job-card-summary">
-                    {job.description || "Brak opisu zlecenia."}
+                  <p>
+                    <strong>
+                      Budżet:
+                    </strong>{" "}
+                    {formatBudget(
+                      job.budget
+                    )}
                   </p>
 
-                  <div className="job-card-facts">
-                    <div>
-                      <span>Budżet</span>
-                      <strong>{formatBudget(job.budget)}</strong>
-                    </div>
-
-                    <div>
-                      <span>Opublikowano</span>
-                      <strong>{formatDate(job.created_at)}</strong>
-                    </div>
-
-                    <div>
-                      <span>Termin wykonania</span>
-                      <strong>
-                        {job.project_deadline
-                          ? formatDate(job.project_deadline)
-                          : "Do ustalenia"}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div className="job-brief-meta">
-                    <span>{getJobOptionLabel(JOB_WORK_MODES, job.work_mode)}</span>
-                    <span>{getJobOptionLabel(JOB_EXPERIENCE_LEVELS, job.experience_level)}</span>
-                    {job.requires_portfolio && <span>Portfolio wymagane</span>}
-                    {job.location && <span>{job.location}</span>}
-                  </div>
-
-                  {Array.isArray(job.required_skills) && job.required_skills.length > 0 && (
-                    <div className="job-required-skills" aria-label="Wymagane umiejętności">
-                      {job.required_skills.map((skill) => (
-                        <span key={skill}>{skill}</span>
-                      ))}
-                    </div>
-                  )}
+                  <p>
+                    <small>
+                      Opublikowano:{" "}
+                      {formatDate(
+                        job.created_at
+                      )}
+                    </small>
+                  </p>
 
                   {isOpen && (
-                    <div className="job-details job-collaboration-details">
-                      <header className="job-collaboration-header">
-                        <span className="job-collaboration-header-icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24">
-                            <path d="M8 12.5 10.5 15 16 9.5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
-                          </svg>
-                        </span>
-                        <div>
-                          <span className="section-label">Czytelne ustalenia przed startem</span>
-                          <h3>Plan współpracy</h3>
-                          <p>
-                            Zakres, sposób realizacji i informacje potrzebne do przygotowania trafnego zgłoszenia.
-                          </p>
-                        </div>
-                      </header>
-
-                      <section className="job-collaboration-section">
-                        <div className="job-collaboration-section-heading">
-                          <span>01</span>
-                          <div>
-                            <h4>Zakres realizacji</h4>
-                            <p>Najważniejsze informacje przekazane przez zleceniodawcę.</p>
-                          </div>
-                        </div>
-
-                      {job.expected_outcome && (
-                        <div className="job-detail-section">
-                          <span>Oczekiwany rezultat</span>
-                          <p>{job.expected_outcome}</p>
-                        </div>
-                      )}
-
-                      {job.client_materials && (
-                        <div className="job-detail-section">
-                          <span>Materiały od zleceniodawcy</span>
-                          <p>{job.client_materials}</p>
-                        </div>
-                      )}
-
-                      {job.category_details && Object.keys(job.category_details).length > 0 && (
-                        <dl className="job-category-detail-list">
-                          {Object.entries(job.category_details).map(([key, value]) => (
-                            <div key={key}>
-                              <dt>{getJobCategoryFieldLabel(job.category, key)}</dt>
-                              <dd>{String(value)}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      )}
-
-                      {safeReferenceUrl && (
-                        <a
-                          className="job-reference-link"
-                          href={safeReferenceUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Otwórz materiały i inspiracje
-                        </a>
-                      )}
-
-                      </section>
-
-                      {collaborationPlanData ? (
-                        <>
-                          <section className="job-collaboration-section">
-                            <div className="job-collaboration-section-heading">
-                              <span>02</span>
-                              <div>
-                                <h4>Przebieg i komunikacja</h4>
-                                <p>Jak będzie wyglądała praca od rozpoczęcia do odbioru.</p>
-                              </div>
-                            </div>
-
-                            {collaborationMilestones.length > 0 && (
-                              <ol className="job-collaboration-timeline">
-                                {collaborationMilestones.map((milestone, index) => (
-                                  <li key={`${job.id}-milestone-${index}`}>
-                                    <span>{String(index + 1).padStart(2, "0")}</span>
-                                    <strong>{milestone}</strong>
-                                  </li>
-                                ))}
-                              </ol>
-                            )}
-
-                            <dl className="job-collaboration-facts">
-                              <div>
-                                <dt>Poprawki</dt>
-                                <dd>
-                                  {getJobOptionLabel(
-                                    COLLABORATION_REVISION_OPTIONS,
-                                    collaborationPlanData.revision_rounds
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt>Zatwierdzanie</dt>
-                                <dd>
-                                  {getJobOptionLabel(
-                                    COLLABORATION_APPROVAL_OPTIONS,
-                                    collaborationPlanData.approval_mode
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt>Kontakt</dt>
-                                <dd>
-                                  {getJobOptionLabel(
-                                    COLLABORATION_CONTACT_OPTIONS,
-                                    collaborationPlanData.contact_frequency
-                                  )}
-                                </dd>
-                              </div>
-                              <div>
-                                <dt>Uwagi zleceniodawcy</dt>
-                                <dd>
-                                  {getJobOptionLabel(
-                                    COLLABORATION_FEEDBACK_OPTIONS,
-                                    collaborationPlanData.feedback_time
-                                  )}
-                                </dd>
-                              </div>
-                            </dl>
-                          </section>
-
-                          <section className="job-collaboration-section">
-                            <div className="job-collaboration-section-heading">
-                              <span>03</span>
-                              <div>
-                                <h4>Odbiór i odpowiedzialność</h4>
-                                <p>Warunki ukończenia oraz obowiązki każdej strony.</p>
-                              </div>
-                            </div>
-
-                            <div className="job-collaboration-responsibility-grid">
-                              {collaborationCriteria.length > 0 && (
-                                <article>
-                                  <span>Kryteria ukończenia</span>
-                                  <ul>
-                                    {collaborationCriteria.map((criterion, index) => (
-                                      <li key={`${job.id}-criterion-${index}`}>
-                                        {criterion}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </article>
-                              )}
-
-                              {collaborationPlanData.client_responsibilities && (
-                                <article>
-                                  <span>Zleceniodawca dostarczy</span>
-                                  <p>{collaborationPlanData.client_responsibilities}</p>
-                                </article>
-                              )}
-
-                              {collaborationPlanData.contractor_responsibilities && (
-                                <article>
-                                  <span>Wykonawca dostarczy</span>
-                                  <p>{collaborationPlanData.contractor_responsibilities}</p>
-                                </article>
-                              )}
-
-                              <article>
-                                <span>Zmiany poza zakresem</span>
-                                <strong>
-                                  {getJobOptionLabel(
-                                    COLLABORATION_CHANGE_OPTIONS,
-                                    collaborationPlanData.change_policy
-                                  )}
-                                </strong>
-                                <p>
-                                  {COLLABORATION_CHANGE_OPTIONS.find(
-                                    (option) =>
-                                      option.value === collaborationPlanData.change_policy
-                                  )?.description ||
-                                    "Szczegóły zostaną ustalone przed rozpoczęciem współpracy."}
-                                </p>
-                              </article>
-                            </div>
-                          </section>
-
-                          {(collaborationRequirements.length > 0 ||
-                            collaborationQuestions.length > 0) && (
-                            <section className="job-collaboration-section">
-                              <div className="job-collaboration-section-heading">
-                                <span>04</span>
-                                <div>
-                                  <h4>Przygotuj kompletne zgłoszenie</h4>
-                                  <p>Uwzględnij poniższe informacje w swojej odpowiedzi.</p>
-                                </div>
-                              </div>
-
-                              {collaborationRequirements.length > 0 && (
-                                <div className="job-collaboration-requirements">
-                                  {collaborationRequirements.map((value) => (
-                                    <span key={`${job.id}-${value}`}>
-                                      {
-                                        COLLABORATION_APPLICATION_REQUIREMENTS.find(
-                                          (option) => option.value === value
-                                        )?.label
-                                      }
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-
-                              {collaborationQuestions.length > 0 && (
-                                <ol className="job-collaboration-questions">
-                                  {collaborationQuestions.map((question, index) => (
-                                    <li key={`${job.id}-question-${index}`}>
-                                      <span>{String(index + 1).padStart(2, "0")}</span>
-                                      <p>{question}</p>
-                                    </li>
-                                  ))}
-                                </ol>
-                              )}
-                            </section>
-                          )}
-                        </>
-                      ) : (
-                        <div className="job-collaboration-empty">
-                          <strong>Podstawowe ustalenia</strong>
-                          <p>
-                            Zleceniodawca nie dodał rozszerzonego planu. Szczegóły współpracy możecie ustalić przed rozpoczęciem projektu.
-                          </p>
-                        </div>
-                      )}
+                    <div className="job-details">
+                      <p>
+                        {
+                          job.description
+                        }
+                      </p>
 
                       <div className="job-details-actions">
                         <Link
                           to={`/profile/${job.user_id}`}
                           className="btn btn-outline"
                         >
-                          Zobacz profil zleceniodawcy 
+                          Zobacz profil zleceniodawcy →
                         </Link>
 
                         {!isOwner && (
@@ -15756,7 +14002,7 @@ function Jobs() {
                               : applyingJobId ===
                                   job.id
                               ? "Wysyłanie..."
-                              : "Zgłoś się do zlecenia "}
+                              : "Zgłoś się do zlecenia →"}
                           </button>
                         )}
 
@@ -15769,7 +14015,7 @@ function Jobs() {
                             )
                           }
                         >
-                          Ukryj plan
+                          Ukryj szczegóły ↑
                         </button>
                       </div>
 
@@ -15786,25 +14032,23 @@ function Jobs() {
 
                   {!isOpen && (
                     <div className="job-actions">
-                      <button
-                        className="btn btn-outline"
-                        type="button"
-                        aria-expanded={isOpen}
-                        onClick={() => setOpenJobId(job.id)}
-                      >
-                        Plan współpracy
-                      </button>
+                    <button
+                      className="btn btn-dark"
+                      type="button"
+                      onClick={() =>
+                        setOpenJobId(
+                          isOpen
+                            ? null
+                            : job.id
+                        )
+                      }
+                    >
+                      Zobacz zlecenie →
+                    </button>
 
-                      <Link
-                        to={`/profile/${job.user_id}`}
-                        className="btn btn-outline"
-                      >
-                        Profil zleceniodawcy
-                      </Link>
-
-                      {!isOwner && (
+                    {!isOwner && (
                         <button
-                          className="btn btn-dark"
+                          className="btn btn-outline"
                           type="button"
                           disabled={
                             !canTransact ||
@@ -15825,7 +14069,7 @@ function Jobs() {
                             : applyingJobId ===
                                 job.id
                             ? "Wysyłanie..."
-                            : "Zgłoś się do zlecenia "}
+                            : "Zgłoś się do zlecenia →"}
                         </button>
                       )}
                     </div>
@@ -16025,7 +14269,7 @@ function Talent() {
 
         <section className="talent-controls" aria-label="Wyszukiwanie wykonawców">
           <div className="talent-search-box">
-            <span aria-hidden="true"></span>
+            <span aria-hidden="true">⌕</span>
             <input
               type="search"
               value={search}
@@ -16080,7 +14324,7 @@ function Talent() {
                 className={selectedCategory === category ? "is-active" : ""}
                 onClick={() => chooseCategory(category)}
               >
-                {category === "Wszystkie" ? category : getJobCategoryLabel(category)}
+                {category}
               </button>
             ))}
           </div>
@@ -16184,7 +14428,7 @@ function Talent() {
                       </span>
                     </div>
                     <Link className="btn btn-dark" to={`/profile/${profile.id}`}>
-                      Zobacz profil 
+                      Zobacz profil →
                     </Link>
                   </div>
                 </article>
@@ -16276,7 +14520,8 @@ function Notifications() {
           .eq(
             "user_id",
             user.id
-          );
+          )
+          .eq("visibility", "public");
 
       if (jobsError) {
         throw jobsError;
@@ -17241,7 +15486,7 @@ function Notifications() {
     <div className="page">
       <AccountNavbar />
 
-      <main className="app-page notifications-page">
+      <main className="app-page">
         <div className="app-page-header">
           <span className="section-label">
             Skrzynka odbiorcza
@@ -17677,7 +15922,7 @@ function Notifications() {
                             className="btn btn-outline"
                             to={`/profile/${notification.applicant_id}`}
                           >
-                            Zobacz profil 
+                            Zobacz profil →
                           </Link>
 
                           <ApplicationActions
@@ -17743,7 +15988,7 @@ function Notifications() {
                           className="btn btn-outline notification-chat-button"
                           to={`/profile/${block.blocker_id}`}
                         >
-                          Zobacz profil 
+                          Zobacz profil →
                         </Link>
                       </article>
                     );
@@ -17777,7 +16022,7 @@ function Notifications() {
                         key={`message-${messageItem.id}`}
                       >
                         <div className="notification-message-icon" aria-hidden="true">
-                          
+                          ↗
                         </div>
 
                         <span className="section-label">
@@ -17802,7 +16047,7 @@ function Notifications() {
                           className="btn btn-dark notification-chat-button"
                           to={`/chat/${messageItem.conversation_id}`}
                         >
-                          Otwórz rozmowę 
+                          Otwórz rozmowę →
                         </Link>
                       </article>
                     );
@@ -17861,7 +16106,7 @@ function Notifications() {
                           className="btn btn-dark notification-chat-button"
                           to={`/chat/${decision.conversation.id}`}
                         >
-                          Przejdź do rozmowy 
+                          Przejdź do rozmowy →
                         </Link>
                       ) : (
                         <p
@@ -18501,19 +16746,17 @@ function Messages() {
               Twoje rozmowy
             </span>
 
-            <div className="messages-title-row">
-              <h1>Wiadomości</h1>
-
-              <div className="messages-overview" aria-label={`${conversations.length} rozmów`}>
-                <strong>{conversations.length}</strong>
-                <span>Rozmowy</span>
-              </div>
-            </div>
+            <h1>Wiadomości</h1>
 
             <p>
               Wszystkie rozmowy dotyczące aktywnych i zakończonych
               współprac w jednym, uporządkowanym miejscu.
             </p>
+          </div>
+
+          <div className="messages-overview" aria-label="Liczba rozmów">
+            <strong>{conversations.length}</strong>
+            <span>{conversations.length === 1 ? "rozmowa" : "rozmów"}</span>
           </div>
         </div>
 
@@ -19413,6 +17656,7 @@ function AgreementPanel({
   priceNegotiable,
   currentUserAccepted,
   otherUserAccepted,
+  firstProposalAuthor = "zleceniodawcy",
   blocked,
   onFieldChange,
   onOpenForm,
@@ -19852,10 +18096,12 @@ function AgreementPanel({
 
           <div>
             <h3>
-              Czekamy na propozycję zleceniodawcy
+              Czekamy na propozycję {firstProposalAuthor}
             </h3>
             <p>
-              Zleceniodawca wypełnia pierwszy formularz. Gdy go wyśle, zobaczysz wszystkie warunki i będziesz mógł je zaakceptować albo zaproponować zmiany.
+              {firstProposalAuthor === "wykonawcy"
+                ? "Wykonawca przygotowuje ofertę na podstawie briefu. Gdy ją wyśle, zobaczysz zakres, termin i cenę oraz zdecydujesz, czy je zaakceptować."
+                : "Zleceniodawca wypełnia pierwszy formularz. Gdy go wyśle, zobaczysz wszystkie warunki i będziesz mógł je zaakceptować albo zaproponować zmiany."}
             </p>
           </div>
         </div>
@@ -19891,10 +18137,6 @@ const PAYMENT_STATUS_COPY = {
     label: "Wypłata przygotowywana",
     tone: "success",
   },
-  release_failed: {
-    label: "Wypłata wymaga ponowienia",
-    tone: "error",
-  },
   released: {
     label: "Wypłacono wykonawcy",
     tone: "success",
@@ -19929,7 +18171,6 @@ const PAYMENT_WORK_ENABLED_STATUSES = new Set([
   "funds_secured",
   "work_submitted",
   "release_pending",
-  "release_failed",
   "released",
 ]);
 
@@ -19945,26 +18186,12 @@ function formatPaymentMoney(value, currency = "PLN") {
   }).format(amount);
 }
 
-function formatChatProjectDate(value) {
-  if (!value) return "Do ustalenia";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "Do ustalenia"
-    : date.toLocaleDateString("pl-PL");
-}
-
-function formatChatProjectBudget(value) {
-  const amount = Number(value);
-  return Number.isFinite(amount) && amount > 0
-    ? `${amount.toLocaleString("pl-PL")} zł`
-    : "Do ustalenia";
-}
-
 function ChatPaymentPanel({
   agreement,
   conversation,
   userId,
   blocked,
+  serviceOrder = false,
   onStatusChange,
 }) {
   const location = useLocation();
@@ -20017,16 +18244,6 @@ function ChatPaymentPanel({
   }, [loadSummary]);
 
   useEffect(() => {
-    function handlePaymentUpdate(event) {
-      if (!event?.detail?.conversationId || event.detail.conversationId === conversation?.id) {
-        loadSummary();
-      }
-    }
-    window.addEventListener("ideahire:payment-updated", handlePaymentUpdate);
-    return () => window.removeEventListener("ideahire:payment-updated", handlePaymentUpdate);
-  }, [conversation?.id, loadSummary]);
-
-  useEffect(() => {
     if (paymentReturn === "success") {
       setMessage(
         "Płatność została wysłana do potwierdzenia. Czekamy na bezpieczny komunikat ze Stripe."
@@ -20041,7 +18258,7 @@ function ChatPaymentPanel({
   useEffect(() => {
     const shouldPoll =
       paymentReturn === "success" ||
-      ["checkout_open", "processing", "release_pending"].includes(summary?.payment_status);
+      ["checkout_open", "processing"].includes(summary?.payment_status);
 
     if (!shouldPoll) return undefined;
 
@@ -20052,7 +18269,7 @@ function ChatPaymentPanel({
 
       if (
         PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status) ||
-        ["failed", "cancelled", "refunded", "disputed", "release_failed"].includes(
+        ["failed", "cancelled", "refunded", "disputed"].includes(
           nextSummary?.payment_status
         ) ||
         attempts >= 15
@@ -20181,7 +18398,9 @@ function ChatPaymentPanel({
                 ? "Otwieranie Stripe…"
                 : summary.payment_status === "processing"
                 ? "Stripe potwierdza płatność…"
-                : `Zapłać ${formatPaymentMoney(summary.total_amount, summary.currency)} — zamówienie z obowiązkiem zapłaty`}
+                : serviceOrder
+                ? "Zamawiam i płacę →"
+                : "Przejdź do bezpiecznej płatności →"}
             </button>
           )}
         </>
@@ -20196,116 +18415,6 @@ function ChatPaymentPanel({
           {message}
         </p>
       )}
-    </section>
-  );
-}
-
-function ChatProjectPlan({ job, agreement }) {
-  const plan = hasCollaborationPlan(job?.collaboration_plan)
-    ? job.collaboration_plan
-    : null;
-  const milestones = cleanCollaborationList(plan?.milestones, 3, 160);
-  const completionCriteria = cleanCollaborationList(
-    plan?.completion_criteria,
-    3,
-    240
-  );
-  const requirements = Array.isArray(plan?.application_requirements)
-    ? plan.application_requirements
-        .map((value) =>
-          getJobOptionLabel(COLLABORATION_APPLICATION_REQUIREMENTS, value, "")
-        )
-        .filter(Boolean)
-    : [];
-
-  return (
-    <section className="chat-project-plan" aria-labelledby="chat-project-plan-title">
-      <header className="chat-project-plan-header">
-        <div>
-          <span className="section-label">Wspólna mapa realizacji</span>
-          <h2 id="chat-project-plan-title">Plan współpracy</h2>
-          <p>
-            Ustalenia z ogłoszenia i zaakceptowany zakres są zebrane obok rozmowy,
-            aby obie strony pracowały na tej samej wersji informacji.
-          </p>
-        </div>
-        <span className={`chat-project-plan-status is-${agreement?.status || "draft"}`}>
-          {agreement?.status === "accepted" ? "Ustalenia zaakceptowane" : "Przed akceptacją"}
-        </span>
-      </header>
-
-      <div className="chat-project-plan-grid">
-        <article>
-          <span>Zakres projektu</span>
-          <h3>{agreement?.scope || job?.description || "Zakres do wspólnego ustalenia"}</h3>
-          {agreement?.deliverables && <p>{agreement.deliverables}</p>}
-        </article>
-        <article>
-          <span>Terminy</span>
-          <dl>
-            <div>
-              <dt>Planowany start</dt>
-              <dd>{formatChatProjectDate(job?.planned_start_date)}</dd>
-            </div>
-            <div>
-              <dt>Termin realizacji</dt>
-              <dd>{job?.project_deadline ? formatChatProjectDate(job.project_deadline) : agreement?.deadline || "Do ustalenia"}</dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-
-      {milestones.length > 0 && (
-        <section className="chat-project-plan-section">
-          <div className="chat-project-plan-section-title">
-            <span>01</span>
-            <div><h3>Etapy pracy</h3><p>Kolejność realizacji ustalona przez zleceniodawcę.</p></div>
-          </div>
-          <ol className="chat-project-plan-timeline">
-            {milestones.map((milestone, index) => (
-              <li key={`${milestone}-${index}`}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{milestone}</strong>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      <section className="chat-project-plan-section">
-        <div className="chat-project-plan-section-title">
-          <span>02</span>
-          <div><h3>Komunikacja i poprawki</h3><p>Proste zasady ograniczające nieporozumienia.</p></div>
-        </div>
-        <dl className="chat-project-plan-facts">
-          <div><dt>Kontakt</dt><dd>{getJobOptionLabel(COLLABORATION_CONTACT_OPTIONS, plan?.contact_frequency)}</dd></div>
-          <div><dt>Informacja zwrotna</dt><dd>{getJobOptionLabel(COLLABORATION_FEEDBACK_OPTIONS, plan?.feedback_time)}</dd></div>
-          <div><dt>Rundy poprawek</dt><dd>{getJobOptionLabel(COLLABORATION_REVISION_OPTIONS, plan?.revision_rounds)}</dd></div>
-          <div><dt>Odbiór</dt><dd>{getJobOptionLabel(COLLABORATION_APPROVAL_OPTIONS, plan?.approval_mode)}</dd></div>
-        </dl>
-      </section>
-
-      {(completionCriteria.length > 0 || requirements.length > 0) && (
-        <section className="chat-project-plan-section">
-          <div className="chat-project-plan-section-title">
-            <span>03</span>
-            <div><h3>Warunki zakończenia</h3><p>Co powinno być sprawdzone przed odbiorem pracy.</p></div>
-          </div>
-          <div className="chat-project-plan-checklists">
-            {completionCriteria.length > 0 && (
-              <div><strong>Kryteria odbioru</strong><ul>{completionCriteria.map((item) => <li key={item}>{item}</li>)}</ul></div>
-            )}
-            {requirements.length > 0 && (
-              <div><strong>Wymagane informacje</strong><ul>{requirements.map((item) => <li key={item}>{item}</li>)}</ul></div>
-            )}
-          </div>
-        </section>
-      )}
-
-      <p className="chat-project-plan-note">
-        Plan porządkuje współpracę. Nie zastępuje wymaganej prawem formy
-        przeniesienia autorskich praw majątkowych ani licencji wyłącznej.
-      </p>
     </section>
   );
 }
@@ -20361,12 +18470,6 @@ function Chat() {
 
   const [jobBudgetNegotiable, setJobBudgetNegotiable] =
     useState(false);
-
-  const [jobDetails, setJobDetails] =
-    useState(null);
-
-  const [workspaceTab, setWorkspaceTab] =
-    useState("conversation");
 
   const [agreement, setAgreement] =
     useState(null);
@@ -20434,10 +18537,12 @@ function Chat() {
       setAgreement(data || null);
 
       if (!data) {
-        if (
-          conversationData.client_id ===
-          user?.id
-        ) {
+        const firstProposerId =
+          conversationData.first_proposer_role === "contractor"
+            ? conversationData.contractor_id
+            : conversationData.client_id;
+
+        if (firstProposerId === user?.id) {
           setAgreementForm(
             agreementToForm(
               null,
@@ -20566,7 +18671,7 @@ function Chat() {
         } = await supabase
           .from("conversations")
           .select(
-            "id, job_id, client_id, contractor_id, agreements_required, created_at"
+            "id, job_id, client_id, contractor_id, agreements_required, origin_type, origin_id, first_proposer_role, created_at"
           )
           .eq("id", id)
           .single();
@@ -20632,9 +18737,7 @@ function Chat() {
 
           supabase
             .from("jobs")
-            .select(
-              "title, budget, budget_negotiable, category, subcategory, collaboration_plan, project_deadline, planned_start_date, description"
-            )
+            .select("title, budget, budget_negotiable")
             .eq(
               "id",
               conversationData.job_id
@@ -20696,8 +18799,6 @@ function Chat() {
         setJobBudgetNegotiable(
           loadedJobBudgetNegotiable
         );
-
-        setJobDetails(jobResult.data || null);
 
         if (mounted) {
           setOtherProfile(
@@ -20937,11 +19038,14 @@ function Chat() {
 
     if (
       !agreement &&
-      conversation?.client_id !==
-        user.id
+      (conversation?.first_proposer_role === "contractor"
+        ? conversation?.contractor_id
+        : conversation?.client_id) !== user.id
     ) {
       setAgreementMessage(
-        "Pierwszą propozycję warunków wysyła zleceniodawca."
+        conversation?.first_proposer_role === "contractor"
+          ? "Pierwszą ofertę przygotowuje wykonawca."
+          : "Pierwszą propozycję warunków wysyła zleceniodawca."
       );
       return;
     }
@@ -21721,7 +19825,7 @@ function Chat() {
                     )
                   }
                 >
-                  <span aria-hidden="true"></span>
+                  <span aria-hidden="true">←</span>
                   <b>Wróć</b>
                 </button>
 
@@ -21824,41 +19928,61 @@ function Chat() {
                 </div>
               </header>
 
-              <section className="chat-workspace-summary" aria-label="Podsumowanie projektu">
-                <div className="chat-workspace-summary-main">
-                  <span className="section-label">
-                    {getJobCategoryLabel(jobDetails?.category)}
-                    {jobDetails?.subcategory ? ` · ${jobDetails.subcategory}` : ""}
+              {conversation?.origin_type === "service_inquiry" && (
+                <section className="chat-service-context">
+                  <span className="chat-service-context-mark" aria-hidden="true">
+                    ◇
                   </span>
-                  <h1>{jobTitle || "Projekt IdeaHire"}</h1>
-                  <p>{jobDetails?.description || "Rozmowa i materiały dotyczące tego zlecenia."}</p>
-                </div>
-                <div className="chat-workspace-summary-facts">
-                  <span><small>Budżet</small><strong>{formatChatProjectBudget(jobBudget)}</strong></span>
-                  <span><small>Ustalenia</small><strong>{agreement?.status === "accepted" ? "Zaakceptowane" : "W toku"}</strong></span>
-                  <span><small>Materiały</small><strong>{privateWork.items.filter((item) => item.moderation_status === "active").length}</strong></span>
-                </div>
-              </section>
+                  <div>
+                    <span>Rozmowa o usłudze</span>
+                    <strong>{jobTitle || "Indywidualna realizacja"}</strong>
+                    <small>
+                      {isClient
+                        ? "Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności."
+                        : "Przygotuj pierwszą ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny."}
+                    </small>
+                  </div>
+                  <Link to={`/services/${conversation.origin_id}`}>
+                    Zobacz usługę
+                  </Link>
+                </section>
+              )}
 
-              <div className="chat-workspace-tabs" role="tablist" aria-label="Przestrzeń projektu">
-                {[
-                  ["conversation", "Rozmowa", messages.length],
-                  ["files", "Pliki", privateWork.items.filter((item) => item.moderation_status === "active").length],
-                  ["plan", "Plan współpracy", agreement?.status === "accepted" ? "✓" : ""],
-                ].map(([value, label, count]) => (
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={workspaceTab === value}
-                    className={workspaceTab === value ? "is-active" : ""}
-                    onClick={() => setWorkspaceTab(value)}
-                    key={value}
-                  >
-                    <span>{label}</span>
-                    {count !== "" && <b>{count}</b>}
-                  </button>
-                ))}
-              </div>
+              <AgreementPanel
+                required={agreementsRequired}
+                agreement={agreement}
+                loading={agreementLoading}
+                saving={agreementSaving}
+                mode={agreementMode}
+                form={agreementForm}
+                message={agreementMessage}
+                priceNegotiable={jobBudgetNegotiable}
+                currentUserAccepted={currentUserAccepted}
+                otherUserAccepted={otherUserAccepted}
+                firstProposalAuthor={
+                  conversation?.first_proposer_role === "contractor"
+                    ? "wykonawcy"
+                    : "zleceniodawcy"
+                }
+                blocked={messagingBlocked}
+                onFieldChange={updateAgreementField}
+                onOpenForm={openAgreementForm}
+                onCancelForm={() => {
+                  setAgreementMode("view");
+                  setAgreementMessage("");
+                }}
+                onSubmit={handleAgreementSubmit}
+                onAccept={handleAgreementAccept}
+              />
+
+              <ChatPaymentPanel
+                agreement={agreement}
+                conversation={conversation}
+                userId={user?.id}
+                blocked={messagingBlocked}
+                serviceOrder={conversation?.origin_type === "service_inquiry"}
+                onStatusChange={setPaymentStatus}
+              />
 
               <ChatDisputePanel
                 agreement={agreement}
@@ -21867,176 +19991,215 @@ function Chat() {
                 launcherHidden
               />
 
-              <div
-                className={`chat-workspace-panel is-${workspaceTab}`}
-                role="tabpanel"
-                key={workspaceTab}
-              >
-                {workspaceTab === "conversation" && (
-                  <>
-                    {agreementsRequired && !agreementAccepted && (
-                      <p className="agreement-negotiation-banner">
-                        Czat negocjacyjny jest otwarty. Możecie omawiać i zmieniać propozycję, ale realizacja zlecenia rozpocznie się dopiero po wspólnej akceptacji warunków.
-                      </p>
-                    )}
+              {paymentConfirmed && (
+                <WorkDeliveryPanel
+                  deliveries={privateWork.deliveries}
+                  events={privateWork.events}
+                  conversation={conversation}
+                  userId={user?.id}
+                  disabled={messagingBlocked}
+                  onComplete={async () => {
+                    await Promise.all([
+                      privateWork.reload(),
+                      loadMessages(),
+                    ]);
+                  }}
+                  onReport={(type, targetId) =>
+                    privateWork.setReportTarget({
+                      type,
+                      id: targetId,
+                    })
+                  }
+                />
+              )}
 
-                    <div className="chat-messages">
-                      {messages.length === 0 ? (
-                        <div className="chat-empty">
-                          Rozmowa została otwarta. Napisz pierwszą wiadomość i ustal szczegóły współpracy.
-                        </div>
-                      ) : (
-                        messages.map((message) => (
-                          <React.Fragment key={message.id}>
-                            <div
-                              className={`chat-message ${message.sender_id === user.id ? "is-mine" : "is-theirs"}`}
-                            >
-                              <MessageText text={message.content} />
-                              <PrivateMessageMaterials
-                                items={privateWork.itemsByMessage[message.id] || []}
-                                signedUrls={privateWork.signedUrls}
-                                ownMessage={message.sender_id === user.id}
-                                onReport={(type, targetId) =>
-                                  privateWork.setReportTarget({ type, id: targetId })
-                                }
-                              />
-                              {message.sender_id !== user.id && message.moderation_status !== "hidden" && (
-                                <details className="chat-message-actions">
-                                  <summary aria-label="Opcje wiadomości" title="Opcje wiadomości">•••</summary>
-                                  <button
-                                    type="button"
-                                    onClick={(event) => {
-                                      event.currentTarget.closest("details")?.removeAttribute("open");
-                                      privateWork.setReportTarget({ type: "message", id: message.id });
-                                    }}
-                                  >
-                                    Zgłoś wiadomość
-                                  </button>
-                                </details>
-                              )}
-                              <time>
-                                {new Date(message.created_at).toLocaleTimeString("pl-PL", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </time>
-                            </div>
-                            {message.id === lastReadOwnMessageId && (
-                              <span className="chat-read-receipt">Wyświetlono</span>
-                            )}
-                          </React.Fragment>
-                        ))
-                      )}
-                    </div>
+              {agreementsRequired &&
+                !agreementAccepted && (
+                  <p className="agreement-negotiation-banner">
+                    Czat negocjacyjny jest otwarty. Możecie omawiać i zmieniać propozycję, ale realizacja zlecenia rozpocznie się dopiero po wspólnej akceptacji warunków.
+                  </p>
+                )}
 
-                    {errorMessage && <p className="chat-error">{errorMessage}</p>}
-                    {messagingBlocked && (
-                      <p className="chat-block-banner">
-                        {blockedByMe
-                          ? "Zablokowałeś tego użytkownika. Otwórz ukryty profil i użyj menu z trzema kropkami, aby go odblokować."
-                          : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
-                      </p>
-                    )}
-
-                    <form className="chat-form" onSubmit={handleSend}>
-                      <textarea
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        placeholder="Napisz wiadomość…"
-                        maxLength={4000}
-                        disabled={sending || messagingBlocked}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" && !event.shiftKey) {
-                            event.preventDefault();
-                            event.currentTarget.form?.requestSubmit();
-                          }
-                        }}
-                      />
-                      <button
-                        type="submit"
-                        className="chat-send"
-                        disabled={sending || !draft.trim() || messagingBlocked}
+              <div className="chat-messages">
+                {messages.length === 0 ? (
+                  <div className="chat-empty">
+                    Rozmowa została otwarta.
+                    Napisz pierwszą wiadomość
+                    i ustal szczegóły współpracy.
+                  </div>
+                ) : (
+                  messages.map(
+                    (message) => (
+                      <React.Fragment
+                        key={message.id}
                       >
-                        {sending ? "Wysyłanie…" : "Wyślij"}
-                      </button>
-                    </form>
-                  </>
-                )}
+                        <div
+                          className={`chat-message ${
+                            message.sender_id ===
+                            user.id
+                              ? "is-mine"
+                              : "is-theirs"
+                          }`}
+                        >
+                          <MessageText
+                            text={message.content}
+                          />
 
-                {workspaceTab === "files" && (
-                  <>
-                    {paymentConfirmed && (
-                      <WorkDeliveryPanel
-                        deliveries={privateWork.deliveries}
-                        events={privateWork.events}
-                        conversation={conversation}
-                        userId={user?.id}
-                        disabled={messagingBlocked}
-                        onComplete={async () => {
-                          await Promise.all([privateWork.reload(), loadMessages()]);
-                        }}
-                        onReport={(type, targetId) =>
-                          privateWork.setReportTarget({ type, id: targetId })
-                        }
-                      />
-                    )}
-                    <ProjectFilesPanel
-                      items={privateWork.items}
-                      signedUrls={privateWork.signedUrls}
-                      userId={user?.id}
-                      loading={privateWork.loading}
-                      error={privateWork.error}
-                      onReport={(type, targetId) =>
-                        privateWork.setReportTarget({ type, id: targetId })
-                      }
-                    />
-                    <PrivateSharePanel
-                      conversationId={id}
-                      userId={user?.id}
-                      disabled={messagingBlocked || privateWork.loading}
-                      agreementAccepted={agreement?.status === "accepted"}
-                      isContractor={!isClient}
-                      onComplete={async () => {
-                        await Promise.all([privateWork.reload(), loadMessages()]);
-                      }}
-                    />
-                  </>
-                )}
+                          <PrivateMessageMaterials
+                            items={
+                              privateWork.itemsByMessage[
+                                message.id
+                              ] || []
+                            }
+                            signedUrls={
+                              privateWork.signedUrls
+                            }
+                            ownMessage={
+                              message.sender_id ===
+                              user.id
+                            }
+                            onReport={(type, targetId) =>
+                              privateWork.setReportTarget({
+                                type,
+                                id: targetId,
+                              })
+                            }
+                          />
 
-                {workspaceTab === "plan" && (
-                  <>
-                    <ChatProjectPlan job={jobDetails} agreement={agreement} />
-                    <AgreementPanel
-                      required={agreementsRequired}
-                      agreement={agreement}
-                      loading={agreementLoading}
-                      saving={agreementSaving}
-                      mode={agreementMode}
-                      form={agreementForm}
-                      message={agreementMessage}
-                      priceNegotiable={jobBudgetNegotiable}
-                      currentUserAccepted={currentUserAccepted}
-                      otherUserAccepted={otherUserAccepted}
-                      blocked={messagingBlocked}
-                      onFieldChange={updateAgreementField}
-                      onOpenForm={openAgreementForm}
-                      onCancelForm={() => {
-                        setAgreementMode("view");
-                        setAgreementMessage("");
-                      }}
-                      onSubmit={handleAgreementSubmit}
-                      onAccept={handleAgreementAccept}
-                    />
-                    <ChatPaymentPanel
-                      agreement={agreement}
-                      conversation={conversation}
-                      userId={user?.id}
-                      blocked={messagingBlocked}
-                      onStatusChange={setPaymentStatus}
-                    />
-                  </>
+                          {message.sender_id !==
+                            user.id &&
+                            message.moderation_status !==
+                              "hidden" && (
+                              <details className="chat-message-actions">
+                                <summary aria-label="Opcje wiadomości" title="Opcje wiadomości">•••</summary>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.currentTarget.closest("details")?.removeAttribute("open");
+                                    privateWork.setReportTarget({
+                                      type: "message",
+                                      id: message.id,
+                                    });
+                                  }}
+                                >
+                                  Zgłoś wiadomość
+                                </button>
+                              </details>
+                            )}
+
+                          <time>
+                            {new Date(
+                              message.created_at
+                            ).toLocaleTimeString(
+                              "pl-PL",
+                              {
+                                hour:
+                                  "2-digit",
+                                minute:
+                                  "2-digit",
+                              }
+                            )}
+                          </time>
+                        </div>
+
+                        {message.id ===
+                          lastReadOwnMessageId && (
+                          <span className="chat-read-receipt">
+                            Wyświetlono
+                          </span>
+                        )}
+                      </React.Fragment>
+                    )
+                  )
                 )}
               </div>
+
+              {errorMessage && (
+                <p className="chat-error">
+                  {errorMessage}
+                </p>
+              )}
+
+              {messagingBlocked && (
+                <p className="chat-block-banner">
+                  {blockedByMe
+                    ? "Zablokowałeś tego użytkownika. Otwórz ukryty profil i użyj menu z trzema kropkami, aby go odblokować."
+                    : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
+                </p>
+              )}
+
+              {privateWork.error && (
+                <p className="chat-error">
+                  {privateWork.error}
+                </p>
+              )}
+
+              <PrivateSharePanel
+                conversationId={id}
+                userId={user?.id}
+                disabled={
+                  messagingBlocked ||
+                  privateWork.loading
+                }
+                agreementAccepted={
+                  agreement?.status === "accepted"
+                }
+                isContractor={!isClient}
+                onComplete={async () => {
+                  await Promise.all([
+                    privateWork.reload(),
+                    loadMessages(),
+                  ]);
+                }}
+              />
+
+              <form
+                className="chat-form"
+                onSubmit={
+                  handleSend
+                }
+              >
+                <textarea
+                  value={draft}
+                  onChange={(event) =>
+                    setDraft(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Napisz wiadomość..."
+                  maxLength={4000}
+                  disabled={
+                    sending ||
+                    messagingBlocked
+                  }
+                  onKeyDown={(event) => {
+                    if (
+                      event.key ===
+                        "Enter" &&
+                      !event.shiftKey
+                    ) {
+                      event.preventDefault();
+                      event.currentTarget
+                        .form
+                        ?.requestSubmit();
+                    }
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  className="chat-send"
+                  disabled={
+                    sending ||
+                    !draft.trim() ||
+                    messagingBlocked
+                  }
+                >
+                  {sending
+                    ? "Wysyłanie..."
+                    : "Wyślij"}
+                </button>
+              </form>
 
               <PrivateReportDialog
                 target={privateWork.reportTarget}
@@ -22169,7 +20332,7 @@ function DisputeListCard({ dispute, userId, adminView = false }) {
       </div>
 
       <span className="dispute-card-arrow" aria-hidden="true">
-        
+        →
       </span>
     </Link>
   );
@@ -23156,7 +21319,7 @@ function DisputeDetails() {
       <main className="disputes-shell dispute-details-shell">
         <div className="dispute-back-row">
           <Link to={isStaff ? "/admin" : "/disputes"}>
-             {isStaff ? "Panel administratora" : "Centrum sporów"}
+            ← {isStaff ? "Panel administratora" : "Centrum sporów"}
           </Link>
         </div>
 
@@ -23467,7 +21630,7 @@ function DisputeDetails() {
                 <div className="dispute-evidence-list">
                   {evidence.map((item) => (
                     <article className="dispute-evidence-item" key={item.id}>
-                      <span className="dispute-evidence-icon" aria-hidden="true"></span>
+                      <span className="dispute-evidence-icon" aria-hidden="true">↗</span>
                       <div>
                         <strong>{item.original_file_name}</strong>
                         <small>
@@ -24265,7 +22428,7 @@ function AdminJobs() {
             >
               <option value="Wszystkie">Wszystkie</option>
               {JOB_CATEGORIES.map((item) => (
-                <option value={item} key={item}>{getJobCategoryLabel(item)}</option>
+                <option value={item} key={item}>{item}</option>
               ))}
             </select>
           </label>
@@ -24292,9 +22455,7 @@ function AdminJobs() {
               return (
                 <article className="admin-job-card" key={job.id}>
                   <div className="admin-job-card-topline">
-                    <span className="section-label">
-                      {job.category ? getJobCategoryLabel(job.category) : "Bez kategorii"}
-                    </span>
+                    <span className="section-label">{job.category || "Bez kategorii"}</span>
                     <span className="admin-readonly-badge is-small">Podgląd</span>
                   </div>
 
@@ -24328,7 +22489,7 @@ function AdminJobs() {
                     className="privacy-admin-account-link"
                     href={`/admin/moderation/job/${encodeURIComponent(job.id)}`}
                   >
-                    Przejdź do moderacji konta 
+                    Przejdź do moderacji konta →
                   </a>
                 </article>
               );
@@ -25764,7 +23925,7 @@ function AdminModeration() {
                                   ) : (
                                     <span aria-hidden="true">
                                       {item.external_url
-                                        ? ""
+                                        ? "↗"
                                         : item.mime_type ===
                                           "application/pdf"
                                         ? "PDF"
@@ -25805,7 +23966,7 @@ function AdminModeration() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          Otwórz lokalizację 
+                          Otwórz lokalizację ↗
                         </a>
                       )}
                       <button
@@ -25991,7 +24152,7 @@ function AdminModeration() {
                   className="privacy-secondary-button"
                   to={`/admin/privacy/users/${selectedUserId}`}
                 >
-                  Otwórz administracyjny widok konta 
+                  Otwórz administracyjny widok konta →
                 </Link>
               </div>
             )}
@@ -26940,7 +25101,7 @@ function AdminUserPrivacyAccount() {
 
       <main className="admin-shell erasure-account-shell">
         <Link className="privacy-back-link" to="/admin/privacy">
-           Wróć do wniosków RODO
+          ← Wróć do wniosków RODO
         </Link>
 
         {loading ? (
@@ -28388,7 +26549,7 @@ function AdminPrivacyRequests() {
                           className="privacy-admin-account-link"
                           to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
                         >
-                          Otwórz konto i kontrolę usunięcia danych 
+                          Otwórz konto i kontrolę usunięcia danych →
                         </Link>
                       </>
                     )}
@@ -29473,36 +27634,12 @@ function SmoothRouteTransitions() {
       const nextAddress =
         `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
 
-      const isSameDocument =
-        nextUrl.pathname === location.pathname &&
-        nextUrl.search === location.search;
-
-      if (isSameDocument && nextUrl.hash) {
-        event.preventDefault();
-
-        const targetId = decodeURIComponent(
-          nextUrl.hash.slice(1)
-        );
-
-        if (nextAddress !== currentAddress) {
-          navigate(nextAddress);
-        }
-
-        window.requestAnimationFrame(() => {
-          document
-            .getElementById(targetId)
-            ?.scrollIntoView({
-              block: "start",
-              behavior: "smooth",
-            });
-        });
-
-        return;
-      }
-
       if (
         nextAddress === currentAddress ||
-        isSameDocument
+        (
+          nextUrl.pathname === location.pathname &&
+          nextUrl.search === location.search
+        )
       ) {
         return;
       }
@@ -29574,6 +27711,21 @@ function RouteScrollManager() {
 /* =========================================================
    ROUTER
 ========================================================= */
+
+function ServiceRoute({ mode }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  return (
+    <ServiceMarketplace
+      mode={mode}
+      supabase={supabase}
+      user={user}
+      navigate={navigate}
+      Navbar={AccountNavbar}
+    />
+  );
+}
 
 function Router() {
   return (
@@ -29768,6 +27920,61 @@ function Router() {
               <ProtectedRoute>
                 <UserOnlyRoute allowLimited>
                   <Talent />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute allowLimited>
+                  <ServiceRoute mode="list" />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/services/new"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute>
+                  <ServiceRoute mode="new" />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/services/mine"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute>
+                  <ServiceRoute mode="mine" />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/services/:id/edit"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute>
+                  <ServiceRoute mode="edit" />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/services/:id"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute allowLimited>
+                  <ServiceRoute mode="detail" />
                 </UserOnlyRoute>
               </ProtectedRoute>
             }
