@@ -52203,3 +52203,604 @@ html[data-template="classic"][data-theme="dark"] .chat-service-context div > sma
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ========================================================================== */
+/* IDEAHIRE — REJESTRACJA I ONBOARDING PROFILU V2 / 2026-10-02               */
+/* Pełne nadpisania końcowe: jasny, ciemny i klasyczny czarno-biały szablon.  */
+/* ========================================================================== */
+
+#root {
+  --ih-onboarding-accent: #2477e8;
+  --ih-onboarding-accent-strong: #155fc5;
+  --ih-onboarding-accent-soft: rgba(36, 119, 232, 0.1);
+  --ih-onboarding-surface: #ffffff;
+  --ih-onboarding-surface-soft: #f6f8fb;
+  --ih-onboarding-text: #111827;
+  --ih-onboarding-muted: #667085;
+  --ih-onboarding-border: rgba(17, 24, 39, 0.14);
+  --ih-onboarding-shadow: 0 20px 55px rgba(15, 23, 42, 0.1);
+}
+
+html[data-theme="dark"] #root {
+  --ih-onboarding-accent: #7dd8ff;
+  --ih-onboarding-accent-strong: #b9ebff;
+  --ih-onboarding-accent-soft: rgba(125, 216, 255, 0.13);
+  --ih-onboarding-surface: #15191f;
+  --ih-onboarding-surface-soft: #1d232b;
+  --ih-onboarding-text: #f7f7f4;
+  --ih-onboarding-muted: #b8c0ca;
+  --ih-onboarding-border: rgba(255, 255, 255, 0.18);
+  --ih-onboarding-shadow: 0 22px 60px rgba(0, 0, 0, 0.34);
+}
+
+html[data-template="classic"] #root {
+  --ih-onboarding-accent: #111111;
+  --ih-onboarding-accent-strong: #000000;
+  --ih-onboarding-accent-soft: rgba(0, 0, 0, 0.07);
+  --ih-onboarding-surface: #ffffff;
+  --ih-onboarding-surface-soft: #f5f5f2;
+  --ih-onboarding-text: #111111;
+  --ih-onboarding-muted: #62625e;
+  --ih-onboarding-border: rgba(0, 0, 0, 0.18);
+  --ih-onboarding-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+html[data-template="classic"][data-theme="dark"] #root {
+  --ih-onboarding-accent: #ffffff;
+  --ih-onboarding-accent-strong: #ffffff;
+  --ih-onboarding-accent-soft: rgba(255, 255, 255, 0.1);
+  --ih-onboarding-surface: #111111;
+  --ih-onboarding-surface-soft: #1b1b19;
+  --ih-onboarding-text: #ffffff;
+  --ih-onboarding-muted: #bcbcb5;
+  --ih-onboarding-border: rgba(255, 255, 255, 0.22);
+  --ih-onboarding-shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+}
+
+/* Rejestracja — wybór sposobu korzystania */
+
+.registration-role-section {
+  display: grid;
+  gap: 18px;
+  margin: 24px 0;
+  padding: 22px;
+  color: var(--ih-onboarding-text);
+  background: var(--ih-onboarding-surface-soft);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 24px;
+}
+
+.registration-role-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.registration-role-heading > span {
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.registration-role-heading h2,
+.registration-role-heading p {
+  margin: 0;
+}
+
+.registration-role-heading h2 {
+  color: var(--ih-onboarding-text);
+  font-size: clamp(21px, 2.4vw, 28px);
+  line-height: 1.12;
+}
+
+.registration-role-heading p {
+  max-width: 60ch;
+  color: var(--ih-onboarding-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.registration-role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.registration-role-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 162px;
+  padding: 17px 42px 17px 17px;
+  color: var(--ih-onboarding-text);
+  text-align: left;
+  background: var(--ih-onboarding-surface);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease,
+    background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.registration-role-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ih-onboarding-accent);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+}
+
+.registration-role-card:focus-visible {
+  outline: 3px solid var(--ih-onboarding-accent-soft);
+  outline-offset: 3px;
+}
+
+.registration-role-card.is-selected {
+  background: var(--ih-onboarding-accent-soft);
+  border-color: var(--ih-onboarding-accent);
+  box-shadow: inset 0 0 0 1px var(--ih-onboarding-accent);
+}
+
+.registration-role-card small {
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.registration-role-card strong {
+  color: var(--ih-onboarding-text);
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.registration-role-card > span {
+  color: var(--ih-onboarding-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.registration-role-card > i {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 900;
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 9px;
+}
+
+.registration-role-card.is-selected > i {
+  color: var(--ih-onboarding-surface);
+  background: var(--ih-onboarding-accent);
+  border-color: var(--ih-onboarding-accent);
+}
+
+html[data-template="classic"][data-theme="dark"]
+  .registration-role-card.is-selected > i {
+  color: #111111;
+}
+
+.registration-role-note {
+  margin: 0;
+  padding-top: 13px;
+  color: var(--ih-onboarding-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  border-top: 1px solid var(--ih-onboarding-border);
+}
+
+/* Onboarding — pola rozszerzone */
+
+.discovery-legal-note,
+.discovery-category-context,
+.discovery-readiness-fieldset,
+.discovery-specialization-field {
+  color: var(--ih-onboarding-text);
+  background: var(--ih-onboarding-surface-soft);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 18px;
+}
+
+.discovery-legal-note {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px 16px;
+}
+
+.discovery-legal-note > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 13px;
+  font-weight: 900;
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 10px;
+}
+
+.discovery-legal-note p {
+  margin: 3px 0 0;
+  color: var(--ih-onboarding-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.discovery-category-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  width: min(100%, 520px);
+  padding: 6px;
+  margin-bottom: 15px;
+  background: var(--ih-onboarding-surface-soft);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 16px;
+}
+
+.discovery-category-switch button {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 8px 12px;
+  color: var(--ih-onboarding-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+.discovery-category-switch button.is-selected {
+  color: var(--ih-onboarding-text);
+  background: var(--ih-onboarding-surface);
+  border-color: var(--ih-onboarding-border);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+}
+
+.discovery-category-switch strong {
+  display: grid;
+  min-width: 34px;
+  min-height: 26px;
+  place-items: center;
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 11px;
+  background: var(--ih-onboarding-accent-soft);
+  border-radius: 8px;
+}
+
+.discovery-category-context {
+  display: flex;
+  gap: 10px 22px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  margin-bottom: 14px;
+}
+
+.discovery-category-context strong {
+  color: var(--ih-onboarding-text);
+  font-size: 13px;
+}
+
+.discovery-category-context span {
+  color: var(--ih-onboarding-muted);
+  font-size: 12px;
+}
+
+.discovery-specialization-field {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.discovery-specialization-field > span,
+.discovery-readiness-fieldset legend {
+  color: var(--ih-onboarding-text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.discovery-specialization-field input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 13px;
+  color: var(--ih-onboarding-text);
+  background: var(--ih-onboarding-surface);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 12px;
+}
+
+.discovery-specialization-field input:focus {
+  outline: 2px solid var(--ih-onboarding-accent);
+  outline-offset: 2px;
+}
+
+.discovery-specialization-field small {
+  color: var(--ih-onboarding-muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.discovery-goal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.discovery-goal-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 30px;
+  gap: 4px 12px;
+  align-items: center;
+  min-height: 106px;
+  padding: 15px;
+  color: var(--ih-onboarding-text);
+  text-align: left;
+  background: var(--ih-onboarding-surface);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: transform 180ms ease, border-color 180ms ease,
+    background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.discovery-goal-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ih-onboarding-accent);
+}
+
+.discovery-goal-card:focus-visible {
+  outline: 3px solid var(--ih-onboarding-accent-soft);
+  outline-offset: 3px;
+}
+
+.discovery-goal-card.is-selected {
+  background: var(--ih-onboarding-accent-soft);
+  border-color: var(--ih-onboarding-accent);
+  box-shadow: inset 0 0 0 1px var(--ih-onboarding-accent);
+}
+
+.discovery-goal-card > span {
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 11px;
+  font-weight: 900;
+  background: var(--ih-onboarding-accent-soft);
+  border-radius: 13px;
+}
+
+.discovery-goal-card strong {
+  color: var(--ih-onboarding-text);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.discovery-goal-card small {
+  grid-column: 2;
+  color: var(--ih-onboarding-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.discovery-goal-card > i {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: var(--ih-onboarding-accent-strong);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 900;
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 9px;
+}
+
+.discovery-goal-card.is-selected > i {
+  color: var(--ih-onboarding-surface);
+  background: var(--ih-onboarding-accent);
+  border-color: var(--ih-onboarding-accent);
+}
+
+html[data-template="classic"][data-theme="dark"]
+  .discovery-goal-card.is-selected > i {
+  color: #111111;
+}
+
+.discovery-readiness-fieldset {
+  min-width: 0;
+  padding: 15px;
+  margin: 18px 0 0;
+}
+
+.discovery-readiness-fieldset legend {
+  padding: 0 8px;
+}
+
+.discovery-readiness-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.discovery-readiness-grid label {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  padding: 13px;
+  background: var(--ih-onboarding-surface);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.discovery-readiness-grid label.is-selected {
+  background: var(--ih-onboarding-accent-soft);
+  border-color: var(--ih-onboarding-accent);
+  box-shadow: inset 0 0 0 1px var(--ih-onboarding-accent);
+}
+
+.discovery-readiness-grid input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.discovery-readiness-grid label:focus-within {
+  outline: 3px solid var(--ih-onboarding-accent-soft);
+  outline-offset: 2px;
+}
+
+.discovery-readiness-grid strong {
+  color: var(--ih-onboarding-text);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.discovery-readiness-grid small {
+  color: var(--ih-onboarding-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+/* Konto — czytelne grupy preferencji */
+
+.discovery-settings-group {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.discovery-settings-group > strong {
+  color: var(--ih-onboarding-text);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.discovery-settings-tags.is-secondary span {
+  color: var(--ih-onboarding-text);
+  background: var(--ih-onboarding-surface-soft);
+  border-color: var(--ih-onboarding-border);
+}
+
+.discovery-settings-readiness {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 15px;
+  margin-top: 16px;
+  color: var(--ih-onboarding-text);
+  background: var(--ih-onboarding-surface-soft);
+  border: 1px solid var(--ih-onboarding-border);
+  border-radius: 14px;
+}
+
+.discovery-settings-readiness span {
+  color: var(--ih-onboarding-muted);
+  font-size: 12px;
+}
+
+.discovery-settings-readiness strong {
+  color: var(--ih-onboarding-text);
+  font-size: 13px;
+  text-align: right;
+}
+
+/* Zawsze czytelne teksty nowych elementów w ciemnym wariancie. */
+
+html[data-theme="dark"] #root :is(
+  .registration-role-section,
+  .registration-role-card,
+  .discovery-legal-note,
+  .discovery-category-context,
+  .discovery-specialization-field,
+  .discovery-goal-card,
+  .discovery-readiness-fieldset,
+  .discovery-readiness-grid label,
+  .discovery-settings-readiness
+) {
+  color: var(--ih-onboarding-text);
+}
+
+@media (max-width: 880px) {
+  .registration-role-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .registration-role-card {
+    min-height: 120px;
+  }
+
+  .discovery-readiness-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .registration-role-section {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .registration-role-card {
+    min-height: 0;
+    padding: 15px 42px 15px 15px;
+  }
+
+  .discovery-category-switch,
+  .discovery-goal-grid,
+  .discovery-readiness-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .discovery-category-context,
+  .discovery-settings-readiness {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .discovery-goal-card {
+    min-height: 94px;
+  }
+
+  .discovery-readiness-grid label {
+    min-height: 80px;
+  }
+
+  .discovery-settings-readiness strong {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .registration-role-card,
+  .discovery-goal-card,
+  .discovery-category-switch button,
+  .discovery-readiness-grid label {
+    animation: none !important;
+    transition: none !important;
+  }
+}
