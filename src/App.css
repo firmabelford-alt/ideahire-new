@@ -52804,3 +52804,91 @@ html[data-theme="dark"] #root :is(
     transition: none !important;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* ONBOARDING V2.1 — PEWNE KLIKNIĘCIE „DALEJ” I WIDOCZNA WALIDACJA           */
+/* -------------------------------------------------------------------------- */
+
+#root .discovery-onboarding-footer {
+  position: relative;
+  z-index: 50;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+#root .discovery-onboarding-footer > * {
+  position: relative;
+  z-index: 51;
+}
+
+#root .discovery-primary-button,
+#root .discovery-text-button {
+  cursor: pointer;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+}
+
+#root .discovery-primary-button:disabled,
+#root .discovery-text-button:disabled {
+  cursor: wait;
+  pointer-events: none !important;
+}
+
+.discovery-footer-message {
+  display: block;
+  min-height: 18px;
+  padding: 0 14px;
+  overflow: hidden;
+  color: #a13f35;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.45;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.discovery-footer-message.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html[data-theme="dark"] .discovery-footer-message,
+html[data-template="classic"][data-theme="dark"] .discovery-footer-message {
+  color: #ffb9ae;
+}
+
+@media (max-width: 600px) {
+  #root .discovery-onboarding-footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px 12px;
+    min-height: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #root .discovery-onboarding-footer > div {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #root .discovery-onboarding-footer > .discovery-footer-message {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  #root .discovery-onboarding-footer > .discovery-primary-button {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discovery-footer-message {
+    transition: none !important;
+  }
+}
