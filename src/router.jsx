@@ -1204,27 +1204,27 @@ const DiscoveryPreferencesContext = createContext(null);
 const DISCOVERY_USAGE_OPTIONS = [
   {
     value: "find_work",
-    eyebrow: "Chcę realizować projekty",
-    title: "Znajdź zlecenia",
+    eyebrow: "Realizuję projekty",
+    title: "Działam jako freelancer",
     description:
-      "Na początku pokażemy wyżej projekty z kategorii, które Cię interesują.",
-    icon: "",
+      "Chcę znajdować zlecenia, rozwijać profil i oferować własne usługi.",
+    icon: "01",
   },
   {
     value: "hire_talent",
-    eyebrow: "Chcę zlecać pracę",
-    title: "Znajdź wykonawców",
+    eyebrow: "Zlecam projekty",
+    title: "Działam jako zleceniodawca",
     description:
-      "Ułatwimy Ci rozpoczęcie projektu i wybór odpowiedniej kategorii.",
-    icon: "+",
+      "Chcę publikować zlecenia i znajdować odpowiednich wykonawców.",
+    icon: "02",
   },
   {
     value: "both",
-    eyebrow: "Chcę korzystać z obu możliwości",
-    title: "Pełna swoboda",
+    eyebrow: "Łączę obie strony",
+    title: "Działam w obu rolach",
     description:
-      "Dopasujemy początek, ale wszystkie funkcje konta pozostaną dostępne.",
-    icon: "∞",
+      "Chcę zarówno realizować projekty, jak i zlecać pracę innym.",
+    icon: "03",
   },
 ];
 
@@ -1240,6 +1240,100 @@ const DISCOVERY_CATEGORY_DETAILS = {
   "Biznes i e-commerce": "E-commerce, CRM, dokumenty i operacje",
   "Architektura, wnętrza i CAD": "Wnętrza, wizualizacje, CAD i modele 3D",
 };
+
+const DISCOVERY_GOAL_OPTIONS = [
+  {
+    value: "first_project",
+    audience: "freelancer",
+    title: "Zdobyć pierwsze zlecenie",
+    description: "Chcę bezpiecznie rozpocząć pracę jako freelancer.",
+    mark: "01",
+  },
+  {
+    value: "more_orders",
+    audience: "freelancer",
+    title: "Zdobywać więcej zleceń",
+    description: "Szukam kolejnych projektów i nowych klientów.",
+    mark: "02",
+  },
+  {
+    value: "offer_service",
+    audience: "freelancer",
+    title: "Wystawić własną usługę",
+    description: "Chcę pokazać konkretną ofertę i jej zakres.",
+    mark: "03",
+  },
+  {
+    value: "build_portfolio",
+    audience: "freelancer",
+    title: "Rozwinąć profil i portfolio",
+    description: "Chcę lepiej zaprezentować swoje doświadczenie.",
+    mark: "04",
+  },
+  {
+    value: "find_specialist",
+    audience: "client",
+    title: "Znaleźć właściwego specjalistę",
+    description: "Potrzebuję osoby dopasowanej do mojego projektu.",
+    mark: "05",
+  },
+  {
+    value: "publish_project",
+    audience: "client",
+    title: "Opublikować konkretne zlecenie",
+    description: "Mam zakres prac i chcę otrzymać zgłoszenia.",
+    mark: "06",
+  },
+  {
+    value: "compare_options",
+    audience: "client",
+    title: "Porównać możliwości",
+    description: "Najpierw chcę sprawdzić specjalistów i usługi.",
+    mark: "07",
+  },
+  {
+    value: "explore_platform",
+    audience: "all",
+    title: "Poznać IdeaHire",
+    description: "Chcę zobaczyć, jak działa bezpieczna współpraca.",
+    mark: "08",
+  },
+];
+
+const DISCOVERY_PROJECT_READINESS_OPTIONS = [
+  {
+    value: "exploring",
+    title: "Dopiero się rozglądam",
+    description: "Najpierw chcę poznać możliwości i wykonawców.",
+  },
+  {
+    value: "idea",
+    title: "Mam pomysł",
+    description: "Potrzebuję pomocy w ułożeniu szczegółów projektu.",
+  },
+  {
+    value: "brief_ready",
+    title: "Mam gotowy zakres",
+    description: "Wiem, co ma powstać i mogę opublikować zlecenie.",
+  },
+  {
+    value: "urgent",
+    title: "Chcę zacząć szybko",
+    description: "Projekt jest przygotowany i zależy mi na czasie.",
+  },
+];
+
+function getDiscoveryGoalLabel(value) {
+  return DISCOVERY_GOAL_OPTIONS.find(
+    (option) => option.value === value
+  )?.title || value;
+}
+
+function getDiscoveryReadinessLabel(value) {
+  return DISCOVERY_PROJECT_READINESS_OPTIONS.find(
+    (option) => option.value === value
+  )?.title || "Jeszcze nie określono";
+}
 
 function getDiscoveryUsageLabel(value) {
   return DISCOVERY_USAGE_OPTIONS.find(
@@ -1268,27 +1362,74 @@ function DiscoveryPreferencesProvider({ children }) {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.rpc(
-        "get_my_ideahire_discovery_preferences"
-      );
+      const [coreResult, profileResult] = await Promise.all([
+        supabase.rpc("get_my_ideahire_discovery_preferences"),
+        supabase.rpc("get_my_ideahire_onboarding_profile"),
+      ]);
 
-      if (error) throw error;
+      if (coreResult.error) throw coreResult.error;
+      if (profileResult.error) throw profileResult.error;
       if (requestId !== requestIdRef.current) return null;
+
+      const data = coreResult.data || {};
+      const onboardingProfile = profileResult.data || {};
+      const storedCategories = Array.isArray(data?.preferred_categories)
+        ? data.preferred_categories.filter((category) =>
+            JOB_CATEGORIES.includes(category)
+          )
+        : [];
+      const pendingRole = window.sessionStorage.getItem(
+        "ideahire_pending_usage_preference"
+      );
+      const rolePreference = ["find_work", "hire_talent", "both"].includes(
+        pendingRole
+      )
+        ? pendingRole
+        : onboardingProfile?.role_preference ||
+          data?.usage_preference ||
+          "both";
+      const freelancerCategories = Array.isArray(
+        onboardingProfile?.freelancer_categories
+      )
+        ? onboardingProfile.freelancer_categories.filter((category) =>
+            JOB_CATEGORIES.includes(category)
+          )
+        : rolePreference !== "hire_talent"
+        ? storedCategories
+        : [];
+      const clientCategories = Array.isArray(
+        onboardingProfile?.client_categories
+      )
+        ? onboardingProfile.client_categories.filter((category) =>
+            JOB_CATEGORIES.includes(category)
+          )
+        : rolePreference !== "find_work"
+        ? storedCategories
+        : [];
 
       const nextPreferences = {
         authenticated: Boolean(data?.authenticated),
-        needsOnboarding: Boolean(data?.needs_onboarding),
-        usagePreference: data?.usage_preference || "both",
-        preferredCategories: Array.isArray(data?.preferred_categories)
-          ? data.preferred_categories.filter((category) =>
-              JOB_CATEGORIES.includes(category)
-            )
+        needsOnboarding: Boolean(
+          data?.needs_onboarding || onboardingProfile?.needs_onboarding
+        ),
+        usagePreference: rolePreference,
+        preferredCategories: storedCategories,
+        freelancerCategories,
+        clientCategories,
+        onboardingGoals: Array.isArray(onboardingProfile?.onboarding_goals)
+          ? onboardingProfile.onboarding_goals
           : [],
+        specialtySummary: onboardingProfile?.specialty_summary || "",
+        projectReadiness: onboardingProfile?.project_readiness || "",
         personalizationEnabled:
           data?.personalization_enabled !== false,
         onboardingCompletedAt: data?.onboarding_completed_at || null,
         onboardingSkippedAt: data?.onboarding_skipped_at || null,
-        updatedAt: data?.updated_at || null,
+        expandedOnboardingCompletedAt:
+          onboardingProfile?.completed_at || null,
+        expandedOnboardingSkippedAt:
+          onboardingProfile?.skipped_at || null,
+        updatedAt: onboardingProfile?.updated_at || data?.updated_at || null,
       };
 
       setPreferences(nextPreferences);
@@ -1314,38 +1455,98 @@ function DiscoveryPreferencesProvider({ children }) {
 
   async function savePreferences({
     usagePreference,
-    preferredCategories,
+    freelancerCategories,
+    clientCategories,
+    onboardingGoals,
+    specialtySummary,
+    projectReadiness,
     personalizationEnabled,
     action = "complete",
   }) {
-    const { data, error } = await supabase.rpc(
-      "save_my_ideahire_discovery_preferences",
-      {
+    const safeFreelancerCategories = Array.isArray(freelancerCategories)
+      ? freelancerCategories.filter((category) =>
+          JOB_CATEGORIES.includes(category)
+        )
+      : [];
+    const safeClientCategories = Array.isArray(clientCategories)
+      ? clientCategories.filter((category) =>
+          JOB_CATEGORIES.includes(category)
+        )
+      : [];
+    const preferredCategories = Array.from(
+      new Set(
+        usagePreference === "find_work"
+          ? safeFreelancerCategories
+          : usagePreference === "hire_talent"
+          ? safeClientCategories
+          : [...safeFreelancerCategories, ...safeClientCategories]
+      )
+    ).slice(0, 3);
+
+    const [coreResult, profileResult] = await Promise.all([
+      supabase.rpc("save_my_ideahire_discovery_preferences", {
         p_usage_preference: usagePreference || "both",
-        p_preferred_categories: preferredCategories || [],
+        p_preferred_categories: preferredCategories,
         p_personalization_enabled: personalizationEnabled !== false,
         p_onboarding_action: action,
-      }
-    );
+      }),
+      supabase.rpc("save_my_ideahire_onboarding_profile", {
+        p_role_preference: usagePreference || "both",
+        p_freelancer_categories: safeFreelancerCategories,
+        p_client_categories: safeClientCategories,
+        p_onboarding_goals: onboardingGoals || [],
+        p_specialty_summary: specialtySummary?.trim() || null,
+        p_project_readiness: projectReadiness || null,
+        p_onboarding_action: action,
+      }),
+    ]);
 
-    if (error) throw error;
+    if (coreResult.error) throw coreResult.error;
+    if (profileResult.error) throw profileResult.error;
+
+    const data = coreResult.data || {};
+    const onboardingProfile = profileResult.data || {};
 
     const nextPreferences = {
       authenticated: true,
       needsOnboarding: false,
-      usagePreference: data?.usage_preference || "both",
+      usagePreference:
+        onboardingProfile?.role_preference ||
+        data?.usage_preference ||
+        "both",
       preferredCategories: Array.isArray(data?.preferred_categories)
         ? data.preferred_categories.filter((category) =>
             JOB_CATEGORIES.includes(category)
           )
         : [],
+      freelancerCategories: Array.isArray(
+        onboardingProfile?.freelancer_categories
+      )
+        ? onboardingProfile.freelancer_categories.filter((category) =>
+            JOB_CATEGORIES.includes(category)
+          )
+        : safeFreelancerCategories,
+      clientCategories: Array.isArray(onboardingProfile?.client_categories)
+        ? onboardingProfile.client_categories.filter((category) =>
+            JOB_CATEGORIES.includes(category)
+          )
+        : safeClientCategories,
+      onboardingGoals: Array.isArray(onboardingProfile?.onboarding_goals)
+        ? onboardingProfile.onboarding_goals
+        : onboardingGoals || [],
+      specialtySummary: onboardingProfile?.specialty_summary || "",
+      projectReadiness: onboardingProfile?.project_readiness || "",
       personalizationEnabled:
         data?.personalization_enabled !== false,
       onboardingCompletedAt: data?.onboarding_completed_at || null,
       onboardingSkippedAt: data?.onboarding_skipped_at || null,
-      updatedAt: data?.updated_at || null,
+      expandedOnboardingCompletedAt:
+        onboardingProfile?.completed_at || null,
+      expandedOnboardingSkippedAt: onboardingProfile?.skipped_at || null,
+      updatedAt: onboardingProfile?.updated_at || data?.updated_at || null,
     };
 
+    window.sessionStorage.removeItem("ideahire_pending_usage_preference");
     setPreferences(nextPreferences);
     setErrorMessage("");
     return nextPreferences;
@@ -1392,8 +1593,31 @@ function DiscoveryOnboarding({
   const [usagePreference, setUsagePreference] = useState(
     initialPreferences?.usagePreference || "both"
   );
-  const [preferredCategories, setPreferredCategories] = useState(
-    initialPreferences?.preferredCategories || []
+  const [freelancerCategories, setFreelancerCategories] = useState(
+    initialPreferences?.freelancerCategories ||
+      (initialPreferences?.usagePreference !== "hire_talent"
+        ? initialPreferences?.preferredCategories || []
+        : [])
+  );
+  const [clientCategories, setClientCategories] = useState(
+    initialPreferences?.clientCategories ||
+      (initialPreferences?.usagePreference !== "find_work"
+        ? initialPreferences?.preferredCategories || []
+        : [])
+  );
+  const [activeCategoryAudience, setActiveCategoryAudience] = useState(
+    initialPreferences?.usagePreference === "hire_talent"
+      ? "client"
+      : "freelancer"
+  );
+  const [onboardingGoals, setOnboardingGoals] = useState(
+    initialPreferences?.onboardingGoals || []
+  );
+  const [specialtySummary, setSpecialtySummary] = useState(
+    initialPreferences?.specialtySummary || ""
+  );
+  const [projectReadiness, setProjectReadiness] = useState(
+    initialPreferences?.projectReadiness || ""
   );
   const [personalizationEnabled, setPersonalizationEnabled] = useState(
     initialPreferences?.personalizationEnabled !== false
@@ -1402,6 +1626,7 @@ function DiscoveryOnboarding({
   const [message, setMessage] = useState("");
   const titleRef = useRef(null);
   const backdropRef = useRef(null);
+  const totalSteps = 5;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -1443,9 +1668,22 @@ function DiscoveryOnboarding({
     titleRef.current?.focus();
   }, [step]);
 
-  function toggleCategory(category) {
+  useEffect(() => {
+    if (usagePreference === "find_work") {
+      setActiveCategoryAudience("freelancer");
+    } else if (usagePreference === "hire_talent") {
+      setActiveCategoryAudience("client");
+    }
+  }, [usagePreference]);
+
+  function toggleCategory(category, audience = activeCategoryAudience) {
     setMessage("");
-    setPreferredCategories((current) => {
+    const setCategories =
+      audience === "client"
+        ? setClientCategories
+        : setFreelancerCategories;
+
+    setCategories((current) => {
       if (current.includes(category)) {
         return current.filter((item) => item !== category);
       }
@@ -1459,6 +1697,64 @@ function DiscoveryOnboarding({
     });
   }
 
+  function toggleGoal(goal) {
+    setMessage("");
+    setOnboardingGoals((current) => {
+      if (current.includes(goal)) {
+        return current.filter((item) => item !== goal);
+      }
+
+      if (current.length >= 3) {
+        setMessage("Możesz wybrać maksymalnie 3 cele.");
+        return current;
+      }
+
+      return [...current, goal];
+    });
+  }
+
+  function validateCurrentStep() {
+    if (step === 1 && !usagePreference) {
+      setMessage("Wybierz, jak chcesz korzystać z IdeaHire.");
+      return false;
+    }
+
+    if (step === 2) {
+      if (
+        usagePreference !== "hire_talent" &&
+        freelancerCategories.length === 0
+      ) {
+        setMessage("Wybierz co najmniej jedną kategorię, w której działasz.");
+        return false;
+      }
+
+      if (
+        usagePreference !== "find_work" &&
+        clientCategories.length === 0
+      ) {
+        setMessage("Wybierz co najmniej jedną kategorię, w której szukasz pomocy.");
+        return false;
+      }
+    }
+
+    if (step === 3) {
+      if (onboardingGoals.length === 0) {
+        setMessage("Wybierz co najmniej jeden cel na początek.");
+        return false;
+      }
+
+      if (
+        usagePreference !== "find_work" &&
+        !projectReadiness
+      ) {
+        setMessage("Określ, na jakim etapie jest Twój projekt.");
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   async function finish(action = "complete") {
     if (saving) return;
     setSaving(true);
@@ -1467,7 +1763,11 @@ function DiscoveryOnboarding({
     try {
       const result = await savePreferences({
         usagePreference,
-        preferredCategories,
+        freelancerCategories,
+        clientCategories,
+        onboardingGoals,
+        specialtySummary,
+        projectReadiness,
         personalizationEnabled,
         action,
       });
@@ -1486,8 +1786,9 @@ function DiscoveryOnboarding({
   }
 
   function goForward() {
+    if (!validateCurrentStep()) return;
     setMessage("");
-    setStep((current) => Math.min(4, current + 1));
+    setStep((current) => Math.min(totalSteps, current + 1));
   }
 
   function goBack() {
@@ -1498,6 +1799,16 @@ function DiscoveryOnboarding({
   const selectedUsage = DISCOVERY_USAGE_OPTIONS.find(
     (option) => option.value === usagePreference
   );
+  const activeCategories =
+    activeCategoryAudience === "client"
+      ? clientCategories
+      : freelancerCategories;
+  const availableGoals = DISCOVERY_GOAL_OPTIONS.filter((option) => {
+    if (option.audience === "all" || usagePreference === "both") return true;
+    return usagePreference === "find_work"
+      ? option.audience === "freelancer"
+      : option.audience === "client";
+  });
 
   return (
     <div
@@ -1523,7 +1834,7 @@ function DiscoveryOnboarding({
           </Link>
 
           <div className="discovery-step-count" aria-live="polite">
-            Krok {step} z 4
+            Krok {step} z {totalSteps}
           </div>
 
           {canClose && (
@@ -1542,11 +1853,11 @@ function DiscoveryOnboarding({
           className="discovery-progress"
           role="progressbar"
           aria-valuemin="1"
-          aria-valuemax="4"
+          aria-valuemax={totalSteps}
           aria-valuenow={step}
-          aria-label={`Postęp konfiguracji: krok ${step} z 4`}
+          aria-label={`Postęp konfiguracji: krok ${step} z ${totalSteps}`}
         >
-          <span style={{ width: `${step * 25}%` }} />
+          <span style={{ width: `${(step / totalSteps) * 100}%` }} />
         </div>
 
         <div className="discovery-onboarding-content" key={step}>
@@ -1562,8 +1873,8 @@ function DiscoveryOnboarding({
                   Jak chcesz rozpocząć korzystanie z IdeaHire?
                 </h1>
                 <p>
-                  Ten wybór służy tylko do dopasowania początku. Nadal możesz
-                  zarówno zlecać pracę, jak i realizować projekty.
+                  Wybierz sposób, w jaki najczęściej chcesz działać. Nie
+                  zablokuje to żadnej funkcji i później możesz zmienić wybór.
                 </p>
               </div>
 
@@ -1588,29 +1899,86 @@ function DiscoveryOnboarding({
                   </button>
                 ))}
               </div>
+
+              <div className="discovery-legal-note">
+                <span aria-hidden="true">i</span>
+                <p>
+                  Ten wybór służy personalizacji i nie określa Twojego statusu
+                  prawnego ani podatkowego. Dane sprzedawcy uzupełnia się
+                  oddzielnie przed pierwszą płatną aktywnością.
+                </p>
+              </div>
             </>
           )}
 
           {step === 2 && (
             <>
               <div className="discovery-copy">
-                <span className="section-label">Twoje zainteresowania</span>
+                <span className="section-label">Twoje obszary</span>
                 <h1
                   id="discovery-onboarding-title"
                   ref={titleRef}
                   tabIndex="-1"
                 >
-                  Co najbardziej Cię interesuje?
+                  {usagePreference === "find_work"
+                    ? "Czym się zajmujesz?"
+                    : usagePreference === "hire_talent"
+                    ? "Jakiej pomocy szukasz?"
+                    : "W czym działasz i czego szukasz?"}
                 </h1>
                 <p>
-                  Wybierz do trzech kategorii. Możesz też przejść dalej bez
-                  zaznaczania żadnej z nich.
+                  Wybierz maksymalnie trzy kategorie dla każdej aktywnej roli.
+                  Posłużą wyłącznie do lepszego ułożenia wyników i formularzy.
                 </p>
+              </div>
+
+              {usagePreference === "both" && (
+                <div
+                  className="discovery-category-switch"
+                  role="tablist"
+                  aria-label="Rodzaj kategorii"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeCategoryAudience === "freelancer"}
+                    className={
+                      activeCategoryAudience === "freelancer"
+                        ? "is-selected"
+                        : ""
+                    }
+                    onClick={() => setActiveCategoryAudience("freelancer")}
+                  >
+                    <span>Realizuję</span>
+                    <strong>{freelancerCategories.length}/3</strong>
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeCategoryAudience === "client"}
+                    className={
+                      activeCategoryAudience === "client" ? "is-selected" : ""
+                    }
+                    onClick={() => setActiveCategoryAudience("client")}
+                  >
+                    <span>Szukam</span>
+                    <strong>{clientCategories.length}/3</strong>
+                  </button>
+                </div>
+              )}
+
+              <div className="discovery-category-context">
+                <strong>
+                  {activeCategoryAudience === "freelancer"
+                    ? "Obszary, w których chcesz realizować projekty"
+                    : "Obszary, w których najczęściej szukasz wykonawców"}
+                </strong>
+                <span>Możesz je później zmienić na swoim koncie.</span>
               </div>
 
               <div className="discovery-category-grid">
                 {JOB_CATEGORIES.map((category, index) => {
-                  const selected = preferredCategories.includes(category);
+                  const selected = activeCategories.includes(category);
 
                   return (
                     <button
@@ -1618,7 +1986,9 @@ function DiscoveryOnboarding({
                       className={`discovery-category-card${
                         selected ? " is-selected" : ""
                       }`}
-                      onClick={() => toggleCategory(category)}
+                      onClick={() =>
+                        toggleCategory(category, activeCategoryAudience)
+                      }
                       aria-pressed={selected}
                       key={category}
                     >
@@ -1634,12 +2004,110 @@ function DiscoveryOnboarding({
               </div>
 
               <div className="discovery-selection-counter" aria-live="polite">
-                Wybrano {preferredCategories.length} z 3
+                Wybrano {activeCategories.length} z 3
               </div>
+
+              {usagePreference !== "hire_talent" &&
+                activeCategoryAudience === "freelancer" && (
+                  <label className="discovery-specialization-field">
+                    <span>Jednym zdaniem: czym się zajmujesz?</span>
+                    <input
+                      type="text"
+                      value={specialtySummary}
+                      maxLength={160}
+                      onChange={(event) => {
+                        setSpecialtySummary(event.target.value);
+                        setMessage("");
+                      }}
+                      placeholder="Np. projektuję sklepy internetowe i automatyzuję sprzedaż"
+                    />
+                    <small>
+                      Pole opcjonalne · {specialtySummary.length}/160 znaków
+                    </small>
+                  </label>
+                )}
             </>
           )}
 
           {step === 3 && (
+            <>
+              <div className="discovery-copy">
+                <span className="section-label">Twój cel</span>
+                <h1
+                  id="discovery-onboarding-title"
+                  ref={titleRef}
+                  tabIndex="-1"
+                >
+                  Co sprowadziło Cię do IdeaHire?
+                </h1>
+                <p>
+                  Wybierz maksymalnie trzy odpowiedzi. Na ich podstawie
+                  pokażemy Ci właściwe miejsce na start, bez ukrywania innych
+                  możliwości.
+                </p>
+              </div>
+
+              <div className="discovery-goal-grid">
+                {availableGoals.map((option) => {
+                  const selected = onboardingGoals.includes(option.value);
+
+                  return (
+                    <button
+                      type="button"
+                      className={`discovery-goal-card${
+                        selected ? " is-selected" : ""
+                      }`}
+                      onClick={() => toggleGoal(option.value)}
+                      aria-pressed={selected}
+                      key={option.value}
+                    >
+                      <span aria-hidden="true">{option.mark}</span>
+                      <strong>{option.title}</strong>
+                      <small>{option.description}</small>
+                      <i aria-hidden="true">{selected ? "✓" : "+"}</i>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="discovery-selection-counter" aria-live="polite">
+                Wybrano {onboardingGoals.length} z 3
+              </div>
+
+              {usagePreference !== "find_work" && (
+                <fieldset className="discovery-readiness-fieldset">
+                  <legend>Na jakim etapie jest Twój najbliższy projekt?</legend>
+                  <div className="discovery-readiness-grid">
+                    {DISCOVERY_PROJECT_READINESS_OPTIONS.map((option) => (
+                      <label
+                        className={
+                          projectReadiness === option.value
+                            ? "is-selected"
+                            : ""
+                        }
+                        key={option.value}
+                      >
+                        <input
+                          type="radio"
+                          name="discovery-project-readiness"
+                          value={option.value}
+                          checked={projectReadiness === option.value}
+                          onChange={() => {
+                            setProjectReadiness(option.value);
+                            setMessage("");
+                          }}
+                        />
+                        <strong>{option.title}</strong>
+                        <small>{option.description}</small>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
+            </>
+          )}
+
+          {step === 4 && (
             <>
               <div className="discovery-copy">
                 <span className="section-label">Ty decydujesz</span>
@@ -1700,7 +2168,7 @@ function DiscoveryOnboarding({
             </>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <>
               <div className="discovery-copy discovery-summary-copy">
                 <span className="section-label">Wszystko gotowe</span>
@@ -1724,21 +2192,52 @@ function DiscoveryOnboarding({
 
                 <div className="discovery-summary-row">
                   <span>Na początek</span>
-                  <strong>{selectedUsage?.eyebrow}</strong>
+                  <strong>{selectedUsage?.title}</strong>
                 </div>
 
+                {usagePreference !== "hire_talent" && (
+                  <div className="discovery-summary-row">
+                    <span>Realizuję</span>
+                    <div className="discovery-summary-tags">
+                      {freelancerCategories.map((category) => (
+                        <strong key={category}>
+                          {getJobCategoryLabel(category)}
+                        </strong>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {usagePreference !== "find_work" && (
+                  <div className="discovery-summary-row">
+                    <span>Szukam pomocy</span>
+                    <div className="discovery-summary-tags">
+                      {clientCategories.map((category) => (
+                        <strong key={category}>
+                          {getJobCategoryLabel(category)}
+                        </strong>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="discovery-summary-row">
-                  <span>Wybrane kategorie</span>
+                  <span>Najważniejsze cele</span>
                   <div className="discovery-summary-tags">
-                    {preferredCategories.length > 0 ? (
-                      preferredCategories.map((category) => (
-                        <strong key={category}>{getJobCategoryLabel(category)}</strong>
-                      ))
-                    ) : (
-                      <strong>Wszystkie kategorie</strong>
-                    )}
+                    {onboardingGoals.map((goal) => (
+                      <strong key={goal}>{getDiscoveryGoalLabel(goal)}</strong>
+                    ))}
                   </div>
                 </div>
+
+                {usagePreference !== "find_work" && (
+                  <div className="discovery-summary-row">
+                    <span>Etap projektu</span>
+                    <strong>
+                      {getDiscoveryReadinessLabel(projectReadiness)}
+                    </strong>
+                  </div>
+                )}
 
                 <div className="discovery-summary-row">
                   <span>Domyślna kolejność</span>
@@ -1770,6 +2269,15 @@ function DiscoveryOnboarding({
               >
                  Wstecz
               </button>
+            ) : canClose ? (
+              <button
+                type="button"
+                className="discovery-text-button"
+                onClick={onClose}
+                disabled={saving}
+              >
+                Anuluj
+              </button>
             ) : (
               <button
                 type="button"
@@ -1782,7 +2290,7 @@ function DiscoveryOnboarding({
             )}
           </div>
 
-          {step < 4 ? (
+          {step < totalSteps ? (
             <button
               type="button"
               className="btn btn-dark discovery-primary-button"
@@ -1821,7 +2329,6 @@ function DiscoveryOnboardingLayer() {
     useDiscoveryPreferences();
 
   const excludedPath = [
-    "/",
     "/login",
     "/register",
     "/reset-password",
@@ -1919,15 +2426,54 @@ function DiscoveryPreferencesCard() {
               </div>
             </div>
 
-            <div className="discovery-settings-tags">
-              {(preferences?.preferredCategories || []).length > 0 ? (
-                preferences.preferredCategories.map((category) => (
-                  <span key={category}>{getJobCategoryLabel(category)}</span>
-                ))
-              ) : (
-                <span>Wszystkie kategorie</span>
+            {preferences?.usagePreference !== "hire_talent" && (
+              <div className="discovery-settings-group">
+                <strong>Realizuję</strong>
+                <div className="discovery-settings-tags">
+                  {(preferences?.freelancerCategories || []).map(
+                    (category) => (
+                      <span key={category}>
+                        {getJobCategoryLabel(category)}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+
+            {preferences?.usagePreference !== "find_work" && (
+              <div className="discovery-settings-group">
+                <strong>Szukam pomocy</strong>
+                <div className="discovery-settings-tags">
+                  {(preferences?.clientCategories || []).map((category) => (
+                    <span key={category}>{getJobCategoryLabel(category)}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(preferences?.onboardingGoals || []).length > 0 && (
+              <div className="discovery-settings-group">
+                <strong>Moje cele</strong>
+                <div className="discovery-settings-tags is-secondary">
+                  {preferences.onboardingGoals.map((goal) => (
+                    <span key={goal}>{getDiscoveryGoalLabel(goal)}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {preferences?.usagePreference !== "find_work" &&
+              preferences?.projectReadiness && (
+                <div className="discovery-settings-readiness">
+                  <span>Etap projektu</span>
+                  <strong>
+                    {getDiscoveryReadinessLabel(
+                      preferences.projectReadiness
+                    )}
+                  </strong>
+                </div>
               )}
-            </div>
 
             <p className="discovery-settings-note">
               To ustawienie nie ogranicza funkcji konta. Nadal możesz zlecać
@@ -5959,6 +6505,9 @@ function Register() {
   const [birthDate, setBirthDate] =
     useState("");
 
+  const [usagePreference, setUsagePreference] =
+    useState("");
+
   const [ageNoticeAcknowledged, setAgeNoticeAcknowledged] =
     useState(false);
 
@@ -5993,9 +6542,20 @@ function Register() {
     if (loading || googleLoading) return;
 
     setMessage("");
+
+    if (!usagePreference) {
+      setMessage("Wybierz, jak chcesz korzystać z IdeaHire.");
+      return;
+    }
+
     setGoogleLoading(true);
 
     try {
+      window.sessionStorage.setItem(
+        "ideahire_pending_usage_preference",
+        usagePreference
+      );
+
       const redirectUrl = new URL(
         "/register",
         window.location.origin
@@ -6033,6 +6593,11 @@ function Register() {
 
     setMessage("");
 
+    if (!usagePreference) {
+      setMessage("Wybierz, jak chcesz korzystać z IdeaHire.");
+      return;
+    }
+
     const birthDateValidation =
       getBirthDateValidation(birthDate);
 
@@ -6060,6 +6625,11 @@ function Register() {
 
     try {
       const acceptedAtClient = new Date().toISOString();
+
+      window.sessionStorage.setItem(
+        "ideahire_pending_usage_preference",
+        usagePreference
+      );
 
       const {
         data,
@@ -6091,6 +6661,10 @@ function Register() {
                 LEGAL_TERMS_VERSION,
               terms_accepted_at_client:
                 acceptedAtClient,
+              usage_preference:
+                usagePreference,
+              onboarding_source:
+                "registration",
             },
           },
         });
@@ -6156,6 +6730,51 @@ function Register() {
             korzystać z IdeaHire.
           </p>
         </div>
+
+        <section
+          className="registration-role-section"
+          aria-labelledby="registration-role-title"
+        >
+          <div className="registration-role-heading">
+            <span>Twój start</span>
+            <h2 id="registration-role-title">
+              Jak chcesz korzystać z IdeaHire?
+            </h2>
+            <p>
+              To ustawia pierwszy widok i podpowiedzi. Nie ogranicza funkcji
+              konta — wybór zmienisz później.
+            </p>
+          </div>
+
+          <div className="registration-role-grid">
+            {DISCOVERY_USAGE_OPTIONS.map((option) => (
+              <button
+                type="button"
+                className={`registration-role-card${
+                  usagePreference === option.value ? " is-selected" : ""
+                }`}
+                onClick={() => {
+                  setUsagePreference(option.value);
+                  setMessage("");
+                }}
+                aria-pressed={usagePreference === option.value}
+                key={option.value}
+              >
+                <small>{option.icon}</small>
+                <strong>{option.title}</strong>
+                <span>{option.description}</span>
+                <i aria-hidden="true">
+                  {usagePreference === option.value ? "✓" : "+"}
+                </i>
+              </button>
+            ))}
+          </div>
+
+          <p className="registration-role-note">
+            Wybór służy personalizacji. Nie określa statusu przedsiębiorcy,
+            formy zatrudnienia ani sposobu rozliczenia podatku.
+          </p>
+        </section>
 
         <div className="auth-provider-section">
           <GoogleAuthButton
@@ -6354,7 +6973,8 @@ function Register() {
               googleLoading ||
               !ageNoticeAcknowledged ||
               !privacyNoticeAcknowledged ||
-              !termsAccepted
+              !termsAccepted ||
+              !usagePreference
             }
           >
             {loading
@@ -11492,6 +12112,7 @@ function FindTalent() {
 
   useEffect(() => {
     const preferredCategory =
+      preferences?.clientCategories?.[0] ||
       preferences?.preferredCategories?.[0];
 
     if (
@@ -11508,6 +12129,7 @@ function FindTalent() {
     }
   }, [
     preferences?.updatedAt,
+    preferences?.clientCategories?.[0],
     preferences?.preferredCategories?.[0],
   ]);
 
@@ -11838,12 +12460,15 @@ function FindTalent() {
       setTitle("");
       setDescription("");
       setCategory(
-        preferences?.preferredCategories?.[0] ||
+        preferences?.clientCategories?.[0] ||
+          preferences?.preferredCategories?.[0] ||
           JOB_CATEGORIES[0]
       );
       setSubcategory(
         JOB_SUBCATEGORIES[
-          preferences?.preferredCategories?.[0] || JOB_CATEGORIES[0]
+          preferences?.clientCategories?.[0] ||
+            preferences?.preferredCategories?.[0] ||
+            JOB_CATEGORIES[0]
         ]?.[0] || ""
       );
       setProjectStage("idea");
@@ -14556,7 +15181,11 @@ function Jobs() {
 
     setSortMode(
       discoveryPreferences?.personalizationEnabled !== false &&
-        (discoveryPreferences?.preferredCategories || []).length > 0
+        (
+          discoveryPreferences?.freelancerCategories ||
+          discoveryPreferences?.preferredCategories ||
+          []
+        ).length > 0
         ? "matched"
         : "latest"
     );
@@ -14936,7 +15565,9 @@ function Jobs() {
     );
 
   const preferredJobCategories =
-    discoveryPreferences?.preferredCategories || [];
+    discoveryPreferences?.freelancerCategories ||
+    discoveryPreferences?.preferredCategories ||
+    [];
 
   const canUseMatchedOrder =
     discoveryPreferences?.personalizationEnabled !== false &&
@@ -15882,7 +16513,11 @@ function Talent() {
 
     setSortMode(
       discoveryPreferences?.personalizationEnabled !== false &&
-        (discoveryPreferences?.preferredCategories || []).length > 0
+        (
+          discoveryPreferences?.clientCategories ||
+          discoveryPreferences?.preferredCategories ||
+          []
+        ).length > 0
         ? "matched"
         : "latest"
     );
@@ -15956,7 +16591,9 @@ function Talent() {
   }
 
   const preferredCategories =
-    discoveryPreferences?.preferredCategories || [];
+    discoveryPreferences?.clientCategories ||
+    discoveryPreferences?.preferredCategories ||
+    [];
   const canUseMatchedOrder =
     discoveryPreferences?.personalizationEnabled !== false &&
     preferredCategories.length > 0;
