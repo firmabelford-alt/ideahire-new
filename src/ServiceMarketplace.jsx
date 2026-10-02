@@ -17,6 +17,10 @@ const SERVICE_CATEGORIES = [
   "Copywriting",
   "Video",
   "Fotografia",
+  "AI i automatyzacje",
+  "Dane, analizy i research",
+  "Biznes i e-commerce",
+  "Architektura, wnętrza i CAD",
 ];
 
 const SERVICE_CATEGORY_COPY = {
@@ -26,6 +30,10 @@ const SERVICE_CATEGORY_COPY = {
   Copywriting: "Teksty, opisy i komunikacja marki",
   Video: "Montaż, animacja i materiały wideo",
   Fotografia: "Sesje, retusz i obróbka zdjęć",
+  "AI i automatyzacje": "Agenci AI, integracje i automatyzacja procesów",
+  "Dane, analizy i research": "Dane, dashboardy i badania rynku",
+  "Biznes i e-commerce": "Sklepy, katalogi, CRM i materiały biznesowe",
+  "Architektura, wnętrza i CAD": "Projekty, wizualizacje i dokumentacja techniczna",
 };
 
 const SERVICE_CATEGORY_MARKS = {
@@ -35,6 +43,152 @@ const SERVICE_CATEGORY_MARKS = {
   Copywriting: "Aa",
   Video: "▶",
   Fotografia: "◎",
+  "AI i automatyzacje": "AI",
+  "Dane, analizy i research": "∑",
+  "Biznes i e-commerce": "▣",
+  "Architektura, wnętrza i CAD": "⌂",
+};
+
+const SERVICE_SUBCATEGORIES = {
+  Programowanie: [
+    "Landing page",
+    "Strona firmowa",
+    "Sklep internetowy",
+    "Aplikacja webowa",
+    "Aplikacja mobilna",
+    "WordPress, Webflow i no-code",
+    "Integracja API",
+    "Naprawa błędów",
+    "Audyt szybkości lub bezpieczeństwa",
+    "Migracja strony albo serwera",
+  ],
+  "Grafika i design": [
+    "Logo",
+    "Identyfikacja wizualna",
+    "Projekt UI/UX",
+    "Grafiki reklamowe",
+    "Pakiet grafik do social mediów",
+    "Materiały do druku",
+    "Opakowanie lub etykieta",
+    "Prezentacja",
+    "Ilustracja",
+    "Szablony Canva",
+    "Model 3D",
+    "Wizualizacja produktu",
+  ],
+  Marketing: [
+    "Strategia marketingowa",
+    "Audyt SEO",
+    "Optymalizacja wskazanych podstron",
+    "Konfiguracja Google Ads",
+    "Konfiguracja Meta Ads",
+    "Konfiguracja TikTok Ads",
+    "Pakiet postów do social mediów",
+    "Kampania e-mail",
+    "Konfiguracja analityki",
+    "Przygotowanie bazy leadów",
+    "Materiały sprzedażowe",
+    "Koncepcja kampanii UGC lub influencerskiej",
+  ],
+  Copywriting: [
+    "Teksty na stronę",
+    "Artykuły",
+    "Opisy produktów",
+    "Teksty SEO",
+    "Teksty reklamowe",
+    "Pakiet postów",
+    "Newsletter",
+    "Scenariusz",
+    "Korekta i redakcja",
+    "Poprawa treści wygenerowanej przez AI",
+    "Tłumaczenie",
+    "Lokalizacja strony lub aplikacji",
+    "Transkrypcja",
+    "Przygotowanie napisów",
+  ],
+  Video: [
+    "Montaż filmu",
+    "Pakiet rolek, Shorts lub TikToków",
+    "Film na YouTube",
+    "Reklama wideo",
+    "Film produktowy",
+    "Animacja",
+    "Motion design",
+    "Wideo generowane przez AI",
+    "Napisy i lokalizacja",
+    "Montaż podcastu",
+    "Obróbka dźwięku",
+    "Nagranie lektorskie",
+    "Jingle lub muzyka",
+    "Sound design",
+  ],
+  Fotografia: [
+    "Fotografia produktowa",
+    "Fotografia wizerunkowa",
+    "Fotografia wydarzenia",
+    "Fotografia nieruchomości",
+    "Fotografia motoryzacyjna",
+    "Portret",
+    "Zdjęcia do sklepu internetowego",
+    "Fotografia 360°",
+    "Retusz",
+    "Usuwanie tła",
+    "Renowacja zdjęć",
+  ],
+  "AI i automatyzacje": [
+    "Chatbot dla firmy",
+    "Agent AI",
+    "Automatyzacja n8n, Make lub Zapier",
+    "Integracja AI ze stroną lub systemem",
+    "Baza wiedzy i RAG",
+    "Asystent głosowy AI",
+    "Automatyzacja dokumentów",
+    "Automatyzacja obsługi klienta",
+    "Audyt procesów pod AI",
+    "Przygotowanie danych dla AI",
+    "System promptów dla firmy",
+  ],
+  "Dane, analizy i research": [
+    "Czyszczenie danych",
+    "Porządkowanie arkusza Excel",
+    "Konwersja PDF do Excel",
+    "Wprowadzanie danych",
+    "Web scraping",
+    "Dashboard Power BI lub Looker",
+    "Analiza danych",
+    "Wizualizacja danych",
+    "Badanie rynku",
+    "Analiza ankiety",
+    "Porządkowanie lub migracja bazy",
+    "Anotacja danych dla AI",
+  ],
+  "Biznes i e-commerce": [
+    "Dodanie produktów do sklepu",
+    "Przygotowanie opisów i parametrów produktów",
+    "Konfiguracja konta marketplace",
+    "Porządkowanie katalogu produktów",
+    "Konfiguracja lub uporządkowanie CRM",
+    "Przygotowanie bazy klientów",
+    "Research konkurencji",
+    "Prezentacja biznesowa",
+    "Dokumentacja i procedury",
+    "Plan realizacji projektu",
+    "Pakiet materiałów rekrutacyjnych",
+    "Jednorazowy pakiet administracyjny",
+    "Audyt sklepu internetowego",
+  ],
+  "Architektura, wnętrza i CAD": [
+    "Projekt wnętrza",
+    "Układ funkcjonalny pomieszczenia",
+    "Wizualizacja 3D",
+    "Rysunek 2D",
+    "Model CAD",
+    "Projekt mebla",
+    "Model do druku 3D",
+    "Dokumentacja produkcyjna",
+    "Aranżacja lokalu",
+    "Wizualizacja nieruchomości",
+  ],
 };
 
 const EMPTY_SERVICE_FORM = {
@@ -42,7 +196,7 @@ const EMPTY_SERVICE_FORM = {
   summary: "",
   description: "",
   category: SERVICE_CATEGORIES[0],
-  subcategory: "",
+  subcategory: SERVICE_SUBCATEGORIES[SERVICE_CATEGORIES[0]][0],
   skills: "",
   deliverables: "",
   clientRequirements: "",
@@ -65,12 +219,20 @@ function splitLines(value, limit = 12) {
 function serviceFormFromRow(row) {
   if (!row) return EMPTY_SERVICE_FORM;
 
+  const category = SERVICE_CATEGORIES.includes(row.category)
+    ? row.category
+    : SERVICE_CATEGORIES[0];
+  const availableSubcategories = SERVICE_SUBCATEGORIES[category] || [];
+  const subcategory = availableSubcategories.includes(row.subcategory)
+    ? row.subcategory
+    : availableSubcategories[0] || "";
+
   return {
     title: row.title || "",
     summary: row.summary || "",
     description: row.description || "",
-    category: row.category || SERVICE_CATEGORIES[0],
-    subcategory: row.subcategory || "",
+    category,
+    subcategory,
     skills: Array.isArray(row.skills) ? row.skills.join(", ") : "",
     deliverables: Array.isArray(row.deliverables)
       ? row.deliverables.join("\n")
@@ -414,6 +576,15 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
     setMessage("");
   }
 
+  function updateCategory(value) {
+    setForm((current) => ({
+      ...current,
+      category: value,
+      subcategory: SERVICE_SUBCATEGORIES[value]?.[0] || "",
+    }));
+    setMessage("");
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage("");
@@ -435,6 +606,16 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
     if (form.description.trim().length < 80) {
       setMessage("Opis usługi musi mieć co najmniej 80 znaków.");
+      return;
+    }
+
+    if (!SERVICE_CATEGORIES.includes(form.category)) {
+      setMessage("Wybierz prawidłową kategorię usługi.");
+      return;
+    }
+
+    if (!(SERVICE_SUBCATEGORIES[form.category] || []).includes(form.subcategory)) {
+      setMessage("Wybierz specjalizację pasującą do kategorii.");
       return;
     }
 
@@ -558,7 +739,8 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 <span>Kategoria *</span>
                 <select
                   value={form.category}
-                  onChange={(event) => update("category", event.target.value)}
+                  onChange={(event) => updateCategory(event.target.value)}
+                  required
                 >
                   {SERVICE_CATEGORIES.map((category) => (
                     <option key={category} value={category}>{category}</option>
@@ -567,13 +749,16 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
               </label>
 
               <label>
-                <span>Specjalizacja</span>
-                <input
+                <span>Podkategoria *</span>
+                <select
                   value={form.subcategory}
                   onChange={(event) => update("subcategory", event.target.value)}
-                  placeholder="Np. landing page, React, identyfikacja"
-                  maxLength={80}
-                />
+                  required
+                >
+                  {(SERVICE_SUBCATEGORIES[form.category] || []).map((subcategory) => (
+                    <option key={subcategory} value={subcategory}>{subcategory}</option>
+                  ))}
+                </select>
               </label>
 
               <label className="is-wide">
