@@ -1626,6 +1626,7 @@ function DiscoveryOnboarding({
   const [message, setMessage] = useState("");
   const titleRef = useRef(null);
   const backdropRef = useRef(null);
+  const contentRef = useRef(null);
   const totalSteps = 5;
 
   useEffect(() => {
@@ -1724,7 +1725,11 @@ function DiscoveryOnboarding({
         usagePreference !== "hire_talent" &&
         freelancerCategories.length === 0
       ) {
+        setActiveCategoryAudience("freelancer");
         setMessage("Wybierz co najmniej jedną kategorię, w której działasz.");
+        window.requestAnimationFrame(() => {
+          contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        });
         return false;
       }
 
@@ -1732,7 +1737,11 @@ function DiscoveryOnboarding({
         usagePreference !== "find_work" &&
         clientCategories.length === 0
       ) {
+        setActiveCategoryAudience("client");
         setMessage("Wybierz co najmniej jedną kategorię, w której szukasz pomocy.");
+        window.requestAnimationFrame(() => {
+          contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        });
         return false;
       }
     }
@@ -1740,6 +1749,9 @@ function DiscoveryOnboarding({
     if (step === 3) {
       if (onboardingGoals.length === 0) {
         setMessage("Wybierz co najmniej jeden cel na początek.");
+        window.requestAnimationFrame(() => {
+          contentRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+        });
         return false;
       }
 
@@ -1748,6 +1760,11 @@ function DiscoveryOnboarding({
         !projectReadiness
       ) {
         setMessage("Określ, na jakim etapie jest Twój projekt.");
+        window.requestAnimationFrame(() => {
+          contentRef.current
+            ?.querySelector(".discovery-readiness-fieldset")
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
         return false;
       }
     }
@@ -1785,7 +1802,9 @@ function DiscoveryOnboarding({
     }
   }
 
-  function goForward() {
+  function goForward(event) {
+    event?.preventDefault();
+    event?.stopPropagation();
     if (!validateCurrentStep()) return;
     setMessage("");
     setStep((current) => Math.min(totalSteps, current + 1));
@@ -1860,7 +1879,11 @@ function DiscoveryOnboarding({
           <span style={{ width: `${(step / totalSteps) * 100}%` }} />
         </div>
 
-        <div className="discovery-onboarding-content" key={step}>
+        <div
+          className="discovery-onboarding-content"
+          key={step}
+          ref={contentRef}
+        >
           {step === 1 && (
             <>
               <div className="discovery-copy">
@@ -2290,11 +2313,21 @@ function DiscoveryOnboarding({
             )}
           </div>
 
+          <span
+            className={`discovery-footer-message${message ? " is-visible" : ""}`}
+            role="status"
+            aria-live="polite"
+          >
+            {message}
+          </span>
+
           {step < totalSteps ? (
             <button
               type="button"
               className="btn btn-dark discovery-primary-button"
               onClick={goForward}
+              disabled={saving}
+              data-action="discovery-next"
             >
               Dalej 
             </button>
