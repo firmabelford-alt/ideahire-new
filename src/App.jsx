@@ -1,298 +1,63 @@
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
 const categories = [
-  { value: "Programowanie", label: "Strony, aplikacje i IT" },
-  { value: "Grafika i design", label: "Grafika, UX i 3D" },
-  { value: "Marketing", label: "Marketing i sprzedaż" },
-  { value: "Copywriting", label: "Teksty i tłumaczenia" },
-  { value: "Video", label: "Wideo, animacja i audio" },
-  { value: "Fotografia", label: "Fotografia i obróbka zdjęć" },
-  { value: "AI i automatyzacje", label: "AI i automatyzacje" },
-  { value: "Dane, analizy i research", label: "Dane, analizy i research" },
-  { value: "Biznes i e-commerce", label: "Biznes i e-commerce" },
-  { value: "Architektura, wnętrza i CAD", label: "Architektura, wnętrza i CAD" },
+  "Programowanie",
+  "Grafika i design",
+  "Marketing",
+  "Copywriting",
+  "Video",
+  "Fotografia",
 ];
 
-const categoryLabels = Object.fromEntries(
-  categories.map((category) => [category.value, category.label])
-);
-
-function getCategoryLabel(category) {
-  return categoryLabels[category] || category || "Inna kategoria";
-}
-
-const fallbackJobs = [
-  {
-    id: "fallback-1",
-    title: "Nowoczesna strona internetowa",
-    description:
-      "Szukam osoby, która stworzy prostą i szybką stronę dla nowej marki.",
-    category: "Programowanie",
-    budget: 3000,
-  },
-  {
-    id: "fallback-2",
-    title: "Identyfikacja wizualna marki",
-    description:
-      "Potrzebuję spójnego logo oraz podstawowych materiałów graficznych.",
-    category: "Grafika i design",
-    budget: 1800,
-  },
-  {
-    id: "fallback-3",
-    title: "Teksty na stronę firmową",
-    description:
-      "Zlecę przygotowanie przejrzystych tekstów do sześciu podstron.",
-    category: "Copywriting",
-    budget: 900,
-  },
-];
-
-function App({ session, loading }) {
+function App() {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [hasNotifications, setHasNotifications] = useState(false);
-  const [recentJobs, setRecentJobs] = useState(fallbackJobs);
-  const [activeJobIndex, setActiveJobIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
 
-    checkNotifications(session);
+    async function getSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    function handleNotificationsRead(
-      event
-    ) {
-      if (
-        !event?.detail?.userId ||
-        event.detail.userId ===
-          session?.user?.id
-      ) {
-        setHasNotifications(false);
-      }
-    }
-
-    function handleStorage(event) {
-      if (
-        event.key ===
-        `ideahire_read_notifications_${session?.user?.id}`
-      ) {
+      if (mounted) {
+        setSession(session);
+        setLoading(false);
+        checkNotifications(session);
         checkNotifications(session);
       }
     }
 
-    window.addEventListener(
-      "ideahire:notifications-read",
-      handleNotificationsRead
-    );
+    getSession();
 
-    window.addEventListener(
-      "storage",
-      handleStorage
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setLoading(false);
+      }
     );
 
     const interval = setInterval(() => {
       if (mounted) {
-        checkNotifications(session);
+        supabase.auth.getSession().then(({ data }) => {
+          checkNotifications(data?.session || null);
+        });
       }
     }, 10000);
 
     return () => {
       mounted = false;
+      subscription.unsubscribe();
       clearInterval(interval);
-
-      window.removeEventListener(
-        "ideahire:notifications-read",
-        handleNotificationsRead
-      );
-
-      window.removeEventListener(
-        "storage",
-        handleStorage
-      );
-    };
-  }, [session?.user?.id]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadRecentJobs() {
-      try {
-        const { data, error } =
-          await supabase
-            .from("jobs")
-            .select(
-              "id, title, description, category, budget, created_at"
-            )
-            .order("created_at", {
-              ascending: false,
-            })
-            .limit(8);
-
-        if (error) {
-          console.error(
-            "HOME RECENT JOBS ERROR:",
-            error
-          );
-          return;
-        }
-
-        if (
-          mounted &&
-          Array.isArray(data) &&
-          data.length > 0
-        ) {
-          setRecentJobs(data);
-          setActiveJobIndex(0);
-        }
-      } catch (error) {
-        console.error(
-          "HOME RECENT JOBS ERROR:",
-          error
-        );
-      }
-    }
-
-    loadRecentJobs();
-
-    const channel = supabase
-      .channel("home-recent-jobs")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "jobs",
-        },
-        () => {
-          loadRecentJobs();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      mounted = false;
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (recentJobs.length <= 1) return undefined;
-
-    const interval = window.setInterval(
-      () => {
-        setActiveJobIndex(
-          (current) =>
-            (current + 1) % recentJobs.length
-        );
-      },
-      4500
-    );
-
-    return () => {
-      window.clearInterval(interval);
-    };
-  }, [recentJobs.length]);
-
-  useLayoutEffect(() => {
-    const root = document.querySelector(".app");
-
-    if (!root) return undefined;
-
-    const revealElements = Array.from(
-      root.querySelectorAll(".home-reveal")
-    );
-
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    root.classList.add("home-motion-ready");
-
-    revealElements.forEach((element) => {
-      const group = element.parentElement;
-      const groupedElements = group
-        ? Array.from(group.children).filter((child) =>
-            child.classList.contains("home-reveal")
-          )
-        : [];
-      const position = Math.max(
-        0,
-        groupedElements.indexOf(element)
-      );
-
-      element.style.setProperty(
-        "--home-reveal-delay",
-        `${Math.min(position, 5) * 75}ms`
-      );
-    });
-
-    if (
-      prefersReducedMotion ||
-      !("IntersectionObserver" in window)
-    ) {
-      revealElements.forEach((element) => {
-        element.classList.add("is-visible");
-      });
-
-      return () => {
-        root.classList.remove("home-motion-ready");
-      };
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const element = entry.target;
-
-          if (entry.isIntersecting) {
-            element.classList.add("is-visible");
-            element.classList.remove(
-              "is-above",
-              "is-below"
-            );
-            return;
-          }
-
-          element.classList.remove("is-visible");
-
-          const viewportTop =
-            entry.rootBounds?.top || 0;
-          const viewportBottom =
-            entry.rootBounds?.bottom ||
-            window.innerHeight;
-
-          if (
-            entry.boundingClientRect.bottom <=
-            viewportTop
-          ) {
-            element.classList.add("is-above");
-            element.classList.remove("is-below");
-          } else if (
-            entry.boundingClientRect.top >=
-            viewportBottom
-          ) {
-            element.classList.add("is-below");
-            element.classList.remove("is-above");
-          }
-        });
-      },
-      {
-        threshold: [0, 0.08, 0.18],
-        rootMargin: "-5% 0px -5% 0px",
-      }
-    );
-
-    revealElements.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => {
-      observer.disconnect();
-      root.classList.remove("home-motion-ready");
     };
   }, []);
 
@@ -317,127 +82,27 @@ function App({ session, loading }) {
 
       const jobIds = (myJobs || []).map((job) => job.id);
 
-      let applications = [];
+      if (jobIds.length === 0) {
+        setHasNotifications(false);
+        return;
+      }
 
-      if (jobIds.length > 0) {
-        const {
-          data,
-          error: applicationsError,
-        } = await supabase
-          .from("job_applications")
-          .select("id, job_id, applicant_id, created_at")
-          .in("job_id", jobIds)
-          .eq("status", "pending")
-          .order("created_at", { ascending: false });
+      const { data: applications, error: applicationsError } = await supabase
+        .from("job_applications")
+        .select("id, job_id, applicant_id, created_at")
+        .in("job_id", jobIds)
+        .order("created_at", { ascending: false });
 
-        if (applicationsError) {
-          console.error(
-            "HOME NOTIFICATION APPLICATIONS ERROR:",
-            applicationsError
-          );
-          return;
-        }
-
-        applications = data || [];
+      if (applicationsError) {
+        console.error("HOME NOTIFICATION APPLICATIONS ERROR:", applicationsError);
+        return;
       }
 
       const readKey = `ideahire_read_notifications_${userId}`;
-
-      let readIds = [];
-
-      try {
-        const storedReadIds = JSON.parse(
-          localStorage.getItem(readKey) || "[]"
-        );
-
-        readIds = Array.isArray(storedReadIds)
-          ? storedReadIds
-          : [];
-      } catch {
-        readIds = [];
-      }
-
-      const [
-        rejectedResult,
-        acceptedResult,
-        blockedResult,
-      ] = await Promise.all([
-        supabase
-          .from("job_applications")
-          .select("id")
-          .eq("applicant_id", userId)
-          .eq("status", "rejected"),
-
-        supabase
-          .from("job_applications")
-          .select("id")
-          .eq("applicant_id", userId)
-          .eq("status", "accepted"),
-
-        supabase
-          .from("user_blocks")
-          .select("id")
-          .eq("blocked_id", userId),
-      ]);
-
-      if (rejectedResult.error) {
-        console.error(
-          "HOME REJECTED NOTIFICATIONS ERROR:",
-          rejectedResult.error
-        );
-      }
-
-      if (acceptedResult.error) {
-        console.error(
-          "HOME ACCEPTED NOTIFICATIONS ERROR:",
-          acceptedResult.error
-        );
-      }
-
-      if (blockedResult.error) {
-        console.error(
-          "HOME BLOCK NOTIFICATIONS ERROR:",
-          blockedResult.error
-        );
-      }
-
-      const hasUnreadIncoming =
-        (applications || []).some(
-          (application) =>
-            !readIds.includes(
-              `incoming:${application.id}`
-            )
-        );
-
-      const hasUnreadRejected =
-        (rejectedResult.data || []).some(
-          (application) =>
-            !readIds.includes(
-              `rejected:${application.id}`
-            )
-        );
-
-      const hasUnreadAccepted =
-        (acceptedResult.data || []).some(
-          (application) =>
-            !readIds.includes(
-              `accepted:${application.id}`
-            )
-        );
-
-      const hasUnreadBlock =
-        (blockedResult.data || []).some(
-          (block) =>
-            !readIds.includes(
-              `blocked:${block.id}`
-            )
-        );
+      const readIds = JSON.parse(localStorage.getItem(readKey) || "[]");
 
       setHasNotifications(
-        hasUnreadIncoming ||
-          hasUnreadRejected ||
-          hasUnreadAccepted ||
-          hasUnreadBlock
+        (applications || []).some((application) => !readIds.includes(application.id))
       );
     } catch (error) {
       console.error("HOME NOTIFICATION CHECK ERROR:", error);
@@ -460,53 +125,30 @@ function App({ session, loading }) {
     session?.user?.email?.split("@")[0] ||
     "Użytkownik";
 
-  const avatarUrl =
-    session?.user?.user_metadata
-      ?.avatar_url || "";
-
-  const userInitial = userName
-    .charAt(0)
-    .toUpperCase();
-
-  const activeJob =
-    recentJobs[
-      activeJobIndex % recentJobs.length
-    ] || fallbackJobs[0];
-
-  const nextJob =
-    recentJobs[
-      (activeJobIndex + 1) %
-        recentJobs.length
-    ] || fallbackJobs[1];
-
-  const followingJob =
-    recentJobs[
-      (activeJobIndex + 2) %
-        recentJobs.length
-    ] || fallbackJobs[2];
-
-  function formatBudget(value) {
-    return `${Number(
-      value || 0
-    ).toLocaleString("pl-PL")} zł`;
-  }
-
   return (
     <div className="app">
-      <header className="navbar home-navbar">
-        <Link className="logo logo-clean" to="/">
+      <header className="navbar">
+        <Link className="logo" to="/">
           Idea<span>Hire</span>
         </Link>
 
-        <nav className="nav-links home-nav-links">
+        <nav className="nav-links">
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
+        </nav>
 
-          {session && (
+        <div className="nav-actions">
+          {loading ? (
+            <span>Ładowanie...</span>
+          ) : session ? (
             <>
+              <span className="auth-user">
+                Cześć, {userName}
+              </span>
+
               <Link
-                className="home-notifications-link"
+                className="home-notifications-link btn btn-ghost"
                 to="/notifications"
               >
                 Powiadomienia
@@ -515,37 +157,11 @@ function App({ session, loading }) {
                 )}
               </Link>
 
-              <Link to="/account">
-                Moje konto
-              </Link>
-            </>
-          )}
-        </nav>
-
-        <div className="nav-actions">
-          {loading ? (
-            <span>Ładowanie...</span>
-          ) : session ? (
-            <>
-              <span className="auth-user home-auth-user">
-                Cześć, {userName}
-              </span>
-
               <Link
-                className="home-account-avatar-link"
+                className="btn btn-ghost"
                 to="/account"
-                aria-label="Moje konto"
               >
-                <span className="account-mini-avatar">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt=""
-                    />
-                  ) : (
-                    userInitial
-                  )}
-                </span>
+                Moje konto
               </Link>
 
               <button
@@ -602,7 +218,7 @@ function App({ session, loading }) {
                 className="btn btn-dark btn-large"
                 to="/find-talent"
               >
-                Znajdź wykonawcę <span></span>
+                Znajdź wykonawcę <span>→</span>
               </Link>
 
               <Link
@@ -632,26 +248,26 @@ function App({ session, loading }) {
           </div>
 
           <div className="hero-visual">
-            <div
-              className="floating-card card-main rotating-job-card"
-              key={activeJob.id}
-            >
+            <div className="floating-card card-main">
               <div className="card-header">
-                <span>Aktualne zlecenie</span>
+                <span>Nowe zlecenie</span>
                 <span className="live-dot">●</span>
               </div>
 
-              <h3>{activeJob.title}</h3>
+              <h3>
+                Potrzebuję nowoczesnej
+                <br />
+                strony internetowej
+              </h3>
 
               <p>
-                {activeJob.description}
+                Szukam osoby, która stworzy prostą i szybką
+                stronę dla nowej marki.
               </p>
 
               <div className="card-meta">
-                <span>
-                  {formatBudget(activeJob.budget)}
-                </span>
-                <span>{getCategoryLabel(activeJob.category)}</span>
+                <span>1 500–3 000 zł</span>
+                <span>3 zgłoszenia</span>
               </div>
             </div>
 
@@ -659,17 +275,17 @@ function App({ session, loading }) {
               <span className="mini-icon">✦</span>
 
               <div>
-                <strong>Najnowsze zlecenia</strong>
-                <span>{nextJob.title}</span>
+                <strong>Nowe zgłoszenie</strong>
+                <span>Projektant UI/UX</span>
               </div>
             </div>
 
             <div className="floating-card card-small card-bottom">
-              <span className="check-icon"></span>
+              <span className="check-icon">✓</span>
 
               <div>
-                <strong>Kolejne zlecenie</strong>
-                <span>{followingJob.title}</span>
+                <strong>Projekt zakończony</strong>
+                <span>Wszystko gotowe</span>
               </div>
             </div>
 
@@ -681,7 +297,7 @@ function App({ session, loading }) {
           className="categories section"
           id="categories"
         >
-          <div className="section-heading home-reveal">
+          <div className="section-heading">
             <div>
               <span className="section-label">Kategorie</span>
 
@@ -701,27 +317,19 @@ function App({ session, loading }) {
           <div className="category-grid">
             {categories.map((category, index) => (
               <button
-                className="category-card home-reveal"
-                key={category.value}
+                className="category-card"
+                key={category}
                 type="button"
-                onClick={() =>
-                  navigate(
-                    `/jobs?category=${encodeURIComponent(
-                      category.value
-                    )}`
-                  )
-                }
-                aria-label={`Pokaż zlecenia: ${category.label}`}
               >
                 <span className="category-number">
-                  {String(index + 1).padStart(2, "0")}
+                  0{index + 1}
                 </span>
 
                 <span className="category-name">
-                  {category.label}
+                  {category}
                 </span>
 
-                <span className="category-arrow"></span>
+                <span className="category-arrow">↗</span>
               </button>
             ))}
           </div>
@@ -731,7 +339,7 @@ function App({ session, loading }) {
           className="how section"
           id="how-it-works"
         >
-          <div className="section-heading centered home-reveal">
+          <div className="section-heading centered">
             <span className="section-label">
               Jak to działa
             </span>
@@ -744,7 +352,7 @@ function App({ session, loading }) {
           </div>
 
           <div className="steps">
-            <article className="step home-reveal">
+            <article className="step">
               <span>01</span>
 
               <h3>Opisz potrzebę</h3>
@@ -755,7 +363,7 @@ function App({ session, loading }) {
               </p>
             </article>
 
-            <article className="step home-reveal">
+            <article className="step">
               <span>02</span>
 
               <h3>Wybierz osobę</h3>
@@ -766,7 +374,7 @@ function App({ session, loading }) {
               </p>
             </article>
 
-            <article className="step home-reveal">
+            <article className="step">
               <span>03</span>
 
               <h3>Zrealizuj projekt</h3>
@@ -780,7 +388,7 @@ function App({ session, loading }) {
         </section>
 
         <section
-          className="split-section section home-reveal"
+          className="split-section section"
           id="for-users"
         >
           <div className="split-card">
@@ -799,7 +407,7 @@ function App({ session, loading }) {
               className="btn btn-light"
               to="/find-talent"
             >
-              Dodaj zlecenie 
+              Dodaj zlecenie →
             </Link>
           </div>
 
@@ -819,17 +427,18 @@ function App({ session, loading }) {
               className="btn btn-outline"
               to="/jobs"
             >
-              Znajdź zlecenia 
+              Znajdź zlecenia →
             </Link>
           </div>
         </section>
 
-        <section className="final-cta home-reveal">
+        <section className="final-cta">
           <span className="section-label">IdeaHire</span>
 
-          <h2 className="final-cta-title">
-            <span>Twój następny projekt</span>
-            <span>zaczyna się tutaj.</span>
+          <h2>
+            Twój następny projekt
+            <br />
+            zaczyna się tutaj.
           </h2>
 
           <Link
@@ -837,15 +446,15 @@ function App({ session, loading }) {
             to={session ? "/account" : "/register"}
           >
             {session
-              ? "Przejdź do konta "
-              : "Zacznij teraz "}
+              ? "Przejdź do konta →"
+              : "Zacznij teraz →"}
           </Link>
         </section>
       </main>
 
-      <footer className="footer home-reveal">
+      <footer className="footer">
         <div>
-          <Link className="logo logo-clean" to="/">
+          <Link className="logo" to="/">
             Idea<span>Hire</span>
           </Link>
 
@@ -856,12 +465,6 @@ function App({ session, loading }) {
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
-          <Link to="/regulamin">Regulamin</Link>
-          <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
-          <Link to="/polityka-cookies">Polityka cookies</Link>
-          <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">
-            Zgłoś nielegalną treść
-          </a>
         </div>
 
         <span>© 2026 IdeaHire</span>
