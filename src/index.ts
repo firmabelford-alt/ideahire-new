@@ -1,357 +1,356 @@
-import { createClient } from "npm:@supabase/supabase-js@2.53.0";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-const SUPABASE_SERVICE_ROLE_KEY =
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, content-type, x-calendar-secret",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
-const DEFAULT_ALLOWED_ORIGINS = [
-  "https://ideahire-new.pages.dev",
-  "https://3438c65b.ideahire-new.pages.dev",
-  "http://localhost:5173",
-];
+type CalendarReminder = {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  event_type: "deadline" | "meeting" | "payment" | "personal";
+  starts_at: string;
+  timezone: string | null;
+  reminder_due_at: string | null;
+  delivery_attempts: number;
+};
 
-const configuredAllowedOrigins = (
-  Deno.env.get("IDEAHIRE_ALLOWED_ORIGINS") ?? ""
-)
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-const allowedOrigins = new Set([
-  ...DEFAULT_ALLOWED_ORIGINS,
-  ...configuredAllowedOrigins,
-]);
-
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function corsHeaders(origin: string | null) {
-  const responseOrigin = origin && allowedOrigins.has(origin)
-    ? origin
-    : DEFAULT_ALLOWED_ORIGINS[0];
-
-  return {
-    "Access-Control-Allow-Origin": responseOrigin,
-    "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Max-Age": "86400",
-    "Content-Type": "application/json; charset=utf-8",
-    "Vary": "Origin",
-  };
-}
+type DeliveryResult = {
+  id: string;
+  status: "sent" | "failed";
+  reason?: string;
+};
 
 function jsonResponse(
   body: Record<string, unknown>,
-  status: number,
-  origin: string | null,
+  status = 200,
 ) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: corsHeaders(origin),
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
   });
 }
 
-function publicErrorMessage(error: unknown) {
-  if (error instanceof Error && error.message.trim()) {
-    return error.message.slice(0, 500);
-  }
-
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof error.message === "string" &&
-    error.message.trim()
-  ) {
-    return error.message.slice(0, 500);
-  }
-
-  return "Nie udało się bezpiecznie wykonać operacji.";
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function requireServerConfiguration() {
-  if (
-    !SUPABASE_URL ||
-    !SUPABASE_ANON_KEY ||
-    !SUPABASE_SERVICE_ROLE_KEY
-  ) {
-    throw new Error("Brak wymaganej konfiguracji funkcji serwerowej.");
+function getEventTypeLabel(type: CalendarReminder["event_type"]) {
+  const labels: Record<CalendarReminder["event_type"], string> = {
+    deadline: "Termin pracy",
+    meeting: "Spotkanie",
+    payment: "Płatność",
+    personal: "Własne przypomnienie",
+  };
+
+  return labels[type] || labels.personal;
+}
+
+function getSafeTimezone(value: string | null) {
+  const fallback = "Europe/Warsaw";
+
+  if (!value) return fallback;
+
+  try {
+    new Intl.DateTimeFormat("pl-PL", {
+      timeZone: value,
+    }).format(new Date());
+
+    return value;
+  } catch {
+    return fallback;
   }
+}
+
+function formatReminderDate(value: string, timezone: string | null) {
+  const date = new Date(value);
+
+  return new Intl.DateTimeFormat("pl-PL", {
+    timeZone: getSafeTimezone(timezone),
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function createReminderEmail(
+  reminder: CalendarReminder,
+  calendarUrl: string,
+) {
+  const title = escapeHtml(reminder.title);
+  const description = reminder.description
+    ? escapeHtml(reminder.description).replaceAll("\n", "<br />")
+    : "Brak dodatkowej notatki.";
+  const eventType = escapeHtml(getEventTypeLabel(reminder.event_type));
+  const eventDate = escapeHtml(
+    formatReminderDate(reminder.starts_at, reminder.timezone),
+  );
+  const safeCalendarUrl = escapeHtml(calendarUrl);
+
+  return {
+    subject: `Przypomnienie IdeaHire: ${reminder.title}`,
+    text: [
+      "IdeaHire — przypomnienie",
+      "",
+      reminder.title,
+      `${getEventTypeLabel(reminder.event_type)} · ${formatReminderDate(
+        reminder.starts_at,
+        reminder.timezone,
+      )}`,
+      "",
+      reminder.description || "Brak dodatkowej notatki.",
+      "",
+      `Otwórz kalendarz: ${calendarUrl}`,
+      "",
+      "To wiadomość transakcyjna ustawiona przez Ciebie w kalendarzu IdeaHire.",
+    ].join("\n"),
+    html: `<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Przypomnienie IdeaHire</title>
+  </head>
+  <body style="margin:0;background:#eef2f7;font-family:Inter,Arial,sans-serif;color:#10213d;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef2f7;padding:32px 14px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #dce4ee;border-radius:24px;overflow:hidden;">
+            <tr>
+              <td style="padding:30px 32px 18px;background:linear-gradient(135deg,#10213d,#245f9f);color:#ffffff;">
+                <div style="font-size:12px;font-weight:800;letter-spacing:.12em;opacity:.76;">IDEAHIRE · KALENDARZ</div>
+                <h1 style="margin:15px 0 0;font-size:30px;line-height:1.12;letter-spacing:-.04em;">${title}</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 32px;">
+                <div style="display:inline-block;padding:7px 10px;border-radius:999px;background:#e8f1fb;color:#1f5b99;font-size:12px;font-weight:800;">${eventType}</div>
+                <p style="margin:20px 0 0;font-size:17px;font-weight:800;line-height:1.5;">${eventDate}</p>
+                <p style="margin:16px 0 24px;color:#56667d;font-size:14px;line-height:1.7;">${description}</p>
+                <a href="${safeCalendarUrl}" style="display:inline-block;padding:13px 18px;border-radius:13px;background:#235fa8;color:#ffffff;text-decoration:none;font-size:13px;font-weight:800;">Otwórz kalendarz</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 32px;border-top:1px solid #e3e8ef;color:#7b8798;font-size:11px;line-height:1.55;">
+                To wiadomość transakcyjna ustawiona przez Ciebie w prywatnym kalendarzu IdeaHire. Ustawienie możesz zmienić lub usunąć po zalogowaniu.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`,
+  };
+}
+
+async function sendReminderEmail(
+  resendApiKey: string,
+  fromEmail: string,
+  recipientEmail: string,
+  reminder: CalendarReminder,
+  calendarUrl: string,
+) {
+  const email = createReminderEmail(reminder, calendarUrl);
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": `ideahire-calendar-${reminder.id}-${
+        reminder.reminder_due_at || reminder.starts_at
+      }`,
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [recipientEmail],
+      subject: email.subject,
+      text: email.text,
+      html: email.html,
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const providerMessage =
+      typeof payload?.message === "string"
+        ? payload.message
+        : `HTTP ${response.status}`;
+
+    throw new Error(`Resend: ${providerMessage}`);
+  }
+
+  return payload;
 }
 
 Deno.serve(async (request) => {
-  const origin = request.headers.get("Origin");
-
-  if (origin && !allowedOrigins.has(origin)) {
-    return jsonResponse(
-      { ok: false, error: "Niedozwolone źródło żądania." },
-      403,
-      origin,
-    );
-  }
-
   if (request.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders(origin),
+    return new Response("ok", {
+      headers: corsHeaders,
     });
   }
 
   if (request.method !== "POST") {
     return jsonResponse(
-      { ok: false, error: "Dozwolona jest wyłącznie metoda POST." },
+      { error: "Method not allowed" },
       405,
-      origin,
     );
   }
 
-  try {
-    requireServerConfiguration();
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  const cronSecret = Deno.env.get("CALENDAR_CRON_SECRET");
+  const fromEmail =
+    Deno.env.get("REMINDER_FROM_EMAIL") ||
+    "IdeaHire <przypomnienia@ideahire.pl>";
+  const siteUrl = (
+    Deno.env.get("SITE_URL") ||
+    "https://ideahire-new.pages.dev"
+  ).replace(/\/$/, "");
 
-    const authorization = request.headers.get("Authorization") ?? "";
-    if (!authorization.startsWith("Bearer ")) {
-      return jsonResponse(
-        { ok: false, error: "Brak aktywnej sesji administratora." },
-        401,
-        origin,
-      );
-    }
+  if (!supabaseUrl || !serviceRoleKey || !resendApiKey || !cronSecret) {
+    return jsonResponse(
+      {
+        error: "Missing required server configuration",
+        required: [
+          "SUPABASE_URL",
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "RESEND_API_KEY",
+          "CALENDAR_CRON_SECRET",
+        ],
+      },
+      500,
+    );
+  }
 
-    let requestBody: {
-      caseId?: unknown;
-      authorizeAndExecute?: unknown;
-      ownerConfirmation?: unknown;
-    };
+  const suppliedSecret =
+    request.headers.get("x-calendar-secret") || "";
+
+  if (suppliedSecret !== cronSecret) {
+    return jsonResponse(
+      { error: "Unauthorized" },
+      401,
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+
+  const { data, error } = await supabase.rpc(
+    "ideahire_claim_due_calendar_reminders",
+    { p_limit: 50 },
+  );
+
+  if (error) {
+    console.error("CALENDAR CLAIM ERROR", error);
+
+    return jsonResponse(
+      {
+        error: "Could not claim reminders",
+        detail: error.message,
+      },
+      500,
+    );
+  }
+
+  const reminders = (data || []) as CalendarReminder[];
+  const results: DeliveryResult[] = [];
+  const calendarUrl = `${siteUrl}/calendar`;
+
+  for (const reminder of reminders) {
     try {
-      requestBody = await request.json();
-    } catch {
-      return jsonResponse(
-        { ok: false, error: "Nieprawidłowa treść żądania." },
-        400,
-        origin,
-      );
-    }
+      const { data: userData, error: userError } =
+        await supabase.auth.admin.getUserById(reminder.user_id);
 
-    const caseId = typeof requestBody.caseId === "string"
-      ? requestBody.caseId.trim()
-      : "";
-    const authorizeAndExecute = requestBody.authorizeAndExecute === true;
-    const ownerConfirmation = typeof requestBody.ownerConfirmation === "string"
-      ? requestBody.ownerConfirmation.trim()
-      : "";
+      if (userError) throw userError;
 
-    if (!UUID_PATTERN.test(caseId)) {
-      return jsonResponse(
-        { ok: false, error: "Nieprawidłowy identyfikator sprawy." },
-        400,
-        origin,
-      );
-    }
+      const recipientEmail = userData.user?.email;
 
-    const userClient = createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY,
-      {
-        global: { headers: { Authorization: authorization } },
-        auth: { persistSession: false, autoRefreshToken: false },
-      },
-    );
-
-    const serviceClient = createClient(
-      SUPABASE_URL,
-      SUPABASE_SERVICE_ROLE_KEY,
-      {
-        auth: { persistSession: false, autoRefreshToken: false },
-      },
-    );
-
-    const { data: authenticated, error: authenticationError } =
-      await userClient.auth.getUser();
-
-    if (authenticationError || !authenticated.user) {
-      return jsonResponse(
-        { ok: false, error: "Sesja administratora wygasła." },
-        401,
-        origin,
-      );
-    }
-
-    const { data: existingCase, error: existingCaseError } = await userClient
-      .from("ideahire_erasure_cases")
-      .select("id, status, action_type")
-      .eq("id", caseId)
-      .maybeSingle();
-
-    if (existingCaseError) throw existingCaseError;
-
-    if (existingCase?.status === "completed") {
-      return jsonResponse(
-        {
-          ok: true,
-          alreadyCompleted: true,
-          caseId,
-          actionType: existingCase.action_type,
-        },
-        200,
-        origin,
-      );
-    }
-
-    if (existingCase?.status === "awaiting_owner") {
-      if (
-        !authorizeAndExecute ||
-        ownerConfirmation !== "ZATWIERDZAM USUNIECIE"
-      ) {
-        return jsonResponse(
-          {
-            ok: false,
-            error:
-              "Operacja oczekuje na zatwierdzenie ownera poprawną frazą.",
-          },
-          409,
-          origin,
-        );
+      if (!recipientEmail) {
+        throw new Error("Konto nie ma adresu e-mail.");
       }
 
-      const { error: authorizationError } = await userClient.rpc(
-        "owner_authorize_ideahire_erasure_case",
-        {
-          p_case_id: caseId,
-          p_confirmation: ownerConfirmation,
-        },
+      await sendReminderEmail(
+        resendApiKey,
+        fromEmail,
+        recipientEmail,
+        reminder,
+        calendarUrl,
       );
 
-      if (authorizationError) throw authorizationError;
+      const { error: updateError } = await supabase
+        .from("ideahire_calendar_events")
+        .update({
+          reminder_sent_at: new Date().toISOString(),
+          delivery_status: "sent",
+          processing_started_at: null,
+          last_delivery_error: null,
+        })
+        .eq("id", reminder.id)
+        .eq("delivery_status", "processing");
+
+      if (updateError) throw updateError;
+
+      results.push({
+        id: reminder.id,
+        status: "sent",
+      });
+    } catch (error) {
+      const reason = String(
+        error instanceof Error ? error.message : error,
+      ).slice(0, 900);
+
+      console.error("CALENDAR DELIVERY ERROR", {
+        reminderId: reminder.id,
+        reason,
+      });
+
+      await supabase
+        .from("ideahire_calendar_events")
+        .update({
+          delivery_status: "failed",
+          processing_started_at: null,
+          last_delivery_error: reason,
+        })
+        .eq("id", reminder.id)
+        .eq("delivery_status", "processing");
+
+      results.push({
+        id: reminder.id,
+        status: "failed",
+        reason,
+      });
     }
-
-    const { data: beginPayload, error: beginError } = await userClient.rpc(
-      "admin_begin_ideahire_erasure_execution",
-      { p_case_id: caseId },
-    );
-
-    if (beginError) throw beginError;
-
-    const targetUserId = typeof beginPayload?.target_user_id === "string"
-      ? beginPayload.target_user_id
-      : "";
-    const actionType = beginPayload?.action_type;
-
-    if (
-      !UUID_PATTERN.test(targetUserId) ||
-      !["minimize_data", "close_account"].includes(actionType)
-    ) {
-      throw new Error("Funkcja bazy zwróciła nieprawidłowy zakres operacji.");
-    }
-
-    if (targetUserId === authenticated.user.id) {
-      throw new Error("Administrator nie może wykonać operacji na własnym koncie.");
-    }
-
-    const avatarPaths = Array.isArray(beginPayload?.avatar_objects)
-      ? beginPayload.avatar_objects
-        .filter((item: unknown) => (
-          typeof item === "object" &&
-          item !== null &&
-          (item as { bucket_id?: unknown }).bucket_id === "avatars" &&
-          typeof (item as { name?: unknown }).name === "string"
-        ))
-        .map((item: unknown) => (item as { name: string }).name)
-      : [];
-
-    let removedAvatarObjects = 0;
-    for (let index = 0; index < avatarPaths.length; index += 1000) {
-      const batch = avatarPaths.slice(index, index + 1000);
-      const { error: storageError } = await serviceClient.storage
-        .from("avatars")
-        .remove(batch);
-
-      if (storageError) throw storageError;
-      removedAvatarObjects += batch.length;
-    }
-
-    const { data: targetAuthData, error: targetAuthError } =
-      await serviceClient.auth.admin.getUserById(targetUserId);
-
-    if (targetAuthError || !targetAuthData.user) {
-      throw targetAuthError ?? new Error("Nie znaleziono konta Auth użytkownika.");
-    }
-
-    const clearedUserMetadata = Object.fromEntries(
-      Object.keys(targetAuthData.user.user_metadata ?? {})
-        .map((key) => [key, null]),
-    );
-
-    if (Object.keys(clearedUserMetadata).length > 0) {
-      const { error: metadataError } =
-        await serviceClient.auth.admin.updateUserById(targetUserId, {
-          user_metadata: clearedUserMetadata,
-        });
-
-      if (metadataError) throw metadataError;
-    }
-
-    const { data: dataResult, error: dataError } = await userClient.rpc(
-      "admin_apply_ideahire_erasure_data",
-      { p_case_id: caseId },
-    );
-
-    if (dataError) throw dataError;
-
-    let authSoftDeleted = false;
-    if (actionType === "close_account") {
-      const { error: deleteAuthError } =
-        await serviceClient.auth.admin.deleteUser(targetUserId, true);
-
-      if (deleteAuthError) throw deleteAuthError;
-      authSoftDeleted = true;
-    }
-
-    const executionResult = {
-      data_minimization: dataResult,
-      avatar_objects_removed: removedAvatarObjects,
-      auth_user_metadata_cleared:
-        Object.keys(clearedUserMetadata).length > 0,
-      auth_soft_deleted: authSoftDeleted,
-      resumed: Boolean(beginPayload?.resumed),
-      executed_at: new Date().toISOString(),
-    };
-
-    const { error: finalizeError } = await userClient.rpc(
-      "admin_finalize_ideahire_erasure_case",
-      {
-        p_case_id: caseId,
-        p_auth_soft_deleted: authSoftDeleted,
-        p_execution_result: executionResult,
-        p_failure_reason: null,
-      },
-    );
-
-    if (finalizeError) throw finalizeError;
-
-    return jsonResponse(
-      {
-        ok: true,
-        caseId,
-        actionType,
-        authSoftDeleted,
-        removedAvatarObjects,
-      },
-      200,
-      origin,
-    );
-  } catch (error) {
-    console.error("ideahire-admin-erasure failed", error);
-
-    return jsonResponse(
-      {
-        ok: false,
-        error: publicErrorMessage(error),
-        retryable: true,
-      },
-      400,
-      origin,
-    );
   }
+
+  return jsonResponse({
+    ok: true,
+    claimed: reminders.length,
+    sent: results.filter((item) => item.status === "sent").length,
+    failed: results.filter((item) => item.status === "failed").length,
+    results,
+  });
 });
