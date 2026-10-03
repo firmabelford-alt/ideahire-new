@@ -295,6 +295,85 @@ function HomeCategoryBrowser({ groups }) {
 }
 
 
+function HomeNavItem({ children, order, to, href, notification = false }) {
+  const Item = to ? Link : "a";
+  return (
+    <Item
+      {...(to ? { to } : { href })}
+      className={`ih-nav-item${to === "/notifications" ? " home-notifications-link" : ""}`}
+      style={{ "--ih-nav-order": order }}
+    >
+      <span className="ih-nav-pixels" aria-hidden="true">
+        <i /><i /><i /><i />
+      </span>
+      <span className="ih-nav-label">{children}</span>
+      {notification && <span className="home-notifications-dot" aria-label="Nowe powiadomienia" />}
+    </Item>
+  );
+}
+
+function HomeGreeting({ name }) {
+  return (
+    <span className="auth-user home-auth-user ih-welcome" title={`Cześć, ${name}`}>
+      <span className="ih-welcome-readable">Cześć, {name}</span>
+      <span className="ih-welcome-spark" aria-hidden="true"><i /><i /><i /><i /></span>
+      <span className="ih-welcome-copy" aria-hidden="true">
+        <span className="ih-welcome-prefix">Cześć,</span>{" "}
+        <strong className="ih-welcome-name">
+          {Array.from(name).map((letter, index) => (
+            <span key={index} style={{ "--ih-letter-order": Math.min(index, 12) }}>{letter}</span>
+          ))}
+        </strong>
+      </span>
+    </span>
+  );
+}
+
+// Fictional content for the requested visual test. Keep the demo label visible.
+const HOME_DEMO_REVIEWS = [
+  { initial: "A", name: "Aleksandra", role: "zleceniodawczyni", text: "Mam pomysł i od razu wiem, gdzie szukać osoby, która pomoże mi go zrealizować." },
+  { initial: "M", name: "Michał", role: "freelancer", text: "Przejrzyste kategorie i zlecenia w jednym miejscu. Tak lubię szukać nowych projektów." },
+  { initial: "K", name: "Karolina", role: "zleceniodawczyni", text: "Najbardziej podoba mi się prosty układ. Mogę skupić się na swoim projekcie." },
+  { initial: "P", name: "Piotr", role: "freelancer", text: "Od małego zadania po większy projekt — łatwo znaleźć swój kierunek." },
+];
+
+function HomeDemoReviews() {
+  const [paused, setPaused] = useState(false);
+  return (
+    <section className="ih-demo-reviews" aria-labelledby="ih-demo-reviews-title" data-paused={paused}>
+      <div className="ih-demo-reviews-heading">
+        <div>
+          <span className="ih-demo-review-caption">Pomysły spotykają ludzi</span>
+          <h2 id="ih-demo-reviews-title">Opinie przykładowe — test wyglądu</h2>
+        </div>
+        <button className="ih-demo-reviews-pause" type="button" aria-pressed={paused} aria-controls="ih-demo-reviews-track" onClick={() => setPaused((value) => !value)}>
+          <span aria-hidden="true">{paused ? "▶" : "Ⅱ"}</span>
+          {paused ? "Wznów" : "Zatrzymaj"}
+        </button>
+      </div>
+      <div className="ih-demo-reviews-viewport" tabIndex={0} aria-label="Przykładowe, fikcyjne opinie do testu wyglądu. Najedź kursorem lub ustaw fokus, aby zatrzymać przewijanie.">
+        <div className="ih-demo-reviews-track" id="ih-demo-reviews-track">
+          {[0, 1].map((copy) => (
+            <div className="ih-demo-reviews-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
+              {HOME_DEMO_REVIEWS.map((review) => (
+                <article className="ih-demo-review" key={review.name}>
+                  <span className="ih-demo-review-tag">Opinia testowa</span>
+                  <blockquote>{review.text}</blockquote>
+                  <div className="ih-demo-review-person">
+                    <span className="ih-demo-review-avatar" aria-hidden="true">{review.initial}</span>
+                    <div><strong>{review.name}</strong><span>{review.role}</span></div>
+                    <span className="ih-demo-review-quote" aria-hidden="true">“</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function App({ session, loading, categoryGroups = [] }) {
   const [hasNotifications, setHasNotifications] = useState(false);
   const [recentJobs, setRecentJobs] = useState(fallbackJobs);
@@ -735,32 +814,21 @@ function App({ session, loading, categoryGroups = [] }) {
   }
 
   return (
-    <div className="app ih-home-refresh">
+    <div className="app ih-home-refresh ih-home-v3">
       <header className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}>
         <Link className="logo logo-clean" to="/">
           Idea<span>Hire</span>
         </Link>
 
         <nav className="nav-links home-nav-links" aria-label="Nawigacja strony głównej">
-          <a href="#how-it-works">Jak to działa</a>
-          <a href="#categories">Kategorie</a>
-          <a href="#for-users">Dla Ciebie</a>
+          <HomeNavItem href="#how-it-works" order={0}>Jak to działa</HomeNavItem>
+          <HomeNavItem href="#categories" order={1}>Kategorie</HomeNavItem>
+          <HomeNavItem href="#for-users" order={2}>Dla Ciebie</HomeNavItem>
 
           {session && (
             <>
-              <Link
-                className="home-notifications-link"
-                to="/notifications"
-              >
-                Powiadomienia
-                {hasNotifications && (
-                  <span className="home-notifications-dot" />
-                )}
-              </Link>
-
-              <Link to="/account">
-                Moje konto
-              </Link>
+              <HomeNavItem to="/notifications" order={3} notification={hasNotifications}>Powiadomienia</HomeNavItem>
+              <HomeNavItem to="/account" order={4}>Moje konto</HomeNavItem>
             </>
           )}
         </nav>
@@ -770,9 +838,7 @@ function App({ session, loading, categoryGroups = [] }) {
             <span>Ładowanie...</span>
           ) : session ? (
             <>
-              <span className="auth-user home-auth-user" title={`Cześć, ${userName}`}>
-                <span>Cześć,</span> <strong>{userName}</strong>
-              </span>
+              <HomeGreeting name={userName} />
 
               <Link
                 className="home-account-avatar-link"
@@ -827,12 +893,10 @@ function App({ session, loading, categoryGroups = [] }) {
               Miejsce, gdzie pomysły spotykają ludzi
             </div>
 
-            <h1>
-              Masz pomysł.
-              <br />
-              <span>Znajdź kogoś,</span>
-              <br />
-              kto go zrealizuje.
+            <h1 className="ih-hero-title">
+              <span className="ih-hero-line">Masz pomysł.</span>{" "}
+              <span className="ih-hero-line">Znajdź kogoś,</span>{" "}
+              <span className="ih-hero-line">kto go zrealizuje.</span>
             </h1>
 
             <p className="hero-text">
@@ -920,18 +984,18 @@ function App({ session, loading, categoryGroups = [] }) {
           </div>
         </section>
 
+        <HomeDemoReviews />
+
         <section
           className="categories section"
           id="categories"
         >
-          <div className="section-heading home-reveal">
+          <div className="section-heading home-reveal ih-category-intro">
             <div>
               <span className="section-label">Kategorie</span>
 
               <h2>
-                Znajdź dokładnie to,
-                <br />
-                czego potrzebujesz.
+                Znajdź dokładnie to, czego potrzebujesz.
               </h2>
             </div>
 
