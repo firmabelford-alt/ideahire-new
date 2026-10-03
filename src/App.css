@@ -47950,3 +47950,507 @@ html #root#root .jobs-subcategory-filter > button {
   html #root#root .ih-home-refresh .ih-category-panel,
   html #root#root .ih-home-refresh .ih-category-browser * { animation: none !important; transition: none !important; }
 }
+
+/* =========================================================
+   IDEAHIRE — HOME POLISH — 2026-10-04 / package 03
+   Header in normal flow, pixel details, compact hero, demo reviews.
+   All four palettes inherit the existing home color tokens.
+========================================================= */
+
+/* Reset the old absolute centering and fixed mobile grid rows. */
+html #root#root .app.ih-home-refresh.ih-home-v3 .navbar.home-navbar.ih-home-header {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  grid-template-rows: auto !important;
+  grid-auto-rows: auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+  min-height: 84px !important;
+  height: auto !important;
+  padding: 16px clamp(16px, 2.4vw, 38px) !important;
+  background: var(--ih-home-surface) !important;
+  backdrop-filter: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header > .logo {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  grid-area: 1 / 1 !important;
+  order: 0 !important;
+  padding: 0 !important;
+  color: var(--ih-home-ink) !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header > .logo span {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header > .logo::after {
+  content: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  translate: none !important;
+  float: none !important;
+  grid-area: 1 / 2 !important;
+  order: 0 !important;
+  justify-self: center !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 6px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(125deg, var(--ih-home-surface), var(--ih-home-soft)) !important;
+  box-shadow: 0 5px 18px color-mix(in srgb, var(--ih-home-ink) 6%, transparent) !important;
+  animation: ih-v3-nav-build 650ms cubic-bezier(.16, 1, .3, 1) both !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links > .ih-nav-item {
+  gap: 7px !important;
+  padding: 10px !important;
+  min-height: 44px !important;
+  height: auto !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  background: transparent !important;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links > .ih-nav-item:is(:hover, :focus-visible, :active) {
+  background: var(--ih-home-accent) !important;
+  border-color: var(--ih-home-accent) !important;
+  color: var(--ih-home-on-accent) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ih-home-ink) 10%, transparent) !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-item .ih-nav-label,
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-item .ih-nav-label * {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-pixels {
+  display: grid !important;
+  grid-template-columns: repeat(2, 4px) !important;
+  grid-template-rows: repeat(2, 4px) !important;
+  gap: 3px !important;
+  flex: 0 0 11px !important;
+  width: 11px !important;
+  height: 11px !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  pointer-events: none;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-pixels > i {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: currentColor;
+  transition: transform 320ms cubic-bezier(.16, 1, .3, 1), border-radius 320ms ease;
+  animation: ih-v3-pixel-build 500ms cubic-bezier(.16, 1, .3, 1) backwards;
+  animation-delay: calc(120ms + var(--ih-nav-order, 0) * 60ms);
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-item:is(:hover, :focus-visible, :active) .ih-nav-pixels > i:nth-child(1) { transform: translate(-2px, -2px) rotate(90deg); }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-item:is(:hover, :focus-visible, :active) .ih-nav-pixels > i:nth-child(2) { transform: translate(2px, -2px) rotate(180deg); border-radius: 50%; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-item:is(:hover, :focus-visible, :active) .ih-nav-pixels > i:nth-child(3) { transform: translate(-2px, 2px) rotate(-90deg); border-radius: 50%; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-item:is(:hover, :focus-visible, :active) .ih-nav-pixels > i:nth-child(4) { transform: translate(2px, 2px) rotate(90deg); }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  grid-area: 1 / 3 !important;
+  order: 0 !important;
+  justify-self: end !important;
+  flex-wrap: nowrap !important;
+  width: auto !important;
+  height: auto !important;
+  gap: 8px !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions > .btn {
+  position: relative !important;
+  inset: auto !important;
+  width: auto !important;
+  border-width: 1px !important;
+  padding: 10px 13px !important;
+  box-shadow: none !important;
+  transition: box-shadow 180ms ease, opacity 180ms ease !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions > .btn:is(:hover, :focus-visible) {
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--ih-home-ink) 12%, transparent) !important;
+}
+
+/* A small spark and staggered letters give the welcome its own character. */
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .ih-welcome {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  max-width: 192px !important;
+  min-width: 0 !important;
+  animation: none !important;
+  clip-path: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .ih-welcome > .ih-welcome-copy {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font: inherit !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-copy :is(span, strong) {
+  color: var(--ih-home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  font: inherit !important;
+  text-shadow: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-copy .ih-welcome-name { font-weight: 800 !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .ih-welcome > .ih-welcome-readable {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-name > span {
+  display: inline-block;
+  white-space: pre;
+  animation: ih-v3-letter-in 600ms cubic-bezier(.16, 1, .3, 1) backwards;
+  animation-delay: calc(150ms + var(--ih-letter-order, 0) * 24ms);
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .ih-welcome > .ih-welcome-spark {
+  display: grid !important;
+  grid-template-columns: repeat(2, 5px) !important;
+  grid-template-rows: repeat(2, 5px) !important;
+  gap: 3px !important;
+  flex: 0 0 13px !important;
+  width: 13px !important;
+  height: 13px !important;
+  color: var(--ih-home-accent) !important;
+  transform: rotate(12deg);
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-spark > i {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: currentColor;
+  animation: ih-v3-welcome-spark 900ms cubic-bezier(.16, 1, .3, 1) 180ms backwards;
+  transition: transform 300ms cubic-bezier(.16, 1, .3, 1);
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome:hover .ih-welcome-spark > i:nth-child(odd) { transform: translateY(-3px) rotate(90deg); }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome:hover .ih-welcome-spark > i:nth-child(even) { transform: translateY(3px) rotate(-90deg); }
+
+/* Use the available width rather than a padded, very narrow headline column. */
+html #root#root .app.ih-home-refresh.ih-home-v3 > main { display: block !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 > main::before,
+html #root#root .app.ih-home-refresh.ih-home-v3 > main::after { content: none !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr) !important;
+  align-items: center !important;
+  gap: clamp(24px, 3vw, 42px) !important;
+  width: min(1240px, calc(100% - 48px)) !important;
+  max-width: 1240px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 32px auto 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero::before,
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero::after { content: none !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-content {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: clamp(24px, 2.5vw, 36px) !important;
+  border-color: var(--ih-home-line) !important;
+  background: var(--ih-home-surface) !important;
+  color: var(--ih-home-ink) !important;
+  box-shadow: var(--ih-home-shadow) !important;
+  backdrop-filter: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-content > .ih-hero-title {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 20px !important;
+  font-family: "Inter", system-ui, sans-serif !important;
+  font-size: clamp(42px, 4.05vw, 58px) !important;
+  font-weight: 800 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.045em !important;
+  color: var(--ih-home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  text-wrap: balance;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .ih-hero-title > .ih-hero-line {
+  display: block !important;
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+  text-shadow: none !important;
+  white-space: normal !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .eyebrow {
+  width: fit-content !important;
+  margin: 0 0 24px !important;
+  padding: 8px 10px !important;
+  min-height: 0 !important;
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  white-space: normal !important;
+  border-color: var(--ih-home-line) !important;
+  background: var(--ih-home-soft) !important;
+  color: var(--ih-home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  box-shadow: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-text {
+  margin: 0 0 24px !important;
+  max-width: 52ch !important;
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  color: var(--ih-home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-actions > .btn {
+  flex: 1 1 180px !important;
+  min-width: 0 !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 12px 15px !important;
+  font-size: 13px !important;
+  white-space: normal !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-stats {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin-top: 24px !important;
+  padding-top: 18px !important;
+  border-top: 1px solid var(--ih-home-line) !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-stats > div { min-width: 0 !important; margin: 0 !important; padding: 0 !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-stats strong { font-size: 14px !important; color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-stats span { font-size: 10px !important; color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; }
+
+/* Job cards also stay in normal flow on narrow displays. */
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-visual {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-content: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 20px 0 !important;
+  transform: none !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual::before,
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual::after,
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual > .visual-glow { display: none !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual > .floating-card {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  animation: none !important;
+  border: 1px solid var(--ih-home-line) !important;
+  background: var(--ih-home-surface) !important;
+  color: var(--ih-home-ink) !important;
+  box-shadow: var(--ih-home-shadow) !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual > .card-main { grid-column: 1 / -1 !important; padding: 28px !important; border-radius: 24px !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual > .card-small { display: flex !important; align-items: center !important; gap: 10px !important; min-height: 82px !important; padding: 16px !important; border-radius: 18px !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-small > div { min-width: 0 !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-small :is(strong, span) { color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-small > div > :is(strong, span) { display: block !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-small strong { font-size: 12px !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-small > div > span { margin-top: 5px !important; font-size: 11px !important; color: var(--ih-home-muted) !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-main h3 { margin: 18px 0 12px !important; font-size: 25px !important; line-height: 1.2 !important; color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; overflow-wrap: anywhere !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-main p { font-size: 14px !important; line-height: 1.6 !important; color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; overflow-wrap: anywhere !important; }
+
+/* The quotes are explicitly fictional examples, even when copied into the loop. */
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews,
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews * { box-sizing: border-box; font-family: "Inter", system-ui, sans-serif !important; -webkit-text-fill-color: currentColor !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews {
+  position: relative;
+  width: min(1240px, calc(100% - 48px));
+  min-width: 0;
+  margin: 32px auto 0;
+  padding: 0;
+  color: var(--ih-home-ink);
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 2px 14px; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-heading > div { min-width: 0; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-caption { display: block; margin-bottom: 5px; color: var(--ih-home-muted) !important; font-size: 11px; font-weight: 600; line-height: 1.4; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-heading h2 { margin: 0 !important; color: var(--ih-home-ink) !important; font-size: 16px !important; font-weight: 750 !important; line-height: 1.4 !important; letter-spacing: -.025em !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  gap: 7px;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 13px;
+  border: 1px solid var(--ih-home-line);
+  border-radius: 12px;
+  background: var(--ih-home-surface);
+  color: var(--ih-home-ink) !important;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-pause span { color: inherit !important; font-size: 12px; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-pause:hover { background: var(--ih-home-soft); }
+html #root#root .app.ih-home-refresh.ih-home-v3 :is(.ih-demo-reviews-pause, .ih-demo-reviews-viewport):focus-visible { outline: 2px solid var(--ih-home-accent); outline-offset: 3px; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-viewport { width: 100%; min-width: 0; padding: 2px 0 4px; overflow: hidden; border-radius: 20px; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-track { display: flex; width: max-content; animation: ih-v3-reviews-loop 48s linear infinite; will-change: transform; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-group { display: flex; flex: 0 0 auto; gap: 14px; padding-right: 14px; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review { display: flex; flex-direction: column; flex: 0 0 286px; width: 286px; min-height: 205px; margin: 0; padding: 20px; border: 1px solid var(--ih-home-line); border-radius: 20px; background: var(--ih-home-surface); }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-tag { display: block; width: fit-content; margin-bottom: 12px; color: var(--ih-home-muted) !important; font-size: 10px; font-weight: 700; line-height: 1.4; letter-spacing: .045em; text-transform: uppercase; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review blockquote { flex: 1; margin: 0 0 18px; padding: 0; border: 0; color: var(--ih-home-ink) !important; font-size: 13px; font-weight: 500; line-height: 1.65; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-person { display: flex; align-items: center; gap: 9px; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-avatar { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 11px; background: var(--ih-home-soft); color: var(--ih-home-ink) !important; font-size: 12px; font-weight: 750; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-person > div { min-width: 0; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-person strong { display: block; color: var(--ih-home-ink) !important; font-size: 12px; line-height: 1.4; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-person > div > span { display: block; color: var(--ih-home-muted) !important; font-size: 10px; line-height: 1.5; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review-quote { margin-left: auto; height: 30px; color: var(--ih-home-accent) !important; font-size: 44px; line-height: 1; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews[data-paused="true"] .ih-demo-reviews-track,
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-viewport:is(:hover, :focus-within) .ih-demo-reviews-track { animation-play-state: paused; }
+
+/* Keep the heading and its description together in the right column. */
+html #root#root .app.ih-home-refresh.ih-home-v3 > main > .categories.section {
+  width: min(1240px, calc(100% - 48px)) !important;
+  margin: 0 auto !important;
+  padding: 64px 0 56px !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .categories.section > .ih-category-intro {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+  width: min(100%, 560px) !important;
+  min-height: 0 !important;
+  margin: 0 0 28px auto !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro > div { width: 100% !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro .section-label { display: block !important; margin: 0 0 10px !important; color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; font-size: 11px !important; line-height: 1.5 !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro h2 { max-width: none !important; margin: 0 !important; font-size: clamp(30px, 3.1vw, 42px) !important; font-weight: 800 !important; line-height: 1.12 !important; letter-spacing: -.035em !important; color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro > p { width: 100% !important; max-width: 48ch !important; margin: 0 !important; font-size: 15px !important; line-height: 1.65 !important; color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; }
+
+@keyframes ih-v3-nav-build { from { clip-path: inset(0 48% 0 48% round 18px); } to { clip-path: inset(0 round 18px); } }
+@keyframes ih-v3-pixel-build { from { opacity: 0; transform: scale(.1) rotate(-90deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes ih-v3-letter-in { from { opacity: 0; transform: translateY(8px) rotate(4deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes ih-v3-welcome-spark { from { opacity: 0; transform: rotate(-180deg) scale(.1); } to { opacity: 1; transform: rotate(0) scale(1); } }
+@keyframes ih-v3-reviews-loop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+@media (max-width: 1279px) {
+  html #root#root .app.ih-home-refresh.ih-home-v3 .navbar.home-navbar.ih-home-header { grid-template-columns: auto minmax(0, 1fr) !important; grid-template-rows: auto auto !important; gap: 12px 18px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions { grid-area: 1 / 2 !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links { grid-area: 2 / 1 / 3 / -1 !important; width: min(760px, 100%) !important; justify-self: center !important; }
+}
+@media (max-width: 980px) {
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero { grid-template-columns: minmax(0, 1fr) !important; gap: 20px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-content > .ih-hero-title { font-size: clamp(36px, 6vw, 52px) !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-visual { width: 100% !important; padding: 0 !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .categories.section > .ih-category-intro { width: min(100%, 520px) !important; }
+}
+@media (max-width: 600px) {
+  html #root#root .app.ih-home-refresh.ih-home-v3 .navbar.home-navbar.ih-home-header { padding: 12px 14px !important; gap: 12px 10px !important; min-height: 0 !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header > .logo { grid-area: 1 / 1 !important; font-size: 24px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions { grid-area: 1 / 2 !important; display: flex !important; flex-wrap: wrap !important; justify-content: flex-end !important; gap: 6px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header[data-auth="guest"] .nav-actions { flex-wrap: nowrap !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions > .btn { min-height: 42px !important; padding: 9px 10px !important; font-size: 11px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .ih-welcome { justify-content: flex-end !important; flex-basis: 100% !important; max-width: 180px !important; font-size: 12px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links { grid-area: 2 / 1 / 3 / -1 !important; display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; width: 100% !important; gap: 5px !important; padding: 5px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links > .ih-nav-item { min-height: 44px !important; padding: 10px 8px !important; font-size: 12px !important; white-space: normal !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links > .ih-nav-item:last-child:nth-child(odd) { grid-column: 1 / -1 !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero { width: calc(100% - 28px) !important; margin-top: 20px !important; gap: 16px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-content { padding: 24px 20px !important; border-radius: 22px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-content > .ih-hero-title { font-size: clamp(29px, 8.1vw, 42px) !important; margin-bottom: 18px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .eyebrow { font-size: 10px !important; margin-bottom: 20px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-text { font-size: 14px !important; margin-bottom: 20px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-actions { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-actions > .btn { width: 100% !important; min-height: 46px !important; padding: 12px 14px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-stats { gap: 8px !important; margin-top: 20px !important; padding-top: 16px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-stats strong { font-size: 12px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual { gap: 10px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual > .card-main { padding: 20px !important; border-radius: 20px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual > .card-small { padding: 12px !important; gap: 7px !important; border-radius: 16px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-small strong { font-size: 11px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual .card-main h3 { font-size: 22px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews { width: calc(100% - 28px); margin-top: 24px; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-heading { gap: 10px; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-heading h2 { font-size: 14px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-pause { padding: 9px 10px; font-size: 11px; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-review { flex-basis: 252px; width: 252px; min-height: 207px; padding: 18px; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .categories.section { width: calc(100% - 28px) !important; padding: 42px 0 38px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .categories.section > .ih-category-intro { width: 100% !important; margin: 0 0 24px !important; gap: 12px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro h2 { font-size: 30px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro > p { font-size: 14px !important; }
+}
+@media (max-width: 360px) {
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header > .logo { font-size: 22px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .nav-actions > .btn { padding: 9px 8px !important; font-size: 10px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 > main > .hero .hero-content { padding: 22px 16px !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .hero-visual { grid-template-columns: minmax(0, 1fr) !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-category-intro h2 { font-size: 28px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-home-header .home-nav-links,
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-pixels > i,
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-name > span,
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-spark > i,
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-track { animation: none !important; transition: none !important; clip-path: none !important; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-viewport { overflow-x: auto; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-group[aria-hidden="true"],
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-pause { display: none; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-demo-reviews-track { will-change: auto; }
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-nav-pixels > i,
+  html #root#root .app.ih-home-refresh.ih-home-v3 .ih-welcome-spark > i { transform: none !important; }
+}
