@@ -1,7 +1,8 @@
-/* IDEA HIRE — NAVY PROFESSIONAL UI V5.5 — RELEASE 2026-09-19 */
+/* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
 /* IDEA HIRE — STRIPE CONNECT PANEL — BUILD 2026-09-05 */
+/* IDEA HIRE — PRIVATE CALENDAR + E-MAIL REMINDERS — BUILD 2026-10-03 */
 
 import React, {
   useCallback,
@@ -5403,6 +5404,9 @@ function AccountNavbar() {
               <NavLink to="/services" onClick={closeAccountMenu}>
                 Usługi
               </NavLink>
+              <NavLink to="/calendar" onClick={closeAccountMenu}>
+                Kalendarz
+              </NavLink>
               {!hasRestrictedAgeAccess && (
                 <NavLink
                   to="/messages"
@@ -5430,6 +5434,26 @@ function AccountNavbar() {
               }
             >
               Moje konto
+            </NavLink>
+
+            <NavLink
+              to="/calendar"
+              onClick={closeAccountMenu}
+              className={({ isActive }) =>
+                isActive ? "is-active" : ""
+              }
+            >
+              <span className="account-menu-calendar-link">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+                  <path d="m9 14 2 2 4-5" />
+                </svg>
+                Kalendarz
+              </span>
             </NavLink>
 
             {!hasRestrictedAgeAccess && (
@@ -16887,6 +16911,1892 @@ function Talent() {
           „Najnowsze” lub zmienić preferencje w zakładce „Moje konto”.
         </p>
       </main>
+    </div>
+  );
+}
+
+/* =========================================================
+   CALENDAR
+========================================================= */
+
+const CALENDAR_WEEKDAYS = [
+  "Pon",
+  "Wt",
+  "Śr",
+  "Czw",
+  "Pt",
+  "Sob",
+  "Niedz",
+];
+
+const CALENDAR_EVENT_TYPES = [
+  {
+    value: "deadline",
+    label: "Termin pracy",
+    shortLabel: "Termin",
+  },
+  {
+    value: "meeting",
+    label: "Spotkanie",
+    shortLabel: "Spotkanie",
+  },
+  {
+    value: "payment",
+    label: "Płatność",
+    shortLabel: "Płatność",
+  },
+  {
+    value: "personal",
+    label: "Własne przypomnienie",
+    shortLabel: "Własne",
+  },
+];
+
+const CALENDAR_REMINDER_OPTIONS = [
+  { value: 0, label: "W chwili rozpoczęcia" },
+  { value: 15, label: "15 minut wcześniej" },
+  { value: 60, label: "1 godzinę wcześniej" },
+  { value: 180, label: "3 godziny wcześniej" },
+  { value: 1440, label: "1 dzień wcześniej" },
+  { value: 4320, label: "3 dni wcześniej" },
+  { value: 10080, label: "7 dni wcześniej" },
+];
+
+function calendarPad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function getCalendarDateKey(value) {
+  const date =
+    value instanceof Date
+      ? value
+      : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return [
+    date.getFullYear(),
+    calendarPad(date.getMonth() + 1),
+    calendarPad(date.getDate()),
+  ].join("-");
+}
+
+function getCalendarDateTimeInput(value) {
+  const date =
+    value instanceof Date
+      ? value
+      : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return `${getCalendarDateKey(date)}T${calendarPad(
+    date.getHours()
+  )}:${calendarPad(date.getMinutes())}`;
+}
+
+function getCalendarMonthStart(value) {
+  const date =
+    value instanceof Date
+      ? value
+      : new Date(value);
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    1,
+    12,
+    0,
+    0,
+    0
+  );
+}
+
+function getCalendarGridDays(monthDate) {
+  const firstDay =
+    getCalendarMonthStart(monthDate);
+
+  const mondayOffset =
+    (firstDay.getDay() + 6) % 7;
+
+  const gridStart =
+    new Date(firstDay);
+
+  gridStart.setDate(
+    firstDay.getDate() - mondayOffset
+  );
+
+  return Array.from(
+    { length: 42 },
+    (_, index) => {
+      const day =
+        new Date(gridStart);
+
+      day.setDate(
+        gridStart.getDate() + index
+      );
+
+      return day;
+    }
+  );
+}
+
+function getCalendarType(type) {
+  return (
+    CALENDAR_EVENT_TYPES.find(
+      (item) => item.value === type
+    ) || CALENDAR_EVENT_TYPES[3]
+  );
+}
+
+function getCalendarMonthLabel(value) {
+  return new Intl.DateTimeFormat(
+    "pl-PL",
+    {
+      month: "long",
+      year: "numeric",
+    }
+  ).format(value);
+}
+
+function getCalendarDayLabel(value) {
+  return new Intl.DateTimeFormat(
+    "pl-PL",
+    {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(value);
+}
+
+function getCalendarEventDateLabel(value, allDay = false) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Nieprawidłowy termin";
+  }
+
+  const datePart =
+    new Intl.DateTimeFormat(
+      "pl-PL",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }
+    ).format(date);
+
+  if (allDay) {
+    return datePart;
+  }
+
+  const timePart =
+    new Intl.DateTimeFormat(
+      "pl-PL",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    ).format(date);
+
+  return `${datePart}, ${timePart}`;
+}
+
+function getCalendarTimeLabel(value, allDay = false) {
+  if (allDay) {
+    return "Termin zlecenia";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return new Intl.DateTimeFormat(
+    "pl-PL",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  ).format(date);
+}
+
+function getCalendarDateOnlyValue(value, hour = 12) {
+  if (!value) return null;
+
+  const parts =
+    String(value)
+      .slice(0, 10)
+      .split("-")
+      .map(Number);
+
+  if (
+    parts.length !== 3 ||
+    parts.some((part) => !Number.isFinite(part))
+  ) {
+    return null;
+  }
+
+  return new Date(
+    parts[0],
+    parts[1] - 1,
+    parts[2],
+    hour,
+    0,
+    0,
+    0
+  );
+}
+
+function createCalendarDraft(dateValue = new Date()) {
+  const now = new Date();
+  const selectedDate =
+    dateValue instanceof Date
+      ? new Date(dateValue)
+      : new Date(dateValue);
+
+  const isToday =
+    getCalendarDateKey(selectedDate) ===
+    getCalendarDateKey(now);
+
+  if (isToday) {
+    selectedDate.setHours(
+      now.getHours() + 1,
+      0,
+      0,
+      0
+    );
+  } else {
+    selectedDate.setHours(
+      9,
+      0,
+      0,
+      0
+    );
+  }
+
+  return {
+    title: "",
+    description: "",
+    event_type: "deadline",
+    starts_at:
+      getCalendarDateTimeInput(
+        selectedDate
+      ),
+    reminder_enabled: true,
+    reminder_minutes_before: 1440,
+    email_enabled: true,
+    linked_job_id: null,
+  };
+}
+
+function Calendar() {
+  const { user } =
+    useAuth();
+
+  const today =
+    new Date();
+
+  const [currentMonth, setCurrentMonth] =
+    useState(
+      getCalendarMonthStart(today)
+    );
+
+  const [selectedDate, setSelectedDate] =
+    useState(today);
+
+  const [customEvents, setCustomEvents] =
+    useState([]);
+
+  const [jobEvents, setJobEvents] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const [dialogOpen, setDialogOpen] =
+    useState(false);
+
+  const [editingId, setEditingId] =
+    useState(null);
+
+  const [draft, setDraft] =
+    useState(() =>
+      createCalendarDraft(today)
+    );
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [monthDirection, setMonthDirection] =
+    useState("next");
+
+  const loadCalendarContent =
+    useCallback(async () => {
+      if (!user?.id) return;
+
+      setLoading(true);
+      setMessage("");
+
+      const gridDays =
+        getCalendarGridDays(
+          currentMonth
+        );
+
+      const rangeStart =
+        new Date(gridDays[0]);
+
+      rangeStart.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const rangeEnd =
+        new Date(
+          gridDays[
+            gridDays.length - 1
+          ]
+        );
+
+      rangeEnd.setHours(
+        23,
+        59,
+        59,
+        999
+      );
+
+      try {
+        const {
+          data: eventRows,
+          error: eventsError,
+        } = await supabase
+          .from(
+            "ideahire_calendar_events"
+          )
+          .select(
+            "id, user_id, title, description, event_type, starts_at, linked_job_id, reminder_enabled, reminder_minutes_before, email_enabled, reminder_sent_at, completed_at, created_at, updated_at"
+          )
+          .eq("user_id", user.id)
+          .gte(
+            "starts_at",
+            rangeStart.toISOString()
+          )
+          .lte(
+            "starts_at",
+            rangeEnd.toISOString()
+          )
+          .order("starts_at", {
+            ascending: true,
+          });
+
+        if (eventsError) {
+          throw eventsError;
+        }
+
+        setCustomEvents(
+          (eventRows || []).map(
+            (item) => ({
+              ...item,
+              source: "custom",
+              all_day: false,
+              read_only: false,
+            })
+          )
+        );
+
+        const {
+          data: ownedJobs,
+          error: ownedJobsError,
+        } = await supabase
+          .from("jobs")
+          .select(
+            "id, user_id, title, project_deadline, planned_start_date"
+          )
+          .eq("user_id", user.id);
+
+        if (ownedJobsError) {
+          console.error(
+            "CALENDAR OWNED JOBS ERROR:",
+            ownedJobsError
+          );
+        }
+
+        const {
+          data: acceptedApplications,
+          error: applicationsError,
+        } = await supabase
+          .from("job_applications")
+          .select("job_id")
+          .eq("applicant_id", user.id)
+          .eq("status", "accepted");
+
+        if (applicationsError) {
+          console.error(
+            "CALENDAR APPLICATIONS ERROR:",
+            applicationsError
+          );
+        }
+
+        const acceptedJobIds = [
+          ...new Set(
+            (acceptedApplications || [])
+              .map((item) => item.job_id)
+              .filter(Boolean)
+          ),
+        ];
+
+        let acceptedJobs = [];
+
+        if (acceptedJobIds.length > 0) {
+          const {
+            data,
+            error,
+          } = await supabase
+            .from("jobs")
+            .select(
+              "id, user_id, title, project_deadline, planned_start_date"
+            )
+            .in("id", acceptedJobIds);
+
+          if (error) {
+            console.error(
+              "CALENDAR ACCEPTED JOBS ERROR:",
+              error
+            );
+          } else {
+            acceptedJobs = data || [];
+          }
+        }
+
+        const jobsById =
+          new Map();
+
+        for (
+          const job of [
+            ...(ownedJobs || []),
+            ...acceptedJobs,
+          ]
+        ) {
+          jobsById.set(job.id, job);
+        }
+
+        const nextJobEvents = [];
+
+        for (
+          const job of
+          jobsById.values()
+        ) {
+          const startDate =
+            getCalendarDateOnlyValue(
+              job.planned_start_date,
+              9
+            );
+
+          const deadlineDate =
+            getCalendarDateOnlyValue(
+              job.project_deadline,
+              18
+            );
+
+          if (startDate) {
+            nextJobEvents.push({
+              id: `job-start:${job.id}`,
+              title: `Start: ${job.title}`,
+              description:
+                "Planowany początek realizacji zlecenia.",
+              event_type: "meeting",
+              starts_at:
+                startDate.toISOString(),
+              linked_job_id: job.id,
+              reminder_enabled: false,
+              email_enabled: false,
+              completed_at: null,
+              source: "job",
+              all_day: true,
+              read_only: true,
+            });
+          }
+
+          if (deadlineDate) {
+            nextJobEvents.push({
+              id: `job-deadline:${job.id}`,
+              title: `Termin: ${job.title}`,
+              description:
+                "Termin wykonania wskazany w zleceniu.",
+              event_type: "deadline",
+              starts_at:
+                deadlineDate.toISOString(),
+              linked_job_id: job.id,
+              reminder_enabled: false,
+              email_enabled: false,
+              completed_at: null,
+              source: "job",
+              all_day: true,
+              read_only: true,
+            });
+          }
+        }
+
+        setJobEvents(
+          nextJobEvents
+        );
+      } catch (error) {
+        console.error(
+          "CALENDAR LOAD ERROR:",
+          error
+        );
+
+        setCustomEvents([]);
+
+        if (
+          error?.code === "42P01" ||
+          String(error?.message || "")
+            .toLowerCase()
+            .includes(
+              "ideahire_calendar_events"
+            )
+        ) {
+          setMessage(
+            "Kalendarz jest gotowy w interfejsie, ale wymaga jeszcze wdrożenia dołączonego pliku SQL w Supabase."
+          );
+        } else {
+          setMessage(
+            `Nie udało się pobrać kalendarza: ${
+              error?.message ||
+              "nieznany błąd"
+            }`
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    }, [
+      currentMonth,
+      user?.id,
+    ]);
+
+  useEffect(() => {
+    loadCalendarContent();
+  }, [loadCalendarContent]);
+
+  useEffect(() => {
+    if (!user?.id) return undefined;
+
+    const channel =
+      supabase
+        .channel(
+          `calendar-events:${user.id}`
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table:
+              "ideahire_calendar_events",
+            filter:
+              `user_id=eq.${user.id}`,
+          },
+          loadCalendarContent
+        )
+        .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [
+    loadCalendarContent,
+    user?.id,
+  ]);
+
+  useEffect(() => {
+    if (!dialogOpen) return undefined;
+
+    function closeWithEscape(event) {
+      if (
+        event.key === "Escape" &&
+        !saving
+      ) {
+        setDialogOpen(false);
+      }
+    }
+
+    document.addEventListener(
+      "keydown",
+      closeWithEscape
+    );
+
+    document.body.classList.add(
+      "calendar-dialog-open"
+    );
+
+    return () => {
+      document.removeEventListener(
+        "keydown",
+        closeWithEscape
+      );
+
+      document.body.classList.remove(
+        "calendar-dialog-open"
+      );
+    };
+  }, [dialogOpen, saving]);
+
+  const gridDays =
+    getCalendarGridDays(
+      currentMonth
+    );
+
+  const allEvents = [
+    ...customEvents,
+    ...jobEvents,
+  ].sort(
+    (first, second) =>
+      new Date(first.starts_at) -
+      new Date(second.starts_at)
+  );
+
+  const selectedKey =
+    getCalendarDateKey(
+      selectedDate
+    );
+
+  const selectedDayEvents =
+    allEvents.filter(
+      (item) =>
+        getCalendarDateKey(
+          item.starts_at
+        ) === selectedKey
+    );
+
+  const upcomingEvents =
+    allEvents
+      .filter(
+        (item) =>
+          !item.completed_at &&
+          new Date(item.starts_at).getTime() >=
+            Date.now() - 60 * 60 * 1000
+      )
+      .slice(0, 8);
+
+  const nextSevenDaysEnd =
+    Date.now() +
+    7 * 24 * 60 * 60 * 1000;
+
+  const nextSevenDaysCount =
+    allEvents.filter((item) => {
+      const timestamp =
+        new Date(
+          item.starts_at
+        ).getTime();
+
+      return (
+        !item.completed_at &&
+        timestamp >= Date.now() &&
+        timestamp <= nextSevenDaysEnd
+      );
+    }).length;
+
+  const activeEmailReminders =
+    customEvents.filter(
+      (item) =>
+        item.reminder_enabled &&
+        item.email_enabled &&
+        !item.completed_at
+    ).length;
+
+  const completedThisMonth =
+    customEvents.filter(
+      (item) =>
+        item.completed_at &&
+        new Date(
+          item.completed_at
+        ).getMonth() ===
+          currentMonth.getMonth() &&
+        new Date(
+          item.completed_at
+        ).getFullYear() ===
+          currentMonth.getFullYear()
+    ).length;
+
+  function openCreateDialog(
+    date = selectedDate,
+    seed = {}
+  ) {
+    const baseDraft =
+      createCalendarDraft(date);
+
+    setEditingId(null);
+    setDraft({
+      ...baseDraft,
+      ...seed,
+    });
+    setMessage("");
+    setDialogOpen(true);
+  }
+
+  function openEditDialog(eventItem) {
+    if (
+      !eventItem ||
+      eventItem.read_only
+    ) {
+      return;
+    }
+
+    setEditingId(eventItem.id);
+    setDraft({
+      title:
+        eventItem.title || "",
+      description:
+        eventItem.description || "",
+      event_type:
+        eventItem.event_type ||
+        "personal",
+      starts_at:
+        getCalendarDateTimeInput(
+          eventItem.starts_at
+        ),
+      reminder_enabled:
+        Boolean(
+          eventItem.reminder_enabled
+        ),
+      reminder_minutes_before:
+        Number(
+          eventItem.reminder_minutes_before ??
+            1440
+        ),
+      email_enabled:
+        Boolean(
+          eventItem.email_enabled
+        ),
+      linked_job_id:
+        eventItem.linked_job_id ||
+        null,
+    });
+    setMessage("");
+    setDialogOpen(true);
+  }
+
+  function openJobReminder(eventItem) {
+    openCreateDialog(
+      new Date(
+        eventItem.starts_at
+      ),
+      {
+        title:
+          eventItem.title,
+        description:
+          eventItem.description,
+        event_type:
+          eventItem.event_type,
+        starts_at:
+          getCalendarDateTimeInput(
+            eventItem.starts_at
+          ),
+        linked_job_id:
+          eventItem.linked_job_id,
+      }
+    );
+  }
+
+  function changeMonth(offset) {
+    setMonthDirection(
+      offset > 0
+        ? "next"
+        : "previous"
+    );
+
+    setCurrentMonth(
+      (current) =>
+        new Date(
+          current.getFullYear(),
+          current.getMonth() + offset,
+          1,
+          12,
+          0,
+          0,
+          0
+        )
+    );
+  }
+
+  function goToToday() {
+    const now = new Date();
+
+    setMonthDirection("today");
+    setCurrentMonth(
+      getCalendarMonthStart(now)
+    );
+    setSelectedDate(now);
+  }
+
+  async function handleCalendarSave(
+    event
+  ) {
+    event.preventDefault();
+
+    if (!user?.id || saving) return;
+
+    const cleanTitle =
+      draft.title.trim();
+
+    const cleanDescription =
+      draft.description.trim();
+
+    const startsAt =
+      new Date(
+        draft.starts_at
+      );
+
+    if (!cleanTitle) {
+      setMessage(
+        "Wpisz nazwę przypomnienia."
+      );
+      return;
+    }
+
+    if (cleanTitle.length > 120) {
+      setMessage(
+        "Nazwa może mieć maksymalnie 120 znaków."
+      );
+      return;
+    }
+
+    if (cleanDescription.length > 1000) {
+      setMessage(
+        "Notatka może mieć maksymalnie 1000 znaków."
+      );
+      return;
+    }
+
+    if (
+      Number.isNaN(
+        startsAt.getTime()
+      )
+    ) {
+      setMessage(
+        "Wybierz prawidłową datę i godzinę."
+      );
+      return;
+    }
+
+    if (
+      !editingId &&
+      startsAt.getTime() <
+        Date.now() - 60 * 1000
+    ) {
+      setMessage(
+        "Nowy termin nie może znajdować się w przeszłości."
+      );
+      return;
+    }
+
+    setSaving(true);
+    setMessage("");
+
+    const payload = {
+      user_id: user.id,
+      title: cleanTitle,
+      description:
+        cleanDescription || null,
+      event_type:
+        draft.event_type,
+      starts_at:
+        startsAt.toISOString(),
+      linked_job_id:
+        draft.linked_job_id ||
+        null,
+      reminder_enabled:
+        Boolean(
+          draft.reminder_enabled
+        ),
+      reminder_minutes_before:
+        Number(
+          draft.reminder_minutes_before
+        ),
+      email_enabled:
+        Boolean(
+          draft.reminder_enabled &&
+          draft.email_enabled
+        ),
+      timezone:
+        Intl.DateTimeFormat()
+          .resolvedOptions()
+          .timeZone ||
+        "Europe/Warsaw",
+    };
+
+    try {
+      let request;
+
+      if (editingId) {
+        request =
+          supabase
+            .from(
+              "ideahire_calendar_events"
+            )
+            .update(payload)
+            .eq("id", editingId)
+            .eq("user_id", user.id);
+      } else {
+        request =
+          supabase
+            .from(
+              "ideahire_calendar_events"
+            )
+            .insert(payload);
+      }
+
+      const { error } =
+        await request;
+
+      if (error) throw error;
+
+      setDialogOpen(false);
+      setEditingId(null);
+      setSelectedDate(startsAt);
+      setCurrentMonth(
+        getCalendarMonthStart(
+          startsAt
+        )
+      );
+      setSuccessMessage(
+        editingId
+          ? "Przypomnienie zostało zapisane."
+          : "Termin został dodany do kalendarza."
+      );
+
+      await loadCalendarContent();
+
+      window.setTimeout(
+        () =>
+          setSuccessMessage(""),
+        3600
+      );
+    } catch (error) {
+      console.error(
+        "CALENDAR SAVE ERROR:",
+        error
+      );
+
+      setMessage(
+        `Nie udało się zapisać terminu: ${
+          error?.message ||
+          "nieznany błąd"
+        }`
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleCalendarDelete() {
+    if (
+      !editingId ||
+      !user?.id ||
+      saving
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        "Usunąć to przypomnienie?"
+      );
+
+    if (!confirmed) return;
+
+    setSaving(true);
+    setMessage("");
+
+    try {
+      const { error } =
+        await supabase
+          .from(
+            "ideahire_calendar_events"
+          )
+          .delete()
+          .eq("id", editingId)
+          .eq("user_id", user.id);
+
+      if (error) throw error;
+
+      setDialogOpen(false);
+      setEditingId(null);
+      setSuccessMessage(
+        "Przypomnienie zostało usunięte."
+      );
+
+      await loadCalendarContent();
+    } catch (error) {
+      setMessage(
+        `Nie udało się usunąć terminu: ${
+          error?.message ||
+          "nieznany błąd"
+        }`
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleCalendarCompleted(
+    eventItem
+  ) {
+    if (
+      !eventItem?.id ||
+      eventItem.read_only ||
+      !user?.id
+    ) {
+      return;
+    }
+
+    const nextCompletedAt =
+      eventItem.completed_at
+        ? null
+        : new Date().toISOString();
+
+    const { error } =
+      await supabase
+        .from(
+          "ideahire_calendar_events"
+        )
+        .update({
+          completed_at:
+            nextCompletedAt,
+        })
+        .eq("id", eventItem.id)
+        .eq("user_id", user.id);
+
+    if (error) {
+      setMessage(
+        `Nie udało się zmienić statusu: ${error.message}`
+      );
+      return;
+    }
+
+    await loadCalendarContent();
+  }
+
+  function renderAgendaItem(
+    eventItem,
+    compact = false
+  ) {
+    const type =
+      getCalendarType(
+        eventItem.event_type
+      );
+
+    return (
+      <article
+        key={eventItem.id}
+        className={`calendar-agenda-item is-${eventItem.event_type}${
+          eventItem.completed_at
+            ? " is-completed"
+            : ""
+        }${
+          compact
+            ? " is-compact"
+            : ""
+        }`}
+      >
+        <span
+          className="calendar-agenda-marker"
+          aria-hidden="true"
+        />
+
+        <div className="calendar-agenda-copy">
+          <span className="calendar-agenda-meta">
+            {type.shortLabel}
+            {eventItem.source === "job" && (
+              <em>Zlecenie</em>
+            )}
+          </span>
+
+          <strong>
+            {eventItem.title}
+          </strong>
+
+          <time
+            dateTime={
+              eventItem.starts_at
+            }
+          >
+            {compact
+              ? getCalendarEventDateLabel(
+                  eventItem.starts_at,
+                  eventItem.all_day
+                )
+              : getCalendarTimeLabel(
+                  eventItem.starts_at,
+                  eventItem.all_day
+                )}
+          </time>
+
+          {!compact &&
+            eventItem.description && (
+              <p>
+                {eventItem.description}
+              </p>
+            )}
+
+          {!compact &&
+            eventItem.reminder_enabled &&
+            eventItem.email_enabled && (
+              <span className="calendar-email-state">
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M3 6h18v12H3z" />
+                  <path d="m3 7 9 7 9-7" />
+                </svg>
+                {eventItem.reminder_sent_at
+                  ? "E-mail wysłany"
+                  : "E-mail zaplanowany"}
+              </span>
+            )}
+        </div>
+
+        {!compact && (
+          <div className="calendar-agenda-actions">
+            {eventItem.read_only ? (
+              <button
+                type="button"
+                onClick={() =>
+                  openJobReminder(
+                    eventItem
+                  )
+                }
+              >
+                Ustaw przypomnienie
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggleCalendarCompleted(
+                      eventItem
+                    )
+                  }
+                >
+                  {eventItem.completed_at
+                    ? "Przywróć"
+                    : "Wykonane"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openEditDialog(
+                      eventItem
+                    )
+                  }
+                >
+                  Edytuj
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </article>
+    );
+  }
+
+  return (
+    <div className="page calendar-page">
+      <AccountNavbar />
+
+      <main className="app-page calendar-shell">
+        <header className="calendar-hero">
+          <div className="calendar-hero-orbit" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+
+          <div className="calendar-hero-copy">
+            <span className="calendar-eyebrow">
+              ORGANIZACJA PRACY
+            </span>
+            <h1>Kalendarz</h1>
+            <p>
+              Terminy zleceń, własne zadania i przypomnienia e-mail
+              w jednym prywatnym miejscu.
+            </p>
+          </div>
+
+          <button
+            className="calendar-primary-action"
+            type="button"
+            onClick={() =>
+              openCreateDialog()
+            }
+          >
+            <span aria-hidden="true">+</span>
+            Dodaj termin
+          </button>
+
+          <div className="calendar-hero-stats">
+            <article>
+              <span>Najbliższe 7 dni</span>
+              <strong>
+                {nextSevenDaysCount}
+              </strong>
+            </article>
+            <article>
+              <span>Przypomnienia e-mail</span>
+              <strong>
+                {activeEmailReminders}
+              </strong>
+            </article>
+            <article>
+              <span>Wykonane w miesiącu</span>
+              <strong>
+                {completedThisMonth}
+              </strong>
+            </article>
+          </div>
+        </header>
+
+        {(message || successMessage) && (
+          <div
+            className={`calendar-feedback${
+              successMessage
+                ? " is-success"
+                : " is-error"
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            <span aria-hidden="true">
+              {successMessage
+                ? "✓"
+                : "!"}
+            </span>
+            <p>
+              {successMessage || message}
+            </p>
+          </div>
+        )}
+
+        <section className="calendar-toolbar">
+          <div className="calendar-month-navigation">
+            <button
+              type="button"
+              onClick={() =>
+                changeMonth(-1)
+              }
+              aria-label="Poprzedni miesiąc"
+            >
+              ←
+            </button>
+
+            <div>
+              <span>Widok miesiąca</span>
+              <h2>
+                {getCalendarMonthLabel(
+                  currentMonth
+                )}
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                changeMonth(1)
+              }
+              aria-label="Następny miesiąc"
+            >
+              →
+            </button>
+          </div>
+
+          <button
+            className="calendar-today-button"
+            type="button"
+            onClick={goToToday}
+          >
+            Dzisiaj
+          </button>
+
+          <div className="calendar-legend" aria-label="Legenda kalendarza">
+            {CALENDAR_EVENT_TYPES.map(
+              (type) => (
+                <span
+                  key={type.value}
+                  className={`is-${type.value}`}
+                >
+                  <i aria-hidden="true" />
+                  {type.shortLabel}
+                </span>
+              )
+            )}
+          </div>
+        </section>
+
+        <div className="calendar-workspace">
+          <section
+            className="calendar-board"
+            aria-label="Kalendarz miesięczny"
+          >
+            <div className="calendar-weekdays" role="row">
+              {CALENDAR_WEEKDAYS.map(
+                (weekday) => (
+                  <span
+                    key={weekday}
+                    role="columnheader"
+                  >
+                    {weekday}
+                  </span>
+                )
+              )}
+            </div>
+
+            {loading ? (
+              <InlineRouteLoader
+                label="Pobieramy Twój kalendarz..."
+              />
+            ) : (
+              <div
+                className={`calendar-grid is-${monthDirection}`}
+                key={`${currentMonth.getFullYear()}-${currentMonth.getMonth()}`}
+                role="grid"
+              >
+                {gridDays.map((day) => {
+                  const dayKey =
+                    getCalendarDateKey(day);
+
+                  const dayEvents =
+                    allEvents.filter(
+                      (item) =>
+                        getCalendarDateKey(
+                          item.starts_at
+                        ) === dayKey
+                    );
+
+                  const isOutside =
+                    day.getMonth() !==
+                    currentMonth.getMonth();
+
+                  const isToday =
+                    dayKey ===
+                    getCalendarDateKey(
+                      new Date()
+                    );
+
+                  const isSelected =
+                    dayKey ===
+                    selectedKey;
+
+                  return (
+                    <div
+                      className={`calendar-day${
+                        isOutside
+                          ? " is-outside"
+                          : ""
+                      }${
+                        isToday
+                          ? " is-today"
+                          : ""
+                      }${
+                        isSelected
+                          ? " is-selected"
+                          : ""
+                      }`}
+                      key={dayKey}
+                      role="gridcell"
+                    >
+                      <button
+                        className="calendar-day-number"
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(day);
+
+                          if (isOutside) {
+                            setMonthDirection(
+                              day < currentMonth
+                                ? "previous"
+                                : "next"
+                            );
+                            setCurrentMonth(
+                              getCalendarMonthStart(
+                                day
+                              )
+                            );
+                          }
+                        }}
+                        onDoubleClick={() =>
+                          openCreateDialog(day)
+                        }
+                        aria-label={`${
+                          getCalendarDayLabel(day)
+                        }. ${
+                          dayEvents.length
+                        } wydarzeń`}
+                      >
+                        <span>
+                          {day.getDate()}
+                        </span>
+                        {isToday && (
+                          <em>Dziś</em>
+                        )}
+                      </button>
+
+                      <div className="calendar-day-events">
+                        {dayEvents
+                          .slice(0, 3)
+                          .map((item) => (
+                            <button
+                              key={item.id}
+                              className={`calendar-event-chip is-${item.event_type}${
+                                item.completed_at
+                                  ? " is-completed"
+                                  : ""
+                              }`}
+                              type="button"
+                              onClick={() => {
+                                setSelectedDate(day);
+
+                                if (!item.read_only) {
+                                  openEditDialog(item);
+                                }
+                              }}
+                              title={item.title}
+                            >
+                              <i aria-hidden="true" />
+                              <span>
+                                {item.title}
+                              </span>
+                            </button>
+                          ))}
+
+                        {dayEvents.length > 3 && (
+                          <button
+                            className="calendar-more-events"
+                            type="button"
+                            onClick={() =>
+                              setSelectedDate(day)
+                            }
+                          >
+                            +{dayEvents.length - 3}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
+          <aside className="calendar-sidebar">
+            <section className="calendar-day-agenda">
+              <div className="calendar-sidebar-heading">
+                <div>
+                  <span>Wybrany dzień</span>
+                  <h2>
+                    {getCalendarDayLabel(
+                      selectedDate
+                    )}
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    openCreateDialog(
+                      selectedDate
+                    )
+                  }
+                  aria-label="Dodaj termin w wybranym dniu"
+                >
+                  +
+                </button>
+              </div>
+
+              {selectedDayEvents.length === 0 ? (
+                <div className="calendar-empty-state">
+                  <span aria-hidden="true">○</span>
+                  <strong>Spokojny dzień</strong>
+                  <p>
+                    Nie masz jeszcze żadnych terminów. Dodaj pierwszy, aby otrzymać przypomnienie.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openCreateDialog(
+                        selectedDate
+                      )
+                    }
+                  >
+                    Dodaj termin
+                  </button>
+                </div>
+              ) : (
+                <div className="calendar-agenda-list">
+                  {selectedDayEvents.map(
+                    (item) =>
+                      renderAgendaItem(
+                        item
+                      )
+                  )}
+                </div>
+              )}
+            </section>
+
+            <section className="calendar-upcoming">
+              <div className="calendar-sidebar-heading is-small">
+                <div>
+                  <span>Następne terminy</span>
+                  <h2>Plan działania</h2>
+                </div>
+              </div>
+
+              {upcomingEvents.length === 0 ? (
+                <p className="calendar-upcoming-empty">
+                  Brak kolejnych terminów w tym widoku.
+                </p>
+              ) : (
+                <div className="calendar-upcoming-list">
+                  {upcomingEvents.map(
+                    (item) =>
+                      renderAgendaItem(
+                        item,
+                        true
+                      )
+                  )}
+                </div>
+              )}
+            </section>
+          </aside>
+        </div>
+      </main>
+
+      {dialogOpen && (
+        <div
+          className="calendar-dialog-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (
+              event.target ===
+                event.currentTarget &&
+              !saving
+            ) {
+              setDialogOpen(false);
+            }
+          }}
+        >
+          <section
+            className="calendar-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="calendar-dialog-title"
+          >
+            <header className="calendar-dialog-heading">
+              <div>
+                <span>
+                  {editingId
+                    ? "EDYCJA TERMINU"
+                    : "NOWE PRZYPOMNIENIE"}
+                </span>
+                <h2 id="calendar-dialog-title">
+                  {editingId
+                    ? "Zmień szczegóły"
+                    : "Zaplanuj swój czas"}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  !saving &&
+                  setDialogOpen(false)
+                }
+                aria-label="Zamknij okno"
+              >
+                ×
+              </button>
+            </header>
+
+            <form
+              className="calendar-form"
+              onSubmit={
+                handleCalendarSave
+              }
+            >
+              <fieldset className="calendar-type-picker">
+                <legend>Rodzaj terminu</legend>
+
+                <div>
+                  {CALENDAR_EVENT_TYPES.map(
+                    (type) => (
+                      <label
+                        key={type.value}
+                        className={`is-${type.value}${
+                          draft.event_type ===
+                          type.value
+                            ? " is-selected"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="calendar-event-type"
+                          value={type.value}
+                          checked={
+                            draft.event_type ===
+                            type.value
+                          }
+                          onChange={(event) =>
+                            setDraft(
+                              (current) => ({
+                                ...current,
+                                event_type:
+                                  event.target.value,
+                              })
+                            )
+                          }
+                        />
+                        <i aria-hidden="true" />
+                        <span>{type.label}</span>
+                      </label>
+                    )
+                  )}
+                </div>
+              </fieldset>
+
+              <label className="calendar-field is-wide">
+                <span>Nazwa terminu</span>
+                <input
+                  type="text"
+                  value={draft.title}
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        title:
+                          event.target.value,
+                      })
+                    )
+                  }
+                  maxLength={120}
+                  placeholder="Np. oddanie projektu strony"
+                  autoFocus
+                  required
+                />
+                <small>
+                  {draft.title.length}/120
+                </small>
+              </label>
+
+              <div className="calendar-form-row">
+                <label className="calendar-field">
+                  <span>Data i godzina</span>
+                  <input
+                    type="datetime-local"
+                    value={
+                      draft.starts_at
+                    }
+                    min={
+                      editingId
+                        ? undefined
+                        : getCalendarDateTimeInput(
+                            new Date()
+                          )
+                    }
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          starts_at:
+                            event.target.value,
+                        })
+                      )
+                    }
+                    required
+                  />
+                </label>
+
+                <label className="calendar-field">
+                  <span>Wyślij przypomnienie</span>
+                  <select
+                    value={
+                      draft.reminder_minutes_before
+                    }
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          reminder_minutes_before:
+                            Number(
+                              event.target.value
+                            ),
+                        })
+                      )
+                    }
+                    disabled={
+                      !draft.reminder_enabled
+                    }
+                  >
+                    {CALENDAR_REMINDER_OPTIONS.map(
+                      (option) => (
+                        <option
+                          key={option.value}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </label>
+              </div>
+
+              <label className="calendar-field is-wide">
+                <span>Notatka opcjonalna</span>
+                <textarea
+                  value={
+                    draft.description
+                  }
+                  onChange={(event) =>
+                    setDraft(
+                      (current) => ({
+                        ...current,
+                        description:
+                          event.target.value,
+                      })
+                    )
+                  }
+                  maxLength={1000}
+                  rows={4}
+                  placeholder="Najważniejsze ustalenia, materiały lub zakres do wykonania..."
+                />
+                <small>
+                  {draft.description.length}/1000
+                </small>
+              </label>
+
+              <div className="calendar-reminder-settings">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={
+                      draft.reminder_enabled
+                    }
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          reminder_enabled:
+                            event.target.checked,
+                        })
+                      )
+                    }
+                  />
+                  <span>
+                    <strong>Aktywne przypomnienie</strong>
+                    <small>
+                      Termin będzie widoczny w planie działania.
+                    </small>
+                  </span>
+                </label>
+
+                <label
+                  className={
+                    !draft.reminder_enabled
+                      ? "is-disabled"
+                      : ""
+                  }
+                >
+                  <input
+                    type="checkbox"
+                    checked={
+                      draft.email_enabled
+                    }
+                    onChange={(event) =>
+                      setDraft(
+                        (current) => ({
+                          ...current,
+                          email_enabled:
+                            event.target.checked,
+                        })
+                      )
+                    }
+                    disabled={
+                      !draft.reminder_enabled
+                    }
+                  />
+                  <span>
+                    <strong>Wyślij także e-mail</strong>
+                    <small>
+                      Wiadomość trafi na adres przypisany do konta IdeaHire.
+                    </small>
+                  </span>
+                </label>
+              </div>
+
+              {message && (
+                <p className="calendar-form-error" role="alert">
+                  {message}
+                </p>
+              )}
+
+              <footer className="calendar-form-actions">
+                {editingId && (
+                  <button
+                    className="calendar-delete-button"
+                    type="button"
+                    onClick={
+                      handleCalendarDelete
+                    }
+                    disabled={saving}
+                  >
+                    Usuń
+                  </button>
+                )}
+
+                <button
+                  className="calendar-cancel-button"
+                  type="button"
+                  onClick={() =>
+                    setDialogOpen(false)
+                  }
+                  disabled={saving}
+                >
+                  Anuluj
+                </button>
+
+                <button
+                  className="calendar-save-button"
+                  type="submit"
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Zapisywanie..."
+                    : editingId
+                    ? "Zapisz zmiany"
+                    : "Dodaj do kalendarza"}
+                </button>
+              </footer>
+            </form>
+          </section>
+        </div>
+      )}
     </div>
   );
 }
@@ -30585,6 +32495,17 @@ function Router() {
               <ProtectedRoute>
                 <UserOnlyRoute>
                   <Notifications />
+                </UserOnlyRoute>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <UserOnlyRoute allowLimited>
+                  <Calendar />
                 </UserOnlyRoute>
               </ProtectedRoute>
             }
