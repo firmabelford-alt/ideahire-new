@@ -1,63 +1,541 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
 const categories = [
-  "Programowanie",
-  "Grafika i design",
-  "Marketing",
-  "Copywriting",
-  "Video",
-  "Fotografia",
+  { value: "Programowanie", label: "Strony, aplikacje i IT" },
+  { value: "Grafika i design", label: "Grafika, UX i 3D" },
+  { value: "Marketing", label: "Marketing i sprzedaż" },
+  { value: "Copywriting", label: "Teksty i tłumaczenia" },
+  { value: "Video", label: "Wideo, animacja i audio" },
+  { value: "Fotografia", label: "Fotografia i obróbka zdjęć" },
+  { value: "AI i automatyzacje", label: "AI i automatyzacje" },
+  { value: "Dane, analizy i research", label: "Dane, analizy i research" },
+  { value: "Biznes i e-commerce", label: "Biznes i e-commerce" },
+  { value: "Architektura, wnętrza i CAD", label: "Architektura, wnętrza i CAD" },
 ];
 
-function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+const categoryLabels = Object.fromEntries(
+  categories.map((category) => [category.value, category.label])
+);
+
+function getCategoryLabel(category) {
+  return categoryLabels[category] || category || "Inna kategoria";
+}
+
+const fallbackJobs = [
+  {
+    id: "fallback-1",
+    title: "Nowoczesna strona internetowa",
+    description:
+      "Szukam osoby, która stworzy prostą i szybką stronę dla nowej marki.",
+    category: "Programowanie",
+    budget: 3000,
+  },
+  {
+    id: "fallback-2",
+    title: "Identyfikacja wizualna marki",
+    description:
+      "Potrzebuję spójnego logo oraz podstawowych materiałów graficznych.",
+    category: "Grafika i design",
+    budget: 1800,
+  },
+  {
+    id: "fallback-3",
+    title: "Teksty na stronę firmową",
+    description:
+      "Zlecę przygotowanie przejrzystych tekstów do sześciu podstron.",
+    category: "Copywriting",
+    budget: 900,
+  },
+];
+
+const HOME_CATEGORY_COPY = {
+  Programowanie: { summary: "Strony, sklepy i aplikacje — od pierwszego projektu po integracje i naprawy.", descriptions: [
+    "Pojedyncza strona prezentująca ofertę i prowadząca do kontaktu lub zakupu.",
+    "Witryna z ofertą firmy, najważniejszymi informacjami i formularzem kontaktowym.",
+    "Sklep z katalogiem produktów, koszykiem i obsługą zamówień.",
+    "Aplikacja działająca w przeglądarce, dopasowana do potrzeb Twoich użytkowników.",
+    "Aplikacja na telefon z funkcjami określonymi w Twoim projekcie.",
+    "Budowa lub rozbudowa strony z wykorzystaniem gotowego systemu i narzędzi no-code.",
+    "Połączenie usług i systemów, które mają wymieniać dane lub wykonywać wspólne zadania.",
+    "Diagnoza i poprawa konkretnych problemów w istniejącej stronie lub aplikacji.",
+    "Sprawdzenie wydajności lub bezpieczeństwa oraz lista zaleceń do wdrożenia.",
+    "Przeniesienie strony, danych lub usług do nowego środowiska.",
+  ] },
+  "Grafika i design": { summary: "Wygląd marki, interfejsy i materiały graficzne dopasowane do Twojego projektu.", descriptions: [
+    "Znak marki przygotowany do użycia w internecie i materiałach drukowanych.",
+    "Spójny zestaw kolorów, typografii i materiałów budujących wygląd marki.",
+    "Projekt ekranów i sposobu korzystania ze strony lub aplikacji.",
+    "Banery i kreacje dopasowane do kampanii oraz formatów reklamowych.",
+    "Zestaw grafik do publikacji na wybranych kanałach społecznościowych.",
+    "Ulotki, plakaty lub inne projekty przygotowane do przekazania drukarni.",
+    "Projekt wyglądu opakowania lub etykiety z uwzględnieniem wymaganych wymiarów.",
+    "Czytelne slajdy z uporządkowaną treścią i spójnym układem.",
+    "Autorska ilustracja do publikacji, produktu lub komunikacji marki.",
+    "Edytowalne projekty, które możesz później samodzielnie uzupełniać w Canvie.",
+    "Model obiektu w trzech wymiarach do dalszej pracy lub prezentacji.",
+    "Obraz produktu pokazujący jego wygląd, materiały i detale.",
+  ] },
+  Marketing: { summary: "Kampanie, treści i analityka pomagające docierać do właściwych odbiorców.", descriptions: [
+    "Plan komunikacji, kanałów i działań dopasowany do celów marki.",
+    "Analiza widoczności strony w wyszukiwarce i lista konkretnych usprawnień.",
+    "Poprawa treści lub elementów wybranych podstron pod określone cele.",
+    "Przygotowanie ustawień i struktury kampanii w Google Ads.",
+    "Przygotowanie kampanii i ustawień reklam w ekosystemie Meta.",
+    "Konfiguracja kampanii reklamowej na TikToku.",
+    "Zestaw publikacji z treścią dopasowaną do marki i jej odbiorców.",
+    "Przygotowanie wiadomości i struktury kampanii do wybranej grupy odbiorców.",
+    "Ustawienie pomiaru zdarzeń i raportów potrzebnych do oceny działań.",
+    "Uporządkowana baza potencjalnych kontaktów według wskazanych kryteriów.",
+    "Treści i materiały ułatwiające prezentację oferty klientom.",
+    "Pomysł i plan współpracy z twórcami w ramach wybranej kampanii.",
+  ] },
+  Copywriting: { summary: "Teksty, redakcja i tłumaczenia — czytelna komunikacja dopasowana do odbiorców.", descriptions: [
+    "Treści na podstrony prezentujące ofertę i pomagające użytkownikowi podjąć decyzję.",
+    "Artykuły o ustalonej tematyce, długości i stylu.",
+    "Opisy przedstawiające cechy, zastosowanie i najważniejsze informacje o produktach.",
+    "Treści odpowiadające na potrzeby odbiorców i wskazane tematy wyszukiwania.",
+    "Krótkie komunikaty do reklam, banerów lub kampanii.",
+    "Zestaw tekstów do publikacji na wybranych profilach społecznościowych.",
+    "Wiadomość do subskrybentów z uporządkowaną treścią i jasnym celem.",
+    "Tekst prowadzący nagranie, reklamę lub inną formę opowieści.",
+    "Poprawa języka, błędów i struktury istniejącego tekstu.",
+    "Redakcja treści AI, sprawdzenie spójności i dopasowanie języka do odbiorców.",
+    "Przekład treści między wskazanymi językami z zachowaniem sensu i stylu.",
+    "Dostosowanie komunikatów i treści produktu do nowego języka oraz odbiorców.",
+    "Przepisanie nagrania do czytelnego tekstu.",
+    "Przygotowanie tekstu i synchronizacji napisów do nagrania.",
+  ] },
+  Video: { summary: "Montaż, animacja i dźwięk — materiały do publikacji, reklamy i prezentacji.", descriptions: [
+    "Uporządkowanie ujęć i montaż nagrania według ustalonego celu i długości.",
+    "Zestaw krótkich filmów dopasowanych do formatów mediów społecznościowych.",
+    "Przygotowanie materiału do publikacji na YouTube.",
+    "Film promujący markę, produkt lub usługę.",
+    "Wideo prezentujące wygląd, działanie lub zastosowanie produktu.",
+    "Animowany materiał objaśniający pomysł lub budujący opowieść.",
+    "Animacja typografii i elementów graficznych do filmu lub kampanii.",
+    "Materiał wideo przygotowany z wykorzystaniem narzędzi generatywnych.",
+    "Dodanie napisów lub przygotowanie wersji filmu w innym języku.",
+    "Montaż odcinka, usunięcie przerw i przygotowanie nagrania do publikacji.",
+    "Czyszczenie, wyrównanie i poprawa jakości dostarczonego dźwięku.",
+    "Nagranie głosu do filmu, prezentacji lub innego materiału.",
+    "Krótki motyw muzyczny lub muzyka do wskazanego zastosowania.",
+    "Dobór i przygotowanie efektów dźwiękowych budujących charakter materiału.",
+  ] },
+  Fotografia: { summary: "Zdjęcia i obróbka materiałów — od sesji produktowej po retusz istniejących ujęć.", descriptions: [
+    "Zdjęcia produktów do katalogu, sklepu lub materiałów promocyjnych.",
+    "Sesja przedstawiająca osoby, zespół lub charakter marki.",
+    "Reportaż fotograficzny z wydarzenia według ustalonego zakresu.",
+    "Zdjęcia lokalu lub budynku do oferty i prezentacji.",
+    "Sesja pojazdu pokazująca jego wygląd i detale.",
+    "Sesja portretowa dopasowana do wybranego stylu i przeznaczenia.",
+    "Zdjęcia produktów przygotowane do spójnego katalogu internetowego.",
+    "Zdjęcia pozwalające oglądać obiekt lub przestrzeń z różnych stron.",
+    "Poprawa szczegółów zdjęcia z zachowaniem uzgodnionego wyglądu.",
+    "Wycięcie obiektu ze zdjęcia i przygotowanie pliku z wybranym tłem.",
+    "Naprawa uszkodzeń i poprawa czytelności starych fotografii.",
+  ] },
+  "AI i automatyzacje": { summary: "Narzędzia AI i integracje, które upraszczają konkretne zadania w Twojej firmie.", descriptions: [
+    "Bot odpowiadający na pytania lub wspierający wybrany proces firmy.",
+    "Asystent wykonujący ustalone zadania z wykorzystaniem modeli AI i narzędzi.",
+    "Połączenie aplikacji w automatyczny przepływ danych i działań.",
+    "Dodanie funkcji AI do istniejącej witryny, aplikacji lub systemu.",
+    "Wyszukiwanie i odpowiedzi oparte na wskazanej bazie dokumentów.",
+    "Asystent obsługujący wybrane zadania za pomocą rozmowy głosowej.",
+    "Automatyczne przetwarzanie dokumentów według ustalonego schematu.",
+    "Usprawnienie powtarzalnych pytań i zadań związanych z obsługą klientów.",
+    "Analiza procesów i wskazanie miejsc, w których można zastosować AI.",
+    "Uporządkowanie i przygotowanie danych do wskazanego zastosowania AI.",
+    "Zestaw instrukcji i szablonów pracy z AI dopasowany do zespołu.",
+  ] },
+  "Dane, analizy i research": { summary: "Porządkowanie informacji, badania i raporty ułatwiające pracę z danymi.", descriptions: [
+    "Usunięcie błędów, duplikatów i niespójności w dostarczonych danych.",
+    "Uporządkowanie struktury, formatów i obliczeń w arkuszu.",
+    "Przeniesienie danych z dokumentu PDF do arkusza nadającego się do dalszej pracy.",
+    "Uzupełnienie danych w uzgodnionym systemie lub pliku.",
+    "Pozyskanie wskazanych danych ze stron zgodnie z ustalonym zakresem.",
+    "Panel raportowy pokazujący wybrane wskaźniki i zestawienia.",
+    "Analiza zbioru danych i przedstawienie wniosków dotyczących zadanych pytań.",
+    "Czytelne wykresy i zestawienia pokazujące zależności w danych.",
+    "Research rynku, odbiorców lub konkurencji w określonym obszarze.",
+    "Opracowanie odpowiedzi i podsumowanie wyników badania ankietowego.",
+    "Uporządkowanie danych lub przeniesienie ich do nowej bazy.",
+    "Oznaczenie przykładów w danych według ustalonej instrukcji.",
+  ] },
+  "Biznes i e-commerce": { summary: "Wsparcie sklepu i organizacji pracy — katalogi, procedury i materiały biznesowe.", descriptions: [
+    "Wprowadzenie produktów, zdjęć i parametrów do katalogu sklepu.",
+    "Opracowanie informacji potrzebnych do publikacji produktów.",
+    "Przygotowanie konta sprzedawcy na wskazanej platformie.",
+    "Ujednolicenie kategorii, parametrów i informacji w katalogu.",
+    "Ustawienie lub uporządkowanie danych i procesów w systemie CRM.",
+    "Przygotowanie i uporządkowanie kontaktów według wybranych kryteriów.",
+    "Zestawienie informacji o ofertach i działaniach wskazanych konkurentów.",
+    "Slajdy przedstawiające ofertę, plan lub wyniki działalności.",
+    "Opis zasad, procesów i instrukcji potrzebnych w codziennej pracy.",
+    "Uporządkowanie etapów, zadań i terminów wybranego projektu.",
+    "Przygotowanie ogłoszeń, formularzy lub innych materiałów rekrutacyjnych.",
+    "Wykonanie ustalonego zestawu zadań administracyjnych.",
+    "Przegląd sklepu i lista usprawnień dotyczących wybranego obszaru.",
+  ] },
+  "Architektura, wnętrza i CAD": { summary: "Projekty przestrzeni, rysunki i modele do prezentacji lub dalszej pracy.", descriptions: [
+    "Projekt aranżacji wnętrza zgodny z potrzebami i zakresem zlecenia.",
+    "Plan rozmieszczenia stref i wyposażenia w pomieszczeniu.",
+    "Obrazy pokazujące planowany wygląd obiektu lub przestrzeni.",
+    "Rysunek techniczny lub projektowy w dwóch wymiarach.",
+    "Model obiektu przygotowany w uzgodnionym narzędziu CAD.",
+    "Projekt mebla z określeniem wymiarów i uzgodnionych detali.",
+    "Model przygotowany do wskazanego procesu druku 3D.",
+    "Rysunki i informacje techniczne potrzebne do produkcji.",
+    "Koncepcja układu i wyglądu przestrzeni lokalu.",
+    "Wizualne przedstawienie budynku, lokalu lub planowanej inwestycji.",
+  ] },
+};
+
+function HomeCategoryBrowser({ groups }) {
+  const [open, setOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || "");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const triggerRef = useRef(null);
+  const hoverTimer = useRef(null);
+  const group = groups.find((item) => item.value === selectedCategory) || groups[0];
+  const subcategories = group?.subcategories || [];
+  const copy = HOME_CATEGORY_COPY[group?.value];
+  const subIndex = subcategories.indexOf(selectedSubcategory);
+  const description = subIndex >= 0
+    ? copy?.descriptions[subIndex] || copy?.summary
+    : copy?.summary;
+  const count = groups.reduce((total, item) => total + (item.subcategories?.length || 0), 0);
+  const query = new URLSearchParams({ category: group?.value || "" });
+  if (selectedSubcategory) query.set("subcategory", selectedSubcategory);
+
+  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
+
+  function clearHoverTimer() {
+    window.clearTimeout(hoverTimer.current);
+  }
+
+  function closeBrowser() {
+    clearHoverTimer();
+    setOpen(false);
+    triggerRef.current?.focus({ preventScroll: true });
+  }
+
+  function selectCategory(value) {
+    if (value !== selectedCategory) {
+      setSelectedCategory(value);
+      setSelectedSubcategory("");
+    }
+  }
+
+  function onMousePreview(event, action) {
+    if (event.pointerType === "mouse" && window.matchMedia("(hover: hover) and (pointer: fine)").matches) action();
+  }
+
+  return (
+    <div className={`ih-category-browser${open ? " is-open" : ""}`}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) { event.preventDefault(); closeBrowser(); }
+      }}>
+      <button ref={triggerRef} type="button" className="ih-category-trigger"
+        aria-expanded={open} aria-controls="ih-category-panel"
+        onPointerEnter={(event) => onMousePreview(event, () => {
+          clearHoverTimer(); hoverTimer.current = window.setTimeout(() => setOpen(true), 180);
+        })}
+        onPointerLeave={clearHoverTimer}
+        onClick={() => { clearHoverTimer(); setOpen((current) => !current); }}>
+        <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, "0")} kategorii</span><span className="ih-category-toggle" aria-hidden="true">{open ? "−" : "+"}</span></span>
+        <span className="ih-category-mark" aria-hidden="true"><i /><i /><i /><i /></span>
+        <span className="ih-category-trigger-title">Nasze<br />kategorie</span>
+        <span className="ih-category-trigger-bottom"><span>{open ? "Zwiń katalog" : "Odkryj specjalizacje"}</span><span aria-hidden="true">↗</span></span>
+      </button>
+
+      <section id="ih-category-panel" className="ih-category-panel" hidden={!open} aria-labelledby="ih-category-panel-title">
+        <div className="ih-category-panel-heading">
+          <div><span className="ih-category-kicker">Znajdź swój kierunek</span><h3 id="ih-category-panel-title">Kategorie i specjalizacje</h3><p>{groups.length} kategorii{count > 0 ? ` · ${count} specjalizacji` : ""}. Wybierz to, czego potrzebujesz.</p></div>
+          <button type="button" className="ih-category-close" onClick={closeBrowser} aria-label="Zamknij kategorie">×</button>
+        </div>
+        <div className="ih-category-layout">
+          <div className="ih-category-list" role="group" aria-label="Wybierz kategorię">
+            {groups.map((item, index) => (
+              <button type="button" key={item.value} className="ih-category-option" aria-pressed={item.value === group?.value}
+                onClick={() => selectCategory(item.value)} onFocus={() => selectCategory(item.value)}
+                onPointerEnter={(event) => onMousePreview(event, () => selectCategory(item.value))}>
+                <span className="ih-category-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{item.label}</span><span className="ih-category-option-arrow" aria-hidden="true">↗</span>
+              </button>
+            ))}
+          </div>
+          <div className="ih-category-content">
+            <div className="ih-category-content-heading"><span className="ih-category-kicker">Specjalizacje</span><h4>{group?.label}</h4></div>
+            <div className="ih-subcategory-grid" role="group" aria-label={`Specjalizacje: ${group?.label}`}>
+              {subcategories.map((item) => (
+                <button type="button" className="ih-subcategory-option" key={item} aria-pressed={item === selectedSubcategory} aria-describedby="ih-category-description"
+                  onClick={() => setSelectedSubcategory(item)} onFocus={() => setSelectedSubcategory(item)}
+                  onPointerEnter={(event) => onMousePreview(event, () => setSelectedSubcategory(item))}>
+                  <span>{item}</span><span aria-hidden="true">↗</span>
+                </button>
+              ))}
+            </div>
+            <div className="ih-category-detail" id="ih-category-description">
+              <span className="ih-category-kicker">{selectedSubcategory ? "O tej specjalizacji" : "O tej kategorii"}</span>
+              <strong>{selectedSubcategory || group?.label}</strong><p>{description || "Przejrzyj zlecenia w tej kategorii i znajdź projekt dla siebie."}</p>
+            </div>
+            <div className="ih-category-links">
+              <Link className="ih-category-jobs-link" to={`/jobs?${query.toString()}`}>Pokaż zlecenia <span aria-hidden="true">↗</span></Link>
+              {selectedSubcategory && <Link className="ih-category-all-link" to={`/jobs?${new URLSearchParams({ category: group?.value }).toString()}`}>Cała kategoria</Link>}
+              <Link className="ih-category-all-link" to="/jobs">Wszystkie zlecenia</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+
+function App({ session, loading, categoryGroups = [] }) {
   const [hasNotifications, setHasNotifications] = useState(false);
+  const [recentJobs, setRecentJobs] = useState(fallbackJobs);
+  const [activeJobIndex, setActiveJobIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
 
-    async function getSession() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    checkNotifications(session);
 
-      if (mounted) {
-        setSession(session);
-        setLoading(false);
-        checkNotifications(session);
+    function handleNotificationsRead(
+      event
+    ) {
+      if (
+        !event?.detail?.userId ||
+        event.detail.userId ===
+          session?.user?.id
+      ) {
+        setHasNotifications(false);
+      }
+    }
+
+    function handleStorage(event) {
+      if (
+        event.key ===
+        `ideahire_read_notifications_${session?.user?.id}`
+      ) {
         checkNotifications(session);
       }
     }
 
-    getSession();
+    window.addEventListener(
+      "ideahire:notifications-read",
+      handleNotificationsRead
+    );
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
+    window.addEventListener(
+      "storage",
+      handleStorage
     );
 
     const interval = setInterval(() => {
       if (mounted) {
-        supabase.auth.getSession().then(({ data }) => {
-          checkNotifications(data?.session || null);
-        });
+        checkNotifications(session);
       }
     }, 10000);
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
       clearInterval(interval);
+
+      window.removeEventListener(
+        "ideahire:notifications-read",
+        handleNotificationsRead
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorage
+      );
+    };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRecentJobs() {
+      try {
+        const { data, error } =
+          await supabase
+            .from("jobs")
+            .select(
+              "id, title, description, category, budget, created_at"
+            )
+            .order("created_at", {
+              ascending: false,
+            })
+            .limit(8);
+
+        if (error) {
+          console.error(
+            "HOME RECENT JOBS ERROR:",
+            error
+          );
+          return;
+        }
+
+        if (
+          mounted &&
+          Array.isArray(data) &&
+          data.length > 0
+        ) {
+          setRecentJobs(data);
+          setActiveJobIndex(0);
+        }
+      } catch (error) {
+        console.error(
+          "HOME RECENT JOBS ERROR:",
+          error
+        );
+      }
+    }
+
+    loadRecentJobs();
+
+    const channel = supabase
+      .channel("home-recent-jobs")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "jobs",
+        },
+        () => {
+          loadRecentJobs();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (recentJobs.length <= 1) return undefined;
+
+    const interval = window.setInterval(
+      () => {
+        setActiveJobIndex(
+          (current) =>
+            (current + 1) % recentJobs.length
+        );
+      },
+      4500
+    );
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [recentJobs.length]);
+
+  useLayoutEffect(() => {
+    const root = document.querySelector(".app");
+
+    if (!root) return undefined;
+
+    const revealElements = Array.from(
+      root.querySelectorAll(".home-reveal")
+    );
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    root.classList.add("home-motion-ready");
+
+    revealElements.forEach((element) => {
+      const group = element.parentElement;
+      const groupedElements = group
+        ? Array.from(group.children).filter((child) =>
+            child.classList.contains("home-reveal")
+          )
+        : [];
+      const position = Math.max(
+        0,
+        groupedElements.indexOf(element)
+      );
+
+      element.style.setProperty(
+        "--home-reveal-delay",
+        `${Math.min(position, 5) * 75}ms`
+      );
+    });
+
+    if (
+      prefersReducedMotion ||
+      !("IntersectionObserver" in window)
+    ) {
+      revealElements.forEach((element) => {
+        element.classList.add("is-visible");
+      });
+
+      return () => {
+        root.classList.remove("home-motion-ready");
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const element = entry.target;
+
+          if (entry.isIntersecting) {
+            element.classList.add("is-visible");
+            element.classList.remove(
+              "is-above",
+              "is-below"
+            );
+            return;
+          }
+
+          element.classList.remove("is-visible");
+
+          const viewportTop =
+            entry.rootBounds?.top || 0;
+          const viewportBottom =
+            entry.rootBounds?.bottom ||
+            window.innerHeight;
+
+          if (
+            entry.boundingClientRect.bottom <=
+            viewportTop
+          ) {
+            element.classList.add("is-above");
+            element.classList.remove("is-below");
+          } else if (
+            entry.boundingClientRect.top >=
+            viewportBottom
+          ) {
+            element.classList.add("is-below");
+            element.classList.remove("is-above");
+          }
+        });
+      },
+      {
+        threshold: [0, 0.08, 0.18],
+        rootMargin: "-5% 0px -5% 0px",
+      }
+    );
+
+    revealElements.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => {
+      observer.disconnect();
+      root.classList.remove("home-motion-ready");
     };
   }, []);
 
@@ -82,27 +560,127 @@ function App() {
 
       const jobIds = (myJobs || []).map((job) => job.id);
 
-      if (jobIds.length === 0) {
-        setHasNotifications(false);
-        return;
-      }
+      let applications = [];
 
-      const { data: applications, error: applicationsError } = await supabase
-        .from("job_applications")
-        .select("id, job_id, applicant_id, created_at")
-        .in("job_id", jobIds)
-        .order("created_at", { ascending: false });
+      if (jobIds.length > 0) {
+        const {
+          data,
+          error: applicationsError,
+        } = await supabase
+          .from("job_applications")
+          .select("id, job_id, applicant_id, created_at")
+          .in("job_id", jobIds)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false });
 
-      if (applicationsError) {
-        console.error("HOME NOTIFICATION APPLICATIONS ERROR:", applicationsError);
-        return;
+        if (applicationsError) {
+          console.error(
+            "HOME NOTIFICATION APPLICATIONS ERROR:",
+            applicationsError
+          );
+          return;
+        }
+
+        applications = data || [];
       }
 
       const readKey = `ideahire_read_notifications_${userId}`;
-      const readIds = JSON.parse(localStorage.getItem(readKey) || "[]");
+
+      let readIds = [];
+
+      try {
+        const storedReadIds = JSON.parse(
+          localStorage.getItem(readKey) || "[]"
+        );
+
+        readIds = Array.isArray(storedReadIds)
+          ? storedReadIds
+          : [];
+      } catch {
+        readIds = [];
+      }
+
+      const [
+        rejectedResult,
+        acceptedResult,
+        blockedResult,
+      ] = await Promise.all([
+        supabase
+          .from("job_applications")
+          .select("id")
+          .eq("applicant_id", userId)
+          .eq("status", "rejected"),
+
+        supabase
+          .from("job_applications")
+          .select("id")
+          .eq("applicant_id", userId)
+          .eq("status", "accepted"),
+
+        supabase
+          .from("user_blocks")
+          .select("id")
+          .eq("blocked_id", userId),
+      ]);
+
+      if (rejectedResult.error) {
+        console.error(
+          "HOME REJECTED NOTIFICATIONS ERROR:",
+          rejectedResult.error
+        );
+      }
+
+      if (acceptedResult.error) {
+        console.error(
+          "HOME ACCEPTED NOTIFICATIONS ERROR:",
+          acceptedResult.error
+        );
+      }
+
+      if (blockedResult.error) {
+        console.error(
+          "HOME BLOCK NOTIFICATIONS ERROR:",
+          blockedResult.error
+        );
+      }
+
+      const hasUnreadIncoming =
+        (applications || []).some(
+          (application) =>
+            !readIds.includes(
+              `incoming:${application.id}`
+            )
+        );
+
+      const hasUnreadRejected =
+        (rejectedResult.data || []).some(
+          (application) =>
+            !readIds.includes(
+              `rejected:${application.id}`
+            )
+        );
+
+      const hasUnreadAccepted =
+        (acceptedResult.data || []).some(
+          (application) =>
+            !readIds.includes(
+              `accepted:${application.id}`
+            )
+        );
+
+      const hasUnreadBlock =
+        (blockedResult.data || []).some(
+          (block) =>
+            !readIds.includes(
+              `blocked:${block.id}`
+            )
+        );
 
       setHasNotifications(
-        (applications || []).some((application) => !readIds.includes(application.id))
+        hasUnreadIncoming ||
+          hasUnreadRejected ||
+          hasUnreadAccepted ||
+          hasUnreadBlock
       );
     } catch (error) {
       console.error("HOME NOTIFICATION CHECK ERROR:", error);
@@ -125,30 +703,53 @@ function App() {
     session?.user?.email?.split("@")[0] ||
     "Użytkownik";
 
+  const avatarUrl =
+    session?.user?.user_metadata
+      ?.avatar_url || "";
+
+  const userInitial = userName
+    .charAt(0)
+    .toUpperCase();
+
+  const activeJob =
+    recentJobs[
+      activeJobIndex % recentJobs.length
+    ] || fallbackJobs[0];
+
+  const nextJob =
+    recentJobs[
+      (activeJobIndex + 1) %
+        recentJobs.length
+    ] || fallbackJobs[1];
+
+  const followingJob =
+    recentJobs[
+      (activeJobIndex + 2) %
+        recentJobs.length
+    ] || fallbackJobs[2];
+
+  function formatBudget(value) {
+    return `${Number(
+      value || 0
+    ).toLocaleString("pl-PL")} zł`;
+  }
+
   return (
-    <div className="app">
-      <header className="navbar">
-        <Link className="logo" to="/">
+    <div className="app ih-home-refresh">
+      <header className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}>
+        <Link className="logo logo-clean" to="/">
           Idea<span>Hire</span>
         </Link>
 
-        <nav className="nav-links">
+        <nav className="nav-links home-nav-links" aria-label="Nawigacja strony głównej">
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
-        </nav>
 
-        <div className="nav-actions">
-          {loading ? (
-            <span>Ładowanie...</span>
-          ) : session ? (
+          {session && (
             <>
-              <span className="auth-user">
-                Cześć, {userName}
-              </span>
-
               <Link
-                className="home-notifications-link btn btn-ghost"
+                className="home-notifications-link"
                 to="/notifications"
               >
                 Powiadomienia
@@ -157,11 +758,37 @@ function App() {
                 )}
               </Link>
 
-              <Link
-                className="btn btn-ghost"
-                to="/account"
-              >
+              <Link to="/account">
                 Moje konto
+              </Link>
+            </>
+          )}
+        </nav>
+
+        <div className="nav-actions">
+          {loading ? (
+            <span>Ładowanie...</span>
+          ) : session ? (
+            <>
+              <span className="auth-user home-auth-user" title={`Cześć, ${userName}`}>
+                <span>Cześć,</span> <strong>{userName}</strong>
+              </span>
+
+              <Link
+                className="home-account-avatar-link"
+                to="/account"
+                aria-label="Moje konto"
+              >
+                <span className="account-mini-avatar">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                    />
+                  ) : (
+                    userInitial
+                  )}
+                </span>
               </Link>
 
               <button
@@ -218,7 +845,7 @@ function App() {
                 className="btn btn-dark btn-large"
                 to="/find-talent"
               >
-                Znajdź wykonawcę <span>→</span>
+                Znajdź wykonawcę <span></span>
               </Link>
 
               <Link
@@ -248,26 +875,26 @@ function App() {
           </div>
 
           <div className="hero-visual">
-            <div className="floating-card card-main">
+            <div
+              className="floating-card card-main rotating-job-card"
+              key={activeJob.id}
+            >
               <div className="card-header">
-                <span>Nowe zlecenie</span>
+                <span>Aktualne zlecenie</span>
                 <span className="live-dot">●</span>
               </div>
 
-              <h3>
-                Potrzebuję nowoczesnej
-                <br />
-                strony internetowej
-              </h3>
+              <h3>{activeJob.title}</h3>
 
               <p>
-                Szukam osoby, która stworzy prostą i szybką
-                stronę dla nowej marki.
+                {activeJob.description}
               </p>
 
               <div className="card-meta">
-                <span>1 500–3 000 zł</span>
-                <span>3 zgłoszenia</span>
+                <span>
+                  {formatBudget(activeJob.budget)}
+                </span>
+                <span>{getCategoryLabel(activeJob.category)}</span>
               </div>
             </div>
 
@@ -275,17 +902,17 @@ function App() {
               <span className="mini-icon">✦</span>
 
               <div>
-                <strong>Nowe zgłoszenie</strong>
-                <span>Projektant UI/UX</span>
+                <strong>Najnowsze zlecenia</strong>
+                <span>{nextJob.title}</span>
               </div>
             </div>
 
             <div className="floating-card card-small card-bottom">
-              <span className="check-icon">✓</span>
+              <span className="check-icon"></span>
 
               <div>
-                <strong>Projekt zakończony</strong>
-                <span>Wszystko gotowe</span>
+                <strong>Kolejne zlecenie</strong>
+                <span>{followingJob.title}</span>
               </div>
             </div>
 
@@ -297,7 +924,7 @@ function App() {
           className="categories section"
           id="categories"
         >
-          <div className="section-heading">
+          <div className="section-heading home-reveal">
             <div>
               <span className="section-label">Kategorie</span>
 
@@ -314,32 +941,14 @@ function App() {
             </p>
           </div>
 
-          <div className="category-grid">
-            {categories.map((category, index) => (
-              <button
-                className="category-card"
-                key={category}
-                type="button"
-              >
-                <span className="category-number">
-                  0{index + 1}
-                </span>
-
-                <span className="category-name">
-                  {category}
-                </span>
-
-                <span className="category-arrow">↗</span>
-              </button>
-            ))}
-          </div>
+          <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} />
         </section>
 
         <section
           className="how section"
           id="how-it-works"
         >
-          <div className="section-heading centered">
+          <div className="section-heading centered home-reveal">
             <span className="section-label">
               Jak to działa
             </span>
@@ -352,7 +961,7 @@ function App() {
           </div>
 
           <div className="steps">
-            <article className="step">
+            <article className="step home-reveal">
               <span>01</span>
 
               <h3>Opisz potrzebę</h3>
@@ -363,7 +972,7 @@ function App() {
               </p>
             </article>
 
-            <article className="step">
+            <article className="step home-reveal">
               <span>02</span>
 
               <h3>Wybierz osobę</h3>
@@ -374,7 +983,7 @@ function App() {
               </p>
             </article>
 
-            <article className="step">
+            <article className="step home-reveal">
               <span>03</span>
 
               <h3>Zrealizuj projekt</h3>
@@ -388,7 +997,7 @@ function App() {
         </section>
 
         <section
-          className="split-section section"
+          className="split-section section home-reveal"
           id="for-users"
         >
           <div className="split-card">
@@ -407,7 +1016,7 @@ function App() {
               className="btn btn-light"
               to="/find-talent"
             >
-              Dodaj zlecenie →
+              Dodaj zlecenie 
             </Link>
           </div>
 
@@ -427,18 +1036,17 @@ function App() {
               className="btn btn-outline"
               to="/jobs"
             >
-              Znajdź zlecenia →
+              Znajdź zlecenia 
             </Link>
           </div>
         </section>
 
-        <section className="final-cta">
+        <section className="final-cta home-reveal">
           <span className="section-label">IdeaHire</span>
 
-          <h2>
-            Twój następny projekt
-            <br />
-            zaczyna się tutaj.
+          <h2 className="final-cta-title">
+            <span>Twój następny projekt</span>
+            <span>zaczyna się tutaj.</span>
           </h2>
 
           <Link
@@ -446,15 +1054,15 @@ function App() {
             to={session ? "/account" : "/register"}
           >
             {session
-              ? "Przejdź do konta →"
-              : "Zacznij teraz →"}
+              ? "Przejdź do konta "
+              : "Zacznij teraz "}
           </Link>
         </section>
       </main>
 
-      <footer className="footer">
+      <footer className="footer home-reveal">
         <div>
-          <Link className="logo" to="/">
+          <Link className="logo logo-clean" to="/">
             Idea<span>Hire</span>
           </Link>
 
@@ -465,6 +1073,12 @@ function App() {
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
+          <Link to="/regulamin">Regulamin</Link>
+          <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
+          <Link to="/polityka-cookies">Polityka cookies</Link>
+          <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">
+            Zgłoś nielegalną treść
+          </a>
         </div>
 
         <span>© 2026 IdeaHire</span>
