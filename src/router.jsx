@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 09 | 2026-10-04 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 10 | 2026-10-04 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -6766,14 +6766,16 @@ function Register() {
   }
 
   return (
-    <div className="page">
-      <div className="auth-card">
+    <div className="page ih10-register">
+      <div className="auth-card ih10-registration-card">
         <Link
           className="logo"
           to="/"
         >
           Idea<span>Hire</span>
         </Link>
+
+        <div className="ih10-registration-intro" aria-hidden="true"><i /><i /><i /><i /></div>
 
         <div className="auth-header">
           <span className="section-label">
@@ -15071,6 +15073,104 @@ function Profile() {
    JOBS
 ========================================================= */
 
+function JobsSpotlight({ jobs, formatBudget }) {
+  const [activeId, setActiveId] = useState(jobs[0]?.id || "");
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [hidden, setHidden] = useState(() => typeof document !== "undefined" && document.hidden);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  );
+  const sequence = jobs.map((job) => job.id).join("|");
+  const activeIndex = Math.max(0, jobs.findIndex((job) => job.id === activeId));
+  const job = jobs[activeIndex];
+  const stopped = paused || hovered || focused || hidden || reducedMotion;
+
+  useEffect(() => {
+    setActiveId(jobs[0]?.id || "");
+  }, [sequence]);
+
+  useEffect(() => {
+    const query = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const updateMotion = () => setReducedMotion(!!query?.matches);
+    const updateVisibility = () => setHidden(document.hidden);
+    updateMotion();
+    updateVisibility();
+    query?.addEventListener?.("change", updateMotion);
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => {
+      query?.removeEventListener?.("change", updateMotion);
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (jobs.length < 2 || stopped) return;
+    const timer = window.setTimeout(() => {
+      setActiveId(jobs[(activeIndex + 1) % jobs.length].id);
+    }, 8000);
+    return () => window.clearTimeout(timer);
+  }, [sequence, activeId, stopped]);
+
+  if (!job) return null;
+
+  function changeJob(direction) {
+    setPaused(true);
+    setActiveId(jobs[(activeIndex + direction + jobs.length) % jobs.length].id);
+  }
+
+  return (
+    <section
+      className={`ih10-jobs-spotlight${stopped ? " is-paused" : ""}`}
+      aria-label="Podgląd zleceń"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
+    >
+      <header className="ih10-spotlight-header">
+        <span><i aria-hidden="true" />Odkryj zlecenie</span>
+        {jobs.length > 1 && (
+          <div className="ih10-spotlight-controls" aria-label="Sterowanie podglądem">
+            <button type="button" onClick={() => changeJob(-1)} aria-label="Poprzednie zlecenie">←</button>
+            <span aria-label={`Zlecenie ${activeIndex + 1} z ${jobs.length}`}>{activeIndex + 1} / {jobs.length}</span>
+            <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? "Włącz automatyczną zmianę zleceń" : "Zatrzymaj automatyczną zmianę zleceń"} disabled={reducedMotion}>
+              <svg viewBox="0 0 20 20" aria-hidden="true">{paused || reducedMotion ? <path d="m7 4 9 6-9 6Z" /> : <path d="M6 4h3v12H6zM12 4h3v12h-3z" />}</svg>
+            </button>
+            <button type="button" onClick={() => changeJob(1)} aria-label="Następne zlecenie">→</button>
+          </div>
+        )}
+      </header>
+      <div className="ih10-spotlight-body" key={job.id}>
+        <div className="ih10-spotlight-copy">
+          <span className="ih10-spotlight-category">{getJobCategoryLabel(job.category)}</span>
+          <h2 title={job.title}>{job.title || "Zlecenie"}</h2>
+          <p>{job.description || "Szczegóły znajdziesz w ogłoszeniu."}</p>
+        </div>
+        <div className="ih10-spotlight-price"><small>Budżet projektu</small><strong>{formatBudget(job.budget)}</strong></div>
+      </div>
+      <footer className="ih10-spotlight-footer">
+        <span>{jobs.length > 1 ? "Nowy podgląd co 8 sekund" : "Zobacz szczegóły projektu"}</span>
+        <a
+          href={`#ih10-job-${job.id}`}
+          onClick={(event) => {
+            const target = document.getElementById(`ih10-job-${job.id}`);
+            if (!target) return;
+            event.preventDefault();
+            setPaused(true);
+            target.focus({ preventScroll: true });
+            target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+          }}
+        >Pokaż w liście <span aria-hidden="true">↘</span></a>
+      </footer>
+    </section>
+  );
+}
+
+
 function Jobs() {
   const { user } =
     useAuth();
@@ -15569,7 +15669,7 @@ function Jobs() {
       "Wszystkie";
 
   return (
-    <div className="page ih-market-v5 ih5-jobs-page">
+    <div className="page ih-market-v5 ih5-jobs-page ih10-jobs-page">
       <AccountNavbar />
 
       <main className="ih-market-shell">
@@ -15607,11 +15707,12 @@ function Jobs() {
           !message &&
           jobs.length > 0 && (
             <div className="ih5-jobs-results-header">
-              <div className="ih5-jobs-results-copy">
+              <div className="ih5-jobs-results-copy" role="status" aria-live="polite">
                 <span>Wyniki wyszukiwania</span>
                 <strong>
-                  {formatPolishJobsCount(filteredJobs.length)}
+                  {new Intl.NumberFormat("pl-PL").format(filteredJobs.length)}
                 </strong>
+                <small>{formatPolishJobsCount(filteredJobs.length).split(" ").pop()}</small>
               </div>
 
               {hasFilters && (
@@ -15700,6 +15801,10 @@ function Jobs() {
             LISTA ZLECEŃ
         ================================================= */}
 
+        {!loading && !message && displayedJobs.length > 0 && (
+          <JobsSpotlight jobs={displayedJobs} formatBudget={formatBudget} />
+        )}
+
         <div className="ih5-jobs-list">
           {displayedJobs.map(
             (job, jobIndex) => {
@@ -15762,6 +15867,8 @@ function Jobs() {
                 <article
                   className={`ih5-job-card${isOpen ? " is-open" : ""}`}
                   style={{ "--ih-job-order": Math.min(jobIndex, 5) }}
+                  id={`ih10-job-${job.id}`}
+                  tabIndex={-1}
                   aria-labelledby={`ih-job-title-${job.id}`}
                   key={job.id}
                 >
@@ -22931,7 +23038,7 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications">
+    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications">
       <AccountNavbar />
 
       <main className="ih7-chat-page">
