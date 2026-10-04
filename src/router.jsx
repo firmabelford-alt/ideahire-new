@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -9848,26 +9848,18 @@ function Account() {
         className="app-page account-workspace-page ih6-account-workspace"
         data-account-section={activeAccountSection}
       >
-        <div className="app-page-header">
-          <span className="section-label">
-            Twoje konto
-          </span>
-
-          <h1>
-            Centrum profilu
-          </h1>
-
-          <p>
-            Uporządkuj dane, specjalizacje, portfolio i ustawienia konta
-            w jednym miejscu.
-          </p>
-        </div>
+        <header className="ih7-account-overview">
+          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
+          <div className="ih7-account-heading">
+            <span className="section-label">Twoje konto</span>
+            <h1>Centrum profilu</h1>
+            <p>Dane, specjalizacje i ustawienia w jednym miejscu. Kliknij koło, aby wybrać sekcję.</p>
+            <div className="ih7-account-current"><span>Wybrana sekcja</span><strong>{ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === activeAccountSection)?.label}</strong></div>
+          </div>
+        </header>
 
         <div className="ih6-account-layout">
-          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
           <div className="ih6-account-content">
-
-
         <section className="account-tab-intro" aria-live="polite">
           <div>
             <span className="section-label">
@@ -19717,6 +19709,9 @@ function Messages() {
   const [errorMessage, setErrorMessage] =
     useState("");
 
+  const [search, setSearch] = useState("");
+  const [inboxFilter, setInboxFilter] = useState("all");
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -20080,305 +20075,59 @@ function Messages() {
     );
   }
 
+  const unreadCount = conversations.filter((conversation) => conversation.isUnread).length;
+  const query = search.trim().toLocaleLowerCase("pl-PL");
+  const visibleConversations = conversations.filter((conversation) =>
+    (inboxFilter !== "unread" || conversation.isUnread) &&
+    (!query || [conversation.otherProfile?.name, conversation.job?.title, conversation.lastMessage?.content]
+      .some((value) => String(value || "").toLocaleLowerCase("pl-PL").includes(query)))
+  );
   return (
-    <div className="account-page">
+    <div className="account-page ih7-communications">
       <AccountNavbar />
-
-      <main className="messages-page">
-        <style>{`
-          .messages-page {
-            width: min(980px, calc(100% - 32px));
-            margin: 34px auto 60px;
-          }
-
-          .messages-heading {
-            margin-bottom: 22px;
-          }
-
-          .messages-heading h1 {
-            margin: 5px 0 8px;
-            font-size: clamp(30px, 5vw, 46px);
-            letter-spacing: -1.5px;
-          }
-
-          .messages-heading p {
-            margin: 0;
-            max-width: 600px;
-            color: #777;
-            line-height: 1.6;
-          }
-
-          .messages-list {
-            overflow: hidden;
-            border: 1px solid rgba(20,20,20,.08);
-            border-radius: 22px;
-            background: #fff;
-            box-shadow: 0 16px 45px rgba(20,20,20,.05);
-          }
-
-          .messages-row {
-            display: grid;
-            grid-template-columns: 54px minmax(0, 1fr) auto;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 18px;
-            border-bottom: 1px solid rgba(20,20,20,.07);
-            color: inherit;
-            text-decoration: none;
-            transition: background .16s ease;
-          }
-
-          .messages-row:last-child {
-            border-bottom: 0;
-          }
-
-          .messages-row:hover {
-            background: #f8f8f5;
-          }
-
-          .messages-avatar {
-            width: 54px;
-            height: 54px;
-            overflow: hidden;
-            display: grid;
-            place-items: center;
-            border-radius: 50%;
-            background: #ecece8;
-            font-size: 17px;
-            font-weight: 800;
-          }
-
-          .messages-avatar img {
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-          }
-
-          .messages-content {
-            min-width: 0;
-          }
-
-          .messages-topline {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-          }
-
-          .messages-name {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 800;
-          }
-
-          .messages-job {
-            margin-top: 3px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: #777;
-            font-size: 12px;
-          }
-
-          .messages-preview {
-            margin-top: 7px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: #555;
-            font-size: 14px;
-          }
-
-          .messages-date {
-            align-self: start;
-            padding-top: 3px;
-            color: #999;
-            font-size: 11px;
-            white-space: nowrap;
-          }
-
-          .messages-empty {
-            padding: 54px 24px;
-            border: 1px solid rgba(20,20,20,.08);
-            border-radius: 22px;
-            background: #fff;
-            text-align: center;
-          }
-
-          .messages-empty h2 {
-            margin: 0 0 8px;
-          }
-
-          .messages-empty p {
-            margin: 0;
-            color: #777;
-            line-height: 1.6;
-          }
-
-          @media (max-width: 600px) {
-            .messages-page {
-              width: calc(100% - 20px);
-              margin: 20px auto 40px;
-            }
-
-            .messages-row {
-              grid-template-columns: 48px minmax(0, 1fr) auto;
-              gap: 11px;
-              padding: 14px 12px;
-            }
-
-            .messages-avatar {
-              width: 48px;
-              height: 48px;
-            }
-
-            .messages-job {
-              max-width: 65vw;
-            }
-          }
-        `}</style>
-
-        <div className="messages-heading">
-          <div className="messages-heading-copy">
-            <span className="section-label">
-              Twoje rozmowy
-            </span>
-
-            <div className="messages-title-row">
-              <h1>Wiadomości</h1>
-
-              <div className="messages-overview" aria-label={`${conversations.length} rozmów`}>
-                <strong>{conversations.length}</strong>
-                <span>Rozmowy</span>
-              </div>
-            </div>
-
-            <p>
-              Wszystkie rozmowy dotyczące aktywnych i zakończonych
-              współprac w jednym, uporządkowanym miejscu.
-            </p>
+      <main className="ih7-inbox-page">
+        <header className="ih7-inbox-heading">
+          <div><span className="ih7-eyebrow">Twoje rozmowy</span><h1>Wiadomości</h1><p>Projekt, ustalenia i pliki. Wszystko w jednej rozmowie.</p></div>
+          <div className="ih7-inbox-overview"><strong>{conversations.length}</strong><span>rozmów</span></div>
+        </header>
+        <section className="ih7-inbox-tools" aria-label="Znajdź rozmowę">
+          <label className="ih7-inbox-search"><MarketIcon /><span className="ih5-sr-only">Szukaj rozmowy</span>
+            <input type="search" placeholder="Osoba, projekt lub wiadomość…" value={search} onChange={(event) => setSearch(event.target.value)} maxLength={160} />
+          </label>
+          <div className="ih7-inbox-switch" aria-label="Widoczne rozmowy">
+            <button type="button" aria-pressed={inboxFilter === "all"} onClick={() => setInboxFilter("all")}>Wszystkie</button>
+            <button type="button" aria-pressed={inboxFilter === "unread"} onClick={() => setInboxFilter("unread")}>Nowe <b>{unreadCount}</b></button>
           </div>
-        </div>
-
-        {loading ? (
-          <InlineRouteLoader
-            className="messages-route-loader"
-            rows={4}
-          />
-        ) : errorMessage ? (
-          <p className="auth-error">
-            {errorMessage}
-          </p>
-        ) : conversations.length === 0 ? (
-          <section className="messages-empty">
-            <h2>
-              Nie masz jeszcze rozmów
-            </h2>
-
-            <p>
-              Gdy zgłoszenie zostanie zaakceptowane,
-              rozmowa pojawi się właśnie tutaj.
-            </p>
-          </section>
-        ) : (
-          <div className="messages-list">
-            <div className="messages-list-header" aria-hidden="true">
-              <span>Ostatnie rozmowy</span>
-              <span>Ostatnia aktywność</span>
-            </div>
-
-            {conversations.map(
-              (conversation) => {
-                const profile =
-                  conversation.otherProfile;
-
-                const name =
-                  profile?.name ||
-                  "Użytkownik";
-
-                const initial =
-                  name
-                    .charAt(0)
-                    .toUpperCase();
-
-                const lastMessage =
-                  conversation.lastMessage;
-
-                return (
-                  <Link
-                    key={
-                      conversation.id
-                    }
-                    className={`messages-row${
-                      conversation.isUnread
-                        ? " is-unread"
-                        : ""
-                    }`}
-                    to={`/chat/${conversation.id}`}
-                  >
-                    <div className="messages-avatar">
-                      {profile?.avatar_url ? (
-                        <img
-                          src={
-                            profile.avatar_url
-                          }
-                          alt=""
-                        />
-                      ) : (
-                        initial
-                      )}
-                    </div>
-
-                    <div className="messages-content">
-                      <div className="messages-topline">
-                        <span className="messages-name">
-                          {name}
-                        </span>
-
-                        {conversation.isUnread && (
-                          <span
-                            className="messages-unread-dot"
-                            aria-label="Nowa rozmowa lub wiadomość"
-                          />
-                        )}
-                      </div>
-
-                      <div className="messages-job">
-                        {conversation.job?.title ||
-                          "Rozmowa dotycząca zlecenia"}
-                      </div>
-
-                      <div className="messages-preview">
-                        {lastMessage
-                          ? `${
-                              lastMessage.sender_id ===
-                              user.id
-                                ? "Ty: "
-                                : ""
-                            }${lastMessage.content}`
-                          : conversation.isUnread
-                          ? "Nowa rozmowa — ustalcie warunki współpracy."
-                          : "Rozmowa została otwarta — napisz pierwszą wiadomość."}
-                      </div>
-                    </div>
-
-                    <time className="messages-date">
-                      {formatConversationDate(
-                        conversation.sortDate
-                      )}
-                    </time>
-                  </Link>
-                );
-              }
-            )}
-          </div>
-        )}
+        </section>
+        {loading ? <InlineRouteLoader className="ih7-route-loader" rows={4} />
+          : errorMessage ? <p className="ih7-feedback" role="alert">{errorMessage}</p>
+          : visibleConversations.length === 0 ? <section className="ih7-empty-state">
+            <span className="ih7-empty-mark" aria-hidden="true">◇</span>
+            <h2>{conversations.length ? "Brak pasujących rozmów" : "Tu zaczyna się współpraca"}</h2>
+            <p>{conversations.length ? "Zmień wyszukiwanie lub pokaż wszystkie rozmowy." : "Po otwarciu rozmowy znajdziesz tutaj wiadomości, materiały i ustalenia projektu."}</p>
+            {conversations.length > 0 && <button type="button" onClick={() => { setSearch(""); setInboxFilter("all"); }}>Pokaż wszystkie</button>}
+          </section> : <section className="ih7-inbox-list" aria-label="Lista rozmów">
+            <div className="ih7-inbox-list-heading"><span>{inboxFilter === "unread" ? "Nowe wiadomości" : "Ostatnie rozmowy"}</span><span>{visibleConversations.length}</span></div>
+            {visibleConversations.map((conversation) => {
+              const profile = conversation.otherProfile;
+              const name = profile?.name || "Użytkownik";
+              const lastMessage = conversation.lastMessage;
+              return <Link key={conversation.id} className={`ih7-inbox-row${conversation.isUnread ? " is-unread" : ""}`} to={`/chat/${conversation.id}`}>
+                <span className="ih7-avatar">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : name.charAt(0).toUpperCase()}</span>
+                <div className="ih7-inbox-copy">
+                  <div className="ih7-inbox-topline"><strong>{name}</strong>{conversation.isUnread && <span className="ih7-unread" aria-label="Nowa rozmowa lub wiadomość" />}</div>
+                  <span className="ih7-inbox-project" title={conversation.job?.title}>{conversation.job?.title || "Rozmowa dotycząca projektu"}</span>
+                  <p>{lastMessage ? `${lastMessage.sender_id === user.id ? "Ty: " : ""}${lastMessage.content}` : "Rozmowa jest otwarta. Ustalcie szczegóły współpracy."}</p>
+                </div>
+                <div className="ih7-inbox-end"><time dateTime={conversation.sortDate}>{formatConversationDate(conversation.sortDate)}</time><MarketIcon kind="arrow" /></div>
+              </Link>;
+            })}
+          </section>}
       </main>
     </div>
   );
 }
+
 
 
 /* =========================================================
@@ -21894,7 +21643,7 @@ function ChatPaymentPanel({
               <strong>
                 {formatPaymentMoney(summary.platform_fee, summary.currency)}
               </strong>
-              <small>7% · minimum 20 zł · maksimum 300 zł</small>
+              <small>Kwota zgodna z podsumowaniem płatności.</small>
             </div>
             <div className="is-total">
               <span>{isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</span>
@@ -22118,6 +21867,14 @@ function Chat() {
 
   const [workspaceTab, setWorkspaceTab] =
     useState("conversation");
+
+  const messageViewportRef = useRef(null);
+  const followMessagesRef = useRef(true);
+  useEffect(() => { followMessagesRef.current = true; }, [id, workspaceTab]);
+  useEffect(() => {
+    const element = messageViewportRef.current;
+    if (element && followMessagesRef.current) element.scrollTop = element.scrollHeight;
+  }, [messages, workspaceTab, loading]);
 
   const [agreement, setAgreement] =
     useState(null);
@@ -23125,376 +22882,52 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page">
+    <div className="account-page ih7-communications">
       <AccountNavbar />
 
-      <main className="chat-page">
-        <style>{`
-          .chat-page {
-            width: min(980px, calc(100% - 32px));
-            margin: 34px auto 60px;
-          }
+      <main className="ih7-chat-page">
 
-          .chat-shell {
-            min-height: 68vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid rgba(20,20,20,.08);
-            border-radius: 24px;
-            background: #fff;
-            box-shadow: 0 18px 55px rgba(20,20,20,.06);
-          }
-
-          .chat-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 18px 20px;
-            border-bottom: 1px solid rgba(20,20,20,.07);
-            background: rgba(250,250,247,.96);
-          }
-
-          .chat-back {
-            flex: 0 0 auto;
-            border: 0;
-            background: transparent;
-            color: #555;
-            font: inherit;
-            cursor: pointer;
-          }
-
-          .chat-profile-link {
-            min-width: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: inherit;
-            text-decoration: none;
-          }
-
-          .chat-profile-link:hover .chat-person strong {
-            text-decoration: underline;
-            text-underline-offset: 3px;
-          }
-
-          .chat-profile-blocked {
-            cursor: pointer;
-          }
-
-          .chat-profile-blocked:hover .chat-person strong {
-            text-decoration: underline;
-            text-underline-offset: 3px;
-          }
-
-          .chat-avatar {
-            width: 46px;
-            height: 46px;
-            flex: 0 0 46px;
-            overflow: hidden;
-            display: grid;
-            place-items: center;
-            border-radius: 50%;
-            background: #ecece8;
-            font-weight: 800;
-          }
-
-          .chat-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .chat-avatar-blocked {
-            background: #dfdfda;
-            color: #74746f;
-            font-size: 22px;
-            font-weight: 500;
-          }
-
-          .chat-person {
-            min-width: 0;
-          }
-
-          .chat-person strong {
-            display: block;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-size: 16px;
-          }
-
-          .chat-person span {
-            display: block;
-            margin-top: 2px;
-            color: #8b8b86;
-            font-size: 12px;
-          }
-
-          .chat-header-actions {
-            flex: 0 0 auto;
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .chat-delete-button {
-            flex: 0 0 auto;
-            min-height: 38px;
-            padding: 8px 12px;
-            border-radius: 11px;
-            background: #fff;
-            font: inherit;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-          }
-
-          .chat-delete-button {
-            border: 1px solid #e2d9d6;
-            color: #8e352b;
-          }
-
-          .chat-delete-button:hover {
-            background: #fff7f5;
-          }
-
-          .chat-delete-button:disabled {
-            cursor: wait;
-            opacity: .6;
-          }
-
-          .chat-messages {
-            flex: 1;
-            min-height: 420px;
-            max-height: 62vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-            padding: 22px;
-            background: #f7f7f4;
-          }
-
-          .chat-empty {
-            margin: auto;
-            max-width: 420px;
-            color: #888;
-            text-align: center;
-            line-height: 1.6;
-          }
-
-          .chat-message {
-            max-width: min(72%, 620px);
-            padding: 11px 14px 8px;
-            border-radius: 18px;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(20,20,20,.04);
-          }
-
-          .chat-message.is-mine {
-            align-self: flex-end;
-            background: #171717;
-            color: #fff;
-            border-bottom-right-radius: 6px;
-          }
-
-          .chat-message.is-theirs {
-            align-self: flex-start;
-            border-bottom-left-radius: 6px;
-          }
-
-          .chat-message p {
-            margin: 0;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            line-height: 1.5;
-          }
-
-          .chat-message time {
-            display: block;
-            margin-top: 5px;
-            color: #999;
-            font-size: 10px;
-            text-align: right;
-          }
-
-          .chat-message.is-mine time {
-            color: rgba(255,255,255,.58);
-          }
-
-          .chat-read-receipt {
-            align-self: flex-end;
-            margin: -3px 5px 3px 0;
-            color: #92928d;
-            font-size: 10px;
-            line-height: 1;
-          }
-
-          .chat-block-banner {
-            margin: 0;
-            padding: 12px 18px;
-            border-top: 1px solid #eadfdc;
-            background: #fff8f6;
-            color: #7f4037;
-            font-size: 13px;
-            line-height: 1.5;
-            text-align: center;
-          }
-
-          .chat-form {
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-            padding: 15px;
-            border-top: 1px solid rgba(20,20,20,.07);
-            background: #fff;
-          }
-
-          .chat-form textarea {
-            flex: 1;
-            min-height: 48px;
-            max-height: 140px;
-            resize: vertical;
-            padding: 13px 15px;
-            border: 1px solid rgba(20,20,20,.12);
-            border-radius: 15px;
-            outline: none;
-            background: #f8f8f5;
-            color: #171717;
-            font: inherit;
-            line-height: 1.45;
-          }
-
-          .chat-form textarea:focus {
-            border-color: #171717;
-            box-shadow: 0 0 0 3px rgba(20,20,20,.05);
-          }
-
-          .chat-send {
-            min-height: 48px;
-            padding: 0 18px;
-            border: 1px solid #171717;
-            border-radius: 14px;
-            background: #171717;
-            color: #fff;
-            font: inherit;
-            font-weight: 750;
-            cursor: pointer;
-          }
-
-          .chat-send:disabled {
-            cursor: wait;
-            opacity: .55;
-          }
-
-          .chat-error {
-            margin: 0;
-            padding: 10px 18px;
-            border-top: 1px solid #f0d6d1;
-            background: #fff7f5;
-            color: #9b352b;
-            font-size: 13px;
-          }
-
-          @media (max-width: 600px) {
-            .chat-page {
-              width: 100%;
-              margin: 0;
-            }
-
-            .chat-shell {
-              min-height: calc(100vh - 70px);
-              border: 0;
-              border-radius: 0;
-              box-shadow: none;
-            }
-
-            .chat-header {
-              padding: 14px;
-              gap: 10px;
-              flex-wrap: wrap;
-            }
-
-            .chat-profile-link {
-              gap: 9px;
-            }
-
-            .chat-person span {
-              display: none;
-            }
-
-            .chat-header-actions {
-              width: 100%;
-              justify-content: flex-end;
-            }
-
-            .chat-delete-button {
-              padding: 8px 10px;
-            }
-
-            .chat-messages {
-              min-height: 0;
-              max-height: none;
-              padding: 15px 12px;
-            }
-
-            .chat-message {
-              max-width: 84%;
-            }
-
-            .chat-form {
-              padding: 10px;
-            }
-
-            .chat-send {
-              padding: 0 14px;
-            }
-          }
-        `}</style>
-
-        <div className="chat-shell">
+        <div className="ih7-chat-shell">
           {loading ? (
             <InlineRouteLoader
-              className="chat-route-loader"
+              className="ih7-chat-route-loader"
               rows={5}
             />
           ) : errorMessage &&
             !conversation ? (
-            <div className="chat-empty">
+            <div className="ih7-chat-empty">
               {errorMessage}
             </div>
           ) : (
             <>
-              <header className="chat-header">
+              <header className="ih7-chat-header">
                 <button
                   type="button"
-                  className="chat-back"
+                  className="ih7-chat-back"
                   onClick={() =>
                     navigate(
                       "/messages"
                     )
                   }
                 >
-                  <span aria-hidden="true"></span>
+                  <MarketIcon kind="arrow" />
                   <b>Wróć</b>
                 </button>
 
                 {messagingBlocked ? (
                   <Link
-                    className="chat-profile-link chat-profile-blocked"
+                    className="ih7-chat-profile-link ih7-chat-profile-blocked"
                     to={`/profile/${otherProfileId}`}
                     aria-label="Zablokowany użytkownik"
                   >
                     <div
-                      className="chat-avatar chat-avatar-blocked"
+                      className="ih7-chat-avatar ih7-chat-avatar-blocked"
                       aria-hidden="true"
                     >
                       ×
                     </div>
 
-                    <div className="chat-person">
+                    <div className="ih7-chat-person">
                       <strong>
                         Zablokowany użytkownik
                       </strong>
@@ -23505,11 +22938,11 @@ function Chat() {
                   </Link>
                 ) : (
                   <Link
-                    className="chat-profile-link"
+                    className="ih7-chat-profile-link"
                     to={`/profile/${otherProfileId}`}
                     aria-label={`Otwórz profil: ${otherName}`}
                   >
-                    <div className="chat-avatar">
+                    <div className="ih7-chat-avatar">
                       {otherProfile?.avatar_url ? (
                         <img
                           src={
@@ -23522,7 +22955,7 @@ function Chat() {
                       )}
                     </div>
 
-                    <div className="chat-person">
+                    <div className="ih7-chat-person">
                       <strong>
                         {otherName}
                       </strong>
@@ -23533,12 +22966,12 @@ function Chat() {
                   </Link>
                 )}
 
-                <div className="chat-header-actions">
-                  <details className="chat-actions-menu">
+                <div className="ih7-chat-header-actions">
+                  <details className="ih7-chat-actions-menu">
                     <summary aria-label="Więcej opcji rozmowy" title="Więcej opcji">
                       <span aria-hidden="true">•••</span>
                     </summary>
-                    <div className="chat-actions-popover">
+                    <div className="ih7-chat-actions-popover">
                       <button
                         type="button"
                         disabled={!agreement?.id || agreement.status !== "accepted"}
@@ -23580,43 +23013,24 @@ function Chat() {
                 </div>
               </header>
 
-              {conversation?.origin_type === "service_inquiry" && (
-                <section className="chat-service-context">
-                  <span className="chat-service-context-mark" aria-hidden="true">
-                    ◇
-                  </span>
-                  <div>
-                    <span>Rozmowa o usłudze</span>
-                    <strong>{jobTitle || "Indywidualna realizacja"}</strong>
-                    <small>
-                      {isClient
-                        ? "Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności."
-                        : "Przygotuj pierwszą ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny."}
-                    </small>
-                  </div>
-                  <Link to={`/services/${conversation.origin_id}`}>
-                    Zobacz usługę
-                  </Link>
-                </section>
-              )}
-
-              <section className="chat-workspace-summary" aria-label="Podsumowanie projektu">
-                <div className="chat-workspace-summary-main">
-                  <span className="section-label">
-                    {getJobCategoryLabel(jobDetails?.category)}
-                    {jobDetails?.subcategory ? ` · ${jobDetails.subcategory}` : ""}
-                  </span>
-                  <h1>{jobTitle || "Projekt IdeaHire"}</h1>
-                  <p>{jobDetails?.description || "Rozmowa i materiały dotyczące tego zlecenia."}</p>
+              <details className="ih7-chat-project">
+                <summary>
+                  <div className="ih7-chat-project-title"><span className="ih7-eyebrow">{getJobCategoryLabel(jobDetails?.category)}{jobDetails?.subcategory ? ` · ${jobDetails.subcategory}` : ""}</span><h1>{jobTitle || "Projekt IdeaHire"}</h1></div>
+                  <span className="ih7-chat-project-budget"><small>Budżet projektu</small><strong>{formatChatProjectBudget(jobBudget)}</strong></span>
+                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
+                </summary>
+                <div className="ih7-chat-project-body">
+                  <strong>{jobTitle || "Projekt IdeaHire"}</strong><p>{jobDetails?.description || "Rozmowa i materiały dotyczące tego projektu."}</p>
+                  <dl><div><dt>Ustalenia</dt><dd>{agreement?.status === "accepted" ? "Zaakceptowane" : "W toku"}</dd></div><div><dt>Materiały</dt><dd>{privateWork.items.filter((item) => item.moderation_status === "active").length}</dd></div></dl>
+                  {conversation?.origin_type === "service_inquiry" && <div className="ih7-chat-service-context">
+                    <span className="ih7-eyebrow">Zapytanie o usługę</span>
+                    <p>{isClient ? "Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności." : "Przygotuj pierwszą ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny."}</p>
+                    <Link to={`/services/${conversation.origin_id}`}>Zobacz usługę <MarketIcon kind="arrow" /></Link>
+                  </div>}
                 </div>
-                <div className="chat-workspace-summary-facts">
-                  <span><small>Budżet</small><strong>{formatChatProjectBudget(jobBudget)}</strong></span>
-                  <span><small>Ustalenia</small><strong>{agreement?.status === "accepted" ? "Zaakceptowane" : "W toku"}</strong></span>
-                  <span><small>Materiały</small><strong>{privateWork.items.filter((item) => item.moderation_status === "active").length}</strong></span>
-                </div>
-              </section>
+              </details>
 
-              <div className="chat-workspace-tabs" role="tablist" aria-label="Przestrzeń projektu">
+              <div className="ih7-chat-workspace-tabs" role="tablist" aria-label="Przestrzeń projektu">
                 {[
                   ["conversation", "Rozmowa", messages.length],
                   ["files", "Pliki", privateWork.items.filter((item) => item.moderation_status === "active").length],
@@ -23625,6 +23039,18 @@ function Chat() {
                   <button
                     type="button"
                     role="tab"
+                    id={`ih7-chat-tab-${value}`}
+                    aria-controls="ih7-chat-panel"
+                    tabIndex={workspaceTab === value ? 0 : -1}
+                    onKeyDown={(event) => {
+                      const keys = ["conversation", "files", "plan"];
+                      const delta = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+                      if (delta === undefined && event.key !== "Home" && event.key !== "End") return;
+                      event.preventDefault();
+                      const next = event.key === "Home" ? 0 : event.key === "End" ? 2 : (keys.indexOf(value) + delta + 3) % 3;
+                      setWorkspaceTab(keys[next]);
+                      event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[next]?.focus();
+                    }}
                     aria-selected={workspaceTab === value}
                     className={workspaceTab === value ? "is-active" : ""}
                     onClick={() => setWorkspaceTab(value)}
@@ -23644,8 +23070,11 @@ function Chat() {
               />
 
               <div
-                className={`chat-workspace-panel is-${workspaceTab}`}
+                className={`ih7-chat-workspace-panel is-${workspaceTab}`}
                 role="tabpanel"
+                id="ih7-chat-panel"
+                aria-labelledby={`ih7-chat-tab-${workspaceTab}`}
+                tabIndex="0"
                 key={workspaceTab}
               >
                 {workspaceTab === "conversation" && (
@@ -23656,16 +23085,17 @@ function Chat() {
                       </p>
                     )}
 
-                    <div className="chat-messages">
+                    <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => { const element = event.currentTarget; followMessagesRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 100; }}>
                       {messages.length === 0 ? (
-                        <div className="chat-empty">
+                        <div className="ih7-chat-empty">
                           Rozmowa została otwarta. Napisz pierwszą wiadomość i ustal szczegóły współpracy.
                         </div>
                       ) : (
-                        messages.map((message) => (
+                        messages.map((message, index) => (
                           <React.Fragment key={message.id}>
+                            {(index === 0 || new Date(messages[index - 1].created_at).toDateString() !== new Date(message.created_at).toDateString()) && <time className="ih7-chat-day" dateTime={message.created_at}>{new Date(message.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}</time>}
                             <div
-                              className={`chat-message ${message.sender_id === user.id ? "is-mine" : "is-theirs"}`}
+                              className={`ih7-chat-message ${message.sender_id === user.id ? "is-mine" : "is-theirs"}`}
                             >
                               <MessageText text={message.content} />
                               <PrivateMessageMaterials
@@ -23677,7 +23107,7 @@ function Chat() {
                                 }
                               />
                               {message.sender_id !== user.id && message.moderation_status !== "hidden" && (
-                                <details className="chat-message-actions">
+                                <details className="ih7-chat-message-actions">
                                   <summary aria-label="Opcje wiadomości" title="Opcje wiadomości">•••</summary>
                                   <button
                                     type="button"
@@ -23690,7 +23120,7 @@ function Chat() {
                                   </button>
                                 </details>
                               )}
-                              <time>
+                              <time dateTime={message.created_at}>
                                 {new Date(message.created_at).toLocaleTimeString("pl-PL", {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -23698,24 +23128,26 @@ function Chat() {
                               </time>
                             </div>
                             {message.id === lastReadOwnMessageId && (
-                              <span className="chat-read-receipt">Wyświetlono</span>
+                              <span className="ih7-chat-read-receipt">Wyświetlono</span>
                             )}
                           </React.Fragment>
                         ))
                       )}
                     </div>
 
-                    {errorMessage && <p className="chat-error">{errorMessage}</p>}
+                    {errorMessage && <p className="ih7-chat-error" role="alert">{errorMessage}</p>}
                     {messagingBlocked && (
-                      <p className="chat-block-banner">
+                      <p className="ih7-chat-block-banner">
                         {blockedByMe
                           ? "Zablokowałeś tego użytkownika. Otwórz ukryty profil i użyj menu z trzema kropkami, aby go odblokować."
                           : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
                       </p>
                     )}
 
-                    <form className="chat-form" onSubmit={handleSend}>
+                    <form className="ih7-chat-form" onSubmit={(event) => { followMessagesRef.current = true; handleSend(event); }}>
                       <textarea
+                        aria-label="Treść wiadomości"
+                        rows={2}
                         value={draft}
                         onChange={(event) => setDraft(event.target.value)}
                         placeholder="Napisz wiadomość…"
@@ -23730,12 +23162,13 @@ function Chat() {
                       />
                       <button
                         type="submit"
-                        className="chat-send"
+                        className="ih7-chat-send"
                         disabled={sending || !draft.trim() || messagingBlocked}
                       >
-                        {sending ? "Wysyłanie…" : "Wyślij"}
+                        <span>{sending ? "Wysyłanie…" : "Wyślij"}</span><MarketIcon kind="arrow" />
                       </button>
                     </form>
+                    <p className="ih7-chat-composer-hint">Enter wysyła · Shift + Enter dodaje linię · załączniki znajdziesz w zakładce Pliki</p>
                   </>
                 )}
 
