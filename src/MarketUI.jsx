@@ -1,9 +1,104 @@
-/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
 export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 6, minimum: 20, maximum: 249, orderLimit: 10000 });
+
+export function IdeaHireLogo({ className = "logo", to = "/" }) {
+  const [cycle, setCycle] = useState(0);
+  const [active, setActive] = useState(false);
+  const timer = useRef(null);
+  function play() {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    window.clearTimeout(timer.current);
+    setCycle((value) => value + 1);
+    setActive(true);
+    timer.current = window.setTimeout(() => setActive(false), 1050);
+  }
+  useEffect(() => { play(); return () => window.clearTimeout(timer.current); }, []);
+  return (
+    <Link className={`${className} ih6-logo`} to={to} aria-label="IdeaHire — strona główna"
+      onPointerEnter={(event) => { if (event.pointerType === "mouse") play(); }} onFocus={play} onClick={play}>
+      <span className="ih6-logo-word" key={cycle} data-active={active} aria-hidden="true">
+        {Array.from("IdeaHire").map((letter, index) => <span className={`ih6-logo-letter${index > 3 ? " is-hire" : ""}`} key={index} style={{ "--ih6-letter": index }}>{letter}</span>)}
+        {active && <span className="ih6-logo-pixels">{[0, 1, 2, 3].map((index) => <i key={index} style={{ "--ih6-pixel": index }} />)}</span>}
+      </span>
+    </Link>
+  );
+}
+
+const PROFILE_HUB_POSITIONS = [
+  { x: "31%", y: "24px" }, { x: "45%", y: "88px" },
+  { x: "55%", y: "152px" }, { x: "55%", y: "216px" },
+  { x: "45%", y: "280px" }, { x: "31%", y: "344px" },
+];
+
+export function ProfileHub({ sections, active, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const activeIndex = Math.max(0, sections.findIndex((section) => section.key === active));
+  const [focusedIndex, setFocusedIndex] = useState(activeIndex);
+  const id = useId();
+  const rootRef = useRef(null);
+  const triggerRef = useRef(null);
+  const itemRefs = useRef([]);
+  const focusOnOpen = useRef(false);
+  const current = sections[activeIndex];
+  useEffect(() => {
+    setOpen(false);
+    setFocusedIndex(activeIndex);
+  }, [active]);
+  useEffect(() => {
+    if (!open) return undefined;
+    if (focusOnOpen.current) { itemRefs.current[activeIndex]?.focus(); focusOnOpen.current = false; }
+    function outside(event) { if (rootRef.current && !rootRef.current.contains(event.target)) setOpen(false); }
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
+  }, [open]);
+  function close() { setOpen(false); triggerRef.current?.focus({ preventScroll: true }); }
+  function choose(section) { onSelect(section); close(); }
+  function keyboard(event) {
+    if (!open) return;
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
+    const delta = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key];
+    if (delta === undefined && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    const next = event.key === "Home" ? 0 : event.key === "End" ? sections.length - 1 : (focusedIndex + delta + sections.length) % sections.length;
+    setFocusedIndex(next);
+    itemRefs.current[next]?.focus();
+  }
+  return (
+    <aside className="ih6-profile-hub" ref={rootRef} data-open={open} aria-label="Centrum profilu" onKeyDown={keyboard}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
+      <svg className="ih6-hub-orbit" viewBox="0 0 340 416" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path d="M172 48C300 106 300 310 172 368" /><path className="ih6-hub-spoke" d="M51 208h66" />
+      </svg>
+      <button type="button" className="ih6-hub-trigger" ref={triggerRef} aria-expanded={open} aria-controls={`${id}-sections`}
+        aria-label={`${open ? "Zamknij" : "Otwórz"} centrum profilu. Bieżąca sekcja: ${current.label}.`}
+        onClick={() => { setFocusedIndex(activeIndex); setOpen((value) => !value); }}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" && !open) { event.preventDefault(); event.stopPropagation(); focusOnOpen.current = true; setOpen(true); }
+        }}>
+        <span className="ih6-hub-emblem" aria-hidden="true"><i /><i /><i /><i /></span>
+        <span>Centrum<br />profilu</span><span className="ih6-hub-toggle" aria-hidden="true">{open ? "−" : "+"}</span>
+      </button>
+      <div className="ih6-hub-items" id={`${id}-sections`} role="tablist" aria-label="Sekcje profilu" aria-orientation="vertical" aria-hidden={!open} inert={open ? undefined : ""}>
+        {sections.map((section, index) => {
+          const position = PROFILE_HUB_POSITIONS[index];
+          return <button type="button" role="tab" key={section.key} id={`account-tab-${section.key}`} aria-selected={active === section.key}
+            aria-controls="account-tab-panel" tabIndex={open && focusedIndex === index ? 0 : -1}
+            className={`ih6-hub-item${active === section.key ? " is-active" : ""}`}
+            ref={(element) => { itemRefs.current[index] = element; }}
+            style={{ "--ih6-hub-x": position.x, "--ih6-hub-y": position.y, "--ih6-hub-order": index }}
+            onFocus={() => setFocusedIndex(index)} onClick={() => choose(section)}>
+            <span className="ih6-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span>
+          </button>;
+        })}
+      </div>
+      <span className="ih6-hub-current" aria-live="polite">{current.label}</span>
+    </aside>
+  );
+}
 
 export function MarketIcon({ kind = "search", ...props }) {
   const paths = {
