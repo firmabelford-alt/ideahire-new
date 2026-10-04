@@ -1,8 +1,8 @@
-/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/App.jsx */
+/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
-import { CommissionStory, HomeStepCard, IdeaHireLogo } from "./MarketUI";
+import { HomePreviewMotion, CommissionStory, HomeStepCard, IdeaHireLogo } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
@@ -819,7 +819,7 @@ function App({ session, loading, categoryGroups = [] }) {
   }
 
   return (
-    <div className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6">
+    <div className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6 ih-home-v7">
       <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
         data-mobile-menu-open={mobileMenuOpen}
         onKeyDown={(event) => {
@@ -964,7 +964,7 @@ function App({ session, loading, categoryGroups = [] }) {
             </div>
           </div>
 
-          <div className="hero-visual ih-orbit-preview ih6-job-preview">
+          <HomePreviewMotion>
             <div className="floating-card card-small card-top">
               <span className="mini-icon">✦</span>
 
@@ -1007,7 +1007,7 @@ function App({ session, loading, categoryGroups = [] }) {
             </div>
 
             <div className="visual-glow" />
-          </div>
+          </HomePreviewMotion>
         </section>
 
         <HomeDemoReviews />
