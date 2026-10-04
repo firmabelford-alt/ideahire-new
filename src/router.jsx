@@ -15672,10 +15672,10 @@ function Jobs() {
       "Wszystkie";
 
   return (
-    <div className="page">
+    <div className="page ih-jobs-refresh">
       <AccountNavbar />
 
-      <main className="app-page">
+      <main className="app-page ih-jobs-shell">
         <div className="app-page-header">
           <span className="section-label">
             Dla wykonawców
@@ -16087,7 +16087,7 @@ function Jobs() {
 
         <div className="jobs-list">
           {displayedJobs.map(
-            (job) => {
+            (job, jobIndex) => {
               const isOpen =
                 openJobId ===
                 job.id;
@@ -16145,7 +16145,9 @@ function Jobs() {
 
               return (
                 <article
-                  className="job-card"
+                  className={`job-card ih-job-card${isOpen ? " is-open" : ""}`}
+                  style={{ "--ih-job-order": Math.min(jobIndex, 5) }}
+                  aria-labelledby={`ih-job-title-${job.id}`}
                   key={job.id}
                 >
                   <div className="job-card-top">
@@ -16165,7 +16167,7 @@ function Jobs() {
                     </span>
                   </div>
 
-                  <h2>
+                  <h2 className="ih-job-title" id={`ih-job-title-${job.id}`} title={job.title}>
                     {job.title}
                   </h2>
 
@@ -16212,7 +16214,7 @@ function Jobs() {
                   )}
 
                   {isOpen && (
-                    <div className="job-details job-collaboration-details">
+                    <div className="job-details job-collaboration-details" id={`ih-job-plan-${job.id}`} aria-labelledby={`ih-job-plan-title-${job.id}`}>
                       <header className="job-collaboration-header">
                         <span className="job-collaboration-header-icon" aria-hidden="true">
                           <svg viewBox="0 0 24 24">
@@ -16221,7 +16223,7 @@ function Jobs() {
                         </span>
                         <div>
                           <span className="section-label">Czytelne ustalenia przed startem</span>
-                          <h3>Plan współpracy</h3>
+                          <h3 id={`ih-job-plan-title-${job.id}`}>Plan współpracy</h3>
                           <p>
                             Zakres, sposób realizacji i informacje potrzebne do przygotowania trafnego zgłoszenia.
                           </p>
@@ -16505,6 +16507,7 @@ function Jobs() {
                         className="btn btn-outline"
                         type="button"
                         aria-expanded={isOpen}
+                        aria-controls={`ih-job-plan-${job.id}`}
                         onClick={() => setOpenJobId(job.id)}
                       >
                         Plan współpracy
@@ -32239,9 +32242,171 @@ function ServiceRoute({ mode }) {
   );
 }
 
+/* Decorative cursor trail shared by every route. No pointer interception. */
+function PixelCursorTrail() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return undefined;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let enabled = !reducedMotion.matches;
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+    let previousTime = 0;
+    let lastEmission = 0;
+    let lastPoint = null;
+    let colorTarget = null;
+    let colorTheme = "";
+    let color = "#173d80";
+    const particles = [];
+
+    function clear() {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      particles.length = 0;
+      lastPoint = null;
+      context.clearRect(0, 0, width, height);
+    }
+
+    function resize() {
+      clear();
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function animate(now) {
+      frame = 0;
+      if (!enabled || document.hidden) { clear(); return; }
+      const delta = Math.min(32, Math.max(0, now - previousTime));
+      previousTime = now;
+      context.clearRect(0, 0, width, height);
+      for (let index = particles.length - 1; index >= 0; index -= 1) {
+        const particle = particles[index];
+        particle.age += delta;
+        if (particle.age >= particle.duration) { particles.splice(index, 1); continue; }
+        particle.x += particle.vx * delta / 1000;
+        particle.y += particle.vy * delta / 1000;
+        particle.vy += 18 * delta / 1000;
+        context.save();
+        context.globalAlpha = Math.pow(1 - particle.age / particle.duration, 2) * .65;
+        context.translate(particle.x, particle.y);
+        context.rotate(particle.angle + particle.spin * particle.age / particle.duration);
+        context.fillStyle = particle.color;
+        context.strokeStyle = particle.color;
+        context.lineWidth = 1;
+        const offset = -particle.size / 2;
+        if (particle.filled) context.fillRect(offset, offset, particle.size, particle.size);
+        else context.strokeRect(offset, offset, particle.size, particle.size);
+        context.restore();
+      }
+      if (particles.length) frame = window.requestAnimationFrame(animate);
+    }
+
+    function particleColor(target) {
+      const surface = target?.closest?.(".step, .ih-job-card, .floating-card, .ih-category-trigger, .split-card, .category-card, .account-card, a, button") || document.body;
+      const theme = `${document.documentElement.dataset.template}:${document.documentElement.dataset.theme}`;
+      if (surface !== colorTarget || theme !== colorTheme) {
+        const resolved = window.getComputedStyle(surface).color;
+        color = resolved && resolved !== "transparent" && resolved !== "rgba(0, 0, 0, 0)"
+          ? resolved
+          : window.getComputedStyle(document.body).color;
+        colorTarget = surface;
+        colorTheme = theme;
+      }
+      return color;
+    }
+
+    function emit(x, y, target, count, dx = 0, dy = 0) {
+      if (!enabled || document.hidden) return;
+      const length = Math.hypot(dx, dy) || 1;
+      const directionX = dx / length;
+      const directionY = dy / length;
+      const tint = particleColor(target);
+      for (let index = 0; index < count; index += 1) {
+        particles.push({
+          x: x - directionX * 7 + (Math.random() - .5) * 10,
+          y: y - directionY * 7 + (Math.random() - .5) * 10,
+          vx: -directionX * 14 + (Math.random() - .5) * 30,
+          vy: -directionY * 14 + (Math.random() - .5) * 30,
+          age: 0,
+          duration: 420 + Math.random() * 280,
+          size: 2.5 + Math.random() * 3.5,
+          angle: Math.random() * .8,
+          spin: (Math.random() - .5) * 1.5,
+          filled: index % 2 === 0,
+          color: tint,
+        });
+      }
+      if (particles.length > 56) particles.splice(0, particles.length - 56);
+      if (!frame) {
+        previousTime = window.performance.now();
+        frame = window.requestAnimationFrame(animate);
+      }
+    }
+
+    function isEditing(target) {
+      return Boolean(target?.closest?.("input, textarea, select, [contenteditable='true']"));
+    }
+
+    function move(event) {
+      if (!enabled || event.pointerType === "touch" || isEditing(event.target)) { lastPoint = null; return; }
+      const current = { x: event.clientX, y: event.clientY };
+      if (!lastPoint) { lastPoint = current; return; }
+      const dx = current.x - lastPoint.x;
+      const dy = current.y - lastPoint.y;
+      const now = window.performance.now();
+      if (Math.hypot(dx, dy) < 7 || now - lastEmission < 28) return;
+      lastEmission = now;
+      lastPoint = current;
+      emit(current.x, current.y, event.target, 2, dx, dy);
+    }
+
+    function tap(event) {
+      if (!isEditing(event.target)) emit(event.clientX, event.clientY, event.target, event.pointerType === "touch" ? 6 : 3);
+    }
+
+    function changeMotion(event) { enabled = !event.matches; clear(); }
+    function visibility() { if (document.hidden) clear(); }
+    function resetPointer() { lastPoint = null; }
+
+    resize();
+    document.addEventListener("pointermove", move, { passive: true });
+    document.addEventListener("pointerdown", tap, { passive: true });
+    document.addEventListener("pointerleave", resetPointer);
+    document.addEventListener("visibilitychange", visibility);
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("scroll", resetPointer, { passive: true });
+    window.addEventListener("blur", clear);
+    reducedMotion.addEventListener?.("change", changeMotion);
+
+    return () => {
+      clear();
+      document.removeEventListener("pointermove", move);
+      document.removeEventListener("pointerdown", tap);
+      document.removeEventListener("pointerleave", resetPointer);
+      document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll", resetPointer);
+      window.removeEventListener("blur", clear);
+      reducedMotion.removeEventListener?.("change", changeMotion);
+    };
+  }, []);
+
+  return <canvas className="ih-pixel-canvas" ref={canvasRef} aria-hidden="true" />;
+}
+
 function Router() {
   return (
     <BrowserRouter>
+      <PixelCursorTrail />
       <SmoothRouteTransitions />
       <RouteScrollManager />
       <AuthProvider>
