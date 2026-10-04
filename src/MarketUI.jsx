@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -120,6 +120,92 @@ export function MarketHeader({ eyebrow, title, description, children }) {
   );
 }
 
+export function MarketSelect({ id, label, value, options, onChange }) {
+  const generatedId = useId();
+  const selectId = id || generatedId;
+  const rootRef = useRef(null);
+  const triggerRef = useRef(null);
+  const optionRefs = useRef([]);
+  const typeahead = useRef({ text: "", time: 0 });
+  const [open, setOpen] = useState(false);
+  const [menuLayout, setMenuLayout] = useState({ side: "down", height: 320 });
+  const selected = Math.max(0, options.findIndex((option) => option.value === value));
+  const [focused, setFocused] = useState(selected);
+  const selectedOption = options[selected];
+  const enabled = options.map((option, index) => !option.disabled ? index : -1).filter((index) => index >= 0);
+  useEffect(() => {
+    if (!open) return undefined;
+    optionRefs.current[focused]?.focus({ preventScroll: true });
+    optionRefs.current[focused]?.scrollIntoView?.({ block: "nearest" });
+  }, [open, focused]);
+  useEffect(() => {
+    if (!open) return undefined;
+    const outside = (event) => { if (!rootRef.current?.contains(event.target)) setOpen(false); };
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
+  }, [open]);
+  function close(restoreFocus = false) {
+    setOpen(false);
+    typeahead.current = { text: "", time: 0 };
+    if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
+  }
+  function show(last = false) {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (rect) {
+      const below = (window.visualViewport?.height || window.innerHeight) - rect.bottom - 16;
+      const above = rect.top - 16;
+      const up = below < 220 && above > below;
+      setMenuLayout({ side: up ? "up" : "down", height: Math.max(80, Math.min(320, up ? above : below)) });
+    }
+    setFocused(last ? enabled[enabled.length - 1] : enabled.includes(selected) ? selected : enabled[0]);
+    setOpen(true);
+  }
+  function choose(index) { if (options[index]?.disabled) return; onChange(options[index].value); close(true); }
+  function keyboard(event) {
+    if (event.key === "Escape" && open) { event.preventDefault(); event.stopPropagation(); close(true); return; }
+    if (event.key === "Tab") { close(); return; }
+    if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      if (!open) { show(event.key === "End"); return; }
+      const current = enabled.indexOf(focused);
+      const index = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1 : (current + (event.key === "ArrowUp" ? -1 : 1) + enabled.length) % enabled.length;
+      setFocused(enabled[index]); return;
+    }
+    if (open && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); choose(focused); return; }
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey && event.key !== " ") {
+      event.preventDefault();
+      const now = Date.now();
+      const previous = now - typeahead.current.time < 700 ? typeahead.current.text : "";
+      const typed = `${previous}${event.key}`.toLocaleLowerCase("pl-PL");
+      typeahead.current = { text: typed, time: now };
+      const normalize = (text) => text.toLocaleLowerCase("pl-PL").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l");
+      const next = enabled.find((index) => normalize(options[index].label).startsWith(normalize(typed)));
+      if (next !== undefined) { setFocused(next); setOpen(true); }
+    }
+  }
+  return (
+    <div className="ih7-select" ref={rootRef} data-open={open} data-side={menuLayout.side} style={{ "--ih7-menu-height": `${menuLayout.height}px` }} onKeyDown={keyboard}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }}>
+      <span id={`${selectId}-label`} className="ih7-select-label">{label}</span>
+      <button type="button" id={selectId} ref={triggerRef} className="ih7-select-trigger" aria-haspopup="listbox"
+        aria-expanded={open} aria-controls={`${selectId}-options`} aria-labelledby={`${selectId}-label ${selectId}-value`}
+        onClick={() => open ? close() : show()}>
+        <span id={`${selectId}-value`}>{selectedOption?.label || "Wybierz"}</span>
+        <svg viewBox="0 0 20 20" aria-hidden="true" fill="none"><path d="m5 7 5 5 5-5" /></svg>
+      </button>
+      <div className="ih7-select-menu" role="listbox" id={`${selectId}-options`} aria-labelledby={`${selectId}-label`}
+        aria-hidden={!open} inert={open ? undefined : ""}>
+        {options.map((option, index) => <button type="button" role="option" key={option.value}
+          ref={(element) => { optionRefs.current[index] = element; }} tabIndex={open && focused === index ? 0 : -1}
+          aria-selected={option.value === value} aria-disabled={Boolean(option.disabled)} disabled={option.disabled}
+          className="ih7-select-option" onFocus={() => setFocused(index)} onClick={() => choose(index)}>
+          <span>{option.label}</span>{option.value === value && <MarketIcon kind="check" />}
+        </button>)}
+      </div>
+    </div>
+  );
+}
+
 export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = (value) => value, sort, onSort, matchedAvailable = false, kind = "zleceń" }) {
   const id = useId();
   return (
@@ -128,29 +214,21 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
         <MarketIcon /><span className="ih5-sr-only">Szukaj {kind}</span>
         <input id={`${id}-search`} type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder={kind === "usług" ? "Usługa, specjalizacja lub rezultat…" : "Tytuł, specjalizacja lub umiejętność…"} maxLength={160} />
       </label>
-      <label className="ih5-select-field" htmlFor={`${id}-category`}>
-        <span>Kategoria</span>
-        <select id={`${id}-category`} value={category} onChange={(event) => onCategory(event.target.value)}>
-          {["Wszystkie", ...categories].map((value) => <option key={value} value={value}>{value === "Wszystkie" ? "Wszystkie kategorie" : categoryLabel(value)}</option>)}
-        </select>
-      </label>
-      {onSort && <label className="ih5-select-field" htmlFor={`${id}-sort`}>
-        <span>Kolejność</span>
-        <select id={`${id}-sort`} value={sort} onChange={(event) => onSort(event.target.value)}>
-          <option value="latest">Najnowsze</option><option value="matched" disabled={!matchedAvailable}>Dopasowane do mnie</option>
-        </select>
-      </label>}
+      <MarketSelect id={`${id}-category`} label="Kategoria" value={category} onChange={onCategory}
+        options={[{ value: "Wszystkie", label: "Wszystkie kategorie" }, ...categories.map((value) => ({ value, label: categoryLabel(value) }))]} />
+      {onSort && <MarketSelect id={`${id}-sort`} label="Kolejność" value={sort} onChange={onSort}
+        options={[{ value: "latest", label: "Najnowsze" }, { value: "matched", label: "Dopasowane do mnie", disabled: !matchedAvailable }]} />}
     </section>
   );
 }
 
-const STEP_TILES = Array.from({ length: 40 }, (_, index) => {
-  const column = index % 8;
-  const row = Math.floor(index / 8);
+const STEP_TILES = Array.from({ length: 84 }, (_, index) => {
+  const column = index % 12;
+  const row = Math.floor(index / 12);
   return {
-    "--tile-x": `${8 + column * 12}%`, "--tile-y": `${8 + row * 20}%`,
-    "--tile-dx": `${(column - 3.5) * 18}px`, "--tile-dy": `${(row - 2) * 23}px`,
-    "--tile-delay": `${(column + row) * 23}ms`, "--tile-turn": `${(index % 3 - 1) * 28}deg`,
+    "--tile-x": `${4 + column * 8.2}%`, "--tile-y": `${5 + row * 14.5}%`,
+    "--tile-dx": `${(column - 5.5) * 9}px`, "--tile-dy": `${(row - 3) * 11}px`,
+    "--tile-delay": `${(column + row) * 17}ms`, "--tile-turn": `${(index % 3 - 1) * 12}deg`,
   };
 });
 
@@ -164,7 +242,7 @@ export function HomeStepCard({ number, title, children }) {
     window.clearTimeout(timeout.current);
     setBurst((value) => value + 1);
     setActive(true);
-    timeout.current = window.setTimeout(() => setActive(false), 1800);
+    timeout.current = window.setTimeout(() => setActive(false), 1600);
   }
   return (
     <article className="step home-reveal ih5-step-card" data-burst={active} onPointerEnter={(event) => { if (event.pointerType === "mouse") play(); }}>
@@ -174,6 +252,25 @@ export function HomeStepCard({ number, title, children }) {
       {active && <span key={burst} className="ih5-step-tiles" aria-hidden="true">{STEP_TILES.map((style, index) => <i key={index} style={style} />)}</span>}
     </article>
   );
+}
+
+export function HomePreviewMotion({ children }) {
+  const [paused, setPaused] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const rootRef = useRef(null);
+  useEffect(() => {
+    if (!window.IntersectionObserver) return undefined;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.08 });
+    if (rootRef.current) observer.observe(rootRef.current);
+    return () => observer.disconnect();
+  }, []);
+  return <div className="hero-visual ih-orbit-preview ih6-job-preview ih7-preview-motion" ref={rootRef} data-paused={paused || !visible}>
+    {children}
+    <button type="button" className="ih7-preview-pause" aria-pressed={paused} onClick={() => setPaused((value) => !value)}
+      aria-label={paused ? "Wznów ruch kart zleceń" : "Zatrzymaj ruch kart zleceń"}>
+      <span aria-hidden="true">{paused ? "▶" : "Ⅱ"}</span><span>{paused ? "Wznów ruch" : "Zatrzymaj ruch"}</span>
+    </button>
+  </div>;
 }
 
 export function CommissionStory() {
@@ -195,19 +292,19 @@ export function CommissionStory() {
         <svg viewBox="0 0 420 280" className="ih5-work-scene" focusable="false">
           <defs><linearGradient id={`${id}-screen`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="var(--ih5-scene-soft)" /><stop offset="1" stopColor="var(--ih5-scene-accent)" stopOpacity=".16" /></linearGradient></defs>
           <ellipse className="ih5-scene-shadow" cx="217" cy="253" rx="151" ry="13" />
-          <g className="ih5-scene-window" fill="none" stroke="var(--ih5-scene-line)" strokeWidth="1.5"><rect x="257" y="25" width="84" height="69" rx="13" /><path d="M299 25v69M257 60h84" /></g>
-          <g className="ih5-scene-plant"><path d="M342 233v-42" stroke="var(--ih5-scene-accent)" strokeWidth="3" /><path d="M342 208c-33-4-30-32-30-32 25 1 35 16 30 32ZM343 200c-3-28 22-38 22-38 8 25-5 34-22 38Z" fill="var(--ih5-scene-accent)" opacity=".55" /><path d="m326 226 4 23h27l4-23Z" fill="var(--ih5-scene-ink)" opacity=".7" /></g>
-          <g className="ih5-scene-chair" fill="var(--ih5-scene-ink)"><rect x="99" y="155" width="20" height="64" rx="9" opacity=".24" /><rect x="103" y="203" width="64" height="12" rx="6" /><path d="M132 215v28m-22 8 22-8 23 8" fill="none" stroke="var(--ih5-scene-ink)" strokeWidth="5" strokeLinecap="round" /></g>
+          <g className="ih5-scene-window" fill="none" data-scene-stroke="line" stroke="var(--ih5-scene-line)" strokeWidth="1.5"><rect x="257" y="25" width="84" height="69" rx="13" /><path d="M299 25v69M257 60h84" /></g>
+          <g className="ih5-scene-plant"><path d="M342 233v-42" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="3" /><path d="M342 208c-33-4-30-32-30-32 25 1 35 16 30 32ZM343 200c-3-28 22-38 22-38 8 25-5 34-22 38Z" data-scene-fill="accent" fill="var(--ih5-scene-accent)" opacity=".55" /><path d="m326 226 4 23h27l4-23Z" data-scene-fill="ink" fill="var(--ih5-scene-ink)" opacity=".7" /></g>
+          <g className="ih5-scene-chair" data-scene-fill="ink" fill="var(--ih5-scene-ink)"><rect x="99" y="155" width="20" height="64" rx="9" opacity=".24" /><rect x="103" y="203" width="64" height="12" rx="6" /><path d="M132 215v28m-22 8 22-8 23 8" fill="none" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="5" strokeLinecap="round" /></g>
           <g className="ih5-scene-person">
-            <g className="ih5-person-head"><path d="M150 101v20" stroke="var(--ih5-scene-skin)" strokeWidth="14" /><circle cx="149" cy="82" r="22" fill="var(--ih5-scene-skin)" /><path d="M126 82c-7-31 33-41 45-15l-5 13c-6-6-13-8-19-8l-4 15Z" fill="var(--ih5-scene-ink)" /><path d="M157 83h15m-10 0v7" stroke="var(--ih5-scene-ink)" strokeWidth="2" fill="none" strokeLinecap="round" /></g>
-            <path d="M141 128c-9 22-17 48-9 74" stroke="var(--ih5-scene-accent)" strokeWidth="37" fill="none" strokeLinecap="round" />
-            <path d="m137 199 41 6-1 36m-45-38 18 16-10 28" stroke="var(--ih5-scene-ink)" strokeWidth="16" fill="none" strokeLinecap="round" /><path d="m175 243 18 7m-52-2 17 3" stroke="var(--ih5-scene-ink)" strokeWidth="10" strokeLinecap="round" />
-            <g className="ih5-person-arm"><path d="m148 131 22 36 35 3" stroke="var(--ih5-scene-accent)" strokeWidth="16" fill="none" strokeLinecap="round" /><path d="m198 169 16 1" stroke="var(--ih5-scene-skin)" strokeWidth="11" strokeLinecap="round" /></g>
+            <g className="ih5-person-head"><path d="M150 101v20" data-scene-stroke="skin" stroke="var(--ih5-scene-skin)" strokeWidth="14" /><circle cx="149" cy="82" r="22" data-scene-fill="skin" fill="var(--ih5-scene-skin)" /><path d="M126 82c-7-31 33-41 45-15l-5 13c-6-6-13-8-19-8l-4 15Z" data-scene-fill="ink" fill="var(--ih5-scene-ink)" /><path d="M157 83h15m-10 0v7" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="2" fill="none" strokeLinecap="round" /></g>
+            <path d="M141 128c-9 22-17 48-9 74" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="37" data-person-part="shirt" fill="none" strokeLinecap="round" />
+            <path d="m137 199 41 6-1 36m-45-38 18 16-10 28" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="16" data-person-part="trousers" fill="none" strokeLinecap="round" /><path d="m175 243 18 7m-52-2 17 3" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="10" strokeLinecap="round" />
+            <g className="ih5-person-arm"><path d="m148 131 22 36 35 3" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="16" data-person-part="shirt" fill="none" strokeLinecap="round" /><path d="m198 169 16 1" data-scene-stroke="skin" stroke="var(--ih5-scene-skin)" strokeWidth="11" strokeLinecap="round" /></g>
           </g>
-          <g className="ih5-scene-desk"><rect x="182" y="176" width="134" height="9" rx="4.5" fill="var(--ih5-scene-ink)" /><path d="M198 185v65m101-65v65" stroke="var(--ih5-scene-ink)" strokeWidth="6" strokeLinecap="round" /><rect x="220" y="81" width="83" height="77" rx="9" fill="var(--ih5-scene-ink)" /><rect x="226" y="87" width="71" height="62" rx="4" fill={`url(#${id}-screen)`} /><path d="M259 158v16m-17 0h34" stroke="var(--ih5-scene-ink)" strokeWidth="5" strokeLinecap="round" /><rect x="192" y="170" width="44" height="4" rx="2" fill="var(--ih5-scene-line)" /></g>
-          <g className="ih5-scene-code" stroke="var(--ih5-scene-accent)" strokeWidth="3" strokeLinecap="round"><path className="ih5-code-line is-one" d="M236 101h34" /><path className="ih5-code-line is-two" d="M242 113h41" /><path className="ih5-code-line is-three" d="M242 125h24" /><path className="ih5-code-line is-four" d="M236 137h44" /></g>
-          <g className="ih5-scene-done"><circle cx="261" cy="118" r="20" fill="var(--ih5-scene-accent)" /><path d="m250 118 7 7 15-15" stroke="var(--ih5-scene-on-accent)" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>
-          <g className="ih5-scene-pixels" fill="var(--ih5-scene-accent)"><rect x="83" y="46" width="10" height="10" rx="2" /><rect x="103" y="30" width="6" height="6" rx="1" /><rect x="328" y="123" width="8" height="8" rx="2" /><rect x="349" y="107" width="5" height="5" rx="1" /></g>
+          <g className="ih5-scene-desk"><rect x="182" y="176" width="134" height="9" rx="4.5" data-scene-fill="ink" fill="var(--ih5-scene-ink)" /><path d="M198 185v65m101-65v65" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="6" strokeLinecap="round" /><rect x="220" y="81" width="83" height="77" rx="9" data-scene-fill="ink" fill="var(--ih5-scene-ink)" /><rect x="226" y="87" width="71" height="62" rx="4" fill={`url(#${id}-screen)`} /><path d="M259 158v16m-17 0h34" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="5" strokeLinecap="round" /><rect x="192" y="170" width="44" height="4" rx="2" data-scene-fill="line" fill="var(--ih5-scene-line)" /></g>
+          <g className="ih5-scene-code" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="3" strokeLinecap="round"><path className="ih5-code-line is-one" d="M236 101h34" /><path className="ih5-code-line is-two" d="M242 113h41" /><path className="ih5-code-line is-three" d="M242 125h24" /><path className="ih5-code-line is-four" d="M236 137h44" /></g>
+          <g className="ih5-scene-done"><circle cx="261" cy="118" r="20" data-scene-fill="accent" fill="var(--ih5-scene-accent)" /><path d="m250 118 7 7 15-15" data-scene-stroke="on-accent" stroke="var(--ih5-scene-on-accent)" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>
+          <g className="ih5-scene-pixels" data-scene-fill="accent" fill="var(--ih5-scene-accent)"><rect x="83" y="46" width="10" height="10" rx="2" /><rect x="103" y="30" width="6" height="6" rx="1" /><rect x="328" y="123" width="8" height="8" rx="2" /><rect x="349" y="107" width="5" height="5" rx="1" /></g>
         </svg>
         <div className="ih5-story-caption"><span className="is-idea">Pomysł. Dobry początek.</span><span className="is-work">Ktoś właśnie zamienia go w efekt.</span><span className="is-done">Gotowa praca. Prosta opłata.</span></div>
       </div>
