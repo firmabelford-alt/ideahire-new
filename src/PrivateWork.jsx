@@ -1,3 +1,4 @@
+/* IdeaHire | PACZKA 09 | 2026-10-04 | Pełny plik: src/PrivateWork.jsx */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "./supabase";
@@ -625,11 +626,13 @@ export function ProjectFilesPanel({
   const counts = activeItems.reduce(
     (result, item) => {
       if (item.item_type === "image") result.images += 1;
-      else if (item.item_type === "link" || item.item_type === "access") result.links += 1;
+      else if (item.item_type === "link") result.links += 1;
+      else if (item.item_type === "text") result.texts += 1;
+      else if (item.item_type === "access") result.access += 1;
       else result.files += 1;
       return result;
     },
-    { files: 0, images: 0, links: 0 }
+    { files: 0, images: 0, links: 0, texts: 0, access: 0 }
   );
 
   if (loading && !items.length) {
@@ -660,9 +663,9 @@ export function ProjectFilesPanel({
           <h3>Wszystkie materiały projektu</h3>
         </div>
         <div className="project-files-counts" aria-label="Podsumowanie materiałów">
-          <span>{counts.files} plików</span>
-          <span>{counts.images} zdjęć</span>
-          <span>{counts.links} linków</span>
+          {[["files", "Pliki"], ["images", "Zdjęcia"], ["links", "Linki"], ["texts", "Tekst"], ["access", "Dostępy"]].filter(([type]) => counts[type] > 0).map(([type, label]) => (
+            <span key={type}><b>{counts[type]}</b><small>{label}</small></span>
+          ))}
         </div>
       </header>
 
@@ -676,8 +679,8 @@ export function ProjectFilesPanel({
               <div className="project-files-group-meta">
                 <strong>{ownGroup ? "Materiały dodane przez Ciebie" : "Materiały drugiej strony"}</strong>
                 {group.createdAt && (
-                  <time dateTime={group.createdAt}>
-                    {new Date(group.createdAt).toLocaleString("pl-PL")}
+                  <time dateTime={group.createdAt} title={new Date(group.createdAt).toLocaleString("pl-PL")}>
+                    {new Date(group.createdAt).toLocaleString("pl-PL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                   </time>
                 )}
               </div>
@@ -706,7 +709,7 @@ export function PrivateSharePanel({
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("materials");
   const [files, setFiles] = useState([]);
-  const [links, setLinks] = useState([{ url: "", label: "" }]);
+  const [links, setLinks] = useState([]);
   const [caption, setCaption] = useState("");
   const [albumTitle, setAlbumTitle] = useState("");
   const [writtenTitle, setWrittenTitle] = useState("");
@@ -720,6 +723,32 @@ export function PrivateSharePanel({
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
   const imageCount = files.filter((file) => ["jpg", "jpeg", "png", "webp"].includes(fileExtension(file.name))).length;
+  const dialogRef = useRef(null);
+  const backdropRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const viewport = window.visualViewport;
+    function updateHeight() {
+      backdropRef.current?.style.setProperty("--ih9-share-viewport-height", `${Math.round(viewport?.height || window.innerHeight)}px`);
+    }
+    updateHeight();
+    viewport?.addEventListener("resize", updateHeight);
+    window.addEventListener("resize", updateHeight);
+    return () => {
+      viewport?.removeEventListener("resize", updateHeight);
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const previousFocus = document.activeElement;
+    dialogRef.current?.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+    return () => {
+      if (previousFocus?.isConnected) previousFocus.focus?.({ preventScroll: true });
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -869,7 +898,7 @@ export function PrivateSharePanel({
 
       setProgress(100);
       setFiles([]);
-      setLinks([{ url: "", label: "" }]);
+      setLinks([]);
       setCaption("");
       setAlbumTitle("");
       setWrittenTitle("");
@@ -899,25 +928,44 @@ export function PrivateSharePanel({
     <section className={`private-work-share ${open ? "is-open" : ""}`}>
       <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled}>
         <span aria-hidden="true">＋</span>
-        <b>Dodaj</b>
-        <small>pliki, tekst, linki lub dostęp</small>
+        <b>Dodaj materiały</b>
+        <small>Pliki, zdjęcia, linki lub gotowa praca</small>
       </button>
-      {open && (
-        <div className="private-work-share-backdrop" role="presentation" onMouseDown={(event) => {
+      {open && createPortal((
+        <div ref={backdropRef} className="private-work-share-backdrop ih9-share-dialog" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget && !busy) setOpen(false);
         }}>
-        <form onSubmit={submit} className="private-work-share-form" role="dialog" aria-modal="true" aria-labelledby="private-work-share-title">
+        <form ref={dialogRef} onSubmit={submit} className="private-work-share-form" role="dialog" aria-modal="true" aria-labelledby="private-work-share-title" onKeyDown={(event) => {
+          if (event.key !== "Tab") return;
+          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary')).filter((control) => !control.closest('details:not([open]) .private-work-extra-body'));
+          const first = controls[0]; const last = controls.at(-1);
+          if (!first) return;
+          const active = document.activeElement;
+          if (event.shiftKey && (active === first || !controls.includes(active))) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && (active === last || !controls.includes(active))) { event.preventDefault(); first.focus(); }
+        }}>
           <div className="private-work-share-heading">
             <div>
               <span className="section-label">Prywatna przestrzeń pracy</span>
-              <h2 id="private-work-share-title">Dodaj materiały do rozmowy</h2>
+              <h2 id="private-work-share-title">Dodaj materiały</h2>
             </div>
             <button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="Zamknij okno dodawania materiałów">×</button>
           </div>
-          <div className="private-work-tabs" role="tablist" aria-label="Sposób wysyłki">
-            <button type="button" className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")}>Materiały do rozmowy</button>
+          <div className="private-work-tabs" role="tablist" aria-label="Sposób wysyłki" onKeyDown={(event) => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+            event.preventDefault();
+            const nextMode = agreementAccepted && isContractor && (event.key === "End" || (event.key !== "Home" && mode === "materials")) ? "delivery" : "materials";
+            setMode(nextMode);
+            event.currentTarget.querySelector(`#ih9-share-tab-${nextMode}`)?.focus();
+          }}>
+            <button type="button" role="tab" id="ih9-share-tab-materials" aria-controls="ih9-share-panel" aria-selected={mode === "materials"} tabIndex={mode === "materials" ? 0 : -1} className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")}>Materiały do rozmowy</button>
             <button
               type="button"
+              role="tab"
+              id="ih9-share-tab-delivery"
+              aria-controls="ih9-share-panel"
+              aria-selected={mode === "delivery"}
+              tabIndex={mode === "delivery" ? 0 : -1}
               className={mode === "delivery" ? "is-active" : ""}
               onClick={() => setMode("delivery")}
               disabled={!agreementAccepted || !isContractor}
@@ -927,6 +975,7 @@ export function PrivateSharePanel({
             </button>
           </div>
 
+          <div className="ih9-share-body" role="tabpanel" id="ih9-share-panel" aria-labelledby={`ih9-share-tab-${mode}`}>
           <div className="private-work-field">
             <label htmlFor="private-work-caption">{mode === "delivery" ? "Co przekazujesz i jak sprawdzić rezultat?" : "Wiadomość do materiałów (opcjonalnie)"}</label>
             <textarea id="private-work-caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz gotową pracę, zawartość plików i sposób ich weryfikacji…" : "Dodaj krótki kontekst…"} />
@@ -935,7 +984,7 @@ export function PrivateSharePanel({
           <div className="private-work-picker-row">
             <label className="private-work-file-picker">
               <input type="file" multiple accept={FILE_ACCEPT} onChange={handleFiles} />
-              <span>Dodaj pliki gotowej pracy</span>
+              <span>{mode === "delivery" ? "Pliki gotowej pracy" : "Wybierz pliki"}</span>
               <small>Obrazy, dokumenty, kod, ZIP, audio lub wideo · do 50 MB</small>
             </label>
             <button type="button" className="private-work-add-link" onClick={() => setLinks((current) => current.length + files.length < MAX_ITEMS ? [...current, { url: "", label: "" }] : current)}>
@@ -972,7 +1021,7 @@ export function PrivateSharePanel({
                   <option value="preview">Podgląd lub wersja testowa</option>
                   <option value="repository">Repozytorium kodu</option>
                 </select>
-                {links.length > 1 && <button type="button" onClick={() => setLinks((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Usuń link">×</button>}
+                <button type="button" onClick={() => setLinks((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Usuń link">×</button>
               </div>
             ))}
           </div>
@@ -1018,6 +1067,8 @@ export function PrivateSharePanel({
           )}
 
           {busy && <div className="private-work-progress"><span style={{ width: `${progress}%` }} /></div>}
+          </div>
+          <div className="ih9-share-footer">
           {message && <p className="private-work-form-message" role="status">{message}</p>}
           <div className="private-work-form-actions">
             <button type="button" onClick={() => setOpen(false)} disabled={busy}>Anuluj</button>
@@ -1025,9 +1076,10 @@ export function PrivateSharePanel({
               {busy ? "Sprawdzanie i wysyłanie…" : mode === "delivery" ? "Przekaż pracę do odbioru" : "Wyślij materiały"}
             </button>
           </div>
+          </div>
         </form>
         </div>
-      )}
+      ), document.body)}
     </section>
   );
 }
