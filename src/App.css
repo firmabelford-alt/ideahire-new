@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -49513,3 +49513,282 @@ html:root body #root#root .page.ih-market-v5 .ih5-service-modal-message { paddin
   html:root body #root#root .page.ih-market-v5 .ih5-collaboration-plan-editor-footer { flex-direction: column; align-items: stretch; gap: 14px; }
   html:root body #root#root .page.ih-market-v5 .ih5-collaboration-plan-launch { padding: 15px; gap: 10px; }
 }
+
+/* IdeaHire — PACZKA 06 — logo, centred preview and profile semicircle. */
+/* Remove decorative sweeps from the header and the opening section. */
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 > main::before,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 > main::after,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 > main > .hero::before,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 > main > .hero::after,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih-home-header::before,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih-home-header::after,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .home-nav-links::before,
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .home-nav-links::after {
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih-home-header .home-nav-links { animation: none !important; }
+
+/* The wordmark keeps its width. A finite fold and four small sparks give it life. */
+html:root body #root#root .ih6-logo { position: relative !important; isolation: isolate; overflow: visible !important; text-decoration: none !important; }
+html:root body #root#root .ih6-logo .ih6-logo-word {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: baseline !important;
+  gap: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  white-space: nowrap !important;
+  perspective: 400px;
+}
+html:root body #root#root .ih6-logo .ih6-logo-word > .ih6-logo-letter {
+  display: inline-block !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+  font: inherit !important;
+  letter-spacing: inherit !important;
+  transform-origin: 50% 80%;
+  backface-visibility: hidden;
+  opacity: 1;
+  transform: none;
+}
+html:root body #root#root .ih6-logo .ih6-logo-word[data-active="true"] > .ih6-logo-letter {
+  animation: ih6-logo-fold 720ms cubic-bezier(.22,.8,.28,1) both !important;
+  animation-delay: calc(var(--ih6-letter) * 30ms) !important;
+}
+html:root body #root#root .ih6-logo .ih6-logo-pixels { position: absolute !important; inset: -6px -5px !important; margin: 0 !important; padding: 0 !important; pointer-events: none; }
+html:root body #root#root .ih6-logo .ih6-logo-pixels > i {
+  position: absolute; width: 4px; height: 4px; border-radius: 1px;
+  background: currentColor; opacity: 0;
+  animation: ih6-logo-spark 850ms cubic-bezier(.16,1,.3,1) both;
+  animation-delay: calc(var(--ih6-pixel) * 50ms);
+}
+html:root body #root#root .ih6-logo .ih6-logo-pixels > i:nth-child(1) { left: 43%; top: 0; --ih6-spark-x: -8px; --ih6-spark-y: -5px; }
+html:root body #root#root .ih6-logo .ih6-logo-pixels > i:nth-child(2) { right: 17%; top: 2px; --ih6-spark-x: 6px; --ih6-spark-y: -4px; }
+html:root body #root#root .ih6-logo .ih6-logo-pixels > i:nth-child(3) { right: 1px; bottom: 2px; --ih6-spark-x: 6px; --ih6-spark-y: 5px; }
+html:root body #root#root .ih6-logo .ih6-logo-pixels > i:nth-child(4) { left: 52%; bottom: 0; --ih6-spark-x: -7px; --ih6-spark-y: 4px; }
+@keyframes ih6-logo-fold {
+  0% { transform: translateY(0) rotateX(0); }
+  28% { transform: translateY(-3px) rotateX(24deg); }
+  56% { transform: translateY(1px) rotateX(-8deg); }
+  100% { transform: translateY(0) rotateX(0); }
+}
+@keyframes ih6-logo-spark {
+  0%,8% { opacity: 0; transform: translate(0,0) rotate(-20deg) scale(.25); }
+  32% { opacity: .75; transform: translate(var(--ih6-spark-x),var(--ih6-spark-y)) rotate(70deg) scale(1); }
+  70% { opacity: .3; transform: translate(var(--ih6-spark-x),var(--ih6-spark-y)) rotate(160deg) scale(.75); }
+  100% { opacity: 0; transform: translate(0,0) rotate(180deg) scale(.2); }
+}
+
+/* Latest / current / next, vertically centred on the sphere. */
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6 > main > .hero .hero-visual.ih-orbit-preview.ih6-job-preview {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) !important;
+  grid-template-rows: 72px 278px 72px !important;
+  align-content: center !important;
+  justify-items: center !important;
+  align-items: center !important;
+  gap: 18px !important;
+  width: min(100%,520px) !important;
+  height: 470px !important;
+  min-height: 470px !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  align-self: center !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .floating-card {
+  position: relative !important;
+  inset: auto !important;
+  grid-column: 1 !important;
+  justify-self: center !important;
+  margin: 0 !important;
+  translate: none !important;
+  transform: none !important;
+  z-index: 2 !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-main {
+  grid-row: 2 !important;
+  width: min(calc(100% - 16px),400px) !important;
+  height: 278px !important;
+  min-height: 278px !important;
+  padding: 24px !important;
+  text-align: center !important;
+  animation: ih6-preview-in 380ms ease both !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-small {
+  width: min(78%,252px) !important;
+  height: 72px !important;
+  min-height: 72px !important;
+  padding: 13px 16px !important;
+  animation: none !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-top { grid-row: 1 !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-bottom { grid-row: 3 !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview .card-main :is(h3,p) { text-align: center !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .visual-glow {
+  inset: 50% auto auto 50% !important;
+  width: min(90%,360px) !important;
+  transform: translate(-50%,-44%) !important;
+  z-index: 0 !important;
+}
+@keyframes ih6-preview-in { from { opacity: .4; } to { opacity: 1; } }
+
+/* A contained profile fan: no floating panel over the form. */
+.ih6-account-page {
+  --ih6-surface: #ffffff; --ih6-soft: #f1f4fa; --ih6-ink: #17243a;
+  --ih6-muted: #516076; --ih6-line: #dbe2ed; --ih6-accent: #264c96; --ih6-on-accent: #ffffff;
+}
+html[data-theme="dark"] .ih6-account-page {
+  --ih6-surface: #151f31; --ih6-soft: #1d2a40; --ih6-ink: #f2f5fc;
+  --ih6-muted: #b7c5da; --ih6-line: #35455e; --ih6-accent: #c4d7ff; --ih6-on-accent: #172945;
+}
+html[data-template="classic"] .ih6-account-page {
+  --ih6-surface: #ffffff; --ih6-soft: #f2f2ef; --ih6-ink: #202020;
+  --ih6-muted: #555551; --ih6-line: #ddddd7; --ih6-accent: #242424; --ih6-on-accent: #ffffff;
+}
+html[data-template="classic"][data-theme="dark"] .ih6-account-page {
+  --ih6-surface: #1c1c1c; --ih6-soft: #272727; --ih6-ink: #f4f4f0;
+  --ih6-muted: #c1c1bb; --ih6-line: #454541; --ih6-accent: #f2f2eb; --ih6-on-accent: #202020;
+}
+html:root body #root#root .page.ih6-account-page .ih6-account-workspace {
+  width: min(1320px,calc(100% - 64px)) !important;
+  max-width: 1320px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  padding: 42px 0 70px !important;
+}
+html:root body #root#root .page.ih6-account-page .ih6-account-workspace > .app-page-header { margin-bottom: 24px !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-workspace > .app-page-header h1 { font-size: clamp(30px,3.2vw,44px) !important; line-height: 1.15 !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-layout { display: grid !important; grid-template-columns: 340px minmax(0,1fr) !important; align-items: start !important; gap: 30px !important; min-width: 0 !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-content { min-width: 0 !important; width: 100% !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-content > .account-tab-intro { grid-template-columns: minmax(0,1fr) !important; gap: 10px !important; min-height: 0 !important; padding: 20px 24px !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-content > .account-tab-intro :is(h2,p) { overflow-wrap: anywhere !important; }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub,
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub * { box-sizing: border-box !important; font-family: "Inter",system-ui,sans-serif !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub {
+  position: sticky !important;
+  top: 20px !important;
+  width: 100% !important;
+  max-width: 340px !important;
+  min-width: 0 !important;
+  height: 116px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--ih6-ink) !important;
+  overflow: hidden;
+  transition: height 540ms cubic-bezier(.22,.8,.25,1);
+}
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] { height: 416px; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-orbit {
+  position: absolute !important; inset: 0 !important; width: 100% !important; height: 416px !important;
+  padding: 0 !important; margin: 0 !important; fill: none !important; stroke: var(--ih6-line) !important;
+  stroke-width: 1.5; opacity: 0; pointer-events: none; transition: opacity 200ms ease;
+}
+html:root body #root#root .page.ih6-account-page .ih6-hub-orbit path { fill: none !important; stroke: var(--ih6-line) !important; stroke-dasharray: 540; stroke-dashoffset: 540; transition: stroke-dashoffset 700ms cubic-bezier(.22,.8,.25,1); }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-orbit { opacity: 1; }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-orbit path { stroke-dashoffset: 0; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-trigger {
+  position: absolute !important;
+  top: 8px !important;
+  left: max(6px,calc(15% - 44px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: 88px !important; height: 88px !important; min-height: 88px !important;
+  margin: 0 !important; padding: 9px !important;
+  border: 1px solid var(--ih6-line) !important;
+  border-radius: 50% !important;
+  background: var(--ih6-surface) !important;
+  color: var(--ih6-ink) !important;
+  font-size: 12px !important; font-weight: 750 !important; line-height: 1.16 !important; text-align: center !important;
+  cursor: pointer;
+  box-shadow: 0 7px 20px color-mix(in srgb,var(--ih6-ink) 6%,transparent) !important;
+  z-index: 2;
+  transition: top 540ms cubic-bezier(.22,.8,.25,1),background 180ms ease,border-color 180ms ease !important;
+}
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-trigger { top: 164px !important; background: var(--ih6-accent) !important; color: var(--ih6-on-accent) !important; border-color: var(--ih6-accent) !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-emblem { display: grid !important; grid-template-columns: repeat(2,4px) !important; gap: 2px !important; width: 10px !important; height: 10px !important; margin: 0 !important; padding: 0 !important; background: none !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-emblem i { display: block; width: 4px; height: 4px; border-radius: 1px; background: currentColor; transition: transform 540ms cubic-bezier(.22,.8,.25,1); }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-emblem i:nth-child(1) { transform: translate(-1px,-1px) rotate(90deg); }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-emblem i:nth-child(2) { transform: translate(1px,-1px) rotate(90deg); }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-emblem i:nth-child(3) { transform: translate(-1px,1px) rotate(90deg); }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-emblem i:nth-child(4) { transform: translate(1px,1px) rotate(90deg); }
+html:root body #root#root .page.ih6-account-page .ih6-hub-toggle { position: absolute; right: 11px; top: 10px; width: auto !important; height: auto !important; padding: 0 !important; margin: 0 !important; color: inherit !important; font-size: 13px !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-items { position: absolute; inset: 0; pointer-events: none; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-item {
+  position: absolute !important;
+  left: -6% !important; top: 28px !important;
+  display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 7px !important;
+  width: 42% !important; max-width: none !important; min-width: 0 !important; height: 48px !important; min-height: 48px !important;
+  margin: 0 !important; padding: 8px 10px !important;
+  border: 1px solid var(--ih6-line) !important; border-radius: 15px !important;
+  background: var(--ih6-surface) !important; color: var(--ih6-ink) !important;
+  font-size: 12px !important; font-weight: 650 !important; line-height: 1.3 !important; text-align: left !important;
+  white-space: normal !important; opacity: 0; transform: scale(.45); pointer-events: none;
+  box-shadow: 0 4px 13px color-mix(in srgb,var(--ih6-ink) 4%,transparent) !important;
+  transition: left 540ms cubic-bezier(.22,.8,.25,1),top 540ms cubic-bezier(.22,.8,.25,1),transform 540ms cubic-bezier(.22,.8,.25,1),opacity 160ms ease,background 160ms ease,border-color 160ms ease !important;
+}
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-item {
+  left: var(--ih6-hub-x) !important; top: var(--ih6-hub-y) !important;
+  opacity: 1; transform: scale(1); pointer-events: auto;
+  transition-delay: calc(var(--ih6-hub-order) * 28ms) !important;
+}
+html:root body #root#root .page.ih6-account-page .ih6-hub-item > span { margin: 0 !important; padding: 0 !important; color: inherit !important; font: inherit !important; background: none !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-item > .ih6-hub-number { display: grid !important; place-items: center !important; width: 23px !important; height: 23px !important; flex: 0 0 23px !important; border-radius: 7px !important; background: var(--ih6-soft) !important; color: var(--ih6-muted) !important; font-size: 9px !important; font-weight: 650 !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-item:hover { border-color: var(--ih6-accent) !important; background: var(--ih6-soft) !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-item.is-active { background: var(--ih6-accent) !important; color: var(--ih6-on-accent) !important; border-color: var(--ih6-accent) !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-item.is-active > .ih6-hub-number { background: color-mix(in srgb,var(--ih6-on-accent) 12%,transparent) !important; color: var(--ih6-on-accent) !important; }
+html:root body #root#root .page.ih6-account-page :is(.ih6-hub-trigger,.ih6-hub-item):focus-visible { outline: 3px solid var(--ih6-accent) !important; outline-offset: 3px !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-current { position: absolute; left: 110px; top: 39px; right: 10px; display: block; margin: 0 !important; color: var(--ih6-muted) !important; font-size: 12px !important; line-height: 1.45 !important; opacity: 1; pointer-events: none; transition: opacity 100ms ease; }
+html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="true"] .ih6-hub-current { opacity: 0; }
+
+@media (max-width: 1100px) {
+  html:root body #root#root .page.ih6-account-page .ih6-account-workspace { width: min(960px,calc(100% - 40px)) !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-account-layout { grid-template-columns: minmax(0,1fr) !important; gap: 14px !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-profile-hub { position: relative !important; top: auto !important; margin: 0 auto !important; }
+}
+@media (max-width: 620px) {
+  html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6 > main > .hero .hero-visual.ih-orbit-preview.ih6-job-preview {
+    height: 420px !important; min-height: 420px !important;
+    grid-template-rows: 64px 264px 64px !important; gap: 14px !important;
+  }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-main { width: calc(100% - 12px) !important; height: 264px !important; min-height: 264px !important; padding: 21px !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-small { width: min(84%,252px) !important; height: 64px !important; min-height: 64px !important; padding: 10px 13px !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .visual-glow { width: min(88%,300px) !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-account-workspace { width: calc(100% - 28px) !important; padding: 28px 0 48px !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-account-workspace > .app-page-header { display: block !important; margin-bottom: 14px !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-account-workspace > .app-page-header h1 { font-size: 30px !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-hub-item { padding: 8px !important; gap: 6px !important; font-size: 11px !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-account-content > .account-tab-intro { padding: 18px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body #root#root .ih6-logo *,
+  html:root body #root#root .page.ih6-account-page .ih6-profile-hub * { animation: none !important; transition: none !important; }
+  html:root body #root#root .ih6-logo .ih6-logo-letter { transform: none !important; opacity: 1 !important; }
+  html:root body #root#root .ih6-logo .ih6-logo-pixels { display: none !important; }
+  html:root body #root#root .page.ih6-account-page .ih6-profile-hub { transition: none !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview > .card-main { animation: none !important; }
+}
+
+html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview .live-dot { display: block !important; flex: 0 0 6px !important; width: 6px !important; height: 6px !important; padding: 0 !important; background: var(--ih-home-accent) !important; border-radius: 50% !important; font-size: 0 !important; line-height: 0 !important; }
+html:root body #root#root .page.ih6-account-page .ih6-hub-item > span:last-child { min-width: 0 !important; overflow-wrap: anywhere !important; }
