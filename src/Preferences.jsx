@@ -1,6 +1,7 @@
+/* IdeaHire | PACZKA 10 | 2026-10-04 | Pełny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
-import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
 
 const THEME_KEY = "ideahire_theme";
 const TEMPLATE_KEY = "ideahire_template";
@@ -27,6 +28,18 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Podgląd zleceń": "Job preview",
+  "Odkryj zlecenie": "Discover a project",
+  "Sterowanie podglądem": "Preview controls",
+  "Poprzednie zlecenie": "Previous job",
+  "Następne zlecenie": "Next job",
+  "Włącz automatyczną zmianę zleceń": "Resume automatic job previews",
+  "Zatrzymaj automatyczną zmianę zleceń": "Pause automatic job previews",
+  "Budżet projektu": "Project budget",
+  "Nowy podgląd co 8 sekund": "A new preview every 8 seconds",
+  "Zobacz szczegóły projektu": "View the project details",
+  "Pokaż w liście": "Show in the list",
+  "Szczegóły znajdziesz w ogłoszeniu.": "You can find the details in the job listing.",
   "Szablony": "Templates",
   "Wygląd interfejsu": "Interface appearance",
   "Wybierz szatę IdeaHire": "Choose your IdeaHire style",
@@ -1971,9 +1984,25 @@ function translateTree(root, language) {
     );
 }
 
+function readStoredPreference(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function rememberChosenPreference(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Blokada pamięci przeglądarki nie blokuje zmiany wyglądu w bieżącej wizycie.
+  }
+}
+
 function getStoredTheme() {
   const stored =
-    localStorage.getItem(THEME_KEY);
+    readStoredPreference(THEME_KEY);
 
   return stored === "dark"
     ? "dark"
@@ -1981,15 +2010,13 @@ function getStoredTheme() {
 }
 
 function getStoredTemplate() {
-  return localStorage.getItem(TEMPLATE_KEY) === "classic"
+  return readStoredPreference(TEMPLATE_KEY) === "classic"
     ? "classic"
     : "current";
 }
 
 function getStoredLanguage() {
-  return localStorage.getItem(
-    LANGUAGE_KEY
-  ) === "en"
+  return readStoredPreference(LANGUAGE_KEY) === "en"
     ? "en"
     : "pl";
 }
@@ -2016,13 +2043,13 @@ function shouldShowCookieNotice() {
 export default function Preferences({
   children,
 }) {
-  const [theme, setTheme] =
+  const [theme, updateTheme] =
     useState(getStoredTheme);
 
-  const [template, setTemplate] =
+  const [template, updateTemplate] =
     useState(getStoredTemplate);
 
-  const [language, setLanguage] =
+  const [language, updateLanguage] =
     useState(getStoredLanguage);
 
   const [mobilePanelOpen, setMobilePanelOpen] =
@@ -2030,6 +2057,21 @@ export default function Preferences({
 
   const [cookieNoticeVisible, setCookieNoticeVisible] =
     useState(shouldShowCookieNotice);
+
+  // Ustawienia utrwalamy dopiero po świadomym wyborze użytkownika.
+  const chosenPreferencesRef = useRef({ theme: false, template: false, language: false });
+  const setTheme = useCallback((value) => {
+    chosenPreferencesRef.current.theme = true;
+    updateTheme(value);
+  }, []);
+  const setTemplate = useCallback((value) => {
+    chosenPreferencesRef.current.template = true;
+    updateTemplate(value);
+  }, []);
+  const setLanguage = useCallback((value) => {
+    chosenPreferencesRef.current.language = true;
+    updateLanguage(value);
+  }, []);
 
   function acknowledgeCookieNotice() {
     setCookieNoticeVisible(false);
@@ -2052,19 +2094,17 @@ export default function Preferences({
       theme;
     document.documentElement.style.colorScheme =
       theme;
-    localStorage.setItem(
-      THEME_KEY,
-      theme
-    );
+    if (chosenPreferencesRef.current.theme) {
+      rememberChosenPreference(THEME_KEY, theme);
+    }
   }, [theme]);
 
   useLayoutEffect(() => {
     document.documentElement.dataset.template =
       template;
-    localStorage.setItem(
-      TEMPLATE_KEY,
-      template
-    );
+    if (chosenPreferencesRef.current.template) {
+      rememberChosenPreference(TEMPLATE_KEY, template);
+    }
   }, [template]);
 
   useEffect(() => {
@@ -2072,10 +2112,9 @@ export default function Preferences({
       language;
     document.documentElement.dataset.language =
       language;
-    localStorage.setItem(
-      LANGUAGE_KEY,
-      language
-    );
+    if (chosenPreferencesRef.current.language) {
+      rememberChosenPreference(LANGUAGE_KEY, language);
+    }
 
     translateTree(
       document.body,
