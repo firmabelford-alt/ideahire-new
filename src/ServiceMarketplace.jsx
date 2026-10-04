@@ -1,7 +1,9 @@
+/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -9,6 +11,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
+import { MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -312,7 +315,7 @@ function ServiceAvatar({ service, size = "normal" }) {
   const image = service?.owner_avatar_url || service?.freelancer_avatar_url || "";
 
   return (
-    <span className={`service-avatar is-${size}`} aria-hidden="true">
+    <span className={`ih5-service-avatar is-${size}`} aria-hidden="true">
       {image ? <img src={image} alt="" /> : name.charAt(0).toUpperCase()}
     </span>
   );
@@ -323,30 +326,30 @@ function ServiceCard({ service }) {
   const isCustom = service.price_mode === "custom";
 
   return (
-    <article className="service-card">
+    <article className="ih5-service-card">
       <Link
-        className="service-card-hitbox"
+        className="ih5-service-card-hitbox"
         to={`/services/${service.id}`}
         aria-label={`Zobacz usługę: ${service.title}`}
       />
 
-      <div className="service-card-topline">
-        <span className="service-category-mark" aria-hidden="true">
+      <div className="ih5-service-card-topline">
+        <span className="ih5-service-category-mark" aria-hidden="true">
           {SERVICE_CATEGORY_MARKS[service.category] || "✦"}
         </span>
-        <span className={`service-capacity ${capacity.className}`}>
+        <span className={`ih5-service-capacity ${capacity.className}`}>
           <i aria-hidden="true" />
           {capacity.label}
         </span>
       </div>
 
-      <div className="service-card-copy">
-        <span className="service-card-category">{service.category}</span>
+      <div className="ih5-service-card-copy">
+        <span className="ih5-service-card-category">{service.category}</span>
         <h2>{service.title}</h2>
         <p>{service.summary}</p>
       </div>
 
-      <div className="service-card-owner">
+      <div className="ih5-service-card-owner">
         <ServiceAvatar service={service} />
         <span>
           <strong>{service.owner_name || "Wykonawca IdeaHire"}</strong>
@@ -354,14 +357,14 @@ function ServiceCard({ service }) {
         </span>
       </div>
 
-      <footer className="service-card-footer">
+      <footer className="ih5-service-card-footer">
         <span>
           <small>{isCustom ? "Wycena" : "Cena usługi"}</small>
           <strong>
             {isCustom ? "Indywidualna" : `od ${formatMoney(service.base_price)}`}
           </strong>
         </span>
-        <span className="service-card-arrow" aria-hidden="true">→</span>
+        <span className="ih5-service-card-arrow" aria-hidden="true">→</span>
       </footer>
     </article>
   );
@@ -369,9 +372,9 @@ function ServiceCard({ service }) {
 
 function ServiceShell({ Navbar, children, className = "" }) {
   return (
-    <div className={`page service-page ${className}`.trim()}>
+    <div className={`page ih-market-v5 ih5-service-page ${className}`.trim()}>
       <Navbar />
-      <main className="service-shell">{children}</main>
+      <main className="ih-market-shell">{children}</main>
     </div>
   );
 }
@@ -430,77 +433,30 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   }
 
   return (
-    <ServiceShell Navbar={Navbar} className="service-list-page">
-      <header className="service-hero">
-        <div className="service-hero-copy">
-          <span className="service-eyebrow">Usługi wykonawców</span>
-          <h1>Znajdź gotową drogę do efektu.</h1>
-          <p>
-            Porównaj konkretny zakres, sposób pracy i dostępność. Rozmowa nie
-            zajmuje miejsca — termin rezerwuje dopiero oferta wykonawcy.
-          </p>
-        </div>
+    <ServiceShell Navbar={Navbar} className="ih5-service-list-page">
+      <MarketHeader eyebrow="Usługi" title="Gotowy pomysł na dobry efekt." description="Poznaj zakres, cenę i dostępność. Wybierz usługę i porozmawiaj o swoim projekcie.">
+        <Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link>
+        <Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" /> Dodaj usługę</Link>
+      </MarketHeader>
+      <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług" />
 
-        <div className="service-hero-actions">
-          <Link className="service-secondary-action" to="/services/mine">
-            Moje usługi
-          </Link>
-          <Link className="service-primary-action" to="/services/new">
-            <span aria-hidden="true">+</span>
-            Dodaj własną usługę
-          </Link>
-        </div>
-
-        <div className="service-hero-orbit" aria-hidden="true">
-          <i />
-          <i />
-          <span>IH</span>
-        </div>
-      </header>
-
-      <section className="service-discovery" aria-label="Wyszukiwanie usług">
-        <label className="service-search">
-          <span aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Szukaj usługi, specjalizacji lub rezultatu"
-            maxLength={120}
-          />
-        </label>
-
-        <div className="service-category-tabs" role="list">
-          {["Wszystkie", ...SERVICE_CATEGORIES].map((category) => (
-            <button
-              key={category}
-              type="button"
-              className={selectedCategory === category ? "is-active" : ""}
-              onClick={() => chooseCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="service-results" aria-live="polite">
-        <div className="service-results-heading">
+      <section className="ih5-service-results" aria-live="polite">
+        <div className="ih5-service-results-heading">
           <div>
-            <span className="service-eyebrow">Katalog</span>
+            <span className="ih5-service-eyebrow">Katalog</span>
             <h2>
               {selectedCategory === "Wszystkie"
                 ? "Wszystkie usługi"
                 : selectedCategory}
             </h2>
           </div>
-          <span className="service-results-count">
+          <span className="ih5-service-results-count">
             {loading ? "Ładowanie" : `${services.length} wyników`}
           </span>
         </div>
 
         {message && (
-          <div className="service-notice is-error" role="alert">
+          <div className="ih5-service-notice is-error" role="alert">
             <span aria-hidden="true">!</span>
             <p>{message}</p>
             <button type="button" onClick={loadServices}>Spróbuj ponownie</button>
@@ -508,19 +464,19 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
         )}
 
         {loading ? (
-          <div className="service-card-grid is-loading" aria-label="Ładowanie usług">
+          <div className="ih5-service-card-grid is-loading" aria-label="Ładowanie usług">
             {[0, 1, 2, 3, 4, 5].map((item) => (
-              <div className="service-card-skeleton" key={item} />
+              <div className="ih5-service-card-skeleton" key={item} />
             ))}
           </div>
         ) : services.length > 0 ? (
-          <div className="service-card-grid">
+          <div className="ih5-service-card-grid">
             {services.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
           </div>
         ) : (
-          <div className="service-empty">
+          <div className="ih5-service-empty">
             <span aria-hidden="true">◇</span>
             <h3>Nie ma jeszcze takiej usługi</h3>
             <p>Zmień wyszukiwanie albo opublikuj pierwszą ofertę w tej niszy.</p>
@@ -626,9 +582,9 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
     if (
       form.priceMode === "fixed" &&
-      (!Number.isFinite(basePrice) || basePrice < 1 || basePrice > 15000)
+      (!Number.isFinite(basePrice) || basePrice < 1 || basePrice > IDEA_HIRE_PUBLIC_OFFER.orderLimit)
     ) {
-      setMessage("Cena stała musi mieścić się w zakresie od 1 zł do 15 000 zł.");
+      setMessage("Cena stała musi mieścić się w zakresie od 1 zł do 10 000 zł.");
       return;
     }
 
@@ -696,11 +652,11 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
   }
 
   return (
-    <ServiceShell Navbar={Navbar} className="service-form-page">
-      <header className="service-form-header">
+    <ServiceShell Navbar={Navbar} className="ih5-service-form-page">
+      <header className="ih5-service-form-header">
         <Link to={editing ? `/services/${id}` : "/services"} aria-label="Wróć">←</Link>
         <div>
-          <span className="service-eyebrow">Dla wykonawców</span>
+          <span className="ih5-service-eyebrow">Dla wykonawców</span>
           <h1>{editing ? "Dopracuj swoją usługę" : "Pokaż, co potrafisz zrobić."}</h1>
           <p>
             Jedna czytelna oferta, konkretny rezultat i realna dostępność.
@@ -711,17 +667,17 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
       </header>
 
       {loading ? (
-        <div className="service-form-loading" aria-label="Ładowanie formularza" />
+        <div className="ih5-service-form-loading" aria-label="Ładowanie formularza" />
       ) : (
-        <form className="service-editor" onSubmit={handleSubmit}>
-          <section className="service-editor-section">
-            <div className="service-editor-index">01</div>
-            <div className="service-editor-heading">
+        <form className="ih5-service-editor" onSubmit={handleSubmit}>
+          <section className="ih5-service-editor-section">
+            <div className="ih5-service-editor-index">01</div>
+            <div className="ih5-service-editor-heading">
               <span>Podstawa</span>
               <h2>Co dokładnie oferujesz?</h2>
               <p>Zacznij od efektu, który zleceniodawca łatwo zrozumie.</p>
             </div>
-            <div className="service-editor-fields">
+            <div className="ih5-service-editor-fields">
               <label className="is-wide">
                 <span>Nazwa usługi *</span>
                 <input
@@ -791,14 +747,14 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             </div>
           </section>
 
-          <section className="service-editor-section">
-            <div className="service-editor-index">02</div>
-            <div className="service-editor-heading">
+          <section className="ih5-service-editor-section">
+            <div className="ih5-service-editor-index">02</div>
+            <div className="ih5-service-editor-heading">
               <span>Zakres</span>
               <h2>Co otrzyma klient?</h2>
               <p>Krótkie punkty są łatwiejsze do porównania niż ściana tekstu.</p>
             </div>
-            <div className="service-editor-fields">
+            <div className="ih5-service-editor-fields">
               <label className="is-wide">
                 <span>Rezultaty pracy * <em>jeden w wierszu</em></span>
                 <textarea
@@ -834,15 +790,15 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             </div>
           </section>
 
-          <section className="service-editor-section">
-            <div className="service-editor-index">03</div>
-            <div className="service-editor-heading">
+          <section className="ih5-service-editor-section">
+            <div className="ih5-service-editor-index">03</div>
+            <div className="ih5-service-editor-heading">
               <span>Warunki</span>
               <h2>Cena, czas i obłożenie</h2>
               <p>Rozmowa nie blokuje miejsca. Rezerwacja powstaje dopiero po wysłaniu oferty.</p>
             </div>
-            <div className="service-editor-fields">
-              <fieldset className="service-choice-field is-wide">
+            <div className="ih5-service-editor-fields">
+              <fieldset className="ih5-service-choice-field is-wide">
                 <legend>Sposób wyceny *</legend>
                 <label className={form.priceMode === "custom" ? "is-selected" : ""}>
                   <input
@@ -875,11 +831,11 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
               {form.priceMode === "fixed" && (
                 <label>
                   <span>Cena usługi *</span>
-                  <span className="service-price-input">
+                  <span className="ih5-service-price-input">
                     <input
                       type="number"
                       min="1"
-                      max="15000"
+                      max={IDEA_HIRE_PUBLIC_OFFER.orderLimit}
                       step="1"
                       inputMode="numeric"
                       value={form.basePrice}
@@ -893,7 +849,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
               <label>
                 <span>Standardowy czas realizacji *</span>
-                <span className="service-price-input">
+                <span className="ih5-service-price-input">
                   <input
                     type="number"
                     min="1"
@@ -930,7 +886,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 />
               </label>
 
-              <label className="service-switch is-wide">
+              <label className="ih5-service-switch is-wide">
                 <input
                   type="checkbox"
                   checked={form.queueEnabled}
@@ -945,9 +901,9 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             </div>
           </section>
 
-          {message && <p className="service-form-message" role="alert">{message}</p>}
+          {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 
-          <footer className="service-editor-actions">
+          <footer className="ih5-service-editor-actions">
             <Link to={editing ? `/services/${id}` : "/services"}>Anuluj</Link>
             <button type="submit" disabled={saving}>
               {saving
@@ -972,6 +928,18 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
   const [confirmed, setConfirmed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    const previous = document.activeElement;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    modalRef.current?.querySelector("textarea")?.focus({ preventScroll: true });
+    return () => {
+      document.body.style.overflow = oldOverflow;
+      previous?.focus?.({ preventScroll: true });
+    };
+  }, []);
 
   useEffect(() => {
     function closeWithEscape(event) {
@@ -1018,18 +986,28 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
   }
 
   return (
-    <div className="service-modal-backdrop" role="presentation" onMouseDown={(event) => {
+    <div className="ih5-service-modal-backdrop" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !saving) onClose();
     }}>
       <section
-        className="service-inquiry-modal"
+        ref={modalRef}
+        className="ih5-service-inquiry-modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="service-inquiry-title"
+        onKeyDown={(event) => {
+          if (event.key !== "Tab") return;
+          const controls = Array.from(modalRef.current?.querySelectorAll("a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled)") || []);
+          if (!controls.length) return;
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }}
       >
         <header>
           <div>
-            <span className="service-eyebrow">
+            <span className="ih5-service-eyebrow">
               {isFull ? "Następny wolny termin" : "Zapytanie o realizację"}
             </span>
             <h2 id="service-inquiry-title">Opowiedz krótko o swoim celu.</h2>
@@ -1037,7 +1015,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
           <button type="button" onClick={onClose} disabled={saving} aria-label="Zamknij">×</button>
         </header>
 
-        <div className="service-modal-summary">
+        <div className="ih5-service-modal-summary">
           <span>{SERVICE_CATEGORY_MARKS[service.category] || "✦"}</span>
           <div>
             <strong>{service.title}</strong>
@@ -1065,7 +1043,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
             <small>{brief.length}/2500</small>
           </label>
 
-          <div className="service-modal-fields">
+          <div className="ih5-service-modal-fields">
             <label>
               <span>Preferowany termin</span>
               <input
@@ -1086,7 +1064,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
             </label>
           </div>
 
-          <div className="service-inquiry-rules">
+          <div className="ih5-service-inquiry-rules">
             <span aria-hidden="true">i</span>
             <p>
               To niewiążące zapytanie i otwarcie czatu — bez płatności i bez
@@ -1096,7 +1074,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
             </p>
           </div>
 
-          <label className="service-modal-confirmation">
+          <label className="ih5-service-modal-confirmation">
             <input
               type="checkbox"
               checked={confirmed}
@@ -1105,7 +1083,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
             <span>Rozumiem, że samo wysłanie zapytania nie jest zamówieniem ani płatnością.</span>
           </label>
 
-          {message && <p className="service-modal-message" role="alert">{message}</p>}
+          {message && <p className="ih5-service-modal-message" role="alert">{message}</p>}
 
           <footer>
             <button type="button" onClick={onClose} disabled={saving}>Anuluj</button>
@@ -1160,16 +1138,16 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
 
   if (loading) {
     return (
-      <ServiceShell Navbar={Navbar} className="service-detail-page">
-        <div className="service-detail-loading" aria-label="Ładowanie usługi" />
+      <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
+        <div className="ih5-service-detail-loading" aria-label="Ładowanie usługi" />
       </ServiceShell>
     );
   }
 
   if (!service) {
     return (
-      <ServiceShell Navbar={Navbar} className="service-detail-page">
-        <div className="service-empty">
+      <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
+        <div className="ih5-service-empty">
           <span aria-hidden="true">!</span>
           <h1>Nie możemy pokazać tej usługi</h1>
           <p>{message || "Usługa mogła zostać wstrzymana albo usunięta."}</p>
@@ -1186,8 +1164,8 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
   const skills = Array.isArray(service.skills) ? service.skills : [];
 
   return (
-    <ServiceShell Navbar={Navbar} className="service-detail-page">
-      <nav className="service-detail-breadcrumb" aria-label="Okruszki">
+    <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
+      <nav className="ih5-service-detail-breadcrumb" aria-label="Okruszki">
         <Link to="/services">Usługi</Link>
         <span>/</span>
         <Link to={`/services?category=${encodeURIComponent(service.category)}`}>
@@ -1195,10 +1173,10 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
         </Link>
       </nav>
 
-      <div className="service-detail-layout">
-        <article className="service-detail-main">
-          <header className="service-detail-header">
-            <div className="service-detail-category">
+      <div className="ih5-service-detail-layout">
+        <article className="ih5-service-detail-main">
+          <header className="ih5-service-detail-header">
+            <div className="ih5-service-detail-category">
               <span aria-hidden="true">{SERVICE_CATEGORY_MARKS[service.category] || "✦"}</span>
               <div>
                 <b>{service.category}</b>
@@ -1209,16 +1187,16 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             <p>{service.summary}</p>
           </header>
 
-          <section className="service-detail-section">
-            <span className="service-eyebrow">O usłudze</span>
+          <section className="ih5-service-detail-section">
+            <span className="ih5-service-eyebrow">O usłudze</span>
             <h2>Jasny zakres od pierwszej rozmowy.</h2>
-            <div className="service-rich-copy">{service.description}</div>
+            <div className="ih5-service-rich-copy">{service.description}</div>
           </section>
 
-          <section className="service-detail-section">
-            <span className="service-eyebrow">Rezultat</span>
+          <section className="ih5-service-detail-section">
+            <span className="ih5-service-eyebrow">Rezultat</span>
             <h2>Co otrzymasz</h2>
-            <ul className="service-check-list">
+            <ul className="ih5-service-check-list">
               {deliverables.map((item, index) => (
                 <li key={`${item}-${index}`}><span>✓</span>{item}</li>
               ))}
@@ -1226,10 +1204,10 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           </section>
 
           {requirements.length > 0 && (
-            <section className="service-detail-section">
-              <span className="service-eyebrow">Dobry start</span>
+            <section className="ih5-service-detail-section">
+              <span className="ih5-service-eyebrow">Dobry start</span>
               <h2>Co przygotować przed rozmową</h2>
-              <ol className="service-requirement-list">
+              <ol className="ih5-service-requirement-list">
                 {requirements.map((item, index) => (
                   <li key={`${item}-${index}`}>
                     <span>{String(index + 1).padStart(2, "0")}</span>
@@ -1240,8 +1218,8 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             </section>
           )}
 
-          <section className="service-process">
-            <span className="service-eyebrow">Jak zaczynamy</span>
+          <section className="ih5-service-process">
+            <span className="ih5-service-eyebrow">Jak zaczynamy</span>
             <div>
               <article><i>01</i><h3>Wyślij brief</h3><p>Otwierasz rozmowę bez opłaty i rezerwacji miejsca.</p></article>
               <article><i>02</i><h3>Odbierz ofertę</h3><p>Wykonawca zapisuje zakres, termin i cenę. Miejsce czeka 24 godziny.</p></article>
@@ -1250,8 +1228,8 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           </section>
         </article>
 
-        <aside className="service-order-card">
-          <div className="service-order-owner">
+        <aside className="ih5-service-order-card">
+          <div className="ih5-service-order-owner">
             <ServiceAvatar service={service} size="large" />
             <span>
               <small>Usługę realizuje</small>
@@ -1260,7 +1238,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             <Link to={`/profile/${service.freelancer_id}`} aria-label="Zobacz profil">↗</Link>
           </div>
 
-          <div className="service-order-price">
+          <div className="ih5-service-order-price">
             <span>{service.price_mode === "fixed" ? "Cena usługi" : "Sposób wyceny"}</span>
             <strong>
               {service.price_mode === "fixed"
@@ -1274,24 +1252,24 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             </small>
           </div>
 
-          <div className="service-order-facts">
+          <div className="ih5-service-order-facts">
             <span><i>◷</i><b>{service.delivery_days} dni</b><small>standardowy czas</small></span>
             <span><i>↻</i><b>{service.revisions}</b><small>poprawki w cenie</small></span>
           </div>
 
-          <span className={`service-capacity ${capacity.className}`}>
+          <span className={`ih5-service-capacity ${capacity.className}`}>
             <i aria-hidden="true" />
             {capacity.label}
           </span>
 
           {isOwner ? (
-            <Link className="service-order-button" to={`/services/${service.id}/edit`}>
+            <Link className="ih5-service-order-button" to={`/services/${service.id}/edit`}>
               Edytuj usługę
             </Link>
           ) : capacity.available > 0 || canAskWhenFull ? (
             <button
               type="button"
-              className="service-order-button"
+              className="ih5-service-order-button"
               onClick={() => setInquiryOpen(true)}
             >
               {capacity.available > 0
@@ -1302,18 +1280,18 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               <span aria-hidden="true">→</span>
             </button>
           ) : (
-            <button type="button" className="service-order-button" disabled>
+            <button type="button" className="ih5-service-order-button" disabled>
               Brak wolnych terminów
             </button>
           )}
 
-          <p className="service-order-legal">
+          <p className="ih5-service-order-legal">
             Pierwszy formularz jest niewiążącym zapytaniem. Zamówienie powstaje
             dopiero po zaakceptowaniu zapisanych warunków i płatności.
           </p>
 
           {skills.length > 0 && (
-            <div className="service-skill-list">
+            <div className="ih5-service-skill-list">
               {skills.map((skill) => <span key={skill}>{skill}</span>)}
             </div>
           )}
@@ -1378,41 +1356,41 @@ function MyServices({ supabase, user, Navbar }) {
   }
 
   return (
-    <ServiceShell Navbar={Navbar} className="my-services-page">
-      <header className="my-services-header">
+    <ServiceShell Navbar={Navbar} className="ih5-my-services-page">
+      <header className="ih5-my-services-header">
         <div>
-          <span className="service-eyebrow">Panel wykonawcy</span>
+          <span className="ih5-service-eyebrow">Panel wykonawcy</span>
           <h1>Twoje usługi</h1>
           <p>Zarządzaj widocznością, obłożeniem i treścią ofert bez usuwania historii rozmów.</p>
         </div>
-        <Link className="service-primary-action" to="/services/new">
+        <Link className="ih5-service-primary-action" to="/services/new">
           <span>+</span> Dodaj usługę
         </Link>
       </header>
 
-      {message && <p className="service-form-message" role="alert">{message}</p>}
+      {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 
       {loading ? (
-        <div className="service-form-loading" aria-label="Ładowanie usług" />
+        <div className="ih5-service-form-loading" aria-label="Ładowanie usług" />
       ) : services.length > 0 ? (
-        <div className="my-services-list">
+        <div className="ih5-my-services-list">
           {services.map((service) => (
             <article key={service.id}>
-              <span className="service-category-mark" aria-hidden="true">
+              <span className="ih5-service-category-mark" aria-hidden="true">
                 {SERVICE_CATEGORY_MARKS[service.category] || "✦"}
               </span>
-              <div className="my-service-copy">
+              <div className="ih5-my-service-copy">
                 <span>{service.category}</span>
                 <h2>{service.title}</h2>
                 <p>{service.summary}</p>
               </div>
-              <div className="my-service-state">
+              <div className="ih5-my-service-state">
                 <span className={service.status === "active" ? "is-active" : "is-paused"}>
                   {service.status === "active" ? "Widoczna" : "Wstrzymana"}
                 </span>
                 <small>Aktualizacja: {formatServiceDate(service.updated_at)}</small>
               </div>
-              <div className="my-service-actions">
+              <div className="ih5-my-service-actions">
                 <Link to={`/services/${service.id}`}>Podgląd</Link>
                 <Link to={`/services/${service.id}/edit`}>Edytuj</Link>
                 <button
@@ -1431,7 +1409,7 @@ function MyServices({ supabase, user, Navbar }) {
           ))}
         </div>
       ) : (
-        <div className="service-empty">
+        <div className="ih5-service-empty">
           <span aria-hidden="true">+</span>
           <h2>Jeszcze nie masz własnej usługi</h2>
           <p>Opisz konkretny rezultat, ustaw dostępność i daj klientom prosty start rozmowy.</p>
