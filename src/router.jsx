@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 08 | 2026-10-04 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 09 | 2026-10-04 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -14,6 +14,7 @@ import React, {
   createContext,
   useRef,
 } from "react";
+import { createPortal } from "react-dom";
 
 import {
   BrowserRouter,
@@ -1634,10 +1635,12 @@ function DiscoveryOnboarding({
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      if (previousFocus?.isConnected) previousFocus.focus?.({ preventScroll: true });
     };
   }, []);
 
@@ -1833,9 +1836,9 @@ function DiscoveryOnboarding({
       : option.audience === "client";
   });
 
-  return (
+  return createPortal((
     <div
-      className="discovery-onboarding-backdrop ih8-onboarding"
+      className="discovery-onboarding-backdrop ih8-onboarding ih9-onboarding"
       ref={backdropRef}
       data-step={step}
     >
@@ -1845,6 +1848,20 @@ function DiscoveryOnboarding({
         aria-modal="true"
         aria-labelledby="discovery-onboarding-title"
         aria-busy={saving}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && canClose && !saving) onClose?.();
+          if (event.key !== "Tab") return;
+          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), a[href]:not([tabindex="-1"])'));
+          const first = controls[0];
+          const last = controls.at(-1);
+          if (!first) return;
+          const active = document.activeElement;
+          if (event.shiftKey && (active === first || !controls.includes(active))) {
+            event.preventDefault(); last.focus();
+          } else if (!event.shiftKey && (active === last || !controls.includes(active))) {
+            event.preventDefault(); first.focus();
+          }
+        }}
       >
         <div className="discovery-onboarding-ambient" aria-hidden="true">
           <span />
@@ -1890,6 +1907,10 @@ function DiscoveryOnboarding({
         >
           {step === 1 && (
             <>
+              <div className="ih9-discovery-welcome">
+                <span className="ih9-discovery-emblem" aria-hidden="true"><i /><i /><i /><i /></span>
+                <span>Twój pomysł. Twój kierunek.</span>
+              </div>
               <div className="discovery-copy">
                 <span className="section-label">Zacznij po swojemu</span>
                 <h1
@@ -2348,7 +2369,7 @@ function DiscoveryOnboarding({
         </footer>
       </section>
     </div>
-  );
+  ), document.body);
 }
 
 function DiscoveryOnboardingLayer() {
@@ -20975,8 +20996,13 @@ function AgreementPanel({
             </small>
           </span>
 
+          <span className="ih9-agreement-keyfacts">
+            <b>{formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN")}</b>
+            <small>Termin: {formatChatProjectDate(agreement.deadline)}</small>
+          </span>
+
           <span className="agreement-summary-action">
-            Pokaż ustalenia
+            Pełne warunki
           </span>
         </summary>
 
@@ -21753,7 +21779,7 @@ function ChatProjectPlan({ job, agreement }) {
       <div className="chat-project-plan-grid">
         <article>
           <span>Zakres projektu</span>
-          <h3>{agreement?.scope || job?.description || "Zakres do wspólnego ustalenia"}</h3>
+          <p className="ih9-plan-scope">{agreement?.scope || job?.description || "Zakres do wspólnego ustalenia"}</p>
           {agreement?.deliverables && <p>{agreement.deliverables}</p>}
         </article>
         <article>
@@ -21765,7 +21791,7 @@ function ChatProjectPlan({ job, agreement }) {
             </div>
             <div>
               <dt>Termin realizacji</dt>
-              <dd>{job?.project_deadline ? formatChatProjectDate(job.project_deadline) : agreement?.deadline || "Do ustalenia"}</dd>
+              <dd>{formatChatProjectDate(agreement?.deadline || job?.project_deadline)}</dd>
             </div>
           </dl>
         </article>
@@ -21796,7 +21822,7 @@ function ChatProjectPlan({ job, agreement }) {
         <dl className="chat-project-plan-facts">
           <div><dt>Kontakt</dt><dd>{getJobOptionLabel(COLLABORATION_CONTACT_OPTIONS, plan?.contact_frequency)}</dd></div>
           <div><dt>Informacja zwrotna</dt><dd>{getJobOptionLabel(COLLABORATION_FEEDBACK_OPTIONS, plan?.feedback_time)}</dd></div>
-          <div><dt>Rundy poprawek</dt><dd>{getJobOptionLabel(COLLABORATION_REVISION_OPTIONS, plan?.revision_rounds)}</dd></div>
+          <div><dt>Rundy poprawek</dt><dd>{agreement?.revisions != null ? agreement.revisions : getJobOptionLabel(COLLABORATION_REVISION_OPTIONS, plan?.revision_rounds)}</dd></div>
           <div><dt>Odbiór</dt><dd>{getJobOptionLabel(COLLABORATION_APPROVAL_OPTIONS, plan?.approval_mode)}</dd></div>
         </dl>
       </section>
@@ -21885,7 +21911,14 @@ function Chat() {
     useState("conversation");
 
   const messageViewportRef = useRef(null);
+  const composerRef = useRef(null);
   const followMessagesRef = useRef(true);
+  useEffect(() => {
+    if (!draft && composerRef.current) {
+      composerRef.current.style.height = "auto";
+      composerRef.current.style.overflowY = "hidden";
+    }
+  }, [draft]);
   useEffect(() => { followMessagesRef.current = true; }, [id, workspaceTab]);
   useEffect(() => {
     const element = messageViewportRef.current;
@@ -22898,7 +22931,7 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page ih7-communications ih8-communications">
+    <div className="account-page ih7-communications ih8-communications ih9-communications">
       <AccountNavbar />
 
       <main className="ih7-chat-page">
@@ -23166,11 +23199,12 @@ function Chat() {
                     <form className="ih7-chat-form" onSubmit={(event) => { followMessagesRef.current = true; handleSend(event); }}>
                       <button type="button" className="ih8-chat-add" aria-label="Otwórz pliki i dodaj materiały" title="Pliki i zdjęcia" onClick={() => setWorkspaceTab("files")}><MarketIcon kind="plus" /></button>
                       <textarea
+                        ref={composerRef}
                         aria-label="Treść wiadomości"
                         rows={1}
                         value={draft}
                         onChange={(event) => setDraft(event.target.value)}
-                        onInput={(event) => { const field = event.currentTarget; field.style.height = "auto"; field.style.height = `${Math.min(field.scrollHeight, 120)}px`; }}
+                        onInput={(event) => { const field = event.currentTarget; field.style.height = "auto"; field.style.height = `${Math.min(field.scrollHeight, 120)}px`; field.style.overflowY = field.scrollHeight > 120 ? "auto" : "hidden"; }}
                         placeholder="Napisz wiadomość…"
                         maxLength={4000}
                         disabled={sending || messagingBlocked}
@@ -23197,6 +23231,16 @@ function Chat() {
 
                 {workspaceTab === "files" && (
                   <>
+                    <PrivateSharePanel
+                      conversationId={id}
+                      userId={user?.id}
+                      disabled={messagingBlocked || privateWork.loading}
+                      agreementAccepted={agreement?.status === "accepted"}
+                      isContractor={!isClient}
+                      onComplete={async () => {
+                        await Promise.all([privateWork.reload(), loadMessages()]);
+                      }}
+                    />
                     {paymentConfirmed && (
                       <WorkDeliveryPanel
                         deliveries={privateWork.deliveries}
@@ -23222,22 +23266,11 @@ function Chat() {
                         privateWork.setReportTarget({ type, id: targetId })
                       }
                     />
-                    <PrivateSharePanel
-                      conversationId={id}
-                      userId={user?.id}
-                      disabled={messagingBlocked || privateWork.loading}
-                      agreementAccepted={agreement?.status === "accepted"}
-                      isContractor={!isClient}
-                      onComplete={async () => {
-                        await Promise.all([privateWork.reload(), loadMessages()]);
-                      }}
-                    />
                   </>
                 )}
 
                 {workspaceTab === "plan" && (
                   <>
-                    <details className="ih8-chat-plan-overview"><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
                     <AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
@@ -23272,6 +23305,7 @@ function Chat() {
                       serviceOrder={conversation?.origin_type === "service_inquiry"}
                       onStatusChange={setPaymentStatus}
                     />
+                    <details className="ih8-chat-plan-overview"><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
                   </>
                 )}
               </div>
