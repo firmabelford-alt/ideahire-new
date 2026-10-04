@@ -375,6 +375,21 @@ function HomeDemoReviews() {
 }
 
 function App({ session, loading, categoryGroups = [] }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
+  const mobileMenuButtonRef = useRef(null);
+  const navigationRef = useRef(null);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    navigationRef.current?.querySelector("a")?.focus({ preventScroll: true });
+    function closeOutside(event) {
+      if (!headerRef.current?.contains(event.target)) setMobileMenuOpen(false);
+    }
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [mobileMenuOpen]);
+
   const [hasNotifications, setHasNotifications] = useState(false);
   const [recentJobs, setRecentJobs] = useState(fallbackJobs);
   const [activeJobIndex, setActiveJobIndex] = useState(0);
@@ -814,13 +829,22 @@ function App({ session, loading, categoryGroups = [] }) {
   }
 
   return (
-    <div className="app ih-home-refresh ih-home-v3">
-      <header className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}>
+    <div className="app ih-home-refresh ih-home-v3 ih-home-v4">
+      <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
+        data-mobile-menu-open={mobileMenuOpen}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && mobileMenuOpen) {
+            event.preventDefault();
+            setMobileMenuOpen(false);
+            mobileMenuButtonRef.current?.focus({ preventScroll: true });
+          }
+        }}>
         <Link className="logo logo-clean" to="/">
           Idea<span>Hire</span>
         </Link>
 
-        <nav className="nav-links home-nav-links" aria-label="Nawigacja strony głównej">
+        <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label="Nawigacja strony głównej"
+          onClick={(event) => { if (event.target?.closest?.("a")) setMobileMenuOpen(false); }}>
           <HomeNavItem href="#how-it-works" order={0}>Jak to działa</HomeNavItem>
           <HomeNavItem href="#categories" order={1}>Kategorie</HomeNavItem>
           <HomeNavItem href="#for-users" order={2}>Dla Ciebie</HomeNavItem>
@@ -831,6 +855,7 @@ function App({ session, loading, categoryGroups = [] }) {
               <HomeNavItem to="/account" order={4}>Moje konto</HomeNavItem>
             </>
           )}
+          {!session && <Link className="ih-mobile-login" to="/login">Zaloguj się</Link>}
         </nav>
 
         <div className="nav-actions">
@@ -858,11 +883,15 @@ function App({ session, loading, categoryGroups = [] }) {
               </Link>
 
               <button
-                className="btn btn-dark"
+                className="btn btn-dark ih-logout-btn"
                 type="button"
                 onClick={handleLogout}
+                aria-label="Wyloguj się"
               >
-                Wyloguj się
+                <span className="ih-logout-label">Wyloguj się</span>
+                <svg className="ih-logout-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h12" />
+                </svg>
               </button>
             </>
           ) : (
@@ -883,6 +912,15 @@ function App({ session, loading, categoryGroups = [] }) {
             </>
           )}
         </div>
+
+        <button ref={mobileMenuButtonRef} className="ih-mobile-nav-toggle" type="button"
+          aria-label={mobileMenuOpen ? "Zamknij menu" : "Otwórz menu"}
+          aria-expanded={mobileMenuOpen} aria-controls="ih-home-navigation"
+          onClick={() => setMobileMenuOpen((current) => !current)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={mobileMenuOpen ? "M6 6l12 12M18 6 6 18" : "M4 7h16M4 12h16M4 17h16"} />
+          </svg>
+        </button>
       </header>
 
       <main>
@@ -938,7 +976,7 @@ function App({ session, loading, categoryGroups = [] }) {
             </div>
           </div>
 
-          <div className="hero-visual">
+          <div className="hero-visual ih-orbit-preview">
             <div
               className="floating-card card-main rotating-job-card"
               key={activeJob.id}
@@ -948,7 +986,7 @@ function App({ session, loading, categoryGroups = [] }) {
                 <span className="live-dot">●</span>
               </div>
 
-              <h3>{activeJob.title}</h3>
+              <h3 title={activeJob.title}>{activeJob.title}</h3>
 
               <p>
                 {activeJob.description}
