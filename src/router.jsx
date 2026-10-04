@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -28,7 +28,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import { MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
+import { MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub } from "./MarketUI";
 import { useSitePreferences } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -5219,12 +5219,7 @@ function AccountNavbar() {
           
         </Link>
 
-        <Link
-          className="logo"
-          to="/"
-        >
-          Idea<span>Hire</span>
-        </Link>
+        <IdeaHireLogo className="logo" />
       </div>
 
       <nav
@@ -9846,11 +9841,11 @@ function Account() {
   }
 
   return (
-    <div className="page">
+    <div className="page ih6-account-page">
       <AccountNavbar />
 
       <main
-        className="app-page account-workspace-page"
+        className="app-page account-workspace-page ih6-account-workspace"
         data-account-section={activeAccountSection}
       >
         <div className="app-page-header">
@@ -9868,38 +9863,17 @@ function Account() {
           </p>
         </div>
 
-        <nav
-          className="account-section-nav"
-          aria-label="Sekcje konta"
-          role="tablist"
-        >
-          {ACCOUNT_WORKSPACE_SECTIONS.map((section) => {
-            const isActive = activeAccountSection === section.key;
+        <div className="ih6-account-layout">
+          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
+          <div className="ih6-account-content">
 
-            return (
-              <button
-                key={section.key}
-                id={`account-tab-${section.key}`}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-controls="account-tab-panel"
-                className={isActive ? "is-active" : ""}
-                onClick={() => openAccountSection(section)}
-              >
-                <span aria-hidden="true">{section.number}</span>
-                {section.label}
-              </button>
-            );
-          })}
-        </nav>
 
         <section className="account-tab-intro" aria-live="polite">
           <div>
             <span className="section-label">
               {activeAccountSectionCopy.eyebrow}
             </span>
-            <h2>{activeAccountSectionCopy.title}</h2>
+            <h2 id="account-section-title">{activeAccountSectionCopy.title}</h2>
           </div>
           <p>{activeAccountSectionCopy.description}</p>
         </section>
@@ -9908,7 +9882,7 @@ function Account() {
           className="account-tab-stage"
           id="account-tab-panel"
           role="tabpanel"
-          aria-labelledby={`account-tab-${activeAccountSection}`}
+          aria-labelledby="account-section-title"
           tabIndex="0"
           key={activeAccountSection}
         >
@@ -9970,12 +9944,12 @@ function Account() {
               <a className="stripe-connect-icon ih5-stripe-brand" href="https://stripe.com" target="_blank" rel="noopener noreferrer" aria-label="Stripe — operator wypłat">
                 <svg width="48" height="48" aria-hidden="true" focusable="false" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clipPath="url(#ih5-stripe-connect-clip)">
-<rect width="48" height="48" aria-hidden="true" focusable="false" fill="#533AFD"/>
-<path fillRule="evenodd" clip-rule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
+<rect width="512" height="512" fill="#533AFD"/>
+<path fillRule="evenodd" clipRule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
 </g>
 <defs>
 <clipPath id="ih5-stripe-connect-clip">
-<rect width="48" height="48" aria-hidden="true" focusable="false" rx="64" fill="white"/>
+<rect width="512" height="512" rx="64" fill="white"/>
 </clipPath>
 </defs>
 </svg>
@@ -10851,6 +10825,8 @@ function Account() {
             </div>
           )}
         </section>
+        </div>
+          </div>
         </div>
       </main>
     </div>
