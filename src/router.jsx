@@ -1,3 +1,4 @@
+/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -27,6 +28,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import { MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
 import { useSitePreferences } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -2515,8 +2517,8 @@ function DiscoveryPreferencesCard() {
             </p>
 
             <div className="discovery-settings-actions">
-              <Link className="btn btn-dark" to="/talent">
-                Znajdź wykonawcę 
+              <Link className="btn btn-dark" to="/services">
+                Przeglądaj usługi
               </Link>
               <Link className="btn btn-outline" to="/jobs">
                 Znajdź zlecenie
@@ -3789,10 +3791,10 @@ function getSafeJobReferenceUrl(value) {
   }
 }
 
-const MAX_JOB_BUDGET = 15000;
+const MAX_JOB_BUDGET = IDEA_HIRE_PUBLIC_OFFER.orderLimit;
 
 const MAX_JOB_BUDGET_MESSAGE =
-  "Nie możesz wpisać wyższej ceny. Maksymalny budżet jednego zlecenia to 15 000 zł.";
+  "Nie możesz wpisać wyższej ceny. Maksymalny budżet jednego zlecenia to 10 000 zł.";
 
 const JOB_LISTING_DURATION_OPTIONS = [
   {
@@ -5259,20 +5261,6 @@ function AccountNavbar() {
         </NavLink>
 
         <NavLink
-          to="/talent"
-          className={({
-            isActive,
-          }) =>
-            isActive
-              ? "is-active"
-              : ""
-          }
-        >
-          <span className="account-nav-label-full">Wykonawcy</span>
-          <span className="account-nav-label-short">Wykonawcy</span>
-        </NavLink>
-
-        <NavLink
           to="/services"
           className={({
             isActive,
@@ -5397,9 +5385,6 @@ function AccountNavbar() {
             >
               <NavLink to="/jobs" onClick={closeAccountMenu}>
                 Zlecenia
-              </NavLink>
-              <NavLink to="/talent" onClick={closeAccountMenu}>
-                Wykonawcy
               </NavLink>
               <NavLink to="/services" onClick={closeAccountMenu}>
                 Usługi
@@ -9982,9 +9967,19 @@ function Account() {
               className={`stripe-connect-panel is-${connectStatus}`}
               aria-labelledby="stripe-connect-title"
             >
-              <div className="stripe-connect-icon" aria-hidden="true">
-                <span></span>
-              </div>
+              <a className="stripe-connect-icon ih5-stripe-brand" href="https://stripe.com" target="_blank" rel="noopener noreferrer" aria-label="Stripe — operator wypłat">
+                <svg width="48" height="48" aria-hidden="true" focusable="false" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clipPath="url(#ih5-stripe-connect-clip)">
+<rect width="48" height="48" aria-hidden="true" focusable="false" fill="#533AFD"/>
+<path fillRule="evenodd" clip-rule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="ih5-stripe-connect-clip">
+<rect width="48" height="48" aria-hidden="true" focusable="false" rx="64" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+              </a>
 
               <div className="stripe-connect-content">
                 <div className="stripe-connect-heading">
@@ -12155,6 +12150,13 @@ function FindTalent() {
   const [success, setSuccess] =
     useState(false);
 
+  const stepPanelRef = useRef(null);
+  const lastFocusedStep = useRef(formStep);
+  useEffect(() => {
+    if (lastFocusedStep.current !== formStep) stepPanelRef.current?.querySelector("h2")?.focus({ preventScroll: true });
+    lastFocusedStep.current = formStep;
+  }, [formStep]);
+
   const categoryFields =
     JOB_CATEGORY_FIELDS[category] || [];
 
@@ -12330,13 +12332,13 @@ function FindTalent() {
     const nextStep = Math.min(formStep + 1, JOB_FORM_STEPS.length);
     setFormStep(nextStep);
     setMaxStepReached((current) => Math.max(current, nextStep));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
   function goToPreviousStep() {
     setMessage("");
     setFormStep((current) => Math.max(1, current - 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
   function handleBudgetChange(
@@ -12564,110 +12566,14 @@ function FindTalent() {
   }
 
   return (
-    <div className="page">
+    <div className="page ih-market-v5 ih5-create-page">
       <AccountNavbar />
 
-      <style>{`
-        .project-form .job-budget-limit-note {
-          display: grid;
-          grid-template-columns: auto minmax(0, 1fr);
-          align-items: center;
-          gap: 13px;
-          margin-top: 3px;
-          padding: 15px 16px;
-          border: 1px solid #e1e1dc;
-          border-radius: 15px;
-          background: #f5f5f1;
-          color: #555550;
-        }
 
-        .project-form .job-budget-limit-icon {
-          width: 34px;
-          height: 34px;
-          display: grid;
-          place-items: center;
-          border: 1px solid #d7d7d1;
-          border-radius: 50%;
-          background: #ffffff;
-          color: #62625d;
-          font-size: 15px;
-          font-style: normal;
-          font-weight: 850;
-        }
+      <main className="ih-market-shell ih5-editor-shell">
+        <MarketHeader eyebrow="Dla zlecających" title="Dodaj zlecenie" description="Cztery krótkie kroki. Opisz projekt, ustal zakres i pokaż wykonawcom jasne warunki." />
 
-        .project-form .job-budget-limit-copy {
-          min-width: 0;
-        }
-
-        .project-form .job-budget-limit-copy strong,
-        .project-form .job-budget-limit-copy small {
-          display: block;
-        }
-
-        .project-form .job-budget-limit-copy strong {
-          color: #343431;
-          font-size: 19px;
-          line-height: 1.25;
-          letter-spacing: -0.25px;
-        }
-
-        .project-form .job-budget-limit-copy small {
-          margin-top: 4px;
-          color: #777771;
-          font-size: 12px;
-          font-weight: 550;
-          line-height: 1.5;
-        }
-
-        html[data-theme="dark"] .project-form .job-budget-limit-note {
-          border-color: #393935;
-          background: #20201e;
-          color: #b7b7b1;
-        }
-
-        html[data-theme="dark"] .project-form .job-budget-limit-icon {
-          border-color: #454540;
-          background: #2a2a27;
-          color: #eeeeea;
-        }
-
-        html[data-theme="dark"] .project-form .job-budget-limit-copy strong {
-          color: #f1f1ed !important;
-        }
-
-        html[data-theme="dark"] .project-form .job-budget-limit-copy small {
-          color: #aaa9a3 !important;
-        }
-
-        @media (max-width: 600px) {
-          .project-form .job-budget-limit-note {
-            padding: 13px 14px;
-          }
-
-          .project-form .job-budget-limit-copy strong {
-            font-size: 17px;
-          }
-        }
-      `}</style>
-
-      <main className="app-page">
-        <div className="app-page-header">
-          <span className="section-label">
-            Dla zlecających
-          </span>
-
-          <h1>
-            Dodaj zlecenie
-          </h1>
-
-          <p>
-            Opisz projekt, wybierz
-            kategorię i ustaw
-            prosty budżet.
-          </p>
-        </div>
-
-        <ol className="job-create-progress" aria-label="Postęp dodawania zlecenia">
+        <ol className="ih5-job-create-progress" aria-label="Postęp dodawania zlecenia">
           {JOB_FORM_STEPS.map((item, index) => {
             const stepNumber = index + 1;
             const isActive = formStep === stepNumber;
@@ -12696,21 +12602,21 @@ function FindTalent() {
         </ol>
 
         <form
-          className="project-form job-create-form"
+          className="ih5-editor ih5-job-create-form"
           onSubmit={handleSubmit}
           noValidate
         >
           {formStep === 1 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-1-title">
-              <div className="job-create-step-heading">
+            <section ref={stepPanelRef} key={formStep} className="ih5-job-create-step-panel" aria-labelledby="job-step-1-title">
+              <div className="ih5-job-create-step-heading">
                 <span>01</span>
                 <div>
-                  <h2 id="job-step-1-title">Podstawowe informacje</h2>
+                  <h2 tabIndex={-1} id="job-step-1-title">Podstawowe informacje</h2>
                   <p>Najpierw pokaż wykonawcom, czego dotyczy projekt.</p>
                 </div>
               </div>
 
-              <div className="job-form-grid">
+              <div className="ih5-job-form-grid">
                 <label className="is-wide">
                   Czego potrzebujesz?
                   <textarea
@@ -12745,12 +12651,12 @@ function FindTalent() {
                   </select>
                 </label>
 
-                <fieldset className="job-compact-fieldset is-wide">
+                <fieldset className="ih5-job-compact-fieldset is-wide">
                   <legend>Na jakim etapie jest projekt?</legend>
-                  <div className="job-choice-grid is-four">
+                  <div className="ih5-job-choice-grid is-four">
                     {JOB_PROJECT_STAGES.map((option) => (
                       <label
-                        className={`job-choice-card${projectStage === option.value ? " is-selected" : ""}`}
+                        className={`ih5-job-choice-card${projectStage === option.value ? " is-selected" : ""}`}
                         key={option.value}
                       >
                         <input
@@ -12782,16 +12688,16 @@ function FindTalent() {
           )}
 
           {formStep === 2 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-2-title">
-              <div className="job-create-step-heading">
+            <section ref={stepPanelRef} key={formStep} className="ih5-job-create-step-panel" aria-labelledby="job-step-2-title">
+              <div className="ih5-job-create-step-heading">
                 <span>02</span>
                 <div>
-                  <h2 id="job-step-2-title">Zakres i wymagania</h2>
+                  <h2 tabIndex={-1} id="job-step-2-title">Zakres i wymagania</h2>
                   <p>Wyświetlamy tylko pytania potrzebne w wybranej kategorii.</p>
                 </div>
               </div>
 
-              <div className="job-form-grid">
+              <div className="ih5-job-form-grid">
                 <label className="is-wide">
                   Jaki rezultat ma przekazać wykonawca?
                   <textarea
@@ -12815,12 +12721,12 @@ function FindTalent() {
                   />
                 </label>
 
-                <div className="job-category-questions is-wide">
-                  <div className="job-category-questions-heading">
-                    <span className="section-label">{getJobCategoryLabel(category)}</span>
+                <div className="ih5-job-category-questions is-wide">
+                  <div className="ih5-job-category-questions-heading">
+                    <span className="ih5-eyebrow">{getJobCategoryLabel(category)}</span>
                     <h3>Szczegóły potrzebne do dobrej wyceny</h3>
                   </div>
-                  <div className="job-form-grid">
+                  <div className="ih5-job-form-grid">
                     {categoryFields.map((field) => (
                       <label key={field.key}>
                         {field.label}
@@ -12836,12 +12742,12 @@ function FindTalent() {
                   </div>
                 </div>
 
-                <fieldset className="job-compact-fieldset is-wide">
+                <fieldset className="ih5-job-compact-fieldset is-wide">
                   <legend>Tryb współpracy</legend>
-                  <div className="job-choice-grid is-three">
+                  <div className="ih5-job-choice-grid is-three">
                     {JOB_WORK_MODES.map((option) => (
                       <label
-                        className={`job-choice-card${workMode === option.value ? " is-selected" : ""}`}
+                        className={`ih5-job-choice-card${workMode === option.value ? " is-selected" : ""}`}
                         key={option.value}
                       >
                         <input
@@ -12903,7 +12809,7 @@ function FindTalent() {
                   />
                 </label>
 
-                <label className="job-portfolio-toggle is-wide">
+                <label className="ih5-job-portfolio-toggle is-wide">
                   <input
                     type="checkbox"
                     checked={requiresPortfolio}
@@ -12915,23 +12821,23 @@ function FindTalent() {
                   </span>
                 </label>
 
-                <div className="collaboration-plan-builder is-wide">
+                <div className="ih5-collaboration-plan-builder is-wide">
                   {!collaborationPlanOpen ? (
                     <button
                       type="button"
-                      className={`collaboration-plan-launch${
+                      className={`ih5-collaboration-plan-launch${
                         collaborationPlan.enabled ? " has-plan" : ""
                       }`}
                       onClick={openCollaborationPlan}
                       aria-expanded="false"
                     >
-                      <span className="collaboration-plan-launch-icon" aria-hidden="true">
+                      <span className="ih5-collaboration-plan-launch-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24">
                           <path d="M8 12.5 10.5 15 16 9.5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
                         </svg>
                       </span>
 
-                      <span className="collaboration-plan-launch-copy">
+                      <span className="ih5-collaboration-plan-launch-copy">
                         <strong>
                           {collaborationPlan.enabled
                             ? "Edytuj plan współpracy"
@@ -12942,7 +12848,7 @@ function FindTalent() {
                         </small>
                       </span>
 
-                      <span className="collaboration-plan-launch-action" aria-hidden="true">
+                      <span className="ih5-collaboration-plan-launch-action" aria-hidden="true">
                         {collaborationPlan.enabled ? "Edytuj" : "Dodaj"}
                         <svg viewBox="0 0 24 24">
                           <path d="m9 5 7 7-7 7" />
@@ -12951,29 +12857,29 @@ function FindTalent() {
                     </button>
                   ) : (
                     <section
-                      className="collaboration-plan-editor"
-                      aria-labelledby="collaboration-plan-editor-title"
+                      className="ih5-collaboration-plan-editor"
+                      aria-labelledby="ih5-collaboration-plan-editor-title"
                     >
-                      <header className="collaboration-plan-editor-header">
+                      <header className="ih5-collaboration-plan-editor-header">
                         <div>
-                          <span className="section-label">Opcjonalne ustalenia</span>
-                          <h3 id="collaboration-plan-editor-title">Plan współpracy</h3>
+                          <span className="ih5-eyebrow">Opcjonalne ustalenia</span>
+                          <h3 id="ih5-collaboration-plan-editor-title">Plan współpracy</h3>
                           <p>
                             Dodaj tylko informacje, które naprawdę pomogą obu stronom rozpocząć projekt bez niedomówień.
                           </p>
                         </div>
 
-                        <div className="collaboration-plan-editor-actions">
+                        <div className="ih5-collaboration-plan-editor-actions">
                           <button
                             type="button"
-                            className="collaboration-plan-text-button"
+                            className="ih5-collaboration-plan-text-button"
                             onClick={() => setCollaborationPlanOpen(false)}
                           >
                             Zwiń
                           </button>
                           <button
                             type="button"
-                            className="collaboration-plan-text-button is-danger"
+                            className="ih5-collaboration-plan-text-button is-danger"
                             onClick={removeCollaborationPlan}
                           >
                             Usuń plan
@@ -12981,9 +12887,9 @@ function FindTalent() {
                         </div>
                       </header>
 
-                      <div className="collaboration-plan-editor-grid">
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
+                      <div className="ih5-collaboration-plan-editor-grid">
+                        <section className="ih5-collaboration-plan-group">
+                          <div className="ih5-collaboration-plan-group-heading">
                             <span>01</span>
                             <div>
                               <h4>Przebieg projektu</h4>
@@ -12991,8 +12897,8 @@ function FindTalent() {
                             </div>
                           </div>
 
-                          <div className="collaboration-plan-fields">
-                            <fieldset className="collaboration-plan-fieldset">
+                          <div className="ih5-collaboration-plan-fields">
+                            <fieldset className="ih5-collaboration-plan-fieldset">
                               <legend>Etapy projektu <em>maks. 3</em></legend>
                               {collaborationPlan.milestones.map((milestone, index) => (
                                 <label key={`milestone-${index}`}>
@@ -13073,8 +12979,8 @@ function FindTalent() {
                           </div>
                         </section>
 
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
+                        <section className="ih5-collaboration-plan-group">
+                          <div className="ih5-collaboration-plan-group-heading">
                             <span>02</span>
                             <div>
                               <h4>Odbiór i poprawki</h4>
@@ -13082,7 +12988,7 @@ function FindTalent() {
                             </div>
                           </div>
 
-                          <div className="collaboration-plan-fields">
+                          <div className="ih5-collaboration-plan-fields">
                             <label>
                               Liczba rund poprawek
                               <select
@@ -13099,7 +13005,7 @@ function FindTalent() {
                               </select>
                             </label>
 
-                            <fieldset className="collaboration-plan-fieldset">
+                            <fieldset className="ih5-collaboration-plan-fieldset">
                               <legend>Kiedy zlecenie jest ukończone? <em>maks. 3</em></legend>
                               {collaborationPlan.completionCriteria.map((criterion, index) => (
                                 <label key={`criterion-${index}`}>
@@ -13127,9 +13033,9 @@ function FindTalent() {
                               ))}
                             </fieldset>
 
-                            <fieldset className="collaboration-plan-fieldset">
+                            <fieldset className="ih5-collaboration-plan-fieldset">
                               <legend>Zmiany poza ustalonym zakresem</legend>
-                              <div className="collaboration-plan-radio-list">
+                              <div className="ih5-collaboration-plan-radio-list">
                                 {COLLABORATION_CHANGE_OPTIONS.map((option) => (
                                   <label
                                     className={
@@ -13158,8 +13064,8 @@ function FindTalent() {
                           </div>
                         </section>
 
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
+                        <section className="ih5-collaboration-plan-group">
+                          <div className="ih5-collaboration-plan-group-heading">
                             <span>03</span>
                             <div>
                               <h4>Obowiązki obu stron</h4>
@@ -13167,7 +13073,7 @@ function FindTalent() {
                             </div>
                           </div>
 
-                          <div className="collaboration-plan-fields">
+                          <div className="ih5-collaboration-plan-fields">
                             <label>
                               Zleceniodawca dostarczy
                               <textarea
@@ -13204,8 +13110,8 @@ function FindTalent() {
                           </div>
                         </section>
 
-                        <section className="collaboration-plan-group">
-                          <div className="collaboration-plan-group-heading">
+                        <section className="ih5-collaboration-plan-group">
+                          <div className="ih5-collaboration-plan-group-heading">
                             <span>04</span>
                             <div>
                               <h4>Odpowiedź wykonawcy</h4>
@@ -13213,10 +13119,10 @@ function FindTalent() {
                             </div>
                           </div>
 
-                          <div className="collaboration-plan-fields">
-                            <fieldset className="collaboration-plan-fieldset">
+                          <div className="ih5-collaboration-plan-fields">
+                            <fieldset className="ih5-collaboration-plan-fieldset">
                               <legend>W zgłoszeniu poproś o</legend>
-                              <div className="collaboration-plan-check-grid">
+                              <div className="ih5-collaboration-plan-check-grid">
                                 {COLLABORATION_APPLICATION_REQUIREMENTS.map((option) => (
                                   <label
                                     className={
@@ -13243,7 +13149,7 @@ function FindTalent() {
                               </div>
                             </fieldset>
 
-                            <fieldset className="collaboration-plan-fieldset">
+                            <fieldset className="ih5-collaboration-plan-fieldset">
                               <legend>Pytania do wykonawcy <em>maks. 3</em></legend>
                               {collaborationPlan.screeningQuestions.map((question, index) => (
                                 <label key={`question-${index}`}>
@@ -13274,13 +13180,13 @@ function FindTalent() {
                         </section>
                       </div>
 
-                      <footer className="collaboration-plan-editor-footer">
+                      <footer className="ih5-collaboration-plan-editor-footer">
                         <span>
                           Plan jest opcjonalny. Zapiszemy go razem ze zleceniem i pokażemy wykonawcom w czytelnym podsumowaniu.
                         </span>
                         <button
                           type="button"
-                          className="btn btn-dark"
+                          className="ih5-button is-primary"
                           onClick={() => setCollaborationPlanOpen(false)}
                         >
                           Zapisz plan
@@ -13294,16 +13200,16 @@ function FindTalent() {
           )}
 
           {formStep === 3 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-3-title">
-              <div className="job-create-step-heading">
+            <section ref={stepPanelRef} key={formStep} className="ih5-job-create-step-panel" aria-labelledby="job-step-3-title">
+              <div className="ih5-job-create-step-heading">
                 <span>03</span>
                 <div>
-                  <h2 id="job-step-3-title">Budżet i terminy</h2>
+                  <h2 tabIndex={-1} id="job-step-3-title">Budżet i terminy</h2>
                   <p>Termin realizacji jest niezależny od czasu wyświetlania ogłoszenia.</p>
                 </div>
               </div>
 
-              <div className="job-form-grid">
+              <div className="ih5-job-form-grid">
                 <label className="is-wide">
                   Budżet (zł)
                   <input
@@ -13315,44 +13221,44 @@ function FindTalent() {
                     placeholder="Np. 3000"
                     maxLength={5}
                     aria-describedby="job-budget-help"
-                    aria-label="Budżet zlecenia, maksymalnie 15 000 zł"
+                    aria-label="Budżet zlecenia, maksymalnie 10 000 zł"
                   />
 
-                  <div className="job-budget-limit-note" id="job-budget-help" role="note">
-                    <i className="job-budget-limit-icon" aria-hidden="true">i</i>
-                    <span className="job-budget-limit-copy">
-                      <strong>Maksymalnie 15 000 zł</strong>
+                  <div className="ih5-job-budget-limit-note" id="job-budget-help" role="note">
+                    <i className="ih5-job-budget-limit-icon" aria-hidden="true">i</i>
+                    <span className="ih5-job-budget-limit-copy">
+                      <strong>Maksymalnie 10 000 zł</strong>
                       <small>Podaj wynagrodzenie wykonawcy. Dodatkowe koszty, np. reklamy, opisz w zakresie projektu.</small>
                     </span>
                   </div>
                 </label>
 
-                <fieldset className="job-option-fieldset is-wide">
+                <fieldset className="ih5-job-option-fieldset is-wide">
                   <legend>Charakter budżetu</legend>
-                  <p className="job-option-intro">Czy kwota jest ostateczna, czy będzie ustalana przed współpracą?</p>
-                  <div className="job-option-grid job-budget-options">
-                    <label className={`job-option-card${budgetNegotiable ? " is-selected" : ""}`}>
+                  <p className="ih5-job-option-intro">Czy kwota jest ostateczna, czy będzie ustalana przed współpracą?</p>
+                  <div className="ih5-job-option-grid ih5-job-budget-options">
+                    <label className={`ih5-job-option-card${budgetNegotiable ? " is-selected" : ""}`}>
                       <input
                         type="radio"
                         name="budget-negotiable"
                         checked={budgetNegotiable}
                         onChange={() => setBudgetNegotiable(true)}
                       />
-                      <span className="job-option-mark" aria-hidden="true">01</span>
+                      <span className="ih5-job-option-mark" aria-hidden="true">01</span>
                       <span>
                         <strong>Do negocjacji</strong>
                         <small>Ostateczną cenę ustalicie w warunkach współpracy.</small>
                       </span>
                     </label>
 
-                    <label className={`job-option-card${!budgetNegotiable ? " is-selected" : ""}`}>
+                    <label className={`ih5-job-option-card${!budgetNegotiable ? " is-selected" : ""}`}>
                       <input
                         type="radio"
                         name="budget-negotiable"
                         checked={!budgetNegotiable}
                         onChange={() => setBudgetNegotiable(false)}
                       />
-                      <span className="job-option-mark" aria-hidden="true">●</span>
+                      <span className="ih5-job-option-mark" aria-hidden="true">●</span>
                       <span>
                         <strong>Cena ustalona</strong>
                         <small>Podana kwota pozostanie stała w ustaleniach.</small>
@@ -13381,13 +13287,13 @@ function FindTalent() {
                   />
                 </label>
 
-                <fieldset className="job-option-fieldset is-wide">
+                <fieldset className="ih5-job-option-fieldset is-wide">
                   <legend>Czas publikacji ogłoszenia</legend>
-                  <p className="job-option-intro">Po tym czasie zlecenie zniknie z publicznej wyszukiwarki.</p>
-                  <div className="job-option-grid job-duration-options">
+                  <p className="ih5-job-option-intro">Po tym czasie zlecenie zniknie z publicznej wyszukiwarki.</p>
+                  <div className="ih5-job-option-grid ih5-job-duration-options">
                     {JOB_LISTING_DURATION_OPTIONS.map((option) => (
                       <label
-                        className={`job-option-card${listingDurationDays === option.days ? " is-selected" : ""}`}
+                        className={`ih5-job-option-card${listingDurationDays === option.days ? " is-selected" : ""}`}
                         key={option.days}
                       >
                         <input
@@ -13397,7 +13303,7 @@ function FindTalent() {
                           checked={listingDurationDays === option.days}
                           onChange={() => setListingDurationDays(option.days)}
                         />
-                        <span className="job-option-duration" aria-hidden="true">{option.days}</span>
+                        <span className="ih5-job-option-duration" aria-hidden="true">{option.days}</span>
                         <span>
                           <strong>{option.label}</strong>
                           <small>{option.description}</small>
@@ -13411,18 +13317,18 @@ function FindTalent() {
           )}
 
           {formStep === 4 && (
-            <section className="job-create-step-panel" aria-labelledby="job-step-4-title">
-              <div className="job-create-step-heading">
+            <section ref={stepPanelRef} key={formStep} className="ih5-job-create-step-panel" aria-labelledby="job-step-4-title">
+              <div className="ih5-job-create-step-heading">
                 <span>04</span>
                 <div>
-                  <h2 id="job-step-4-title">Sprawdź przed publikacją</h2>
+                  <h2 tabIndex={-1} id="job-step-4-title">Sprawdź przed publikacją</h2>
                   <p>Tak najważniejsze informacje zobaczy potencjalny wykonawca.</p>
                 </div>
               </div>
 
-              <div className="job-create-summary">
+              <div className="ih5-job-create-summary">
                 <article className="is-wide">
-                  <span className="section-label">{getJobCategoryLabel(category)} · {subcategory}</span>
+                  <span className="ih5-eyebrow">{getJobCategoryLabel(category)} · {subcategory}</span>
                   <h3>{title || "Bez tytułu"}</h3>
                   <p>{description || "Brak opisu."}</p>
                 </article>
@@ -13453,7 +13359,7 @@ function FindTalent() {
                 </article>
 
                 {Object.keys(categoryDetails).length > 0 && (
-                  <article className="is-wide job-create-summary-details">
+                  <article className="is-wide ih5-job-create-summary-details">
                     <span>Szczegóły kategorii</span>
                     <dl>
                       {Object.entries(categoryDetails)
@@ -13469,7 +13375,7 @@ function FindTalent() {
                 )}
 
                 {collaborationPlan.enabled && (
-                  <article className="is-wide job-create-summary-details collaboration-summary-card">
+                  <article className="is-wide ih5-job-create-summary-details collaboration-summary-card">
                     <span>Plan współpracy</span>
                     <dl>
                       <div>
@@ -13521,7 +13427,7 @@ function FindTalent() {
                 )}
               </div>
 
-              <p className="job-create-publish-note">
+              <p className="ih5-job-create-publish-note">
                 Po publikacji zlecenie będzie widoczne przez {listingDurationDays} dni. Termin wykonania projektu pozostaje osobną informacją.
               </p>
             </section>
@@ -13529,26 +13435,26 @@ function FindTalent() {
 
           {message && (
             <p
-              className={success ? "auth-message" : "auth-error"}
+              className={success ? "ih5-notice is-success" : "ih5-notice is-error"}
               role={success ? "status" : "alert"}
             >
               {message}
             </p>
           )}
 
-          <div className="job-create-navigation">
+          <div className="ih5-job-create-navigation">
             {formStep > 1 && (
-              <button className="btn btn-outline" type="button" onClick={goToPreviousStep} disabled={saving}>
+              <button className="ih5-button is-quiet" type="button" onClick={goToPreviousStep} disabled={saving}>
                 Wstecz
               </button>
             )}
 
             {formStep < JOB_FORM_STEPS.length ? (
-              <button className="btn btn-dark" type="button" onClick={goToNextStep}>
+              <button className="ih5-button is-primary" type="button" onClick={goToNextStep}>
                 Dalej
               </button>
             ) : (
-              <button className="btn btn-dark" type="submit" disabled={saving}>
+              <button className="ih5-button is-primary" type="submit" disabled={saving}>
                 {saving ? "Publikowanie..." : "Opublikuj zlecenie"}
               </button>
             )}
@@ -13721,11 +13627,11 @@ function EditJob() {
 
   if (!job) {
     return (
-      <div className="page">
+      <div className="page ih-market-v5 ih5-create-page">
         <AccountNavbar />
 
-        <main className="app-page">
-          <p className="auth-error">
+        <main className="ih-market-shell ih5-editor-shell">
+          <p className="ih5-notice is-error">
             {message ||
               "Nie znaleziono zlecenia."}
           </p>
@@ -13735,27 +13641,14 @@ function EditJob() {
   }
 
   return (
-    <div className="page">
+    <div className="page ih-market-v5 ih5-create-page">
       <AccountNavbar />
 
-      <main className="app-page">
-        <div className="app-page-header">
-          <span className="section-label">
-            Edycja zlecenia
-          </span>
-
-          <h1>
-            Edytuj zlecenie
-          </h1>
-
-          <p>
-            Cena zlecenia
-            pozostaje bez zmian.
-          </p>
-        </div>
+      <main className="ih-market-shell ih5-editor-shell">
+        <MarketHeader eyebrow="Twoje zlecenie" title="Edytuj zlecenie" description="Dopracuj opis i wymagania. Zapisane ustalenia pozostają czytelne dla wykonawców." />
 
         <form
-          className="project-form"
+          className="ih5-editor"
           onSubmit={handleSave}
         >
           <label>
@@ -13836,8 +13729,8 @@ function EditJob() {
             </small>
           </div>
 
-          <div className="job-edit-publication-summary">
-            <span className="section-label">Warunki publikacji</span>
+          <div className="ih5-job-edit-publication-summary">
+            <span className="ih5-eyebrow">Warunki publikacji</span>
             <JobListingMeta job={job} />
             <small>
               Wybrany czas publikacji i charakter budżetu są zapisywane w
@@ -13846,13 +13739,13 @@ function EditJob() {
           </div>
 
           {message && (
-            <p className="auth-error">
+            <p className="ih5-notice is-error">
               {message}
             </p>
           )}
 
           <button
-            className="btn btn-dark btn-large"
+            className="ih5-button is-primary btn-large"
             type="submit"
             disabled={saving}
           >
@@ -15234,6 +15127,7 @@ function Jobs() {
   );
 
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const [applicationNotice, setApplicationNotice] = useState("");
 
   useEffect(() => {
     if (discoveryPreferencesLoading) return;
@@ -15528,9 +15422,7 @@ function Jobs() {
         ]
       );
 
-      alert(
-        "Zgłoszenie zostało wysłane do zleceniodawcy."
-      );
+      setApplicationNotice("Zgłoszenie zostało wysłane. Zleceniodawca może teraz odpowiedzieć na Twoją ofertę.");
     } catch (error) {
       setMessage(
         `Nie udało się wysłać zgłoszenia: ${
@@ -15672,30 +15564,15 @@ function Jobs() {
       "Wszystkie";
 
   return (
-    <div className="page ih-jobs-refresh">
+    <div className="page ih-market-v5 ih5-jobs-page">
       <AccountNavbar />
 
-      <main className="app-page ih-jobs-shell">
-        <div className="app-page-header">
-          <span className="section-label">
-            Dla wykonawców
-          </span>
-
-          <h1>
-            Znajdź zlecenie
-          </h1>
-
-          <p>
-            Przeglądaj zlecenia
-            opublikowane przez
-            użytkowników
-            IdeaHire.
-          </p>
-        </div>
+      <main className="ih-market-shell">
+        <MarketHeader eyebrow="Dla wykonawców" title="Znajdź zlecenie" description="Dobry projekt zaczyna się od jasnych ustaleń. Znajdź coś dla siebie." />
 
         {isLimited && (
-          <section className="jobs-age-notice">
-            <span className="jobs-age-notice-icon" aria-hidden="true">16+</span>
+          <section className="ih5-jobs-age-notice">
+            <span className="ih5-jobs-age-notice-icon" aria-hidden="true">16+</span>
             <div>
               <strong>Przeglądanie dostępne</strong>
               <p>
@@ -15707,282 +15584,15 @@ function Jobs() {
           </section>
         )}
 
-        <style>{`
-          .jobs-search {
-            margin: 0 0 34px;
-            padding: 18px;
-            background: #fff;
-            border: 1px solid #e8e8e5;
-            border-radius: 22px;
-            box-shadow: 0 12px 35px rgba(17, 17, 17, 0.045);
-          }
-
-          .jobs-search-box {
-            position: relative;
-            display: flex;
-            align-items: center;
-            min-height: 58px;
-            padding: 0 16px 0 18px;
-            border: 1px solid #deded9;
-            border-radius: 15px;
-            background: #fafaf8;
-            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
-          }
-
-          .jobs-search-box:focus-within {
-            border-color: #b9b9b3;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(17, 17, 17, .045);
-          }
-
-          .jobs-search-icon {
-            width: 20px;
-            margin-right: 12px;
-            color: #777;
-            font-size: 22px;
-            line-height: 1;
-            transform: translateY(-1px);
-          }
-
-          .jobs-search-box input {
-            width: 100%;
-            min-width: 0;
-            border: 0;
-            outline: 0;
-            background: transparent;
-            color: #111;
-            font-size: 15px;
-            font-weight: 500;
-          }
-
-          .jobs-search-box input::placeholder {
-            color: #999;
-            font-weight: 400;
-          }
-
-          .jobs-search-clear {
-            width: 30px;
-            height: 30px;
-            flex: 0 0 30px;
-            display: grid;
-            place-items: center;
-            margin-left: 10px;
-            padding: 0;
-            border: 0;
-            border-radius: 50%;
-            background: #ededeb;
-            color: #555;
-            font-size: 19px;
-            line-height: 1;
-            transition: background .2s ease, color .2s ease, transform .2s ease;
-          }
-
-          .jobs-search-clear:hover {
-            background: #deded9;
-            color: #111;
-            transform: none;
-          }
-
-          .jobs-filter-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 14px;
-            padding: 2px 1px;
-            overflow-x: auto;
-            scrollbar-width: none;
-          }
-
-          .jobs-filter-row::-webkit-scrollbar {
-            display: none;
-          }
-
-          .jobs-filter {
-            flex: 0 0 auto;
-            min-height: 38px;
-            padding: 8px 14px;
-            border: 1px solid #e1e1dc;
-            border-radius: 999px;
-            background: #fff;
-            color: #666;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: .1px;
-            white-space: nowrap;
-            transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
-          }
-
-          .jobs-filter:hover {
-            border-color: #c8c8c2;
-            background: #f7f7f4;
-            color: #111;
-            transform: none;
-          }
-
-          .jobs-filter.active {
-            border-color: #111;
-            background: #111;
-            color: #fff;
-          }
-
-          .jobs-filter.active:hover {
-            border-color: #111;
-            background: #111;
-            color: #fff;
-          }
-
-          @media (max-width: 600px) {
-            .jobs-search {
-              margin-bottom: 28px;
-              padding: 12px;
-              border-radius: 18px;
-            }
-
-            .jobs-search-box {
-              min-height: 54px;
-              padding-left: 15px;
-            }
-
-            .jobs-filter-row {
-              margin-top: 11px;
-            }
-          }
-        `}</style>
 
         {/* =================================================
             WYSZUKIWARKA
         ================================================= */}
 
-        <section
-          className="jobs-search"
-          aria-label="Wyszukiwarka zleceń"
-        >
-          <div className="jobs-search-box">
-            <span
-              className="jobs-search-icon"
-              aria-hidden="true"
-            >
-              
-            </span>
+        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder} />
+        {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
 
-            <input
-              type="text"
-              value={search}
-              onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
-              }
-              placeholder="Czego szukasz?"
-              aria-label="Szukaj zleceń"
-            />
-
-            {search && (
-              <button
-                type="button"
-                className="jobs-search-clear"
-                onClick={() =>
-                  setSearch("")
-                }
-                aria-label="Wyczyść wyszukiwanie"
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          {/* =================================================
-              FILTRY KATEGORII
-          ================================================= */}
-
-          <div className="jobs-filter-row">
-            <button
-              type="button"
-              className={
-                selectedCategory ===
-                "Wszystkie"
-                  ? "jobs-filter active"
-                  : "jobs-filter"
-              }
-              onClick={() =>
-                chooseCategory(
-                  "Wszystkie"
-                )
-              }
-            >
-              Wszystkie
-            </button>
-
-            {JOB_CATEGORIES.map(
-              (category) => (
-                <button
-                  type="button"
-                  key={category}
-                  className={
-                    selectedCategory ===
-                    category
-                      ? "jobs-filter active"
-                      : "jobs-filter"
-                  }
-                  onClick={() =>
-                    chooseCategory(
-                      category
-                    )
-                  }
-                >
-                  {getJobCategoryLabel(category)}
-                </button>
-              )
-            )}
-          </div>
-          {selectedSubcategory && (
-            <div className="jobs-subcategory-filter">
-              <span>Specjalizacja: <strong>{selectedSubcategory}</strong></span>
-              <button type="button" onClick={() => chooseCategory(selectedCategory)}>
-                Pokaż całą kategorię
-              </button>
-            </div>
-          )}
-        </section>
-
-        <section
-          className="jobs-order-panel"
-          aria-label="Sposób sortowania zleceń"
-        >
-          <div className="jobs-order-copy">
-            <span className="jobs-order-icon" aria-hidden="true">✦</span>
-            <div>
-              <strong>Dopasowanie do Twoich kategorii</strong>
-              <small>
-                Najpierw pokazujemy zlecenia zgodne z kategoriami wybranymi
-                na Twoim koncie. Pozostałe oferty nadal są widoczne.
-              </small>
-            </div>
-          </div>
-
-          <div className="jobs-order-switch" role="group" aria-label="Kolejność wyników">
-            <button
-              type="button"
-              className={sortMode === "matched" ? "is-active" : ""}
-              onClick={() => setSortMode("matched")}
-              disabled={!canUseMatchedOrder}
-              title={
-                canUseMatchedOrder
-                  ? "Pokaż najpierw wybrane kategorie"
-                  : "Wybierz kategorie w ustawieniach konta"
-              }
-            >
-              Dopasowane do mnie
-            </button>
-            <button
-              type="button"
-              className={sortMode === "latest" ? "is-active" : ""}
-              onClick={() => setSortMode("latest")}
-            >
-              Najnowsze
-            </button>
-          </div>
-        </section>
+        {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
 
         {/* =================================================
             WYNIKI
@@ -15991,8 +15601,8 @@ function Jobs() {
         {!loading &&
           !message &&
           jobs.length > 0 && (
-            <div className="jobs-results-header">
-              <div className="jobs-results-copy">
+            <div className="ih5-jobs-results-header">
+              <div className="ih5-jobs-results-copy">
                 <span>Wyniki wyszukiwania</span>
                 <strong>
                   {formatPolishJobsCount(filteredJobs.length)}
@@ -16002,7 +15612,7 @@ function Jobs() {
               {hasFilters && (
                 <button
                   type="button"
-                  className="jobs-clear-filters"
+                  className="ih5-jobs-clear-filters"
                   onClick={
                     clearFilters
                   }
@@ -16015,14 +15625,14 @@ function Jobs() {
 
         {loading && (
           <InlineRouteLoader
-            className="jobs-route-loader"
+            className="ih5-jobs-route-loader"
             rows={4}
           />
         )}
 
         {!loading &&
           message && (
-            <p className="auth-error">
+            <p className="ih5-notice is-error">
               {message}
             </p>
           )}
@@ -16030,8 +15640,8 @@ function Jobs() {
         {!loading &&
           !message &&
           jobs.length === 0 && (
-            <section className="account-card">
-              <span className="section-label">
+            <section className="ih5-empty">
+              <span className="ih5-eyebrow">
                 Brak zleceń
               </span>
 
@@ -16053,8 +15663,8 @@ function Jobs() {
           jobs.length > 0 &&
           filteredJobs.length ===
             0 && (
-            <section className="account-card jobs-empty-search">
-              <span className="section-label">
+            <section className="ih5-empty ih5-jobs-empty-search">
+              <span className="ih5-eyebrow">
                 Brak wyników
               </span>
 
@@ -16071,7 +15681,7 @@ function Jobs() {
 
               <button
                 type="button"
-                className="btn btn-dark"
+                className="ih5-button is-primary"
                 onClick={
                   clearFilters
                 }
@@ -16085,7 +15695,7 @@ function Jobs() {
             LISTA ZLECEŃ
         ================================================= */}
 
-        <div className="jobs-list">
+        <div className="ih5-jobs-list">
           {displayedJobs.map(
             (job, jobIndex) => {
               const isOpen =
@@ -16145,19 +15755,19 @@ function Jobs() {
 
               return (
                 <article
-                  className={`job-card ih-job-card${isOpen ? " is-open" : ""}`}
+                  className={`ih5-job-card${isOpen ? " is-open" : ""}`}
                   style={{ "--ih-job-order": Math.min(jobIndex, 5) }}
                   aria-labelledby={`ih-job-title-${job.id}`}
                   key={job.id}
                 >
-                  <div className="job-card-top">
-                    <span className="section-label">
+                  <div className="ih5-job-card-top">
+                    <span className="ih5-eyebrow">
                       {getJobCategoryLabel(job.category)}
                       {job.subcategory ? ` · ${job.subcategory}` : ""}
                     </span>
 
                     <span
-                      className={`job-active-badge ${
+                      className={`ih5-job-active-badge ${
                         isMatched ? "is-matched" : "is-active"
                       }`}
                     >
@@ -16167,62 +15777,30 @@ function Jobs() {
                     </span>
                   </div>
 
-                  <h2 className="ih-job-title" id={`ih-job-title-${job.id}`} title={job.title}>
-                    {job.title}
-                  </h2>
-
-                  <JobListingMeta job={job} />
-
-                  <p className="job-card-summary">
-                    {job.description || "Brak opisu zlecenia."}
-                  </p>
-
-                  <div className="job-card-facts">
-                    <div>
-                      <span>Budżet</span>
-                      <strong>{formatBudget(job.budget)}</strong>
+                  <div className="ih5-job-overview">
+                    <div className="ih5-job-copy">
+                      <h2 className="ih5-job-title" id={`ih-job-title-${job.id}`} title={job.title}>{job.title}</h2>
+                      <p className="ih5-job-summary">{job.description || "Brak opisu zlecenia."}</p>
                     </div>
-
-                    <div>
-                      <span>Opublikowano</span>
-                      <strong>{formatDate(job.created_at)}</strong>
-                    </div>
-
-                    <div>
-                      <span>Termin wykonania</span>
-                      <strong>
-                        {job.project_deadline
-                          ? formatDate(job.project_deadline)
-                          : "Do ustalenia"}
-                      </strong>
-                    </div>
+                    <div className="ih5-job-price"><span>Budżet</span><strong>{formatBudget(job.budget)}</strong><small>{job.budget_negotiable ? "Do negocjacji" : "Cena ustalona"}</small></div>
                   </div>
-
-                  <div className="job-brief-meta">
-                    <span>{getJobOptionLabel(JOB_WORK_MODES, job.work_mode)}</span>
-                    <span>{getJobOptionLabel(JOB_EXPERIENCE_LEVELS, job.experience_level)}</span>
-                    {job.requires_portfolio && <span>Portfolio wymagane</span>}
-                    {job.location && <span>{job.location}</span>}
+                  <div className="ih5-job-facts">
+                    <div><span>Współpraca</span><strong>{getJobOptionLabel(JOB_WORK_MODES, job.work_mode)}</strong></div>
+                    <div><span>Termin</span><strong>{job.project_deadline ? formatDate(job.project_deadline) : "Do ustalenia"}</strong></div>
+                    <div><span>Opublikowano</span><strong>{formatDate(job.created_at)}</strong><small className="ih5-job-expiry">{getJobExpiryInfo(job.expires_at).label}</small></div>
                   </div>
-
-                  {Array.isArray(job.required_skills) && job.required_skills.length > 0 && (
-                    <div className="job-required-skills" aria-label="Wymagane umiejętności">
-                      {job.required_skills.map((skill) => (
-                        <span key={skill}>{skill}</span>
-                      ))}
-                    </div>
-                  )}
+                  {Array.isArray(job.required_skills) && job.required_skills.length > 0 && <div className="ih5-job-skills" aria-label="Wymagane umiejętności">{(isOpen ? job.required_skills : job.required_skills.slice(0, 3)).map((skill) => <span key={skill}>{skill}</span>)}{!isOpen && job.required_skills.length > 3 && <span>+{job.required_skills.length - 3}</span>}</div>}
 
                   {isOpen && (
-                    <div className="job-details job-collaboration-details" id={`ih-job-plan-${job.id}`} aria-labelledby={`ih-job-plan-title-${job.id}`}>
-                      <header className="job-collaboration-header">
-                        <span className="job-collaboration-header-icon" aria-hidden="true">
+                    <div className="ih5-job-details ih5-job-collaboration-details" id={`ih-job-plan-${job.id}`} aria-labelledby={`ih-job-plan-title-${job.id}`}>
+                      <header className="ih5-job-collaboration-header">
+                        <span className="ih5-job-collaboration-header-icon" aria-hidden="true">
                           <svg viewBox="0 0 24 24">
                             <path d="M8 12.5 10.5 15 16 9.5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
                           </svg>
                         </span>
                         <div>
-                          <span className="section-label">Czytelne ustalenia przed startem</span>
+                          <span className="ih5-eyebrow">Czytelne ustalenia przed startem</span>
                           <h3 id={`ih-job-plan-title-${job.id}`}>Plan współpracy</h3>
                           <p>
                             Zakres, sposób realizacji i informacje potrzebne do przygotowania trafnego zgłoszenia.
@@ -16230,8 +15808,8 @@ function Jobs() {
                         </div>
                       </header>
 
-                      <section className="job-collaboration-section">
-                        <div className="job-collaboration-section-heading">
+                      <section className="ih5-job-collaboration-section">
+                        <div className="ih5-job-collaboration-section-heading">
                           <span>01</span>
                           <div>
                             <h4>Zakres realizacji</h4>
@@ -16240,21 +15818,21 @@ function Jobs() {
                         </div>
 
                       {job.expected_outcome && (
-                        <div className="job-detail-section">
+                        <div className="ih5-job-detail-section">
                           <span>Oczekiwany rezultat</span>
                           <p>{job.expected_outcome}</p>
                         </div>
                       )}
 
                       {job.client_materials && (
-                        <div className="job-detail-section">
+                        <div className="ih5-job-detail-section">
                           <span>Materiały od zleceniodawcy</span>
                           <p>{job.client_materials}</p>
                         </div>
                       )}
 
                       {job.category_details && Object.keys(job.category_details).length > 0 && (
-                        <dl className="job-category-detail-list">
+                        <dl className="ih5-job-category-detail-list">
                           {Object.entries(job.category_details).map(([key, value]) => (
                             <div key={key}>
                               <dt>{getJobCategoryFieldLabel(job.category, key)}</dt>
@@ -16266,7 +15844,7 @@ function Jobs() {
 
                       {safeReferenceUrl && (
                         <a
-                          className="job-reference-link"
+                          className="ih5-job-reference-link"
                           href={safeReferenceUrl}
                           target="_blank"
                           rel="noreferrer"
@@ -16279,8 +15857,8 @@ function Jobs() {
 
                       {collaborationPlanData ? (
                         <>
-                          <section className="job-collaboration-section">
-                            <div className="job-collaboration-section-heading">
+                          <section className="ih5-job-collaboration-section">
+                            <div className="ih5-job-collaboration-section-heading">
                               <span>02</span>
                               <div>
                                 <h4>Przebieg i komunikacja</h4>
@@ -16289,7 +15867,7 @@ function Jobs() {
                             </div>
 
                             {collaborationMilestones.length > 0 && (
-                              <ol className="job-collaboration-timeline">
+                              <ol className="ih5-job-collaboration-timeline">
                                 {collaborationMilestones.map((milestone, index) => (
                                   <li key={`${job.id}-milestone-${index}`}>
                                     <span>{String(index + 1).padStart(2, "0")}</span>
@@ -16299,7 +15877,7 @@ function Jobs() {
                               </ol>
                             )}
 
-                            <dl className="job-collaboration-facts">
+                            <dl className="ih5-job-collaboration-facts">
                               <div>
                                 <dt>Poprawki</dt>
                                 <dd>
@@ -16339,8 +15917,8 @@ function Jobs() {
                             </dl>
                           </section>
 
-                          <section className="job-collaboration-section">
-                            <div className="job-collaboration-section-heading">
+                          <section className="ih5-job-collaboration-section">
+                            <div className="ih5-job-collaboration-section-heading">
                               <span>03</span>
                               <div>
                                 <h4>Odbiór i odpowiedzialność</h4>
@@ -16348,7 +15926,7 @@ function Jobs() {
                               </div>
                             </div>
 
-                            <div className="job-collaboration-responsibility-grid">
+                            <div className="ih5-job-collaboration-responsibility-grid">
                               {collaborationCriteria.length > 0 && (
                                 <article>
                                   <span>Kryteria ukończenia</span>
@@ -16397,8 +15975,8 @@ function Jobs() {
 
                           {(collaborationRequirements.length > 0 ||
                             collaborationQuestions.length > 0) && (
-                            <section className="job-collaboration-section">
-                              <div className="job-collaboration-section-heading">
+                            <section className="ih5-job-collaboration-section">
+                              <div className="ih5-job-collaboration-section-heading">
                                 <span>04</span>
                                 <div>
                                   <h4>Przygotuj kompletne zgłoszenie</h4>
@@ -16407,7 +15985,7 @@ function Jobs() {
                               </div>
 
                               {collaborationRequirements.length > 0 && (
-                                <div className="job-collaboration-requirements">
+                                <div className="ih5-job-collaboration-requirements">
                                   {collaborationRequirements.map((value) => (
                                     <span key={`${job.id}-${value}`}>
                                       {
@@ -16421,7 +15999,7 @@ function Jobs() {
                               )}
 
                               {collaborationQuestions.length > 0 && (
-                                <ol className="job-collaboration-questions">
+                                <ol className="ih5-job-collaboration-questions">
                                   {collaborationQuestions.map((question, index) => (
                                     <li key={`${job.id}-question-${index}`}>
                                       <span>{String(index + 1).padStart(2, "0")}</span>
@@ -16434,7 +16012,7 @@ function Jobs() {
                           )}
                         </>
                       ) : (
-                        <div className="job-collaboration-empty">
+                        <div className="ih5-job-collaboration-empty">
                           <strong>Podstawowe ustalenia</strong>
                           <p>
                             Zleceniodawca nie dodał rozszerzonego planu. Szczegóły współpracy możecie ustalić przed rozpoczęciem projektu.
@@ -16442,17 +16020,17 @@ function Jobs() {
                         </div>
                       )}
 
-                      <div className="job-details-actions">
+                      <div className="ih5-job-details-actions">
                         <Link
                           to={`/profile/${job.user_id}`}
-                          className="btn btn-outline"
+                          className="ih5-button is-quiet"
                         >
                           Zobacz profil zleceniodawcy 
                         </Link>
 
                         {!isOwner && (
                           <button
-                            className="btn btn-dark"
+                            className="ih5-button is-primary"
                             type="button"
                             disabled={
                               !canTransact ||
@@ -16473,12 +16051,12 @@ function Jobs() {
                               : applyingJobId ===
                                   job.id
                               ? "Wysyłanie..."
-                              : "Zgłoś się do zlecenia "}
+                              : "Zgłoś się"}
                           </button>
                         )}
 
                         <button
-                          className="btn btn-outline"
+                          className="ih5-button is-quiet"
                           type="button"
                           onClick={() =>
                             setOpenJobId(
@@ -16491,7 +16069,7 @@ function Jobs() {
                       </div>
 
                       {isOwner && (
-                        <p className="job-owner-note">
+                        <p className="ih5-job-owner-note">
                           <small>
                             To jest Twoje
                             zlecenie.
@@ -16502,27 +16080,20 @@ function Jobs() {
                   )}
 
                   {!isOpen && (
-                    <div className="job-actions">
+                    <div className="ih5-job-actions">
                       <button
-                        className="btn btn-outline"
+                        className="ih5-button is-quiet"
                         type="button"
                         aria-expanded={isOpen}
                         aria-controls={`ih-job-plan-${job.id}`}
                         onClick={() => setOpenJobId(job.id)}
                       >
-                        Plan współpracy
+                        Szczegóły <MarketIcon kind="arrow" />
                       </button>
-
-                      <Link
-                        to={`/profile/${job.user_id}`}
-                        className="btn btn-outline"
-                      >
-                        Profil zleceniodawcy
-                      </Link>
 
                       {!isOwner && (
                         <button
-                          className="btn btn-dark"
+                          className="ih5-button is-primary"
                           type="button"
                           disabled={
                             !canTransact ||
@@ -16543,7 +16114,7 @@ function Jobs() {
                             : applyingJobId ===
                                 job.id
                             ? "Wysyłanie..."
-                            : "Zgłoś się do zlecenia "}
+                            : "Zgłoś się"}
                         </button>
                       )}
                     </div>
@@ -16561,418 +16132,6 @@ function Jobs() {
 /* =========================================================
    TALENT DIRECTORY — POMOCNE DOPASOWANIE, BEZ BLOKAD RÓL
 ========================================================= */
-
-function Talent() {
-  const { user } = useAuth();
-  const {
-    preferences: discoveryPreferences,
-    loading: discoveryPreferencesLoading,
-  } = useDiscoveryPreferences();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [profiles, setProfiles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Wszystkie");
-  const [sortMode, setSortMode] = useState("matched");
-
-  useEffect(() => {
-    if (discoveryPreferencesLoading) return;
-
-    setSortMode(
-      discoveryPreferences?.personalizationEnabled !== false &&
-        (
-          discoveryPreferences?.clientCategories ||
-          discoveryPreferences?.preferredCategories ||
-          []
-        ).length > 0
-        ? "matched"
-        : "latest"
-    );
-  }, [
-    discoveryPreferencesLoading,
-    discoveryPreferences?.updatedAt,
-  ]);
-
-  useEffect(() => {
-    const category = new URLSearchParams(location.search).get("category");
-
-    setSelectedCategory(
-      category && JOB_CATEGORIES.includes(category)
-        ? category
-        : "Wszystkie"
-    );
-  }, [location.search]);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadProfiles() {
-      setLoading(true);
-      setMessage("");
-
-      try {
-        let query = supabase
-          .from("profiles")
-          .select(
-            "id, name, avatar_url, about, specialty_categories, specialization, skills, completed_jobs, positive_reviews, neutral_reviews, negative_reviews, created_at"
-          )
-          .order("created_at", { ascending: false });
-
-        if (user?.id) {
-          query = query.neq("id", user.id);
-        }
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-        if (active) setProfiles(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("TALENT DIRECTORY LOAD ERROR:", error);
-        if (active) {
-          setMessage(
-            `Nie udało się pobrać profili: ${
-              error?.message || "Nieznany błąd"
-            }`
-          );
-        }
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    loadProfiles();
-
-    return () => {
-      active = false;
-    };
-  }, [user?.id]);
-
-  function chooseCategory(category) {
-    setSelectedCategory(category);
-    navigate(
-      category === "Wszystkie"
-        ? "/talent"
-        : `/talent?category=${encodeURIComponent(category)}`,
-      { replace: true }
-    );
-  }
-
-  const preferredCategories =
-    discoveryPreferences?.clientCategories ||
-    discoveryPreferences?.preferredCategories ||
-    [];
-  const canUseMatchedOrder =
-    discoveryPreferences?.personalizationEnabled !== false &&
-    preferredCategories.length > 0;
-  const normalizedSearch = search.trim().toLowerCase();
-
-  const displayedProfiles = profiles
-    .filter((profile) => {
-      const categories = Array.isArray(profile.specialty_categories)
-        ? profile.specialty_categories.filter((category) =>
-            JOB_CATEGORIES.includes(category)
-          )
-        : [];
-
-      if (
-        selectedCategory !== "Wszystkie" &&
-        !categories.includes(selectedCategory)
-      ) {
-        return false;
-      }
-
-      if (!normalizedSearch) return true;
-
-      return [
-        profile.name,
-        profile.about,
-        profile.specialization,
-        ...categories,
-        ...(Array.isArray(profile.skills) ? profile.skills : []),
-      ]
-        .map((value) => String(value || "").toLowerCase())
-        .some((value) => value.includes(normalizedSearch));
-    })
-    .sort((firstProfile, secondProfile) => {
-      if (sortMode === "matched" && canUseMatchedOrder) {
-        const firstCategories = Array.isArray(
-          firstProfile.specialty_categories
-        )
-          ? firstProfile.specialty_categories
-          : [];
-        const secondCategories = Array.isArray(
-          secondProfile.specialty_categories
-        )
-          ? secondProfile.specialty_categories
-          : [];
-        const firstScore = firstCategories.some((category) =>
-          preferredCategories.includes(category)
-        )
-          ? 0
-          : 1;
-        const secondScore = secondCategories.some((category) =>
-          preferredCategories.includes(category)
-        )
-          ? 0
-          : 1;
-
-        if (firstScore !== secondScore) return firstScore - secondScore;
-      }
-
-      const dateDifference =
-        new Date(secondProfile.created_at || 0).getTime() -
-        new Date(firstProfile.created_at || 0).getTime();
-
-      if (dateDifference) return dateDifference;
-
-      return String(firstProfile.name || "").localeCompare(
-        String(secondProfile.name || ""),
-        "pl"
-      );
-    });
-
-  return (
-    <div className="page">
-      <AccountNavbar />
-
-      <main className="app-page talent-page">
-        <div className="app-page-header talent-page-header">
-          <span className="section-label">Dla zleceniodawców</span>
-          <h1>Znajdź wykonawcę</h1>
-          <p>
-            Przeglądaj profile, specjalizacje i portfolio. Dopasowanie zmienia
-            jedynie kolejność — żaden profil nie jest przez nie ukrywany.
-          </p>
-        </div>
-
-        <section className="talent-controls" aria-label="Wyszukiwanie wykonawców">
-          <div className="talent-search-box">
-            <span aria-hidden="true"></span>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Imię, umiejętność lub specjalizacja"
-              aria-label="Szukaj wykonawców"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                aria-label="Wyczyść wyszukiwanie"
-              >
-                ×
-              </button>
-            )}
-          </div>
-
-          <div className="talent-order-row">
-            <div className="jobs-order-copy">
-              <strong>Kolejność profili</strong>
-              <span>
-                {sortMode === "matched" && canUseMatchedOrder
-                  ? "Najpierw zgodne z wybranymi kategoriami"
-                  : "Najpierw ostatnio utworzone profile"}
-              </span>
-            </div>
-            <div className="jobs-order-switch" role="group" aria-label="Kolejność profili">
-              <button
-                type="button"
-                className={sortMode === "matched" ? "is-active" : ""}
-                disabled={!canUseMatchedOrder}
-                onClick={() => setSortMode("matched")}
-              >
-                Dopasowane
-              </button>
-              <button
-                type="button"
-                className={sortMode === "latest" ? "is-active" : ""}
-                onClick={() => setSortMode("latest")}
-              >
-                Najnowsze
-              </button>
-            </div>
-          </div>
-
-          <div className="talent-category-row" aria-label="Kategorie wykonawców">
-            {["Wszystkie", ...JOB_CATEGORIES].map((category) => (
-              <button
-                type="button"
-                key={category}
-                className={selectedCategory === category ? "is-active" : ""}
-                onClick={() => chooseCategory(category)}
-              >
-                {category === "Wszystkie" ? category : getJobCategoryLabel(category)}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {message && <p className="auth-error">{message}</p>}
-
-        {loading ? (
-          <InlineRouteLoader
-            className="talent-route-loader"
-            rows={4}
-          />
-        ) : displayedProfiles.length === 0 ? (
-          <section className="talent-empty-state">
-            <span aria-hidden="true">◎</span>
-            <h2>Brak profili pasujących do filtrów</h2>
-            <p>Zmień kategorię albo wpisz inne hasło.</p>
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={() => {
-                setSearch("");
-                chooseCategory("Wszystkie");
-              }}
-            >
-              Wyczyść filtry
-            </button>
-          </section>
-        ) : (
-          <section className="talent-grid" aria-label="Profile wykonawców">
-            {displayedProfiles.map((profile) => {
-              const name = profile.name?.trim() || "Użytkownik IdeaHire";
-              const categories = Array.isArray(profile.specialty_categories)
-                ? profile.specialty_categories.filter((category) =>
-                    JOB_CATEGORIES.includes(category)
-                  )
-                : [];
-              const skills = Array.isArray(profile.skills)
-                ? profile.skills.filter(
-                    (skill) => typeof skill === "string" && skill.trim()
-                  )
-                : [];
-              const reviewCount =
-                Math.max(0, Number(profile.positive_reviews) || 0) +
-                Math.max(0, Number(profile.neutral_reviews) || 0) +
-                Math.max(0, Number(profile.negative_reviews) || 0);
-              const isMatched =
-                canUseMatchedOrder &&
-                categories.some((category) =>
-                  preferredCategories.includes(category)
-                );
-
-              return (
-                <article className="talent-card" key={profile.id}>
-                  <div className="talent-card-topline">
-                    <div className="talent-avatar" aria-hidden="true">
-                      {profile.avatar_url ? (
-                        <img src={profile.avatar_url} alt="" />
-                      ) : (
-                        <span>{name.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                    <div className="talent-identity">
-                      <h2>{name}</h2>
-                      <p>
-                        {profile.specialization?.trim() ||
-                          categories[0] ||
-                          "Profil wykonawcy"}
-                      </p>
-                    </div>
-                    {sortMode === "matched" && isMatched && (
-                      <span className="talent-match-badge">Dopasowany</span>
-                    )}
-                  </div>
-
-                  <p className="talent-about">
-                    {profile.about?.trim() ||
-                      "Otwórz profil, aby zobaczyć szczegóły doświadczenia i portfolio."}
-                  </p>
-
-                  <div className="talent-tag-list">
-                    {[...categories, ...skills]
-                      .filter((value, index, values) =>
-                        value && values.indexOf(value) === index
-                      )
-                      .slice(0, 4)
-                      .map((value) => (
-                        <span key={value}>{value}</span>
-                      ))}
-                  </div>
-
-                  <div className="talent-card-footer">
-                    <div className="talent-stats">
-                      <span>
-                        <strong>{Math.max(0, Number(profile.completed_jobs) || 0)}</strong>
-                        realizacji
-                      </span>
-                      <span>
-                        <strong>{reviewCount}</strong>
-                        opinii
-                      </span>
-                    </div>
-                    <Link className="btn btn-dark" to={`/profile/${profile.id}`}>
-                      Zobacz profil 
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-        )}
-
-        <p className="talent-ranking-note">
-          O kolejności decyduje zgodność kategorii wybranych w ustawieniach,
-          a następnie data utworzenia profilu. Możesz przełączyć widok na
-          „Najnowsze” lub zmienić preferencje w zakładce „Moje konto”.
-        </p>
-      </main>
-    </div>
-  );
-}
-
-/* =========================================================
-   CALENDAR
-========================================================= */
-
-const CALENDAR_WEEKDAYS = [
-  "Pon",
-  "Wt",
-  "Śr",
-  "Czw",
-  "Pt",
-  "Sob",
-  "Niedz",
-];
-
-const CALENDAR_EVENT_TYPES = [
-  {
-    value: "deadline",
-    label: "Termin pracy",
-    shortLabel: "Termin",
-  },
-  {
-    value: "meeting",
-    label: "Spotkanie",
-    shortLabel: "Spotkanie",
-  },
-  {
-    value: "payment",
-    label: "Płatność",
-    shortLabel: "Płatność",
-  },
-  {
-    value: "personal",
-    label: "Własne przypomnienie",
-    shortLabel: "Własne",
-  },
-];
-
-const CALENDAR_REMINDER_OPTIONS = [
-  { value: 0, label: "W chwili rozpoczęcia" },
-  { value: 15, label: "15 minut wcześniej" },
-  { value: 60, label: "1 godzinę wcześniej" },
-  { value: 180, label: "3 godziny wcześniej" },
-  { value: 1440, label: "1 dzień wcześniej" },
-  { value: 4320, label: "3 dni wcześniej" },
-  { value: 10080, label: "7 dni wcześniej" },
-];
 
 function calendarPad(value) {
   return String(value).padStart(2, "0");
@@ -32243,170 +31402,9 @@ function ServiceRoute({ mode }) {
 }
 
 /* Decorative cursor trail shared by every route. No pointer interception. */
-function PixelCursorTrail() {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return undefined;
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let enabled = !reducedMotion.matches;
-    let width = 0;
-    let height = 0;
-    let frame = 0;
-    let previousTime = 0;
-    let lastEmission = 0;
-    let lastPoint = null;
-    let colorTarget = null;
-    let colorTheme = "";
-    let color = "#173d80";
-    const particles = [];
-
-    function clear() {
-      if (frame) window.cancelAnimationFrame(frame);
-      frame = 0;
-      particles.length = 0;
-      lastPoint = null;
-      context.clearRect(0, 0, width, height);
-    }
-
-    function resize() {
-      clear();
-      width = window.innerWidth;
-      height = window.innerHeight;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * ratio);
-      canvas.height = Math.round(height * ratio);
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    }
-
-    function animate(now) {
-      frame = 0;
-      if (!enabled || document.hidden) { clear(); return; }
-      const delta = Math.min(32, Math.max(0, now - previousTime));
-      previousTime = now;
-      context.clearRect(0, 0, width, height);
-      for (let index = particles.length - 1; index >= 0; index -= 1) {
-        const particle = particles[index];
-        particle.age += delta;
-        if (particle.age >= particle.duration) { particles.splice(index, 1); continue; }
-        particle.x += particle.vx * delta / 1000;
-        particle.y += particle.vy * delta / 1000;
-        particle.vy += 18 * delta / 1000;
-        context.save();
-        context.globalAlpha = Math.pow(1 - particle.age / particle.duration, 2) * .65;
-        context.translate(particle.x, particle.y);
-        context.rotate(particle.angle + particle.spin * particle.age / particle.duration);
-        context.fillStyle = particle.color;
-        context.strokeStyle = particle.color;
-        context.lineWidth = 1;
-        const offset = -particle.size / 2;
-        if (particle.filled) context.fillRect(offset, offset, particle.size, particle.size);
-        else context.strokeRect(offset, offset, particle.size, particle.size);
-        context.restore();
-      }
-      if (particles.length) frame = window.requestAnimationFrame(animate);
-    }
-
-    function particleColor(target) {
-      const surface = target?.closest?.(".step, .ih-job-card, .floating-card, .ih-category-trigger, .split-card, .category-card, .account-card, a, button") || document.body;
-      const theme = `${document.documentElement.dataset.template}:${document.documentElement.dataset.theme}`;
-      if (surface !== colorTarget || theme !== colorTheme) {
-        const resolved = window.getComputedStyle(surface).color;
-        color = resolved && resolved !== "transparent" && resolved !== "rgba(0, 0, 0, 0)"
-          ? resolved
-          : window.getComputedStyle(document.body).color;
-        colorTarget = surface;
-        colorTheme = theme;
-      }
-      return color;
-    }
-
-    function emit(x, y, target, count, dx = 0, dy = 0) {
-      if (!enabled || document.hidden) return;
-      const length = Math.hypot(dx, dy) || 1;
-      const directionX = dx / length;
-      const directionY = dy / length;
-      const tint = particleColor(target);
-      for (let index = 0; index < count; index += 1) {
-        particles.push({
-          x: x - directionX * 7 + (Math.random() - .5) * 10,
-          y: y - directionY * 7 + (Math.random() - .5) * 10,
-          vx: -directionX * 14 + (Math.random() - .5) * 30,
-          vy: -directionY * 14 + (Math.random() - .5) * 30,
-          age: 0,
-          duration: 420 + Math.random() * 280,
-          size: 2.5 + Math.random() * 3.5,
-          angle: Math.random() * .8,
-          spin: (Math.random() - .5) * 1.5,
-          filled: index % 2 === 0,
-          color: tint,
-        });
-      }
-      if (particles.length > 56) particles.splice(0, particles.length - 56);
-      if (!frame) {
-        previousTime = window.performance.now();
-        frame = window.requestAnimationFrame(animate);
-      }
-    }
-
-    function isEditing(target) {
-      return Boolean(target?.closest?.("input, textarea, select, [contenteditable='true']"));
-    }
-
-    function move(event) {
-      if (!enabled || event.pointerType === "touch" || isEditing(event.target)) { lastPoint = null; return; }
-      const current = { x: event.clientX, y: event.clientY };
-      if (!lastPoint) { lastPoint = current; return; }
-      const dx = current.x - lastPoint.x;
-      const dy = current.y - lastPoint.y;
-      const now = window.performance.now();
-      if (Math.hypot(dx, dy) < 7 || now - lastEmission < 28) return;
-      lastEmission = now;
-      lastPoint = current;
-      emit(current.x, current.y, event.target, 2, dx, dy);
-    }
-
-    function tap(event) {
-      if (!isEditing(event.target)) emit(event.clientX, event.clientY, event.target, event.pointerType === "touch" ? 6 : 3);
-    }
-
-    function changeMotion(event) { enabled = !event.matches; clear(); }
-    function visibility() { if (document.hidden) clear(); }
-    function resetPointer() { lastPoint = null; }
-
-    resize();
-    document.addEventListener("pointermove", move, { passive: true });
-    document.addEventListener("pointerdown", tap, { passive: true });
-    document.addEventListener("pointerleave", resetPointer);
-    document.addEventListener("visibilitychange", visibility);
-    window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener("scroll", resetPointer, { passive: true });
-    window.addEventListener("blur", clear);
-    reducedMotion.addEventListener?.("change", changeMotion);
-
-    return () => {
-      clear();
-      document.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerdown", tap);
-      document.removeEventListener("pointerleave", resetPointer);
-      document.removeEventListener("visibilitychange", visibility);
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("scroll", resetPointer);
-      window.removeEventListener("blur", clear);
-      reducedMotion.removeEventListener?.("change", changeMotion);
-    };
-  }, []);
-
-  return <canvas className="ih-pixel-canvas" ref={canvasRef} aria-hidden="true" />;
-}
-
 function Router() {
   return (
     <BrowserRouter>
-      <PixelCursorTrail />
       <SmoothRouteTransitions />
       <RouteScrollManager />
       <AuthProvider>
@@ -32591,16 +31589,7 @@ function Router() {
             }
           />
 
-          <Route
-            path="/talent"
-            element={
-              <ProtectedRoute>
-                <UserOnlyRoute allowLimited>
-                  <Talent />
-                </UserOnlyRoute>
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/talent" element={<Navigate to="/services" replace />} />
 
           <Route
             path="/services"
