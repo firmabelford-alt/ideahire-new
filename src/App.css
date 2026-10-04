@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -49514,7 +49514,7 @@ html:root body #root#root .page.ih-market-v5 .ih5-service-modal-message { paddin
   html:root body #root#root .page.ih-market-v5 .ih5-collaboration-plan-launch { padding: 15px; gap: 10px; }
 }
 
-/* IdeaHire — PACZKA 06 — logo, centred preview and profile semicircle. */
+/* IdeaHire — PACZKA 07 — logo, centred preview and profile semicircle. */
 /* Remove decorative sweeps from the header and the opening section. */
 html:root body #root#root .app.ih-home-refresh.ih-home-v6 > main::before,
 html:root body #root#root .app.ih-home-refresh.ih-home-v6 > main::after,
@@ -49792,3 +49792,399 @@ html:root body #root#root .page.ih6-account-page .ih6-profile-hub[data-open="tru
 
 html:root body #root#root .app.ih-home-refresh.ih-home-v6 .ih6-job-preview .live-dot { display: block !important; flex: 0 0 6px !important; width: 6px !important; height: 6px !important; padding: 0 !important; background: var(--ih-home-accent) !important; border-radius: 50% !important; font-size: 0 !important; line-height: 0 !important; }
 html:root body #root#root .page.ih6-account-page .ih6-hub-item > span:last-child { min-width: 0 !important; overflow-wrap: anywhere !important; }
+
+/* =========================================================
+   PACZKA 07 — account composition, contrast, themed filters,
+   local home animation and a private conversation workspace.
+========================================================= */
+:root {
+  --ih7-ink: #17243a; --ih7-muted: #516076; --ih7-surface: #ffffff;
+  --ih7-soft: #f1f4fa; --ih7-bg: #f4f6fb; --ih7-line: #dbe2ed;
+  --ih7-accent: #264c96; --ih7-on-accent: #ffffff; --ih7-error: #a32237;
+  --ih7-notice: #715f2c;
+  --ih7-cta-ink: #f1f6ff; --ih7-cta-muted: #c5d6ed;
+}
+html[data-theme="dark"] {
+  --ih7-ink: #f2f5fc; --ih7-muted: #b7c5da; --ih7-surface: #151f31;
+  --ih7-soft: #1d2a40; --ih7-bg: #10192a; --ih7-line: #35455e;
+  --ih7-accent: #c4d7ff; --ih7-on-accent: #172945; --ih7-error: #ffa8b7;
+  --ih7-notice: #e2ca87;
+}
+html[data-template="classic"] {
+  --ih7-ink: #202020; --ih7-muted: #555551; --ih7-surface: #ffffff;
+  --ih7-soft: #f2f2ef; --ih7-bg: #f7f7f5; --ih7-line: #ddddd7;
+  --ih7-accent: #242424; --ih7-on-accent: #ffffff; --ih7-error: #a32237;
+  --ih7-notice: #715f2c;
+  --ih7-cta-ink: #202020; --ih7-cta-muted: #555551;
+}
+html[data-template="classic"][data-theme="dark"] {
+  --ih7-ink: #f4f4f0; --ih7-muted: #c1c1bb; --ih7-surface: #1c1c1c;
+  --ih7-soft: #272727; --ih7-bg: #141414; --ih7-line: #454541;
+  --ih7-accent: #f2f2eb; --ih7-on-accent: #202020; --ih7-error: #ffa8b7;
+  --ih7-notice: #e2ca87;
+  --ih7-cta-ink: #f4f4f0; --ih7-cta-muted: #c1c1bb;
+}
+
+/* Keep the existing backgrounds and color families. Text follows its surface. */
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.hero-text,.ih-category-intro > p,.footer p,.footer > span,.footer .footer-links a) {
+  color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .footer .footer-links a:hover { color: var(--ih-home-ink) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .final-cta :is(.final-cta-title,.final-cta-title > span) {
+  color: var(--ih7-cta-ink) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .final-cta > .section-label { color: var(--ih7-cta-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .section-heading :is(h2,.section-label,p),
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .ih5-step-trigger > span,
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card:not(.light) > :is(h2,p,.section-label) {
+  color: #f2f6ff !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html[data-template="classic"] body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .section-heading :is(h2,.section-label,p),
+html[data-template="classic"] body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .ih5-step-trigger > span,
+html[data-template="classic"] body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card:not(.light) > :is(h2,p,.section-label) { color: #f5f5f1 !important; }
+html:root body #root#root :is(.page,.account-page) :is(.app-page-header > p,.account-tab-intro > p,.account-card-subtitle,.account-card-description,.account-helper,.form-helper,.field-help,.input-help,.profile-description,.portfolio-empty,.templates-subtitle,.notification-description,.notification-time,.job-card-meta) {
+  color: var(--ih7-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html:root body #root#root :is(.page,.account-page) :is(.app-page-header h1,.account-tab-intro h2,.account-card > h2,.account-card-heading h2,.profile-section h2,.notifications-heading h1) {
+  color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html:root body #root#root .account-profile-workspace > .profile-preview .profile-info :is(h2,p) {
+  color: #f4f7ff !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html[data-template="classic"] body #root#root .account-profile-workspace > .profile-preview .profile-info :is(h2,p) { color: #f5f5f1 !important; }
+html:root body #root#root :is(.page,.account-page,.app,.auth-page,.auth-card) :is(input,textarea)::placeholder { color: var(--ih7-muted) !important; opacity: 1 !important; }
+html:root body #root#root :is(.auth-card,.privacy-center-page,.notifications-page,.legal-document-page) :is(.auth-footer,.auth-header > p,.privacy-center-header > p,.legal-document-subtitle,.notification-meta,.notification-date) { color: var(--ih7-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important; }
+html:root body #root#root :is(.auth-card,.notifications-page,.profile-expertise,.profile-reviews-section,.profile-public-portfolio) :is(.auth-form small,.auth-switch,.notification-job small,.notification-person p,.profile-expertise-label,.profile-about-copy,.profile-reviews-empty,.profile-public-portfolio-copy p,.profile-review-card small) { color: var(--ih7-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important; }
+html:root body #root#root .auth-card .auth-header h1 { color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root .calendar-page { --calendar-muted: var(--ih7-muted); }
+html:root body #root#root .calendar-day.is-outside { opacity: 1 !important; }
+html:root body #root#root .calendar-day.is-outside .calendar-day-number { color: var(--calendar-muted) !important; }
+html:root body #root#root .calendar-reminder-settings > label.is-disabled { opacity: 1 !important; color: var(--calendar-muted) !important; }
+
+/* One account overview, then a full-width section. The original fan is retained. */
+html:root body #root#root .page.ih6-account-page .ih6-account-workspace { width: min(1140px,calc(100% - 48px)) !important; max-width: 1140px !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-overview {
+  display: grid !important; grid-template-columns: 340px minmax(0,1fr) !important; align-items: center !important;
+  gap: 28px !important; margin: 0 0 26px !important; padding: 24px !important;
+  border: 1px solid var(--ih6-line) !important; border-radius: 25px !important;
+  background: var(--ih6-surface) !important; color: var(--ih6-ink) !important;
+}
+html:root body #root#root .page.ih6-account-page .ih7-account-overview .ih6-profile-hub { position: relative !important; top: auto !important; align-self: center !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-heading { display: block !important; min-width: 0 !important; padding: 6px 12px 6px 0 !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-heading > .section-label { color: var(--ih6-muted) !important; font-size: 10px !important; opacity: 1 !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-heading h1 { margin: 9px 0 12px !important; font-size: clamp(28px,3vw,39px) !important; line-height: 1.16 !important; letter-spacing: -.04em !important; color: var(--ih6-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-heading > p { max-width: 480px !important; margin: 0 !important; font-size: 13px !important; line-height: 1.8 !important; color: var(--ih6-muted) !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-current { display: flex !important; flex-wrap: wrap !important; gap: 8px 14px !important; margin: 18px 0 0 !important; padding-top: 15px !important; border-top: 1px solid var(--ih6-line) !important; font-size: 12px !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-current > span { color: var(--ih6-muted) !important; }
+html:root body #root#root .page.ih6-account-page .ih7-account-current > strong { color: var(--ih6-ink) !important; font-weight: 650 !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-layout { display: block !important; width: 100% !important; }
+html:root body #root#root .page.ih6-account-page .ih6-account-content > .account-tab-intro { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 9px !important; padding: 4px 4px 20px !important; margin: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html:root body #root#root .page.ih6-account-page .account-tab-intro h2 { margin: 5px 0 0 !important; font-size: 25px !important; line-height: 1.25 !important; }
+html:root body #root#root .page.ih6-account-page .account-tab-intro p { max-width: 760px !important; margin: 0 !important; font-size: 13px !important; line-height: 1.75 !important; }
+html:root body #root#root .page.ih6-account-page .account-tab-stage { min-width: 0 !important; }
+html:root body #root#root .page.ih6-account-page .account-tab-stage:focus-visible { outline: 2px solid var(--ih6-accent) !important; outline-offset: 6px !important; border-radius: 18px !important; }
+
+/* Per-shape roles prevent global SVG rules from darkening the worker. */
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story {
+  --ih5-scene-skin: #d8a48b; --ih7-shirt: #365a98; --ih7-trousers: #364a6c;
+  background: var(--ih-home-surface) !important;
+}
+html[data-theme="dark"] body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story { --ih5-scene-skin: #efb79a; --ih7-shirt: #98b5ee; --ih7-trousers: #bacae5; }
+html[data-template="classic"] body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story { --ih7-shirt: #555555; --ih7-trousers: #484848; }
+html[data-template="classic"][data-theme="dark"] body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story { --ih7-shirt: #c8c8c8; --ih7-trousers: #b7b7b7; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="ink"] { fill: var(--ih5-scene-ink) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="accent"] { fill: var(--ih5-scene-accent) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="skin"] { fill: var(--ih5-scene-skin) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="line"] { fill: var(--ih5-scene-line) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="ink"] { stroke: var(--ih5-scene-ink) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="accent"] { stroke: var(--ih5-scene-accent) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="skin"] { stroke: var(--ih5-scene-skin) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="line"] { stroke: var(--ih5-scene-line) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="on-accent"] { stroke: var(--ih5-scene-on-accent) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-person-part="shirt"] { stroke: var(--ih7-shirt) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-person-part="trousers"] { stroke: var(--ih7-trousers) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [fill="none"], html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene path[stroke]:not([fill]) { fill: none !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [fill^="url("] { fill: var(--ih5-scene-soft) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-chair > rect { fill: var(--ih5-scene-ink) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-window :is(rect,path) { fill: none !important; stroke: var(--ih5-scene-line) !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-code path { stroke: var(--ih5-scene-accent) !important; fill: none !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-person { opacity: 1; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story-caption { color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; }
+
+/* Small squares settle into a grid under readable, stationary copy. */
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .ih5-step-tiles i { width: clamp(5px,.65vw,9px) !important; height: clamp(5px,.65vw,9px) !important; border-radius: 1.5px !important; animation: ih7-tile-settle 1.2s cubic-bezier(.2,.75,.3,1) both !important; animation-delay: var(--tile-delay) !important; }
+@keyframes ih7-tile-settle {
+  0% { opacity: 0; transform: translate(var(--tile-dx),var(--tile-dy)) rotate(var(--tile-turn)) scale(.45); }
+  30% { opacity: .12; }
+  62% { opacity: .2; transform: translate(0,0) rotate(0) scale(1); }
+  82% { opacity: .12; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(0,0) scale(.9); }
+}
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 > main > .hero .hero-visual.ih-orbit-preview.ih7-preview-motion { grid-template-rows: 72px 278px 72px 44px !important; height: 532px !important; min-height: 532px !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-motion > .card-top { animation: ih7-orbit-top 9s ease-in-out infinite !important; transform-origin: 50% 210% !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-motion > .card-bottom { animation: ih7-orbit-bottom 9s ease-in-out infinite !important; transform-origin: 50% -110% !important; }
+@keyframes ih7-orbit-top { 0%,100% { rotate: -2deg; } 50% { rotate: 2deg; } }
+@keyframes ih7-orbit-bottom { 0%,100% { rotate: 2deg; } 50% { rotate: -2deg; } }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-motion > .ih7-preview-pause { position: relative !important; grid-row: 4 !important; display: flex !important; align-items: center !important; gap: 7px !important; width: auto !important; min-height: 44px !important; padding: 4px 11px !important; border: 1px solid var(--ih-home-line) !important; border-radius: 20px !important; background: var(--ih-home-surface) !important; color: var(--ih-home-muted) !important; font: inherit !important; font-size: 10px !important; cursor: pointer; transform: none !important; }
+html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-motion[data-paused="true"] > .card-small { animation-play-state: paused !important; }
+
+/* Animated listbox replaces OS dropdowns only in marketplace filters. */
+html:root body #root#root .page.ih-market-v5 .ih5-filters { position: relative !important; z-index: 6 !important; overflow: visible !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select { position: relative !important; min-width: 0 !important; min-height: 60px !important; padding: 0 !important; border: 1px solid var(--ih5-line) !important; border-radius: 12px !important; background: var(--ih5-soft) !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select[data-open="true"] { z-index: 10 !important; border-color: var(--ih5-accent) !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-label { position: absolute !important; left: 12px !important; top: 7px !important; display: block !important; margin: 0 !important; font-size: 10px !important; color: var(--ih5-muted) !important; pointer-events: none; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-trigger { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; width: 100% !important; min-height: 58px !important; padding: 24px 12px 9px !important; margin: 0 !important; border: 0 !important; background: transparent !important; color: var(--ih5-ink) !important; font: inherit !important; font-size: 13px !important; font-weight: 650 !important; text-align: left !important; box-shadow: none !important; transform: none !important; cursor: pointer; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-trigger > span { min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-trigger svg { flex: 0 0 18px !important; width: 18px !important; height: 18px !important; fill: none !important; stroke: currentColor !important; stroke-width: 1.7 !important; transition: transform 220ms ease; }
+html:root body #root#root .page.ih-market-v5 .ih7-select[data-open="true"] .ih7-select-trigger svg { transform: rotate(180deg); }
+html:root body #root#root .page.ih-market-v5 .ih7-select-menu { position: absolute !important; top: calc(100% + 8px) !important; left: 0 !important; right: 0 !important; display: flex !important; flex-direction: column !important; gap: 3px !important; max-height: var(--ih7-menu-height,320px) !important; margin: 0 !important; padding: 6px !important; overflow-y: auto !important; overscroll-behavior: contain; scrollbar-width: thin; background: var(--ih5-surface) !important; border: 1px solid var(--ih5-line) !important; border-radius: 15px !important; box-shadow: 0 18px 42px #00000024 !important; opacity: 0; visibility: hidden; transform: translateY(-6px) scale(.985); transform-origin: top center; pointer-events: none; transition: opacity 160ms ease,transform 200ms ease,visibility 200ms; }
+html:root body #root#root .page.ih-market-v5 .ih7-select[data-side="up"] .ih7-select-menu { top: auto !important; bottom: calc(100% + 8px) !important; transform-origin: bottom center; }
+html:root body #root#root .page.ih-market-v5 .ih7-select[data-open="true"] .ih7-select-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); pointer-events: auto; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-option { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; flex: 0 0 auto !important; width: 100% !important; min-height: 44px !important; padding: 11px 12px !important; margin: 0 !important; border: 0 !important; border-radius: 9px !important; background: transparent !important; color: var(--ih5-ink) !important; font: inherit !important; font-size: 12px !important; text-align: left !important; transform: none !important; box-shadow: none !important; cursor: pointer; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-option[aria-selected="true"] { background: var(--ih5-accent) !important; color: var(--ih5-on-accent) !important; font-weight: 650 !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-option:not([aria-selected="true"]):is(:hover,:focus) { background: var(--ih5-soft) !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-option:disabled { opacity: 1 !important; color: var(--ih5-muted) !important; cursor: not-allowed; }
+html:root body #root#root .page.ih-market-v5 .ih7-select-option svg { width: 16px !important; height: 16px !important; flex: 0 0 16px; stroke: currentColor !important; fill: none !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select :is(button,button > span) { -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root .page.ih-market-v5 .ih7-select button:focus-visible { outline: 2px solid var(--ih5-accent) !important; outline-offset: 2px !important; }
+
+/* A centered headline, a separate back control, centered management action. */
+html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih7-service-centered-header { position: relative !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 18px !important; width: 100% !important; margin: 0 auto 32px !important; padding: 14px 54px 0 !important; text-align: center !important; }
+html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih7-service-centered-header > div { width: min(100%,680px) !important; min-width: 0 !important; margin: 0 auto !important; }
+html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih7-service-centered-header :is(h1,p) { margin-left: auto !important; margin-right: auto !important; text-align: center !important; }
+html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih7-service-centered-header h1 { margin-top: 9px !important; font-size: clamp(28px,3.3vw,39px) !important; line-height: 1.16 !important; }
+html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih7-service-centered-header p { max-width: 620px !important; line-height: 1.8 !important; }
+html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih5-service-form-header.ih7-service-centered-header > a { position: absolute !important; top: 17px !important; left: 0 !important; width: 40px !important; height: 40px !important; min-height: 40px !important; display: grid !important; place-items: center !important; padding: 0 !important; background: var(--ih5-surface) !important; color: var(--ih5-ink) !important; border: 1px solid var(--ih5-line) !important; border-radius: 50% !important; font-size: 19px !important; }
+
+/* The inbox and chat use their own namespace, never browser-default typography. */
+html:root body #root#root .account-page.ih7-communications { display: block !important; min-height: 100dvh !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; background: var(--ih7-bg) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page),
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) * { box-sizing: border-box !important; font-family: "Inter",system-ui,sans-serif !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) { width: min(1040px,calc(100% - 48px)) !important; max-width: 1040px !important; margin: 34px auto 64px !important; padding: 0 !important; min-width: 0 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) :is(h1,h2,h3,p,dl) { margin: 0; color: var(--ih7-ink); overflow-wrap: anywhere; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) :is(a,button,input,textarea,select) { font: inherit; }
+html:root body #root#root .account-page.ih7-communications .ih7-eyebrow { display: block !important; color: var(--ih7-muted) !important; font-size: 10px !important; font-weight: 650 !important; letter-spacing: .055em !important; line-height: 1.5 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; margin: 0 0 24px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-heading h1 { color: var(--ih7-ink) !important; margin: 7px 0 10px !important; font-size: clamp(30px,3.4vw,41px) !important; line-height: 1.15 !important; letter-spacing: -.04em !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-heading p { color: var(--ih7-muted) !important; font-size: 13px !important; line-height: 1.7 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-overview { display: flex !important; align-items: baseline !important; gap: 8px !important; padding: 16px 20px !important; border: 1px solid var(--ih7-line) !important; border-radius: 17px !important; background: var(--ih7-surface) !important; color: var(--ih7-muted) !important; font-size: 12px !important; white-space: nowrap; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-overview strong { color: var(--ih7-ink) !important; font-size: 27px !important; line-height: 1 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-tools { display: flex !important; align-items: center !important; gap: 14px !important; margin: 0 0 20px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-search { display: flex !important; align-items: center !important; flex: 1 1 0 !important; min-width: 0 !important; gap: 11px !important; padding: 0 15px !important; background: var(--ih7-surface) !important; border: 1px solid var(--ih7-line) !important; border-radius: 13px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-search svg { width: 19px !important; height: 19px !important; flex: 0 0 19px; stroke: var(--ih7-muted) !important; fill: none !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-search input { width: 100% !important; min-width: 0 !important; height: 50px !important; padding: 0 !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; color: var(--ih7-ink) !important; font-size: 13px !important; outline: 0 !important; box-shadow: none !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-search:focus-within { outline: 2px solid var(--ih7-accent); outline-offset: 2px; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-switch { display: flex !important; gap: 4px !important; padding: 4px !important; border: 1px solid var(--ih7-line) !important; border-radius: 13px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-switch button { min-height: 42px !important; padding: 9px 13px !important; border: 0 !important; border-radius: 9px !important; color: var(--ih7-muted) !important; background: transparent !important; font-size: 12px !important; font-weight: 650 !important; cursor: pointer; transition: background 180ms ease,color 180ms ease; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-switch button[aria-pressed="true"] { background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; box-shadow: 0 2px 6px #0000000c; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-switch b { margin-left: 5px; font-size: 10px; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-list { border: 1px solid var(--ih7-line) !important; border-radius: 22px !important; background: var(--ih7-surface) !important; overflow: hidden !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-list-heading { display: flex !important; justify-content: space-between !important; gap: 12px !important; padding: 15px 22px !important; border-bottom: 1px solid var(--ih7-line) !important; color: var(--ih7-muted) !important; font-size: 11px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-row { display: grid !important; grid-template-columns: 48px minmax(0,1fr) 70px !important; align-items: center !important; gap: 16px !important; padding: 22px !important; min-width: 0 !important; border-bottom: 1px solid var(--ih7-line) !important; color: var(--ih7-ink) !important; text-decoration: none !important; transition: background 160ms ease; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-row:last-child { border-bottom: 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-row:is(:hover,:focus-visible) { background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-avatar, html:root body #root#root .account-page.ih7-communications .ih7-chat-avatar { display: grid !important; place-items: center !important; width: 48px !important; height: 48px !important; flex: 0 0 48px !important; overflow: hidden !important; border-radius: 50% !important; border: 1px solid var(--ih7-line) !important; background: var(--ih7-soft) !important; color: var(--ih7-accent) !important; font-size: 17px !important; font-weight: 650 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-avatar,.ih7-chat-avatar) img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-copy { min-width: 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-topline { display: flex !important; align-items: center !important; gap: 8px !important; min-width: 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-topline strong { min-width: 0 !important; overflow: hidden !important; white-space: nowrap !important; text-overflow: ellipsis !important; font-size: 14px !important; font-weight: 650 !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-unread { width: 7px !important; height: 7px !important; flex: 0 0 7px; border-radius: 50%; background: var(--ih7-accent); }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-project, html:root body #root#root .account-page.ih7-communications .ih7-inbox-copy p { display: block !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; color: var(--ih7-muted) !important; font-size: 12px !important; line-height: 1.6 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-project { margin: 3px 0 7px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-row.is-unread .ih7-inbox-copy p { color: var(--ih7-ink) !important; font-weight: 550 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-end { display: flex !important; flex-direction: column !important; align-items: flex-end !important; gap: 14px !important; color: var(--ih7-muted) !important; font-size: 10px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-end svg { width: 18px !important; height: 18px !important; stroke: currentColor !important; fill: none !important; transition: transform 180ms ease; }
+html:root body #root#root .account-page.ih7-communications .ih7-inbox-row:hover .ih7-inbox-end svg { transform: translateX(4px); }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-empty-state,.ih7-chat-empty) { display: grid !important; place-items: center !important; gap: 12px !important; min-height: 220px !important; padding: 36px !important; border: 1px solid var(--ih7-line) !important; border-radius: 20px !important; background: var(--ih7-surface) !important; color: var(--ih7-muted) !important; text-align: center !important; font-size: 13px !important; line-height: 1.8 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-empty-state h2 { color: var(--ih7-ink) !important; font-size: 22px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-empty-state p { color: var(--ih7-muted) !important; max-width: 450px; }
+html:root body #root#root .account-page.ih7-communications .ih7-empty-mark { display: grid; place-items: center; width: 48px; height: 48px; background: var(--ih7-soft); border-radius: 16px; font-size: 25px; color: var(--ih7-accent); }
+
+/* Header -> expandable brief -> tabs -> thread and composer. */
+html:root body #root#root .account-page.ih7-communications .ih7-chat-shell { min-width: 0 !important; min-height: 600px !important; background: var(--ih7-surface) !important; border: 1px solid var(--ih7-line) !important; border-radius: 25px !important; box-shadow: 0 20px 65px #00000009 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-header { display: grid !important; grid-template-columns: 44px minmax(0,1fr) 44px !important; align-items: center !important; gap: 16px !important; padding: 20px 24px !important; border-bottom: 1px solid var(--ih7-line) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-back { display: grid !important; place-items: center !important; width: 44px !important; height: 44px !important; padding: 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 50% !important; color: var(--ih7-ink) !important; background: var(--ih7-soft) !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-back svg { width: 18px !important; height: 18px !important; fill: none !important; stroke: currentColor !important; transform: rotate(180deg); }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-back b { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; clip-path: inset(50%) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-profile-link { display: flex !important; align-items: center !important; gap: 12px !important; min-width: 0 !important; text-decoration: none !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-person { display: block !important; min-width: 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-person strong { display: block !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; font-size: 15px !important; color: var(--ih7-ink) !important; font-weight: 700 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-person > span { display: block !important; color: var(--ih7-muted) !important; font-size: 11px !important; line-height: 1.5 !important; margin-top: 3px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-header-actions { position: relative !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-menu { position: relative !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-menu > summary { display: grid !important; place-items: center !important; width: 44px !important; height: 44px !important; list-style: none !important; padding: 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 50% !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications summary::-webkit-details-marker { display: none !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-popover { position: absolute !important; z-index: 20 !important; top: 52px !important; right: 0 !important; width: min(320px,calc(100vw - 44px)) !important; padding: 7px !important; background: var(--ih7-surface) !important; border: 1px solid var(--ih7-line) !important; border-radius: 16px !important; box-shadow: 0 16px 45px #00000029 !important; animation: ih7-panel-in 180ms ease both; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-popover > :is(button,a) { display: flex !important; align-items: flex-start !important; gap: 10px !important; width: 100% !important; padding: 12px !important; border: 0 !important; border-radius: 10px !important; background: transparent !important; color: var(--ih7-ink) !important; text-decoration: none !important; text-align: left !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-popover :is(b,small) { display: block !important; font-size: 11px !important; line-height: 1.7 !important; white-space: normal !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-popover small { color: var(--ih7-muted) !important; font-weight: 400 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-popover > :is(button,a):hover { background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-popover .is-danger b { color: var(--ih7-error) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project { margin: 0 !important; border-bottom: 1px solid var(--ih7-line) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project > summary { display: grid !important; grid-template-columns: minmax(0,1fr) auto 18px !important; align-items: center !important; gap: 22px !important; padding: 22px 24px !important; list-style: none !important; background: var(--ih7-soft) !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-title { min-width: 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-title h1 { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important; overflow-wrap: anywhere !important; font-size: 20px !important; line-height: 1.35 !important; letter-spacing: -.025em !important; color: var(--ih7-ink) !important; margin: 6px 0 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-budget { display: flex !important; flex-direction: column !important; align-items: flex-end !important; gap: 5px !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-budget small { color: var(--ih7-muted) !important; font-size: 10px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-budget strong { font-size: 15px !important; white-space: nowrap; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project > summary > svg { width: 18px !important; height: 18px !important; stroke: var(--ih7-muted) !important; fill: none !important; stroke-width: 1.7; transition: transform 220ms ease; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project[open] > summary > svg { transform: rotate(180deg); }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body { padding: 22px 24px !important; animation: ih7-panel-in 200ms ease both; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body > strong { display: block; color: var(--ih7-ink) !important; font-size: 14px; overflow-wrap: anywhere; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body p { margin: 10px 0 !important; color: var(--ih7-muted) !important; font-size: 12px !important; line-height: 1.8 !important; white-space: pre-wrap; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body dl { display: flex !important; flex-wrap: wrap !important; gap: 18px 32px !important; margin-top: 16px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body dl div { display: flex; gap: 8px; font-size: 11px; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body dt { color: var(--ih7-muted) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body dd { color: var(--ih7-ink) !important; margin: 0 !important; font-weight: 650; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-service-context { margin: 18px 0 0 !important; padding-top: 16px !important; border-top: 1px solid var(--ih7-line) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-service-context a { display: inline-flex; align-items: center; gap: 8px; color: var(--ih7-accent) !important; text-decoration: none; font-size: 12px; font-weight: 650; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-service-context svg { width: 16px; height: 16px; fill: none !important; stroke: currentColor !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 4px !important; margin: 18px 24px 0 !important; padding: 5px !important; border: 1px solid var(--ih7-line) !important; border-radius: 14px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs button { display: flex !important; align-items: center !important; justify-content: center !important; gap: 9px !important; min-width: 0 !important; min-height: 44px !important; padding: 10px 8px !important; margin: 0 !important; border: 0 !important; border-radius: 10px !important; background: transparent !important; color: var(--ih7-muted) !important; font-size: 12px !important; font-weight: 650 !important; cursor: pointer; transition: background 180ms ease,color 180ms ease,box-shadow 180ms ease; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs button[aria-selected="true"] { background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; box-shadow: 0 3px 9px #0000000b !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs b { min-width: 18px; padding: 2px 4px; border-radius: 6px; font-size: 10px; background: var(--ih7-soft); color: inherit; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-panel { min-width: 0 !important; padding: 20px 24px 24px !important; animation: ih7-panel-in 200ms ease both; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-messages { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 13px !important; min-height: 260px !important; max-height: min(530px,60dvh) !important; padding: 12px 4px 24px !important; overflow-y: auto !important; overscroll-behavior: contain; scrollbar-width: thin; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message { position: relative !important; display: block !important; flex: 0 0 auto !important; width: fit-content !important; max-width: 80% !important; min-width: 92px !important; padding: 15px 17px 10px !important; border: 1px solid var(--ih7-line) !important; border-radius: 18px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; animation: ih7-message-in 200ms ease both; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message.is-mine { align-self: flex-end !important; border-bottom-right-radius: 5px !important; background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; border-color: var(--ih7-accent) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message.is-theirs { align-self: flex-start !important; border-bottom-left-radius: 5px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message :is(p,.private-work-written-item p) { font-size: 13px !important; line-height: 1.8 !important; white-space: pre-wrap !important; overflow-wrap: anywhere !important; color: inherit !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message > time { display: block !important; text-align: right !important; margin: 7px 0 0 !important; color: inherit !important; font-size: 9px !important; opacity: 1 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message .private-work-message-text a { color: inherit !important; text-decoration: underline !important; text-underline-offset: 3px !important; overflow-wrap: anywhere !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-read-receipt { align-self: flex-end !important; color: var(--ih7-muted) !important; font-size: 10px !important; margin: -7px 3px 1px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-day { display: flex !important; align-items: center !important; justify-content: center !important; gap: 12px !important; margin: 8px 0 !important; color: var(--ih7-muted) !important; font-size: 10px !important; text-align: center !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-day::before, html:root body #root#root .account-page.ih7-communications .ih7-chat-day::after { content: ""; width: 34px; height: 1px; background: var(--ih7-line); }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message-actions { display: inline-block !important; position: relative !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message-actions summary { min-width: 30px; min-height: 30px; list-style: none; cursor: pointer; color: inherit; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message-actions button { position: absolute; z-index: 8; left: 0; bottom: 100%; width: 160px; padding: 10px; border: 1px solid var(--ih7-line); border-radius: 10px; background: var(--ih7-surface); color: var(--ih7-ink); font-size: 11px; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-form { display: flex !important; align-items: flex-end !important; gap: 12px !important; padding: 12px !important; margin: 8px 0 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 17px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-form:focus-within { border-color: var(--ih7-accent) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-form textarea { display: block !important; flex: 1 1 0 !important; min-width: 0 !important; min-height: 54px !important; max-height: 180px !important; padding: 7px 3px !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; outline: none !important; box-shadow: none !important; background: transparent !important; color: var(--ih7-ink) !important; font-size: 13px !important; line-height: 1.7 !important; resize: vertical; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-send { display: flex !important; align-items: center !important; gap: 9px !important; min-height: 44px !important; flex: 0 0 auto !important; padding: 11px 17px !important; border: 1px solid var(--ih7-accent) !important; border-radius: 12px !important; background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; font-size: 12px !important; font-weight: 650 !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-send svg { width: 17px !important; height: 17px !important; stroke: currentColor !important; fill: none !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-composer-hint { color: var(--ih7-muted) !important; font-size: 10px !important; line-height: 1.7 !important; margin: 10px 3px 0 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-feedback,.ih7-chat-error) { padding: 14px !important; border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-error) !important; font-size: 12px !important; line-height: 1.8 !important; margin: 12px 0 !important; overflow-wrap: anywhere !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-negotiation-banner,.ih7-chat-block-banner) { padding: 13px 16px !important; margin: 0 0 16px !important; border: 1px solid var(--ih7-line) !important; border-radius: 13px !important; background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; font-size: 11px !important; line-height: 1.8 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) :is(button,a,summary,input,textarea):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 3px !important; }
+html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) button:disabled { opacity: 1 !important; cursor: not-allowed !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-send:disabled { background: var(--ih7-soft) !important; border-color: var(--ih7-line) !important; color: var(--ih7-muted) !important; }
+html:root body #root#root .account-page.ih7-communications :is(input,textarea)::placeholder { color: var(--ih7-muted) !important; opacity: 1 !important; }
+
+/* Existing files, agreements, payment and dispute components keep all callbacks. */
+html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-panel :is(.chat-project-plan,.agreement-workspace,.agreement-summary,.chat-payment-panel,.project-files-library,.project-files-empty,.private-work-delivery,.chat-dispute-card) { min-width: 0 !important; margin: 0 0 20px !important; padding: 22px !important; border: 1px solid var(--ih7-line) !important; border-radius: 18px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; box-shadow: none !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.chat-project-plan,.agreement-workspace,.agreement-summary,.chat-payment-panel,.project-files-library,.private-work-delivery,.chat-dispute-card) :is(h2,h3,strong,b) { color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.chat-project-plan,.agreement-workspace,.agreement-summary,.chat-payment-panel,.project-files-library,.private-work-delivery,.chat-dispute-card) :is(p,dt,small,.section-label) { color: var(--ih7-muted) !important; -webkit-text-fill-color: currentColor !important; font-size: 12px; line-height: 1.8; opacity: 1 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.chat-project-plan-header,.chat-payment-heading,.project-files-library-header,.private-work-delivery-heading,.agreement-form-heading) { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 14px !important; padding: 0 !important; margin: 0 0 20px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.chat-project-plan,.chat-payment-panel,.project-files-library,.private-work-delivery) h2 { font-size: 21px !important; line-height: 1.3 !important; margin: 7px 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.chat-project-plan-section,.project-files-group) { min-width: 0 !important; padding: 18px !important; margin: 16px 0 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 13px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-section-title { display: flex !important; gap: 13px !important; margin-bottom: 16px !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-section-title > span { display: grid !important; place-items: center !important; width: 32px !important; height: 32px !important; flex: 0 0 32px; background: var(--ih7-surface) !important; border: 1px solid var(--ih7-line) !important; border-radius: 10px !important; color: var(--ih7-accent) !important; font-size: 11px !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-section h3 { font-size: 15px !important; }
+html:root body #root#root .account-page.ih7-communications :is(.chat-project-plan-grid,.chat-project-plan-facts,.chat-project-plan-checklists,.agreement-details,.agreement-form-grid,.chat-payment-breakdown) { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 14px !important; min-width: 0 !important; margin: 18px 0 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.chat-project-plan-facts,.agreement-details) > div { display: flex !important; flex-direction: column !important; gap: 7px !important; min-width: 0 !important; padding: 13px !important; border: 1px solid var(--ih7-line) !important; border-radius: 11px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-facts dd { margin: 0 !important; font-size: 12px !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-timeline { margin: 0 !important; padding-left: 20px !important; font-size: 12px !important; line-height: 1.8 !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-timeline li { margin: 12px 0 !important; padding-left: 6px !important; }
+html:root body #root#root .account-page.ih7-communications .chat-project-plan-checklists ul { padding-left: 18px !important; font-size: 12px !important; line-height: 1.9 !important; color: var(--ih7-muted) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-field,.private-work-fields label,.private-work-file-input,.private-work-report-dialog label) { display: flex !important; flex-direction: column !important; gap: 8px !important; min-width: 0 !important; color: var(--ih7-ink) !important; font-size: 12px !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-field-wide,.agreement-detail-wide) { grid-column: 1 / -1 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-field,.private-work-fields,.private-work-share-form,.private-work-report-dialog,.chat-dispute-form) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { width: 100% !important; min-width: 0 !important; min-height: 44px !important; padding: 12px !important; border: 1px solid var(--ih7-line) !important; border-radius: 11px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 13px !important; line-height: 1.7 !important; }
+html:root body #root#root .account-page.ih7-communications .agreement-field textarea { min-height: 100px !important; }
+html:root body #root#root .account-page.ih7-communications .agreement-price-input { display: flex !important; align-items: center !important; gap: 10px !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-form-actions,.agreement-proposal-actions,.private-work-form-actions,.private-work-delivery-actions) { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 20px !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-form-actions,.agreement-proposal-actions,.private-work-form-actions,.private-work-delivery-actions,.chat-payment-panel,.ih7-empty-state) > button,
+html:root body #root#root .account-page.ih7-communications :is(.agreement-workspace-toggle,.private-work-share-toggle,.private-work-secure-access-button) { min-height: 44px !important; padding: 12px 17px !important; border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 12px !important; font-weight: 650 !important; line-height: 1.65 !important; white-space: normal !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-form-actions,.agreement-proposal-actions,.private-work-form-actions,.private-work-delivery-actions) > .is-primary,
+html:root body #root#root .account-page.ih7-communications :is(.agreement-primary-button,.chat-payment-button) { background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; border-color: var(--ih7-accent) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-secondary-button,.agreement-primary-button) { min-height: 44px !important; padding: 12px 17px !important; border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; font-size: 12px !important; font-weight: 650 !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications .agreement-secondary-button { background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-proposal-card,.agreement-waiting-card,.agreement-gate) { margin: 18px 0 !important; padding: 18px !important; background: var(--ih7-soft) !important; border: 1px solid var(--ih7-line) !important; border-radius: 14px !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-proposal-topline,.agreement-progress) { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 13px !important; margin: 14px 0 !important; }
+html:root body #root#root .account-page.ih7-communications .agreement-progress > span { display: inline-flex !important; align-items: center !important; gap: 8px !important; font-size: 11px !important; color: var(--ih7-muted) !important; }
+html:root body #root#root .account-page.ih7-communications .agreement-progress i { display: grid !important; place-items: center !important; width: 27px !important; height: 27px !important; background: var(--ih7-surface) !important; border: 1px solid var(--ih7-line) !important; border-radius: 50% !important; font-style: normal !important; }
+html:root body #root#root .account-page.ih7-communications .agreement-progress .is-complete i { background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-version-pill,.agreement-pending-pill,.chat-project-plan-status,.chat-payment-status) { display: inline-flex !important; align-items: center !important; min-height: 28px !important; padding: 5px 10px !important; border: 1px solid var(--ih7-line) !important; border-radius: 20px !important; background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; font-size: 10px !important; line-height: 1.6 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-shell > .chat-collapsible-panel { margin: 16px 24px 0 !important; }
+html:root body #root#root .account-page.ih7-communications .chat-dispute-card { padding: 18px !important; border: 1px solid var(--ih7-line) !important; border-radius: 15px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-summary > summary,.chat-collapsible-summary) { display: flex !important; align-items: center !important; gap: 12px !important; min-height: 50px !important; padding: 13px !important; list-style: none !important; background: var(--ih7-soft) !important; border: 1px solid var(--ih7-line) !important; border-radius: 13px !important; color: var(--ih7-ink) !important; cursor: pointer; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-summary-copy,.chat-collapsible-copy) { display: flex !important; flex-direction: column !important; gap: 5px !important; min-width: 0 !important; font-size: 12px !important; }
+html:root body #root#root .account-page.ih7-communications :is(.agreement-summary-body,.chat-collapsible-body) { padding: 18px 0 0 !important; }
+html:root body #root#root .account-page.ih7-communications .chat-payment-breakdown { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+html:root body #root#root .account-page.ih7-communications .chat-payment-breakdown > div { display: flex !important; flex-direction: column !important; gap: 9px !important; padding: 15px !important; border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; font-size: 11px !important; }
+html:root body #root#root .account-page.ih7-communications .chat-payment-breakdown strong { color: var(--ih7-ink) !important; font-size: 18px !important; }
+html:root body #root#root .account-page.ih7-communications .chat-payment-breakdown small { font-size: 10px !important; }
+html:root body #root#root .account-page.ih7-communications .chat-payment-explainer { display: flex !important; align-items: flex-start !important; gap: 12px !important; margin: 17px 0 !important; }
+html:root body #root#root .account-page.ih7-communications :is(.private-work-material-group,.private-work-written-item,.private-work-access-item,.private-work-link-row) { min-width: 0 !important; overflow-wrap: anywhere !important; border-color: var(--ih7-line) !important; color: var(--ih7-ink) !important; background: var(--ih7-soft) !important; }
+html:root body #root#root .account-page.ih7-communications .private-work-link-row :is(a,button), html:root body #root#root .account-page.ih7-communications .private-work-secure-access-button { color: var(--ih7-accent) !important; overflow-wrap: anywhere !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message .private-work-materials { margin: 12px 0 0 !important; padding: 12px !important; border: 1px solid var(--ih7-line) !important; border-radius: 11px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-message .private-work-materials p { color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.private-work-share-form,.private-work-report-dialog,.private-work-release-dialog) { width: min(680px,100%) !important; max-height: calc(100dvh - 40px) !important; overflow-y: auto !important; padding: 26px !important; border: 1px solid var(--ih7-line) !important; border-radius: 23px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.private-work-share-form,.private-work-report-dialog,.private-work-release-dialog) :is(h2,h3,strong,b) { color: var(--ih7-ink) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.private-work-share-form,.private-work-report-dialog,.private-work-release-dialog) :is(p,small,.section-label) { color: var(--ih7-muted) !important; font-size: 12px; line-height: 1.8; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.private-work-delivery-note,.private-work-hidden,.project-files-state) { color: var(--ih7-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page .private-work-form-message { color: var(--ih7-notice) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page .private-work-security-note :is(p,strong) { color: #66501e !important; }
+html[data-theme="dark"] body #root#root .account-page.ih7-communications .ih7-chat-page .private-work-security-note :is(p,strong) { color: #e2ca87 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.private-work-tabs,.private-work-fields) { gap: 12px !important; margin: 20px 0 !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page .private-work-tabs button { background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; border: 1px solid var(--ih7-line) !important; border-radius: 11px !important; padding: 12px !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page .private-work-tabs button.is-active { background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; }
+html:root body #root#root .account-page.ih7-communications .ih7-chat-page :is(.private-work-report-close,.private-work-share-heading > button) { background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; border: 1px solid var(--ih7-line) !important; border-radius: 50% !important; min-width: 40px !important; min-height: 40px !important; }
+@keyframes ih7-panel-in { from { opacity: .75; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ih7-message-in { from { opacity: .65; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 760px) {
+  html:root body #root#root .page.ih6-account-page .ih7-account-overview { grid-template-columns: minmax(0,1fr) !important; padding: 20px !important; gap: 12px !important; }
+  html:root body #root#root .page.ih6-account-page .ih7-account-heading { grid-row: 1 !important; padding: 0 !important; text-align: center !important; }
+  html:root body #root#root .page.ih6-account-page .ih7-account-heading > p { margin: 0 auto !important; }
+  html:root body #root#root .page.ih6-account-page .ih7-account-current { justify-content: center !important; }
+  html:root body #root#root .page.ih6-account-page .ih7-account-overview .ih6-profile-hub { margin: 0 auto !important; }
+  html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) { width: calc(100% - 28px) !important; margin: 24px auto 46px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-inbox-tools { flex-wrap: wrap !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-inbox-search { flex-basis: 100% !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-inbox-overview { padding: 12px !important; flex-direction: column !important; gap: 5px !important; font-size: 10px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-inbox-row { grid-template-columns: 42px minmax(0,1fr) 38px !important; gap: 11px !important; padding: 17px 14px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-avatar { width: 42px !important; height: 42px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-shell { border-radius: 21px !important; min-height: 520px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-header { gap: 10px !important; padding: 16px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-avatar { width: 38px !important; height: 38px !important; flex-basis: 38px !important; font-size: 14px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-person strong { font-size: 13px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-person > span { font-size: 10px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-project > summary { grid-template-columns: minmax(0,1fr) 18px !important; gap: 12px !important; padding: 18px 16px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-project-budget { grid-column: 1 !important; grid-row: 2 !important; flex-direction: row !important; justify-content: flex-start !important; align-items: center !important; gap: 10px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-project > summary > svg { grid-column: 2 !important; grid-row: 1 / 3 !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-project-title h1 { font-size: 18px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-project-body { padding: 18px 16px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs { margin: 14px 12px 0 !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs button { font-size: 11px !important; gap: 5px !important; padding: 9px 5px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-panel { padding: 16px 12px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-message { max-width: 90% !important; padding: 12px 14px 9px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-messages { max-height: 58dvh !important; min-height: 220px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-form { flex-wrap: wrap !important; padding: 10px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-form textarea { flex-basis: 100% !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-send { margin-left: auto !important; }
+  html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-search input,.ih7-chat-form textarea) { font-size: 16px !important; }
+  html:root body #root#root .account-page.ih7-communications :is(.chat-project-plan-grid,.chat-project-plan-facts,.chat-project-plan-checklists,.agreement-form-grid,.agreement-details,.chat-payment-breakdown) { grid-template-columns: minmax(0,1fr) !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-panel :is(.chat-project-plan,.agreement-workspace,.agreement-summary,.chat-payment-panel,.project-files-library,.private-work-delivery,.chat-dispute-card) { padding: 16px !important; }
+  html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih7-service-centered-header { padding: 12px 0 0 !important; }
+  html:root body #root#root .page.ih-market-v5 .ih-market-shell .ih5-service-form-header.ih7-service-centered-header > a { position: relative !important; top: auto !important; align-self: flex-start !important; }
+}
+@media (max-width: 620px) {
+  html:root body #root#root .page.ih6-account-page .ih6-account-workspace { width: calc(100% - 28px) !important; }
+  html:root body #root#root .page.ih6-account-page .ih7-account-overview { padding: 17px 12px !important; border-radius: 21px !important; }
+  html:root body #root#root .page.ih6-account-page .ih7-account-heading h1 { font-size: 29px !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 > main > .hero .hero-visual.ih-orbit-preview.ih7-preview-motion { grid-template-rows: 64px 264px 64px 44px !important; height: 478px !important; min-height: 478px !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-motion > .card-small { width: min(78%,252px) !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .ih5-step-tiles i { width: 6px !important; height: 6px !important; }
+}
+@media (max-width: 370px) {
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-header { grid-template-columns: 36px minmax(0,1fr) 36px !important; gap: 7px !important; padding: 12px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-back, html:root body #root#root .account-page.ih7-communications .ih7-chat-actions-menu > summary { width: 36px !important; height: 36px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-profile-link { gap: 8px !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-person > span { display: none !important; }
+  html:root body #root#root .account-page.ih7-communications .ih7-chat-workspace-tabs button { flex-direction: column !important; font-size: 10px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-motion *, html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-step-tiles,
+  html:root body #root#root .page.ih-market-v5 .ih7-select *, html:root body #root#root .account-page.ih7-communications :is(.ih7-inbox-page,.ih7-chat-page) * { animation: none !important; transition: none !important; }
+  html:root body #root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih7-preview-pause { display: none !important; }
+}
