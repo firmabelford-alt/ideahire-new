@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/ServiceMarketplace.jsx */
+/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
   useEffect,
@@ -653,7 +653,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-form-page">
-      <header className="ih5-service-form-header">
+      <header className="ih5-service-form-header ih7-service-centered-header">
         <Link to={editing ? `/services/${id}` : "/services"} aria-label="Wróć">←</Link>
         <div>
           <span className="ih5-service-eyebrow">Dla wykonawców</span>
@@ -1357,7 +1357,7 @@ function MyServices({ supabase, user, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-my-services-page">
-      <header className="ih5-my-services-header">
+      <header className="ih5-my-services-header ih7-service-centered-header">
         <div>
           <span className="ih5-service-eyebrow">Panel wykonawcy</span>
           <h1>Twoje usługi</h1>
