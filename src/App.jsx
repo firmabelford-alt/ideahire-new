@@ -1,8 +1,8 @@
-/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/App.jsx */
+/* IdeaHire | PACZKA 06 | 2026-10-04 | Pełny plik: src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
-import { CommissionStory, HomeStepCard } from "./MarketUI";
+import { CommissionStory, HomeStepCard, IdeaHireLogo } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
@@ -819,7 +819,7 @@ function App({ session, loading, categoryGroups = [] }) {
   }
 
   return (
-    <div className="app ih-home-refresh ih-home-v3 ih-home-v4">
+    <div className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6">
       <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
         data-mobile-menu-open={mobileMenuOpen}
         onKeyDown={(event) => {
@@ -829,9 +829,7 @@ function App({ session, loading, categoryGroups = [] }) {
             mobileMenuButtonRef.current?.focus({ preventScroll: true });
           }
         }}>
-        <Link className="logo logo-clean" to="/">
-          Idea<span>Hire</span>
-        </Link>
+        <IdeaHireLogo className="logo logo-clean" />
 
         <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label="Nawigacja strony głównej"
           onClick={(event) => { if (event.target?.closest?.("a")) setMobileMenuOpen(false); }}>
@@ -966,14 +964,23 @@ function App({ session, loading, categoryGroups = [] }) {
             </div>
           </div>
 
-          <div className="hero-visual ih-orbit-preview">
+          <div className="hero-visual ih-orbit-preview ih6-job-preview">
+            <div className="floating-card card-small card-top">
+              <span className="mini-icon">✦</span>
+
+              <div>
+                <strong>Najnowsze zlecenia</strong>
+                <span title={nextJob.title}>{nextJob.title}</span>
+              </div>
+            </div>
+
             <div
               className="floating-card card-main rotating-job-card"
               key={activeJob.id}
             >
               <div className="card-header">
                 <span>Aktualne zlecenie</span>
-                <span className="live-dot">●</span>
+                <span className="live-dot" aria-hidden="true" />
               </div>
 
               <h3 title={activeJob.title}>{activeJob.title}</h3>
@@ -990,21 +997,12 @@ function App({ session, loading, categoryGroups = [] }) {
               </div>
             </div>
 
-            <div className="floating-card card-small card-top">
-              <span className="mini-icon">✦</span>
-
-              <div>
-                <strong>Najnowsze zlecenia</strong>
-                <span>{nextJob.title}</span>
-              </div>
-            </div>
-
             <div className="floating-card card-small card-bottom">
-              <span className="check-icon"></span>
+              <span className="check-icon" aria-hidden="true">↗</span>
 
               <div>
                 <strong>Kolejne zlecenie</strong>
-                <span>{followingJob.title}</span>
+                <span title={followingJob.title}>{followingJob.title}</span>
               </div>
             </div>
 
