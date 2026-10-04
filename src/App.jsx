@@ -1,6 +1,8 @@
+/* IdeaHire | PACZKA 05 | 2026-10-04 | Pełny plik: src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
+import { CommissionStory, HomeStepCard } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
@@ -199,7 +201,6 @@ function HomeCategoryBrowser({ groups }) {
   const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || "");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const triggerRef = useRef(null);
-  const hoverTimer = useRef(null);
   const group = groups.find((item) => item.value === selectedCategory) || groups[0];
   const subcategories = group?.subcategories || [];
   const copy = HOME_CATEGORY_COPY[group?.value];
@@ -211,14 +212,7 @@ function HomeCategoryBrowser({ groups }) {
   const query = new URLSearchParams({ category: group?.value || "" });
   if (selectedSubcategory) query.set("subcategory", selectedSubcategory);
 
-  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
-
-  function clearHoverTimer() {
-    window.clearTimeout(hoverTimer.current);
-  }
-
   function closeBrowser() {
-    clearHoverTimer();
     setOpen(false);
     triggerRef.current?.focus({ preventScroll: true });
   }
@@ -241,11 +235,7 @@ function HomeCategoryBrowser({ groups }) {
       }}>
       <button ref={triggerRef} type="button" className="ih-category-trigger"
         aria-expanded={open} aria-controls="ih-category-panel"
-        onPointerEnter={(event) => onMousePreview(event, () => {
-          clearHoverTimer(); hoverTimer.current = window.setTimeout(() => setOpen(true), 180);
-        })}
-        onPointerLeave={clearHoverTimer}
-        onClick={() => { clearHoverTimer(); setOpen((current) => !current); }}>
+        onClick={() => setOpen((current) => !current)}>
         <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, "0")} kategorii</span><span className="ih-category-toggle" aria-hidden="true">{open ? "−" : "+"}</span></span>
         <span className="ih-category-mark" aria-hidden="true"><i /><i /><i /><i /></span>
         <span className="ih-category-trigger-title">Nasze<br />kategorie</span>
@@ -1043,7 +1033,10 @@ function App({ session, loading, categoryGroups = [] }) {
             </p>
           </div>
 
-          <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} />
+          <div className="ih5-category-showcase">
+            <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} />
+            <CommissionStory />
+          </div>
         </section>
 
         <section
@@ -1063,38 +1056,9 @@ function App({ session, loading, categoryGroups = [] }) {
           </div>
 
           <div className="steps">
-            <article className="step home-reveal">
-              <span>01</span>
-
-              <h3>Opisz potrzebę</h3>
-
-              <p>
-                Powiedz nam, czego potrzebujesz i określ
-                podstawowe szczegóły projektu.
-              </p>
-            </article>
-
-            <article className="step home-reveal">
-              <span>02</span>
-
-              <h3>Wybierz osobę</h3>
-
-              <p>
-                Przejrzyj zgłoszenia i wybierz wykonawcę,
-                który najlepiej pasuje do Twojego projektu.
-              </p>
-            </article>
-
-            <article className="step home-reveal">
-              <span>03</span>
-
-              <h3>Zrealizuj projekt</h3>
-
-              <p>
-                Ustal szczegóły, rozpocznij współpracę
-                i doprowadź projekt do końca.
-              </p>
-            </article>
+            <HomeStepCard number="01" title="Opisz potrzebę">Powiedz nam, czego potrzebujesz i określ podstawowe szczegóły projektu.</HomeStepCard>
+            <HomeStepCard number="02" title="Wybierz osobę">Przejrzyj zgłoszenia i wybierz wykonawcę, który najlepiej pasuje do Twojego projektu.</HomeStepCard>
+            <HomeStepCard number="03" title="Zrealizuj projekt">Ustal szczegóły, rozpocznij współpracę i doprowadź projekt do końca.</HomeStepCard>
           </div>
         </section>
 
