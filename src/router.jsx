@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 08 | 2026-10-04 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -1669,7 +1669,8 @@ function DiscoveryOnboarding({
   }, []);
 
   useEffect(() => {
-    titleRef.current?.focus();
+    contentRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    titleRef.current?.focus({ preventScroll: true });
   }, [step]);
 
   useEffect(() => {
@@ -1834,7 +1835,7 @@ function DiscoveryOnboarding({
 
   return (
     <div
-      className="discovery-onboarding-backdrop"
+      className="discovery-onboarding-backdrop ih8-onboarding"
       ref={backdropRef}
       data-step={step}
     >
@@ -7355,18 +7356,34 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
   const [activeIndex, setActiveIndex] = useState(
     Math.min(Math.max(Number(initialIndex) || 0, 0), Math.max(media.length - 1, 0))
   );
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const downloadRef = useRef({ controller: null, url: null, timer: null });
+  const closeRef = useRef(null);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
     document.body.style.overflow = "hidden";
+    closeRef.current?.focus({ preventScroll: true });
 
     function handleKeyDown(event) {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft" && media.length > 1) {
+        event.preventDefault();
         setActiveIndex((current) => (current - 1 + media.length) % media.length);
       }
       if (event.key === "ArrowRight" && media.length > 1) {
+        event.preventDefault();
         setActiveIndex((current) => (current + 1) % media.length);
+      }
+      if (event.key === "Tab") {
+        const dialog = closeRef.current?.closest('[role="dialog"]');
+        const controls = dialog?.querySelectorAll('button:not(:disabled):not([tabindex="-1"]), a[href]:not([tabindex="-1"])');
+        if (!controls?.length) return;
+        const first = controls[0], last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       }
     }
 
@@ -7374,83 +7391,82 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = previousOverflow;
+      previousFocus?.focus?.({ preventScroll: true });
     };
   }, [media.length, onClose]);
 
-  if (!album || media.length === 0) return null;
+  useEffect(() => () => {
+    const transfer = downloadRef.current;
+    transfer.controller?.abort();
+    window.clearTimeout(transfer.timer);
+    if (transfer.url) URL.revokeObjectURL(transfer.url);
+  }, []);
 
+  if (!album || media.length === 0) return null;
   const activeMedia = media[activeIndex];
 
-  return (
-    <div className="portfolio-lightbox" role="dialog" aria-modal="true" aria-label={`Album: ${album.title}`}>
-      <button
-        type="button"
-        className="portfolio-lightbox-backdrop"
-        onClick={onClose}
-        aria-label="Zamknij album"
-      />
+  async function downloadPhoto() {
+    if (downloading) return;
+    const controller = new AbortController();
+    downloadRef.current.controller = controller;
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      const address = new URL(activeMedia.image_url, window.location.href);
+      if (!["https:", "http:"].includes(address.protocol)) throw new Error("Nieprawidłowy adres zdjęcia.");
+      const response = await fetch(address.href, { signal: controller.signal, credentials: "omit" });
+      if (!response.ok) throw new Error("Nie udało się pobrać zdjęcia.");
+      const blob = await response.blob();
+      if (controller.signal.aborted) return;
+      const extension = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "image/avif": "avif" }[blob.type] || address.pathname.match(/\.(jpe?g|png|webp|gif|avif)$/i)?.[1] || "jpg";
+      const filename = `${String(album.title || "IdeaHire-portfolio").replace(/[<>:"/\\|?*\x00-\x1f]/g, "-").trim().slice(0, 80) || "IdeaHire-portfolio"}-${activeIndex + 1}.${extension}`;
+      const transfer = downloadRef.current;
+      window.clearTimeout(transfer.timer);
+      if (transfer.url) URL.revokeObjectURL(transfer.url);
+      const url = URL.createObjectURL(blob);
+      transfer.url = url;
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      transfer.timer = window.setTimeout(() => { URL.revokeObjectURL(url); if (transfer.url === url) transfer.url = null; }, 1500);
+    } catch (error) {
+      if (!controller.signal.aborted) setDownloadError("Nie udało się pobrać automatycznie. Otwórz oryginał i zapisz zdjęcie.");
+    } finally {
+      if (!controller.signal.aborted) setDownloading(false);
+    }
+  }
 
+  return (
+    <div className="portfolio-lightbox ih8-portfolio-viewer" role="dialog" aria-modal="true" aria-label={`Album: ${album.title}`}>
+      <button type="button" className="portfolio-lightbox-backdrop" onClick={onClose} aria-label="Zamknij album" tabIndex={-1} />
       <div className="portfolio-lightbox-panel">
         <header>
-          <div>
-            <span>Portfolio</span>
-            <strong>{album.title}</strong>
-          </div>
-          <button type="button" onClick={onClose} aria-label="Zamknij album">×</button>
+          <div><span>Portfolio</span><strong>{album.title}</strong></div>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label="Zamknij album">×</button>
         </header>
-
         <div className="portfolio-lightbox-stage">
-          <img
-            src={activeMedia.image_url}
-            alt={activeMedia.alt_text || `${album.title} — zdjęcie ${activeIndex + 1}`}
-          />
-
-          {media.length > 1 && (
-            <>
-              <button
-                type="button"
-                className="portfolio-lightbox-arrow is-left"
-                onClick={() => setActiveIndex((activeIndex - 1 + media.length) % media.length)}
-                aria-label="Poprzednie zdjęcie"
-              >
-                Poprzednie
-              </button>
-              <button
-                type="button"
-                className="portfolio-lightbox-arrow is-right"
-                onClick={() => setActiveIndex((activeIndex + 1) % media.length)}
-                aria-label="Następne zdjęcie"
-              >
-                Następne
-              </button>
-            </>
-          )}
+          <img key={activeMedia.id || activeIndex} src={activeMedia.image_url} alt={activeMedia.alt_text || `${album.title} — zdjęcie ${activeIndex + 1}`} />
         </div>
-
-        <footer>
-          <span>{activeIndex + 1} / {media.length}</span>
-          <div className="portfolio-lightbox-thumbnails" aria-label="Zdjęcia w albumie">
-            {media.map((mediaItem, index) => (
-              <button
-                type="button"
-                className={index === activeIndex ? "is-active" : ""}
-                onClick={() => setActiveIndex(index)}
-                aria-label={`Pokaż zdjęcie ${index + 1}`}
-                key={mediaItem.id}
-              >
-                <img src={mediaItem.image_url} alt="" />
-              </button>
-            ))}
+        <div className="ih8-portfolio-controls" aria-label="Sterowanie galerią">
+          <div className="ih8-portfolio-navigation">
+            <button type="button" className="portfolio-lightbox-arrow is-left" onClick={() => { setDownloadError(""); setActiveIndex((activeIndex - 1 + media.length) % media.length); }} disabled={media.length < 2} aria-label="Poprzednie zdjęcie"><MarketIcon kind="arrow" /></button>
+            <span className="ih8-portfolio-count" aria-live="polite">{activeIndex + 1} / {media.length}</span>
+            <button type="button" className="portfolio-lightbox-arrow is-right" onClick={() => { setDownloadError(""); setActiveIndex((activeIndex + 1) % media.length); }} disabled={media.length < 2} aria-label="Następne zdjęcie"><MarketIcon kind="arrow" /></button>
           </div>
-          {canReport && (
-            <button
-              type="button"
-              className="portfolio-lightbox-report"
-              onClick={() => onReport(album, activeMedia)}
-            >
-              Zgłoś to zdjęcie
-            </button>
-          )}
+          <button type="button" className="ih8-portfolio-download" onClick={downloadPhoto} disabled={downloading}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" /></svg>
+            <span>{downloading ? "Pobieranie…" : "Pobierz zdjęcie"}</span>
+          </button>
+          {downloadError && <p className="ih8-portfolio-error" role="status">{downloadError} <a href={activeMedia.image_url} target="_blank" rel="noopener noreferrer">Otwórz oryginał</a></p>}
+        </div>
+        <footer>
+          <div className="portfolio-lightbox-thumbnails" aria-label="Zdjęcia w albumie">
+            {media.map((mediaItem, index) => <button type="button" className={index === activeIndex ? "is-active" : ""} onClick={() => { setDownloadError(""); setActiveIndex(index); }} aria-label={`Pokaż zdjęcie ${index + 1}`} aria-pressed={index === activeIndex} key={mediaItem.id || index}><img src={mediaItem.image_url} alt="" loading="lazy" /></button>)}
+          </div>
+          {canReport && <button type="button" className="portfolio-lightbox-report" onClick={() => onReport(album, activeMedia)}>Zgłoś zdjęcie</button>}
         </footer>
       </div>
     </div>
@@ -20083,7 +20099,7 @@ function Messages() {
       .some((value) => String(value || "").toLocaleLowerCase("pl-PL").includes(query)))
   );
   return (
-    <div className="account-page ih7-communications">
+    <div className="account-page ih7-communications ih8-communications">
       <AccountNavbar />
       <main className="ih7-inbox-page">
         <header className="ih7-inbox-heading">
@@ -22882,7 +22898,7 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page ih7-communications">
+    <div className="account-page ih7-communications ih8-communications">
       <AccountNavbar />
 
       <main className="ih7-chat-page">
@@ -23034,13 +23050,14 @@ function Chat() {
                 {[
                   ["conversation", "Rozmowa", messages.length],
                   ["files", "Pliki", privateWork.items.filter((item) => item.moderation_status === "active").length],
-                  ["plan", "Plan współpracy", agreement?.status === "accepted" ? "✓" : ""],
+                  ["plan", "Ustalenia", agreement?.status === "accepted" ? "✓" : ""],
                 ].map(([value, label, count]) => (
                   <button
                     type="button"
                     role="tab"
                     id={`ih7-chat-tab-${value}`}
                     aria-controls="ih7-chat-panel"
+                    aria-label={label}
                     tabIndex={workspaceTab === value ? 0 : -1}
                     onKeyDown={(event) => {
                       const keys = ["conversation", "files", "plan"];
@@ -23097,7 +23114,7 @@ function Chat() {
                             <div
                               className={`ih7-chat-message ${message.sender_id === user.id ? "is-mine" : "is-theirs"}`}
                             >
-                              <MessageText text={message.content} />
+                              {String(message.content || "").trim() && <MessageText text={message.content} />}
                               <PrivateMessageMaterials
                                 items={privateWork.itemsByMessage[message.id] || []}
                                 signedUrls={privateWork.signedUrls}
@@ -23106,9 +23123,10 @@ function Chat() {
                                   privateWork.setReportTarget({ type, id: targetId })
                                 }
                               />
+                              <div className="ih8-chat-message-meta">
                               {message.sender_id !== user.id && message.moderation_status !== "hidden" && (
                                 <details className="ih7-chat-message-actions">
-                                  <summary aria-label="Opcje wiadomości" title="Opcje wiadomości">•••</summary>
+                                  <summary aria-label="Opcje wiadomości" title="Opcje wiadomości"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg></summary>
                                   <button
                                     type="button"
                                     onClick={(event) => {
@@ -23126,6 +23144,7 @@ function Chat() {
                                   minute: "2-digit",
                                 })}
                               </time>
+                              </div>
                             </div>
                             {message.id === lastReadOwnMessageId && (
                               <span className="ih7-chat-read-receipt">Wyświetlono</span>
@@ -23145,15 +23164,18 @@ function Chat() {
                     )}
 
                     <form className="ih7-chat-form" onSubmit={(event) => { followMessagesRef.current = true; handleSend(event); }}>
+                      <button type="button" className="ih8-chat-add" aria-label="Otwórz pliki i dodaj materiały" title="Pliki i zdjęcia" onClick={() => setWorkspaceTab("files")}><MarketIcon kind="plus" /></button>
                       <textarea
                         aria-label="Treść wiadomości"
-                        rows={2}
+                        rows={1}
                         value={draft}
                         onChange={(event) => setDraft(event.target.value)}
+                        onInput={(event) => { const field = event.currentTarget; field.style.height = "auto"; field.style.height = `${Math.min(field.scrollHeight, 120)}px`; }}
                         placeholder="Napisz wiadomość…"
                         maxLength={4000}
                         disabled={sending || messagingBlocked}
                         onKeyDown={(event) => {
+                          if (event.isComposing || event.nativeEvent?.isComposing) return;
                           if (event.key === "Enter" && !event.shiftKey) {
                             event.preventDefault();
                             event.currentTarget.form?.requestSubmit();
@@ -23163,6 +23185,7 @@ function Chat() {
                       <button
                         type="submit"
                         className="ih7-chat-send"
+                        aria-label={sending ? "Wysyłanie wiadomości" : "Wyślij wiadomość"}
                         disabled={sending || !draft.trim() || messagingBlocked}
                       >
                         <span>{sending ? "Wysyłanie…" : "Wyślij"}</span><MarketIcon kind="arrow" />
@@ -23214,7 +23237,7 @@ function Chat() {
 
                 {workspaceTab === "plan" && (
                   <>
-                    <ChatProjectPlan job={jobDetails} agreement={agreement} />
+                    <details className="ih8-chat-plan-overview"><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
                     <AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
