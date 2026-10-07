@@ -1,11 +1,13 @@
-/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/ServiceMarketplace.jsx */
+/* IdeaHire | PACZKA 11A | 2026-10-07 — te same funkcje, mniej plików | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   Link,
   useLocation,
@@ -434,7 +436,8 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page">
-      <MarketHeader eyebrow="Usługi" title="Gotowy pomysł na dobry efekt." description="Poznaj zakres, cenę i dostępność. Wybierz usługę i porozmawiaj o swoim projekcie.">
+      <MarketplaceSwitch />
+      <MarketHeader eyebrow="Usługi" title="Gotowy pomysł na dobry efekt." description="Wybierz gotową usługę albo przejdź do freelancerów, poznaj ich profile i napisz o projekcie, który chcesz zlecić.">
         <Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link>
         <Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" /> Dodaj usługę</Link>
       </MarketHeader>
@@ -1475,4 +1478,236 @@ export default function ServiceMarketplace({
       Navbar={Navbar}
     />
   );
+}
+
+/* P11: katalog freelancerów i zapytania — połączone bez zmiany zachowania. */
+// IdeaHire P11 — public profile data and project enquiries, never private contact data.
+export const FREELANCER_CATEGORIES = [
+  "Programowanie", "Grafika i design", "Marketing", "Copywriting", "Video",
+  "Fotografia", "AI i automatyzacje", "Dane, analizy i research",
+  "Biznes i e-commerce", "Architektura, wnętrza i CAD",
+];
+
+export function normalizeFreelancerSearch(value) {
+  return String(value || "").trim().slice(0, 100);
+}
+
+export function getFreelancerResult(data) {
+  const payload = Array.isArray(data) ? data[0] : data;
+  return {
+    items: Array.isArray(payload?.items) ? payload.items : [],
+    total: Math.max(0, Number(payload?.total) || 0),
+  };
+}
+
+export function getInquiryError(error) {
+  const code = String(error?.message || "");
+  if (/IH_CONTACT_DISABLED/.test(code)) return "Ta osoba nie przyjmuje teraz nowych zapytań. Możesz nadal obejrzeć jej profil.";
+  if (/IH_CONTACT_BLOCKED/.test(code)) return "Kontakt z tym użytkownikiem jest zablokowany.";
+  if (/IH_CONTACT_LIMIT/.test(code)) return "Osiągnięto limit nowych zapytań. Wróć do prowadzonych rozmów lub spróbuj później.";
+  if (/IH_CONTACT_AGE/.test(code)) return "Zapytania o współpracę są dostępne dla pełnoletnich użytkowników.";
+  if (/IH_CONTACT_RESTRICTED/.test(code)) return "To konto nie może teraz rozpoczynać współpracy.";
+  if (/IH_CONTACT_SELF/.test(code)) return "To Twój profil. Wybierz inną osobę do współpracy.";
+  if (/IH_CONTACT_BRIEF/.test(code)) return "Dodaj tytuł i opis projektu: od 30 do 2000 znaków.";
+  if (/IH_CONTACT_CONFIRM/.test(code)) return "Potwierdź, że wysyłasz zapytanie o konkretny projekt.";
+  return "Nie udało się wysłać zapytania. Spróbuj ponownie za chwilę.";
+}
+
+export function getInquiryConversationId(data) {
+  const payload = Array.isArray(data) ? data[0] : data;
+  return typeof payload?.conversation_id === "string" ? payload.conversation_id : null;
+}
+
+export function validateProjectInquiry(title, brief, confirmed) {
+  if (String(title || "").trim().length < 3 || String(title || "").trim().length > 120) return "Podaj tytuł projektu: od 3 do 120 znaków.";
+  if (String(brief || "").trim().length < 30 || String(brief || "").trim().length > 2000) return "Opisz, co chcesz zlecić: od 30 do 2000 znaków.";
+  if (!confirmed) return "Potwierdź, że kontakt dotyczy projektu do zlecenia.";
+  return "";
+}
+
+export function MarketplaceSwitch({ active = "services" }) {
+  return <nav className="ih11-market-switch" aria-label="Usługi i freelancerzy">
+    <Link to="/services" aria-current={active === "services" ? "page" : undefined} className={active === "services" ? "is-active" : ""}>Usługi</Link>
+    <span aria-hidden="true">/</span>
+    <Link to="/freelancers" aria-current={active === "freelancers" ? "page" : undefined} className={active === "freelancers" ? "is-active" : ""}>Freelancerzy <span aria-hidden="true">↗</span></Link>
+  </nav>;
+}
+
+export function ProjectInquiryDialog({ profile, supabase, navigate, onClose }) {
+  const id = useId();
+  const rootRef = useRef(null);
+  const requestId = useRef(null);
+  const [title, setTitle] = useState("");
+  const [brief, setBrief] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const previous = document.activeElement;
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    rootRef.current?.querySelector("input[type=text]")?.focus();
+    return () => { document.body.style.overflow = oldOverflow; previous?.focus?.({ preventScroll: true }); };
+  }, []);
+  function keyboard(event) {
+    if (event.key === "Escape" && !sending) { event.preventDefault(); onClose(); }
+    if (event.key !== "Tab") return;
+    const items = Array.from(rootRef.current?.querySelectorAll("button:not(:disabled), input:not(:disabled), textarea:not(:disabled), a[href]") || []);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+  async function submit(event) {
+    event.preventDefault();
+    if (sending) return;
+    const invalid = validateProjectInquiry(title, brief, confirmed);
+    if (invalid) { setError(invalid); return; }
+    setSending(true); setError("");
+    try {
+      if (!requestId.current) requestId.current = window.crypto.randomUUID();
+      const { data, error: rpcError } = await supabase.rpc("create_ideahire_profile_inquiry", {
+        p_recipient_id: profile.id, p_title: title.trim(), p_brief: brief.trim(), p_project_only: confirmed, p_request_id: requestId.current,
+      });
+      if (rpcError) throw rpcError;
+      const conversationId = getInquiryConversationId(data);
+      if (!conversationId) throw new Error("Missing conversation");
+      onClose(); navigate(`/chat/${conversationId}`);
+    } catch (rpcError) { setError(getInquiryError(rpcError)); setSending(false); }
+  }
+  return createPortal(<div className="ih11-dialog-backdrop" onClick={(event) => { if (event.target === event.currentTarget && !sending) onClose(); }}>
+    <section className="ih11-inquiry-dialog" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} ref={rootRef} onKeyDown={keyboard}>
+      <header><div><span className="ih11-eyebrow">Zapytanie o współpracę</span><h2 id={`${id}-title`}>Zleć projekt: {profile.name || "freelancer"}</h2></div>
+        <button type="button" className="ih11-icon-button" aria-label="Zamknij zapytanie" onClick={onClose} disabled={sending}>×</button>
+      </header>
+      <p>Opisz efekt, którego potrzebujesz. Zakres, cenę i termin ustalicie razem w rozmowie.</p>
+      <form onSubmit={submit}>
+        <label htmlFor={`${id}-subject`}>Tytuł projektu<input id={`${id}-subject`} type="text" value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} disabled={sending} placeholder="Np. strona dla mojej marki" required /></label>
+        <label htmlFor={`${id}-brief`}>Co chcesz zlecić?<textarea id={`${id}-brief`} rows={5} value={brief} maxLength={2000} onChange={(event) => setBrief(event.target.value)} disabled={sending} placeholder="Opisz cel, zakres i oczekiwany termin…" required /></label>
+        <small>{brief.trim().length} / 2000 znaków · minimum 30</small>
+        <label className="ih11-contact-confirm"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} disabled={sending} required /><span>Kontaktuję się w sprawie projektu do zlecenia. Nie wysyłam reklamy ani oferty sprzedaży własnych usług.</span></label>
+        {error && <p className="ih11-notice is-error" role="alert">{error}</p>}
+        <footer><span>Odbiorca sam decyduje o współpracy. Wysłanie zapytania nie uruchamia płatności.</span><button className="ih11-button is-primary" type="submit" disabled={sending}>{sending ? "Wysyłanie…" : "Wyślij zapytanie"}<MarketIcon kind="arrow" /></button></footer>
+      </form>
+    </section>
+  </div>, document.body);
+}
+
+export function ProfileContactAction({ profile, user, supabase, navigate, disabled = false, canContact = true }) {
+  const [available, setAvailable] = useState(false);
+  const [resolved, setResolved] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    let active = true; setAvailable(false); setResolved(false); setOpen(false);
+    if (!profile?.id || profile.id === user?.id || disabled) { setResolved(true); return undefined; }
+    supabase.rpc("get_ideahire_profile_contact", { p_user_id: profile.id }).then(({ data, error }) => {
+      if (!active) return;
+      setAvailable(!error && data?.allow_project_inquiries === true); setResolved(true);
+    }).catch(() => { if (active) { setAvailable(false); setResolved(true); } });
+    return () => { active = false; };
+  }, [profile?.id, user?.id, disabled, supabase]);
+  if (profile?.id === user?.id || disabled) return null;
+  return <div className="ih11-profile-contact">
+    <button className="ih11-button is-primary" type="button" disabled={!resolved || !available || !canContact} onClick={() => setOpen(true)}><MarketIcon kind="plus" />Zleć projekt</button>
+    <small>{!resolved ? "Sprawdzanie dostępności…" : !canContact ? "Zapytania o współpracę są dostępne dla pełnoletnich kont." : available ? "Napisz o projekcie i ustal szczegóły w rozmowie." : "Ta osoba nie przyjmuje teraz nowych zapytań o projekt."}</small>
+    {open && <ProjectInquiryDialog profile={profile} supabase={supabase} navigate={navigate} onClose={() => setOpen(false)} />}
+  </div>;
+}
+
+export function FreelancerVisibility({ supabase, user, canContact = true }) {
+  const [settings, setSettings] = useState({ directory_visible: false, allow_project_inquiries: false });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true); setFailed(false); setMessage("");
+    if (!user?.id) { setLoading(false); return undefined; }
+    supabase.rpc("get_my_ideahire_profile_discovery").then(({ data, error }) => {
+      if (!mounted) return;
+      if (error) { setFailed(true); setMessage("Nie udało się pobrać ustawień widoczności. Odśwież stronę i spróbuj ponownie."); }
+      else setSettings({ directory_visible: data?.directory_visible === true, allow_project_inquiries: data?.allow_project_inquiries === true });
+      setLoading(false);
+    }).catch(() => { if (mounted) { setFailed(true); setMessage("Nie udało się pobrać ustawień widoczności. Odśwież stronę i spróbuj ponownie."); setLoading(false); } });
+    return () => { mounted = false; };
+  }, [supabase, user?.id]);
+  async function save(event) {
+    event.preventDefault(); if (saving || failed) return;
+    setSaving(true); setMessage("");
+    try {
+      const { error } = await supabase.rpc("save_my_ideahire_profile_discovery", {
+        p_directory_visible: settings.directory_visible, p_allow_project_inquiries: settings.allow_project_inquiries,
+      });
+      if (error) throw error;
+      setMessage("Ustawienia widoczności i kontaktu zapisane.");
+    } catch (error) { setMessage(getInquiryError(error)); }
+    finally { setSaving(false); }
+  }
+  return <section className="ih11-visibility-panel" aria-label="Widoczność i zapytania o współpracę">
+    <span className="ih11-eyebrow">Twój profil w katalogu</span><h2>Daj się znaleźć.</h2>
+    <p>Pokaż swój profil osobom szukającym pomocy. To Ty wybierasz, czy mogą wysłać Ci zapytanie o konkretny projekt.</p>
+    <form onSubmit={save}>
+      <label className="ih11-setting"><input type="checkbox" checked={settings.directory_visible} disabled={loading || saving || failed || !canContact} onChange={(event) => setSettings((previous) => ({ ...previous, directory_visible: event.target.checked }))} /><span><b>Pokaż mnie w przeglądzie freelancerów</b><small>Widoczne będą dane publicznego profilu. E-mail i data urodzenia pozostają prywatne.</small></span></label>
+      <label className="ih11-setting"><input type="checkbox" checked={settings.allow_project_inquiries} disabled={loading || saving || failed || !canContact} onChange={(event) => setSettings((previous) => ({ ...previous, allow_project_inquiries: event.target.checked }))} /><span><b>Przyjmuj zapytania o projekty</b><small>Pozwól zalogowanym, pełnoletnim osobom pisać w sprawie zlecenia pracy. Nie jest to zgoda na reklamy.</small></span></label>
+      {!canContact && <p className="ih11-notice">Te ustawienia są dostępne dla pełnoletnich kont.</p>}
+      {message && <p className="ih11-notice" role="status">{message}</p>}
+      <button className="ih11-button is-quiet" disabled={loading || saving || failed || !canContact}>{loading ? "Ładowanie…" : saving ? "Zapisywanie…" : "Zapisz widoczność"}</button>
+    </form>
+  </section>;
+}
+
+export function FreelancerDirectory({ supabase, user, navigate, Navbar, canContact = true }) {
+  const location = useLocation();
+  const requestedCategory = new URLSearchParams(location.search).get("category");
+  const category = FREELANCER_CATEGORIES.includes(requestedCategory) ? requestedCategory : "Wszystkie";
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [refresh, setRefresh] = useState(0);
+  const [result, setResult] = useState({ items: [], total: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState(null);
+  const requestRef = useRef(0);
+  const pageSize = 12;
+  useEffect(() => { setPage(0); }, [search, category]);
+  useEffect(() => {
+    let current = true;
+    const request = ++requestRef.current;
+    setLoading(true); setError("");
+    const timer = window.setTimeout(async () => {
+      try {
+        const { data, error: rpcError } = await supabase.rpc("list_ideahire_freelancers", {
+          p_search: normalizeFreelancerSearch(search) || null, p_category: category === "Wszystkie" ? null : category,
+          p_offset: page * pageSize, p_limit: pageSize,
+        });
+        if (!current || request !== requestRef.current) return;
+        if (rpcError) throw rpcError;
+        setResult(getFreelancerResult(data));
+      } catch { if (current && request === requestRef.current) { setResult({ items: [], total: 0 }); setError("Nie udało się pobrać freelancerów. Spróbuj ponownie."); } }
+      finally { if (current && request === requestRef.current) setLoading(false); }
+    }, 220);
+    return () => { current = false; window.clearTimeout(timer); };
+  }, [supabase, search, category, page, refresh]);
+  return <div className="page ih-market-v5 ih5-service-page ih11-freelancers">
+    <Navbar /><main className="ih-market-shell">
+      <MarketplaceSwitch active="freelancers" />
+      <MarketHeader eyebrow="Freelancerzy" title="Dobry projekt zaczyna się od dobrego kontaktu." description="Znajdź osobę po nazwie, umiejętnościach lub kategorii. Zobacz jej profil i portfolio, a potem napisz, co chcesz zlecić."><Link className="ih11-button is-quiet" to="/account#profile">Mój profil</Link></MarketHeader>
+      <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów" />
+      <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
+        <div className="ih11-directory-heading"><h2>{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2><span role="status">{loading ? "Szukamy…" : `${result.total} ${result.total === 1 ? "profil" : "profili"}`}</span></div>
+        {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
+          {result.items.map((profile, index) => <article className="ih11-freelancer-card" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
+            <div className="ih11-freelancer-person"><Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`Profil: ${profile.name || "freelancer"}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || "F")[0]}</span>}</Link><div><h3><Link to={`/profile/${profile.id}`}>{profile.name || "Freelancer"}</Link></h3><p>{profile.specialization || "Tworzę i realizuję projekty."}</p></div></div>
+            <p className="ih11-freelancer-about">{profile.about || "Poznaj doświadczenie i portfolio na profilu."}</p>
+            <div className="ih11-freelancer-skills">{(Array.isArray(profile.skills) ? profile.skills : []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div>
+            <div className="ih11-freelancer-meta"><span>{Number(profile.completed_jobs) || 0} zakończonych zleceń</span><span>{Number(profile.positive_reviews) || 0} pozytywnych opinii</span></div>
+            <footer><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#profile">Edytuj profil</Link> : <button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected(profile)} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Napisz o projekcie"}>Zleć projekt</button>}</footer>
+          </article>)}
+        </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Tu spotkają się pomysły i umiejętności."}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#profile">Ustaw widoczność profilu</Link></div>}
+        {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}
+      </section>
+      {selected && <ProjectInquiryDialog profile={selected} supabase={supabase} navigate={navigate} onClose={() => setSelected(null)} />}
+    </main>
+  </div>;
 }
