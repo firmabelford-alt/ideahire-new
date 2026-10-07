@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 10 | 2026-10-04 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 11 | 2026-10-05 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -60,7 +60,7 @@ import {
   usePrivateWork,
   WorkDeliveryPanel,
 } from "./PrivateWork";
-import ServiceMarketplace from "./ServiceMarketplace";
+import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction } from "./ServiceMarketplace";
 
 /* =========================================================
    FLUID NAVIGATION ENGINE
@@ -4533,6 +4533,8 @@ function markConversationSeen(
 ========================================================= */
 
 function AccountNavbar() {
+  const accountLocation = useLocation();
+  const marketplaceActive = accountLocation.pathname.startsWith("/services") || accountLocation.pathname.startsWith("/freelancers");
   const navigate =
     useNavigate();
 
@@ -5228,8 +5230,8 @@ function AccountNavbar() {
 
   return (
     <header
-      className="navbar account-navbar"
-      data-ui-release="ideahire-v5-5-20260919"
+      className="navbar account-navbar ih11-account-navbar"
+      data-ui-release="ideahire-p11-20261005"
     >
       <div className="account-navbar-brand">
         <Link
@@ -5244,74 +5246,21 @@ function AccountNavbar() {
         <IdeaHireLogo className="logo" />
       </div>
 
-      <nav
-        className="nav-links account-primary-nav"
-        aria-label="Główna nawigacja konta"
-      >
-        <NavLink
-          to="/account"
-          end
-          className={({
-            isActive,
-          }) =>
-            isActive
-              ? "is-active"
-              : ""
-          }
-        >
-          <span className="account-nav-label-full">Konto</span>
-          <span className="account-nav-label-short">Konto</span>
-        </NavLink>
-
-        <NavLink
-          to="/jobs"
-          className={({
-            isActive,
-          }) =>
-            isActive
-              ? "is-active"
-              : ""
-          }
-        >
-          <span className="account-nav-label-full">Zlecenia</span>
-          <span className="account-nav-label-short">Zlecenia</span>
-        </NavLink>
-
-        <NavLink
-          to="/services"
-          className={({
-            isActive,
-          }) =>
-            isActive
-              ? "is-active"
-              : ""
-          }
-        >
-          <span className="account-nav-label-full">Usługi</span>
-          <span className="account-nav-label-short">Usługi</span>
-        </NavLink>
-
-        {!hasRestrictedAgeAccess && (
-          <NavLink
-            to="/messages"
-            className={({
-              isActive,
-            }) =>
-              isActive
-                ? "is-active"
-                : ""
-            }
-          >
-            <span className="account-nav-label-full">Wiadomości</span>
-            <span className="account-nav-label-short">Wiadomości</span>
-            {hasMessageNotifications && (
-              <span
-                className="notification-dot messages-nav-dot"
-                aria-label="Nowa rozmowa lub wiadomość"
-              />
-            )}
+      <nav className="home-nav-links ih11-account-nav" aria-label="Główna nawigacja konta">
+        {[
+          { to: "/account", label: "Konto", end: true },
+          { to: "/jobs", label: "Zlecenia" },
+          { to: accountLocation.pathname.startsWith("/freelancers") ? "/freelancers" : "/services", label: "Usługi / Freelancerzy", market: true },
+          ...(!hasRestrictedAgeAccess ? [{ to: "/messages", label: "Wiadomości", notice: hasMessageNotifications }] : []),
+        ].map((item, index) => (
+          <NavLink key={item.to} to={item.to} end={item.end} style={{ "--ih-nav-order": index }}
+            className={({ isActive }) => `ih-nav-item${(item.market ? marketplaceActive : isActive) ? " is-active" : ""}`}
+            aria-current={item.market && marketplaceActive ? "page" : undefined}>
+            <span className="ih-nav-pixels" aria-hidden="true"><i /><i /><i /><i /></span>
+            <span className="ih-nav-label">{item.label}</span>
+            {item.notice && <span className="notification-dot messages-nav-dot" aria-label="Nowa rozmowa lub wiadomość" />}
           </NavLink>
-        )}
+        ))}
       </nav>
 
       <div className="nav-actions account-navbar-actions">
@@ -5404,7 +5353,7 @@ function AccountNavbar() {
                 Zlecenia
               </NavLink>
               <NavLink to="/services" onClick={closeAccountMenu}>
-                Usługi
+                Usługi / Freelancerzy
               </NavLink>
               <NavLink to="/calendar" onClick={closeAccountMenu}>
                 Kalendarz
@@ -10055,8 +10004,12 @@ function Account() {
             </section>
           )}
 
+          {activeAccountSection === "profile" && (
+            <FreelancerVisibility supabase={supabase} user={user} canContact={isAdult} />
+          )}
+
           <form
-            className="auth-form account-form"
+            className="auth-form account-form ih11-profile-form"
             onSubmit={handleSave}
             hidden={
               activeAccountSection !== "profile" &&
@@ -10078,29 +10031,20 @@ function Account() {
                 </div>
               </header>
 
-            <label>
-              Zdjęcie profilowe
-
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={
-                  handleAvatarChange
-                }
-                disabled={
-                  uploading ||
-                  saving
-                }
-              />
-
-              <small>
-                JPG, PNG lub WEBP.
-                Zdjęcie zostanie
-                automatycznie
-                przycięte do
-                400 × 400 px.
-              </small>
-            </label>
+            <div className="ih11-avatar-editor">
+              <div className="ih11-avatar-preview" aria-hidden="true">
+                {avatarUrl ? <img src={avatarUrl} alt="" /> : <span>{Array.from(name || "I")[0]}</span>}
+              </div>
+              <div>
+                <strong>Zdjęcie profilowe</strong>
+                <label className={`ih11-avatar-upload${uploading || saving ? " is-disabled" : ""}`}>
+                  <span>{uploading ? "Przesyłanie…" : "Wybierz zdjęcie"}</span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarChange}
+                    disabled={uploading || saving} aria-label="Wybierz zdjęcie profilowe" />
+                </label>
+                <small>JPG, PNG lub WEBP. Przytniemy zdjęcie do 400 × 400 px.</small>
+              </div>
+            </div>
 
             <label>
               Imię / nazwa
@@ -13771,6 +13715,8 @@ function EditJob() {
 ========================================================= */
 
 function Profile() {
+  const profileNavigate = useNavigate();
+  const { canTransact: canContactProfile, loading: profileAgeLoading } = useAgeAccess();
   const { id } =
     useParams();
 
@@ -14573,6 +14519,11 @@ function Profile() {
               )}
             </div>
           </div>
+
+          {!profileHidden && isOtherProfile && (
+            <ProfileContactAction profile={profile} user={user} supabase={supabase} navigate={profileNavigate}
+              disabled={blockedByMe || blockedMe} canContact={!profileAgeLoading && canContactProfile} />
+          )}
 
           {isOtherProfile && (
               <>
@@ -19912,7 +19863,7 @@ function Messages() {
             rows.map(
               (conversation) =>
                 conversation.job_id
-            )
+            ).filter(Boolean)
           ),
         ];
 
@@ -19927,6 +19878,7 @@ function Messages() {
           jobsResult,
           messagesResult,
           statesResult,
+          profileInquiriesResult,
         ] = await Promise.all([
           supabase
             .from("profiles")
@@ -19935,10 +19887,7 @@ function Messages() {
             )
             .in("id", otherUserIds),
 
-          supabase
-            .from("jobs")
-            .select("id, title")
-            .in("id", jobIds),
+          jobIds.length ? supabase.from("jobs").select("id, title").in("id", jobIds) : Promise.resolve({ data: [], error: null }),
 
           supabase
             .from("messages")
@@ -19965,6 +19914,7 @@ function Messages() {
               "conversation_id",
               conversationIds
             ),
+          supabase.from("ideahire_profile_inquiries").select("conversation_id, title").in("conversation_id", conversationIds),
         ]);
 
         if (profilesResult.error) {
@@ -20008,6 +19958,8 @@ function Messages() {
               ]
             )
           );
+        const profileInquiryTitles = new Map((profileInquiriesResult.data || []).map((item) => [item.conversation_id, item.title]));
+
 
         const lastMessageMap =
           new Map();
@@ -20095,7 +20047,7 @@ function Messages() {
                 job:
                   jobMap.get(
                     conversation.job_id
-                  ),
+                  ) || (profileInquiryTitles.has(conversation.id) ? { title: profileInquiryTitles.get(conversation.id) } : null),
                 lastMessage,
                 sortDate:
                   lastMessage?.created_at ||
@@ -22296,16 +22248,11 @@ function Chat() {
             )
             .maybeSingle(),
 
-          supabase
-            .from("jobs")
-            .select(
-              "title, budget, budget_negotiable, category, subcategory, collaboration_plan, project_deadline, planned_start_date, description"
-            )
-            .eq(
-              "id",
-              conversationData.job_id
-            )
-            .maybeSingle(),
+          conversationData.job_id
+            ? supabase.from("jobs").select("title, budget, budget_negotiable, category, subcategory, collaboration_plan, project_deadline, planned_start_date, description")
+                .eq("id", conversationData.job_id).maybeSingle()
+            : supabase.from("ideahire_profile_inquiries").select("title, brief").eq("conversation_id", id).maybeSingle()
+                .then(({ data, error }) => ({ data: data ? { title: data.title, description: data.brief } : null, error })),
         ]);
 
         const profileData =
@@ -30962,6 +30909,10 @@ function RouteScrollManager() {
 function ServiceRoute({ mode }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { canTransact, loading: ageLoading } = useAgeAccess();
+
+  if (mode === "freelancers") return <FreelancerDirectory supabase={supabase} user={user}
+    navigate={navigate} Navbar={AccountNavbar} canContact={!ageLoading && canTransact} />;
 
   return (
     <ServiceMarketplace
@@ -31162,7 +31113,11 @@ function Router() {
             }
           />
 
-          <Route path="/talent" element={<Navigate to="/services" replace />} />
+          <Route path="/talent" element={<Navigate to="/freelancers" replace />} />
+
+          <Route path="/freelancers" element={
+            <ProtectedRoute><UserOnlyRoute allowLimited><ServiceRoute mode="freelancers" /></UserOnlyRoute></ProtectedRoute>
+          } />
 
           <Route
             path="/services"
