@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 10 | 2026-10-04 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 11 | 2026-10-05 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -50943,4 +50943,243 @@ html, body, body * { scrollbar-width: thin !important; scrollbar-color: var(--ih
 @keyframes ih10-spotlight-reveal { from { opacity: 0; transform: translateY(9px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (prefers-reduced-motion: reduce) {
   html:root body #root#root .page.ih10-register *, html:root body #root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page .ih10-jobs-spotlight * { animation: none !important; transition: none !important; transform: none !important; }
+}
+
+/* =========================================================
+   PACZKA 11 — wspólny pasek, kontrast kontrolek, prosty profil,
+   katalog freelancerów i zapytania o konkretne projekty.
+========================================================= */
+html:root body #root#root#root :is(.page,.account-page,.app) :is(input,textarea,select) {
+  color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important;
+  font-family: inherit !important; opacity: 1 !important;
+}
+html:root body #root#root#root :is(.page,.account-page,.app) input[type="file"] {
+  background: var(--ih7-soft) !important; color: var(--ih7-ink) !important;
+  font-size: 14px !important; line-height: 1.5 !important;
+}
+html:root body #root#root#root :is(.page,.account-page,.app) input[type="file"]::file-selector-button {
+  margin: 0 12px 0 0 !important; padding: 11px 15px !important;
+  border: 0 !important; border-radius: 10px !important;
+  background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important;
+  -webkit-text-fill-color: var(--ih7-on-accent) !important;
+  font: 650 14px/1.4 Inter,system-ui,sans-serif !important; cursor: pointer;
+}
+html:root body #root#root#root :is(.page,.account-page,.app) :is(.btn-dark,.is-primary,.auth-submit) {
+  background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important;
+  -webkit-text-fill-color: currentColor !important; text-shadow: none !important;
+}
+html:root body #root#root#root :is(.btn-dark,.is-primary,.auth-submit) :is(span,b,strong,small) {
+  color: inherit !important; -webkit-text-fill-color: currentColor !important;
+}
+html:root body #root#root#root :is(.page,.account-page,.app) :is(input,textarea,select)::placeholder {
+  color: var(--ih7-muted) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important;
+}
+html:root body #root#root#root :is(.page,.account-page,.app) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]):not([type="file"]),textarea,select) {
+  background-color: var(--ih7-soft) !important;
+}
+html:root body #root#root#root :is(.page,.account-page,.app) :is(.btn-outline,.btn-light,.ih5-button.is-quiet,.ih5-button.is-outline) {
+  background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:root body #root#root#root .ih11-account-navbar {
+  display: grid !important; grid-template-columns: auto minmax(0,1fr) auto !important;
+  gap: clamp(14px,2vw,30px) !important; align-items: center !important;
+  width: min(1440px,calc(100% - 48px)) !important; max-width: 1440px !important;
+  padding: 14px 20px !important; margin: 16px auto 0 !important; border: 0 !important;
+  border-radius: 24px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important;
+  box-shadow: 0 8px 24px color-mix(in srgb,var(--ih7-ink) 5%,transparent) !important;
+}
+html:root body #root#root#root .ih11-account-navbar .account-navbar-brand {
+  position: static !important; grid-area: 1 / 1 !important; min-width: 0 !important; gap: 10px !important;
+}
+html:root body #root#root#root .ih11-account-navbar .nav-actions {
+  position: static !important; grid-area: 1 / 3 !important; min-width: 0 !important; width: auto !important; flex-wrap: nowrap !important;
+}
+html:root body #root#root#root .ih11-account-navbar .ih11-account-nav {
+  position: static !important; inset: auto !important; transform: none !important;
+  grid-area: 1 / 2 !important; display: flex !important; flex-wrap: nowrap !important;
+  align-items: center !important; justify-content: center !important; justify-self: center !important;
+  gap: 4px !important; width: max-content !important; max-width: 100% !important;
+  min-height: 0 !important; height: auto !important; padding: 6px !important; margin: 0 !important;
+  border: 0 !important; border-radius: 18px !important; overflow-x: auto !important; overflow-y: hidden !important;
+  background: linear-gradient(125deg,var(--ih7-surface),var(--ih7-soft)) !important;
+  box-shadow: 0 5px 18px color-mix(in srgb,var(--ih7-ink) 6%,transparent) !important;
+}
+html:root body #root#root#root .ih11-account-navbar .ih11-account-nav::before,
+html:root body #root#root#root .ih11-account-navbar .ih11-account-nav::after { content: none !important; }
+html:root body #root#root#root .ih11-account-navbar .ih11-account-nav > .ih-nav-item {
+  position: relative !important; display: inline-flex !important; align-items: center !important;
+  justify-content: center !important; flex: 0 0 auto !important; gap: 7px !important;
+  width: auto !important; max-width: none !important; min-height: 44px !important; padding: 10px 12px !important;
+  border: 0 !important; border-radius: 12px !important; background: transparent !important;
+  color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important;
+  font: 700 12px/1.4 Inter,system-ui,sans-serif !important; white-space: nowrap !important;
+  text-decoration: none !important; overflow: visible !important; box-shadow: none !important;
+  transition: background-color 180ms ease,box-shadow 180ms ease !important;
+}
+html:root body #root#root#root .ih11-account-navbar .ih11-account-nav > .ih-nav-item:is(:hover,:focus-visible,.is-active) {
+  background: var(--ih7-surface) !important; color: var(--ih7-ink) !important;
+  box-shadow: 0 3px 10px color-mix(in srgb,var(--ih7-ink) 7%,transparent) !important;
+}
+html:root body #root#root#root .ih11-account-nav .ih-nav-label { display: inline !important; color: inherit !important; font: inherit !important; }
+html:root body #root#root#root .ih11-account-nav .ih-nav-pixels {
+  display: grid !important; grid-template-columns: repeat(2,4px) !important; grid-template-rows: repeat(2,4px) !important;
+  gap: 3px !important; width: 11px !important; height: 11px !important; flex: 0 0 11px !important; color: inherit !important;
+}
+html:root body #root#root#root .ih11-account-nav .ih-nav-pixels > i {
+  display: block !important; width: 4px !important; height: 4px !important; border-radius: 1px !important;
+  background: currentColor !important; transition: transform 320ms cubic-bezier(.16,1,.3,1),border-radius 320ms ease !important;
+  animation: ih-v3-pixel-build 500ms cubic-bezier(.16,1,.3,1) backwards;
+  animation-delay: calc(120ms + var(--ih-nav-order,0) * 60ms);
+}
+html:root body #root#root#root .ih11-account-nav .ih-nav-item:is(:hover,:focus-visible) .ih-nav-pixels > i:nth-child(1) { transform: translate(-2px,-2px) rotate(90deg); }
+html:root body #root#root#root .ih11-account-nav .ih-nav-item:is(:hover,:focus-visible) .ih-nav-pixels > i:nth-child(2) { transform: translate(2px,-2px) rotate(180deg); border-radius: 50% !important; }
+html:root body #root#root#root .ih11-account-nav .ih-nav-item:is(:hover,:focus-visible) .ih-nav-pixels > i:nth-child(3) { transform: translate(-2px,2px) rotate(-90deg); border-radius: 50% !important; }
+html:root body #root#root#root .ih11-account-nav .ih-nav-item:is(:hover,:focus-visible) .ih-nav-pixels > i:nth-child(4) { transform: translate(2px,2px) rotate(90deg); }
+html:root body #root#root#root .page.ih6-account-page .ih11-profile-form {
+  display: flex !important; flex-direction: column !important; gap: 28px !important;
+  width: min(760px,100%) !important; max-width: 760px !important; margin: 28px auto !important; padding: 0 !important;
+  border: 0 !important; background: transparent !important; background-image: none !important; box-shadow: none !important;
+}
+html:root body #root#root#root .ih11-profile-form > .account-form-section {
+  display: flex !important; flex-direction: column !important; gap: 22px !important;
+  width: 100% !important; min-width: 0 !important; padding: 0 !important; margin: 0 !important;
+  border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+html:root body #root#root#root .ih11-profile-form > .account-form-section[hidden],
+html:root body #root#root#root .ih11-profile-form[hidden] { display: none !important; }
+html:root body #root#root#root .ih11-profile-form :is(.account-form-section-heading,label) {
+  position: static !important; grid-column: auto !important; width: 100% !important; min-width: 0 !important;
+  background: none !important; border: 0 !important; color: var(--ih7-ink) !important;
+}
+html:root body #root#root#root .ih11-profile-form .account-form-section-heading { display: flex !important; gap: 14px !important; align-items: flex-start !important; padding: 0 !important; }
+html:root body #root#root#root .ih11-profile-form .account-form-section-heading > span { flex: 0 0 34px !important; padding: 9px 0 !important; background: var(--ih7-soft) !important; color: var(--ih7-accent) !important; border-radius: 10px !important; text-align: center !important; font-size: 12px !important; }
+html:root body #root#root#root .ih11-profile-form .account-form-section-heading :is(h2,p,small) { color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important; opacity: 1 !important; }
+html:root body #root#root#root .ih11-profile-form .account-form-section-heading h2 { font-size: 24px !important; line-height: 1.25 !important; margin: 5px 0 !important; }
+html:root body #root#root#root .ih11-profile-form label { display: grid !important; gap: 9px !important; margin: 0 !important; padding: 0 !important; font-size: 14px !important; font-weight: 600 !important; line-height: 1.5 !important; }
+html:root body #root#root#root .ih11-profile-form :is(input:not([type="file"]):not([type="checkbox"]),textarea) {
+  width: 100% !important; min-width: 0 !important; max-width: 100% !important; min-height: 48px !important;
+  padding: 13px 16px !important; margin: 0 !important; border: 1px solid var(--ih7-line) !important;
+  border-radius: 14px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important;
+  font: 400 16px/1.6 Inter,system-ui,sans-serif !important; box-shadow: none !important;
+}
+html:root body #root#root#root .ih11-profile-form textarea { min-height: 150px !important; }
+html:root body #root#root#root .ih11-profile-form :is(input,textarea):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 3px !important; }
+html:root body #root#root#root .ih11-profile-form small { font-size: 12px !important; line-height: 1.55 !important; font-weight: 400 !important; color: var(--ih7-muted) !important; }
+html:root body #root#root#root .ih11-avatar-editor { display: flex !important; gap: 18px !important; align-items: center !important; min-width: 0 !important; }
+html:root body #root#root#root .ih11-avatar-preview { flex: 0 0 72px !important; width: 72px !important; height: 72px !important; border-radius: 50% !important; overflow: hidden !important; display: grid !important; place-items: center !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 24px !important; }
+html:root body #root#root#root .ih11-avatar-preview img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+html:root body #root#root#root .ih11-avatar-editor > div:last-child { flex: 1 !important; min-width: 0 !important; display: grid !important; gap: 8px !important; }
+html:root body #root#root#root .ih11-profile-form label.ih11-avatar-upload {
+  position: relative !important; display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  width: fit-content !important; min-height: 44px !important; padding: 10px 16px !important; border-radius: 12px !important;
+  background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; overflow: hidden !important; cursor: pointer !important;
+}
+html:root body #root#root#root .ih11-avatar-upload span { color: inherit !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root#root .ih11-avatar-upload input[type="file"] { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; min-height: 0 !important; opacity: 0 !important; cursor: pointer !important; padding: 0 !important; }
+html:root body #root#root#root .ih11-avatar-upload:focus-within { outline: 2px solid var(--ih7-accent) !important; outline-offset: 4px !important; }
+html:root body #root#root#root .ih11-avatar-upload.is-disabled { opacity: .65 !important; cursor: wait !important; }
+
+/* A scoped design system: every label follows the surface on which it appears. */
+html:root body #root#root#root :is(.ih11-freelancers,.ih11-inquiry-dialog,.ih11-visibility-panel,.ih11-profile-contact,.ih11-market-switch) {
+  box-sizing: border-box !important; color: var(--ih7-ink) !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important;
+}
+html:root body #root#root#root :is(.ih11-inquiry-dialog,.ih11-visibility-panel,.ih11-freelancer-card) :is(h2,h3,p,span,b,strong,small,label,a) {
+  -webkit-text-fill-color: currentColor !important; text-shadow: none !important; opacity: 1 !important;
+}
+html:root body #root#root#root .ih11-market-switch { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; gap: 7px !important; width: fit-content !important; max-width: 100% !important; margin: 0 0 25px !important; padding: 5px !important; border-radius: 15px !important; border: 0 !important; background: var(--ih7-soft) !important; }
+html:root body #root#root#root .ih11-market-switch > a { display: flex !important; gap: 10px !important; align-items: center !important; min-height: 44px !important; padding: 10px 18px !important; border: 0 !important; border-radius: 11px !important; font: 650 14px/1.4 Inter,system-ui,sans-serif !important; text-decoration: none !important; color: var(--ih7-muted) !important; background: transparent !important; transition: background-color 200ms ease,box-shadow 200ms ease !important; }
+html:root body #root#root#root .ih11-market-switch > a:is(.is-active,:hover) { background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; box-shadow: 0 3px 10px color-mix(in srgb,var(--ih7-ink) 5%,transparent) !important; }
+html:root body #root#root#root .ih11-market-switch > span { color: var(--ih7-muted) !important; }
+html:root body #root#root#root .ih11-button { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; min-width: 0 !important; min-height: 44px !important; width: auto !important; padding: 11px 16px !important; margin: 0 !important; border: 0 !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font: 650 13px/1.4 Inter,system-ui,sans-serif !important; -webkit-text-fill-color: currentColor !important; text-decoration: none !important; text-align: center !important; cursor: pointer !important; transition: transform 160ms ease,box-shadow 160ms ease !important; }
+html:root body #root#root#root .ih11-button.is-primary { background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; }
+html:root body #root#root#root .ih11-button:disabled { cursor: default !important; opacity: .6 !important; }
+html:root body #root#root#root .ih11-button svg { width: 16px !important; height: 16px !important; flex: 0 0 16px !important; color: inherit !important; }
+html:root body #root#root#root .ih11-button:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 5px 14px color-mix(in srgb,var(--ih7-ink) 9%,transparent) !important; }
+html:root body #root#root#root :is(.ih11-button,.ih11-icon-button,.ih11-market-switch > a):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 3px !important; }
+html:root body #root#root#root .ih11-directory-results { margin-top: 30px !important; }
+html:root body #root#root#root .ih11-directory-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; margin-bottom: 18px !important; }
+html:root body #root#root#root .ih11-directory-heading h2 { margin: 0 !important; color: var(--ih7-ink) !important; font-size: 23px !important; line-height: 1.3 !important; }
+html:root body #root#root#root .ih11-directory-heading > span { flex-shrink: 0 !important; padding: 8px 12px !important; border-radius: 10px !important; background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; font-size: 12px !important; }
+html:root body #root#root#root .ih11-freelancer-grid { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 18px !important; min-width: 0 !important; }
+html:root body #root#root#root .ih11-freelancer-card { display: flex !important; flex-direction: column !important; gap: 16px !important; min-width: 0 !important; padding: 24px !important; border: 0 !important; border-radius: 24px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; box-shadow: 0 6px 22px color-mix(in srgb,var(--ih7-ink) 5%,transparent) !important; animation: ih11-profile-enter 380ms cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--ih11-order,0) * 45ms); transition: box-shadow 200ms ease !important; }
+html:root body #root#root#root .ih11-freelancer-card:hover { box-shadow: 0 10px 30px color-mix(in srgb,var(--ih7-ink) 9%,transparent) !important; }
+html:root body #root#root#root .ih11-freelancer-person { display: flex !important; align-items: center !important; gap: 13px !important; min-width: 0 !important; }
+html:root body #root#root#root .ih11-freelancer-person > div { min-width: 0 !important; }
+html:root body #root#root#root .ih11-freelancer-avatar { display: grid !important; place-items: center !important; flex: 0 0 52px !important; width: 52px !important; height: 52px !important; border-radius: 50% !important; overflow: hidden !important; background: var(--ih7-soft) !important; color: var(--ih7-accent) !important; font-size: 22px !important; text-decoration: none !important; }
+html:root body #root#root#root .ih11-freelancer-avatar img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+html:root body #root#root#root .ih11-freelancer-person h3 { margin: 0 !important; color: var(--ih7-ink) !important; font-size: 19px !important; line-height: 1.25 !important; overflow-wrap: anywhere !important; }
+html:root body #root#root#root .ih11-freelancer-person h3 a { color: inherit !important; text-decoration: none !important; }
+html:root body #root#root#root .ih11-freelancer-person p { margin: 5px 0 0 !important; color: var(--ih7-muted) !important; font-size: 12px !important; line-height: 1.6 !important; overflow-wrap: anywhere !important; }
+html:root body #root#root#root .ih11-freelancer-about { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden !important; overflow-wrap: anywhere !important; margin: 0 !important; color: var(--ih7-muted) !important; font-size: 13px !important; line-height: 1.65 !important; }
+html:root body #root#root#root .ih11-freelancer-skills { display: flex !important; gap: 6px !important; flex-wrap: wrap !important; min-height: 30px !important; }
+html:root body #root#root#root .ih11-freelancer-skills > span { padding: 5px 9px !important; border-radius: 9px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 11px !important; line-height: 1.5 !important; overflow-wrap: anywhere !important; }
+html:root body #root#root#root .ih11-freelancer-meta { display: flex !important; flex-wrap: wrap !important; gap: 7px 14px !important; color: var(--ih7-muted) !important; font-size: 11px !important; }
+html:root body #root#root#root .ih11-freelancer-card footer { display: flex !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 8px !important; padding: 3px 0 0 !important; margin-top: auto !important; }
+html:root body #root#root#root .ih11-freelancer-skeleton { height: 300px !important; padding: 24px !important; border-radius: 24px !important; background: var(--ih7-surface) !important; animation: ih11-loading 1100ms ease-in-out infinite alternate; }
+html:root body #root#root#root .ih11-freelancer-skeleton i { display: block !important; width: 70% !important; height: 16px !important; margin: 20px 0 !important; border-radius: 8px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root#root .ih11-freelancer-skeleton i:first-child { width: 52px !important; height: 52px !important; border-radius: 50% !important; }
+html:root body #root#root#root .ih11-empty { padding: 50px 25px !important; border-radius: 24px !important; background: var(--ih7-surface) !important; text-align: center !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root .ih11-empty h3 { font-size: 22px !important; margin: 10px 0 !important; }
+html:root body #root#root#root .ih11-empty p { color: var(--ih7-muted) !important; margin: 0 0 22px !important; }
+html:root body #root#root#root .ih11-pagination { display: flex !important; align-items: center !important; justify-content: center !important; gap: 18px !important; margin-top: 28px !important; color: var(--ih7-muted) !important; }
+html:root body #root#root#root .ih11-icon-button { display: grid !important; place-items: center !important; flex: 0 0 44px !important; width: 44px !important; height: 44px !important; border: 0 !important; border-radius: 50% !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font: 500 24px/1 Inter,system-ui,sans-serif !important; cursor: pointer !important; }
+html:root body #root#root#root .ih11-icon-button:disabled { opacity: .4 !important; cursor: default !important; }
+html:root body #root#root#root .ih11-visibility-panel { width: min(760px,100%) !important; margin: 26px auto !important; padding: 23px !important; border: 0 !important; border-radius: 20px !important; background: var(--ih7-soft) !important; }
+html:root body #root#root#root .ih11-eyebrow { display: block !important; color: var(--ih7-muted) !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: .09em !important; text-transform: uppercase !important; }
+html:root body #root#root#root .ih11-visibility-panel h2 { margin: 6px 0 !important; font-size: 23px !important; line-height: 1.3 !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root .ih11-visibility-panel p { color: var(--ih7-muted) !important; font-size: 13px !important; margin: 6px 0 16px !important; }
+html:root body #root#root#root .ih11-visibility-panel form { display: grid !important; gap: 16px !important; margin: 0 !important; }
+html:root body #root#root#root :is(.ih11-setting,.ih11-contact-confirm) { display: flex !important; align-items: flex-start !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; background: none !important; color: var(--ih7-ink) !important; text-align: left !important; font: 400 13px/1.6 Inter,system-ui,sans-serif !important; }
+html:root body #root#root#root :is(.ih11-setting,.ih11-contact-confirm) input[type="checkbox"] { appearance: auto !important; width: 18px !important; min-width: 18px !important; height: 18px !important; min-height: 18px !important; margin: 3px 0 0 !important; padding: 0 !important; flex: 0 0 18px !important; accent-color: var(--ih7-accent); }
+html:root body #root#root#root .ih11-setting b { display: block !important; font-size: 13px !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root .ih11-setting small { display: block !important; font-size: 12px !important; color: var(--ih7-muted) !important; margin-top: 3px !important; }
+html:root body #root#root#root .ih11-visibility-panel form > button { justify-self: start !important; background: var(--ih7-surface) !important; }
+html:root body #root#root#root .ih11-profile-contact { display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 10px 16px !important; padding: 0 !important; margin: 0 0 25px !important; }
+html:root body #root#root#root .ih11-profile-contact small { color: var(--ih7-muted) !important; font-size: 12px !important; }
+.ih11-dialog-backdrop { position: fixed; inset: 0; z-index: 110000; display: flex; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; background: rgba(5,10,18,.68); backdrop-filter: blur(5px); }
+html:root body .ih11-inquiry-dialog { width: min(590px,100%) !important; max-height: calc(100dvh - 48px) !important; overflow-y: auto !important; padding: 28px !important; margin: auto !important; border: 0 !important; border-radius: 26px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important; box-shadow: 0 24px 100px rgba(0,0,0,.22) !important; animation: ih11-profile-enter 250ms ease both; }
+html:root body .ih11-inquiry-dialog header { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 20px !important; padding: 0 !important; background: none !important; border: 0 !important; }
+html:root body .ih11-inquiry-dialog h2 { color: var(--ih7-ink) !important; margin: 7px 0 0 !important; font-size: 25px !important; line-height: 1.3 !important; overflow-wrap: anywhere !important; }
+html:root body .ih11-inquiry-dialog p { color: var(--ih7-muted) !important; margin: 14px 0 20px !important; font-size: 13px !important; }
+html:root body .ih11-inquiry-dialog form { display: grid !important; gap: 14px !important; }
+html:root body .ih11-inquiry-dialog form > label:not(.ih11-contact-confirm) { display: grid !important; gap: 7px !important; color: var(--ih7-ink) !important; font-size: 13px !important; font-weight: 650 !important; }
+html:root body .ih11-inquiry-dialog :is(input[type="text"],textarea) { width: 100% !important; min-width: 0 !important; padding: 13px 15px !important; border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important; font: 400 16px/1.55 Inter,system-ui,sans-serif !important; resize: vertical; box-sizing: border-box !important; }
+html:root body .ih11-inquiry-dialog :is(input,textarea):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 2px !important; }
+html:root body .ih11-inquiry-dialog form > small { color: var(--ih7-muted) !important; font-size: 11px !important; }
+html:root body .ih11-inquiry-dialog footer { display: grid !important; gap: 14px !important; padding: 3px 0 0 !important; }
+html:root body .ih11-inquiry-dialog footer > span { color: var(--ih7-muted) !important; font-size: 11px !important; }
+html:root body .ih11-inquiry-dialog .ih11-button { width: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 9px !important; min-height: 48px !important; border: 0 !important; border-radius: 12px !important; background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; font: 650 14px/1.4 Inter,system-ui,sans-serif !important; }
+html:root body .ih11-inquiry-dialog .ih11-icon-button { display: grid !important; place-items: center !important; flex: 0 0 44px !important; width: 44px !important; height: 44px !important; padding: 0 !important; border: 0 !important; border-radius: 50% !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 25px !important; }
+html:root body .ih11-inquiry-dialog .ih11-contact-confirm { display: flex !important; align-items: flex-start !important; gap: 11px !important; color: var(--ih7-ink) !important; font: 400 12px/1.65 Inter,system-ui,sans-serif !important; }
+html:root body .ih11-inquiry-dialog input[type="checkbox"] { width: 18px !important; height: 18px !important; min-width: 18px !important; margin: 3px 0 0 !important; accent-color: var(--ih7-accent); }
+html:root body .ih11-inquiry-dialog :is(.ih11-button,.ih11-icon-button):disabled { opacity: .6 !important; }
+html:root body :is(.ih11-inquiry-dialog,.ih11-visibility-panel) .ih11-notice { margin: 0 !important; padding: 11px 13px !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 12px !important; }
+html:root body .ih11-inquiry-dialog .ih11-notice.is-error { color: var(--ih7-error) !important; }
+@keyframes ih11-profile-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ih11-loading { from { opacity: .5; } to { opacity: 1; } }
+@media (max-width: 1220px) {
+  html:root body #root#root#root .ih11-account-navbar { grid-template-columns: minmax(0,1fr) auto !important; gap: 12px !important; }
+  html:root body #root#root#root .ih11-account-navbar .nav-actions { grid-area: 1 / 2 !important; }
+  html:root body #root#root#root .ih11-account-navbar .ih11-account-nav { grid-area: 2 / 1 / 3 / -1 !important; }
+  html:root body #root#root#root .ih11-freelancer-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+}
+@media (max-width: 720px) {
+  html:root body #root#root#root .ih11-account-navbar { width: calc(100% - 24px) !important; margin-top: 12px !important; padding: 12px !important; border-radius: 20px !important; }
+  html:root body #root#root#root .ih11-account-navbar .ih11-account-nav { width: 100% !important; justify-content: flex-start !important; gap: 2px !important; padding: 4px !important; border-radius: 14px !important; }
+  html:root body #root#root#root .ih11-account-navbar .ih11-account-nav > .ih-nav-item { padding: 10px !important; font-size: 11px !important; }
+  html:root body #root#root#root .ih11-account-nav .ih-nav-pixels { display: none !important; }
+  html:root body #root#root#root .ih11-account-navbar .nav-actions { gap: 7px !important; }
+  html:root body #root#root#root .ih11-freelancer-grid { grid-template-columns: minmax(0,1fr) !important; gap: 14px !important; }
+  html:root body #root#root#root .ih11-freelancer-card { padding: 21px !important; }
+  html:root body #root#root#root .ih11-visibility-panel { padding: 18px !important; }
+  html:root body #root#root#root .ih11-directory-heading h2 { font-size: 20px !important; }
+  html:root body #root#root#root .ih11-market-switch > a { padding: 10px 15px !important; }
+  .ih11-dialog-backdrop { padding: 12px; }
+  html:root body .ih11-inquiry-dialog { padding: 22px !important; max-height: calc(100dvh - 24px) !important; border-radius: 22px !important; }
+  html:root body .ih11-inquiry-dialog h2 { font-size: 22px !important; }
+  html:root body #root#root#root .ih11-profile-form .account-form-section-heading h2 { font-size: 22px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body :is(.ih11-inquiry-dialog,.ih11-freelancer-card,.ih11-freelancer-skeleton,.ih11-account-nav .ih-nav-pixels > i) { animation: none !important; }
+  html:root body :is(.ih11-button,.ih11-freelancer-card,.ih11-account-nav .ih-nav-pixels > i) { transition: none !important; transform: none !important; }
 }
