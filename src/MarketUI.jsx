@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -107,8 +107,11 @@ export function MarketIcon({ kind = "search", ...props }) {
     close: "m6 6 12 12M18 6 6 18",
     plus: "M12 5v14M5 12h14",
     check: "m5 12 4 4L19 6",
+    message: "M5 4h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 3V6a2 2 0 0 1 2-2ZM7 9h10M7 13h6",
+    chevron: "m7 10 5 5 5-5",
+    files: "M8 3h7l5 5v12H8ZM15 3v6h5M4 7v15h12",
   };
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
 }
 
 export function MarketHeader({ eyebrow, title, description, children }) {
@@ -255,7 +258,6 @@ export function HomeStepCard({ number, title, children }) {
 }
 
 export function HomePreviewMotion({ children }) {
-  const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(true);
   const rootRef = useRef(null);
   useEffect(() => {
@@ -264,18 +266,13 @@ export function HomePreviewMotion({ children }) {
     if (rootRef.current) observer.observe(rootRef.current);
     return () => observer.disconnect();
   }, []);
-  return <div className="hero-visual ih-orbit-preview ih6-job-preview ih7-preview-motion" ref={rootRef} data-paused={paused || !visible}>
+  return <div className="hero-visual ih-orbit-preview ih6-job-preview ih7-preview-motion" ref={rootRef} data-paused={!visible}>
     {children}
-    <button type="button" className="ih7-preview-pause" aria-pressed={paused} onClick={() => setPaused((value) => !value)}
-      aria-label={paused ? "Wznów ruch kart zleceń" : "Zatrzymaj ruch kart zleceń"}>
-      <span aria-hidden="true">{paused ? "▶" : "Ⅱ"}</span><span>{paused ? "Wznów ruch" : "Zatrzymaj ruch"}</span>
-    </button>
   </div>;
 }
 
 export function CommissionStory() {
   const id = useId().replace(/:/g, "");
-  const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(true);
   const sceneRef = useRef(null);
   useEffect(() => {
@@ -286,8 +283,8 @@ export function CommissionStory() {
   }, []);
   const offer = IDEA_HIRE_PUBLIC_OFFER;
   return (
-    <aside ref={sceneRef} className="ih5-story" data-paused={paused || !visible} aria-labelledby={`${id}-title`}>
-      <div className="ih5-story-top"><span className="ih5-eyebrow">Od pomysłu do gotowej pracy</span><button type="button" className="ih5-story-pause" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? "Wznów animację pracy" : "Zatrzymaj animację pracy"}>{paused ? "▶" : "Ⅱ"}</button></div>
+    <aside ref={sceneRef} className="ih5-story" data-paused={!visible} aria-labelledby={`${id}-title`}>
+      <div className="ih5-story-top"><span className="ih5-eyebrow">Od pomysłu do gotowej pracy</span></div>
       <div className="ih5-story-stage" aria-hidden="true">
         <svg viewBox="0 0 420 280" className="ih5-work-scene" focusable="false">
           <defs><linearGradient id={`${id}-screen`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="var(--ih5-scene-soft)" /><stop offset="1" stopColor="var(--ih5-scene-accent)" stopOpacity=".16" /></linearGradient></defs>
