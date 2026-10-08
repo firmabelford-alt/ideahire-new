@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 07 | 2026-10-04 | Pełny plik: src/App.jsx */
+/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./App.css";
@@ -328,18 +328,13 @@ const HOME_DEMO_REVIEWS = [
 ];
 
 function HomeDemoReviews() {
-  const [paused, setPaused] = useState(false);
   return (
-    <section className="ih-demo-reviews" aria-labelledby="ih-demo-reviews-title" data-paused={paused}>
+    <section className="ih-demo-reviews" aria-labelledby="ih-demo-reviews-title">
       <div className="ih-demo-reviews-heading">
         <div>
           <span className="ih-demo-review-caption">Pomysły spotykają ludzi</span>
           <h2 id="ih-demo-reviews-title">Opinie przykładowe — test wyglądu</h2>
         </div>
-        <button className="ih-demo-reviews-pause" type="button" aria-pressed={paused} aria-controls="ih-demo-reviews-track" onClick={() => setPaused((value) => !value)}>
-          <span aria-hidden="true">{paused ? "▶" : "Ⅱ"}</span>
-          {paused ? "Wznów" : "Zatrzymaj"}
-        </button>
       </div>
       <div className="ih-demo-reviews-viewport" tabIndex={0} aria-label="Przykładowe, fikcyjne opinie do testu wyglądu. Najedź kursorem lub ustaw fokus, aby zatrzymać przewijanie.">
         <div className="ih-demo-reviews-track" id="ih-demo-reviews-track">
