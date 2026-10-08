@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 11 | 2026-10-05 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -60,7 +60,7 @@ import {
   usePrivateWork,
   WorkDeliveryPanel,
 } from "./PrivateWork";
-import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction } from "./ServiceMarketplace";
+import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction, profileInquiryToJob, localProjectDate } from "./ServiceMarketplace";
 
 /* =========================================================
    FLUID NAVIGATION ENGINE
@@ -15026,7 +15026,6 @@ function Profile() {
 
 function JobsSpotlight({ jobs, formatBudget }) {
   const [activeId, setActiveId] = useState(jobs[0]?.id || "");
-  const [paused, setPaused] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(() => typeof document !== "undefined" && document.hidden);
@@ -15036,7 +15035,7 @@ function JobsSpotlight({ jobs, formatBudget }) {
   const sequence = jobs.map((job) => job.id).join("|");
   const activeIndex = Math.max(0, jobs.findIndex((job) => job.id === activeId));
   const job = jobs[activeIndex];
-  const stopped = paused || hovered || focused || hidden || reducedMotion;
+  const stopped = hovered || focused || hidden || reducedMotion;
 
   useEffect(() => {
     setActiveId(jobs[0]?.id || "");
@@ -15067,7 +15066,6 @@ function JobsSpotlight({ jobs, formatBudget }) {
   if (!job) return null;
 
   function changeJob(direction) {
-    setPaused(true);
     setActiveId(jobs[(activeIndex + direction + jobs.length) % jobs.length].id);
   }
 
@@ -15088,9 +15086,6 @@ function JobsSpotlight({ jobs, formatBudget }) {
           <div className="ih10-spotlight-controls" aria-label="Sterowanie podglądem">
             <button type="button" onClick={() => changeJob(-1)} aria-label="Poprzednie zlecenie">←</button>
             <span aria-label={`Zlecenie ${activeIndex + 1} z ${jobs.length}`}>{activeIndex + 1} / {jobs.length}</span>
-            <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? "Włącz automatyczną zmianę zleceń" : "Zatrzymaj automatyczną zmianę zleceń"} disabled={reducedMotion}>
-              <svg viewBox="0 0 20 20" aria-hidden="true">{paused || reducedMotion ? <path d="m7 4 9 6-9 6Z" /> : <path d="M6 4h3v12H6zM12 4h3v12h-3z" />}</svg>
-            </button>
             <button type="button" onClick={() => changeJob(1)} aria-label="Następne zlecenie">→</button>
           </div>
         )}
@@ -15111,7 +15106,6 @@ function JobsSpotlight({ jobs, formatBudget }) {
             const target = document.getElementById(`ih10-job-${job.id}`);
             if (!target) return;
             event.preventDefault();
-            setPaused(true);
             target.focus({ preventScroll: true });
             target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
           }}
@@ -19791,7 +19785,7 @@ function Notifications() {
    MESSAGES / CONVERSATION LIST
 ========================================================= */
 
-function Messages() {
+function useConversationInbox() {
   const { user } =
     useAuth();
 
@@ -19811,9 +19805,13 @@ function Messages() {
     if (!user?.id) return;
 
     let mounted = true;
+    let generation = 0;
+    let firstLoad = true;
+    let reloadTimer = 0;
 
     async function loadConversations() {
-      setLoading(true);
+      const request = ++generation;
+      if (firstLoad) setLoading(true);
       setErrorMessage("");
 
       try {
@@ -19841,7 +19839,7 @@ function Messages() {
           conversationRows || [];
 
         if (!rows.length) {
-          if (mounted) {
+          if (mounted && request === generation) {
             setConversations([]);
           }
           return;
@@ -19961,6 +19959,7 @@ function Messages() {
         const profileInquiryTitles = new Map((profileInquiriesResult.data || []).map((item) => [item.conversation_id, item.title]));
 
 
+        const unreadConversationIds = new Set((messagesResult.data || []).filter((message) => message.sender_id !== user.id && !message.read_at).map((message) => message.conversation_id));
         const lastMessageMap =
           new Map();
 
@@ -20053,11 +20052,7 @@ function Messages() {
                   lastMessage?.created_at ||
                   conversation.created_at,
                 isUnread:
-                  (
-                    lastMessage?.sender_id &&
-                    lastMessage.sender_id !== user.id &&
-                    !lastMessage.read_at
-                  ) ||
+                  unreadConversationIds.has(conversation.id) ||
                   (
                     !lastMessage &&
                     new Date(
@@ -20080,96 +20075,67 @@ function Messages() {
                 ).getTime()
             );
 
-        if (mounted) {
+        if (mounted && request === generation) {
           setConversations(
             result
           );
         }
       } catch (error) {
-        if (mounted) {
+        if (mounted && request === generation) {
           setErrorMessage(
             error?.message ||
               "Nie udało się pobrać rozmów."
           );
         }
       } finally {
-        if (mounted) {
+        firstLoad = false;
+        if (mounted && request === generation) {
           setLoading(false);
         }
       }
     }
 
+    function scheduleReload() {
+      window.clearTimeout(reloadTimer);
+      reloadTimer = window.setTimeout(loadConversations, 100);
+    }
     loadConversations();
 
     const channel =
       supabase
         .channel(
-          `messages-list:${user.id}`
+          `messages-list:${user.id}:${window.crypto.randomUUID()}`
         )
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "messages",
           },
-          () => {
-            loadConversations();
-          }
+          scheduleReload
         )
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "conversations",
           },
-          () => {
-            loadConversations();
-          }
+          scheduleReload
         )
+        .on("postgres_changes", { event: "*", schema: "public", table: "conversation_user_state", filter: `user_id=eq.${user.id}` }, scheduleReload)
         .subscribe();
 
     return () => {
       mounted = false;
+      window.clearTimeout(reloadTimer);
       supabase.removeChannel(
         channel
       );
     };
   }, [user?.id]);
 
-  function formatConversationDate(
-    value
-  ) {
-    if (!value) return "";
-
-    const date =
-      new Date(value);
-
-    const today =
-      new Date();
-
-    if (
-      date.toDateString() ===
-      today.toDateString()
-    ) {
-      return date.toLocaleTimeString(
-        "pl-PL",
-        {
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      );
-    }
-
-    return date.toLocaleDateString(
-      "pl-PL",
-      {
-        day: "2-digit",
-        month: "2-digit",
-      }
-    );
-  }
 
   const unreadCount = conversations.filter((conversation) => conversation.isUnread).length;
   const query = search.trim().toLocaleLowerCase("pl-PL");
@@ -20178,50 +20144,41 @@ function Messages() {
     (!query || [conversation.otherProfile?.name, conversation.job?.title, conversation.lastMessage?.content]
       .some((value) => String(value || "").toLocaleLowerCase("pl-PL").includes(query)))
   );
-  return (
-    <div className="account-page ih7-communications ih8-communications">
-      <AccountNavbar />
-      <main className="ih7-inbox-page">
-        <header className="ih7-inbox-heading">
-          <div><span className="ih7-eyebrow">Twoje rozmowy</span><h1>Wiadomości</h1><p>Projekt, ustalenia i pliki. Wszystko w jednej rozmowie.</p></div>
-          <div className="ih7-inbox-overview"><strong>{conversations.length}</strong><span>rozmów</span></div>
-        </header>
-        <section className="ih7-inbox-tools" aria-label="Znajdź rozmowę">
-          <label className="ih7-inbox-search"><MarketIcon /><span className="ih5-sr-only">Szukaj rozmowy</span>
-            <input type="search" placeholder="Osoba, projekt lub wiadomość…" value={search} onChange={(event) => setSearch(event.target.value)} maxLength={160} />
-          </label>
-          <div className="ih7-inbox-switch" aria-label="Widoczne rozmowy">
-            <button type="button" aria-pressed={inboxFilter === "all"} onClick={() => setInboxFilter("all")}>Wszystkie</button>
-            <button type="button" aria-pressed={inboxFilter === "unread"} onClick={() => setInboxFilter("unread")}>Nowe <b>{unreadCount}</b></button>
-          </div>
-        </section>
-        {loading ? <InlineRouteLoader className="ih7-route-loader" rows={4} />
-          : errorMessage ? <p className="ih7-feedback" role="alert">{errorMessage}</p>
-          : visibleConversations.length === 0 ? <section className="ih7-empty-state">
-            <span className="ih7-empty-mark" aria-hidden="true">◇</span>
-            <h2>{conversations.length ? "Brak pasujących rozmów" : "Tu zaczyna się współpraca"}</h2>
-            <p>{conversations.length ? "Zmień wyszukiwanie lub pokaż wszystkie rozmowy." : "Po otwarciu rozmowy znajdziesz tutaj wiadomości, materiały i ustalenia projektu."}</p>
-            {conversations.length > 0 && <button type="button" onClick={() => { setSearch(""); setInboxFilter("all"); }}>Pokaż wszystkie</button>}
-          </section> : <section className="ih7-inbox-list" aria-label="Lista rozmów">
-            <div className="ih7-inbox-list-heading"><span>{inboxFilter === "unread" ? "Nowe wiadomości" : "Ostatnie rozmowy"}</span><span>{visibleConversations.length}</span></div>
-            {visibleConversations.map((conversation) => {
-              const profile = conversation.otherProfile;
-              const name = profile?.name || "Użytkownik";
-              const lastMessage = conversation.lastMessage;
-              return <Link key={conversation.id} className={`ih7-inbox-row${conversation.isUnread ? " is-unread" : ""}`} to={`/chat/${conversation.id}`}>
-                <span className="ih7-avatar">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" /> : name.charAt(0).toUpperCase()}</span>
-                <div className="ih7-inbox-copy">
-                  <div className="ih7-inbox-topline"><strong>{name}</strong>{conversation.isUnread && <span className="ih7-unread" aria-label="Nowa rozmowa lub wiadomość" />}</div>
-                  <span className="ih7-inbox-project" title={conversation.job?.title}>{conversation.job?.title || "Rozmowa dotycząca projektu"}</span>
-                  <p>{lastMessage ? `${lastMessage.sender_id === user.id ? "Ty: " : ""}${lastMessage.content}` : "Rozmowa jest otwarta. Ustalcie szczegóły współpracy."}</p>
-                </div>
-                <div className="ih7-inbox-end"><time dateTime={conversation.sortDate}>{formatConversationDate(conversation.sortDate)}</time><MarketIcon kind="arrow" /></div>
-              </Link>;
-            })}
-          </section>}
-      </main>
+  return { user, conversations, visibleConversations, loading, errorMessage, search, setSearch, inboxFilter, setInboxFilter, unreadCount };
+}
+
+function formatInboxDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  return date.toDateString() === new Date().toDateString()
+    ? date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })
+    : date.toLocaleDateString("pl-PL", { day: "2-digit", month: "short" });
+}
+
+function ConversationInbox({ activeId, compact = false }) {
+  const { user, conversations, visibleConversations, loading, errorMessage, search, setSearch, inboxFilter, setInboxFilter, unreadCount } = useConversationInbox();
+  return <aside className={`ih12-inbox${compact ? " is-sidebar" : ""}`} aria-label="Twoje rozmowy">
+    <header className="ih12-inbox-heading"><div><span className="ih12-kicker">Twoje centrum współpracy</span><h1>Wiadomości <span>{conversations.length}</span></h1></div><Link className="ih12-icon-button" to="/freelancers" aria-label="Znajdź freelancera i rozpocznij rozmowę" title="Nowa współpraca"><MarketIcon kind="plus" /></Link></header>
+    <label className="ih12-inbox-search"><MarketIcon /><span className="ih5-sr-only">Szukaj rozmowy</span><input type="search" placeholder="Osoba lub projekt…" value={search} onChange={(event) => setSearch(event.target.value)} maxLength={160} /></label>
+    <div className="ih12-inbox-filters" aria-label="Filtr rozmów"><button type="button" aria-pressed={inboxFilter === "all"} onClick={() => setInboxFilter("all")}>Wszystkie</button><button type="button" aria-pressed={inboxFilter === "unread"} onClick={() => setInboxFilter("unread")}>Nieprzeczytane <b>{unreadCount}</b></button></div>
+    <div className="ih12-inbox-rows">
+      {loading ? <InlineRouteLoader rows={4} /> : errorMessage ? <p className="ih12-feedback" role="alert">{errorMessage}</p> : !visibleConversations.length ? <div className="ih12-inbox-empty"><MarketIcon kind="message" /><h2>{conversations.length ? "Brak pasujących rozmów" : "Zacznijmy od rozmowy"}</h2><p>{conversations.length ? "Zmień wyszukiwanie lub filtr." : "Napisz do freelancera albo wyślij mu opis projektu."}</p>{conversations.length ? <button type="button" onClick={() => { setSearch(""); setInboxFilter("all"); }}>Pokaż wszystkie</button> : <Link to="/freelancers">Poznaj freelancerów <MarketIcon kind="arrow" /></Link>}</div> : visibleConversations.map((conversation) => {
+        const profile = conversation.otherProfile;
+        const name = profile?.name || "Użytkownik";
+        const message = conversation.lastMessage;
+        return <Link key={conversation.id} to={`/chat/${conversation.id}`} aria-current={activeId === conversation.id ? "page" : undefined} className={`ih12-inbox-row${conversation.isUnread && activeId !== conversation.id ? " is-unread" : ""}${activeId === conversation.id ? " is-active" : ""}`}>
+          <span className="ih12-avatar">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" /> : Array.from(name)[0].toUpperCase()}</span>
+          <div className="ih12-inbox-copy"><div><strong>{name}</strong><time dateTime={conversation.sortDate}>{formatInboxDate(conversation.sortDate)}</time></div><span>{conversation.job?.title || "Zapytanie o współpracę"}</span><p>{message ? `${message.sender_id === user.id ? "Ty: " : ""}${message.content}` : "Rozmowa jest otwarta. Ustalcie szczegóły."}</p></div>
+          {conversation.isUnread && activeId !== conversation.id && <i className="ih12-unread-dot" aria-label="Nieprzeczytane wiadomości" />}
+        </Link>;
+      })}
     </div>
-  );
+    <footer><MarketIcon kind="message" /><span>Wiadomości, pliki i warunki w jednym miejscu.</span></footer>
+  </aside>;
+}
+
+function Messages() {
+  return <div className="account-page ih7-communications ih8-communications ih12-communications"><AccountNavbar /><main className="ih12-messenger is-index"><ConversationInbox /><section className="ih12-inbox-welcome"><div className="ih12-welcome-icon" aria-hidden="true"><MarketIcon kind="message" /><i /></div><span className="ih12-kicker">Od pierwszego „cześć” do gotowego projektu</span><h2>Wszystko zaczyna się<br />od dobrej rozmowy.</h2><p>Wybierz rozmowę z listy. Tutaj omówisz pomysł, uzgodnisz warunki i przekażesz pliki.</p><div className="ih12-welcome-features"><span><MarketIcon kind="message" />Rozmowa</span><span><MarketIcon kind="files" />Materiały</span><span><MarketIcon kind="check" />Ustalenia</span></div><Link className="ih12-button is-primary" to="/freelancers">Znajdź freelancera <MarketIcon kind="arrow" /></Link></section></main></div>;
 }
 
 
@@ -20837,6 +20794,13 @@ function agreementToForm(
   };
 }
 
+function profileBriefToAgreementForm(job, title = "", price = "") {
+  const form = agreementToForm(null, title, price);
+  if (!job?.project_details) return form;
+  const details = job.project_details;
+  return { ...form, scope: job.description || "", deliverables: details.deliverables || "", deadline: details.deadline || "", deliveryFormat: details.delivery_format || "", additionalTerms: details.materials ? `Materiały dostarczane przez klienta: ${details.materials}` : "" };
+}
+
 function getAgreementSaveMismatches(
   agreement,
   expected
@@ -21094,9 +21058,7 @@ function AgreementPanel({
             Czat negocjacyjny jest aktywny · realizacja ruszy po wspólnej akceptacji
           </small>
         </span>
-        <b aria-hidden="true">
-          {expanded ? "−" : "+"}
-        </b>
+        <span className="ih12-collapse-icon" aria-hidden="true"><MarketIcon kind={expanded ? "close" : "plus"} /></span>
       </button>
 
       {expanded && (
@@ -21148,6 +21110,7 @@ function AgreementPanel({
           </div>
 
           <div className="agreement-form-grid">
+            <h4 className="ih12-form-section"><span>01</span> Zakres i rezultat</h4>
             <label className="agreement-field agreement-field-wide">
               <span>Nazwa zlecenia *</span>
               <input
@@ -21197,8 +21160,9 @@ function AgreementPanel({
               />
             </label>
 
+            <h4 className="ih12-form-section"><span>02</span> Cena, termin i przekazanie</h4>
             <label className="agreement-field">
-              <span>Cena zlecenia</span>
+              <span>Cena zlecenia *</span>
               <div className="agreement-price-input">
                 <input
                   type="text"
@@ -21224,7 +21188,7 @@ function AgreementPanel({
               </div>
               <small className="agreement-fixed-price-note">
                 {priceNegotiable
-                  ? "Budżet został oznaczony jako negocjowalny. Wpiszcie ostateczną kwotę, którą zaakceptują obie strony."
+                  ? "Wpiszcie ostateczne wynagrodzenie wykonawcy. Kwotę zaakceptują obie strony."
                   : "Cena została ustalona przez zleceniodawcę przy publikacji zlecenia i nie podlega zmianie."}
               </small>
             </label>
@@ -21233,7 +21197,7 @@ function AgreementPanel({
               <span>Termin wykonania *</span>
               <input
                 type="date"
-                min={new Date().toISOString().slice(0, 10)}
+                min={localProjectDate()}
                 value={form.deadline}
                 onChange={(event) =>
                   onFieldChange(
@@ -21280,6 +21244,7 @@ function AgreementPanel({
               />
             </label>
 
+            <h4 className="ih12-form-section"><span>03</span> Odbiór i zasady współpracy</h4>
             <label className="agreement-field agreement-field-wide">
               <span>Sposób odbioru pracy *</span>
               <textarea
@@ -21930,8 +21895,17 @@ function Chat() {
   const [messages, setMessages] =
     useState([]);
 
-  const [draft, setDraft] =
-    useState("");
+  const chatIdRef = useRef(id);
+  chatIdRef.current = id;
+  const [conversationDrafts, setConversationDrafts] = useState({});
+  const draft = conversationDrafts[id] || "";
+  function setDraft(value) {
+    setConversationDrafts((current) => {
+      const next = { ...current };
+      if (value) next[id] = value; else delete next[id];
+      return next;
+    });
+  }
 
   const [loading, setLoading] =
     useState(true);
@@ -22014,8 +21988,10 @@ function Chat() {
   async function loadAgreement(
     conversationData,
     fallbackTitle = "",
-    fallbackPrice = ""
+    fallbackPrice = "",
+    projectBrief = null
   ) {
+    if (conversationData?.id !== chatIdRef.current) return null;
     if (
       !conversationData?.agreements_required
     ) {
@@ -22047,6 +22023,7 @@ function Chat() {
         throw error;
       }
 
+      if (conversationData.id !== chatIdRef.current) return null;
       setAgreement(data || null);
 
       if (!data) {
@@ -22057,11 +22034,7 @@ function Chat() {
 
         if (firstProposerId === user?.id) {
           setAgreementForm(
-            agreementToForm(
-              null,
-              fallbackTitle,
-              fallbackPrice
-            )
+            profileBriefToAgreementForm(projectBrief, fallbackTitle, fallbackPrice)
           );
           setAgreementMode("form");
         } else {
@@ -22073,7 +22046,7 @@ function Chat() {
 
       return data || null;
     } finally {
-      setAgreementLoading(false);
+      if (conversationData.id === chatIdRef.current) setAgreementLoading(false);
     }
   }
 
@@ -22165,7 +22138,7 @@ function Chat() {
         data || []
       );
 
-    setMessages(preparedMessages);
+    if (id === chatIdRef.current) setMessages(preparedMessages);
   }
 
   useEffect(() => {
@@ -22251,10 +22224,16 @@ function Chat() {
           conversationData.job_id
             ? supabase.from("jobs").select("title, budget, budget_negotiable, category, subcategory, collaboration_plan, project_deadline, planned_start_date, description")
                 .eq("id", conversationData.job_id).maybeSingle()
-            : supabase.from("ideahire_profile_inquiries").select("title, brief").eq("conversation_id", id).maybeSingle()
-                .then(({ data, error }) => ({ data: data ? { title: data.title, description: data.brief } : null, error })),
+            : Promise.resolve({ data: null, error: null }),
         ]);
 
+        if (conversationData.origin_type === "profile") {
+          const inquiry = await supabase.from("ideahire_profile_inquiries")
+            .select("title, brief, contact_kind, project_details").eq("conversation_id", id).maybeSingle();
+          if (inquiry.error) throw inquiry.error;
+          jobResult.data = profileInquiryToJob(inquiry.data);
+        }
+        if (!mounted) return;
         const profileData =
           profileResult.data;
 
@@ -22296,7 +22275,7 @@ function Chat() {
           jobResult.data?.budget ?? "";
 
         const loadedJobBudgetNegotiable =
-          jobResult.data?.budget_negotiable === true;
+          conversationData.origin_type === "profile" || jobResult.data?.budget_negotiable === true;
 
         setJobTitle(
           loadedJobTitle
@@ -22329,11 +22308,13 @@ function Chat() {
         await loadAgreement(
           conversationData,
           loadedJobTitle,
-          loadedJobBudget
+          loadedJobBudget,
+          jobResult.data
         );
 
+        if (!mounted) return;
         await loadMessages();
-
+        if (!mounted) return;
         markConversationSeen(
           user.id,
           id
@@ -22369,6 +22350,7 @@ function Chat() {
               `conversation_id=eq.${id}`,
           },
           (payload) => {
+            if (!mounted || id !== chatIdRef.current) return;
             let newMessage =
               payload.new;
 
@@ -22430,6 +22412,7 @@ function Chat() {
               `conversation_id=eq.${id}`,
           },
           (payload) => {
+            if (!mounted || id !== chatIdRef.current) return;
             const updatedMessage =
               payload.new;
 
@@ -22515,11 +22498,7 @@ function Chat() {
 
   function openAgreementForm() {
     setAgreementMessage("");
-    const nextForm = agreementToForm(
-      agreement,
-      jobTitle,
-      jobBudget
-    );
+    const nextForm = agreement ? agreementToForm(agreement, jobTitle, jobBudget) : profileBriefToAgreementForm(jobDetails, jobTitle, jobBudget);
 
     setAgreementForm({
       ...nextForm,
@@ -22613,11 +22592,12 @@ function Chat() {
 
     if (
       !Number.isFinite(price) ||
-      price <= 0 ||
-      price > MAX_JOB_BUDGET
+      price < 1 ||
+      price > MAX_JOB_BUDGET ||
+      Math.abs(price * 100 - Math.round(price * 100)) > 0.000001
     ) {
       setAgreementMessage(
-        "Nie udało się pobrać ceny ze zlecenia. Odśwież stronę i spróbuj ponownie."
+        jobBudgetNegotiable ? "Wpisz cenę zlecenia od 1 do 10 000 zł, z dokładnością do grosza." : "Nie udało się pobrać ceny ze zlecenia. Odśwież stronę i spróbuj ponownie."
       );
       return;
     }
@@ -22681,6 +22661,12 @@ function Chat() {
     setAgreementMessage("");
 
     try {
+      if (conversation?.origin_type === "profile" && !conversation.job_id) {
+        const { data, error: projectError } = await supabase.rpc("ensure_ideahire_profile_project", { p_conversation_id: id, p_price_amount: price });
+        if (projectError) throw projectError;
+        if (!data?.job_id) throw new Error("Nie udało się przygotować prywatnego zlecenia.");
+        setConversation((current) => ({ ...current, job_id: data.job_id }));
+      }
       const { error } =
         await supabase.rpc(
           "propose_conversation_agreement_v2",
@@ -22853,7 +22839,7 @@ function Chat() {
       }
 
       setDraft("");
-
+      if (id !== chatIdRef.current) return;
       /*
        * Dodajemy wiadomość lokalnie od razu.
        * Realtime ma ochronę przed duplikatem po id.
@@ -22985,11 +22971,11 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications">
+    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih12-communications">
       <AccountNavbar />
 
-      <main className="ih7-chat-page">
-
+      <main className="ih7-chat-page ih12-messenger is-chat">
+        <ConversationInbox activeId={id} compact />
         <div className="ih7-chat-shell">
           {loading ? (
             <InlineRouteLoader
@@ -23119,11 +23105,12 @@ function Chat() {
               <details className="ih7-chat-project">
                 <summary>
                   <div className="ih7-chat-project-title"><span className="ih7-eyebrow">{getJobCategoryLabel(jobDetails?.category)}{jobDetails?.subcategory ? ` · ${jobDetails.subcategory}` : ""}</span><h1>{jobTitle || "Projekt IdeaHire"}</h1></div>
-                  <span className="ih7-chat-project-budget"><small>Budżet projektu</small><strong>{formatChatProjectBudget(jobBudget)}</strong></span>
+                  <span className="ih7-chat-project-budget"><small>{agreement?.status === "accepted" ? "Uzgodniona cena" : "Proponowany budżet"}</small><strong>{formatChatProjectBudget(agreement?.status === "accepted" ? agreement.price_amount : jobBudget)}</strong></span>
                   <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
                 </summary>
                 <div className="ih7-chat-project-body">
                   <strong>{jobTitle || "Projekt IdeaHire"}</strong><p>{jobDetails?.description || "Rozmowa i materiały dotyczące tego projektu."}</p>
+                  {jobDetails?.project_details?.deliverables && <div className="ih12-project-brief"><span>Oczekiwany rezultat</span><p>{jobDetails.project_details.deliverables}</p>{jobDetails.project_details.delivery_format && <p><b>Format: </b>{jobDetails.project_details.delivery_format}</p>}{jobDetails.project_details.materials && <p><b>Materiały od klienta: </b>{jobDetails.project_details.materials}</p>}<p><b>Termin: </b>{formatChatProjectDate(jobDetails.project_details.deadline)}</p></div>}
                   <dl><div><dt>Ustalenia</dt><dd>{agreement?.status === "accepted" ? "Zaakceptowane" : "W toku"}</dd></div><div><dt>Materiały</dt><dd>{privateWork.items.filter((item) => item.moderation_status === "active").length}</dd></div></dl>
                   {conversation?.origin_type === "service_inquiry" && <div className="ih7-chat-service-context">
                     <span className="ih7-eyebrow">Zapytanie o usługę</span>
@@ -23184,9 +23171,7 @@ function Chat() {
                 {workspaceTab === "conversation" && (
                   <>
                     {agreementsRequired && !agreementAccepted && (
-                      <p className="agreement-negotiation-banner">
-                        Czat negocjacyjny jest otwarty. Możecie omawiać i zmieniać propozycję, ale realizacja zlecenia rozpocznie się dopiero po wspólnej akceptacji warunków.
-                      </p>
+                      <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>{agreement ? "Sprawdźcie propozycję warunków" : "Najpierw porozmawiajcie o szczegółach"}</strong><small>{agreement ? "Obie strony akceptują tę samą wersję." : "Zakres, cenę i termin zapiszecie w ustaleniach."}</small></span></div><button type="button" onClick={() => setWorkspaceTab("plan")}>{agreement ? "Zobacz ustalenia" : "Ustal warunki"}<MarketIcon kind="arrow" /></button></div>
                     )}
 
                     <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => { const element = event.currentTarget; followMessagesRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 100; }}>
@@ -30925,10 +30910,35 @@ function ServiceRoute({ mode }) {
   );
 }
 
+function AmbientBackground() {
+  const rootRef = useRef(null);
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0;
+    function paint() {
+      frame = 0;
+      const height = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      rootRef.current?.style.setProperty("--ih12-scroll", String(Math.min(1, Math.max(0, window.scrollY / height))));
+    }
+    function scroll() { if (!frame && !reduced.matches) frame = window.requestAnimationFrame(paint); }
+    function preference() {
+      window.cancelAnimationFrame(frame); frame = 0;
+      if (reduced.matches) rootRef.current?.style.setProperty("--ih12-scroll", "0"); else paint();
+    }
+    window.addEventListener("scroll", scroll, { passive: true });
+    window.addEventListener("resize", scroll, { passive: true });
+    reduced.addEventListener("change", preference);
+    preference();
+    return () => { window.removeEventListener("scroll", scroll); window.removeEventListener("resize", scroll); reduced.removeEventListener("change", preference); window.cancelAnimationFrame(frame); };
+  }, []);
+  return <div className="ih12-ambient" aria-hidden="true" ref={rootRef}><i /><i /><i /></div>;
+}
+
 /* Decorative cursor trail shared by every route. No pointer interception. */
 function Router() {
   return (
     <BrowserRouter>
+      <AmbientBackground />
       <SmoothRouteTransitions />
       <RouteScrollManager />
       <AuthProvider>
