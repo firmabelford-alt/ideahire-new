@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 13A | 2026-10-08 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 14 | 2026-10-09 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51709,3 +51709,246 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .is-active { outline: 1px solid Highlight !important; }
 }
 @media print { html:root body .ih13-background { display: none; } }
+
+/* IdeaHire P14: visible canvas, an open conversation and clear account actions. */
+:root {
+  --ih13-start-a: #dce7fc;
+  --ih13-start-b: #eff3fc;
+  --ih13-end-a: #e5d7f5;
+  --ih13-end-b: #cce8eb;
+}
+html[data-theme="dark"] {
+  --ih13-start-a: #142846;
+  --ih13-start-b: #101a2b;
+  --ih13-end-a: #302542;
+  --ih13-end-b: #143139;
+}
+html[data-template="classic"] {
+  --ih13-start-a: #e3e4df;
+  --ih13-start-b: #f2f1ec;
+  --ih13-end-a: #d7d8d3;
+  --ih13-end-b: #e7e0d4;
+}
+html[data-template="classic"][data-theme="dark"] {
+  --ih13-start-a: #24272c;
+  --ih13-start-b: #15171a;
+  --ih13-end-a: #302c2a;
+  --ih13-end-b: #1c2728;
+}
+/* The body paints the backdrop. Root content must not paint over that layer. */
+html:root body #root#root#root { background: transparent !important; }
+html:root body .ih13-background-end { transition: opacity 360ms linear; }
+
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded {
+  position: relative !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: min(1500px, calc(100% - 48px)) !important;
+  max-width: 1500px !important;
+  background: transparent !important;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-shell {
+  background: transparent !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-shell.is-ready {
+  animation: ih14-chat-open 300ms cubic-bezier(.2,.75,.25,1) both !important;
+}
+@keyframes ih14-chat-open {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-header {
+  min-height: 86px !important;
+  padding: 18px 30px !important;
+  gap: 18px !important;
+  background: var(--ih7-surface) !important;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-conversations-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  gap: 9px !important;
+  width: auto !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  margin: 0 !important;
+  padding: 0 13px !important;
+  border: 1px solid var(--ih7-line) !important;
+  border-radius: 11px !important;
+  color: var(--ih7-ink) !important;
+  background: var(--ih7-soft) !important;
+  font: 600 14px/1.4 Inter,system-ui,sans-serif !important;
+  cursor: pointer !important;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-conversations-toggle svg { width: 19px !important; height: 19px !important; flex: 0 0 19px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-project > summary { padding: 16px 30px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-tabs { margin: 16px 30px 0 !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-tabs button { min-height: 46px !important; padding: 12px 20px !important; font-size: 15px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-panel {
+  padding: 20px 30px 20px !important;
+  background: var(--ih7-surface) !important;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-panel.is-conversation {
+  background: color-mix(in srgb, var(--ih7-surface) 82%, transparent) !important;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-messages { gap: 18px !important; padding-top: 20px !important; padding-bottom: 24px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-message { max-width: min(72%, 800px) !important; padding: 14px 18px 9px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-message.has-materials { width: min(72%, 800px) !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-form { min-height: 62px !important; padding: 9px 11px !important; margin-top: 16px !important; border-radius: 16px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-project-next { padding: 14px 16px !important; margin-bottom: 14px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-project-next strong { font-size: 14px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-inbox-tools { display: flex !important; align-items: center !important; gap: 6px !important; flex: 0 0 auto !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox {
+  display: flex !important;
+  position: absolute !important;
+  z-index: 4 !important;
+  inset: 0 auto 0 0 !important;
+  width: min(390px, calc(100% - 28px)) !important;
+  height: 100% !important;
+  border-radius: 19px 0 0 19px !important;
+  background: var(--ih7-surface) !important;
+  box-shadow: 14px 0 36px #00000015 !important;
+  transform: translateX(-101%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 240ms cubic-bezier(.2,.75,.25,1), opacity 180ms ease, visibility 240ms;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded.is-inbox-open .ih12-inbox {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox-heading { gap: 8px !important; padding-left: 20px !important; padding-right: 16px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox-heading h1 { font-size: 23px !important; gap: 8px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-inbox-scrim {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 3 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #09182b40 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+  animation: ih14-scrim-in 180ms ease both;
+}
+@keyframes ih14-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-conversations-toggle:focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 3px !important; }
+
+html:root body #root#root#root .page.ih6-account-page .ih7-account-overview { gap: 20px 28px !important; padding: 28px !important; }
+html:root body #root#root#root .page.ih6-account-page .ih7-account-heading h1 { font-size: clamp(28px, 3vw, 36px) !important; }
+html:root body #root#root#root .page.ih6-account-page .ih13-account-shortcuts.ih14-account-actions {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  margin: 0 !important;
+  padding-top: 20px !important;
+  border-top: 1px solid var(--ih6-line) !important;
+  align-items: stretch !important;
+}
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 18px !important;
+  border: 1px solid var(--ih6-line) !important;
+  border-radius: 16px !important;
+  color: var(--ih6-ink) !important;
+  background: var(--ih6-soft, var(--ih7-soft)) !important;
+}
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group h2 { margin: 0 !important; color: var(--ih6-ink) !important; font: 650 15px/1.4 Inter,system-ui,sans-serif !important; }
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-links { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 7px !important; }
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group a,
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  border: 1px solid var(--ih6-line) !important;
+  border-radius: 10px !important;
+  color: var(--ih6-ink) !important;
+  background: var(--ih6-surface) !important;
+  font: 550 13px/1.5 Inter,system-ui,sans-serif !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group a > svg:last-child,
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group button > svg:last-child { margin-left: auto !important; }
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group .ih14-account-action-primary {
+  background: var(--ih7-accent) !important;
+  border-color: var(--ih7-accent) !important;
+  color: var(--ih7-on-accent) !important;
+  font-weight: 650 !important;
+}
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group :is(a,button):hover { border-color: var(--ih7-accent) !important; }
+html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group :is(a,button):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 3px !important; }
+
+@media (max-width: 1000px) {
+  html:root body #root#root#root .page.ih6-account-page .ih7-account-overview { grid-template-columns: 310px minmax(0, 1fr) !important; padding: 22px !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih14-account-action-group { padding: 14px !important; }
+}
+@media (max-width: 800px) {
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded { width: calc(100% - 24px) !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-header { min-height: 76px !important; gap: 8px !important; padding: 14px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-conversations-toggle { width: 44px !important; padding: 0 !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-conversations-toggle span { display: none !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-profile-link { gap: 8px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-person strong { font-size: 16px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-project > summary { padding: 12px 14px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-tabs { margin: 10px 14px 0 !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-tabs button { min-height: 44px !important; padding: 10px 8px !important; font-size: 14px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-workspace-panel { padding: 14px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-messages { gap: 14px !important; padding-top: 12px !important; padding-bottom: 16px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-message { max-width: 90% !important; padding: 12px 14px 8px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-message.has-materials { width: 90% !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-form { min-height: 60px !important; margin-top: 10px !important; padding: 8px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-project-next { padding: 11px !important; margin-bottom: 8px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { border-radius: 15px 0 0 15px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox-heading h1 { font-size: 21px !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih7-account-overview { grid-template-columns: minmax(0, 1fr) !important; padding: 20px !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih7-account-heading { grid-row: 1 !important; padding: 0 !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih7-account-overview .ih6-profile-hub { grid-row: 2 !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih13-account-shortcuts.ih14-account-actions { grid-template-columns: minmax(0, 1fr) !important; padding-top: 16px !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih14-account-action-links { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 370px) {
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded { width: calc(100% - 16px) !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox-heading { padding-left: 14px !important; padding-right: 12px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox-heading h1 { font-size: 20px !important; gap: 6px !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox-heading h1 > span { display: none !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih7-account-overview { padding: 16px !important; }
+  html:root body #root#root#root .page.ih6-account-page .ih14-account-action-links { grid-template-columns: minmax(0, 1fr) !important; }
+}
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded.is-condensed .ih7-chat-header { min-height: 64px !important; padding-top: 9px !important; padding-bottom: 9px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded.is-condensed .ih7-chat-workspace-tabs { margin-top: 8px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded.is-condensed .ih7-chat-workspace-tabs button { min-height: 40px !important; padding-top: 8px !important; padding-bottom: 8px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded.is-condensed .ih7-chat-workspace-panel { padding-top: 8px !important; padding-bottom: 10px !important; }
+html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded.is-condensed .ih7-chat-form { margin-top: 6px !important; min-height: 58px !important; }
+@media (prefers-reduced-motion: reduce) {
+  html:root body .ih13-background-end { opacity: 0 !important; transition: none !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-shell.is-ready, html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-inbox-scrim { animation: none !important; }
+  html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { transition: none !important; }
+}
