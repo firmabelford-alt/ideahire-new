@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 13A | 2026-10-08 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | PACZKA 14 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
@@ -39,6 +39,16 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Wybierz rozmowę": "Choose a conversation",
   "Otwórz ją z listy po lewej. Wiadomości, pliki i ustalenia dotyczące projektu znajdziesz w jednym miejscu.": "Open it from the list on the left. Find project messages, files and terms in one place.",
   "Chcesz rozpocząć nową współpracę?": "Ready to start a new project?",
+  "Wybierz sekcję profilu lub skorzystaj z szybkich działań.": "Choose a profile section or use the quick actions.",
+  "Szybkie działania konta": "Quick account actions",
+  "Zlecam pracę": "Hiring help",
+  "Oferuję usługi": "Offering services",
+  "Współpraca": "Collaboration",
+  "Moje portfolio": "My portfolio",
+  "Rozmowy": "Conversations",
+  "Pokaż listę rozmów": "Show conversations",
+  "Zamknij listę rozmów": "Close conversations",
+  "Zamknij panel rozmów": "Close the conversation panel",
   "Przeglądaj usługi": "Browse services",
   "Usługi i współpraca": "Services and collaboration",
   "Komunikator IdeaHire": "IdeaHire messenger",
