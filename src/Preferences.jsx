@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | PACZKA 13A | 2026-10-08 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
@@ -28,6 +28,20 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  /* P13 — clear messenger and account shortcuts. */
+  "Lista rozmów": "Conversation list",
+  "Twoje rozmowy i projekty": "Your conversations and projects",
+  "Nowa rozmowa": "New conversation",
+  "Szukaj osoby lub projektu": "Search for a person or project",
+  "Znajdź freelancera i napisz o współpracy.": "Find a freelancer and discuss a project.",
+  "Przesłano załącznik": "Attachment shared",
+  "Rozmowy, pliki i ustalenia": "Conversations, files and terms",
+  "Wybierz rozmowę": "Choose a conversation",
+  "Otwórz ją z listy po lewej. Wiadomości, pliki i ustalenia dotyczące projektu znajdziesz w jednym miejscu.": "Open it from the list on the left. Find project messages, files and terms in one place.",
+  "Chcesz rozpocząć nową współpracę?": "Ready to start a new project?",
+  "Przeglądaj usługi": "Browse services",
+  "Usługi i współpraca": "Services and collaboration",
+  "Komunikator IdeaHire": "IdeaHire messenger",
   /* P12 — messages and profile contact. */
   "Twoje centrum współpracy": "Your collaboration hub",
   "Znajdź freelancera i rozpocznij rozmowę": "Find a freelancer and start a conversation",
