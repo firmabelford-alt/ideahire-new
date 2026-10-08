@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 13A | 2026-10-08 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 14 | 2026-10-09 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -9841,15 +9841,34 @@ function Account() {
           <div className="ih7-account-heading">
             <span className="section-label">Konto</span>
             <h1>Centrum profilu</h1>
-            <p>Dane, specjalizacje i ustawienia w jednym miejscu. Kliknij koło, aby wybrać sekcję.</p>
+            <p>Wybierz sekcję profilu lub skorzystaj z szybkich działań.</p>
             <div className="ih7-account-current"><span>Wybrana sekcja</span><strong>{ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === activeAccountSection)?.label}</strong></div>
-            <nav className="ih13-account-shortcuts" aria-label="Usługi i współpraca">
-              {isAdult && <Link to="/services/new"><MarketIcon kind="plus" />Dodaj usługę</Link>}
-              {isAdult && <Link to="/services/mine">Moje usługi<MarketIcon kind="arrow" /></Link>}
-              <Link to="/freelancers">Znajdź freelancera<MarketIcon kind="arrow" /></Link>
-              {isAdult && <Link to="/messages">Wiadomości<MarketIcon kind="message" /></Link>}
-            </nav>
           </div>
+          <nav className="ih13-account-shortcuts ih14-account-actions" aria-label="Szybkie działania konta">
+            <section className="ih14-account-action-group">
+              <h2>Zlecam pracę</h2>
+              {isAdult && <Link className="ih14-account-action-primary" to="/find-talent"><MarketIcon kind="plus" /><span>Dodaj zlecenie</span><MarketIcon kind="arrow" /></Link>}
+              <div className="ih14-account-action-links">
+                <Link to="/freelancers"><span>Znajdź freelancera</span><MarketIcon kind="arrow" /></Link>
+                <Link to="/services"><span>Przeglądaj usługi</span><MarketIcon kind="arrow" /></Link>
+              </div>
+            </section>
+            <section className="ih14-account-action-group">
+              <h2>Oferuję usługi</h2>
+              <div className="ih14-account-action-links">
+                {isAdult && <Link to="/services/new"><MarketIcon kind="plus" /><span>Dodaj usługę</span></Link>}
+                {isAdult && <Link to="/services/mine"><span>Moje usługi</span><MarketIcon kind="arrow" /></Link>}
+                <button type="button" onClick={() => openAccountSection(ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === "portfolio"))}><span>Moje portfolio</span><MarketIcon kind="arrow" /></button>
+              </div>
+            </section>
+            <section className="ih14-account-action-group">
+              <h2>Współpraca</h2>
+              <div className="ih14-account-action-links">
+                {isAdult && <Link to="/messages"><span>Wiadomości</span><MarketIcon kind="message" /></Link>}
+                <button type="button" onClick={() => openAccountSection(ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === "jobs"))}><span>Moje zlecenia</span><MarketIcon kind="arrow" /></button>
+              </div>
+            </section>
+          </nav>
         </header>
 
         <div className="ih6-account-layout">
@@ -20162,8 +20181,7 @@ function formatInboxDate(value) {
 }
 
 /* P13A: presentation components remain inside the existing router file. */
-// A separate, negative-z-index body layer cannot cover headers or controls.
-// Scroll updates one opacity value on this layer only, never the React tree.
+// One background layer under the page; scroll never updates the React tree.
 function AmbientBackground() {
   const layerRef = useRef(null);
   const { pathname } = useLocation();
@@ -20173,16 +20191,26 @@ function AmbientBackground() {
     let frame = 0;
     let distance = 1;
     let last = -1;
+    let scroller = document.scrollingElement || document.documentElement;
+
+    function pageScroller(element) {
+      return element === document.documentElement || element === document.body ||
+        element?.id === "root" || element?.matches?.(".app, .page, .account-page");
+    }
 
     function measure() {
-      distance = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const viewportHeight = scroller === document.scrollingElement || scroller === document.documentElement
+        ? window.innerHeight : scroller.clientHeight;
+      distance = Math.max(1, scroller.scrollHeight - viewportHeight);
       schedule();
     }
 
     function paint() {
       frame = 0;
       if (document.hidden) return;
-      const progress = motion?.matches ? 0 : Math.min(1, Math.max(0, window.scrollY / distance));
+      const offset = scroller.scrollTop || (scroller === document.scrollingElement
+        ? document.documentElement.scrollTop || document.body.scrollTop || window.scrollY : 0);
+      const progress = motion?.matches ? 0 : Math.min(1, Math.max(0, offset / distance));
       const blend = Math.round(progress * 250) / 250;
       if (blend === last) return;
       last = blend;
@@ -20191,6 +20219,20 @@ function AmbientBackground() {
 
     function schedule() {
       if (!frame && !document.hidden) frame = window.requestAnimationFrame(paint);
+    }
+
+    function scroll(event) {
+      const target = event.target === document || event.target === window
+        ? document.scrollingElement || document.documentElement : event.target;
+      if (!pageScroller(target)) return;
+      if (target !== scroller) { scroller = target; measure(); }
+      else schedule();
+    }
+
+    function viewportScroll() {
+      const target = document.scrollingElement || document.documentElement;
+      if (target !== scroller) { scroller = target; measure(); }
+      else schedule();
     }
 
     function preference() {
@@ -20210,7 +20252,8 @@ function AmbientBackground() {
     // Content may grow after data arrives. Read its height on resize, not on scroll.
     const observer = window.ResizeObserver ? new ResizeObserver(measure) : null;
     observer?.observe(document.body);
-    window.addEventListener("scroll", schedule, { passive: true });
+    document.addEventListener("scroll", scroll, { capture: true, passive: true });
+    window.addEventListener("scroll", viewportScroll, { passive: true });
     window.addEventListener("resize", measure, { passive: true });
     document.addEventListener("visibilitychange", visibility);
     motion?.addEventListener?.("change", preference);
@@ -20218,7 +20261,8 @@ function AmbientBackground() {
 
     return () => {
       observer?.disconnect();
-      window.removeEventListener("scroll", schedule);
+      document.removeEventListener("scroll", scroll, true);
+      window.removeEventListener("scroll", viewportScroll);
       window.removeEventListener("resize", measure);
       document.removeEventListener("visibilitychange", visibility);
       motion?.removeEventListener?.("change", preference);
@@ -20235,8 +20279,21 @@ function AmbientBackground() {
   );
 }
 
+const MessengerLayoutContext = createContext(null);
+
+function MessengerConversationsButton() {
+  const layout = useContext(MessengerLayoutContext);
+  return <button type="button" className="ih14-conversations-toggle" aria-expanded={layout?.inboxOpen || false}
+    aria-controls="ih14-conversation-inbox" aria-label="Pokaż listę rozmów" onClick={() => layout?.setInboxOpen(true)}>
+    <MarketIcon kind="message" /><span>Rozmowy</span>
+  </button>;
+}
+
 function MessengerFrame({ chat = false, children }) {
   const frameRef = useRef(null);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => { setInboxOpen(false); }, [pathname]);
   useEffect(() => {
     let task = 0;
     const viewport = window.visualViewport;
@@ -20267,7 +20324,40 @@ function MessengerFrame({ chat = false, children }) {
       window.cancelAnimationFrame(task);
     };
   }, []);
-  return <main ref={frameRef} className={`ih12-messenger${chat ? " ih7-chat-page is-chat" : " is-index"}`} aria-label="Komunikator IdeaHire">{children}</main>;
+  useEffect(() => {
+    if (!chat || !inboxOpen) return undefined;
+    const panel = frameRef.current?.querySelector(".ih12-inbox");
+    const content = frameRef.current?.querySelector(".ih7-chat-shell");
+    const previous = document.activeElement;
+    if (content) content.inert = true;
+    const focusable = () => [...(panel?.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])') || [])];
+    panel?.querySelector('input[type="search"]')?.focus({ preventScroll: true });
+    function keyboard(event) {
+      if (event.key === "Escape") { event.preventDefault(); setInboxOpen(false); return; }
+      if (event.key !== "Tab") return;
+      const elements = focusable();
+      const first = elements[0], last = elements[elements.length - 1];
+      if (!first) return;
+      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    }
+    document.addEventListener("keydown", keyboard);
+    return () => {
+      document.removeEventListener("keydown", keyboard);
+      if (content) content.inert = false;
+      const returnFocus = previous?.isConnected ? previous : frameRef.current?.querySelector(".ih14-conversations-toggle");
+      returnFocus?.focus?.({ preventScroll: true });
+    };
+  }, [chat, inboxOpen]);
+  return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen }}>
+    <main ref={frameRef} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}`} aria-label="Komunikator IdeaHire">
+      {children}
+      {chat && inboxOpen && <button type="button" tabIndex={-1} className="ih14-inbox-scrim" aria-label="Zamknij listę rozmów" onClick={() => setInboxOpen(false)} />}
+    </main>
+  </MessengerLayoutContext.Provider>;
 }
 
 // Presentation only. Existing inbox, permissions and real-time logic stay in router.jsx.
@@ -20287,16 +20377,22 @@ function InboxPanel({
   formatDate,
   Loader,
 }) {
+  const layout = useContext(MessengerLayoutContext);
   return (
-    <aside className={`ih12-inbox${compact ? " is-sidebar" : ""}`} aria-label="Lista rozmów">
+    <aside id={compact ? "ih14-conversation-inbox" : undefined} className={`ih12-inbox${compact ? " is-sidebar" : ""}`}
+      role={compact && layout?.inboxOpen ? "dialog" : undefined} aria-modal={compact && layout?.inboxOpen ? true : undefined}
+      aria-hidden={compact && !layout?.inboxOpen ? true : undefined} inert={compact && !layout?.inboxOpen ? "" : undefined} aria-label="Lista rozmów">
       <header className="ih12-inbox-heading">
         <div>
           <h1>Wiadomości <span aria-label={`Liczba rozmów: ${conversations.length}`}>{conversations.length}</span></h1>
           <p>Twoje rozmowy i projekty</p>
         </div>
-        <Link className="ih12-icon-button" to="/freelancers" aria-label="Znajdź freelancera i rozpocznij rozmowę" title="Nowa rozmowa">
-          <MarketIcon kind="plus" />
-        </Link>
+        <div className="ih14-inbox-tools">
+          <Link className="ih12-icon-button" to="/freelancers" aria-label="Znajdź freelancera i rozpocznij rozmowę" title="Nowa rozmowa">
+            <MarketIcon kind="plus" />
+          </Link>
+          {compact && <button type="button" className="ih12-icon-button" aria-label="Zamknij panel rozmów" onClick={() => layout?.setInboxOpen(false)}><MarketIcon kind="close" /></button>}
+        </div>
       </header>
 
       <label className="ih12-inbox-search">
@@ -20337,7 +20433,7 @@ function InboxPanel({
             ? `${message.sender_id === user?.id ? "Ty: " : ""}${text || "Przesłano załącznik"}`
             : "Rozmowa jest otwarta. Ustalcie szczegóły.";
           return (
-            <Link key={conversation.id} to={`/chat/${conversation.id}`} aria-current={activeId === conversation.id ? "page" : undefined} className={`ih12-inbox-row${unread ? " is-unread" : ""}${activeId === conversation.id ? " is-active" : ""}`}>
+            <Link key={conversation.id} to={`/chat/${conversation.id}`} onClick={() => layout?.setInboxOpen(false)} aria-current={activeId === conversation.id ? "page" : undefined} className={`ih12-inbox-row${unread ? " is-unread" : ""}${activeId === conversation.id ? " is-active" : ""}`}>
               <span className="ih12-avatar" aria-hidden="true">
                 {profile?.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" /> : Array.from(name)[0].toUpperCase()}
               </span>
@@ -23192,7 +23288,7 @@ function Chat() {
 
       <MessengerFrame chat>
         <ConversationInbox activeId={id} compact />
-        <div className="ih7-chat-shell">
+        <div className={`ih7-chat-shell${!loading ? " is-ready" : ""}`} key={id}>
           {loading ? (
             <InlineRouteLoader
               className="ih7-chat-route-loader"
@@ -23206,6 +23302,7 @@ function Chat() {
           ) : (
             <>
               <header className="ih7-chat-header">
+                <MessengerConversationsButton />
                 <button
                   type="button"
                   className="ih7-chat-back"
