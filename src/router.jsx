@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 13A | 2026-10-08 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -9839,10 +9839,16 @@ function Account() {
         <header className="ih7-account-overview">
           <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
           <div className="ih7-account-heading">
-            <span className="section-label">Twoje konto</span>
+            <span className="section-label">Konto</span>
             <h1>Centrum profilu</h1>
             <p>Dane, specjalizacje i ustawienia w jednym miejscu. Kliknij koło, aby wybrać sekcję.</p>
             <div className="ih7-account-current"><span>Wybrana sekcja</span><strong>{ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === activeAccountSection)?.label}</strong></div>
+            <nav className="ih13-account-shortcuts" aria-label="Usługi i współpraca">
+              {isAdult && <Link to="/services/new"><MarketIcon kind="plus" />Dodaj usługę</Link>}
+              {isAdult && <Link to="/services/mine">Moje usługi<MarketIcon kind="arrow" /></Link>}
+              <Link to="/freelancers">Znajdź freelancera<MarketIcon kind="arrow" /></Link>
+              {isAdult && <Link to="/messages">Wiadomości<MarketIcon kind="message" /></Link>}
+            </nav>
           </div>
         </header>
 
@@ -15073,8 +15079,8 @@ function JobsSpotlight({ jobs, formatBudget }) {
     <section
       className={`ih10-jobs-spotlight${stopped ? " is-paused" : ""}`}
       aria-label="Podgląd zleceń"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onPointerEnter={(event) => { if (event.pointerType === "mouse") setHovered(true); }}
+      onPointerLeave={(event) => { if (event.pointerType === "mouse") setHovered(false); }}
       onFocusCapture={() => setFocused(true)}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
@@ -20155,30 +20161,240 @@ function formatInboxDate(value) {
     : date.toLocaleDateString("pl-PL", { day: "2-digit", month: "short" });
 }
 
+/* P13A: presentation components remain inside the existing router file. */
+// A separate, negative-z-index body layer cannot cover headers or controls.
+// Scroll updates one opacity value on this layer only, never the React tree.
+function AmbientBackground() {
+  const layerRef = useRef(null);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    let frame = 0;
+    let distance = 1;
+    let last = -1;
+
+    function measure() {
+      distance = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      schedule();
+    }
+
+    function paint() {
+      frame = 0;
+      if (document.hidden) return;
+      const progress = motion?.matches ? 0 : Math.min(1, Math.max(0, window.scrollY / distance));
+      const blend = Math.round(progress * 250) / 250;
+      if (blend === last) return;
+      last = blend;
+      layerRef.current?.style.setProperty("--ih13-blend", String(blend));
+    }
+
+    function schedule() {
+      if (!frame && !document.hidden) frame = window.requestAnimationFrame(paint);
+    }
+
+    function preference() {
+      last = -1;
+      schedule();
+    }
+
+    function visibility() {
+      if (document.hidden) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      } else {
+        measure();
+      }
+    }
+
+    // Content may grow after data arrives. Read its height on resize, not on scroll.
+    const observer = window.ResizeObserver ? new ResizeObserver(measure) : null;
+    observer?.observe(document.body);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", measure, { passive: true });
+    document.addEventListener("visibilitychange", visibility);
+    motion?.addEventListener?.("change", preference);
+    measure();
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", measure);
+      document.removeEventListener("visibilitychange", visibility);
+      motion?.removeEventListener?.("change", preference);
+      window.cancelAnimationFrame(frame);
+    };
+  }, [pathname]);
+
+  return createPortal(
+    <div className="ih13-background" ref={layerRef} aria-hidden="true">
+      <div className="ih13-background-start" />
+      <div className="ih13-background-end" />
+    </div>,
+    document.body
+  );
+}
+
+function MessengerFrame({ chat = false, children }) {
+  const frameRef = useRef(null);
+  useEffect(() => {
+    let task = 0;
+    const viewport = window.visualViewport;
+    function measure() {
+      task = 0;
+      const element = frameRef.current;
+      if (!element) return;
+      const top = Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0));
+      const height = Math.max(240, Math.round((viewport?.height || window.innerHeight) - top - 24));
+      element.style.setProperty("height", `${height}px`, "important");
+      element.classList.toggle("is-condensed", height < 420);
+    }
+    function schedule() {
+      if (!task) task = window.requestAnimationFrame(measure);
+    }
+    const observer = window.ResizeObserver ? new ResizeObserver(schedule) : null;
+    const navbar = frameRef.current?.parentElement?.querySelector(".navbar");
+    if (navbar) observer?.observe(navbar);
+    window.addEventListener("resize", schedule, { passive: true });
+    viewport?.addEventListener("resize", schedule, { passive: true });
+    viewport?.addEventListener("scroll", schedule, { passive: true });
+    schedule();
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
+      window.cancelAnimationFrame(task);
+    };
+  }, []);
+  return <main ref={frameRef} className={`ih12-messenger${chat ? " ih7-chat-page is-chat" : " is-index"}`} aria-label="Komunikator IdeaHire">{children}</main>;
+}
+
+// Presentation only. Existing inbox, permissions and real-time logic stay in router.jsx.
+function InboxPanel({
+  activeId,
+  compact,
+  user,
+  conversations,
+  visibleConversations,
+  loading,
+  errorMessage,
+  search,
+  setSearch,
+  inboxFilter,
+  setInboxFilter,
+  unreadCount,
+  formatDate,
+  Loader,
+}) {
+  return (
+    <aside className={`ih12-inbox${compact ? " is-sidebar" : ""}`} aria-label="Lista rozmów">
+      <header className="ih12-inbox-heading">
+        <div>
+          <h1>Wiadomości <span aria-label={`Liczba rozmów: ${conversations.length}`}>{conversations.length}</span></h1>
+          <p>Twoje rozmowy i projekty</p>
+        </div>
+        <Link className="ih12-icon-button" to="/freelancers" aria-label="Znajdź freelancera i rozpocznij rozmowę" title="Nowa rozmowa">
+          <MarketIcon kind="plus" />
+        </Link>
+      </header>
+
+      <label className="ih12-inbox-search">
+        <MarketIcon />
+        <span className="ih5-sr-only">Szukaj rozmowy</span>
+        <input type="search" placeholder="Szukaj osoby lub projektu" value={search} onChange={(event) => setSearch(event.target.value)} maxLength={160} />
+      </label>
+
+      <div className="ih12-inbox-filters" aria-label="Filtr rozmów">
+        <button type="button" aria-pressed={inboxFilter === "all"} onClick={() => setInboxFilter("all")}>Wszystkie</button>
+        <button type="button" aria-pressed={inboxFilter === "unread"} onClick={() => setInboxFilter("unread")}>Nieprzeczytane <b>{unreadCount}</b></button>
+      </div>
+
+      <div className="ih12-inbox-rows">
+        {loading ? (
+          <Loader rows={4} />
+        ) : errorMessage ? (
+          <p className="ih12-feedback" role="alert">{errorMessage}</p>
+        ) : !visibleConversations.length ? (
+          <div className="ih12-inbox-empty">
+            <MarketIcon kind="message" />
+            <h2>{conversations.length ? "Brak pasujących rozmów" : "Nie masz jeszcze rozmów"}</h2>
+            <p>{conversations.length ? "Zmień wyszukiwanie lub filtr." : "Znajdź freelancera i napisz o współpracy."}</p>
+            {conversations.length ? (
+              <button type="button" onClick={() => { setSearch(""); setInboxFilter("all"); }}>Pokaż wszystkie</button>
+            ) : (
+              <Link to="/freelancers">Znajdź freelancera <MarketIcon kind="arrow" /></Link>
+            )}
+          </div>
+        ) : visibleConversations.map((conversation) => {
+          const profile = conversation.otherProfile;
+          const name = profile?.name || "Użytkownik";
+          const message = conversation.lastMessage;
+          const unread = conversation.isUnread && activeId !== conversation.id;
+          const title = conversation.job?.title || "Zapytanie o współpracę";
+          const text = String(message?.content || "").trim();
+          const preview = message
+            ? `${message.sender_id === user?.id ? "Ty: " : ""}${text || "Przesłano załącznik"}`
+            : "Rozmowa jest otwarta. Ustalcie szczegóły.";
+          return (
+            <Link key={conversation.id} to={`/chat/${conversation.id}`} aria-current={activeId === conversation.id ? "page" : undefined} className={`ih12-inbox-row${unread ? " is-unread" : ""}${activeId === conversation.id ? " is-active" : ""}`}>
+              <span className="ih12-avatar" aria-hidden="true">
+                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" /> : Array.from(name)[0].toUpperCase()}
+              </span>
+              <div className="ih12-inbox-copy">
+                <div><strong title={name}>{name}</strong><time dateTime={conversation.sortDate}>{formatDate(conversation.sortDate)}</time></div>
+                <span title={title}>{title}</span>
+                <p title={preview}>{preview}</p>
+              </div>
+              {unread && <i className="ih12-unread-dot" aria-label="Nieprzeczytane wiadomości" />}
+            </Link>
+          );
+        })}
+      </div>
+
+      <footer><MarketIcon kind="message" /><span>Rozmowy, pliki i ustalenia</span></footer>
+    </aside>
+  );
+}
+
+function MessengerStart() {
+  return (
+    <section className="ih12-inbox-welcome" aria-label="Otwórz rozmowę">
+      <div className="ih13-welcome-copy">
+        <span className="ih12-welcome-icon" aria-hidden="true"><MarketIcon kind="message" /></span>
+        <h2>Wybierz rozmowę</h2>
+        <p>Otwórz ją z listy po lewej. Wiadomości, pliki i ustalenia dotyczące projektu znajdziesz w jednym miejscu.</p>
+        <div className="ih12-welcome-features">
+          <span><MarketIcon kind="message" />Rozmowa</span>
+          <span><MarketIcon kind="files" />Pliki</span>
+          <span><MarketIcon kind="check" />Ustalenia</span>
+        </div>
+      </div>
+      <div className="ih13-start-actions">
+        <p>Chcesz rozpocząć nową współpracę?</p>
+        <Link className="ih12-button" to="/freelancers">Znajdź freelancera <MarketIcon kind="arrow" /></Link>
+        <Link className="ih12-button" to="/services">Przeglądaj usługi <MarketIcon kind="arrow" /></Link>
+      </div>
+    </section>
+  );
+}
+
 function ConversationInbox({ activeId, compact = false }) {
-  const { user, conversations, visibleConversations, loading, errorMessage, search, setSearch, inboxFilter, setInboxFilter, unreadCount } = useConversationInbox();
-  return <aside className={`ih12-inbox${compact ? " is-sidebar" : ""}`} aria-label="Twoje rozmowy">
-    <header className="ih12-inbox-heading"><div><span className="ih12-kicker">Twoje centrum współpracy</span><h1>Wiadomości <span>{conversations.length}</span></h1></div><Link className="ih12-icon-button" to="/freelancers" aria-label="Znajdź freelancera i rozpocznij rozmowę" title="Nowa współpraca"><MarketIcon kind="plus" /></Link></header>
-    <label className="ih12-inbox-search"><MarketIcon /><span className="ih5-sr-only">Szukaj rozmowy</span><input type="search" placeholder="Osoba lub projekt…" value={search} onChange={(event) => setSearch(event.target.value)} maxLength={160} /></label>
-    <div className="ih12-inbox-filters" aria-label="Filtr rozmów"><button type="button" aria-pressed={inboxFilter === "all"} onClick={() => setInboxFilter("all")}>Wszystkie</button><button type="button" aria-pressed={inboxFilter === "unread"} onClick={() => setInboxFilter("unread")}>Nieprzeczytane <b>{unreadCount}</b></button></div>
-    <div className="ih12-inbox-rows">
-      {loading ? <InlineRouteLoader rows={4} /> : errorMessage ? <p className="ih12-feedback" role="alert">{errorMessage}</p> : !visibleConversations.length ? <div className="ih12-inbox-empty"><MarketIcon kind="message" /><h2>{conversations.length ? "Brak pasujących rozmów" : "Zacznijmy od rozmowy"}</h2><p>{conversations.length ? "Zmień wyszukiwanie lub filtr." : "Napisz do freelancera albo wyślij mu opis projektu."}</p>{conversations.length ? <button type="button" onClick={() => { setSearch(""); setInboxFilter("all"); }}>Pokaż wszystkie</button> : <Link to="/freelancers">Poznaj freelancerów <MarketIcon kind="arrow" /></Link>}</div> : visibleConversations.map((conversation) => {
-        const profile = conversation.otherProfile;
-        const name = profile?.name || "Użytkownik";
-        const message = conversation.lastMessage;
-        return <Link key={conversation.id} to={`/chat/${conversation.id}`} aria-current={activeId === conversation.id ? "page" : undefined} className={`ih12-inbox-row${conversation.isUnread && activeId !== conversation.id ? " is-unread" : ""}${activeId === conversation.id ? " is-active" : ""}`}>
-          <span className="ih12-avatar">{profile?.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" /> : Array.from(name)[0].toUpperCase()}</span>
-          <div className="ih12-inbox-copy"><div><strong>{name}</strong><time dateTime={conversation.sortDate}>{formatInboxDate(conversation.sortDate)}</time></div><span>{conversation.job?.title || "Zapytanie o współpracę"}</span><p>{message ? `${message.sender_id === user.id ? "Ty: " : ""}${message.content}` : "Rozmowa jest otwarta. Ustalcie szczegóły."}</p></div>
-          {conversation.isUnread && activeId !== conversation.id && <i className="ih12-unread-dot" aria-label="Nieprzeczytane wiadomości" />}
-        </Link>;
-      })}
-    </div>
-    <footer><MarketIcon kind="message" /><span>Wiadomości, pliki i warunki w jednym miejscu.</span></footer>
-  </aside>;
+  const inbox = useConversationInbox();
+  return <InboxPanel {...inbox} activeId={activeId} compact={compact}
+    formatDate={formatInboxDate} Loader={InlineRouteLoader} />;
 }
 
 function Messages() {
-  return <div className="account-page ih7-communications ih8-communications ih12-communications"><AccountNavbar /><main className="ih12-messenger is-index"><ConversationInbox /><section className="ih12-inbox-welcome"><div className="ih12-welcome-icon" aria-hidden="true"><MarketIcon kind="message" /><i /></div><span className="ih12-kicker">Od pierwszego „cześć” do gotowego projektu</span><h2>Wszystko zaczyna się<br />od dobrej rozmowy.</h2><p>Wybierz rozmowę z listy. Tutaj omówisz pomysł, uzgodnisz warunki i przekażesz pliki.</p><div className="ih12-welcome-features"><span><MarketIcon kind="message" />Rozmowa</span><span><MarketIcon kind="files" />Materiały</span><span><MarketIcon kind="check" />Ustalenia</span></div><Link className="ih12-button is-primary" to="/freelancers">Znajdź freelancera <MarketIcon kind="arrow" /></Link></section></main></div>;
+  return (
+    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications">
+      <AccountNavbar />
+      <MessengerFrame>
+        <ConversationInbox />
+        <MessengerStart />
+      </MessengerFrame>
+    </div>
+  );
 }
 
 
@@ -22971,10 +23187,10 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih12-communications">
+    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications">
       <AccountNavbar />
 
-      <main className="ih7-chat-page ih12-messenger is-chat">
+      <MessengerFrame chat>
         <ConversationInbox activeId={id} compact />
         <div className="ih7-chat-shell">
           {loading ? (
@@ -23359,7 +23575,7 @@ function Chat() {
             </>
           )}
         </div>
-      </main>
+      </MessengerFrame>
     </div>
   );
 }
@@ -30908,30 +31124,6 @@ function ServiceRoute({ mode }) {
       Navbar={AccountNavbar}
     />
   );
-}
-
-function AmbientBackground() {
-  const rootRef = useRef(null);
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0;
-    function paint() {
-      frame = 0;
-      const height = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      rootRef.current?.style.setProperty("--ih12-scroll", String(Math.min(1, Math.max(0, window.scrollY / height))));
-    }
-    function scroll() { if (!frame && !reduced.matches) frame = window.requestAnimationFrame(paint); }
-    function preference() {
-      window.cancelAnimationFrame(frame); frame = 0;
-      if (reduced.matches) rootRef.current?.style.setProperty("--ih12-scroll", "0"); else paint();
-    }
-    window.addEventListener("scroll", scroll, { passive: true });
-    window.addEventListener("resize", scroll, { passive: true });
-    reduced.addEventListener("change", preference);
-    preference();
-    return () => { window.removeEventListener("scroll", scroll); window.removeEventListener("resize", scroll); reduced.removeEventListener("change", preference); window.cancelAnimationFrame(frame); };
-  }, []);
-  return <div className="ih12-ambient" aria-hidden="true" ref={rootRef}><i /><i /><i /></div>;
 }
 
 /* Decorative cursor trail shared by every route. No pointer interception. */
