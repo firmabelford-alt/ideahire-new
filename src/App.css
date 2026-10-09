@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 14 | 2026-10-09 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 15 | 2026-10-09 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51951,4 +51951,189 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
   html:root body .ih13-background-end { opacity: 0 !important; transition: none !important; }
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih7-chat-shell.is-ready, html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-inbox-scrim { animation: none !important; }
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { transition: none !important; }
+}
+
+/* IdeaHire P15: a visible flowing canvas and focused account/chat views. */
+:root { --ih13-start-a: #c9ddf5; --ih13-start-b: #e5eaf7; --ih13-end-a: #dcc4ee; --ih13-end-b: #b9dedd; }
+html[data-theme="dark"] { --ih13-start-a: #183555; --ih13-start-b: #13253c; --ih13-end-a: #37334f; --ih13-end-b: #214744; }
+html[data-template="classic"] { --ih13-start-a: #d7ded5; --ih13-start-b: #eee9df; --ih13-end-a: #d4c3ac; --ih13-end-b: #bdcfca; }
+html[data-template="classic"][data-theme="dark"] { --ih13-start-a: #222c2b; --ih13-start-b: #1c2023; --ih13-end-a: #3a342f; --ih13-end-b: #30403c; }
+html:root body .ih13-background-start {
+  background: radial-gradient(ellipse at 12% 18%, var(--ih13-start-a), transparent 70%), linear-gradient(135deg, var(--ih13-start-b), var(--ih13-start-a));
+}
+html:root body .ih13-background-end {
+  inset: -5%;
+  background: radial-gradient(ellipse at 78% 24%, var(--ih13-end-a), transparent 68%), linear-gradient(155deg, var(--ih13-end-b), var(--ih13-end-a));
+  transition: opacity 180ms linear;
+}
+@supports (animation-timeline: scroll(root block)) {
+  html:root body .ih13-background-end {
+    animation: ih15-color-flow linear both;
+    animation-duration: auto;
+    animation-timeline: scroll(root block);
+    transition: none;
+  }
+}
+@keyframes ih15-color-flow {
+  from { opacity: 0; transform: translate(-2%, -2%); }
+  to { opacity: 1; transform: translate(2%, 2%); }
+}
+
+/* Layout containers share the page canvas. Actual cards retain their surfaces. */
+html:root body #root#root#root#root :is(.account-workspace-page, .ih6-account-layout, .ih6-account-content, .account-tab-stage),
+html:root body #root#root#root#root .page > .app-page {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.how.section, .final-cta) { background: transparent !important; color: var(--ih-home-ink) !important; border: 0 !important; box-shadow: none !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.how.section, .final-cta)::before,
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.how.section, .final-cta)::after { display: none !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.how.section, .final-cta) :is(h2,h3,.section-label,.ih5-step-title) { color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.how.section, .final-cta) :is(p,.ih5-step-copy) { color: var(--ih-home-muted) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .how .ih5-step-card { background: var(--ih-home-surface) !important; color: var(--ih-home-ink) !important; border-color: var(--ih-home-line) !important; }
+
+/* The closed account header contains one centred control. */
+html:root body #root#root#root#root .page.ih6-account-page .ih7-account-overview.ih15-account-overview {
+  display: block !important; margin: 0 0 26px !important; padding: 26px 0 18px !important;
+  border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub {
+  display: flex !important; flex-direction: column !important; align-items: center !important;
+  width: 100% !important; height: auto !important; min-height: 0 !important; margin: 0 !important;
+  padding: 0 !important; position: relative !important; overflow: visible !important;
+  border: 0 !important; background: transparent !important; box-shadow: none !important;
+}
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub > .section-label { color: var(--ih6-muted) !important; margin: 0 0 16px !important; font-size: 11px !important; letter-spacing: .12em !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-trigger {
+  position: relative !important; inset: auto !important; transform: none !important;
+  display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 10px !important;
+  width: 152px !important; height: 152px !important; min-height: 152px !important; max-height: none !important;
+  margin: 0 !important; padding: 20px !important; border-radius: 50% !important;
+  border: 1px solid var(--ih6-line) !important; background: var(--ih6-surface) !important; color: var(--ih6-ink) !important;
+  font: 650 17px/1.25 Inter,system-ui,sans-serif !important; box-shadow: 0 12px 30px #152b4a10 !important;
+  transition: border-color 160ms, box-shadow 160ms !important;
+}
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-trigger:hover { border-color: var(--ih6-accent) !important; box-shadow: 0 12px 30px #152b4a1b !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-toggle { position: absolute !important; top: 19px !important; right: 24px !important; font-size: 19px !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-emblem { position: static !important; margin: 0 !important; width: 21px !important; height: 21px !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih15-hub-hint { margin: 16px 0 7px !important; color: var(--ih6-muted) !important; font-size: 13px !important; text-align: center !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-current { position: static !important; width: auto !important; margin: 0 !important; color: var(--ih6-ink) !important; font-size: 12px !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-hub-panel {
+  display: block !important; width: 100% !important; margin-top: 24px !important; padding: 20px !important;
+  border: 1px solid var(--ih6-line) !important; border-radius: 20px !important; background: var(--ih6-surface) !important;
+  animation: ih15-panel-open 220ms ease both;
+}
+html:root body #root#root#root#root .page.ih6-account-page .ih15-hub-panel[hidden] { display: none !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-items {
+  display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 9px !important;
+  position: static !important; inset: auto !important; width: 100% !important; height: auto !important;
+  opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; transform: none !important;
+}
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-item {
+  display: flex !important; align-items: center !important; gap: 10px !important; width: 100% !important; height: auto !important;
+  min-height: 48px !important; max-height: none !important; position: static !important; inset: auto !important;
+  margin: 0 !important; padding: 10px 12px !important; border: 1px solid var(--ih6-line) !important; border-radius: 10px !important;
+  color: var(--ih6-ink) !important; background: var(--ih6-soft) !important; opacity: 1 !important; visibility: visible !important;
+  transform: none !important; transition: background-color 140ms !important; font: 550 14px/1.4 Inter,system-ui,sans-serif !important;
+}
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-item.is-active { border-color: var(--ih6-accent) !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-number { position: static !important; flex: 0 0 26px !important; width: 26px !important; height: 26px !important; border-radius: 7px !important; font-size: 11px !important; }
+html:root body #root#root#root#root .page.ih6-account-page .ih15-hub-panel .ih14-account-actions { margin-top: 20px !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+@keyframes ih15-panel-open { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Full view stays mounted so message drafts and the active form survive. */
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-messenger.ih15-focus {
+  position: fixed !important; left: 12px !important; right: 12px !important; bottom: auto !important;
+  width: calc(100% - 24px) !important; max-width: none !important; margin: 0 !important;
+  z-index: 800 !important; border-radius: 20px !important; background: var(--ih7-surface) !important;
+  box-shadow: 0 0 0 20px var(--ih7-bg), 0 20px 80px #00000025 !important;
+}
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-header-actions { display: flex !important; align-items: center !important; gap: 8px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus-toggle { flex: 0 0 44px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-profile-link { min-width: 0 !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-person { min-width: 0 !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-person strong { display: block !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-project[hidden] { display: none !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs { flex-wrap: nowrap !important; flex: 0 0 auto !important; gap: 6px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > .ih15-pin-plan { margin-left: auto !important; display: inline-flex !important; align-items: center !important; gap: 8px !important; border: 1px solid var(--ih7-line) !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace {
+  display: grid !important; grid-template-columns: minmax(0,1fr) !important;
+  flex: 1 1 auto !important; min-height: 0 !important; min-width: 0 !important; overflow: hidden !important;
+}
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace.is-pinned { grid-template-columns: minmax(0,1fr) minmax(360px,440px) !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace > .ih7-chat-workspace-panel { min-width: 0 !important; min-height: 0 !important; width: 100% !important; height: 100% !important; margin: 0 !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace > .ih7-chat-workspace-panel[hidden] { display: none !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace .is-conversation { display: flex !important; flex-direction: column !important; background: color-mix(in srgb,var(--ih7-surface) 88%,transparent) !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace .is-conversation .ih7-chat-messages { flex: 1 1 auto !important; min-height: 0 !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window { border-left: 1px solid var(--ih7-line) !important; padding: 18px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace :is(.is-files,.is-plan) { overflow-y: auto !important; overscroll-behavior-y: contain; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; margin: 0 0 20px !important; padding-bottom: 14px !important; border-bottom: 1px solid var(--ih7-line) !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading h2 { margin: 0 !important; color: var(--ih7-ink) !important; font: 650 20px/1.3 Inter,system-ui,sans-serif !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading > div { display: flex !important; align-items: center !important; gap: 6px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-back { display: inline-flex !important; align-items: center !important; gap: 8px !important; height: auto !important; min-height: 44px !important; max-height: none !important; padding: 9px 12px !important; margin: 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 10px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font: 550 13px/1.4 Inter,system-ui,sans-serif !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-back svg { transform: rotate(180deg); flex: 0 0 18px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window :is(.agreement-form-grid,.agreement-form-fields,.agreement-summary-grid) { grid-template-columns: minmax(0,1fr) !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window :is(.agreement-field,.agreement-field-full,.agreement-form-actions) { grid-column: 1 / -1 !important; min-width: 0 !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window .agreement-form-actions { flex-wrap: wrap !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window .ih15-workspace-heading .ih15-workspace-back { padding: 9px !important; }
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window .ih15-workspace-heading .ih15-workspace-back span { display: none !important; }
+
+/* Give every illustration shape its own paint instead of inherited UI text. */
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story {
+  --ih5-scene-ink: #344861; --ih5-scene-line: #a2b0c4; --ih5-scene-soft: #e8eef9; --ih5-scene-accent: #5277a9;
+  --ih5-scene-on-accent: #ffffff; --ih5-scene-skin: #d8a48b; --ih7-shirt: #365a98; --ih7-trousers: #364a6c; --ih15-hair: #26374f;
+}
+html:root[data-theme="dark"] body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story { --ih5-scene-ink: #7f99b8; --ih5-scene-line: #5c728e; --ih5-scene-soft: #20344e; --ih5-scene-accent: #93b6dc; --ih5-scene-on-accent: #152b43; --ih5-scene-skin: #e8b99a; --ih7-shirt: #82aade; --ih7-trousers: #475d82; --ih15-hair: #27354c; }
+html:root[data-template="classic"] body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story { --ih5-scene-ink: #454a4a; --ih5-scene-line: #b7bcb6; --ih5-scene-soft: #e8ece5; --ih5-scene-accent: #6c7972; --ih5-scene-on-accent: #ffffff; --ih5-scene-skin: #cdb29d; --ih7-shirt: #727b7c; --ih7-trousers: #43494b; --ih15-hair: #303636; }
+html:root[data-template="classic"][data-theme="dark"] body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-story { --ih5-scene-ink: #969e9e; --ih5-scene-line: #67716e; --ih5-scene-soft: #303a38; --ih5-scene-accent: #a9b9b0; --ih5-scene-on-accent: #25312b; --ih5-scene-skin: #d6b8a4; --ih7-shirt: #bec5ca; --ih7-trousers: #666b70; --ih15-hair: #292e32; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene :is(g,path,rect,circle,ellipse) { stroke: none !important; fill: none !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="skin"] { fill: var(--ih5-scene-skin) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="ink"] { fill: var(--ih5-scene-ink) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="accent"],
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-pixels rect { fill: var(--ih5-scene-accent) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-fill="line"] { fill: var(--ih5-scene-line) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="skin"] { stroke: var(--ih5-scene-skin) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="ink"] { stroke: var(--ih5-scene-ink) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="accent"] { stroke: var(--ih5-scene-accent) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="line"],
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-window :is(rect,path) { stroke: var(--ih5-scene-line) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-scene-stroke="on-accent"] { stroke: var(--ih5-scene-on-accent) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-person-part="shirt"] { stroke: var(--ih7-shirt) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [data-person-part="trousers"] { stroke: var(--ih7-trousers) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-person-head [data-scene-fill="ink"] { fill: var(--ih15-hair) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-chair rect { fill: var(--ih5-scene-ink) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-shadow { fill: var(--ih5-scene-ink) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-scene-code path { stroke: var(--ih5-scene-accent) !important; }
+html:root body #root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih5-work-scene [fill^="url("] { fill: var(--ih5-scene-soft) !important; }
+
+@media (max-width: 900px) {
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace.is-pinned { grid-template-columns: minmax(0,1fr) !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace.is-pinned > .is-conversation { display: none !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window { border-left: 0 !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-plan-window .ih15-workspace-heading .ih15-workspace-back span { display: inline !important; }
+}
+@media (max-width: 800px) {
+  html:root body #root#root#root#root .page.ih6-account-page .ih15-hub-panel { padding: 14px !important; }
+  html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-items { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  html:root body #root#root#root#root .page.ih6-account-page .ih15-hub-panel .ih14-account-actions { grid-template-columns: minmax(0,1fr) !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-messenger.ih15-focus { left: 0 !important; right: 0 !important; width: 100% !important; border: 0 !important; border-radius: 0 !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus .ih7-chat-header { padding: 10px 12px !important; min-height: 66px !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus .ih7-chat-person > span { display: none !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading { gap: 8px !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading h2 { font-size: 18px !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > .ih15-pin-plan { padding: 8px !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > .ih15-pin-plan span { display: none !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > .ih15-pin-plan svg { width: 18px !important; height: 18px !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus .ih7-chat-workspace-tabs { margin: 8px 12px 0 !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus .ih7-chat-workspace-tabs > button { padding: 9px 10px !important; min-height: 44px !important; }
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus .ih7-chat-header-actions { gap: 4px !important; }
+}
+@media (max-width: 390px) {
+  html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-focus .ih7-chat-avatar { display: none !important; }
+  html:root body #root#root#root#root .page.ih6-account-page .ih15-profile-hub .ih6-hub-item { padding: 9px !important; gap: 7px !important; font-size: 12px !important; }
+}
+html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .is-condensed .ih7-chat-workspace-tabs > .ih15-pin-plan { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  html:root body .ih13-background-end { animation: none !important; opacity: 0 !important; transform: none !important; transition: none !important; }
+  html:root body #root#root#root#root .page.ih6-account-page .ih15-hub-panel { animation: none !important; }
 }
