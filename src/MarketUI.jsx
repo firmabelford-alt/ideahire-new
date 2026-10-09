@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 16 | 2026-10-09 | Pelny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -32,7 +32,6 @@ export function ProfileHub({ sections, active, onSelect, children }) {
   const [open, setOpen] = useState(false);
   const activeIndex = Math.max(0, sections.findIndex((section) => section.key === active));
   const id = useId();
-  const rootRef = useRef(null);
   const triggerRef = useRef(null);
   const itemRefs = useRef([]);
   const current = sections[activeIndex];
@@ -49,24 +48,24 @@ export function ProfileHub({ sections, active, onSelect, children }) {
     const next = event.key === "Home" ? 0 : event.key === "End" ? sections.length - 1 : (index + delta + sections.length) % sections.length;
     itemRefs.current[next]?.focus();
   }
-  return <div className="ih6-profile-hub ih15-profile-hub" ref={rootRef} data-open={open} onKeyDown={keyboard}>
+  return <div className="ih16-profile-hub" data-open={open} onKeyDown={keyboard}>
     <span className="section-label">Konto</span>
-    <button type="button" className="ih6-hub-trigger" ref={triggerRef} aria-expanded={open} aria-controls={`${id}-sections`}
+    <button type="button" className="ih16-hub-trigger" ref={triggerRef} aria-expanded={open} aria-controls={`${id}-sections`}
       aria-label={`${open ? "Zamknij" : "Otwórz"} centrum profilu. Bieżąca sekcja: ${current.label}.`}
       onClick={() => setOpen(value => !value)} onKeyDown={event => {
         if (event.key === "ArrowDown") { event.preventDefault(); setOpen(true); window.requestAnimationFrame(() => itemRefs.current[activeIndex]?.focus()); }
       }}>
-      <span className="ih6-hub-emblem" aria-hidden="true"><i /><i /><i /><i /></span>
-      <span>Centrum<br />profilu</span><span className="ih6-hub-toggle" aria-hidden="true">{open ? "−" : "+"}</span>
+      <span className="ih16-hub-emblem" aria-hidden="true"><i /><i /><i /><i /></span>
+      <span>Centrum<br />profilu</span><span className="ih16-hub-toggle" aria-hidden="true">{open ? "−" : "+"}</span>
     </button>
-    <p className="ih15-hub-hint">Kliknij koło, aby otworzyć funkcje konta.</p>
-    <span className="ih6-hub-current" aria-live="polite">{current.label}</span>
-    <div className="ih15-hub-panel" id={`${id}-sections`} hidden={!open} inert={open ? undefined : ""}>
-      <div className="ih6-hub-items" role="tablist" aria-label="Sekcje profilu">
+    <p className="ih16-hub-hint">{open ? "Wybierz funkcję poniżej" : "Kliknij koło, aby otworzyć funkcje konta"}</p>
+    <span className="ih16-hub-current" aria-live="polite">{current.label}</span>
+    <div className="ih16-hub-panel" id={`${id}-sections`} hidden={!open} inert={open ? undefined : ""}>
+      <div className="ih16-hub-items" role="tablist" aria-label="Sekcje profilu">
         {sections.map((section, index) => <button type="button" role="tab" key={section.key} id={`account-tab-${section.key}`}
           aria-selected={active === section.key} aria-controls="account-tab-panel" tabIndex={open ? 0 : -1}
-          className={`ih6-hub-item${active === section.key ? " is-active" : ""}`} ref={el => { itemRefs.current[index] = el; }}
-          onClick={() => choose(section)}><span className="ih6-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span></button>)}
+          className={`ih16-hub-item${active === section.key ? " is-active" : ""}`} ref={el => { itemRefs.current[index] = el; }}
+          onClick={() => choose(section)}><span className="ih16-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span><MarketIcon kind="arrow" /></button>)}
       </div>
       {children}
     </div>
@@ -269,7 +268,7 @@ export function CommissionStory() {
           <g className="ih5-scene-plant"><path d="M342 233v-42" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="3" /><path d="M342 208c-33-4-30-32-30-32 25 1 35 16 30 32ZM343 200c-3-28 22-38 22-38 8 25-5 34-22 38Z" data-scene-fill="accent" fill="var(--ih5-scene-accent)" opacity=".55" /><path d="m326 226 4 23h27l4-23Z" data-scene-fill="ink" fill="var(--ih5-scene-ink)" opacity=".7" /></g>
           <g className="ih5-scene-chair" data-scene-fill="ink" fill="var(--ih5-scene-ink)"><rect x="99" y="155" width="20" height="64" rx="9" opacity=".24" /><rect x="103" y="203" width="64" height="12" rx="6" /><path d="M132 215v28m-22 8 22-8 23 8" fill="none" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="5" strokeLinecap="round" /></g>
           <g className="ih5-scene-person">
-            <g className="ih5-person-head"><path d="M150 101v20" data-scene-stroke="skin" stroke="var(--ih5-scene-skin)" strokeWidth="14" /><circle cx="149" cy="82" r="22" data-scene-fill="skin" fill="var(--ih5-scene-skin)" /><path d="M126 82c-7-31 33-41 45-15l-5 13c-6-6-13-8-19-8l-4 15Z" data-scene-fill="ink" fill="var(--ih5-scene-ink)" /><path d="M157 83h15m-10 0v7" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="2" fill="none" strokeLinecap="round" /></g>
+            <g className="ih5-person-head"><path d="M150 101v20" data-scene-stroke="skin" stroke="var(--ih5-scene-skin)" strokeWidth="14" /><circle cx="149" cy="82" r="22" data-scene-fill="skin" fill="var(--ih5-scene-skin)" /><path d="M126 82c-7-31 33-41 45-15l-5 13c-6-6-13-8-19-8l-4 15Z" data-scene-fill="ink" fill="var(--ih5-scene-ink)" /><circle cx="160" cy="81" r="1.6" data-person-part="eye" fill="var(--ih16-face)" /><path d="m166 84 5 4h-6m-5 7h5" data-person-part="face" stroke="var(--ih16-face)" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></g>
             <path d="M141 128c-9 22-17 48-9 74" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="37" data-person-part="shirt" fill="none" strokeLinecap="round" />
             <path d="m137 199 41 6-1 36m-45-38 18 16-10 28" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="16" data-person-part="trousers" fill="none" strokeLinecap="round" /><path d="m175 243 18 7m-52-2 17 3" data-scene-stroke="ink" stroke="var(--ih5-scene-ink)" strokeWidth="10" strokeLinecap="round" />
             <g className="ih5-person-arm"><path d="m148 131 22 36 35 3" data-scene-stroke="accent" stroke="var(--ih5-scene-accent)" strokeWidth="16" data-person-part="shirt" fill="none" strokeLinecap="round" /><path d="m198 169 16 1" data-scene-stroke="skin" stroke="var(--ih5-scene-skin)" strokeWidth="11" strokeLinecap="round" /></g>
