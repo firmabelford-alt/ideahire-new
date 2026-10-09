@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 16 | 2026-10-09 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 17 | 2026-10-09 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -15111,7 +15111,6 @@ function JobsSpotlight({ jobs, formatBudget }) {
         <div className="ih10-spotlight-price"><small>Budżet projektu</small><strong>{formatBudget(job.budget)}</strong></div>
       </div>
       <footer className="ih10-spotlight-footer">
-        <span>{jobs.length > 1 ? (reducedMotion ? "Wybierz zlecenie strzałkami" : "Automatyczna zmiana co 6 sekund") : "Zobacz szczegóły projektu"}</span>
         <a
           href={`#ih10-job-${job.id}`}
           onClick={(event) => {
@@ -20178,7 +20177,7 @@ function AmbientBackground() {
     const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     let frame = 0;
     let distance = 1;
-    let colorDistance = 1;
+    let revealDistance = 1;
     let last = "";
     let scroller = document.scrollingElement || document.documentElement;
 
@@ -20191,8 +20190,8 @@ function AmbientBackground() {
       const rootScroll = scroller === document.scrollingElement || scroller === document.documentElement || scroller === document.body;
       const viewport = rootScroll ? window.innerHeight : scroller.clientHeight;
       distance = Math.max(1, scroller.scrollHeight - viewport);
-      // Every screen of a long list changes color too; its total height is irrelevant.
-      colorDistance = Math.max(640, viewport * 1.1);
+      // The wash appears within the first screens, even on a very long list.
+      revealDistance = Math.max(560, viewport * 0.9);
       schedule();
     }
 
@@ -20204,20 +20203,18 @@ function AmbientBackground() {
         ? Math.max(scroller.scrollTop || 0, document.documentElement.scrollTop || 0, document.body.scrollTop || 0, window.scrollY || 0)
         : scroller.scrollTop || 0);
       const progress = motion?.matches ? 0 : Math.min(1, offset / distance);
-      const phase = motion?.matches ? 0 : Math.round(((offset / colorDistance) % 3) * 500) / 500;
-      // Blue -> mint -> violet -> blue, with an identical path when scrolling up.
-      const mint = phase < 1 ? phase : phase < 2 ? 1 : 0;
-      const violet = phase < 1 ? 0 : phase < 2 ? phase - 1 : 3 - phase;
+      // Two fixed theme colors. Only the bottom glow's opacity and position move.
+      const lift = motion?.matches ? 0 : 1 - Math.exp(-offset / revealDistance);
       const blend = Math.round(progress * 250) / 250;
-      const first = Math.round(mint * 500) / 500;
-      const second = Math.round(violet * 500) / 500;
-      const signature = `${blend}|${first}|${second}`;
+      const glow = motion?.matches ? 0 : Math.round((0.32 + lift * 0.44 + progress * 0.14) * 500) / 500;
+      const rise = Math.round((22 - lift * 26 - progress * 18) * 100) / 100;
+      const signature = `${blend}|${glow}|${rise}`;
       if (signature === last) return;
       last = signature;
       const style = layerRef.current?.style;
       style?.setProperty("--ih13-blend", String(blend));
-      style?.setProperty("--ih16-mint", String(first));
-      style?.setProperty("--ih16-violet", String(second));
+      style?.setProperty("--ih17-glow-opacity", String(glow));
+      style?.setProperty("--ih17-glow-rise", `${rise}%`);
     }
 
     function schedule() {
@@ -20265,7 +20262,6 @@ function AmbientBackground() {
     <div className="ih13-background" ref={layerRef} aria-hidden="true">
       <div className="ih13-background-start" />
       <div className="ih13-background-end" />
-      <div className="ih16-background-violet" />
     </div>,
     document.body
   );
@@ -20391,6 +20387,7 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
     return () => window.cancelAnimationFrame(frame);
   }, [focusMode]);
   return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen, focusMode, setFocusMode: onFocusModeChange }}>
+    {focusMode && createPortal(<div className="ih17-chat-backdrop" aria-hidden="true" />, document.body)}
     <main ref={frameRef} role={focusMode ? "dialog" : undefined} aria-modal={focusMode ? true : undefined} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}${focusMode ? " ih15-focus" : ""}`} aria-label="Komunikator IdeaHire">
       {children}
       {chat && inboxOpen && <button type="button" tabIndex={-1} className="ih14-inbox-scrim" aria-label="Zamknij listę rozmów" onClick={() => setInboxOpen(false)} />}
@@ -20506,8 +20503,12 @@ function MessengerStart() {
       </div>
       <div className="ih13-start-actions">
         <p>Chcesz rozpocząć nową współpracę?</p>
-        <Link className="ih12-button" to="/freelancers">Znajdź freelancera <MarketIcon kind="arrow" /></Link>
-        <Link className="ih12-button" to="/services">Przeglądaj usługi <MarketIcon kind="arrow" /></Link>
+        <nav className="ih17-start-grid" aria-label="Rozpocznij współpracę">
+          <Link className="ih12-button" to="/freelancers"><MarketIcon /><span>Znajdź freelancera</span><MarketIcon kind="arrow" /></Link>
+          <Link className="ih12-button" to="/services"><MarketIcon kind="files" /><span>Przeglądaj usługi</span><MarketIcon kind="arrow" /></Link>
+          <Link className="ih12-button ih17-start-primary" to="/find-talent"><MarketIcon kind="plus" /><span>Dodaj zlecenie</span><MarketIcon kind="arrow" /></Link>
+          <Link className="ih17-browse-jobs" to="/jobs"><span>Przeglądaj zlecenia</span><MarketIcon kind="arrow" /></Link>
+        </nav>
       </div>
     </section>
   );
@@ -21329,7 +21330,7 @@ function AgreementPanel({
     useState(false);
 
   const [expanded, setExpanded] =
-    useState(false);
+    useState(true);
 
   useEffect(() => {
     setConfirmed(false);
@@ -21354,7 +21355,7 @@ function AgreementPanel({
 
   if (agreement?.status === "accepted") {
     return (
-      <details className="agreement-summary">
+      <details className="agreement-summary" open>
         <summary>
           <span className="agreement-status-icon">
             ✓
@@ -22171,6 +22172,18 @@ function ChatProjectPlan({ job, agreement }) {
         </article>
       </div>
 
+      {job?.project_details && (
+        <section className="ih17-project-brief" aria-labelledby="ih17-project-brief-title">
+          <h3 id="ih17-project-brief-title">Szczegóły zlecenia</h3>
+          <dl>
+            {job.project_details.deliverables && <div><dt>Oczekiwany rezultat</dt><dd>{job.project_details.deliverables}</dd></div>}
+            {job.project_details.delivery_format && <div><dt>Format przekazania</dt><dd>{job.project_details.delivery_format}</dd></div>}
+            {job.project_details.materials && <div><dt>Materiały od zleceniodawcy</dt><dd>{job.project_details.materials}</dd></div>}
+            {job.project_details.deadline && <div><dt>Termin z zapytania</dt><dd>{formatChatProjectDate(job.project_details.deadline)}</dd></div>}
+          </dl>
+        </section>
+      )}
+
       {milestones.length > 0 && (
         <section className="chat-project-plan-section">
           <div className="chat-project-plan-section-title">
@@ -22308,13 +22321,14 @@ function Chat() {
   const messageViewportRef = useRef(null);
   const composerRef = useRef(null);
   const followMessagesRef = useRef(true);
+  const [showLatest, setShowLatest] = useState(false);
   useEffect(() => {
     if (!draft && composerRef.current) {
       composerRef.current.style.height = "auto";
       composerRef.current.style.overflowY = "hidden";
     }
   }, [draft]);
-  useEffect(() => { followMessagesRef.current = true; }, [id, workspaceTab]);
+  useEffect(() => { followMessagesRef.current = true; setShowLatest(false); }, [id]);
   useEffect(() => {
     const element = messageViewportRef.current;
     if (element && followMessagesRef.current) element.scrollTop = element.scrollHeight;
@@ -23536,7 +23550,11 @@ function Chat() {
                       <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>{agreement ? "Sprawdźcie propozycję warunków" : "Najpierw porozmawiajcie o szczegółach"}</strong><small>{agreement ? "Obie strony akceptują tę samą wersję." : "Zakres, cenę i termin zapiszecie w ustaleniach."}</small></span></div><button type="button" onClick={() => openWorkspace("plan")}>{agreement ? "Zobacz ustalenia" : "Ustal warunki"}<MarketIcon kind="arrow" /></button></div>
                     )}
 
-                    <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => { const element = event.currentTarget; followMessagesRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 100; }}>
+                    <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => {
+                      const element = event.currentTarget;
+                      followMessagesRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 100;
+                      setShowLatest(!followMessagesRef.current);
+                    }}>
                       {messages.length === 0 ? (
                         <div className="ih7-chat-empty">
                           Rozmowa została otwarta. Napisz pierwszą wiadomość i ustal szczegóły współpracy.
@@ -23587,6 +23605,12 @@ function Chat() {
                         ))
                       )}
                     </div>
+
+                    {showLatest && <button type="button" className="ih17-chat-latest" onClick={() => {
+                      followMessagesRef.current = true;
+                      setShowLatest(false);
+                      if (messageViewportRef.current) messageViewportRef.current.scrollTop = messageViewportRef.current.scrollHeight;
+                    }}>Najnowsze wiadomości <MarketIcon kind="chevron" /></button>}
 
                     {errorMessage && <p className="ih7-chat-error" role="alert">{errorMessage}</p>}
                     {messagingBlocked && (
@@ -23709,7 +23733,7 @@ function Chat() {
                       serviceOrder={conversation?.origin_type === "service_inquiry"}
                       onStatusChange={setPaymentStatus}
                     />
-                    <details className="ih8-chat-plan-overview"><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
+                    <details className="ih8-chat-plan-overview" open><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
 
                 </div>}
               </div>
