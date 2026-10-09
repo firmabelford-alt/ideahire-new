@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 16 | 2026-10-09 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -9836,7 +9836,7 @@ function Account() {
         className="app-page account-workspace-page ih6-account-workspace"
         data-account-section={activeAccountSection}
       >
-        <header className="ih7-account-overview ih15-account-overview">
+        <header className="ih16-account-overview">
           <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection}>
           <nav className="ih13-account-shortcuts ih14-account-actions" aria-label="Szybkie działania konta">
             <section className="ih14-account-action-group">
@@ -15046,8 +15046,6 @@ function Profile() {
 
 function JobsSpotlight({ jobs, formatBudget }) {
   const [activeId, setActiveId] = useState(jobs[0]?.id || "");
-  const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(() => typeof document !== "undefined" && document.hidden);
   const [reducedMotion, setReducedMotion] = useState(() =>
     typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
@@ -15055,7 +15053,7 @@ function JobsSpotlight({ jobs, formatBudget }) {
   const sequence = jobs.map((job) => job.id).join("|");
   const activeIndex = Math.max(0, jobs.findIndex((job) => job.id === activeId));
   const job = jobs[activeIndex];
-  const stopped = hovered || focused || hidden || reducedMotion;
+  const stopped = hidden || reducedMotion;
 
   useEffect(() => {
     setActiveId(jobs[0]?.id || "");
@@ -15079,7 +15077,7 @@ function JobsSpotlight({ jobs, formatBudget }) {
     if (jobs.length < 2 || stopped) return;
     const timer = window.setTimeout(() => {
       setActiveId(jobs[(activeIndex + 1) % jobs.length].id);
-    }, 8000);
+    }, 6000);
     return () => window.clearTimeout(timer);
   }, [sequence, activeId, stopped]);
 
@@ -15093,12 +15091,6 @@ function JobsSpotlight({ jobs, formatBudget }) {
     <section
       className={`ih10-jobs-spotlight${stopped ? " is-paused" : ""}`}
       aria-label="Podgląd zleceń"
-      onPointerEnter={(event) => { if (event.pointerType === "mouse") setHovered(true); }}
-      onPointerLeave={(event) => { if (event.pointerType === "mouse") setHovered(false); }}
-      onFocusCapture={() => setFocused(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
-      }}
     >
       <header className="ih10-spotlight-header">
         <span><i aria-hidden="true" />Odkryj zlecenie</span>
@@ -15119,7 +15111,7 @@ function JobsSpotlight({ jobs, formatBudget }) {
         <div className="ih10-spotlight-price"><small>Budżet projektu</small><strong>{formatBudget(job.budget)}</strong></div>
       </div>
       <footer className="ih10-spotlight-footer">
-        <span>{jobs.length > 1 ? "Nowy podgląd co 8 sekund" : "Zobacz szczegóły projektu"}</span>
+        <span>{jobs.length > 1 ? (reducedMotion ? "Wybierz zlecenie strzałkami" : "Automatyczna zmiana co 6 sekund") : "Zobacz szczegóły projektu"}</span>
         <a
           href={`#ih10-job-${job.id}`}
           onClick={(event) => {
@@ -15131,6 +15123,7 @@ function JobsSpotlight({ jobs, formatBudget }) {
           }}
         >Pokaż w liście <span aria-hidden="true">↘</span></a>
       </footer>
+      {jobs.length > 1 && <div className="ih16-spotlight-progress" aria-hidden="true"><i key={`${job.id}:${stopped}`} /></div>}
     </section>
   );
 }
@@ -20185,7 +20178,8 @@ function AmbientBackground() {
     const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     let frame = 0;
     let distance = 1;
-    let last = -1;
+    let colorDistance = 1;
+    let last = "";
     let scroller = document.scrollingElement || document.documentElement;
 
     function pageScroller(element) {
@@ -20194,22 +20188,36 @@ function AmbientBackground() {
     }
 
     function measure() {
-      const viewportHeight = scroller === document.scrollingElement || scroller === document.documentElement
-        ? window.innerHeight : scroller.clientHeight;
-      distance = Math.max(1, scroller.scrollHeight - viewportHeight);
+      const rootScroll = scroller === document.scrollingElement || scroller === document.documentElement || scroller === document.body;
+      const viewport = rootScroll ? window.innerHeight : scroller.clientHeight;
+      distance = Math.max(1, scroller.scrollHeight - viewport);
+      // Every screen of a long list changes color too; its total height is irrelevant.
+      colorDistance = Math.max(640, viewport * 1.1);
       schedule();
     }
 
     function paint() {
       frame = 0;
       if (document.hidden) return;
-      const offset = scroller.scrollTop || (scroller === document.scrollingElement
-        ? document.documentElement.scrollTop || document.body.scrollTop || window.scrollY : 0);
-      const progress = motion?.matches ? 0 : Math.min(1, Math.max(0, offset / distance));
+      const rootScroll = scroller === document.scrollingElement || scroller === document.documentElement || scroller === document.body;
+      const offset = Math.max(0, rootScroll
+        ? Math.max(scroller.scrollTop || 0, document.documentElement.scrollTop || 0, document.body.scrollTop || 0, window.scrollY || 0)
+        : scroller.scrollTop || 0);
+      const progress = motion?.matches ? 0 : Math.min(1, offset / distance);
+      const phase = motion?.matches ? 0 : Math.round(((offset / colorDistance) % 3) * 500) / 500;
+      // Blue -> mint -> violet -> blue, with an identical path when scrolling up.
+      const mint = phase < 1 ? phase : phase < 2 ? 1 : 0;
+      const violet = phase < 1 ? 0 : phase < 2 ? phase - 1 : 3 - phase;
       const blend = Math.round(progress * 250) / 250;
-      if (blend === last) return;
-      last = blend;
-      layerRef.current?.style.setProperty("--ih13-blend", String(blend));
+      const first = Math.round(mint * 500) / 500;
+      const second = Math.round(violet * 500) / 500;
+      const signature = `${blend}|${first}|${second}`;
+      if (signature === last) return;
+      last = signature;
+      const style = layerRef.current?.style;
+      style?.setProperty("--ih13-blend", String(blend));
+      style?.setProperty("--ih16-mint", String(first));
+      style?.setProperty("--ih16-violet", String(second));
     }
 
     function schedule() {
@@ -20224,31 +20232,19 @@ function AmbientBackground() {
       else schedule();
     }
 
-    function viewportScroll() {
-      const target = document.scrollingElement || document.documentElement;
-      if (target !== scroller) { scroller = target; measure(); }
-      else schedule();
-    }
-
-    function preference() {
-      last = -1;
-      schedule();
-    }
-
+    function preference() { last = ""; schedule(); }
     function visibility() {
-      if (document.hidden) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-      } else {
-        measure();
-      }
+      if (document.hidden) { window.cancelAnimationFrame(frame); frame = 0; }
+      else measure();
     }
 
-    // Content may grow after data arrives. Read its height on resize, not on scroll.
     const observer = window.ResizeObserver ? new ResizeObserver(measure) : null;
     observer?.observe(document.body);
+    const root = document.getElementById("root");
+    if (root) observer?.observe(root);
     document.addEventListener("scroll", scroll, { capture: true, passive: true });
-    window.addEventListener("scroll", viewportScroll, { passive: true });
+    // Window events must not overwrite an active scrollable page container.
+    window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", measure, { passive: true });
     document.addEventListener("visibilitychange", visibility);
     motion?.addEventListener?.("change", preference);
@@ -20257,7 +20253,7 @@ function AmbientBackground() {
     return () => {
       observer?.disconnect();
       document.removeEventListener("scroll", scroll, true);
-      window.removeEventListener("scroll", viewportScroll);
+      window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
       document.removeEventListener("visibilitychange", visibility);
       motion?.removeEventListener?.("change", preference);
@@ -20269,6 +20265,7 @@ function AmbientBackground() {
     <div className="ih13-background" ref={layerRef} aria-hidden="true">
       <div className="ih13-background-start" />
       <div className="ih13-background-end" />
+      <div className="ih16-background-violet" />
     </div>,
     document.body
   );
