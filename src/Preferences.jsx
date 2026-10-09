@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 14 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
@@ -28,6 +28,15 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Kliknij koło, aby otworzyć funkcje konta.": "Click the circle to open account tools.",
+  "Okno ustaleń": "Agreement window",
+  "Otwórz okno ustaleń": "Open agreement window",
+  "Pliki projektu": "Project files",
+  "Wróć do rozmowy": "Back to conversation",
+  "Rozwiń czat na cały ekran": "Expand conversation to full screen",
+  "Przywróć zwykły widok czatu": "Restore conversation view",
+  "Rozwiń ustalenia na cały ekran": "Expand agreement to full screen",
+
   /* P13 — clear messenger and account shortcuts. */
   "Lista rozmów": "Conversation list",
   "Twoje rozmowy i projekty": "Your conversations and projects",
