@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 17 | 2026-10-09 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 18 | 2026-10-09 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -4575,6 +4575,58 @@ function AccountNavbar() {
 
   const accountMenuRef =
     useRef(null);
+  const accountDropdownRef = useRef(null);
+  const accountNavigationRef = useRef(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!accountMenuOpen) return undefined;
+    let frame = 0;
+    const viewport = window.visualViewport;
+    function placeMenu() {
+      frame = 0;
+      const menu = accountDropdownRef.current;
+      const trigger = accountMenuRef.current?.querySelector("summary");
+      if (!menu || !trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const height = viewport?.height || window.innerHeight;
+      const width = viewport?.width || window.innerWidth;
+      const offsetTop = viewport?.offsetTop || 0;
+      const offsetLeft = viewport?.offsetLeft || 0;
+      const menuWidth = Math.min(340, width - 24);
+      const top = Math.max(offsetTop + 12, Math.min(rect.bottom + 8, offsetTop + height - 160));
+      const left = Math.max(offsetLeft + 12, Math.min(rect.right - menuWidth, offsetLeft + width - menuWidth - 12));
+      menu.style.setProperty("top", `${top}px`);
+      menu.style.setProperty("left", `${left}px`);
+      menu.style.setProperty("width", `${menuWidth}px`);
+      menu.style.setProperty("max-height", `${Math.max(80, offsetTop + height - top - 12)}px`);
+    }
+    function schedule() { if (!frame) frame = window.requestAnimationFrame(placeMenu); }
+    placeMenu();
+    const focusFrame = window.requestAnimationFrame(() => accountDropdownRef.current?.querySelector("a")?.focus({ preventScroll: true }));
+    window.addEventListener("resize", schedule, { passive: true });
+    window.addEventListener("scroll", schedule, { passive: true });
+    viewport?.addEventListener("resize", schedule, { passive: true });
+    viewport?.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", schedule);
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
+    };
+  }, [accountMenuOpen]);
+
+  useEffect(() => {
+    setAccountMenuOpen(false);
+    const nav = accountNavigationRef.current;
+    const activeLink = nav?.querySelector(".is-active");
+    if (!nav || !activeLink || nav.scrollWidth <= nav.clientWidth) return;
+    const left = activeLink.offsetLeft - nav.offsetLeft;
+    if (left < nav.scrollLeft) nav.scrollLeft = Math.max(0, left - 8);
+    else if (left + activeLink.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = left + activeLink.offsetWidth - nav.clientWidth + 8;
+  }, [accountLocation.pathname]);
 
   const userName =
     user?.user_metadata?.name ||
@@ -5097,9 +5149,10 @@ function AccountNavbar() {
 
       if (
         menu?.open &&
-        !menu.contains(event.target)
+        !menu.contains(event.target) &&
+        !accountDropdownRef.current?.contains(event.target)
       ) {
-        menu.removeAttribute("open");
+        setAccountMenuOpen(false);
       }
     }
 
@@ -5110,7 +5163,7 @@ function AccountNavbar() {
         event.key === "Escape" &&
         menu?.open
       ) {
-        menu.removeAttribute("open");
+        setAccountMenuOpen(false);
         menu
           .querySelector("summary")
           ?.focus();
@@ -5223,6 +5276,7 @@ function AccountNavbar() {
   }
 
   function closeAccountMenu(event) {
+    setAccountMenuOpen(false);
     event.currentTarget
       .closest("details")
       ?.removeAttribute("open");
@@ -5246,7 +5300,7 @@ function AccountNavbar() {
         <IdeaHireLogo className="logo" />
       </div>
 
-      <nav className="home-nav-links ih11-account-nav" aria-label="Główna nawigacja konta">
+      <nav ref={accountNavigationRef} className="home-nav-links ih11-account-nav" aria-label="Główna nawigacja konta">
         {[
           { to: "/account", label: "Konto", end: true },
           { to: "/jobs", label: "Zlecenia" },
@@ -5267,6 +5321,7 @@ function AccountNavbar() {
         {!hasRestrictedAgeAccess && (
           <NavLink
             to="/find-talent"
+            aria-label="Dodaj zlecenie"
             className={({ isActive }) =>
               `account-create-job-button${isActive ? " is-active" : ""}`
             }
@@ -5303,10 +5358,14 @@ function AccountNavbar() {
         <details
           className="account-menu"
           ref={accountMenuRef}
+          open={accountMenuOpen}
         >
           <summary
             className="account-mini"
             aria-label="Otwórz menu konta"
+            aria-expanded={accountMenuOpen}
+            aria-controls="ih18-account-menu"
+            onClick={(event) => { event.preventDefault(); setAccountMenuOpen(value => !value); }}
           >
             <span className="account-mini-avatar">
               {avatarUrl ? (
@@ -5339,7 +5398,7 @@ function AccountNavbar() {
             )}
           </summary>
 
-          <div className="account-menu-dropdown">
+          {accountMenuOpen && createPortal(<div className="account-menu-dropdown ih18-account-dropdown" ref={accountDropdownRef} id="ih18-account-menu" aria-label="Funkcje konta">
             <div className="account-menu-identity">
               <strong>{userName}</strong>
               <span>{user?.email || "Konto IdeaHire"}</span>
@@ -5354,9 +5413,6 @@ function AccountNavbar() {
               </NavLink>
               <NavLink to="/services" onClick={closeAccountMenu}>
                 Usługi / Freelancerzy
-              </NavLink>
-              <NavLink to="/calendar" onClick={closeAccountMenu}>
-                Kalendarz
               </NavLink>
               {!hasRestrictedAgeAccess && (
                 <NavLink
@@ -5458,7 +5514,7 @@ function AccountNavbar() {
             >
               Wyloguj się
             </button>
-          </div>
+          </div>, document.body)}
         </details>
       </div>
     </header>
@@ -16206,6 +16262,21 @@ function calendarPad(value) {
   return String(value).padStart(2, "0");
 }
 
+const CALENDAR_WEEKDAYS = Object.freeze(["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"]);
+const CALENDAR_EVENT_TYPES = Object.freeze([
+  { value: "deadline", label: "Termin projektu", shortLabel: "Termin" },
+  { value: "meeting", label: "Spotkanie", shortLabel: "Spotkanie" },
+  { value: "payment", label: "Płatność", shortLabel: "Płatność" },
+  { value: "personal", label: "Własne zadanie", shortLabel: "Zadanie" },
+]);
+const CALENDAR_REMINDER_OPTIONS = Object.freeze([
+  { value: 15, label: "15 minut wcześniej" },
+  { value: 60, label: "Godzinę wcześniej" },
+  { value: 180, label: "3 godziny wcześniej" },
+  { value: 1440, label: "Dzień wcześniej" },
+  { value: 10080, label: "Tydzień wcześniej" },
+]);
+
 function getCalendarDateKey(value) {
   const date =
     value instanceof Date
@@ -16482,10 +16553,13 @@ function Calendar() {
 
   const [monthDirection, setMonthDirection] =
     useState("next");
+  const calendarLoadRef = useRef(0);
+  useEffect(() => () => { calendarLoadRef.current += 1; }, []);
 
   const loadCalendarContent =
     useCallback(async () => {
       if (!user?.id) return;
+      const requestId = ++calendarLoadRef.current;
 
       setLoading(true);
       setMessage("");
@@ -16543,12 +16617,14 @@ function Calendar() {
             ascending: true,
           });
 
+        if (requestId !== calendarLoadRef.current) return;
         if (eventsError) {
-          throw eventsError;
+          console.error("CALENDAR EVENTS ERROR:", eventsError);
+          setMessage("Nie udało się pobrać własnych terminów. Możesz ponowić próbę; kalendarz i terminy zleceń pozostają dostępne.");
         }
 
         setCustomEvents(
-          (eventRows || []).map(
+          (eventsError ? [] : eventRows || []).map(
             (item) => ({
               ...item,
               source: "custom",
@@ -16691,10 +16767,12 @@ function Calendar() {
           }
         }
 
+        if (requestId !== calendarLoadRef.current) return;
         setJobEvents(
           nextJobEvents
         );
       } catch (error) {
+        if (requestId !== calendarLoadRef.current) return;
         console.error(
           "CALENDAR LOAD ERROR:",
           error
@@ -16702,27 +16780,9 @@ function Calendar() {
 
         setCustomEvents([]);
 
-        if (
-          error?.code === "42P01" ||
-          String(error?.message || "")
-            .toLowerCase()
-            .includes(
-              "ideahire_calendar_events"
-            )
-        ) {
-          setMessage(
-            "Kalendarz jest gotowy w interfejsie, ale wymaga jeszcze wdrożenia dołączonego pliku SQL w Supabase."
-          );
-        } else {
-          setMessage(
-            `Nie udało się pobrać kalendarza: ${
-              error?.message ||
-              "nieznany błąd"
-            }`
-          );
-        }
+        setMessage("Nie udało się pobrać zapisanych terminów. Spróbuj ponownie za chwilę.");
       } finally {
-        setLoading(false);
+        if (requestId === calendarLoadRef.current) setLoading(false);
       }
     }, [
       currentMonth,
@@ -17431,6 +17491,7 @@ function Calendar() {
             <p>
               {successMessage || message}
             </p>
+            {message && !successMessage && <button type="button" onClick={loadCalendarContent} disabled={loading}>Spróbuj ponownie</button>}
           </div>
         )}
 
@@ -20206,7 +20267,7 @@ function AmbientBackground() {
       // Two fixed theme colors. Only the bottom glow's opacity and position move.
       const lift = motion?.matches ? 0 : 1 - Math.exp(-offset / revealDistance);
       const blend = Math.round(progress * 250) / 250;
-      const glow = motion?.matches ? 0 : Math.round((0.32 + lift * 0.44 + progress * 0.14) * 500) / 500;
+      const glow = motion?.matches ? 0 : Math.round((0.4 + lift * 0.46 + progress * 0.1) * 500) / 500;
       const rise = Math.round((22 - lift * 26 - progress * 18) * 100) / 100;
       const signature = `${blend}|${glow}|${rise}`;
       if (signature === last) return;
@@ -22242,6 +22303,7 @@ function ChatProjectPlan({ job, agreement }) {
 function Chat() {
   const { user } =
     useAuth();
+  const { canTransact } = useAgeAccess();
 
   const { id } =
     useParams();
@@ -23489,7 +23551,7 @@ function Chat() {
                 <div className="ih7-chat-project-body">
                   <strong>{jobTitle || "Projekt IdeaHire"}</strong><p>{jobDetails?.description || "Rozmowa i materiały dotyczące tego projektu."}</p>
                   {jobDetails?.project_details?.deliverables && <div className="ih12-project-brief"><span>Oczekiwany rezultat</span><p>{jobDetails.project_details.deliverables}</p>{jobDetails.project_details.delivery_format && <p><b>Format: </b>{jobDetails.project_details.delivery_format}</p>}{jobDetails.project_details.materials && <p><b>Materiały od klienta: </b>{jobDetails.project_details.materials}</p>}<p><b>Termin: </b>{formatChatProjectDate(jobDetails.project_details.deadline)}</p></div>}
-                  <dl><div><dt>Ustalenia</dt><dd>{agreement?.status === "accepted" ? "Zaakceptowane" : "W toku"}</dd></div><div><dt>Materiały</dt><dd>{privateWork.items.filter((item) => item.moderation_status === "active").length}</dd></div></dl>
+                  <dl><div><dt>Plan współpracy</dt><dd>{agreement?.status === "accepted" ? "Zaakceptowane warunki" : agreementsRequired ? "Do uzgodnienia" : "Brak formalnych warunków"}</dd></div><div><dt>Materiały</dt><dd>{privateWork.items.filter((item) => item.moderation_status === "active").length}</dd></div></dl>
                   {conversation?.origin_type === "service_inquiry" && <div className="ih7-chat-service-context">
                     <span className="ih7-eyebrow">Zapytanie o usługę</span>
                     <p>{isClient ? "Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności." : "Przygotuj pierwszą ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny."}</p>
@@ -23502,7 +23564,7 @@ function Chat() {
                 {[
                   ["conversation", "Rozmowa", messages.length],
                   ["files", "Pliki", privateWork.items.filter((item) => item.moderation_status === "active").length],
-                  ["plan", "Ustalenia", agreement?.status === "accepted" ? "✓" : ""],
+                  ["plan", "Plan współpracy", agreement?.status === "accepted" ? "✓" : ""],
                 ].map(([value, label, count]) => (
                   <button
                     type="button"
@@ -23529,9 +23591,9 @@ function Chat() {
                     {count !== "" && <b>{count}</b>}
                   </button>
                 ))}
-                {workspaceTab === "conversation" && <button type="button" className="ih15-pin-plan" aria-label="Otwórz okno ustaleń"
+                {workspaceTab === "conversation" && <button type="button" className="ih15-pin-plan" aria-label="Otwórz plan obok rozmowy"
                   onClick={() => { setPlanPinned(value => !value); setFocusMode(true); }} aria-pressed={planPinned}>
-                  <MarketIcon kind="panels" /><span>Okno ustaleń</span>
+                  <MarketIcon kind="panels" /><span>Plan obok rozmowy</span>
                 </button>}
               </div>
 
@@ -23546,9 +23608,7 @@ function Chat() {
                 <div className="ih7-chat-workspace-panel is-conversation" role="tabpanel" id="ih7-chat-panel-conversation"
                   aria-labelledby="ih7-chat-tab-conversation" hidden={workspaceTab !== "conversation"}>
 
-                    {agreementsRequired && !agreementAccepted && (
-                      <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>{agreement ? "Sprawdźcie propozycję warunków" : "Najpierw porozmawiajcie o szczegółach"}</strong><small>{agreement ? "Obie strony akceptują tę samą wersję." : "Zakres, cenę i termin zapiszecie w ustaleniach."}</small></span></div><button type="button" onClick={() => openWorkspace("plan")}>{agreement ? "Zobacz ustalenia" : "Ustal warunki"}<MarketIcon kind="arrow" /></button></div>
-                    )}
+                    <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>Plan współpracy</strong><small>{agreement?.status === "accepted" ? "Zaakceptowany zakres, cena i termin." : agreementsRequired ? "Zapiszcie warunki i zaakceptujcie tę samą wersję." : "Ta starsza rozmowa nie ma formalnych warunków."}</small></span></div><button type="button" onClick={() => openWorkspace("plan")}>{agreement?.status === "accepted" ? "Zobacz plan" : "Otwórz plan"}<MarketIcon kind="arrow" /></button></div>
 
                     <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => {
                       const element = event.currentTarget;
@@ -23694,11 +23754,16 @@ function Chat() {
 
                 </div>}
                 {(workspaceTab === "plan" || planPinned) && <div className={`ih7-chat-workspace-panel is-plan${planPinned ? " ih15-plan-window" : ""}`} role={planPinned ? "region" : "tabpanel"} id="ih7-chat-panel-plan" aria-labelledby="ih7-chat-tab-plan" tabIndex={0}>
-                  <header className="ih15-workspace-heading"><h2>Ustalenia</h2><div>
+                  <header className="ih15-workspace-heading"><h2>Plan współpracy</h2><div>
                     {planPinned && <button type="button" className="ih12-icon-button" aria-label="Rozwiń ustalenia na cały ekran" onClick={() => openWorkspace("plan")}><MarketIcon kind="expand" /></button>}
                     <button type="button" className="ih15-workspace-back" onClick={() => { if (planPinned) closePlanWindow(); else openWorkspace("conversation"); }}><MarketIcon kind="arrow" /><span>Wróć do rozmowy</span></button>
                   </div></header>
 
+                    {!agreementsRequired && <section className="ih18-legacy-plan" aria-labelledby="ih18-legacy-plan-title">
+                      <h3 id="ih18-legacy-plan-title">Zapiszcie formalne warunki współpracy</h3>
+                      <p>Ta starsza rozmowa nie obsługuje dwustronnej akceptacji warunków. Utwórz projekt z tym wykonawcą, aby zapisać zakres, rezultat, cenę, termin i zasady odbioru. Historia tej rozmowy pozostaje dostępna.</p>
+                      {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}
+                    </section>}
                     <AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
@@ -25167,8 +25232,8 @@ function DisputeDetails() {
                 <div className="dispute-evidence-list">
                   {evidence.map((item) => (
                     <article className="dispute-evidence-item" key={item.id}>
-                      <span className="dispute-evidence-icon" aria-hidden="true"></span>
-                      <div>
+                      <span className="dispute-evidence-icon" aria-hidden="true"><MarketIcon kind="files" /></span>
+                      <div className="ih18-evidence-copy">
                         <strong>{item.original_file_name}</strong>
                         <small>
                           Plik · {item.size_bytes
@@ -25191,7 +25256,7 @@ function DisputeDetails() {
                   {messageEvidence.map((item) => (
                     <article className="dispute-evidence-item is-message" key={item.id}>
                       <span className="dispute-evidence-icon" aria-hidden="true">“</span>
-                      <div>
+                      <div className="ih18-evidence-copy">
                         <strong>Wiadomość z rozmowy</strong>
                         <small>{formatDisputeDate(item.message_created_at_snapshot)}</small>
                         <p>{item.message_content_snapshot}</p>
