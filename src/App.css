@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 17 | 2026-10-09 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 18 | 2026-10-09 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51953,16 +51953,16 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { transition: none !important; }
 }
 
-/* IdeaHire P17: one canvas and one soft blue/neutral bottom wash. */
-:root { --ih17-canvas: #eef3fa; --ih17-glow: #acc6df; }
-html[data-theme="dark"] { --ih17-canvas: #0c1728; --ih17-glow: #294c70; }
-html[data-template="classic"] { --ih17-canvas: #ffffff; --ih17-glow: #c6d9e8; }
-html[data-template="classic"][data-theme="dark"] { --ih17-canvas: #17191b; --ih17-glow: #3c4b58; }
+/* IdeaHire P18: two theme colors; a diffuse wash follows page scrolling. */
+:root { --ih17-canvas: #eef3fa; --ih17-glow: #8db7dd; }
+html[data-theme="dark"] { --ih17-canvas: #0c1728; --ih17-glow: #325f89; }
+html[data-template="classic"] { --ih17-canvas: #ffffff; --ih17-glow: #b5cedf; }
+html[data-template="classic"][data-theme="dark"] { --ih17-canvas: #17191b; --ih17-glow: #485c6b; }
 html:root body .ih13-background { background: var(--ih17-canvas); }
 html:root body .ih13-background-start { background: var(--ih17-canvas); }
 html:root body .ih13-background-end {
   inset: -12% -10% -20%;
-  background: radial-gradient(ellipse 78% 72% at 50% 100%, var(--ih17-glow) 12%, transparent 78%);
+  background: radial-gradient(ellipse 88% 80% at 50% 100%, var(--ih17-glow) 18%, transparent 82%);
   opacity: var(--ih17-glow-opacity, .32);
   transform: translate3d(0, var(--ih17-glow-rise, 22%), 0);
   animation: none;
@@ -52315,4 +52315,267 @@ html:root body #root#root#root#root .account-page.ih7-communications.ih8-communi
   html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih17-start-grid .ih12-button > svg:first-child { width: 16px !important; height: 16px !important; }
   html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih17-browse-jobs > svg { display: none !important; }
   html:root body #root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .is-condensed .ih13-start-actions > p { display: none !important; }
+}
+
+
+/* IdeaHire P18: viewport-safe menus, animated profile network and readable workspaces. */
+html:root body .ih18-account-dropdown {
+  position: fixed !important; z-index: 1100 !important; right: auto !important;
+  box-sizing: border-box !important; display: grid !important; gap: 3px !important;
+  padding: 8px !important; margin: 0 !important; min-width: 0 !important;
+  border: 1px solid var(--ih7-line) !important; border-radius: 18px !important;
+  background: var(--ih7-surface) !important; color: var(--ih7-ink) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,.16) !important; backdrop-filter: none !important;
+  overflow-x: hidden !important; overflow-y: auto !important; overscroll-behavior: contain;
+  touch-action: pan-y; animation: none !important; transform: none !important;
+}
+html:root body .ih18-account-dropdown :is(a,button) {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  box-sizing: border-box !important; width: 100% !important; min-width: 0 !important;
+  min-height: 44px !important; height: auto !important; padding: 10px 12px !important;
+  border: 0 !important; border-radius: 10px !important; background: transparent !important;
+  color: var(--ih7-ink) !important; font: 500 14px/1.5 Inter,system-ui,sans-serif !important;
+  text-decoration: none !important; white-space: normal !important; overflow-wrap: anywhere !important;
+}
+html:root body .ih18-account-dropdown :is(a,button):hover { background: var(--ih7-soft) !important; }
+html:root body .ih18-account-dropdown :is(a,button):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: -2px !important; }
+html:root body .ih18-account-dropdown .account-menu-mobile-nav { display: none !important; }
+html:root body #root#root#root#root#root .ih11-account-navbar { overflow: visible !important; }
+
+/* Draw the existing six SVG branches; close the whole network without a height jump. */
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal {
+  display: grid !important; grid-template-rows: 0fr !important; width: 100% !important; min-width: 0 !important;
+  transition: grid-template-rows 600ms cubic-bezier(.2,.7,.2,1) !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal[data-expanded="true"] { grid-template-rows: 1fr !important; transition-duration: 900ms !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal[hidden] { display: none !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-clip { min-height: 0 !important; overflow: hidden !important; padding: 0 4px !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih16-profile-hub[data-present="true"] > :is(.ih16-hub-hint,.ih16-hub-current) { display: none !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih17-hub-network { animation: none !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih17-hub-network path {
+  stroke-dasharray: 1 !important; stroke-dashoffset: 1 !important;
+  transition: stroke-dashoffset 500ms ease, stroke 180ms ease !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal[data-expanded="true"] .ih17-hub-network path {
+  stroke-dashoffset: 0 !important; transition-duration: 1000ms,180ms !important;
+  transition-delay: calc(var(--ih18-branch-index,0) * 90ms),0ms !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih16-hub-item {
+  animation: none !important; opacity: 0 !important; transform: translateY(-12px) scale(.9) !important;
+  transition: opacity 450ms ease,transform 500ms cubic-bezier(.2,.7,.2,1),border-color 180ms ease,box-shadow 180ms ease !important;
+  transition-delay: 0ms !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal[data-expanded="true"] .ih16-hub-item {
+  opacity: 1 !important; transform: translateY(0) scale(1) !important;
+  transition-delay: calc(380ms + var(--ih17-node-index,0) * 100ms),calc(380ms + var(--ih17-node-index,0) * 100ms),0ms,0ms !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih16-hub-panel .ih14-account-actions { opacity: 0 !important; transform: translateY(-8px) !important; transition: opacity 400ms ease,transform 400ms ease !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal[data-expanded="true"] .ih14-account-actions { opacity: 1 !important; transform: none !important; transition-delay: 900ms !important; }
+
+/* One rounded editing surface, with unclipped pickers and consistent form sections. */
+html:root body #root#root#root#root#root .page.ih6-account-page .ih6-account-workspace[data-account-section="profile"] .account-profile-workspace,
+html:root body #root#root#root#root#root .page.ih6-account-page .account-profile-workspace {
+  box-sizing: border-box !important; width: 100% !important; min-width: 0 !important;
+  padding: 22px !important; border-width: 1px !important; border-style: solid !important; border-color: var(--ih6-line) !important; border-radius: 24px !important;
+  background: var(--ih6-surface) !important; color: var(--ih6-ink) !important;
+  box-shadow: 0 10px 32px color-mix(in srgb,var(--ih6-ink) 5%,transparent) !important;
+  overflow: visible !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .account-profile-workspace > .account-profile-preview {
+  width: 100% !important; border-radius: 20px !important; margin: 0 0 18px !important;
+  clip-path: inset(0 round 20px) !important; overflow: hidden !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih11-profile-form { width: 100% !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih11-profile-form .account-form-section {
+  box-sizing: border-box !important; width: 100% !important; min-width: 0 !important;
+  padding: 24px 10px !important; margin: 0 !important; gap: 20px !important;
+  border: 0 !important; border-bottom: 1px solid var(--ih6-line) !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important; color: var(--ih6-ink) !important;
+}
+html:root body #root#root#root#root#root .page.ih6-account-page .ih11-profile-form .account-form-section:last-child { border-bottom: 0 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih11-profile-form :is(label,.account-form-section-heading,.account-form-section-heading > div) { min-width: 0 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .ih11-profile-form :is(input,textarea,select) { box-sizing: border-box !important; max-width: 100% !important; min-width: 0 !important; font-size: 16px !important; line-height: 1.6 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .account-profile-preview :is(strong,p) { overflow-wrap: anywhere !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page :is(.profile-portfolio-manager,.discovery-settings-card,.account-template-card) { min-width: 0 !important; border-radius: 24px !important; background: var(--ih6-surface) !important; color: var(--ih6-ink) !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-summary { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 16px !important; margin: 22px 0 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-summary > div { display: grid !important; gap: 7px !important; min-width: 0 !important; padding: 18px !important; border: 1px solid var(--ih6-line) !important; border-radius: 14px !important; background: var(--ih6-soft) !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-summary span,
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-readiness > span { display: block !important; color: var(--ih6-muted) !important; font-size: 12px !important; line-height: 1.5 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-summary strong,
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-readiness strong { display: block !important; color: var(--ih6-ink) !important; font-size: 16px !important; line-height: 1.5 !important; overflow-wrap: anywhere !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-group { display: grid !important; gap: 12px !important; margin: 24px 0 !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-group > strong { margin: 0 0 12px !important; color: var(--ih6-ink) !important; font-size: 16px !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-tags { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-tags > span { display: inline-flex !important; max-width: 100% !important; min-height: 32px !important; align-items: center !important; padding: 7px 12px !important; border: 1px solid var(--ih6-line) !important; border-radius: 12px !important; background: var(--ih6-soft) !important; color: var(--ih6-ink) !important; font-size: 13px !important; line-height: 1.5 !important; white-space: normal !important; overflow-wrap: anywhere !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-readiness { display: grid !important; gap: 6px !important; margin: 22px 0 12px !important; padding: 18px !important; border: 1px solid var(--ih6-line) !important; border-radius: 14px !important; background: var(--ih6-soft) !important; }
+html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-actions { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 22px !important; }
+
+/* A solid, calm conversation canvas and one continuous composer focus outline. */
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-shell { background: var(--ih7-surface) !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace > .is-conversation { background: var(--ih7-soft) !important; gap: 14px !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace .is-conversation .ih7-chat-messages {
+  box-sizing: border-box !important; width: 100% !important; max-width: 720px !important;
+  padding: 16px 8px 22px !important; gap: 14px !important; background: transparent !important;
+  overflow-y: auto !important; overflow-x: hidden !important; scroll-padding: 16px !important;
+}
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-message { max-width: min(82%,520px) !important; border-radius: 17px !important; box-shadow: none !important; border: 1px solid var(--ih7-line) !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-message.is-theirs { background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; border-bottom-left-radius: 5px !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-message.is-mine { background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; border-color: var(--ih7-accent) !important; border-bottom-right-radius: 5px !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-form {
+  display: grid !important; grid-template-columns: 44px minmax(0,1fr) 44px !important; align-items: end !important;
+  box-sizing: border-box !important; width: 100% !important; max-width: 720px !important; min-width: 0 !important;
+  gap: 8px !important; margin: 0 auto !important; padding: 8px !important; border: 1px solid var(--ih7-line) !important;
+  border-radius: 18px !important; background: var(--ih7-surface) !important; box-shadow: none !important;
+}
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-form:focus-within { outline: 2px solid var(--ih7-accent) !important; outline-offset: 2px !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-form textarea {
+  box-sizing: border-box !important; display: block !important; width: 100% !important; min-width: 0 !important;
+  min-height: 44px !important; max-height: 120px !important; margin: 0 !important; padding: 10px 4px !important;
+  border: 0 !important; border-radius: 10px !important; background: transparent !important; color: var(--ih7-ink) !important;
+  font: 400 16px/1.5 Inter,system-ui,sans-serif !important; resize: none !important; box-shadow: none !important; outline: 0 !important;
+}
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-form > :is(button,.ih7-composer-upload) { width: 44px !important; min-width: 44px !important; height: 44px !important; padding: 10px !important; border-radius: 12px !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs { align-items: center !important; gap: 4px !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > [role="tab"] { border-radius: 12px !important; min-height: 44px !important; height: auto !important; font-size: 13px !important; white-space: normal !important; line-height: 1.35 !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next { box-sizing: border-box !important; width: 100% !important; max-width: 720px !important; margin: 0 auto !important; padding: 12px 14px !important; border: 1px solid var(--ih7-line) !important; border-radius: 14px !important; background: var(--ih7-surface) !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next > div { min-width: 0 !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next small { color: var(--ih7-muted) !important; font-size: 12px !important; line-height: 1.5 !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next > button { flex: 0 0 auto !important; min-height: 44px !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih18-legacy-plan { display: grid !important; gap: 14px !important; margin: 0 0 20px !important; padding: 20px !important; border: 1px solid var(--ih7-line) !important; border-radius: 16px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih18-legacy-plan h3 { margin: 0 !important; font-size: 17px !important; line-height: 1.4 !important; }
+html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih18-legacy-plan p { margin: 0 !important; font-size: 14px !important; line-height: 1.65 !important; overflow-wrap: anywhere !important; }
+
+/* Evidence stays in the text column even when an older icon reset is present. */
+html:root body #root#root#root#root#root .disputes-page .disputes-shell { background: transparent !important; box-shadow: none !important; }
+html:root body #root#root#root#root#root .disputes-page .dispute-evidence-item {
+  display: grid !important; grid-template-columns: 36px minmax(0,1fr) auto !important; gap: 12px !important;
+  align-items: start !important; padding: 18px !important; min-width: 0 !important; width: 100% !important; box-sizing: border-box !important;
+  background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; border-color: var(--ih7-line) !important;
+}
+html:root body #root#root#root#root#root .disputes-page .dispute-evidence-icon { display: grid !important; grid-column: 1 !important; grid-row: 1 !important; place-items: center !important; width: 36px !important; height: 36px !important; margin: 0 !important; background: transparent !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root .disputes-page .ih18-evidence-copy { grid-column: 2 !important; grid-row: 1 !important; min-width: 0 !important; width: 100% !important; }
+html:root body #root#root#root#root#root .disputes-page .ih18-evidence-copy :is(strong,small,p) { display: block !important; width: auto !important; max-width: 100% !important; white-space: pre-wrap !important; overflow-wrap: anywhere !important; word-break: normal !important; line-height: 1.6 !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root .disputes-page .ih18-evidence-copy strong { font-size: 14px !important; }
+html:root body #root#root#root#root#root .disputes-page .ih18-evidence-copy small { font-size: 12px !important; color: var(--ih7-muted) !important; margin-top: 6px !important; }
+html:root body #root#root#root#root#root .disputes-page .ih18-evidence-copy p { font-size: 14px !important; margin: 10px 0 0 !important; }
+html:root body #root#root#root#root#root .disputes-page .dispute-evidence-item > button { grid-column: 3 !important; grid-row: 1 !important; min-height: 44px !important; min-width: 72px !important; height: auto !important; padding: 10px 14px !important; white-space: normal !important; line-height: 1.5 !important; }
+html:root body #root#root#root#root#root .disputes-page .dispute-evidence-item.is-message .ih18-evidence-copy { grid-column: 2 / -1 !important; }
+html:root body #root#root#root#root#root .disputes-page :is(.dispute-panel-heading,.dispute-action-row,.dispute-form-footer) { gap: 12px !important; flex-wrap: wrap !important; }
+
+/* Decisions and appeals use neutral, high-contrast type directly on the page canvas. */
+html:root body #root#root#root#root#root .moderation-user-page { --ih18-notice-ink: #181b1e; --ih18-notice-muted: #53585e; --ih18-notice-line: #c8cdd3; }
+html[data-theme="dark"] body #root#root#root#root#root .moderation-user-page { --ih18-notice-ink: #f3f4f5; --ih18-notice-muted: #c0c4cb; --ih18-notice-line: #555e69; }
+html:root body #root#root#root#root#root .moderation-user-page .moderation-user-shell {
+  box-sizing: border-box !important; width: min(1120px,calc(100% - 48px)) !important; max-width: 1120px !important; min-width: 0 !important;
+  margin: 0 auto !important; padding: 28px 0 64px !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
+  color: var(--ih18-notice-ink) !important; gap: 26px !important;
+}
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-user-header,.moderation-decision-card,.moderation-appeal-card,.moderation-clear-card,.moderation-status-error-card,.restricted-account-lock-card) {
+  box-sizing: border-box !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 24px 0 !important;
+  background: transparent !important; border: 0 !important; border-bottom: 1px solid var(--ih18-notice-line) !important;
+  border-radius: 0 !important; box-shadow: none !important; backdrop-filter: none !important; color: var(--ih18-notice-ink) !important;
+}
+html:root body #root#root#root#root#root .moderation-user-page :is(h1,h2,h3,strong,dd,p,a,button,label,textarea) { color: var(--ih18-notice-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(p,dd) { line-height: 1.65 !important; font-size: 14px !important; overflow-wrap: anywhere !important; white-space: pre-wrap !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(dt,small,.section-label,.moderation-duration-banner > span) { color: var(--ih18-notice-muted) !important; font-size: 12px !important; line-height: 1.5 !important; }
+html:root body #root#root#root#root#root .moderation-user-page h1 { font-size: clamp(28px,4vw,40px) !important; line-height: 1.2 !important; margin: 12px 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page h2 { font-size: 22px !important; line-height: 1.35 !important; margin: 8px 0 12px !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-decision-topline,.moderation-decision-actions,.moderation-status-error-actions,.restricted-account-lock-actions) { display: flex !important; align-items: flex-start !important; flex-wrap: wrap !important; gap: 12px !important; min-width: 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page .moderation-decision-topline { justify-content: space-between !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-decision-meta,.moderation-appeal-meta) { display: grid !important; grid-template-columns: repeat(auto-fit,minmax(min(190px,100%),1fr)) !important; gap: 20px !important; margin: 24px 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-decision-meta,.moderation-appeal-meta) > div { padding: 0 !important; min-width: 0 !important; background: transparent !important; border: 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-decision-meta,.moderation-appeal-meta) dd { margin: 6px 0 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-duration-banner,.moderation-reason-block,.moderation-notice-source,.moderation-adjustment-banner,.moderation-lift-banner,.moderation-appeal-decision,.restricted-account-lock-duration,.restricted-account-lock-reason) { display: grid !important; gap: 8px !important; padding: 18px !important; margin: 18px 0 !important; border: 1px solid var(--ih18-notice-line) !important; border-radius: 14px !important; background: transparent !important; color: var(--ih18-notice-ink) !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.moderation-duration-banner,.moderation-reason-block) :is(strong,p,h3) { margin: 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page .moderation-basis-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 20px !important; margin: 22px 0 !important; }
+html:root body #root#root#root#root#root .moderation-user-page .moderation-basis-grid > article { min-width: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+html:root body #root#root#root#root#root .moderation-user-page .moderation-status-pill { flex: 0 0 auto !important; display: inline-flex !important; min-height: 32px !important; align-items: center !important; padding: 6px 12px !important; border: 1px solid var(--ih18-notice-line) !important; border-radius: 999px !important; background: transparent !important; color: var(--ih18-notice-ink) !important; font-size: 12px !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.privacy-primary-button,.privacy-secondary-button) { display: inline-flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; min-width: 0 !important; max-width: 100% !important; min-height: 44px !important; height: auto !important; padding: 11px 16px !important; border: 1px solid var(--ih18-notice-line) !important; border-radius: 12px !important; background: transparent !important; font: 600 14px/1.5 Inter,system-ui,sans-serif !important; white-space: normal !important; overflow-wrap: anywhere !important; text-align: center !important; }
+html:root body #root#root#root#root#root .moderation-user-page :is(.privacy-primary-button,.privacy-secondary-button):focus-visible { outline: 2px solid currentColor !important; outline-offset: 3px !important; }
+html:root body #root#root#root#root#root .moderation-user-page textarea { box-sizing: border-box !important; width: 100% !important; font-size: 16px !important; line-height: 1.6 !important; background: var(--ih7-surface) !important; }
+
+/* The glow is the page canvas, not a separate footer stripe. Cards react only to hover. */
+html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .footer { background: transparent !important; box-shadow: none !important; }
+html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .footer::before,html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .footer::after { content: none !important; }
+@media (hover: hover) and (pointer: fine) {
+  html:root body #root#root#root#root#root .page.ih6-account-page :is(.ih16-hub-trigger,.ih16-hub-item,.ih14-account-action-group):hover { box-shadow: 0 12px 30px color-mix(in srgb,var(--ih6-accent) 18%,transparent) !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.hero-content,.ih5-opportunity-panel,.ih5-benefit-card):hover { box-shadow: 0 16px 40px color-mix(in srgb,var(--ih7-accent) 15%,transparent) !important; transition: box-shadow 220ms ease !important; }
+}
+html:root body #root#root#root#root#root .calendar-feedback { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 12px !important; }
+html:root body #root#root#root#root#root .calendar-feedback > button { min-height: 44px !important; height: auto !important; padding: 10px 14px !important; border: 1px solid var(--calendar-line) !important; border-radius: 12px !important; background: var(--calendar-surface) !important; color: var(--calendar-ink) !important; font: 600 13px/1.5 Inter,system-ui,sans-serif !important; }
+
+@media (max-width: 800px) {
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header {
+    position: relative !important; inset: auto !important; display: grid !important;
+    grid-template-columns: minmax(0,1fr) auto 44px !important; align-items: center !important; gap: 10px !important;
+    box-sizing: border-box !important; width: calc(100% - 24px) !important; max-width: none !important;
+    min-height: 68px !important; margin: 12px auto 16px !important; padding: 10px 12px !important;
+    overflow: visible !important; backdrop-filter: none !important;
+  }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header > .logo { grid-column: 1 !important; min-width: 0 !important; font-size: 26px !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header > .nav-actions { grid-column: 2 !important; grid-row: 1 !important; display: flex !important; gap: 6px !important; margin: 0 !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .ih-mobile-nav-toggle { grid-column: 3 !important; grid-row: 1 !important; display: grid !important; place-items: center !important; position: static !important; width: 44px !important; height: 44px !important; min-width: 44px !important; margin: 0 !important; padding: 10px !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions :is(.home-account-avatar-link,.ih-logout-btn,.btn) { box-sizing: border-box !important; min-width: 44px !important; min-height: 44px !important; height: 44px !important; padding: 8px !important; margin: 0 !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions > a[href="/login"] { display: none !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions .account-mini-avatar { width: 34px !important; height: 34px !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions .account-mini-avatar img { width: 34px !important; height: 34px !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .home-nav-links {
+    display: none !important; position: static !important; inset: auto !important; grid-column: 1 / -1 !important; grid-row: 2 !important;
+    flex-direction: column !important; align-items: stretch !important; justify-content: flex-start !important;
+    box-sizing: border-box !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important;
+    max-height: calc(100svh - 120px) !important; margin: 0 !important; padding: 8px !important; gap: 4px !important;
+    border: 1px solid var(--ih7-line) !important; border-radius: 16px !important; background: var(--ih7-surface) !important;
+    overflow-y: auto !important; overflow-x: hidden !important; touch-action: pan-y; overscroll-behavior: contain;
+    box-shadow: none !important; transform: none !important;
+  }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header[data-mobile-menu-open="true"] .home-nav-links { display: flex !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .home-nav-links :is(.ih-nav-item,.home-nav-account,.home-notifications) { width: 100% !important; min-width: 0 !important; min-height: 44px !important; height: auto !important; margin: 0 !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .home-nav-links :is(a,button) { min-height: 44px !important; white-space: normal !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .hero { width: calc(100% - 24px) !important; min-width: 0 !important; margin-left: auto !important; margin-right: auto !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .hero-content { min-width: 0 !important; padding: 26px 22px !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-hero-title { font-size: clamp(29px,7.7vw,40px) !important; line-height: 1.12 !important; overflow-wrap: normal !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .hero-content > p { font-size: 16px !important; line-height: 1.65 !important; }
+  html:root body #root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .hero-actions :is(a,button) { min-width: 0 !important; min-height: 48px !important; white-space: normal !important; font-size: 15px !important; }
+  html:root body #root#root#root#root#root .ih11-account-navbar { padding: 10px !important; }
+  html:root body #root#root#root#root#root .ih11-account-navbar .ih11-account-nav {
+    min-width: 0 !important; width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important;
+    scrollbar-width: none !important; -ms-overflow-style: none; touch-action: pan-x; overscroll-behavior-x: contain;
+  }
+  html:root body #root#root#root#root#root .ih11-account-navbar .ih11-account-nav::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+  html:root body #root#root#root#root#root .ih11-account-navbar .ih11-account-nav > .ih-nav-item { flex: 0 0 auto !important; font-size: 13px !important; min-height: 44px !important; padding: 10px 12px !important; }
+  html:root body #root#root#root#root#root .ih11-account-navbar .nav-actions { gap: 6px !important; }
+  html:root body #root#root#root#root#root .ih11-account-navbar .nav-actions > a[href="/find-talent"] { display: inline-flex !important; width: 44px !important; min-width: 44px !important; min-height: 44px !important; padding: 10px !important; }
+  html:root body #root#root#root#root#root .ih11-account-navbar .nav-actions > a[href="/find-talent"] > span { display: none !important; }
+  html:root body .ih18-account-dropdown .account-menu-mobile-nav { display: grid !important; gap: 3px !important; padding-bottom: 8px !important; margin-bottom: 5px !important; border-bottom: 1px solid var(--ih7-line) !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .ih6-account-workspace { width: calc(100% - 24px) !important; padding-top: 18px !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .ih16-account-overview { padding: 14px 0 12px !important; margin-bottom: 24px !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .ih6-account-workspace[data-account-section="profile"] .account-profile-workspace,html:root body #root#root#root#root#root .page.ih6-account-page .account-profile-workspace { padding: 14px !important; border-radius: 22px !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .ih11-profile-form .account-form-section { grid-template-columns: minmax(0,1fr) !important; padding: 22px 2px !important; gap: 18px !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-summary { grid-template-columns: minmax(0,1fr) !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-actions { flex-direction: column !important; }
+  html:root body #root#root#root#root#root .page.ih6-account-page .discovery-settings-actions > :is(a,button) { width: 100% !important; min-height: 44px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > [role="tab"] { flex: 1 1 0 !important; padding: 8px !important; font-size: 12px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-workspace-tabs > .ih15-pin-plan { flex: 0 0 44px !important; width: 44px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace > .is-conversation { padding: 10px 12px 14px !important; gap: 10px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace .is-conversation .ih7-chat-messages { padding: 12px 2px 16px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-message { max-width: 90% !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next { padding: 8px 10px !important; gap: 8px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next small { display: none !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih12-project-next strong { font-size: 13px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih7-chat-form { padding: 6px !important; gap: 4px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading { flex-wrap: wrap !important; gap: 10px !important; }
+  html:root body #root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih15-workspace-heading h2 { font-size: 19px !important; }
+  html:root body #root#root#root#root#root .moderation-user-page .moderation-user-shell { width: calc(100% - 24px) !important; padding-top: 16px !important; gap: 18px !important; }
+  html:root body #root#root#root#root#root .moderation-user-page .moderation-basis-grid { grid-template-columns: minmax(0,1fr) !important; }
+  html:root body #root#root#root#root#root .moderation-user-page .moderation-decision-actions { flex-direction: column !important; align-items: stretch !important; }
+  html:root body #root#root#root#root#root .moderation-user-page .moderation-decision-actions > :is(a,button) { width: 100% !important; }
+}
+@media (max-width: 600px) {
+  html:root body #root#root#root#root#root .disputes-page .dispute-evidence-item { grid-template-columns: 28px minmax(0,1fr) !important; padding: 14px !important; gap: 10px !important; }
+  html:root body #root#root#root#root#root .disputes-page .dispute-evidence-icon { width: 28px !important; height: 32px !important; }
+  html:root body #root#root#root#root#root .disputes-page .dispute-evidence-item > button { grid-column: 2 !important; grid-row: 2 !important; justify-self: start !important; }
+  html:root body #root#root#root#root#root .disputes-page .dispute-details-shell { width: calc(100% - 24px) !important; min-width: 0 !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal,html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal * { transition: none !important; animation: none !important; }
 }
