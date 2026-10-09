@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -28,76 +28,49 @@ export function IdeaHireLogo({ className = "logo", to = "/" }) {
   );
 }
 
-const PROFILE_HUB_POSITIONS = [
-  { x: "31%", y: "24px" }, { x: "45%", y: "88px" },
-  { x: "55%", y: "152px" }, { x: "55%", y: "216px" },
-  { x: "45%", y: "280px" }, { x: "31%", y: "344px" },
-];
-
-export function ProfileHub({ sections, active, onSelect }) {
+export function ProfileHub({ sections, active, onSelect, children }) {
   const [open, setOpen] = useState(false);
   const activeIndex = Math.max(0, sections.findIndex((section) => section.key === active));
-  const [focusedIndex, setFocusedIndex] = useState(activeIndex);
   const id = useId();
   const rootRef = useRef(null);
   const triggerRef = useRef(null);
   const itemRefs = useRef([]);
-  const focusOnOpen = useRef(false);
   const current = sections[activeIndex];
-  useEffect(() => {
-    setOpen(false);
-    setFocusedIndex(activeIndex);
-  }, [active]);
-  useEffect(() => {
-    if (!open) return undefined;
-    if (focusOnOpen.current) { itemRefs.current[activeIndex]?.focus(); focusOnOpen.current = false; }
-    function outside(event) { if (rootRef.current && !rootRef.current.contains(event.target)) setOpen(false); }
-    document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
-  }, [open]);
+  useEffect(() => { setOpen(false); }, [active]);
   function close() { setOpen(false); triggerRef.current?.focus({ preventScroll: true }); }
   function choose(section) { onSelect(section); close(); }
   function keyboard(event) {
-    if (!open) return;
-    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
+    if (event.key === "Escape" && open) { event.preventDefault(); event.stopPropagation(); close(); return; }
+    if (!event.target.closest('[role="tablist"]')) return;
     const delta = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[event.key];
     if (delta === undefined && event.key !== "Home" && event.key !== "End") return;
     event.preventDefault();
-    const next = event.key === "Home" ? 0 : event.key === "End" ? sections.length - 1 : (focusedIndex + delta + sections.length) % sections.length;
-    setFocusedIndex(next);
+    const index = itemRefs.current.indexOf(document.activeElement);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? sections.length - 1 : (index + delta + sections.length) % sections.length;
     itemRefs.current[next]?.focus();
   }
-  return (
-    <aside className="ih6-profile-hub" ref={rootRef} data-open={open} aria-label="Centrum profilu" onKeyDown={keyboard}
-      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
-      <svg className="ih6-hub-orbit" viewBox="0 0 340 416" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <path d="M172 48C300 106 300 310 172 368" /><path className="ih6-hub-spoke" d="M51 208h66" />
-      </svg>
-      <button type="button" className="ih6-hub-trigger" ref={triggerRef} aria-expanded={open} aria-controls={`${id}-sections`}
-        aria-label={`${open ? "Zamknij" : "Otwórz"} centrum profilu. Bieżąca sekcja: ${current.label}.`}
-        onClick={() => { setFocusedIndex(activeIndex); setOpen((value) => !value); }}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowDown" && !open) { event.preventDefault(); event.stopPropagation(); focusOnOpen.current = true; setOpen(true); }
-        }}>
-        <span className="ih6-hub-emblem" aria-hidden="true"><i /><i /><i /><i /></span>
-        <span>Centrum<br />profilu</span><span className="ih6-hub-toggle" aria-hidden="true">{open ? "−" : "+"}</span>
-      </button>
-      <div className="ih6-hub-items" id={`${id}-sections`} role="tablist" aria-label="Sekcje profilu" aria-orientation="vertical" aria-hidden={!open} inert={open ? undefined : ""}>
-        {sections.map((section, index) => {
-          const position = PROFILE_HUB_POSITIONS[index];
-          return <button type="button" role="tab" key={section.key} id={`account-tab-${section.key}`} aria-selected={active === section.key}
-            aria-controls="account-tab-panel" tabIndex={open && focusedIndex === index ? 0 : -1}
-            className={`ih6-hub-item${active === section.key ? " is-active" : ""}`}
-            ref={(element) => { itemRefs.current[index] = element; }}
-            style={{ "--ih6-hub-x": position.x, "--ih6-hub-y": position.y, "--ih6-hub-order": index }}
-            onFocus={() => setFocusedIndex(index)} onClick={() => choose(section)}>
-            <span className="ih6-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span>
-          </button>;
-        })}
+  return <div className="ih6-profile-hub ih15-profile-hub" ref={rootRef} data-open={open} onKeyDown={keyboard}>
+    <span className="section-label">Konto</span>
+    <button type="button" className="ih6-hub-trigger" ref={triggerRef} aria-expanded={open} aria-controls={`${id}-sections`}
+      aria-label={`${open ? "Zamknij" : "Otwórz"} centrum profilu. Bieżąca sekcja: ${current.label}.`}
+      onClick={() => setOpen(value => !value)} onKeyDown={event => {
+        if (event.key === "ArrowDown") { event.preventDefault(); setOpen(true); window.requestAnimationFrame(() => itemRefs.current[activeIndex]?.focus()); }
+      }}>
+      <span className="ih6-hub-emblem" aria-hidden="true"><i /><i /><i /><i /></span>
+      <span>Centrum<br />profilu</span><span className="ih6-hub-toggle" aria-hidden="true">{open ? "−" : "+"}</span>
+    </button>
+    <p className="ih15-hub-hint">Kliknij koło, aby otworzyć funkcje konta.</p>
+    <span className="ih6-hub-current" aria-live="polite">{current.label}</span>
+    <div className="ih15-hub-panel" id={`${id}-sections`} hidden={!open} inert={open ? undefined : ""}>
+      <div className="ih6-hub-items" role="tablist" aria-label="Sekcje profilu">
+        {sections.map((section, index) => <button type="button" role="tab" key={section.key} id={`account-tab-${section.key}`}
+          aria-selected={active === section.key} aria-controls="account-tab-panel" tabIndex={open ? 0 : -1}
+          className={`ih6-hub-item${active === section.key ? " is-active" : ""}`} ref={el => { itemRefs.current[index] = el; }}
+          onClick={() => choose(section)}><span className="ih6-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span></button>)}
       </div>
-      <span className="ih6-hub-current" aria-live="polite">{current.label}</span>
-    </aside>
-  );
+      {children}
+    </div>
+  </div>;
 }
 
 export function MarketIcon({ kind = "search", ...props }) {
@@ -110,6 +83,9 @@ export function MarketIcon({ kind = "search", ...props }) {
     message: "M5 4h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 3V6a2 2 0 0 1 2-2ZM7 9h10M7 13h6",
     chevron: "m7 10 5 5 5-5",
     files: "M8 3h7l5 5v12H8ZM15 3v6h5M4 7v15h12",
+    expand: "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5",
+    collapse: "M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5",
+    panels: "M3 4h18v16H3ZM14 4v16",
   };
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
 }
