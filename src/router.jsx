@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 14 | 2026-10-09 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -9836,14 +9836,8 @@ function Account() {
         className="app-page account-workspace-page ih6-account-workspace"
         data-account-section={activeAccountSection}
       >
-        <header className="ih7-account-overview">
-          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
-          <div className="ih7-account-heading">
-            <span className="section-label">Konto</span>
-            <h1>Centrum profilu</h1>
-            <p>Wybierz sekcję profilu lub skorzystaj z szybkich działań.</p>
-            <div className="ih7-account-current"><span>Wybrana sekcja</span><strong>{ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === activeAccountSection)?.label}</strong></div>
-          </div>
+        <header className="ih7-account-overview ih15-account-overview">
+          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection}>
           <nav className="ih13-account-shortcuts ih14-account-actions" aria-label="Szybkie działania konta">
             <section className="ih14-account-action-group">
               <h2>Zlecam pracę</h2>
@@ -9869,6 +9863,7 @@ function Account() {
               </div>
             </section>
           </nav>
+          </ProfileHub>
         </header>
 
         <div className="ih6-account-layout">
@@ -20289,7 +20284,16 @@ function MessengerConversationsButton() {
   </button>;
 }
 
-function MessengerFrame({ chat = false, children }) {
+function MessengerFocusButton() {
+  const layout = useContext(MessengerLayoutContext);
+  return <button type="button" className="ih12-icon-button ih15-focus-toggle" aria-pressed={layout?.focusMode || false}
+    aria-label={layout?.focusMode ? "Przywróć zwykły widok czatu" : "Rozwiń czat na cały ekran"}
+    title={layout?.focusMode ? "Przywróć widok" : "Rozwiń czat"} onClick={() => layout?.setFocusMode?.(!layout.focusMode)}>
+    <MarketIcon kind={layout?.focusMode ? "collapse" : "expand"} />
+  </button>;
+}
+
+function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, children }) {
   const frameRef = useRef(null);
   const [inboxOpen, setInboxOpen] = useState(false);
   const { pathname } = useLocation();
@@ -20301,8 +20305,11 @@ function MessengerFrame({ chat = false, children }) {
       task = 0;
       const element = frameRef.current;
       if (!element) return;
-      const top = Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0));
-      const height = Math.max(240, Math.round((viewport?.height || window.innerHeight) - top - 24));
+      const inset = window.matchMedia?.("(max-width: 800px)").matches ? 0 : 12;
+      const top = focusMode ? inset : Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0));
+      const height = Math.max(focusMode ? 180 : 240, Math.round((viewport?.height || window.innerHeight) - top - (focusMode ? inset : 24)));
+      if (focusMode) element.style.setProperty("top", `${(viewport?.offsetTop || 0) + inset}px`, "important");
+      else element.style.removeProperty("top");
       element.style.setProperty("height", `${height}px`, "important");
       element.classList.toggle("is-condensed", height < 420);
     }
@@ -20323,7 +20330,7 @@ function MessengerFrame({ chat = false, children }) {
       viewport?.removeEventListener("scroll", schedule);
       window.cancelAnimationFrame(task);
     };
-  }, []);
+  }, [focusMode]);
   useEffect(() => {
     if (!chat || !inboxOpen) return undefined;
     const panel = frameRef.current?.querySelector(".ih12-inbox");
@@ -20352,8 +20359,42 @@ function MessengerFrame({ chat = false, children }) {
       returnFocus?.focus?.({ preventScroll: true });
     };
   }, [chat, inboxOpen]);
-  return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen }}>
-    <main ref={frameRef} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}`} aria-label="Komunikator IdeaHire">
+  useEffect(() => {
+    if (!focusMode) return undefined;
+    const element = frameRef.current;
+    const navbar = element?.parentElement?.querySelector(".account-navbar");
+    const wasInert = navbar?.inert || false;
+    if (navbar) navbar.inert = true;
+    const previous = document.body.style.getPropertyValue("overflow");
+    const priority = document.body.style.getPropertyPriority("overflow");
+    document.body.style.setProperty("overflow", "hidden", "important");
+    function escape(event) {
+      const dialog = event.target.closest?.('[role="dialog"]');
+      if (inboxOpen || event.defaultPrevented || (dialog && dialog !== element)) return;
+      if (event.key === "Escape") { onFocusModeChange?.(false); return; }
+      if (event.key !== "Tab") return;
+      const controls = [...(element?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),summary,[tabindex="0"]') || [])]
+        .filter(control => control.tabIndex >= 0 && !control.closest('[hidden],[aria-hidden="true"],[inert]') && control.getClientRects().length > 0);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (!first) return;
+      if (event.shiftKey && (document.activeElement === first || !element.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !element.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
+    }
+    document.addEventListener("keydown", escape);
+    return () => {
+      if (previous) document.body.style.setProperty("overflow", previous, priority);
+      else document.body.style.removeProperty("overflow");
+      if (navbar) navbar.inert = wasInert;
+      document.removeEventListener("keydown", escape);
+    };
+  }, [focusMode, inboxOpen, onFocusModeChange]);
+  useEffect(() => {
+    if (!focusMode) return undefined;
+    const frame = window.requestAnimationFrame(() => frameRef.current?.querySelector('.ih15-focus-toggle')?.focus({ preventScroll: true }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusMode]);
+  return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen, focusMode, setFocusMode: onFocusModeChange }}>
+    <main ref={frameRef} role={focusMode ? "dialog" : undefined} aria-modal={focusMode ? true : undefined} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}${focusMode ? " ih15-focus" : ""}`} aria-label="Komunikator IdeaHire">
       {children}
       {chat && inboxOpen && <button type="button" tabIndex={-1} className="ih14-inbox-scrim" aria-label="Zamknij listę rozmów" onClick={() => setInboxOpen(false)} />}
     </main>
@@ -22254,6 +22295,18 @@ function Chat() {
 
   const [workspaceTab, setWorkspaceTab] =
     useState("conversation");
+  const [focusMode, setFocusMode] = useState(true);
+  const [planPinned, setPlanPinned] = useState(false);
+  useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); }, [id]);
+  function openWorkspace(value) {
+    setWorkspaceTab(value);
+    setPlanPinned(false);
+    if (value !== "conversation") setFocusMode(true);
+  }
+  function closePlanWindow() {
+    setPlanPinned(false);
+    window.requestAnimationFrame(() => composerRef.current?.focus({ preventScroll: true }));
+  }
 
   const messageViewportRef = useRef(null);
   const composerRef = useRef(null);
@@ -23286,7 +23339,7 @@ function Chat() {
     <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications">
       <AccountNavbar />
 
-      <MessengerFrame chat>
+      <MessengerFrame chat focusMode={focusMode} onFocusModeChange={setFocusMode}>
         <ConversationInbox activeId={id} compact />
         <div className={`ih7-chat-shell${!loading ? " is-ready" : ""}`} key={id}>
           {loading ? (
@@ -23369,6 +23422,7 @@ function Chat() {
                 )}
 
                 <div className="ih7-chat-header-actions">
+                  <MessengerFocusButton />
                   <details className="ih7-chat-actions-menu">
                     <summary aria-label="Więcej opcji rozmowy" title="Więcej opcji">
                       <span aria-hidden="true">•••</span>
@@ -23415,7 +23469,7 @@ function Chat() {
                 </div>
               </header>
 
-              <details className="ih7-chat-project">
+              <details className="ih7-chat-project" hidden={workspaceTab !== "conversation"}>
                 <summary>
                   <div className="ih7-chat-project-title"><span className="ih7-eyebrow">{getJobCategoryLabel(jobDetails?.category)}{jobDetails?.subcategory ? ` · ${jobDetails.subcategory}` : ""}</span><h1>{jobTitle || "Projekt IdeaHire"}</h1></div>
                   <span className="ih7-chat-project-budget"><small>{agreement?.status === "accepted" ? "Uzgodniona cena" : "Proponowany budżet"}</small><strong>{formatChatProjectBudget(agreement?.status === "accepted" ? agreement.price_amount : jobBudget)}</strong></span>
@@ -23443,7 +23497,7 @@ function Chat() {
                     type="button"
                     role="tab"
                     id={`ih7-chat-tab-${value}`}
-                    aria-controls="ih7-chat-panel"
+                    aria-controls={`ih7-chat-panel-${value}`}
                     aria-label={label}
                     tabIndex={workspaceTab === value ? 0 : -1}
                     onKeyDown={(event) => {
@@ -23452,18 +23506,22 @@ function Chat() {
                       if (delta === undefined && event.key !== "Home" && event.key !== "End") return;
                       event.preventDefault();
                       const next = event.key === "Home" ? 0 : event.key === "End" ? 2 : (keys.indexOf(value) + delta + 3) % 3;
-                      setWorkspaceTab(keys[next]);
+                      openWorkspace(keys[next]);
                       event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[next]?.focus();
                     }}
                     aria-selected={workspaceTab === value}
                     className={workspaceTab === value ? "is-active" : ""}
-                    onClick={() => setWorkspaceTab(value)}
+                    onClick={() => openWorkspace(value)}
                     key={value}
                   >
                     <span>{label}</span>
                     {count !== "" && <b>{count}</b>}
                   </button>
                 ))}
+                {workspaceTab === "conversation" && <button type="button" className="ih15-pin-plan" aria-label="Otwórz okno ustaleń"
+                  onClick={() => { setPlanPinned(value => !value); setFocusMode(true); }} aria-pressed={planPinned}>
+                  <MarketIcon kind="panels" /><span>Okno ustaleń</span>
+                </button>}
               </div>
 
               <ChatDisputePanel
@@ -23473,18 +23531,12 @@ function Chat() {
                 launcherHidden
               />
 
-              <div
-                className={`ih7-chat-workspace-panel is-${workspaceTab}`}
-                role="tabpanel"
-                id="ih7-chat-panel"
-                aria-labelledby={`ih7-chat-tab-${workspaceTab}`}
-                tabIndex="0"
-                key={workspaceTab}
-              >
-                {workspaceTab === "conversation" && (
-                  <>
+              <div className={`ih15-workspace${planPinned ? " is-pinned" : ""}`}>
+                <div className="ih7-chat-workspace-panel is-conversation" role="tabpanel" id="ih7-chat-panel-conversation"
+                  aria-labelledby="ih7-chat-tab-conversation" hidden={workspaceTab !== "conversation"}>
+
                     {agreementsRequired && !agreementAccepted && (
-                      <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>{agreement ? "Sprawdźcie propozycję warunków" : "Najpierw porozmawiajcie o szczegółach"}</strong><small>{agreement ? "Obie strony akceptują tę samą wersję." : "Zakres, cenę i termin zapiszecie w ustaleniach."}</small></span></div><button type="button" onClick={() => setWorkspaceTab("plan")}>{agreement ? "Zobacz ustalenia" : "Ustal warunki"}<MarketIcon kind="arrow" /></button></div>
+                      <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>{agreement ? "Sprawdźcie propozycję warunków" : "Najpierw porozmawiajcie o szczegółach"}</strong><small>{agreement ? "Obie strony akceptują tę samą wersję." : "Zakres, cenę i termin zapiszecie w ustaleniach."}</small></span></div><button type="button" onClick={() => openWorkspace("plan")}>{agreement ? "Zobacz ustalenia" : "Ustal warunki"}<MarketIcon kind="arrow" /></button></div>
                     )}
 
                     <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => { const element = event.currentTarget; followMessagesRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 100; }}>
@@ -23549,7 +23601,7 @@ function Chat() {
                     )}
 
                     <form className="ih7-chat-form" onSubmit={(event) => { followMessagesRef.current = true; handleSend(event); }}>
-                      <button type="button" className="ih8-chat-add" aria-label="Otwórz pliki i dodaj materiały" title="Pliki i zdjęcia" onClick={() => setWorkspaceTab("files")}><MarketIcon kind="plus" /></button>
+                      <button type="button" className="ih8-chat-add" aria-label="Otwórz pliki i dodaj materiały" title="Pliki i zdjęcia" onClick={() => openWorkspace("files")}><MarketIcon kind="plus" /></button>
                       <textarea
                         ref={composerRef}
                         aria-label="Treść wiadomości"
@@ -23578,11 +23630,11 @@ function Chat() {
                       </button>
                     </form>
                     <p className="ih7-chat-composer-hint">Enter wysyła · Shift + Enter dodaje linię · załączniki znajdziesz w zakładce Pliki</p>
-                  </>
-                )}
 
-                {workspaceTab === "files" && (
-                  <>
+                </div>
+                {workspaceTab === "files" && <div className="ih7-chat-workspace-panel is-files" role="tabpanel" id="ih7-chat-panel-files" aria-labelledby="ih7-chat-tab-files" tabIndex={0}>
+                  <header className="ih15-workspace-heading"><h2>Pliki projektu</h2><button type="button" className="ih15-workspace-back" onClick={() => openWorkspace("conversation")}><MarketIcon kind="arrow" /><span>Wróć do rozmowy</span></button></header>
+
                     <PrivateSharePanel
                       conversationId={id}
                       userId={user?.id}
@@ -23618,11 +23670,14 @@ function Chat() {
                         privateWork.setReportTarget({ type, id: targetId })
                       }
                     />
-                  </>
-                )}
 
-                {workspaceTab === "plan" && (
-                  <>
+                </div>}
+                {(workspaceTab === "plan" || planPinned) && <div className={`ih7-chat-workspace-panel is-plan${planPinned ? " ih15-plan-window" : ""}`} role={planPinned ? "region" : "tabpanel"} id="ih7-chat-panel-plan" aria-labelledby="ih7-chat-tab-plan" tabIndex={0}>
+                  <header className="ih15-workspace-heading"><h2>Ustalenia</h2><div>
+                    {planPinned && <button type="button" className="ih12-icon-button" aria-label="Rozwiń ustalenia na cały ekran" onClick={() => openWorkspace("plan")}><MarketIcon kind="expand" /></button>}
+                    <button type="button" className="ih15-workspace-back" onClick={() => { if (planPinned) closePlanWindow(); else openWorkspace("conversation"); }}><MarketIcon kind="arrow" /><span>Wróć do rozmowy</span></button>
+                  </div></header>
+
                     <AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
@@ -23658,8 +23713,8 @@ function Chat() {
                       onStatusChange={setPaymentStatus}
                     />
                     <details className="ih8-chat-plan-overview"><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
-                  </>
-                )}
+
+                </div>}
               </div>
 
               <PrivateReportDialog
