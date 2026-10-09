@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 16 | 2026-10-09 | Pelny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 17 | 2026-10-09 | Pelny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -35,6 +35,18 @@ export function ProfileHub({ sections, active, onSelect, children }) {
   const triggerRef = useRef(null);
   const itemRefs = useRef([]);
   const current = sections[activeIndex];
+  const branches = [
+    "M480 0C480 32 160 20 160 64", "M480 0V64", "M480 0C480 32 800 20 800 64",
+    "M480 0C480 30 24 12 24 58V198C24 224 160 204 160 232",
+    "M480 0C480 32 320 20 320 58V198C320 224 480 204 480 232",
+    "M480 0C480 30 936 12 936 58V198C936 224 800 204 800 232",
+  ];
+  const mobileBranches = [
+    "M400 0C400 28 200 14 200 56", "M400 0C400 28 600 14 600 56",
+    "M400 0C400 28 8 14 8 48V184C8 208 200 186 200 214",
+    "M400 0C400 28 792 14 792 48V184C792 208 600 186 600 214",
+    "M400 0V340C400 364 200 344 200 372", "M400 0V340C400 364 600 344 600 372",
+  ];
   useEffect(() => { setOpen(false); }, [active]);
   function close() { setOpen(false); triggerRef.current?.focus({ preventScroll: true }); }
   function choose(section) { onSelect(section); close(); }
@@ -62,10 +74,16 @@ export function ProfileHub({ sections, active, onSelect, children }) {
     <span className="ih16-hub-current" aria-live="polite">{current.label}</span>
     <div className="ih16-hub-panel" id={`${id}-sections`} hidden={!open} inert={open ? undefined : ""}>
       <div className="ih16-hub-items" role="tablist" aria-label="Sekcje profilu">
+        <svg className="ih17-hub-network is-desktop" viewBox="0 0 960 356" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          {branches.map((path, index) => <path key={index} d={path} className={index === activeIndex ? "is-active" : undefined} vectorEffect="non-scaling-stroke" />)}
+        </svg>
+        <svg className="ih17-hub-network is-mobile" viewBox="0 0 800 486" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          {mobileBranches.map((path, index) => <path key={index} d={path} className={index === activeIndex ? "is-active" : undefined} vectorEffect="non-scaling-stroke" />)}
+        </svg>
         {sections.map((section, index) => <button type="button" role="tab" key={section.key} id={`account-tab-${section.key}`}
           aria-selected={active === section.key} aria-controls="account-tab-panel" tabIndex={open ? 0 : -1}
-          className={`ih16-hub-item${active === section.key ? " is-active" : ""}`} ref={el => { itemRefs.current[index] = el; }}
-          onClick={() => choose(section)}><span className="ih16-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span><MarketIcon kind="arrow" /></button>)}
+          className={`ih16-hub-item${active === section.key ? " is-active" : ""}`} style={{ "--ih17-node-index": index }} ref={el => { itemRefs.current[index] = el; }}
+          onClick={() => choose(section)}><span className="ih16-hub-number" aria-hidden="true">{section.number}</span><span>{section.label}</span></button>)}
       </div>
       {children}
     </div>
