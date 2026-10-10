@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 22 | 2026-10-10 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 23 | 2026-10-10 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -20126,7 +20126,7 @@ function formatInboxDate(value) {
 }
 
 /* P13A: presentation components remain inside the existing router file. */
-// Full-screen washes cross-fade on vertical scrolling; their edges never move.
+// Two full-screen light compositions respond to scrolling without moving their edges.
 function AmbientBackground() {
   const layerRef = useRef(null);
   const { pathname } = useLocation();
@@ -20140,10 +20140,11 @@ function AmbientBackground() {
     const documentScroller = document.scrollingElement || document.documentElement;
     let frame = 0;
     let previousTime = 0;
-    let span = Math.max(900, window.innerHeight * 1.65);
+    // The first swipe must visibly change the light on both small and large screens.
+    let span = Math.max(560, Math.min(1100, window.innerHeight * 1.15));
     let travel = documentOffset();
-    let current = Number.parseFloat(layer.style.getPropertyValue("--ih22-mix"));
-    if (!Number.isFinite(current)) current = 0.18;
+    let current = Number.parseFloat(layer.style.getPropertyValue("--ih23-mix"));
+    if (!Number.isFinite(current)) current = 0.25;
     let target = washFor(travel);
     let last = "";
     positions.set(documentScroller, travel);
@@ -20154,15 +20155,16 @@ function AmbientBackground() {
     }
 
     function washFor(offset) {
-      // A calm repeat of the same two theme shades also works on long pages.
-      return motion?.matches ? 0.18 : 0.18 + 0.64 * (1 - Math.cos(offset / span * Math.PI)) / 2;
+      // A phase offset avoids the nearly invisible, flat start of the previous wash.
+      // The two theme shades repeat gently on long pages and reverse at the same position.
+      return motion?.matches ? 0.25 : (1 - Math.cos(offset / span * Math.PI + Math.PI / 3)) / 2;
     }
 
     function write(value) {
       const next = value.toFixed(4);
       if (next === last) return;
       last = next;
-      layer.style.setProperty("--ih22-mix", next);
+      layer.style.setProperty("--ih23-mix", next);
     }
 
     function paint(time) {
@@ -20170,7 +20172,7 @@ function AmbientBackground() {
       if (document.hidden) return;
       const elapsed = previousTime ? Math.min(48, Math.max(1, time - previousTime)) : 16;
       previousTime = time;
-      current += (target - current) * (1 - Math.exp(-elapsed / 110));
+      current += (target - current) * (1 - Math.exp(-elapsed / 150));
       const settled = Math.abs(target - current) < 0.0005;
       if (settled || motion?.matches) current = target;
       write(current);
@@ -20197,7 +20199,7 @@ function AmbientBackground() {
     }
 
     function resize() {
-      span = Math.max(900, window.innerHeight * 1.65);
+      span = Math.max(560, Math.min(1100, window.innerHeight * 1.15));
       target = washFor(travel);
       schedule();
     }
