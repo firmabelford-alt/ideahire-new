@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 18 | 2026-10-09 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51296,7 +51296,7 @@ html:root body .ih13-background > div {
   opacity: var(--ih13-blend);
   transition: opacity 280ms linear;
 }
-html:root body #root#root#root :is(.app, .page, .account-page) {
+html:root body #root#root#root#root#root#root :is(.app, .page, .account-page) {
   background-color: transparent !important;
   background-image: none !important;
 }
@@ -51956,13 +51956,13 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
 /* IdeaHire P18: two theme colors; a diffuse wash follows page scrolling. */
 :root { --ih17-canvas: #eef3fa; --ih17-glow: #8db7dd; }
 html[data-theme="dark"] { --ih17-canvas: #0c1728; --ih17-glow: #325f89; }
-html[data-template="classic"] { --ih17-canvas: #ffffff; --ih17-glow: #b5cedf; }
-html[data-template="classic"][data-theme="dark"] { --ih17-canvas: #17191b; --ih17-glow: #485c6b; }
+html[data-template="classic"] { --ih17-canvas: #ffffff; --ih17-glow: #9cbed8; }
+html[data-template="classic"][data-theme="dark"] { --ih17-canvas: #17191b; --ih17-glow: #667784; }
 html:root body .ih13-background { background: var(--ih17-canvas); }
 html:root body .ih13-background-start { background: var(--ih17-canvas); }
 html:root body .ih13-background-end {
   inset: -12% -10% -20%;
-  background: radial-gradient(ellipse 88% 80% at 50% 100%, var(--ih17-glow) 18%, transparent 82%);
+  background: radial-gradient(ellipse 110% 85% at 50% 100%, var(--ih17-glow) 10%, transparent 88%);
   opacity: var(--ih17-glow-opacity, .32);
   transform: translate3d(0, var(--ih17-glow-rise, 22%), 0);
   animation: none;
@@ -52579,3 +52579,99 @@ html:root body #root#root#root#root#root .calendar-feedback > button { min-heigh
 @media (prefers-reduced-motion: reduce) {
   html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal,html:root body #root#root#root#root#root .page.ih6-account-page .ih18-hub-reveal * { transition: none !important; animation: none !important; }
 }
+
+/* IdeaHire P21: shared calendar, clear project fields and theme-aware public profiles. */
+html:root[data-template][data-theme] body #root#root#root#root#root#root,
+html:root[data-template][data-theme] body #root#root#root#root#root#root > .sorts-root { background: transparent !important; background-color: transparent !important; background-image: none !important; }
+html:root body #root#root#root#root#root#root .app .final-cta {
+  background: transparent !important; background-image: none !important; color: var(--ih-home-ink) !important;
+  border: 1px solid var(--ih-home-line) !important; box-shadow: none !important;
+}
+html:root body #root#root#root#root#root#root .app .final-cta::before,
+html:root body #root#root#root#root#root#root .app .final-cta::after { content: none !important; }
+html:root body #root#root#root#root#root#root .app .final-cta :is(h2,h2 > span,.section-label) { color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root#root#root#root#root .app .final-cta .btn { background: var(--ih-home-surface) !important; color: var(--ih-home-ink) !important; border: 1px solid var(--ih-home-line) !important; }
+html:root body #root#root#root#root#root#root .account-profile-workspace > .stripe-connect-panel { margin-top: 24px !important; }
+html:root body #root#root#root#root#root#root .account-profile-workspace > .ih11-profile-form { margin-top: 0 !important; }
+html:root body #root#root#root#root#root#root .ih5-jobs-results-header { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; margin: 0 0 12px !important; padding: 0 !important; }
+html:root body #root#root#root#root#root#root .ih5-jobs-results-copy { display: flex !important; align-items: baseline !important; flex-wrap: wrap !important; justify-content: flex-start !important; gap: 7px !important; }
+html:root body #root#root#root#root#root#root .ih5-jobs-results-copy strong { font-size: 22px !important; }
+html:root body #root#root#root#root#root#root .profile-card-with-menu { background: transparent !important; background-image: none !important; box-shadow: none !important; display: flex !important; flex-direction: column !important; gap: 24px !important; }
+html:root body #root#root#root#root#root#root .profile-card-with-menu > :is(.public-profile-preview,.profile-content-card,.profile-expertise,.profile-expertise-card,.profile-public-portfolio,.profile-stats,.profile-reviews-section) { width: 100% !important; min-width: 0 !important; margin: 0 !important; box-sizing: border-box !important; }
+html:root body #root#root#root#root#root#root .public-profile-preview { background: transparent !important; background-image: none !important; color: var(--ih7-ink) !important; padding: 12px 44px 12px 0 !important; }
+html:root body #root#root#root#root#root#root .public-profile-info h1 { color: var(--ih7-ink) !important; -webkit-text-fill-color: currentColor !important; font-size: clamp(28px,5vw,40px) !important; }
+html:root body #root#root#root#root#root#root .profile-card-with-menu :is(.profile-content-card,.profile-expertise-card,.profile-public-portfolio,.profile-reviews-section) { padding: 22px !important; border: 1px solid var(--ih7-line) !important; border-radius: 20px !important; background: color-mix(in srgb,var(--ih7-surface) 80%,transparent) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root#root .profile-public-portfolio-heading { display: flex !important; justify-content: space-between !important; align-items: center !important; gap: 16px !important; margin-bottom: 20px !important; }
+html:root body #root#root#root#root#root#root .ih20-profile-empty { display: flex !important; align-items: flex-start !important; gap: 14px !important; padding: 16px !important; border-radius: 14px !important; background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; line-height: 1.65 !important; }
+html:root body #root#root#root#root#root#root .ih20-profile-empty :is(h3,p) { margin: 0 !important; color: inherit !important; }
+html:root body #root#root#root#root#root#root .ih20-profile-empty h3 { font-size: 16px !important; margin-bottom: 5px !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root#root .ih20-profile-empty svg { flex: 0 0 22px !important; margin-top: 4px !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.ih15-workspace-heading,.chat-project-plan-header,.chat-project-plan-section-title) { position: static !important; display: flex !important; align-items: flex-start !important; flex-wrap: wrap !important; gap: 12px !important; width: 100% !important; min-width: 0 !important; height: auto !important; margin: 0 0 20px !important; transform: none !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan,.agreement-workspace,.agreement-summary,.ih18-legacy-plan) { min-width: 0 !important; overflow-wrap: anywhere !important; word-break: normal !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan-header h2,.chat-project-plan-section-title h3,.agreement-gate-heading h2,.agreement-form-heading h3,.ih18-legacy-plan h3) { position: static !important; transform: none !important; height: auto !important; white-space: normal !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan-header,.chat-project-plan-section-title,.agreement-form-heading) > div { flex: 1 1 200px !important; min-width: 0 !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan-header p,.agreement-gate-heading p,.agreement-fixed-price-note,.agreement-detail p,.chat-project-plan-note,.ih18-legacy-plan p) { line-height: 1.65 !important; white-space: pre-wrap !important; }
+html:root body #root#root#root#root#root#root .is-plan .chat-project-plan-status { position: static !important; flex: 0 1 auto !important; max-width: 100% !important; white-space: normal !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan h2,.chat-project-plan h3,.agreement-gate-heading h2,.agreement-form-heading h3,.ih18-legacy-plan h3) { line-height: 1.3 !important; margin: 0 0 8px !important; }
+html:root body #root#root#root#root#root#root .is-plan > :is(.chat-project-plan,.agreement-panel,.agreement-summary,.ih18-legacy-plan) { flex: 0 0 auto !important; width: 100% !important; min-width: 0 !important; margin: 0 0 22px !important; box-sizing: border-box !important; }
+html:root body #root#root#root#root#root#root .chat-project-plan-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 14px !important; }
+html:root body #root#root#root#root#root#root .chat-project-plan-grid > article { display: flex !important; flex-direction: column !important; gap: 8px !important; padding: 18px !important; border: 1px solid var(--ih7-line) !important; border-radius: 14px !important; background: var(--ih7-surface) !important; min-width: 0 !important; }
+html:root body #root#root#root#root#root#root .chat-project-plan-grid article > span { font-size: 12px !important; font-weight: 700 !important; color: var(--ih7-muted) !important; }
+html:root body #root#root#root#root#root#root .chat-project-plan-grid article p { font-size: 15px !important; color: var(--ih7-ink) !important; margin: 0 !important; white-space: pre-wrap !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan-facts,.agreement-details,.ih17-project-brief dl,.chat-project-plan-grid dl) { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 12px !important; margin: 0 !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan-facts,.ih17-project-brief dl,.chat-project-plan-grid dl) > div { display: grid !important; grid-template-columns: minmax(0,1fr) !important; align-content: start !important; gap: 6px !important; padding: 14px !important; min-width: 0 !important; }
+html:root body #root#root#root#root#root#root .is-plan :is(dt,dd) { width: auto !important; margin: 0 !important; padding: 0 !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-detail { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 8px !important; padding: 16px !important; min-width: 0 !important; background: var(--ih7-surface) !important; border: 1px solid var(--ih7-line) !important; border-radius: 14px !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-detail-wide { grid-column: 1 / -1 !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-summary > summary { display: grid !important; grid-template-columns: 28px minmax(0,1fr) !important; align-items: start !important; height: auto !important; gap: 10px !important; padding: 16px !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-summary :is(.ih9-agreement-keyfacts,.agreement-summary-action) { grid-column: 2 !important; grid-row: auto !important; text-align: left !important; justify-self: start !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-summary :is(.agreement-summary-copy,.ih9-agreement-keyfacts) { display: flex !important; flex-direction: column !important; gap: 4px !important; min-width: 0 !important; white-space: normal !important; }
+html:root body #root#root#root#root#root#root .is-plan .chat-project-plan-grid dl { grid-template-columns: minmax(0,1fr) !important; }
+html:root body #root#root#root#root#root#root .is-plan .ih18-legacy-plan { padding: 18px !important; }
+html:root body #root#root#root#root#root#root .is-plan.ih15-plan-window :is(.chat-project-plan-grid,.chat-project-plan-facts,.chat-project-plan-checklists,.agreement-details,.agreement-form-grid,.ih17-project-brief dl) { grid-template-columns: minmax(0,1fr) !important; }
+html:root body #root#root#root#root#root#root .is-plan.ih15-plan-window .agreement-field { grid-column: 1 / -1 !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-price-currency { position: absolute !important; top: 50% !important; right: 14px !important; transform: translateY(-50%) !important; white-space: nowrap !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-price-input { position: relative !important; }
+html:root body #root#root#root#root#root#root .is-plan .agreement-price-input input { padding-right: 54px !important; }
+html:root body #root#root#root#root#root#root .account-profile-workspace > .stripe-connect-panel.is-ready { padding: 20px !important; }
+html:root body #root#root#root#root#root#root .stripe-connect-panel.is-ready :is(.stripe-connect-heading h2,.stripe-connect-content h2) { font-size: 20px !important; line-height: 1.4 !important; }
+html:root body .ih9-share-dialog fieldset.ih9-share-body { border: 0 !important; margin: 0 !important; min-width: 0 !important; }
+/* Portal prevents calendars from being clipped by dialogs or rounded cards. */
+html:root body .ih20-date-field { position: relative !important; display: block !important; width: 100% !important; min-width: 0 !important; }
+html:root body .ih20-date-field > input:first-child,html:root body #root#root#root#root#root#root .ih20-date-field > input:first-child { cursor: pointer !important; padding-right: 40px !important; width: 100% !important; min-height: 44px !important; box-sizing: border-box !important; }
+html:root body .ih20-date-field .ih20-date-validator { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; padding: 0 !important; min-height: 0 !important; inset: 0 !important; }
+html:root body .ih20-date-icon,html:root body #root#root#root#root#root#root .ih20-date-icon { position: absolute !important; right: 14px !important; top: 50% !important; transform: translateY(-50%) !important; pointer-events: none !important; color: var(--ih7-muted) !important; }
+html:root body .ih20-calendar-backdrop { position: fixed !important; inset: 0 !important; z-index: 2147483647 !important; display: grid !important; place-items: center !important; padding: 16px !important; box-sizing: border-box !important; background: #00000030 !important; }
+html:root body .ih20-calendar { box-sizing: border-box !important; width: min(380px,100%) !important; max-height: calc(100dvh - 32px) !important; overflow: auto !important; padding: 20px !important; border: 1px solid var(--ih7-line) !important; border-radius: 20px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; box-shadow: 0 12px 48px #00000025 !important; font: 14px/1.5 Inter,system-ui,sans-serif !important; }
+html:root body .ih20-calendar * { box-sizing: border-box !important; }
+html:root body .ih20-calendar :is(header,footer) { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 8px !important; padding: 0 !important; margin: 0 !important; position: static !important; background: transparent !important; }
+html:root body .ih20-calendar header { margin-bottom: 18px !important; }
+html:root body .ih20-calendar header strong { font-size: 18px !important; }
+html:root body .ih20-calendar :is(button,select) { min-height: 44px !important; min-width: 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 9px !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; font: inherit !important; cursor: pointer !important; padding: 7px !important; margin: 0 !important; }
+html:root body .ih20-date-icon svg { display: block !important; width: 18px !important; height: 18px !important; }
+html:root body .ih20-calendar button:disabled { opacity: .3 !important; cursor: default !important; }
+html:root body .ih20-calendar-navigation { display: grid !important; grid-template-columns: 36px minmax(0,1fr) 78px 36px !important; gap: 6px !important; margin-bottom: 14px !important; }
+html:root body .ih20-calendar :is(.ih21-calendar-row,.ih20-calendar-weekdays) { display: grid !important; grid-template-columns: repeat(7,minmax(0,1fr)) !important; gap: 4px !important; }
+html:root body .ih20-calendar-days { display: block !important; }
+html:root body .ih21-calendar-row { margin-bottom: 4px !important; }
+html:root body .ih20-calendar-weekdays { text-align: center !important; font-size: 12px !important; color: var(--ih7-muted) !important; margin-bottom: 8px !important; }
+html:root body .ih20-calendar-days button { border: 0 !important; padding: 5px !important; }
+html:root body .ih20-calendar-days button:hover:not(:disabled) { background: var(--ih7-soft) !important; }
+html:root body .ih20-calendar button[aria-selected="true"],html:root body .ih20-calendar button.is-primary { background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; }
+html:root body .ih20-calendar :is(button,select):focus-visible { outline: 2px solid var(--ih7-accent) !important; outline-offset: 2px !important; }
+html:root body .ih20-calendar-time { display: flex !important; align-items: center !important; gap: 8px !important; margin-top: 16px !important; }
+html:root body .ih20-calendar-time > span:first-child { margin-right: auto !important; }
+html:root body .ih20-calendar footer { margin-top: 18px !important; justify-content: flex-end !important; flex-wrap: wrap !important; }
+html:root body .ih21-calendar-hint { margin: 12px 0 0 !important; color: var(--ih7-muted) !important; font: inherit !important; }
+html:root body .ih20-calendar button[aria-current="date"]:not([aria-selected="true"]) { box-shadow: inset 0 0 0 1px var(--ih7-accent) !important; }
+@media(max-width:600px) {
+  html:root body #root#root#root#root#root#root .chat-project-plan-grid,
+  html:root body #root#root#root#root#root#root .is-plan :is(.chat-project-plan-facts,.agreement-details,.ih17-project-brief dl) { grid-template-columns: minmax(0,1fr) !important; }
+  html:root body #root#root#root#root#root#root .profile-card-with-menu { gap: 16px !important; padding: 16px !important; }
+  html:root body #root#root#root#root#root#root .profile-card-with-menu :is(.profile-content-card,.profile-expertise-card,.profile-public-portfolio,.profile-reviews-section) { padding: 16px !important; }
+  html:root body #root#root#root#root#root#root .ih5-jobs-results-header { flex-wrap: wrap !important; }
+  html:root body .ih20-calendar { padding: 14px !important; }
+  html:root body .ih20-calendar-navigation { grid-template-columns: 32px minmax(0,1fr) 72px 32px !important; }
+}
+
+html:root body #root#root#root#root#root#root .profile-reviews-empty { background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; }
