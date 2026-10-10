@@ -31266,6 +31266,16 @@ function SmoothRouteTransitions() {
         return;
       }
 
+      // The help center is a separate HTML document, not a React route.
+      // Native navigation loads it instead of the app's wildcard redirect.
+      if (
+        nextUrl.pathname === "/help" ||
+        nextUrl.pathname.startsWith("/help/") ||
+        /\.html?$/i.test(nextUrl.pathname)
+      ) {
+        return;
+      }
+
       const currentAddress =
         `${location.pathname}${location.search}${location.hash}`;
 
