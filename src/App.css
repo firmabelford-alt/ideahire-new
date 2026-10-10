@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 24 | 2026-10-10 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 25 | 2026-10-10 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51873,25 +51873,25 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { transition: none !important; }
 }
 
-/* IdeaHire P24: moving transparent light clouds over one stationary page canvas. */
+/* IdeaHire P25: moving transparent light clouds over one stationary page canvas. */
 :root {
   --ih24-canvas: #ffffff;
   --ih24-light: #ffffff;
-  --ih24-shade: #cbdcf2;
+  --ih24-shade: #b5c9e3;
 }
 html[data-theme="dark"] {
   --ih24-canvas: #0c1728;
-  --ih24-light: #325373;
+  --ih24-light: #34597e;
   --ih24-shade: #08111e;
 }
 html[data-template="classic"] {
   --ih24-canvas: #ffffff;
   --ih24-light: #ffffff;
-  --ih24-shade: #cccccc;
+  --ih24-shade: #bfbfbf;
 }
 html[data-template="classic"][data-theme="dark"] {
   --ih24-canvas: #17191b;
-  --ih24-light: #4b4b4b;
+  --ih24-light: #505050;
   --ih24-shade: #101010;
 }
 
@@ -51923,14 +51923,14 @@ html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-en
 html:root body .ih13-background > .ih13-background-start {
   z-index: 1;
   background-image: radial-gradient(ellipse 38% 36% at 40% 38%, color-mix(in srgb,var(--ih24-light) 94%,transparent) 0%, color-mix(in srgb,var(--ih24-light) 68%,transparent) 28%, color-mix(in srgb,var(--ih24-light) 30%,transparent) 60%, transparent 100%);
-  transform: translate3d(0,12vh,0) scale(1,1.06);
-  opacity: 0.8667;
+  transform: translate3d(0,14vh,0) scale(1,1.06);
+  opacity: 0.7589;
 }
 html:root body .ih13-background > .ih13-background-end {
   z-index: 0;
-  background-image: radial-gradient(ellipse 39% 37% at 58% 60%, color-mix(in srgb,var(--ih24-shade) 98%,transparent) 0%, color-mix(in srgb,var(--ih24-shade) 75%,transparent) 28%, color-mix(in srgb,var(--ih24-shade) 35%,transparent) 60%, transparent 100%);
-  transform: translate3d(14vw,0,0) scale(1.06,1);
-  opacity: 0.86;
+  background-image: radial-gradient(ellipse 39% 37% at 58% 60%, color-mix(in srgb,var(--ih24-shade) 98%,transparent) 0%, color-mix(in srgb,var(--ih24-shade) 85%,transparent) 35%, color-mix(in srgb,var(--ih24-shade) 48%,transparent) 65%, transparent 100%);
+  transform: translate3d(17vw,0,0) scale(1.06,1);
+  opacity: 0.94;
 }
 @media (prefers-reduced-motion: reduce) {
   html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-end) { transform: none !important; will-change: auto; }
@@ -51939,7 +51939,7 @@ html:root body .ih13-background > .ih13-background-end {
 @media print { html:root body .ih13-background { display: none; } }
 
 /* Section backings were masking the page light. Keep the functional tiles and buttons. */
-html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.categories.section,.ih-category-intro,.split-section.section,.split-card,.final-cta) {
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.categories.section,.ih-category-intro,.split-section.section) {
   background: transparent !important;
   background-image: none !important;
   border: 0 !important;
@@ -52674,3 +52674,230 @@ html:root body .ih20-calendar button[aria-current="date"]:not([aria-selected="tr
 }
 
 html:root body #root#root#root#root#root#root .profile-reviews-empty { background: var(--ih7-soft) !important; color: var(--ih7-muted) !important; }
+
+
+/* IdeaHire P25: coherent cards, account entry, messenger and small-screen layout. */
+html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .step.ih5-step-card,
+html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card,
+html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .final-cta {
+  border: 1px solid var(--ih-home-line) !important; border-radius: 24px !important;
+  background: var(--ih-home-surface) !important;
+  background-image: none !important; box-shadow: 0 8px 28px color-mix(in srgb,var(--ih-home-ink) 5%,transparent) !important;
+  overflow: hidden !important; color: var(--ih-home-ink) !important;
+}
+html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .step.ih5-step-card { padding: 24px !important; }
+html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .final-cta :is(h2,.section-label) { color: var(--ih-home-ink) !important; -webkit-text-fill-color: currentColor !important; }
+html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .final-cta p { color: var(--ih-home-muted) !important; }
+
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih6-account-workspace { padding-top: 24px !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-account-overview { padding: 14px 0 16px !important; margin: 0 0 20px !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih6-account-workspace[data-account-section="home"] .ih16-account-overview { min-height: min(560px,65vh) !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-trigger {
+  width: 190px !important; min-width: 190px !important; max-width: 190px !important;
+  height: 190px !important; min-height: 190px !important; max-height: 190px !important;
+  gap: 14px !important; font-size: 21px !important; padding: 28px !important;
+}
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-toggle { top: 24px !important; right: 29px !important; font-size: 24px !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-emblem { transform: scale(1.2); }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih25-account-panel[hidden] { display: none !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih25-account-panel { outline: none !important; scroll-margin-top: 24px; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih25-hub-back {
+  display: inline-flex !important; align-items: center !important; gap: 8px !important; width: max-content !important;
+  min-height: 44px !important; margin: 0 0 16px !important; padding: 10px 14px !important;
+  border: 1px solid var(--ih6-line) !important; border-radius: 12px !important; background: var(--ih6-surface) !important;
+  color: var(--ih6-ink) !important; font: 600 13px/1.5 Inter,system-ui,sans-serif !important;
+}
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih25-hub-back svg { transform: rotate(180deg); width: 18px !important; height: 18px !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .account-tab-intro { padding: 0 0 18px !important; margin: 0 !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .account-tab-intro h2 { margin: 0 0 10px !important; font-size: clamp(25px,3vw,34px) !important; line-height: 1.2 !important; }
+html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page :is(.account-profile-workspace,.account-template-card,.profile-portfolio-manager,.discovery-settings-card) { min-width: 0 !important; }
+html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-create-job-button > svg { display: block !important; width: 18px !important; height: 18px !important; flex: 0 0 auto !important; color: inherit !important; }
+
+/* One frame: conversation list, thread header, scrolling history, fixed composer. */
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.is-chat {
+  display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 0 !important;
+  min-height: 0 !important; padding: 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 20px !important;
+  background: var(--ih7-surface) !important; box-shadow: 0 12px 36px color-mix(in srgb,var(--ih7-ink) 7%,transparent) !important; overflow: hidden !important;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.is-chat:not(.ih15-focus) { position: relative !important; width: min(1260px,calc(100% - 48px)) !important; max-width: 1260px !important; margin: 18px auto 24px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.is-chat.is-sidebar-visible { grid-template-columns: 280px minmax(0,1fr) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.is-sidebar-visible .ih12-inbox.is-sidebar {
+  display: flex !important; position: static !important; inset: auto !important; z-index: auto !important;
+  width: 280px !important; max-width: 280px !important; height: 100% !important; min-height: 0 !important;
+  transform: none !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important;
+  border: 0 !important; border-right: 1px solid var(--ih7-line) !important; border-radius: 0 !important; box-shadow: none !important;
+  background: var(--ih7-surface) !important;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-sidebar-visible :is(.ih14-conversations-toggle,.ih14-inbox-tools > button) { display: none !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-sidebar-visible .ih12-inbox-heading { padding: 18px 14px 12px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-sidebar-visible .ih12-inbox-heading h1 { font-size: 19px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-sidebar-visible .ih12-inbox-row { margin: 0 8px !important; padding: 12px 10px !important; border-radius: 12px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-sidebar-visible .ih12-inbox-copy > div strong { font-size: 14px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-shell { display: flex !important; flex-direction: column !important; min-width: 0 !important; min-height: 0 !important; height: 100% !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: var(--ih7-surface) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-header { min-height: 66px !important; flex: 0 0 auto !important; padding: 12px 18px !important; gap: 12px !important; border-bottom: 1px solid var(--ih7-line) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-person { min-width: 0 !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-person strong { font-size: 16px !important; line-height: 1.4 !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications :is(.ih7-chat-avatar,.ih7-chat-avatar img) { width: 40px !important; height: 40px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-header-actions { gap: 6px !important; margin-left: auto !important; flex: 0 0 auto !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-back { display: none !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project { flex: 0 0 auto !important; border: 0 !important; border-bottom: 1px solid var(--ih7-line) !important; border-radius: 0 !important; margin: 0 !important; background: var(--ih7-soft) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project > summary { min-height: 54px !important; padding: 9px 18px !important; gap: 14px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project-title h1 { font-size: 15px !important; line-height: 1.4 !important; margin: 2px 0 0 !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project-budget strong { font-size: 15px !important; line-height: 1.4 !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project-body { max-height: min(300px,35vh) !important; overflow-y: auto !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs {
+  display: flex !important; align-items: stretch !important; flex-wrap: nowrap !important; flex: 0 0 auto !important;
+  min-height: 48px !important; gap: 2px !important; padding: 0 14px !important; margin: 0 !important;
+  border: 0 !important; border-bottom: 1px solid var(--ih7-line) !important; border-radius: 0 !important; background: var(--ih7-surface) !important;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs > button {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 5px !important;
+  min-width: 0 !important; min-height: 48px !important; width: auto !important; padding: 10px 12px !important; margin: 0 !important;
+  border: 0 !important; border-bottom: 2px solid transparent !important; border-radius: 0 !important; background: transparent !important;
+  color: var(--ih7-muted) !important; box-shadow: none !important; font: 600 13px/1.4 Inter,system-ui,sans-serif !important; white-space: nowrap !important;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs > button.is-active { border-bottom-color: var(--ih7-accent) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs > .ih15-pin-plan { margin-left: auto !important; font-size: 12px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace { display: grid !important; grid-template-columns: minmax(0,1fr) !important; flex: 1 1 0 !important; min-width: 0 !important; min-height: 0 !important; gap: 0 !important; overflow: hidden !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace.is-pinned { grid-template-columns: minmax(0,1fr) minmax(320px,360px) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace > .is-conversation { display: flex !important; flex-direction: column !important; min-width: 0 !important; min-height: 0 !important; gap: 0 !important; padding: 0 !important; overflow: hidden !important; background: var(--ih7-soft) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace > [hidden] { display: none !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace .is-conversation .ih7-chat-messages {
+  display: flex !important; flex-direction: column !important; align-items: stretch !important; flex: 1 1 0 !important;
+  width: 100% !important; max-width: none !important; min-height: 0 !important; margin: 0 !important;
+  padding: 20px clamp(16px,3vw,36px) !important; gap: 8px !important; overflow-y: auto !important;
+  background: var(--ih7-soft) !important; scrollbar-gutter: stable; overscroll-behavior-y: contain;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-message { max-width: min(80%,520px) !important; padding: 10px 14px 7px !important; border-radius: 16px !important; box-shadow: none !important; font-size: 14px !important; line-height: 1.6 !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-message.is-theirs { align-self: flex-start !important; border: 1px solid var(--ih7-line) !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-message.is-mine { align-self: flex-end !important; border: 1px solid var(--ih7-accent) !important; background: var(--ih7-accent) !important; color: var(--ih7-on-accent) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-message:has(.private-work-materials) { border-color: var(--ih7-line) !important; background: var(--ih7-surface) !important; color: var(--ih7-ink) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-day { align-self: center !important; margin: 4px auto 12px !important; font-size: 11px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-read-receipt { align-self: flex-end !important; margin: -2px 2px 6px !important; color: var(--ih7-muted) !important; font-size: 11px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-conversation > .ih7-chat-form {
+  display: grid !important; grid-template-columns: 44px minmax(0,1fr) 44px !important; align-items: end !important;
+  flex: 0 0 auto !important; width: 100% !important; max-width: none !important; gap: 8px !important; margin: 0 !important; padding: 12px 16px !important;
+  border: 0 !important; border-top: 1px solid var(--ih7-line) !important; border-radius: 0 !important;
+  background: var(--ih7-surface) !important; outline: none !important; box-shadow: none !important;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-conversation > .ih7-chat-form:focus-within { outline: none !important; box-shadow: none !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-form textarea, html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-form textarea:focus, html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-form textarea:focus-visible {
+  width: 100% !important; min-height: 44px !important; max-height: 120px !important; margin: 0 !important; padding: 10px 12px !important;
+  border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; background: var(--ih7-soft) !important;
+  color: var(--ih7-ink) !important; font: 400 16px/1.4 Inter,system-ui,sans-serif !important; resize: none !important; box-shadow: none !important; outline: none !important;
+}
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-form textarea:focus-visible { border-color: var(--ih7-accent) !important; outline: 2px solid var(--ih7-accent) !important; outline-offset: -2px !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-composer-hint { flex: 0 0 auto !important; width: 100% !important; max-width: none !important; padding: 0 16px 10px !important; margin: 0 !important; background: var(--ih7-surface) !important; color: var(--ih7-muted) !important; font-size: 11px !important; text-align: center !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace > :is(.is-plan,.is-files) { min-width: 0 !important; min-height: 0 !important; padding: 20px 24px !important; overflow-y: auto !important; background: var(--ih7-surface) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-plan-window { border: 0 !important; border-left: 1px solid var(--ih7-line) !important; border-radius: 0 !important; box-shadow: none !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace-heading { margin: 0 0 18px !important; padding: 8px 0 14px !important; border-bottom: 1px solid var(--ih7-line) !important; }
+html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.ih15-focus { max-width: 1180px !important; border-radius: 20px !important; }
+
+/* Results are one unit after the filters, not a detached number above them. */
+html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-jobs-results-header { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 10px !important; margin: 14px 0 18px !important; padding: 0 !important; }
+html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-jobs-results-copy { display: flex !important; align-items: baseline !important; justify-content: flex-start !important; gap: 8px !important; padding: 0 !important; margin: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; text-align: left !important; }
+html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-jobs-results-copy > span { display: block !important; font-size: 13px !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--ih5-muted) !important; }
+html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-jobs-results-copy > strong { display: block !important; font-size: 15px !important; line-height: 1.5 !important; font-weight: 650 !important; color: var(--ih5-ink) !important; }
+
+/* Calendar motion uses the same theme tokens in every colour variant. */
+html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-orbit { display: block !important; border-color: var(--calendar-accent) !important; opacity: .25 !important; animation: ih25-calendar-orbit 22s linear infinite !important; }
+html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-orbit::before { border-color: var(--calendar-accent) !important; }
+html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-orbit::after { background: color-mix(in srgb,var(--calendar-accent) 18%,transparent) !important; }
+html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-orbit span { background: var(--calendar-accent) !important; box-shadow: 0 0 0 6px color-mix(in srgb,var(--calendar-accent) 15%,transparent) !important; }
+html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-grid { animation-duration: 340ms !important; }
+@keyframes ih25-calendar-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-width: 800px) {
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar { display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; grid-template-rows: auto auto !important; gap: 10px 8px !important; width: calc(100% - 24px) !important; max-width: none !important; margin: 12px auto 0 !important; padding: 10px !important; border-radius: 20px !important; box-sizing: border-box !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-navbar-brand { grid-column: 1 !important; grid-row: 1 !important; display: flex !important; gap: 8px !important; min-width: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-navbar-brand .logo { display: inline-flex !important; font-size: 18px !important; min-width: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .navbar-home-back { width: 40px !important; min-width: 40px !important; height: 40px !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-navbar-actions { grid-column: 2 !important; grid-row: 1 !important; display: flex !important; gap: 6px !important; padding: 0 !important; margin: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-navbar-actions :is(.account-create-job-button,.account-notification-button,.account-mini) { display: flex !important; align-items: center !important; justify-content: center !important; width: 40px !important; min-width: 40px !important; height: 40px !important; min-height: 40px !important; padding: 8px !important; margin: 0 !important; box-sizing: border-box !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-create-job-button .account-create-job-label { display: none !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-mini-avatar, html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .account-mini-avatar img { width: 34px !important; height: 34px !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih11-account-nav { grid-column: 1 / -1 !important; grid-row: 2 !important; display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; width: 100% !important; min-width: 0 !important; max-width: none !important; gap: 6px !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; scrollbar-width: none !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih11-account-nav::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih11-account-nav .ih-nav-item { display: flex !important; align-items: center !important; justify-content: center !important; gap: 5px !important; width: 100% !important; min-width: 0 !important; min-height: 44px !important; padding: 8px 5px !important; margin: 0 !important; border: 1px solid var(--ih7-line) !important; border-radius: 12px !important; background: var(--ih7-soft) !important; color: var(--ih7-ink) !important; font-size: 13px !important; line-height: 1.3 !important; box-sizing: border-box !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih11-account-nav .ih-nav-item.is-active { background: var(--ih7-surface) !important; border-color: var(--ih7-accent) !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih-nav-label { overflow: visible !important; text-overflow: clip !important; white-space: normal !important; text-align: center !important; font-size: 13px !important; }
+  html:root body #root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih-nav-pixels { display: none !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih6-account-workspace { width: calc(100% - 24px) !important; padding-top: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-account-overview { padding: 6px 0 14px !important; margin-bottom: 14px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-profile-hub > .section-label { margin-bottom: 12px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-trigger { width: 180px !important; min-width: 180px !important; max-width: 180px !important; height: 180px !important; min-height: 180px !important; max-height: 180px !important; font-size: 20px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-hint { font-size: 12px !important; line-height: 1.6 !important; margin: 12px 0 4px !important; max-width: 260px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-panel .ih14-account-actions { padding-top: 18px !important; gap: 12px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih14-account-action-group { padding: 14px !important; border-radius: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .account-profile-workspace { padding: 12px !important; border-radius: 20px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .account-profile-preview { padding: 18px !important; gap: 14px !important; border-radius: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .account-profile-preview strong { font-size: 23px !important; line-height: 1.3 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .account-profile-preview p { font-size: 13px !important; line-height: 1.6 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih11-profile-form { margin: 20px auto !important; gap: 20px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih11-profile-form .account-form-section-heading h2 { font-size: 22px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.is-chat:not(.ih15-focus) { width: calc(100% - 20px) !important; margin: 14px auto 18px !important; border-radius: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih12-messenger.ih15-focus { width: 100% !important; left: 0 !important; right: 0 !important; border: 0 !important; border-radius: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-header { min-height: 56px !important; padding: 8px 12px !important; gap: 7px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-person strong { font-size: 14px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications :is(.ih7-chat-avatar,.ih7-chat-avatar img) { width: 34px !important; height: 34px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-person > span { font-size: 11px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-header-actions { gap: 4px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-header-actions :is(.ih12-icon-button,.ih7-chat-actions-menu > summary) { width: 38px !important; min-width: 38px !important; height: 38px !important; min-height: 38px !important; padding: 9px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih14-conversations-toggle { width: 38px !important; min-width: 38px !important; height: 38px !important; padding: 9px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih14-conversations-toggle > span { display: none !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-focus .ih14-conversations-toggle { display: none !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-focus .ih7-chat-back { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 38px !important; min-width: 38px !important; min-height: 38px !important; height: 38px !important; flex: 0 0 38px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project > summary { min-height: 50px !important; padding: 8px 12px !important; gap: 8px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-project-budget small { font-size: 9px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs { padding: 0 7px !important; min-height: 44px !important; gap: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs > button { min-height: 44px !important; padding: 10px 9px !important; font-size: 12px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-workspace-tabs > .ih15-pin-plan { display: none !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace .is-conversation .ih7-chat-messages { padding: 14px 12px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-message { max-width: 88% !important; padding: 9px 12px 6px !important; font-size: 14px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .is-conversation > .ih7-chat-form { padding: 10px 8px !important; gap: 5px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-composer-hint { display: none !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace > :is(.is-plan,.is-files) { padding: 14px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace-heading { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; }
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih15-workspace-heading h2 { font-size: 19px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih-market-shell { width: calc(100% - 24px) !important; max-width: none !important; margin: 0 auto !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-page-heading { margin: 24px 0 !important; padding: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-page-heading h1 { font-size: 31px !important; line-height: 1.2 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-page-heading p { font-size: 14px !important; line-height: 1.65 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-filters { grid-template-columns: minmax(0,1fr) !important; gap: 12px !important; padding: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-search { grid-column: 1 !important; min-width: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih5-search input { font-size: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih7-select-field { min-width: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih7-select-trigger { min-height: 48px !important; min-width: 0 !important; padding: 10px 12px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih7-select-trigger > span { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; font-size: 14px !important; line-height: 1.5 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-jobs-spotlight { padding: 18px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-header { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: space-between !important; gap: 8px !important; margin-bottom: 16px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-header > span { font-size: 11px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-controls { display: flex !important; align-items: center !important; gap: 6px !important; width: auto !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-controls button { width: 36px !important; min-width: 36px !important; height: 36px !important; min-height: 36px !important; padding: 8px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-body { gap: 14px !important; margin: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-copy h2 { font-size: 24px !important; line-height: 1.3 !important; margin: 8px 0 !important; overflow-wrap: anywhere !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-price { display: flex !important; flex-direction: row !important; align-items: baseline !important; gap: 8px !important; margin: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih-market-v5.ih5-jobs-page.ih10-jobs-page.ih25-jobs-page .ih10-spotlight-price strong { font-size: 23px !important; line-height: 1.3 !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-shell { width: calc(100% - 24px) !important; margin-top: 24px !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero { padding: 22px !important; gap: 20px !important; border-radius: 20px !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-copy h1 { font-size: 34px !important; line-height: 1.2 !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-copy p { font-size: 14px !important; line-height: 1.65 !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-orbit { top: 14px !important; right: 14px !important; width: 100px !important; opacity: .15 !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-stats { grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 8px !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-stats article { padding: 12px 8px !important; min-width: 0 !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-stats article strong { font-size: 23px !important; line-height: 1.3 !important; }
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-stats article span { font-size: 11px !important; line-height: 1.45 !important; overflow-wrap: normal !important; }
+}
+@media (max-width: 640px) {
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-items { grid-template-columns: repeat(2,minmax(0,1fr)) !important; grid-template-rows: repeat(3,104px) !important; column-gap: 0 !important; row-gap: 24px !important; padding-top: 36px !important; min-height: 396px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih17-hub-network { height: 396px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-item { width: 104px !important; min-width: 104px !important; max-width: 104px !important; height: 104px !important; min-height: 104px !important; max-height: 104px !important; padding: 8px !important; gap: 7px !important; font-size: 13px !important; }
+  html:root body #root#root#root#root#root#root#root .page.ih6-account-page.ih25-account-page .ih16-hub-number { width: 22px !important; height: 22px !important; flex-basis: 22px !important; }
+  html:root body #root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .step.ih5-step-card { padding: 20px !important; border-radius: 20px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-hero-orbit, html:root body #root#root#root#root#root#root#root .page.calendar-page .calendar-grid { animation: none !important; }
+}
+@media (forced-colors: active) {
+  html:root body #root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications .ih7-chat-form textarea:focus-visible { outline-color: Highlight !important; }
+}
