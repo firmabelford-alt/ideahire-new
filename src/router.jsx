@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 18 | 2026-10-09 | Pelny plik: src/router.jsx */
+/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -29,7 +29,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import { MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub } from "./MarketUI";
 import { useSitePreferences } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -3046,7 +3046,8 @@ function AgeCompletionScreen() {
           <form className="age-access-form" onSubmit={handleCompleteAge}>
             <label>
               Data urodzenia
-              <input
+              <IdeaHireDateField
+                aria-label="Data urodzenia"
                 type="date"
                 value={birthDate}
                 min={getDateInputBoundary(120)}
@@ -6903,7 +6904,8 @@ function Register() {
           <label>
             Data urodzenia
 
-            <input
+            <IdeaHireDateField
+                aria-label="Data urodzenia"
               type="date"
               value={birthDate}
               min={getDateInputBoundary(120)}
@@ -9992,98 +9994,6 @@ function Account() {
             </div>
           </div>
 
-          {isAdult && activeAccountSection === "profile" && (
-            <section
-              className={`stripe-connect-panel is-${connectStatus}`}
-              aria-labelledby="stripe-connect-title"
-            >
-              <a className="stripe-connect-icon ih5-stripe-brand" href="https://stripe.com" target="_blank" rel="noopener noreferrer" aria-label="Stripe — operator wypłat">
-                <svg width="48" height="48" aria-hidden="true" focusable="false" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clipPath="url(#ih5-stripe-connect-clip)">
-<rect width="512" height="512" fill="#533AFD"/>
-<path fillRule="evenodd" clipRule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
-</g>
-<defs>
-<clipPath id="ih5-stripe-connect-clip">
-<rect width="512" height="512" rx="64" fill="white"/>
-</clipPath>
-</defs>
-</svg>
-              </a>
-
-              <div className="stripe-connect-content">
-                <div className="stripe-connect-heading">
-                  <div>
-                    <span className="stripe-connect-eyebrow">
-                      Wypłaty dla wykonawcy
-                    </span>
-
-                    <h2 id="stripe-connect-title">
-                      {connectStatusLoading
-                        ? "Sprawdzamy połączenie ze Stripe..."
-                        : currentConnectCopy.title}
-                    </h2>
-                  </div>
-
-                  <span className={`stripe-connect-status is-${connectStatus}`}>
-                    {connectStatusLoading
-                      ? "Sprawdzanie"
-                      : currentConnectCopy.label}
-                  </span>
-                </div>
-
-                <p>
-                  {connectStatusLoading
-                    ? "Pobieramy aktualny status konfiguracji wypłat."
-                    : currentConnectCopy.description}
-                </p>
-
-                {connectFeedback && (
-                  <p
-                    className={`stripe-connect-feedback is-${connectFeedback.type}`}
-                    role="status"
-                  >
-                    {connectFeedback.text}
-                  </p>
-                )}
-
-                <div className="stripe-connect-footer">
-                  <button
-                    type="button"
-                    className="stripe-connect-button"
-                    onClick={() =>
-                      handleConnectOnboarding()
-                    }
-                    disabled={
-                      connectStatusLoading ||
-                      connectActionLoading ||
-                      connectStatus === "ready" ||
-                      connectStatus === "disabled"
-                    }
-                  >
-                    {connectActionLoading
-                      ? "Łączenie ze Stripe..."
-                      : currentConnectCopy.action}
-
-                    {connectStatus !== "ready" &&
-                      connectStatus !== "disabled" && (
-                        <span aria-hidden="true"></span>
-                      )}
-                  </button>
-
-                  <small>
-                    Formularz otworzy się na bezpiecznej stronie Stripe.
-                    IdeaHire nie przechowuje danych Twojego rachunku bankowego.
-                  </small>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {activeAccountSection === "profile" && (
-            <FreelancerVisibility supabase={supabase} user={user} canContact={isAdult} />
-          )}
-
           <form
             className="auth-form account-form ih11-profile-form"
             onSubmit={handleSave}
@@ -10417,6 +10327,101 @@ function Account() {
               </button>
             </div>
           </form>
+
+          {isAdult && activeAccountSection === "profile" && (
+            <section
+              className={`stripe-connect-panel is-${connectStatus}`}
+              aria-labelledby="stripe-connect-title"
+            >
+              <a className="stripe-connect-icon ih5-stripe-brand" href="https://stripe.com" target="_blank" rel="noopener noreferrer" aria-label="Stripe — operator wypłat">
+                <svg width="48" height="48" aria-hidden="true" focusable="false" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clipPath="url(#ih5-stripe-connect-clip)">
+<rect width="512" height="512" fill="#533AFD"/>
+<path fillRule="evenodd" clipRule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="ih5-stripe-connect-clip">
+<rect width="512" height="512" rx="64" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+              </a>
+
+              <div className="stripe-connect-content">
+                <div className="stripe-connect-heading">
+                  <div>
+                    <span className="stripe-connect-eyebrow">
+                      Wypłaty dla wykonawcy
+                    </span>
+
+                    <h2 id="stripe-connect-title">
+                      {connectStatusLoading
+                        ? "Sprawdzamy połączenie ze Stripe..."
+                        : currentConnectCopy.title}
+                    </h2>
+                  </div>
+
+                  <span className={`stripe-connect-status is-${connectStatus}`}>
+                    {connectStatusLoading
+                      ? "Sprawdzanie"
+                      : currentConnectCopy.label}
+                  </span>
+                </div>
+
+                <p>
+                  {connectStatusLoading
+                    ? "Pobieramy aktualny status konfiguracji wypłat."
+                    : currentConnectCopy.description}
+                </p>
+
+                {connectFeedback && (
+                  <p
+                    className={`stripe-connect-feedback is-${connectFeedback.type}`}
+                    role="status"
+                  >
+                    {connectFeedback.text}
+                  </p>
+                )}
+
+                <div className="stripe-connect-footer">
+                  {connectStatus !== "ready" && <button
+                    type="button"
+                    className="stripe-connect-button"
+                    onClick={() =>
+                      handleConnectOnboarding()
+                    }
+                    disabled={
+                      connectStatusLoading ||
+                      connectActionLoading ||
+                      connectStatus === "ready" ||
+                      connectStatus === "disabled"
+                    }
+                  >
+                    {connectActionLoading
+                      ? "Łączenie ze Stripe..."
+                      : currentConnectCopy.action}
+
+                    {connectStatus !== "ready" &&
+                      connectStatus !== "disabled" && (
+                        <span aria-hidden="true"></span>
+                      )}
+                  </button>}
+
+                  <small>
+                    {connectStatus === "ready"
+                      ? "Wypłaty są skonfigurowane. Dane rachunku są obsługiwane przez Stripe."
+                      : "Formularz otworzy się na stronie Stripe. IdeaHire nie przechowuje danych Twojego rachunku bankowego."}
+                  </small>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {activeAccountSection === "profile" && (
+            <FreelancerVisibility supabase={supabase} user={user} canContact={isAdult} />
+          )}
+
+
 
           <section
             className="profile-portfolio-manager"
@@ -13296,7 +13301,8 @@ function FindTalent() {
 
                 <label>
                   Planowany start <em>Opcjonalnie</em>
-                  <input
+                  <IdeaHireDateField
+                aria-label="Planowany start projektu"
                     type="date"
                     min={todayDate}
                     value={plannedStartDate}
@@ -13306,7 +13312,8 @@ function FindTalent() {
 
                 <label>
                   Termin wykonania
-                  <input
+                  <IdeaHireDateField
+                aria-label="Termin wykonania projektu"
                     type="date"
                     min={todayDate}
                     value={projectDeadline}
@@ -13801,6 +13808,7 @@ function Profile() {
 
   const [profile, setProfile] =
     useState(null);
+  const [loadedProfileId, setLoadedProfileId] = useState(null);
 
   const [countryCode, setCountryCode] =
     useState("");
@@ -13832,6 +13840,8 @@ function Profile() {
   const [blockMessage, setBlockMessage] =
     useState("");
 
+  const [portfolioError, setPortfolioError] = useState("");
+
   const [portfolioViewer, setPortfolioViewer] =
     useState(null);
 
@@ -13843,187 +13853,72 @@ function Profile() {
 
   useEffect(() => {
     if (!id) return;
-
+    let cancelled = false;
     async function loadProfile() {
       setLoading(true);
-
+      setProfile(null);
+      setCountryCode("");
+      setJobs([]);
+      setReviews([]);
+      setPortfolioItems([]);
+      setPortfolioError("");
+      setBlockedByMe(false);
+      setBlockedMe(false);
+      setBlockMessage("");
+      setPortfolioViewer(null);
+      setPortfolioReportTarget(null);
+      setMessage("");
       try {
-        const {
-          data:
-            profileData,
-          error:
-            profileError,
-        } =
-          await supabase
-            .from("profiles")
-            .select(
-              "id, name, avatar_url, about, specialty_categories, specialization, skills, completed_jobs, disputed_jobs, positive_reviews, neutral_reviews, negative_reviews, posted_jobs"
-            )
-            .eq("id", id)
-            .single();
-
-        if (profileError) {
-          setMessage(
-            `Nie udało się pobrać profilu: ${profileError.message}`
-          );
-
-          return;
-        }
-
-        setProfile(
-          profileData
-        );
-
-        const {
-          data: reviewsData,
-          error: reviewsError,
-        } = await supabase
-          .from("ideahire_job_reviews")
-          .select(
-            "id, contractor_id, rating, review_text, job_title_snapshot, created_at"
-          )
-          .eq("contractor_id", id)
-          .order("created_at", {
-            ascending: false,
-          });
-
-        if (reviewsError) {
-          console.error(
-            "PROFILE REVIEWS ERROR:",
-            reviewsError
-          );
-          setReviews([]);
-        } else {
-          setReviews(
-            Array.isArray(reviewsData)
-              ? reviewsData
-              : []
-          );
-        }
-
-        if (
-          user?.id &&
-          user.id !== id
-        ) {
-          const [
-            blockedByMeResult,
-            blockedMeResult,
-          ] = await Promise.all([
-            supabase
-              .from("user_blocks")
-              .select("id")
-              .eq("blocker_id", user.id)
-              .eq("blocked_id", id)
-              .maybeSingle(),
-
-            supabase
-              .from("user_blocks")
-              .select("id")
-              .eq("blocker_id", id)
-              .eq("blocked_id", user.id)
-              .maybeSingle(),
-          ]);
-
-          if (blockedByMeResult.error) {
-            console.error(
-              "PROFILE BLOCK STATUS ERROR:",
-              blockedByMeResult.error
-            );
-          }
-
-          if (blockedMeResult.error) {
-            console.error(
-              "PROFILE BLOCKED STATUS ERROR:",
-              blockedMeResult.error
-            );
-          }
-
-          setBlockedByMe(
-            !!blockedByMeResult.data?.id
-          );
-
-          setBlockedMe(
-            !!blockedMeResult.data?.id
-          );
-        }
-
-        const {
-          data: countryData,
-          error: countryError,
-        } = await supabase
-          .from("public_profiles")
-          .select("country_code")
-          .eq("user_id", id)
-          .maybeSingle();
-
-        if (countryError) {
-          console.error(
-            "PROFILE COUNTRY ERROR:",
-            countryError
-          );
-        } else {
-          setCountryCode(
-            countryData?.country_code || ""
-          );
-        }
-
-        const {
-          data:
-            jobsData,
-          error:
-            jobsError,
-        } =
-          await supabase
-            .from("jobs")
-            .select(
-              "id, user_id, title, description, category, subcategory, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
-            )
-            .eq(
-              "user_id",
-              id
-            )
-            .gt(
-              "expires_at",
-              new Date().toISOString()
-            )
-            .order(
-              "created_at",
-              {
-                ascending: false,
-              }
-            );
-
-        if (jobsError) {
-          console.error(
-            "PROFILE JOBS ERROR:",
-            jobsError
-          );
-        } else {
-          setJobs(
-            jobsData || []
-          );
-        }
-
-        try {
-          const portfolioData = await fetchPortfolioAlbums(id);
-          setPortfolioItems(portfolioData);
-        } catch (portfolioError) {
-          console.error("PROFILE PORTFOLIO ERROR:", portfolioError);
-          setPortfolioItems([]);
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, name, avatar_url, about, specialty_categories, specialization, skills, completed_jobs, disputed_jobs, positive_reviews, neutral_reviews, negative_reviews, posted_jobs")
+          .eq("id", id).single();
+        if (cancelled) return;
+        if (profileError) throw profileError;
+        if (!profileData) { setMessage("Nie znaleziono profilu."); return; }
+        const checkBlocks = !!user?.id && user.id !== id;
+        const results = await Promise.allSettled([
+          supabase.from("ideahire_job_reviews")
+            .select("id, contractor_id, rating, review_text, job_title_snapshot, created_at")
+            .eq("contractor_id", id).order("created_at", { ascending: false }),
+          checkBlocks ? supabase.from("user_blocks").select("id").eq("blocker_id", user.id).eq("blocked_id", id).maybeSingle() : Promise.resolve({ data: null }),
+          checkBlocks ? supabase.from("user_blocks").select("id").eq("blocker_id", id).eq("blocked_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
+          supabase.from("public_profiles").select("country_code").eq("user_id", id).maybeSingle(),
+          supabase.from("jobs")
+            .select("id, user_id, title, description, category, subcategory, budget, budget_negotiable, listing_duration_days, expires_at, created_at")
+            .eq("user_id", id).gt("expires_at", new Date().toISOString()).order("created_at", { ascending: false }),
+          fetchPortfolioAlbums(id),
+        ]);
+        if (cancelled) return;
+        const response = (index, label) => {
+          const result = results[index];
+          const error = result.status === "rejected" ? result.reason : result.value?.error;
+          if (error) { console.error(`PROFILE ${label} ERROR:`, error); return null; }
+          return result.value?.data;
+        };
+        setProfile(profileData);
+        const loadedReviews = response(0, "REVIEWS");
+        setReviews(Array.isArray(loadedReviews) ? loadedReviews : []);
+        setBlockedByMe(!!response(1, "BLOCK STATUS")?.id);
+        setBlockedMe(!!response(2, "BLOCKED STATUS")?.id);
+        setCountryCode(response(3, "COUNTRY")?.country_code || "");
+        setJobs(response(4, "JOBS") || []);
+        if (results[5].status === "fulfilled") setPortfolioItems(results[5].value);
+        else {
+          console.error("PROFILE PORTFOLIO ERROR:", results[5].reason);
+          setPortfolioError("Nie udało się wczytać portfolio. Odśwież profil i spróbuj ponownie.");
         }
       } catch (error) {
-        setMessage(
-          `Nie udało się pobrać profilu: ${
-            error?.message ||
-            "Nieznany błąd"
-          }`
-        );
+        if (!cancelled) {
+          console.error("PROFILE LOAD ERROR:", error);
+          setMessage("Nie udało się pobrać profilu. Odśwież stronę i spróbuj ponownie.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) { setLoadedProfileId(id); setLoading(false); }
       }
     }
-
     loadProfile();
+    return () => { cancelled = true; };
   }, [id, user?.id]);
 
   async function handleBlockToggle(
@@ -14096,7 +13991,7 @@ function Profile() {
     }
   }
 
-  if (loading) {
+  if (loading || loadedProfileId !== id) {
     return <LoadingScreen />;
   }
 
@@ -14509,11 +14404,7 @@ function Profile() {
           }
         `}</style>
 
-        <section className={`account-card ${
-          isOtherProfile
-            ? "profile-card-with-menu"
-            : ""
-        }`}>
+        <section className="account-card profile-card-with-menu">
           {isOtherProfile && (
             <details className="profile-more-menu">
               <summary
@@ -14617,7 +14508,218 @@ function Profile() {
               </>
             )}
 
+          {!profileHidden && !hasExpertiseDetails && !profile.specialization?.trim() && <section className="profile-expertise-card"><h2>Specjalizacja</h2><p className="ih20-profile-empty">Ten freelancer nie uzupełnił jeszcze specjalizacji i umiejętności.</p></section>}
+
+          {!profileHidden &&
+            profile.about?.trim() && (
+              <div className="profile-content-card">
+                <span className="profile-expertise-label">
+                  O mnie
+                </span>
+
+                <p className="profile-about-copy">
+                  {profile.about}
+                </p>
+              </div>
+            )}
+
+          {!profileHidden &&
+            hasExpertiseDetails && (
+              <div className="profile-expertise">
+                {visibleSpecialtyCategories.length > 0 && (
+                  <div className="profile-expertise-card">
+                    <span className="profile-expertise-label">
+                      Kategorie specjalizacji
+                    </span>
+
+                    <div className="profile-specialty-chips">
+                      {visibleSpecialtyCategories.map(
+                        (category) => (
+                          <span
+                            className="profile-specialty-chip"
+                            key={category}
+                          >
+                            {getJobCategoryLabel(category)}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {visibleSkills.length > 0 && (
+                  <div className="profile-expertise-card">
+                    <span className="profile-expertise-label">
+                      Umiejętności
+                    </span>
+
+                    <div className="profile-specialty-chips">
+                      {visibleSkills.map(
+                        (skill) => (
+                          <span
+                            className="profile-specialty-chip"
+                            key={skill}
+                          >
+                            {skill}
+                          </span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+          {!profileHidden &&
+            profile.specialization?.trim() && (
+              <div className="profile-expertise-card profile-specialization-card">
+                <span className="profile-expertise-label">
+                  W czym się specjalizuję
+                </span>
+
+                <p className="profile-specialization-copy">
+                  {profile.specialization}
+                </p>
+              </div>
+            )}
+
           {!profileHidden && (
+            <section
+              className="profile-public-portfolio"
+              aria-labelledby="profile-public-portfolio-title"
+            >
+              <div className="profile-public-portfolio-heading">
+                <div>
+                  <span className="profile-expertise-label">Wybrane realizacje</span>
+                  <h2 id="profile-public-portfolio-title">Portfolio</h2>
+                </div>
+                <span className="profile-public-portfolio-count">
+                  {portfolioItems.length} {portfolioItems.length === 1 ? "realizacja" : "realizacji"}
+                </span>
+              </div>
+
+              {portfolioError ? <p className="ih20-profile-empty is-error" role="status">{portfolioError}</p> : portfolioItems.length === 0 && <div className="ih20-profile-empty"><MarketIcon kind="files" /><div><h3>Portfolio jeszcze się pojawi</h3><p>Ten freelancer nie dodał jeszcze realizacji do portfolio. Możesz zapytać o przykłady jego pracy w wiadomości.</p></div></div>}
+
+              {portfolioReportMessage && (
+                <p className="profile-public-report-message" role="status">
+                  {portfolioReportMessage}
+                </p>
+              )}
+
+              {portfolioAlbums.length > 0 && (
+                <div className="profile-public-portfolio-group">
+                  <div className="profile-public-portfolio-subheading">
+                    <div>
+                      <h3>Albumy ze zdjęciami</h3>
+                      <p>Otwórz album, aby zobaczyć każde zdjęcie w pełnych proporcjach.</p>
+                    </div>
+                    <span>{portfolioAlbums.length}</span>
+                  </div>
+
+                  <div className="profile-public-portfolio-grid">
+                    {portfolioAlbums.map((item) => {
+                      const media = getPortfolioMedia(item);
+                      const cover = media[0];
+
+                      return (
+                        <article
+                          className="profile-public-portfolio-card"
+                          id={`portfolio-${item.id}`}
+                          key={item.id}
+                        >
+                          <button
+                            type="button"
+                            className="profile-public-album-cover"
+                            onClick={() => setPortfolioViewer({ album: item, index: 0 })}
+                            aria-label={`Otwórz album ${item.title}, ${media.length} zdjęć`}
+                          >
+                            <img
+                              className="profile-public-album-cover-backdrop"
+                              src={cover.image_url}
+                              alt=""
+                              aria-hidden="true"
+                            />
+                            <img
+                              className="profile-public-album-cover-image"
+                              src={cover.image_url}
+                              alt={`Projekt: ${item.title}`}
+                            />
+                            <span className="profile-public-album-count">
+                              <strong>{media.length}</strong>
+                              {media.length === 1 ? "zdjęcie" : "zdjęć"}
+                            </span>
+                            <span className="profile-public-album-open">Otwórz album</span>
+                          </button>
+
+                          <div className="profile-public-portfolio-copy">
+                            <span className="profile-public-album-label">Album</span>
+                            <h3>{item.title}</h3>
+                            {item.description && <p>{item.description}</p>}
+
+                            {user?.id !== id && (
+                              <button
+                                type="button"
+                                className="profile-public-item-report"
+                                onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "album" })}
+                              >
+                                Zgłoś album
+                              </button>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {portfolioLinks.length > 0 && (
+                <div className="profile-public-portfolio-group profile-public-links-group">
+                  <div className="profile-public-portfolio-subheading">
+                    <div>
+                      <h3>Linki do projektów</h3>
+                      <p>Zewnętrzne realizacje i materiały powiązane z portfolio.</p>
+                    </div>
+                    <span>{portfolioLinks.length}</span>
+                  </div>
+
+                  <div className="profile-public-project-links">
+                    {portfolioLinks.map((item, index) => (
+                      <article className="profile-public-project-link-row" key={item.id}>
+                        <span className="profile-public-project-link-index" aria-hidden="true">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <div className="profile-public-project-link-copy">
+                          <strong>{item.title}</strong>
+                          {item.description && <p>{item.description}</p>}
+                          <a
+                            className="profile-public-project-link"
+                            href={item.project_url}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            title={item.project_url}
+                          >
+                            <span>{getPortfolioLinkLabel(item.project_url)}</span>
+                            <span aria-hidden="true"></span>
+                          </a>
+                        </div>
+
+                        {user?.id !== id && (
+                          <button
+                            type="button"
+                            className="profile-public-item-report"
+                            onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "link" })}
+                          >
+                            Zgłoś link
+                          </button>
+                        )}
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}          {!profileHidden && (
             <div className="profile-stats">
               <div className="profile-stat-card">
                 <div className="profile-stat-top">
@@ -14790,214 +14892,7 @@ function Profile() {
             </section>
           )}
 
-          {!profileHidden &&
-            profile.about?.trim() && (
-              <div className="profile-content-card">
-                <span className="profile-expertise-label">
-                  O mnie
-                </span>
 
-                <p className="profile-about-copy">
-                  {profile.about}
-                </p>
-              </div>
-            )}
-
-          {!profileHidden &&
-            hasExpertiseDetails && (
-              <div className="profile-expertise">
-                {visibleSpecialtyCategories.length > 0 && (
-                  <div className="profile-expertise-card">
-                    <span className="profile-expertise-label">
-                      Kategorie specjalizacji
-                    </span>
-
-                    <div className="profile-specialty-chips">
-                      {visibleSpecialtyCategories.map(
-                        (category) => (
-                          <span
-                            className="profile-specialty-chip"
-                            key={category}
-                          >
-                            {getJobCategoryLabel(category)}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {visibleSkills.length > 0 && (
-                  <div className="profile-expertise-card">
-                    <span className="profile-expertise-label">
-                      Umiejętności
-                    </span>
-
-                    <div className="profile-specialty-chips">
-                      {visibleSkills.map(
-                        (skill) => (
-                          <span
-                            className="profile-specialty-chip"
-                            key={skill}
-                          >
-                            {skill}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-          {!profileHidden &&
-            profile.specialization?.trim() && (
-              <div className="profile-expertise-card profile-specialization-card">
-                <span className="profile-expertise-label">
-                  W czym się specjalizuję
-                </span>
-
-                <p className="profile-specialization-copy">
-                  {profile.specialization}
-                </p>
-              </div>
-            )}
-
-          {!profileHidden && portfolioItems.length > 0 && (
-            <section
-              className="profile-public-portfolio"
-              aria-labelledby="profile-public-portfolio-title"
-            >
-              <div className="profile-public-portfolio-heading">
-                <div>
-                  <span className="profile-expertise-label">Wybrane realizacje</span>
-                  <h2 id="profile-public-portfolio-title">Portfolio</h2>
-                </div>
-                <span className="profile-public-portfolio-count">
-                  {portfolioItems.length} {portfolioItems.length === 1 ? "realizacja" : "realizacji"}
-                </span>
-              </div>
-
-              {portfolioReportMessage && (
-                <p className="profile-public-report-message" role="status">
-                  {portfolioReportMessage}
-                </p>
-              )}
-
-              {portfolioAlbums.length > 0 && (
-                <div className="profile-public-portfolio-group">
-                  <div className="profile-public-portfolio-subheading">
-                    <div>
-                      <h3>Albumy ze zdjęciami</h3>
-                      <p>Otwórz album, aby zobaczyć każde zdjęcie w pełnych proporcjach.</p>
-                    </div>
-                    <span>{portfolioAlbums.length}</span>
-                  </div>
-
-                  <div className="profile-public-portfolio-grid">
-                    {portfolioAlbums.map((item) => {
-                      const media = getPortfolioMedia(item);
-                      const cover = media[0];
-
-                      return (
-                        <article
-                          className="profile-public-portfolio-card"
-                          id={`portfolio-${item.id}`}
-                          key={item.id}
-                        >
-                          <button
-                            type="button"
-                            className="profile-public-album-cover"
-                            onClick={() => setPortfolioViewer({ album: item, index: 0 })}
-                            aria-label={`Otwórz album ${item.title}, ${media.length} zdjęć`}
-                          >
-                            <img
-                              className="profile-public-album-cover-backdrop"
-                              src={cover.image_url}
-                              alt=""
-                              aria-hidden="true"
-                            />
-                            <img
-                              className="profile-public-album-cover-image"
-                              src={cover.image_url}
-                              alt={`Projekt: ${item.title}`}
-                            />
-                            <span className="profile-public-album-count">
-                              <strong>{media.length}</strong>
-                              {media.length === 1 ? "zdjęcie" : "zdjęć"}
-                            </span>
-                            <span className="profile-public-album-open">Otwórz album</span>
-                          </button>
-
-                          <div className="profile-public-portfolio-copy">
-                            <span className="profile-public-album-label">Album</span>
-                            <h3>{item.title}</h3>
-                            {item.description && <p>{item.description}</p>}
-
-                            {user?.id !== id && (
-                              <button
-                                type="button"
-                                className="profile-public-item-report"
-                                onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "album" })}
-                              >
-                                Zgłoś album
-                              </button>
-                            )}
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {portfolioLinks.length > 0 && (
-                <div className="profile-public-portfolio-group profile-public-links-group">
-                  <div className="profile-public-portfolio-subheading">
-                    <div>
-                      <h3>Linki do projektów</h3>
-                      <p>Zewnętrzne realizacje i materiały powiązane z portfolio.</p>
-                    </div>
-                    <span>{portfolioLinks.length}</span>
-                  </div>
-
-                  <div className="profile-public-project-links">
-                    {portfolioLinks.map((item, index) => (
-                      <article className="profile-public-project-link-row" key={item.id}>
-                        <span className="profile-public-project-link-index" aria-hidden="true">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <div className="profile-public-project-link-copy">
-                          <strong>{item.title}</strong>
-                          {item.description && <p>{item.description}</p>}
-                          <a
-                            className="profile-public-project-link"
-                            href={item.project_url}
-                            target="_blank"
-                            rel="noopener noreferrer nofollow"
-                            title={item.project_url}
-                          >
-                            <span>{getPortfolioLinkLabel(item.project_url)}</span>
-                            <span aria-hidden="true"></span>
-                          </a>
-                        </div>
-
-                        {user?.id !== id && (
-                          <button
-                            type="button"
-                            className="profile-public-item-report"
-                            onClick={() => setPortfolioReportTarget({ album: item, media: null, kind: "link" })}
-                          >
-                            Zgłoś link
-                          </button>
-                        )}
-                      </article>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
-          )}
         </section>
 
         {!profileHidden && (
@@ -15707,18 +15602,8 @@ function Jobs() {
             WYSZUKIWARKA
         ================================================= */}
 
-        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder} />
-        {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
-
-        {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
-
-        {/* =================================================
-            WYNIKI
-        ================================================= */}
-
         {!loading &&
-          !message &&
-          jobs.length > 0 && (
+          !message && (
             <div className="ih5-jobs-results-header">
               <div className="ih5-jobs-results-copy" role="status" aria-live="polite">
                 <span>Wyniki wyszukiwania</span>
@@ -15741,6 +15626,17 @@ function Jobs() {
               )}
             </div>
           )}
+
+        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder} />
+        {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
+
+        {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
+
+        {/* =================================================
+            WYNIKI
+        ================================================= */}
+
+
 
         {loading && (
           <InlineRouteLoader
@@ -17908,7 +17804,8 @@ function Calendar() {
               <div className="calendar-form-row">
                 <label className="calendar-field">
                   <span>Data i godzina</span>
-                  <input
+                  <IdeaHireDateField
+                aria-label="Data i godzina wydarzenia"
                     type="datetime-local"
                     value={
                       draft.starts_at
@@ -20244,7 +20141,7 @@ function AmbientBackground() {
 
     function pageScroller(element) {
       return element === document.documentElement || element === document.body ||
-        element?.id === "root" || element?.matches?.(".app, .page, .account-page");
+        element?.id === "root" || element?.matches?.(".app, .page, .account-page, .sorts-root, .app-page, .ih6-account-content, .account-tab-stage");
     }
 
     function measure() {
@@ -21427,7 +21324,7 @@ function AgreementPanel({
               Warunki współpracy zaakceptowane
             </strong>
             <small>
-              Wersja {agreement.version} · Czat jest aktywny
+              Wersja {agreement.version} · Akceptacja obu stron
             </small>
           </span>
 
@@ -21467,7 +21364,7 @@ function AgreementPanel({
         <span>
           <strong>Warunki współpracy</strong>
           <small>
-            Czat negocjacyjny jest aktywny · realizacja ruszy po wspólnej akceptacji
+            Czat jest aktywny · praca rusza po akceptacji i potwierdzeniu płatności
           </small>
         </span>
         <span className="ih12-collapse-icon" aria-hidden="true"><MarketIcon kind={expanded ? "close" : "plus"} /></span>
@@ -21483,7 +21380,7 @@ function AgreementPanel({
         <h2>Ustalcie warunki współpracy</h2>
 
         <p>
-          Możecie już rozmawiać na czacie. Realizacja zlecenia rozpocznie się, gdy obie strony zaakceptują dokładnie tę samą wersję ustaleń.
+          Najpierw zaakceptujcie tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.
         </p>
 
         <div className="agreement-progress" aria-label="Postęp akceptacji">
@@ -21607,7 +21504,8 @@ function AgreementPanel({
 
             <label className="agreement-field">
               <span>Termin wykonania *</span>
-              <input
+              <IdeaHireDateField
+                aria-label="Termin wykonania zlecenia"
                 type="date"
                 min={localProjectDate()}
                 value={form.deadline}
@@ -22200,11 +22098,13 @@ function ChatProjectPlan({ job, agreement }) {
     <section className="chat-project-plan" aria-labelledby="chat-project-plan-title">
       <header className="chat-project-plan-header">
         <div>
-          <span className="section-label">Wspólna mapa realizacji</span>
-          <h2 id="chat-project-plan-title">Plan współpracy</h2>
+          <span className="section-label">Szczegóły zlecenia</span>
+          <h2 id="chat-project-plan-title">Zakres i szczegóły projektu</h2>
           <p>
-            Ustalenia z ogłoszenia i zaakceptowany zakres są zebrane obok rozmowy,
-            aby obie strony pracowały na tej samej wersji informacji.
+            {agreement?.status === "accepted"
+              ? "Zakres, cena i termin pochodzą z zaakceptowanej wersji warunków. Pozostałe informacje dotyczą planu zlecenia."
+              : agreement ? "Poniżej widzicie aktualną propozycję i informacje ze zlecenia. Propozycja wymaga akceptacji obu stron."
+              : "To plan ze zlecenia lub zapytania. Ostateczne warunki uzgodnijcie i zaakceptujcie w formularzu współpracy."}
           </p>
         </div>
         <span className={`chat-project-plan-status is-${agreement?.status || "draft"}`}>
@@ -22216,7 +22116,15 @@ function ChatProjectPlan({ job, agreement }) {
         <article>
           <span>Zakres projektu</span>
           <p className="ih9-plan-scope">{agreement?.scope || job?.description || "Zakres do wspólnego ustalenia"}</p>
-          {agreement?.deliverables && <p>{agreement.deliverables}</p>}
+        </article>
+        <article>
+          <span>Co zostanie przekazane</span>
+          <p>{agreement?.deliverables || job?.project_details?.deliverables || "Rezultat do wspólnego ustalenia"}</p>
+        </article>
+        <article>
+          <span>Wynagrodzenie wykonawcy</span>
+          <p>{agreement?.price_amount != null ? formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN") : Number(job?.budget) > 0 ? `${formatChatProjectBudget(job.budget)} (budżet zlecenia)` : "Cena do wspólnego ustalenia"}</p>
+
         </article>
         <article>
           <span>Terminy</span>
@@ -23721,6 +23629,7 @@ function Chat() {
                       userId={user?.id}
                       disabled={messagingBlocked || privateWork.loading}
                       agreementAccepted={agreement?.status === "accepted"}
+                      paymentConfirmed={paymentConfirmed}
                       isContractor={!isClient}
                       onComplete={async () => {
                         await Promise.all([privateWork.reload(), loadMessages()]);
@@ -23759,11 +23668,6 @@ function Chat() {
                     <button type="button" className="ih15-workspace-back" onClick={() => { if (planPinned) closePlanWindow(); else openWorkspace("conversation"); }}><MarketIcon kind="arrow" /><span>Wróć do rozmowy</span></button>
                   </div></header>
 
-                    {!agreementsRequired && <section className="ih18-legacy-plan" aria-labelledby="ih18-legacy-plan-title">
-                      <h3 id="ih18-legacy-plan-title">Zapiszcie formalne warunki współpracy</h3>
-                      <p>Ta starsza rozmowa nie obsługuje dwustronnej akceptacji warunków. Utwórz projekt z tym wykonawcą, aby zapisać zakres, rezultat, cenę, termin i zasady odbioru. Historia tej rozmowy pozostaje dostępna.</p>
-                      {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}
-                    </section>}
                     <AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
@@ -23790,6 +23694,13 @@ function Chat() {
                       onSubmit={handleAgreementSubmit}
                       onAccept={handleAgreementAccept}
                     />
+                    <ChatProjectPlan job={jobDetails} agreement={agreement} />
+
+                    {!agreementsRequired && <section className="ih18-legacy-plan" aria-labelledby="ih18-legacy-plan-title">
+                      <h3 id="ih18-legacy-plan-title">Ustalenia w starszej rozmowie</h3>
+                      <p>W tej rozmowie nie można zaakceptować formalnych warunków. Aby uzgodnić zakres, cenę i termin, rozpocznij projekt z tym wykonawcą. Dotychczasowe wiadomości pozostaną dostępne.</p>
+                      {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}
+                    </section>}
                     <ChatPaymentPanel
                       agreement={agreement}
                       conversation={conversation}
@@ -23798,7 +23709,7 @@ function Chat() {
                       serviceOrder={conversation?.origin_type === "service_inquiry"}
                       onStatusChange={setPaymentStatus}
                     />
-                    <details className="ih8-chat-plan-overview" open><summary><span>Zakres i szczegóły projektu</span><MarketIcon kind="chevron" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>
+                    
 
                 </div>}
               </div>
