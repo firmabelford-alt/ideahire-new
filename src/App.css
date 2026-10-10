@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 23 | 2026-10-10 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 24 | 2026-10-10 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51873,26 +51873,26 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { transition: none !important; }
 }
 
-/* IdeaHire P23: two complete, opaque light compositions; only the top canvas fades. */
+/* IdeaHire P24: moving transparent light clouds over one stationary page canvas. */
 :root {
-  --ih23-canvas: #eef3fa;
-  --ih23-light: #ffffff;
-  --ih23-shade: #cbdcf2;
+  --ih24-canvas: #ffffff;
+  --ih24-light: #ffffff;
+  --ih24-shade: #cbdcf2;
 }
 html[data-theme="dark"] {
-  --ih23-canvas: #0c1728;
-  --ih23-light: #325373;
-  --ih23-shade: #08111e;
+  --ih24-canvas: #0c1728;
+  --ih24-light: #325373;
+  --ih24-shade: #08111e;
 }
 html[data-template="classic"] {
-  --ih23-canvas: #ffffff;
-  --ih23-light: #ffffff;
-  --ih23-shade: #cccccc;
+  --ih24-canvas: #ffffff;
+  --ih24-light: #ffffff;
+  --ih24-shade: #cccccc;
 }
 html[data-template="classic"][data-theme="dark"] {
-  --ih23-canvas: #17191b;
-  --ih23-light: #4b4b4b;
-  --ih23-shade: #101010;
+  --ih24-canvas: #17191b;
+  --ih24-light: #4b4b4b;
+  --ih24-shade: #101010;
 }
 
 html:root body .ih13-background {
@@ -51902,43 +51902,77 @@ html:root body .ih13-background {
   pointer-events: none;
   overflow: hidden;
   contain: strict;
-  background: var(--ih23-canvas);
-  --ih23-mix: 0.25;
+  background: var(--ih24-canvas);
 }
 html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-end) {
   position: absolute;
-  inset: 0;
+  inset: -40%;
   width: auto;
   height: auto;
   margin: 0;
   pointer-events: none;
-  background-color: var(--ih23-canvas);
+  background-color: transparent;
   background-repeat: no-repeat;
   background-size: 100% 100%;
-  transform: none;
+  transform-origin: center;
   filter: none;
   animation: none;
   transition: none;
+  will-change: transform, opacity;
 }
 html:root body .ih13-background > .ih13-background-start {
-  background-image:
-    radial-gradient(ellipse 75% 84% at 5% 20%, color-mix(in srgb,var(--ih23-light) 94%,transparent) 0%, color-mix(in srgb,var(--ih23-light) 68%,transparent) 30%, transparent 85%),
-    radial-gradient(ellipse 86% 88% at 95% 82%, color-mix(in srgb,var(--ih23-shade) 94%,transparent) 0%, color-mix(in srgb,var(--ih23-shade) 60%,transparent) 35%, transparent 92%);
-  opacity: 1;
+  z-index: 1;
+  background-image: radial-gradient(ellipse 38% 36% at 40% 38%, color-mix(in srgb,var(--ih24-light) 94%,transparent) 0%, color-mix(in srgb,var(--ih24-light) 68%,transparent) 28%, color-mix(in srgb,var(--ih24-light) 30%,transparent) 60%, transparent 100%);
+  transform: translate3d(0,12vh,0) scale(1,1.06);
+  opacity: 0.8667;
 }
 html:root body .ih13-background > .ih13-background-end {
-  background-image:
-    radial-gradient(ellipse 85% 82% at 85% 86%, color-mix(in srgb,var(--ih23-light) 96%,transparent) 0%, color-mix(in srgb,var(--ih23-light) 72%,transparent) 32%, transparent 90%),
-    radial-gradient(ellipse 95% 100% at 12% 24%, color-mix(in srgb,var(--ih23-shade) 98%,transparent) 0%, color-mix(in srgb,var(--ih23-shade) 80%,transparent) 38%, transparent 96%);
-  opacity: var(--ih23-mix);
-  will-change: opacity;
+  z-index: 0;
+  background-image: radial-gradient(ellipse 39% 37% at 58% 60%, color-mix(in srgb,var(--ih24-shade) 98%,transparent) 0%, color-mix(in srgb,var(--ih24-shade) 75%,transparent) 28%, color-mix(in srgb,var(--ih24-shade) 35%,transparent) 60%, transparent 100%);
+  transform: translate3d(14vw,0,0) scale(1.06,1);
+  opacity: 0.86;
 }
 @media (prefers-reduced-motion: reduce) {
-  html:root body .ih13-background { --ih23-mix: 0.25 !important; }
-  html:root body .ih13-background > .ih13-background-end { will-change: auto; }
+  html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-end) { transform: none !important; will-change: auto; }
 }
 @media (forced-colors: active) { html:root body .ih13-background { display: none; } }
 @media print { html:root body .ih13-background { display: none; } }
+
+/* Section backings were masking the page light. Keep the functional tiles and buttons. */
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.categories.section,.ih-category-intro,.split-section.section,.split-card,.final-cta) {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.categories.section,.ih-category-intro,.split-section.section,.split-card,.final-cta)::before,
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 :is(.categories.section,.ih-category-intro,.split-section.section,.split-card,.final-cta)::after {
+  content: none !important;
+  display: none !important;
+}
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card:not(.light) > :is(h2,.section-label),
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card.light > :is(h2,.section-label) {
+  color: var(--ih-home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card:not(.light) > p,
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card.light > p {
+  color: var(--ih-home-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card:not(.light) .btn {
+  background: var(--ih7-accent) !important;
+  color: var(--ih7-on-accent) !important;
+  -webkit-text-fill-color: currentColor !important;
+  border-color: var(--ih7-accent) !important;
+}
+html:root body #root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .split-card.light .btn {
+  background: transparent !important;
+  color: var(--ih-home-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  border: 1px solid var(--ih-home-line) !important;
+}
 
 /* Layout containers share the page canvas. Actual cards retain their surfaces. */
 html:root body #root#root#root#root :is(.account-workspace-page, .ih6-account-layout, .ih6-account-content, .account-tab-stage),
