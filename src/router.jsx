@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 23 | 2026-10-10 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 24 | 2026-10-10 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -20126,27 +20126,29 @@ function formatInboxDate(value) {
 }
 
 /* P13A: presentation components remain inside the existing router file. */
-// Two full-screen light compositions respond to scrolling without moving their edges.
+// Transparent light clouds move inside a fixed canvas; their edges never cover the page.
 function AmbientBackground() {
   const layerRef = useRef(null);
+  const stateRef = useRef(null);
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     const layer = layerRef.current;
-    if (!layer) return;
-
+    const light = layer?.firstElementChild;
+    const shade = layer?.lastElementChild;
+    if (!light || !shade) return;
+    const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const finePointer = window.matchMedia?.("(hover: hover) and (pointer: fine)");
     const positions = new WeakMap();
     const documentScroller = document.scrollingElement || document.documentElement;
     let frame = 0;
     let previousTime = 0;
-    // The first swipe must visibly change the light on both small and large screens.
-    let span = Math.max(560, Math.min(1100, window.innerHeight * 1.15));
+    let pointerX = 0;
+    let pointerY = 0;
+    let span = Math.max(580, Math.min(1100, window.innerHeight * 0.95));
     let travel = documentOffset();
-    let current = Number.parseFloat(layer.style.getPropertyValue("--ih23-mix"));
-    if (!Number.isFinite(current)) current = 0.25;
-    let target = washFor(travel);
-    let last = "";
+    let target = composition();
+    let current = motion?.matches ? [...target] : [...(stateRef.current || target)];
     positions.set(documentScroller, travel);
 
     function documentOffset() {
@@ -20154,17 +20156,27 @@ function AmbientBackground() {
         document.documentElement.scrollTop || 0, document.body.scrollTop || 0, window.scrollY || 0);
     }
 
-    function washFor(offset) {
-      // A phase offset avoids the nearly invisible, flat start of the previous wash.
-      // The two theme shades repeat gently on long pages and reverse at the same position.
-      return motion?.matches ? 0.25 : (1 - Math.cos(offset / span * Math.PI + Math.PI / 3)) / 2;
+    function composition() {
+      const phase = motion?.matches ? 0 : travel / span * Math.PI;
+      const x = motion?.matches ? 0 : pointerX;
+      const y = motion?.matches ? 0 : pointerY;
+      return [
+        Math.sin(phase) * 16 + x * 3, Math.cos(phase) * 12 + y * 3,
+        1 + Math.sin(phase * 0.7) * 0.07, 1 + Math.cos(phase * 0.7) * 0.06,
+        0.82 + Math.sin(phase * 0.6 + 0.4) * 0.12,
+        Math.cos(phase * 0.9) * 14 - x * 2, Math.sin(phase * 0.9) * 14 - y * 2,
+        1 + Math.cos(phase * 0.8) * 0.06, 1 + Math.sin(phase * 0.8) * 0.07,
+        0.72 + Math.cos(phase * 0.6) * 0.14
+      ];
     }
 
-    function write(value) {
-      const next = value.toFixed(4);
-      if (next === last) return;
-      last = next;
-      layer.style.setProperty("--ih23-mix", next);
+    function write() {
+      // Only transparent, oversized radial clouds move. The opaque base stays fixed.
+      light.style.transform = `translate3d(${current[0].toFixed(3)}vw,${current[1].toFixed(3)}vh,0) scale(${current[2].toFixed(4)},${current[3].toFixed(4)})`;
+      shade.style.transform = `translate3d(${current[5].toFixed(3)}vw,${current[6].toFixed(3)}vh,0) scale(${current[7].toFixed(4)},${current[8].toFixed(4)})`;
+      light.style.opacity = current[4].toFixed(4);
+      shade.style.opacity = current[9].toFixed(4);
+      stateRef.current = [...current];
     }
 
     function paint(time) {
@@ -20172,16 +20184,21 @@ function AmbientBackground() {
       if (document.hidden) return;
       const elapsed = previousTime ? Math.min(48, Math.max(1, time - previousTime)) : 16;
       previousTime = time;
-      current += (target - current) * (1 - Math.exp(-elapsed / 150));
-      const settled = Math.abs(target - current) < 0.0005;
-      if (settled || motion?.matches) current = target;
-      write(current);
-      if (!settled && !motion?.matches) schedule();
+      const easing = 1 - Math.exp(-elapsed / 160);
+      let settled = true;
+      current = current.map((value, index) => {
+        const next = value + (target[index] - value) * easing;
+        if (Math.abs(target[index] - next) > 0.0005) settled = false;
+        return next;
+      });
+      if (settled) current = [...target];
+      write();
+      if (!settled) schedule();
       else previousTime = 0;
     }
 
     function schedule() {
-      if (!frame && !document.hidden) frame = window.requestAnimationFrame(paint);
+      if (!frame && !document.hidden && !motion?.matches) frame = window.requestAnimationFrame(paint);
     }
 
     function scroll(event = {}) {
@@ -20192,26 +20209,44 @@ function AmbientBackground() {
       const position = element === documentScroller ? documentOffset() : Math.max(0, element.scrollTop || 0);
       const previous = positions.get(element) || 0;
       positions.set(element, position);
-      if (position === previous) return; // Horizontal tab scrolling does not change the backdrop.
+      if (position === previous) return;
       travel = Math.max(0, travel + position - previous);
-      target = washFor(travel);
-      if (!motion?.matches) schedule();
+      target = composition();
+      schedule();
+    }
+
+    function pointer(event) {
+      if (motion?.matches || !finePointer?.matches || event.pointerType === "touch") return;
+      pointerX = Math.max(-1, Math.min(1, event.clientX / Math.max(1, window.innerWidth) * 2 - 1));
+      pointerY = Math.max(-1, Math.min(1, event.clientY / Math.max(1, window.innerHeight) * 2 - 1));
+      target = composition();
+      schedule();
+    }
+
+    function resetPointer(event) {
+      if (event?.type === "pointerout" && event.relatedTarget) return;
+      pointerX = 0;
+      pointerY = 0;
+      target = composition();
+      schedule();
     }
 
     function resize() {
-      span = Math.max(560, Math.min(1100, window.innerHeight * 1.15));
-      target = washFor(travel);
+      span = Math.max(580, Math.min(1100, window.innerHeight * 0.95));
+      target = composition();
       schedule();
     }
 
     function preference() {
-      target = washFor(travel);
+      pointerX = 0;
+      pointerY = 0;
+      target = composition();
       if (motion?.matches) {
         window.cancelAnimationFrame(frame);
         frame = 0;
         previousTime = 0;
-        current = target;
-        write(current);
+        current = [...target];
+        write();
       } else schedule();
     }
 
@@ -20226,21 +20261,28 @@ function AmbientBackground() {
       }
     }
 
-    // Capture vertical movement in the page and its scrollable sections, including touch scrolling.
     document.addEventListener("scroll", scroll, { capture: true, passive: true });
     window.addEventListener("scroll", scroll, { passive: true });
+    window.addEventListener("pointermove", pointer, { passive: true });
+    window.addEventListener("pointerout", resetPointer, { passive: true });
+    window.addEventListener("blur", resetPointer);
     window.addEventListener("resize", resize, { passive: true });
     document.addEventListener("visibilitychange", visibility);
     motion?.addEventListener?.("change", preference);
-    if (motion?.matches) { current = target; write(current); }
-    else schedule();
+    finePointer?.addEventListener?.("change", preference);
+    write();
+    if (current.some((value, index) => Math.abs(target[index] - value) > 0.0005)) schedule();
 
     return () => {
       document.removeEventListener("scroll", scroll, true);
       window.removeEventListener("scroll", scroll);
+      window.removeEventListener("pointermove", pointer);
+      window.removeEventListener("pointerout", resetPointer);
+      window.removeEventListener("blur", resetPointer);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       motion?.removeEventListener?.("change", preference);
+      finePointer?.removeEventListener?.("change", preference);
       window.cancelAnimationFrame(frame);
     };
   }, [pathname]);
