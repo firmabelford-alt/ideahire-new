@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
+/* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
   useEffect,
@@ -13,7 +13,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -436,27 +436,14 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page">
-      <MarketplaceSwitch />
-      <MarketHeader eyebrow="Usługi" title="Gotowy pomysł na dobry efekt." description="Wybierz gotową usługę albo przejdź do freelancerów, poznaj ich profile i napisz o projekcie, który chcesz zlecić.">
-        <Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link>
-        <Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" /> Dodaj usługę</Link>
-      </MarketHeader>
-      <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług" />
+      <MarketCatalogHeader eyebrow="Usługi" title="Gotowy pomysł na dobry efekt." description="Wybierz gotową usługę albo przejdź do freelancerów, poznaj ich profile i napisz o projekcie, który chcesz zlecić."
+        tabs={<MarketplaceSwitch />} count={services.length} noun="services" status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined}
+        actions={<><Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link><Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />Dodaj usługę</Link></>}>
+        <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług" />
+      </MarketCatalogHeader>
 
       <section className="ih5-service-results" aria-live="polite">
-        <div className="ih5-service-results-heading">
-          <div>
-            <span className="ih5-service-eyebrow">Katalog</span>
-            <h2>
-              {selectedCategory === "Wszystkie"
-                ? "Wszystkie usługi"
-                : selectedCategory}
-            </h2>
-          </div>
-          <span className="ih5-service-results-count">
-            {loading ? "Ładowanie" : `${services.length} wyników`}
-          </span>
-        </div>
+<h2 className="ih5-sr-only">{selectedCategory === "Wszystkie" ? "Wszystkie usługi" : selectedCategory}</h2>
 
         {message && (
           <div className="ih5-service-notice is-error" role="alert">
@@ -1762,20 +1749,22 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
   }, [supabase, search, category, page, refresh]);
   return <div className="page ih-market-v5 ih5-service-page ih11-freelancers">
     <Navbar /><main className="ih-market-shell">
-      <MarketplaceSwitch active="freelancers" />
-      <MarketHeader eyebrow="Freelancerzy" title="Dobry projekt zaczyna się od dobrego kontaktu." description="Znajdź osobę po nazwie, umiejętnościach lub kategorii. Zobacz jej profil i portfolio, a potem napisz, co chcesz zlecić."><Link className="ih11-button is-quiet" to="/account#profile">Mój profil</Link></MarketHeader>
-      <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów" />
+      <MarketCatalogHeader eyebrow="Freelancerzy" title="Dobry projekt zaczyna się od dobrego kontaktu." description="Znajdź osobę po nazwie, umiejętnościach lub kategorii. Zobacz jej profil i portfolio, a potem napisz, co chcesz zlecić."
+        tabs={<MarketplaceSwitch active="freelancers" />} count={result.total} noun="profiles" status={loading ? "Szukamy freelancerów…" : error ? "Wyniki niedostępne" : undefined}
+        actions={<Link className="ih11-button is-quiet" to="/account#account-profile-data">Mój profil</Link>}>
+        <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów" />
+      </MarketCatalogHeader>
       <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
-        <div className="ih11-directory-heading"><h2>{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2><span role="status">{loading ? "Szukamy…" : `${result.total} ${result.total === 1 ? "profil" : "profili"}`}</span></div>
+        <h2 className="ih5-sr-only">{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2>
         {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
           {result.items.map((profile, index) => <article className="ih11-freelancer-card" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
             <div className="ih11-freelancer-person"><Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`Profil: ${profile.name || "freelancer"}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || "F")[0]}</span>}</Link><div><h3><Link to={`/profile/${profile.id}`}>{profile.name || "Freelancer"}</Link></h3><p>{profile.specialization || "Tworzę i realizuję projekty."}</p></div></div>
             <p className="ih11-freelancer-about">{profile.about || "Poznaj doświadczenie i portfolio na profilu."}</p>
             <div className="ih11-freelancer-skills">{(Array.isArray(profile.skills) ? profile.skills : []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div>
             <div className="ih11-freelancer-meta"><span>{Number(profile.completed_jobs) || 0} zakończonych zleceń</span><span>{Number(profile.positive_reviews) || 0} pozytywnych opinii</span></div>
-            <footer className="ih12-directory-contact"><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#profile">Edytuj profil</Link> : <div className="ih12-contact-actions"><button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "message" })} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Zapytaj o współpracę"}><MarketIcon kind="message" />Napisz wiadomość</button><button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "project" })}><MarketIcon kind="plus" />Zleć pracę</button></div>}</footer>
+            <footer className="ih12-directory-contact"><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#account-profile-data">Edytuj profil</Link> : <div className="ih12-contact-actions"><button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "message" })} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Zapytaj o współpracę"}><MarketIcon kind="message" />Napisz wiadomość</button><button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "project" })}><MarketIcon kind="plus" />Zleć pracę</button></div>}</footer>
           </article>)}
-        </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Tu spotkają się pomysły i umiejętności."}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#profile">Ustaw widoczność profilu</Link></div>}
+        </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Tu spotkają się pomysły i umiejętności."}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
         {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}
       </section>
       {selected && <ProjectInquiryDialog key={selected.mode} mode={selected.mode} profile={selected.profile} supabase={supabase} navigate={navigate} onClose={() => setSelected(null)} />}
