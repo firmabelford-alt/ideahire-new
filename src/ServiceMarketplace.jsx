@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/ServiceMarketplace.jsx */
+/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
   useEffect,
@@ -13,7 +13,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import { MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -1049,9 +1049,10 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
           <div className="ih5-service-modal-fields">
             <label>
               <span>Preferowany termin</span>
-              <input
+              <IdeaHireDateField
+                aria-label="Preferowany termin realizacji"
                 type="date"
-                min={new Date().toISOString().slice(0, 10)}
+                min={localProjectDate()}
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
               />
@@ -1647,7 +1648,7 @@ export function ProjectInquiryDialog({ profile, supabase, navigate, onClose, mod
             <h3 className="ih12-form-section"><span>02</span> Budżet i termin</h3>
             <div className="ih12-contact-grid">
               <div><label htmlFor={`${id}-budget`}>Proponowany budżet (PLN)<input id={`${id}-budget`} type="text" inputMode="decimal" value={budget} maxLength={12} onChange={(event) => setBudget(event.target.value)} disabled={sending || budgetOpen} placeholder={budgetOpen ? "Do ustalenia" : "Np. 1500"} required={!budgetOpen} /></label><label className="ih12-inline-check"><input type="checkbox" checked={budgetOpen} onChange={(event) => setBudgetOpen(event.target.checked)} disabled={sending} />Do ustalenia w rozmowie</label></div>
-              <div><label htmlFor={`${id}-deadline`}>Oczekiwany termin<input id={`${id}-deadline`} type="date" min={localProjectDate()} value={deadline} onChange={(event) => setDeadline(event.target.value)} disabled={sending || deadlineOpen} required={!deadlineOpen} /></label><label className="ih12-inline-check"><input type="checkbox" checked={deadlineOpen} onChange={(event) => setDeadlineOpen(event.target.checked)} disabled={sending} />Do ustalenia w rozmowie</label></div>
+              <div><label htmlFor={`${id}-deadline`}>Oczekiwany termin<IdeaHireDateField aria-label="Oczekiwany termin realizacji" id={`${id}-deadline`} type="date" min={localProjectDate()} value={deadline} onChange={(event) => setDeadline(event.target.value)} disabled={sending || deadlineOpen} required={!deadlineOpen} /></label><label className="ih12-inline-check"><input type="checkbox" checked={deadlineOpen} onChange={(event) => setDeadlineOpen(event.target.checked)} disabled={sending} />Do ustalenia w rozmowie</label></div>
             </div>
             <small>Budżet dotyczy wynagrodzenia wykonawcy. Ostateczną cenę i opłatę IdeaHire zobaczysz przed płatnością.</small>
             <h3 className="ih12-form-section"><span>03</span> Materiały i przekazanie</h3>
