@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 25 | 2026-10-10 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 27 | 2026-10-10 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -29,7 +29,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, helpCenterHref } from "./MarketUI";
 import { useSitePreferences } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -5505,6 +5505,10 @@ function AccountNavbar() {
             >
               Prywatność i dane
             </NavLink>
+
+            <a href={helpCenterHref()} onClick={closeAccountMenu} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
+              <MarketIcon kind="help" /><span>Pomoc</span>
+            </a>
 
             <div className="account-menu-divider" />
 
