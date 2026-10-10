@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="pl" data-theme="light" data-template="current">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Centrum pomocy IdeaHire. Instrukcje dotyczące konta, zleceń, usług, wiadomości, planu współpracy, płatności i sporów.">
+  <title>Centrum pomocy — IdeaHire</title>
+  <style>
+    :root { color-scheme: light; --bg:#f6f8fc; --surface:#fff; --soft:#eef2f8; --ink:#18263d; --muted:#4e6078; --line:#d6deea; --accent:#355b93; --on-accent:#fff; --glow:#dde7f5; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    :root[data-theme="dark"] { color-scheme:dark; --bg:#101a2b; --surface:#18253b; --soft:#21324c; --ink:#f4f7fc; --muted:#b9c8df; --line:#394c69; --accent:#b2cef8; --on-accent:#162741; --glow:#203552; }
+    :root[data-template="classic"] { --bg:#fafafa; --surface:#fff; --soft:#f0f0f0; --ink:#202020; --muted:#5b5b5b; --line:#d9d9d9; --accent:#222; --on-accent:#fff; --glow:#e7e7e7; }
+    :root[data-template="classic"][data-theme="dark"] { --bg:#161616; --surface:#212121; --soft:#2b2b2b; --ink:#f5f5f5; --muted:#c1c1c1; --line:#494949; --accent:#ededed; --on-accent:#202020; --glow:#2d2d2d; }
+    *,*::before,*::after { box-sizing:border-box; }
+    body { margin:0; min-height:100svh; color:var(--ink); background:radial-gradient(ellipse at 90% 0,var(--glow),transparent 55%) fixed,var(--bg); font-size:15px; line-height:1.65; }
+    button,input,a { -webkit-tap-highlight-color:transparent; }
+    button,input { font:inherit; color:inherit; }
+    button,a { touch-action:manipulation; }
+    button { cursor:pointer; }
+    a { color:var(--accent); text-underline-offset:4px; }
+    svg { width:20px; height:20px; display:block; flex:none; }
+    [hidden] { display:none !important; }
+    :focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    .sr { position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+    .skip { position:fixed; left:16px; top:12px; z-index:50; padding:12px 18px; background:var(--surface); transform:translateY(-200%); }
+    .skip:focus { transform:translateY(0); }
+    .shell { max-width:1160px; margin:0 auto; padding:0 28px; }
+    .site-header { display:flex; justify-content:space-between; align-items:center; gap:24px; min-height:92px; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:18px; text-decoration:none; color:var(--ink); }
+    .brand strong { font-size:25px; font-weight:800; letter-spacing:-.06em; }
+    .brand span { padding-left:18px; border-left:1px solid var(--line); color:var(--muted); font-size:13px; }
+    .header-actions { display:flex; gap:10px; align-items:center; }
+    .return-link { display:flex; gap:8px; align-items:center; min-height:44px; color:var(--ink); text-decoration:none; font-size:13px; font-weight:600; }
+    .mode-toggle { display:grid; place-items:center; width:44px; height:44px; border:1px solid var(--line); border-radius:50%; background:var(--surface); }
+    .hero { padding:70px 0 38px; max-width:790px; margin:0 auto; text-align:center; }
+    .eyebrow { display:block; color:var(--muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.14em; }
+    h1,h2,h3,p { margin-top:0; }
+    h1 { font-size:clamp(32px,4vw,48px); line-height:1.17; letter-spacing:-.045em; margin:12px 0 18px; }
+    .hero > p { color:var(--muted); max-width:54ch; margin:0 auto; font-size:16px; }
+    .search-wrap { position:relative; margin-top:30px; text-align:left; }
+    .search { display:flex; align-items:center; gap:14px; min-height:68px; padding:8px 18px; border:1px solid var(--line); border-radius:18px; background:var(--surface); box-shadow:0 12px 28px color-mix(in srgb,var(--ink) 5%,transparent); }
+    .search:focus-within { outline:2px solid var(--accent); outline-offset:3px; }
+    .search > svg { width:24px; height:24px; color:var(--muted); }
+    .search input { flex:1; width:100%; min-width:0; border:0; padding:12px 0; outline:0; background:transparent; font-size:16px; }
+    .search input::placeholder { color:var(--muted); opacity:1; }
+    .clear-search { display:grid; place-items:center; width:40px; height:40px; border:0; border-radius:10px; background:var(--soft); color:var(--muted); }
+    .suggestions { position:absolute; top:calc(100% + 8px); left:0; right:0; z-index:10; list-style:none; padding:8px; margin:0; border:1px solid var(--line); border-radius:16px; background:var(--surface); box-shadow:0 16px 36px color-mix(in srgb,var(--ink) 12%,transparent); }
+    .suggestions li { border-radius:10px; }
+    .suggestions li[aria-selected="true"] { background:var(--soft); }
+    .suggestions button { display:flex; align-items:center; gap:12px; width:100%; min-height:48px; padding:12px; border:0; background:transparent; text-align:left; font-size:14px; line-height:1.4; }
+    .suggestions button span { flex:1; }
+    .search-hints { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:4px 12px; margin-top:14px; color:var(--muted); font-size:12px; }
+    .search-hints button { min-height:36px; padding:4px 0; border:0; background:transparent; color:var(--accent); font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+    .topics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:0 0 34px; }
+    .topic { display:flex; align-items:center; justify-content:flex-start; gap:10px; min-width:0; min-height:62px; padding:14px 16px; border:1px solid var(--line); border-radius:14px; background:var(--surface); text-align:left; font-size:13px; line-height:1.4; font-weight:600; }
+    .topic svg { width:18px; height:18px; color:var(--muted); }
+    .topic[aria-pressed="true"] { border-color:var(--accent); background:var(--soft); }
+    .topic span { min-width:0; }
+    .results-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin:0 0 18px; }
+    .results-heading h2 { margin:0; font-size:21px; line-height:1.35; letter-spacing:-.02em; }
+    .results-heading p { margin:0; font-size:12px; color:var(--muted); }
+    .results { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .article-card { display:flex; flex-direction:column; gap:10px; padding:24px; border:1px solid var(--line); border-radius:18px; background:var(--surface); text-decoration:none; color:var(--ink); transition:border-color .18s ease,transform .18s ease; }
+    .article-card .category { color:var(--muted); font-size:11px; font-weight:600; }
+    .article-card h3 { margin:0; font-size:17px; line-height:1.45; letter-spacing:-.02em; }
+    .article-card p { flex:1; margin:0; font-size:13px; color:var(--muted); }
+    .article-card .read { display:flex; align-items:center; gap:8px; margin-top:4px; font-size:12px; color:var(--accent); font-weight:600; }
+    .article-card .read svg { width:16px; height:16px; }
+    mark { color:var(--ink); background:var(--soft); font-weight:700; padding:0 2px; }
+    .no-results { grid-column:1/-1; text-align:center; padding:42px 24px; border:1px dashed var(--line); border-radius:18px; }
+    .no-results h3 { margin:0 0 12px; font-size:21px; }
+    .no-results p { color:var(--muted); margin-bottom:20px; }
+    .text-button { border:0; background:transparent; color:var(--accent); padding:10px 0; min-height:44px; font-weight:600; }
+    .article-view { max-width:790px; margin:40px auto 0; }
+    .article-back { display:inline-flex; align-items:center; gap:8px; min-height:44px; margin-bottom:24px; font-size:13px; font-weight:600; text-decoration:none; }
+    .article-body { padding:clamp(24px,4vw,40px); border:1px solid var(--line); border-radius:22px; background:var(--surface); }
+    .article-body h1 { font-size:clamp(28px,3vw,38px); margin:12px 0 18px; }
+    .article-summary { color:var(--muted); font-size:16px; margin-bottom:30px; }
+    .steps { counter-reset:step; padding:0; margin:0; list-style:none; }
+    .steps li { counter-increment:step; position:relative; padding:0 0 25px 46px; font-size:15px; line-height:1.8; overflow-wrap:anywhere; }
+    .steps li::before { content:counter(step); display:grid; place-items:center; position:absolute; left:0; top:2px; width:30px; height:30px; border:1px solid var(--line); border-radius:50%; background:var(--soft); font-size:12px; font-weight:700; }
+    .article-note { margin:8px 0 0; padding:18px 20px; border-left:3px solid var(--accent); border-radius:0 12px 12px 0; background:var(--soft); font-size:13px; line-height:1.8; }
+    .article-action { display:inline-flex; align-items:center; justify-content:center; gap:10px; margin-top:26px; padding:13px 18px; min-height:48px; border-radius:12px; background:var(--accent); color:var(--on-accent); font-weight:600; font-size:13px; text-decoration:none; }
+    .article-legal { margin:24px 0 0; color:var(--muted); font-size:12px; line-height:1.7; }
+    .related { margin:30px 0 0; }
+    .related h2 { font-size:19px; margin-bottom:14px; }
+    .related a { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:14px 0; min-height:48px; border-bottom:1px solid var(--line); color:var(--ink); font-size:14px; text-decoration:none; }
+    .contact-section { margin:54px 0 40px; padding:30px; border:1px solid var(--line); border-radius:22px; background:var(--surface); }
+    .contact-section h2 { margin:0 0 10px; font-size:24px; line-height:1.3; letter-spacing:-.03em; }
+    .contact-section > p { color:var(--muted); font-size:14px; max-width:68ch; }
+    .contacts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; margin-top:25px; }
+    .contacts > div { display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-width:0; }
+    .contacts h3 { margin:0; font-size:14px; }
+    .contacts a { display:inline-block; min-height:36px; padding:4px 0; font-size:13px; overflow-wrap:anywhere; }
+    .contacts p { margin:0; color:var(--muted); font-size:12px; }
+    .contact-note { padding-top:22px; margin:22px 0 0; border-top:1px solid var(--line); font-size:12px !important; }
+    .site-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px; border-top:1px solid var(--line); padding:26px 0 32px; color:var(--muted); font-size:12px; }
+    .site-footer nav { display:flex; flex-wrap:wrap; gap:18px; }
+    .site-footer a { color:var(--muted); min-height:36px; display:inline-flex; align-items:center; }
+    @media (hover:hover) and (pointer:fine) { .article-card:hover { border-color:var(--accent); transform:translateY(-2px); } .topic:hover,.suggestions li:hover { background:var(--soft); } }
+    @media (max-width:800px) { .shell { padding:0 20px; } .brand { gap:12px; } .brand span { font-size:12px; padding-left:12px; } .return-link span { display:none; } .hero { padding:44px 0 30px; } .topics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .contacts { grid-template-columns:minmax(0,1fr); gap:22px; } .contacts > div + div { border-top:1px solid var(--line); padding-top:20px; } }
+    @media (max-width:520px) { .shell { padding:0 16px; } .site-header { min-height:78px; gap:12px; } .brand { display:block; } .brand strong { font-size:23px; } .brand span { display:block; padding:0; border:0; font-size:11px; line-height:1.3; } .header-actions { gap:6px; } .return-link { width:40px; justify-content:center; } .hero { padding-top:36px; } h1 { font-size:32px; } .hero > p { font-size:14px; } .search { padding:7px 12px; gap:9px; min-height:60px; border-radius:15px; } .search input { font-size:16px; } .search > svg { width:20px; } .topic { padding:12px; font-size:12px; min-height:58px; gap:8px; } .results { grid-template-columns:minmax(0,1fr); } .article-card { padding:20px; } .article-card h3 { font-size:17px; } .contact-section { margin-top:36px; padding:22px; } .contact-section h2 { font-size:22px; } .article-view { margin-top:26px; } .article-back { margin-bottom:14px; } .article-body { padding:22px; border-radius:18px; } .article-body h1 { font-size:28px; } .steps li { padding-left:38px; font-size:14px; } .steps li::before { width:26px; height:26px; } .article-action { width:100%; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation:none !important; transition:none !important; } }
+    @media (forced-colors:active) { .topic[aria-pressed="true"],.suggestions li[aria-selected="true"] { outline:2px solid Highlight; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Przejdź do treści</a>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" data-app-path="/" href="https://ideahire-new.pages.dev/"><strong>IdeaHire</strong><span>Centrum pomocy</span></a>
+      <div class="header-actions"><a class="return-link" data-app-path="/account" href="https://ideahire-new.pages.dev/account" aria-label="Wróć do IdeaHire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg><span>Wróć do IdeaHire</span></a><button class="mode-toggle" id="mode-toggle" type="button" aria-label="Włącz ciemny wygląd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.5 14.1A9 9 0 0 1 9.9 3.5a9 9 0 1 0 10.6 10.6Z"/></svg></button></div>
+    </header>
+    <main id="main">
+      <section id="help-home" aria-labelledby="help-title">
+        <div class="hero"><span class="eyebrow">Instrukcje. Odpowiedzi. Wsparcie.</span><h1 id="help-title">W czym możemy pomóc?</h1><p>Znajdź odpowiedź i przejdź przez kolejny krok współpracy. Prosto, w swoim tempie.</p>
+          <div class="search-wrap" id="search-wrap"><form class="search" id="search-form" role="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m20 20-4.2-4.2M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg><label class="sr" for="help-query">Szukaj instrukcji w centrum pomocy</label><input id="help-query" type="search" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="suggestions" placeholder="Szukaj, np. konto, plan, spór…" autocomplete="off" maxlength="160"><button class="clear-search" id="clear-search" type="button" aria-label="Wyczyść wyszukiwanie" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></form><ul class="suggestions" id="suggestions" role="listbox" aria-label="Podpowiedzi instrukcji" hidden></ul></div>
+          <div class="search-hints"><span>Popularne:</span><button type="button" data-search="konto">konto</button><button type="button" data-search="plan współpracy">plan współpracy</button><button type="button" data-search="spór">spór</button><button type="button" data-search="pliki">pliki</button></div>
+        </div>
+        <nav class="topics" id="topics" aria-label="Tematy centrum pomocy"></nav>
+        <section aria-labelledby="results-title"><div class="results-heading"><h2 id="results-title">Od tego warto zacząć</h2><p id="results-status" role="status" aria-live="polite" aria-atomic="true"></p></div><div class="results" id="results"></div></section>
+      </section>
+      <section class="article-view" id="article-view" hidden aria-label="Instrukcja pomocy" tabindex="-1"><a class="article-back" href="#" id="article-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg>Wróć do centrum pomocy</a><article class="article-body" id="article-body"></article><nav class="related" id="related" aria-label="Powiązane instrukcje"></nav></section>
+      <section class="contact-section" aria-labelledby="contact-title"><h2 id="contact-title">Potrzebujesz pomocy w swojej sprawie?</h2><p>Wyszukiwarka pokazuje instrukcje. Aby przekazać problem administracji, użyj odpowiedniego kontaktu lub formularza sprawy w IdeaHire.</p><div class="contacts"><div><h3>Pomoc ogólna</h3><a href="mailto:ideahire26@gmail.com">ideahire26@gmail.com</a><p>Pytania o konto i korzystanie z serwisu.</p></div><div><h3>Reklamacje</h3><a href="mailto:ideahirereklamacja@gmail.com">ideahirereklamacja@gmail.com</a><p>Reklamacje dotyczące usług platformy.</p></div><div><h3>Prywatność i zgłoszenia</h3><a href="mailto:ideahireprywatnosc@gmail.com">ideahireprywatnosc@gmail.com</a><p>Dane osobowe i zgłoszenia nielegalnych treści.</p></div></div><p class="contact-note">Nigdy nie wysyłaj hasła, kodów logowania ani pełnych danych karty. Centrum pomocy nie prosi o logowanie. Frazy wyszukiwania są przetwarzane w tej stronie i nie są wysyłane jako zgłoszenia.</p></section>
+    </main>
+    <footer class="site-footer"><span>IdeaHire · Centrum pomocy</span><nav aria-label="Dokumenty i zasady"><a data-app-path="/regulamin" href="https://ideahire-new.pages.dev/regulamin">Regulamin</a><a data-app-path="/polityka-prywatnosci" href="https://ideahire-new.pages.dev/polityka-prywatnosci">Polityka prywatności</a><a data-app-path="/polityka-cookies" href="https://ideahire-new.pages.dev/polityka-cookies">Polityka cookies</a></nav></footer>
+    <noscript><p>Włącz JavaScript, aby przeszukiwać instrukcje. Możesz też skorzystać z kontaktów i odnośników do dokumentów powyżej.</p></noscript>
+  </div>
+  <script id="help-articles" type="application/json">[
+  {
+    "id": "zaloz-konto",
+    "category": "konto",
+    "title": "Jak założyć konto w IdeaHire?",
+    "summary": "Rejestracja przez e-mail lub Google, wymagane dane i pierwsze logowanie.",
+    "keywords": [
+      "konto",
+      "rejestracja",
+      "zarejestruj",
+      "założenie",
+      "logowanie",
+      "email",
+      "google"
+    ],
+    "steps": [
+      "Otwórz rejestrację i wybierz, czy chcesz zlecać pracę, oferować usługi czy korzystać z obu możliwości. Ten wybór personalizuje konto; nie określa Twojego statusu podatkowego.",
+      "Przy rejestracji przez e-mail podaj imię lub nazwę, adres e-mail, datę urodzenia i hasło. Przeczytaj dokumenty oraz potwierdź wymagane pola w formularzu.",
+      "Jeśli formularz poprosi o potwierdzenie adresu, otwórz wiadomość otrzymaną na swoją skrzynkę. Po rejestracji zaloguj się i uzupełnij profil."
+    ],
+    "note": "Nie wpisuj danych innej osoby. Data urodzenia służy do ustalenia uprawnień konta i nie jest pokazywana w publicznym profilu.",
+    "action": {
+      "label": "Przejdź do rejestracji",
+      "path": "/register"
+    }
+  },
+  {
+    "id": "wiek-konta",
+    "category": "konto",
+    "title": "Jaki wiek jest wymagany do korzystania z konta?",
+    "summary": "Różnica między pełnym kontem 18+ a kontem ograniczonym 16–17.",
+    "keywords": [
+      "konto",
+      "wiek",
+      "urodzenie",
+      "data",
+      "16",
+      "17",
+      "18",
+      "pełnoletność",
+      "ograniczone"
+    ],
+    "steps": [
+      "Podaj swoją prawdziwą datę urodzenia. Formularz pokaże dostępny rodzaj konta.",
+      "Konto pełne 18+ udostępnia funkcje współpracy dostępne dla pełnoletnich użytkowników. Konto 16–17 jest ograniczone i służy do przeglądania zgodnie z komunikatami w serwisie.",
+      "Jeśli konkretna funkcja jest niedostępna, przeczytaj komunikat o uprawnieniach. Nie zakładaj kolejnego konta z inną datą, aby ominąć ograniczenie."
+    ],
+    "note": "Szczegółowe zasady wieku i uprawnień znajdziesz w Regulaminie. Osoby poniżej minimalnego wieku nie mogą aktywować konta.",
+    "action": {
+      "label": "Przeczytaj Regulamin",
+      "path": "/regulamin"
+    }
+  },
+  {
+    "id": "google-konto",
+    "category": "konto",
+    "title": "Jak zarejestrować się lub zalogować przez Google?",
+    "summary": "Logowanie Google i uzupełnienie danych wymaganych przez IdeaHire.",
+    "keywords": [
+      "konto",
+      "google",
+      "gmail",
+      "logowanie",
+      "oauth",
+      "rejestracja"
+    ],
+    "steps": [
+      "Na stronie logowania lub rejestracji wybierz przycisk Google. W rejestracji najpierw określ sposób korzystania z IdeaHire.",
+      "Wybierz właściwe konto w oknie Google. Nie przekazuj nikomu swojego hasła ani kodów do tego konta.",
+      "Po powrocie uzupełnij dane i potwierdzenia wymagane przez IdeaHire. Samo zalogowanie przez Google nie omija ograniczeń wieku ani zasad serwisu."
+    ],
+    "note": "Komunikat przy przycisku Google wyjaśnia przekazywane dane. Publiczne zdjęcie profilu ustawisz w swoim koncie.",
+    "action": {
+      "label": "Otwórz logowanie",
+      "path": "/login"
+    }
+  },
+  {
+    "id": "potwierdzenie-email",
+    "category": "konto",
+    "title": "Nie otrzymuję wiadomości z potwierdzeniem konta",
+    "summary": "Co sprawdzić, gdy e-mail aktywacyjny nie dociera albo link nie działa.",
+    "keywords": [
+      "konto",
+      "email",
+      "potwierdzenie",
+      "aktywacja",
+      "spam",
+      "link",
+      "skrzynka"
+    ],
+    "steps": [
+      "Sprawdź poprawność adresu podanego przy rejestracji oraz foldery Spam, Oferty i Powiadomienia.",
+      "Jeżeli dostępne jest ponowne wysłanie potwierdzenia, skorzystaj z niego i otwórz najnowszą wiadomość. Starszy link może być już nieaktualny.",
+      "Jeśli problem pozostaje, skontaktuj się z pomocą. Podaj opis błędu i przybliżony czas próby, ale nie wysyłaj hasła ani pełnego linku zawierającego kod logowania."
+    ],
+    "action": {
+      "label": "Otwórz logowanie",
+      "path": "/login"
+    }
+  },
+  {
+    "id": "odzyskaj-haslo",
+    "category": "konto",
+    "title": "Jak odzyskać dostęp do konta?",
+    "summary": "Reset hasła oraz bezpieczne postępowanie przy problemach z logowaniem.",
+    "keywords": [
+      "konto",
+      "hasło",
+      "haslo",
+      "reset",
+      "zapomniałem",
+      "logowanie",
+      "dostęp"
+    ],
+    "steps": [
+      "Na stronie logowania wybierz opcję odzyskania hasła i podaj adres przypisany do konta.",
+      "Otwórz najnowszą wiadomość z instrukcją. Ustaw nowe, nieużywane w innych usługach hasło.",
+      "Jeśli korzystasz z Google, odzyskanie dostępu do konta Google odbywa się po stronie Google. Gdy nadal nie możesz wejść do IdeaHire, opisz problem pomocy."
+    ],
+    "note": "Administracja nie potrzebuje Twojego hasła, kodów jednorazowych ani numeru karty.",
+    "action": {
+      "label": "Przejdź do logowania",
+      "path": "/login"
+    }
+  },
+  {
+    "id": "centrum-profilu",
+    "category": "profil",
+    "title": "Jak otworzyć funkcje centrum profilu?",
+    "summary": "Koło centrum profilu i przejście do danych, portfolio, zleceń oraz ustawień.",
+    "keywords": [
+      "konto",
+      "profil",
+      "centrum",
+      "koło",
+      "kółko",
+      "dane",
+      "ustawienia",
+      "szablon"
+    ],
+    "steps": [
+      "Wejdź w Konto. Początkowy widok pokazuje koło Centrum profilu.",
+      "Kliknij koło lub użyj klawiatury, aby rozwinąć połączone sekcje. Wybierz Dane profilu, Specjalizację, Portfolio, Zlecenia, Ustawienia lub Szablony.",
+      "Po otwarciu sekcji użyj przycisku Centrum profilu, aby wrócić do wyboru. Przed opuszczeniem edytowanego formularza zapisz zmiany."
+    ],
+    "action": {
+      "label": "Otwórz centrum profilu",
+      "path": "/account"
+    }
+  },
+  {
+    "id": "edytuj-profil",
+    "category": "profil",
+    "title": "Jak uzupełnić dane profilu i specjalizację?",
+    "summary": "Zdjęcie, nazwa, opis, kraj oraz umiejętności widoczne dla innych osób.",
+    "keywords": [
+      "konto",
+      "profil",
+      "zdjęcie",
+      "avatar",
+      "nazwa",
+      "opis",
+      "specjalizacja",
+      "umiejętności",
+      "dane"
+    ],
+    "steps": [
+      "W centrum profilu otwórz Dane profilu. Ustaw zdjęcie, nazwę, opis i dostępne informacje o lokalizacji.",
+      "W Specjalizacji wybierz dziedziny, opisz doświadczenie i dodaj konkretne umiejętności. Formularz informuje o limitach liczby pozycji.",
+      "Zapisz zmiany i sprawdź publiczny profil. Publikuj wyłącznie informacje i materiały, do których masz prawa."
+    ],
+    "note": "Nie umieszczaj w opisie haseł, danych karty ani danych klienta bez uprawnienia do ich ujawnienia.",
+    "action": {
+      "label": "Edytuj dane profilu",
+      "path": "/account#account-profile-data"
+    }
+  },
+  {
+    "id": "portfolio",
+    "category": "profil",
+    "title": "Jak dodać realizacje do portfolio?",
+    "summary": "Projekty, opisy i materiały pokazujące doświadczenie freelancera.",
+    "keywords": [
+      "konto",
+      "profil",
+      "portfolio",
+      "realizacje",
+      "projekt",
+      "zdjęcia",
+      "prace"
+    ],
+    "steps": [
+      "Otwórz Portfolio w centrum profilu i wybierz dodanie realizacji.",
+      "Uzupełnij tytuł oraz opis, a następnie dodaj obsługiwane materiały lub odnośniki. Opisz swój rzeczywisty udział w projekcie.",
+      "Zapisz realizację i sprawdź jej widoczność na profilu. Poufnych materiałów klienta nie publikuj bez odpowiednich praw lub zgody."
+    ],
+    "note": "Brak portfolio nie oznacza błędu strony. Przeglądający widzi informację, że freelancer nie dodał jeszcze realizacji.",
+    "action": {
+      "label": "Otwórz portfolio",
+      "path": "/account#account-portfolio"
+    }
+  },
+  {
+    "id": "widocznosc-freelancera",
+    "category": "profil",
+    "title": "Dlaczego nie widać mnie w katalogu freelancerów?",
+    "summary": "Ustawienia widoczności oraz zgoda na nowe zapytania o współpracę.",
+    "keywords": [
+      "konto",
+      "profil",
+      "widoczność",
+      "freelancer",
+      "katalog",
+      "zapytania",
+      "niewidoczny"
+    ],
+    "steps": [
+      "Otwórz dane profilu i znajdź ustawienia widoczności w katalogu oraz przyjmowania zapytań.",
+      "Ustaw wybrane opcje i zapisz je przyciskiem widoczności. Uzupełnij nazwę i specjalizację, żeby łatwiej było Cię odnaleźć.",
+      "Sprawdź katalog z wyczyszczonymi filtrami. Ograniczenia konta lub wyłączone zapytania mogą wpływać na możliwość kontaktu."
+    ],
+    "action": {
+      "label": "Sprawdź ustawienia profilu",
+      "path": "/account#account-profile-data"
+    }
+  },
+  {
+    "id": "dodaj-zlecenie",
+    "category": "zlecenia",
+    "title": "Jak dodać zlecenie?",
+    "summary": "Opis projektu, zakres, budżet i informacje potrzebne wykonawcy.",
+    "keywords": [
+      "zlecenie",
+      "zlecenia",
+      "dodaj",
+      "klient",
+      "zlecam",
+      "ogłoszenie",
+      "budżet",
+      "termin"
+    ],
+    "steps": [
+      "Na pełnym koncie wybierz Dodaj zlecenie. Nadaj projektowi konkretny tytuł i wybierz odpowiednią kategorię.",
+      "Opisz oczekiwany rezultat, zakres pracy, termin, sposób przekazania materiałów oraz informacje o budżecie wymagane w formularzu.",
+      "Przejrzyj podsumowanie i opublikuj zlecenie. Szczegóły współpracy z wybraną osobą uzgodnicie później w jej rozmowie."
+    ],
+    "note": "Opis ogłoszenia pomaga znaleźć wykonawcę; plan zaakceptowany przez obie strony zapisuje konkretne warunki współpracy.",
+    "action": {
+      "label": "Dodaj zlecenie",
+      "path": "/find-talent"
+    }
+  },
+  {
+    "id": "znajdz-zlecenie",
+    "category": "zlecenia",
+    "title": "Jak znaleźć zlecenie i zgłosić zainteresowanie?",
+    "summary": "Wyszukiwarka, kategorie, kolejność wyników i kontakt z klientem.",
+    "keywords": [
+      "zlecenie",
+      "zlecenia",
+      "szukam",
+      "wykonawca",
+      "freelancer",
+      "zgłoszenie",
+      "oferta",
+      "filtry"
+    ],
+    "steps": [
+      "Otwórz Zlecenia. Wpisz temat lub umiejętność i wybierz kategorię. Licznik w ramce pokazuje wyniki bieżącego wyszukiwania.",
+      "Otwórz interesujące zlecenie i przeczytaj zakres, budżet oraz wymagania. Wyczyść filtry, jeśli chcesz ponownie zobaczyć całą listę.",
+      "Użyj dostępnej akcji kontaktu lub zgłoszenia. Funkcje współpracy wymagają odpowiednich uprawnień konta."
+    ],
+    "action": {
+      "label": "Przeglądaj zlecenia",
+      "path": "/jobs"
+    }
+  },
+  {
+    "id": "moje-zlecenia",
+    "category": "zlecenia",
+    "title": "Gdzie edytować własne zlecenia?",
+    "summary": "Własne ogłoszenia i dostępne działania w centrum profilu.",
+    "keywords": [
+      "konto",
+      "zlecenie",
+      "zlecenia",
+      "moje",
+      "edycja",
+      "ogłoszenie",
+      "publikacja"
+    ],
+    "steps": [
+      "W centrum profilu wybierz Zlecenia. Zobaczysz ogłoszenia przypisane do Twojego konta.",
+      "Przy właściwym ogłoszeniu wybierz dostępną akcję edycji lub zarządzania i zapisz zmiany.",
+      "Zmiana treści ogłoszenia nie zastępuje zmiany zaakceptowanych warunków w rozmowie. Aktualizację ustaleń uzgodnij z drugą stroną w planie."
+    ],
+    "action": {
+      "label": "Otwórz moje zlecenia",
+      "path": "/account#account-jobs"
+    }
+  },
+  {
+    "id": "usluga-czy-freelancer",
+    "category": "uslugi",
+    "title": "Czym różnią się usługi od katalogu freelancerów?",
+    "summary": "Gotowa oferta usługi albo osoba, z którą uzgodnisz własny projekt.",
+    "keywords": [
+      "usługi",
+      "uslugi",
+      "freelancer",
+      "katalog",
+      "wykonawca",
+      "oferta",
+      "różnica"
+    ],
+    "steps": [
+      "W Usługach szukasz opublikowanej oferty z opisanym rezultatem. Otwórz ofertę, aby sprawdzić, co obejmuje.",
+      "W katalogu Freelancerzy szukasz osoby po umiejętnościach, nazwie lub kategorii. Otwórz profil, aby zobaczyć opis i portfolio.",
+      "Przełącznik w nagłówku pozwala przejść między oboma katalogami. Wybierz sposób kontaktu odpowiedni do swojego projektu."
+    ],
+    "action": {
+      "label": "Otwórz katalog usług",
+      "path": "/services"
+    }
+  },
+  {
+    "id": "zlec-freelancerowi",
+    "category": "uslugi",
+    "title": "Jak napisać do freelancera lub zlecić mu pracę?",
+    "summary": "Wiadomość wstępna i zapytanie zawierające szczegóły konkretnego projektu.",
+    "keywords": [
+      "freelancer",
+      "wiadomość",
+      "napisz",
+      "kontakt",
+      "zleć",
+      "praca",
+      "zapytanie",
+      "projekt"
+    ],
+    "steps": [
+      "Znajdź osobę w katalogu i otwórz jej profil. Sprawdź specjalizację, realizacje i dostępność nowych zapytań.",
+      "Wybierz Napisz wiadomość, aby zapytać o współpracę, albo Zleć pracę, aby opisać konkretny projekt w pełniejszym formularzu.",
+      "Uzupełnij wymagane informacje i potwierdzenia. Po wysłaniu kontynuuj rozmowę w Wiadomościach i zapisz warunki w planie współpracy."
+    ],
+    "note": "Nie wysyłaj masowych reklam ani zapytań niezwiązanych z oferowaną współpracą. Wyłączenie zapytań przez freelancera należy uszanować.",
+    "action": {
+      "label": "Znajdź freelancera",
+      "path": "/freelancers"
+    }
+  },
+  {
+    "id": "opublikuj-usluge",
+    "category": "uslugi",
+    "title": "Jak dodać i zarządzać własną usługą?",
+    "summary": "Publikacja oferty i przejście do Moich usług.",
+    "keywords": [
+      "usługi",
+      "usługa",
+      "usluga",
+      "dodaj",
+      "oferuję",
+      "oferta",
+      "moje",
+      "publikacja"
+    ],
+    "steps": [
+      "Na koncie z właściwymi uprawnieniami otwórz Usługi i wybierz Dodaj usługę.",
+      "Opisz rezultat, zakres oferty i wymagane informacje z formularza. Jasno wskaż, jakie materiały powinien przekazać klient.",
+      "Zapisz ofertę. Kolejne zmiany wykonasz w Moich usługach. Przed rozpoczęciem konkretnej realizacji potwierdź warunki z klientem w rozmowie."
+    ],
+    "action": {
+      "label": "Dodaj usługę",
+      "path": "/services/new"
+    }
+  },
+  {
+    "id": "zapytanie-usluga",
+    "category": "uslugi",
+    "title": "Czy wysłanie zapytania o usługę rozpoczyna płatną współpracę?",
+    "summary": "Zapytanie, propozycja warunków i potwierdzenie obu stron.",
+    "keywords": [
+      "usługa",
+      "usługi",
+      "zapytanie",
+      "rezerwacja",
+      "oferta",
+      "płatność",
+      "akceptacja"
+    ],
+    "steps": [
+      "Przeczytaj ofertę i wyślij zapytanie z informacjami potrzebnymi wykonawcy.",
+      "Ustalcie w rozmowie zakres, cenę, termin i sposób przekazania pracy. Sprawdź plan oraz aktualny komunikat o dostępności lub rezerwacji.",
+      "Samo wysłanie zapytania nie jest potwierdzeniem opłacenia projektu. Dalsze działania podejmuj według statusu warunków i płatności w rozmowie."
+    ],
+    "action": {
+      "label": "Przeglądaj usługi",
+      "path": "/services"
+    }
+  },
+  {
+    "id": "otworz-rozmowe",
+    "category": "wspolpraca",
+    "title": "Jak korzystać z Wiadomości na telefonie i komputerze?",
+    "summary": "Lista rozmów, wyszukiwanie, historia i przełączanie przestrzeni projektu.",
+    "keywords": [
+      "wiadomości",
+      "wiadomosci",
+      "czat",
+      "rozmowa",
+      "telefon",
+      "komunikator",
+      "nieprzeczytane"
+    ],
+    "steps": [
+      "Otwórz Wiadomości. Wyszukaj osobę lub projekt albo wybierz filtr Nieprzeczytane.",
+      "Kliknij rozmowę. Na większym ekranie lista może pozostać obok; na telefonie przycisk listy w nagłówku pozwala przełączyć rozmowę.",
+      "Napisz w polu na dole i wybierz Wyślij. Na klawiaturze Enter wysyła, a Shift + Enter dodaje nową linię. Pliki i Plan współpracy otworzysz nad historią."
+    ],
+    "action": {
+      "label": "Otwórz wiadomości",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "plan-wspolpracy",
+    "category": "wspolpraca",
+    "title": "Co wpisać do planu współpracy?",
+    "summary": "Zakres, rezultat, cena, termin i zasady przekazania pracy w osobnych polach.",
+    "keywords": [
+      "plan",
+      "współpraca",
+      "wspolpraca",
+      "ustalenia",
+      "warunki",
+      "zakres",
+      "termin",
+      "cena",
+      "formularz"
+    ],
+    "steps": [
+      "W rozmowie otwórz Plan współpracy. Osoba uprawniona do złożenia propozycji uzupełnia formularz lub otwiera jego edycję.",
+      "Opisz oczekiwany rezultat i zakres pracy, uzgodnioną cenę, termin oraz pozostałe wymagane zasady odbioru, kontaktu i materiałów. Unikaj niejasnych określeń typu „wszystko” lub „jak najszybciej”.",
+      "Wyślij propozycję do drugiej strony. Przeczytajcie całość przed akceptacją. Stan planu pokazuje, czy potwierdziły go obie osoby."
+    ],
+    "note": "Plan i wiadomości pomagają odtworzyć ustalenia w razie problemu. Sam opis projektu lub ustne zapewnienie nie oznacza akceptacji planu przez obie strony.",
+    "action": {
+      "label": "Przejdź do rozmów",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "zaakceptuj-plan",
+    "category": "wspolpraca",
+    "title": "Kiedy plan jest zaakceptowany i jak zmienić ustalenia?",
+    "summary": "Potwierdzenia obu stron, nowe wersje warunków i rozbieżności w rozmowie.",
+    "keywords": [
+      "plan",
+      "akceptacja",
+      "zaakceptuj",
+      "warunki",
+      "ustalenia",
+      "zmiana",
+      "wersja",
+      "potwierdzenie"
+    ],
+    "steps": [
+      "Sprawdź zakres, cenę, termin i pozostałe pola propozycji. Jeśli coś jest niejasne, wyjaśnij to w rozmowie przed kliknięciem akceptacji.",
+      "Plan jest wspólnie zaakceptowany dopiero wtedy, gdy system pokazuje potwierdzenia obu stron dla aktualnej wersji.",
+      "Jeśli później zmienia się zakres lub termin, uzgodnijcie zmianę i użyjcie dostępnej funkcji nowej propozycji. Nie zakładaj, że sam dopisek w wiadomości automatycznie zmienił zatwierdzony plan."
+    ],
+    "action": {
+      "label": "Otwórz wiadomości",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "plan-obok",
+    "category": "wspolpraca",
+    "title": "Jak czytać plan obok wiadomości?",
+    "summary": "Osobny widok ustaleń, powrót do rozmowy i panel obok na szerokim ekranie.",
+    "keywords": [
+      "plan",
+      "ustalenia",
+      "okno",
+      "obok",
+      "panel",
+      "pełny ekran",
+      "rozmowa"
+    ],
+    "steps": [
+      "Kliknij Plan współpracy, aby otworzyć czytelny widok ustaleń tej rozmowy.",
+      "Na szerokim ekranie dostępny jest przycisk Plan obok. Pozwala czytać ustalenia i pisać wiadomość bez ciągłego przełączania.",
+      "Na mniejszym ekranie plan zajmuje osobny widok. Użyj Wróć do rozmowy. Przycisk rozwinięcia w nagłówku pozwala zwiększyć przestrzeń komunikatora."
+    ],
+    "action": {
+      "label": "Otwórz rozmowy",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "wyslij-materialy",
+    "category": "wspolpraca",
+    "title": "Jak przesłać pliki, zdjęcia i materiały do projektu?",
+    "summary": "Materiały w rozmowie, wymagane pola i kontrola komunikatu po wysłaniu.",
+    "keywords": [
+      "pliki",
+      "plik",
+      "materiały",
+      "materialy",
+      "zdjęcie",
+      "wyślij",
+      "załącznik",
+      "praca",
+      "upload"
+    ],
+    "steps": [
+      "W odpowiedniej rozmowie wybierz Pliki lub przycisk dodawania przy polu wiadomości.",
+      "Uzupełnij wymagane pola i wybierz materiał zgodny z formatem oraz limitem pokazanym w formularzu. Dodawaj tylko pliki, które możesz udostępnić drugiej stronie.",
+      "Wybierz wysłanie i poczekaj na potwierdzenie. Sprawdź, czy materiał jest na liście projektu. Komunikat błędu oznacza, że operacja wymaga sprawdzenia, a nie że praca została przekazana."
+    ],
+    "note": "Nie wgrywaj dokumentów tożsamości, pełnych danych kart ani haseł jako zwykłych materiałów projektu.",
+    "action": {
+      "label": "Otwórz wiadomości",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "blad-materialu",
+    "category": "wspolpraca",
+    "title": "Dlaczego nie mogę wysłać materiału?",
+    "summary": "Uprawnienia, wymagane informacje, rozmiar pliku oraz ponowna próba.",
+    "keywords": [
+      "materiały",
+      "pliki",
+      "błąd",
+      "blad",
+      "wysyłanie",
+      "nie działa",
+      "formularz",
+      "email",
+      "limit"
+    ],
+    "steps": [
+      "Przeczytaj dokładny komunikat pod formularzem. Sprawdź wymagane pola, prawidłowość adresów e-mail oraz wybrany plik.",
+      "Porównaj format i rozmiar z limitami w formularzu. Sprawdź także stan planu, płatności i możliwość kontaktu w tej rozmowie.",
+      "Jeśli nadal nie możesz wysłać materiału, zachowaj nazwę komunikatu i czas próby. Skontaktuj się z pomocą bez dołączania poufnego pliku ani danych logowania."
+    ],
+    "action": {
+      "label": "Wróć do wiadomości",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "koszt-wspolpracy",
+    "category": "platnosci",
+    "title": "Gdzie sprawdzić prowizję i całkowity koszt współpracy?",
+    "summary": "Aktualne podsumowanie kosztów przed potwierdzeniem płatności.",
+    "keywords": [
+      "płatności",
+      "platnosci",
+      "prowizja",
+      "koszt",
+      "cena",
+      "opłata",
+      "stripe",
+      "ile",
+      "vat"
+    ],
+    "steps": [
+      "Najpierw uzgodnijcie wynagrodzenie i warunki w planie współpracy.",
+      "Gdy płatność jest dostępna, przeczytaj podsumowanie w rozmowie. Sprawdź wynagrodzenie, prowizję oraz pełną kwotę do zapłaty przed potwierdzeniem.",
+      "Jeśli podsumowanie jest niedostępne lub budzi wątpliwości, wyjaśnij je z pomocą przed zapłatą. Aktualne kwoty w procesie płatności i Regulamin są właściwym miejscem do sprawdzania warunków rozliczenia."
+    ],
+    "note": "Centrum pomocy nie nalicza opłat i nie zastępuje podsumowania płatności. Informacje podatkowe zależą od sytuacji stron.",
+    "action": {
+      "label": "Przejdź do rozmów",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "potwierdzenie-platnosci",
+    "category": "platnosci",
+    "title": "Jak sprawdzić, czy projekt jest opłacony?",
+    "summary": "Potwierdzenie w rozmowie zamiast samego zrzutu ekranu lub wiadomości klienta.",
+    "keywords": [
+      "płatność",
+      "platnosc",
+      "opłacony",
+      "potwierdzenie",
+      "stripe",
+      "blik",
+      "karta",
+      "status"
+    ],
+    "steps": [
+      "Otwórz właściwą rozmowę i jej plan. Upewnij się, że sprawdzasz ten sam projekt i aktualną wersję warunków.",
+      "Przeczytaj status płatności pokazany w rozmowie. Sama wiadomość „zapłaciłem” lub zrzut ekranu nie jest potwierdzeniem systemowym.",
+      "Jeśli środki zostały pobrane, ale status nie zmienia się, nie ponawiaj płatności bez wyjaśnienia. Zanotuj czas i numer płatności, jeśli jest dostępny, i skontaktuj się z pomocą."
+    ],
+    "note": "Jeśli moduł płatności jest wyłączony lub niedostępny, centrum pomocy nie oznacza, że można już opłacić projekt.",
+    "action": {
+      "label": "Sprawdź projekt w rozmowie",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "stripe-wyplaty",
+    "category": "platnosci",
+    "title": "Gdzie skonfigurować konto Stripe do wypłat?",
+    "summary": "Konfiguracja wykonawcy i odczytywanie statusu konta płatniczego.",
+    "keywords": [
+      "stripe",
+      "wypłaty",
+      "wyplaty",
+      "konto",
+      "bank",
+      "wykonawca",
+      "onboarding",
+      "konfiguracja"
+    ],
+    "steps": [
+      "Na pełnym koncie otwórz Dane profilu i sekcję konfiguracji wypłat, jeśli jest dostępna.",
+      "Wykonaj instrukcje po przekierowaniu do Stripe. Wymagane dane przekazuj wyłącznie w właściwym formularzu Stripe, a nie w zwykłej wiadomości do innego użytkownika.",
+      "Po powrocie sprawdź komunikat o stanie konfiguracji. Status niekompletny oznacza konieczność uzupełnienia danych; sama rejestracja w IdeaHire nie aktywuje wypłat."
+    ],
+    "action": {
+      "label": "Otwórz dane profilu",
+      "path": "/account#account-profile-data"
+    }
+  },
+  {
+    "id": "zwrot-platnosci",
+    "category": "platnosci",
+    "title": "Jak zgłosić problem z płatnością lub prośbę o zwrot?",
+    "summary": "Zgłoszenie problemu, dokumentacja i różnica między sporem projektu a sporem bankowym.",
+    "keywords": [
+      "zwrot",
+      "refund",
+      "płatność",
+      "platnosc",
+      "stripe",
+      "spór",
+      "chargeback",
+      "bank",
+      "reklamacja"
+    ],
+    "steps": [
+      "Opisz problem drugiej stronie i sprawdź plan, stan realizacji oraz status płatności w rozmowie.",
+      "Jeśli problem dotyczy wykonania projektu, użyj zgłoszenia problemu ze współpracą. Jeśli dotyczy samej obsługi płatności, podaj pomocy informacje pozwalające ją zidentyfikować.",
+      "Przeczytaj odpowiedź i aktualny status sprawy. Samo otwarcie sporu nie oznacza automatycznego zwrotu ani zakończenia rozliczenia."
+    ],
+    "note": "Spór projektu w IdeaHire i reklamacja transakcji w banku to różne procedury. Nie ma obietnicy automatycznego zwrotu; sposób rozliczenia zależy od sprawy, Regulaminu i dostępnego procesu płatności.",
+    "action": {
+      "label": "Przejdź do swoich sporów",
+      "path": "/disputes"
+    }
+  },
+  {
+    "id": "otworz-spor",
+    "category": "spory",
+    "title": "Jak zgłosić problem ze współpracą?",
+    "summary": "Rozmowa, menu opcji i zgłoszenie dotyczące zaakceptowanego planu.",
+    "keywords": [
+      "spór",
+      "spor",
+      "spory",
+      "problem",
+      "współpraca",
+      "administracja",
+      "nie wykonano",
+      "zgłoszenie"
+    ],
+    "steps": [
+      "Otwórz właściwą rozmowę i sprawdź plan. W menu z trzema kropkami wybierz Zgłoś problem ze współpracą, jeśli opcja jest dostępna.",
+      "Wskaż powód, oczekiwane rozwiązanie i opis zdarzeń. Odnieś się do konkretnych warunków i potwierdź informacje o udostępnieniu kontekstu administracji.",
+      "Wyślij zgłoszenie, a następnie sprawdzaj jego status w Sporach. Dodawaj odpowiedzi i materiały w tej sprawie, zamiast otwierać wiele zgłoszeń tego samego problemu."
+    ],
+    "note": "Dostępność formalnego sporu zależy od stanu planu i uprawnień. Centrum pomocy nie rozstrzyga spraw i nie obiecuje wyniku.",
+    "action": {
+      "label": "Otwórz spory",
+      "path": "/disputes"
+    }
+  },
+  {
+    "id": "dowody-sporu",
+    "category": "spory",
+    "title": "Jakie dowody dodać do sporu?",
+    "summary": "Ustalenia, przebieg projektu i materiały związane z konkretnym problemem.",
+    "keywords": [
+      "spór",
+      "spor",
+      "spory",
+      "dowody",
+      "materiały",
+      "plik",
+      "zdjęcie",
+      "wyjaśnienie"
+    ],
+    "steps": [
+      "Opisz, którego punktu planu dotyczy problem i kiedy wystąpił. Oddziel fakty od oceny sytuacji.",
+      "Dodaj odpowiednie materiały w obsługiwanym formacie, na przykład rezultat pracy, zrzut przedstawiający problem lub dokument związany z ustaleniami. Sprawdź limity formularza.",
+      "Wyjaśnij, co pokazuje każdy materiał. Nie publikuj niezwiązanych danych innych osób. Administracja analizuje kontekst udostępniony zgodnie z informacją w formularzu sprawy."
+    ],
+    "action": {
+      "label": "Otwórz swoje sprawy",
+      "path": "/disputes"
+    }
+  },
+  {
+    "id": "odpowiedz-spor",
+    "category": "spory",
+    "title": "Jak odpowiedzieć na spór i odczytać decyzję?",
+    "summary": "Wyjaśnienia drugiej strony, status sprawy i uzasadnienie administracji.",
+    "keywords": [
+      "spór",
+      "spor",
+      "spory",
+      "odpowiedź",
+      "decyzja",
+      "status",
+      "administracja",
+      "rozpatrzenie"
+    ],
+    "steps": [
+      "Otwórz sprawę z powiadomienia lub zakładki Spory i przeczytaj treść zgłoszenia.",
+      "Dodaj swoją odpowiedź w dostępnej sekcji. Podaj fakty, odwołanie do planu i materiały potwierdzające stanowisko. Sprawdzaj terminy wyświetlane w sprawie.",
+      "Po rozpatrzeniu przeczytaj decyzję oraz jej uzasadnienie. Status sprawy i status płatności mogą opisywać różne etapy; sprawdź oba, jeśli sprawa dotyczy środków."
+    ],
+    "action": {
+      "label": "Otwórz spory",
+      "path": "/disputes"
+    }
+  },
+  {
+    "id": "odwolanie",
+    "category": "spory",
+    "title": "Gdzie złożyć odwołanie od decyzji administracji?",
+    "summary": "Uzasadnienie, zakres decyzji i dostępna ścieżka odwołania.",
+    "keywords": [
+      "decyzja",
+      "administracja",
+      "odwołanie",
+      "odwolanie",
+      "zawieszenie",
+      "blokada",
+      "status",
+      "spór"
+    ],
+    "steps": [
+      "Jeśli decyzja dotyczy konta, otwórz Status konta lub Decyzję administracji z menu profilu. Decyzję dotyczącą projektu sprawdź we właściwej sprawie.",
+      "Przeczytaj powód, zakres, czas obowiązywania oraz instrukcję odwołania. Korzystaj z właściwego formularza, jeśli jest dostępny.",
+      "Wyjaśnij, z czym się nie zgadzasz i dlaczego, oraz dołącz istotne informacje. Zachowaj potwierdzenie wysłania i sprawdzaj odpowiedź."
+    ],
+    "note": "Korzystanie z instrukcji pomocy nie ogranicza uprawnień wynikających z prawa ani informacji o innych dostępnych środkach wskazanych w decyzji lub Regulaminie.",
+    "action": {
+      "label": "Sprawdź status konta",
+      "path": "/account-status"
+    }
+  },
+  {
+    "id": "prywatnosc-dane",
+    "category": "bezpieczenstwo",
+    "title": "Jak pobrać dane lub zamknąć konto?",
+    "summary": "Centrum prywatności, dostęp do danych i wnioski dotyczące konta.",
+    "keywords": [
+      "konto",
+      "prywatność",
+      "dane",
+      "rodo",
+      "usuń",
+      "usunięcie",
+      "zamknij",
+      "eksport",
+      "kopia"
+    ],
+    "steps": [
+      "Otwórz menu profilu i wybierz Prywatność i dane.",
+      "Przeczytaj dostępne opcje i informacje dotyczące pobrania danych, wniosku o ich usunięcie lub zamknięcia konta.",
+      "Złóż właściwy wniosek i zachowaj jego potwierdzenie. Niektóre informacje mogą być przechowywane dalej na odpowiedniej podstawie, na przykład w związku z trwającą sprawą; wyjaśnienia zawiera polityka prywatności i odpowiedź na wniosek."
+    ],
+    "action": {
+      "label": "Otwórz centrum prywatności",
+      "path": "/privacy-center"
+    }
+  },
+  {
+    "id": "zglos-tresc",
+    "category": "bezpieczenstwo",
+    "title": "Jak zgłosić wiadomość lub nielegalną treść?",
+    "summary": "Zgłoszenie konkretnego materiału i informacje potrzebne do jego sprawdzenia.",
+    "keywords": [
+      "zgłoś",
+      "zgłoszenie",
+      "spam",
+      "wiadomość",
+      "nielegalne",
+      "treść",
+      "bezpieczeństwo",
+      "moderacja"
+    ],
+    "steps": [
+      "Przy wiadomości lub materiale skorzystaj z dostępnej opcji zgłoszenia. Przy innych treściach użyj odnośnika do zgłaszania nielegalnych treści.",
+      "Wskaż konkretną treść i wyjaśnij problem. Podaj informacje potrzebne do oceny zgłoszenia, bez umieszczania niepotrzebnych danych innych osób.",
+      "Zachowaj potwierdzenie. Jeżeli zgłoszenie dotyczy zagrożenia życia lub popełnienia przestępstwa, skorzystaj również z odpowiedniej pomocy i właściwych organów."
+    ],
+    "action": {
+      "label": "Kontakt w sprawie nielegalnej treści",
+      "path": "mailto:ideahireprywatnosc@gmail.com"
+    }
+  },
+  {
+    "id": "blokowanie",
+    "category": "bezpieczenstwo",
+    "title": "Co oznacza zablokowany użytkownik w rozmowie?",
+    "summary": "Ograniczenie kontaktu i odczytanie komunikatu w czacie.",
+    "keywords": [
+      "blokada",
+      "zablokowany",
+      "użytkownik",
+      "wiadomości",
+      "profil",
+      "odblokuj",
+      "kontakt"
+    ],
+    "steps": [
+      "Przeczytaj komunikat w rozmowie. Rozróżnia on blokadę wykonaną przez Ciebie od blokady wykonanej przez drugą osobę.",
+      "Jeżeli Ty zablokowałeś użytkownika, otwórz jego profil i sprawdź dostępną akcję odblokowania w menu profilu.",
+      "Nie omijaj blokady drugim kontem. Problemy z wykonaniem projektu zgłaszaj w odpowiedniej sprawie lub pomocy, zamiast wymuszać dalszy kontakt."
+    ],
+    "action": {
+      "label": "Otwórz rozmowy",
+      "path": "/messages"
+    }
+  },
+  {
+    "id": "kontakt-pomoc",
+    "category": "bezpieczenstwo",
+    "title": "Jak skontaktować się z pomocą IdeaHire?",
+    "summary": "Kontakt ogólny, reklamacja i prywatność — wybór właściwego adresu.",
+    "keywords": [
+      "pomoc",
+      "help",
+      "kontakt",
+      "support",
+      "administracja",
+      "reklamacja",
+      "email"
+    ],
+    "steps": [
+      "Sprawdź instrukcję dotyczącą swojego problemu. Jeśli nie rozwiązuje sprawy, wybierz kontakt ogólny, reklamacje lub prywatność z sekcji kontaktu w centrum pomocy.",
+      "Opisz, co próbowałeś zrobić, gdzie wystąpił problem, kiedy to było i jaki komunikat zobaczyłeś. Podaj identyfikator projektu lub sprawy, jeśli jest potrzebny.",
+      "Nie przesyłaj hasła, kodów logowania, pełnych danych karty ani poufnych materiałów klienta. Zrzut ekranu przed wysłaniem oczyść z niepotrzebnych danych."
+    ],
+    "note": "Centrum pomocy nie jest czatem z administratorem. Wpisanie frazy tylko przeszukuje instrukcje i nie wysyła zgłoszenia."
+  },
+  {
+    "id": "kalendarz",
+    "category": "narzedzia",
+    "title": "Jak korzystać z kalendarza i wyboru daty?",
+    "summary": "Przegląd terminów projektów oraz daty w formularzach.",
+    "keywords": [
+      "kalendarz",
+      "data",
+      "termin",
+      "wiek",
+      "urodzenia",
+      "miesiąc",
+      "dzień"
+    ],
+    "steps": [
+      "Kalendarz otworzysz z menu profilu. Sprawdź miesiąc i dostępne terminy powiązane z Twoimi projektami.",
+      "W formularzu kliknij pole daty, aby otworzyć wybór dnia. Przy dacie urodzenia wybierz właściwy rok, miesiąc i dzień.",
+      "Po wyborze sprawdź wartość w formularzu. Wybór daty nie zapisuje automatycznie całego profilu ani planu; użyj odpowiedniego przycisku zapisania."
+    ],
+    "action": {
+      "label": "Otwórz kalendarz",
+      "path": "/calendar"
+    }
+  },
+  {
+    "id": "szablony",
+    "category": "narzedzia",
+    "title": "Jak zmienić szablon i jasny lub ciemny wygląd?",
+    "summary": "Zmiana wyglądu bez zmiany danych, ofert i funkcji konta.",
+    "keywords": [
+      "szablon",
+      "wygląd",
+      "ciemny",
+      "jasny",
+      "biały",
+      "czarny",
+      "kolor",
+      "telefon",
+      "ustawienia"
+    ],
+    "steps": [
+      "W centrum profilu wybierz Szablony i zastosuj wybrany wariant strony.",
+      "Przełącz jasny lub ciemny wygląd dostępną opcją wyglądu. Układ pozostaje dopasowany do szerokości ekranu.",
+      "Zmiana szablonu nie zmienia danych profilu ani warunków projektu. W centrum pomocy możesz osobno przełączyć jasność przyciskiem w nagłówku."
+    ],
+    "action": {
+      "label": "Otwórz szablony",
+      "path": "/account#account-templates"
+    }
+  },
+  {
+    "id": "blad-strony",
+    "category": "narzedzia",
+    "title": "Strona, formularz lub kalendarz nie działa prawidłowo",
+    "summary": "Bezpieczna diagnostyka i informacje przydatne w zgłoszeniu błędu.",
+    "keywords": [
+      "błąd",
+      "blad",
+      "biały ekran",
+      "nie działa",
+      "telefon",
+      "przeglądarka",
+      "formularz",
+      "kalendarz"
+    ],
+    "steps": [
+      "Zapisz treść ważnego formularza przed odświeżaniem strony. Sprawdź połączenie z internetem i komunikaty przy polach.",
+      "Spróbuj ponownie w aktualnej przeglądarce. Przy problemach z logowaniem upewnij się, że jesteś na właściwej stronie IdeaHire.",
+      "Jeśli błąd się powtarza, opisz kroki, typ urządzenia i przeglądarkę. Dołącz oczyszczony zrzut lub treść komunikatu, bez haseł i kodów logowania."
+    ],
+    "note": "Przy niepewnym statusie płatności nie płać drugi raz, dopóki problem nie zostanie wyjaśniony."
+  }
+]</script>
+  <script>
+  (() => {
+    "use strict";
+    // Change this one address when the main IdeaHire domain changes.
+    const APP_ORIGIN = "https://ideahire-new.pages.dev";
+    const articles = JSON.parse(document.getElementById("help-articles").textContent);
+    const categories = [
+      ["konto", "Konto i logowanie", "account"], ["profil", "Profil i portfolio", "account"],
+      ["zlecenia", "Zlecenia", "briefcase"], ["uslugi", "Usługi i freelancerzy", "talent"],
+      ["wspolpraca", "Wiadomości i plan", "message"], ["platnosci", "Płatności i wypłaty", "payment"],
+      ["spory", "Spory i decyzje", "check"], ["bezpieczenstwo", "Prywatność i pomoc", "help"],
+      ["narzedzia", "Kalendarz i wygląd", "calendar"]
+    ];
+    const iconPaths = { search:"m20 20-4.2-4.2M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z", arrow:"M5 12h14m-6-6 6 6-6 6", account:"M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z", briefcase:"M3 7h18v14H3ZM8 7V3h8v4M3 12l9 3 9-3M12 12v5", talent:"M3 4h7v7H3ZM14 4h7v7h-7ZM3 15h7v6H3ZM14 15h7v6h-7", message:"M5 4h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 3V6a2 2 0 0 1 2-2ZM7 9h10M7 13h6", payment:"M3 5h18v14H3ZM3 10h18M6 15h4", check:"m5 12 4 4L19 6", help:"M9 9a3 3 0 1 1 5 2c-1.2.8-2 1.2-2 3M12 17h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z", calendar:"M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM7 3v4M17 3v4M3 10h18M7 14h2M13 14h2" };
+    const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g,"l").replace(/Ł/g,"L").toLocaleLowerCase("pl-PL").replace(/[^a-z0-9]+/g," ").trim();
+    const stopWords = new Set(["jak","co","czy","to","jest","sie","w","z","na","do","i","o","mi","moje","moj"]);
+    const synonyms = { rejestracja:["zaloz","konto"], zarejestrowac:["zaloz","konto"], haslo:["hasla","haslo"], spor:["spory","spor"], wiadomosc:["wiadomosci","rozmowa"], wiadomosci:["czat","rozmowa"], oplata:["koszt","prowizja"], material:["materialy","pliki"], usluga:["uslugi","usluga"], refund:["zwrot"], faktura:["koszt","platnosci"], kalendarz:["kalendarz","data"] };
+    const indexed = articles.map(article => ({ article, title:normalize(article.title), keywords:normalize(article.keywords.join(" ")), text:normalize([article.title,article.summary,...article.steps,article.note || ""].join(" ")) }));
+    const categoryName = id => categories.find(category => category[0] === id)?.[1] || "Instrukcje";
+    const query = document.getElementById("help-query"), results = document.getElementById("results"), suggestions = document.getElementById("suggestions");
+    const home = document.getElementById("help-home"), view = document.getElementById("article-view"), root = document.documentElement;
+    const clear = document.getElementById("clear-search"), wrap = document.getElementById("search-wrap");
+    let selectedCategory = "all", matches = [], suggested = [], activeSuggestion = -1, suggestionsOpen = false;
+    let returnScroll = 0, articleReturnId = "", searchTask = 0;
+    const parameters = new URLSearchParams(location.search);
+    root.dataset.theme = parameters.get("theme") === "dark" ? "dark" : "light";
+    root.dataset.template = parameters.get("template") === "classic" ? "classic" : "current";
+    function appLink(path) { return new URL(path, APP_ORIGIN).href; }
+    for (const link of document.querySelectorAll("[data-app-path]")) link.href = appLink(link.dataset.appPath);
+    function node(tag, text, className) { const element=document.createElement(tag); if(text !== undefined)element.textContent=text; if(className)element.className=className; return element; }
+    function icon(kind) { const svg=document.createElementNS("http://www.w3.org/2000/svg","svg"); for(const [name,value] of Object.entries({viewBox:"0 0 24 24",fill:"none",stroke:"currentColor","stroke-width":"1.7","stroke-linecap":"round","stroke-linejoin":"round","aria-hidden":"true",focusable:"false"}))svg.setAttribute(name,value); const path=document.createElementNS(svg.namespaceURI,"path"); path.setAttribute("d",iconPaths[kind] || iconPaths.arrow); svg.append(path); return svg; }
+    function searchArticles(value, category = selectedCategory) {
+      const tokens=normalize(value).split(" ").filter(token => token && !stopWords.has(token));
+      return indexed.filter(item => category === "all" || item.article.category === category).map(item => {
+        let score=0;
+        for(const token of tokens) {
+          const alternatives=[token,...(synonyms[token] || [])];
+          const stem=word => word.length > 5 ? word.slice(0,-1) : word;
+          const has=text => alternatives.some(word => text.includes(word) || text.split(" ").some(part => part.startsWith(stem(word))));
+          if(!has(item.text) && !has(item.keywords)) return null;
+          score += has(item.title) ? 8 : has(item.keywords) ? 4 : 1;
+        }
+        return {article:item.article,score};
+      }).filter(Boolean).sort((a,b) => b.score-a.score).map(item => item.article);
+    }
+    function setSuggestions(open) {
+      suggestionsOpen=!!open && suggested.length > 0 && query.value.trim().length > 0;
+      suggestions.hidden=!suggestionsOpen; query.setAttribute("aria-expanded",String(suggestionsOpen));
+      if(!suggestionsOpen) { activeSuggestion=-1; query.removeAttribute("aria-activedescendant"); }
+      for(const [index,option] of [...suggestions.children].entries()) option.setAttribute("aria-selected",String(index===activeSuggestion));
+      if(suggestionsOpen && activeSuggestion >= 0) query.setAttribute("aria-activedescendant",`help-suggestion-${activeSuggestion}`);
+      else query.removeAttribute("aria-activedescendant");
+    }
+    function openArticle(id) { setSuggestions(false); returnScroll=window.scrollY; articleReturnId=id; location.hash=`article/${id}`; }
+    function renderSuggestions() {
+      suggestions.replaceChildren(); suggested=matches.slice(0,5); activeSuggestion=-1;
+      suggested.forEach((article,index) => { const item=node("li"); item.id=`help-suggestion-${index}`; item.setAttribute("role","option"); item.setAttribute("aria-selected","false"); const button=node("button"); button.type="button"; button.tabIndex=-1; button.append(icon("search"),node("span",article.title),icon("arrow")); button.addEventListener("click",()=>openArticle(article.id)); item.append(button); suggestions.append(item); });
+      setSuggestions(document.activeElement===query);
+    }
+    function renderTopics() {
+      const topics=document.getElementById("topics"); topics.replaceChildren();
+      for(const [id,label,kind] of [["all","Wszystkie tematy","help"],...categories]) {
+        const button=node("button",undefined,"topic"); button.type="button"; button.dataset.category=id; button.setAttribute("aria-pressed",String(id===selectedCategory)); button.append(icon(kind),node("span",label));
+        button.addEventListener("click",() => { selectedCategory=id; render(); }); topics.append(button);
+      }
+    }
+    function render() {
+      matches=searchArticles(query.value); clear.hidden=!query.value; results.replaceChildren();
+      const searching=!!query.value.trim(), limit=searching || selectedCategory!=="all" ? matches.length : 8;
+      document.getElementById("results-title").textContent=searching ? "Odpowiedzi na Twoje pytanie" : selectedCategory==="all" ? "Od tego warto zacząć" : categoryName(selectedCategory);
+      document.getElementById("results-status").textContent=searching || selectedCategory!=="all" ? `${matches.length} ${matches.length===1 ? "instrukcja" : matches.length%10>=2 && matches.length%10<=4 && (matches.length%100<12 || matches.length%100>14) ? "instrukcje" : "instrukcji"}` : `${articles.length} instrukcji w centrum pomocy`;
+      if(!matches.length) { const empty=node("div",undefined,"no-results"); empty.append(node("h3","Nie znaleźliśmy tej instrukcji."),node("p","Spróbuj krótszej frazy, np. konto, plan lub płatność. Możesz też wybrać inny temat albo skontaktować się z pomocą.")); const reset=node("button","Pokaż wszystkie tematy","text-button"); reset.type="button"; reset.addEventListener("click",()=>{query.value="";selectedCategory="all";renderTopics();render();query.focus();});empty.append(reset); results.append(empty); }
+      for(const article of matches.slice(0,limit)) {
+        const link=node("a",undefined,"article-card"); link.href=`#article/${article.id}`; link.dataset.article=article.id; const read=node("span","Przeczytaj instrukcję","read"); read.append(icon("arrow")); link.append(node("span",categoryName(article.category),"category"),node("h3",article.title),node("p",article.summary),read);
+        link.addEventListener("click",() => {returnScroll=window.scrollY;articleReturnId=article.id;}); results.append(link);
+      }
+      for(const button of document.querySelectorAll(".topic")) button.setAttribute("aria-pressed",String(button.dataset.category===selectedCategory));
+      renderSuggestions();
+    }
+    function renderRoute() {
+      let id=""; try { const hash=decodeURIComponent(location.hash.slice(1)); if(hash.startsWith("article/")) id=hash.slice(8); } catch { id=""; }
+      const article=articles.find(item=>item.id===id);
+      if(!article) { home.hidden=false; view.hidden=true; document.title="Centrum pomocy — IdeaHire"; if(id) {query.value="";selectedCategory="all";render();document.getElementById("results-status").textContent="Nie znaleziono tej instrukcji. Wybierz temat lub użyj wyszukiwarki.";} if(articleReturnId) { const link=[...results.querySelectorAll("[data-article]")].find(link=>link.dataset.article===articleReturnId); link?.focus({preventScroll:true}); window.scrollTo({top:returnScroll,behavior:"auto"}); articleReturnId=""; } return; }
+      home.hidden=true;view.hidden=false;setSuggestions(false);
+      const body=document.getElementById("article-body");body.replaceChildren(); const title=node("h1",article.title);title.id="article-title";view.setAttribute("aria-labelledby","article-title"); const steps=node("ol",undefined,"steps");for(const step of article.steps)steps.append(node("li",step));body.append(node("span",categoryName(article.category),"eyebrow"),title,node("p",article.summary,"article-summary"),steps);
+      if(article.note)body.append(node("p",article.note,"article-note"));
+      if(article.action) { const link=node("a",article.action.label,"article-action");link.href=appLink(article.action.path);link.append(icon("arrow"));body.append(link); }
+      const legal=node("p","Instrukcja wyjaśnia korzystanie z serwisu. Szczegółowe warunki i prawa opisuje ","article-legal"), terms=node("a","Regulamin");terms.href=appLink("/regulamin");legal.append(terms,document.createTextNode(" oraz polityka prywatności."));body.append(legal);
+      const related=document.getElementById("related");related.replaceChildren(node("h2","To też może pomóc")); for(const item of articles.filter(item=>item.category===article.category && item.id!==article.id).slice(0,3)) {const link=node("a",item.title);link.href=`#article/${item.id}`;link.append(icon("arrow"));related.append(link);}
+      document.title=`${article.title} — Pomoc IdeaHire`;view.focus({preventScroll:true});window.scrollTo({top:0,behavior:"auto"});
+    }
+    query.addEventListener("input",()=>{window.clearTimeout(searchTask);searchTask=window.setTimeout(render,60);});
+    query.addEventListener("focus",()=>setSuggestions(true));
+    query.addEventListener("keydown",event=>{
+      if(event.key==="Escape") { event.preventDefault();setSuggestions(false);return; }
+      if(["ArrowDown","ArrowUp"].includes(event.key) && suggested.length) {event.preventDefault();activeSuggestion=event.key==="ArrowDown" ? (activeSuggestion+1)%suggested.length : (activeSuggestion<=0 ? suggested.length-1 : activeSuggestion-1);setSuggestions(true);return;}
+      if(event.key==="Enter" && suggestionsOpen && activeSuggestion>=0) {event.preventDefault();openArticle(suggested[activeSuggestion].id);}
+    });
+    document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();window.clearTimeout(searchTask);render();setSuggestions(false);document.getElementById("results-title").tabIndex=-1;document.getElementById("results-title").focus();});
+    clear.addEventListener("click",()=>{window.clearTimeout(searchTask);query.value="";render();query.focus();});
+    document.addEventListener("pointerdown",event=>{if(!wrap.contains(event.target))setSuggestions(false);});
+    wrap.addEventListener("focusout",event=>{if(!wrap.contains(event.relatedTarget))setSuggestions(false);});
+    for(const button of document.querySelectorAll("[data-search]"))button.addEventListener("click",()=>{query.value=button.dataset.search;selectedCategory="all";render();query.focus();setSuggestions(true);});
+    window.addEventListener("hashchange",renderRoute);
+    const mode=document.getElementById("mode-toggle");function modeLabel(){mode.setAttribute("aria-label",root.dataset.theme==="dark" ? "Włącz jasny wygląd" : "Włącz ciemny wygląd");mode.setAttribute("aria-pressed",String(root.dataset.theme==="dark"));}mode.addEventListener("click",()=>{root.dataset.theme=root.dataset.theme==="dark" ? "light" : "dark";modeLabel();});modeLabel();
+    renderTopics();render();renderRoute();
+  })();
+  </script>
+</body>
+</html>
