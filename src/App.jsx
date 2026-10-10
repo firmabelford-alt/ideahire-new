@@ -1,8 +1,9 @@
-/* IdeaHire | PACZKA 12 | 2026-10-08 | Pelny plik: src/App.jsx */
+/* IdeaHire | PACZKA 27 | 2026-10-10 | Pełny plik: src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./App.css";
-import { HomePreviewMotion, CommissionStory, HomeStepCard, IdeaHireLogo } from "./MarketUI";
+import { HomePreviewMotion, CommissionStory, HomeStepCard, IdeaHireLogo, MarketIcon, helpCenterHref } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 
@@ -300,6 +301,98 @@ function HomeNavItem({ children, order, to, href, notification = false }) {
       {notification && <span className="home-notifications-dot" aria-label="Nowe powiadomienia" />}
     </Item>
   );
+}
+
+function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+    const viewport = window.visualViewport;
+    let frame = 0;
+    function placeMenu() {
+      frame = 0;
+      const menu = menuRef.current;
+      const trigger = triggerRef.current;
+      if (!menu || !trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const width = viewport?.width || window.innerWidth;
+      const height = viewport?.height || window.innerHeight;
+      const offsetLeft = viewport?.offsetLeft || 0;
+      const offsetTop = viewport?.offsetTop || 0;
+      const menuWidth = Math.max(0, Math.min(300, width - 24));
+      const top = Math.max(offsetTop + 12, Math.min(rect.bottom + 8, offsetTop + height - 160));
+      const left = Math.max(offsetLeft + 12, Math.min(rect.right - menuWidth, offsetLeft + width - menuWidth - 12));
+      menu.style.setProperty("top", `${top}px`);
+      menu.style.setProperty("left", `${left}px`);
+      menu.style.setProperty("width", `${menuWidth}px`);
+      menu.style.setProperty("max-height", `${Math.max(0, offsetTop + height - top - 12)}px`);
+    }
+    function schedule() { if (!frame) frame = window.requestAnimationFrame(placeMenu); }
+    placeMenu();
+    const focusFrame = window.requestAnimationFrame(() => menuRef.current?.querySelector("a")?.focus({ preventScroll: true }));
+    window.addEventListener("resize", schedule, { passive: true });
+    window.addEventListener("scroll", schedule, { passive: true });
+    viewport?.addEventListener("resize", schedule, { passive: true });
+    viewport?.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", schedule);
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    function closeOutside(event) {
+      if (!triggerRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) setOpen(false);
+    }
+    function closeWithKeyboard(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus({ preventScroll: true });
+    }
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeWithKeyboard);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeWithKeyboard);
+    };
+  }, [open]);
+
+  function navigateMenu(event) {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const links = Array.from(menuRef.current?.querySelectorAll("a") || []);
+    if (!links.length) return;
+    event.preventDefault();
+    const index = links.indexOf(document.activeElement);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? links.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + links.length) % links.length;
+    links[next].focus({ preventScroll: true });
+  }
+
+  return <>
+    <button ref={triggerRef} className="home-account-avatar-link ih27-home-account-trigger" type="button"
+      aria-label={open ? "Zamknij menu konta" : "Otwórz menu konta"} aria-expanded={open} aria-controls="ih27-home-account-menu"
+      onClick={() => { if (!open) onOpen?.(); setOpen(value => !value); }}
+      onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); if (open) menuRef.current?.querySelector("a")?.focus({ preventScroll: true }); else { onOpen?.(); setOpen(true); } } }}>
+      <span className="account-mini-avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : initial}</span>
+    </button>
+    {open && createPortal(<nav ref={menuRef} id="ih27-home-account-menu" className="account-menu-dropdown ih18-account-dropdown ih27-home-account-menu"
+      aria-label="Funkcje konta" onKeyDown={navigateMenu}
+      onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget) && !triggerRef.current?.contains(event.relatedTarget)) setOpen(false); }}>
+      <div className="account-menu-identity"><strong>{name}</strong><span>Konto IdeaHire</span></div>
+      <Link to="/account" onClick={() => setOpen(false)}>Moje konto</Link>
+      <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
+        <MarketIcon kind="help" /><span>Pomoc</span>
+      </a>
+    </nav>, document.body)}
+  </>;
 }
 
 function HomeGreeting({ name }) {
@@ -848,22 +941,7 @@ function App({ session, loading, categoryGroups = [] }) {
             <>
               <HomeGreeting name={userName} />
 
-              <Link
-                className="home-account-avatar-link"
-                to="/account"
-                aria-label="Moje konto"
-              >
-                <span className="account-mini-avatar">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt=""
-                    />
-                  ) : (
-                    userInitial
-                  )}
-                </span>
-              </Link>
+              <HomeAccountMenu name={userName} avatarUrl={avatarUrl} initial={userInitial} onOpen={() => setMobileMenuOpen(false)} />
 
               <button
                 className="btn btn-dark ih-logout-btn"
@@ -1129,6 +1207,7 @@ function App({ session, loading, categoryGroups = [] }) {
         </div>
 
         <div className="footer-links">
+          <a href={helpCenterHref()} onClick={event => { event.currentTarget.href = helpCenterHref(); }} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">Pomoc</a>
           <a href="#how-it-works">Jak to działa</a>
           <a href="#categories">Kategorie</a>
           <a href="#for-users">Dla Ciebie</a>
