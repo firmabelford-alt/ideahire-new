@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 22 | 2026-10-10 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -20126,90 +20126,117 @@ function formatInboxDate(value) {
 }
 
 /* P13A: presentation components remain inside the existing router file. */
-// One background layer under the page; scroll never updates the React tree.
+// Full-screen washes cross-fade on vertical scrolling; their edges never move.
 function AmbientBackground() {
   const layerRef = useRef(null);
   const { pathname } = useLocation();
 
   useEffect(() => {
     const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    const layer = layerRef.current;
+    if (!layer) return;
+
+    const positions = new WeakMap();
+    const documentScroller = document.scrollingElement || document.documentElement;
     let frame = 0;
-    let distance = 1;
-    let revealDistance = 1;
+    let previousTime = 0;
+    let span = Math.max(900, window.innerHeight * 1.65);
+    let travel = documentOffset();
+    let current = Number.parseFloat(layer.style.getPropertyValue("--ih22-mix"));
+    if (!Number.isFinite(current)) current = 0.18;
+    let target = washFor(travel);
     let last = "";
-    let scroller = document.scrollingElement || document.documentElement;
+    positions.set(documentScroller, travel);
 
-    function pageScroller(element) {
-      return element === document.documentElement || element === document.body ||
-        element?.id === "root" || element?.matches?.(".app, .page, .account-page, .sorts-root, .app-page, .ih6-account-content, .account-tab-stage");
+    function documentOffset() {
+      return Math.max(0, documentScroller.scrollTop || 0,
+        document.documentElement.scrollTop || 0, document.body.scrollTop || 0, window.scrollY || 0);
     }
 
-    function measure() {
-      const rootScroll = scroller === document.scrollingElement || scroller === document.documentElement || scroller === document.body;
-      const viewport = rootScroll ? window.innerHeight : scroller.clientHeight;
-      distance = Math.max(1, scroller.scrollHeight - viewport);
-      // The wash appears within the first screens, even on a very long list.
-      revealDistance = Math.max(560, viewport * 0.9);
-      schedule();
+    function washFor(offset) {
+      // A calm repeat of the same two theme shades also works on long pages.
+      return motion?.matches ? 0.18 : 0.18 + 0.64 * (1 - Math.cos(offset / span * Math.PI)) / 2;
     }
 
-    function paint() {
+    function write(value) {
+      const next = value.toFixed(4);
+      if (next === last) return;
+      last = next;
+      layer.style.setProperty("--ih22-mix", next);
+    }
+
+    function paint(time) {
       frame = 0;
       if (document.hidden) return;
-      const rootScroll = scroller === document.scrollingElement || scroller === document.documentElement || scroller === document.body;
-      const offset = Math.max(0, rootScroll
-        ? Math.max(scroller.scrollTop || 0, document.documentElement.scrollTop || 0, document.body.scrollTop || 0, window.scrollY || 0)
-        : scroller.scrollTop || 0);
-      const progress = motion?.matches ? 0 : Math.min(1, offset / distance);
-      // Two fixed theme colors. Only the bottom glow's opacity and position move.
-      const lift = motion?.matches ? 0 : 1 - Math.exp(-offset / revealDistance);
-      const blend = Math.round(progress * 250) / 250;
-      const glow = motion?.matches ? 0 : Math.round((0.4 + lift * 0.46 + progress * 0.1) * 500) / 500;
-      const rise = Math.round((22 - lift * 26 - progress * 18) * 100) / 100;
-      const signature = `${blend}|${glow}|${rise}`;
-      if (signature === last) return;
-      last = signature;
-      const style = layerRef.current?.style;
-      style?.setProperty("--ih13-blend", String(blend));
-      style?.setProperty("--ih17-glow-opacity", String(glow));
-      style?.setProperty("--ih17-glow-rise", `${rise}%`);
+      const elapsed = previousTime ? Math.min(48, Math.max(1, time - previousTime)) : 16;
+      previousTime = time;
+      current += (target - current) * (1 - Math.exp(-elapsed / 110));
+      const settled = Math.abs(target - current) < 0.0005;
+      if (settled || motion?.matches) current = target;
+      write(current);
+      if (!settled && !motion?.matches) schedule();
+      else previousTime = 0;
     }
 
     function schedule() {
       if (!frame && !document.hidden) frame = window.requestAnimationFrame(paint);
     }
 
-    function scroll(event) {
-      const target = event.target === document || event.target === window
-        ? document.scrollingElement || document.documentElement : event.target;
-      if (!pageScroller(target)) return;
-      if (target !== scroller) { scroller = target; measure(); }
-      else schedule();
+    function scroll(event = {}) {
+      const element = !event.target || event.target === window || event.target === document ||
+        event.target === document.documentElement || event.target === document.body
+        ? documentScroller : event.target;
+      if (element !== documentScroller && element?.nodeType !== 1) return;
+      const position = element === documentScroller ? documentOffset() : Math.max(0, element.scrollTop || 0);
+      const previous = positions.get(element) || 0;
+      positions.set(element, position);
+      if (position === previous) return; // Horizontal tab scrolling does not change the backdrop.
+      travel = Math.max(0, travel + position - previous);
+      target = washFor(travel);
+      if (!motion?.matches) schedule();
     }
 
-    function preference() { last = ""; schedule(); }
+    function resize() {
+      span = Math.max(900, window.innerHeight * 1.65);
+      target = washFor(travel);
+      schedule();
+    }
+
+    function preference() {
+      target = washFor(travel);
+      if (motion?.matches) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+        previousTime = 0;
+        current = target;
+        write(current);
+      } else schedule();
+    }
+
     function visibility() {
-      if (document.hidden) { window.cancelAnimationFrame(frame); frame = 0; }
-      else measure();
+      if (document.hidden) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+        previousTime = 0;
+      } else {
+        scroll();
+        schedule();
+      }
     }
 
-    const observer = window.ResizeObserver ? new ResizeObserver(measure) : null;
-    observer?.observe(document.body);
-    const root = document.getElementById("root");
-    if (root) observer?.observe(root);
+    // Capture vertical movement in the page and its scrollable sections, including touch scrolling.
     document.addEventListener("scroll", scroll, { capture: true, passive: true });
-    // Window events must not overwrite an active scrollable page container.
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", measure, { passive: true });
+    window.addEventListener("scroll", scroll, { passive: true });
+    window.addEventListener("resize", resize, { passive: true });
     document.addEventListener("visibilitychange", visibility);
     motion?.addEventListener?.("change", preference);
-    measure();
+    if (motion?.matches) { current = target; write(current); }
+    else schedule();
 
     return () => {
-      observer?.disconnect();
       document.removeEventListener("scroll", scroll, true);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", scroll);
+      window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
       motion?.removeEventListener?.("change", preference);
       window.cancelAnimationFrame(frame);
