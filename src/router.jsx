@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 24 | 2026-10-10 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 25 | 2026-10-10 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -5327,7 +5327,7 @@ function AccountNavbar() {
               `account-create-job-button${isActive ? " is-active" : ""}`
             }
           >
-            <span aria-hidden="true">+</span>
+            <MarketIcon kind="plus" />
             <span className="account-create-job-label">Dodaj zlecenie</span>
           </NavLink>
         )}
@@ -8335,7 +8335,8 @@ function getAccountWorkspaceSection(hash = "") {
   }
   if (normalizedHash === "account-templates") return "templates";
 
-  return "profile";
+  if (normalizedHash === "account-profile-data") return "profile";
+  return null;
 }
 
 function Account() {
@@ -8353,6 +8354,9 @@ function Account() {
   const [activeAccountSection, setActiveAccountSection] = useState(() =>
     getAccountWorkspaceSection(location.hash)
   );
+
+  const [accountHubOpen, setAccountHubOpen] = useState(false);
+  const accountContentRef = useRef(null);
 
   const connectReturnHandledRef =
     useRef("");
@@ -8861,13 +8865,14 @@ function Account() {
     }
 
     connectReturnHandledRef.current = handledKey;
+    setActiveAccountSection("profile");
 
     handleConnectOnboarding({
       redirectToStripe: returnMode === "refresh",
       returningFromStripe: true,
     }).finally(() => {
       if (returnMode === "return") {
-        navigate("/account", {
+        navigate("/account#account-profile-data", {
           replace: true,
         });
       }
@@ -9875,6 +9880,8 @@ function Account() {
     ) || ACCOUNT_WORKSPACE_SECTIONS[0];
 
   function openAccountSection(section) {
+    if (!section) return;
+    setAccountHubOpen(false);
     setActiveAccountSection(section.key);
     navigateAccountWorkspace(
       {
@@ -9884,18 +9891,31 @@ function Account() {
       },
       { replace: true }
     );
+    window.requestAnimationFrame(() => {
+      accountContentRef.current?.focus({ preventScroll: true });
+      accountContentRef.current?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    });
+  }
+
+  function returnToAccountHub() {
+    setAccountHubOpen(true);
+    window.requestAnimationFrame(() => {
+      const trigger = document.querySelector(".ih16-hub-trigger");
+      trigger?.focus({ preventScroll: true });
+      trigger?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    });
   }
 
   return (
-    <div className="page ih6-account-page">
+    <div className="page ih6-account-page ih25-account-page">
       <AccountNavbar />
 
       <main
         className="app-page account-workspace-page ih6-account-workspace"
-        data-account-section={activeAccountSection}
+        data-account-section={activeAccountSection || "home"}
       >
         <header className="ih16-account-overview">
-          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection}>
+          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} open={accountHubOpen} onOpenChange={setAccountHubOpen}>
           <nav className="ih13-account-shortcuts ih14-account-actions" aria-label="Szybkie działania konta">
             <section className="ih14-account-action-group">
               <h2>Zlecam pracę</h2>
@@ -9924,9 +9944,10 @@ function Account() {
           </ProfileHub>
         </header>
 
-        <div className="ih6-account-layout">
+        <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
           <div className="ih6-account-content">
         <section className="account-tab-intro" aria-live="polite">
+          <button type="button" className="ih25-hub-back" onClick={returnToAccountHub}><MarketIcon kind="arrow" /><span>Centrum profilu</span></button>
           <div>
             <span className="section-label">
               {activeAccountSectionCopy.eyebrow}
@@ -15577,7 +15598,7 @@ function Jobs() {
       "Wszystkie";
 
   return (
-    <div className="page ih-market-v5 ih5-jobs-page ih10-jobs-page">
+    <div className="page ih-market-v5 ih5-jobs-page ih10-jobs-page ih25-jobs-page">
       <AccountNavbar />
 
       <main className="ih-market-shell">
@@ -15602,15 +15623,16 @@ function Jobs() {
             WYSZUKIWARKA
         ================================================= */}
 
+
+        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder} />
+        {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
+
         {!loading &&
           !message && (
             <div className="ih5-jobs-results-header">
               <div className="ih5-jobs-results-copy" role="status" aria-live="polite">
-                <span>Wyniki wyszukiwania</span>
-                <strong>
-                  {new Intl.NumberFormat("pl-PL").format(filteredJobs.length)}
-                </strong>
-                <small>{formatPolishJobsCount(filteredJobs.length).split(" ").pop()}</small>
+                <span>Wyniki</span>
+                <strong>{formatPolishJobsCount(filteredJobs.length)}</strong>
               </div>
 
               {hasFilters && (
@@ -15627,8 +15649,6 @@ function Jobs() {
             </div>
           )}
 
-        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder} />
-        {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
 
         {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
 
@@ -20145,7 +20165,7 @@ function AmbientBackground() {
     let previousTime = 0;
     let pointerX = 0;
     let pointerY = 0;
-    let span = Math.max(580, Math.min(1100, window.innerHeight * 0.95));
+    let span = Math.max(580, Math.min(1100, window.innerHeight * 0.8));
     let travel = documentOffset();
     let target = composition();
     let current = motion?.matches ? [...target] : [...(stateRef.current || target)];
@@ -20161,12 +20181,12 @@ function AmbientBackground() {
       const x = motion?.matches ? 0 : pointerX;
       const y = motion?.matches ? 0 : pointerY;
       return [
-        Math.sin(phase) * 16 + x * 3, Math.cos(phase) * 12 + y * 3,
+        Math.sin(phase) * 17 + x * 3, Math.cos(phase) * 14 + y * 3,
         1 + Math.sin(phase * 0.7) * 0.07, 1 + Math.cos(phase * 0.7) * 0.06,
-        0.82 + Math.sin(phase * 0.6 + 0.4) * 0.12,
-        Math.cos(phase * 0.9) * 14 - x * 2, Math.sin(phase * 0.9) * 14 - y * 2,
+        0.72 + Math.sin(phase * 0.6 + 0.4) * 0.1,
+        Math.cos(phase * 0.9) * 17 - x * 2, Math.sin(phase * 0.9) * 16 - y * 2,
         1 + Math.cos(phase * 0.8) * 0.06, 1 + Math.sin(phase * 0.8) * 0.07,
-        0.72 + Math.cos(phase * 0.6) * 0.14
+        0.84 + Math.cos(phase * 0.6) * 0.1
       ];
     }
 
@@ -20232,7 +20252,7 @@ function AmbientBackground() {
     }
 
     function resize() {
-      span = Math.max(580, Math.min(1100, window.innerHeight * 0.95));
+      span = Math.max(580, Math.min(1100, window.innerHeight * 0.8));
       target = composition();
       schedule();
     }
@@ -20318,6 +20338,14 @@ function MessengerFocusButton() {
 function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, children }) {
   const frameRef = useRef(null);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const [wideLayout, setWideLayout] = useState(() => !!window.matchMedia?.("(min-width: 1120px)").matches);
+  const inboxPersistent = chat && wideLayout && !focusMode;
+  useEffect(() => {
+    const query = window.matchMedia?.("(min-width: 1120px)");
+    const update = () => { setWideLayout(!!query?.matches); setInboxOpen(false); };
+    query?.addEventListener?.("change", update);
+    return () => query?.removeEventListener?.("change", update);
+  }, []);
   const { pathname } = useLocation();
   useEffect(() => { setInboxOpen(false); }, [pathname]);
   useEffect(() => {
@@ -20354,7 +20382,7 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
     };
   }, [focusMode]);
   useEffect(() => {
-    if (!chat || !inboxOpen) return undefined;
+    if (!chat || !inboxOpen || inboxPersistent) return undefined;
     const panel = frameRef.current?.querySelector(".ih12-inbox");
     const content = frameRef.current?.querySelector(".ih7-chat-shell");
     const previous = document.activeElement;
@@ -20380,7 +20408,7 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
       const returnFocus = previous?.isConnected ? previous : frameRef.current?.querySelector(".ih14-conversations-toggle");
       returnFocus?.focus?.({ preventScroll: true });
     };
-  }, [chat, inboxOpen]);
+  }, [chat, inboxOpen, inboxPersistent]);
   useEffect(() => {
     if (!focusMode) return undefined;
     const element = frameRef.current;
@@ -20415,11 +20443,11 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
     const frame = window.requestAnimationFrame(() => frameRef.current?.querySelector('.ih15-focus-toggle')?.focus({ preventScroll: true }));
     return () => window.cancelAnimationFrame(frame);
   }, [focusMode]);
-  return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen, focusMode, setFocusMode: onFocusModeChange }}>
+  return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen, inboxPersistent, focusMode, setFocusMode: onFocusModeChange }}>
     {focusMode && createPortal(<div className="ih17-chat-backdrop" aria-hidden="true" />, document.body)}
-    <main ref={frameRef} role={focusMode ? "dialog" : undefined} aria-modal={focusMode ? true : undefined} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}${focusMode ? " ih15-focus" : ""}`} aria-label="Komunikator IdeaHire">
+    <main ref={frameRef} role={focusMode ? "dialog" : undefined} aria-modal={focusMode ? true : undefined} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}${inboxPersistent ? " is-sidebar-visible" : ""}${focusMode ? " ih15-focus" : ""}`} aria-label="Komunikator IdeaHire">
       {children}
-      {chat && inboxOpen && <button type="button" tabIndex={-1} className="ih14-inbox-scrim" aria-label="Zamknij listę rozmów" onClick={() => setInboxOpen(false)} />}
+      {chat && inboxOpen && !inboxPersistent && <button type="button" tabIndex={-1} className="ih14-inbox-scrim" aria-label="Zamknij listę rozmów" onClick={() => setInboxOpen(false)} />}
     </main>
   </MessengerLayoutContext.Provider>;
 }
@@ -20444,8 +20472,8 @@ function InboxPanel({
   const layout = useContext(MessengerLayoutContext);
   return (
     <aside id={compact ? "ih14-conversation-inbox" : undefined} className={`ih12-inbox${compact ? " is-sidebar" : ""}`}
-      role={compact && layout?.inboxOpen ? "dialog" : undefined} aria-modal={compact && layout?.inboxOpen ? true : undefined}
-      aria-hidden={compact && !layout?.inboxOpen ? true : undefined} inert={compact && !layout?.inboxOpen ? "" : undefined} aria-label="Lista rozmów">
+      role={compact && layout?.inboxOpen && !layout?.inboxPersistent ? "dialog" : undefined} aria-modal={compact && layout?.inboxOpen && !layout?.inboxPersistent ? true : undefined}
+      aria-hidden={compact && !layout?.inboxOpen && !layout?.inboxPersistent ? true : undefined} inert={compact && !layout?.inboxOpen && !layout?.inboxPersistent ? "" : undefined} aria-label="Lista rozmów">
       <header className="ih12-inbox-heading">
         <div>
           <h1>Wiadomości <span aria-label={`Liczba rozmów: ${conversations.length}`}>{conversations.length}</span></h1>
@@ -20551,7 +20579,7 @@ function ConversationInbox({ activeId, compact = false }) {
 
 function Messages() {
   return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications">
+    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications ih25-communications">
       <AccountNavbar />
       <MessengerFrame>
         <ConversationInbox />
@@ -22346,14 +22374,29 @@ function Chat() {
 
   const [workspaceTab, setWorkspaceTab] =
     useState("conversation");
-  const [focusMode, setFocusMode] = useState(true);
+  const [focusMode, setFocusMode] = useState(() => !!window.matchMedia?.("(max-width: 800px)").matches);
+  const workspaceFocusRef = useRef(null);
   const [planPinned, setPlanPinned] = useState(false);
-  useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); }, [id]);
+  useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); workspaceFocusRef.current = null; }, [id]);
   function openWorkspace(value) {
     setWorkspaceTab(value);
     setPlanPinned(false);
-    if (value !== "conversation") setFocusMode(true);
+    if (value !== "conversation") {
+      if (workspaceFocusRef.current === null) workspaceFocusRef.current = focusMode;
+      setFocusMode(true);
+    } else if (workspaceFocusRef.current !== null) {
+      setFocusMode(workspaceFocusRef.current);
+      workspaceFocusRef.current = null;
+    }
   }
+  useEffect(() => {
+    if (!planPinned) return undefined;
+    const query = window.matchMedia?.("(max-width: 980px)");
+    const update = () => { if (query?.matches) openWorkspace("plan"); };
+    update();
+    query?.addEventListener?.("change", update);
+    return () => query?.removeEventListener?.("change", update);
+  }, [planPinned, focusMode]);
   function closePlanWindow() {
     setPlanPinned(false);
     window.requestAnimationFrame(() => composerRef.current?.focus({ preventScroll: true }));
@@ -23388,7 +23431,7 @@ function Chat() {
       : null);
 
   return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications">
+    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications ih25-communications">
       <AccountNavbar />
 
       <MessengerFrame chat focusMode={focusMode} onFocusModeChange={setFocusMode}>
@@ -23541,7 +23584,7 @@ function Chat() {
 
               <div className="ih7-chat-workspace-tabs" role="tablist" aria-label="Przestrzeń projektu">
                 {[
-                  ["conversation", "Rozmowa", messages.length],
+                  ["conversation", "Rozmowa", ""],
                   ["files", "Pliki", privateWork.items.filter((item) => item.moderation_status === "active").length],
                   ["plan", "Plan współpracy", agreement?.status === "accepted" ? "✓" : ""],
                 ].map(([value, label, count]) => (
@@ -23571,8 +23614,8 @@ function Chat() {
                   </button>
                 ))}
                 {workspaceTab === "conversation" && <button type="button" className="ih15-pin-plan" aria-label="Otwórz plan obok rozmowy"
-                  onClick={() => { setPlanPinned(value => !value); setFocusMode(true); }} aria-pressed={planPinned}>
-                  <MarketIcon kind="panels" /><span>Plan obok rozmowy</span>
+                  onClick={() => { if (window.matchMedia?.("(max-width: 980px)").matches) openWorkspace("plan"); else setPlanPinned(value => !value); }} aria-pressed={planPinned}>
+                  <MarketIcon kind="panels" /><span>Plan obok</span>
                 </button>}
               </div>
 
@@ -23587,7 +23630,7 @@ function Chat() {
                 <div className="ih7-chat-workspace-panel is-conversation" role="tabpanel" id="ih7-chat-panel-conversation"
                   aria-labelledby="ih7-chat-tab-conversation" hidden={workspaceTab !== "conversation"}>
 
-                    <div className="ih12-project-next"><div><MarketIcon kind="check" /><span><strong>Plan współpracy</strong><small>{agreement?.status === "accepted" ? "Zaakceptowany zakres, cena i termin." : agreementsRequired ? "Zapiszcie warunki i zaakceptujcie tę samą wersję." : "Ta starsza rozmowa nie ma formalnych warunków."}</small></span></div><button type="button" onClick={() => openWorkspace("plan")}>{agreement?.status === "accepted" ? "Zobacz plan" : "Otwórz plan"}<MarketIcon kind="arrow" /></button></div>
+
 
                     <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => {
                       const element = event.currentTarget;
