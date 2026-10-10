@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 27 | 2026-10-10 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -53204,4 +53204,19 @@ html:root body #root#root#root#root#root#root#root#root .account-page.ih7-commun
   html:root body #root#root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications.ih26-communications .ih26-inbox-row.is-active { border-left-color: Highlight !important; }
   html:root body #root#root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications.ih26-communications .ih26-unread-marker { background: Highlight !important; }
   html:root body #root#root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications.ih26-communications .ih26-composer-form:focus-within, html:root body #root#root#root#root#root#root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications.ih25-communications.ih26-communications .ih26-inbox-search:focus-within { outline-color: Highlight !important; }
+}
+
+
+/* IdeaHire P27 — Help in the footer and both account menus. */
+html:root body #root#root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions button.ih27-home-account-trigger {
+  box-sizing: border-box !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--ih-home-ink) !important;
+  cursor: pointer !important;
+}
+html:root body #root#root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions button.ih27-home-account-trigger:focus-visible {
+  outline: 2px solid var(--ih-home-ink) !important;
+  outline-offset: 4px !important;
 }
