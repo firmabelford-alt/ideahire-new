@@ -1,6 +1,7 @@
-/* IdeaHire | PACZKA 09 | 2026-10-04 | Pełny plik: src/PrivateWork.jsx */
+/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/PrivateWork.jsx */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { IdeaHireDateField } from "./MarketUI";
 import { supabase } from "./supabase";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
@@ -51,17 +52,22 @@ async function invokeSecureWork(body) {
     { body }
   );
   if (error) {
-    let serverMessage = "";
+    let payload;
     try {
-      const payload = await error.context?.json?.();
-      serverMessage = String(payload?.error || "");
+      payload = await error.context?.json?.();
     } catch {
       // Odpowiedź nie zawierała możliwego do odczytu JSON-u.
     }
-    throw new Error(serverMessage || error.message);
+    const failure = new Error(String(payload?.error || error.message));
+    failure.safeToCleanup = payload?.safeToCleanup;
+    failure.definitelyRejected = payload?.ok === false;
+    throw failure;
   }
   if (!data?.ok) {
-    throw new Error(data?.error || "Funkcja serwerowa odrzuciła operację.");
+    const failure = new Error(data?.error || "Nie otrzymaliśmy potwierdzenia operacji.");
+    failure.safeToCleanup = data?.safeToCleanup;
+    failure.definitelyRejected = data?.ok === false;
+    throw failure;
   }
   return data;
 }
@@ -703,6 +709,7 @@ export function PrivateSharePanel({
   userId,
   disabled,
   agreementAccepted,
+  paymentConfirmed = false,
   isContractor,
   onComplete,
 }) {
@@ -720,6 +727,7 @@ export function PrivateSharePanel({
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [safetyConfirmed, setSafetyConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [outcomeUnknown, setOutcomeUnknown] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
   const imageCount = files.filter((file) => ["jpg", "jpeg", "png", "webp"].includes(fileExtension(file.name))).length;
@@ -784,9 +792,37 @@ export function PrivateSharePanel({
 
   async function submit(event) {
     event.preventDefault();
-    if (busy || disabled) return;
-    const preparedLinks = links.filter((link) => link.url.trim());
-    const preparedAccess = accessEntries.filter((entry) => entry.secureUrl.trim());
+    if (busy || disabled || outcomeUnknown) return;
+    if (mode === "delivery" && (!agreementAccepted || !paymentConfirmed || !isContractor)) {
+      setMessage("Pracę przekazuje wykonawca po wspólnej akceptacji warunków i potwierdzeniu płatności.");
+      return;
+    }
+    let preparedLinks;
+    let preparedAccess;
+    try {
+      const totalFileBytes = files.reduce((sum, file) => sum + file.size, 0);
+      if (totalFileBytes > MAX_BATCH_BYTES) throw new Error("Łączny rozmiar jednej paczki plików nie może przekroczyć 150 MB.");
+      preparedLinks = links.filter((link) => link.url.trim()).map((link, index) => {
+        try { return { ...link, url: normalizeLink(link.url) }; }
+        catch { throw new Error(`Link nr ${index + 1}: podaj pełny adres HTTPS bez loginu ani hasła w adresie.`); }
+      });
+      preparedAccess = accessEntries.filter((entry) => Object.values(entry).some((value) => String(value).trim())).map((entry, index) => {
+        if (!entry.secureUrl.trim()) throw new Error(`Dostęp nr ${index + 1}: uzupełnij bezpieczny link dostępu albo usuń dane tego dostępu.`);
+        let secureUrl, serviceUrl;
+        try {
+          secureUrl = normalizeLink(entry.secureUrl);
+          serviceUrl = entry.serviceUrl.trim() ? normalizeLink(entry.serviceUrl) : "";
+        } catch { throw new Error(`Dostęp nr ${index + 1}: linki muszą używać HTTPS i nie mogą zawierać loginu ani hasła w adresie.`); }
+        const expires = entry.expiresAt ? new Date(entry.expiresAt) : null;
+        if (expires && (!Number.isFinite(expires.getTime()) || expires.getTime() <= Date.now())) throw new Error(`Dostęp nr ${index + 1}: termin ważności linku musi przypadać w przyszłości.`);
+        if (containsCredentialLikeText(entry.login) || containsCredentialLikeText(entry.instructions)) throw new Error("Nie wpisuj jawnego hasła, tokenu ani kodu 2FA. Użyj bezpiecznego linku dostępu.");
+        return { ...entry, secureUrl, serviceUrl, expiresAt: expires ? expires.toISOString() : "" };
+      });
+      if (containsCredentialLikeText(writtenText)) throw new Error("Treść przypomina zapis jawnego hasła lub sekretu. Użyj bezpiecznego linku dostępu.");
+    } catch (validationError) {
+      setMessage(readableError(validationError, "Sprawdź dane materiałów."));
+      return;
+    }
     const hasWrittenText = writtenText.trim().length > 0;
     const total = files.length + preparedLinks.length + preparedAccess.length + (hasWrittenText ? 1 : 0);
     if (total < 1 || total > MAX_ITEMS) {
@@ -804,21 +840,13 @@ export function PrivateSharePanel({
 
     let batchId = crypto.randomUUID();
     const uploaded = [];
+    let committed = false;
+    let finalizationStarted = false;
     setBusy(true);
     setProgress(0);
     setMessage("");
 
     try {
-      const totalFileBytes = files.reduce(
-        (sum, file) => sum + file.size,
-        0
-      );
-      if (totalFileBytes > MAX_BATCH_BYTES) {
-        throw new Error(
-          "Łączny rozmiar jednej paczki plików nie może przekroczyć 150 MB."
-        );
-      }
-
       let preparedFiles = [];
       if (files.length) {
         const preparation = await invokeSecureWork({
@@ -879,22 +907,24 @@ export function PrivateSharePanel({
         links: preparedLinks.map((link) => ({
           id: crypto.randomUUID(),
           batchId,
-          url: normalizeLink(link.url),
-          label: link.label.trim() || new URL(normalizeLink(link.url)).hostname,
+          url: link.url,
+          label: link.label.trim() || new URL(link.url).hostname,
           materialKind: link.materialKind || "link",
         })),
         accessEntries: preparedAccess.map((entry) => ({
           label: entry.label.trim() || "Dane dostępowe",
-          serviceUrl: entry.serviceUrl.trim() ? normalizeLink(entry.serviceUrl) : "",
+          serviceUrl: entry.serviceUrl,
           login: entry.login.trim(),
-          secureUrl: normalizeLink(entry.secureUrl),
-          expiresAt: entry.expiresAt ? new Date(entry.expiresAt).toISOString() : "",
+          secureUrl: entry.secureUrl,
+          expiresAt: entry.expiresAt,
           instructions: entry.instructions.trim(),
         })),
       };
 
       setProgress(82);
+      finalizationStarted = true;
       await invokeSecureWork(preparedBody);
+      committed = true;
 
       setProgress(100);
       setFiles([]);
@@ -912,13 +942,20 @@ export function PrivateSharePanel({
           detail: { conversationId, status: "work_submitted" },
         }));
       }
-      await onComplete?.();
+      try { await onComplete?.(); } catch {
+        setMessage("Materiały zostały zapisane. Odśwież rozmowę, aby je zobaczyć.");
+      }
       window.setTimeout(() => setOpen(false), 650);
     } catch (submitError) {
-      if (uploaded.length) {
-        await supabase.storage.from(PRIVATE_WORK_BUCKET).remove(uploaded.map((item) => item.path));
+      // A lost response is not proof of failure. Never remove potentially committed files.
+      if (!committed && uploaded.length && (!finalizationStarted || submitError.safeToCleanup === true)) {
+        try { await supabase.storage.from(PRIVATE_WORK_BUCKET).remove(uploaded.map((item) => item.path)); } catch { /* The original error remains visible. */ }
       }
-      setMessage(readableError(submitError, "Nie udało się przekazać materiałów."));
+      const unknown = finalizationStarted && (!submitError.definitelyRejected || submitError.safeToCleanup === false);
+      setOutcomeUnknown(unknown);
+      setMessage(unknown
+        ? "Nie udało się potwierdzić zapisu. Pliki nie zostały usunięte. Wróć do rozmowy i sprawdź zakładkę Pliki; odśwież stronę przed ponowną wysyłką, aby nie powielić materiałów."
+        : readableError(submitError, "Nie udało się przekazać materiałów."));
     } finally {
       setBusy(false);
     }
@@ -926,7 +963,7 @@ export function PrivateSharePanel({
 
   return (
     <section className={`private-work-share ${open ? "is-open" : ""}`}>
-      <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled}>
+      <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled || busy}>
         <span aria-hidden="true">＋</span>
         <b>Dodaj materiały</b>
         <small>Pliki, zdjęcia, linki lub gotowa praca</small>
@@ -937,7 +974,7 @@ export function PrivateSharePanel({
         }}>
         <form ref={dialogRef} onSubmit={submit} className="private-work-share-form" role="dialog" aria-modal="true" aria-labelledby="private-work-share-title" onKeyDown={(event) => {
           if (event.key !== "Tab") return;
-          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary')).filter((control) => !control.closest('details:not([open]) .private-work-extra-body'));
+          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary')).filter((control) => control.tabIndex !== -1 && !control.closest('fieldset[disabled]') && !control.closest('details:not([open]) .private-work-extra-body'));
           const first = controls[0]; const last = controls.at(-1);
           if (!first) return;
           const active = document.activeElement;
@@ -954,11 +991,12 @@ export function PrivateSharePanel({
           <div className="private-work-tabs" role="tablist" aria-label="Sposób wysyłki" onKeyDown={(event) => {
             if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
             event.preventDefault();
-            const nextMode = agreementAccepted && isContractor && (event.key === "End" || (event.key !== "Home" && mode === "materials")) ? "delivery" : "materials";
+            if (busy || outcomeUnknown) return;
+            const nextMode = agreementAccepted && paymentConfirmed && isContractor && (event.key === "End" || (event.key !== "Home" && mode === "materials")) ? "delivery" : "materials";
             setMode(nextMode);
             event.currentTarget.querySelector(`#ih9-share-tab-${nextMode}`)?.focus();
           }}>
-            <button type="button" role="tab" id="ih9-share-tab-materials" aria-controls="ih9-share-panel" aria-selected={mode === "materials"} tabIndex={mode === "materials" ? 0 : -1} className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")}>Materiały do rozmowy</button>
+            <button type="button" role="tab" id="ih9-share-tab-materials" aria-controls="ih9-share-panel" aria-selected={mode === "materials"} tabIndex={mode === "materials" ? 0 : -1} className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")} disabled={busy || outcomeUnknown}>Materiały do rozmowy</button>
             <button
               type="button"
               role="tab"
@@ -968,14 +1006,14 @@ export function PrivateSharePanel({
               tabIndex={mode === "delivery" ? 0 : -1}
               className={mode === "delivery" ? "is-active" : ""}
               onClick={() => setMode("delivery")}
-              disabled={!agreementAccepted || !isContractor}
-              title={!agreementAccepted ? "Najpierw zaakceptujcie Formularz współpracy" : !isContractor ? "Pracę przekazuje wykonawca" : ""}
+              disabled={!agreementAccepted || !paymentConfirmed || !isContractor || busy || outcomeUnknown}
+              title={!agreementAccepted ? "Najpierw zaakceptujcie Formularz współpracy" : !isContractor ? "Pracę przekazuje wykonawca" : !paymentConfirmed ? "Pracę możesz przekazać po potwierdzeniu płatności" : ""}
             >
               Przekaż pracę
             </button>
           </div>
 
-          <div className="ih9-share-body" role="tabpanel" id="ih9-share-panel" aria-labelledby={`ih9-share-tab-${mode}`}>
+          <fieldset className="ih9-share-body" role="tabpanel" id="ih9-share-panel" aria-labelledby={`ih9-share-tab-${mode}`} disabled={busy || outcomeUnknown}>
           <div className="private-work-field">
             <label htmlFor="private-work-caption">{mode === "delivery" ? "Co przekazujesz i jak sprawdzić rezultat?" : "Wiadomość do materiałów (opcjonalnie)"}</label>
             <textarea id="private-work-caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz gotową pracę, zawartość plików i sposób ich weryfikacji…" : "Dodaj krótki kontekst…"} />
@@ -1045,7 +1083,7 @@ export function PrivateSharePanel({
                   <input type="url" value={entry.serviceUrl} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, serviceUrl: event.target.value } : item))} placeholder="https://adres-logowania.pl" />
                   <input type="text" value={entry.login} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, login: event.target.value } : item))} maxLength={320} placeholder="Login lub e-mail" />
                   <input type="url" value={entry.secureUrl} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, secureUrl: event.target.value } : item))} placeholder="https://bezpieczny-link-do-hasla…" />
-                  <label>Link ważny do<input type="datetime-local" value={entry.expiresAt} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, expiresAt: event.target.value } : item))} /></label>
+                  <label>Link ważny do<IdeaHireDateField aria-label="Termin ważności bezpiecznego linku" type="datetime-local" value={entry.expiresAt} disabled={busy || outcomeUnknown} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, expiresAt: event.target.value } : item))} /></label>
                   <textarea value={entry.instructions} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, instructions: event.target.value } : item))} maxLength={2000} rows={3} placeholder="Instrukcja logowania bez hasła, tokenu i kodu 2FA" />
                   {accessEntries.length > 1 && <button type="button" onClick={() => setAccessEntries((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Usuń ten dostęp</button>}
                 </div>
@@ -1067,12 +1105,12 @@ export function PrivateSharePanel({
           )}
 
           {busy && <div className="private-work-progress"><span style={{ width: `${progress}%` }} /></div>}
-          </div>
+          </fieldset>
           <div className="ih9-share-footer">
           {message && <p className="private-work-form-message" role="status">{message}</p>}
           <div className="private-work-form-actions">
-            <button type="button" onClick={() => setOpen(false)} disabled={busy}>Anuluj</button>
-            <button type="submit" className="is-primary" disabled={busy || disabled}>
+            <button type="button" onClick={async () => { setOpen(false); if (outcomeUnknown) { try { await onComplete?.(); } catch { /* Retry through the conversation's reload control. */ } } }} disabled={busy}>{outcomeUnknown ? "Wróć do rozmowy" : "Anuluj"}</button>
+            <button type="submit" className="is-primary" disabled={busy || disabled || outcomeUnknown}>
               {busy ? "Sprawdzanie i wysyłanie…" : mode === "delivery" ? "Przekaż pracę do odbioru" : "Wyślij materiały"}
             </button>
           </div>
