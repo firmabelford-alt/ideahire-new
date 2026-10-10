@@ -1,5 +1,6 @@
-/* IdeaHire | PACZKA 18 | 2026-10-09 | Pelny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
@@ -126,6 +127,7 @@ export function MarketIcon({ kind = "search", ...props }) {
     expand: "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5",
     collapse: "M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5",
     panels: "M3 4h18v16H3ZM14 4v16",
+    calendar: "M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM7 3v4M17 3v4M3 10h18M7 14h2M13 14h2M7 18h2",
   };
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
 }
@@ -326,4 +328,202 @@ export function CommissionStory() {
       <Link className="ih5-story-link" to="/find-talent">Zamień pomysł w projekt <MarketIcon kind="arrow" /></Link>
     </aside>
   );
+}
+
+// Shared local calendar. ISO values remain unchanged for forms and server validation.
+export function IdeaHireDateField({ type = "date", value = "", onChange, min, max, id, name, required, disabled, autoComplete, ...props }) {
+  const generated = useId();
+  const fieldId = id || generated;
+  const root = useRef(null);
+  const panel = useRef(null);
+  const trigger = useRef(null);
+  const focusPending = useRef(false);
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [focusedDay, setFocusedDay] = useState("");
+  const [month, setMonth] = useState("");
+  const isTime = type === "datetime-local";
+  const months = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+  const weekdays = ["Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd"];
+  const pad = number => String(number).padStart(2, "0");
+  const isoDate = date => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  function parseDate(raw) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(raw || "")) return null;
+    const [year, monthNumber, day] = raw.split("-").map(Number);
+    const date = new Date(0);
+    date.setFullYear(year, monthNumber - 1, day);
+    date.setHours(12, 0, 0, 0);
+    return isoDate(date) === raw ? date : null;
+  }
+  function hasValidFormat(raw) {
+    if (!parseDate(raw?.slice(0, 10))) return false;
+    return !isTime || /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d$/.test(raw);
+  }
+  const now = new Date();
+  const today = isoDate(now);
+  const nowYear = now.getFullYear();
+  const lowerDate = parseDate(min?.slice(0, 10)) ? min.slice(0, 10) : `${nowYear - 120}-01-01`;
+  const upperDate = parseDate(max?.slice(0, 10)) ? max.slice(0, 10) : `${nowYear + 30}-12-31`;
+  const lowerMonth = lowerDate.slice(0, 7);
+  const upperMonth = upperDate.slice(0, 7);
+  const minYear = Number(lowerDate.slice(0, 4));
+  const maxYear = Number(upperDate.slice(0, 4));
+  const rangeAvailable = lowerDate <= upperDate && (!min || !max || min <= max);
+  const dateKey = draft.slice(0, 10);
+  const timeKey = draft.slice(11, 16) || `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const [year, monthNumber] = (month || today.slice(0, 7)).split("-").map(Number);
+  const firstDay = parseDate(`${year}-${pad(monthNumber)}-01`);
+  const days = new Date(year, monthNumber, 0).getDate();
+  const offset = firstDay ? (firstDay.getDay() + 6) % 7 : 0;
+  const valid = candidate => hasValidFormat(candidate) && candidate.slice(0, 10) >= lowerDate && candidate.slice(0, 10) <= upperDate && (!min || candidate >= min) && (!max || candidate <= max);
+  const caption = props["aria-label"] || (isTime ? "Data i godzina" : "Wybierz datę");
+  function format(raw) {
+    return hasValidFormat(raw) ? `${raw.slice(8, 10)}.${raw.slice(5, 7)}.${raw.slice(0, 4)}${isTime ? `, ${raw.slice(11, 16)}` : ""}` : "";
+  }
+  function clampDate(raw) { return raw < lowerDate ? lowerDate : raw > upperDate ? upperDate : raw; }
+  function candidateForDate(raw) {
+    let candidate = isTime ? `${raw}T${timeKey}` : raw;
+    if (min && candidate < min && min.slice(0, 10) === raw) candidate = min;
+    if (max && candidate > max && max.slice(0, 10) === raw) candidate = max;
+    return candidate;
+  }
+  function close() {
+    setOpen(false);
+    if (trigger.current?.isConnected) trigger.current.focus({ preventScroll: true });
+  }
+  function show() {
+    if (disabled) return;
+    const initialDate = clampDate(hasValidFormat(value) ? value.slice(0, 10) : today);
+    let initial = hasValidFormat(value) ? value : candidateForDate(initialDate);
+    if (min && initial < min) initial = min;
+    if (max && initial > max) initial = max;
+    setDraft(initial);
+    setMonth(initial.slice(0, 7));
+    setFocusedDay(initial.slice(0, 10));
+    focusPending.current = true;
+    setOpen(true);
+  }
+  function commit(candidate) {
+    if (candidate && !valid(candidate)) return;
+    if (!candidate && required) return;
+    onChange?.({ target: { value: candidate, name }, currentTarget: { value: candidate, name } });
+    close();
+  }
+  function changeMonth(nextMonth, focus = false) {
+    const next = nextMonth < lowerMonth ? lowerMonth : nextMonth > upperMonth ? upperMonth : nextMonth;
+    const [nextYear, nextNumber] = next.split("-").map(Number);
+    const lastDay = new Date(nextYear, nextNumber, 0).getDate();
+    const day = Math.min(Number(focusedDay.slice(8, 10)) || 1, lastDay);
+    setFocusedDay(clampDate(`${next}-${pad(day)}`));
+    setMonth(next);
+    focusPending.current = focus;
+  }
+  function moveMonth(delta, focus = false) {
+    const date = parseDate(`${month}-01`);
+    if (!date) return;
+    date.setMonth(date.getMonth() + delta);
+    changeMonth(isoDate(date).slice(0, 7), focus);
+  }
+  function dayKeyDown(event) {
+    const date = parseDate(event.target.dataset.date);
+    if (!date) return;
+    const shifts = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+    if (event.key === "PageUp" || event.key === "PageDown") {
+      event.preventDefault();
+      moveMonth((event.key === "PageUp" ? -1 : 1) * (event.shiftKey ? 12 : 1), true);
+      return;
+    }
+    let shift = shifts[event.key];
+    if (event.key === "Home") shift = -((date.getDay() + 6) % 7);
+    if (event.key === "End") shift = 6 - ((date.getDay() + 6) % 7);
+    if (shift == null) return;
+    event.preventDefault();
+    date.setDate(date.getDate() + shift);
+    const next = clampDate(isoDate(date));
+    setFocusedDay(next);
+    setMonth(next.slice(0, 7));
+    focusPending.current = true;
+  }
+  useEffect(() => {
+    if (!open || !focusPending.current) return;
+    focusPending.current = false;
+    const selected = panel.current?.querySelector(`[data-date="${focusedDay}"]:not(:disabled)`);
+    const firstAvailable = panel.current?.querySelector('.ih20-calendar-days button:not(:disabled)');
+    (selected || firstAvailable || panel.current?.querySelector('button'))?.focus({ preventScroll: true });
+  }, [open, month, focusedDay]);
+  useEffect(() => { if (disabled && open) setOpen(false); }, [disabled, open]);
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.getPropertyValue("overflow");
+    const previousPriority = document.body.style.getPropertyPriority("overflow");
+    document.body.style.setProperty("overflow", "hidden", "important");
+    function outside(event) {
+      if (!panel.current?.contains(event.target) && !root.current?.contains(event.target)) close();
+    }
+    document.addEventListener("pointerdown", outside);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      if (previousOverflow) document.body.style.setProperty("overflow", previousOverflow, previousPriority);
+      else document.body.style.removeProperty("overflow");
+    };
+  }, [open]);
+  const cells = Array.from({ length: Math.ceil((days + offset) / 7) * 7 }, (_, index) => {
+    const day = index - offset + 1;
+    if (day < 1 || day > days) return null;
+    const key = `${month}-${pad(day)}`;
+    return { day, key, unavailable: !rangeAvailable || key < lowerDate || key > upperDate };
+  });
+  return <span className="ih20-date-field" ref={root}>
+    <input {...props} ref={trigger} id={fieldId} type="text" value={format(value)} readOnly disabled={disabled} autoComplete={autoComplete}
+      placeholder={props.placeholder || (isTime ? "Wybierz datę i godzinę" : "Wybierz datę")}
+      aria-haspopup="dialog" aria-expanded={open} aria-required={required || undefined} aria-controls={open ? `${fieldId}-calendar` : undefined}
+      onClick={show} onKeyDown={event => { if (["Enter", " ", "ArrowDown"].includes(event.key)) { event.preventDefault(); show(); } }} />
+    <input className="ih20-date-validator" type={type} name={name} value={value} min={min} max={max} required={required} disabled={disabled}
+      tabIndex={-1} aria-hidden="true" onChange={onChange} onInvalid={event => { event.preventDefault(); show(); }} />
+    <span className="ih20-date-icon" aria-hidden="true"><MarketIcon kind="calendar" /></span>
+    {open && createPortal(<div className="ih20-calendar-backdrop" onClick={event => { if (event.target === event.currentTarget) close(); }}>
+      <section ref={panel} id={`${fieldId}-calendar`} className="ih20-calendar" role="dialog" aria-modal="true" aria-labelledby={`${fieldId}-calendar-title`}
+        onKeyDown={event => {
+          event.stopPropagation();
+          if (event.key === "Escape") { event.preventDefault(); close(); }
+          if (event.key === "Tab") {
+            const controls = [...panel.current.querySelectorAll('button:not(:disabled):not([tabindex="-1"]), select:not(:disabled)')];
+            if (event.shiftKey && (document.activeElement === controls[0] || !controls.includes(document.activeElement))) { event.preventDefault(); controls.at(-1)?.focus(); }
+            else if (!event.shiftKey && (document.activeElement === controls.at(-1) || !controls.includes(document.activeElement))) { event.preventDefault(); controls[0]?.focus(); }
+          }
+        }}>
+        <header><strong id={`${fieldId}-calendar-title`}>{caption}</strong><button type="button" onClick={close} aria-label="Zamknij kalendarz">×</button></header>
+        <div className="ih20-calendar-navigation">
+          <button type="button" onClick={() => moveMonth(-1)} disabled={!rangeAvailable || month <= lowerMonth} aria-label="Poprzedni miesiąc">‹</button>
+          <select aria-label="Miesiąc" value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
+            {months.map((label, index) => <option value={index + 1} key={label} disabled={`${year}-${pad(index + 1)}` < lowerMonth || `${year}-${pad(index + 1)}` > upperMonth}>{label}</option>)}
+          </select>
+          <select aria-label="Rok" value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
+            {Array.from({ length: Math.max(0, maxYear - minYear + 1) }, (_, index) => <option value={maxYear - index} key={index}>{maxYear - index}</option>)}
+          </select>
+          <button type="button" onClick={() => moveMonth(1)} disabled={!rangeAvailable || month >= upperMonth} aria-label="Następny miesiąc">›</button>
+        </div>
+        <div className="ih20-calendar-weekdays" aria-hidden="true">{weekdays.map(day => <span key={day}>{day}</span>)}</div>
+        <div className="ih20-calendar-days" role="grid" aria-label={`${months[monthNumber - 1]} ${year}`} onKeyDown={dayKeyDown}>
+          {Array.from({ length: cells.length / 7 }, (_, row) => <div className="ih21-calendar-row" role="row" key={row}>
+            {cells.slice(row * 7, row * 7 + 7).map((cell, column) => cell ? <button type="button" role="gridcell" key={cell.key} data-day={cell.day} data-date={cell.key}
+              disabled={cell.unavailable} tabIndex={focusedDay === cell.key ? 0 : -1} aria-selected={dateKey === cell.key}
+              aria-current={today === cell.key ? "date" : undefined} aria-label={parseDate(cell.key)?.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
+              onFocus={() => setFocusedDay(cell.key)} onClick={() => { if (isTime) setDraft(candidateForDate(cell.key)); else commit(cell.key); }}>{cell.day}</button>
+              : <span role="gridcell" aria-hidden="true" key={`blank-${column}`} />)}
+          </div>)}
+        </div>
+        {isTime && <div className="ih20-calendar-time"><span>Godzina</span>
+          <select aria-label="Godzina" value={timeKey.slice(0, 2)} onChange={event => setDraft(`${dateKey}T${event.target.value}:${timeKey.slice(3, 5)}`)}>
+            {Array.from({ length: 24 }, (_, index) => pad(index)).map(hour => <option key={hour}>{hour}</option>)}
+          </select><span>:</span>
+          <select aria-label="Minuta" value={timeKey.slice(3, 5)} onChange={event => setDraft(`${dateKey}T${timeKey.slice(0, 2)}:${event.target.value}`)}>
+            {Array.from({ length: 60 }, (_, index) => pad(index)).map(minute => <option key={minute}>{minute}</option>)}
+          </select>
+        </div>}
+        {(!rangeAvailable || (isTime && !valid(draft))) && <p className="ih21-calendar-hint" role="status">{!rangeAvailable ? "Brak dostępnych dat w tym zakresie." : `Wybierz termin${min ? ` od ${format(min)}` : ""}${max ? ` do ${format(max)}` : ""}.`}</p>}
+        <footer>{!required && <button type="button" onClick={() => commit("")}>Wyczyść</button>}<button type="button" onClick={close}>Anuluj</button>{isTime && <button type="button" className="is-primary" disabled={!valid(draft)} onClick={() => commit(draft)}>Wybierz</button>}</footer>
+      </section>
+    </div>, document.body)}
+  </span>;
 }
