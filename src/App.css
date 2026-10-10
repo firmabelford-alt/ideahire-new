@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 22 | 2026-10-10 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 23 | 2026-10-10 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -51873,15 +51873,27 @@ html:root body #root#root#root .account-page.ih7-communications.ih8-communicatio
   html:root body #root#root#root .account-page.ih7-communications.ih8-communications.ih9-communications.ih10-communications.ih13-communications .ih14-expanded .ih12-inbox { transition: none !important; }
 }
 
-/* IdeaHire P22: fixed full-screen washes; scroll changes their blend, never their bounds. */
-
-:root { --ih22-canvas: #eef3fa; --ih22-wash: #93b4d2; }
-
-html[data-theme="dark"] { --ih22-canvas: #0c1728; --ih22-wash: #426f9b; }
-
-html[data-template="classic"] { --ih22-canvas: #ffffff; --ih22-wash: #d5d5d5; }
-
-html[data-template="classic"][data-theme="dark"] { --ih22-canvas: #17191b; --ih22-wash: #555555; }
+/* IdeaHire P23: two complete, opaque light compositions; only the top canvas fades. */
+:root {
+  --ih23-canvas: #eef3fa;
+  --ih23-light: #ffffff;
+  --ih23-shade: #cbdcf2;
+}
+html[data-theme="dark"] {
+  --ih23-canvas: #0c1728;
+  --ih23-light: #325373;
+  --ih23-shade: #08111e;
+}
+html[data-template="classic"] {
+  --ih23-canvas: #ffffff;
+  --ih23-light: #ffffff;
+  --ih23-shade: #cccccc;
+}
+html[data-template="classic"][data-theme="dark"] {
+  --ih23-canvas: #17191b;
+  --ih23-light: #4b4b4b;
+  --ih23-shade: #101010;
+}
 
 html:root body .ih13-background {
   position: fixed;
@@ -51890,10 +51902,9 @@ html:root body .ih13-background {
   pointer-events: none;
   overflow: hidden;
   contain: strict;
-  background: var(--ih22-canvas);
-  --ih22-mix: 0.18;
+  background: var(--ih23-canvas);
+  --ih23-mix: 0.25;
 }
-
 html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-end) {
   position: absolute;
   inset: 0;
@@ -51901,36 +51912,32 @@ html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-en
   height: auto;
   margin: 0;
   pointer-events: none;
+  background-color: var(--ih23-canvas);
   background-repeat: no-repeat;
   background-size: 100% 100%;
   transform: none;
   filter: none;
   animation: none;
   transition: none;
-  will-change: opacity;
 }
-
 html:root body .ih13-background > .ih13-background-start {
   background-image:
-    radial-gradient(ellipse 95% 90% at 0% 20%, color-mix(in srgb,var(--ih22-wash) 76%,transparent) 0%, color-mix(in srgb,var(--ih22-wash) 36%,transparent) 42%, transparent 84%),
-    radial-gradient(ellipse 90% 85% at 100% 95%, color-mix(in srgb,var(--ih22-wash) 30%,transparent) 0%, transparent 86%);
-  opacity: calc(1 - var(--ih22-mix));
+    radial-gradient(ellipse 75% 84% at 5% 20%, color-mix(in srgb,var(--ih23-light) 94%,transparent) 0%, color-mix(in srgb,var(--ih23-light) 68%,transparent) 30%, transparent 85%),
+    radial-gradient(ellipse 86% 88% at 95% 82%, color-mix(in srgb,var(--ih23-shade) 94%,transparent) 0%, color-mix(in srgb,var(--ih23-shade) 60%,transparent) 35%, transparent 92%);
+  opacity: 1;
 }
-
 html:root body .ih13-background > .ih13-background-end {
   background-image:
-    radial-gradient(ellipse 95% 100% at 100% 38%, color-mix(in srgb,var(--ih22-wash) 92%,transparent) 0%, color-mix(in srgb,var(--ih22-wash) 50%,transparent) 38%, transparent 88%),
-    radial-gradient(ellipse 95% 85% at 0% 92%, color-mix(in srgb,var(--ih22-wash) 70%,transparent) 0%, transparent 86%);
-  opacity: var(--ih22-mix);
+    radial-gradient(ellipse 85% 82% at 85% 86%, color-mix(in srgb,var(--ih23-light) 96%,transparent) 0%, color-mix(in srgb,var(--ih23-light) 72%,transparent) 32%, transparent 90%),
+    radial-gradient(ellipse 95% 100% at 12% 24%, color-mix(in srgb,var(--ih23-shade) 98%,transparent) 0%, color-mix(in srgb,var(--ih23-shade) 80%,transparent) 38%, transparent 96%);
+  opacity: var(--ih23-mix);
+  will-change: opacity;
 }
-
 @media (prefers-reduced-motion: reduce) {
-  html:root body .ih13-background { --ih22-mix: 0.18 !important; }
-  html:root body .ih13-background > :is(.ih13-background-start,.ih13-background-end) { will-change: auto; }
+  html:root body .ih13-background { --ih23-mix: 0.25 !important; }
+  html:root body .ih13-background > .ih13-background-end { will-change: auto; }
 }
-
 @media (forced-colors: active) { html:root body .ih13-background { display: none; } }
-
 @media print { html:root body .ih13-background { display: none; } }
 
 /* Layout containers share the page canvas. Actual cards retain their surfaces. */
