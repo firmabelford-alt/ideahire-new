@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 25 | 2026-10-10 | Pełny plik: src/MarketUI.jsx */
+/* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/MarketUI.jsx */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
@@ -141,6 +141,10 @@ export function MarketIcon({ kind = "search", ...props }) {
     collapse: "M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5",
     panels: "M3 4h18v16H3ZM14 4v16",
     calendar: "M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM7 3v4M17 3v4M3 10h18M7 14h2M13 14h2M7 18h2",
+    account: "M20 21v-2a7 7 0 0 0-14 0v2M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z",
+    briefcase: "M3 7h18v14H3ZM8 7V3h8v4M3 12l9 3 9-3M12 12v5",
+    talent: "M3 4h7v7H3ZM14 4h7v7h-7ZM3 15h7v6H3ZM14 15h7v6h-7",
+    help: "M9 9a3 3 0 1 1 5 2c-1.2.8-2 1.2-2 3M12 17h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
   };
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
 }
@@ -152,6 +156,43 @@ export function MarketHeader({ eyebrow, title, description, children }) {
       {children && <div className="ih5-heading-actions">{children}</div>}
     </header>
   );
+}
+
+export function MarketCatalogHeader({ eyebrow, title, description, count, noun = "jobs", status, tabs, actions, children }) {
+  const value = Math.max(0, Number(count) || 0);
+  const words = { jobs: ["zlecenie", "zlecenia", "zleceń"], services: ["usługa", "usługi", "usług"], profiles: ["profil", "profile", "profili"] }[noun] || ["wynik", "wyniki", "wyników"];
+  const suffix = value === 1 ? words[0] : value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 12 || value % 100 > 14) ? words[1] : words[2];
+  return <header className="ih26-catalog-header">
+    <div className="ih26-catalog-top">
+      <div className="ih26-catalog-location">{tabs}<span className="ih5-eyebrow">{eyebrow}</span></div>
+      <div className="ih26-catalog-count" role="status" aria-live="polite" aria-atomic="true">
+        <span>Wyniki wyszukiwania</span>
+        {status ? <p>{status}</p> : <p><strong>{new Intl.NumberFormat("pl-PL").format(value)}</strong><span>{suffix}</span></p>}
+      </div>
+    </div>
+    <div className="ih26-catalog-intro">
+      <div><h1>{title}</h1><p>{description}</p></div>
+      {actions && <nav className="ih26-catalog-actions" aria-label="Działania katalogu">{actions}</nav>}
+    </div>
+    {children && <div className="ih26-catalog-filters">{children}</div>}
+  </header>;
+}
+
+// Only visual preferences travel to the public help site. Never forward a session,
+// email, account ID, the current route or the application's query string.
+export function helpCenterHref() {
+  const fallback = "/help/index.html";
+  const setting = String(import.meta.env?.VITE_HELP_CENTER_URL || "").trim();
+  let address;
+  try {
+    address = setting ? new URL(setting) : new URL(fallback, window.location.origin);
+    if (address.username || address.password || (setting && address.protocol !== "https:")) throw new Error("Invalid help address");
+  } catch { address = new URL(fallback, window.location.origin); }
+  address.search = "";
+  address.hash = "";
+  address.searchParams.set("theme", document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  address.searchParams.set("template", document.documentElement.dataset.template === "classic" ? "classic" : "current");
+  return address.origin === window.location.origin ? `${address.pathname}${address.search}` : address.href;
 }
 
 export function MarketSelect({ id, label, value, options, onChange }) {
