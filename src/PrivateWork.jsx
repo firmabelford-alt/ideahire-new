@@ -1,6 +1,7 @@
 /* IdeaHire | PACZKA 21 | 2026-10-10 | Pełny plik: src/PrivateWork.jsx */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import { IdeaHireDateField } from "./MarketUI";
 import { supabase } from "./supabase";
 
@@ -1330,6 +1331,11 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
         {!isClient && latest.status !== "blocked" && <small>{latest.status === "submitted" ? "Czekamy na decyzję zleceniodawcy" : "Status formalnego przekazania"}</small>}
       </div>
       <p>{latest.summary}</p>
+      {import.meta.env.VITE_LUCYNA_ENABLED !== "false" && !disabled && latest.status !== "blocked" && (
+        <p className="private-work-lucyna-link"><Link to={"/lucyna?mode=review&delivery="+encodeURIComponent(latest.id)}>
+          Sprawdź rezultat względem kryteriów z Lucyną IA
+        </Link><small> Wstępna pomoc; decyzja o odbiorze należy do Ciebie.</small></p>
+      )}
       {latest.requested_changes && <blockquote><b>Wymagane poprawki</b>{latest.requested_changes}</blockquote>}
       {history.length > 0 && (
         <details><summary>Historia odbioru ({history.length})</summary>{history.map((event) => <p key={event.id}><time>{new Date(event.created_at).toLocaleString("pl-PL")}</time>{event.message}</p>)}</details>
