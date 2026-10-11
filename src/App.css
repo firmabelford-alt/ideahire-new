@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 27 | 2026-10-10 | Pełny plik: src/App.css */
+/* IdeaHire | PACZKA 30 | 2026-10-11 | Pełny plik: src/App.css */
 /* IDEA HIRE — PROFESSIONAL UI V6.1 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/App.css */
 
@@ -53219,4 +53219,9 @@ html:root body #root#root#root#root#root#root#root#root .app.ih-home-refresh.ih-
 html:root body #root#root#root#root#root#root#root#root .app.ih-home-refresh.ih-home-v3.ih-home-v4.ih-home-v6.ih-home-v7 .ih-home-header .nav-actions button.ih27-home-account-trigger:focus-visible {
   outline: 2px solid var(--ih-home-ink) !important;
   outline-offset: 4px !important;
+}
+
+/* P30: Lucyna jest dodatkową zakładką na komputerze. Na telefonie otwórz menu zdjęcia profilowego. */
+@media (max-width: 800px) {
+  html:root body #root#root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih11-account-nav .ih-nav-item[data-lucyna] { display: none !important; }
 }
