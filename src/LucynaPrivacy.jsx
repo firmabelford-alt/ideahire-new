@@ -1,0 +1,32 @@
+/* Informacja o funkcji Lucyna. Dane administratora pozostają w głównym dokumencie. */
+import React from "react";
+export default function LucynaPrivacy({kind}) {
+  if (!['privacy','terms'].includes(kind)) return null;
+  return <section className="legal-document-content" id="lucyna-informacja" aria-labelledby="lucyna-legal-heading">
+    <h2 id="lucyna-legal-heading">Lucyna IA — informacja o funkcji</h2>
+    <p>Wersja funkcji 2, informacja z 11 października 2026 r. Ta część opisuje funkcję Lucyny, jeżeli jest udostępniona w serwisie.</p>
+    {kind==='privacy' ? <>
+      <h3>Cel i zakres przetwarzania</h3>
+      <p>Lucyna przygotowuje odpowiedzi, szkice wiadomości i zleceń, filtry katalogów oraz wstępne sprawdzenie wybranego rezultatu względem wskazanych kryteriów. Administratorem danych jest podmiot wskazany w głównej polityce prywatności. Podstawą przetwarzania danych niezbędnych do realizacji zamówionej przez Ciebie funkcji konta jest art. 6 ust. 1 lit. b RODO. Ta podstawa nie uprawnia Cię do przekazywania dowolnych danych innych osób.</p>
+      <p>Do generowania odpowiedzi przekazywane są: treść Twojego pytania, ograniczony kontekst tej samej rozmowy, wybrane kryteria oraz tekst lub obraz, który samodzielnie wybierzesz do analizy. Bez Twojego wyboru Lucyna nie pobiera plików ani treści prywatnych wiadomości. Nie ma uprawnień do przyjmowania prac, publikowania ocen lub rozporządzania płatnościami.</p>
+      <h3>Odbiorcy danych</h3>
+      <p>Supabase obsługuje uwierzytelnianie, zapytania funkcji i zapis historii. Cloudflare Workers AI przetwarza wybraną treść w celu generowania odpowiedzi. Zwracanie odpowiedzi i przechowywanie danych może wiązać się z przetwarzaniem poza EOG, zgodnie z umowami powierzenia, stosowanymi zabezpieczeniami transferu oraz informacjami o odbiorcach w głównej polityce. Konkretny region konta i właściwe zabezpieczenia muszą odpowiadać konfiguracji administratora.</p>
+      <p>Cloudflare deklaruje, że treści klientów Workers AI nie wykorzystuje do trenowania modeli bez wyraźnej zgody. IdeaHire nie przewiduje udzielania takiej zgody dla rozmów Lucyny. Nie oznacza to braku wszystkich logów technicznych u dostawców.</p>
+      <h3>Zapis, usuwanie i kopia rozmów</h3>
+      <p>Zapis historii na koncie możesz włączyć albo wyłączyć w Lucynie. Jeśli jest włączony, treść pytań i odpowiedzi, wybrane kryteria, informacje o powiązanej pracy oraz oznaczenia pochodzenia odpowiedzi są przechowywane przez maksymalnie 30 dni od ostatniego zapisu danej rozmowy. Po upływie terminu rozmowa jest niedostępna w aplikacji; usunięcie z aktywnej bazy wykonuje zadanie retencji uruchamiane co godzinę.</p>
+      <p>Surowy plik ani obraz wybrany do analizy nie jest dodawany do historii Lucyny. Odpowiedź może zawierać cytaty i obserwacje z materiału. Po odświeżeniu strony materiał trzeba wybrać ponownie. Wyłączenie dalszego zapisu nie usuwa wcześniej zapisanych rozmów. Możesz usunąć pojedynczą rozmowę lub całą historię oraz pobrać jej kopię w formacie JSON.</p>
+      <p>Usunięcie historii nie zeruje limitu wykorzystania. Informacje o próbach generowania, powiązane z identyfikatorem konta, są usuwane po zakończeniu dnia, w którym powstały, oraz dwóch następnych dni; zadanie retencji może dodać do godziny. Zagregowane dzienne liczniki bez identyfikatora użytkownika są przechowywane do 31 dni. Rejestr wybranego ustawienia i przeczytanej wersji informacji pozostaje do usunięcia konta lub realizacji żądania dotyczącego danych. Połączenie z procedurą zamknięcia konta usuwa dane Lucyny z aktywnej bazy. Retencja kopii zapasowych i logów dostawców jest opisana w głównej polityce i zależy od usług stosowanych przez administratora.</p>
+      <h3>Pogoda i narzędzia lokalne</h3>
+      <p>Prognoza pochodzi z MET Norway. Serwer wysyła stałe współrzędne centrum wskazanego, obsługiwanego miasta. Nie używamy GPS urządzenia i nie przekazujemy dostawcy pogody historii rozmowy, adresu użytkownika ani jego adresu IP. Dane prognozy są udostępniane z oznaczeniem źródła i licencji CC BY 4.0. Szablony wiadomości, lista kompletności briefu, proste obliczenia oraz przygotowanie pliku do podglądu działają lokalnie w przeglądarce.</p>
+      <h3>Twoje prawa i ograniczenia funkcji</h3>
+      <p>Przysługują Ci prawa opisane w głównej polityce, w tym dostęp, sprostowanie, usunięcie i, jeśli spełnione są przesłanki, ograniczenie przetwarzania lub przenoszenie danych. Żądanie możesz złożyć przez kontakt do spraw prywatności wskazany w serwisie. Możesz również złożyć skargę do właściwego organu ochrony danych.</p>
+      <p>Nie przekazuj danych wrażliwych, haseł, tajemnic, cudzych danych osobowych ani materiałów, których ujawnienia zabrania umowa. Automatyczne wykrywanie wybranych danych jest pomocą i nie gwarantuje anonimizacji. Potwierdzenie praw do materiału nie zastępuje wymaganej podstawy prawnej przetwarzania.</p>
+    </> : <>
+      <p>Lucyna jest asystentką AI dla uprawnionych, aktywnych kont osób pełnoletnich. Dostęp do funkcji jest bezpłatny dla użytkownika. Generowanie ma limity na konto i wspólną pulę serwisu; dostępność oraz zakres mogą zmienić się wraz z warunkami usług dostawców. Także przerwana lub nieudana próba może zużyć limit.</p>
+      <p>Odpowiedzi mogą być błędne lub niepełne. Aktualna pogoda pochodzi z oznaczonego źródła; pozostałe odpowiedzi nie są automatycznie weryfikowane w internecie. Ważne informacje, prawa do materiałów, terminy, ceny i zobowiązania sprawdza użytkownik.</p>
+      <p>Sprawdzenie pracy dotyczy wyłącznie wskazanego tekstu lub obrazu oraz kryteriów. Wynik nie jest oceną kompetencji lub reputacji freelancera, ekspertyzą prawną, audytem bezpieczeństwa ani decyzją o wykonaniu umowy. Punkty wymagające dalszej weryfikacji pozostają oznaczone. Człowiek podejmuje decyzję o odbiorze, płatności, ocenie i dalszej współpracy.</p>
+      <p>Lucyna nie wysyła wiadomości, nie publikuje zleceń ani opinii, nie akceptuje prac i nie wykonuje płatności. Użytkownik przegląda, edytuje i samodzielnie wykorzystuje szkice, odpowiadając za ich treść oraz dopuszczalność wykorzystania. Do funkcji wolno przekazywać wyłącznie materiały, które można legalnie ujawnić dostawcy AI i których przekazanie nie narusza poufności.</p>
+      <p>Odpowiedzi AI są oznaczone w interfejsie i w eksporcie. Jeśli dalsza publikacja wymaga ujawnienia użycia AI, użytkownik zachowuje lub dodaje odpowiednie oznaczenie. Historia na koncie, wybór materiałów i prawa dotyczące danych są opisane w polityce prywatności.</p>
+    </>}
+  </section>;
+}
