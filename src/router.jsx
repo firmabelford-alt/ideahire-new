@@ -1,4 +1,4 @@
-/* IdeaHire | PACZKA 27 | 2026-10-10 | Pełny plik: src/router.jsx */
+/* IdeaHire | PACZKA 30 | 2026-10-11 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
 
@@ -61,6 +61,23 @@ import {
   WorkDeliveryPanel,
 } from "./PrivateWork";
 import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction, profileInquiryToJob, localProjectDate } from "./ServiceMarketplace";
+
+// P30: odrębny moduł. VITE_LUCYNA_ENABLED=false ukrywa wejścia i wyłącza trasę.
+const LUCYNA_VISIBLE = import.meta.env.VITE_LUCYNA_ENABLED !== "false";
+const LucynaModule = React.lazy(() => import("./Lucyna"));
+
+class LucynaBoundary extends React.Component {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return <><AccountNavbar /><main style={{ maxWidth: 650, margin: "50px auto", padding: 24 }}>
+      <h1>Lucyna jest chwilowo niedostępna</h1>
+      <p>Możesz dalej korzystać z konta, zleceń, usług i wiadomości.</p>
+      <Link to="/account">Wróć do konta</Link>{" · "}<a href={helpCenterHref()}>Centrum pomocy</a>
+    </main></>;
+  }
+}
 
 /* =========================================================
    FLUID NAVIGATION ENGINE
@@ -5307,9 +5324,11 @@ function AccountNavbar() {
           { to: "/jobs", label: "Zlecenia" },
           { to: accountLocation.pathname.startsWith("/freelancers") ? "/freelancers" : "/services", label: "Usługi / Freelancerzy", market: true },
           ...(!hasRestrictedAgeAccess ? [{ to: "/messages", label: "Wiadomości", notice: hasMessageNotifications }] : []),
+          ...(LUCYNA_VISIBLE && !hasRestrictedAgeAccess ? [{ to: "/lucyna", label: "Lucyna IA", lucyna: true }] : []),
         ].map((item, index) => (
           <NavLink key={item.to} to={item.to} end={item.end} style={{ "--ih-nav-order": index }}
             className={({ isActive }) => `ih-nav-item${(item.market ? marketplaceActive : isActive) ? " is-active" : ""}`}
+            data-lucyna={item.lucyna ? "" : undefined}
             aria-current={item.market && marketplaceActive ? "page" : undefined}>
             <span className="ih-nav-pixels" aria-hidden="true"><i /><i /><i /><i /></span>
             <span className="ih-nav-label">{item.label}</span>
@@ -5505,6 +5524,13 @@ function AccountNavbar() {
             >
               Prywatność i dane
             </NavLink>
+
+            {LUCYNA_VISIBLE && !hasRestrictedAgeAccess && (
+              <NavLink to="/lucyna" onClick={closeAccountMenu}
+                className={({ isActive }) => isActive ? "is-active" : ""}>
+                <MarketIcon kind="message" /><span>Lucyna IA</span>
+              </NavLink>
+            )}
 
             <a href={helpCenterHref()} onClick={closeAccountMenu} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
               <MarketIcon kind="help" /><span>Pomoc</span>
@@ -15195,6 +15221,14 @@ function Jobs() {
       (JOB_SUBCATEGORIES[validCategory] || []).includes(subcategory) ? subcategory : ""
     );
   }, [location.search]);
+
+  // P30: karta wyniku Lucyny otwiera istniejące ogłoszenie w zwykłym katalogu.
+  useEffect(() => {
+    const id = location.state?.lucynaJobId;
+    if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return;
+    setSearch(String(location.state?.lucynaTitle || "").slice(0, 120));
+    setSelectedCategory("Wszystkie"); setSelectedSubcategory(""); setOpenJobId(id);
+  }, [location.key]);
 
   function chooseCategory(
     category
@@ -31384,6 +31418,15 @@ function RouteScrollManager() {
    ROUTER
 ========================================================= */
 
+function LucynaRoute() {
+  const { user } = useAuth();
+  if (!LUCYNA_VISIBLE) return <Navigate to="/account" replace />;
+  return <LucynaBoundary><React.Suspense fallback={<><AccountNavbar />
+    <p role="status" style={{ textAlign: "center", padding: 40 }}>Otwieram Lucynę IA…</p></>}>
+    <LucynaModule supabase={supabase} user={user} Navbar={AccountNavbar} />
+  </React.Suspense></LucynaBoundary>;
+}
+
 function ServiceRoute({ mode }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -31569,6 +31612,10 @@ function Router() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/lucyna" element={
+            <ProtectedRoute><UserOnlyRoute><LucynaRoute /></UserOnlyRoute></ProtectedRoute>
+          } />
 
           <Route
             path="/edit-job/:id"
