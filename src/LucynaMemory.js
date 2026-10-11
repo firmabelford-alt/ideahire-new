@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LUCYNA_NOTICE_VERSION, packConversation } from "./LucynaCore";
 
-const historyError = error => /stale/.test(error?.message || "") ? "Rozmowa zmieniĹa siÄ w innej karcie. OdĹwieĹź stronÄ przed dalszym zapisem."
-  : /thread_limit/.test(error?.message || "") ? "Masz juĹź 12 zapisanych rozmĂłw. UsuĹ wybranÄ rozmowÄ, aby zapisaÄ nowÄ."
-  : /capacity/.test(error?.message || "") ? "OsiÄgniÄto limit miejsca na historiÄ. Ta zmiana pozostaje w bieĹźÄcej sesji; moĹźesz wyeksportowaÄ rozmowÄ."
-  : "Nie udaĹo siÄ zapisaÄ historii na koncie. Zmiany pozostajÄ w tej sesji. MoĹźesz pobraÄ ich kopiÄ.";
+const historyError = error => /stale/.test(error?.message || "") ? "Rozmowa zmieniła się w innej karcie. Odśwież stronę przed dalszym zapisem."
+  : /thread_limit/.test(error?.message || "") ? "Masz już 12 zapisanych rozmów. Usuń wybraną rozmowę, aby zapisać nową."
+  : /capacity/.test(error?.message || "") ? "Osiągnięto limit miejsca na historię. Ta zmiana pozostaje w bieżącej sesji; możesz wyeksportować rozmowę."
+  : "Nie udało się zapisać historii na koncie. Zmiany pozostają w tej sesji. Możesz pobrać ich kopię.";
 
 export function useLucynaMemory({ supabase, user, conversations, setConversations }) {
   const [ready, setReady] = useState(false), [acknowledged, setAcknowledged] = useState(false);
@@ -55,7 +55,7 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
           hashes.current.set(restored[i].id, JSON.stringify(packConversation(restored[i])));
         }
         if (restored.length) setConversations(restored);
-      } catch { if (alive && context.current.epoch === epoch) setMemoryError("Historia na koncie jest chwilowo niedostÄpna. Nie wysĹaliĹmy treĹci rozmĂłw do AI."); }
+      } catch { if (alive && context.current.epoch === epoch) setMemoryError("Historia na koncie jest chwilowo niedostępna. Nie wysłaliśmy treści rozmów do AI."); }
       finally { if (alive && context.current.epoch === epoch) {context.current.loaded=true;setReady(true);} }
     })();
     return () => { alive = false; };
@@ -95,7 +95,7 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
     return worker.current;
   }, [request]);
   useEffect(() => {
-    // Stan React z poprzedniego renderu nie moĹźe wĹÄczyÄ zapisu po zmianie wĹaĹciciela.
+    // Stan React z poprzedniego renderu nie może włączyć zapisu po zmianie właściciela.
     if (!context.current.loaded || !ready || !acknowledged || !historyEnabled || context.current.uid !== user?.id) return;
     for (const conversation of conversations) {
       const snapshot = packConversation(conversation), hash = JSON.stringify(snapshot);
