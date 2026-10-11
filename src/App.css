@@ -53225,3 +53225,8 @@ html:root body #root#root#root#root#root#root#root#root .app.ih-home-refresh.ih-
 @media (max-width: 800px) {
   html:root body #root#root#root#root#root#root#root#root .navbar.account-navbar.ih11-account-navbar .ih11-account-nav .ih-nav-item[data-lucyna] { display: none !important; }
 }
+
+/* P31: odnośnik pomocniczy nie zastępuje odbioru ani przycisków płatności. */
+.private-work-lucyna-link { font-size: 12px; padding: 10px 12px; border: 1px solid var(--ih7-line, #dfe5ed); border-radius: 10px; }
+.private-work-lucyna-link a { color: var(--ih7-accent, #315b99); text-decoration: underline; text-underline-offset: 3px; }
+.private-work-lucyna-link small { display: block; opacity: .75; margin-top: 4px; }
