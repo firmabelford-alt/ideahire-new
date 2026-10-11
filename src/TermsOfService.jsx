@@ -1,4 +1,5 @@
 import React from "react";
+import LucynaPrivacy from "./LucynaPrivacy";
 import { Link } from "react-router-dom";
 
 /*
@@ -183,6 +184,7 @@ function LegalDocument({ kind, html }) {
           className="legal-document-content"
           dangerouslySetInnerHTML={{ __html: renderedHtml }}
         />
+        <LucynaPrivacy kind={kind} />
 
         <footer className="cookie-policy-footer legal-document-footer">
           <Link to="/">IdeaHire</Link>
