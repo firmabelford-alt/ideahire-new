@@ -22005,11 +22005,34 @@ function ChatPaymentPanel({
 
       if (error) throw error;
 
-      const nextSummary = data?.[0] || null;
+      let nextSummary = data?.[0] || null;
+      if (isClient && nextSummary
+        && nextSummary.agreement_id === agreement.id
+        && ["awaiting_payment", "checkout_open", "failed", "cancelled"].includes(nextSummary.payment_status)
+        && nextSummary.pricing_rule_code !== "PLN_5_5_MIN20_MAX229_V3") {
+        // Kwoty wyswietlamy dopiero po ich rzeczywistym przeliczeniu w bazie.
+        const { data: refreshed, error: refreshError } = await supabase.functions.invoke(
+          "create-checkout-session",
+          { body: { agreement_id: agreement.id, action: "refresh_pricing" } }
+        );
+        if (refreshError || !refreshed?.ok) {
+          let reason = refreshed?.error || "";
+          if (refreshError?.context instanceof Response) {
+            try { reason = (await refreshError.context.json())?.error || reason; } catch { /* Wyswietlamy blad dostepny ponizej. */ }
+          }
+          throw new Error(reason || refreshError?.message || "Nie udało się zaktualizować prowizji. Odśwież status za chwilę.");
+        }
+        const { data: updated, error: updatedError } = await supabase.rpc(
+          "get_ideahire_payment_summary", { p_conversation_id: conversation.id }
+        );
+        if (updatedError) throw updatedError;
+        nextSummary = updated?.[0] || null;
+      }
       setSummary(nextSummary);
       onStatusChange?.(nextSummary?.payment_status || "");
       return nextSummary;
     } catch (error) {
+      setSummary(null);
       setMessage(
         cleanSupabaseError(
           error,
@@ -22021,7 +22044,7 @@ function ChatPaymentPanel({
     } finally {
       setLoading(false);
     }
-  }, [agreement?.id, agreement?.status, conversation?.id, onStatusChange]);
+  }, [agreement?.id, agreement?.status, conversation?.id, isClient, onStatusChange]);
 
   useEffect(() => {
     loadSummary();
@@ -22186,7 +22209,7 @@ function ChatPaymentPanel({
               type="button"
               className="chat-payment-button"
               onClick={handleCheckout}
-              disabled={paying || blocked || summary.payment_status === "processing"}
+              disabled={loading || paying || blocked || summary.payment_status === "processing"}
             >
               {paying
                 ? "Otwieranie Stripe…"
