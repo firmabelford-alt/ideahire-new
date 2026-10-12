@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
-export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 6, minimum: 20, maximum: 249, orderLimit: 10000 });
+export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 5.5, minimum: 20, maximum: 229, orderLimit: 10000 });
 
 export function IdeaHireLogo({ className = "logo", to = "/" }) {
   const [cycle, setCycle] = useState(0);
@@ -377,7 +377,7 @@ export function CommissionStory() {
         </svg>
         <div className="ih5-story-caption"><span className="is-idea">Pomysł. Dobry początek.</span><span className="is-work">Ktoś właśnie zamienia go w efekt.</span><span className="is-done">Gotowa praca. Prosta opłata.</span></div>
       </div>
-      <div className="ih5-story-offer"><div><span>Prowizja IdeaHire</span><h3 id={`${id}-title`}>{offer.percent}<span>%</span></h3></div><div className="ih5-story-limits"><strong>maks. {offer.maximum} zł</strong><span>min. {offer.minimum} zł · zlecenia do {offer.orderLimit.toLocaleString("pl-PL")} zł</span></div></div>
+      <div className="ih5-story-offer"><div><span>Prowizja IdeaHire</span><h3 id={`${id}-title`}>{offer.percent.toLocaleString("pl-PL", { maximumFractionDigits: 1 })}<span>%</span></h3></div><div className="ih5-story-limits"><strong>maks. {offer.maximum} zł</strong><span>min. {offer.minimum} zł · zlecenia do {offer.orderLimit.toLocaleString("pl-PL")} zł</span></div></div>
       <p className="ih5-story-footnote">Klient płaci wynagrodzenie wykonawcy + prowizję IdeaHire.</p>
       <Link className="ih5-story-link" to="/find-talent">Zamień pomysł w projekt <MarketIcon kind="arrow" /></Link>
     </aside>
