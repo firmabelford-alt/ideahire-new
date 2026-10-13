@@ -3,8 +3,8 @@ import React from "react";
 export default function LucynaPrivacy({kind}) {
   if (!['privacy','terms'].includes(kind)) return null;
   return <section className="legal-document-content" id="lucyna-informacja" aria-labelledby="lucyna-legal-heading">
-    <h2 id="lucyna-legal-heading">Lucyna IA — informacja o funkcji</h2>
-    <p>Wersja funkcji 2, informacja z 11 października 2026 r. Ta część opisuje funkcję Lucyny, jeżeli jest udostępniona w serwisie.</p>
+    <h2 id="lucyna-legal-heading">Lucyna AI — informacja o funkcji</h2>
+    <p>Wersja funkcji 3, informacja z 13 października 2026 r. Ta część opisuje funkcję Lucyny, jeżeli jest udostępniona w serwisie.</p>
     {kind==='privacy' ? <>
       <h3>Cel i zakres przetwarzania</h3>
       <p>Lucyna przygotowuje odpowiedzi, szkice wiadomości i zleceń, filtry katalogów oraz wstępne sprawdzenie wybranego rezultatu względem wskazanych kryteriów. Administratorem danych jest podmiot wskazany w głównej polityce prywatności. Podstawą przetwarzania danych niezbędnych do realizacji zamówionej przez Ciebie funkcji konta jest art. 6 ust. 1 lit. b RODO. Ta podstawa nie uprawnia Cię do przekazywania dowolnych danych innych osób.</p>
@@ -22,7 +22,7 @@ export default function LucynaPrivacy({kind}) {
       <p>Przysługują Ci prawa opisane w głównej polityce, w tym dostęp, sprostowanie, usunięcie i, jeśli spełnione są przesłanki, ograniczenie przetwarzania lub przenoszenie danych. Żądanie możesz złożyć przez kontakt do spraw prywatności wskazany w serwisie. Możesz również złożyć skargę do właściwego organu ochrony danych.</p>
       <p>Nie przekazuj danych wrażliwych, haseł, tajemnic, cudzych danych osobowych ani materiałów, których ujawnienia zabrania umowa. Automatyczne wykrywanie wybranych danych jest pomocą i nie gwarantuje anonimizacji. Potwierdzenie praw do materiału nie zastępuje wymaganej podstawy prawnej przetwarzania.</p>
     </> : <>
-      <p>Lucyna jest asystentką AI dla uprawnionych, aktywnych kont osób pełnoletnich. Dostęp do funkcji jest bezpłatny dla użytkownika. Generowanie ma limity na konto i wspólną pulę serwisu; dostępność oraz zakres mogą zmienić się wraz z warunkami usług dostawców. Także przerwana lub nieudana próba może zużyć limit.</p>
+      <p>Lucyna AI jest asystentką IdeaHire. Generowanie odpowiedzi AI jest dostępne dla uprawnionych, aktywnych kont osób pełnoletnich. Podstawowe instrukcje IdeaHire są dostępne także dla kont ograniczonych. Dostęp do funkcji jest bezpłatny dla użytkownika. Generowanie ma limity na konto i wspólną pulę serwisu; dostępność oraz zakres mogą zmienić się wraz z warunkami usług dostawców. Także przerwana lub nieudana próba może zużyć limit.</p>
       <p>Odpowiedzi mogą być błędne lub niepełne. Aktualna pogoda pochodzi z oznaczonego źródła; pozostałe odpowiedzi nie są automatycznie weryfikowane w internecie. Ważne informacje, prawa do materiałów, terminy, ceny i zobowiązania sprawdza użytkownik.</p>
       <p>Sprawdzenie pracy dotyczy wyłącznie wskazanego tekstu lub obrazu oraz kryteriów. Wynik nie jest oceną kompetencji lub reputacji freelancera, ekspertyzą prawną, audytem bezpieczeństwa ani decyzją o wykonaniu umowy. Punkty wymagające dalszej weryfikacji pozostają oznaczone. Człowiek podejmuje decyzję o odbiorze, płatności, ocenie i dalszej współpracy.</p>
       <p>Lucyna nie wysyła wiadomości, nie publikuje zleceń ani opinii, nie akceptuje prac i nie wykonuje płatności. Użytkownik przegląda, edytuje i samodzielnie wykorzystuje szkice, odpowiadając za ich treść oraz dopuszczalność wykorzystania. Do funkcji wolno przekazywać wyłącznie materiały, które można legalnie ujawnić dostawcy AI i których przekazanie nie narusza poufności.</p>
