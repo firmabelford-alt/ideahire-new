@@ -5324,7 +5324,7 @@ function AccountNavbar() {
           { to: "/jobs", label: "Zlecenia" },
           { to: accountLocation.pathname.startsWith("/freelancers") ? "/freelancers" : "/services", label: "Usługi / Freelancerzy", market: true },
           ...(!hasRestrictedAgeAccess ? [{ to: "/messages", label: "Wiadomości", notice: hasMessageNotifications }] : []),
-          ...(LUCYNA_VISIBLE && !hasRestrictedAgeAccess ? [{ to: "/lucyna", label: "Lucyna IA", lucyna: true }] : []),
+          ...(LUCYNA_VISIBLE ? [{ to: "/lucyna", label: "Lucyna AI", lucyna: true }] : []),
         ].map((item, index) => (
           <NavLink key={item.to} to={item.to} end={item.end} style={{ "--ih-nav-order": index }}
             className={({ isActive }) => `ih-nav-item${(item.market ? marketplaceActive : isActive) ? " is-active" : ""}`}
@@ -5525,10 +5525,10 @@ function AccountNavbar() {
               Prywatność i dane
             </NavLink>
 
-            {LUCYNA_VISIBLE && !hasRestrictedAgeAccess && (
+            {LUCYNA_VISIBLE && (
               <NavLink to="/lucyna" onClick={closeAccountMenu}
                 className={({ isActive }) => isActive ? "is-active" : ""}>
-                <MarketIcon kind="message" /><span>Lucyna IA</span>
+                <MarketIcon kind="message" /><span>Lucyna AI</span>
               </NavLink>
             )}
 
@@ -31445,7 +31445,7 @@ function LucynaRoute() {
   const { user } = useAuth();
   if (!LUCYNA_VISIBLE) return <Navigate to="/account" replace />;
   return <LucynaBoundary><React.Suspense fallback={<><AccountNavbar />
-    <p role="status" style={{ textAlign: "center", padding: 40 }}>Otwieram Lucynę IA…</p></>}>
+    <p role="status" style={{ textAlign: "center", padding: 40 }}>Otwieram Lucynę AI…</p></>}>
     <LucynaModule supabase={supabase} user={user} Navbar={AccountNavbar} />
   </React.Suspense></LucynaBoundary>;
 }
@@ -31637,7 +31637,7 @@ function Router() {
           />
 
           <Route path="/lucyna" element={
-            <ProtectedRoute><UserOnlyRoute><LucynaRoute /></UserOnlyRoute></ProtectedRoute>
+            <ProtectedRoute><UserOnlyRoute allowLimited><LucynaRoute /></UserOnlyRoute></ProtectedRoute>
           } />
 
           <Route
