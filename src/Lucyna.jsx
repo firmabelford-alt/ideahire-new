@@ -1,9 +1,9 @@
-/* IdeaHire | Lucyna AI | 2026-10-13 | Pełny ekran i wiedza serwisu. */
+/* IdeaHire | Lucyna AI | P33 | 2026-10-13 | Poprawka odpowiedzi i rozpoznawania pytań. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { helpCenterHref } from "./MarketUI";
 import { containsPrivateInput, downloadLucynaExport, LUCYNA_NOTICE_VERSION, localAnswer, weatherCity, revealAnswer } from "./LucynaCore";
-import { knowledgeAnswer, LUCYNA_GUIDE } from "./LucynaKnowledge";
+import { knowledgeAnswer, LUCYNA_GUIDE, resolveLucynaMode } from "./LucynaKnowledge";
 import { useLucynaMemory } from "./LucynaMemory";
 import LucynaTools, { ReviewResult } from "./LucynaTools";
 export { containsPrivateInput } from "./LucynaCore";
@@ -45,6 +45,15 @@ const ERRORS = {
   weather_disabled: "Pobieranie pogody jest teraz wyłączone.",
   weather_setup: "Pobieranie pogody czeka na konfigurację.",
   provider: "Nie udało się uzyskać odpowiedzi AI. Spróbuj później; katalogi i instrukcje nadal działają.",
+  provider_auth: "Połączenie Lucyny z AI wymaga poprawienia klucza lub uprawnień przez obsługę IdeaHire. Instrukcje strony nadal działają.",
+  provider_quota: "Wspólna darmowa pula dostawcy AI została dziś wyczerpana. Podstawowa pomoc IdeaHire nadal działa.",
+  provider_busy: "Model AI jest teraz przeciążony. Spróbuj ponownie za chwilę.",
+  provider_model: "Model Lucyny wymaga poprawienia konfiguracji przez obsługę IdeaHire.",
+  provider_request: "Usługa AI odrzuciła format zapytania. Obsługa IdeaHire musi sprawdzić konfigurację połączenia.",
+  provider_empty: "Model nie zwrócił treści odpowiedzi. Możesz ponowić pytanie.",
+  provider_format: "Nie udało się odczytać odpowiedzi modelu. Możesz ponowić pytanie.",
+  provider_stream: "Odpowiedź została przerwana. Otrzymana część pozostaje widoczna.",
+  free_model: "Wybrany model wymaga płatnego planu. Połączenie zostało zatrzymane; obsługa IdeaHire musi ustawić bezpłatny model.",
   timeout: "Generowanie trwało zbyt długo. Zachowaliśmy otrzymaną część odpowiedzi.",
   unavailable: "Lucyna jest chwilowo niedostępna. Spróbuj później lub skorzystaj z katalogów i pomocy.",
 };
@@ -101,14 +110,17 @@ export function SafeText({ text }) {
 export async function readEvents(response, signal, onEvent) {
   if (!response.body) throw Object.assign(new Error("unavailable"), { code: "unavailable" });
   const reader = response.body.getReader(), decoder = new TextDecoder();
-  let buffer = "", finished = false;
+  let buffer = "", finished = false, receivedText = false;
   const onAbort = () => { reader.cancel().catch(() => {}); };
   const frame = value => {
     const lines = value.split("\n");
     const event = lines.find(line => line.startsWith("event:"))?.slice(6).trim();
     const data = lines.filter(line => line.startsWith("data:")).map(line => line.slice(5).trim()).join("\n");
     if (!event || !data || finished) return;
-    onEvent(event, JSON.parse(data));
+    let payload;
+    try { payload = JSON.parse(data); } catch { throw Object.assign(new Error(), {code:"provider_format"}); }
+    if (event === "text" && typeof payload?.text === "string" && payload.text.trim()) receivedText = true;
+    onEvent(event, payload);
     if (event === "done" || event === "error") finished = true;
   };
   signal.addEventListener("abort", onAbort, { once: true });
@@ -119,17 +131,17 @@ export async function readEvents(response, signal, onEvent) {
       if (signal.aborted) throw new DOMException("Aborted", "AbortError");
       if (chunk.done) break;
       buffer = (buffer + decoder.decode(chunk.value, { stream: true })).replace(/\r\n/g, "\n");
-      if (buffer.length > 30_000) throw new Error("unavailable");
+      if (buffer.length > 30_000) throw Object.assign(new Error(), {code:"provider_format"});
       let i;
       while (!finished && (i = buffer.indexOf("\n\n")) !== -1) { frame(buffer.slice(0, i)); buffer = buffer.slice(i + 2); }
     }
     if (!finished) { buffer += decoder.decode(); if (buffer.trim()) frame(buffer); }
-    if (!finished) throw new Error("unavailable");
+    if (!finished) throw Object.assign(new Error(), {code:receivedText ? "provider_stream" : "provider_empty"});
   } finally { signal.removeEventListener("abort", onAbort); await reader.cancel().catch(() => {}); reader.releaseLock(); }
 }
 
 function SourceLinks({ sources }) {
-  const allowed = sources?.filter(s => FAQ.some(f => f.id === s.id)).slice(0, 2) || [];
+  const allowed = sources?.filter(s => LUCYNA_GUIDE.some(f => f.id === s.id)).slice(0, 3) || [];
   const weather = sources?.filter(s=>["https://www.met.no/en","https://creativecommons.org/licenses/by/4.0/"].includes(s.url)) || [];
   if (weather.length) return <div className="lu-sources"><span>Źródło prognozy</span>{weather.map(s=><a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer">{s.title}<Icon name="arrow" /></a>)}</div>;
   return allowed.length ? <div className="lu-sources"><span>Instrukcje IdeaHire</span>{allowed.map(s =>
@@ -363,20 +375,20 @@ export default function Lucyna({ supabase, user, Navbar }) {
         patchMessage(conversationId, messageId, { text: visible, status: "streaming" });
     });
     if (mounted.current && requestRef.current === controller)
-      patchMessage(conversationId, messageId, { text, status: "done" });
+      patchMessage(conversationId, messageId, { text, status: "done", partial: !!result.partial });
   }
   async function send(event, options = {}) {
     event?.preventDefault();
     if (requestRef.current || deleting || !(options.text || draft).trim()) return;
     if (!memory.ready) { setNotice("Wczytuję ustawienia historii. Spróbuj za chwilę."); return; }
     const text = (options.text || draft).trim();
-    const sendMode = options.mode || (active.mode === "review" ? "chat" : active.mode);
+    const sendMode = resolveLucynaMode(text, options.mode || (active.mode === "review" ? "chat" : active.mode), !!options.review);
     if (active.messages.length > 38) { setNotice("Ta rozmowa jest już pełna. Pobierz kopię lub zacznij nową rozmowę."); return; }
     if (text.length > 2000 || new TextEncoder().encode(text).length > 3600) { setNotice(ERRORS.invalid); return; }
     if (containsPrivateInput(text)) { setNotice(ERRORS.private); return; }
     if (options.review && [options.review.material, ...options.review.criteria].some(containsPrivateInput)) { setNotice(ERRORS.private); return; }
-    const guide = ["chat", "help"].includes(sendMode) && !options.review ? knowledgeAnswer(text) : null;
-    const local = ["chat", "help"].includes(sendMode) && !options.review && !guide ? localAnswer(text) : null;
+    const guide = !options.review && !["jobs", "freelancers"].includes(sendMode) ? knowledgeAnswer(text) : null;
+    const local = !options.review && !guide ? localAnswer(text) : null;
     const simple = guide || (local ? { text: local, sources: [], kind: "local" } : null);
     const isWeather = ["chat", "help"].includes(sendMode) && weatherCity(text) !== null;
     if (!simple && !memory.acknowledged) { setNotice(ERRORS.notice); setInfoOpen(true); return; }
@@ -408,7 +420,10 @@ export default function Lucyna({ supabase, user, Navbar }) {
             .slice(-4).map(m => ({ role: m.role, content: m.text.slice(-1500) })) }), signal: controller.signal,
       });
       if (requestRef.current !== controller) return;
-      if (!response.ok) { const detail = await response.json().catch(() => ({})); throw Object.assign(new Error(), { code: detail.code || "unavailable", detail }); }
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        throw Object.assign(new Error(), { code: response.status === 401 ? "auth" : detail.code || "unavailable", detail });
+      }
       if (response.headers.get("content-type")?.includes("application/json")) {
         const result = await response.json();
         if (requestRef.current !== controller || !mounted.current) return;
@@ -422,25 +437,43 @@ export default function Lucyna({ supabase, user, Navbar }) {
         } else if (typeof result.text === "string") await animateResult(result, controller, conversationId, messageId);
         else throw new Error("provider");
         if (Number.isInteger(result.remaining)) setStatus(old => ({ ...old, remaining: result.remaining, code: result.remaining === 0 ? "user_limit" : "" }));
-      } else await readEvents(response, controller.signal, (eventName, value) => {
+      } else {
+        let completed = false, failed = false, receivedText = "";
+        await readEvents(response, controller.signal, (eventName, value) => {
         if (requestRef.current !== controller || !mounted.current) return;
         if (eventName === "meta") {
           patchMessage(conversationId, messageId, { sources: value.sources });
           setStatus(old => ({ ...old, remaining: value.remaining, code: value.remaining === 0 ? "user_limit" : "" }));
-        } else if (eventName === "text" && typeof value.text === "string") patchMessage(conversationId, messageId, { text: value.text.slice(0, 8000), status: "streaming" });
-        else if (eventName === "done") patchMessage(conversationId, messageId, { status: "done", partial: !!value.partial, provenance: value.provenance });
-        else if (eventName === "error") patchMessage(conversationId, messageId, { status: "error", error: ERRORS[value.code] || ERRORS.unavailable });
-      });
+        } else if (eventName === "text" && typeof value.text === "string") {
+          receivedText = value.text.slice(0, 8000);
+          patchMessage(conversationId, messageId, { text: receivedText, status: "streaming" });
+        } else if (eventName === "done") {
+          if (!receivedText.trim()) throw Object.assign(new Error(), { code: "provider_empty" });
+          completed = true;
+          patchMessage(conversationId, messageId, { status: "done", partial: !!value.partial, provenance: value.provenance });
+        } else if (eventName === "error") {
+          failed = true;
+          throw Object.assign(new Error(), { code: value.code || "provider", detail: value });
+        }
+        });
+        if (!completed && !failed && requestRef.current === controller && !controller.signal.aborted)
+          throw Object.assign(new Error(), { code: receivedText.trim() ? "provider_stream" : "provider_empty" });
+      }
     } catch (error) {
       if (requestRef.current !== controller || !mounted.current) return;
       const code = error.name === "AbortError" ? "timeout" : error.code || "provider";
-      patchMessage(conversationId, messageId, { status: "error", error: ERRORS[code] || ERRORS.unavailable });
+      const reference = UUID.test(error.detail?.request_id || "") ? error.detail.request_id : requestId;
+      const message = (ERRORS[code] || ERRORS.unavailable) + "\nIdentyfikator zgłoszenia: " + reference;
+      patchMessage(conversationId, messageId, { status: "error", error: message });
       if (BLOCKED.has(code) || Number.isInteger(error.detail?.remaining)) setStatus(old => ({ ...old,
         ...(Number.isInteger(error.detail?.remaining) ? { remaining: error.detail.remaining } : {}),
         code: BLOCKED.has(code) ? code : error.detail?.remaining === 0 ? "user_limit" : old.code }));
     } finally {
       window.clearTimeout(timer);
-      if (requestRef.current === controller) { requestRef.current = null; if (mounted.current) setBusy(false); }
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+        if (mounted.current) { setBusy(false); if (!simple) refreshStatus(); }
+      }
     }
   }
 
