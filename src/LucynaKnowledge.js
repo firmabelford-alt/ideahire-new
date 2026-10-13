@@ -3,238 +3,238 @@ const LUCYNA_GUIDE = [
     "id": "usluga-czy-freelancer",
     "title": "Czym jest IdeaHire?",
     "keys": "ideahire idea hire platforma serwis strona marketplace co czym jak dziala",
-    "text": "IdeaHire to platforma, która łączy osoby i firmy szukające wykonawcy z freelancerami oferującymi swoje umiejętności.\n\nMożesz:\n- opublikować zlecenie i znaleźć wykonawcę;\n- przeglądać usługi, specjalizacje i portfolio freelancerów;\n- znaleźć zlecenie albo zaoferować własną usługę;\n- ustalić zakres, cenę, termin i odbiór w rozmowie.\n\nJestem Lucyna AI — pomagam korzystać z IdeaHire, przygotować opis projektu i wiadomości oraz dobrać filtry wyszukiwania. Powiedz, czy chcesz zlecić pracę, czy znaleźć zlecenie."
+    "text": "IdeaHire to platforma, ktĂłra ĹÄczy osoby i firmy szukajÄce wykonawcy z freelancerami oferujÄcymi swoje umiejÄtnoĹci.\n\nMoĹźesz:\n- opublikowaÄ zlecenie i znaleĹşÄ wykonawcÄ;\n- przeglÄdaÄ usĹugi, specjalizacje i portfolio freelancerĂłw;\n- znaleĹşÄ zlecenie albo zaoferowaÄ wĹasnÄ usĹugÄ;\n- ustaliÄ zakres, cenÄ, termin i odbiĂłr w rozmowie.\n\nJestem Lucyna AI â pomagam korzystaÄ z IdeaHire, przygotowaÄ opis projektu i wiadomoĹci oraz dobraÄ filtry wyszukiwania. Powiedz, czy chcesz zleciÄ pracÄ, czy znaleĹşÄ zlecenie."
   },
   {
     "id": "plan-wspolpracy",
     "title": "Czym jest brief?",
     "keys": "brief opis projekt wymagania zakres cel rezultat",
-    "text": "Brief to krótki opis zadania dla wykonawcy. Dobry brief odpowiada na sześć pytań:\n\n1. Jaki jest cel projektu?\n2. Co dokładnie obejmuje zakres?\n3. Jaki rezultat lub pliki mają powstać?\n4. Jaki jest termin?\n5. Jaki jest budżet?\n6. Jak sprawdzisz i zaakceptujesz rezultat?\n\nW Lucynie wybierz „Szkic zlecenia”, żeby uzupełnić te pola. Gotowy szkic sprawdzasz i publikujesz samodzielnie."
+    "text": "Brief to krĂłtki opis zadania dla wykonawcy. Dobry brief odpowiada na szeĹÄ pytaĹ:\n\n1. Jaki jest cel projektu?\n2. Co dokĹadnie obejmuje zakres?\n3. Jaki rezultat lub pliki majÄ powstaÄ?\n4. Jaki jest termin?\n5. Jaki jest budĹźet?\n6. Jak sprawdzisz i zaakceptujesz rezultat?\n\nW Lucynie wybierz âSzkic zleceniaâ, Ĺźeby uzupeĹniÄ te pola. Gotowy szkic sprawdzasz i publikujesz samodzielnie."
   },
   {
     "id": "zaloz-konto",
-    "title": "Jak założyć konto w IdeaHire?",
-    "keys": "konto rejestracja zarejestruj założenie logowanie email google",
-    "text": "Rejestracja przez e-mail lub Google, wymagane dane i pierwsze logowanie.\n\n1. Otwórz rejestrację i wybierz, czy chcesz zlecać pracę, oferować usługi czy korzystać z obu możliwości. Ten wybór personalizuje konto; nie określa Twojego statusu podatkowego.\n2. Przy rejestracji przez e-mail podaj imię lub nazwę, adres e-mail, datę urodzenia i hasło. Przeczytaj dokumenty oraz potwierdź wymagane pola w formularzu.\n3. Jeśli formularz poprosi o potwierdzenie adresu, otwórz wiadomość otrzymaną na swoją skrzynkę. Po rejestracji zaloguj się i uzupełnij profil.\n\nNie wpisuj danych innej osoby. Data urodzenia służy do ustalenia uprawnień konta i nie jest pokazywana w publicznym profilu."
+    "title": "Jak zaĹoĹźyÄ konto w IdeaHire?",
+    "keys": "konto rejestracja zarejestruj zaĹoĹźenie logowanie email google",
+    "text": "Rejestracja przez e-mail lub Google, wymagane dane i pierwsze logowanie.\n\n1. OtwĂłrz rejestracjÄ i wybierz, czy chcesz zlecaÄ pracÄ, oferowaÄ usĹugi czy korzystaÄ z obu moĹźliwoĹci. Ten wybĂłr personalizuje konto; nie okreĹla Twojego statusu podatkowego.\n2. Przy rejestracji przez e-mail podaj imiÄ lub nazwÄ, adres e-mail, datÄ urodzenia i hasĹo. Przeczytaj dokumenty oraz potwierdĹş wymagane pola w formularzu.\n3. JeĹli formularz poprosi o potwierdzenie adresu, otwĂłrz wiadomoĹÄ otrzymanÄ na swojÄ skrzynkÄ. Po rejestracji zaloguj siÄ i uzupeĹnij profil.\n\nNie wpisuj danych innej osoby. Data urodzenia sĹuĹźy do ustalenia uprawnieĹ konta i nie jest pokazywana w publicznym profilu."
   },
   {
     "id": "wiek-konta",
     "title": "Jaki wiek jest wymagany do korzystania z konta?",
-    "keys": "konto wiek urodzenie data 16 17 18 pełnoletność ograniczone",
-    "text": "Różnica między pełnym kontem 18+ a kontem ograniczonym 16–17.\n\n1. Podaj swoją prawdziwą datę urodzenia. Formularz pokaże dostępny rodzaj konta.\n2. Konto pełne 18+ udostępnia funkcje współpracy dostępne dla pełnoletnich użytkowników. Konto 16–17 jest ograniczone i służy do przeglądania zgodnie z komunikatami w serwisie.\n3. Jeśli konkretna funkcja jest niedostępna, przeczytaj komunikat o uprawnieniach. Nie zakładaj kolejnego konta z inną datą, aby ominąć ograniczenie.\n\nSzczegółowe zasady wieku i uprawnień znajdziesz w Regulaminie. Osoby poniżej minimalnego wieku nie mogą aktywować konta."
+    "keys": "konto wiek urodzenie data 16 17 18 peĹnoletnoĹÄ ograniczone",
+    "text": "RĂłĹźnica miÄdzy peĹnym kontem 18+ a kontem ograniczonym 16â17.\n\n1. Podaj swojÄ prawdziwÄ datÄ urodzenia. Formularz pokaĹźe dostÄpny rodzaj konta.\n2. Konto peĹne 18+ udostÄpnia funkcje wspĂłĹpracy dostÄpne dla peĹnoletnich uĹźytkownikĂłw. Konto 16â17 jest ograniczone i sĹuĹźy do przeglÄdania zgodnie z komunikatami w serwisie.\n3. JeĹli konkretna funkcja jest niedostÄpna, przeczytaj komunikat o uprawnieniach. Nie zakĹadaj kolejnego konta z innÄ datÄ, aby ominÄÄ ograniczenie.\n\nSzczegĂłĹowe zasady wieku i uprawnieĹ znajdziesz w Regulaminie. Osoby poniĹźej minimalnego wieku nie mogÄ aktywowaÄ konta."
   },
   {
     "id": "google-konto",
-    "title": "Jak zarejestrować się lub zalogować przez Google?",
+    "title": "Jak zarejestrowaÄ siÄ lub zalogowaÄ przez Google?",
     "keys": "konto google gmail logowanie oauth rejestracja",
-    "text": "Logowanie Google i uzupełnienie danych wymaganych przez IdeaHire.\n\n1. Na stronie logowania lub rejestracji wybierz przycisk Google. W rejestracji najpierw określ sposób korzystania z IdeaHire.\n2. Wybierz właściwe konto w oknie Google. Nie przekazuj nikomu swojego hasła ani kodów do tego konta.\n3. Po powrocie uzupełnij dane i potwierdzenia wymagane przez IdeaHire. Samo zalogowanie przez Google nie omija ograniczeń wieku ani zasad serwisu.\n\nKomunikat przy przycisku Google wyjaśnia przekazywane dane. Publiczne zdjęcie profilu ustawisz w swoim koncie."
+    "text": "Logowanie Google i uzupeĹnienie danych wymaganych przez IdeaHire.\n\n1. Na stronie logowania lub rejestracji wybierz przycisk Google. W rejestracji najpierw okreĹl sposĂłb korzystania z IdeaHire.\n2. Wybierz wĹaĹciwe konto w oknie Google. Nie przekazuj nikomu swojego hasĹa ani kodĂłw do tego konta.\n3. Po powrocie uzupeĹnij dane i potwierdzenia wymagane przez IdeaHire. Samo zalogowanie przez Google nie omija ograniczeĹ wieku ani zasad serwisu.\n\nKomunikat przy przycisku Google wyjaĹnia przekazywane dane. Publiczne zdjÄcie profilu ustawisz w swoim koncie."
   },
   {
     "id": "potwierdzenie-email",
-    "title": "Nie otrzymuję wiadomości z potwierdzeniem konta",
+    "title": "Nie otrzymujÄ wiadomoĹci z potwierdzeniem konta",
     "keys": "konto email potwierdzenie aktywacja spam link skrzynka",
-    "text": "Co sprawdzić, gdy e-mail aktywacyjny nie dociera albo link nie działa.\n\n1. Sprawdź poprawność adresu podanego przy rejestracji oraz foldery Spam, Oferty i Powiadomienia.\n2. Jeżeli dostępne jest ponowne wysłanie potwierdzenia, skorzystaj z niego i otwórz najnowszą wiadomość. Starszy link może być już nieaktualny.\n3. Jeśli problem pozostaje, skontaktuj się z pomocą. Podaj opis błędu i przybliżony czas próby, ale nie wysyłaj hasła ani pełnego linku zawierającego kod logowania."
+    "text": "Co sprawdziÄ, gdy e-mail aktywacyjny nie dociera albo link nie dziaĹa.\n\n1. SprawdĹş poprawnoĹÄ adresu podanego przy rejestracji oraz foldery Spam, Oferty i Powiadomienia.\n2. JeĹźeli dostÄpne jest ponowne wysĹanie potwierdzenia, skorzystaj z niego i otwĂłrz najnowszÄ wiadomoĹÄ. Starszy link moĹźe byÄ juĹź nieaktualny.\n3. JeĹli problem pozostaje, skontaktuj siÄ z pomocÄ. Podaj opis bĹÄdu i przybliĹźony czas prĂłby, ale nie wysyĹaj hasĹa ani peĹnego linku zawierajÄcego kod logowania."
   },
   {
     "id": "odzyskaj-haslo",
-    "title": "Jak odzyskać dostęp do konta?",
-    "keys": "konto hasło haslo reset zapomniałem logowanie dostęp",
-    "text": "Reset hasła oraz bezpieczne postępowanie przy problemach z logowaniem.\n\n1. Na stronie logowania wybierz opcję odzyskania hasła i podaj adres przypisany do konta.\n2. Otwórz najnowszą wiadomość z instrukcją. Ustaw nowe, nieużywane w innych usługach hasło.\n3. Jeśli korzystasz z Google, odzyskanie dostępu do konta Google odbywa się po stronie Google. Gdy nadal nie możesz wejść do IdeaHire, opisz problem pomocy.\n\nAdministracja nie potrzebuje Twojego hasła, kodów jednorazowych ani numeru karty."
+    "title": "Jak odzyskaÄ dostÄp do konta?",
+    "keys": "konto hasĹo haslo reset zapomniaĹem logowanie dostÄp",
+    "text": "Reset hasĹa oraz bezpieczne postÄpowanie przy problemach z logowaniem.\n\n1. Na stronie logowania wybierz opcjÄ odzyskania hasĹa i podaj adres przypisany do konta.\n2. OtwĂłrz najnowszÄ wiadomoĹÄ z instrukcjÄ. Ustaw nowe, nieuĹźywane w innych usĹugach hasĹo.\n3. JeĹli korzystasz z Google, odzyskanie dostÄpu do konta Google odbywa siÄ po stronie Google. Gdy nadal nie moĹźesz wejĹÄ do IdeaHire, opisz problem pomocy.\n\nAdministracja nie potrzebuje Twojego hasĹa, kodĂłw jednorazowych ani numeru karty."
   },
   {
     "id": "centrum-profilu",
-    "title": "Jak otworzyć funkcje centrum profilu?",
-    "keys": "konto profil centrum koło kółko dane ustawienia szablon",
-    "text": "Koło centrum profilu i przejście do danych, portfolio, zleceń oraz ustawień.\n\n1. Wejdź w Konto. Początkowy widok pokazuje koło Centrum profilu.\n2. Kliknij koło lub użyj klawiatury, aby rozwinąć połączone sekcje. Wybierz Dane profilu, Specjalizację, Portfolio, Zlecenia, Ustawienia lub Szablony.\n3. Po otwarciu sekcji użyj przycisku Centrum profilu, aby wrócić do wyboru. Przed opuszczeniem edytowanego formularza zapisz zmiany."
+    "title": "Jak otworzyÄ funkcje centrum profilu?",
+    "keys": "konto profil centrum koĹo kĂłĹko dane ustawienia szablon",
+    "text": "KoĹo centrum profilu i przejĹcie do danych, portfolio, zleceĹ oraz ustawieĹ.\n\n1. WejdĹş w Konto. PoczÄtkowy widok pokazuje koĹo Centrum profilu.\n2. Kliknij koĹo lub uĹźyj klawiatury, aby rozwinÄÄ poĹÄczone sekcje. Wybierz Dane profilu, SpecjalizacjÄ, Portfolio, Zlecenia, Ustawienia lub Szablony.\n3. Po otwarciu sekcji uĹźyj przycisku Centrum profilu, aby wrĂłciÄ do wyboru. Przed opuszczeniem edytowanego formularza zapisz zmiany."
   },
   {
     "id": "edytuj-profil",
-    "title": "Jak uzupełnić dane profilu i specjalizację?",
-    "keys": "konto profil zdjęcie avatar nazwa opis specjalizacja umiejętności dane",
-    "text": "Zdjęcie, nazwa, opis, kraj oraz umiejętności widoczne dla innych osób.\n\n1. W centrum profilu otwórz Dane profilu. Ustaw zdjęcie, nazwę, opis i dostępne informacje o lokalizacji.\n2. W Specjalizacji wybierz dziedziny, opisz doświadczenie i dodaj konkretne umiejętności. Formularz informuje o limitach liczby pozycji.\n3. Zapisz zmiany i sprawdź publiczny profil. Publikuj wyłącznie informacje i materiały, do których masz prawa.\n\nNie umieszczaj w opisie haseł, danych karty ani danych klienta bez uprawnienia do ich ujawnienia."
+    "title": "Jak uzupeĹniÄ dane profilu i specjalizacjÄ?",
+    "keys": "konto profil zdjÄcie avatar nazwa opis specjalizacja umiejÄtnoĹci dane",
+    "text": "ZdjÄcie, nazwa, opis, kraj oraz umiejÄtnoĹci widoczne dla innych osĂłb.\n\n1. W centrum profilu otwĂłrz Dane profilu. Ustaw zdjÄcie, nazwÄ, opis i dostÄpne informacje o lokalizacji.\n2. W Specjalizacji wybierz dziedziny, opisz doĹwiadczenie i dodaj konkretne umiejÄtnoĹci. Formularz informuje o limitach liczby pozycji.\n3. Zapisz zmiany i sprawdĹş publiczny profil. Publikuj wyĹÄcznie informacje i materiaĹy, do ktĂłrych masz prawa.\n\nNie umieszczaj w opisie haseĹ, danych karty ani danych klienta bez uprawnienia do ich ujawnienia."
   },
   {
     "id": "portfolio",
-    "title": "Jak dodać realizacje do portfolio?",
-    "keys": "konto profil portfolio realizacje projekt zdjęcia prace",
-    "text": "Projekty, opisy i materiały pokazujące doświadczenie freelancera.\n\n1. Otwórz Portfolio w centrum profilu i wybierz dodanie realizacji.\n2. Uzupełnij tytuł oraz opis, a następnie dodaj obsługiwane materiały lub odnośniki. Opisz swój rzeczywisty udział w projekcie.\n3. Zapisz realizację i sprawdź jej widoczność na profilu. Poufnych materiałów klienta nie publikuj bez odpowiednich praw lub zgody.\n\nBrak portfolio nie oznacza błędu strony. Przeglądający widzi informację, że freelancer nie dodał jeszcze realizacji."
+    "title": "Jak dodaÄ realizacje do portfolio?",
+    "keys": "konto profil portfolio realizacje projekt zdjÄcia prace",
+    "text": "Projekty, opisy i materiaĹy pokazujÄce doĹwiadczenie freelancera.\n\n1. OtwĂłrz Portfolio w centrum profilu i wybierz dodanie realizacji.\n2. UzupeĹnij tytuĹ oraz opis, a nastÄpnie dodaj obsĹugiwane materiaĹy lub odnoĹniki. Opisz swĂłj rzeczywisty udziaĹ w projekcie.\n3. Zapisz realizacjÄ i sprawdĹş jej widocznoĹÄ na profilu. Poufnych materiaĹĂłw klienta nie publikuj bez odpowiednich praw lub zgody.\n\nBrak portfolio nie oznacza bĹÄdu strony. PrzeglÄdajÄcy widzi informacjÄ, Ĺźe freelancer nie dodaĹ jeszcze realizacji."
   },
   {
     "id": "widocznosc-freelancera",
-    "title": "Dlaczego nie widać mnie w katalogu freelancerów?",
-    "keys": "konto profil widoczność freelancer katalog zapytania niewidoczny",
-    "text": "Ustawienia widoczności oraz zgoda na nowe zapytania o współpracę.\n\n1. Otwórz dane profilu i znajdź ustawienia widoczności w katalogu oraz przyjmowania zapytań.\n2. Ustaw wybrane opcje i zapisz je przyciskiem widoczności. Uzupełnij nazwę i specjalizację, żeby łatwiej było Cię odnaleźć.\n3. Sprawdź katalog z wyczyszczonymi filtrami. Ograniczenia konta lub wyłączone zapytania mogą wpływać na możliwość kontaktu."
+    "title": "Dlaczego nie widaÄ mnie w katalogu freelancerĂłw?",
+    "keys": "konto profil widocznoĹÄ freelancer katalog zapytania niewidoczny",
+    "text": "Ustawienia widocznoĹci oraz zgoda na nowe zapytania o wspĂłĹpracÄ.\n\n1. OtwĂłrz dane profilu i znajdĹş ustawienia widocznoĹci w katalogu oraz przyjmowania zapytaĹ.\n2. Ustaw wybrane opcje i zapisz je przyciskiem widocznoĹci. UzupeĹnij nazwÄ i specjalizacjÄ, Ĺźeby Ĺatwiej byĹo CiÄ odnaleĹşÄ.\n3. SprawdĹş katalog z wyczyszczonymi filtrami. Ograniczenia konta lub wyĹÄczone zapytania mogÄ wpĹywaÄ na moĹźliwoĹÄ kontaktu."
   },
   {
     "id": "dodaj-zlecenie",
-    "title": "Jak dodać zlecenie?",
-    "keys": "zlecenie zlecenia dodaj klient zlecam ogłoszenie budżet termin",
-    "text": "Opis projektu, zakres, budżet i informacje potrzebne wykonawcy.\n\n1. Na pełnym koncie wybierz Dodaj zlecenie. Nadaj projektowi konkretny tytuł i wybierz odpowiednią kategorię.\n2. Opisz oczekiwany rezultat, zakres pracy, termin, sposób przekazania materiałów oraz informacje o budżecie wymagane w formularzu.\n3. Przejrzyj podsumowanie i opublikuj zlecenie. Szczegóły współpracy z wybraną osobą uzgodnicie później w jej rozmowie.\n\nOpis ogłoszenia pomaga znaleźć wykonawcę; plan zaakceptowany przez obie strony zapisuje konkretne warunki współpracy."
+    "title": "Jak dodaÄ zlecenie?",
+    "keys": "zlecenie zlecenia dodaj klient zlecam ogĹoszenie budĹźet termin",
+    "text": "Opis projektu, zakres, budĹźet i informacje potrzebne wykonawcy.\n\n1. Na peĹnym koncie wybierz Dodaj zlecenie. Nadaj projektowi konkretny tytuĹ i wybierz odpowiedniÄ kategoriÄ.\n2. Opisz oczekiwany rezultat, zakres pracy, termin, sposĂłb przekazania materiaĹĂłw oraz informacje o budĹźecie wymagane w formularzu.\n3. Przejrzyj podsumowanie i opublikuj zlecenie. SzczegĂłĹy wspĂłĹpracy z wybranÄ osobÄ uzgodnicie pĂłĹşniej w jej rozmowie.\n\nOpis ogĹoszenia pomaga znaleĹşÄ wykonawcÄ; plan zaakceptowany przez obie strony zapisuje konkretne warunki wspĂłĹpracy."
   },
   {
     "id": "znajdz-zlecenie",
-    "title": "Jak znaleźć zlecenie i zgłosić zainteresowanie?",
-    "keys": "zlecenie zlecenia szukam wykonawca freelancer zgłoszenie oferta filtry",
-    "text": "Wyszukiwarka, kategorie, kolejność wyników i kontakt z klientem.\n\n1. Otwórz Zlecenia. Wpisz temat lub umiejętność i wybierz kategorię. Licznik w ramce pokazuje wyniki bieżącego wyszukiwania.\n2. Otwórz interesujące zlecenie i przeczytaj zakres, budżet oraz wymagania. Wyczyść filtry, jeśli chcesz ponownie zobaczyć całą listę.\n3. Użyj dostępnej akcji kontaktu lub zgłoszenia. Funkcje współpracy wymagają odpowiednich uprawnień konta."
+    "title": "Jak znaleĹşÄ zlecenie i zgĹosiÄ zainteresowanie?",
+    "keys": "zlecenie zlecenia szukam wykonawca freelancer zgĹoszenie oferta filtry",
+    "text": "Wyszukiwarka, kategorie, kolejnoĹÄ wynikĂłw i kontakt z klientem.\n\n1. OtwĂłrz Zlecenia. Wpisz temat lub umiejÄtnoĹÄ i wybierz kategoriÄ. Licznik w ramce pokazuje wyniki bieĹźÄcego wyszukiwania.\n2. OtwĂłrz interesujÄce zlecenie i przeczytaj zakres, budĹźet oraz wymagania. WyczyĹÄ filtry, jeĹli chcesz ponownie zobaczyÄ caĹÄ listÄ.\n3. UĹźyj dostÄpnej akcji kontaktu lub zgĹoszenia. Funkcje wspĂłĹpracy wymagajÄ odpowiednich uprawnieĹ konta."
   },
   {
     "id": "moje-zlecenia",
-    "title": "Gdzie edytować własne zlecenia?",
-    "keys": "konto zlecenie zlecenia moje edycja ogłoszenie publikacja",
-    "text": "Własne ogłoszenia i dostępne działania w centrum profilu.\n\n1. W centrum profilu wybierz Zlecenia. Zobaczysz ogłoszenia przypisane do Twojego konta.\n2. Przy właściwym ogłoszeniu wybierz dostępną akcję edycji lub zarządzania i zapisz zmiany.\n3. Zmiana treści ogłoszenia nie zastępuje zmiany zaakceptowanych warunków w rozmowie. Aktualizację ustaleń uzgodnij z drugą stroną w planie."
+    "title": "Gdzie edytowaÄ wĹasne zlecenia?",
+    "keys": "konto zlecenie zlecenia moje edycja ogĹoszenie publikacja",
+    "text": "WĹasne ogĹoszenia i dostÄpne dziaĹania w centrum profilu.\n\n1. W centrum profilu wybierz Zlecenia. Zobaczysz ogĹoszenia przypisane do Twojego konta.\n2. Przy wĹaĹciwym ogĹoszeniu wybierz dostÄpnÄ akcjÄ edycji lub zarzÄdzania i zapisz zmiany.\n3. Zmiana treĹci ogĹoszenia nie zastÄpuje zmiany zaakceptowanych warunkĂłw w rozmowie. AktualizacjÄ ustaleĹ uzgodnij z drugÄ stronÄ w planie."
   },
   {
     "id": "usluga-czy-freelancer",
-    "title": "Czym różnią się usługi od katalogu freelancerów?",
-    "keys": "usługi uslugi freelancer katalog wykonawca oferta różnica",
-    "text": "Gotowa oferta usługi albo osoba, z którą uzgodnisz własny projekt.\n\n1. W Usługach szukasz opublikowanej oferty z opisanym rezultatem. Otwórz ofertę, aby sprawdzić, co obejmuje.\n2. W katalogu Freelancerzy szukasz osoby po umiejętnościach, nazwie lub kategorii. Otwórz profil, aby zobaczyć opis i portfolio.\n3. Przełącznik w nagłówku pozwala przejść między oboma katalogami. Wybierz sposób kontaktu odpowiedni do swojego projektu."
+    "title": "Czym rĂłĹźniÄ siÄ usĹugi od katalogu freelancerĂłw?",
+    "keys": "usĹugi uslugi freelancer katalog wykonawca oferta rĂłĹźnica",
+    "text": "Gotowa oferta usĹugi albo osoba, z ktĂłrÄ uzgodnisz wĹasny projekt.\n\n1. W UsĹugach szukasz opublikowanej oferty z opisanym rezultatem. OtwĂłrz ofertÄ, aby sprawdziÄ, co obejmuje.\n2. W katalogu Freelancerzy szukasz osoby po umiejÄtnoĹciach, nazwie lub kategorii. OtwĂłrz profil, aby zobaczyÄ opis i portfolio.\n3. PrzeĹÄcznik w nagĹĂłwku pozwala przejĹÄ miÄdzy oboma katalogami. Wybierz sposĂłb kontaktu odpowiedni do swojego projektu."
   },
   {
     "id": "zlec-freelancerowi",
-    "title": "Jak napisać do freelancera lub zlecić mu pracę?",
-    "keys": "freelancer wiadomość napisz kontakt zleć praca zapytanie projekt",
-    "text": "Wiadomość wstępna i zapytanie zawierające szczegóły konkretnego projektu.\n\n1. Znajdź osobę w katalogu i otwórz jej profil. Sprawdź specjalizację, realizacje i dostępność nowych zapytań.\n2. Wybierz Napisz wiadomość, aby zapytać o współpracę, albo Zleć pracę, aby opisać konkretny projekt w pełniejszym formularzu.\n3. Uzupełnij wymagane informacje i potwierdzenia. Po wysłaniu kontynuuj rozmowę w Wiadomościach i zapisz warunki w planie współpracy.\n\nNie wysyłaj masowych reklam ani zapytań niezwiązanych z oferowaną współpracą. Wyłączenie zapytań przez freelancera należy uszanować."
+    "title": "Jak napisaÄ do freelancera lub zleciÄ mu pracÄ?",
+    "keys": "freelancer wiadomoĹÄ napisz kontakt zleÄ praca zapytanie projekt",
+    "text": "WiadomoĹÄ wstÄpna i zapytanie zawierajÄce szczegĂłĹy konkretnego projektu.\n\n1. ZnajdĹş osobÄ w katalogu i otwĂłrz jej profil. SprawdĹş specjalizacjÄ, realizacje i dostÄpnoĹÄ nowych zapytaĹ.\n2. Wybierz Napisz wiadomoĹÄ, aby zapytaÄ o wspĂłĹpracÄ, albo ZleÄ pracÄ, aby opisaÄ konkretny projekt w peĹniejszym formularzu.\n3. UzupeĹnij wymagane informacje i potwierdzenia. Po wysĹaniu kontynuuj rozmowÄ w WiadomoĹciach i zapisz warunki w planie wspĂłĹpracy.\n\nNie wysyĹaj masowych reklam ani zapytaĹ niezwiÄzanych z oferowanÄ wspĂłĹpracÄ. WyĹÄczenie zapytaĹ przez freelancera naleĹźy uszanowaÄ."
   },
   {
     "id": "opublikuj-usluge",
-    "title": "Jak dodać i zarządzać własną usługą?",
-    "keys": "usługi usługa usluga dodaj oferuję oferta moje publikacja",
-    "text": "Publikacja oferty i przejście do Moich usług.\n\n1. Na koncie z właściwymi uprawnieniami otwórz Usługi i wybierz Dodaj usługę.\n2. Opisz rezultat, zakres oferty i wymagane informacje z formularza. Jasno wskaż, jakie materiały powinien przekazać klient.\n3. Zapisz ofertę. Kolejne zmiany wykonasz w Moich usługach. Przed rozpoczęciem konkretnej realizacji potwierdź warunki z klientem w rozmowie."
+    "title": "Jak dodaÄ i zarzÄdzaÄ wĹasnÄ usĹugÄ?",
+    "keys": "usĹugi usĹuga usluga dodaj oferujÄ oferta moje publikacja",
+    "text": "Publikacja oferty i przejĹcie do Moich usĹug.\n\n1. Na koncie z wĹaĹciwymi uprawnieniami otwĂłrz UsĹugi i wybierz Dodaj usĹugÄ.\n2. Opisz rezultat, zakres oferty i wymagane informacje z formularza. Jasno wskaĹź, jakie materiaĹy powinien przekazaÄ klient.\n3. Zapisz ofertÄ. Kolejne zmiany wykonasz w Moich usĹugach. Przed rozpoczÄciem konkretnej realizacji potwierdĹş warunki z klientem w rozmowie."
   },
   {
     "id": "zapytanie-usluga",
-    "title": "Czy wysłanie zapytania o usługę rozpoczyna płatną współpracę?",
-    "keys": "usługa usługi zapytanie rezerwacja oferta płatność akceptacja",
-    "text": "Zapytanie, propozycja warunków i potwierdzenie obu stron.\n\n1. Przeczytaj ofertę i wyślij zapytanie z informacjami potrzebnymi wykonawcy.\n2. Ustalcie w rozmowie zakres, cenę, termin i sposób przekazania pracy. Sprawdź plan oraz aktualny komunikat o dostępności lub rezerwacji.\n3. Samo wysłanie zapytania nie jest potwierdzeniem opłacenia projektu. Dalsze działania podejmuj według statusu warunków i płatności w rozmowie."
+    "title": "Czy wysĹanie zapytania o usĹugÄ rozpoczyna pĹatnÄ wspĂłĹpracÄ?",
+    "keys": "usĹuga usĹugi zapytanie rezerwacja oferta pĹatnoĹÄ akceptacja",
+    "text": "Zapytanie, propozycja warunkĂłw i potwierdzenie obu stron.\n\n1. Przeczytaj ofertÄ i wyĹlij zapytanie z informacjami potrzebnymi wykonawcy.\n2. Ustalcie w rozmowie zakres, cenÄ, termin i sposĂłb przekazania pracy. SprawdĹş plan oraz aktualny komunikat o dostÄpnoĹci lub rezerwacji.\n3. Samo wysĹanie zapytania nie jest potwierdzeniem opĹacenia projektu. Dalsze dziaĹania podejmuj wedĹug statusu warunkĂłw i pĹatnoĹci w rozmowie."
   },
   {
     "id": "otworz-rozmowe",
-    "title": "Jak korzystać z Wiadomości na telefonie i komputerze?",
-    "keys": "wiadomości wiadomosci czat rozmowa telefon komunikator nieprzeczytane",
-    "text": "Lista rozmów, wyszukiwanie, historia i przełączanie przestrzeni projektu.\n\n1. Otwórz Wiadomości. Wyszukaj osobę lub projekt albo wybierz filtr Nieprzeczytane.\n2. Kliknij rozmowę. Na większym ekranie lista może pozostać obok; na telefonie przycisk listy w nagłówku pozwala przełączyć rozmowę.\n3. Napisz w polu na dole i wybierz Wyślij. Na klawiaturze Enter wysyła, a Shift + Enter dodaje nową linię. Pliki i Plan współpracy otworzysz nad historią."
+    "title": "Jak korzystaÄ z WiadomoĹci na telefonie i komputerze?",
+    "keys": "wiadomoĹci wiadomosci czat rozmowa telefon komunikator nieprzeczytane",
+    "text": "Lista rozmĂłw, wyszukiwanie, historia i przeĹÄczanie przestrzeni projektu.\n\n1. OtwĂłrz WiadomoĹci. Wyszukaj osobÄ lub projekt albo wybierz filtr Nieprzeczytane.\n2. Kliknij rozmowÄ. Na wiÄkszym ekranie lista moĹźe pozostaÄ obok; na telefonie przycisk listy w nagĹĂłwku pozwala przeĹÄczyÄ rozmowÄ.\n3. Napisz w polu na dole i wybierz WyĹlij. Na klawiaturze Enter wysyĹa, a Shift + Enter dodaje nowÄ liniÄ. Pliki i Plan wspĂłĹpracy otworzysz nad historiÄ."
   },
   {
     "id": "plan-wspolpracy",
-    "title": "Co wpisać do planu współpracy?",
-    "keys": "plan współpraca wspolpraca ustalenia warunki zakres termin cena formularz",
-    "text": "Zakres, rezultat, cena, termin i zasady przekazania pracy w osobnych polach.\n\n1. W rozmowie otwórz Plan współpracy. Osoba uprawniona do złożenia propozycji uzupełnia formularz lub otwiera jego edycję.\n2. Opisz oczekiwany rezultat i zakres pracy, uzgodnioną cenę, termin oraz pozostałe wymagane zasady odbioru, kontaktu i materiałów. Unikaj niejasnych określeń typu „wszystko” lub „jak najszybciej”.\n3. Wyślij propozycję do drugiej strony. Przeczytajcie całość przed akceptacją. Stan planu pokazuje, czy potwierdziły go obie osoby.\n\nPlan i wiadomości pomagają odtworzyć ustalenia w razie problemu. Sam opis projektu lub ustne zapewnienie nie oznacza akceptacji planu przez obie strony."
+    "title": "Co wpisaÄ do planu wspĂłĹpracy?",
+    "keys": "plan wspĂłĹpraca wspolpraca ustalenia warunki zakres termin cena formularz",
+    "text": "Zakres, rezultat, cena, termin i zasady przekazania pracy w osobnych polach.\n\n1. W rozmowie otwĂłrz Plan wspĂłĹpracy. Osoba uprawniona do zĹoĹźenia propozycji uzupeĹnia formularz lub otwiera jego edycjÄ.\n2. Opisz oczekiwany rezultat i zakres pracy, uzgodnionÄ cenÄ, termin oraz pozostaĹe wymagane zasady odbioru, kontaktu i materiaĹĂłw. Unikaj niejasnych okreĹleĹ typu âwszystkoâ lub âjak najszybciejâ.\n3. WyĹlij propozycjÄ do drugiej strony. Przeczytajcie caĹoĹÄ przed akceptacjÄ. Stan planu pokazuje, czy potwierdziĹy go obie osoby.\n\nPlan i wiadomoĹci pomagajÄ odtworzyÄ ustalenia w razie problemu. Sam opis projektu lub ustne zapewnienie nie oznacza akceptacji planu przez obie strony."
   },
   {
     "id": "zaakceptuj-plan",
-    "title": "Kiedy plan jest zaakceptowany i jak zmienić ustalenia?",
+    "title": "Kiedy plan jest zaakceptowany i jak zmieniÄ ustalenia?",
     "keys": "plan akceptacja zaakceptuj warunki ustalenia zmiana wersja potwierdzenie",
-    "text": "Potwierdzenia obu stron, nowe wersje warunków i rozbieżności w rozmowie.\n\n1. Sprawdź zakres, cenę, termin i pozostałe pola propozycji. Jeśli coś jest niejasne, wyjaśnij to w rozmowie przed kliknięciem akceptacji.\n2. Plan jest wspólnie zaakceptowany dopiero wtedy, gdy system pokazuje potwierdzenia obu stron dla aktualnej wersji.\n3. Jeśli później zmienia się zakres lub termin, uzgodnijcie zmianę i użyjcie dostępnej funkcji nowej propozycji. Nie zakładaj, że sam dopisek w wiadomości automatycznie zmienił zatwierdzony plan."
+    "text": "Potwierdzenia obu stron, nowe wersje warunkĂłw i rozbieĹźnoĹci w rozmowie.\n\n1. SprawdĹş zakres, cenÄ, termin i pozostaĹe pola propozycji. JeĹli coĹ jest niejasne, wyjaĹnij to w rozmowie przed klikniÄciem akceptacji.\n2. Plan jest wspĂłlnie zaakceptowany dopiero wtedy, gdy system pokazuje potwierdzenia obu stron dla aktualnej wersji.\n3. JeĹli pĂłĹşniej zmienia siÄ zakres lub termin, uzgodnijcie zmianÄ i uĹźyjcie dostÄpnej funkcji nowej propozycji. Nie zakĹadaj, Ĺźe sam dopisek w wiadomoĹci automatycznie zmieniĹ zatwierdzony plan."
   },
   {
     "id": "plan-obok",
-    "title": "Jak czytać plan obok wiadomości?",
-    "keys": "plan ustalenia okno obok panel pełny ekran rozmowa",
-    "text": "Osobny widok ustaleń, powrót do rozmowy i panel obok na szerokim ekranie.\n\n1. Kliknij Plan współpracy, aby otworzyć czytelny widok ustaleń tej rozmowy.\n2. Na szerokim ekranie dostępny jest przycisk Plan obok. Pozwala czytać ustalenia i pisać wiadomość bez ciągłego przełączania.\n3. Na mniejszym ekranie plan zajmuje osobny widok. Użyj Wróć do rozmowy. Przycisk rozwinięcia w nagłówku pozwala zwiększyć przestrzeń komunikatora."
+    "title": "Jak czytaÄ plan obok wiadomoĹci?",
+    "keys": "plan ustalenia okno obok panel peĹny ekran rozmowa",
+    "text": "Osobny widok ustaleĹ, powrĂłt do rozmowy i panel obok na szerokim ekranie.\n\n1. Kliknij Plan wspĂłĹpracy, aby otworzyÄ czytelny widok ustaleĹ tej rozmowy.\n2. Na szerokim ekranie dostÄpny jest przycisk Plan obok. Pozwala czytaÄ ustalenia i pisaÄ wiadomoĹÄ bez ciÄgĹego przeĹÄczania.\n3. Na mniejszym ekranie plan zajmuje osobny widok. UĹźyj WrĂłÄ do rozmowy. Przycisk rozwiniÄcia w nagĹĂłwku pozwala zwiÄkszyÄ przestrzeĹ komunikatora."
   },
   {
     "id": "wyslij-materialy",
-    "title": "Jak przesłać pliki, zdjęcia i materiały do projektu?",
-    "keys": "pliki plik materiały materialy zdjęcie wyślij załącznik praca upload",
-    "text": "Materiały w rozmowie, wymagane pola i kontrola komunikatu po wysłaniu.\n\n1. W odpowiedniej rozmowie wybierz Pliki lub przycisk dodawania przy polu wiadomości.\n2. Uzupełnij wymagane pola i wybierz materiał zgodny z formatem oraz limitem pokazanym w formularzu. Dodawaj tylko pliki, które możesz udostępnić drugiej stronie.\n3. Wybierz wysłanie i poczekaj na potwierdzenie. Sprawdź, czy materiał jest na liście projektu. Komunikat błędu oznacza, że operacja wymaga sprawdzenia, a nie że praca została przekazana.\n\nNie wgrywaj dokumentów tożsamości, pełnych danych kart ani haseł jako zwykłych materiałów projektu."
+    "title": "Jak przesĹaÄ pliki, zdjÄcia i materiaĹy do projektu?",
+    "keys": "pliki plik materiaĹy materialy zdjÄcie wyĹlij zaĹÄcznik praca upload",
+    "text": "MateriaĹy w rozmowie, wymagane pola i kontrola komunikatu po wysĹaniu.\n\n1. W odpowiedniej rozmowie wybierz Pliki lub przycisk dodawania przy polu wiadomoĹci.\n2. UzupeĹnij wymagane pola i wybierz materiaĹ zgodny z formatem oraz limitem pokazanym w formularzu. Dodawaj tylko pliki, ktĂłre moĹźesz udostÄpniÄ drugiej stronie.\n3. Wybierz wysĹanie i poczekaj na potwierdzenie. SprawdĹş, czy materiaĹ jest na liĹcie projektu. Komunikat bĹÄdu oznacza, Ĺźe operacja wymaga sprawdzenia, a nie Ĺźe praca zostaĹa przekazana.\n\nNie wgrywaj dokumentĂłw toĹźsamoĹci, peĹnych danych kart ani haseĹ jako zwykĹych materiaĹĂłw projektu."
   },
   {
     "id": "blad-materialu",
-    "title": "Dlaczego nie mogę wysłać materiału?",
-    "keys": "materiały pliki błąd blad wysyłanie nie działa formularz email limit",
-    "text": "Uprawnienia, wymagane informacje, rozmiar pliku oraz ponowna próba.\n\n1. Przeczytaj dokładny komunikat pod formularzem. Sprawdź wymagane pola, prawidłowość adresów e-mail oraz wybrany plik.\n2. Porównaj format i rozmiar z limitami w formularzu. Sprawdź także stan planu, płatności i możliwość kontaktu w tej rozmowie.\n3. Jeśli nadal nie możesz wysłać materiału, zachowaj nazwę komunikatu i czas próby. Skontaktuj się z pomocą bez dołączania poufnego pliku ani danych logowania."
+    "title": "Dlaczego nie mogÄ wysĹaÄ materiaĹu?",
+    "keys": "materiaĹy pliki bĹÄd blad wysyĹanie nie dziaĹa formularz email limit",
+    "text": "Uprawnienia, wymagane informacje, rozmiar pliku oraz ponowna prĂłba.\n\n1. Przeczytaj dokĹadny komunikat pod formularzem. SprawdĹş wymagane pola, prawidĹowoĹÄ adresĂłw e-mail oraz wybrany plik.\n2. PorĂłwnaj format i rozmiar z limitami w formularzu. SprawdĹş takĹźe stan planu, pĹatnoĹci i moĹźliwoĹÄ kontaktu w tej rozmowie.\n3. JeĹli nadal nie moĹźesz wysĹaÄ materiaĹu, zachowaj nazwÄ komunikatu i czas prĂłby. Skontaktuj siÄ z pomocÄ bez doĹÄczania poufnego pliku ani danych logowania."
   },
   {
     "id": "koszt-wspolpracy",
-    "title": "Gdzie sprawdzić prowizję i całkowity koszt współpracy?",
-    "keys": "płatności platnosci prowizja koszt cena opłata stripe ile vat",
-    "text": "Cennik IdeaHire: 5,5% wartości zlecenia, minimum 20 zł i maksimum 229 zł. Limit wartości zlecenia wynosi 10 000 zł. Opłata jest doliczana do wynagrodzenia wykonawcy; wykonawca otrzymuje całą uzgodnioną kwotę.\n\nPrzykład: zlecenie za 5000 zł → 229 zł opłaty IdeaHire → 5229 zł łącznie. To obecny cennik bez doliczania VAT.\n\nPrzed zapłatą sprawdź rzeczywiste podsumowanie w rozmowie. Wcześniej dokonana lub potwierdzana płatność może zachować stary cennik. Lucyna nie zmienia płatności i nie potwierdza ich statusu."
+    "title": "Gdzie sprawdziÄ prowizjÄ i caĹkowity koszt wspĂłĹpracy?",
+    "keys": "pĹatnoĹci platnosci prowizja koszt cena opĹata stripe ile vat",
+    "text": "Cennik IdeaHire: 5,5% wartoĹci zlecenia, minimum 20 zĹ i maksimum 229 zĹ. Limit wartoĹci zlecenia wynosi 10 000 zĹ. OpĹata jest doliczana do wynagrodzenia wykonawcy; wykonawca otrzymuje caĹÄ uzgodnionÄ kwotÄ.\n\nPrzykĹad: zlecenie za 5000 zĹ â 229 zĹ opĹaty IdeaHire â 5229 zĹ ĹÄcznie. To obecny cennik bez doliczania VAT.\n\nPrzed zapĹatÄ sprawdĹş rzeczywiste podsumowanie w rozmowie. WczeĹniej dokonana lub potwierdzana pĹatnoĹÄ moĹźe zachowaÄ stary cennik. Lucyna nie zmienia pĹatnoĹci i nie potwierdza ich statusu."
   },
   {
     "id": "potwierdzenie-platnosci",
-    "title": "Jak sprawdzić, czy projekt jest opłacony?",
-    "keys": "płatność platnosc opłacony potwierdzenie stripe blik karta status",
-    "text": "Potwierdzenie w rozmowie zamiast samego zrzutu ekranu lub wiadomości klienta.\n\n1. Otwórz właściwą rozmowę i jej plan. Upewnij się, że sprawdzasz ten sam projekt i aktualną wersję warunków.\n2. Przeczytaj status płatności pokazany w rozmowie. Sama wiadomość „zapłaciłem” lub zrzut ekranu nie jest potwierdzeniem systemowym.\n3. Jeśli środki zostały pobrane, ale status nie zmienia się, nie ponawiaj płatności bez wyjaśnienia. Zanotuj czas i numer płatności, jeśli jest dostępny, i skontaktuj się z pomocą.\n\nJeśli moduł płatności jest wyłączony lub niedostępny, centrum pomocy nie oznacza, że można już opłacić projekt."
+    "title": "Jak sprawdziÄ, czy projekt jest opĹacony?",
+    "keys": "pĹatnoĹÄ platnosc opĹacony potwierdzenie stripe blik karta status",
+    "text": "Potwierdzenie w rozmowie zamiast samego zrzutu ekranu lub wiadomoĹci klienta.\n\n1. OtwĂłrz wĹaĹciwÄ rozmowÄ i jej plan. Upewnij siÄ, Ĺźe sprawdzasz ten sam projekt i aktualnÄ wersjÄ warunkĂłw.\n2. Przeczytaj status pĹatnoĹci pokazany w rozmowie. Sama wiadomoĹÄ âzapĹaciĹemâ lub zrzut ekranu nie jest potwierdzeniem systemowym.\n3. JeĹli Ĺrodki zostaĹy pobrane, ale status nie zmienia siÄ, nie ponawiaj pĹatnoĹci bez wyjaĹnienia. Zanotuj czas i numer pĹatnoĹci, jeĹli jest dostÄpny, i skontaktuj siÄ z pomocÄ.\n\nJeĹli moduĹ pĹatnoĹci jest wyĹÄczony lub niedostÄpny, centrum pomocy nie oznacza, Ĺźe moĹźna juĹź opĹaciÄ projekt."
   },
   {
     "id": "stripe-wyplaty",
-    "title": "Gdzie skonfigurować konto Stripe do wypłat?",
-    "keys": "stripe wypłaty wyplaty konto bank wykonawca onboarding konfiguracja",
-    "text": "Konfiguracja wykonawcy i odczytywanie statusu konta płatniczego.\n\n1. Na pełnym koncie otwórz Dane profilu i sekcję konfiguracji wypłat, jeśli jest dostępna.\n2. Wykonaj instrukcje po przekierowaniu do Stripe. Wymagane dane przekazuj wyłącznie w właściwym formularzu Stripe, a nie w zwykłej wiadomości do innego użytkownika.\n3. Po powrocie sprawdź komunikat o stanie konfiguracji. Status niekompletny oznacza konieczność uzupełnienia danych; sama rejestracja w IdeaHire nie aktywuje wypłat."
+    "title": "Gdzie skonfigurowaÄ konto Stripe do wypĹat?",
+    "keys": "stripe wypĹaty wyplaty konto bank wykonawca onboarding konfiguracja",
+    "text": "Konfiguracja wykonawcy i odczytywanie statusu konta pĹatniczego.\n\n1. Na peĹnym koncie otwĂłrz Dane profilu i sekcjÄ konfiguracji wypĹat, jeĹli jest dostÄpna.\n2. Wykonaj instrukcje po przekierowaniu do Stripe. Wymagane dane przekazuj wyĹÄcznie w wĹaĹciwym formularzu Stripe, a nie w zwykĹej wiadomoĹci do innego uĹźytkownika.\n3. Po powrocie sprawdĹş komunikat o stanie konfiguracji. Status niekompletny oznacza koniecznoĹÄ uzupeĹnienia danych; sama rejestracja w IdeaHire nie aktywuje wypĹat."
   },
   {
     "id": "zwrot-platnosci",
-    "title": "Jak zgłosić problem z płatnością lub prośbę o zwrot?",
-    "keys": "zwrot refund płatność platnosc stripe spór chargeback bank reklamacja",
-    "text": "Zgłoszenie problemu, dokumentacja i różnica między sporem projektu a sporem bankowym.\n\n1. Opisz problem drugiej stronie i sprawdź plan, stan realizacji oraz status płatności w rozmowie.\n2. Jeśli problem dotyczy wykonania projektu, użyj zgłoszenia problemu ze współpracą. Jeśli dotyczy samej obsługi płatności, podaj pomocy informacje pozwalające ją zidentyfikować.\n3. Przeczytaj odpowiedź i aktualny status sprawy. Samo otwarcie sporu nie oznacza automatycznego zwrotu ani zakończenia rozliczenia.\n\nSpór projektu w IdeaHire i reklamacja transakcji w banku to różne procedury. Nie ma obietnicy automatycznego zwrotu; sposób rozliczenia zależy od sprawy, Regulaminu i dostępnego procesu płatności."
+    "title": "Jak zgĹosiÄ problem z pĹatnoĹciÄ lub proĹbÄ o zwrot?",
+    "keys": "zwrot refund pĹatnoĹÄ platnosc stripe spĂłr chargeback bank reklamacja",
+    "text": "ZgĹoszenie problemu, dokumentacja i rĂłĹźnica miÄdzy sporem projektu a sporem bankowym.\n\n1. Opisz problem drugiej stronie i sprawdĹş plan, stan realizacji oraz status pĹatnoĹci w rozmowie.\n2. JeĹli problem dotyczy wykonania projektu, uĹźyj zgĹoszenia problemu ze wspĂłĹpracÄ. JeĹli dotyczy samej obsĹugi pĹatnoĹci, podaj pomocy informacje pozwalajÄce jÄ zidentyfikowaÄ.\n3. Przeczytaj odpowiedĹş i aktualny status sprawy. Samo otwarcie sporu nie oznacza automatycznego zwrotu ani zakoĹczenia rozliczenia.\n\nSpĂłr projektu w IdeaHire i reklamacja transakcji w banku to rĂłĹźne procedury. Nie ma obietnicy automatycznego zwrotu; sposĂłb rozliczenia zaleĹźy od sprawy, Regulaminu i dostÄpnego procesu pĹatnoĹci."
   },
   {
     "id": "otworz-spor",
-    "title": "Jak zgłosić problem ze współpracą?",
-    "keys": "spór spor spory problem współpraca administracja nie wykonano zgłoszenie",
-    "text": "Rozmowa, menu opcji i zgłoszenie dotyczące zaakceptowanego planu.\n\n1. Otwórz właściwą rozmowę i sprawdź plan. W menu z trzema kropkami wybierz Zgłoś problem ze współpracą, jeśli opcja jest dostępna.\n2. Wskaż powód, oczekiwane rozwiązanie i opis zdarzeń. Odnieś się do konkretnych warunków i potwierdź informacje o udostępnieniu kontekstu administracji.\n3. Wyślij zgłoszenie, a następnie sprawdzaj jego status w Sporach. Dodawaj odpowiedzi i materiały w tej sprawie, zamiast otwierać wiele zgłoszeń tego samego problemu.\n\nDostępność formalnego sporu zależy od stanu planu i uprawnień. Centrum pomocy nie rozstrzyga spraw i nie obiecuje wyniku."
+    "title": "Jak zgĹosiÄ problem ze wspĂłĹpracÄ?",
+    "keys": "spĂłr spor spory problem wspĂłĹpraca administracja nie wykonano zgĹoszenie",
+    "text": "Rozmowa, menu opcji i zgĹoszenie dotyczÄce zaakceptowanego planu.\n\n1. OtwĂłrz wĹaĹciwÄ rozmowÄ i sprawdĹş plan. W menu z trzema kropkami wybierz ZgĹoĹ problem ze wspĂłĹpracÄ, jeĹli opcja jest dostÄpna.\n2. WskaĹź powĂłd, oczekiwane rozwiÄzanie i opis zdarzeĹ. OdnieĹ siÄ do konkretnych warunkĂłw i potwierdĹş informacje o udostÄpnieniu kontekstu administracji.\n3. WyĹlij zgĹoszenie, a nastÄpnie sprawdzaj jego status w Sporach. Dodawaj odpowiedzi i materiaĹy w tej sprawie, zamiast otwieraÄ wiele zgĹoszeĹ tego samego problemu.\n\nDostÄpnoĹÄ formalnego sporu zaleĹźy od stanu planu i uprawnieĹ. Centrum pomocy nie rozstrzyga spraw i nie obiecuje wyniku."
   },
   {
     "id": "dowody-sporu",
-    "title": "Jakie dowody dodać do sporu?",
-    "keys": "spór spor spory dowody materiały plik zdjęcie wyjaśnienie",
-    "text": "Ustalenia, przebieg projektu i materiały związane z konkretnym problemem.\n\n1. Opisz, którego punktu planu dotyczy problem i kiedy wystąpił. Oddziel fakty od oceny sytuacji.\n2. Dodaj odpowiednie materiały w obsługiwanym formacie, na przykład rezultat pracy, zrzut przedstawiający problem lub dokument związany z ustaleniami. Sprawdź limity formularza.\n3. Wyjaśnij, co pokazuje każdy materiał. Nie publikuj niezwiązanych danych innych osób. Administracja analizuje kontekst udostępniony zgodnie z informacją w formularzu sprawy."
+    "title": "Jakie dowody dodaÄ do sporu?",
+    "keys": "spĂłr spor spory dowody materiaĹy plik zdjÄcie wyjaĹnienie",
+    "text": "Ustalenia, przebieg projektu i materiaĹy zwiÄzane z konkretnym problemem.\n\n1. Opisz, ktĂłrego punktu planu dotyczy problem i kiedy wystÄpiĹ. Oddziel fakty od oceny sytuacji.\n2. Dodaj odpowiednie materiaĹy w obsĹugiwanym formacie, na przykĹad rezultat pracy, zrzut przedstawiajÄcy problem lub dokument zwiÄzany z ustaleniami. SprawdĹş limity formularza.\n3. WyjaĹnij, co pokazuje kaĹźdy materiaĹ. Nie publikuj niezwiÄzanych danych innych osĂłb. Administracja analizuje kontekst udostÄpniony zgodnie z informacjÄ w formularzu sprawy."
   },
   {
     "id": "odpowiedz-spor",
-    "title": "Jak odpowiedzieć na spór i odczytać decyzję?",
-    "keys": "spór spor spory odpowiedź decyzja status administracja rozpatrzenie",
-    "text": "Wyjaśnienia drugiej strony, status sprawy i uzasadnienie administracji.\n\n1. Otwórz sprawę z powiadomienia lub zakładki Spory i przeczytaj treść zgłoszenia.\n2. Dodaj swoją odpowiedź w dostępnej sekcji. Podaj fakty, odwołanie do planu i materiały potwierdzające stanowisko. Sprawdzaj terminy wyświetlane w sprawie.\n3. Po rozpatrzeniu przeczytaj decyzję oraz jej uzasadnienie. Status sprawy i status płatności mogą opisywać różne etapy; sprawdź oba, jeśli sprawa dotyczy środków."
+    "title": "Jak odpowiedzieÄ na spĂłr i odczytaÄ decyzjÄ?",
+    "keys": "spĂłr spor spory odpowiedĹş decyzja status administracja rozpatrzenie",
+    "text": "WyjaĹnienia drugiej strony, status sprawy i uzasadnienie administracji.\n\n1. OtwĂłrz sprawÄ z powiadomienia lub zakĹadki Spory i przeczytaj treĹÄ zgĹoszenia.\n2. Dodaj swojÄ odpowiedĹş w dostÄpnej sekcji. Podaj fakty, odwoĹanie do planu i materiaĹy potwierdzajÄce stanowisko. Sprawdzaj terminy wyĹwietlane w sprawie.\n3. Po rozpatrzeniu przeczytaj decyzjÄ oraz jej uzasadnienie. Status sprawy i status pĹatnoĹci mogÄ opisywaÄ rĂłĹźne etapy; sprawdĹş oba, jeĹli sprawa dotyczy ĹrodkĂłw."
   },
   {
     "id": "odwolanie",
-    "title": "Gdzie złożyć odwołanie od decyzji administracji?",
-    "keys": "decyzja administracja odwołanie odwolanie zawieszenie blokada status spór",
-    "text": "Uzasadnienie, zakres decyzji i dostępna ścieżka odwołania.\n\n1. Jeśli decyzja dotyczy konta, otwórz Status konta lub Decyzję administracji z menu profilu. Decyzję dotyczącą projektu sprawdź we właściwej sprawie.\n2. Przeczytaj powód, zakres, czas obowiązywania oraz instrukcję odwołania. Korzystaj z właściwego formularza, jeśli jest dostępny.\n3. Wyjaśnij, z czym się nie zgadzasz i dlaczego, oraz dołącz istotne informacje. Zachowaj potwierdzenie wysłania i sprawdzaj odpowiedź.\n\nKorzystanie z instrukcji pomocy nie ogranicza uprawnień wynikających z prawa ani informacji o innych dostępnych środkach wskazanych w decyzji lub Regulaminie."
+    "title": "Gdzie zĹoĹźyÄ odwoĹanie od decyzji administracji?",
+    "keys": "decyzja administracja odwoĹanie odwolanie zawieszenie blokada status spĂłr",
+    "text": "Uzasadnienie, zakres decyzji i dostÄpna ĹcieĹźka odwoĹania.\n\n1. JeĹli decyzja dotyczy konta, otwĂłrz Status konta lub DecyzjÄ administracji z menu profilu. DecyzjÄ dotyczÄcÄ projektu sprawdĹş we wĹaĹciwej sprawie.\n2. Przeczytaj powĂłd, zakres, czas obowiÄzywania oraz instrukcjÄ odwoĹania. Korzystaj z wĹaĹciwego formularza, jeĹli jest dostÄpny.\n3. WyjaĹnij, z czym siÄ nie zgadzasz i dlaczego, oraz doĹÄcz istotne informacje. Zachowaj potwierdzenie wysĹania i sprawdzaj odpowiedĹş.\n\nKorzystanie z instrukcji pomocy nie ogranicza uprawnieĹ wynikajÄcych z prawa ani informacji o innych dostÄpnych Ĺrodkach wskazanych w decyzji lub Regulaminie."
   },
   {
     "id": "prywatnosc-dane",
-    "title": "Jak pobrać dane lub zamknąć konto?",
-    "keys": "konto prywatność dane rodo usuń usunięcie zamknij eksport kopia",
-    "text": "Centrum prywatności, dostęp do danych i wnioski dotyczące konta.\n\n1. Otwórz menu profilu i wybierz Prywatność i dane.\n2. Przeczytaj dostępne opcje i informacje dotyczące pobrania danych, wniosku o ich usunięcie lub zamknięcia konta.\n3. Złóż właściwy wniosek i zachowaj jego potwierdzenie. Niektóre informacje mogą być przechowywane dalej na odpowiedniej podstawie, na przykład w związku z trwającą sprawą; wyjaśnienia zawiera polityka prywatności i odpowiedź na wniosek."
+    "title": "Jak pobraÄ dane lub zamknÄÄ konto?",
+    "keys": "konto prywatnoĹÄ dane rodo usuĹ usuniÄcie zamknij eksport kopia",
+    "text": "Centrum prywatnoĹci, dostÄp do danych i wnioski dotyczÄce konta.\n\n1. OtwĂłrz menu profilu i wybierz PrywatnoĹÄ i dane.\n2. Przeczytaj dostÄpne opcje i informacje dotyczÄce pobrania danych, wniosku o ich usuniÄcie lub zamkniÄcia konta.\n3. ZĹĂłĹź wĹaĹciwy wniosek i zachowaj jego potwierdzenie. NiektĂłre informacje mogÄ byÄ przechowywane dalej na odpowiedniej podstawie, na przykĹad w zwiÄzku z trwajÄcÄ sprawÄ; wyjaĹnienia zawiera polityka prywatnoĹci i odpowiedĹş na wniosek."
   },
   {
     "id": "zglos-tresc",
-    "title": "Jak zgłosić wiadomość lub nielegalną treść?",
-    "keys": "zgłoś zgłoszenie spam wiadomość nielegalne treść bezpieczeństwo moderacja",
-    "text": "Zgłoszenie konkretnego materiału i informacje potrzebne do jego sprawdzenia.\n\n1. Przy wiadomości lub materiale skorzystaj z dostępnej opcji zgłoszenia. Przy innych treściach użyj odnośnika do zgłaszania nielegalnych treści.\n2. Wskaż konkretną treść i wyjaśnij problem. Podaj informacje potrzebne do oceny zgłoszenia, bez umieszczania niepotrzebnych danych innych osób.\n3. Zachowaj potwierdzenie. Jeżeli zgłoszenie dotyczy zagrożenia życia lub popełnienia przestępstwa, skorzystaj również z odpowiedniej pomocy i właściwych organów."
+    "title": "Jak zgĹosiÄ wiadomoĹÄ lub nielegalnÄ treĹÄ?",
+    "keys": "zgĹoĹ zgĹoszenie spam wiadomoĹÄ nielegalne treĹÄ bezpieczeĹstwo moderacja",
+    "text": "ZgĹoszenie konkretnego materiaĹu i informacje potrzebne do jego sprawdzenia.\n\n1. Przy wiadomoĹci lub materiale skorzystaj z dostÄpnej opcji zgĹoszenia. Przy innych treĹciach uĹźyj odnoĹnika do zgĹaszania nielegalnych treĹci.\n2. WskaĹź konkretnÄ treĹÄ i wyjaĹnij problem. Podaj informacje potrzebne do oceny zgĹoszenia, bez umieszczania niepotrzebnych danych innych osĂłb.\n3. Zachowaj potwierdzenie. JeĹźeli zgĹoszenie dotyczy zagroĹźenia Ĺźycia lub popeĹnienia przestÄpstwa, skorzystaj rĂłwnieĹź z odpowiedniej pomocy i wĹaĹciwych organĂłw."
   },
   {
     "id": "blokowanie",
-    "title": "Co oznacza zablokowany użytkownik w rozmowie?",
-    "keys": "blokada zablokowany użytkownik wiadomości profil odblokuj kontakt",
-    "text": "Ograniczenie kontaktu i odczytanie komunikatu w czacie.\n\n1. Przeczytaj komunikat w rozmowie. Rozróżnia on blokadę wykonaną przez Ciebie od blokady wykonanej przez drugą osobę.\n2. Jeżeli Ty zablokowałeś użytkownika, otwórz jego profil i sprawdź dostępną akcję odblokowania w menu profilu.\n3. Nie omijaj blokady drugim kontem. Problemy z wykonaniem projektu zgłaszaj w odpowiedniej sprawie lub pomocy, zamiast wymuszać dalszy kontakt."
+    "title": "Co oznacza zablokowany uĹźytkownik w rozmowie?",
+    "keys": "blokada zablokowany uĹźytkownik wiadomoĹci profil odblokuj kontakt",
+    "text": "Ograniczenie kontaktu i odczytanie komunikatu w czacie.\n\n1. Przeczytaj komunikat w rozmowie. RozrĂłĹźnia on blokadÄ wykonanÄ przez Ciebie od blokady wykonanej przez drugÄ osobÄ.\n2. JeĹźeli Ty zablokowaĹeĹ uĹźytkownika, otwĂłrz jego profil i sprawdĹş dostÄpnÄ akcjÄ odblokowania w menu profilu.\n3. Nie omijaj blokady drugim kontem. Problemy z wykonaniem projektu zgĹaszaj w odpowiedniej sprawie lub pomocy, zamiast wymuszaÄ dalszy kontakt."
   },
   {
     "id": "kontakt-pomoc",
-    "title": "Jak skontaktować się z pomocą IdeaHire?",
+    "title": "Jak skontaktowaÄ siÄ z pomocÄ IdeaHire?",
     "keys": "pomoc help kontakt support administracja reklamacja email",
-    "text": "Kontakt ogólny, reklamacja i prywatność — wybór właściwego adresu.\n\n1. Sprawdź instrukcję dotyczącą swojego problemu. Jeśli nie rozwiązuje sprawy, wybierz kontakt ogólny, reklamacje lub prywatność z sekcji kontaktu w centrum pomocy.\n2. Opisz, co próbowałeś zrobić, gdzie wystąpił problem, kiedy to było i jaki komunikat zobaczyłeś. Podaj identyfikator projektu lub sprawy, jeśli jest potrzebny.\n3. Nie przesyłaj hasła, kodów logowania, pełnych danych karty ani poufnych materiałów klienta. Zrzut ekranu przed wysłaniem oczyść z niepotrzebnych danych.\n\nCentrum pomocy nie jest czatem z administratorem. Wpisanie frazy tylko przeszukuje instrukcje i nie wysyła zgłoszenia."
+    "text": "Kontakt ogĂłlny, reklamacja i prywatnoĹÄ â wybĂłr wĹaĹciwego adresu.\n\n1. SprawdĹş instrukcjÄ dotyczÄcÄ swojego problemu. JeĹli nie rozwiÄzuje sprawy, wybierz kontakt ogĂłlny, reklamacje lub prywatnoĹÄ z sekcji kontaktu w centrum pomocy.\n2. Opisz, co prĂłbowaĹeĹ zrobiÄ, gdzie wystÄpiĹ problem, kiedy to byĹo i jaki komunikat zobaczyĹeĹ. Podaj identyfikator projektu lub sprawy, jeĹli jest potrzebny.\n3. Nie przesyĹaj hasĹa, kodĂłw logowania, peĹnych danych karty ani poufnych materiaĹĂłw klienta. Zrzut ekranu przed wysĹaniem oczyĹÄ z niepotrzebnych danych.\n\nCentrum pomocy nie jest czatem z administratorem. Wpisanie frazy tylko przeszukuje instrukcje i nie wysyĹa zgĹoszenia."
   },
   {
     "id": "kalendarz",
-    "title": "Jak korzystać z kalendarza i wyboru daty?",
-    "keys": "kalendarz data termin wiek urodzenia miesiąc dzień",
-    "text": "Przegląd terminów projektów oraz daty w formularzach.\n\n1. Kalendarz otworzysz z menu profilu. Sprawdź miesiąc i dostępne terminy powiązane z Twoimi projektami.\n2. W formularzu kliknij pole daty, aby otworzyć wybór dnia. Przy dacie urodzenia wybierz właściwy rok, miesiąc i dzień.\n3. Po wyborze sprawdź wartość w formularzu. Wybór daty nie zapisuje automatycznie całego profilu ani planu; użyj odpowiedniego przycisku zapisania."
+    "title": "Jak korzystaÄ z kalendarza i wyboru daty?",
+    "keys": "kalendarz data termin wiek urodzenia miesiÄc dzieĹ",
+    "text": "PrzeglÄd terminĂłw projektĂłw oraz daty w formularzach.\n\n1. Kalendarz otworzysz z menu profilu. SprawdĹş miesiÄc i dostÄpne terminy powiÄzane z Twoimi projektami.\n2. W formularzu kliknij pole daty, aby otworzyÄ wybĂłr dnia. Przy dacie urodzenia wybierz wĹaĹciwy rok, miesiÄc i dzieĹ.\n3. Po wyborze sprawdĹş wartoĹÄ w formularzu. WybĂłr daty nie zapisuje automatycznie caĹego profilu ani planu; uĹźyj odpowiedniego przycisku zapisania."
   },
   {
     "id": "szablony",
-    "title": "Jak zmienić szablon i jasny lub ciemny wygląd?",
-    "keys": "szablon wygląd ciemny jasny biały czarny kolor telefon ustawienia",
-    "text": "Zmiana wyglądu bez zmiany danych, ofert i funkcji konta.\n\n1. W centrum profilu wybierz Szablony i zastosuj wybrany wariant strony.\n2. Przełącz jasny lub ciemny wygląd dostępną opcją wyglądu. Układ pozostaje dopasowany do szerokości ekranu.\n3. Zmiana szablonu nie zmienia danych profilu ani warunków projektu. W centrum pomocy możesz osobno przełączyć jasność przyciskiem w nagłówku."
+    "title": "Jak zmieniÄ szablon i jasny lub ciemny wyglÄd?",
+    "keys": "szablon wyglÄd ciemny jasny biaĹy czarny kolor telefon ustawienia",
+    "text": "Zmiana wyglÄdu bez zmiany danych, ofert i funkcji konta.\n\n1. W centrum profilu wybierz Szablony i zastosuj wybrany wariant strony.\n2. PrzeĹÄcz jasny lub ciemny wyglÄd dostÄpnÄ opcjÄ wyglÄdu. UkĹad pozostaje dopasowany do szerokoĹci ekranu.\n3. Zmiana szablonu nie zmienia danych profilu ani warunkĂłw projektu. W centrum pomocy moĹźesz osobno przeĹÄczyÄ jasnoĹÄ przyciskiem w nagĹĂłwku."
   },
   {
     "id": "blad-strony",
-    "title": "Strona, formularz lub kalendarz nie działa prawidłowo",
-    "keys": "błąd blad biały ekran nie działa telefon przeglądarka formularz kalendarz",
-    "text": "Bezpieczna diagnostyka i informacje przydatne w zgłoszeniu błędu.\n\n1. Zapisz treść ważnego formularza przed odświeżaniem strony. Sprawdź połączenie z internetem i komunikaty przy polach.\n2. Spróbuj ponownie w aktualnej przeglądarce. Przy problemach z logowaniem upewnij się, że jesteś na właściwej stronie IdeaHire.\n3. Jeśli błąd się powtarza, opisz kroki, typ urządzenia i przeglądarkę. Dołącz oczyszczony zrzut lub treść komunikatu, bez haseł i kodów logowania.\n\nPrzy niepewnym statusie płatności nie płać drugi raz, dopóki problem nie zostanie wyjaśniony."
+    "title": "Strona, formularz lub kalendarz nie dziaĹa prawidĹowo",
+    "keys": "bĹÄd blad biaĹy ekran nie dziaĹa telefon przeglÄdarka formularz kalendarz",
+    "text": "Bezpieczna diagnostyka i informacje przydatne w zgĹoszeniu bĹÄdu.\n\n1. Zapisz treĹÄ waĹźnego formularza przed odĹwieĹźaniem strony. SprawdĹş poĹÄczenie z internetem i komunikaty przy polach.\n2. SprĂłbuj ponownie w aktualnej przeglÄdarce. Przy problemach z logowaniem upewnij siÄ, Ĺźe jesteĹ na wĹaĹciwej stronie IdeaHire.\n3. JeĹli bĹÄd siÄ powtarza, opisz kroki, typ urzÄdzenia i przeglÄdarkÄ. DoĹÄcz oczyszczony zrzut lub treĹÄ komunikatu, bez haseĹ i kodĂłw logowania.\n\nPrzy niepewnym statusie pĹatnoĹci nie pĹaÄ drugi raz, dopĂłki problem nie zostanie wyjaĹniony."
   }
 ];
-const normalizeGuide = (value) => String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l").replace(/\s+/g, " ").trim();
+const normalizeGuide = (value) => String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/Ĺ/g, "l").replace(/\s+/g, " ").trim();
 function guideSources(message, limit = 3) {
   const words = normalizeGuide(message).match(/[a-z0-9]+/g)?.filter((w) => w.length > 2 && !["jak", "jest", "czy", "sie", "dla", "mam", "chce", "nie", "moje", "mojego", "mozesz"].includes(w)) || [];
   const seen = /* @__PURE__ */ new Set();
@@ -277,10 +277,20 @@ const INTENTS = [
 function knowledgeAnswer(message) {
   const text = normalizeGuide(message).replace(/[!?.,]+$/g, "");
   if (!text || text.length > 420 || /(?:zignoruj|ignore|system prompt|twoje instrukcje)/.test(text)) return null;
+  if (/^(?:szukam|szukaj|znajdz)\b/.test(text)
+    || /^potrzebuj\w*\s+(?:wykonawc\w*|freelancer\w*|programist\w*|grafik\w*|zlecen\w*)\b/.test(text)) return null;
+  // Kraj nie jest jednym punktem prognozy. Nie pytamy modelu o bieĹźÄcÄ temperaturÄ.
+  if (/\b(?:pogod\w*|temperatur\w*|stopni|weather)\b/.test(text)) {
+    const place = text.match(/\b(?:w|we|in|dla)\s+([^?!.;\n]{2,70})/)?.[1]
+      .replace(/\s+(?:dzis(?:iaj)?|teraz|obecnie|today|now).*$/, "").trim();
+    if (place && /^norweg(?:i|ii|ia)$/.test(place))
+      return { text: "Dla ktĂłrego miasta w Norwegii chcesz sprawdziÄ pogodÄ? Warunki rĂłĹźniÄ siÄ miÄdzy miejscowoĹciami.\n\nNapisz na przykĹad: âJaka pogoda w Oslo?â. AktualnÄ prognozÄ pobieram ze ĹşrĂłdĹa pogodowego, zamiast zgadywaÄ temperaturÄ.", sources: [], kind: "local" };
+    if (!place) return { text: "Dla ktĂłrego miasta chcesz sprawdziÄ pogodÄ? Napisz na przykĹad: âJaka pogoda w Oslo?â albo âJaka pogoda w Warszawie?â.", sources: [], kind: "local" };
+  }
   const source = (id) => [...LUCYNA_GUIDE].reverse().find((item) => item.id === id);
   const response = (item) => ({ text: item.text, sources: [{ id: item.id, title: item.title }], kind: "guide" });
   if (/^(?:kim jestes|co potrafisz|co umiesz|jak mozesz mi pomoc|czym jest lucyna|kim jest lucyna|co to lucyna)(?:\b|$)/.test(text))
-    return { text: "Jestem Lucyna AI, asystentka IdeaHire. Pomagam znaleźć wykonawcę lub zlecenie, przygotować brief i wiadomość, wyjaśnić działanie strony oraz uporządkować kryteria odbioru.\n\nWyniki katalogu pochodzą z IdeaHire. Ty zatwierdzasz filtry, publikujesz ogłoszenia i podejmujesz decyzje. Podstawowe instrukcje nie zużywają limitu generowania AI.", sources: [], kind: "guide" };
+    return { text: "Jestem Lucyna AI, asystentka IdeaHire. Pomagam znaleĹşÄ wykonawcÄ lub zlecenie, przygotowaÄ brief i wiadomoĹÄ, wyjaĹniÄ dziaĹanie strony oraz uporzÄdkowaÄ kryteria odbioru.\n\nWyniki katalogu pochodzÄ z IdeaHire. Ty zatwierdzasz filtry, publikujesz ogĹoszenia i podejmujesz decyzje. Podstawowe instrukcje nie zuĹźywajÄ limitu generowania AI.", sources: [], kind: "guide" };
   if (/(?:czym(?: jest)?|co to(?: jest)?|co jest|jak dziala|opisz|wyjasnij|opowiedz(?: o)?|do czego(?: sluzy)?|na czym(?: polega)?)\s+(?:(?:platforma|strona|serwis)\s+)?(?:ideahire|idea hire)/.test(text)) return response(LUCYNA_GUIDE[0]);
   if (/(?:czym|co to|jak|wyjasnij).*(?:brief)/.test(text)) return response(LUCYNA_GUIDE[1]);
   if (/prowizj|oplata|razem do zaplaty/.test(text)) {
@@ -290,7 +300,7 @@ function knowledgeAnswer(message) {
       if (Number.isFinite(amount) && amount >= 1 && amount <= 1e4) {
         const grosz = Math.round(amount * 100), fee = Math.max(2e3, Math.min(22900, Math.floor((grosz * 550 + 5e3) / 1e4)));
         const money = (n) => new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(n / 100);
-        return { text: "Dla zlecenia za " + money(grosz) + " według obecnego cennika:\n\n- wynagrodzenie wykonawcy: " + money(grosz) + ";\n- opłata IdeaHire (5,5%, min. 20 zł, maks. 229 zł): " + money(fee) + ";\n- razem do zapłaty: " + money(grosz + fee) + ".\n\nTo obliczenie pomocnicze, bez doliczania VAT. Przed zapłatą sprawdź zapisane podsumowanie w rozmowie; nie zmieniłam żadnej płatności.", sources: [{ id: "koszt-wspolpracy", title: source("koszt-wspolpracy").title }], kind: "guide" };
+        return { text: "Dla zlecenia za " + money(grosz) + " wedĹug obecnego cennika:\n\n- wynagrodzenie wykonawcy: " + money(grosz) + ";\n- opĹata IdeaHire (5,5%, min. 20 zĹ, maks. 229 zĹ): " + money(fee) + ";\n- razem do zapĹaty: " + money(grosz + fee) + ".\n\nTo obliczenie pomocnicze, bez doliczania VAT. Przed zapĹatÄ sprawdĹş zapisane podsumowanie w rozmowie; nie zmieniĹam Ĺźadnej pĹatnoĹci.", sources: [{ id: "koszt-wspolpracy", title: source("koszt-wspolpracy").title }], kind: "guide" };
       }
     }
   }
@@ -298,8 +308,23 @@ function knowledgeAnswer(message) {
   for (const [id, pattern] of INTENTS) if (pattern.test(text)) return response(source(id));
   return null;
 }
+// Pytania ogĂłlne w trybie katalogu sÄ rozmowÄ, a nie ĹźÄdaniem filtrĂłw JSON.
+function resolveLucynaMode(message, selectedMode = "chat", hasReview = false) {
+  if (hasReview) return "review";
+  if (knowledgeAnswer(message)) return "chat";
+  const text = normalizeGuide(message);
+  if (/\b(?:pogod\w*|temperatur\w*|stopni|weather)\b/.test(text)) return "chat";
+  if (!["jobs", "freelancers"].includes(selectedMode)) return selectedMode;
+  if (/^(?:napisz|przygotuj|zredaguj|popraw|wyjasnij|opowiedz|oblicz|przetlumacz|wymysl)\b/.test(text)) return "chat";
+  const catalog = /\b(?:freelancer\w*|wykonawc\w*|zlecen\w*|ofert\w*|ogloszen\w*|katalog\w*|szuk\w*|znajdz\w*|programist\w*|grafik\w*|copywriter\w*)\b/.test(text);
+  const catalogQuestion = /^jakie\s+(?:sa\s+)?(?:dostepne\s+)?(?:zlecenia|oferty|ogloszenia)\b/.test(text);
+  if (!catalogQuestion && /^(?:co\b|czym\b|kim\b|jak\b|jaki\w*\b|dlaczego\b|ile\b|czy\b|hej\b|czesc\b|dzien dobry\b|witaj\b)/.test(text)) return "chat";
+  if (!catalog && /^(?:powiedz|wytlumacz|pomoz|pomĂłĹź)\b/.test(text)) return "chat";
+  return selectedMode;
+}
 export {
   LUCYNA_GUIDE,
   guideSources,
-  knowledgeAnswer
+  knowledgeAnswer,
+  resolveLucynaMode
 };
