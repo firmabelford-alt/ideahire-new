@@ -1,10 +1,10 @@
 /* IdeaHire P31 / Lucyna: funkcje lokalne. Nie wywołują AI ani nie wysyłają wiadomości. */
 import { knowledgeAnswer } from "./LucynaKnowledge.js";
 
-export const LUCYNA_NOTICE_VERSION = "IH-LUCYNA-2026-10-11-V2";
+export const LUCYNA_NOTICE_VERSION = "IH-LUCYNA-2026-10-13-V3";
 export const LUCYNA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export const PRIVATE_INPUT = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\b\d{11}\b|\b(?:sk-[A-Za-z0-9_-]{12,}|(?:sk|rk)_(?:test|live)_[A-Za-z0-9]{12,}|whsec_[A-Za-z0-9]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b|\b(?:has[łl]o|password|passwd|token|api[_ -]?key|secret|kod\s*(?:2fa|mfa))\s*[:=]/i;
-export const containsPrivateInput = value => PRIVATE_INPUT.test(String(value || ""));
+export const containsPrivateInput = value => PRIVATE_INPUT.test(String(value || "").replace(/\b(?:ideahire26|ideahirereklamacja|ideahireprywatnosc)@gmail\.com\b/gi, "[publiczny kontakt IdeaHire]"));
 export const fold = value => String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l").trim();
 
 export function weatherCity(message) {
@@ -86,10 +86,10 @@ export function briefTemplate(fields) {
 
 export function packConversation(conversation) {
   const messages = conversation.messages.filter(message =>
-    !["loading", "streaming"].includes(message.status) && (message.text || message.error)).slice(-40).map(message => {
-    const value = { id: message.id, role: message.role, text: String(message.text).slice(0, 8000),
+    !["loading", "streaming"].includes(message.status) && (message.text || message.error || message.review || message.catalogs?.length)).slice(-40).map(message => {
+    const value = { id: message.id, role: message.role, text: String(message.text || "").slice(0, 8000),
       status: ["done", "error", "stopped", "catalog", "catalog-error"].includes(message.status) ? message.status : "done" };
-    for (const key of ["filters", "searchMode", "sources", "provenance", "review", "error", "partial", "kind", "createdAt"])
+    for (const key of ["filters", "searchMode", "sources", "provenance", "review", "error", "partial", "kind", "createdAt", "catalogs"])
       if (message[key] !== undefined) value[key] = message[key];
     return value;
   });
@@ -127,4 +127,21 @@ export async function revealAnswer(text, signal, onText, reducedMotion = globalT
     signal.addEventListener("abort", abort, { once: true });
     timer = setTimeout(tick, 80);
   });
+}
+
+export function conversationContext(messages, limit = 10) {
+  return messages.filter(message => ["user", "assistant"].includes(message.role)
+    && ["done", "catalog", "stopped"].includes(message.status)
+    && !message.error && (message.text || message.review || message.catalogs?.length))
+    .map(message => {
+      let text = String(message.text || "");
+      if (message.review) text += "\nAnaliza wskazanego materiału:\n" + message.review.summary + "\n" +
+        (message.review.criteria || []).map(row => row.criterion + ": " + row.status + ". " + row.reason + (row.fix ? " Poprawka: " + row.fix : "")).join("\n");
+      const catalogs = message.catalogs || (message.items ? [{mode:message.searchMode,items:message.items,filters:message.filters}] : []);
+      if (catalogs.length) text = "Odczyty katalogu IdeaHire (dane, numeracja odpowiada kartom):\n" + catalogs.map(catalog =>
+        catalog.mode + ":\n" + catalog.items.slice(0,10).map((row,index) => (index+1) + ". " +
+          String(row.title || row.name || "Pozycja").slice(0,160) +
+          (row.category ? " | " + row.category : "") + (row.budget != null ? " | " + row.budget + " PLN" : "")).join("\n")).join("\n") + "\n\n" + text;
+      return {role:message.role,content:text.slice(0,5800)};
+    }).filter(message => !containsPrivateInput(message.content)).slice(-limit);
 }
