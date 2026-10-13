@@ -1,7 +1,9 @@
 /* IdeaHire P31 / Lucyna: funkcje lokalne. Nie wywołują AI ani nie wysyłają wiadomości. */
+import { knowledgeAnswer } from "./LucynaKnowledge.js";
+
 export const LUCYNA_NOTICE_VERSION = "IH-LUCYNA-2026-10-11-V2";
 export const LUCYNA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-export const PRIVATE_INPUT = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\b\d{11}\b|\b(?:sk-[A-Za-z0-9_-]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b|\b(?:has[łl]o|password|passwd|token|api[_ -]?key|secret|kod\s*(?:2fa|mfa))\s*[:=]/i;
+export const PRIVATE_INPUT = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\b\d{11}\b|\b(?:sk-[A-Za-z0-9_-]{12,}|(?:sk|rk)_(?:test|live)_[A-Za-z0-9]{12,}|whsec_[A-Za-z0-9]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b|\b(?:has[łl]o|password|passwd|token|api[_ -]?key|secret|kod\s*(?:2fa|mfa))\s*[:=]/i;
 export const containsPrivateInput = value => PRIVATE_INPUT.test(String(value || ""));
 export const fold = value => String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l").trim();
 
@@ -18,6 +20,8 @@ export function weatherCity(message) {
 }
 
 export function localAnswer(message, now = new Date()) {
+  const guide = knowledgeAnswer(message);
+  if (guide) return guide.text;
   const text = fold(message).replace(/[!.?]+$/g, "").trim();
   if (/^(hej|czesc|czesc lucyna|hej lucyna|dzien dobry|witaj|hello|hi)$/.test(text))
     return "Hej! Możesz ze mną normalnie porozmawiać, zapytać o pogodę, przygotować wiadomość albo sprawdzić rezultat pracy. Od czego zaczynamy?";
@@ -94,10 +98,33 @@ export function packConversation(conversation) {
     sourceConversationId: LUCYNA_UUID.test(conversation.sourceConversationId || "") ? conversation.sourceConversationId : null };
 }
 export function downloadLucynaExport(conversations) {
-  const payload = { format: "IdeaHire-Lucyna-2", exported_at: new Date().toISOString(),
+  const payload = { format: "IdeaHire-Lucyna-AI", exported_at: new Date().toISOString(),
     note: "Odpowiedzi oznaczone ai_generated pochodzą z AI. Analizy dotyczą wskazanych materiałów, nie są decyzją o odbiorze.",
     conversations: conversations.map(packConversation) };
   const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }));
-  const link = document.createElement("a"); link.href = url; link.download = "Lucyna-moje-rozmowy.json";
+  const link = document.createElement("a"); link.href = url; link.download = "Lucyna-AI-moje-rozmowy.json";
   link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export async function revealAnswer(text, signal, onText, reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+  if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+  if (reducedMotion || !text) { onText(text); return; }
+  const started = performance.now();
+  const duration = Math.min(1500, Math.max(240, text.length * 1.25));
+  await new Promise((resolve, reject) => {
+    let timer;
+    const abort = () => { clearTimeout(timer); signal.removeEventListener("abort", abort); reject(new DOMException("Aborted", "AbortError")); };
+    const tick = () => {
+      if (signal.aborted) { abort(); return; }
+      const fraction = Math.min(1, (performance.now() - started) / duration);
+      let end = Math.ceil(text.length * fraction);
+      // Nie dziel pary UTF-16 w połowie podczas wyświetlania emoji.
+      if (end > 0 && end < text.length && /[\uD800-\uDBFF]/.test(text[end - 1])) end--;
+      onText(text.slice(0, end));
+      if (fraction === 1) { signal.removeEventListener("abort", abort); resolve(); }
+      else timer = setTimeout(tick, 24);
+    };
+    signal.addEventListener("abort", abort, { once: true });
+    timer = setTimeout(tick, 80);
+  });
 }
