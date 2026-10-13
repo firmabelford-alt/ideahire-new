@@ -1,7 +1,7 @@
 /* IdeaHire P31 / Lucyna: narzędzia współpracy. Pliki są odczytywane lokalnie. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, messageTemplate, reviewSummary, suggestedCriteria } from "./LucynaCore";
+import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, reviewSummary, suggestedCriteria } from "./LucynaCore";
 
 const byteLimit = (value, limit = 12000) => {
   let out = String(value); const encoder = new TextEncoder();
@@ -49,7 +49,7 @@ async function copyText(text,onNotice) {
   try { await navigator.clipboard.writeText(text); onNotice("Skopiowano. Sprawdź treść przed samodzielnym wysłaniem."); }
   catch { onNotice("Możesz zaznaczyć tekst i skopiować go ręcznie."); }
 }
-export function ReviewResult({ review, onDraft }) {
+export function ReviewResult({ review, onDraft, busy }) {
   const summary = reviewSummary(review);
   const labels = {met:"Spełnione",partial:"Częściowo",missing:"Niezgodność",unknown:"Do sprawdzenia"};
   return <section className="lu-review-result" aria-label="Wstępne sprawdzenie materiału">
@@ -64,31 +64,28 @@ export function ReviewResult({ review, onDraft }) {
       <small>{row.basis==="text" ? "Podstawa: dosłowny cytat z wybranego tekstu" : row.basis==="image" ? "Podstawa: obserwacja wybranego obrazu" : "Brak wystarczającego materiału"}</small>
       {row.fix && <p className="lu-fix"><strong>Propozycja poprawki:</strong> {row.fix}</p>}
     </li>)}</ol>
-    <button type="button" className="lu-secondary" onClick={()=>onDraft(correctionDraft(review))}>Przygotuj wiadomość o poprawkach</button>
+    <button type="button" className="lu-secondary" disabled={busy} onClick={()=>onDraft(correctionDraft(review))}>Przygotuj wiadomość o poprawkach z AI</button>
   </section>;
 }
-function MessageTool({onUseDraft,onNotice,initialDraft=""}) {
-  const [purpose,setPurpose] = useState(""), [details,setDetails] = useState(initialDraft), [tone,setTone] = useState("polite"), [text,setText] = useState(initialDraft);
-  useEffect(()=>{setDetails(initialDraft);setText(initialDraft);},[initialDraft]);
-  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>WIADOMOŚCI</span><h2>Dobierz słowa do sytuacji</h2><p>Stwórz szablon bez AI lub poproś Lucynę o dopracowanie treści.</p></div>
+function MessageTool({onUseDraft,busy,initialDraft=""}) {
+  const [purpose,setPurpose] = useState(""), [details,setDetails] = useState(initialDraft), [tone,setTone] = useState("polite");
+  useEffect(()=>{setDetails(initialDraft);},[initialDraft]);
+  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>WIADOMOŚCI</span><h2>Dobierz słowa do sytuacji</h2><p>Lucyna przygotuje propozycję na podstawie Twoich faktów. Możesz też po prostu opisać sytuację w rozmowie.</p></div>
     <label>Cel wiadomości<input value={purpose} maxLength={300} placeholder="Np. zapytanie o termin albo prośba o poprawki" onChange={e=>setPurpose(e.target.value)} /></label>
     <label>Fakty i ustalenia<textarea value={details} maxLength={1200} rows={4} placeholder="Podaj tylko fakty potrzebne do tej wiadomości" onChange={e=>setDetails(e.target.value)} /></label>
     <label>Ton<select value={tone} onChange={e=>setTone(e.target.value)}><option value="polite">Uprzejmy</option><option value="firm">Stanowczy</option><option value="short">Krótki</option></select></label>
-    <div className="lu-tool-actions"><button type="button" className="lu-secondary" disabled={!purpose.trim() && !details.trim()} onClick={()=>setText(messageTemplate({purpose,details,tone}))}>Ułóż bez AI</button>
-      <button type="button" className="lu-primary" disabled={!purpose.trim() && !details.trim()} onClick={()=>onUseDraft("Przygotuj wiadomość. Ton: "+({polite:"uprzejmy",firm:"stanowczy",short:"krótki"}[tone])+". Cel: "+purpose+". Fakty: "+details)}>Dopracuj z AI</button></div>
-    {text && <div className="lu-local-output"><label>Twoja propozycja<textarea value={text} maxLength={2400} rows={6} onChange={e=>setText(e.target.value)} /></label><button type="button" className="lu-text-button" onClick={()=>copyText(text,onNotice)}>Kopiuj wiadomość</button></div>}
+    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onUseDraft("Pomóż mi napisać "+({polite:"uprzejmą",firm:"stanowczą",short:"krótką"}[tone])+" wiadomość.\n\n"+purpose+"\n\nFakty i ustalenia:\n"+details)}>{busy ? "Przygotowuję…" : "Przygotuj wiadomość z AI"}</button></div>
     <p className="lu-tool-note">Wiadomość wysyłasz samodzielnie w rozmowie. Sprawdź adresata, fakty, terminy i zobowiązania.</p>
   </section>;
 }
-function BriefTool({onUseDraft,onNotice}) {
-  const [fields,setFields] = useState({goal:"",scope:"",result:"",deadline:"",budget:"",acceptance:""}), [text,setText] = useState("");
+function BriefTool({onUseDraft,busy}) {
+  const [fields,setFields] = useState({goal:"",scope:"",result:"",deadline:"",budget:"",acceptance:""});
   const labels = {goal:"Cel",scope:"Zakres",result:"Oczekiwany rezultat",deadline:"Termin",budget:"Budżet",acceptance:"Jak sprawdzisz odbiór?"};
   const readiness = briefReadiness(fields);
-  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>ZLECENIE</span><h2>Zacznij od jasnych ustaleń</h2><p>Lista kompletności pomaga uzupełnić brief przed publikacją.</p></div>
+  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>ZLECENIE</span><h2>Zacznij od jasnych ustaleń</h2><p>Podaj znane informacje. Lucyna ułoży z nich szkic i wskaże, co warto jeszcze uzgodnić.</p></div>
     <div className="lu-brief-progress"><strong>{readiness.percent}% pól uzupełnionych</strong><progress max="100" value={readiness.percent} aria-label="Kompletność pól zlecenia" /><span>To kompletność formularza; jakość ustaleń sprawdzasz samodzielnie.</span></div>
     <div className="lu-tool-grid">{Object.entries(labels).map(([key,label])=><label key={key}>{label}<textarea rows={2} maxLength={key==="scope" || key==="acceptance" ? 350 : 180} value={fields[key]} onChange={e=>setFields({...fields,[key]:e.target.value})} /></label>)}</div>
-    <div className="lu-tool-actions"><button type="button" className="lu-secondary" onClick={()=>setText(briefTemplate(fields))}>Ułóż bez AI</button><button type="button" className="lu-primary" onClick={()=>onUseDraft("Uporządkuj brief. Zachowaj fakty, brakujące pola oznacz Do uzupełnienia.\n"+briefTemplate(fields))}>Dopracuj z AI</button></div>
-    {text && <div className="lu-local-output"><pre>{text}</pre><button type="button" className="lu-text-button" onClick={()=>copyText(text,onNotice)}>Kopiuj brief</button><Link to="/find-talent">Otwórz formularz zlecenia</Link></div>}
+    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !Object.values(fields).some(value=>value.trim())} onClick={()=>onUseDraft("Przygotuj przejrzyste zlecenie na podstawie moich informacji. Zachowaj fakty, brakujące informacje oznacz jako do uzgodnienia.\n\n"+briefTemplate(fields))}>{busy ? "Przygotowuję…" : "Przygotuj zlecenie z AI"}</button><Link to="/find-talent">Otwórz formularz publikacji</Link></div>
   </section>;
 }
 function ReviewTool({supabase,user,busy,onReview,onNotice,deliveryId,conversationId}) {
