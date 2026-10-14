@@ -1,4 +1,4 @@
-/* IdeaHire P31 / Lucyna: narzędzia współpracy. Pliki są odczytywane lokalnie. */
+/* IdeaHire | Lucyna AI | P35 | Wiadomości, brief i analiza wybranego materiału. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, reviewSummary, suggestedCriteria } from "./LucynaCore";
