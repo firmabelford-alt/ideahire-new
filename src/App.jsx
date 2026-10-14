@@ -1,11 +1,390 @@
-/* IdeaHire | PACZKA 27 | 2026-10-10 | Pełny plik: src/App.jsx */
+/* IdeaHire | P36 | 2026-10-14 | Pełny plik: src/App.jsx | Scena startowa 3D */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "./App.css";
-import { HomePreviewMotion, CommissionStory, HomeStepCard, IdeaHireLogo, MarketIcon, helpCenterHref } from "./MarketUI";
+import { CommissionStory, HomeStepCard, IdeaHireLogo, MarketIcon, helpCenterHref } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
+import { useSitePreferences } from "./Preferences";
+
+const HOME_SCENE_VERTEX = `attribute vec2 aPosition;
+void main(){gl_Position=vec4(aPosition,0.0,1.0);}`;
+const HOME_SCENE_FRAGMENT = `precision highp float;
+uniform vec2 uResolution,uRotation;
+uniform float uTime,uIntro,uDark,uClassic,uRole,uCompact;
+const float PI=3.14159265;
+mat2 spin(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
+float rb(vec3 p,vec3 b,float r){vec3 q=abs(p)-b+r;return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0)-r;}
+float box2(vec2 p,vec2 b){vec2 q=abs(p)-b;return length(max(q,0.0))+min(max(q.x,q.y),0.0);}
+vec2 add(vec2 a,vec2 b){return a.x<b.x?a:b;}
+vec3 local(vec3 p){p.xz=spin(uRotation.x+0.54+smoothstep(0.0,1.0,uIntro))*p.xz;p.yz=spin(uRotation.y-0.22)*p.yz;return p;}
+float mark(vec2 p){
+ float i=box2(p+vec2(0.24,0.0),vec2(0.032,0.22));
+ i=min(i,box2(p+vec2(0.24,-0.22),vec2(0.09,0.025)));
+ i=min(i,box2(p+vec2(0.24,0.22),vec2(0.09,0.025)));
+ float h=min(box2(p-vec2(0.12,0.0),vec2(0.029,0.235)),box2(p-vec2(0.35,0.0),vec2(0.029,0.235)));
+ return min(i,min(h,box2(p-vec2(0.235,0.0),vec2(0.115,0.026))));
+}
+vec2 scene(vec3 p){
+ vec2 d=vec2(p.y+1.52,0.0);vec3 q=local(p);
+ float gap=(1.0-smoothstep(0.14,0.83,uIntro))*1.03,s=0.79+gap;
+ vec2 core=vec2(rb(q,vec3(0.55),0.13),1.0);
+ float frame=max(rb(q,vec3(0.84),0.10),-rb(q,vec3(0.765),0.08));
+ float holes=min(min(max(abs(q.x)-0.68,abs(q.y)-0.68),max(abs(q.x)-0.68,abs(q.z)-0.68)),max(abs(q.y)-0.68,abs(q.z)-0.68));
+ core=add(core,vec2(max(frame,-holes),2.0));
+ float panels=min(rb(vec3(q.xy,abs(q.z)-s),vec3(0.665,0.665,0.045),0.035),
+  min(rb(vec3(q.yz,abs(q.x)-s),vec3(0.665,0.665,0.045),0.035),rb(vec3(q.xz,abs(q.y)-s),vec3(0.665,0.665,0.045),0.035)));
+ core=add(core,vec2(panels,3.0));
+ float signs=min(max(mark(vec2(q.x*sign(q.z),q.y)),abs(abs(q.z)-(s+0.055))-0.012),max(mark(vec2(-q.z*sign(q.x),q.y)),abs(abs(q.x)-(s+0.055))-0.012));
+ core=add(core,vec2(signs,4.0));
+ vec3 bolts=vec3(abs(q.xy)-0.535,abs(q.z)-(s+0.052)),sideBolts=vec3(abs(q.zy)-0.535,abs(q.x)-(s+0.052));
+ core=add(core,vec2(min(length(vec3(bolts.xy,bolts.z*1.5)),length(vec3(sideBolts.xy,sideBolts.z*1.5)))-0.035,5.0));
+ float rail=max(rb(q,vec3(0.88),0.095),-rb(q,vec3(0.867),0.09));
+ core=add(core,vec2(max(rail,-holes),4.0));
+ vec3 ring=p;ring.yz=spin(0.44)*ring.yz;ring.xz=spin(-0.21)*ring.xz;
+ float halo=length(vec2(length(ring.xz)-1.53,ring.y))-0.011;
+ halo=max(halo,-sin(atan(ring.z,ring.x)*3.0+uTime*0.26)+0.24);
+ core=add(core,vec2(halo,4.0));
+ vec3 r2=p;r2.xy=spin(0.93)*r2.xy;
+ core=add(core,vec2(length(vec2(length(r2.xz)-1.69,r2.y))-0.006,2.0));
+ for(int i=0;i<6;i++){
+  float a=float(i)*PI/3.0+uTime*0.105;
+  vec3 n=p-vec3(cos(a)*1.56,sin(a*2.0)*0.19,sin(a)*1.56);n.xz=spin(a+0.4)*n.xz;
+  core=add(core,vec2(rb(n,vec3(0.062,0.075,0.062),0.017),mod(float(i),2.0)>0.5?4.0:2.0));
+ }
+ return add(d,core);
+}
+vec3 accent(){vec3 b=mix(vec3(0.055,0.27,0.90),vec3(0.18,0.58,1.0),uDark);return mix(b,mix(vec3(0.30),vec3(0.83,0.86,0.91),uDark),uClassic);}
+vec3 backdrop(vec2 uv){
+ vec3 b=mix(vec3(0.941,0.958,0.980),vec3(0.020,0.032,0.061),uDark);
+ b=mix(b,mix(vec3(0.953,0.950,0.940),vec3(0.042,0.043,0.045),uDark),uClassic);
+ return b+accent()*exp(-dot(uv-vec2(0.26,0.22),uv-vec2(0.26,0.22))*3.0)*mix(0.025,0.032,uDark);
+}
+void main(){
+ vec2 uv=(gl_FragCoord.xy-uResolution*0.5)/min(uResolution.x,uResolution.y);vec3 bg=backdrop(uv);
+ uv.y-=mix(0.025,mix(0.16,0.225,uCompact),smoothstep(0.66,1.0,uIntro));uv.x-=mix(0.0,0.045,smoothstep(0.66,1.0,uIntro));
+ vec3 ro=vec3(0.0,1.05,mix(9.3,mix(8.0,9.15,uCompact),smoothstep(0.16,0.94,uIntro))),target=vec3(0.0,-0.1,0.0);
+ vec3 forward=normalize(target-ro),right=normalize(cross(forward,vec3(0.0,1.0,0.0))),up=cross(right,forward);
+ vec3 rd=normalize(forward*1.55+right*uv.x+up*uv.y);float dist=0.0;vec2 hit=vec2(0.0);bool found=false;
+ for(int i=0;i<72;i++){hit=scene(ro+rd*dist);if(hit.x<0.0017){found=true;break;}dist+=hit.x*0.82;if(dist>15.0)break;}
+ vec3 color=bg;
+ if(found){
+  vec3 p=ro+rd*dist;vec2 e=vec2(0.002,0.0);
+  vec3 n=hit.y<0.5?vec3(0.0,1.0,0.0):normalize(vec3(scene(p+e.xyy).x-hit.x,scene(p+e.yxy).x-hit.x,scene(p+e.yyx).x-hit.x));
+  vec3 l=normalize(vec3(-0.6,1.4,2.0)),tint=accent();float dif=max(dot(n,l),0.0),rim=pow(1.0-max(dot(n,-rd),0.0),3.5);
+  float spec=pow(max(dot(n,normalize(l-rd)),0.0),45.0),ao=clamp(scene(p+n*0.14).x/0.14,0.22,1.0);
+  if(hit.y<0.5){
+   color=bg*(1.0-exp(-dot(p.xz,p.xz)*0.82)*mix(0.21,0.44,uDark));
+   vec2 grid=abs(fract(p.xz*0.72+0.5)-0.5);
+   float lines=1.0-smoothstep(0.003,0.007,min(grid.x,grid.y));
+   color=mix(color,tint,lines*exp(-length(p.xz)*0.28)*mix(0.055,0.11,uDark));
+   color=mix(color,bg,smoothstep(7.0,14.0,dist));
+  }else{
+   vec3 base=mix(vec3(0.35,0.42,0.51),vec3(0.21,0.27,0.36),uDark);
+   base=mix(base,vec3(dot(base,vec3(0.299,0.587,0.114))),uClassic);
+   if(hit.y<1.5)base=mix(vec3(0.035,0.07,0.12),vec3(0.02,0.04,0.07),uClassic);
+   if(hit.y>2.5&&hit.y<3.5){
+    vec3 q=local(p),an=abs(local(p+n*0.01)-q);
+    vec2 face=an.z>=max(an.x,an.y)?q.xy:(an.x>=an.y?q.yz:q.xz);
+    float inset=1.0-smoothstep(0.46,0.48,max(abs(face.x),abs(face.y)));
+    base=mix(base,base*0.66,inset*0.34);base=mix(base,tint,step(0.970,fract((face.x+face.y*0.28)*18.0))*inset*0.12);
+    float c=max(abs(face.x),abs(face.y));base+=tint*smoothstep(0.61,0.616,c)*(1.0-smoothstep(0.623,0.627,c))*0.45;
+   }
+   color=base*(0.33+dif*0.68)*ao+vec3(spec)*0.85+tint*rim*0.24;
+   color+=vec3(0.14,0.19,0.26)*pow(max(dot(n,normalize(vec3(1.0,0.4,-1.0))),0.0),2.0);
+   if(hit.y>3.5&&hit.y<4.5)color=tint*(0.72+0.16*sin(uTime*1.3+p.x*2.0)+uRole*0.09)+vec3(0.17)*dif+tint*rim*0.26;
+   if(hit.y>4.5)color=vec3(0.09,0.11,0.15)*(0.8+dif)+vec3(spec*0.75);
+  }
+ }
+ gl_FragColor=vec4(pow(max(color,0.0),vec3(0.90)),1.0);
+}`;
+
+const HOME_SCENE_STYLES = `
+#root#root#root .ihx-hero{--ihx-bg:#f3f6fb;--ihx-fg:#172538;--ihx-muted:#53627a;--ihx-accent:#185bd8;--ihx-line:rgba(30,65,112,.15);--ihx-chip:rgba(248,250,255,.84);--ihx-button:#185bd8;--ihx-button-fg:#fff;position:relative!important;width:min(100% - 40px,860px,max(640px,100svh - 150px))!important;aspect-ratio:1!important;min-height:0!important;margin:34px auto 54px!important;display:block!important;isolation:isolate;overflow:hidden;border:1px solid var(--ihx-line)!important;border-radius:28px!important;background:var(--ihx-bg)!important;color:var(--ihx-fg)!important;box-shadow:0 22px 70px rgba(25,47,88,.07)!important;}
+#root#root#root .ihx-hero[data-dark="true"]{--ihx-bg:#090f1c;--ihx-fg:#edf2fb;--ihx-muted:#acb9cf;--ihx-line:rgba(145,180,235,.17);--ihx-chip:rgba(12,21,38,.8);--ihx-accent:#82b4ff;--ihx-button:#c4dcff;--ihx-button-fg:#10264a;box-shadow:0 24px 74px rgba(0,0,0,.2)!important;}
+#root#root#root .ihx-hero[data-classic="true"]{--ihx-bg:#f4f3f0;--ihx-fg:#232421;--ihx-muted:#62635c;--ihx-accent:#35362f;--ihx-line:rgba(35,36,33,.14);--ihx-chip:rgba(250,249,246,.85);--ihx-button:#242520;--ihx-button-fg:#fff;}
+#root#root#root .ihx-hero[data-classic="true"][data-dark="true"]{--ihx-bg:#111211;--ihx-fg:#f0efe9;--ihx-muted:#b5b6ae;--ihx-accent:#ddded6;--ihx-line:rgba(225,225,215,.16);--ihx-chip:rgba(21,22,20,.86);--ihx-button:#e4e5dc;--ihx-button-fg:#22231f;}
+#root#root#root .ihx-hero *,#root#root#root .ihx-hero *::before,#root#root#root .ihx-hero *::after{box-sizing:border-box;}
+#root#root#root .ihx-canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;touch-action:pan-y;cursor:grab;opacity:1;transition:opacity .5s ease;z-index:1;}
+#root#root#root .ihx-canvas:active{cursor:grabbing;}
+#root#root#root .ihx-canvas:focus-visible{outline:2px solid var(--ihx-accent);outline-offset:-4px;}
+#root#root#root .ihx-hero[data-gpu="false"] .ihx-canvas{opacity:0;pointer-events:none;}
+#root#root#root .ihx-bottom-shade{position:absolute;inset:45% 0 0;z-index:2;pointer-events:none;background:linear-gradient(180deg,transparent 0%,var(--ihx-bg) 81%);opacity:.92;}
+#root#root#root .ihx-topline{position:absolute;inset:25px 28px auto;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+#root#root#root .ihx-wordmark{display:flex;align-items:center;gap:8px;min-width:0;font-size:12px!important;font-weight:650!important;letter-spacing:.06em!important;color:var(--ihx-muted)!important;line-height:1.3!important;}
+#root#root#root .ihx-wordmark svg{width:18px;height:18px;flex:none;stroke:var(--ihx-accent);}
+#root#root#root .ihx-controls{display:flex;align-items:center;gap:6px;flex:none;}
+#root#root#root .ihx-control{appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;width:auto!important;min-width:34px!important;height:34px!important;padding:0 9px!important;border:1px solid var(--ihx-line)!important;border-radius:9px!important;background:var(--ihx-chip)!important;backdrop-filter:blur(12px);color:var(--ihx-fg)!important;font:inherit!important;font-size:11px!important;font-weight:550!important;line-height:1!important;cursor:pointer;box-shadow:none!important;transform:none!important;transition:background .2s ease,border-color .2s ease!important;white-space:nowrap;}
+#root#root#root .ihx-control svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.65;flex:none;}
+#root#root#root .ihx-control:hover{border-color:var(--ihx-accent)!important;}
+#root#root#root .ihx-control:focus-visible,#root#root#root .ihx-cta:focus-visible,#root#root#root .ihx-live:focus-visible{outline:2px solid var(--ihx-accent)!important;outline-offset:4px!important;}
+#root#root#root .ihx-phase{position:absolute;left:30px;right:30px;bottom:35px;display:flex;align-items:center;justify-content:space-between;gap:18px;z-index:4;transition:opacity .4s ease,transform .4s ease;pointer-events:none;}
+#root#root#root .ihx-phase-label{color:var(--ihx-fg)!important;font-size:15px!important;letter-spacing:.04em!important;font-weight:550!important;line-height:1.4!important;}
+#root#root#root .ihx-phase-index{margin-right:13px;color:var(--ihx-muted);font-variant-numeric:tabular-nums;font-size:11px!important;}
+#root#root#root .ihx-progress{display:flex;gap:5px;width:76px;flex:none;}
+#root#root#root .ihx-progress i{height:2px;flex:1;background:var(--ihx-line);border-radius:2px;transition:background .4s ease;}
+#root#root#root .ihx-progress i.is-current{background:var(--ihx-accent);}
+#root#root#root .ihx-hero[data-ready="true"] .ihx-phase{opacity:0;transform:translateY(8px);}
+#root#root#root .ihx-copy{position:absolute;left:36px;right:36px;bottom:35px;z-index:4;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .65s ease,transform .65s cubic-bezier(.2,.7,.2,1);}
+#root#root#root .ihx-hero[data-ready="true"] .ihx-copy{opacity:1;transform:none;pointer-events:auto;}
+#root#root#root .ihx-eyebrow{margin:0 0 10px!important;display:block!important;font-size:10px!important;font-weight:650!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:var(--ihx-muted)!important;line-height:1.4!important;}
+#root#root#root .ihx-title{margin:0!important;padding:0!important;display:block!important;font-size:clamp(25px,3.35vw,43px)!important;font-weight:650!important;letter-spacing:-.045em!important;line-height:1.08!important;color:var(--ihx-fg)!important;max-width:660px!important;text-wrap:balance!important;word-break:normal!important;overflow-wrap:normal!important;}
+#root#root#root .ihx-title>span{display:block!important;color:var(--ihx-fg)!important;}
+#root#root#root .ihx-title>span:last-child{font-weight:450!important;}
+#root#root#root .ihx-description{margin:13px 0 0!important;color:var(--ihx-muted)!important;font-size:13px!important;line-height:1.55!important;max-width:490px!important;}
+#root#root#root .ihx-actions{display:flex!important;align-items:stretch!important;gap:10px!important;margin:21px 0 0!important;}
+#root#root#root .ihx-cta{display:inline-flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;min-height:47px!important;min-width:0!important;padding:0 18px!important;border:1px solid var(--ihx-line)!important;border-radius:10px!important;font:inherit!important;font-size:13px!important;font-weight:600!important;text-decoration:none!important;color:var(--ihx-fg)!important;background:var(--ihx-chip)!important;box-shadow:none!important;transform:none!important;transition:background .2s ease,border-color .2s ease!important;line-height:1.25!important;}
+#root#root#root .ihx-cta:first-child{background:var(--ihx-button)!important;border-color:var(--ihx-button)!important;color:var(--ihx-button-fg)!important;}
+#root#root#root .ihx-cta:hover{border-color:var(--ihx-accent)!important;}
+#root#root#root .ihx-cta svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;transition:transform .2s ease!important;}
+#root#root#root .ihx-cta:hover svg{transform:translate(2px,-2px);}
+#root#root#root .ihx-explore{position:absolute;z-index:3;right:29px;top:56%;display:flex;align-items:center;gap:7px;color:var(--ihx-muted)!important;font-size:10px!important;letter-spacing:.02em;pointer-events:none;opacity:0;transition:opacity .6s ease;}
+#root#root#root .ihx-explore svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.3;}
+#root#root#root .ihx-hero[data-ready="true"] .ihx-explore{opacity:.85;}
+#root#root#root .ihx-live{position:absolute;z-index:4;left:28px;right:28px;top:58px;display:flex;gap:9px;align-items:center;max-width:430px;color:var(--ihx-muted)!important;text-decoration:none!important;font-size:10px!important;line-height:1.5!important;opacity:0;pointer-events:none;transition:opacity .5s ease;overflow:hidden;}
+#root#root#root .ihx-hero[data-ready="true"] .ihx-live{opacity:1;pointer-events:auto;}
+#root#root#root .ihx-live i{width:5px;height:5px;border-radius:50%;background:var(--ihx-accent);flex:none;}
+#root#root#root .ihx-live>span{white-space:nowrap;flex:none;}
+#root#root#root .ihx-live strong{font:inherit!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+#root#root#root .ihx-sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;}
+#root#root#root .ihx-fallback{position:absolute;inset:0;z-index:0;perspective:800px;background:radial-gradient(ellipse at 62% 32%,color-mix(in srgb,var(--ihx-accent) 7%,transparent),transparent 65%),var(--ihx-bg);}
+#root#root#root .ihx-fallback-cube{position:absolute;left:50%;top:29%;width:150px;height:150px;margin-left:-75px;transform-style:preserve-3d;transform:rotateX(-18deg) rotateY(28deg);animation:ihx-turn 32s linear infinite;}
+#root#root#root .ihx-face{position:absolute;inset:0;display:grid;place-items:center;border:1px solid var(--ihx-line);border-radius:15px;background:linear-gradient(135deg,var(--ihx-chip),var(--ihx-bg));color:var(--ihx-accent);font-size:32px;font-weight:600;backface-visibility:hidden;box-shadow:inset 0 0 0 9px var(--ihx-bg),inset 0 0 0 10px var(--ihx-line);}
+#root#root#root .ihx-face:nth-child(1){transform:translateZ(75px);}#root#root#root .ihx-face:nth-child(2){transform:rotateY(180deg) translateZ(75px);}
+#root#root#root .ihx-face:nth-child(3){transform:rotateY(90deg) translateZ(75px);}#root#root#root .ihx-face:nth-child(4){transform:rotateY(-90deg) translateZ(75px);}
+#root#root#root .ihx-face:nth-child(5){transform:rotateX(90deg) translateZ(75px);}#root#root#root .ihx-face:nth-child(6){transform:rotateX(-90deg) translateZ(75px);}
+#root#root#root .ihx-hero[data-gpu="true"] .ihx-fallback{visibility:hidden;}
+#root#root#root .ihx-hero[data-paused="true"] .ihx-fallback-cube{animation-play-state:paused;}
+@keyframes ihx-turn{from{transform:rotateX(-18deg) rotateY(28deg);}to{transform:rotateX(-18deg) rotateY(388deg);}}
+@media(max-width:640px){
+ #root#root#root .ihx-hero{width:calc(100% - 28px)!important;max-width:560px!important;margin:18px auto 32px!important;border-radius:20px!important;}
+ #root#root#root .ihx-topline{inset:17px 18px auto;gap:9px;}
+ #root#root#root .ihx-wordmark{font-size:10px!important;letter-spacing:.02em!important;}
+ #root#root#root .ihx-wordmark svg{width:16px;height:16px;}
+ #root#root#root .ihx-copy{left:23px;right:23px;bottom:23px;}
+ #root#root#root .ihx-title{font-size:clamp(24px,6.4vw,34px)!important;max-width:100%!important;}
+ #root#root#root .ihx-description{font-size:12px!important;line-height:1.4!important;margin-top:9px!important;}
+ #root#root#root .ihx-actions{margin-top:15px!important;gap:8px!important;}
+ #root#root#root .ihx-cta{flex:1!important;padding:0 12px!important;gap:7px!important;font-size:12px!important;min-height:44px!important;}
+ #root#root#root .ihx-cta svg{width:14px;height:14px;}
+ #root#root#root .ihx-eyebrow{font-size:9px!important;margin-bottom:7px!important;letter-spacing:.09em!important;}
+ #root#root#root .ihx-phase{left:23px;right:23px;bottom:25px;}
+ #root#root#root .ihx-explore{right:22px;top:48%;font-size:9px!important;}
+ #root#root#root .ihx-live{left:18px;right:18px;top:48px;font-size:9px!important;}
+}
+@media(max-width:440px){
+ #root#root#root .ihx-hero{width:calc(100% - 20px)!important;border-radius:17px!important;}
+ #root#root#root .ihx-topline{inset:13px 14px auto;}
+ #root#root#root .ihx-control{height:30px!important;min-width:30px!important;padding:0 6px!important;font-size:10px!important;}
+ #root#root#root .ihx-control svg{width:13px;height:13px;}
+ #root#root#root .ihx-copy{left:19px;right:19px;bottom:18px;}
+ #root#root#root .ihx-description{display:none!important;}
+ #root#root#root .ihx-title{font-size:clamp(22px,6.3vw,28px)!important;letter-spacing:-.04em!important;}
+ #root#root#root .ihx-actions{margin-top:12px!important;}
+ #root#root#root .ihx-cta{font-size:11px!important;padding:0 10px!important;min-height:43px!important;}
+ #root#root#root .ihx-explore{top:52%;right:18px;}
+ #root#root#root .ihx-live{max-width:250px;}
+ #root#root#root .ihx-live strong{display:none!important;}
+ #root#root#root .ihx-fallback-cube{width:112px;height:112px;margin-left:-56px;top:24%;}
+ #root#root#root .ihx-face:nth-child(1){transform:translateZ(56px);}#root#root#root .ihx-face:nth-child(2){transform:rotateY(180deg) translateZ(56px);}
+ #root#root#root .ihx-face:nth-child(3){transform:rotateY(90deg) translateZ(56px);}#root#root#root .ihx-face:nth-child(4){transform:rotateY(-90deg) translateZ(56px);}
+ #root#root#root .ihx-face:nth-child(5){transform:rotateX(90deg) translateZ(56px);}#root#root#root .ihx-face:nth-child(6){transform:rotateX(-90deg) translateZ(56px);}
+}
+@media(prefers-reduced-motion:reduce){#root#root#root .ihx-hero *,#root#root#root .ihx-hero *::before,#root#root#root .ihx-hero *::after{animation:none!important;transition:none!important;}}
+@media print{#root#root#root .ihx-canvas,#root#root#root .ihx-controls,#root#root#root .ihx-explore{display:none!important;}#root#root#root .ihx-copy{opacity:1;transform:none;position:relative;padding:24px;}#root#root#root .ihx-hero{aspect-ratio:auto!important;}}
+`;
+
+/* IdeaHire P36 — scena startowa bez dodatkowych zaleznosci. */
+const HOME_INTRO_SEEN = new Set();
+const HOME_INTRO_DURATION = 5.2;
+const HOME_SCENE_COPY = {
+ pl:{eyebrow:"Od pomysłu do realizacji",title:"Masz pomysł.",subtitle:"Znajdź kogoś, kto go zrealizuje.",
+ description:"Połącz swój pomysł z ludźmi, którzy potrafią nadać mu kształt.",
+ talent:"Znajdź wykonawcę",jobs:"Znajdź zlecenie",skip:"Pomiń wstęp",replay:"Odtwórz wstęp",
+ pause:"Zatrzymaj animację",resume:"Wznów animację",rotate:"Obróć obiekt projektu",
+ help:"Przeciągnij, aby obrócić. Możesz też użyć strzałek na klawiaturze. Home przywraca widok.",
+ drag:"Przeciągnij i odkryj",live:"Nowe w IdeaHire",browse:"Odkryj aktualne zlecenia",
+ phases:["Pomysł","Możliwości","Połączenie","Twój następny krok"],region:"Od pomysłu do współpracy w IdeaHire"},
+ en:{eyebrow:"From idea to reality",title:"Have an idea?",subtitle:"Find someone who can bring it to life.",
+ description:"Connect your idea with people who can give it shape.",
+ talent:"Find a freelancer",jobs:"Find a project",skip:"Skip intro",replay:"Replay intro",
+ pause:"Pause animation",resume:"Resume animation",rotate:"Rotate the project object",
+ help:"Drag to rotate. You can also use the arrow keys. Home resets the view.",
+ drag:"Drag to explore",live:"New on IdeaHire",browse:"Explore current projects",
+ phases:["The idea","Possibilities","Connection","Your next step"],region:"From idea to collaboration on IdeaHire"}
+};
+function homeReducedMotion(){return typeof window!=="undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;}
+function startHomeScene(canvas,state,onPhase,onComplete,onFailure,onFirstFrame){
+ let gl,program,buffer,vertex,fragment,frame=0,disposed=false,observer,resizeObserver,lastFrame=0,visible=true,sizeDirty=true;
+ const listeners=[];
+ const listen=(node,type,handler,options)=>{node.addEventListener(type,handler,options);listeners.push(()=>node.removeEventListener(type,handler,options));};
+ const destroy=()=>{
+  if(disposed)return;disposed=true;cancelAnimationFrame(frame);
+  observer?.disconnect();resizeObserver?.disconnect();listeners.forEach(remove=>remove());
+  if(gl&&!gl.isContextLost()){if(buffer)gl.deleteBuffer(buffer);if(program)gl.deleteProgram(program);if(vertex)gl.deleteShader(vertex);if(fragment)gl.deleteShader(fragment);}
+ };
+ try{
+  gl=canvas.getContext("webgl",{alpha:false,antialias:false,depth:false,stencil:false,powerPreference:"low-power"});
+  if(!gl||gl.isContextLost())throw new Error("scene_context");
+  const shader=(type,source)=>{
+   const value=gl.createShader(type);if(!value)throw new Error("scene_shader");
+   gl.shaderSource(value,source);gl.compileShader(value);
+   if(!gl.getShaderParameter(value,gl.COMPILE_STATUS)){gl.deleteShader(value);throw new Error("scene_shader");}
+   return value;
+  };
+  vertex=shader(gl.VERTEX_SHADER,HOME_SCENE_VERTEX);
+  const precision=gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER,gl.HIGH_FLOAT);
+  fragment=shader(gl.FRAGMENT_SHADER,precision?.precision?HOME_SCENE_FRAGMENT:HOME_SCENE_FRAGMENT.replace("precision highp float;","precision mediump float;"));
+  program=gl.createProgram();if(!program)throw new Error("scene_program");
+  gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);
+  if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error("scene_program");
+  gl.useProgram(program);buffer=gl.createBuffer();if(!buffer)throw new Error("scene_buffer");
+  gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const position=gl.getAttribLocation(program,"aPosition");gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
+  const uniforms=Object.fromEntries(["uResolution","uRotation","uTime","uIntro","uDark","uClassic","uRole","uCompact"].map(key=>[key,gl.getUniformLocation(program,key)]));
+  let completed=state.current.intro>=HOME_INTRO_DURATION,previousPhase=-1,previousActive=false,painted=false,renderScale=1,slowFrames=0;
+  const schedule=()=>{if(!disposed&&!frame&&visible&&!document.hidden)frame=requestAnimationFrame(draw);};
+  function draw(now){
+   frame=0;if(disposed||!visible||document.hidden)return;
+   const s=state.current,active=!s.paused&&!s.reduced,compact=canvas.clientWidth<520,limit=1000/(compact?24:30);
+   if(active&&!s.dirty&&lastFrame&&now-lastFrame<limit){schedule();return;}
+   const dt=lastFrame&&previousActive&&active?Math.max(0,(now-lastFrame)/1000):0;lastFrame=now;previousActive=active;
+   if(dt>0.085&&active){slowFrames++;}else slowFrames=Math.max(0,slowFrames-1);
+   if(slowFrames>=4&&renderScale>0.55){renderScale=Math.max(0.55,renderScale*0.8);sizeDirty=true;slowFrames=0;}
+   if(active){s.time+=Math.min(dt,0.12);if(s.intro<HOME_INTRO_DURATION)s.intro+=dt;}
+   if(s.reduced)s.intro=HOME_INTRO_DURATION;
+   if(sizeDirty){
+    const r=canvas.getBoundingClientRect(),ratio=Math.min(window.devicePixelRatio||1,compact?1.2:1.25);
+    const w=Math.max(1,Math.round(Math.min(r.width*ratio,compact?480:780)*renderScale)),h=Math.max(1,Math.round(r.height*(w/Math.max(r.width,1))));
+    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+    gl.viewport(0,0,w,h);sizeDirty=false;
+   }
+   const progress=Math.min(1,s.intro/HOME_INTRO_DURATION);
+   gl.uniform2f(uniforms.uResolution,canvas.width,canvas.height);
+   gl.uniform2f(uniforms.uRotation,s.yaw+s.time*0.065,s.pitch);
+   gl.uniform1f(uniforms.uTime,s.time);gl.uniform1f(uniforms.uIntro,progress);
+   gl.uniform1f(uniforms.uDark,s.dark?1:0);gl.uniform1f(uniforms.uClassic,s.classic?1:0);gl.uniform1f(uniforms.uRole,s.role);
+   gl.uniform1f(uniforms.uCompact,canvas.clientWidth<520?1:0);
+   gl.drawArrays(gl.TRIANGLES,0,3);s.dirty=false;
+   if(!painted){painted=true;onFirstFrame();}
+   const phase=progress<0.24?0:progress<0.57?1:progress<1?2:3;
+   if(phase!==previousPhase){previousPhase=phase;onPhase(phase);}
+   if(progress<1)completed=false;
+   if(progress>=1&&!completed){completed=true;onComplete();}
+   if(active)schedule();
+  }
+  const resize=()=>{renderScale=1;slowFrames=0;sizeDirty=true;state.current.dirty=true;schedule();};
+  if(typeof ResizeObserver!=="undefined"){resizeObserver=new ResizeObserver(resize);resizeObserver.observe(canvas);}
+  else listen(window,"resize",resize);
+  if(typeof IntersectionObserver!=="undefined"){
+   observer=new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;lastFrame=0;
+    if(visible)schedule();else{cancelAnimationFrame(frame);frame=0;}},{rootMargin:"80px"});observer.observe(canvas);
+  }
+  listen(document,"visibilitychange",()=>{lastFrame=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;}else schedule();});
+  listen(canvas,"webglcontextlost",event=>{event.preventDefault();destroy();onFailure();});
+  schedule();return{destroy,wake:()=>{state.current.dirty=true;schedule();}};
+ }catch{destroy();onFailure();return{destroy,wake:()=>{}};}
+}
+function SceneIcon({kind}){
+ const paths={mark:"M5 5h4v14H5zM13 5h3v6h3v8h-3v-5h-3z",arrow:"M6 18 18 6M6 6h12v12",
+ replay:"M4 9a8 8 0 1 1 0 6M4 4v5h5",pause:"M9 6v12M15 6v12",play:"m8 5 11 7-11 7z",
+ move:"M12 3v18M3 12h18m-13-5-5 5 5 5m8-10 5 5-5 5"};
+ return <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.arrow}/></svg>;
+}
+export function IdeaHireCinematicHero({job,userKey="guest"}){
+ const site=useSitePreferences();
+ const [reduced,setReduced]=useState(homeReducedMotion);
+ const preferences={dark:site.theme==="dark",classic:site.template==="classic",language:site.language==="en"?"en":"pl",reduced};
+ const [ready,setReady]=useState(()=>HOME_INTRO_SEEN.has(userKey)||homeReducedMotion());
+ const [phase,setPhase]=useState(0),[paused,setPaused]=useState(false),[gpu,setGpu]=useState(false);
+ const canvasRef=useRef(null),engineRef=useRef(null),dragRef=useRef(null),keyRef=useRef(userKey);
+ const motion=useRef({intro:ready?HOME_INTRO_DURATION:0,time:0,yaw:0,pitch:0.08,role:0,paused:false,
+  reduced:preferences.reduced,dark:preferences.dark,classic:preferences.classic,dirty:true});
+ const text=HOME_SCENE_COPY[preferences.language];
+ const realJob=job?.id&&/^[0-9a-f-]{36}$/i.test(String(job.id))?job:null;
+ const complete=()=>{HOME_INTRO_SEEN.add(keyRef.current);setReady(true);setPhase(3);};
+ useLayoutEffect(()=>{keyRef.current=userKey;},[userKey]);
+ useEffect(()=>{
+  const media=window.matchMedia("(prefers-reduced-motion: reduce)");
+  const update=()=>setReduced(media.matches);update();media.addEventListener?.("change",update);
+  return()=>{media.removeEventListener?.("change",update);};
+ },[]);
+ useLayoutEffect(()=>{
+  Object.assign(motion.current,{dark:preferences.dark,classic:preferences.classic,reduced:preferences.reduced,paused});
+  if(preferences.reduced){motion.current.intro=HOME_INTRO_DURATION;complete();}
+  engineRef.current?.wake();
+ },[site.theme,site.template,site.language,reduced,paused]);
+ useEffect(()=>{
+  const canvas=canvasRef.current;if(!canvas)return undefined;
+  const engine=startHomeScene(canvas,motion,setPhase,complete,()=>{setGpu(false);complete();},()=>setGpu(true));
+  engineRef.current=engine;return()=>{engine.destroy();engineRef.current=null;};
+ },[]);
+ const wake=()=>engineRef.current?.wake();
+ function skip(){motion.current.intro=HOME_INTRO_DURATION;complete();wake();}
+ function replay(){
+  if(preferences.reduced||!gpu){skip();return;}
+  Object.assign(motion.current,{intro:0,time:0,yaw:0,pitch:0.08});setPaused(false);setPhase(0);setReady(false);wake();
+ }
+ function pointDown(event){
+  if(event.button!==0||!ready)return;dragRef.current={id:event.pointerId,x:event.clientX,y:event.clientY};
+  try{event.currentTarget.setPointerCapture(event.pointerId);}catch{/* Gest systemowy moze anulowac dotyk. */}
+ }
+ function pointMove(event){
+  const d=dragRef.current;if(!d||d.id!==event.pointerId)return;
+  motion.current.yaw+=(event.clientX-d.x)*0.009;
+  motion.current.pitch=Math.max(-1,Math.min(1,motion.current.pitch+(event.clientY-d.y)*0.006));
+  d.x=event.clientX;d.y=event.clientY;wake();
+ }
+ function pointUp(event){
+  if(dragRef.current?.id!==event.pointerId)return;dragRef.current=null;
+  try{event.currentTarget.releasePointerCapture(event.pointerId);}catch{/* Capture mogl juz wygasnac. */}
+ }
+ function keyRotate(event){
+  if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home"].includes(event.key))return;event.preventDefault();
+  if(event.key==="Home"){motion.current.yaw=0;motion.current.pitch=0.08;}
+  else if(event.key==="ArrowLeft")motion.current.yaw-=0.16;
+  else if(event.key==="ArrowRight")motion.current.yaw+=0.16;
+  else motion.current.pitch=Math.max(-1,Math.min(1,motion.current.pitch+(event.key==="ArrowUp"?-0.12:0.12)));
+  wake();
+ }
+ function role(value){motion.current.role=value;wake();}
+ return <section className="ihx-hero" data-cinematic-version="P36-2026-10-14" data-no-translate="true"
+  data-dark={preferences.dark} data-classic={preferences.classic} data-ready={ready} data-gpu={gpu}
+  data-paused={paused||preferences.reduced} aria-label={text.region}>
+  <style>{HOME_SCENE_STYLES}</style>
+  <div className="ihx-fallback" aria-hidden="true"><div className="ihx-fallback-cube">
+   {Array.from({length:6},(_,i)=><div className="ihx-face" key={i}>IH</div>)}</div></div>
+  <canvas ref={canvasRef} className="ihx-canvas" role="img" aria-label={text.rotate} aria-describedby="ihx-rotation-help"
+   tabIndex={ready&&gpu?0:-1} onPointerDown={pointDown} onPointerMove={pointMove} onPointerUp={pointUp}
+   onPointerCancel={pointUp} onLostPointerCapture={()=>{dragRef.current=null;}} onKeyDown={keyRotate}/>
+  <p id="ihx-rotation-help" className="ihx-sr">{text.help}</p><div className="ihx-bottom-shade" aria-hidden="true"/>
+  <div className="ihx-topline"><span className="ihx-wordmark"><SceneIcon kind="mark"/>IDEAHIRE · STUDIO</span>
+   <div className="ihx-controls">
+    <button className="ihx-control" type="button" onClick={ready?replay:skip} aria-label={ready?text.replay:text.skip} title={ready?text.replay:text.skip}>
+     <SceneIcon kind={ready?"replay":"arrow"}/>{!ready&&<span>{text.skip}</span>}</button>
+    <button className="ihx-control" type="button" onClick={()=>setPaused(value=>!value)} aria-label={paused?text.resume:text.pause}
+     title={paused?text.resume:text.pause} aria-pressed={paused} disabled={preferences.reduced}><SceneIcon kind={paused?"play":"pause"}/></button>
+   </div>
+  </div>
+  <div className="ihx-phase" aria-hidden="true"><span className="ihx-phase-label"><span className="ihx-phase-index">0{Math.min(phase,2)+1}</span>{text.phases[phase]}</span>
+   <span className="ihx-progress">{[0,1,2].map(i=><i className={phase>=i?"is-current":""} key={i}/>)}</span></div>
+  <span className="ihx-explore" aria-hidden="true"><SceneIcon kind="move"/>{text.drag}</span>
+  <Link className="ihx-live" to="/jobs" tabIndex={ready?0:-1} aria-hidden={!ready} aria-label={text.browse}>
+   <i aria-hidden="true"/><span>{realJob?text.live:text.browse}</span>{realJob&&<strong title={realJob.title}>{String(realJob.title||"").slice(0,160)}</strong>}</Link>
+  <div className="ihx-copy" inert={!ready?"":undefined} aria-hidden={!ready}>
+   <span className="ihx-eyebrow">{text.eyebrow}</span><h1 className="ihx-title"><span>{text.title}</span><span>{text.subtitle}</span></h1>
+   <p className="ihx-description">{text.description}</p>
+   <div className="ihx-actions">
+    <Link className="ihx-cta" to="/find-talent" onPointerEnter={()=>role(1)} onPointerLeave={()=>role(0)} onFocus={()=>role(1)} onBlur={()=>role(0)}>
+     {text.talent}<SceneIcon kind="arrow"/></Link>
+    <Link className="ihx-cta" to="/jobs" onPointerEnter={()=>role(2)} onPointerLeave={()=>role(0)} onFocus={()=>role(2)} onBlur={()=>role(0)}>
+     {text.jobs}<SceneIcon kind="arrow"/></Link>
+   </div>
+  </div>
+ </section>;
+}
+
 
 const categories = [
   { value: "Programowanie", label: "Strony, aplikacje i IT" },
@@ -985,103 +1364,7 @@ function App({ session, loading, categoryGroups = [] }) {
       </header>
 
       <main>
-        <section className="hero">
-          <div className="hero-content">
-            <div className="eyebrow">
-              <span className="eyebrow-dot" />
-              Miejsce, gdzie pomysły spotykają ludzi
-            </div>
-
-            <h1 className="ih-hero-title">
-              <span className="ih-hero-line">Masz pomysł.</span>{" "}
-              <span className="ih-hero-line">Znajdź kogoś,</span>{" "}
-              <span className="ih-hero-line">kto go zrealizuje.</span>
-            </h1>
-
-            <p className="hero-text">
-              IdeaHire łączy osoby szukające wykonawców z ludźmi,
-              którzy potrafią zamienić pomysł w gotowy projekt.
-            </p>
-
-            <div className="hero-actions">
-              <Link
-                className="btn btn-dark btn-large"
-                to="/find-talent"
-              >
-                Znajdź wykonawcę <span></span>
-              </Link>
-
-              <Link
-                className="btn btn-outline btn-large"
-                to="/jobs"
-              >
-                Znajdź zlecenie
-              </Link>
-            </div>
-
-            <div className="hero-stats">
-              <div>
-                <strong>Prosto</strong>
-                <span>bez zbędnych kroków</span>
-              </div>
-
-              <div>
-                <strong>Szybko</strong>
-                <span>znajdź odpowiednią osobę</span>
-              </div>
-
-              <div>
-                <strong>Skutecznie</strong>
-                <span>realizuj swoje projekty</span>
-              </div>
-            </div>
-          </div>
-
-          <HomePreviewMotion>
-            <div className="floating-card card-small card-top">
-              <span className="mini-icon">✦</span>
-
-              <div>
-                <strong>Najnowsze zlecenia</strong>
-                <span title={nextJob.title}>{nextJob.title}</span>
-              </div>
-            </div>
-
-            <div
-              className="floating-card card-main rotating-job-card"
-              key={activeJob.id}
-            >
-              <div className="card-header">
-                <span>Aktualne zlecenie</span>
-                <span className="live-dot" aria-hidden="true" />
-              </div>
-
-              <h3 title={activeJob.title}>{activeJob.title}</h3>
-
-              <p>
-                {activeJob.description}
-              </p>
-
-              <div className="card-meta">
-                <span>
-                  {formatBudget(activeJob.budget)}
-                </span>
-                <span>{getCategoryLabel(activeJob.category)}</span>
-              </div>
-            </div>
-
-            <div className="floating-card card-small card-bottom">
-              <span className="check-icon" aria-hidden="true">↗</span>
-
-              <div>
-                <strong>Kolejne zlecenie</strong>
-                <span title={followingJob.title}>{followingJob.title}</span>
-              </div>
-            </div>
-
-            <div className="visual-glow" />
-          </HomePreviewMotion>
-        </section>
+        <IdeaHireCinematicHero job={activeJob} userKey={session?.user?.id || "guest"} />
 
         <HomeDemoReviews />
 
