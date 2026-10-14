@@ -25,7 +25,7 @@ const ERRORS = {
   migration:"Obsługa IdeaHire musi dokończyć aktualizację modułu AI. Spróbuj ponownie po jej zakończeniu.",
   version:"Obsługa IdeaHire musi ujednolicić wersję czatu i połączenia AI. Centrum pomocy pozostaje dostępne.",
   user_limit: "Dzisiejszy limit generowania AI został wykorzystany. Pomoc IdeaHire i narzędzia lokalne pozostają dostępne.",
-  global_limit: "Wspólna darmowa pula AI została dziś wykorzystana. Nadal możesz pytać o IdeaHire i korzystać z narzędzi lokalnych.",
+  global_limit: "Wspólna darmowa pula AI nie wystarcza teraz na kolejną odpowiedź. Spróbuj później; instrukcje IdeaHire i narzędzia lokalne nadal działają.",
   busy: "Lucyna obsługuje teraz inne rozmowy. Spróbuj ponownie za chwilę.",
   cooldown: "Poczekaj kilka sekund przed kolejną wiadomością.",
   duplicate: "To żądanie zostało już przyjęte. Poczekaj na wynik albo wyślij nowe pytanie.",
@@ -672,7 +672,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
                 : <button className="lu-send" type="submit" disabled={!draft.trim() || !memory.ready || deleting} aria-label="Wyślij wiadomość do Lucyny AI"><Icon name="send" /></button>}
             </form>
             <div className="lu-composer-meta"><span>Lucyna AI może się mylić. Sprawdź ważne informacje.</span>
-              <span>{status.loading ? "Sprawdzam pulę AI…" : status.remaining == null ? "Darmowa pula AI" : status.remaining + " / " + (status.limit || 20) + " prób AI na dziś"}{draft.length > 4800 ? " · " + draft.length + "/6000" : ""}</span></div>
+              <span>{status.loading ? "Sprawdzam pulę AI…" : status.remaining == null ? "Darmowa pula AI" : status.remaining + " / " + (status.limit || 50) + " prób AI na dziś"}{draft.length > 4800 ? " · " + draft.length + "/6000" : ""}</span></div>
           </div>
         </main>
       </div>
@@ -686,7 +686,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
             <li>Jeśli włączysz zapis, historia pozostaje na Twoim koncie w Supabase do 30 dni od ostatniego zapisu. Możesz ją pobrać i usunąć.</li>
             <li>Wybrany plik nie jest przechowywany w historii. Odpowiedź może zawierać cytaty z materiału.</li>
             <li>Nie wklejaj haseł, numerów dokumentów, danych wrażliwych ani materiałów poufnych.</li>
-            <li>Do 20 prób generowania dziennie na konto w ramach wspólnej darmowej puli. Także przerwana lub nieudana próba może zużyć limit. Reset o północy UTC.</li>
+            <li>Do 50 prób generowania dziennie na konto w ramach wspólnej darmowej puli. Błędy bez odpowiedzi są zwracane do osobistej puli. Przerwane generowanie może zużyć limit. Reset o północy UTC.</li>
             <li>Prognoza pochodzi z MET Norway, dla centrum wskazanego miasta. Nie korzystamy z GPS urządzenia.</li>
             <li>Ty określasz potrzebę i podejmujesz decyzje. Lucyna AI nie wysyła wiadomości, nie akceptuje prac i nie wykonuje płatności.</li></ul>
           <label className="lu-check"><input type="checkbox" disabled={memory.ackSaving} checked={memory.acknowledged ? memory.historyEnabled : historyChoice}
