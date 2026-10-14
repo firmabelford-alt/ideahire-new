@@ -1,6 +1,7 @@
-/* IdeaHire P31 / Lucyna: funkcje lokalne. Nie wywołują AI ani nie wysyłają wiadomości. */
+/* IdeaHire | Lucyna AI | P35 | Kontekst rozmowy, historia i pomocnicze narzędzia. */
 import { knowledgeAnswer } from "./LucynaKnowledge.js";
 
+export const LUCYNA_BUILD_VERSION = "P35-2026-10-14";
 export const LUCYNA_NOTICE_VERSION = "IH-LUCYNA-2026-10-13-V3";
 export const LUCYNA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export const PRIVATE_INPUT = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\b\d{11}\b|\b(?:sk-[A-Za-z0-9_-]{12,}|(?:sk|rk)_(?:test|live)_[A-Za-z0-9]{12,}|whsec_[A-Za-z0-9]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b|\b(?:has[łl]o|password|passwd|token|api[_ -]?key|secret|kod\s*(?:2fa|mfa))\s*[:=]/i;
@@ -91,6 +92,9 @@ export function packConversation(conversation) {
       status: ["done", "error", "stopped", "catalog", "catalog-error"].includes(message.status) ? message.status : "done" };
     for (const key of ["filters", "searchMode", "sources", "provenance", "review", "error", "partial", "kind", "createdAt", "catalogs"])
       if (message[key] !== undefined) value[key] = message[key];
+    if (!value.catalogs?.length && Array.isArray(message.items)) value.catalogs = [{
+      kind:"catalog",mode:message.searchMode,items:message.items,filters:message.filters,total:message.total
+    }];
     return value;
   });
   return { id: conversation.id, title: conversation.title.slice(0, 80), mode: conversation.mode,
@@ -141,6 +145,7 @@ export function conversationContext(messages, limit = 10) {
       if (catalogs.length) text = "Odczyty katalogu IdeaHire (dane, numeracja odpowiada kartom):\n" + catalogs.map(catalog =>
         catalog.mode + ":\n" + catalog.items.slice(0,10).map((row,index) => (index+1) + ". " +
           String(row.title || row.name || "Pozycja").slice(0,160) +
+          (LUCYNA_UUID.test(row.id || "") ? " | ID: " + row.id : "") +
           (row.category ? " | " + row.category : "") + (row.budget != null ? " | " + row.budget + " PLN" : "")).join("\n")).join("\n") + "\n\n" + text;
       return {role:message.role,content:text.slice(0,5800)};
     }).filter(message => !containsPrivateInput(message.content)).slice(-limit);
