@@ -1,16 +1,18 @@
-/* IdeaHire | Lucyna AI | P34 | Potwierdzona wiedza. */
+/* IdeaHire | Lucyna AI | P35 | Potwierdzona wiedza. */
 const LUCYNA_GUIDE = [
     {
-        "id": "usluga-czy-freelancer",
+        "id": "o-ideahire",
         "title": "Czym jest IdeaHire?",
         "keys": "ideahire idea hire platforma serwis strona marketplace co czym jak dziala",
-        "text": "IdeaHire to platforma, która łączy osoby i firmy szukające wykonawcy z freelancerami oferującymi swoje umiejętności.\n\nMożesz:\n- opublikować zlecenie i znaleźć wykonawcę;\n- przeglądać usługi, specjalizacje i portfolio freelancerów;\n- znaleźć zlecenie albo zaoferować własną usługę;\n- ustalić zakres, cenę, termin i odbiór w rozmowie.\n\nJestem Lucyna AI — pomagam korzystać z IdeaHire, przygotować opis projektu i wiadomości oraz dobrać filtry wyszukiwania. Powiedz, czy chcesz zlecić pracę, czy znaleźć zlecenie."
+        "text": "IdeaHire to platforma, która łączy osoby i firmy szukające wykonawcy z freelancerami oferującymi swoje umiejętności.\n\nMożesz:\n- opublikować zlecenie i znaleźć wykonawcę;\n- przeglądać usługi, specjalizacje i portfolio freelancerów;\n- znaleźć zlecenie albo zaoferować własną usługę;\n- ustalić zakres, cenę, termin i odbiór w rozmowie.\n\nJestem Lucyna AI — pomagam korzystać z IdeaHire, przygotować opis projektu i wiadomości oraz dobrać filtry wyszukiwania. Powiedz, czy chcesz zlecić pracę, czy znaleźć zlecenie.",
+        "href": "/"
     },
     {
-        "id": "plan-wspolpracy",
+        "id": "brief-projektu",
         "title": "Czym jest brief?",
         "keys": "brief opis projekt wymagania zakres cel rezultat",
-        "text": "Brief to krótki opis zadania dla wykonawcy. Dobry brief odpowiada na sześć pytań:\n\n1. Jaki jest cel projektu?\n2. Co dokładnie obejmuje zakres?\n3. Jaki rezultat lub pliki mają powstać?\n4. Jaki jest termin?\n5. Jaki jest budżet?\n6. Jak sprawdzisz i zaakceptujesz rezultat?\n\nW Lucynie wybierz „Szkic zlecenia”, żeby uzupełnić te pola. Gotowy szkic sprawdzasz i publikujesz samodzielnie."
+        "text": "Brief to krótki opis zadania dla wykonawcy. Dobry brief odpowiada na sześć pytań:\n\n1. Jaki jest cel projektu?\n2. Co dokładnie obejmuje zakres?\n3. Jaki rezultat lub pliki mają powstać?\n4. Jaki jest termin?\n5. Jaki jest budżet?\n6. Jak sprawdzisz i zaakceptujesz rezultat?\n\nW Lucynie wybierz „Szkic zlecenia”, żeby uzupełnić te pola. Gotowy szkic sprawdzasz i publikujesz samodzielnie.",
+        "href": "/find-talent"
     },
     {
         "id": "zaloz-konto",
@@ -214,7 +216,7 @@ const LUCYNA_GUIDE = [
         "id": "kontakt-pomoc",
         "title": "Jak skontaktować się z pomocą IdeaHire?",
         "keys": "pomoc help kontakt support administracja reklamacja email",
-        "text": "Kontakt ogólny, reklamacja i prywatność — wybór właściwego adresu.\n\n1. Sprawdź instrukcję dotyczącą swojego problemu. Jeśli nie rozwiązuje sprawy, wybierz kontakt ogólny, reklamacje lub prywatność z sekcji kontaktu w centrum pomocy.\n2. Opisz, co próbowałeś zrobić, gdzie wystąpił problem, kiedy to było i jaki komunikat zobaczyłeś. Podaj identyfikator projektu lub sprawy, jeśli jest potrzebny.\n3. Nie przesyłaj hasła, kodów logowania, pełnych danych karty ani poufnych materiałów klienta. Zrzut ekranu przed wysłaniem oczyść z niepotrzebnych danych.\n\nCentrum pomocy nie jest czatem z administratorem. Wpisanie frazy tylko przeszukuje instrukcje i nie wysyła zgłoszenia."
+        "text": "Kontakt ogólny, reklamacja i prywatność — wybór właściwego adresu.\n\n1. Sprawdź instrukcję dotyczącą swojego problemu. Jeśli nie rozwiązuje sprawy, wybierz kontakt ogólny, reklamacje lub prywatność z sekcji kontaktu w centrum pomocy.\n2. Opisz, co próbowałeś zrobić, gdzie wystąpił problem, kiedy to było i jaki komunikat zobaczyłeś. Podaj identyfikator projektu lub sprawy, jeśli jest potrzebny.\n3. Nie przesyłaj hasła, kodów logowania, pełnych danych karty ani poufnych materiałów klienta. Zrzut ekranu przed wysłaniem oczyść z niepotrzebnych danych.\n\nCentrum pomocy nie jest czatem z administratorem. Wpisanie frazy tylko przeszukuje instrukcje i nie wysyła zgłoszenia.\n\nPubliczne kontakty z Centrum pomocy:\n- pomoc ogólna: ideahire26@gmail.com;\n- reklamacje dotyczące platformy: ideahirereklamacja@gmail.com;\n- prywatność i zgłoszenia treści: ideahireprywatnosc@gmail.com."
     },
     {
         "id": "kalendarz",
