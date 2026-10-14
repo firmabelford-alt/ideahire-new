@@ -1,9 +1,9 @@
-/* IdeaHire | Lucyna AI | 2026-10-13 | Pełny ekran i wiedza serwisu. */
+/* IdeaHire | Lucyna AI | P35 | Swobodna rozmowa, rzeczywiste narzędzia i strumień odpowiedzi. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { helpCenterHref } from "./MarketUI";
-import { containsPrivateInput, downloadLucynaExport, LUCYNA_NOTICE_VERSION, localAnswer, weatherCity, revealAnswer } from "./LucynaCore";
-import { knowledgeAnswer, LUCYNA_GUIDE } from "./LucynaKnowledge";
+import { containsPrivateInput, conversationContext, downloadLucynaExport, LUCYNA_NOTICE_VERSION, LUCYNA_BUILD_VERSION } from "./LucynaCore";
+import { LUCYNA_GUIDE } from "./LucynaKnowledge";
 import { useLucynaMemory } from "./LucynaMemory";
 import LucynaTools, { ReviewResult } from "./LucynaTools";
 export { containsPrivateInput } from "./LucynaCore";
@@ -22,17 +22,19 @@ const MODES = [
 ];
 const FAQ = LUCYNA_GUIDE.filter((item, index, all) => all.findIndex(other => other.id === item.id) === index);
 const ERRORS = {
+  migration:"Obsługa IdeaHire musi dokończyć aktualizację modułu AI. Spróbuj ponownie po jej zakończeniu.",
+  version:"Obsługa IdeaHire musi ujednolicić wersję czatu i połączenia AI. Centrum pomocy pozostaje dostępne.",
   user_limit: "Dzisiejszy limit generowania AI został wykorzystany. Pomoc IdeaHire i narzędzia lokalne pozostają dostępne.",
   global_limit: "Wspólna darmowa pula AI została dziś wykorzystana. Nadal możesz pytać o IdeaHire i korzystać z narzędzi lokalnych.",
   busy: "Lucyna obsługuje teraz inne rozmowy. Spróbuj ponownie za chwilę.",
   cooldown: "Poczekaj kilka sekund przed kolejną wiadomością.",
   duplicate: "To żądanie zostało już przyjęte. Poczekaj na wynik albo wyślij nowe pytanie.",
-  setup: "Lucyna czeka na uruchomienie. Możesz już korzystać z katalogów i instrukcji pomocy.",
+  setup: "Połączenie z AI wymaga dokończenia konfiguracji przez obsługę IdeaHire. Centrum pomocy i katalogi pozostają dostępne.",
   disabled: "Rozmowy AI są teraz wyłączone. Katalogi i Centrum pomocy pozostają dostępne.",
   account: "Generowanie AI wymaga pełnego, aktywnego konta. Podstawowa pomoc IdeaHire pozostaje dostępna.",
   auth: "Sesja wygasła. Zaloguj się ponownie, aby porozmawiać z Lucyną.",
   private: "Usuń dane kontaktowe, numery dokumentów i klucze dostępu z treści wiadomości.",
-  invalid: "Skróć wiadomość i spróbuj ponownie. Limit wynosi 2000 znaków i 3,6 kB tekstu.",
+  invalid: "Skróć wiadomość i spróbuj ponownie. Limit wynosi 6000 znaków i 10 kB tekstu.",
   size: "Wybrany materiał jest zbyt duży. Skróć tekst albo wybierz mniejszy obraz.",
   notice: "Przeczytaj informację o działaniu Lucyny i wybierz zapis historii przed użyciem AI.",
   legal_pending: "Lucyna jest w przygotowaniu do uruchomienia publicznego. Lokalne szablony i katalogi są dostępne.",
@@ -45,10 +47,23 @@ const ERRORS = {
   weather_disabled: "Pobieranie pogody jest teraz wyłączone.",
   weather_setup: "Pobieranie pogody czeka na konfigurację.",
   provider: "Nie udało się uzyskać odpowiedzi AI. Spróbuj później; katalogi i instrukcje nadal działają.",
+  provider_tool: "Nie udało się poprawnie wykonać odczytu potrzebnego do odpowiedzi. Spróbuj doprecyzować prośbę.",
+  provider_forbidden: "Dostawca AI odmówił dostępu. Obsługa IdeaHire musi sprawdzić uprawnienia i konfigurację konta.",
+  provider_blocked: "Dostawca AI ograniczył dostęp dla konta serwisu. Obsługa IdeaHire musi wyjaśnić tę blokadę.",
+  reasoning_limit: "Analiza nie zakończyła się odpowiedzią w dostępnej puli. Podziel zadanie na krótsze części.",
+  provider_auth: "Połączenie Lucyny z AI wymaga poprawienia klucza lub uprawnień przez obsługę IdeaHire. Instrukcje strony nadal działają.",
+  provider_quota: "Wspólna darmowa pula dostawcy AI została dziś wyczerpana. Podstawowa pomoc IdeaHire nadal działa.",
+  provider_busy: "Model AI jest teraz przeciążony. Spróbuj ponownie za chwilę.",
+  provider_model: "Model Lucyny wymaga poprawienia konfiguracji przez obsługę IdeaHire.",
+  provider_request: "Usługa AI odrzuciła format zapytania. Obsługa IdeaHire musi sprawdzić konfigurację połączenia.",
+  provider_empty: "Model nie zwrócił treści odpowiedzi. Możesz ponowić pytanie.",
+  provider_format: "Nie udało się odczytać odpowiedzi modelu. Możesz ponowić pytanie.",
+  provider_stream: "Odpowiedź została przerwana. Otrzymana część pozostaje widoczna.",
+  free_model: "Wybrany model wymaga płatnego planu. Połączenie zostało zatrzymane; obsługa IdeaHire musi ustawić bezpłatny model.",
   timeout: "Generowanie trwało zbyt długo. Zachowaliśmy otrzymaną część odpowiedzi.",
   unavailable: "Lucyna jest chwilowo niedostępna. Spróbuj później lub skorzystaj z katalogów i pomocy.",
 };
-const BLOCKED = new Set(["user_limit", "global_limit", "disabled", "setup", "account", "auth", "legal_pending"]);
+const BLOCKED = new Set(["migration","version","user_limit", "global_limit", "disabled", "setup", "account", "auth", "legal_pending", "free_setup", "provider_auth", "provider_forbidden", "provider_model", "provider_blocked", "free_model"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const makeId = () => crypto.randomUUID();
 const newConversation = () => ({ id: makeId(), title: "Nowa rozmowa", mode: "chat", messages: [] });
@@ -76,11 +91,14 @@ function Icon({ name = "spark", ...props }) {
 function Mark({ small = false }) {
   return <span className={"lu-mark" + (small ? " is-small" : "")} aria-hidden="true"><span className="lu-mark-halo" /><Icon name="spark" /></span>;
 }
-function ThinkingIndicator() {
-  const [elapsed, setElapsed] = useState(0);
-  useEffect(() => { const start = Date.now(); const timer = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000); return () => clearInterval(timer); }, []);
+function ThinkingIndicator({phase = "preparing"}) {
+  const [elapsed,setElapsed]=useState(0);
+  useEffect(()=>{const start=Date.now();const timer=setInterval(()=>setElapsed(Math.floor((Date.now()-start)/1000)),1000);return ()=>clearInterval(timer);},[]);
+  const labels = {preparing:"Przygotowuję odpowiedź…",analyzing:"Analizuję Twoją prośbę…",
+    jobs:"Sprawdzam aktualne zlecenia…",freelancers:"Sprawdzam katalog wykonawców…",services:"Sprawdzam opublikowane usługi…",
+    checking:"Sprawdzam informacje…",responding:"Układam odpowiedź…"};
   return <div className="lu-thinking" role="status"><span className="lu-thinking-dots" aria-hidden="true"><i /><i /><i /></span>
-    <span>{elapsed >= 30 ? "To trwa dłużej niż zwykle…" : elapsed >= 12 ? "Jeszcze chwila…" : "Przygotowuję odpowiedź…"}</span></div>;
+    <span>{labels[phase] || labels.preparing}</span>{elapsed>=12 && <small>{elapsed} s</small>}</div>;
 }
 function Inline({ text }) {
   return String(text).split(/(\*\*[^*]+\*\*|\x60[^\x60]+\x60)/g).map((part, i) => part.startsWith("**") && part.endsWith("**")
@@ -89,26 +107,44 @@ function Inline({ text }) {
       ? <code key={i}>{part.slice(1, -1)}</code> : <React.Fragment key={i}>{part}</React.Fragment>);
 }
 export function SafeText({ text }) {
-  return <div className="lu-answer-text">{String(text).split(/\n{2,}/).map((block, i) => {
-    const lines = block.split("\n");
-    if (/^\x60{3}/.test(block)) return <pre key={i}><code>{block.replace(/^\x60{3}[^\n]*\n?|\n?\x60{3}$/g, "")}</code></pre>;
-    if (lines.every(l => /^\s*[-*]\s+/.test(l))) return <ul key={i}>{lines.map((l, j) => <li key={j}><Inline text={l.replace(/^\s*[-*]\s+/, "")} /></li>)}</ul>;
-    if (lines.every(l => /^\s*\d+[.)]\s+/.test(l))) return <ol key={i}>{lines.map((l, j) => <li key={j}><Inline text={l.replace(/^\s*\d+[.)]\s+/, "")} /></li>)}</ol>;
-    if (lines.length === 1 && /^#{1,3}\s/.test(block)) return <h3 key={i}><Inline text={block.replace(/^#{1,3}\s+/, "")} /></h3>;
-    return <p key={i}><Inline text={block} /></p>;
+  const lines=String(text || "").split("\n"), blocks=[];
+  const fence=/^\s*\x60{3}([a-z0-9_+-]*)\s*$/i;
+  for(let index=0;index<lines.length;) {
+    if(!lines[index].trim()) {index++;continue;}
+    const opening=lines[index].match(fence);
+    if(opening) {
+      const code=[];index++;
+      while(index<lines.length && !fence.test(lines[index]))code.push(lines[index++]);
+      if(index<lines.length)index++;
+      blocks.push({kind:"code",text:code.join("\n"),language:opening[1]});
+    } else {
+      const paragraph=[];
+      while(index<lines.length && lines[index].trim() && !fence.test(lines[index]))paragraph.push(lines[index++]);
+      blocks.push({kind:"text",lines:paragraph,text:paragraph.join("\n")});
+    }
+  }
+  return <div className="lu-answer-text">{blocks.map((block,index)=>{
+    if(block.kind==="code") return <pre key={index} data-language={block.language}><code>{block.text}</code></pre>;
+    if(block.lines.every(line=>/^\s*[-*]\s+/.test(line))) return <ul key={index}>{block.lines.map((line,i)=><li key={i}><Inline text={line.replace(/^\s*[-*]\s+/,"")} /></li>)}</ul>;
+    if(block.lines.every(line=>/^\s*\d+[.)]\s+/.test(line))) return <ol key={index}>{block.lines.map((line,i)=><li key={i}><Inline text={line.replace(/^\s*\d+[.)]\s+/,"")} /></li>)}</ol>;
+    if(block.lines.length===1 && /^#{1,3}\s/.test(block.text)) return <h3 key={index}><Inline text={block.text.replace(/^#{1,3}\s+/,"")} /></h3>;
+    return <p key={index}><Inline text={block.text} /></p>;
   })}</div>;
 }
 export async function readEvents(response, signal, onEvent) {
   if (!response.body) throw Object.assign(new Error("unavailable"), { code: "unavailable" });
   const reader = response.body.getReader(), decoder = new TextDecoder();
-  let buffer = "", finished = false;
+  let buffer = "", finished = false, receivedText = false;
   const onAbort = () => { reader.cancel().catch(() => {}); };
   const frame = value => {
     const lines = value.split("\n");
     const event = lines.find(line => line.startsWith("event:"))?.slice(6).trim();
     const data = lines.filter(line => line.startsWith("data:")).map(line => line.slice(5).trim()).join("\n");
     if (!event || !data || finished) return;
-    onEvent(event, JSON.parse(data));
+    let payload;
+    try { payload = JSON.parse(data); } catch { throw Object.assign(new Error(), {code:"provider_format"}); }
+    if (event === "text" && typeof payload?.text === "string" && payload.text.trim()) receivedText = true;
+    onEvent(event, payload);
     if (event === "done" || event === "error") finished = true;
   };
   signal.addEventListener("abort", onAbort, { once: true });
@@ -119,27 +155,27 @@ export async function readEvents(response, signal, onEvent) {
       if (signal.aborted) throw new DOMException("Aborted", "AbortError");
       if (chunk.done) break;
       buffer = (buffer + decoder.decode(chunk.value, { stream: true })).replace(/\r\n/g, "\n");
-      if (buffer.length > 30_000) throw new Error("unavailable");
+      if (buffer.length > 30_000) throw Object.assign(new Error(), {code:"provider_format"});
       let i;
       while (!finished && (i = buffer.indexOf("\n\n")) !== -1) { frame(buffer.slice(0, i)); buffer = buffer.slice(i + 2); }
     }
     if (!finished) { buffer += decoder.decode(); if (buffer.trim()) frame(buffer); }
-    if (!finished) throw new Error("unavailable");
+    if (!finished) throw Object.assign(new Error(), {code:receivedText ? "provider_stream" : "provider_empty"});
   } finally { signal.removeEventListener("abort", onAbort); await reader.cancel().catch(() => {}); reader.releaseLock(); }
 }
 
 function SourceLinks({ sources }) {
-  const allowed = sources?.filter(s => FAQ.some(f => f.id === s.id)).slice(0, 2) || [];
+  const allowed = sources?.filter(s => LUCYNA_GUIDE.some(f => f.id === s.id)).slice(0, 3) || [];
   const weather = sources?.filter(s=>["https://www.met.no/en","https://creativecommons.org/licenses/by/4.0/"].includes(s.url)) || [];
   if (weather.length) return <div className="lu-sources"><span>Źródło prognozy</span>{weather.map(s=><a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer">{s.title}<Icon name="arrow" /></a>)}</div>;
   return allowed.length ? <div className="lu-sources"><span>Instrukcje IdeaHire</span>{allowed.map(s =>
-    <a key={s.id} href={helpCenterHref() + "#article/" + encodeURIComponent(s.id)}><Icon name="help" />{s.title}<Icon name="arrow" /></a>)}</div> : null;
+    <a key={s.id} href={LUCYNA_GUIDE.find(item=>item.id===s.id)?.href || helpCenterHref() + "#article/" + encodeURIComponent(s.id)}><Icon name="help" />{s.title}<Icon name="arrow" /></a>)}</div> : null;
 }
 function SearchBox({ mode, filters, onSearch, loading }) {
   const [query, setQuery] = useState(filters?.query || "");
   const [category, setCategory] = useState(filters?.category || "");
   const id = React.useId();
-  return <form className="lu-search-box" onSubmit={event => { event.preventDefault(); onSearch({ query: query.trim().slice(0, 100), category }); }}>
+  return <form className="lu-search-box" onSubmit={event => { event.preventDefault(); onSearch({ query: query.trim().slice(0, 60), category, limit: filters?.limit || 5 }); }}>
     <div className="lu-search-title"><Icon name={mode === "jobs" ? "work" : "people"} /><strong>Filtry katalogu</strong><span>Możesz je zmienić</span></div>
     <div className="lu-search-fields">
       <label htmlFor={id + "-query"}>Hasło<input id={id + "-query"} value={query} maxLength={100} placeholder="Np. WordPress, logo, montaż"
@@ -155,15 +191,16 @@ function Results({ mode, items, total }) {
   if (!items?.length) return <div className="lu-no-results"><Icon name={mode === "jobs" ? "work" : "people"} />
     <strong>Brak wyników dla tych filtrów</strong><p>Spróbuj krótszego hasła lub wybierz wszystkie kategorie.</p></div>;
   return <div className="lu-results"><div className="lu-results-heading"><strong>Wyniki katalogu</strong><span>{total} dostępnych wyników</span></div>
-    <div className="lu-result-grid">{items.filter(row => UUID.test(row.id)).slice(0, 6).map(row =>
+    <div className="lu-result-grid">{items.filter(row => UUID.test(row.id)).slice(0, 10).map(row =>
       <article className="lu-result-card" key={row.id}>
         <span className="lu-result-symbol" aria-hidden="true">{mode === "jobs" ? <Icon name="work" /> : String(row.name || "U").slice(0, 1).toUpperCase()}</span>
-        <div><span className="lu-result-category">{mode === "jobs" ? row.category : row.specialization || "Profil freelancera"}</span>
-          <h3>{mode === "jobs" ? row.title : row.name || "Freelancer"}</h3>
-          <p>{mode === "jobs" ? row.description : String(row.about || "Poznaj informacje i realizacje na profilu.").slice(0, 160)}</p>
-          {mode === "jobs" && <strong className="lu-result-budget">{row.budget_negotiable ? "Budżet do ustalenia" : new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN", maximumFractionDigits: 0 }).format(Number(row.budget) || 0)}</strong>}
-          <Link to={mode === "jobs" ? "/jobs" : "/profile/" + row.id} state={mode === "jobs" ? { lucynaJobId: row.id, lucynaTitle: row.title } : undefined}>
-            {mode === "jobs" ? "Zobacz zlecenie" : "Zobacz profil"}<Icon name="arrow" /></Link>
+        <div><span className="lu-result-category">{mode === "freelancers" ? row.specialization || "Profil freelancera" : row.category}</span>
+          <h3>{mode === "freelancers" ? row.name || "Freelancer" : row.title}</h3>
+          <p>{mode === "freelancers" ? String(row.about || "Poznaj informacje i realizacje na profilu.").slice(0, 160) : row.description}</p>
+          {mode === "jobs" && <strong className="lu-result-budget">{row.budget_negotiable || row.budget == null ? "Budżet do ustalenia" : new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN", maximumFractionDigits: 2 }).format(Number(row.budget))}</strong>}
+          {mode === "services" && <strong className="lu-result-budget">{row.price_mode === "custom" || row.base_price == null ? "Wycena indywidualna" : "od " + new Intl.NumberFormat("pl-PL", {style:"currency",currency:"PLN"}).format(row.base_price)}</strong>}
+          <Link to={mode === "jobs" ? "/jobs" : mode === "services" ? "/services/" + row.id : "/profile/" + row.id} state={mode === "jobs" ? { lucynaJobId: row.id, lucynaTitle: row.title } : undefined}>
+            {mode === "jobs" ? "Zobacz zlecenie" : mode === "services" ? "Zobacz usługę" : "Zobacz profil"}<Icon name="arrow" /></Link>
         </div>
       </article>)}</div>
     <p className="lu-result-note">{mode === "jobs" ? "Kolejność: najnowsze ogłoszenia." : "Kolejność odpowiada zwykłemu katalogowi IdeaHire."} Bez ocen osób przez AI.</p>
@@ -187,6 +224,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
   const [toolDraft,setToolDraft] = useState(""); const [deleting,setDeleting] = useState(false);
   const [historyChoice,setHistoryChoice] = useState(true);
   const memory = useLucynaMemory({supabase,user,conversations,setConversations});
+  useEffect(() => {if (memory.ready && !memory.acknowledged) setHistoryChoice(memory.historyEnabled);}, [memory.ready,memory.acknowledged,memory.historyEnabled]);
   const initialRoute = useRef("");
   const routeTarget = useRef(null);
   const requestRef = useRef(null); const searchRef = useRef(null); const mounted = useRef(true);
@@ -196,16 +234,33 @@ export default function Lucyna({ supabase, user, Navbar }) {
   const userIdRef = useRef(user?.id); const ownerRef = useRef(user?.id); const mainRef = useRef(null);
   const patchMessage = useCallback((conversationId, messageId, values) => setConversations(all => all.map(c => c.id === conversationId
     ? { ...c, messages: c.messages.map(m => m.id === messageId ? { ...m, ...values } : m) } : c)), []);
-  const refreshStatus = useCallback(async () => {
+  const refreshStatus = useCallback(async (resetProviderError = false) => {
     const uid = user?.id;
     try {
-      const { data, error } = await supabase.rpc("ideahire_lucyna_v2_status");
+      const {data:sessionData,error:sessionError} = await supabase.auth.getSession();
+      if (sessionError || !sessionData?.session?.access_token || sessionData.session.user?.id !== uid)
+        throw Object.assign(new Error(),{code:"auth"});
+      const response = await fetch(String(import.meta.env.VITE_SUPABASE_URL).replace(/\/$/,"") + "/functions/v1/ideahire-lucyna", {
+        method:"POST",headers:{Authorization:"Bearer " + sessionData.session.access_token,
+          apikey:import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,"Content-Type":"application/json"},
+        body:JSON.stringify({action:"status"}),signal:AbortSignal.timeout(12000),
+      });
+      const data = await response.json().catch(()=>({}));
       if (!mounted.current || uid !== userIdRef.current) return;
-      if (error || !data) throw new Error("setup");
-      const code = data.code || (!data.eligible ? "account" : !data.enabled ? "disabled" : !data.global_available ? "global_limit" : data.remaining <= 0 ? "user_limit" : "");
-      setStatus({ ...data, loading: false, code });
-    } catch { if (mounted.current && uid === userIdRef.current) setStatus({ loading: false, enabled: false, remaining: null, code: "setup" }); }
-  }, [supabase, user?.id]);
+      if (!response.ok) throw Object.assign(new Error(),{code:response.status === 401 ? "auth" : data.code || "setup",detail:data});
+      if (data.backend_version !== LUCYNA_BUILD_VERSION) throw Object.assign(new Error(),{code:"version",detail:data});
+      const code = data.code || (!data.eligible ? "account" : !data.enabled ? "disabled" :
+        !data.global_available ? "global_limit" : data.remaining <= 0 ? "user_limit" : "");
+      setStatus(old => {
+        const keep = !resetProviderError && ["provider_auth","provider_forbidden","provider_model","provider_blocked","free_model"].includes(old.code);
+        return {...data,loading:false,code:code || (keep ? old.code : ""),
+          diagnosticRequestId:keep ? old.diagnosticRequestId : code ? data.request_id : null};
+      });
+    } catch (error) {
+      if (mounted.current && uid === userIdRef.current) setStatus({loading:false,enabled:false,remaining:null,
+        code:error.code || "setup",diagnosticRequestId:error.detail?.request_id});
+    }
+  }, [supabase,user?.id]);
   const stop = useCallback(() => {
     const current = requestRef.current;
     if (!current) return;
@@ -340,49 +395,48 @@ export default function Lucyna({ supabase, user, Navbar }) {
     if (!messageId) setConversations(all => all.map(c => c.id === conversationId
       ? { ...c, messages: [...c.messages, { id, role: "assistant", text: "Przeszukuję katalog według wybranych filtrów.", status: "catalog", filters, searchMode }] } : c));
     try {
-      const operation = searchMode === "jobs"
-        ? supabase.rpc("ideahire_lucyna_search_jobs", { p_search: filters.query || null, p_category: filters.category || null, p_limit: 6 })
-        : supabase.rpc("list_ideahire_freelancers", { p_search: filters.query || null, p_category: filters.category || null, p_offset: 0, p_limit: 6 });
-      const { data, error } = await operation.abortSignal(controller.signal);
-      if (controller.signal.aborted || !mounted.current) return;
-      if (error) throw new Error("catalog");
-      const value = Array.isArray(data) ? data[0] : data;
-      patchMessage(conversationId, id, { text: "Wyniki dla zatwierdzonych filtrów.", status: "catalog", filters,
-        items: value?.items || [], total: Number(value?.total) || 0 });
+      const limit=Math.min(10,Math.max(1,Number(filters.limit) || 5));
+      const operation=searchMode==="jobs"
+        ? supabase.rpc("ideahire_lucyna_v3_search_jobs",{p_search:filters.query || null,p_category:filters.category || null,p_limit:limit})
+        : searchMode==="services"
+          ? supabase.rpc("list_freelancer_services",{p_search:filters.query || null,p_category:filters.category || null})
+          : supabase.rpc("list_ideahire_freelancers",{p_search:filters.query || null,p_category:filters.category || null,p_offset:0,p_limit:limit});
+      const {data,error}=await operation.abortSignal(controller.signal);
+      if(controller.signal.aborted || !mounted.current)return;
+      if(error)throw new Error("catalog");
+      const value=Array.isArray(data) ? data[0] : data;
+      const rows=searchMode==="services" ? Array.isArray(data) ? data : [] : Array.isArray(value?.items) ? value.items : [];
+      const snippet=(value,max)=>{const text=String(value || "").slice(0,max);return containsPrivateInput(text) ? "Fragment pominięto. Otwórz pozycję w katalogu." : text;};
+      const items=rows.filter(row=>row && UUID.test(row.id || "")).slice(0,limit).map(row=>
+        searchMode==="freelancers" ? {id:row.id,name:snippet(row.name,100),about:snippet(row.about,180),specialization:snippet(row.specialization,80)}
+          : {id:row.id,title:snippet(row.title,160),description:snippet(searchMode==="services" ? row.summary || row.description : row.description,180),
+            category:snippet(row.category,60),...(searchMode==="services" ? {price_mode:row.price_mode,base_price:row.base_price}
+              : {budget:row.budget,budget_negotiable:row.budget_negotiable===true})});
+      const total=searchMode==="services" ? rows.length : Number(value?.total) || items.length;
+      const catalog={kind:"catalog",mode:searchMode,filters:{...filters,limit},items,total};
+      patchMessage(conversationId,id,{text:"Wyniki dla wybranych filtrów.",status:"catalog",catalogs:[catalog],searchMode});
+
     } catch {
       if (!controller.signal.aborted && mounted.current) patchMessage(conversationId, id,
         { text: "Nie udało się pobrać katalogu. Możesz przejść do niego bezpośrednio i spróbować ponownie.", status: "catalog-error" });
     } finally { if (searchRef.current === controller) { searchRef.current = null; if (mounted.current) setSearching(false); } }
   }
-  async function animateResult(result, controller, conversationId, messageId) {
-    const text = String(result.text).slice(0, 8000);
-    patchMessage(conversationId, messageId, { sources: result.sources, kind: result.kind,
-      provenance: result.provenance || { ai_generated: false, method: "ideahire-guide" } });
-    await revealAnswer(text, controller.signal, visible => {
-      if (mounted.current && requestRef.current === controller)
-        patchMessage(conversationId, messageId, { text: visible, status: "streaming" });
-    });
-    if (mounted.current && requestRef.current === controller)
-      patchMessage(conversationId, messageId, { text, status: "done" });
+  function applyResult(result, conversationId, messageId) {
+    patchMessage(conversationId,messageId,{text:String(result.text).slice(0,8000),sources:result.sources,kind:result.kind || "ai",
+      provenance:result.provenance,status:"done"});
   }
   async function send(event, options = {}) {
     event?.preventDefault();
     if (requestRef.current || deleting || !(options.text || draft).trim()) return;
     if (!memory.ready) { setNotice("Wczytuję ustawienia historii. Spróbuj za chwilę."); return; }
     const text = (options.text || draft).trim();
-    const sendMode = options.mode || (active.mode === "review" ? "chat" : active.mode);
+    const sendMode = options.review ? "review" : options.mode || (active.mode === "review" ? "chat" : active.mode);
     if (active.messages.length > 38) { setNotice("Ta rozmowa jest już pełna. Pobierz kopię lub zacznij nową rozmowę."); return; }
-    if (text.length > 2000 || new TextEncoder().encode(text).length > 3600) { setNotice(ERRORS.invalid); return; }
+    if (text.length > 6000 || new TextEncoder().encode(text).length > 10000) { setNotice(ERRORS.invalid); return; }
     if (containsPrivateInput(text)) { setNotice(ERRORS.private); return; }
     if (options.review && [options.review.material, ...options.review.criteria].some(containsPrivateInput)) { setNotice(ERRORS.private); return; }
-    const guide = ["chat", "help"].includes(sendMode) && !options.review ? knowledgeAnswer(text) : null;
-    const local = ["chat", "help"].includes(sendMode) && !options.review && !guide ? localAnswer(text) : null;
-    const simple = guide || (local ? { text: local, sources: [], kind: "local" } : null);
-    const isWeather = ["chat", "help"].includes(sendMode) && weatherCity(text) !== null;
-    if (!simple && !memory.acknowledged) { setNotice(ERRORS.notice); setInfoOpen(true); return; }
-    if (!simple && (status.loading || BLOCKED.has(status.code) && !(isWeather && ["user_limit", "global_limit"].includes(status.code)))) {
-      setNotice(ERRORS[status.code] || ERRORS.unavailable); return;
-    }
+    if (!memory.acknowledged) { setNotice(ERRORS.notice); setInfoOpen(true); return; }
+    if (status.loading || BLOCKED.has(status.code)) { setNotice(ERRORS[status.code] || ERRORS.unavailable); return; }
     const conversationId = active.id, messageId = makeId(), requestId = makeId(), ownerId = user?.id;
     const controller = new AbortController();
     controller.conversationId = conversationId; controller.messageId = messageId; requestRef.current = controller;
@@ -391,10 +445,9 @@ export default function Lucyna({ supabase, user, Navbar }) {
       ...(options.review ? { sourceDeliveryId: options.review.source_delivery_id || null, sourceConversationId: options.review.source_conversation_id || null } : {}),
       messages: [...c.messages, { id: makeId(), role: "user", text, status: "done", createdAt: new Date().toISOString() },
         { id: messageId, role: "assistant", text: "", status: "loading", createdAt: new Date().toISOString(),
-          provenance: simple ? { ai_generated: false, method: "ideahire-guide" } : { ai_generated: true, verified: false }, kind: simple?.kind || "ai" }] } : c));
-    const timer = window.setTimeout(() => controller.abort(), 65_000);
+          provenance: { ai_generated: true, verified: false }, kind: options.review ? "review" : "ai", phase:"preparing" }] } : c));
+    const timer = window.setTimeout(() => controller.abort(), 90_000);
     try {
-      if (simple) { await animateResult(simple, controller, conversationId, messageId); return; }
       const { data, error } = await supabase.auth.getSession();
       if (error || !data?.session?.access_token || data.session.user?.id !== ownerId || userIdRef.current !== ownerId
         || controller.signal.aborted || requestRef.current !== controller) throw Object.assign(new Error(), { code: "auth" });
@@ -404,11 +457,13 @@ export default function Lucyna({ supabase, user, Navbar }) {
         body: JSON.stringify({ request_id: requestId, mode: sendMode, message: text, notice_version: LUCYNA_NOTICE_VERSION,
           ...(options.review ? { review: options.review } : {}),
           notes: options.review ? "" : active.messages.filter(m => m.role === "user" && !containsPrivateInput(m.text)).slice(0, -2).map(m => m.text).join("\n").slice(-1200),
-          history: options.review ? [] : active.messages.filter(m => m.status === "done" && !m.filters && !m.items && !m.review && !containsPrivateInput(m.text))
-            .slice(-4).map(m => ({ role: m.role, content: m.text.slice(-1500) })) }), signal: controller.signal,
+          history: options.review ? [] : conversationContext(active.messages) }), signal: controller.signal,
       });
       if (requestRef.current !== controller) return;
-      if (!response.ok) { const detail = await response.json().catch(() => ({})); throw Object.assign(new Error(), { code: detail.code || "unavailable", detail }); }
+      if (!response.ok) {
+        const detail = await response.json().catch(() => ({}));
+        throw Object.assign(new Error(), { code: response.status === 401 ? "auth" : detail.code || "unavailable", detail });
+      }
       if (response.headers.get("content-type")?.includes("application/json")) {
         const result = await response.json();
         if (requestRef.current !== controller || !mounted.current) return;
@@ -419,28 +474,59 @@ export default function Lucyna({ supabase, user, Navbar }) {
         } else if (Array.isArray(result.review?.criteria)) {
           patchMessage(conversationId, messageId, { text: "Wstępne sprawdzenie materiału względem Twoich kryteriów.", review: result.review,
             provenance: result.provenance, kind: "review", status: "done" });
-        } else if (typeof result.text === "string") await animateResult(result, controller, conversationId, messageId);
+        } else if (typeof result.text === "string") applyResult(result, conversationId, messageId);
         else throw new Error("provider");
         if (Number.isInteger(result.remaining)) setStatus(old => ({ ...old, remaining: result.remaining, code: result.remaining === 0 ? "user_limit" : "" }));
-      } else await readEvents(response, controller.signal, (eventName, value) => {
+      } else {
+        let completed = false, failed = false, receivedText = "", catalogs = [], replySources = [];
+        await readEvents(response, controller.signal, (eventName, value) => {
         if (requestRef.current !== controller || !mounted.current) return;
         if (eventName === "meta") {
-          patchMessage(conversationId, messageId, { sources: value.sources });
+          replySources = value.sources || []; patchMessage(conversationId, messageId, { sources: replySources });
           setStatus(old => ({ ...old, remaining: value.remaining, code: value.remaining === 0 ? "user_limit" : "" }));
-        } else if (eventName === "text" && typeof value.text === "string") patchMessage(conversationId, messageId, { text: value.text.slice(0, 8000), status: "streaming" });
-        else if (eventName === "done") patchMessage(conversationId, messageId, { status: "done", partial: !!value.partial, provenance: value.provenance });
-        else if (eventName === "error") patchMessage(conversationId, messageId, { status: "error", error: ERRORS[value.code] || ERRORS.unavailable });
-      });
+        } else if (eventName === "stage") {
+          patchMessage(conversationId,messageId,{phase:value.phase});
+        } else if (eventName === "sources") {
+          replySources = [...replySources,...(value.sources || [])].filter((item,index,all) =>
+            all.findIndex(other => (other.id || other.url) === (item.id || item.url)) === index);
+          patchMessage(conversationId,messageId,{sources:replySources});
+        } else if (eventName === "catalog") {
+          if (!["jobs","freelancers","services"].includes(value.mode) || !Array.isArray(value.items) || value.items.length > 10)
+            throw Object.assign(new Error(),{code:"provider_format"});
+          catalogs = [...catalogs,value].slice(0,2);
+          patchMessage(conversationId,messageId,{catalogs,filters:value.filters,searchMode:value.mode});
+        } else if (eventName === "catalog_error") {
+          patchMessage(conversationId,messageId,{catalogError:"Nie udało się odczytać katalogu. Możesz otworzyć go bezpośrednio."});
+        } else if (eventName === "text" && typeof value.text === "string") {
+          receivedText = value.text.slice(0, 8000);
+          patchMessage(conversationId, messageId, { text: receivedText, status: "streaming" });
+        } else if (eventName === "done") {
+          if (!receivedText.trim()) throw Object.assign(new Error(), { code: "provider_empty" });
+          completed = true;
+          patchMessage(conversationId, messageId, { status: "done", partial: !!value.partial, provenance: value.provenance });
+        } else if (eventName === "error") {
+          failed = true;
+          throw Object.assign(new Error(), { code: value.code || "provider", detail: value });
+        }
+        });
+        if (!completed && !failed && requestRef.current === controller && !controller.signal.aborted)
+          throw Object.assign(new Error(), { code: receivedText.trim() ? "provider_stream" : "provider_empty" });
+      }
     } catch (error) {
       if (requestRef.current !== controller || !mounted.current) return;
       const code = error.name === "AbortError" ? "timeout" : error.code || "provider";
-      patchMessage(conversationId, messageId, { status: "error", error: ERRORS[code] || ERRORS.unavailable });
+      const reference = UUID.test(error.detail?.request_id || "") ? error.detail.request_id : requestId;
+      const message = (ERRORS[code] || ERRORS.unavailable) + "\nIdentyfikator zgłoszenia: " + reference;
+      patchMessage(conversationId, messageId, { status: "error", error: message });
       if (BLOCKED.has(code) || Number.isInteger(error.detail?.remaining)) setStatus(old => ({ ...old,
         ...(Number.isInteger(error.detail?.remaining) ? { remaining: error.detail.remaining } : {}),
-        code: BLOCKED.has(code) ? code : error.detail?.remaining === 0 ? "user_limit" : old.code }));
+        code: BLOCKED.has(code) ? code : error.detail?.remaining === 0 ? "user_limit" : old.code, diagnosticRequestId:reference }));
     } finally {
       window.clearTimeout(timer);
-      if (requestRef.current === controller) { requestRef.current = null; if (mounted.current) setBusy(false); }
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+        if (mounted.current) { setBusy(false); refreshStatus(); }
+      }
     }
   }
 
@@ -450,11 +536,11 @@ export default function Lucyna({ supabase, user, Navbar }) {
     catch { setNotice("Nie udało się skopiować. Możesz zaznaczyć tekst i skopiować go ręcznie."); }
   }
   const isSearch = ["freelancers", "jobs"].includes(active.mode);
-  function useToolDraft(text) {setDraft(text.slice(0,2000));setNotice("Propozycja jest w polu wiadomości. Sprawdź ją i wybierz wysłanie do Lucyny, aby skorzystać z AI.");textareaRef.current?.focus({preventScroll:true});}
-  function useCorrection(text) {chooseMode("message");setToolDraft(text);setNotice("Przygotowano szkic wiadomości. Sprawdź punkty względem uzgodnień przed wysłaniem drugiej stronie.");}
+  function useToolDraft(text) {send(null,{text:text.slice(0,6000),mode:active.mode});}
+  function useCorrection(text) {send(null,{text:"Przygotuj uprzejmą wiadomość o poprawkach na podstawie powyższej analizy. Zachowaj ustalenia i konkretne punkty.\n\n"+text,mode:"message"});}
   return <div className="lucyna-route">
     <section className={"lucyna-root" + (sidebarCollapsed ? " is-sidebar-hidden" : "")}
-      ref={pageRef} aria-label="Lucyna AI — asystentka IdeaHire">
+      ref={pageRef} data-lucyna-version={LUCYNA_BUILD_VERSION} aria-label="Lucyna AI — asystentka IdeaHire">
       <div className="lu-shell">
         {mobile && historyOpen && <button className="lu-drawer-shade" type="button"
           aria-label="Zamknij historię rozmów" onClick={() => setHistoryOpen(false)} />}
@@ -511,7 +597,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
             onScroll={() => { const el = listRef.current; followingRef.current = el.scrollHeight - el.clientHeight - el.scrollTop < 100; if (followingRef.current) setNewBelow(false); }}>
             {memory.ready && !memory.acknowledged && <section className="lu-first-notice" aria-label="Przed rozmową z Lucyną AI">
               <div><Icon name="shield" /><strong>Ty wybierasz, czy zapamiętywać rozmowy</strong></div>
-              <p>Generowanie AI przekazuje pytanie i krótki kontekst do Cloudflare. Podstawowa pomoc IdeaHire działa bez wywoływania modelu.</p>
+              <p>Generowanie AI przekazuje pytanie i krótki kontekst do Cloudflare. Rozmowa korzysta z modelu AI; instrukcje możesz również otworzyć w Centrum pomocy.</p>
               <label className="lu-check"><input type="checkbox" checked={historyChoice} onChange={e => setHistoryChoice(e.target.checked)} />
                 <span>Zapamiętuj rozmowy na moim koncie przez maksymalnie 30 dni od ostatniego zapisu. Mogę je pobrać i usunąć.</span></label>
               <div className="lu-tool-actions"><button type="button" className="lu-text-button" onClick={() => setInfoOpen(true)}>Jak chronimy dane?</button>
@@ -529,28 +615,36 @@ export default function Lucyna({ supabase, user, Navbar }) {
                 {MODES.filter(m => ["brief", "freelancers", "jobs"].includes(m.id)).map(m => <button key={m.id} type="button"
                   onClick={() => { chooseMode(m.id); setDraft(m.example); }}><Icon name={m.icon} /><strong>{m.title}</strong><span>{m.text}</span><Icon name="arrow" /></button>)}
               </div>
-              <div className="lu-welcome-note"><span /><span>Podstawowe pytania o IdeaHire bez zużywania puli AI</span></div>
+              <div className="lu-welcome-note"><span /><span>Rozmawiaj swobodnie — Lucyna dobiera potrzebne narzędzia</span></div>
             </div>}
             {isSearch && !active.messages.length && <SearchBox mode={active.mode} onSearch={filters => runSearch(filters)} loading={searching} />}
             {active.mode === "help" && !active.messages.length && <div className="lu-faq-links"><span>Przewodnik po IdeaHire</span>{FAQ.slice(0, 4).map(f =>
               <button key={f.id} type="button" disabled={!memory.ready || busy} onClick={() => send(null, { text: f.title, mode: "help" })}><Icon name="help" /><span>{f.title}</span><Icon name="arrow" /></button>)}</div>}
-            <LucynaTools key={active.id + ":" + active.mode} mode={active.mode} supabase={supabase} user={user} busy={busy}
+            {(toolsOpen || active.mode === "review") && <LucynaTools key={active.id + ":" + active.mode} mode={active.mode} supabase={supabase} user={user} busy={busy}
               onUseDraft={useToolDraft} onNotice={setNotice} initialDraft={toolDraft}
               deliveryId={active.sourceDeliveryId || (routeTarget.current === active.id ? params.get("delivery") : null)}
               conversationId={active.sourceConversationId || (routeTarget.current === active.id ? params.get("conversation") : null)}
-              onReview={review => send(null, { text: "Sprawdź wybrany materiał względem kryteriów:\n" + review.criteria.map((c, i) => (i + 1) + ". " + c).join("\n"), mode: "review", review })} />
+              onReview={review => send(null, { text: "Sprawdź wybrany materiał względem kryteriów:\n" + review.criteria.map((c, i) => (i + 1) + ". " + c).join("\n"), mode: "review", review })} />}
             {active.messages.map(message => <article key={message.id} className={"lu-message is-" + message.role}
               data-ai-generated={message.provenance?.ai_generated ? "true" : "false"} data-ai-model={message.provenance?.model}
               data-ai-output-sha256={message.provenance?.answer_sha256}>
               <div className="lu-message-avatar">{message.role === "assistant" ? <Mark small /> : <span aria-hidden="true">Ty</span>}</div>
-              <div className="lu-message-content"><span className="lu-message-author">{message.role === "assistant" ? message.status?.startsWith("catalog") ? "Katalog IdeaHire" : "Lucyna AI" : "Ty"}</span>
+              <div className="lu-message-content"><span className="lu-message-author">{message.role === "assistant" ? message.status?.startsWith("catalog") ? "Katalog IdeaHire" : message.error && !message.text ? "Połączenie z AI" : "Lucyna AI" : "Ty"}</span>
                 {message.text && <SafeText text={message.text} />}
-                {message.review && <ReviewResult review={message.review} onDraft={useCorrection} />}
-                {message.status === "loading" && <ThinkingIndicator />}
+                {message.review && <ReviewResult review={message.review} onDraft={useCorrection} busy={busy} />}
+                {["loading","streaming"].includes(message.status) && (!message.text || ["jobs","freelancers","services","checking","analyzing"].includes(message.phase)) && <ThinkingIndicator phase={message.phase} />}
                 {message.status === "streaming" && <span className="lu-stream-cursor" aria-label="Odpowiedź jest wyświetlana" />}
-                {message.filters && <SearchBox key={JSON.stringify(message.filters)} mode={message.searchMode} filters={message.filters} loading={searching}
-                  onSearch={filters => runSearch(filters, active.id, message.id, message.searchMode)} />}
+                {message.catalogs?.map((catalog,index) => <section className="lu-catalog-answer" key={index}
+                  aria-label={catalog.mode === "jobs" ? "Zlecenia znalezione w IdeaHire" : catalog.mode === "services" ? "Usługi znalezione w IdeaHire" : "Wykonawcy znalezieni w IdeaHire"}>
+                  <Results mode={catalog.mode} items={catalog.items} total={catalog.total} />
+                  {<details className="lu-catalog-filters"><summary>Zmień filtry katalogu</summary>
+                    <SearchBox mode={catalog.mode} filters={catalog.filters} loading={searching}
+                      onSearch={filters => runSearch(filters,active.id,null,catalog.mode)} /></details>}
+                </section>)}
+                {message.filters && !message.catalogs?.length && <SearchBox key={JSON.stringify(message.filters)} mode={message.searchMode}
+                  filters={message.filters} loading={searching} onSearch={filters => runSearch(filters,active.id,null,message.searchMode)} />}
                 {message.items && <Results mode={message.searchMode} items={message.items} total={message.total} />}
+                {message.catalogError && <p className="lu-message-note">{message.catalogError}</p>}
                 <SourceLinks sources={message.sources} />
                 {message.error && <p className="lu-message-error" role="status">{message.error}</p>}
                 {message.status === "stopped" && <span className="lu-message-note">Generowanie zatrzymane.</span>}
@@ -565,11 +659,11 @@ export default function Lucyna({ supabase, user, Navbar }) {
           </div>
           {newBelow && <button type="button" className="lu-jump-bottom" onClick={() => { followingRef.current = true; listRef.current.scrollTop = listRef.current.scrollHeight; setNewBelow(false); }}><Icon name="arrow" />Nowsze wiadomości</button>}
           <div className="lu-composer-area">
-            {(notice || status.code) && <div className="lu-notice" role="status"><Icon name="help" /><p>{notice || ERRORS[status.code]}</p>
-              {["setup", "disabled", "global_limit", "user_limit", "account"].includes(status.code) && <button type="button" onClick={refreshStatus}>Sprawdź dostępność</button>}</div>}
+            {(notice || status.code) && <div className="lu-notice" role="status"><Icon name="help" /><p>{notice || ERRORS[status.code]}{status.diagnosticRequestId && <small className="lu-diagnostic-id">Identyfikator zgłoszenia: {status.diagnosticRequestId}</small>}</p>
+              {["migration", "version", "setup", "disabled", "global_limit", "user_limit", "account", "provider_auth", "provider_forbidden", "provider_model", "provider_blocked", "free_model", "free_setup"].includes(status.code) && <button type="button" onClick={() => refreshStatus(true)}>Sprawdź dostępność</button>}</div>}
             <form className={"lu-composer" + (busy ? " is-busy" : "")} onSubmit={send}>
               <label className="lu-sr-only" htmlFor="lucyna-message">Wiadomość do Lucyny AI</label>
-              <textarea id="lucyna-message" ref={textareaRef} rows={1} maxLength={2000} value={draft}
+              <textarea id="lucyna-message" ref={textareaRef} rows={1} maxLength={6000} value={draft}
                 placeholder={isSearch ? "Opisz, kogo lub jakiego zlecenia szukasz…" : active.mode === "brief" ? "Opisz pomysł na zlecenie…" : "Napisz do Lucyny AI…"}
                 onChange={event => setDraft(event.target.value)} onKeyDown={event => {
                   if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing && !window.matchMedia("(pointer: coarse)").matches) { event.preventDefault(); if (!busy) send(); }
@@ -578,7 +672,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
                 : <button className="lu-send" type="submit" disabled={!draft.trim() || !memory.ready || deleting} aria-label="Wyślij wiadomość do Lucyny AI"><Icon name="send" /></button>}
             </form>
             <div className="lu-composer-meta"><span>Lucyna AI może się mylić. Sprawdź ważne informacje.</span>
-              <span>{status.loading ? "Sprawdzam pulę AI…" : status.remaining == null ? "Pomoc IdeaHire bez zużycia puli AI" : status.remaining + " / " + (status.limit || 20) + " prób AI na dziś"}{draft.length > 1600 ? " · " + draft.length + "/2000" : ""}</span></div>
+              <span>{status.loading ? "Sprawdzam pulę AI…" : status.remaining == null ? "Darmowa pula AI" : status.remaining + " / " + (status.limit || 20) + " prób AI na dziś"}{draft.length > 4800 ? " · " + draft.length + "/6000" : ""}</span></div>
           </div>
         </main>
       </div>
@@ -587,14 +681,14 @@ export default function Lucyna({ supabase, user, Navbar }) {
           <button className="lu-icon-button" type="button" aria-label="Zamknij informacje" onClick={() => setInfoOpen(false)}><Icon name="close" /></button>
           <Mark small /><h2 id="lucyna-info-title">Lucyna AI i Twoje dane</h2>
           <p>Rozmawiasz z asystentką AI IdeaHire. Pomagam w pytaniach, tekstach i przygotowaniu współpracy.</p>
-          <ul><li>Podstawowe instrukcje IdeaHire i obliczenia prowizji działają bez wysyłania pytania do modelu.</li>
-            <li>Generowanie AI przekazuje Cloudflare pytanie, krótki kontekst i materiały wybrane przez Ciebie.</li>
+          <ul><li>Swobodna rozmowa korzysta z modelu AI. W razie potrzeby Lucyna odczytuje potwierdzone instrukcje i publiczne katalogi IdeaHire.</li>
+            <li>Generowanie AI przekazuje Cloudflare pytanie, kontekst tej samej rozmowy, publiczne wyniki wybranych odczytów oraz materiały wskazane przez Ciebie.</li>
             <li>Jeśli włączysz zapis, historia pozostaje na Twoim koncie w Supabase do 30 dni od ostatniego zapisu. Możesz ją pobrać i usunąć.</li>
             <li>Wybrany plik nie jest przechowywany w historii. Odpowiedź może zawierać cytaty z materiału.</li>
             <li>Nie wklejaj haseł, numerów dokumentów, danych wrażliwych ani materiałów poufnych.</li>
             <li>Do 20 prób generowania dziennie na konto w ramach wspólnej darmowej puli. Także przerwana lub nieudana próba może zużyć limit. Reset o północy UTC.</li>
             <li>Prognoza pochodzi z MET Norway, dla centrum wskazanego miasta. Nie korzystamy z GPS urządzenia.</li>
-            <li>Ty zatwierdzasz filtry i podejmujesz decyzje. Lucyna AI nie wysyła wiadomości, nie akceptuje prac i nie wykonuje płatności.</li></ul>
+            <li>Ty określasz potrzebę i podejmujesz decyzje. Lucyna AI nie wysyła wiadomości, nie akceptuje prac i nie wykonuje płatności.</li></ul>
           <label className="lu-check"><input type="checkbox" disabled={memory.ackSaving} checked={memory.acknowledged ? memory.historyEnabled : historyChoice}
             onChange={e => memory.acknowledged ? memory.acknowledge(e.target.checked).catch(() => setNotice("Nie udało się zmienić ustawienia historii.")) : setHistoryChoice(e.target.checked)} /><span>Zapamiętuj rozmowy na moim koncie</span></label>
           <p className="lu-tool-note">Wyłączenie zapisu nie usuwa wcześniejszych rozmów.</p>
