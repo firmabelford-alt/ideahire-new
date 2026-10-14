@@ -1,4 +1,4 @@
-/* IdeaHire | Lucyna AI | 2026-10-13. Style ograniczone do modułu Lucyny. */
+/* IdeaHire | Lucyna AI | P35 | 2026-10-14. Style ograniczone do modułu Lucyny. */
 .lucyna-root {
   --lu-surface: var(--ih7-surface, #fff);
   --lu-soft: var(--ih7-soft, #f4f6fa);
@@ -543,3 +543,76 @@ html[data-template="classic"][data-theme="dark"] .lucyna-root { --lu-accent: #ee
   .lucyna-root .lu-shell::before, .lucyna-root .lu-composer::before { opacity: .35; }
   .lucyna-root .lu-thinking-dots i { opacity: .7; }
 }
+
+/* P34: spokojne pole wpisywania i odróżnione role rozmowy. */
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer,
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer:focus-within {
+  background: var(--lu-soft) !important;
+  border: 1px solid var(--lu-line) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer:focus-within {
+  border-color: color-mix(in srgb, var(--lu-muted) 65%, var(--lu-line)) !important;
+}
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer::before,
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer::after {
+  content: none !important;
+  display: none !important;
+}
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer textarea,
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer textarea:focus,
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer textarea:focus-visible {
+  appearance: none !important;
+  border: 0 !important;
+  border-image: none !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--lu-ink) !important;
+}
+.lucyna-root .is-assistant .lu-message-content {
+  flex: 1 1 auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 3px 0 10px;
+}
+.lucyna-root .is-assistant .lu-message-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--lu-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1px;
+  margin-bottom: 13px;
+}
+.lucyna-root .is-assistant .lu-message-avatar .lu-mark-halo { display: none; }
+.lucyna-root .is-user .lu-message-content {
+  background: color-mix(in srgb, var(--lu-accent) 7%, var(--lu-soft));
+  border: 1px solid color-mix(in srgb, var(--lu-accent) 18%, var(--lu-line));
+  border-radius: 20px 20px 5px 20px;
+  padding: 14px 20px;
+}
+.lucyna-root .lu-message-error { background: var(--lu-soft); border-color: var(--lu-line); color: var(--lu-muted); }
+.lucyna-root .lu-catalog-answer { margin-top: 18px; }
+.lucyna-root .lu-catalog-filters { margin-top: 12px; color: var(--lu-muted); font-size: 11px; }
+.lucyna-root .lu-catalog-filters summary { cursor: pointer; padding: 7px 0; }
+.lucyna-root .lu-catalog-filters summary:focus-visible { outline: 2px solid var(--lu-accent); outline-offset: 2px; }
+.lucyna-root .lu-diagnostic-id { display: block; margin-top: 6px; overflow-wrap: anywhere; font-size: 10px; opacity: .8; }
+@media (forced-colors: active) {
+  html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer:focus-within { border-color: Highlight !important; }
+}
+
+/* P35: spokojne pole tekstowe; neon pozostaje na obramowaniu czatu. */
+html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-composer textarea {
+  filter: none !important;
+  -webkit-appearance: none !important;
+  border-radius: 0 !important;
+  background-image: none !important;
+}
+.lucyna-root .lu-thinking small { margin-left: auto; font-size: 11px; color: var(--lu-muted); font-variant-numeric: tabular-nums; }
+.lucyna-root .lu-result-card { content-visibility: auto; contain-intrinsic-size: auto 150px; }
