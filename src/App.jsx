@@ -1,4 +1,4 @@
-/* IdeaHire | P37 | 2026-10-14 | Pełny plik: src/App.jsx | Panorama projektu 3D */
+/* IdeaHire | P38 | 2026-10-15 | Pełny plik: src/App.jsx | Przestrzeń zleceń + nawigacja kursora */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -8,489 +8,999 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
-/* IdeaHire P37 — lokalne studio 3D, WebGL, bez zewnętrznych modeli. */
-const IH37_VERTEX = [
- "attribute vec3 aPosition,aNormal;",
- "attribute vec2 aUV;",
- "uniform mat4 uProjection,uModel;",
- "varying vec3 vPosition,vNormal;varying vec2 vUV;",
- "void main(){vec4 p=uModel*vec4(aPosition,1.0);vPosition=p.xyz;vNormal=mat3(uModel)*aNormal;vUV=aUV;gl_Position=uProjection*p;}"
-].join("\n");
-const IH37_FRAGMENT = [
- "precision mediump float;",
- "uniform vec3 uColor,uEye,uAccent;",
- "uniform float uFinish,uRough,uDark,uPower,uTime;",
- "uniform sampler2D uTexture;",
- "varying vec3 vPosition,vNormal;varying vec2 vUV;",
- "void main(){",
- " vec3 n=normalize(vNormal),v=normalize(uEye-vPosition),r=reflect(-v,n);",
- " if(uFinish>4.5){float a=exp(-dot(vPosition.xz*vec2(.46,.72),vPosition.xz*vec2(.46,.72)))*.28;gl_FragColor=vec4(mix(vec3(.17,.21,.30),vec3(.0),uDark),a);return;}",
- " vec3 l=normalize(vec3(-2.2,4.2,3.7)),l2=normalize(vec3(3.0,1.8,-2.0));",
- " float d=max(dot(n,l),0.0),d2=max(dot(n,l2),0.0),f=pow(1.0-max(dot(n,v),0.0),4.0);",
- " float s=pow(max(dot(n,normalize(l+v)),0.0),mix(135.0,12.0,uRough));",
- " float s2=pow(max(dot(n,normalize(l2+v)),0.0),mix(80.0,9.0,uRough));",
- " vec3 env=vec3(.12)+vec3(.65)*smoothstep(.55,.94,r.y)+vec3(.55)*pow(max(0.0,1.0-abs(r.x+.25)),18.0);",
- " env+=uAccent*pow(max(0.0,1.0-abs(r.z+.75)),10.0)*.32;",
- " vec3 color=uColor*(.24+d*.56+d2*.22)+vec3(s)*1.2+uAccent*s2*.44;",
- " color=mix(color,color*.62+env*.48+vec3(f*.27),1.0-uRough);",
- " if(uFinish>2.5&&uFinish<3.5){vec4 t=texture2D(uTexture,vUV);if(t.a<.08)discard;color=t.rgb*(.68+d*.22);}",
- " if(uFinish>1.5&&uFinish<2.5){vec3 t=texture2D(uTexture,vUV).rgb;color=mix(vec3(.005,.009,.016),t,uPower);color+=vec3(s*.15)+uAccent*f*.06;gl_FragColor=vec4(color,1.0);return;}",
- " if(uFinish>3.5&&uFinish<4.5)color=uAccent*(.8+uPower*.55);",
- " color=color/(vec3(1.0)+color*.24);gl_FragColor=vec4(pow(max(color,0.0),vec3(.87)),1.0);",
- "}"
-].join("\n");
-const IH37_FIELD_VERTEX=[
- "attribute vec3 aPosition;uniform mat4 uProjection;uniform float uTime,uRatio;uniform vec2 uPointer;varying float vGlow,vDepth,vSide;",
- "void main(){vec3 p=aPosition;float d=length(p.xz-uPointer);",
- "p.y=-1.05+.30*sin(p.x*1.22+uTime*.28)+.18*sin(p.z*.95-uTime*.22)+.09*sin(p.x*2.6+p.z*2.1+uTime*.40);",
- "p.y+=.12*sin(d*2.8-uTime*.65)*exp(-d*.42);",
- "vec4 clip=uProjection*vec4(p,1.0);gl_Position=clip;vSide=clip.x/max(.1,clip.w);vDepth=exp(-max(0.0,-p.z)*.12);",
- "vGlow=.38+.62*smoothstep(-1.1,-.78,p.y);gl_PointSize=(1.1+vGlow*1.0)*uRatio;"
-].join("\n")+"\n}";
-const IH37_FIELD_FRAGMENT=[
- "precision mediump float;uniform vec3 uAccent;uniform float uDark,uDots;varying float vGlow,vDepth,vSide;",
- "void main(){float a=1.0;if(uDots>.5){float r=length(gl_PointCoord-vec2(.5));a=1.0-smoothstep(.22,.5,r);}",
- "float shade=smoothstep(-.9,.3,vSide);a*=mix(.10,.40,uDark)*vGlow*vDepth*mix(.18,1.0,shade);if(uDots<.5)a*=.40;",
- "gl_FragColor=vec4(uAccent*(.74+vGlow*.52),a);}"
-].join("\n");
-function ih37FieldGeometry(){
- const points=[],lines=[],nx=121,nz=76;
- for(let z=0;z<nz;z++)for(let x=0;x<nx;x++)points.push(-9+x*18/(nx-1),0,-6+z*12/(nz-1));
- const xx=57,zz=36,point=(x,z)=>[-9+x*18/(xx-1),0,-6+z*12/(zz-1)];
- for(let z=0;z<zz;z++)for(let x=0;x<xx;x++){if(x<xx-1)lines.push(...point(x,z),...point(x+1,z));if(z<zz-1)lines.push(...point(x,z),...point(x,z+1));}
- return{points,lines};
+const IH38_STYLES = String.raw`
+#root#root#root .ih38-hero {
+  --ih38-bg: #f1f4f8; --ih38-ink: #18283b; --ih38-muted: #526277;
+  --ih38-accent: #285ed4; --ih38-accent-soft: #dce6f9; --ih38-on-accent: #fff;
+  --ih38-line: #cbd4e1; --ih38-paper: #fbfcfe; --ih38-paper-back: #e2e7ef;
+  --ih38-glass: rgba(251,253,255,.86); --ih38-shade: rgba(40,62,100,.16);
+  --ih38-scene-scale: 1; --ih38-stage-scale: 1; --ih38-orbit-x: 0deg; --ih38-orbit-y: 0deg;
+  position: relative !important; isolation: isolate !important; display: block !important;
+  width: 100% !important; max-width: none !important; min-height: 660px !important;
+  margin: 0 0 36px !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: var(--ih38-bg) !important; color: var(--ih38-ink) !important; overflow: hidden !important;
+  font-family: Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+  text-align: left !important; box-shadow: none !important;
 }
+#root#root#root .ih38-hero[data-dark="true"] {
+  --ih38-bg: #0c1422; --ih38-ink: #edf2fa; --ih38-muted: #a2b2ca;
+  --ih38-accent: #9dbcf8; --ih38-accent-soft: #223756; --ih38-on-accent: #101c31;
+  --ih38-line: #35435a; --ih38-paper: #1b2a3e; --ih38-paper-back: #28374e;
+  --ih38-glass: rgba(24,38,57,.92); --ih38-shade: rgba(0,3,10,.42);
+}
+#root#root#root .ih38-hero[data-classic="true"] {
+  --ih38-bg: #f1f0ed; --ih38-ink: #242925; --ih38-muted: #63665e;
+  --ih38-accent: #424a42; --ih38-accent-soft: #dddfd7; --ih38-line: #ccd0c6;
+  --ih38-paper: #fbfbf7; --ih38-paper-back: #e2e3db; --ih38-glass: rgba(249,250,246,.91);
+  --ih38-shade: rgba(36,43,31,.17); --ih38-on-accent: #fff;
+}
+#root#root#root .ih38-hero[data-classic="true"][data-dark="true"] {
+  --ih38-bg: #161816; --ih38-ink: #f0f1eb; --ih38-muted: #b0b7ad;
+  --ih38-accent: #d0d8c9; --ih38-accent-soft: #373f33; --ih38-line: #454e42;
+  --ih38-paper: #262c24; --ih38-paper-back: #373e33; --ih38-glass: rgba(37,44,33,.94);
+  --ih38-shade: rgba(0,0,0,.36); --ih38-on-accent: #20261d;
+}
+#root#root#root .ih38-hero, #root#root#root .ih38-hero * { box-sizing: border-box !important; }
+#root#root#root .ih38-hero :is(h1,h2,p,button,a,strong,span,small) {
+  font-family: inherit !important; -webkit-text-fill-color: currentColor !important;
+}
+#root#root#root .ih38-hero :is(h1,h2,p) { text-shadow: none !important; }
+#root#root#root .ih38-hero svg { flex: 0 0 auto; }
+#root#root#root .ih38-atmosphere { position: absolute; z-index: -2; inset: 0; overflow: hidden; pointer-events: none; }
+#root#root#root .ih38-horizon {
+  position: absolute; left: 35%; top: -4%; width: 75%; height: 100%;
+  background: radial-gradient(ellipse at 62% 48%,color-mix(in srgb,var(--ih38-accent) 12%,transparent),transparent 64%);
+  opacity: .9;
+}
+#root#root#root .ih38-light {
+  position: absolute; top: -26%; left: 34%; width: 60%; height: 150%;
+  transform: rotate(-26deg); transform-origin: 50% 50%;
+  background: linear-gradient(90deg,transparent 15%,color-mix(in srgb,var(--ih38-accent) 5%,transparent) 47%,color-mix(in srgb,var(--ih38-accent) 12%,transparent) 52%,transparent 75%);
+  filter: blur(25px); animation: ih38-light-travel 19s ease-in-out infinite alternate;
+}
+#root#root#root .ih38-grain {
+  position: absolute; inset: 0; opacity: .035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23888888' filter='url(%23n)' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
+}
+#root#root#root .ih38-field {
+  position: absolute !important; inset: 0 !important; z-index: -1; display: block !important;
+  width: 100% !important; height: 100% !important; margin: 0 !important; border: 0 !important;
+  opacity: .73; pointer-events: none !important;
+  mask-image: linear-gradient(90deg,rgba(0,0,0,.16),#000 58%);
+}
+#root#root#root .ih38-hero[data-gpu="false"] .ih38-field { visibility: hidden; }
+#root#root#root .ih38-topline {
+  position: absolute; z-index: 8; left: clamp(28px,5.6vw,100px); right: clamp(28px,4vw,72px); top: 26px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+#root#root#root .ih38-wordmark {
+  display: inline-flex !important; align-items: center; gap: 9px; margin: 0 !important;
+  font-size: 10px !important; font-weight: 700 !important; line-height: 1.4 !important; letter-spacing: .095em !important;
+  color: var(--ih38-ink) !important;
+}
+#root#root#root .ih38-wordmark > i { display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--ih38-accent); }
+#root#root#root .ih38-wordmark > span { margin-left: 12px; color: var(--ih38-muted); font-weight: 500 !important; letter-spacing: .035em !important; }
+#root#root#root .ih38-controls { display: flex; align-items: center; gap: 7px; }
+#root#root#root .ih38-control {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 7px;
+  min-width: 40px !important; min-height: 40px !important; width: auto !important; height: 40px !important;
+  padding: 0 11px !important; margin: 0 !important; background: var(--ih38-glass) !important;
+  border: 1px solid var(--ih38-line) !important; border-radius: 99px !important;
+  color: var(--ih38-ink) !important; font-size: 11px !important; font-weight: 550 !important; line-height: 1 !important;
+  box-shadow: none !important; transform: none !important; cursor: pointer; backdrop-filter: blur(14px);
+}
+#root#root#root .ih38-control svg { width: 16px; height: 16px; }
+#root#root#root .ih38-control:hover { border-color: var(--ih38-accent) !important; }
+#root#root#root .ih38-control:disabled { opacity: .5 !important; cursor: default; }
+#root#root#root .ih38-layout {
+  position: relative; z-index: 2; display: grid !important; grid-template-columns: minmax(0,.46fr) minmax(0,.54fr);
+  align-items: center !important; gap: 12px; min-height: 660px;
+  padding: 96px clamp(28px,4vw,72px) 84px clamp(28px,5.6vw,100px) !important;
+}
+#root#root#root .ih38-copy { position: relative !important; z-index: 4; min-width: 0; padding: 0 !important; }
+#root#root#root .ih38-eyebrow {
+  display: block !important; margin: 0 0 20px !important; color: var(--ih38-muted) !important;
+  font-size: 10px !important; font-weight: 650 !important; line-height: 1.6 !important; letter-spacing: .12em !important;
+  text-transform: uppercase !important; max-width: 100%;
+}
+#root#root#root .ih38-title {
+  display: block !important; width: auto !important; max-width: 100% !important;
+  margin: 0 !important; padding: 0 !important; color: var(--ih38-ink) !important;
+  font-size: clamp(51px,5.85vw,98px) !important; font-weight: 640 !important;
+  line-height: 1.035 !important; letter-spacing: -.064em !important; text-wrap: initial !important;
+  word-break: normal !important; overflow-wrap: normal !important;
+}
+#root#root#root .ih38-title > span { display: block !important; white-space: nowrap !important; color: var(--ih38-ink) !important; }
+#root#root#root .ih38-title > span:last-child { color: var(--ih38-accent) !important; font-weight: 450 !important; }
+#root#root#root .ih38-description {
+  max-width: 325px !important; margin: 24px 0 0 !important; padding: 0 !important;
+  color: var(--ih38-muted) !important; font-size: 15px !important; font-weight: 400 !important; line-height: 1.75 !important;
+}
+#root#root#root .ih38-actions { display: flex !important; align-items: stretch; gap: 10px; margin: 27px 0 0 !important; }
+#root#root#root .ih38-cta {
+  position: relative; display: inline-flex !important; align-items: center !important; justify-content: space-between !important;
+  gap: 16px; min-height: 51px !important; min-width: 0 !important; width: auto !important;
+  margin: 0 !important; padding: 13px 17px !important; border: 1px solid var(--ih38-line) !important;
+  border-radius: 8px !important; background: var(--ih38-glass) !important; color: var(--ih38-ink) !important;
+  font-size: 12px !important; font-weight: 650 !important; line-height: 1.4 !important; text-decoration: none !important;
+  box-shadow: none !important; transform: none !important; transition: border-color .2s ease !important;
+}
+#root#root#root .ih38-cta:first-child { background: var(--ih38-accent) !important; border-color: var(--ih38-accent) !important; color: var(--ih38-on-accent) !important; }
+#root#root#root .ih38-cta svg { width: 15px; height: 15px; transition: transform .2s ease; }
+#root#root#root .ih38-cta:hover { border-color: var(--ih38-accent) !important; }
+#root#root#root .ih38-cta:hover svg { transform: translate(2px,-2px); }
+#root#root#root .ih38-chapters { display: flex; gap: 14px; margin-top: 34px; max-width: 100%; }
+#root#root#root .ih38-chapter {
+  position: relative; display: flex !important; align-items: center; gap: 7px; min-height: 44px !important;
+  min-width: 0 !important; width: auto !important; padding: 0 1px 11px !important; margin: 0 !important;
+  border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--ih38-muted) !important;
+  box-shadow: none !important; transform: none !important; font-size: 10px !important; line-height: 1.4 !important;
+  font-weight: 600 !important; cursor: pointer;
+}
+#root#root#root .ih38-chapter-number { font-size: 9px !important; font-variant-numeric: tabular-nums; font-weight: 450 !important; opacity: .85; }
+#root#root#root .ih38-chapter > i { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--ih38-line); }
+#root#root#root .ih38-chapter > i::after { content: ""; display: block; height: 100%; background: var(--ih38-accent); transform: scaleX(0); transform-origin: left; transition: transform .65s ease; }
+#root#root#root .ih38-chapter[aria-pressed="true"] { color: var(--ih38-ink) !important; }
+#root#root#root .ih38-chapter[aria-pressed="true"] > i::after { transform: scaleX(1); }
+#root#root#root .ih38-stage {
+  position: relative !important; align-self: center !important; width: 100% !important; height: 490px !important;
+  min-width: 0 !important; margin: 0 !important; padding: 0 !important;
+  touch-action: pan-y; cursor: grab; perspective: 1200px; outline: none;
+}
+#root#root#root .ih38-stage[data-dragging="true"] { cursor: grabbing; }
+#root#root#root .ih38-stage-sizer {
+  position: absolute; left: 50%; top: 50%; width: 650px; height: 510px;
+  transform: translate(-50%,-50%) scale(var(--ih38-stage-scale)); transform-origin: center;
+  perspective: 1200px;
+}
+#root#root#root .ih38-world {
+  position: absolute; inset: 0; transform-style: preserve-3d;
+  transform: rotateX(var(--ih38-orbit-x)) rotateY(var(--ih38-orbit-y));
+}
+#root#root#root .ih38-connections { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; color: var(--ih38-accent); opacity: .43; transform: translateZ(-45px); pointer-events: none; }
+#root#root#root .ih38-connections path { stroke: currentColor; stroke-width: .6; }
+#root#root#root .ih38-connections circle { fill: currentColor; }
+#root#root#root .ih38-connections path.ih38-stream { stroke-width: 1.4; stroke-dasharray: 14 320; animation: ih38-stream 8s linear infinite; opacity: .8; }
+#root#root#root .ih38-ground-shadow { position: absolute; left: 150px; top: 344px; width: 407px; height: 136px; transform: rotate(-8deg) translateZ(-60px); border-radius: 50%; background: radial-gradient(ellipse,var(--ih38-shade),transparent 67%); filter: blur(14px); pointer-events: none; }
+#root#root#root .ih38-plate { border: 1px solid var(--ih38-line) !important; background: var(--ih38-glass) !important; color: var(--ih38-ink) !important; box-shadow: 0 20px 50px var(--ih38-shade),inset 0 1px 0 rgba(255,255,255,.17) !important; }
+#root#root#root .ih38-job-wrap {
+  position: absolute; z-index: 5; left: 205px; top: 86px; width: 325px;
+  transform: translateZ(56px) rotateY(-13deg) rotateX(5deg) rotateZ(-6deg);
+  transform-style: preserve-3d; animation: ih38-document-arrive 1.65s cubic-bezier(.2,.72,.2,1) both;
+}
+#root#root#root .ih38-paper-edge { position: absolute; inset: 7px -5px -7px 5px; border: 1px solid var(--ih38-line); border-radius: 17px; background: var(--ih38-paper-back); transform: translateZ(-6px); opacity: .8; }
+#root#root#root .ih38-paper-edge-two { inset: 13px -9px -13px 9px; transform: translateZ(-12px); opacity: .38; }
+#root#root#root .ih38-document {
+  position: relative !important; display: flex !important; flex-direction: column;
+  width: 325px !important; height: 369px !important; min-height: 369px !important; margin: 0 !important; padding: 21px 23px 16px !important;
+  border-radius: 17px !important; background: var(--ih38-paper) !important; overflow: hidden;
+}
+#root#root#root .ih38-document-top { display: flex; align-items: center; gap: 10px; padding-bottom: 17px; border-bottom: 1px solid var(--ih38-line); }
+#root#root#root .ih38-file-icon { display: grid; place-items: center; width: 32px; height: 38px; border: 1px solid var(--ih38-line); border-radius: 6px; background: var(--ih38-accent-soft); color: var(--ih38-accent); }
+#root#root#root .ih38-file-icon svg { width: 18px; height: 18px; }
+#root#root#root .ih38-document-top > span:nth-child(2) { color: var(--ih38-ink) !important; font-size: 9px !important; font-weight: 650 !important; letter-spacing: .095em; }
+#root#root#root .ih38-document-top small { display: block; margin-top: 5px; color: var(--ih38-muted); font-size: 9px !important; font-weight: 400 !important; letter-spacing: 0; }
+#root#root#root .ih38-document-number { margin-left: auto; font-size: 11px !important; font-weight: 400 !important; color: var(--ih38-muted); font-variant-numeric: tabular-nums; }
+#root#root#root .ih38-document-content { min-width: 0; flex: 1; animation: ih38-content-update .7s ease both; }
+#root#root#root .ih38-category { display: block; margin: 17px 0 9px; height: 13px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 9px !important; font-weight: 600 !important; line-height: 1.4 !important; color: var(--ih38-accent); }
+#root#root#root .ih38-document h2 {
+  display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; height: 57px; overflow: hidden;
+  margin: 0 !important; padding: 0 !important; max-width: 100% !important; color: var(--ih38-ink) !important;
+  font-size: 24px !important; font-weight: 600 !important; line-height: 1.17 !important; letter-spacing: -.045em !important; overflow-wrap: anywhere !important;
+}
+#root#root#root .ih38-document-content > p { display: -webkit-box !important; -webkit-box-orient: vertical; -webkit-line-clamp: 2; height: 33px; overflow: hidden; color: var(--ih38-muted) !important; font-size: 10px !important; font-weight: 400 !important; line-height: 1.65 !important; margin: 12px 0 14px !important; padding: 0 !important; }
+#root#root#root .ih38-brief-line { display: flex; gap: 5px; width: 100%; height: 3px; margin-bottom: 17px; }
+#root#root#root .ih38-brief-line > i { flex: 1; border-radius: 2px; background: var(--ih38-line); }
+#root#root#root .ih38-brief-line > i:first-child { background: var(--ih38-accent); }
+#root#root#root .ih38-hero[data-phase="1"] .ih38-brief-line > i:nth-child(2),
+#root#root#root .ih38-hero[data-phase="2"] .ih38-brief-line > i { background: var(--ih38-accent); }
+#root#root#root .ih38-document-facts { display: grid; grid-template-columns: .8fr 1.2fr; gap: 14px; }
+#root#root#root .ih38-document-facts span { display: block; margin-bottom: 7px; color: var(--ih38-muted); font-size: 9px !important; font-weight: 450 !important; }
+#root#root#root .ih38-document-facts strong { display: block; font-size: 10px !important; font-weight: 650 !important; line-height: 1.5 !important; overflow-wrap: anywhere; }
+#root#root#root .ih38-document-facts > div:first-child strong { font-size: 19px !important; letter-spacing: -.025em; font-weight: 550 !important; white-space: nowrap; }
+#root#root#root .ih38-document-facts > div:last-child strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; height: 30px; overflow: hidden; }
+#root#root#root .ih38-document-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px; padding-top: 13px; border-top: 1px solid var(--ih38-line); }
+#root#root#root .ih38-document-footer > span { display: flex; align-items: center; gap: 6px; font-size: 8px !important; color: var(--ih38-muted); font-weight: 500 !important; }
+#root#root#root .ih38-document-footer > span i { display: block; width: 4px; height: 4px; background: var(--ih38-accent); border-radius: 50%; }
+#root#root#root .ih38-document-footer svg { width: 13px; height: 13px; color: var(--ih38-accent); }
+#root#root#root .ih38-card-sheen {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(112deg,transparent 26%,rgba(255,255,255,.09) 43%,rgba(255,255,255,.22) 47%,transparent 66%);
+  background-size: 230% 100%; background-position: var(--ih38-light-x,53%) 0; mix-blend-mode: screen; opacity: .7;
+}
+#root#root#root .ih38-project {
+  position: absolute; z-index: 2; left: 444px; top: 40px; width: 188px; padding: 9px !important;
+  border-radius: 11px !important; transform: translateZ(-16px) rotateY(-16deg) rotateZ(7deg);
+  animation: ih38-project-arrive 1.55s cubic-bezier(.18,.7,.2,1) .85s both;
+}
+#root#root#root .ih38-project-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+#root#root#root .ih38-project-top > span { color: var(--ih38-muted); font-size: 6px !important; font-weight: 550 !important; letter-spacing: .06em; }
+#root#root#root .ih38-project-top svg { width: 11px; height: 11px; color: var(--ih38-accent); }
+#root#root#root .ih38-artwork { position: relative; height: 185px; padding: 13px; background: var(--ih38-accent-soft); border: 1px solid color-mix(in srgb,var(--ih38-accent) 18%,transparent); border-radius: 5px; overflow: hidden; }
+#root#root#root .ih38-art-edition { position: relative; z-index: 2; font-size: 7px !important; color: var(--ih38-accent); font-weight: 650 !important; letter-spacing: .07em; }
+#root#root#root .ih38-art-sculpture { position: absolute; width: 136px; height: 100px; left: 35px; top: 35px; transform: rotate(-24deg); }
+#root#root#root .ih38-art-sculpture > i { position: absolute; width: 100px; height: 68px; border-radius: 50%; border: 10px solid var(--ih38-accent); box-shadow: inset 3px 2px 6px rgba(255,255,255,.24),4px 8px 8px var(--ih38-shade); transform: rotateX(25deg); }
+#root#root#root .ih38-art-sculpture > i:nth-child(2) { left: 8px; top: 8px; }
+#root#root#root .ih38-art-sculpture > i:nth-child(3) { left: 16px; top: 16px; }
+#root#root#root .ih38-art-sculpture > i:nth-child(4) { left: 24px; top: 24px; }
+#root#root#root .ih38-art-sculpture > i:nth-child(5) { left: 32px; top: 32px; }
+#root#root#root .ih38-artwork > strong { position: absolute; left: 13px; bottom: 27px; max-width: 110px; color: var(--ih38-accent); font-size: 16px !important; line-height: 1 !important; font-weight: 550 !important; letter-spacing: -.04em; }
+#root#root#root .ih38-art-footer { position: absolute; left: 13px; right: 13px; bottom: 9px; display: flex; gap: 10px; align-items: center; font-size: 6px !important; color: var(--ih38-accent); }
+#root#root#root .ih38-art-footer > i { flex: 1; height: 1px; background: currentColor; opacity: .35; }
+#root#root#root .ih38-swatches { display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+#root#root#root .ih38-swatches > i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--ih38-line); background: var(--ih38-accent); }
+#root#root#root .ih38-swatches > i:nth-child(2) { background: var(--ih38-ink); }
+#root#root#root .ih38-swatches > i:nth-child(3) { background: var(--ih38-accent-soft); }
+#root#root#root .ih38-swatches > i:nth-child(4) { background: var(--ih38-paper); }
+#root#root#root .ih38-swatches > span { margin-left: auto; font-size: 5px !important; font-weight: 500 !important; letter-spacing: .04em; color: var(--ih38-muted); }
+#root#root#root .ih38-small-job {
+  position: absolute; z-index: 3; left: 28px; top: 302px; width: 209px;
+  display: flex; align-items: flex-start; gap: 10px; padding: 14px !important; border-radius: 12px !important;
+  transform: translateZ(3px) rotateY(15deg) rotateZ(-10deg);
+  animation: ih38-small-arrive 1.4s cubic-bezier(.2,.7,.2,1) 1.1s both;
+}
+#root#root#root .ih38-small-job-icon { display: grid; place-items: center; flex: 0 0 27px; height: 30px; border-radius: 5px; border: 1px solid var(--ih38-line); color: var(--ih38-accent); background: var(--ih38-accent-soft); }
+#root#root#root .ih38-small-job-icon svg { width: 15px; height: 15px; }
+#root#root#root .ih38-small-job > div { min-width: 0; animation: ih38-content-update .7s ease both; }
+#root#root#root .ih38-small-job > div > span { display: block; margin-bottom: 6px; color: var(--ih38-muted); font-size: 7px !important; line-height: 1.4 !important; font-weight: 500 !important; }
+#root#root#root .ih38-small-job strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 12px !important; line-height: 1.2 !important; font-weight: 550 !important; letter-spacing: -.02em; }
+#root#root#root .ih38-small-job small { display: block; margin-top: 9px; color: var(--ih38-muted); font-size: 7px !important; line-height: 1.4 !important; font-weight: 450 !important; }
+#root#root#root .ih38-talent {
+  position: absolute; z-index: 4; left: 380px; top: 445px; width: 244px;
+  display: flex; align-items: center; gap: 12px; padding: 16px !important; border-radius: 12px !important;
+  transform: translateZ(24px) rotateY(-12deg) rotateZ(4deg);
+  animation: ih38-talent-arrive 1.3s cubic-bezier(.2,.7,.2,1) 2.3s both;
+}
+#root#root#root .ih38-talent-symbol { display: grid; place-items: center; flex: 0 0 32px; height: 36px; border-radius: 8px; border: 1px solid var(--ih38-line); background: var(--ih38-accent-soft); color: var(--ih38-accent); }
+#root#root#root .ih38-talent-symbol svg { width: 18px; height: 18px; }
+#root#root#root .ih38-talent > div:nth-child(2) { min-width: 0; }
+#root#root#root .ih38-talent > div > span { display: block; color: var(--ih38-ink); font-size: 10px !important; font-weight: 600 !important; line-height: 1.4 !important; }
+#root#root#root .ih38-talent strong { display: block; margin-top: 5px; color: var(--ih38-muted); font-size: 7px !important; font-weight: 450 !important; line-height: 1.4 !important; }
+#root#root#root .ih38-talent-indicator { display: block; margin-left: auto; flex: 0 0 5px; height: 5px; background: var(--ih38-accent); border-radius: 50%; }
+#root#root#root .ih38-scene-label { position: absolute; z-index: 1; top: 18px; left: 145px; display: flex; align-items: center; gap: 10px; color: var(--ih38-muted); transform: translateZ(-28px); opacity: .7; }
+#root#root#root .ih38-scene-label span { font-size: 7px !important; font-weight: 500 !important; letter-spacing: .045em; }
+#root#root#root .ih38-scene-label > i { width: 30px; height: 1px; background: currentColor; }
+#root#root#root .ih38-foot {
+  position: absolute; z-index: 5; left: clamp(28px,5.6vw,100px); right: clamp(28px,4vw,72px); bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  min-height: 39px; padding-top: 15px; border-top: 1px solid var(--ih38-line); color: var(--ih38-muted);
+}
+#root#root#root .ih38-caption { display: flex; align-items: center; gap: 9px; min-width: 0; font-size: 9px !important; font-weight: 450 !important; line-height: 1.5 !important; }
+#root#root#root .ih38-caption svg { width: 14px; height: 14px; }
+#root#root#root .ih38-feed { display: flex; align-items: center; gap: 9px; min-width: 0; max-width: 45%; min-height: 28px; color: var(--ih38-ink) !important; font-size: 9px !important; line-height: 1.5 !important; font-weight: 500 !important; text-decoration: none !important; }
+#root#root#root .ih38-feed > span { flex: 0 0 auto; }
+#root#root#root .ih38-feed > strong { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ih38-muted); font-size: 9px !important; font-weight: 450 !important; animation: ih38-content-update .7s ease both; }
+#root#root#root .ih38-feed > svg { width: 13px; height: 13px; }
+#root#root#root .ih38-feed-dot { display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--ih38-accent); }
+#root#root#root .ih38-sr { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip-path: inset(50%) !important; white-space: nowrap !important; }
+#root#root#root .ih38-hero :is(.ih38-cta,.ih38-control,.ih38-chapter,.ih38-feed,.ih38-stage):focus-visible { outline: 2px solid var(--ih38-accent) !important; outline-offset: 5px !important; }
+#root#root#root .ih38-hero[data-paused="true"] *, #root#root#root .ih38-hero[data-paused="true"] *::before, #root#root#root .ih38-hero[data-paused="true"] *::after { animation-play-state: paused !important; }
+#root#root#root .ih38-hero[data-ready="true"] :is(.ih38-job-wrap,.ih38-project,.ih38-small-job,.ih38-talent) { animation: none; }
+#root#root#root .ih38-hero[data-phase="0"] .ih38-project { opacity: .68; }
+#root#root#root .ih38-hero[data-phase="0"] .ih38-talent { opacity: .65; }
+#root#root#root .ih38-hero[data-phase="2"] .ih38-project { opacity: 1; }
+@keyframes ih38-light-travel { from { transform: translateX(-12%) rotate(-26deg); opacity: .45; } to { transform: translateX(14%) rotate(-22deg); opacity: 1; } }
+@keyframes ih38-stream { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -668; } }
+@keyframes ih38-document-arrive { from { opacity: 0; transform: translate3d(14px,40px,-100px) rotateY(-30deg) rotateX(13deg) rotateZ(-10deg); } to { opacity: 1; transform: translateZ(56px) rotateY(-13deg) rotateX(5deg) rotateZ(-6deg); } }
+@keyframes ih38-project-arrive { from { opacity: 0; transform: translate3d(30px,-15px,-85px) rotateY(-35deg) rotateZ(14deg); } to { opacity: 1; transform: translateZ(-16px) rotateY(-16deg) rotateZ(7deg); } }
+@keyframes ih38-small-arrive { from { opacity: 0; transform: translate3d(-30px,30px,-70px) rotateY(25deg) rotateZ(-17deg); } to { opacity: 1; transform: translateZ(3px) rotateY(15deg) rotateZ(-10deg); } }
+@keyframes ih38-talent-arrive { from { opacity: 0; transform: translate3d(25px,22px,-65px) rotateY(-20deg) rotateZ(10deg); } to { opacity: 1; transform: translateZ(24px) rotateY(-12deg) rotateZ(4deg); } }
+@keyframes ih38-content-update { from { opacity: .35; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (min-width: 1680px) { #root#root#root .ih38-layout { min-height: 720px; } #root#root#root .ih38-stage { height: 525px !important; } }
+@media (min-width: 821px) and (max-width: 1080px) {
+  #root#root#root .ih38-layout { padding-left: 34px !important; padding-right: 26px !important; grid-template-columns: minmax(0,.46fr) minmax(0,.54fr); gap: 0; min-height: 620px; }
+  #root#root#root .ih38-hero { min-height: 620px !important; }
+  #root#root#root .ih38-title { font-size: clamp(45px,5.75vw,63px) !important; }
+  #root#root#root .ih38-description { max-width: 285px !important; font-size: 14px !important; }
+  #root#root#root .ih38-actions { gap: 8px; }
+  #root#root#root .ih38-cta { padding: 12px !important; gap: 8px; font-size: 11px !important; }
+  #root#root#root .ih38-chapters { gap: 10px; }
+  #root#root#root .ih38-stage { height: 410px !important; }
+  #root#root#root .ih38-wordmark > span { display: none; }
+}
+@media (max-width: 820px) {
+  #root#root#root .ih38-hero { min-height: 0 !important; margin-bottom: 28px !important; }
+  #root#root#root .ih38-layout { display: flex !important; flex-direction: column; align-items: stretch !important; gap: 15px; min-height: 0; padding: 90px 24px 104px !important; }
+  #root#root#root .ih38-topline { left: 24px; right: 24px; top: 20px; gap: 9px; }
+  #root#root#root .ih38-wordmark { font-size: 9px !important; }
+  #root#root#root .ih38-wordmark > span { display: none; }
+  #root#root#root .ih38-control { min-height: 40px !important; min-width: 40px !important; padding: 0 9px !important; font-size: 10px !important; }
+  #root#root#root .ih38-eyebrow { font-size: 9px !important; margin-bottom: 16px !important; letter-spacing: .09em !important; }
+  #root#root#root .ih38-title { font-size: clamp(48px,8.7vw,75px) !important; letter-spacing: -.058em !important; }
+  #root#root#root .ih38-description { font-size: 14px !important; margin-top: 20px !important; max-width: 365px !important; }
+  #root#root#root .ih38-actions { margin-top: 23px !important; }
+  #root#root#root .ih38-cta { min-height: 49px !important; font-size: 12px !important; }
+  #root#root#root .ih38-chapters { gap: 18px; margin-top: 20px; }
+  #root#root#root .ih38-chapter { font-size: 10px !important; }
+  #root#root#root .ih38-stage { height: min(calc((100vw - 48px)*1.1591),591.6px) !important; max-width: 540px; align-self: center !important; margin-top: 2px !important; }
+  #root#root#root .ih38-stage-sizer { width: 440px; height: 510px; }
+  #root#root#root .ih38-job-wrap { left: 69px; top: 61px; width: 296px; }
+  #root#root#root .ih38-document { width: 296px !important; height: 354px !important; min-height: 354px !important; padding: 19px 21px 14px !important; }
+  #root#root#root .ih38-document h2 { font-size: 23px !important; }
+  #root#root#root .ih38-document-top { padding-bottom: 13px; }
+  #root#root#root .ih38-document-content > p { margin: 10px 0 13px !important; }
+  #root#root#root .ih38-document-facts > div:first-child strong { font-size: 18px !important; }
+  #root#root#root .ih38-document-footer { margin-top: 16px; }
+  #root#root#root .ih38-project { left: 291px; top: 15px; width: 139px; padding: 7px !important; }
+  #root#root#root .ih38-project-top > span { font-size: 5px !important; }
+  #root#root#root .ih38-artwork { height: 149px; padding: 9px; }
+  #root#root#root .ih38-art-edition { font-size: 5px !important; }
+  #root#root#root .ih38-art-sculpture { left: 20px; top: 23px; transform: scale(.76) rotate(-24deg); transform-origin: top left; }
+  #root#root#root .ih38-artwork > strong { left: 9px; bottom: 26px; font-size: 13px !important; }
+  #root#root#root .ih38-swatches > span { display: none; }
+  #root#root#root .ih38-small-job { left: 9px; top: 411px; width: 187px; padding: 12px !important; }
+  #root#root#root .ih38-talent { left: 224px; top: 424px; width: 207px; padding: 13px !important; gap: 9px; }
+  #root#root#root .ih38-talent > div > span { font-size: 9px !important; }
+  #root#root#root .ih38-talent-symbol { flex-basis: 28px; height: 32px; }
+  #root#root#root .ih38-scene-label { top: 17px; left: 50px; }
+  #root#root#root .ih38-scene-label span:last-child { display: none; }
+  #root#root#root .ih38-ground-shadow { left: 20px; width: 410px; top: 318px; }
+  #root#root#root .ih38-connections { opacity: .24; }
+  #root#root#root .ih38-horizon { left: -15%; width: 150%; }
+  #root#root#root .ih38-field { mask-image: linear-gradient(#0000 10%,#000 47%); opacity: .66; }
+  #root#root#root .ih38-foot { left: 24px; right: 24px; bottom: 22px; flex-wrap: wrap; gap: 9px; padding-top: 13px; }
+  #root#root#root .ih38-caption { width: 100%; font-size: 9px !important; }
+  #root#root#root .ih38-feed { max-width: 100%; font-size: 10px !important; min-height: 30px; }
+}
+@media (max-width: 420px) {
+  #root#root#root .ih38-layout { padding: 88px 20px 107px !important; gap: 18px; }
+  #root#root#root .ih38-topline { left: 20px; right: 20px; }
+  #root#root#root .ih38-title { font-size: clamp(43px,11.7vw,51px) !important; }
+  #root#root#root .ih38-eyebrow { max-width: 245px; font-size: 8px !important; }
+  #root#root#root .ih38-actions { flex-wrap: wrap; gap: 8px; }
+  #root#root#root .ih38-cta { padding: 12px 13px !important; font-size: 11px !important; gap: 8px; flex: 1 1 140px; }
+  #root#root#root .ih38-chapters { gap: 17px; }
+  #root#root#root .ih38-chapter { font-size: 9px !important; }
+  #root#root#root .ih38-stage { height: calc((100vw - 40px)*1.1591) !important; }
+  #root#root#root .ih38-foot { left: 20px; right: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #root#root#root .ih38-hero *, #root#root#root .ih38-hero *::before, #root#root#root .ih38-hero *::after { animation: none !important; transition: none !important; }
+}
+@media print {
+  #root#root#root .ih38-hero { background: #fff !important; color: #111 !important; min-height: 0 !important; }
+  #root#root#root .ih38-layout { display: block !important; min-height: 0 !important; padding: 32px !important; }
+  #root#root#root .ih38-hero :is(.ih38-field,.ih38-stage,.ih38-controls,.ih38-foot,.ih38-chapters,.ih38-atmosphere) { display: none !important; }
+  #root#root#root .ih38-title > span { color: #111 !important; }
+}
+`;
 
-const IH37 = {
- identity:()=>new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]),
- multiply(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o;},
- move(x,y,z){const m=this.identity();m[12]=x;m[13]=y;m[14]=z;return m;},
- rx(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]);},
- ry(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]);},
- rz(a){const c=Math.cos(a),s=Math.sin(a);return new Float32Array([c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1]);},
- unit(a){const l=Math.hypot(...a)||1;return a.map(x=>x/l);},
- cross(a,b){return[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];},
- look(eye,at){const z=this.unit(eye.map((v,i)=>v-at[i])),x=this.unit(this.cross([0,1,0],z)),y=this.cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-x.reduce((s,v,i)=>s+v*eye[i],0),-y.reduce((s,v,i)=>s+v*eye[i],0),-z.reduce((s,v,i)=>s+v*eye[i],0),1]);},
- perspective(fov,aspect){const f=1/Math.tan(fov/2),near=.1,far=50;return new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);},
- ease(a,b,t){const p=Math.max(0,Math.min(1,(t-a)/(b-a)));return p*p*(3-2*p);},
- point(mesh,p,n,uv=[0,0]){mesh.push(...p,...n,...uv);},
- triangle(mesh,a,b,c,na,nb=na,nc=na,ua=[0,0],ub=[1,0],uc=[1,1]){this.point(mesh,a,na,ua);this.point(mesh,b,nb,ub);this.point(mesh,c,nc,uc);},
- quad(mesh,a,b,c,d,n,uv=[[0,0],[1,0],[1,1],[0,1]]){this.triangle(mesh,a,b,c,n,n,n,uv[0],uv[1],uv[2]);this.triangle(mesh,a,c,d,n,n,n,uv[0],uv[2],uv[3]);},
- prism(w,h,d,r,center=[0,0,0],steps=7){
-  const mesh=[],ring=(inset,y)=>{const out=[],ww=w/2-inset,dd=d/2-inset,rr=Math.max(.002,r-inset);
-   for(let c=0;c<4;c++){const angle=c*Math.PI/2,xx=Math.cos(angle+Math.PI/4)>0?ww-rr:-ww+rr,zz=Math.sin(angle+Math.PI/4)>0?dd-rr:-dd+rr;
-    for(let j=0;j<=steps;j++){const a=angle+j*Math.PI/(2*steps);out.push([center[0]+xx+Math.cos(a)*rr,center[1]+y,center[2]+zz+Math.sin(a)*rr,Math.cos(a),Math.sin(a)]);}}
-   return out;};
-  const bevel=Math.min(h*.24,.025),layers=[ring(bevel,-h/2),ring(0,-h/2+bevel),ring(0,h/2-bevel),ring(bevel,h/2)];
-  for(let k=0;k<3;k++)for(let i=0;i<layers[k].length;i++){const j=(i+1)%layers[k].length,a=layers[k][i],b=layers[k][j],c=layers[k+1][j],e=layers[k+1][i];
-   const ny=k===0?-.6:k===2?.6:0,na=this.unit([a[3],ny,a[4]]),nb=this.unit([b[3],ny,b[4]]);
-   this.triangle(mesh,a.slice(0,3),b.slice(0,3),c.slice(0,3),na,nb,nb);this.triangle(mesh,a.slice(0,3),c.slice(0,3),e.slice(0,3),na,nb,na);}
-  for(const [k,ny] of [[0,-1],[3,1]]){const ring=layers[k],c=[center[0],center[1]+(k===0?-h/2:h/2),center[2]];
-   for(let i=0;i<ring.length;i++)this.triangle(mesh,c,ring[i].slice(0,3),ring[(i+1)%ring.length].slice(0,3),[0,ny,0]);}
-  return mesh;
- },
- plane(w,d,y,z=0,x=0,down=false,uv){const mesh=[];this.quad(mesh,[x-w/2,y,z-d/2],[x+w/2,y,z-d/2],[x+w/2,y,z+d/2],[x-w/2,y,z+d/2],[0,down?-1:1,0],uv);return mesh;},
- sphere(rx,ry,rz,center=[0,0,0],steps=28,rows=14){
-  const mesh=[],p=(u,v)=>{const a=u*Math.PI*2,b=v*Math.PI,s=Math.sin(b),n=[Math.cos(a)*s,Math.cos(b),Math.sin(a)*s];return{p:n.map((q,i)=>q*[rx,ry,rz][i]+center[i]),n:this.unit([n[0]/rx,n[1]/ry,n[2]/rz])};};
-  for(let y=0;y<rows;y++)for(let x=0;x<steps;x++){const a=p(x/steps,y/rows),b=p((x+1)/steps,y/rows),c=p((x+1)/steps,(y+1)/rows),d=p(x/steps,(y+1)/rows);
-   this.triangle(mesh,a.p,b.p,c.p,a.n,b.n,c.n);this.triangle(mesh,a.p,c.p,d.p,a.n,c.n,d.n);}
-  return mesh;
- },
- cylinder(radius,length,center=[0,0,0],steps=24){
-  const mesh=[],axis=(a,y)=>[center[0]+Math.cos(a)*radius,center[1]+y,center[2]+Math.sin(a)*radius];
-  for(let i=0;i<steps;i++){const a=i/steps*Math.PI*2,b=(i+1)/steps*Math.PI*2,na=[Math.cos(a),0,Math.sin(a)],nb=[Math.cos(b),0,Math.sin(b)];
-   this.triangle(mesh,axis(a,-length/2),axis(b,-length/2),axis(b,length/2),na,nb,nb);this.triangle(mesh,axis(a,-length/2),axis(b,length/2),axis(a,length/2),na,nb,na);
-   for(const y of [-length/2,length/2])this.triangle(mesh,[center[0],center[1]+y,center[2]],axis(a,y),axis(b,y),[0,Math.sign(y),0]);}
-  return mesh;
- }
+/* IdeaHire P38 — przestrzeń zleceń. Własne pole WebGL + ostre karty DOM. */
+const IH38_DURATION = 4.8;
+const IH38_SEEN = new Set();
+const IH38_COPY = {
+  pl: {
+    region: "Od pomysłu do realizacji",
+    eyebrow: "Twój pomysł zasługuje na ciąg dalszy.",
+    title: "Masz pomysł.",
+    subtitle: "Daj mu życie.",
+    description: "Znajdź kogoś, kto go zrealizuje. Albo odkryj projekt dla siebie.",
+    talent: "Znajdź wykonawcę",
+    jobs: "Znajdź zlecenie",
+    skip: "Pomiń wstęp",
+    replay: "Odtwórz wstęp",
+    pause: "Zatrzymaj animację",
+    resume: "Wznów animację",
+    reduced: "Animacja ograniczona",
+    reset: "Przywróć kadr",
+    stage: "Interaktywna przestrzeń zleceń",
+    help: "Przesuń kursor, aby zmienić perspektywę. Przeciągnij scenę lub użyj strzałek klawiatury. Home przywraca kadr. Przewijanie telefonu pozostaje dostępne.",
+    hint: "Przeciągnij, aby zmienić perspektywę",
+    live: "Zlecenia z IdeaHire",
+    demo: "Scena demonstracyjna",
+    browse: "Odkryj zlecenia",
+    phases: ["Pomysł", "Połączenie", "Realizacja"],
+    phaseLabels: ["Zaczyna się od pomysłu.", "Właściwi ludzie. Wspólny kierunek.", "Pomysł nabiera kształtu."],
+    brief: "BRIEF PROJEKTU",
+    project: "Identyfikacja wizualna marki",
+    category: "Grafika i design",
+    categoryLabel: "Kategoria",
+    summary: "Nowy znak, spójna typografia i materiały, które opowiedzą historię marki.",
+    budget: "Budżet",
+    scope: "Zakres",
+    scopeText: "Logo / Typografia / Materiały",
+    connection: "Połącz pomysł z talentem",
+    skills: "Design · Strategia · Wykonanie",
+    draft: "KIERUNEK KREATYWNY",
+    deliverable: "PODGLĄD PROJEKTU",
+    artwork: "Nadaj temu formę.",
+    nextProject: "Strona dla nowej marki",
+    nextCategory: "Strony i aplikacje",
+    list: "Zobacz projekty",
+    sceneSteps: "Wybierz etap animacji",
+    briefPreview: "Przykład briefu",
+    relatedProject: "Kolejne zlecenie",
+    offer: "Od pierwszego szkicu do efektu.",
+    craft: "Szczegóły robią różnicę.",
+  },
+  en: {
+    region: "From idea to reality",
+    eyebrow: "Your idea deserves a next chapter.",
+    title: "Your idea.",
+    subtitle: "Made real.",
+    description: "Find someone who can bring it to life. Or discover a project of your own.",
+    talent: "Find a freelancer",
+    jobs: "Find a project",
+    skip: "Skip intro",
+    replay: "Replay intro",
+    pause: "Pause animation",
+    resume: "Resume animation",
+    reduced: "Reduced animation",
+    reset: "Reset the view",
+    stage: "Interactive project space",
+    help: "Move your pointer to change the perspective. Drag the scene or use the arrow keys. Home resets the view. Scrolling on your phone remains available.",
+    hint: "Drag to change the perspective",
+    live: "Projects on IdeaHire",
+    demo: "Illustrative scene",
+    browse: "Explore projects",
+    phases: ["Idea", "Connection", "Reality"],
+    phaseLabels: ["It starts with an idea.", "The right people. A shared direction.", "Your idea takes shape."],
+    brief: "PROJECT BRIEF",
+    project: "A visual identity for a brand",
+    category: "Graphic design",
+    categoryLabel: "Category",
+    summary: "A new mark, considered typography and materials that tell the brand's story.",
+    budget: "Budget",
+    scope: "Scope",
+    scopeText: "Logo / Typography / Materials",
+    connection: "Connect your idea with talent",
+    skills: "Design · Strategy · Craft",
+    draft: "CREATIVE DIRECTION",
+    deliverable: "PROJECT PREVIEW",
+    artwork: "Give it form.",
+    nextProject: "A website for a new brand",
+    nextCategory: "Websites and apps",
+    list: "Explore projects",
+    sceneSteps: "Select an animation stage",
+    briefPreview: "Illustrative brief",
+    relatedProject: "Another project",
+    offer: "From the first sketch to the result.",
+    craft: "Details make the difference.",
+  },
 };
-function ih37BuildLaptop(){
- const mesh=(geometry,color,rough=.5,finish=0,group="base",texture="",transform=IH37.identity())=>({geometry,color,rough,finish,group,texture,transform});
- const all=[],metal=[.43,.48,.56],edge=[.63,.66,.71],black=[.012,.016,.023],keys=[],labels=[],speakers=[];
- all.push(mesh(IH37.plane(10,8,-.13),[0,0,0],1,5,"floor"));
- all.push(mesh(IH37.prism(3.64,.11,2.38,.12,[0,.015,0]),metal,.15));
- all.push(mesh(IH37.prism(3.58,.018,2.32,.1,[0,.078,0]),edge,.24));
- all.push(mesh(IH37.prism(2.99,.009,1.25,.07,[0,.092,-.40]),black,.8));
- const rows=[
-  ["esc","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","⌫"],
-  ["~","1","2","3","4","5","6","7","8","9","0","−","=","⌫"],
-  ["tab","Q","W","E","R","T","Y","U","I","O","P","[","]","\\"],
-  ["caps","A","S","D","F","G","H","J","K","L",";","'","enter"],
-  ["shift","Z","X","C","V","B","N","M",",",".","/","↑","shift"],
-  ["fn","ctrl","⌥","⌘","","space","","","⌘","⌥","←","↓","→"]
- ];
- for(let row=0;row<rows.length;row++)for(let col=0;col<rows[row].length;col++){
-  if(row===5&&[4,6,7].includes(col))continue;
-  const w=row===5&&col===5?.84:.185,x=(col-6.5)*.211+(row===5&&col===5?.105:0),z=-.90+row*.201;
-  keys.push(...IH37.prism(w,.018,.159,.021,[x,.109,z],4));
-  const u=col/16,v=1-(row+1)/6,uv=[[u,v],[u+1/16,v],[u+1/16,v+1/6],[u,v+1/6]];
-  labels.push(...IH37.plane(Math.min(w,.17),.142,.120,z,x,false,uv));
- }
- all.push(mesh(keys,black,.67));all.push(mesh(labels,[1,1,1],.8,3,"base","keys"));
- for(const x of [-1.62,1.62])for(let row=0;row<30;row++)for(let col=0;col<3;col++)speakers.push(...IH37.plane(.006,.012,.09,-.96+row*.035,x+(col-1)*.019));
- all.push(mesh(speakers,[.024,.028,.035],1));
- all.push(mesh(IH37.prism(1.15,.006,.58,.044,[0,.087,.69]),[.25,.29,.36],.22));
- all.push(mesh(IH37.prism(1.13,.006,.557,.039,[0,.092,.69]),metal,.23));
- all.push(mesh(IH37.cylinder(.043,2.9),[.21,.24,.29],.12,0,"base","",IH37.multiply(IH37.move(0,.102,-1.1),IH37.rz(Math.PI/2))));
- for(const x of [-1.82,1.82])for(const z of [-.80,-.43,-.04])all.push(mesh(IH37.prism(.011,.027,.145,.008,[x,.016,z]),black,.72));
- all.push(mesh(IH37.prism(3.61,.080,2.20,.10,[0,0,1.10]),metal,.12,0,"lid"));
- all.push(mesh(IH37.prism(3.45,.009,2.02,.073,[0,-.046,1.12]),black,.65,0,"lid"));
- all.push(mesh(IH37.plane(3.24,1.79,-.053,1.13,0,true),[1,1,1],1,2,"lid","screen"));
- all.push(mesh(IH37.plane(1.15,.24,.044,1.05,0,false),[1,1,1],1,3,"lid","brand"));
- all.push(mesh(IH37.sphere(.014,.006,.014,[0,-.054,2.10],16,8),[.025,.05,.10],.08,0,"lid"));
- all.push(mesh(IH37.prism(.28,.006,.020,.006,[0,-.055,.112]),[.3,.33,.38],.6,0,"lid"));
- all.push(mesh(IH37.sphere(.246,.121,.385,[2.18,.04,.65],36,18),metal,.19));
- all.push(mesh(IH37.prism(.012,.006,.21,.005,[2.18,.161,.49]),black,.7));
- all.push(mesh(IH37.sphere(.031,.014,.057,[2.18,.170,.53],16,8),edge,.15));
- all.push(mesh(IH37.cylinder(.032,1.86),edge,.09,0,"pen","",IH37.multiply(IH37.move(-2.16,.18,.13),IH37.multiply(IH37.rx(Math.PI/2),IH37.rz(.27)))));
- all.push(mesh(IH37.cylinder(.033,.10),black,.7,0,"pen","",IH37.multiply(IH37.move(-2.42,.18,1.065),IH37.multiply(IH37.rx(Math.PI/2),IH37.rz(.27)))));
- return {all,rows};
+
+function ih38Reduced() {
+  return typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+const IH38_VERTEX = [
+  "attribute vec3 aPosition;",
+  "uniform mat4 uCamera;",
+  "uniform float uTime,uKind,uRatio,uReveal;",
+  "uniform vec2 uPointer;",
+  "varying float vDepth,vLight,vSide,vKind;",
+  "float surface(vec2 p){",
+  " float t=uTime*.24;",
+  " float wave=.34*sin(p.x*.77+p.y*.32+t)+.19*cos(p.y*.91-p.x*.23-t*.74);",
+  " wave+=.09*sin(p.x*1.68+p.y*.85-t*1.1);",
+  " float d=length(p-uPointer);",
+  " wave+=.24*cos(d*2.4-uTime*.58)*exp(-d*.57);",
+  " return wave;",
+  "}",
+  "void main(){",
+  " vec3 p=aPosition;",
+  " if(uKind<1.5){p.y=-1.16+surface(p.xz);",
+  "  float dx=(surface(p.xz+vec2(.025,0.0))-surface(p.xz-vec2(.025,0.0)))/.05;",
+  "  float dz=(surface(p.xz+vec2(0.0,.025))-surface(p.xz-vec2(0.0,.025)))/.05;",
+  "  vec3 n=normalize(vec3(-dx,1.0,-dz));",
+  "  vLight=.24+.52*max(0.0,dot(n,normalize(vec3(-1.0,2.0,.4))));",
+  "  vLight+=.42*pow(max(0.0,dot(n,normalize(vec3(1.0,1.0,-.5)))),20.0);",
+  " }else{p.y+=.055*sin(uTime*.34+p.x);p.x+=.035*cos(uTime*.27+p.z);vLight=.4+.5*sin(aPosition.x*13.5)*sin(aPosition.z*8.1);}",
+  " vec4 clip=uCamera*vec4(p,1.0);gl_Position=clip;",
+  " vSide=clip.x/max(.1,clip.w);vDepth=exp(-max(0.0,clip.w-3.0)*.12);vKind=uKind;",
+  " gl_PointSize=clamp((uKind>1.5?2.6:2.2)*uRatio/max(1.0,clip.w*.22),.85*uRatio,3.4*uRatio);",
+  " vLight*=uReveal;",
+  "}",
+].join("\n");
 
-function ih37CanvasTexture(gl,width,height){
- const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
- const context=canvas.getContext("2d");if(!context)throw new Error("studio_texture_context");
- const texture=gl.createTexture();if(!texture)throw new Error("studio_texture");
- return{canvas,context,texture,update(){gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,canvas);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);}};
-}
-function ih37Screen(texture,state){
- const c=texture.context,w=texture.canvas.width,h=texture.canvas.height,en=state.language==="en",classic=state.classic;
- const bg=state.dark?"#0d121b":"#f7f8fb",fg=state.dark?"#f1f4fa":"#182032",muted=state.dark?"#93a0b4":"#768298";
- const accent=classic?(state.dark?"#dddcd8":"#383a3a"):"#4169ed",soft=state.dark?"#1b2433":"#e8edf5";
- c.clearRect(0,0,w,h);c.fillStyle=bg;c.fillRect(0,0,w,h);
- const round=(x,y,ww,hh,r,fill)=>{c.fillStyle=fill;c.beginPath();c.roundRect?c.roundRect(x,y,ww,hh,r):c.rect(x,y,ww,hh);c.fill();};
- c.fillStyle=soft;c.fillRect(0,0,w,56);
- for(let i=0;i<3;i++){c.beginPath();c.arc(29+i*20,28,5,0,Math.PI*2);c.fillStyle=i===0?accent:muted;c.fill();}
- c.font="600 15px Arial,sans-serif";c.fillStyle=muted;c.fillText("ideahire / "+(en?"your project":"twój projekt"),125,33);
- c.fillStyle=fg;c.font="700 24px Arial,sans-serif";c.fillText("IdeaHire",48,113);
- c.font="14px Arial,sans-serif";c.fillStyle=muted;c.fillText(en?"IDEA / DESIGN / REALITY":"POMYSŁ / PROJEKT / REALIZACJA",48,149);
- const headlines=state.role===2?(en?["Create.","Make an impact."]:["Twórz.","Zostaw swój ślad."]):(en?["Every great project","starts with an idea."]:["Każdy wielki projekt","zaczyna się od pomysłu."]);
- c.font="700 49px Arial,sans-serif";c.fillStyle=fg;c.fillText(headlines[0],48,222);c.fillText(headlines[1],48,279);
- c.font="16px Arial,sans-serif";c.fillStyle=muted;c.fillText(en?"Connect with people who make things happen.":"Połącz się z ludźmi, którzy potrafią działać.",48,322);
- round(48,354,173,41,9,accent);c.fillStyle=classic&&state.dark?"#1a1a1a":"#fff";c.font="600 14px Arial,sans-serif";
- c.fillText(state.role===2?(en?"Explore projects":"Zobacz zlecenia"):(en?"Bring it to life":"Zacznij realizację"),63,380);
- round(48,438,384,207,15,soft);
- c.strokeStyle=muted;c.globalAlpha=.15;c.lineWidth=1;for(let x=67;x<425;x+=28){c.beginPath();c.moveTo(x,453);c.lineTo(x,631);c.stroke();}
- for(let y=460;y<645;y+=28){c.beginPath();c.moveTo(64,y);c.lineTo(415,y);c.stroke();}c.globalAlpha=1;
- c.fillStyle=accent;c.font="700 110px Arial,sans-serif";c.fillText("Aa",92,581);
- c.fillStyle=fg;c.font="600 14px Arial,sans-serif";c.fillText(en?"A new point of view":"Nowy punkt widzenia",73,617);
- round(449,438,193,96,15,fg);c.fillStyle=bg;c.font="700 22px Arial,sans-serif";c.fillText(en?"Your next":"Twój następny",466,477);c.fillText(en?"chapter.":"rozdział.",466,506);
- round(449,549,193,96,15,soft);c.strokeStyle=accent;c.lineWidth=3;c.beginPath();c.moveTo(470,623);c.lineTo(510,581);c.lineTo(548,613);c.lineTo(614,568);c.stroke();
- const gradient=c.createLinearGradient(673,153,1150,584);gradient.addColorStop(0,classic?"#93948d":"#6e86f0");gradient.addColorStop(1,classic?"#d9d8d1":"#b8c8f2");round(677,153,475,493,26,gradient);
- c.save();c.translate(916,382);c.rotate(-.20);
- c.fillStyle="rgba(255,255,255,.22)";c.beginPath();c.ellipse(0,0,170,74,-.25,0,Math.PI*2);c.fill();
- c.fillStyle=classic?"#444640":"#243981";c.font="700 176px Arial,sans-serif";c.textAlign="center";c.fillText("IH",0,65);c.restore();
- c.fillStyle=classic?"#34352f":"#273865";c.font="600 15px Arial,sans-serif";c.fillText(en?"THE FUTURE STARTS WITH YOU":"PRZYSZŁOŚĆ ZACZYNA SIĘ OD CIEBIE",712,607);
- c.fillStyle=muted;c.font="13px Arial,sans-serif";c.fillText(en?"From idea to collaboration.":"Od pomysłu do współpracy.",48,705);
- texture.update();
-}
-function ih37Start(canvas,state,onPhase,onComplete,onFailure,onFirstFrame){
- let gl,program,vertex,fragment,fieldProgram,fieldVertex,fieldFragment,frame=0,disposed=false,resizeObserver,observer,visible=true,last=0,dirtySize=true;
- const buffers=[],textures=[],listeners=[];
- const listen=(node,type,fn,opts)=>{node.addEventListener(type,fn,opts);listeners.push(()=>node.removeEventListener(type,fn,opts));};
- const destroy=()=>{if(disposed)return;disposed=true;cancelAnimationFrame(frame);resizeObserver?.disconnect();observer?.disconnect();listeners.forEach(fn=>fn());
-  if(gl&&!gl.isContextLost()){buffers.forEach(b=>gl.deleteBuffer(b));textures.forEach(t=>gl.deleteTexture(t.texture));if(program)gl.deleteProgram(program);if(vertex)gl.deleteShader(vertex);if(fragment)gl.deleteShader(fragment);if(fieldProgram)gl.deleteProgram(fieldProgram);if(fieldVertex)gl.deleteShader(fieldVertex);if(fieldFragment)gl.deleteShader(fieldFragment);}};
- try{
-  gl=canvas.getContext("webgl",{alpha:true,antialias:true,depth:true,stencil:false,premultipliedAlpha:true,powerPreference:"low-power"});
-  if(!gl||gl.isContextLost())throw new Error("studio_context");
-  const shader=(type,src)=>{const sh=gl.createShader(type);if(!sh)throw new Error("studio_shader");gl.shaderSource(sh,src);gl.compileShader(sh);
-   if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){gl.deleteShader(sh);throw new Error("studio_shader");}return sh;};
-  vertex=shader(gl.VERTEX_SHADER,IH37_VERTEX);fragment=shader(gl.FRAGMENT_SHADER,IH37_FRAGMENT);
-  program=gl.createProgram();if(!program)throw new Error("studio_program");gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);
-  if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error("studio_program");gl.useProgram(program);
-  const uniforms=Object.fromEntries(["uProjection","uModel","uEye","uColor","uAccent","uFinish","uRough","uDark","uPower","uTime","uTexture"].map(n=>[n,gl.getUniformLocation(program,n)]));
-  const attributes=[["aPosition",3,0],["aNormal",3,12],["aUV",2,24]].map(([n,size,offset])=>({location:gl.getAttribLocation(program,n),size,offset}));
-  fieldVertex=shader(gl.VERTEX_SHADER,IH37_FIELD_VERTEX);fieldFragment=shader(gl.FRAGMENT_SHADER,IH37_FIELD_FRAGMENT);
-  fieldProgram=gl.createProgram();if(!fieldProgram)throw new Error("studio_field_program");gl.attachShader(fieldProgram,fieldVertex);gl.attachShader(fieldProgram,fieldFragment);gl.linkProgram(fieldProgram);
-  if(!gl.getProgramParameter(fieldProgram,gl.LINK_STATUS))throw new Error("studio_field_program");
-  const fieldUniforms=Object.fromEntries(["uProjection","uTime","uRatio","uPointer","uAccent","uDark","uDots"].map(n=>[n,gl.getUniformLocation(fieldProgram,n)]));
-  const fieldPosition=gl.getAttribLocation(fieldProgram,"aPosition"),fieldGeometry=ih37FieldGeometry();
-  const fieldMeshes=[fieldGeometry.lines,fieldGeometry.points].map((geometry,i)=>{const b=gl.createBuffer();if(!b)throw new Error("studio_field_buffer");buffers.push(b);gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(geometry),gl.STATIC_DRAW);return{buffer:b,count:geometry.length/3,dots:i};});
-  const laptop=ih37BuildLaptop(),meshes=laptop.all.map(item=>{const b=gl.createBuffer();if(!b)throw new Error("studio_buffer");buffers.push(b);gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(item.geometry),gl.STATIC_DRAW);
-   return{...item,buffer:b,count:item.geometry.length/8};});
-  const texture=(w,h)=>{const value=ih37CanvasTexture(gl,w,h);textures.push(value);return value;};
-  const screen=texture(1200,750),keys=texture(1024,384),brand=texture(512,128);
-  keys.context.clearRect(0,0,1024,384);keys.context.textAlign="center";keys.context.textBaseline="middle";keys.context.fillStyle="#bec5cf";
-  laptop.rows.forEach((row,y)=>row.forEach((label,x)=>{keys.context.font=(label.length>2?"12":"18")+"px Arial,sans-serif";keys.context.fillText(label,32+x*64,32+y*64);}));keys.update();
-  brand.context.clearRect(0,0,512,128);brand.context.fillStyle="#ced3dc";brand.context.font="500 48px Arial,sans-serif";brand.context.textAlign="center";brand.context.fillText("ideahire",256,82);brand.update();
-  const textureMap={screen,keys,brand};let screenKey="",phase=-1,completed=state.current.intro>=IH37_DURATION,painted=false,previousActive=false,renderScale=1,slowFrames=0;
-  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uniforms.uTexture,0);
-  const schedule=()=>{if(!disposed&&!frame&&visible&&!document.hidden)frame=requestAnimationFrame(draw);};
-  function draw(now){
-   frame=0;if(disposed||!visible||document.hidden)return;
-   const s=state.current,active=!s.paused&&!s.reduced,compact=canvas.closest(".ihfilm-hero").clientWidth<=760;
-   const limit=1000/(compact?24:30);if(active&&!s.dirty&&last&&now-last<limit){schedule();return;}
-   const elapsed=active&&previousActive&&last?Math.max(0,(now-last)/1000):0,dt=Math.min(.12,elapsed);last=now;previousActive=active;
-   if(active&&elapsed>(compact?.068:.054))slowFrames++;else slowFrames=Math.max(0,slowFrames-1);
-   if(slowFrames>=6&&renderScale>.65){renderScale=Math.max(.65,renderScale*.85);slowFrames=0;dirtySize=true;}
-   if(active){s.time+=dt;s.intro=Math.min(IH37_DURATION,s.intro+dt);s.lidValue+=((s.closed?0:1)-s.lidValue)*Math.min(1,dt*6);}
-   if(s.reduced){s.intro=IH37_DURATION;s.lidValue=s.closed?0:1;}
-   if(dirtySize){const r=canvas.getBoundingClientRect(),ratio=Math.min(window.devicePixelRatio||1,compact?1.6:1.7);
-    const w=Math.max(1,Math.round(Math.min(r.width*ratio,1400)*renderScale)),h=Math.max(1,Math.round(r.height*w/Math.max(1,r.width)));
-    canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);dirtySize=false;}
-   const p=s.intro/IH37_DURATION,e=IH37.ease(.05,.95,p),open=IH37.ease(.17,.82,p)*s.lidValue;
-   if(!active)s.reveal=p>=1?1:0;else s.reveal+=((p>=1?1:0)-s.reveal)*Math.min(1,dt*5.3);
-   const angle=-.38+e*.79,distance=compact?6.65:6.10,eye=[Math.sin(angle)*distance,2.7-e*.2,Math.cos(angle)*distance];
-   const view=IH37.look(eye,[0,.17+e*.62,0]),sceneWidth=compact?canvas.width:Math.max(1,Math.round(canvas.width*(1-s.reveal*.36))),sceneLeft=canvas.width-sceneWidth;
-   const projection=IH37.perspective(.68,sceneWidth/canvas.height);
-   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(fieldProgram);
-   for(const a of attributes)if(a.location>=0)gl.disableVertexAttribArray(a.location);
-   gl.enableVertexAttribArray(fieldPosition);gl.depthMask(false);
-   const fieldView=IH37.multiply(IH37.perspective(.78,canvas.width/canvas.height),IH37.look([0,2.6,6.6],[0,-.5,-.8]));
-   gl.uniformMatrix4fv(fieldUniforms.uProjection,false,fieldView);gl.uniform1f(fieldUniforms.uTime,s.time);gl.uniform1f(fieldUniforms.uRatio,Math.min(1.5,canvas.width/Math.max(1,canvas.clientWidth)));
-   gl.uniform2fv(fieldUniforms.uPointer,s.pointer);gl.uniform1f(fieldUniforms.uDark,s.dark?1:0);
-   gl.uniform3fv(fieldUniforms.uAccent,s.classic?(s.dark?[.57,.61,.55]:[.35,.40,.35]):[.21,.46,.95]);
-   for(const mesh of fieldMeshes){gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.vertexAttribPointer(fieldPosition,3,gl.FLOAT,false,12,0);gl.uniform1f(fieldUniforms.uDots,mesh.dots);gl.drawArrays(mesh.dots?gl.POINTS:gl.LINES,0,mesh.count);}
-   gl.disableVertexAttribArray(fieldPosition);gl.depthMask(true);gl.useProgram(program);gl.viewport(sceneLeft,0,sceneWidth,canvas.height);
-   gl.uniformMatrix4fv(uniforms.uProjection,false,IH37.multiply(projection,view));gl.uniform3fv(uniforms.uEye,eye);
-   const accent=s.classic?(s.dark?[.84,.85,.83]:[.37,.40,.39]):[.17,.37,.95];
-   gl.uniform3fv(uniforms.uAccent,accent);gl.uniform1f(uniforms.uDark,s.dark?1:0);gl.uniform1f(uniforms.uPower,IH37.ease(.40,.86,p));gl.uniform1f(uniforms.uTime,s.time);
-   const nextKey=[s.dark,s.classic,s.language,s.role].join(":");if(nextKey!==screenKey){ih37Screen(screen,s);screenKey=nextKey;}
-   const yaw=s.yaw+(s.reduced?0:Math.sin(s.time*.18)*.10);
-   const root=IH37.multiply(IH37.move(0,.025+(s.reduced?0:Math.sin(s.time*.45)*.022),0),IH37.multiply(IH37.ry(yaw),IH37.rx(s.pitch)));
-   const lid=IH37.multiply(root,IH37.multiply(IH37.move(0,.14,-1.1),IH37.rx(-1.83*open)));
-   const pen=IH37.multiply(root,IH37.move(0,s.reduced?0:Math.sin(s.time*.35+1)*.045,0));
-   for(const item of meshes){
-    const group=item.group==="lid"?lid:item.group==="pen"?pen:item.group==="floor"?IH37.identity():root;
-    gl.uniformMatrix4fv(uniforms.uModel,false,IH37.multiply(group,item.transform));
-    gl.uniform3fv(uniforms.uColor,item.color);gl.uniform1f(uniforms.uFinish,item.finish);gl.uniform1f(uniforms.uRough,item.rough);
-    gl.bindTexture(gl.TEXTURE_2D,textureMap[item.texture]?.texture||screen.texture);
-    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
-    for(const a of attributes){if(a.location>=0){gl.enableVertexAttribArray(a.location);gl.vertexAttribPointer(a.location,a.size,gl.FLOAT,false,32,a.offset);}}
-    gl.depthMask(item.group!=="floor");gl.drawArrays(gl.TRIANGLES,0,item.count);
-   }gl.depthMask(true);s.dirty=false;
-   if(!painted){painted=true;onFirstFrame();}
-   const nextPhase=p<.25?0:p<.65?1:p<1?2:3;if(phase!==nextPhase){phase=nextPhase;onPhase(phase);}
-   if(p<1)completed=false;if(p>=1&&!completed){completed=true;onComplete();}
-   if(active)schedule();
+const IH38_FRAGMENT = [
+  "precision mediump float;",
+  "uniform vec3 uAccent;uniform float uDark;",
+  "varying float vDepth,vLight,vSide,vKind;",
+  "void main(){",
+  " float a=1.0;",
+  " if(vKind>.5){float d=length(gl_PointCoord-vec2(.5));a=1.0-smoothstep(.08,.5,d);}",
+  " float side=mix(.13,1.0,smoothstep(-.65,.25,vSide));",
+  " a*=vDepth*vLight*side*mix(.34,.78,uDark);",
+  " if(vKind<.5)a*=.26;if(vKind>1.5)a*=.35;",
+  " vec3 c=mix(uAccent,mix(uAccent,vec3(.90,.95,1.0),.52),clamp(vLight-.3,0.0,.7)*uDark);",
+  " gl_FragColor=vec4(c,a);",
+  "}",
+].join("\n");
+
+const IH38_MATH = {
+  unit(a) { const d = Math.hypot(...a) || 1; return a.map(v => v / d); },
+  cross(a, b) { return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]; },
+  multiply(a, b) {
+    const out = new Float32Array(16);
+    for (let c=0;c<4;c++) for (let r=0;r<4;r++) for (let k=0;k<4;k++) out[c*4+r]+=a[k*4+r]*b[c*4+k];
+    return out;
+  },
+  camera(aspect, yaw, pitch) {
+    const eye = [1.1+yaw*.045,3.25+pitch*.025,9.3], at = [0,-.48,-2.4];
+    const z=this.unit(eye.map((v,i)=>v-at[i])),x=this.unit(this.cross([0,1,0],z)),y=this.cross(z,x);
+    const view=new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,
+      -x.reduce((s,v,i)=>s+v*eye[i],0),-y.reduce((s,v,i)=>s+v*eye[i],0),-z.reduce((s,v,i)=>s+v*eye[i],0),1]);
+    const f=1/Math.tan(.67/2),near=.1,far=65;
+    const projection=new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
+    return this.multiply(projection,view);
+  },
+};
+
+function ih38Start(canvas, root, stage, state, report) {
+  let gl, program, vertex, fragment, frame=0, last=0, visible=true, disposed=false;
+  let dirtySize=true, resizeObserver, intersectionObserver, previousPhase=-1, previousReady=false;
+  const buffers=[], listeners=[];
+  const listen=(node,type,fn,options)=> {
+    node.addEventListener(type,fn,options);
+    listeners.push(()=>node.removeEventListener(type,fn,options));
+  };
+  const destroy=()=> {
+    if(disposed)return;
+    disposed=true;cancelAnimationFrame(frame);frame=0;
+    resizeObserver?.disconnect();intersectionObserver?.disconnect();listeners.forEach(fn=>fn());
+    if(gl&&!gl.isContextLost()){
+      buffers.forEach(buffer=>gl.deleteBuffer(buffer));
+      if(program)gl.deleteProgram(program);
+      if(vertex)gl.deleteShader(vertex);
+      if(fragment)gl.deleteShader(fragment);
+    }
+  };
+  try {
+    gl=canvas.getContext("webgl",{alpha:true,antialias:true,depth:false,stencil:false,premultipliedAlpha:false,powerPreference:"low-power"});
+    if(!gl||gl.isContextLost())throw new Error("ih38_context");
+    const shader=(type,source)=> {
+      const item=gl.createShader(type);
+      if(!item)throw new Error("ih38_shader");
+      gl.shaderSource(item,source);gl.compileShader(item);
+      if(!gl.getShaderParameter(item,gl.COMPILE_STATUS)){gl.deleteShader(item);throw new Error("ih38_shader");}
+      return item;
+    };
+    vertex=shader(gl.VERTEX_SHADER,IH38_VERTEX);fragment=shader(gl.FRAGMENT_SHADER,IH38_FRAGMENT);
+    program=gl.createProgram();
+    if(!program)throw new Error("ih38_program");
+    gl.attachShader(program,vertex);gl.attachShader(program,fragment);gl.linkProgram(program);
+    if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error("ih38_program");
+    gl.useProgram(program);
+    const attribute=gl.getAttribLocation(program,"aPosition");
+    if(attribute<0)throw new Error("ih38_position");
+    const uniforms=Object.fromEntries(["uCamera","uTime","uKind","uRatio","uReveal","uPointer","uAccent","uDark"].map(name=>[name,gl.getUniformLocation(program,name)]));
+    const point=(x,z,nx,nz)=>[-15+x*30/(nx-1),0,-21+z*28/(nz-1)];
+    const compact=window.matchMedia("(max-width: 820px)").matches;
+    const points=[],lines=[],dust=[];
+    const nx=compact?96:146,nz=compact?64:94;
+    for(let z=0;z<nz;z++)for(let x=0;x<nx;x++)points.push(...point(x,z,nx,nz));
+    const lx=compact?54:86,lz=compact?36:56;
+    for(let z=0;z<lz;z++)for(let x=0;x<lx;x++){
+      if(x<lx-1)lines.push(...point(x,z,lx,lz),...point(x+1,z,lx,lz));
+      if(z<lz-1)lines.push(...point(x,z,lx,lz),...point(x,z+1,lx,lz));
+    }
+    for(let i=0;i<(compact?70:130);i++){
+      const noise=n=>{const p=Math.sin(n*12.9898+78.233)*43758.5453;return p-Math.floor(p);};
+      dust.push((noise(i+1)-.5)*24,noise(i+20)*4.2-.6,-noise(i+60)*20);
+    }
+    const meshes=[lines,points,dust].map((data,kind)=>{
+      const buffer=gl.createBuffer();
+      if(!buffer)throw new Error("ih38_buffer");
+      buffers.push(buffer);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.STATIC_DRAW);
+      return {buffer,kind,count:data.length/3,mode:kind===0?gl.LINES:gl.POINTS};
+    });
+    let ratio=1;
+    const resize=()=> {
+      const box=root.getBoundingClientRect();
+      if(!box.width||!box.height)return;
+      const cap=box.width<=820?1.35:1.65;
+      ratio=Math.min(window.devicePixelRatio||1,cap);
+      const pixels=box.width*box.height*ratio*ratio;
+      if(pixels>1800000)ratio*=Math.sqrt(1800000/pixels);
+      const width=Math.max(1,Math.round(box.width*ratio)),height=Math.max(1,Math.round(box.height*ratio));
+      if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
+      gl.viewport(0,0,width,height);
+      const stageWidth=stage.getBoundingClientRect().width;
+      const base=window.matchMedia("(max-width: 820px)").matches?440:650;
+      root.style.setProperty("--ih38-stage-scale",String(Math.min(1.16,Math.max(.2,stageWidth/base))));
+      dirtySize=false;
+    };
+    const render=now=> {
+      frame=0;if(disposed||!visible||document.hidden)return;
+      try {
+        if(gl.isContextLost()){destroy();report({failed:true,ready:true,phase:2});return;}
+        const elapsed=last?Math.min(.06,(now-last)/1000):1/60;last=now;
+        const s=state.current;
+        if(!s.paused&&!s.reduced){
+          s.time+=elapsed;
+          if(!s.ready){s.intro=Math.min(IH38_DURATION,s.intro+elapsed);if(s.intro>=IH38_DURATION)s.ready=true;}
+        }
+        if(s.reduced){s.ready=true;s.intro=IH38_DURATION;}
+        const phase=s.ready?s.phase:Math.min(2,Math.floor(s.intro/(IH38_DURATION/3)));
+        if(phase!==previousPhase||s.ready!==previousReady){
+          previousPhase=phase;previousReady=s.ready;
+          report({phase,ready:s.ready});
+        }
+        const smooth=1-Math.exp(-elapsed*7.5);
+        if(s.reduced){s.yaw=s.targetYaw;s.pitch=s.targetPitch;}
+        s.yaw+=(s.targetYaw-s.yaw)*smooth;s.pitch+=(s.targetPitch-s.pitch)*smooth;
+        const settled=Math.abs(s.targetYaw-s.yaw)+Math.abs(s.targetPitch-s.pitch)<.025;
+        if(settled){s.yaw=s.targetYaw;s.pitch=s.targetPitch;}
+        const ambient=s.paused||s.reduced?0:Math.sin(s.time*.22)*.85;
+        root.style.setProperty("--ih38-orbit-x",(s.pitch*.72)+"deg");
+        root.style.setProperty("--ih38-orbit-y",(s.yaw*.8+ambient)+"deg");
+        root.style.setProperty("--ih38-light-x",(53+s.yaw*1.2)+"%");
+        if(dirtySize)resize();
+        gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+        gl.useProgram(program);gl.enableVertexAttribArray(attribute);
+        gl.uniformMatrix4fv(uniforms.uCamera,false,IH38_MATH.camera(canvas.width/canvas.height,s.yaw,s.pitch));
+        gl.uniform1f(uniforms.uTime,s.time);gl.uniform1f(uniforms.uRatio,ratio);
+        gl.uniform1f(uniforms.uReveal,s.ready?1:.38+.62*Math.min(1,s.intro/1.4));
+        gl.uniform2f(uniforms.uPointer,s.pointer[0],s.pointer[1]);
+        gl.uniform1f(uniforms.uDark,s.dark?1:0);
+        const accent=s.classic?(s.dark?[.65,.69,.74]:[.31,.35,.41]):(s.dark?[.35,.58,.88]:[.18,.38,.68]);
+        gl.uniform3fv(uniforms.uAccent,accent);
+        for(const mesh of meshes){
+          gl.bindBuffer(gl.ARRAY_BUFFER,mesh.buffer);gl.vertexAttribPointer(attribute,3,gl.FLOAT,false,0,0);
+          gl.uniform1f(uniforms.uKind,mesh.kind);gl.drawArrays(mesh.mode,0,mesh.count);
+        }
+        if(!s.paused&&!s.reduced||!settled)frame=requestAnimationFrame(render);
+      } catch {
+        destroy();report({failed:true,ready:true,phase:2});
+      }
+    };
+    const wake=()=>{if(!disposed&&visible&&!document.hidden&&!frame){last=0;frame=requestAnimationFrame(render);}};
+    listen(document,"visibilitychange",()=>{
+      last=0;
+      if(document.hidden){cancelAnimationFrame(frame);frame=0;}else wake();
+    });
+    listen(window,"resize",()=>{dirtySize=true;wake();},{passive:true});
+    listen(canvas,"webglcontextlost",event=>{event.preventDefault();destroy();report({failed:true,ready:true,phase:2});});
+    if(typeof ResizeObserver!=="undefined"){
+      resizeObserver=new ResizeObserver(()=>{dirtySize=true;wake();});resizeObserver.observe(root);resizeObserver.observe(stage);
+    }
+    if(typeof IntersectionObserver!=="undefined"){
+      intersectionObserver=new IntersectionObserver(entries=>{
+        visible=!!entries[0]?.isIntersecting;
+        if(visible){last=0;wake();}else{cancelAnimationFrame(frame);frame=0;last=0;}
+      },{rootMargin:"100px"});
+      intersectionObserver.observe(root);
+    }
+    resize();report({gpu:true});wake();
+    return {wake,destroy};
+  } catch {
+    destroy();report({failed:true,ready:true,phase:2});
+    return {wake(){},destroy};
   }
-  const resize=()=>{renderScale=1;slowFrames=0;dirtySize=true;state.current.dirty=true;schedule();};
-  if(typeof ResizeObserver!=="undefined"){resizeObserver=new ResizeObserver(resize);resizeObserver.observe(canvas);}else listen(window,"resize",resize);
-  if(typeof IntersectionObserver!=="undefined"){observer=new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting!==false;last=0;
-   if(visible)schedule();else{cancelAnimationFrame(frame);frame=0;}},{rootMargin:"80px"});observer.observe(canvas);}
-  listen(document,"visibilitychange",()=>{last=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;}else schedule();});
-  listen(canvas,"webglcontextlost",event=>{event.preventDefault();destroy();onFailure();});
-  schedule();return{destroy,wake:()=>{state.current.dirty=true;schedule();}};
- }catch{destroy();onFailure();return{destroy,wake:()=>{}};}
 }
 
-
-const IH37_STYLES = [
- "#root#root#root .ihfilm-hero{--film-bg:#eef1f6;--film-fg:#142035;--film-muted:#58657a;--film-accent:#315fed;--film-soft:rgba(41,70,110,.13);--film-chip:rgba(248,250,253,.7);--film-button:#172844;--film-button-fg:#fff;position:relative!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(580px,calc(100svh - 94px),760px)!important;min-height:580px!important;margin:0 0 58px!important;overflow:hidden!important;isolation:isolate;border:0!important;border-radius:0!important;background:var(--film-bg)!important;color:var(--film-fg)!important;box-shadow:none!important;}",
- "#root#root#root .ihfilm-hero[data-dark=\"true\"]{--film-bg:#070a10;--film-fg:#f1f4fa;--film-muted:#a5afbf;--film-accent:#88aaff;--film-soft:rgba(166,188,228,.17);--film-chip:rgba(14,20,31,.66);--film-button:#e4ecfb;--film-button-fg:#15223c;}",
- "#root#root#root .ihfilm-hero[data-classic=\"true\"]{--film-bg:#efede8;--film-fg:#242722;--film-muted:#64675f;--film-accent:#42483d;--film-soft:rgba(55,61,51,.16);--film-chip:rgba(251,250,246,.74);--film-button:#242722;--film-button-fg:#fff;}",
- "#root#root#root .ihfilm-hero[data-classic=\"true\"][data-dark=\"true\"]{--film-bg:#111310;--film-fg:#f1f0e9;--film-muted:#adb2a7;--film-accent:#d3d9ca;--film-soft:rgba(222,227,216,.16);--film-chip:rgba(20,24,19,.68);--film-button:#e9ede2;--film-button-fg:#20251b;}",
- "#root#root#root .ihfilm-hero *,#root#root#root .ihfilm-hero *::before,#root#root#root .ihfilm-hero *::after{box-sizing:border-box;}",
- "#root#root#root .ihfilm-atmosphere{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 76% 38%,color-mix(in srgb,var(--film-accent) 10%,transparent),transparent 54%),linear-gradient(160deg,transparent 40%,color-mix(in srgb,var(--film-fg) 3%,transparent) 90%);}",
- "#root#root#root .ihfilm-beam{position:absolute;left:41%;top:-65%;width:24%;height:160%;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--film-accent) 8%,transparent),transparent);transform:rotate(35deg);filter:blur(36px);animation:ihfilm-beam 22s ease-in-out infinite alternate;opacity:.6;}",
- "#root#root#root .ihfilm-ghost{position:absolute!important;z-index:0!important;right:4%;top:10%;font-size:clamp(120px,19vw,320px)!important;font-weight:750!important;letter-spacing:-.075em!important;line-height:1!important;color:var(--film-fg)!important;opacity:.035!important;pointer-events:none!important;white-space:nowrap!important;}",
- "#root#root#root .ihfilm-stage{position:absolute;z-index:1;right:0;top:0;bottom:53px;width:100%;}",
- "#root#root#root .ihfilm-hero[data-ready=\"false\"] .ihfilm-stage{width:100%;}",
- "#root#root#root .ihfilm-canvas{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;cursor:grab;touch-action:pan-y;opacity:1;transition:opacity .45s ease;}",
- "#root#root#root .ihfilm-canvas:active{cursor:grabbing;}",
- "#root#root#root .ihfilm-canvas:focus-visible{outline:2px solid var(--film-accent);outline-offset:-5px;}",
- "#root#root#root .ihfilm-hero[data-gpu=\"false\"] .ihfilm-canvas{opacity:0;pointer-events:none;}",
- "#root#root#root .ihfilm-topline{position:absolute;z-index:5;top:29px;left:clamp(24px,6vw,106px);right:clamp(24px,4vw,80px);display:flex;align-items:center;justify-content:space-between;gap:16px;}",
- "#root#root#root .ihfilm-wordmark{display:flex;align-items:center;gap:11px;font-size:10px!important;font-weight:650!important;letter-spacing:.11em!important;color:var(--film-muted)!important;line-height:1.4!important;}",
- "#root#root#root .ihfilm-wordmark i{height:6px;width:6px;border-radius:50%;display:block;background:var(--film-accent);box-shadow:0 0 15px color-mix(in srgb,var(--film-accent) 30%,transparent);}",
- "#root#root#root .ihfilm-controls{display:flex;align-items:center;gap:7px;}",
- "#root#root#root .ihfilm-control{appearance:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:39px!important;width:auto!important;height:39px!important;margin:0!important;padding:0 10px!important;border:1px solid var(--film-soft)!important;border-radius:50px!important;background:var(--film-chip)!important;color:var(--film-fg)!important;font:inherit!important;font-size:11px!important;font-weight:550!important;line-height:1!important;box-shadow:none!important;transform:none!important;cursor:pointer;backdrop-filter:blur(12px);transition:border-color .2s ease!important;}",
- "#root#root#root .ihfilm-control svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.55;flex:none;}",
- "#root#root#root .ihfilm-control:hover{border-color:var(--film-accent)!important;}",
- "#root#root#root .ihfilm-control:disabled{opacity:.45;cursor:default;}",
- "#root#root#root .ihfilm-control:focus-visible,#root#root#root .ihfilm-cta:focus-visible,#root#root#root .ihfilm-live:focus-visible{outline:2px solid var(--film-accent)!important;outline-offset:4px!important;}",
- "#root#root#root .ihfilm-copy{position:absolute!important;z-index:4!important;left:clamp(24px,6vw,106px)!important;top:27%!important;width:42%!important;max-width:650px!important;opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .85s ease .12s,transform 1s cubic-bezier(.2,.7,.15,1) .12s;}",
- "#root#root#root .ihfilm-hero[data-ready=\"true\"] .ihfilm-copy{opacity:1;transform:none;pointer-events:auto;}",
- "#root#root#root .ihfilm-eyebrow{display:block!important;margin:0 0 19px!important;font-size:10px!important;font-weight:650!important;letter-spacing:.16em!important;color:var(--film-muted)!important;line-height:1.4!important;text-transform:uppercase!important;}",
- "#root#root#root .ihfilm-title{display:block!important;margin:0!important;padding:0!important;color:var(--film-fg)!important;font-family:inherit!important;font-size:clamp(54px,6.3vw,94px)!important;font-weight:650!important;line-height:1.02!important;letter-spacing:-.065em!important;max-width:100%!important;text-wrap:initial!important;word-break:normal!important;overflow-wrap:normal!important;}",
- "#root#root#root .ihfilm-title span{display:block!important;white-space:nowrap!important;color:var(--film-fg)!important;}",
- "#root#root#root .ihfilm-title span:last-child{color:var(--film-accent)!important;font-weight:450!important;}",
- "#root#root#root .ihfilm-description{margin:25px 0 0!important;font-size:15px!important;font-weight:400!important;line-height:1.65!important;color:var(--film-muted)!important;max-width:330px!important;}",
- "#root#root#root .ihfilm-actions{display:flex!important;align-items:stretch!important;gap:11px!important;margin:29px 0 0!important;}",
- "#root#root#root .ihfilm-cta{display:inline-flex!important;align-items:center!important;justify-content:space-between!important;gap:19px!important;min-width:0!important;min-height:51px!important;padding:0 19px!important;border:1px solid var(--film-soft)!important;border-radius:6px!important;background:var(--film-chip)!important;color:var(--film-fg)!important;font-family:inherit!important;font-size:13px!important;font-weight:600!important;line-height:1.3!important;text-decoration:none!important;box-shadow:none!important;transform:none!important;transition:background .2s ease,border-color .2s ease!important;}",
- "#root#root#root .ihfilm-cta:first-child{color:var(--film-button-fg)!important;background:var(--film-button)!important;border-color:var(--film-button)!important;}",
- "#root#root#root .ihfilm-cta svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;flex:none;transition:transform .2s ease;}",
- "#root#root#root .ihfilm-cta:hover{border-color:var(--film-accent)!important;}",
- "#root#root#root .ihfilm-cta:hover svg{transform:translate(2px,-2px);}",
- "#root#root#root .ihfilm-foot{position:absolute;z-index:4;left:clamp(24px,6vw,106px);right:clamp(24px,4vw,80px);bottom:22px;border-top:1px solid var(--film-soft);padding-top:17px;display:flex;align-items:center;justify-content:space-between;gap:18px;color:var(--film-muted);}",
- "#root#root#root .ihfilm-caption{font-size:10px!important;letter-spacing:.04em!important;line-height:1.4!important;display:flex;gap:10px;align-items:center;pointer-events:none;}",
- "#root#root#root .ihfilm-caption svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.4;}",
- "#root#root#root .ihfilm-live{display:inline-flex;align-items:center;gap:10px;min-width:0;max-width:330px;color:var(--film-muted)!important;font-size:10px!important;text-decoration:none!important;line-height:1.4!important;}",
- "#root#root#root .ihfilm-live span{white-space:nowrap;}",
- "#root#root#root .ihfilm-live strong{font:inherit!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}",
- "#root#root#root .ihfilm-phase{position:absolute;z-index:4;left:clamp(24px,6vw,106px);bottom:82px;display:flex;align-items:center;gap:20px;color:var(--film-fg);transition:opacity .3s ease;}",
- "#root#root#root .ihfilm-phase span:first-child{font-size:11px!important;font-variant-numeric:tabular-nums;color:var(--film-muted);}",
- "#root#root#root .ihfilm-phase span:last-child{font-size:18px!important;font-weight:500!important;letter-spacing:-.015em;}",
- "#root#root#root .ihfilm-hero[data-ready=\"true\"] .ihfilm-phase{opacity:0;pointer-events:none;}",
- "#root#root#root .ihfilm-sr{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;}",
- "#root#root#root .ihfilm-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;perspective:900px;}",
- "#root#root#root .ihfilm-fallback-laptop{position:relative;width:300px;height:195px;transform:rotateY(-17deg) rotateZ(-5deg);transform-style:preserve-3d;}",
- "#root#root#root .ihfilm-fallback-screen{position:absolute;inset:0;border:9px solid #647180;border-radius:11px;background:linear-gradient(130deg,#1b273a,#101b2b);color:#eff3fb;font-size:28px;font-weight:550;display:grid;place-items:center;box-shadow:10px 20px 35px rgba(0,0,0,.16);}",
- "#root#root#root .ihfilm-fallback-base{position:absolute;top:100%;left:-10px;right:-10px;height:105px;border-radius:4px 4px 17px 17px;background:repeating-linear-gradient(90deg,transparent 0 19px,rgba(20,31,47,.6) 20px 22px),linear-gradient(#6f7c8d,#b1bbc8);transform-origin:top;transform:rotateX(70deg);border:3px solid #818e9e;}",
- "#root#root#root .ihfilm-hero[data-gpu=\"true\"] .ihfilm-fallback{visibility:hidden;}",
- "@keyframes ihfilm-beam{from{transform:translateX(-25%) rotate(35deg);opacity:.35;}to{transform:translateX(120%) rotate(35deg);opacity:.7;}}",
- "#root#root#root .ihfilm-hero[data-paused=\"true\"] .ihfilm-beam{animation-play-state:paused;}",
- "@media(max-width:1080px) and (min-width:761px){",
- " #root#root#root .ihfilm-copy{left:34px!important;width:43%!important;}",
- " #root#root#root .ihfilm-stage{width:100%;}",
- " #root#root#root .ihfilm-title{font-size:clamp(50px,6vw,65px)!important;}",
- " #root#root#root .ihfilm-description{font-size:14px!important;max-width:285px!important;}",
- " #root#root#root .ihfilm-actions{gap:8px!important;}",
- " #root#root#root .ihfilm-cta{padding:0 13px!important;font-size:12px!important;gap:10px!important;}",
- "}",
- "@media(max-width:760px){",
- " #root#root#root .ihfilm-hero{height:720px!important;min-height:720px!important;margin-bottom:37px!important;}",
- " #root#root#root .ihfilm-stage,#root#root#root .ihfilm-hero[data-ready=\"false\"] .ihfilm-stage{top:47px;bottom:auto;width:100%;height:345px;transition:none;}",
- " #root#root#root .ihfilm-topline{top:18px;left:24px;right:24px;gap:10px;}",
- " #root#root#root .ihfilm-wordmark{font-size:9px!important;letter-spacing:.055em!important;}",
- " #root#root#root .ihfilm-control{height:35px!important;min-width:35px!important;padding:0 8px!important;font-size:10px!important;}",
- " #root#root#root .ihfilm-control svg{width:14px;height:14px;}",
- " #root#root#root .ihfilm-copy{top:auto!important;bottom:103px!important;left:24px!important;right:24px!important;width:auto!important;max-width:none!important;transform:translateY(12px)!important;}",
- " #root#root#root .ihfilm-hero[data-ready=\"true\"] .ihfilm-copy{transform:none!important;}",
- " #root#root#root .ihfilm-title{font-size:clamp(46px,10.4vw,60px)!important;letter-spacing:-.06em!important;}",
- " #root#root#root .ihfilm-description{font-size:14px!important;margin-top:18px!important;max-width:360px!important;line-height:1.6!important;}",
- " #root#root#root .ihfilm-eyebrow{font-size:9px!important;margin-bottom:12px!important;}",
- " #root#root#root .ihfilm-actions{margin-top:21px!important;gap:10px!important;}",
- " #root#root#root .ihfilm-cta{flex:1!important;padding:0 13px!important;font-size:12px!important;gap:8px!important;min-height:49px!important;}",
- " #root#root#root .ihfilm-cta svg{width:14px;height:14px;}",
- " #root#root#root .ihfilm-ghost{right:3%;top:9%;font-size:clamp(110px,27vw,210px)!important;}",
- " #root#root#root .ihfilm-foot{left:24px;right:24px;bottom:24px;gap:12px;flex-wrap:wrap;padding-top:15px;}",
- " #root#root#root .ihfilm-caption,#root#root#root .ihfilm-live{font-size:9px!important;}",
- " #root#root#root .ihfilm-live strong{display:none;}",
- " #root#root#root .ihfilm-phase{left:24px;bottom:127px;}",
- " #root#root#root .ihfilm-fallback-laptop{width:265px;height:172px;}",
- "}",
- "@media(max-width:360px){",
- " #root#root#root .ihfilm-hero{height:778px!important;min-height:778px!important;}",
- " #root#root#root .ihfilm-stage,#root#root#root .ihfilm-hero[data-ready=\"false\"] .ihfilm-stage{height:321px;}",
- " #root#root#root .ihfilm-topline{left:20px;right:20px;}",
- " #root#root#root .ihfilm-wordmark{letter-spacing:0!important;}",
- " #root#root#root .ihfilm-copy{left:20px!important;right:20px!important;bottom:100px!important;}",
- " #root#root#root .ihfilm-title{font-size:43px!important;}",
- " #root#root#root .ihfilm-actions{flex-direction:column!important;gap:8px!important;}",
- " #root#root#root .ihfilm-cta{font-size:13px!important;}",
- " #root#root#root .ihfilm-foot{left:20px;right:20px;}",
- "}",
- "@media(prefers-reduced-motion:reduce){#root#root#root .ihfilm-hero *,#root#root#root .ihfilm-hero *::before,#root#root#root .ihfilm-hero *::after{animation:none!important;transition:none!important;}}",
- "@media print{#root#root#root .ihfilm-canvas,#root#root#root .ihfilm-controls,#root#root#root .ihfilm-foot{display:none!important;}#root#root#root .ihfilm-copy{position:relative!important;top:auto!important;left:auto!important;width:auto!important;opacity:1!important;transform:none!important;padding:24px;}#root#root#root .ihfilm-hero{height:auto!important;min-height:0!important;}}"
-].join("\n");
-
-
-const IH37_DURATION=5.0;
-const IH37_SEEN=new Set();
-const IH37_COPY={
- pl:{region:"Od pomysłu do projektu",eyebrow:"Twój pomysł zasługuje na ciąg dalszy.",title:"Masz pomysł.",subtitle:"Daj mu życie.",
-  description:"Znajdź kogoś, kto go zrealizuje. Albo odkryj projekt dla siebie.",talent:"Znajdź wykonawcę",jobs:"Znajdź zlecenie",
-  skip:"Pomiń wstęp",replay:"Odtwórz wstęp",pause:"Zatrzymaj animację",resume:"Wznów animację",off:"Animacja ograniczona",
-  close:"Zamknij laptop",open:"Otwórz laptop",rotate:"Obróć model laptopa",drag:"Przeciągnij i obróć model",browse:"Odkryj aktualne zlecenia",
-  live:"Nowe w IdeaHire",help:"Przeciągnij, aby obrócić laptop. Strzałki klawiatury także zmieniają widok. Home przywraca kadr.",
-  phases:["Zaczyna się od pomysłu.","Dodaj talent.","Twórz coś własnego.","Od pomysłu do realizacji."]},
- en:{region:"From idea to project",eyebrow:"Your idea deserves a next chapter.",title:"Your idea.",subtitle:"Made real.",
-  description:"Find someone who can bring it to life. Or discover a project of your own.",talent:"Find a freelancer",jobs:"Find a project",
-  skip:"Skip intro",replay:"Replay intro",pause:"Pause animation",resume:"Resume animation",off:"Reduced animation",
-  close:"Close laptop",open:"Open laptop",rotate:"Rotate the laptop model",drag:"Drag to rotate the model",browse:"Explore current projects",
-  live:"New on IdeaHire",help:"Drag to rotate the laptop. Arrow keys also change the view. Home resets the framing.",
-  phases:["It starts with an idea.","Add the right talent.","Create something of your own.","From idea to reality."]}
-};
-function ih37Reduced(){return typeof window!=="undefined"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;}
-function IH37Icon({kind}){
- const paths={arrow:"M5 19 19 5M6 5h13v13",pause:"M9 6v12M15 6v12",play:"m8 5 11 7-11 7z",
-  replay:"M4 9a8 8 0 1 1 0 6M4 4v5h5",laptop:"M5 4h14v12H5zM3 20h18l-2-4H5z",move:"M4 12h16M12 4v16m-5-7-3 3 3 3m10-6 3 3-3 3"};
- return <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.arrow}/></svg>;
-}
-export function IdeaHireCinematicHero({job,userKey="guest"}){
- const site=useSitePreferences(),[reduced,setReduced]=useState(ih37Reduced);
- const [ready,setReady]=useState(()=>IH37_SEEN.has(userKey)||ih37Reduced()),[phase,setPhase]=useState(0);
- const [paused,setPaused]=useState(false),[closed,setClosed]=useState(false),[gpu,setGpu]=useState(false);
- const canvasRef=useRef(null),engineRef=useRef(null),dragRef=useRef(null),userRef=useRef(userKey);
- const motion=useRef({intro:ready?IH37_DURATION:0,time:0,yaw:0,pitch:0,role:0,paused:false,closed:false,lidValue:1,reveal:ready?1:0,pointer:[2,0],
-  reduced,dark:site.theme==="dark",classic:site.template==="classic",language:site.language,dirty:true});
- const text=IH37_COPY[site.language==="en"?"en":"pl"];
- const realJob=job?.id&&/^[0-9a-f-]{36}$/i.test(String(job.id))?job:null;
- const complete=()=>{IH37_SEEN.add(userRef.current);setReady(true);setPhase(3);};
- useLayoutEffect(()=>{userRef.current=userKey;},[userKey]);
- useEffect(()=>{const media=window.matchMedia("(prefers-reduced-motion: reduce)");const update=()=>setReduced(media.matches);update();
-  media.addEventListener?.("change",update);return()=>media.removeEventListener?.("change",update);},[]);
- useLayoutEffect(()=>{
-  Object.assign(motion.current,{dark:site.theme==="dark",classic:site.template==="classic",language:site.language,reduced,paused,closed});
-  if(reduced){motion.current.intro=IH37_DURATION;complete();}
-  engineRef.current?.wake();
- },[site.theme,site.template,site.language,reduced,paused,closed]);
- useEffect(()=>{const canvas=canvasRef.current;if(!canvas)return undefined;
-  const engine=ih37Start(canvas,motion,setPhase,complete,()=>{setGpu(false);complete();},()=>setGpu(true));
-  engineRef.current=engine;return()=>{engine.destroy();engineRef.current=null;};},[]);
- const wake=()=>engineRef.current?.wake();
- function skip(){Object.assign(motion.current,{intro:IH37_DURATION,lidValue:1,reveal:1});setClosed(false);complete();wake();}
- function replay(){
-  if(reduced||!gpu){skip();return;}
-  Object.assign(motion.current,{intro:0,time:0,yaw:0,pitch:0,closed:false,lidValue:1,reveal:0});setClosed(false);setPaused(false);setReady(false);setPhase(0);wake();
- }
- function toggleLid(){const value=!closed;if(paused||reduced)motion.current.lidValue=value?0:1;setClosed(value);wake();}
- function down(event){if(!ready||event.button!==0)return;dragRef.current={id:event.pointerId,x:event.clientX,y:event.clientY};
-  try{event.currentTarget.setPointerCapture(event.pointerId);}catch{/* System może przejąć gest dotykowy. */}}
- function move(event){if(!paused&&!reduced){const r=event.currentTarget.getBoundingClientRect();motion.current.pointer=[((event.clientX-r.left)/Math.max(1,r.width)-.5)*12,((event.clientY-r.top)/Math.max(1,r.height)-.5)*8];}
-  const d=dragRef.current;if(!d||d.id!==event.pointerId)return;
-  motion.current.yaw+=(event.clientX-d.x)*.007;motion.current.pitch=Math.max(-.25,Math.min(.25,motion.current.pitch+(event.clientY-d.y)*.003));
-  d.x=event.clientX;d.y=event.clientY;wake();}
- function up(event){if(dragRef.current?.id!==event.pointerId)return;dragRef.current=null;
-  try{event.currentTarget.releasePointerCapture(event.pointerId);}catch{/* Gest mógł zostać anulowany. */}}
- function keys(event){if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home"].includes(event.key))return;event.preventDefault();
-  if(event.key==="Home"){motion.current.yaw=0;motion.current.pitch=0;}
-  else if(event.key==="ArrowLeft")motion.current.yaw-=.15;
-  else if(event.key==="ArrowRight")motion.current.yaw+=.15;
-  else motion.current.pitch=Math.max(-.25,Math.min(.25,motion.current.pitch+(event.key==="ArrowUp"?-.06:.06)));
-  wake();
- }
- function role(value){motion.current.role=value;wake();}
- return <section className="ihfilm-hero" data-cinematic-version="P37-2026-10-14" data-no-translate="true"
-  data-ready={ready} data-gpu={gpu} data-paused={paused||reduced} data-dark={site.theme==="dark"} data-classic={site.template==="classic"}
-  data-closed={closed} aria-label={text.region}>
-  <style>{IH37_STYLES}</style>
-  <div className="ihfilm-atmosphere" aria-hidden="true"><div className="ihfilm-beam"/><span className="ihfilm-ghost">CREATE.</span></div>
-  <div className="ihfilm-stage">
-   <div className="ihfilm-fallback" aria-hidden="true"><div className="ihfilm-fallback-laptop">
-    <div className="ihfilm-fallback-screen">IdeaHire</div><div className="ihfilm-fallback-base"/></div></div>
-   <canvas ref={canvasRef} className="ihfilm-canvas" role="img" aria-label={text.rotate} aria-describedby="ihfilm-rotation-help"
-    tabIndex={ready&&gpu?0:-1} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
-    onLostPointerCapture={()=>{dragRef.current=null;}} onKeyDown={keys}/>
-  </div>
-  <p id="ihfilm-rotation-help" className="ihfilm-sr">{text.help}</p>
-  <div className="ihfilm-topline"><span className="ihfilm-wordmark"><i aria-hidden="true"/>IDEAHIRE</span>
-   <div className="ihfilm-controls">
-    <button className="ihfilm-control" type="button" onClick={ready?replay:skip} title={ready?text.replay:text.skip} aria-label={ready?text.replay:text.skip}>
-     <IH37Icon kind={ready?"replay":"arrow"}/>{!ready&&<span>{text.skip}</span>}</button>
-    {ready&&<button className="ihfilm-control" type="button" onClick={toggleLid} title={closed?text.open:text.close} aria-label={closed?text.open:text.close} aria-pressed={closed} disabled={!gpu}>
-     <IH37Icon kind="laptop"/></button>}
-    <button className="ihfilm-control" type="button" onClick={()=>setPaused(value=>!value)}
-     title={reduced?text.off:paused?text.resume:text.pause} aria-label={reduced?text.off:paused?text.resume:text.pause}
-     aria-pressed={paused||reduced} disabled={reduced}><IH37Icon kind={paused&&!reduced?"play":"pause"}/></button>
-   </div>
-  </div>
-  <div className="ihfilm-phase" aria-hidden="true"><span>0{Math.min(phase,2)+1}</span><span>{text.phases[phase]}</span></div>
-  <div className="ihfilm-copy" inert={!ready?"":undefined} aria-hidden={!ready}>
-   <span className="ihfilm-eyebrow">{text.eyebrow}</span>
-   <h1 className="ihfilm-title"><span>{text.title}</span><span>{text.subtitle}</span></h1>
-   <p className="ihfilm-description">{text.description}</p>
-   <div className="ihfilm-actions">
-    <Link className="ihfilm-cta" to="/find-talent" tabIndex={ready?0:-1} onPointerEnter={()=>role(1)} onPointerLeave={()=>role(0)} onFocus={()=>role(1)} onBlur={()=>role(0)}>
-     {text.talent}<IH37Icon kind="arrow"/></Link>
-    <Link className="ihfilm-cta" to="/jobs" tabIndex={ready?0:-1} onPointerEnter={()=>role(2)} onPointerLeave={()=>role(0)} onFocus={()=>role(2)} onBlur={()=>role(0)}>
-     {text.jobs}<IH37Icon kind="arrow"/></Link>
-   </div>
-  </div>
-  <div className="ihfilm-foot">
-   <span className="ihfilm-caption"><IH37Icon kind="move"/>{ready?text.drag:text.phases[phase]}</span>
-   <Link className="ihfilm-live" to="/jobs" aria-label={text.browse}><span>{realJob?text.live:text.browse}</span>
-    {realJob&&<strong title={realJob.title}>{String(realJob.title||"").slice(0,140)}</strong>}<span aria-hidden="true">↗</span></Link>
-  </div>
- </section>;
+function IH38Icon({kind="arrow"}) {
+  const paths={
+    arrow:"M5 19 19 5M6 5h13v13",
+    pause:"M9 6v12M15 6v12",
+    play:"m8 5 11 7-11 7z",
+    replay:"M4 9a8 8 0 1 1 0 6M4 4v5h5",
+    move:"M4 12h16M12 4v16m-5-7-3 3 3 3m10-6 3 3-3 3",
+    brief:"M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h4",
+    check:"m5 12 4 4L19 6",
+    link:"M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2",
+  };
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[kind]||paths.arrow}/></svg>;
 }
 
+export function IdeaHireCinematicHero({job,jobs=[],userKey="guest"}) {
+  const site=useSitePreferences();
+  const [reduced,setReduced]=useState(ih38Reduced);
+  const [ready,setReady]=useState(()=>IH38_SEEN.has(userKey)||ih38Reduced());
+  const [phase,setPhase]=useState(()=>IH38_SEEN.has(userKey)||ih38Reduced()?2:0);
+  const [paused,setPaused]=useState(false);
+  const [gpu,setGpu]=useState(false);
+  const [visible,setVisible]=useState(true);
+  const rootRef=useRef(null),canvasRef=useRef(null),stageRef=useRef(null),engineRef=useRef(null);
+  const dragRef=useRef(null),pointerTimerRef=useRef(0),userRef=useRef(userKey);
+  const motion=useRef({
+    intro:ready?IH38_DURATION:0,time:0,ready,phase:ready?2:0,paused:false,reduced,
+    dark:site.theme==="dark",classic:site.template==="classic",
+    yaw:0,pitch:0,targetYaw:0,targetPitch:0,pointer:[2,-2],
+  });
+  const text=IH38_COPY[site.language==="en"?"en":"pl"];
+  const realJobs=jobs.filter(item=>item?.id&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(item.id)));
+  const isRealJob=!!job?.id&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(job.id));
+  const mainJob=isRealJob?job:realJobs[0];
+  const otherJob=realJobs.find(item=>item.id!==mainJob?.id);
+  const title=mainJob?.title||text.project;
+  const category=mainJob?.category||text.category;
+  const summary=mainJob?.description||text.summary;
+  const numericBudget=Number(mainJob?.budget);
+  const budget=mainJob?(Number.isFinite(numericBudget)&&numericBudget>0?
+    new Intl.NumberFormat(site.language==="en"?"en-GB":"pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:0}).format(numericBudget):"—"):
+    new Intl.NumberFormat(site.language==="en"?"en-GB":"pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:0}).format(1800);
 
+  useLayoutEffect(()=>{userRef.current=userKey;},[userKey]);
+  useEffect(()=>{
+    const media=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update=()=>setReduced(media.matches);
+    media.addEventListener?.("change",update);update();
+    return()=>media.removeEventListener?.("change",update);
+  },[]);
+  useLayoutEffect(()=>{
+    Object.assign(motion.current,{dark:site.theme==="dark",classic:site.template==="classic",paused,reduced});
+    if(reduced){
+      motion.current.ready=true;motion.current.intro=IH38_DURATION;motion.current.phase=2;
+      setReady(true);setPhase(2);IH38_SEEN.add(userRef.current);
+    }
+    engineRef.current?.wake();
+  },[site.theme,site.template,reduced,paused]);
+  useEffect(()=>{
+    const root=rootRef.current,stage=stageRef.current,canvas=canvasRef.current;
+    if(!root||!stage||!canvas)return undefined;
+    const engine=ih38Start(canvas,root,stage,motion,update=>{
+      if(update.gpu)setGpu(true);
+      if(update.failed)setGpu(false);
+      if(update.phase!==undefined){setPhase(update.phase);motion.current.phase=update.phase;}
+      if(update.ready){setReady(true);motion.current.ready=true;IH38_SEEN.add(userRef.current);}
+    });
+    engineRef.current=engine;
+    return()=>{engine.destroy();engineRef.current=null;};
+  },[]);
+  useEffect(()=>{
+    const root=rootRef.current,stage=stageRef.current;if(!root||!stage)return undefined;
+    const resize=()=>{
+      const mobile=window.matchMedia("(max-width: 820px)").matches;
+      root.style.setProperty("--ih38-stage-scale",String(Math.min(1.16,Math.max(.2,stage.getBoundingClientRect().width/(mobile?440:650)))));
+    };
+    resize();window.addEventListener("resize",resize,{passive:true});
+    const size=typeof ResizeObserver!=="undefined"?new ResizeObserver(resize):null;
+    size?.observe(stage);
+    const observer=typeof IntersectionObserver!=="undefined"?new IntersectionObserver(entries=>setVisible(!!entries[0]?.isIntersecting),{rootMargin:"100px"}):null;
+    observer?.observe(root);
+    const visibility=()=>{if(document.hidden)setVisible(false);else setVisible(root.getBoundingClientRect().bottom>0&&root.getBoundingClientRect().top<window.innerHeight+100);};
+    document.addEventListener("visibilitychange",visibility);
+    return()=>{window.removeEventListener("resize",resize);document.removeEventListener("visibilitychange",visibility);size?.disconnect();observer?.disconnect();};
+  },[]);
+  useEffect(()=>()=>window.clearTimeout(pointerTimerRef.current),[]);
+  function finish(nextPhase=2) {
+    Object.assign(motion.current,{ready:true,intro:IH38_DURATION,phase:nextPhase});
+    setReady(true);setPhase(nextPhase);IH38_SEEN.add(userRef.current);engineRef.current?.wake();
+  }
+  function replay() {
+    if(reduced||!gpu){finish();return;}
+    Object.assign(motion.current,{ready:false,intro:0,time:0,phase:0,targetYaw:0,targetPitch:0});
+    setReady(false);setPhase(0);setPaused(false);engineRef.current?.wake();
+  }
+  function resetView() {
+    Object.assign(motion.current,{targetYaw:0,targetPitch:0,pointer:[2,-2]});
+    rootRef.current?.style.setProperty("--ih38-orbit-x","0deg");
+    rootRef.current?.style.setProperty("--ih38-orbit-y","0deg");
+    engineRef.current?.wake();
+  }
+  function updateView(yaw,pitch) {
+    motion.current.targetYaw=Math.max(-12,Math.min(12,yaw));
+    motion.current.targetPitch=Math.max(-8,Math.min(8,pitch));
+    if(!gpu){
+      rootRef.current?.style.setProperty("--ih38-orbit-y",motion.current.targetYaw*.8+"deg");
+      rootRef.current?.style.setProperty("--ih38-orbit-x",motion.current.targetPitch*.72+"deg");
+    }
+    engineRef.current?.wake();
+  }
+  function pointerDown(event) {
+    if(event.button!==0||event.target.closest("a,button")||reduced)return;
+    dragRef.current={id:event.pointerId,x:event.clientX,y:event.clientY,yaw:motion.current.targetYaw,pitch:motion.current.targetPitch};
+    stageRef.current?.setAttribute("data-dragging","true");
+    try{event.currentTarget.setPointerCapture(event.pointerId);}catch{/* Przewijanie może przejąć gest. */}
+  }
+  function pointerMove(event) {
+    if(reduced||paused&&!dragRef.current)return;
+    const rect=event.currentTarget.getBoundingClientRect();
+    const x=(event.clientX-rect.left)/Math.max(1,rect.width)-.5,y=(event.clientY-rect.top)/Math.max(1,rect.height)-.5;
+    motion.current.pointer=[x*12+2,y*8-2];
+    const drag=dragRef.current;
+    if(drag&&drag.id===event.pointerId){
+      updateView(drag.yaw+(event.clientX-drag.x)*.055,drag.pitch-(event.clientY-drag.y)*.034);
+    }else if(event.pointerType==="mouse"){
+      updateView(x*11,-y*7);
+    }
+    window.clearTimeout(pointerTimerRef.current);
+    pointerTimerRef.current=window.setTimeout(()=>{if(!dragRef.current)resetView();},1200);
+  }
+  function pointerUp(event) {
+    if(dragRef.current?.id!==event.pointerId)return;
+    dragRef.current=null;stageRef.current?.removeAttribute("data-dragging");
+    try{event.currentTarget.releasePointerCapture(event.pointerId);}catch{/* Gest mógł zostać anulowany. */}
+  }
+  function keys(event) {
+    if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home"].includes(event.key))return;
+    event.preventDefault();
+    if(event.key==="Home"){resetView();return;}
+    updateView(motion.current.targetYaw+(event.key==="ArrowLeft"?-2:event.key==="ArrowRight"?2:0),
+      motion.current.targetPitch+(event.key==="ArrowUp"?2:event.key==="ArrowDown"?-2:0));
+  }
+  const stopped=paused||reduced||!visible;
+  return (
+    <section ref={rootRef} id="ih38-experience" className="ih38-hero"
+      data-cinematic-version="P38-2026-10-15" data-no-translate="true"
+      data-dark={site.theme==="dark"} data-classic={site.template==="classic"}
+      data-ready={ready} data-phase={phase} data-gpu={gpu} data-paused={stopped}
+      aria-label={text.region}>
+      <style>{IH38_STYLES}</style>
+      <div className="ih38-atmosphere" aria-hidden="true"><i className="ih38-horizon"/><i className="ih38-light"/><i className="ih38-grain"/></div>
+      <canvas ref={canvasRef} className="ih38-field" aria-hidden="true"/>
+      <div className="ih38-topline">
+        <span className="ih38-wordmark"><i aria-hidden="true"/>IDEAHIRE<span>/ {text.region}</span></span>
+        <div className="ih38-controls">
+          <button type="button" className="ih38-control" onClick={ready?replay:()=>finish()}
+            title={ready?text.replay:text.skip} aria-label={ready?text.replay:text.skip}>
+            <IH38Icon kind={ready?"replay":"arrow"}/>{!ready&&<span>{text.skip}</span>}
+          </button>
+          <button type="button" className="ih38-control" onClick={resetView} title={text.reset} aria-label={text.reset}><IH38Icon kind="move"/></button>
+          <button type="button" className="ih38-control" onClick={()=>setPaused(value=>!value)}
+            title={reduced?text.reduced:paused?text.resume:text.pause}
+            aria-label={reduced?text.reduced:paused?text.resume:text.pause}
+            aria-pressed={paused||reduced} disabled={reduced}><IH38Icon kind={paused&&!reduced?"play":"pause"}/></button>
+        </div>
+      </div>
+      <div className="ih38-layout">
+        <div className="ih38-copy">
+          <span className="ih38-eyebrow">{text.eyebrow}</span>
+          <h1 className="ih38-title"><span>{text.title}</span><span>{text.subtitle}</span></h1>
+          <p className="ih38-description">{text.description}</p>
+          <div className="ih38-actions">
+            <Link className="ih38-cta" to="/find-talent">{text.talent}<IH38Icon/></Link>
+            <Link className="ih38-cta" to="/jobs">{text.jobs}<IH38Icon/></Link>
+          </div>
+          <div className="ih38-chapters" role="group" aria-label={text.sceneSteps}>
+            {text.phases.map((label,index)=><button key={index} type="button" className="ih38-chapter"
+              aria-pressed={phase===index} onClick={()=>finish(index)}>
+              <span className="ih38-chapter-number">0{index+1}</span><span>{label}</span><i aria-hidden="true"/>
+            </button>)}
+          </div>
+        </div>
+        <div ref={stageRef} className="ih38-stage" role="group" tabIndex={0}
+          aria-label={text.stage} aria-describedby="ih38-stage-help"
+          onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}
+          onLostPointerCapture={()=>{dragRef.current=null;stageRef.current?.removeAttribute("data-dragging");}}
+          onPointerLeave={()=>{if(!dragRef.current)resetView();}} onKeyDown={keys}>
+          <div className="ih38-stage-sizer">
+            <div className="ih38-world">
+              <svg className="ih38-connections" viewBox="0 0 650 510" aria-hidden="true">
+                <path d="M45 370C100 365 170 320 240 246S400 98 555 82"/>
+                <path d="M176 392C295 455 375 474 508 468"/>
+                <path className="ih38-stream" d="M45 370C100 365 170 320 240 246S400 98 555 82"/>
+                <circle cx="45" cy="370" r="3"/><circle cx="555" cy="82" r="3"/><circle cx="508" cy="468" r="3"/>
+              </svg>
+              <div className="ih38-ground-shadow" aria-hidden="true"/>
+              <div className="ih38-project ih38-plate" aria-label={text.deliverable}>
+                <div className="ih38-project-top"><span>02 / {text.deliverable}</span><IH38Icon kind="check"/></div>
+                <div className="ih38-artwork">
+                  <span className="ih38-art-edition">FORMA / STUDIO</span>
+                  <div className="ih38-art-sculpture" aria-hidden="true"><i/><i/><i/><i/><i/></div>
+                  <strong>{text.artwork}</strong><span className="ih38-art-footer">Aa <i/> 01 — 26</span>
+                </div>
+                <div className="ih38-swatches" aria-hidden="true"><i/><i/><i/><i/><span>FORM / TYPE / DETAIL</span></div>
+              </div>
+              <div className="ih38-job-wrap">
+                <div className="ih38-paper-edge" aria-hidden="true"/><div className="ih38-paper-edge ih38-paper-edge-two" aria-hidden="true"/>
+                <article className="ih38-document ih38-plate">
+                  <div className="ih38-document-top"><span className="ih38-file-icon"><IH38Icon kind="brief"/></span>
+                    <span>{text.brief}<small>{mainJob?"IdeaHire":text.briefPreview}</small></span><span className="ih38-document-number">01</span>
+                  </div>
+                  <div className="ih38-document-content" key={String(mainJob?.id||"demo")+site.language}>
+                    <span className="ih38-category">{category}</span>
+                    <h2 title={String(title)}>{title}</h2>
+                    <p title={String(summary)}>{summary}</p>
+                    <div className="ih38-brief-line" aria-hidden="true"><i/><i/><i/></div>
+                    <div className="ih38-document-facts">
+                      <div><span>{text.budget}</span><strong>{budget}</strong></div>
+                      <div><span>{mainJob?text.categoryLabel:text.scope}</span><strong>{mainJob?category:text.scopeText}</strong></div>
+                    </div>
+                  </div>
+                  <div className="ih38-document-footer"><span><i aria-hidden="true"/>{mainJob?text.live:text.demo}</span><IH38Icon/></div>
+                  <div className="ih38-card-sheen" aria-hidden="true"/>
+                </article>
+              </div>
+              <div className="ih38-small-job ih38-plate">
+                <span className="ih38-small-job-icon"><IH38Icon kind="brief"/></span>
+                <div key={String(otherJob?.id||"second-demo")+site.language}>
+                  <span>{otherJob?.category||text.nextCategory}</span><strong title={String(otherJob?.title||text.nextProject)}>{otherJob?.title||text.nextProject}</strong>
+                  <small>{otherJob?text.relatedProject:text.demo}</small>
+                </div>
+              </div>
+              <div className="ih38-talent ih38-plate">
+                <div className="ih38-talent-symbol" aria-hidden="true"><IH38Icon kind="link"/></div>
+                <div><span>{text.connection}</span><strong>{text.skills}</strong></div>
+                <i className="ih38-talent-indicator" aria-hidden="true"/>
+              </div>
+              <div className="ih38-scene-label" aria-hidden="true"><span>03 / {text.draft}</span><i/><span>{text.craft}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p id="ih38-stage-help" className="ih38-sr">{text.help}</p>
+      <div className="ih38-foot">
+        <span className="ih38-caption"><IH38Icon kind="move"/><span>{ready?text.hint:text.phaseLabels[phase]}</span></span>
+        <Link className="ih38-feed" to="/jobs" aria-label={text.browse}>
+          <span className="ih38-feed-dot" aria-hidden="true"/><span>{mainJob?text.live:text.browse}</span>
+          {mainJob&&<strong key={mainJob.id} title={String(mainJob.title)}>{mainJob.title}</strong>}<IH38Icon/>
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/* Tylko pasek nawigacji na stronie głównej; bez zmian pozycji logo i konta. */
+function useIdeaHireCursorNavigation(navigationRef,headerRef) {
+  useEffect(()=>{
+    const nav=navigationRef.current,header=headerRef.current;
+    if(!nav||!header)return undefined;
+    const desktop=window.matchMedia("(min-width: 1001px) and (hover: hover) and (pointer: fine)");
+    const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+    const saved=["translate","will-change","z-index"].map(name=>[name,nav.style.getPropertyValue(name),nav.style.getPropertyPriority(name)]);
+    const overflow=[header.style.getPropertyValue("overflow"),header.style.getPropertyPriority("overflow")];
+    let current=0,target=0,frame=0,idleTimer=0,last=0,pointerOver=false,focused=false,disposed=false;
+    const enabled=()=>desktop.matches&&!reduced.matches;
+    const tick=now=>{
+      frame=0;if(disposed)return;
+      const dt=last?Math.min(.05,(now-last)/1000):1/60;last=now;
+      current+=(target-current)*(1-Math.exp(-dt*9));
+      if(Math.abs(target-current)<.05)current=target;
+      nav.style.setProperty("translate","0 "+current.toFixed(2)+"px","important");
+      if(Math.abs(target-current)>.01)frame=requestAnimationFrame(tick);
+    };
+    const wake=()=>{if(!frame){last=0;frame=requestAnimationFrame(tick);}};
+    const returnHome=()=>{
+      window.clearTimeout(idleTimer);idleTimer=0;
+      if(pointerOver||focused)return;
+      target=0;wake();
+    };
+    const scheduleHome=()=>{
+      window.clearTimeout(idleTimer);
+      idleTimer=window.setTimeout(returnHome,780);
+    };
+    const move=event=>{
+      if(!enabled()||event.pointerType!=="mouse"||pointerOver||focused||event.buttons)return;
+      const box=nav.getBoundingClientRect(),originTop=box.top-current;
+      if(originTop+box.height<0||originTop>window.innerHeight)returnHome();
+      else {
+        const desired=Math.max(0,(event.clientY-originTop-box.height/2-36)*.42);
+        const viewportRoom=Math.max(0,window.innerHeight-originTop-box.height-24);
+        target=Math.min(180,viewportRoom,desired);wake();scheduleHome();
+      }
+    };
+    const enter=()=>{pointerOver=true;window.clearTimeout(idleTimer);target=current;};
+    const leave=()=>{pointerOver=false;scheduleHome();};
+    const focus=()=>{focused=true;window.clearTimeout(idleTimer);target=current;};
+    const blur=event=>{if(nav.contains(event.relatedTarget))return;focused=false;returnHome();};
+    const settings=()=>{
+      window.clearTimeout(idleTimer);cancelAnimationFrame(frame);frame=0;current=0;target=0;last=0;
+      nav.style.setProperty("translate","0 0","important");
+      if(enabled()){
+        nav.style.setProperty("will-change","translate","important");
+        nav.style.setProperty("z-index","150","important");
+        header.style.setProperty("overflow","visible","important");
+      }else{
+        saved.forEach(([name,value,priority])=>value?nav.style.setProperty(name,value,priority):nav.style.removeProperty(name));
+        overflow[0]?header.style.setProperty("overflow",overflow[0],overflow[1]):header.style.removeProperty("overflow");
+      }
+    };
+    const scroll=()=>{if(!pointerOver&&!focused)returnHome();};
+    const outside=()=>{pointerOver=false;returnHome();};
+    settings();
+    document.addEventListener("pointermove",move,{passive:true});
+    nav.addEventListener("pointerenter",enter);nav.addEventListener("pointerleave",leave);
+    nav.addEventListener("focusin",focus);nav.addEventListener("focusout",blur);
+    window.addEventListener("scroll",scroll,{passive:true});
+    window.addEventListener("blur",outside);document.addEventListener("pointerleave",outside);
+    desktop.addEventListener?.("change",settings);reduced.addEventListener?.("change",settings);
+    return()=>{
+      disposed=true;window.clearTimeout(idleTimer);cancelAnimationFrame(frame);
+      document.removeEventListener("pointermove",move);
+      nav.removeEventListener("pointerenter",enter);nav.removeEventListener("pointerleave",leave);
+      nav.removeEventListener("focusin",focus);nav.removeEventListener("focusout",blur);
+      window.removeEventListener("scroll",scroll);window.removeEventListener("blur",outside);document.removeEventListener("pointerleave",outside);
+      desktop.removeEventListener?.("change",settings);reduced.removeEventListener?.("change",settings);
+      saved.forEach(([name,value,priority])=>value?nav.style.setProperty(name,value,priority):nav.style.removeProperty(name));
+      overflow[0]?header.style.setProperty("overflow",overflow[0],overflow[1]):header.style.removeProperty("overflow");
+    };
+  },[navigationRef,headerRef]);
+}
 
 const categories = [
   { value: "Programowanie", label: "Strony, aplikacje i IT" },
@@ -942,6 +1452,7 @@ function App({ session, loading, categoryGroups = [] }) {
   const headerRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
   const navigationRef = useRef(null);
+  useIdeaHireCursorNavigation(navigationRef, headerRef);
 
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;
@@ -1470,7 +1981,7 @@ function App({ session, loading, categoryGroups = [] }) {
       </header>
 
       <main>
-        <IdeaHireCinematicHero job={activeJob} userKey={session?.user?.id || "guest"} />
+        <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} userKey={session?.user?.id || "guest"} />
 
         <HomeDemoReviews />
 
@@ -1615,4 +2126,5 @@ function App({ session, loading, categoryGroups = [] }) {
 }
 
 export default App;
+
 
