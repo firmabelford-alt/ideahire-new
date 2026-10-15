@@ -1,3 +1,4 @@
+/* IdeaHire | P40 | 2026-10-15 | Oczko hasła i nowe centrum konta. */
 /* IdeaHire | STRIPE 12 | 2026-10-15 | Saldo i wyplaty w profilu. */
 /* IdeaHire | PACZKA 30 | 2026-10-11 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
@@ -30,7 +31,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, helpCenterHref } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -6070,8 +6071,8 @@ function Login() {
           <label>
             Hasło
 
-            <input
-              type="password"
+            <PasswordInput
+              
               value={password}
               onChange={(event) =>
                 setPassword(
@@ -6510,8 +6511,8 @@ function ResetPassword() {
               <label>
                 Nowe hasło
 
-                <input
-                  type="password"
+                <PasswordInput
+                  
                   value={password}
                   onChange={(event) =>
                     setPassword(
@@ -6528,8 +6529,8 @@ function ResetPassword() {
               <label>
                 Powtórz nowe hasło
 
-                <input
-                  type="password"
+                <PasswordInput
+                  
                   value={passwordAgain}
                   onChange={(event) =>
                     setPasswordAgain(
@@ -6976,8 +6977,8 @@ function Register() {
           <label>
             Hasło
 
-            <input
-              type="password"
+            <PasswordInput
+              
               value={password}
               onChange={(event) =>
                 setPassword(
@@ -10132,7 +10133,7 @@ function Account() {
   function returnToAccountHub() {
     setAccountHubOpen(true);
     window.requestAnimationFrame(() => {
-      const trigger = document.querySelector(".ih16-hub-trigger");
+      const trigger = document.querySelector(".ih40-hub-home, .ih40-hub-tile");
       trigger?.focus({ preventScroll: true });
       trigger?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
     });
@@ -10146,8 +10147,8 @@ function Account() {
         className="app-page account-workspace-page ih6-account-workspace"
         data-account-section={activeAccountSection || "home"}
       >
-        <header className="ih16-account-overview">
-          <ProfileHub sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} open={accountHubOpen} onOpenChange={setAccountHubOpen}>
+        <div className="ih16-account-overview ih40-account-overview">
+          <ProfileHub displayName={displayName} sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} open={accountHubOpen} onOpenChange={setAccountHubOpen}>
           <nav className="ih13-account-shortcuts ih14-account-actions" aria-label="Szybkie działania konta">
             <section className="ih14-account-action-group">
               <h2>Zlecam pracę</h2>
@@ -10174,7 +10175,7 @@ function Account() {
             </section>
           </nav>
           </ProfileHub>
-        </header>
+        </div>
 
         <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
           <div className="ih6-account-content">
