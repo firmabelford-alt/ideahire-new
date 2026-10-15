@@ -1,4 +1,4 @@
-/* IdeaHire | P39 | 2026-10-15 | Pełny plik: src/App.jsx | Pomysł × Talent — autorski spektakl iH */
+/* IdeaHire | P40 | 2026-10-15 | Pełny plik: src/App.jsx | SPLOT — kwadratowa tożsamość IdeaHire */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -275,7 +275,7 @@ const IH39_STYLES=String.raw`
 }
 `;
 
-/* P39: autorski sygnet iH, powierzchnie frezowane, studio odbić i pole cząstek. */
+/* P40: SPLOT — cztery kwadratowe ramy, 96 mikromodułów, metal i światło. */
 const IH39_DURATION=6.8;
 const IH39_SEEN=new Set();
 const IH39_MATH={
@@ -301,7 +301,7 @@ const IH39_MATH={
     return{matrix:this.mul(projection,view),eye};
   },
   triangle(out,a,b,c){out.push(...a,...b,...c);},
-  sweep(path,width,depth,twist=0,steps=64){
+  sweep(path,width,depth,twist=0,steps=64,closed=false){
     const m=[],around=32;
     const sample=(u,v)=>{
       const t=Math.max(0,Math.min(1,u)),p=path(t),a=path(Math.max(0,t-.001)),b=path(Math.min(1,t+.001));
@@ -322,9 +322,12 @@ const IH39_MATH={
       return [...p.map((q,i)=>q+side[i]*px+front[i]*py+tangent[i]*tip),...normal,t,v];
     };
     const rings=[];
-    for(let i=0;i<=5;i++)rings.push(-.045+i*.009);
-    for(let i=1;i<steps;i++)rings.push(i/steps);
-    for(let i=0;i<=5;i++)rings.push(1+i*.009);
+    if(closed){for(let i=0;i<=steps;i++)rings.push(i/steps);}
+    else{
+      for(let i=0;i<=5;i++)rings.push(-.045+i*.009);
+      for(let i=1;i<steps;i++)rings.push(i/steps);
+      for(let i=0;i<=5;i++)rings.push(1+i*.009);
+    }
     for(let r=0;r<rings.length-1;r++)for(let j=0;j<around;j++){
       const a=sample(rings[r],j/around),b=sample(rings[r],(j+1)/around),c=sample(rings[r+1],(j+1)/around),d=sample(rings[r+1],j/around);
       this.triangle(m,a,c,b);this.triangle(m,a,d,c);
@@ -341,20 +344,49 @@ const IH39_MATH={
   },
 };
 
+/* Frezowane, cienkie kwadratowe segmenty; cztery otwarte ramy zamiast bryły. */
+function ih40Tile(cx,cy,cz,size,depth=.045) {
+  const out=[],half=size/2,bevel=.003,corner=.006,segments=4;
+  const rings=[[-depth/2,half-bevel,0,-1],[-depth/2+bevel,half,1,0],[depth/2-bevel,half,1,0],[depth/2,half-bevel,0,1]];
+  const sample=(ring,index)=>{
+    const [z,h,side,front]=ring,c=Math.floor(index/(segments+1))%4,k=index%(segments+1),angle=(c+k/segments)*Math.PI/2;
+    const r=Math.max(.001,corner-(half-h)),center=c*Math.PI/2+Math.PI/4;
+    const x=Math.cos(center)>0?h-r:-h+r,y=Math.sin(center)>0?h-r:-h+r;
+    return[cx+x+Math.cos(angle)*r,cy+y+Math.sin(angle)*r,cz+z,Math.cos(angle)*side,Math.sin(angle)*side,front,cx,cy];
+  };
+  const n=4*(segments+1),triangle=(a,b,c)=>out.push(...a,...b,...c);
+  for(let ring=0;ring<3;ring++)for(let i=0;i<n;i++){
+    const a=sample(rings[ring],i),b=sample(rings[ring],(i+1)%n),c=sample(rings[ring+1],(i+1)%n),d=sample(rings[ring+1],i);
+    triangle(a,b,c);triangle(a,c,d);
+  }
+  for(let i=0;i<n;i++){
+    triangle([cx,cy,cz+depth/2,0,0,1,cx,cy],sample(rings[3],i),sample(rings[3],(i+1)%n));
+    triangle([cx,cy,cz-depth/2,0,0,-1,cx,cy],sample(rings[0],(i+1)%n),sample(rings[0],i));
+  }
+  return out;
+}
+
 function ih39Geometry(){
   const g=IH39_MATH;
-  const parts=[
-    {geometry:g.sweep(t=>[-1.35+.025*Math.sin(t*Math.PI*2),-1.12+t*1.65,.04*Math.sin(t*Math.PI)],.43,.31,.18),tint:0,group:0},
-    {geometry:g.sphere([-1.35,1.05,0],.235),tint:1,group:0},
-    {geometry:g.sweep(t=>[-.31+.025*Math.sin(t*Math.PI),-1.12+t*2.45,.03*Math.sin(t*Math.PI*2)],.44,.32,-.09),tint:0,group:1},
-    {geometry:g.sweep(t=>[.98-.045*Math.sin(t*Math.PI),-1.12+t*2.45,-.03*Math.sin(t*Math.PI)],.44,.32,.12),tint:0,group:2},
-    {geometry:g.sweep(t=>[-.31+1.29*t,.03+.14*Math.sin((t-.5)*Math.PI),.08+.11*Math.sin(t*Math.PI)],.43,.30,.6,54),tint:1,group:3},
-  ];
-  const field=[],cols=140,rows=92;
+  const parts=Array.from({length:4},(_,group)=>{
+    const geometry=[],cx=group%2?.685:-.685,cy=group<2?.685:-.685;
+    for(let y=0;y<7;y++)for(let x=0;x<7;x++){
+      if(x>0&&x<6&&y>0&&y<6)continue;
+      const px=cx+(x-3)*.18,py=cy+(y-3)*.18;
+      geometry.push(...ih40Tile(px,py,(group===1||group===2?-.045:.045),.1795));
+    }
+    return{geometry,tint:group===3?1:0,group,cx,cy,continuous:false};
+  });
+  const continuous=parts.map(part=>({...part,continuous:true,geometry:g.sweep(t=>{
+    const a=t*Math.PI*2,co=Math.cos(a),si=Math.sin(a),power=.22;
+    return[part.cx+Math.sign(co)*Math.pow(Math.abs(co),power)*.54,part.cy+Math.sign(si)*Math.pow(Math.abs(si),power)*.54,part.group===1||part.group===2?-.045:.045];
+  },.18,.07,0,192,true)}));
+  parts.push(...continuous);
+  const field=[],cols=128,rows=82;
   for(let z=0;z<rows;z++)for(let x=0;x<cols;x++)field.push(-10+x*20/(cols-1),0,-15+z*22/(rows-1));
-  const particles=[],count=6200;
+  const particles=[],count=4800;
   for(let i=0;i<count;i++){
-    const part=parts[i%parts.length],vertices=part.geometry.length/8;
+    const part=parts[i%4],vertices=part.geometry.length/8;
     const offset=Math.floor(g.noise(i+17)*vertices)*8;
     particles.push(part.geometry[offset],part.geometry[offset+1],part.geometry[offset+2],g.noise(i+200),i%2?1:-1,0);
   }
@@ -365,11 +397,22 @@ function ih39Geometry(){
 
 const IH39_MESH_VERTEX=[
   "attribute vec3 aPosition,aNormal;attribute vec2 aUV;",
-  "uniform mat4 uCamera,uModel;uniform float uShift;",
+  "uniform mat4 uCamera,uModel;uniform float uShift,uBreak;",
   "varying vec3 vWorld,vNormal,vLocal;varying vec2 vUV;",
-  "void main(){vec4 w=uModel*vec4(aPosition,1.0);vWorld=w.xyz;vLocal=aPosition;vNormal=mat3(uModel)*aNormal;vUV=aUV;",
-  "vec4 clip=uCamera*w;clip.x+=uShift*clip.w;gl_Position=clip;}",
+  "void main(){",
+  " float seed=fract(sin(dot(aUV,vec2(17.123,91.713)))*43758.5453);",
+  " float a=uBreak*(seed-.5)*6.8,b=uBreak*(.5-seed)*4.3;",
+  " mat3 ry=mat3(cos(a),0.0,-sin(a),0.0,1.0,0.0,sin(a),0.0,cos(a));",
+  " mat3 rx=mat3(1.0,0.0,0.0,0.0,cos(b),sin(b),0.0,-sin(b),cos(b));",
+  " mat3 turn=ry*rx;vec3 center=vec3(aUV,0.0);",
+  " vec3 base=aPosition;float wave=.20*sin(base.x*2.1)*cos(base.y*1.8);",
+  " vec3 normal=normalize(vec3(aNormal.x-aNormal.z*.42*cos(base.x*2.1)*cos(base.y*1.8),aNormal.y+aNormal.z*.36*sin(base.x*2.1)*sin(base.y*1.8),aNormal.z));",
+  " base.z+=wave;vec3 p=center+turn*(base-center);",
+  " p+=vec3(cos(seed*25.13),sin(seed*25.13),sin(seed*17.7))*uBreak*(.32+seed*1.65);",
+  " vec4 w=uModel*vec4(p,1.0);vWorld=w.xyz;vLocal=aPosition;vNormal=mat3(uModel)*turn*normal;vUV=aUV;",
+  " vec4 clip=uCamera*w;clip.x+=uShift*clip.w;gl_Position=clip;}",
 ].join("\n");
+
 const IH39_MESH_FRAGMENT=[
   "precision highp float;",
   "uniform vec3 uEye,uAccent;uniform float uDark,uTint,uAlpha,uMirror,uTime;",
@@ -434,7 +477,7 @@ const IH39_PARTICLE_VERTEX=[
 ].join("\n");
 const IH39_PARTICLE_FRAGMENT=[
   "precision mediump float;uniform vec3 uAccent;uniform float uDark,uLines;varying float vAlpha,vSide,vTrail;",
-  "void main(){float a;if(uLines>.5)a=.20*(1.0-vTrail);else a=1.0-smoothstep(.04,.5,length(gl_PointCoord-vec2(.5)));a*=vAlpha;",
+  "void main(){float a;if(uLines>.5)a=.20*(1.0-vTrail);else a=1.0-smoothstep(.34,.5,max(abs(gl_PointCoord.x-.5),abs(gl_PointCoord.y-.5)));a*=vAlpha;",
   "vec3 color=mix(uAccent,mix(uAccent,vec3(.96),.8),step(.0,vSide)*uDark);",
   "gl_FragColor=vec4(color,a*mix(.62,1.0,uDark));}",
 ].join("\n");
@@ -450,7 +493,7 @@ const IH39_FIELD_VERTEX=[
 ].join("\n");
 const IH39_FIELD_FRAGMENT=[
   "precision mediump float;uniform vec3 uAccent;uniform float uDark;varying float vFade,vLight,vSide;",
-  "void main(){float a=1.0-smoothstep(.08,.5,length(gl_PointCoord-vec2(.5)));",
+  "void main(){float a=1.0-smoothstep(.32,.5,max(abs(gl_PointCoord.x-.5),abs(gl_PointCoord.y-.5)));",
   "gl_FragColor=vec4(uAccent,a*vFade*vLight*mix(.35,.72,uDark)*mix(.3,1.0,smoothstep(-.65,.15,vSide)));}",
 ].join("\n");
 
@@ -461,7 +504,7 @@ const IH39_QUAD_FRAGMENT=[
   "void main(){",
   " vec2 p=(vUV-vec2(.5+uShift*.5,.51))*vec2(uAspect,1.0);",
   " float halo=exp(-dot(p*vec2(1.0,1.12),p*vec2(1.0,1.12))*8.0)*.07;",
-  " float ring=exp(-pow((length(p)-uPulse*.75)*26.0,2.0))*uPulsePower*.34;",
+  " float ring=exp(-pow((max(abs(p.x),abs(p.y))-uPulse*.75)*26.0,2.0))*uPulsePower*.34;",
   " float ground=exp(-pow((vUV.y-.19)*18.0,2.0))*exp(-p.x*p.x*5.0)*.12;",
   " vec3 col=mix(uAccent,mix(uAccent,vec3(.9,.96,1.0),.55),ring*uDark);",
   " gl_FragColor=vec4(col,(halo+ring+ground)*mix(.40,1.0,uDark));",
@@ -491,7 +534,7 @@ function ih39Pose(state,dt,compact) {
     const u=Math.min(1,s.impulse/2.55);burst=Math.sin(u*Math.PI)*.85;pulse=u;pulsePower=Math.sin(u*Math.PI);
   }
   const gather=m.ease(.35,1.65,t),assemble=m.ease(2.9,4.5,t);
-  const alpha=m.ease(3.22,4.4,t)*(1-Math.min(.8,burst*.9));
+  const alpha=m.ease(.65,1.65,t)*(.55+assemble*.45)*(1-Math.min(.55,burst*.55));
   const yaw=m.mix(.92,-.62,m.ease(.65,3.95,t))+m.ease(4.1,5.8,t)*.29+s.yaw+idle;
   let distance=7.9-m.ease(.7,1.8,t)*.9+m.ease(1.94,2.65,t)*1.6-m.ease(3.05,4.15,t)*2.0+m.ease(4.35,6.3,t)*1.65;
   if(compact)distance+=.75;
@@ -528,7 +571,7 @@ function ih39Start(canvas,host,state,report) {
       return{program:p,uniforms:Object.fromEntries(uniformNames.map(n=>[n,gl.getUniformLocation(p,n)])),
         attributes:attributes.map(([name,size,offset])=>({location:gl.getAttribLocation(p,name),size,offset}))};
     };
-    const meshProgram=program(IH39_MESH_VERTEX,IH39_MESH_FRAGMENT,["uCamera","uModel","uShift","uEye","uAccent","uDark","uTint","uAlpha","uMirror","uTime"],[["aPosition",3,0],["aNormal",3,12],["aUV",2,24]]);
+    const meshProgram=program(IH39_MESH_VERTEX,IH39_MESH_FRAGMENT,["uCamera","uModel","uShift","uEye","uAccent","uDark","uTint","uAlpha","uMirror","uTime","uBreak"],[["aPosition",3,0],["aNormal",3,12],["aUV",2,24]]);
     const particleProgram=program(IH39_PARTICLE_VERTEX,IH39_PARTICLE_FRAGMENT,["uCamera","uModel","uShift","uTime","uGather","uAssemble","uBurst","uRatio","uAccent","uDark","uLines"],[["aTarget",3,0],["aSeed",1,12],["aSide",1,16],["aTrail",1,20]]);
     const fieldProgram=program(IH39_FIELD_VERTEX,IH39_FIELD_FRAGMENT,["uCamera","uShift","uTime","uRatio","uPulse","uAccent","uDark"],[["aPosition",3,0]]);
     const quadProgram=program(IH39_QUAD_VERTEX,IH39_QUAD_FRAGMENT,["uAspect","uShift","uTime","uDark","uPulse","uPulsePower","uAccent"],[["aPosition",2,0]]);
@@ -567,6 +610,7 @@ function ih39Start(canvas,host,state,report) {
       if(u.uDark!=null)gl.uniform1f(u.uDark,dark?1:0);
       if(u.uTime!=null)gl.uniform1f(u.uTime,pose.time);
       if(u.uRatio!=null)gl.uniform1f(u.uRatio,ratio);
+      if(u.uBreak!=null)gl.uniform1f(u.uBreak,Math.min(1.5,(1-pose.assemble)*.85+pose.burst*1.2));
     };
     const render=now=>{
       frame=0;if(disposed||!visible||document.hidden)return;
@@ -592,14 +636,18 @@ function ih39Start(canvas,host,state,report) {
           gl.enable(gl.DEPTH_TEST);gl.depthMask(true);
           for(const mirror of [1,0]){
             for(const part of parts){
+              const finish=IH39_MATH.ease(4.15,4.85,pose.t)*(1-IH39_MATH.ease(.03,.16,pose.burst));
+              const partAlpha=pose.alpha*(part.continuous?finish:1-finish);if(partAlpha<.002)continue;
               use(meshProgram,part.mesh);uniforms(meshProgram,pose,camera,accent,s.dark);
-              const separated=(1-IH39_MATH.ease(3.1,4.7,pose.t))*.12+pose.burst*.32;
-              const x=(part.group-1.3)*separated;
-              let model=IH39_MATH.mul(pose.model,IH39_MATH.move(x,Math.sin(part.group*2)*separated*.3,0));
+              const m=IH39_MATH,separated=(1-pose.assemble)*.24+pose.burst*.32;
+              const tilt=(part.group%2?1:-1)*(.16+separated*.7),lean=(part.group<2?1:-1)*.11;
+              let model=m.mul(pose.model,m.mul(m.move(part.cx*(1+separated),part.cy*(1+separated),0),
+                m.mul(m.ry(tilt),m.mul(m.rx(lean),m.move(-part.cx,-part.cy,0)))));
               if(mirror)model=IH39_MATH.mul(IH39_MATH.move(0,-2.84,0),IH39_MATH.mul(IH39_MATH.scale(1,-1,1),model));
               gl.uniformMatrix4fv(meshProgram.uniforms.uModel,false,model);
               gl.uniform1f(meshProgram.uniforms.uTint,part.tint);
-              gl.uniform1f(meshProgram.uniforms.uAlpha,pose.alpha);
+              gl.uniform1f(meshProgram.uniforms.uAlpha,partAlpha);
+              if(part.continuous)gl.uniform1f(meshProgram.uniforms.uBreak,0);
               gl.uniform1f(meshProgram.uniforms.uMirror,mirror);
               gl.drawArrays(gl.TRIANGLES,0,part.mesh.count);
             }
@@ -642,7 +690,6 @@ function ih39Start(canvas,host,state,report) {
     destroy();report({failed:true,ready:true});return{wake(){},destroy};
   }
 }
-
 const IH39_COPY={
   pl:{
     region:"IdeaHire — pomysł spotyka talent",eyebrow:"Twój pomysł zasługuje na ciąg dalszy.",
@@ -651,10 +698,10 @@ const IH39_COPY={
     talent:"Znajdź wykonawcę",jobs:"Znajdź zlecenie",
     skip:"Pomiń wstęp",replay:"Odtwórz pokaz",pause:"Zatrzymaj animację",resume:"Wznów animację",
     impulse:"Pokaż impuls",reset:"Przywróć kadr",reduced:"Animacja ograniczona",static:"Podgląd statyczny",
-    stage:"Przestrzenny sygnet IdeaHire — pomysł i talent",
+    stage:"Splot IdeaHire — cztery kwadratowe ramy składane z mikromodułów",
     help:"Przeciągnij, aby obrócić sygnet. Strzałki zmieniają kadr, Home przywraca widok, a Enter uruchamia impuls. Na telefonie możesz nadal przewijać stronę pionowo.",
     interaction:"Przeciągnij. Odkryj inną perspektywę.",
-    signature:"POMYSŁ × TALENT",identity:"RAZEM W IDEAHIRE",catalog:"Odkryj zlecenia",
+    signature:"POMYSŁ × TALENT",identity:"SPLOT MOŻLIWOŚCI",catalog:"Odkryj zlecenia",
     demo:"Projekt przykładowy",live:"Z katalogu IdeaHire",projectList:"Projekty w IdeaHire",
     words:["POMYSŁ.","TALENT.","RAZEM.","IdeaHire.","DZIAŁAJ."],
     labels:["Wszystko zaczyna się od pomysłu.","Potrzebuje tylko właściwej osoby.","Dwie strony. Jedna wspólna energia.","Pomysł i talent znajdują swoje miejsce.","Teraz kolej na Twój projekt."],
@@ -673,10 +720,10 @@ const IH39_COPY={
     talent:"Find a freelancer",jobs:"Find a project",
     skip:"Skip intro",replay:"Replay the show",pause:"Pause animation",resume:"Resume animation",
     impulse:"Release an impulse",reset:"Reset the view",reduced:"Reduced animation",static:"Static preview",
-    stage:"The three-dimensional IdeaHire mark — idea and talent",
+    stage:"IdeaHire Weave — four square frames assembled from micro modules",
     help:"Drag to rotate the mark. Arrow keys change the view, Home resets it, and Enter releases an impulse. You can still scroll vertically on your phone.",
     interaction:"Drag. Discover a new perspective.",
-    signature:"IDEA × TALENT",identity:"TOGETHER ON IDEAHIRE",catalog:"Explore projects",
+    signature:"IDEA × TALENT",identity:"POSSIBILITIES, CONNECTED",catalog:"Explore projects",
     demo:"Illustrative project",live:"From the IdeaHire catalog",projectList:"Projects on IdeaHire",
     words:["IDEA.","TALENT.","TOGETHER.","IdeaHire.","CREATE."],
     labels:["It all starts with an idea.","It just needs the right person.","Two sides. One shared energy.","Where ideas and talent come together.","Now it is your project's turn."],
@@ -804,7 +851,7 @@ export function IdeaHireCinematicHero({job,jobs=[],userKey="guest"}){
   }
   const stopped=paused||reduced||!visible;
   return <section ref={rootRef} id="ih39-experience" className="ih39-hero"
-    data-cinematic-version="P39-2026-10-15" data-no-translate="true" data-ready={ready} data-act={phase}
+    data-cinematic-version="P40-SPLOT-2026-10-15" data-no-translate="true" data-ready={ready} data-act={phase}
     data-dark={site.theme==="dark"} data-classic={site.template==="classic"} data-paused={stopped} data-gpu={gpu}
     aria-label={text.region}>
     <style>{IH39_STYLES}</style>
@@ -815,13 +862,15 @@ export function IdeaHireCinematicHero({job,jobs=[],userKey="guest"}){
       onLostPointerCapture={()=>{dragRef.current=null;hostRef.current?.removeAttribute("data-dragging");}}
       onPointerLeave={()=>{if(!dragRef.current)resetView();}} onKeyDown={keys}>
       <div className="ih39-static-mark" aria-hidden="true">
-        <svg viewBox="0 0 330 280" fill="none">
-          <path d="M54 115v123M147 42v196M263 42v196" stroke="currentColor" strokeWidth="32" strokeLinecap="round"/>
-          <circle cx="54" cy="60" r="18" className="ih39-static-dot"/><path d="M148 150c44 11 71-19 115-24" className="ih39-static-cross" strokeWidth="31" strokeLinecap="round"/>
+        <svg viewBox="0 -12 330 280" fill="none">
+          {[0,1,2,3].map(index => <g key={index} transform={`translate(${index%2*139+25} ${index<2?0:139})`}>
+            <rect x="0" y="0" width="118" height="118" rx="5" stroke="currentColor" strokeWidth="17" className={index===3?"ih39-static-cross":undefined}/>
+            {Array.from({length:5},(_,i)=><path key={i} d={`M${17+i*18} -8v16M${17+i*18} 110v16M-8 ${17+i*18}h16M110 ${17+i*18}h16`} stroke="var(--ih39-bg)" strokeWidth="1.5"/>)}
+          </g>)}
         </svg>
       </div>
       <canvas ref={canvasRef} className="ih39-canvas" aria-hidden="true"/>
-      <span className="ih39-stage-corner" aria-hidden="true">iH / 01</span>
+      <span className="ih39-stage-corner" aria-hidden="true">SPLOT / 04</span>
     </div>
     <div className="ih39-topline">
       <span className="ih39-wordmark"><i aria-hidden="true"/>IDEAHIRE <span>/ {text.signature}</span></span>
@@ -871,81 +920,93 @@ export function IdeaHireCinematicHero({job,jobs=[],userKey="guest"}){
   </section>;
 }
 
-/* Tylko pasek nawigacji na stronie głównej; bez zmian pozycji logo i konta. */
-function useIdeaHireCursorNavigation(navigationRef,headerRef) {
-  useEffect(()=>{
-    const nav=navigationRef.current,header=headerRef.current;
-    if(!nav||!header)return undefined;
-    const desktop=window.matchMedia("(min-width: 1001px) and (hover: hover) and (pointer: fine)");
-    const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
-    const saved=["translate","will-change","z-index"].map(name=>[name,nav.style.getPropertyValue(name),nav.style.getPropertyPriority(name)]);
-    const overflow=[header.style.getPropertyValue("overflow"),header.style.getPropertyPriority("overflow")];
-    let current=0,target=0,frame=0,idleTimer=0,last=0,pointerOver=false,focused=false,disposed=false;
-    const enabled=()=>desktop.matches&&!reduced.matches;
-    const tick=now=>{
-      frame=0;if(disposed)return;
-      const dt=last?Math.min(.05,(now-last)/1000):1/60;last=now;
-      current+=(target-current)*(1-Math.exp(-dt*9));
-      if(Math.abs(target-current)<.05)current=target;
-      nav.style.setProperty("translate","0 "+current.toFixed(2)+"px","important");
-      if(Math.abs(target-current)>.01)frame=requestAnimationFrame(tick);
-    };
-    const wake=()=>{if(!frame){last=0;frame=requestAnimationFrame(tick);}};
-    const returnHome=()=>{
-      window.clearTimeout(idleTimer);idleTimer=0;
-      if(pointerOver||focused)return;
-      target=0;wake();
-    };
-    const scheduleHome=()=>{
-      window.clearTimeout(idleTimer);
-      idleTimer=window.setTimeout(returnHome,780);
-    };
-    const move=event=>{
-      if(!enabled()||event.pointerType!=="mouse"||pointerOver||focused||event.buttons)return;
-      const box=nav.getBoundingClientRect(),originTop=box.top-current;
-      if(originTop+box.height<0||originTop>window.innerHeight)returnHome();
-      else {
-        const desired=Math.max(0,(event.clientY-originTop-box.height/2-36)*.42);
-        const viewportRoom=Math.max(0,window.innerHeight-originTop-box.height-24);
-        target=Math.min(180,viewportRoom,desired);wake();scheduleHome();
+/* P40: jeden nagłówek w DOM; przewijanie zabiera cały pas, bezruch odsyła go na górę. */
+const IH40_HEADER_STYLES = String.raw`
+__IH40__ .ih40-header-slot {display:flow-root!important;position:relative!important;width:100%!important;min-width:0!important;overflow:visible!important;}
+__IH40__ .ih40-header-slot > .ih-home-header {position:relative!important;inset:auto!important;translate:0 0!important;}
+__IH40__ .ih40-header-slot .home-nav-links {translate:0 0!important;}
+@media(prefers-reduced-motion:reduce){__IH40__ .ih40-header-slot > .ih-home-header{transition:none!important;}}
+`.replaceAll("__IH40__", "#root".repeat(10));
+
+function useIdeaHireScrollHeader(headerRef, slotRef) {
+  useLayoutEffect(() => {
+    const header = headerRef.current, slot = slotRef.current;
+    if (!header || !slot) return undefined;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const properties = ["position","top","right","bottom","left","width","max-width","margin","z-index","opacity","translate","transition","pointer-events","box-shadow"];
+    const saved = properties.map(name => [name,header.style.getPropertyValue(name),header.style.getPropertyPriority(name)]);
+    const originalInert = header.hasAttribute("inert");
+    let mode = "home", idle = 0, returning = 0, frame = 0, hovering = false, focused = false, disposed = false, insetLeft = 0, insetRight = 0;
+    const set = (name,value) => header.style.setProperty(name,value,"important");
+    const hold = () => hovering || focused || Boolean(header.querySelector('[aria-expanded="true"]'));
+    function restore() {
+      window.clearTimeout(idle); window.clearTimeout(returning); idle = 0; returning = 0;
+      mode = "home";
+      saved.forEach(([name,value,priority]) => value ? header.style.setProperty(name,value,priority) : header.style.removeProperty(name));
+      slot.style.removeProperty("height");
+      if (!originalInert) header.removeAttribute("inert");
+      header.dataset.scrollHeader = "home";
+    }
+    function rest() {
+      window.clearTimeout(idle); idle = 0;
+      if (mode !== "following" || hold()) return;
+      mode = "returning"; header.dataset.scrollHeader = "returning";
+      set("opacity","0"); set("translate",reduced.matches ? "0 0" : "0 -12px"); set("pointer-events","none");
+      header.setAttribute("inert","");
+      returning = window.setTimeout(restore,reduced.matches ? 0 : 230);
+    }
+    function arm() {
+      window.clearTimeout(idle);
+      if (mode === "following" && !hold()) idle = window.setTimeout(rest,1200);
+    }
+    function follow() {
+      if (disposed) return;
+      const box = slot.getBoundingClientRect();
+      const beyond = box.bottom < -12;
+      if (!beyond) { restore(); return; }
+      if (mode === "home") {
+        const headerBox = header.getBoundingClientRect();
+        insetLeft = headerBox.left - box.left; insetRight = box.right - headerBox.right;
+        slot.style.setProperty("height",`${box.height}px`,"important");
+        set("position","fixed"); set("top","0px"); set("right","auto"); set("bottom","auto");
+        set("left",`${headerBox.left}px`); set("width",`${headerBox.width}px`); set("max-width","none"); set("margin","0");
+        set("z-index","500"); set("box-shadow","0 10px 32px rgba(8,16,30,.12)");
+        set("transition",reduced.matches ? "none" : "opacity 210ms ease, translate 230ms cubic-bezier(.2,.75,.3,1)");
       }
+      window.clearTimeout(returning); returning = 0;
+      if (!originalInert) header.removeAttribute("inert");
+      mode = "following"; header.dataset.scrollHeader = "following";
+      set("opacity","1"); set("translate","0 0"); set("pointer-events","auto"); arm();
+    }
+    const scroll = () => { if (!frame) frame = window.requestAnimationFrame(() => {frame = 0; follow();}); };
+    const enter = event => {if(event.pointerType === "mouse"){hovering = true;window.clearTimeout(idle);}};
+    const leave = () => {hovering = false;arm();};
+    const focus = () => {focused = true;window.clearTimeout(idle);if(mode === "returning") follow();};
+    const blur = event => {if(header.contains(event.relatedTarget)) return;focused = false;arm();};
+    const pointer = event => {if(mode === "following" && event.pointerType === "mouse" && !event.buttons) arm();};
+    const resize = () => {
+      if (mode === "home") return;
+      if (!hold()) {restore();return;}
+      const box = slot.getBoundingClientRect();set("left",`${box.left + insetLeft}px`);set("width",`${Math.max(0,box.width - insetLeft - insetRight)}px`);
     };
-    const enter=()=>{pointerOver=true;window.clearTimeout(idleTimer);target=current;};
-    const leave=()=>{pointerOver=false;scheduleHome();};
-    const focus=()=>{focused=true;window.clearTimeout(idleTimer);target=current;};
-    const blur=event=>{if(nav.contains(event.relatedTarget))return;focused=false;returnHome();};
-    const settings=()=>{
-      window.clearTimeout(idleTimer);cancelAnimationFrame(frame);frame=0;current=0;target=0;last=0;
-      nav.style.setProperty("translate","0 0","important");
-      if(enabled()){
-        nav.style.setProperty("will-change","translate","important");
-        nav.style.setProperty("z-index","150","important");
-        header.style.setProperty("overflow","visible","important");
-      }else{
-        saved.forEach(([name,value,priority])=>value?nav.style.setProperty(name,value,priority):nav.style.removeProperty(name));
-        overflow[0]?header.style.setProperty("overflow",overflow[0],overflow[1]):header.style.removeProperty("overflow");
-      }
+    const hidden = () => {if(document.hidden) restore();};
+    const lost = () => {hovering = false;focused = false;arm();};
+    const settings = () => {if(mode === "following") set("transition",reduced.matches ? "none" : "opacity 210ms ease, translate 230ms cubic-bezier(.2,.75,.3,1)");};
+    const observer = typeof MutationObserver !== "undefined" ? new MutationObserver(arm) : null;
+    observer?.observe(header,{subtree:true,attributes:true,attributeFilter:["aria-expanded","data-mobile-menu-open"]});
+    header.dataset.scrollHeader = "home";
+    window.addEventListener("scroll",scroll,{passive:true});window.addEventListener("resize",resize,{passive:true});window.addEventListener("blur",lost);
+    document.addEventListener("pointermove",pointer,{passive:true});document.addEventListener("visibilitychange",hidden);
+    header.addEventListener("pointerenter",enter);header.addEventListener("pointerleave",leave);header.addEventListener("focusin",focus);header.addEventListener("focusout",blur);
+    reduced.addEventListener?.("change",settings);
+    return () => {
+      disposed = true;window.cancelAnimationFrame(frame);restore();observer?.disconnect();delete header.dataset.scrollHeader;
+      window.removeEventListener("scroll",scroll);window.removeEventListener("resize",resize);window.removeEventListener("blur",lost);
+      document.removeEventListener("pointermove",pointer);document.removeEventListener("visibilitychange",hidden);
+      header.removeEventListener("pointerenter",enter);header.removeEventListener("pointerleave",leave);header.removeEventListener("focusin",focus);header.removeEventListener("focusout",blur);
+      reduced.removeEventListener?.("change",settings);
     };
-    const scroll=()=>{if(!pointerOver&&!focused)returnHome();};
-    const outside=()=>{pointerOver=false;returnHome();};
-    settings();
-    document.addEventListener("pointermove",move,{passive:true});
-    nav.addEventListener("pointerenter",enter);nav.addEventListener("pointerleave",leave);
-    nav.addEventListener("focusin",focus);nav.addEventListener("focusout",blur);
-    window.addEventListener("scroll",scroll,{passive:true});
-    window.addEventListener("blur",outside);document.addEventListener("pointerleave",outside);
-    desktop.addEventListener?.("change",settings);reduced.addEventListener?.("change",settings);
-    return()=>{
-      disposed=true;window.clearTimeout(idleTimer);cancelAnimationFrame(frame);
-      document.removeEventListener("pointermove",move);
-      nav.removeEventListener("pointerenter",enter);nav.removeEventListener("pointerleave",leave);
-      nav.removeEventListener("focusin",focus);nav.removeEventListener("focusout",blur);
-      window.removeEventListener("scroll",scroll);window.removeEventListener("blur",outside);document.removeEventListener("pointerleave",outside);
-      desktop.removeEventListener?.("change",settings);reduced.removeEventListener?.("change",settings);
-      saved.forEach(([name,value,priority])=>value?nav.style.setProperty(name,value,priority):nav.style.removeProperty(name));
-      overflow[0]?header.style.setProperty("overflow",overflow[0],overflow[1]):header.style.removeProperty("overflow");
-    };
-  },[navigationRef,headerRef]);
+  },[headerRef,slotRef]);
 }
 
 const categories = [
@@ -1396,9 +1457,10 @@ function HomeDemoReviews() {
 function App({ session, loading, categoryGroups = [] }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = useRef(null);
+  const headerSlotRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
   const navigationRef = useRef(null);
-  useIdeaHireCursorNavigation(navigationRef, headerRef);
+  useIdeaHireScrollHeader(headerRef, headerSlotRef);
 
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;
@@ -1850,6 +1912,8 @@ function App({ session, loading, categoryGroups = [] }) {
 
   return (
     <div className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6 ih-home-v7">
+      <style>{IH40_HEADER_STYLES}</style>
+      <div ref={headerSlotRef} className="ih40-header-slot">
       <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
         data-mobile-menu-open={mobileMenuOpen}
         onKeyDown={(event) => {
@@ -1925,6 +1989,7 @@ function App({ session, loading, categoryGroups = [] }) {
           </svg>
         </button>
       </header>
+      </div>
 
       <main>
         <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} userKey={session?.user?.id || "guest"} />
