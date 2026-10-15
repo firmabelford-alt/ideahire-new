@@ -1,3 +1,4 @@
+/* IdeaHire | STRIPE 12 | 2026-10-15 | Saldo i wyplaty w profilu. */
 /* IdeaHire | PACZKA 30 | 2026-10-11 | Pełny plik: src/router.jsx */
 /* IDEA HIRE — NAVY PROFESSIONAL UI V5.6 — RELEASE 2026-10-03 */
 /* Full file for direct replacement: src/router.jsx */
@@ -8369,6 +8370,207 @@ function getAccountWorkspaceSection(hash = "") {
   return null;
 }
 
+/* STRIPE 12: private balance and bank payout view, PL / EN. */
+async function stripeProfileRequest(action, userId) {
+  const session = await supabase.auth.getSession();
+  if (session.error || !session.data?.session?.access_token || session.data.session.user?.id !== userId) {
+    throw Object.assign(new Error("Session expired"), { code: "invalid_session" });
+  }
+  const { data, error } = await supabase.functions.invoke("create-connect-onboarding", {
+    body: { action },
+    headers: { Authorization: `Bearer ${session.data.session.access_token}` },
+  });
+  if (error) {
+    let code = "payouts_unavailable";
+    try { code = (await error.context?.clone?.().json())?.code || code; } catch { /* Safe local copy below. */ }
+    throw Object.assign(new Error("Stripe unavailable"), { code });
+  }
+  if (!data || data.schema_version !== 1 || data.error) {
+    throw Object.assign(new Error("Payout view unavailable"), { code: data?.code || "payouts_setup_required" });
+  }
+  if (action === "payouts" && (typeof data.connected !== "boolean"
+    || data.connected && (!Number.isSafeInteger(data.available_grosz) || !Number.isSafeInteger(data.pending_grosz)
+      || !Array.isArray(data.payouts) || !data.schedule || typeof data.livemode !== "boolean"))) {
+    throw Object.assign(new Error("Invalid payout response"), { code: "payouts_response_mismatch" });
+  }
+  return data;
+}
+
+function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children }) {
+  const { language } = useSitePreferences();
+  const en = language === "en";
+  const c = (pl, english) => en ? english : pl;
+  const [tab, setTab] = useState("connection");
+  const [record, setRecord] = useState(null);
+  const [issue, setIssue] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [refresh, setRefresh] = useState(0);
+  const generation = useRef(0);
+  const currentUser = useRef(userId);
+  const mounted = useRef(true);
+  currentUser.current = userId;
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useEffect(() => {
+    const requestId = ++generation.current;
+    if (tab !== "payouts") return;
+    setLoading(true);
+    setIssue(null);
+    stripeProfileRequest("payouts", userId).then(data => {
+      if (generation.current !== requestId || !mounted.current || currentUser.current !== userId) return;
+      setRecord({ userId, data });
+      if (["not_started", "in_progress", "restricted", "ready", "disabled"].includes(data.status)) onStatusChange?.(data.status);
+    }).catch(error => {
+      if (generation.current !== requestId || !mounted.current || currentUser.current !== userId) return;
+      setRecord(null);
+      setIssue({ userId, code: error?.code || "payouts_unavailable" });
+    }).finally(() => {
+      if (generation.current === requestId && mounted.current) setLoading(false);
+    });
+    return () => { generation.current += 1; };
+  }, [tab, userId, refresh, onStatusChange]);
+  const data = record?.userId === userId ? record.data : null;
+  const errorCode = issue?.userId === userId ? issue.code : "";
+  const money = (grosz, currency = "PLN") => Number.isSafeInteger(grosz)
+    ? new Intl.NumberFormat(en ? "en-GB" : "pl-PL", { style: "currency", currency: currency.toUpperCase() }).format(grosz / 100) : "—";
+  const date = seconds => Number.isSafeInteger(seconds)
+    ? new Intl.DateTimeFormat(en ? "en-GB" : "pl-PL", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(seconds * 1000)) : "—";
+  const statuses = {
+    pending: c("Oczekuje na wysłanie", "Waiting to be sent"),
+    in_transit: c("W drodze do banku", "On the way to the bank"),
+    paid: c("Zrealizowana", "Completed"),
+    failed: c("Nieudana", "Failed"),
+    canceled: c("Anulowana", "Canceled"),
+  };
+  const errors = {
+    invalid_session: c("Sesja wygasła. Zaloguj się ponownie.", "Your session expired. Sign in again."),
+    account_not_eligible: c("Wypłaty są dostępne dla aktywnych, pełnoletnich użytkowników.", "Payouts require an active adult account."),
+    connect_account_review_required: c("Nie można odczytać zapisanego konta Stripe w tym trybie. Skontaktuj się z pomocą IdeaHire.", "The saved Stripe account cannot be read in this mode. Contact IdeaHire support."),
+    connect_account_mismatch: c("Dane konta Stripe wymagają sprawdzenia przez pomoc IdeaHire.", "IdeaHire support needs to check the Stripe account details."),
+    connect_account_closed: c("Konto Stripe jest zamknięte. Skontaktuj się z pomocą IdeaHire.", "The Stripe account is closed. Contact IdeaHire support."),
+    express_dashboard_unavailable: c("Panel Stripe Express nie jest dostępny dla tego konta. Skontaktuj się z pomocą IdeaHire.", "Stripe Express is unavailable for this account. Contact IdeaHire support."),
+    payouts_setup_required: c("Podgląd wypłat wymaga dokończenia konfiguracji przez obsługę IdeaHire.", "IdeaHire needs to finish setting up the payout view."),
+    payouts_response_mismatch: c("Dane wypłat wymagają sprawdzenia. Spróbuj ponownie lub skontaktuj się z pomocą IdeaHire.", "The payout details need to be checked. Try again or contact IdeaHire support."),
+  };
+  const schedule = data?.schedule;
+  const intervals = {
+    daily: c("Automatycznie — codziennie", "Automatic — daily"),
+    weekly: c("Automatycznie — co tydzień", "Automatic — weekly"),
+    monthly: c("Automatycznie — co miesiąc", "Automatic — monthly"),
+    manual: c("Wypłaty ręczne", "Manual payouts"),
+    unknown: c("Harmonogram niedostępny", "Schedule unavailable"),
+  };
+  const weekdays = en
+    ? { monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday" }
+    : { monday: "poniedziałek", tuesday: "wtorek", wednesday: "środa", thursday: "czwartek", friday: "piątek", saturday: "sobota", sunday: "niedziela" };
+  const scheduleDays = schedule?.interval === "weekly"
+    ? (schedule.weekly_days || []).map(day => weekdays[day]).filter(Boolean).join(", ")
+    : schedule?.interval === "monthly" ? (schedule.monthly_days || []).join(", ") : "";
+  const bankEnabled = data?.payouts_enabled === true && data?.payout_settings_status === "enabled";
+  async function openStripe() {
+    if (opening) return;
+    setOpening(true);
+    setIssue(null);
+    const requestedUser = userId;
+    try {
+      const result = await stripeProfileRequest("dashboard", requestedUser);
+      if (!mounted.current || currentUser.current !== requestedUser) return;
+      if (!result.connected) throw Object.assign(new Error("No account"), { code: "payouts_setup_required" });
+      const url = new URL(result.dashboard_url);
+      if (url.protocol !== "https:" || !["connect.stripe.com", "stripe.com"].includes(url.hostname)
+        || !url.pathname.startsWith("/express/") || url.username || url.password || url.port) {
+        throw Object.assign(new Error("Invalid dashboard URL"), { code: "payouts_response_mismatch" });
+      }
+      window.location.assign(url.href);
+    } catch (error) {
+      if (mounted.current && currentUser.current === requestedUser) setIssue({ userId: requestedUser, code: error?.code || "payouts_unavailable" });
+    } finally {
+      if (mounted.current) setOpening(false);
+    }
+  }
+  const tabs = [
+    { key: "connection", text: c("Połączenie ze Stripe", "Stripe connection") },
+    { key: "payouts", text: c("Saldo i wypłaty", "Balance and payouts") },
+  ];
+  return <div className="ih-stripe-profile">
+    <style>{`
+      .ih-stripe-profile{min-width:0;margin-block:20px;color:inherit}
+      .ih-stripe-profile .ih-sp-tabs,.ih-stripe-profile .ih-sp-panel,.ih-stripe-profile .ih-sp-tabs *,.ih-stripe-profile .ih-sp-panel *{font-family:Inter,system-ui,sans-serif!important}
+      .ih-stripe-profile .ih-sp-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:5px;border:1px solid rgba(127,127,127,.25);border-radius:16px;width:fit-content;max-width:100%;background:rgba(127,127,127,.05)}
+      .ih-stripe-profile .ih-sp-tab,.ih-stripe-profile .ih-sp-button{font:inherit;color:inherit;cursor:pointer;border:1px solid rgba(127,127,127,.3);background:rgba(127,127,127,.06);padding:11px 15px;border-radius:11px;line-height:1.35;white-space:normal;min-height:44px;transition:background .16s ease,border-color .16s ease}
+      .ih-stripe-profile .ih-sp-tab{border-color:transparent;background:transparent;font-weight:600}
+      .ih-stripe-profile .ih-sp-tab[aria-selected=true]{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.16)}
+      .ih-stripe-profile .ih-sp-tab:hover,.ih-stripe-profile .ih-sp-button:hover{background:rgba(127,127,127,.18)}
+      .ih-stripe-profile button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+      .ih-stripe-profile button:disabled{cursor:wait;opacity:.65}
+      .ih-stripe-profile .ih-sp-panel{border:1px solid rgba(127,127,127,.25);border-radius:22px;padding:24px;background:rgba(127,127,127,.035);min-width:0}
+      .ih-stripe-profile .ih-sp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+      .ih-stripe-profile .ih-sp-panel h2{font:inherit;font-size:1.3rem;font-weight:700;color:inherit;margin:0 0 7px;line-height:1.3}
+      .ih-stripe-profile .ih-sp-panel h3{font:inherit;font-size:1rem;font-weight:700;color:inherit;margin:0 0 12px}
+      .ih-stripe-profile .ih-sp-panel p{color:inherit;font:inherit;line-height:1.6;margin:8px 0;overflow-wrap:anywhere}
+      .ih-stripe-profile .ih-sp-muted{opacity:.75;font-size:.9rem!important}
+      .ih-stripe-profile .ih-sp-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+      .ih-stripe-profile .ih-sp-notice{padding:12px 14px;margin:16px 0;border:1px solid rgba(127,127,127,.3);border-radius:12px;background:rgba(127,127,127,.07)}
+      .ih-stripe-profile .ih-sp-error{border-left:4px solid currentColor}
+      .ih-stripe-profile .ih-sp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+      .ih-stripe-profile .ih-sp-card{border:1px solid rgba(127,127,127,.22);border-radius:16px;padding:18px;min-width:0;background:rgba(127,127,127,.045)}
+      .ih-stripe-profile .ih-sp-card strong{display:block;font-size:clamp(1.35rem,3vw,1.9rem);line-height:1.25;margin:7px 0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+      .ih-stripe-profile .ih-sp-setting{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;padding:16px 0;border-top:1px solid rgba(127,127,127,.22)}
+      .ih-stripe-profile .ih-sp-badge{font-size:.8rem;font-weight:600;border:1px solid rgba(127,127,127,.3);border-radius:999px;padding:5px 10px;line-height:1.4;max-width:100%;overflow-wrap:anywhere}
+      .ih-stripe-profile .ih-sp-history{margin-top:20px}
+      .ih-stripe-profile .ih-sp-list{list-style:none;padding:0;margin:0}
+      .ih-stripe-profile .ih-sp-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;padding:15px 0;border-top:1px solid rgba(127,127,127,.22);align-items:start;min-width:0}
+      .ih-stripe-profile .ih-sp-row strong{font-variant-numeric:tabular-nums}
+      .ih-stripe-profile .ih-sp-row small{display:block;line-height:1.5;margin-top:5px;overflow-wrap:anywhere;opacity:.75}
+      @media(max-width:600px){.ih-stripe-profile .ih-sp-tabs{width:100%;box-sizing:border-box;flex-wrap:nowrap}.ih-stripe-profile .ih-sp-tab{flex:1;padding:10px 8px;font-size:.9rem}.ih-stripe-profile .ih-sp-panel{padding:17px;border-radius:18px}.ih-stripe-profile .ih-sp-grid{grid-template-columns:1fr}.ih-stripe-profile .ih-sp-actions{width:100%}.ih-stripe-profile .ih-sp-actions .ih-sp-button{flex:1}.ih-stripe-profile .ih-sp-row{grid-template-columns:1fr}.ih-stripe-profile .ih-sp-row .ih-sp-badge{justify-self:start}}
+      @media(prefers-reduced-motion:reduce){.ih-stripe-profile .ih-sp-tab,.ih-stripe-profile .ih-sp-button{transition:none}}
+    `}</style>
+    <div className="ih-sp-tabs" role="tablist" aria-label={c("Konto Stripe", "Stripe account")} data-no-translate="true">
+      {tabs.map((item, index) => <button key={item.key} type="button" className="ih-sp-tab" role="tab"
+        id={`ih-stripe-tab-${item.key}`} aria-controls={`ih-stripe-panel-${item.key}`}
+        aria-selected={tab === item.key} tabIndex={tab === item.key ? 0 : -1}
+        onClick={() => setTab(item.key)} onKeyDown={event => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          const target = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+          setTab(tabs[target].key);
+          document.getElementById(`ih-stripe-tab-${tabs[target].key}`)?.focus();
+        }}>{item.text}</button>)}
+    </div>
+    {tab === "connection" ? <div role="tabpanel" id="ih-stripe-panel-connection" aria-labelledby="ih-stripe-tab-connection">{children}</div>
+      : <section className="ih-sp-panel" role="tabpanel" id="ih-stripe-panel-payouts" aria-labelledby="ih-stripe-tab-payouts" aria-busy={loading} data-no-translate="true">
+        <div className="ih-sp-head">
+          <div><h2>{c("Saldo i wypłaty", "Balance and payouts")}</h2><p className="ih-sp-muted">{c("Twoje wynagrodzenie w Stripe i wypłaty na rachunek bankowy.", "Your earnings in Stripe and payouts to your bank account.")}</p></div>
+          <div className="ih-sp-actions">
+            <button type="button" className="ih-sp-button" disabled={loading || opening} onClick={() => setRefresh(value => value + 1)}>{loading ? c("Odświeżanie…", "Refreshing…") : c("Odśwież", "Refresh")}</button>
+            {data?.connected && data.dashboard_available && <button type="button" className="ih-sp-button" disabled={opening} onClick={openStripe}>{opening ? c("Otwieranie…", "Opening…") : c("Zarządzaj w Stripe", "Manage in Stripe")}</button>}
+          </div>
+        </div>
+        {errorCode && <p className="ih-sp-notice ih-sp-error" role="alert">{errors[errorCode] || c("Nie udało się pobrać danych ze Stripe. Spróbuj odświeżyć podgląd.", "Stripe details could not be loaded. Try refreshing this view.")}</p>}
+        {loading && !data && <p role="status">{c("Pobieramy saldo i historię wypłat ze Stripe…", "Loading your Stripe balance and payout history…")}</p>}
+        {data?.connected === false && <div className="ih-sp-notice"><p>{c("Połącz konto Stripe, aby otrzymywać wynagrodzenie i sprawdzać wypłaty.", "Connect Stripe to receive earnings and view payouts.")}</p><button type="button" className="ih-sp-button" onClick={() => { setTab("connection"); onConfigure?.(); }}>{c("Połącz konto Stripe", "Connect Stripe account")}</button></div>}
+        {data?.connected && <>
+          {data.livemode === false && <p className="ih-sp-notice" role="status">{c("Tryb testowy — kwoty i wypłaty są symulowane. Pieniądze nie trafią do banku.", "Test mode — balances and payouts are simulated. No money will reach a bank.")}</p>}
+          <div className="ih-sp-grid">
+            <div className="ih-sp-card"><span>{c("Dostępne w Stripe", "Available in Stripe")}</span><strong>{money(data.available_grosz)}</strong><p className="ih-sp-muted">{c("Środki rozliczone, dostępne do wypłaty zgodnie z ustawieniami konta.", "Settled funds available for payout according to your account settings.")}</p></div>
+            <div className="ih-sp-card"><span>{c("Oczekujące w Stripe", "Pending in Stripe")}</span><strong>{money(data.pending_grosz)}</strong><p className="ih-sp-muted">{c("Stripe rozlicza te środki. Nie są jeszcze dostępne do wypłaty.", "Stripe is settling these funds. They are not yet available for payout.")}</p></div>
+          </div>
+          <div className="ih-sp-setting"><div><h3>{c("Wypłaty bankowe", "Bank payouts")}</h3><p className="ih-sp-muted">{bankEnabled ? c("Stripe umożliwia wypłaty z tego konta.", "Stripe allows payouts from this account.") : data.payout_settings_status === "unknown" ? c("Nie udało się potwierdzić ustawień wypłat. Sprawdź je w Stripe.", "Payout settings could not be confirmed. Check them in Stripe.") : c("Wypłaty wymagają sprawdzenia lub uzupełnienia danych w Stripe.", "Payouts require a review or additional details in Stripe.")}</p></div><span className="ih-sp-badge">{bankEnabled ? c("Aktywne", "Enabled") : c("Wymagają sprawdzenia", "Review needed")}</span></div>
+          <div className="ih-sp-setting"><div><h3>{c("Harmonogram", "Schedule")}</h3><p>{intervals[schedule?.interval] || intervals.unknown}{scheduleDays ? ` · ${scheduleDays}` : ""}</p><p className="ih-sp-muted">{schedule?.interval === "manual" ? c("Automatyczne wypłaty są wyłączone. Wypłatę zlecisz w panelu Stripe, jeśli ta funkcja jest dostępna.", "Automatic payouts are off. Request a payout in Stripe if this option is available.") : c("Wypłaty obejmują dostępne środki. Termin dotarcia do banku potwierdza Stripe.", "Payouts use available funds. Stripe confirms their expected bank arrival.")}</p>{Number.isSafeInteger(schedule?.minimum_balance_grosz) && schedule.minimum_balance_grosz > 0 && <p className="ih-sp-muted">{c("Minimalne saldo pozostawiane w Stripe:", "Minimum balance kept in Stripe:")} {money(schedule.minimum_balance_grosz)}</p>}</div></div>
+          <div className="ih-sp-history"><h3>{c("Ostatnie wypłaty bankowe", "Recent bank payouts")}</h3>
+            {data.payouts.length === 0 ? <p className="ih-sp-muted">{c("Stripe nie utworzył jeszcze wypłaty bankowej. Przekazanie wynagrodzenia na saldo Stripe zobaczysz powyżej.", "Stripe has not created a bank payout yet. Earnings transferred to your Stripe balance appear above.")}</p> : <ul className="ih-sp-list">{data.payouts.map(payout => <li className="ih-sp-row" key={payout.id}>
+              <div><strong>{money(payout.amount_grosz, payout.currency)}</strong><small>{c("Utworzona:", "Created:")} {date(payout.created)}{["pending", "in_transit"].includes(payout.status) ? <> · {c("Planowane dotarcie:", "Expected arrival:")} {date(payout.arrival_date)}</> : null}</small></div>
+              <span className="ih-sp-badge">{statuses[payout.status] || c("Sprawdź w Stripe", "Check in Stripe")}</span>
+            </li>)}</ul>}
+          </div>
+          <p className="ih-sp-muted">{c("Przekazanie wynagrodzenia po odbiorze pracy zasila saldo Stripe. Wypłata bankowa jest osobną operacją. Rachunkiem zarządzasz bezpośrednio w Stripe.", "Accepting work transfers earnings to your Stripe balance. A bank payout is a separate operation. Manage your bank account directly in Stripe.")}</p>
+          {data.checked_at && <p className="ih-sp-muted">{c("Ostatnie sprawdzenie:", "Last checked:")} {new Intl.DateTimeFormat(en ? "en-GB" : "pl-PL", { dateStyle: "short", timeStyle: "short" }).format(new Date(data.checked_at))}</p>}
+        </>}
+      </section>}
+  </div>;
+}
+
+
 function Account() {
   const {
     user,
@@ -10380,6 +10582,11 @@ function Account() {
           </form>
 
           {isAdult && activeAccountSection === "profile" && (
+            <StripeAccountPayouts
+              userId={user.id}
+              onConfigure={() => handleConnectOnboarding()}
+              onStatusChange={setConnectStatus}
+            >
             <section
               className={`stripe-connect-panel is-${connectStatus}`}
               aria-labelledby="stripe-connect-title"
@@ -10466,6 +10673,7 @@ function Account() {
                 </div>
               </div>
             </section>
+            </StripeAccountPayouts>
           )}
 
           {activeAccountSection === "profile" && (
@@ -21906,7 +22114,7 @@ const PAYMENT_STATUS_COPY = {
     tone: "error",
   },
   released: {
-    label: "Wypłacono wykonawcy",
+    label: "Przekazano na saldo Stripe wykonawcy",
     tone: "success",
   },
   refund_pending: {
@@ -21978,6 +22186,7 @@ function ChatPaymentPanel({
   serviceOrder = false,
   onStatusChange,
 }) {
+  const { language: paymentLanguage } = useSitePreferences();
   const location = useLocation();
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22029,6 +22238,7 @@ function ChatPaymentPanel({
         nextSummary = updated?.[0] || null;
       }
       setSummary(nextSummary);
+      if (PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status)) setMessage("");
       onStatusChange?.(nextSummary?.payment_status || "");
       return nextSummary;
     } catch (error) {
@@ -22159,7 +22369,8 @@ function ChatPaymentPanel({
           <h2>{isClient ? "Opłać zlecenie" : "Płatność za zlecenie"}</h2>
         </div>
         <span className={`chat-payment-status is-${status.tone}`}>
-          {status.label}
+          {summary?.payment_status === "released" && paymentLanguage === "en"
+            ? "Transferred to the freelancer's Stripe balance" : status.label}
         </span>
       </div>
 
@@ -22192,7 +22403,11 @@ function ChatPaymentPanel({
           <div className="chat-payment-explainer">
             <span aria-hidden="true">✓</span>
             <p>
-              {workEnabled
+              {summary.payment_status === "released"
+                ? paymentLanguage === "en"
+                  ? "The earnings have been transferred to the freelancer's Stripe balance. The freelancer can check bank payouts in their profile."
+                  : "Wynagrodzenie przekazano na saldo Stripe wykonawcy. Informacje o wypłatach bankowych wykonawca znajdzie w swoim profilu."
+                : workEnabled
                 ? "Stripe potwierdził środki. Realizacja zlecenia może się rozpocząć."
                 : isClient
                 ? "Wykonawca otrzyma pełne wynagrodzenie wskazane w ustaleniach. Koszt Stripe pokrywa IdeaHire ze swojej opłaty."
