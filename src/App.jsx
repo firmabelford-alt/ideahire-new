@@ -1,4 +1,4 @@
-/* IdeaHire | P42 | Splot | Pełny plik: src/App.jsx | Cykl 76 s */
+/* IdeaHire | P42 | Rezonans | Pełny plik: src/App.jsx | Cykl 84 s */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,7 +9,7 @@ import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
 const IH42_STYLES=String.raw`
-__IH42__ .ih42-hero {--ih42-bg:#e9e2d5;--ih42-ink:#261b13;--ih42-muted:#6f5c4d;--ih42-accent:#9b3e1c;--ih42-line:rgba(166,190,227,.23);position:relative!important;isolation:isolate!important;display:block!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:var(--ih42-bg)!important;color:var(--ih42-ink)!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;text-align:left!important;box-shadow:none!important;}
+__IH42__ .ih42-hero {--ih42-bg:#050b08;--ih42-ink:#efffde;--ih42-muted:#adc0a1;--ih42-accent:#c9ff6b;--ih42-line:rgba(166,190,227,.23);position:relative!important;isolation:isolate!important;display:block!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:var(--ih42-bg)!important;color:var(--ih42-ink)!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;text-align:left!important;box-shadow:none!important;}
 __IH42__ .ih42-hero[data-classic="true"] {--ih42-bg:#0b0b0b;--ih42-accent:#d5d5d5;--ih42-muted:#b6b6b6;--ih42-ink:#f2f2f2;}
 __IH42__ .ih42-hero,__IH42__ .ih42-hero * {box-sizing:border-box!important;}
 __IH42__ .ih42-hero :is(h1,p,span,strong,small,button,a) {font-family:inherit!important;-webkit-text-fill-color:currentColor!important;text-shadow:none!important;}
@@ -23,7 +23,7 @@ __IH42__ .ih42-hero[data-gpu="true"] .ih42-canvas {opacity:1;}
 __IH42__ .ih42-fallback {position:absolute;inset:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 70% 42%,color-mix(in srgb,var(--ih42-accent) 14%,transparent),transparent 58%),var(--ih42-bg);}
 __IH42__ .ih42-fallback svg {position:absolute;width:135%;height:80%;right:-18%;bottom:-8%;fill:none;stroke:var(--ih42-accent);stroke-width:.8;opacity:.43;transform:perspective(700px) rotateX(34deg) rotateZ(-12deg);}
 __IH42__ .ih42-hero[data-gpu="true"] .ih42-fallback {opacity:0;transition:opacity 500ms ease;}
-__IH42__ .ih42-shade {position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(233, 226, 213,.75),rgba(233, 226, 213,.42) 31%,transparent 66%),linear-gradient(0deg,rgba(233, 226, 213,.93),transparent 24%,transparent 86%,rgba(233, 226, 213,.30));}
+__IH42__ .ih42-shade {position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(5, 11, 8,.75),rgba(5, 11, 8,.42) 31%,transparent 66%),linear-gradient(0deg,rgba(5, 11, 8,.93),transparent 24%,transparent 86%,rgba(5, 11, 8,.30));}
 __IH42__ .ih42-topline {position:absolute;z-index:7;top:28px;left:clamp(25px,5.6vw,100px);right:clamp(25px,4.6vw,84px);display:flex;align-items:center;justify-content:space-between;gap:15px;}
 __IH42__ .ih42-wordmark {display:inline-flex;align-items:center;gap:12px;color:var(--ih42-ink)!important;font-size:10px!important;font-weight:600!important;letter-spacing:.15em!important;white-space:nowrap;}
 __IH42__ .ih42-wordmark i {display:block;width:5px;height:5px;border-radius:50%;background:var(--ih42-accent);box-shadow:0 0 18px color-mix(in srgb,var(--ih42-accent) 65%,transparent);}
@@ -71,7 +71,7 @@ __IH42__ .ih42-sr {position:absolute!important;width:1px!important;height:1px!im
 @media(max-width:1100px) and (min-width:821px){__IH42__ .ih42-title{font-size:57px!important;}__IH42__ .ih42-act-title{font-size:66px!important;}__IH42__ .ih42-copy,__IH42__ .ih42-titles{width:46%;}__IH42__ .ih42-description{font-size:13px!important;max-width:340px!important;}}
 @media(max-width:820px){
  __IH42__ .ih42-hero{height:clamp(680px,calc(100svh - 100px),800px)!important;min-height:680px!important;margin-bottom:30px!important;}
- __IH42__ .ih42-shade{background:linear-gradient(0deg,rgba(233, 226, 213,.97),rgba(233, 226, 213,.68) 27%,rgba(233, 226, 213,.12) 57%,transparent 74%,rgba(233, 226, 213,.15));}
+ __IH42__ .ih42-shade{background:linear-gradient(0deg,rgba(5, 11, 8,.97),rgba(5, 11, 8,.68) 27%,rgba(5, 11, 8,.12) 57%,transparent 74%,rgba(5, 11, 8,.15));}
  __IH42__ .ih42-topline{top:20px;left:22px;right:22px;gap:8px;}
  __IH42__ .ih42-wordmark{font-size:9px!important;gap:8px;letter-spacing:.12em!important;}
  __IH42__ .ih42-wordmark > span{display:none;}
@@ -111,121 +111,102 @@ __IH42__ .ih42-title {font-weight:540!important;}
 __IH42__ .ih42-act-title {font-size:clamp(56px,6.3vw,100px)!important;}
 @media(max-width:1100px) and (min-width:821px){__IH42__ .ih42-act-title{font-size:60px!important;}}
 @media(max-width:820px){__IH42__ .ih42-act-title{font-size:clamp(43px,9.5vw,68px)!important;}__IH42__ .ih42-titles{bottom:211px;}}
-
-__IH42__ .ih42-hero {--ih42-line:rgba(34,26,20,.22);}
-__IH42__ .ih42-control {background:rgba(255,255,255,.40)!important;}
-__IH42__ .ih42-control:hover {background:rgba(255,255,255,.70)!important;}
-__IH42__ .ih42-cta {background:rgba(255,255,255,.35)!important;border-color:rgba(30,30,30,.25)!important;}
-__IH42__ .ih42-cta:first-child {background:var(--ih42-ink)!important;color:#fff!important;border-color:var(--ih42-ink)!important;}
-__IH42__ .ih42-cta:hover {background:var(--ih42-accent)!important;color:#fff!important;border-color:var(--ih42-accent)!important;}
-__IH42__ .ih42-footline {border-color:rgba(30,30,30,.17);}
-__IH42__ .ih42-hero[data-classic="true"] {--ih42-bg:#ededed;--ih42-ink:#181818;--ih42-muted:#666;--ih42-accent:#3b3b3b;}
-__IH42__ .ih42-hero[data-classic="true"] .ih42-control {background:rgba(255,255,255,.4)!important;}
-__IH42__ .ih42-hero[data-classic="true"] .ih42-cta {background:rgba(255,255,255,.4)!important;color:#181818!important;}
-__IH42__ .ih42-hero[data-classic="true"] .ih42-cta:first-child {background:#181818!important;color:white!important;border-color:#181818!important;}
-__IH42__ .ih42-hero[data-classic="true"] .ih42-cta:hover {background:#333!important;color:white!important;}
-__IH42__ .ih42-hero[data-classic="true"] .ih42-shade {background:linear-gradient(90deg,rgba(237,237,237,.75),rgba(237,237,237,.42) 31%,transparent 66%),linear-gradient(0deg,rgba(237,237,237,.93),transparent 24%,transparent 86%,rgba(237,237,237,.3));}
-@media(max-width:820px){__IH42__ .ih42-hero[data-classic="true"] .ih42-shade{background:linear-gradient(0deg,rgba(237,237,237,.97),rgba(237,237,237,.68) 27%,rgba(237,237,237,.12) 57%,transparent 74%,rgba(237,237,237,.15));}}
 `.replaceAll("__IH42__", "#root".repeat(10));
 
 const IH42_CONFIG={
-  "key": "01-Splot",
-  "name": "Splot",
-  "period": 76,
-  "intro": 28,
-  "light": true,
-  "material": 0,
+  "key": "02-Rezonans",
+  "name": "Rezonans",
+  "period": 84,
+  "intro": 30,
+  "light": false,
+  "material": 1,
   "rgb": {
     "bg": [
-      0.913725,
-      0.886275,
-      0.835294
+      0.019608,
+      0.043137,
+      0.031373
     ],
     "a": [
-      0.756863,
-      0.301961,
-      0.12549
+      0.141176,
+      0.486275,
+      0.258824
     ],
     "b": [
-      0.937255,
-      0.733333,
-      0.462745
+      0.752941,
+      0.976471,
+      0.317647
     ]
   },
   "wordsPL": [
-    "Jedna myśl.",
-    "Nabiera kształtu.",
-    "Łączy perspektywy.",
-    "Tworzy coś\nwiększego.",
-    "Twój ruch."
+    "Jeden sygnał.",
+    "Tysiące możliwości.",
+    "Właściwe\npołączenie.",
+    "Pomysł łapie\nenergię.",
+    "Nadaj mu kierunek."
   ],
   "wordsEN": [
-    "One thought.",
-    "Takes shape.",
-    "Connects perspectives.",
-    "Becomes something\nbigger.",
-    "Your move."
+    "One signal.",
+    "A thousand possibilities.",
+    "The right\nconnection.",
+    "An idea\nfinds energy.",
+    "Give it direction."
   ],
   "cuesPL": [
-    "Myśl",
-    "Kształt",
-    "Splot",
-    "Możliwości",
-    "Twój ruch"
+    "Sygnał",
+    "Potencjał",
+    "Połączenie",
+    "Energia",
+    "Kierunek"
   ],
   "cuesEN": [
-    "Thought",
-    "Shape",
-    "Weave",
-    "Possibilities",
-    "Your move"
+    "Signal",
+    "Potential",
+    "Connection",
+    "Energy",
+    "Direction"
   ]
 };
 
 const IH42_FORMS=String.raw`
-vec3 strip(vec4 q,float s){
- float u=q.x*TAU,v=(q.y-.5),id=q.z,offset=id*PI*.5;
- float breathe=sin(uTime*2.+id)*.12;
- vec3 p;
+vec3 field(vec4 q,float s){
+ float a=q.x*TAU,b=q.y*TAU,seed=q.z;vec3 p;
  if(s<.5){
-  float a=u+offset;float radius=1.6+.14*cos(u*3.+uTime);
-  p=vec3(sin(a)*radius,cos(a)*radius,sin(u*2.+offset+uTime)*.55);
-  p+=vec3(cos(a),-sin(a),sin(u+uTime))*(v*.58);
-  p=ry(id*.22)*p;
+  float r=(1.8+.65*cos(a*4.+uTime))*sqrt(q.y);
+  p=vec3(cos(a)*r,sin(a*3.+uTime*2.)*.75+(seed-.5)*1.8,sin(a)*r);p=rx(.35)*p;
  }else if(s<1.5){
-  float a=u+offset;
-  p=vec3(sin(a)*(1.55+v*.9),cos(a)*(1.55+v*.9),sin(u*3.+id+uTime)*.65+v*cos(u*2.)*.7);
-  p=rx(.28+id*.14)*p;
+  float stream=(q.x-.5)*5.;
+  p=vec3(stream,sin(q.x*TAU*2.+uTime)*1.25,cos(q.x*TAU*2.+uTime)*.85);
+  p+=unitSphere(q.y,seed)*(.18+.60*pow(abs(sin(q.x*TAU)),2.));
  }else if(s<2.5){
-  float a=u*2.+offset;
-  p=vec3((q.x-.5)*5.5,sin(a+uTime)*1.10,cos(a+uTime)*1.1);
-  p+=vec3(0.,cos(a)*v*.8,-sin(a)*v*.8);p=rz(id*.18-.27)*p;
+  vec3 v=unitSphere(q.x,q.y);
+  float spikes=.25+.55*pow(abs(sin(a*4.+uTime)*cos(b*3.-uTime)),2.);
+  p=v*(.4+pow(seed,.28)*(1.75+spikes));p=ry(uTime)*p;
  }else if(s<3.5){
-  float a=u+offset,r=1.45+.48*cos(u*2.+id);
-  p=vec3(cos(a)*(r+v*.7),sin(a)*(r+v*.7),sin(u*2.+uTime+id)*.8);
-  p=ry(offset*.27+sin(uTime)*.18)*p;
+  float t=(q.x-.5)*TAU*2.,r=1.55+.62*cos(b);
+  p=vec3(cos(t)*r,sin(t)*r,sin(b)*.65);
+  p=ry(q.x*PI)*p;p=rx(.4)*p;
  }else if(s<4.5){
-  float a=u+offset,r=1.50+v*.75;
-  p=vec3(cos(a)*r,sin(a)*r,cos(u*2.+uTime+id)*.32);
-  p+=vec3((mod(id,2.)-.5)*1.8,(floor(id*.5)-.5)*1.8,0.);
-  p*=.78;p=ry(sin(uTime)*.3)*p;
+  float tile=floor(q.x*4.),u=fract(q.x*4.),angle=u*TAU;
+  vec2 corner=vec2(mod(tile,2.)-.5,floor(tile*.5)-.5)*2.10;
+  vec2 edge=vec2(cos(angle),sin(angle));edge/=max(abs(edge.x),abs(edge.y));
+  p=vec3(corner+edge*(.70+(q.y-.5)*.25),(seed-.5)*.60);p=ry(sin(uTime)*.3)*p;
  }else{
-  float a=u+offset,r=1.50+v*.65;
-  p=vec3(cos(a)*r,sin(a)*r,cos(u*3.+uTime+id)*.5);
-  p=rx(offset*.30)*p;
-  p.z+=sin(uTime*3.+id)*.14;
+  float t=a*3.;float r=1.85+.50*cos(a*5.+uTime);
+  p=vec3(sin(t)*r,cos(t)*r,sin(a*2.+uTime)*1.2);
+  vec3 n=normalize(p+vec3(.01));p+=n*(q.y-.5)*.75;
  }
- p*=1.27;p.y+=breathe;return ry(sin(uTime)*.25)*p;
+ p+=normalize(p+vec3(.01))*sin(seed*60.+uTime*4.)*.025;
+ return p*1.18;
 }
-vec3 form(vec4 q,float stage){return strip(q,stage);}
-vec3 particle(vec4 q,float stage){return form(vec4(q.x,q.y,q.z,0.),stage)*1.04;}
+vec3 form(vec4 q,float stage){return field(q,stage);}
+vec3 particle(vec4 q,float stage){return field(q,stage);}
 `;
 function ih42Geometry(compact){
- const mesh=[],points=[],lines=[],nu=compact?164:268,nv=compact?10:18;
- for(let group=0;group<4;group++)for(let j=0;j<nv;j++)for(let i=0;i<nu;i++){
-  const a=[i/nu,j/nv,group,0],b=[(i+1)/nu,j/nv,group,0],c=[(i+1)/nu,(j+1)/nv,group,0],d=[i/nu,(j+1)/nv,group,0];mesh.push(...a,...b,...c,...a,...c,...d);
- }
- for(let i=0;i<(compact?110:240);i++)points.push(IH42_M.noise(i),IH42_M.noise(i+300),IH42_M.noise(i+1000),9);
+ const mesh=[],points=[],lines=[],count=compact?24500:76000;
+ for(let i=0;i<count;i++)points.push(IH42_M.noise(i+20),IH42_M.noise(i+80000),IH42_M.noise(i+160000),0);
+ const bands=compact?26:70,steps=compact?84:144;
+ for(let j=0;j<bands;j++)for(let i=0;i<steps;i++){lines.push(i/steps,j/bands,IH42_M.noise(j),1,(i+1)/steps,j/bands,IH42_M.noise(j),1);}
+ for(let i=0;i<(compact?100:220);i++)points.push(IH42_M.noise(i),IH42_M.noise(i+300),IH42_M.noise(i+1000),9);
  return{mesh,points,lines};
 }
 
