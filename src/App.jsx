@@ -1,270 +1,246 @@
-/* IdeaHire | P44 | Irys | Pełny plik: src/App.jsx | Przebudowa całego widoku głównego */
+/* IdeaHire | P45 | Turkus / Czerń i biel | Pełny plik: src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "./App.css";
-import { IDEA_HIRE_PUBLIC_OFFER, CommissionStory, HomeStepCard, IdeaHireLogo, MarketIcon, helpCenterHref } from "./MarketUI";
+import { IDEA_HIRE_PUBLIC_OFFER, helpCenterHref } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
-import { useSitePreferences } from "./Preferences";
+import { useSitePreferences, translateUiText } from "./Preferences";
 
-const IH44_CONFIG={
-  "key": "03-Irys",
-  "name": "Irys",
-  "mode": "quadrants",
-  "hue": 286,
-  "duration": 20,
-  "description": "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu.",
-  "descriptionEN": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen.",
-  "light": {
-    "bg": "#f4eff4",
-    "surface": "#fffcf5",
-    "soft": "#e9dfec",
-    "ink": "#42263f",
-    "muted": "#795e75",
-    "line": "#d7c2d5",
-    "accent": "#79516f",
-    "on": "#ffffff",
-    "pop": "#e5e9ad"
-  },
-  "dark": {
-    "bg": "#271b28",
-    "surface": "#352537",
-    "soft": "#473048",
-    "ink": "#f9edf2",
-    "muted": "#d2b4cb",
-    "line": "#654660",
-    "accent": "#ddb8d4",
-    "on": "#392036",
-    "pop": "#d8dea4"
-  },
-  "pl": {
-    "final": [
-      "Z czego",
-      "zrobimy coś?"
-    ],
-    "subtitle": "Kliknij pole. Sprawdź zawartość. Wybierz swój następny krok.",
-    "eyebrow": "Cztery wejścia. Własny kierunek.",
-    "acts": [
-      [
-        "Jeden ekran.",
-        "Wiele możliwości."
-      ],
-      [
-        "Potrzebujesz?",
-        "Poszukaj."
-      ],
-      [
-        "Potrafisz?",
-        "Pokaż."
-      ],
-      [
-        "Klik.",
-        "Twój ruch."
-      ]
-    ],
-    "strip": "POTRZEBA / WARSZTAT / KONTAKT / SZCZEGÓŁY",
-    "section": "Rozwiń właściwe pole.",
-    "jobs": "Wybierz punkt zaczepienia.",
-    "how": "Połącz potrzeby z umiejętnościami.",
-    "end": [
-      "Ten ruch",
-      "należy do Ciebie."
-    ],
-    "themeDescription": "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu."
-  },
-  "en": {
-    "final": [
-      "What shall",
-      "we make of it?"
-    ],
-    "subtitle": "Click a field. See what is inside. Choose your next move.",
-    "eyebrow": "Four entrances. Your own direction.",
-    "acts": [
-      [
-        "One screen.",
-        "Many possibilities."
-      ],
-      [
-        "Need it?",
-        "Look for it."
-      ],
-      [
-        "Know how?",
-        "Show it."
-      ],
-      [
-        "Click.",
-        "Your move."
-      ]
-    ],
-    "strip": "NEED / CRAFT / CONTACT / DETAILS",
-    "section": "Open the right field.",
-    "jobs": "Find a starting point.",
-    "how": "Connect needs with skills.",
-    "end": [
-      "This move",
-      "is yours."
-    ],
-    "themeDescription": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen."
-  }
-};
-
-/* P44 — jedna scenografia pod całym dokumentem; stałe obszary kliknięć. */
-function ih44Reduced(){return typeof window!=="undefined"&&!!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;}
-function ih44WorldFrame(c,w,h,time,s){
-  const p=s.palette,px=s.x||0,py=s.y||0,scroll=s.scroll||0,energy=s.intro?1:.45,mode=IH44_CONFIG.mode;
-  c.clearRect(0,0,w,h);c.save();
-  if(mode==="lagoon"){
-    for(let i=0;i<4;i++){
-      const x=w*(.17+i*.25)+Math.sin(time*.32+i)*w*.13+px*32,y=h*(.16+i*.22)+Math.cos(time*.26+i)*h*.17+py*24-scroll*.035;
-      const gradient=c.createRadialGradient(x,y,0,x,y,w*(.30+i*.035));gradient.addColorStop(0,(i%2?p.pop:p.accent)+(s.dark?"24":"19"));gradient.addColorStop(1,(i%2?p.pop:p.accent)+"00");c.fillStyle=gradient;c.fillRect(0,0,w,h);
-    }
-    c.lineWidth=1.1;c.strokeStyle=p.accent;c.globalAlpha=s.dark?.16:.10;
-    for(let j=0;j<9;j++){c.beginPath();for(let i=0;i<=45;i++){const x=i*w/45,y=h*.62+j*13+Math.sin(i*.15+time*.62+j*.22)*62*energy+Math.cos(i*.10-time*.38)*36+px*10;if(!i)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();}
-  }else if(mode==="editorial"){
-    c.globalAlpha=.08;c.fillStyle=p.accent;const speed=s.intro?18:5,offset=(time*speed+scroll*.07)%170;
-    for(let i=-2;i<12;i++){c.save();c.translate(w*.72+Math.sin(time*.3)*25+px*20,(i*170+offset));c.rotate(-.20);c.fillRect(-w*.15,-1,w*.65,2);c.restore();}
-    c.globalAlpha=.15;c.strokeStyle=p.line;c.lineWidth=1;c.beginPath();c.moveTo(w*.38+px*7,0);c.lineTo(w*.38+px*7,h);c.moveTo(w*.76,0);c.lineTo(w*.76,h);c.stroke();
-  }else{
-    const x=w*(.5+px*.13),y=h*(.48+py*.12),r=Math.max(w,h)*.58;
-    const g=c.createRadialGradient(x,y,1,x,y,r);g.addColorStop(0,p.pop+(s.dark?"1c":"51"));g.addColorStop(.48,p.accent+"0c");g.addColorStop(1,p.accent+"00");c.fillStyle=g;c.fillRect(0,0,w,h);
-    c.globalAlpha=.13;c.strokeStyle=p.accent;c.lineWidth=1;const yy=h*.51+Math.sin(time*.4)*13;
-    c.beginPath();c.moveTo(0,yy);c.lineTo(w,yy);c.moveTo(w*.5+Math.cos(time*.36)*12,0);c.lineTo(w*.5+Math.cos(time*.36)*12,h);c.stroke();
-  }
-  c.restore();
+/* P45 — autorski, przestrzenny monogram iH. Geometria, światło i ruch w WebGL. */
+const IH45_VERTEX = String.raw`
+precision highp float;
+attribute vec2 aSurface;
+uniform float uTime, uAssemble, uBurst, uKind, uAspect, uScale, uTurn, uScroll;
+uniform vec2 uPointer;
+varying vec3 vNormal, vPosition;
+varying vec2 vSurface;
+mat2 spin(float a){float s=sin(a),c=cos(a);return mat2(c,-s,s,c);}
+vec3 point(vec2 uv){
+  float s=uv.x, a=uv.y, k=uKind;
+  float horizontal=step(2.5,k)* (1.0-step(3.5,k));
+  float dotPart=step(3.5,k);
+  float length=mix(mix(1.36,1.12,1.0-step(.5,k)),.84,horizontal);
+  length=mix(length,.19,dotPart);
+  float taper=smoothstep(0.0,.035,s)*smoothstep(0.0,.035,1.0-s);
+  float ca=cos(a),sa=sin(a);
+  float w=mix(.29,.25,horizontal),thick=.07;
+  w=mix(w,.245,dotPart);
+  float across=sign(ca)*pow(abs(ca),.38)*w*taper;
+  float depth=sign(sa)*pow(abs(sa),.5)*thick*taper;
+  float along=(s*2.0-1.0)*length;
+  float fold=(1.0-uAssemble);
+  float twist=sin(s*6.28318+uTime*.62+k*.7)*(.25+fold*1.8)+fold*(k-1.5)*.7;
+  twist*=1.0-dotPart;
+  vec2 crossSection=spin(twist)*vec2(across,depth);
+  vec3 p=mix(vec3(crossSection.x,along,crossSection.y),vec3(along,crossSection.x,crossSection.y),horizontal);
+  p.z+=sin(s*6.28318+uTime*.5+k)*(.12+fold*.7)*(1.0-dotPart);
+  p.x+=sin(s*3.14159)*fold*.34;
+  p.xy=spin(fold*(k-1.2)*.95+sin(uTime*.32+k)*.02)*p.xy;
+  vec3 centre=k<.5?vec3(-1.62,-.23,.12):k<1.5?vec3(-.34,0.0,0.0):k<2.5?vec3(1.12,0.0,.05):k<3.5?vec3(.39,0.0,.14):vec3(-1.62,1.30,.12);
+  centre.x+=(k-1.7)*(fold*.8+uBurst*.36);
+  centre.y+=sin(k*2.1+uTime*.5)*(fold*.5+uBurst*.22);
+  centre.z+=cos(k*1.7)*(fold*.9+uBurst*.28);
+  p+=centre;
+  float turn=-.38+uTurn+sin(uTime*.21)*.12+uPointer.x*.34;
+  p.xz=spin(turn)*p.xz;
+  p.yz=spin(-.12+sin(uTime*.16)*.05+uPointer.y*.15)*p.yz;
+  p.xy=spin(-.12+sin(uTime*.2)*.035)*p.xy;
+  p.y+=sin(uTime*.45)*.075-uScroll*.17;
+  return p;
 }
-function ih44StartWorld(canvas,root,state,report){
-  let frame=0,last=0,drawn=0,disposed=false,visible=true,width=0,height=0,ratio=1,context=null,dirty=true,previous=-1,resizeObserver=null;
-  const listeners=[],listen=(node,type,fn,opts)=>{node.addEventListener(type,fn,opts);listeners.push(()=>node.removeEventListener(type,fn,opts));};
-  const render=now=>{
-    frame=0;if(disposed||document.hidden||!visible)return;
-    const s=state.current,interval=width<821?1000/28:1000/40;
-    if(!s.paused&&!s.reduced&&drawn&&now-drawn<interval-1){frame=requestAnimationFrame(render);return;}
-    const dt=last?Math.min(.08,(now-last)/1000):0;last=now;drawn=now;
-    if(dirty){width=window.innerWidth;height=window.innerHeight;ratio=Math.min(window.devicePixelRatio||1,1.4);const budget=width<821?600000:1350000,area=width*height*ratio*ratio;if(area>budget)ratio*=Math.sqrt(budget/area);canvas.width=Math.max(1,Math.floor(width*ratio));canvas.height=Math.max(1,Math.floor(height*ratio));dirty=false;}
-    if(!s.paused&&!s.reduced){s.time+=dt;if(s.intro)s.elapsed+=dt;}
-    if(s.reduced){s.intro=false;s.elapsed=IH44_CONFIG.duration;}
-    if(s.elapsed>=IH44_CONFIG.duration)s.intro=false;
-    const act=s.intro?Math.min(3,Math.floor(s.elapsed/(IH44_CONFIG.duration/4))):4;
-    if(act!==previous){previous=act;root.style.setProperty("--ih44-progress",String(act/4));report({act,intro:s.intro});}
-    if(context){try{context.setTransform(ratio,0,0,ratio,0,0);ih44WorldFrame(context,width,height,s.reduced?0:s.time,s);}catch{context=null;}}
-    if(!s.paused&&!s.reduced)frame=requestAnimationFrame(render);
+void main(){
+  vec2 uv=aSurface;
+  vec3 p=point(uv);
+  vec3 du=point(vec2(min(.9999,uv.x+.0006),uv.y))-point(vec2(max(.0001,uv.x-.0006),uv.y));
+  vec3 dv=point(vec2(uv.x,uv.y+.0006))-point(vec2(uv.x,uv.y-.0006));
+  vNormal=normalize(cross(dv,du));vPosition=p;vSurface=uv;
+  float camera=6.8, perspective=camera/(camera-p.z);
+  gl_Position=vec4(p.x*uScale/uAspect*perspective,p.y*uScale*perspective,(camera-p.z)/20.0,1.0);
+}`;
+const IH45_FRAGMENT = String.raw`
+precision highp float;
+uniform vec3 uColor;
+uniform float uTime,uDark,uMono,uKind;
+varying vec3 vNormal,vPosition;
+varying vec2 vSurface;
+vec3 environment(vec3 r){
+  vec3 e=vec3(.10,.14,.15)+vec3(.16)*max(r.y,0.0);
+  float window1=pow(max(0.0,dot(r,normalize(vec3(-.75,1.1,.9)))),16.0);
+  float window2=pow(max(0.0,dot(r,normalize(vec3(1.4,.5,1.1)))),38.0);
+  float strip=pow(max(0.0,dot(r,normalize(vec3(.3,1.1,-.3)))),60.0);
+  e+=vec3(1.0,.98,.92)*window1*2.7+vec3(.7,.94,1.0)*window2*2.0+vec3(1.0)*strip*2.0;
+  return e;
+}
+void main(){
+  vec3 n=normalize(vNormal);
+  vec3 eye=normalize(vec3(0.0,0.0,6.8)-vPosition);
+  if(dot(n,eye)<0.0)n=-n;
+  vec3 key=normalize(vec3(-3.0,4.5,5.0)-vPosition);
+  vec3 fill=normalize(vec3(4.0,1.6,3.0)-vPosition);
+  float diffuse=.35+.65*max(0.0,dot(n,key))+.18*max(0.0,dot(n,fill));
+  float fresnel=pow(1.0-max(0.0,dot(n,eye)),4.0);
+  float fibre=sin(vSurface.x*620.0+sin(vSurface.y*9.0)*.8)*.003;
+  vec3 base=mix(uColor,vec3(.76,.84,.84),.09);
+  if(uMono>.5)base=mix(vec3(.43,.45,.46),vec3(.78,.79,.78),uDark);
+  float alternating=step(.5,mod(uKind,2.0));
+  base=mix(base,vec3(.86,.92,.91),alternating*.50);
+  vec3 env=environment(reflect(-eye,n));
+  float gloss=pow(max(0.0,dot(n,normalize(key+eye))),55.0);
+  vec3 result=base*(diffuse+fibre)+env*(.12+fresnel*.30)+vec3(gloss*.32);
+  float occlusion=.88+.12*smoothstep(-.16,.55,abs(vPosition.y));result*=occlusion;
+  result=result/(result+vec3(.52));result=pow(result,vec3(.78));
+  gl_FragColor=vec4(result,1.0);
+}`;
+
+function ih45CreateRenderer(canvas) {
+  const gl=canvas.getContext("webgl",{alpha:true,antialias:true,premultipliedAlpha:false,powerPreference:"low-power"});
+  if(!gl)return null;
+  const resources=[];
+  function shader(type,source){const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const message=gl.getShaderInfoLog(s);gl.deleteShader(s);throw new Error(message||"Shader compilation");}resources.push(["shader",s]);return s;}
+  let program;
+  try{program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,IH45_VERTEX));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,IH45_FRAGMENT));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));}
+  catch{if(program)gl.deleteProgram(program);resources.forEach(([,s])=>gl.deleteShader(s));return null;}
+  const surfaces=[],indices=[],rows=80,columns=24;
+  for(let i=0;i<=rows;i++)for(let j=0;j<=columns;j++)surfaces.push(i/rows,j/columns*Math.PI*2);
+  for(let i=0;i<rows;i++)for(let j=0;j<columns;j++){const a=i*(columns+1)+j,b=a+columns+1;indices.push(a,b,a+1,a+1,b,b+1);}
+  const vertices=gl.createBuffer(),elements=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,vertices);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(surfaces),gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,elements);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(indices),gl.STATIC_DRAW);
+  const uniform={};for(const name of ["uTime","uAssemble","uBurst","uKind","uAspect","uScale","uTurn","uScroll","uPointer","uColor","uDark","uMono"])uniform[name]=gl.getUniformLocation(program,name);
+  gl.useProgram(program);const attr=gl.getAttribLocation(program,"aSurface");gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,2,gl.FLOAT,false,0,0);gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);
+  return {
+    draw(width,height,s){
+      if(gl.isContextLost())return;
+      if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
+      gl.viewport(0,0,width,height);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);
+      gl.uniform1f(uniform.uTime,s.time);gl.uniform1f(uniform.uAssemble,s.assemble);gl.uniform1f(uniform.uBurst,s.burst);gl.uniform1f(uniform.uAspect,width/height);gl.uniform1f(uniform.uScale,s.scale);gl.uniform1f(uniform.uTurn,s.turn);gl.uniform1f(uniform.uScroll,s.scroll);gl.uniform2f(uniform.uPointer,s.x,s.y);gl.uniform3fv(uniform.uColor,s.color);gl.uniform1f(uniform.uDark,s.dark?1:0);gl.uniform1f(uniform.uMono,s.mono?1:0);
+      for(let kind=0;kind<5;kind++){gl.uniform1f(uniform.uKind,kind);gl.drawElements(gl.TRIANGLES,indices.length,gl.UNSIGNED_SHORT,0);}
+    },
+    destroy(){gl.deleteBuffer(vertices);gl.deleteBuffer(elements);gl.deleteProgram(program);resources.forEach(([,s])=>gl.deleteShader(s));}
   };
-  const wake=()=>{if(!disposed&&!document.hidden&&visible&&!frame){last=0;drawn=0;frame=requestAnimationFrame(render);}};
-  const move=e=>{if(e.pointerType!=="mouse"||state.current.paused||state.current.reduced)return;state.current.x=Math.max(-1,Math.min(1,e.clientX/window.innerWidth*2-1));state.current.y=Math.max(-1,Math.min(1,e.clientY/window.innerHeight*2-1));};
-  const scroll=()=>{state.current.scroll=window.scrollY;if(state.current.paused||state.current.reduced)return;wake();};
-  try{context=canvas.getContext("2d");}catch{/* Strona i jej funkcje działają również bez warstwy canvas. */}
-  listen(window,"resize",()=>{dirty=true;wake();},{passive:true});listen(window,"scroll",scroll,{passive:true});listen(root,"pointermove",move,{passive:true});listen(root,"pointerleave",()=>{state.current.x=0;state.current.y=0;});
-  listen(document,"visibilitychange",()=>{last=0;drawn=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;root.dataset.worldHidden="true";}else{root.dataset.worldHidden="false";wake();}});
-  if(typeof IntersectionObserver!=="undefined"){resizeObserver=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:"100px"});resizeObserver.observe(root);}
-  wake();return{wake,destroy(){disposed=true;cancelAnimationFrame(frame);listeners.forEach(fn=>fn());resizeObserver?.disconnect();},finish(){state.current.intro=false;state.current.elapsed=IH44_CONFIG.duration;wake();},replay(){Object.assign(state.current,{intro:true,elapsed:0,time:0,paused:false});previous=-1;wake();}};
-}
-function useIH44Stage(rootRef,canvasRef,palette,dark){
-  const [reduced,setReduced]=useState(ih44Reduced),[paused,setPaused]=useState(false),[act,setAct]=useState(()=>ih44Reduced()?4:0),[intro,setIntro]=useState(()=>!ih44Reduced()),[cycle,setCycle]=useState(0);
-  const engine=useRef(null),state=useRef({time:0,elapsed:0,intro:!reduced,reduced,paused:false,palette,dark,x:0,y:0,scroll:0});
-  useLayoutEffect(()=>{document.body.classList.add("ih44-page");return()=>document.body.classList.remove("ih44-page");},[]);
-  useLayoutEffect(()=>{Object.assign(state.current,{palette,dark,reduced,paused});engine.current?.wake();},[palette,dark,reduced,paused]);
-  useEffect(()=>{const m=window.matchMedia?.("(prefers-reduced-motion: reduce)");if(!m)return;const change=()=>setReduced(m.matches);m.addEventListener?.("change",change);return()=>m.removeEventListener?.("change",change);},[]);
-  useEffect(()=>{let alive=true;const e=ih44StartWorld(canvasRef.current,rootRef.current,state,u=>{if(alive){setAct(u.act);setIntro(u.intro);}});engine.current=e;return()=>{alive=false;e.destroy();engine.current=null;};},[]);
-  useEffect(()=>{const root=rootRef.current;if(!root)return;const elements=[...root.querySelectorAll("[data-world-reveal]")];if(reduced||typeof IntersectionObserver==="undefined"){elements.forEach(el=>el.dataset.worldReveal="seen");return;}
-    const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.dataset.worldReveal="seen";observer.unobserve(entry.target);} }),{threshold:.08,rootMargin:"0px 0px -30px 0px"});
-    elements.forEach(el=>{el.dataset.worldReveal="waiting";observer.observe(el);});return()=>{observer.disconnect();elements.forEach(el=>el.dataset.worldReveal="seen");};
-  },[reduced]);
-  return{act,intro,paused,reduced,cycle,state,finish(){engine.current?.finish();},replay(){if(reduced)return;setPaused(false);setIntro(true);setAct(0);setCycle(n=>n+1);engine.current?.replay();},toggle(){state.current.paused=!state.current.paused;setPaused(state.current.paused);engine.current?.wake();}};
 }
 
-const IH44_CLASSIC_LIGHT={bg:"#f2f1ed",surface:"#ffffff",soft:"#e8e7e3",ink:"#202020",muted:"#656560",line:"#d0d0cb",accent:"#242424",on:"#ffffff",pop:"#d7d7d0"};
-const IH44_CLASSIC_DARK={bg:"#181818",surface:"#242424",soft:"#303030",ink:"#f6f5ef",muted:"#bdbdb5",line:"#494944",accent:"#f0efe8",on:"#202020",pop:"#c9c9bd"};
-const IH44_UTIL={
- pl:{menu:"Menu",how:"Jak to działa",categories:"Kategorie",forYou:"Dla Ciebie",notices:"Powiadomienia",account:"Moje konto",login:"Zaloguj się",register:"Dołącz",logout:"Wyloguj się",skip:"Pomiń sekwencję",replay:"Powtórz wejście",pause:"Zatrzymaj ruch",play:"Wznów ruch",next:"Następna strona",previous:"Poprzednia strona",latest:"Ostatnio dodane",sample:"Przykładowy projekt",sampleNote:"Przykład zakresu — nieaktywna oferta",all:"Wszystkie ogłoszenia",find:"Znajdź wykonawcę",work:"Przeglądaj zlecenia",fee:"Zasady rozliczenia",roles:["Zlecam pracę","Szukam zlecenia","Wybieram dziedzinę","Otwieram konto"],rolesCopy:["Przejrzyj specjalistów i opowiedz o zadaniu.","Sprawdź ogłoszenia pasujące do Twoich umiejętności.","Odkryj kategorie i wybierz specjalizację.","Profil, rozmowy i ustalenia w jednym miejscu."],go:"Otwórz",choose:"Wybierz pole",summary:"Pomysł, wykonanie i rozmowa w jednym miejscu.",legal:"Dokumenty i pomoc",steps:[["Opis","Określ zakres, oczekiwany rezultat i termin."],["Wybór","Znajdź osobę z odpowiednimi umiejętnościami."],["Ustalenia","Porozmawiaj o cenie, przekazaniu i szczegółach."]]},
- en:{menu:"Menu",how:"How it works",categories:"Categories",forYou:"For you",notices:"Notifications",account:"My account",login:"Sign in",register:"Join",logout:"Sign out",skip:"Skip the sequence",replay:"Replay the entrance",pause:"Pause motion",play:"Resume motion",next:"Next page",previous:"Previous page",latest:"Recently added",sample:"Sample project",sampleNote:"Illustrative scope — not an active listing",all:"All listings",find:"Find a professional",work:"Browse projects",fee:"Payment rules",roles:["I need help","I want a project","I choose a field","I open my account"],rolesCopy:["Browse professionals and describe the task.","Explore listings that match your skills.","Discover categories and choose a specialism.","Your profile, conversations and agreements together."],go:"Open",choose:"Choose a field",summary:"Ideas, execution and conversation in one place.",legal:"Documents and help",steps:[["Brief","Define the scope, expected outcome and timing."],["Selection","Find a person with the right skills."],["Agreement","Discuss the price, delivery and details."]]},
+const IH45_DURATION=30;
+function ih45Clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v));}
+function ih45Ease(v){const t=ih45Clamp(v);return t*t*(3-2*t);}
+function ih45Pose(time,elapsed,intro,pointer,scroll,mono,dark){
+  const t=intro?elapsed:IH45_DURATION+time%24;
+  const assemble=intro?(.18+.82*ih45Ease(t/5)-.30*Math.sin(ih45Clamp((t-8)/9)*Math.PI)+.0):1;
+  const burst=intro?Math.pow(Math.sin(ih45Clamp((t-13)/8)*Math.PI),2):.06+.05*Math.sin(time*.35);
+  const turn=intro?Math.sin(ih45Clamp(t/23)*Math.PI*2)*.65+Math.sin(t*1.12)*.32*(1-ih45Ease((t-22)/5)):Math.sin(time*.14)*.23;
+  return {time,assemble,burst,turn,x:pointer.x,y:pointer.y,scroll:ih45Clamp(scroll/900),mono,dark,color:mono?[.50,.53,.53]:[.04,.68,.71],scale:.50};
+}
+function ih45StartScene(canvas,root,state,report){
+  let engine=null,frame=0,last=0,previous=-1,previousTicket=-1,previousIntro=null,width=0,height=0,dirty=true,visible=true,dead=false,observer=null,resize=null,drawAt=0;
+  const clean=[],listen=(target,event,fn,opts)=>{target.addEventListener(event,fn,opts);clean.push(()=>target.removeEventListener(event,fn,opts));};
+  function create(){engine?.destroy();try{engine=ih45CreateRenderer(canvas);}catch{engine=null;}root.dataset.webgl=engine?"ready":"fallback";dirty=true;}
+  function render(now){
+    frame=0;if(dead||document.hidden||!visible)return;
+    const s=state.current;
+    if(!s.reduced&&!s.paused&&drawAt&&now-drawAt<(window.innerWidth<821?33:25)-1){frame=requestAnimationFrame(render);return;}
+    const delta=last?Math.min(.065,(now-last)/1000):0;last=now;drawAt=now;
+    if(!s.paused&&!s.reduced){s.time+=delta;if(s.intro)s.elapsed+=delta;s.x+=(s.targetX-s.x)*.10;s.y+=(s.targetY-s.y)*.10;}
+    if(s.elapsed>=IH45_DURATION||s.reduced){s.intro=false;s.elapsed=IH45_DURATION;}
+    const act=s.intro?Math.min(4,Math.floor(s.elapsed/6)):4;
+    const ticket=s.reduced?3:s.intro?Math.min(3,act):Math.floor((Math.max(0,s.time-IH45_DURATION)+21)/7)%4;
+    if(act!==previous||ticket!==previousTicket||previousIntro!==s.intro){previous=act;previousTicket=ticket;previousIntro=s.intro;report({act,ticket,intro:s.intro});}
+    root.style.setProperty("--scene-progress",String(Math.min(1,s.elapsed/IH45_DURATION)));
+    root.style.setProperty("--scene-time",String(s.time));
+    if(dirty){const box=canvas.getBoundingClientRect();let ratio=Math.min(window.devicePixelRatio||1,1.6);const budget=box.width<750?470000:1100000;ratio=Math.min(ratio,Math.sqrt(budget/Math.max(1,box.width*box.height)));width=Math.max(1,Math.round(box.width*ratio));height=Math.max(1,Math.round(box.height*ratio));dirty=false;}
+    const pose=ih45Pose(s.reduced?0:s.time,s.elapsed,s.intro,s,s.scroll,s.mono,s.dark||act===1||act===3);
+    pose.scale=width/height<.9?.42:.50;
+    try{engine?.draw(width,height,pose);}catch{engine?.destroy();engine=null;root.dataset.webgl="fallback";}
+    if(!s.paused&&!s.reduced)frame=requestAnimationFrame(render);
+  }
+  function wake(){if(!dead&&!document.hidden&&visible&&!frame){last=0;drawAt=0;frame=requestAnimationFrame(render);}}
+  create();
+  listen(root,"pointermove",e=>{if(e.pointerType!=="mouse"||state.current.reduced||state.current.paused)return;const box=root.getBoundingClientRect();state.current.targetX=ih45Clamp((e.clientX-box.left)/box.width*2-1,-1,1);state.current.targetY=ih45Clamp((e.clientY-box.top)/box.height*2-1,-1,1);},{passive:true});
+  listen(root,"pointerleave",()=>{state.current.targetX=0;state.current.targetY=0;});
+  listen(window,"scroll",()=>{state.current.scroll=window.scrollY;},{passive:true});
+  listen(window,"resize",()=>{dirty=true;wake();},{passive:true});
+  listen(document,"visibilitychange",()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;last=0;}else wake();});
+  listen(canvas,"webglcontextlost",e=>{e.preventDefault();engine=null;root.dataset.webgl="fallback";});
+  listen(canvas,"webglcontextrestored",()=>{create();wake();});
+  if(typeof ResizeObserver!=="undefined"){resize=new ResizeObserver(()=>{dirty=true;wake();});resize.observe(canvas);}
+  if(typeof IntersectionObserver!=="undefined"){observer=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:"80px"});observer.observe(root);}
+  wake();return {wake,seek(act){state.current.elapsed=act*6;state.current.intro=act<4;previous=-1;wake();},replay(){Object.assign(state.current,{elapsed:0,time:0,intro:true,paused:false});previous=-1;wake();},finish(){state.current.elapsed=IH45_DURATION;state.current.intro=false;previous=-1;wake();},destroy(){dead=true;cancelAnimationFrame(frame);clean.forEach(fn=>fn());observer?.disconnect();resize?.disconnect();engine?.destroy();}};
+}
+function ih45Reduced(){return typeof window!=="undefined"&&!!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;}
+function useIH45Scene(rootRef,canvasRef,mono,dark){
+  const [reduced,setReduced]=useState(ih45Reduced),[paused,setPaused]=useState(false),[intro,setIntro]=useState(()=>!ih45Reduced()),[act,setAct]=useState(()=>ih45Reduced()?4:0),[ticket,setTicket]=useState(()=>ih45Reduced()?3:0),[cycle,setCycle]=useState(0);
+  const engine=useRef(null),state=useRef({time:0,elapsed:0,intro:!reduced,reduced,paused:false,mono,dark,x:0,y:0,targetX:0,targetY:0,scroll:0});
+  useLayoutEffect(()=>{Object.assign(state.current,{mono,dark,reduced,paused});engine.current?.wake();},[mono,dark,reduced,paused]);
+  useEffect(()=>{const media=window.matchMedia?.("(prefers-reduced-motion: reduce)");if(!media)return;const change=()=>setReduced(media.matches);media.addEventListener?.("change",change);return()=>media.removeEventListener?.("change",change);},[]);
+  useEffect(()=>{let alive=true;engine.current=ih45StartScene(canvasRef.current,rootRef.current,state,next=>{if(alive){setAct(next.act);setTicket(next.ticket);setIntro(next.intro);}});return()=>{alive=false;engine.current?.destroy();engine.current=null;};},[]);
+  useLayoutEffect(()=>{document.body.classList.add("ih45-page");return()=>document.body.classList.remove("ih45-page");},[]);
+  return {act,ticket,intro,paused,reduced,cycle,state,replay(){if(reduced)return;setCycle(n=>n+1);setPaused(false);setIntro(true);setAct(0);engine.current?.replay();},finish(){engine.current?.finish();},seek(next){if(reduced)return;engine.current?.seek(next);},toggle(){state.current.paused=!state.current.paused;setPaused(state.current.paused);engine.current?.wake();}};
+}
+
+const IH45_COPY={
+  pl:{menu:"Menu",close:"Zamknij menu",how:"Jak to działa",categories:"Kategorie",fee:"Prowizja",account:"Moje konto",login:"Zaloguj się",register:"Dołącz",logout:"Wyloguj się",notices:"Powiadomienia",find:"Znajdź wykonawcę",work:"Znajdź zlecenie",skip:"Pomiń wejście",replay:"Powtórz animację",pause:"Zatrzymaj animacje",play:"Wznów animacje",hero:"Ludzie do Twoich pomysłów.",intro:[ ["Masz","pomysł."],["Ktoś","potrafi."],["Złapcie","kontakt."],["Działajcie","razem."],["Masz pomysł.","Daj mu życie."] ],chapters:["Pomysł","Umiejętności","Rozmowa","Współpraca"],subtitle:"Strona, identyfikacja, film? Znajdź osobę, z którą zrobisz następny krok.",sample:"Przykładowy projekt",all:"Wszystkie zlecenia",go:"Przejrzyj zlecenia",latest:"Do zrobienia",examples:"Przykładowe zakresy",jobsTitle:"Ktoś właśnie szuka\nTwoich umiejętności.",categoriesTitle:"Zacznij od\nswojej dziedziny.",categoryLead:"Wybierz kierunek. Dalej są konkretne specjalizacje.",methodTitle:"Od pierwszej rozmowy\ndo konkretów.",method:[["Opisz, co chcesz zrobić.","Zakres, termin i oczekiwany rezultat. Kilka konkretów ułatwi znalezienie właściwej osoby."],["Sprawdź, z kim pracujesz.","Zobacz profil i portfolio. Zapytaj o doświadczenie przy podobnych projektach."],["Ustalcie warunki.","Porozmawiajcie o cenie, przekazaniu pracy i poprawkach. Zapiszcie ustalenia przed rozpoczęciem."]],closing:["Dobry moment,","żeby zacząć."],summary:"Miejsce spotkania pomysłu z wykonaniem.",legal:"Dokumenty i pomoc",help:"Pomoc",terms:"Regulamin",privacy:"Prywatność",illegal:"Zgłoś nielegalną treść",light:"Tryb jasny",dark:"Tryb ciemny",mono:"Czerń i biel",turquoise:"Turkus",theme:"Szablon strony",language:"Język",more:"Więcej",noOffers:"Przykład — to nie jest aktywne ogłoszenie."},
+  en:{menu:"Menu",close:"Close menu",how:"How it works",categories:"Categories",fee:"Service fee",account:"My account",login:"Sign in",register:"Join",logout:"Sign out",notices:"Notifications",find:"Find a professional",work:"Find a project",skip:"Skip the entrance",replay:"Replay the animation",pause:"Pause animations",play:"Resume animations",hero:"People for your ideas.",intro:[["You have","an idea."],["Someone has","the skills."],["Start a","conversation."],["Make it","together."],["Have an idea?","Bring it to life."]],chapters:["Idea","Skills","Conversation","Collaboration"],subtitle:"A website, identity or film? Find the person for your next step.",sample:"Illustrative project",all:"All projects",go:"Browse projects",latest:"Work to do",examples:"Illustrative briefs",jobsTitle:"Someone is looking\nfor your skills.",categoriesTitle:"Start with\nyour field.",categoryLead:"Choose a field, then explore the specialisms.",methodTitle:"From the first conversation\nto the details.",method:[["Say what you need.","The scope, deadline and expected result. A few clear details help you find the right person."],["Get to know the professional.","Explore their profile and portfolio. Ask about experience with similar projects."],["Agree on the details.","Discuss the price, delivery and revisions. Record your agreement before you begin."]],closing:["A good time","to get started."],summary:"Where an idea meets the skills to make it happen.",legal:"Documents and help",help:"Help",terms:"Terms",privacy:"Privacy",illegal:"Report illegal content",light:"Light mode",dark:"Dark mode",mono:"Black and white",turquoise:"Turquoise",theme:"Site template",language:"Language",more:"More",noOffers:"Illustrative scope — not an active listing."}
 };
-function IH44Arrow({back=false}){return <svg viewBox="0 0 24 24" aria-hidden="true" style={back?{transform:"rotate(180deg)"}:undefined}><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg>;}
-function IH44Mark(){return <span className="ih44-mark" aria-hidden="true"><i/><i/><i/><i/></span>;}
-function IH44Controls({stage,ui}){return <div className="ih44-motion-controls" role="group" aria-label={ui.menu}>
-  <button type="button" onClick={stage.intro?stage.finish:stage.replay} disabled={stage.reduced}>{stage.intro?ui.skip:ui.replay}<span aria-hidden="true">↗</span></button>
-  <button type="button" onClick={stage.toggle} disabled={stage.reduced} aria-pressed={stage.paused||stage.reduced}>{stage.paused?ui.play:ui.pause}<span aria-hidden="true">{stage.paused?"▷":"Ⅱ"}</span></button>
+function IH45Arrow({back=false}){return <svg viewBox="0 0 24 24" aria-hidden="true" style={back?{transform:"rotate(180deg)"}:undefined}><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg>;}
+function IH45Mark(){return <span className="ih45-mark" aria-hidden="true"><i/><i/><i/><i/></span>;}
+function IH45Burger({open=false}){return <span className="ih45-burger-lines" data-open={open} aria-hidden="true"><i/><i/><i/></span>;}
+function IH45Brand(){return <Link to="/" className="ih45-brand" aria-label="IdeaHire"><IH45Mark/><span>IdeaHire</span></Link>;}
+function IH45Motion({stage,copy}){return <div className="ih45-motion" role="group" aria-label={copy.menu}>
+  <button type="button" onClick={stage.intro?stage.finish:stage.replay} disabled={stage.reduced}>{stage.intro?copy.skip:copy.replay}<svg viewBox="0 0 24 24" aria-hidden="true"><path d={stage.intro?"m9 6 6 6-6 6M18 6v12":"M5 8a8 8 0 1 1-1 8M5 3v5h5"} fill="none" stroke="currentColor" strokeWidth="1.6"/></svg></button>
+  <button type="button" onClick={stage.toggle} disabled={stage.reduced} aria-pressed={stage.paused||stage.reduced} aria-label={stage.paused?copy.play:copy.pause}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={stage.paused?"m8 5 11 7-11 7Z":"M8 5v14M16 5v14"} fill="none" stroke="currentColor" strokeWidth="1.6"/></svg></button>
 </div>;}
-function IH44Headline({stage,copy}){return <div className="ih44-headline" data-final={!stage.intro}>
-  <h1 className="ih44-final-title">{copy.final.map((line,i)=><span key={i}>{line}</span>)}</h1>
-  {stage.intro&&<div className="ih44-entrance-title" key={stage.cycle+"-"+stage.act} aria-hidden="true">{copy.acts[Math.min(stage.act,3)].map((line,i)=><span key={i} style={{"--line":i}}>{line}</span>)}</div>}
-</div>;}
-function IH44FeatureArt({index}){const english=useSitePreferences().language==="en";return <div className={"ih44-art ih44-art-"+index} aria-hidden="true">
-  {index===0?<><span className="ih44-art-caption">BRIEF / 01</span><strong>{english?"Small":"Mała"}<br/>{english?"big":"wielka"}<br/>{english?"change.":"zmiana."}</strong><span className="ih44-art-rule"/><i/><i/></>:index===1?<><span className="ih44-art-caption">PORTFOLIO / 02</span><div className="ih44-letter-wall"><b>Aa</b><b>Web</b><b>▶</b></div><span className="ih44-art-rule"/></>:index===2?<><span className="ih44-art-caption">{english?"CATALOG":"KATALOG"} / 03</span><div className="ih44-category-art"><span>WEB</span><span>FILM</span><span>COPY</span><span>DESIGN</span></div></>:<><span className="ih44-art-caption">{english?"CONTACT":"KONTAKT"} / 04</span><div className="ih44-chat-art"><span>{english?"Hi.":"Hej."}</span><span>{english?"Let’s talk.":"Porozmawiajmy."}</span><span>{english?"Sure.":"Jasne."}</span></div></>}
-</div>;}
-function IH44Actions({ui,session}){return <div className="ih44-primary-actions"><Link to="/find-talent" className="ih44-button ih44-primary">{ui.find}<IH44Arrow/></Link><Link to="/jobs" className="ih44-button">{ui.work}<IH44Arrow/></Link></div>;}
-function IH44LagoonLanding({stage,copy,ui,session}){
- const items=[{to:"/find-talent"},{to:"/jobs"},{href:"#categories"},{to:session?"/account":"/register"}];
- return <section className="ih44-landing ih44-lagoon-landing" aria-label={copy.eyebrow} data-no-translate="true">
-  <div className="ih44-opening-meta"><span><IH44Mark/>{copy.eyebrow}</span><IH44Controls stage={stage} ui={ui}/></div>
-  <div className="ih44-lagoon-composition">
-   <div className="ih44-leading-copy"><IH44Headline stage={stage} copy={copy}/><p>{copy.subtitle}</p><IH44Actions ui={ui} session={session}/></div>
-   <div className="ih44-function-grid">{items.map((item,i)=>{const Item=item.to?Link:"a";return <Item key={i} {...item} className={"ih44-function ih44-function-"+i} style={{"--tile":i}}>
-    <div className="ih44-function-face"><span className="ih44-function-top"><small>0{i+1}</small><IH44Mark/></span><strong>{ui.roles[i]}</strong><span>{ui.rolesCopy[i]}</span><IH44Arrow/></div>
-   </Item>;})}</div>
+function IH45Fallback(){return <svg className="ih45-fallback" viewBox="0 0 600 470" aria-hidden="true"><defs><linearGradient id="ih45-metal" x1="0" y1="0" x2="1" y2=".7"><stop stopColor="var(--ih45-sculpt-light)"/><stop offset=".28" stopColor="var(--ih45-sculpt)"/><stop offset=".48" stopColor="var(--ih45-sculpt-light)"/><stop offset="1" stopColor="var(--ih45-sculpt)"/></linearGradient></defs><g transform="translate(70 30) rotate(-9 230 200) skewY(5)" fill="url(#ih45-metal)" stroke="var(--ih45-sculpt)"><rect x="40" y="110" width="56" height="235" rx="17"/><rect x="40" y="40" width="56" height="48" rx="12"/><rect x="185" y="40" width="60" height="305" rx="18"/><rect x="360" y="40" width="60" height="305" rx="18"/><path d="M210 170h180v55H210z"/></g></svg>;}
+function IH45Ticket({act,english}){const content=english?[["THE BRIEF","A new website.","Scope · timing · result"],["THE PORTFOLIO","A good match.","Web / design / motion"],["THE CONVERSATION","Shall we talk?","Let’s agree on the details."],["THE AGREEMENT","Ready to begin.","Scope and delivery agreed."]]:[["POMYSŁ","Nowa strona.","Zakres · termin · rezultat"],["PORTFOLIO","To może być to.","Web / grafika / animacja"],["ROZMOWA","Porozmawiamy?","Ustalmy szczegóły."],["USTALENIA","Można zaczynać.","Zakres i termin ustalone."]];const index=Math.min(3,act);return <div className="ih45-ticket" key={index} aria-hidden="true"><div><IH45Mark/><small>{content[index][0]}</small><span>0{index+1}</span></div><strong>{content[index][1]}</strong><p>{content[index][2]}</p><span className="ih45-ticket-rule"/><small>{english?"Illustrative project":"Przykładowy projekt"}</small></div>;}
+function IH45Hero({stage,sceneRef,canvasRef,english,copy}){const words=copy.intro[Math.min(4,stage.act)];return <section ref={sceneRef} className="ih45-hero" data-act={stage.act} data-intro={stage.intro} data-cycle={stage.cycle} aria-labelledby="ih45-hero-title" data-no-translate="true">
+  <div className="ih45-hero-meta"><span><IH45Mark/>{copy.hero}</span><IH45Motion stage={stage} copy={copy}/></div>
+  <div className="ih45-stage">
+    <div className="ih45-scene" aria-hidden="true"><IH45Fallback/><canvas ref={canvasRef} className="ih45-canvas"/><span className="ih45-ground"/></div>
+    <div className="ih45-hero-heading"><h1 id="ih45-hero-title" className="ih45-sr-only">{copy.intro[4].join(" ")}</h1><div className="ih45-kinetic-title" aria-hidden="true" key={stage.act+"-"+stage.cycle}>{words.map((word,i)=><span key={i} style={{"--word":i}}><b>{word}</b></span>)}</div></div>
+    <div className="ih45-hero-copy"><p>{copy.subtitle}</p><div className="ih45-hero-actions"><Link className="ih45-button ih45-solid" to="/find-talent">{copy.find}<IH45Arrow/></Link><Link className="ih45-button" to="/jobs">{copy.work}<IH45Arrow/></Link></div></div>
+    <div className="ih45-ticket-wrap"><IH45Ticket act={stage.ticket} english={english}/></div>
+    <span className="ih45-stage-signature" aria-hidden="true">IDEA / HIRE</span>
   </div>
-  <div className="ih44-world-caption"><span>{copy.strip}</span><a href="#categories">{ui.categories}<span aria-hidden="true">↓</span></a></div>
- </section>;
+  <div className="ih45-chapters"><span className="ih45-progress" aria-hidden="true"/>{copy.chapters.map((title,i)=><button type="button" key={title} onClick={()=>stage.seek(i)} disabled={stage.reduced} aria-current={Math.min(stage.act,3)===i?"step":undefined}><span>0{i+1}</span>{title}<IH45Mark/></button>)}</div>
+</section>;}
+function IH45FeeStrip({english}){const o=IDEA_HIRE_PUBLIC_OFFER,number=n=>n.toLocaleString(english?"en-GB":"pl-PL");return <a className="ih45-fee-strip" href="#commission" data-no-translate="true"><span><strong>{number(o.percent)}%</strong> {english?"IdeaHire fee":"prowizji IdeaHire"}</span><span>{english?"min.":"min."} {number(o.minimum)} {english?"PLN":"zł"} <i/> {english?"max.":"maks."} {number(o.maximum)} {english?"PLN":"zł"}</span><span className="ih45-fee-strip-last">{english?"The professional gets the project amount.":"Wykonawca otrzymuje kwotę zlecenia."}<IH45Arrow/></span></a>;}
+function IH45ThemeButtons({site,copy}){return <div className="ih45-template-switch" role="group" aria-label={copy.theme}><button type="button" aria-pressed={site.template==="classic"} onClick={()=>site.setTemplate("classic")}><i className="ih45-swatch-mono"/>{copy.mono}</button><button type="button" aria-pressed={site.template!=="classic"} onClick={()=>site.setTemplate("current")}><i className="ih45-swatch-turquoise"/>{copy.turquoise}</button></div>;}
+function IH45Menu({open,onClose,rootRef,triggerRef,site,copy,session,hasNotifications,logout}){
+  const panel=useRef(null);
+  useLayoutEffect(()=>{if(!open)return;const root=rootRef.current,oldOverflow=document.body.style.overflow,wasInert=root?.hasAttribute("inert"),returnTo=triggerRef.current;document.body.style.overflow="hidden";root?.setAttribute("inert","");const dialog=panel.current;dialog?.querySelector("button,a")?.focus({preventScroll:true});
+    const key=e=>{if(e.key==="Escape"){e.preventDefault();onClose();return;}if(e.key!=="Tab")return;const list=[...(dialog?.querySelectorAll('a[href],button:not([disabled]),[tabindex="0"]')||[])].filter(el=>!el.hidden);if(!list.length)return;const first=list[0],last=list[list.length-1];if(e.shiftKey&&(document.activeElement===first||!dialog.contains(document.activeElement))){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}};
+    document.addEventListener("keydown",key);return()=>{document.body.style.overflow=oldOverflow;if(!wasInert)root?.removeAttribute("inert");document.removeEventListener("keydown",key);returnTo?.focus({preventScroll:true});};
+  },[open]);
+  if(!open||typeof document==="undefined")return null;
+  const english=site.language==="en",links=[{href:"#how-it-works",name:copy.how},{href:"#categories",name:copy.categories},{to:"/jobs",name:copy.work},{to:"/find-talent",name:copy.find},{to:session?"/account":"/register",name:session?copy.account:copy.register}];
+  return createPortal(<div ref={panel} id="ih45-menu-dialog" className="ih45-menu" role="dialog" aria-modal="true" aria-labelledby="ih45-menu-title" data-no-translate="true"><div className="ih45-menu-top"><IH45Brand/><button className="ih45-close" onClick={onClose} type="button" aria-label={copy.close}><IH45Burger open/></button></div><div className="ih45-menu-body"><div className="ih45-menu-navigation"><span className="ih45-eyebrow" id="ih45-menu-title">{copy.menu}</span><nav onClick={e=>{if(e.target.closest("a"))onClose();}}>{links.map((item,i)=>{const Item=item.to?Link:"a";return <Item key={i} {...(item.to?{to:item.to}:{href:item.href})} style={{"--index":i}}><small>0{i+1}</small><span>{item.name}</span><IH45Arrow/></Item>;})}</nav></div><div className="ih45-menu-settings"><span className="ih45-eyebrow">{copy.theme}</span><IH45ThemeButtons site={site} copy={copy}/><div className="ih45-menu-options"><button type="button" onClick={()=>site.setTheme(site.theme==="dark"?"light":"dark")}>{site.theme==="dark"?copy.light:copy.dark}<span aria-hidden="true">◐</span></button><button type="button" onClick={()=>site.setLanguage(english?"pl":"en")}>{english?"Polski":"English"}<span aria-hidden="true">{english?"PL":"EN"}</span></button></div>{session?<><Link className="ih45-menu-notices" to="/notifications" onClick={onClose}>{copy.notices}{hasNotifications&&<i/>}<IH45Arrow/></Link><button className="ih45-menu-logout" onClick={()=>{onClose();logout();}} type="button">{copy.logout}<IH45Arrow/></button></>:<Link className="ih45-menu-notices" to="/login" onClick={onClose}>{copy.login}<IH45Arrow/></Link>}<p>{copy.summary}</p><IH45Mark/></div></div></div>,document.body);
 }
-function IH44PapayaLanding({stage,copy,ui,session}){
- const rail=useRef(null),manual=useRef(false),hover=useRef(false);const [index,setIndex]=useState(0);
- function page(next,automatic=false){const el=rail.current;if(!el)return;if(!automatic)manual.current=true;const n=Math.max(0,Math.min(3,next));setIndex(n);el.scrollTo({left:el.children[n].offsetLeft-el.children[0].offsetLeft,behavior:stage.reduced?"instant":"smooth"});}
- useEffect(()=>{manual.current=false;setIndex(0);rail.current?.scrollTo({left:0,behavior:"instant"});},[stage.cycle]);
- useEffect(()=>{if(!stage.intro||stage.paused||stage.reduced)return;const id=setInterval(()=>{const el=rail.current;if(!el||manual.current||hover.current||document.hidden||el.contains(document.activeElement))return;const r=el.getBoundingClientRect();if(r.bottom<0||r.top>window.innerHeight)return;const width=el.children[0].getBoundingClientRect().width+18,current=Math.round(el.scrollLeft/width);page((current+1)%4,true);},4800);return()=>clearInterval(id);},[stage.intro,stage.paused,stage.reduced]);
- return <section className="ih44-landing ih44-editorial-landing" aria-label={copy.eyebrow} data-no-translate="true">
-  <div className="ih44-opening-meta"><span>{copy.eyebrow}</span><IH44Controls stage={stage} ui={ui}/></div>
-  <IH44Headline stage={stage} copy={copy}/><div className="ih44-editorial-intro"><p>{copy.subtitle}</p><span className="ih44-edition">IDEAHIRE / {new Date().getFullYear()}</span></div>
-  <div className="ih44-filmstrip" ref={rail} onPointerEnter={()=>hover.current=true} onPointerLeave={()=>hover.current=false} onPointerDown={()=>manual.current=true} onScroll={()=>{const el=rail.current;if(el)setIndex(Math.max(0,Math.min(3,Math.round(el.scrollLeft/(el.children[0].getBoundingClientRect().width+18)))));}}>
-   {ui.roles.map((label,i)=><article className={"ih44-film-page ih44-film-page-"+i} style={{"--tile":i}} key={label}><IH44FeatureArt index={i}/><div className="ih44-film-page-copy"><small>0{i+1}</small><h2>{label}</h2><p>{ui.rolesCopy[i]}</p>{i===2?<a className="ih44-button" href="#categories">{ui.go}<IH44Arrow/></a>:<Link className="ih44-button" to={i===0?"/find-talent":i===1?"/jobs":session?"/account":"/register"}>{ui.go}<IH44Arrow/></Link>}</div></article>)}
-  </div>
-  <div className="ih44-strip-controls"><span>{copy.strip}</span><div><button type="button" onClick={()=>page(index-1)} disabled={index===0} aria-label={ui.previous}><IH44Arrow back/></button><span>{String(index+1).padStart(2,"0")} / 04</span><button type="button" onClick={()=>page(index+1)} disabled={index===3} aria-label={ui.next}><IH44Arrow/></button></div></div>
- </section>;
+const IH45_CATEGORY_EN={Programowanie:"Web, apps and IT","Grafika i design":"Graphics, UX and 3D",Marketing:"Marketing and sales",Copywriting:"Copy and translation",Video:"Video, motion and audio",Fotografia:"Photography","AI i automatyzacje":"AI and automation","Dane, analizy i research":"Data and research","Biznes i e-commerce":"Business and e-commerce","Architektura, wnętrza i CAD":"Architecture and CAD"};
+const IH45_CATEGORY_COPY={
+  Programowanie:["Strona firmowa, sklep, aplikacja lub techniczne wsparcie.","Company websites, shops, apps and technical support."],
+  "Grafika i design":["Identyfikacja, projekt interfejsu i grafika do publikacji.","Brand identities, interface design and graphics for publication."],
+  Marketing:["Kampanie, komunikacja i promocja Twojej działalności.","Campaigns, communication and promotion for your business."],
+  Copywriting:["Teksty na stronę, artykuły i tłumaczenia.","Website copy, articles and translations."],
+  Video:["Montaż, animacja i dźwięk do Twojego materiału.","Editing, animation and sound for your content."],
+  Fotografia:["Sesje zdjęciowe, retusz i zdjęcia produktów.","Photo shoots, retouching and product photography."],
+  "AI i automatyzacje":["Automatyzacja zadań i połączenie narzędzi, z których korzystasz.","Task automation and connections between the tools you use."],
+  "Dane, analizy i research":["Uporządkowanie danych, analiza i sprawdzenie informacji.","Data organisation, analysis and research."],
+  "Biznes i e-commerce":["Wsparcie w prowadzeniu działalności i sklepu internetowego.","Support for your business and online shop."],
+  "Architektura, wnętrza i CAD":["Projekty przestrzeni, wizualizacje i dokumentacja techniczna.","Space design, visualisations and technical drawings."]
+};
+function IH45Categories({groups,english,copy}){
+  const [selection,setSelection]=useState(groups[0]?.value||"Programowanie"),buttons=useRef([]),selected=groups.find(x=>x.value===selection)||groups[0];
+  const group=selected||{value:"Programowanie",label:"Strony, aplikacje i IT",subcategories:[]};
+  const current=Math.max(0,groups.findIndex(x=>x.value===group.value)),label=english?IH45_CATEGORY_EN[group.value]||group.label:group.label;
+  function key(e,index){if(!["ArrowDown","ArrowUp","Home","End"].includes(e.key))return;e.preventDefault();const next=e.key==="Home"?0:e.key==="End"?groups.length-1:(index+(e.key==="ArrowDown"?1:groups.length-1))%groups.length;setSelection(groups[next].value);buttons.current[next]?.focus({preventScroll:true});}
+  return <section className="ih45-section ih45-categories" id="categories" data-reveal data-no-translate="true"><div className="ih45-section-heading"><span className="ih45-eyebrow">01 / {copy.categories}</span><h2>{copy.categoriesTitle.split("\n").map(x=><span key={x}>{x}</span>)}</h2><p>{copy.categoryLead}</p></div><div className="ih45-category-workspace"><div className="ih45-category-tabs" role="tablist" aria-orientation="vertical" aria-label={copy.categories}>{groups.map((g,i)=><button ref={el=>buttons.current[i]=el} type="button" role="tab" key={g.value} id={"ih45-category-"+i} aria-controls="ih45-category-detail" aria-selected={g.value===group.value} tabIndex={g.value===group.value?0:-1} onKeyDown={e=>key(e,i)} onClick={()=>setSelection(g.value)}><small>{String(i+1).padStart(2,"0")}</small><span>{english?IH45_CATEGORY_EN[g.value]||g.label:g.label}</span><IH45Arrow/></button>)}</div><div className="ih45-category-detail" id="ih45-category-detail" role="tabpanel" tabIndex={0} aria-labelledby={"ih45-category-"+current} key={group.value}><div className="ih45-category-number" aria-hidden="true">{String(current+1).padStart(2,"0")}<IH45Mark/></div><h3>{label}</h3><p>{(IH45_CATEGORY_COPY[group.value]||["Znajdź projekt dla siebie.","Find your next project."])[english?1:0]}</p>{group.subcategories?.length>0&&<div className="ih45-specialisms">{group.subcategories.map(s=><Link key={s} to={"/jobs?"+new URLSearchParams({category:group.value,subcategory:s})}>{english?translateUiText(s):s}<span aria-hidden="true">↗</span></Link>)}</div>}<Link className="ih45-button ih45-solid" to={"/jobs?"+new URLSearchParams({category:group.value})}>{copy.go}<IH45Arrow/></Link></div></div></section>;
 }
-function IH44IrisLanding({stage,copy,ui,session}){
- const [active,setActive]=useState(0),buttons=useRef([]),manual=useRef(false);
- useEffect(()=>{manual.current=false;},[stage.cycle]);
- useEffect(()=>{if(stage.intro&&!manual.current)setActive(Math.min(3,stage.act));},[stage.act,stage.intro]);
- function keys(e){if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(e.key))return;e.preventDefault();const next=e.key==="Home"?0:e.key==="End"?3:(active+({ArrowLeft:3,ArrowRight:1,ArrowUp:2,ArrowDown:2}[e.key]))%4;setActive(next);buttons.current[next]?.focus({preventScroll:true});}
- return <section className="ih44-landing ih44-iris-landing" aria-label={copy.eyebrow} data-no-translate="true">
-  <div className="ih44-opening-meta"><span><IH44Mark/>{copy.eyebrow}</span><IH44Controls stage={stage} ui={ui}/></div>
-  <div className="ih44-iris-heading"><IH44Headline stage={stage} copy={copy}/><p>{copy.subtitle}</p></div>
-  <div className="ih44-quadrants" data-active={active} onKeyDown={keys} aria-label={ui.choose}>
-   {ui.roles.map((title,i)=><article className={"ih44-quadrant ih44-quadrant-"+i+(active===i?" is-active":"")} key={i} style={{"--tile":i}} onPointerEnter={e=>{if(e.pointerType==="mouse"){manual.current=true;setActive(i);}}}>
-    <button type="button" className="ih44-quadrant-pick" ref={el=>buttons.current[i]=el} onClick={()=>{manual.current=true;setActive(i);}} onFocus={()=>{manual.current=true;setActive(i);}} aria-pressed={active===i} aria-controls={"ih44-field-"+i}><span>0{i+1}<IH44Mark/></span><strong>{title}</strong></button>
-    <div className="ih44-quadrant-detail" id={"ih44-field-"+i}><p>{ui.rolesCopy[i]}</p>{i===2?<a className="ih44-button" href="#categories">{ui.go}<IH44Arrow/></a>:<Link className="ih44-button" to={i===0?"/find-talent":i===1?"/jobs":session?"/account":"/register"}>{ui.go}<IH44Arrow/></Link>}</div>
-    <div className="ih44-quadrant-art" aria-hidden="true"><IH44FeatureArt index={i}/></div>
-   </article>)}
-  </div>
-  <div className="ih44-world-caption"><span>{copy.strip}</span><a href="#categories">{ui.categories}<span aria-hidden="true">↓</span></a></div>
- </section>;
-}
-function ih44RealJob(job){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(job?.id||""));}
-function ih44PublicFee(budget,offer){return Math.round(Math.min(offer.maximum,Math.max(offer.minimum,Number(budget)*offer.percent/100))*100)/100;}
-function IH44CommissionPanel(){
- const english=useSitePreferences().language==="en",offer=IDEA_HIRE_PUBLIC_OFFER,[budget,setBudget]=useState(2200),fee=ih44PublicFee(budget,offer);
- const money=value=>Number(value).toLocaleString(english?"en-GB":"pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:2}),percent=Number(offer.percent).toLocaleString(english?"en-GB":"pl-PL");
- return <aside className="ih44-fee-panel" data-no-translate="true"><div className="ih44-fee-heading"><span className="ih44-kicker">{english?"IdeaHire service fee":"Prowizja IdeaHire"}</span><IH44Mark/></div><strong className="ih44-fee-rate">{percent}<span>%</span></strong>
-  <p className="ih44-fee-limits">{english?"Minimum":"Minimum"} {money(offer.minimum)} · {english?"maximum":"maksimum"} {money(offer.maximum)}</p>
-  <p>{english?"Orders up to":"Zlecenia do"} {money(offer.orderLimit)}. {english?"Paid by the client.":"Płaci zleceniodawca."}</p>
-  <label className="ih44-fee-slider"><span>{english?"Try a project value":"Sprawdź wartość zlecenia"}<output>{money(budget)}</output></span><input type="range" min="100" max={offer.orderLimit} step="100" value={budget} onChange={e=>setBudget(Number(e.target.value))}/></label>
-  <div className="ih44-fee-result"><span>{english?"Service fee":"Prowizja"}<strong>{money(fee)}</strong></span><span>{english?"Client total":"Razem dla klienta"}<strong>{money(Number(budget)+fee)}</strong></span></div>
-  <small>{english?"Illustrative calculation. You confirm the amount before payment.":"Przykładowe obliczenie. Kwotę potwierdzisz przed płatnością."}</small>
- </aside>;
-}
-function ih44CategoryLabel(value,english){if(!english)return getCategoryLabel(value);return {Programowanie:"Web, apps and IT","Grafika i design":"Graphics, UX and 3D",Marketing:"Marketing and sales",Copywriting:"Copy and translation",Video:"Video, motion and audio",Fotografia:"Photography","AI i automatyzacje":"AI and automation","Dane, analizy i research":"Data and research","Biznes i e-commerce":"Business and e-commerce","Architektura, wnętrza i CAD":"Architecture and CAD"}[value]||value||"Other";}
-function IH44Jobs({jobs,ui,copy,english}){const real=jobs.some(ih44RealJob);return <section className="ih44-section ih44-jobs" id="projects" data-world-reveal="seen" data-no-translate="true">
- <div className="ih44-section-heading"><span className="ih44-kicker">{real?ui.latest:ui.sample}</span><h2>{copy.jobs}</h2><Link to="/jobs">{ui.all}<IH44Arrow/></Link></div>
- <div className="ih44-job-list">{jobs.slice(0,4).map((job,i)=>{const actual=ih44RealJob(job),title=!actual&&english?["A website for a new brand","A visual identity","Copy for a company website"][i%3]:job.title;return <Link className="ih44-job" key={job.id||i} to="/jobs" state={actual?{lucynaJobId:String(job.id),lucynaTitle:String(job.title)}:undefined} style={{"--row":i}}><span className="ih44-job-number">{String(i+1).padStart(2,"0")}</span><div><small>{actual?ih44CategoryLabel(job.category,english):ui.sampleNote}</small><strong>{title}</strong></div><span className="ih44-job-budget">{job.budget?Number(job.budget).toLocaleString(english?"en-GB":"pl-PL")+(english?" PLN":" zł"):"—"}</span><IH44Arrow/></Link>;})}</div>
- </section>;}
-
-/* P40: jeden nagłówek w DOM; przewijanie zabiera cały pas, bezruch odsyła go na górę. */
-const IH40_HEADER_STYLES = String.raw`
-__IH40__ .ih40-header-slot {display:flow-root!important;position:relative!important;width:100%!important;min-width:0!important;overflow:visible!important;}
-__IH40__ .ih40-header-slot > .ih-home-header {position:relative!important;inset:auto!important;translate:0 0!important;}
-__IH40__ .ih40-header-slot .home-nav-links {translate:0 0!important;}
-@media(prefers-reduced-motion:reduce){__IH40__ .ih40-header-slot > .ih-home-header{transition:none!important;}}
-`.replaceAll("__IH40__", "#root".repeat(10));
+function ih45RealJob(job){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(job?.id||""));}
+function IH45Jobs({jobs,english,copy}){const real=jobs.some(ih45RealJob);return <section className="ih45-section ih45-jobs" id="projects" data-reveal data-no-translate="true"><div className="ih45-section-heading"><span className="ih45-eyebrow">02 / {real?copy.latest:copy.examples}</span><h2>{copy.jobsTitle.split("\n").map(x=><span key={x}>{x}</span>)}</h2><Link className="ih45-text-link" to="/jobs">{copy.all}<IH45Arrow/></Link></div><div className="ih45-job-list">{jobs.slice(0,4).map((job,i)=>{const actual=ih45RealJob(job),title=!actual&&english?["A website for a new brand","A visual identity","Copy for a company website"][i%3]:job.title;return <Link className="ih45-job" key={job.id||i} to="/jobs" state={actual?{lucynaJobId:String(job.id),lucynaTitle:String(job.title)}:undefined}><small>{String(i+1).padStart(2,"0")}</small><div><span>{actual?(english?IH45_CATEGORY_EN[job.category]||job.category:getCategoryLabel(job.category)):copy.noOffers}</span><strong>{title}</strong></div><span className="ih45-job-price">{job.budget?Number(job.budget).toLocaleString(english?"en-GB":"pl-PL")+(english?" PLN":" zł"):"—"}</span><IH45Arrow/></Link>;})}</div></section>;}
+function IH45How({english,copy}){const[active,setActive]=useState(0);return <section className="ih45-section ih45-how" id="how-it-works" data-reveal data-no-translate="true"><div className="ih45-section-heading"><span className="ih45-eyebrow">03 / {copy.how}</span><h2>{copy.methodTitle.split("\n").map(x=><span key={x}>{x}</span>)}</h2></div><div className="ih45-method-list">{copy.method.map(([title,text],i)=><article key={title} data-open={active===i}><h3><button type="button" onClick={()=>setActive(active===i?-1:i)} aria-expanded={active===i} aria-controls={"ih45-method-"+i}><small>0{i+1}</small><span>{title}</span><b aria-hidden="true">{active===i?"−":"+"}</b></button></h3><div className="ih45-method-content" id={"ih45-method-"+i} hidden={active!==i}><p>{text}</p><IH45Mark/></div></article>)}</div></section>;}
+function ih45Fee(amount){const o=IDEA_HIRE_PUBLIC_OFFER;return Math.round(Math.max(o.minimum,Math.min(o.maximum,amount*o.percent/100))*100)/100;}
+function IH45Commission({english,copy}){const[value,setValue]=useState(2200),o=IDEA_HIRE_PUBLIC_OFFER,fee=ih45Fee(value),money=n=>Number(n).toLocaleString(english?"en-GB":"pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:2});return <section className="ih45-section ih45-commission" id="commission" data-reveal data-no-translate="true"><div className="ih45-section-heading"><span className="ih45-eyebrow">04 / {copy.fee}</span><h2>{english?<>Your project.<br/>Clear numbers.</>:<>Twój projekt.<br/>Jasne kwoty.</>}</h2><p>{english?"The client pays the IdeaHire fee. The professional gets the agreed project amount.":"Prowizję IdeaHire płaci zleceniodawca. Wykonawca otrzymuje ustaloną kwotę zlecenia."}</p></div><div className="ih45-fee-calculator"><div className="ih45-fee-rate"><strong>{o.percent.toLocaleString(english?"en-GB":"pl-PL")}<span>%</span></strong><span>{english?"minimum":"minimum"} {money(o.minimum)}<br/>{english?"maximum":"maksimum"} {money(o.maximum)}</span></div><label htmlFor="ih45-budget">{english?"Project value":"Wartość zlecenia"}<output htmlFor="ih45-budget">{money(value)}</output></label><input id="ih45-budget" type="range" min="100" max={o.orderLimit} step="100" value={value} onChange={e=>setValue(Number(e.target.value))}/><div className="ih45-fee-sum"><span>{english?"IdeaHire fee":"Prowizja IdeaHire"}<strong>{money(fee)}</strong></span><span>{english?"Client total":"Razem dla klienta"}<strong>{money(value+fee)}</strong></span></div><p>{english?"Illustrative calculation. The amount is confirmed before payment. Projects up to ":"Przykładowe obliczenie. Kwota jest potwierdzana przed płatnością. Zlecenia do "}{money(o.orderLimit)}.</p></div></section>;}
+function useIH45Reveal(ref,reduced){useEffect(()=>{const items=[...(ref.current?.querySelectorAll("[data-reveal]")||[])];if(reduced||typeof IntersectionObserver==="undefined"){items.forEach(el=>el.dataset.reveal="seen");return;}const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.dataset.reveal="seen";observer.unobserve(e.target);}}),{threshold:.06});items.forEach(el=>{el.dataset.reveal="waiting";observer.observe(el);});return()=>{observer.disconnect();items.forEach(el=>el.dataset.reveal="seen");};},[reduced]);}
 
 function useIdeaHireScrollHeader(headerRef, slotRef, enabled=true) {
   useLayoutEffect(() => {
@@ -396,388 +372,16 @@ const fallbackJobs = [
   },
 ];
 
-const HOME_CATEGORY_COPY = {
-  Programowanie: { summary: "Strony, sklepy i aplikacje — od pierwszego projektu po integracje i naprawy.", descriptions: [
-    "Pojedyncza strona prezentująca ofertę i prowadząca do kontaktu lub zakupu.",
-    "Witryna z ofertą firmy, najważniejszymi informacjami i formularzem kontaktowym.",
-    "Sklep z katalogiem produktów, koszykiem i obsługą zamówień.",
-    "Aplikacja działająca w przeglądarce, dopasowana do potrzeb Twoich użytkowników.",
-    "Aplikacja na telefon z funkcjami określonymi w Twoim projekcie.",
-    "Budowa lub rozbudowa strony z wykorzystaniem gotowego systemu i narzędzi no-code.",
-    "Połączenie usług i systemów, które mają wymieniać dane lub wykonywać wspólne zadania.",
-    "Diagnoza i poprawa konkretnych problemów w istniejącej stronie lub aplikacji.",
-    "Sprawdzenie wydajności lub bezpieczeństwa oraz lista zaleceń do wdrożenia.",
-    "Przeniesienie strony, danych lub usług do nowego środowiska.",
-  ] },
-  "Grafika i design": { summary: "Wygląd marki, interfejsy i materiały graficzne dopasowane do Twojego projektu.", descriptions: [
-    "Znak marki przygotowany do użycia w internecie i materiałach drukowanych.",
-    "Spójny zestaw kolorów, typografii i materiałów budujących wygląd marki.",
-    "Projekt ekranów i sposobu korzystania ze strony lub aplikacji.",
-    "Banery i kreacje dopasowane do kampanii oraz formatów reklamowych.",
-    "Zestaw grafik do publikacji na wybranych kanałach społecznościowych.",
-    "Ulotki, plakaty lub inne projekty przygotowane do przekazania drukarni.",
-    "Projekt wyglądu opakowania lub etykiety z uwzględnieniem wymaganych wymiarów.",
-    "Czytelne slajdy z uporządkowaną treścią i spójnym układem.",
-    "Autorska ilustracja do publikacji, produktu lub komunikacji marki.",
-    "Edytowalne projekty, które możesz później samodzielnie uzupełniać w Canvie.",
-    "Model obiektu w trzech wymiarach do dalszej pracy lub prezentacji.",
-    "Obraz produktu pokazujący jego wygląd, materiały i detale.",
-  ] },
-  Marketing: { summary: "Kampanie, treści i analityka pomagające docierać do właściwych odbiorców.", descriptions: [
-    "Plan komunikacji, kanałów i działań dopasowany do celów marki.",
-    "Analiza widoczności strony w wyszukiwarce i lista konkretnych usprawnień.",
-    "Poprawa treści lub elementów wybranych podstron pod określone cele.",
-    "Przygotowanie ustawień i struktury kampanii w Google Ads.",
-    "Przygotowanie kampanii i ustawień reklam w ekosystemie Meta.",
-    "Konfiguracja kampanii reklamowej na TikToku.",
-    "Zestaw publikacji z treścią dopasowaną do marki i jej odbiorców.",
-    "Przygotowanie wiadomości i struktury kampanii do wybranej grupy odbiorców.",
-    "Ustawienie pomiaru zdarzeń i raportów potrzebnych do oceny działań.",
-    "Uporządkowana baza potencjalnych kontaktów według wskazanych kryteriów.",
-    "Treści i materiały ułatwiające prezentację oferty klientom.",
-    "Pomysł i plan współpracy z twórcami w ramach wybranej kampanii.",
-  ] },
-  Copywriting: { summary: "Teksty, redakcja i tłumaczenia — czytelna komunikacja dopasowana do odbiorców.", descriptions: [
-    "Treści na podstrony prezentujące ofertę i pomagające użytkownikowi podjąć decyzję.",
-    "Artykuły o ustalonej tematyce, długości i stylu.",
-    "Opisy przedstawiające cechy, zastosowanie i najważniejsze informacje o produktach.",
-    "Treści odpowiadające na potrzeby odbiorców i wskazane tematy wyszukiwania.",
-    "Krótkie komunikaty do reklam, banerów lub kampanii.",
-    "Zestaw tekstów do publikacji na wybranych profilach społecznościowych.",
-    "Wiadomość do subskrybentów z uporządkowaną treścią i jasnym celem.",
-    "Tekst prowadzący nagranie, reklamę lub inną formę opowieści.",
-    "Poprawa języka, błędów i struktury istniejącego tekstu.",
-    "Redakcja treści AI, sprawdzenie spójności i dopasowanie języka do odbiorców.",
-    "Przekład treści między wskazanymi językami z zachowaniem sensu i stylu.",
-    "Dostosowanie komunikatów i treści produktu do nowego języka oraz odbiorców.",
-    "Przepisanie nagrania do czytelnego tekstu.",
-    "Przygotowanie tekstu i synchronizacji napisów do nagrania.",
-  ] },
-  Video: { summary: "Montaż, animacja i dźwięk — materiały do publikacji, reklamy i prezentacji.", descriptions: [
-    "Uporządkowanie ujęć i montaż nagrania według ustalonego celu i długości.",
-    "Zestaw krótkich filmów dopasowanych do formatów mediów społecznościowych.",
-    "Przygotowanie materiału do publikacji na YouTube.",
-    "Film promujący markę, produkt lub usługę.",
-    "Wideo prezentujące wygląd, działanie lub zastosowanie produktu.",
-    "Animowany materiał objaśniający pomysł lub budujący opowieść.",
-    "Animacja typografii i elementów graficznych do filmu lub kampanii.",
-    "Materiał wideo przygotowany z wykorzystaniem narzędzi generatywnych.",
-    "Dodanie napisów lub przygotowanie wersji filmu w innym języku.",
-    "Montaż odcinka, usunięcie przerw i przygotowanie nagrania do publikacji.",
-    "Czyszczenie, wyrównanie i poprawa jakości dostarczonego dźwięku.",
-    "Nagranie głosu do filmu, prezentacji lub innego materiału.",
-    "Krótki motyw muzyczny lub muzyka do wskazanego zastosowania.",
-    "Dobór i przygotowanie efektów dźwiękowych budujących charakter materiału.",
-  ] },
-  Fotografia: { summary: "Zdjęcia i obróbka materiałów — od sesji produktowej po retusz istniejących ujęć.", descriptions: [
-    "Zdjęcia produktów do katalogu, sklepu lub materiałów promocyjnych.",
-    "Sesja przedstawiająca osoby, zespół lub charakter marki.",
-    "Reportaż fotograficzny z wydarzenia według ustalonego zakresu.",
-    "Zdjęcia lokalu lub budynku do oferty i prezentacji.",
-    "Sesja pojazdu pokazująca jego wygląd i detale.",
-    "Sesja portretowa dopasowana do wybranego stylu i przeznaczenia.",
-    "Zdjęcia produktów przygotowane do spójnego katalogu internetowego.",
-    "Zdjęcia pozwalające oglądać obiekt lub przestrzeń z różnych stron.",
-    "Poprawa szczegółów zdjęcia z zachowaniem uzgodnionego wyglądu.",
-    "Wycięcie obiektu ze zdjęcia i przygotowanie pliku z wybranym tłem.",
-    "Naprawa uszkodzeń i poprawa czytelności starych fotografii.",
-  ] },
-  "AI i automatyzacje": { summary: "Narzędzia AI i integracje, które upraszczają konkretne zadania w Twojej firmie.", descriptions: [
-    "Bot odpowiadający na pytania lub wspierający wybrany proces firmy.",
-    "Asystent wykonujący ustalone zadania z wykorzystaniem modeli AI i narzędzi.",
-    "Połączenie aplikacji w automatyczny przepływ danych i działań.",
-    "Dodanie funkcji AI do istniejącej witryny, aplikacji lub systemu.",
-    "Wyszukiwanie i odpowiedzi oparte na wskazanej bazie dokumentów.",
-    "Asystent obsługujący wybrane zadania za pomocą rozmowy głosowej.",
-    "Automatyczne przetwarzanie dokumentów według ustalonego schematu.",
-    "Usprawnienie powtarzalnych pytań i zadań związanych z obsługą klientów.",
-    "Analiza procesów i wskazanie miejsc, w których można zastosować AI.",
-    "Uporządkowanie i przygotowanie danych do wskazanego zastosowania AI.",
-    "Zestaw instrukcji i szablonów pracy z AI dopasowany do zespołu.",
-  ] },
-  "Dane, analizy i research": { summary: "Porządkowanie informacji, badania i raporty ułatwiające pracę z danymi.", descriptions: [
-    "Usunięcie błędów, duplikatów i niespójności w dostarczonych danych.",
-    "Uporządkowanie struktury, formatów i obliczeń w arkuszu.",
-    "Przeniesienie danych z dokumentu PDF do arkusza nadającego się do dalszej pracy.",
-    "Uzupełnienie danych w uzgodnionym systemie lub pliku.",
-    "Pozyskanie wskazanych danych ze stron zgodnie z ustalonym zakresem.",
-    "Panel raportowy pokazujący wybrane wskaźniki i zestawienia.",
-    "Analiza zbioru danych i przedstawienie wniosków dotyczących zadanych pytań.",
-    "Czytelne wykresy i zestawienia pokazujące zależności w danych.",
-    "Research rynku, odbiorców lub konkurencji w określonym obszarze.",
-    "Opracowanie odpowiedzi i podsumowanie wyników badania ankietowego.",
-    "Uporządkowanie danych lub przeniesienie ich do nowej bazy.",
-    "Oznaczenie przykładów w danych według ustalonej instrukcji.",
-  ] },
-  "Biznes i e-commerce": { summary: "Wsparcie sklepu i organizacji pracy — katalogi, procedury i materiały biznesowe.", descriptions: [
-    "Wprowadzenie produktów, zdjęć i parametrów do katalogu sklepu.",
-    "Opracowanie informacji potrzebnych do publikacji produktów.",
-    "Przygotowanie konta sprzedawcy na wskazanej platformie.",
-    "Ujednolicenie kategorii, parametrów i informacji w katalogu.",
-    "Ustawienie lub uporządkowanie danych i procesów w systemie CRM.",
-    "Przygotowanie i uporządkowanie kontaktów według wybranych kryteriów.",
-    "Zestawienie informacji o ofertach i działaniach wskazanych konkurentów.",
-    "Slajdy przedstawiające ofertę, plan lub wyniki działalności.",
-    "Opis zasad, procesów i instrukcji potrzebnych w codziennej pracy.",
-    "Uporządkowanie etapów, zadań i terminów wybranego projektu.",
-    "Przygotowanie ogłoszeń, formularzy lub innych materiałów rekrutacyjnych.",
-    "Wykonanie ustalonego zestawu zadań administracyjnych.",
-    "Przegląd sklepu i lista usprawnień dotyczących wybranego obszaru.",
-  ] },
-  "Architektura, wnętrza i CAD": { summary: "Projekty przestrzeni, rysunki i modele do prezentacji lub dalszej pracy.", descriptions: [
-    "Projekt aranżacji wnętrza zgodny z potrzebami i zakresem zlecenia.",
-    "Plan rozmieszczenia stref i wyposażenia w pomieszczeniu.",
-    "Obrazy pokazujące planowany wygląd obiektu lub przestrzeni.",
-    "Rysunek techniczny lub projektowy w dwóch wymiarach.",
-    "Model obiektu przygotowany w uzgodnionym narzędziu CAD.",
-    "Projekt mebla z określeniem wymiarów i uzgodnionych detali.",
-    "Model przygotowany do wskazanego procesu druku 3D.",
-    "Rysunki i informacje techniczne potrzebne do produkcji.",
-    "Koncepcja układu i wyglądu przestrzeni lokalu.",
-    "Wizualne przedstawienie budynku, lokalu lub planowanej inwestycji.",
-  ] },
-};
-
-function HomeCategoryBrowser({ groups }) {
-  const [open, setOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || "");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("");
-  const triggerRef = useRef(null);
-  const group = groups.find((item) => item.value === selectedCategory) || groups[0];
-  const subcategories = group?.subcategories || [];
-  const copy = HOME_CATEGORY_COPY[group?.value];
-  const subIndex = subcategories.indexOf(selectedSubcategory);
-  const description = subIndex >= 0
-    ? copy?.descriptions[subIndex] || copy?.summary
-    : copy?.summary;
-  const count = groups.reduce((total, item) => total + (item.subcategories?.length || 0), 0);
-  const query = new URLSearchParams({ category: group?.value || "" });
-  if (selectedSubcategory) query.set("subcategory", selectedSubcategory);
-
-  function closeBrowser() {
-    setOpen(false);
-    triggerRef.current?.focus({ preventScroll: true });
-  }
-
-  function selectCategory(value) {
-    if (value !== selectedCategory) {
-      setSelectedCategory(value);
-      setSelectedSubcategory("");
-    }
-  }
-
-  function onMousePreview(event, action) {
-    if (event.pointerType === "mouse" && window.matchMedia("(hover: hover) and (pointer: fine)").matches) action();
-  }
-
-  return (
-    <div className={`ih-category-browser${open ? " is-open" : ""}`}
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && open) { event.preventDefault(); closeBrowser(); }
-      }}>
-      <button ref={triggerRef} type="button" className="ih-category-trigger"
-        aria-expanded={open} aria-controls="ih-category-panel"
-        onClick={() => setOpen((current) => !current)}>
-        <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, "0")} kategorii</span><span className="ih-category-toggle" aria-hidden="true">{open ? "−" : "+"}</span></span>
-        <span className="ih-category-mark" aria-hidden="true"><i /><i /><i /><i /></span>
-        <span className="ih-category-trigger-title">Nasze<br />kategorie</span>
-        <span className="ih-category-trigger-bottom"><span>{open ? "Zwiń katalog" : "Odkryj specjalizacje"}</span><span aria-hidden="true">↗</span></span>
-      </button>
-
-      <section id="ih-category-panel" className="ih-category-panel" hidden={!open} aria-labelledby="ih-category-panel-title">
-        <div className="ih-category-panel-heading">
-          <div><span className="ih-category-kicker">Znajdź swój kierunek</span><h3 id="ih-category-panel-title">Kategorie i specjalizacje</h3><p>{groups.length} kategorii{count > 0 ? ` · ${count} specjalizacji` : ""}. Wybierz to, czego potrzebujesz.</p></div>
-          <button type="button" className="ih-category-close" onClick={closeBrowser} aria-label="Zamknij kategorie">×</button>
-        </div>
-        <div className="ih-category-layout">
-          <div className="ih-category-list" role="group" aria-label="Wybierz kategorię">
-            {groups.map((item, index) => (
-              <button type="button" key={item.value} className="ih-category-option" aria-pressed={item.value === group?.value}
-                onClick={() => selectCategory(item.value)} onFocus={() => selectCategory(item.value)}
-                onPointerEnter={(event) => onMousePreview(event, () => selectCategory(item.value))}>
-                <span className="ih-category-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{item.label}</span><span className="ih-category-option-arrow" aria-hidden="true">↗</span>
-              </button>
-            ))}
-          </div>
-          <div className="ih-category-content">
-            <div className="ih-category-content-heading"><span className="ih-category-kicker">Specjalizacje</span><h4>{group?.label}</h4></div>
-            <div className="ih-subcategory-grid" role="group" aria-label={`Specjalizacje: ${group?.label}`}>
-              {subcategories.map((item) => (
-                <button type="button" className="ih-subcategory-option" key={item} aria-pressed={item === selectedSubcategory} aria-describedby="ih-category-description"
-                  onClick={() => setSelectedSubcategory(item)} onFocus={() => setSelectedSubcategory(item)}
-                  onPointerEnter={(event) => onMousePreview(event, () => setSelectedSubcategory(item))}>
-                  <span>{item}</span><span aria-hidden="true">↗</span>
-                </button>
-              ))}
-            </div>
-            <div className="ih-category-detail" id="ih-category-description">
-              <span className="ih-category-kicker">{selectedSubcategory ? "O tej specjalizacji" : "O tej kategorii"}</span>
-              <strong>{selectedSubcategory || group?.label}</strong><p>{description || "Przejrzyj zlecenia w tej kategorii i znajdź projekt dla siebie."}</p>
-            </div>
-            <div className="ih-category-links">
-              <Link className="ih-category-jobs-link" to={`/jobs?${query.toString()}`}>Pokaż zlecenia <span aria-hidden="true">↗</span></Link>
-              {selectedSubcategory && <Link className="ih-category-all-link" to={`/jobs?${new URLSearchParams({ category: group?.value }).toString()}`}>Cała kategoria</Link>}
-              <Link className="ih-category-all-link" to="/jobs">Wszystkie zlecenia</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-
-function HomeNavItem({ children, order, to, href, notification = false }) {
-  const Item = to ? Link : "a";
-  return (
-    <Item
-      {...(to ? { to } : { href })}
-      className={`ih-nav-item${to === "/notifications" ? " home-notifications-link" : ""}`}
-      style={{ "--ih-nav-order": order }}
-    >
-      <span className="ih-nav-pixels" aria-hidden="true">
-        <i /><i /><i /><i />
-      </span>
-      <span className="ih-nav-label">{children}</span>
-      {notification && <span className="home-notifications-dot" aria-label="Nowe powiadomienia" />}
-    </Item>
-  );
-}
-
-function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
-  const english=useSitePreferences().language==="en";
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-
-  useLayoutEffect(() => {
-    if (!open) return undefined;
-    const viewport = window.visualViewport;
-    let frame = 0;
-    function placeMenu() {
-      frame = 0;
-      const menu = menuRef.current;
-      const trigger = triggerRef.current;
-      if (!menu || !trigger) return;
-      const rect = trigger.getBoundingClientRect();
-      const width = viewport?.width || window.innerWidth;
-      const height = viewport?.height || window.innerHeight;
-      const offsetLeft = viewport?.offsetLeft || 0;
-      const offsetTop = viewport?.offsetTop || 0;
-      const menuWidth = Math.max(0, Math.min(300, width - 24));
-      const top = Math.max(offsetTop + 12, Math.min(rect.bottom + 8, offsetTop + height - 160));
-      const left = Math.max(offsetLeft + 12, Math.min(rect.right - menuWidth, offsetLeft + width - menuWidth - 12));
-      menu.style.setProperty("top", `${top}px`);
-      menu.style.setProperty("left", `${left}px`);
-      menu.style.setProperty("width", `${menuWidth}px`);
-      menu.style.setProperty("max-height", `${Math.max(0, offsetTop + height - top - 12)}px`);
-    }
-    function schedule() { if (!frame) frame = window.requestAnimationFrame(placeMenu); }
-    placeMenu();
-    const focusFrame = window.requestAnimationFrame(() => menuRef.current?.querySelector("a")?.focus({ preventScroll: true }));
-    window.addEventListener("resize", schedule, { passive: true });
-    window.addEventListener("scroll", schedule, { passive: true });
-    viewport?.addEventListener("resize", schedule, { passive: true });
-    viewport?.addEventListener("scroll", schedule, { passive: true });
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.cancelAnimationFrame(focusFrame);
-      window.removeEventListener("resize", schedule);
-      window.removeEventListener("scroll", schedule);
-      viewport?.removeEventListener("resize", schedule);
-      viewport?.removeEventListener("scroll", schedule);
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    function closeOutside(event) {
-      if (!triggerRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) setOpen(false);
-    }
-    function closeWithKeyboard(event) {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      setOpen(false);
-      triggerRef.current?.focus({ preventScroll: true });
-    }
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeWithKeyboard);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeWithKeyboard);
-    };
-  }, [open]);
-
-  function navigateMenu(event) {
-    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-    const links = Array.from(menuRef.current?.querySelectorAll("a") || []);
-    if (!links.length) return;
-    event.preventDefault();
-    const index = links.indexOf(document.activeElement);
-    const next = event.key === "Home" ? 0 : event.key === "End" ? links.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + links.length) % links.length;
-    links[next].focus({ preventScroll: true });
-  }
-
-  return <>
-    <button ref={triggerRef} className="home-account-avatar-link ih27-home-account-trigger" type="button"
-      aria-label={english?(open?"Close account menu":"Open account menu"):(open?"Zamknij menu konta":"Otwórz menu konta")} aria-expanded={open} aria-controls="ih27-home-account-menu"
-      onClick={() => { if (!open) onOpen?.(); setOpen(value => !value); }}
-      onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); if (open) menuRef.current?.querySelector("a")?.focus({ preventScroll: true }); else { onOpen?.(); setOpen(true); } } }}>
-      <span className="account-mini-avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : initial}</span>
-    </button>
-    {open && createPortal(<nav ref={menuRef} id="ih27-home-account-menu" className="account-menu-dropdown ih18-account-dropdown ih27-home-account-menu"
-      aria-label={english?"Account tools":"Funkcje konta"} data-no-translate="true" onKeyDown={navigateMenu}
-      onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget) && !triggerRef.current?.contains(event.relatedTarget)) setOpen(false); }}>
-      <div className="account-menu-identity"><strong>{name}</strong><span>{english?"IdeaHire account":"Konto IdeaHire"}</span></div>
-      <Link to="/account" onClick={() => setOpen(false)}>{english?"My account":"Moje konto"}</Link>
-      <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label={english?"Help — Help centre":"Pomoc — Centrum pomocy"}>
-        <MarketIcon kind="help" /><span>{english?"Help":"Pomoc"}</span>
-      </a>
-    </nav>, document.body)}
-  </>;
-}
-
-function HomeGreeting({ name }) {
-  return (
-    <span className="auth-user home-auth-user ih-welcome" title={`Cześć, ${name}`}>
-      <span className="ih-welcome-readable">Cześć, {name}</span>
-      <span className="ih-welcome-spark" aria-hidden="true"><i /><i /><i /><i /></span>
-      <span className="ih-welcome-copy" aria-hidden="true">
-        <span className="ih-welcome-prefix">Cześć,</span>{" "}
-        <strong className="ih-welcome-name">
-          {Array.from(name).map((letter, index) => (
-            <span key={index} style={{ "--ih-letter-order": Math.min(index, 12) }}>{letter}</span>
-          ))}
-        </strong>
-      </span>
-    </span>
-  );
-}
-
 function App({ session, loading, categoryGroups = [] }) {
 
-  const homeRootRef=useRef(null),worldCanvasRef=useRef(null);
-  const site=useSitePreferences(),english=site.language==="en",dark=site.theme==="dark";
-  const palette=site.template==="classic"?(dark?IH44_CLASSIC_DARK:IH44_CLASSIC_LIGHT):(dark?IH44_CONFIG.dark:IH44_CONFIG.light);
-  const ui=IH44_UTIL[english?"en":"pl"],copy=IH44_CONFIG[english?"en":"pl"];
-  const stage=useIH44Stage(homeRootRef,worldCanvasRef,palette,dark);
-
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const headerRef = useRef(null);
-  const headerSlotRef = useRef(null);
-  const mobileMenuButtonRef = useRef(null);
-  const navigationRef = useRef(null);
-  useIdeaHireScrollHeader(headerRef, headerSlotRef, IH44_CONFIG.mode==="lagoon");
-
-  useEffect(() => {
-    if (!mobileMenuOpen) return undefined;
-    navigationRef.current?.querySelector("a")?.focus({ preventScroll: true });
-    function closeOutside(event) {
-      if (!headerRef.current?.contains(event.target)) setMobileMenuOpen(false);
-    }
-    document.addEventListener("pointerdown", closeOutside);
-    return () => document.removeEventListener("pointerdown", closeOutside);
-  }, [mobileMenuOpen]);
+  const homeRootRef=useRef(null),sceneRef=useRef(null),canvasRef=useRef(null);
+  const headerRef=useRef(null),headerSlotRef=useRef(null),mobileMenuButtonRef=useRef(null);
+  const [mobileMenuOpen,setMobileMenuOpen]=useState(false);
+  const site=useSitePreferences(),english=site.language==="en",mono=site.template==="classic",dark=site.theme==="dark";
+  const copy=IH45_COPY[english?"en":"pl"];
+  const stage=useIH45Scene(sceneRef,canvasRef,mono,dark);
+  useIH45Reveal(homeRootRef,stage.reduced);
+  useIdeaHireScrollHeader(headerRef,headerSlotRef,true);
 
   const [hasNotifications, setHasNotifications] = useState(false);
   const [recentJobs, setRecentJobs] = useState(fallbackJobs);
@@ -1118,59 +722,34 @@ function App({ session, loading, categoryGroups = [] }) {
     ).toLocaleString("pl-PL")} zł`;
   }
 
-  return (
-    <div ref={homeRootRef} className="app ih44-home" data-design={IH44_CONFIG.mode} data-intro={stage.intro} data-act={stage.act}
-      data-paused={stage.paused||stage.reduced} data-reduced={stage.reduced} data-cycle={stage.cycle}>
-      <canvas ref={worldCanvasRef} className="ih44-world" aria-hidden="true"/>
-      <a className="ih44-skip-link" href="#ih44-content">{english?"Skip to content":"Przejdź do treści"}</a>
-      <div ref={headerSlotRef} className="ih44-header-slot">
-        <header ref={headerRef} className="ih44-nav" data-auth={session?"member":"guest"} data-mobile-menu-open={mobileMenuOpen}
-          onKeyDown={event=>{if(event.key==="Escape"&&mobileMenuOpen){event.preventDefault();setMobileMenuOpen(false);mobileMenuButtonRef.current?.focus({preventScroll:true});}}}>
-          <div className="ih44-brand"><IdeaHireLogo className="logo logo-clean"/><small>{IH44_CONFIG.name.toUpperCase()}</small></div>
-          <nav ref={navigationRef} id="ih-home-navigation" className="ih44-nav-links" aria-label={ui.menu} data-no-translate="true"
-            onClick={event=>{if(event.target?.closest?.("a"))setMobileMenuOpen(false);}}>
-            <HomeNavItem href="#how-it-works" order={0}>{ui.how}</HomeNavItem>
-            <HomeNavItem href="#categories" order={1}>{ui.categories}</HomeNavItem>
-            <HomeNavItem href="#for-users" order={2}>{ui.forYou}</HomeNavItem>
-            {session&&<><HomeNavItem to="/notifications" order={3} notification={hasNotifications}>{ui.notices}</HomeNavItem><HomeNavItem to="/account" order={4}>{ui.account}</HomeNavItem></>}
-            {!session&&<HomeNavItem to="/jobs" order={3}>{ui.work}</HomeNavItem>}
-            {!session&&<Link className="ih44-menu-login" to="/login">{ui.login}</Link>}
-          </nav>
-          <div className="ih44-user-actions" data-no-translate="true">
-            {loading?<span className="ih44-loading-label">{english?"Loading…":"Ładowanie…"}</span>:session?<>
-              <HomeAccountMenu name={userName} avatarUrl={avatarUrl} initial={userInitial} onOpen={()=>setMobileMenuOpen(false)}/>
-              <button className="ih44-logout" type="button" onClick={handleLogout} aria-label={ui.logout}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h12" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg></button>
-            </>:<><Link className="ih44-login" to="/login">{ui.login}</Link><Link className="ih44-join" to="/register">{ui.register}<IH44Arrow/></Link></>}
+  return <>
+    <div ref={homeRootRef} className="ih45-home" data-paused={stage.paused||stage.reduced} data-reduced={stage.reduced} data-palette={site.template}>
+      <a className="ih45-skip-link" href="#ih45-content">{english?"Skip to content":"Przejdź do treści"}</a>
+      <div ref={headerSlotRef} className="ih45-header-slot">
+        <header ref={headerRef} className="ih45-header" data-mobile-menu-open={mobileMenuOpen}>
+          <IH45FeeStrip english={english}/>
+          <div className="ih45-navigation"><IH45Brand/>
+            <nav className="ih45-desktop-nav" aria-label={copy.menu} data-no-translate="true"><a href="#how-it-works">{copy.how}</a><a href="#categories">{copy.categories}</a><a href="#commission">{copy.fee}</a></nav>
+            <div className="ih45-header-actions" data-no-translate="true"><button className="ih45-quick-template" type="button" onClick={()=>site.setTemplate(mono?"current":"classic")} aria-label={mono?copy.turquoise:copy.mono}><i className={mono?"ih45-swatch-turquoise":"ih45-swatch-mono"}/><span>{mono?copy.turquoise:copy.mono}</span></button>
+              {session?<Link to="/account" className="ih45-avatar" aria-label={copy.account}>{avatarUrl?<img src={avatarUrl} alt=""/>:<span>{userInitial}</span>}{hasNotifications&&<i/>}</Link>:<Link className="ih45-header-login" to="/login">{copy.login}</Link>}
+              <button ref={mobileMenuButtonRef} className="ih45-burger" type="button" onClick={()=>setMobileMenuOpen(true)} aria-label={copy.menu} aria-expanded={mobileMenuOpen} aria-controls="ih45-menu-dialog"><span>{copy.menu}</span><IH45Burger/></button>
+            </div>
           </div>
-          <button ref={mobileMenuButtonRef} type="button" className="ih44-burger" aria-label={mobileMenuOpen?(english?"Close menu":"Zamknij menu"):(english?"Open menu":"Otwórz menu")}
-            aria-expanded={mobileMenuOpen} aria-controls="ih-home-navigation" onClick={()=>setMobileMenuOpen(v=>!v)}><span aria-hidden="true">{mobileMenuOpen?"×":"☰"}</span></button>
         </header>
       </div>
-      <main className="ih44-main" id="ih44-content">
-        {IH44_CONFIG.mode==="lagoon"?<IH44LagoonLanding stage={stage} copy={copy} ui={ui} session={session}/>:IH44_CONFIG.mode==="editorial"?<IH44PapayaLanding stage={stage} copy={copy} ui={ui} session={session}/>:<IH44IrisLanding stage={stage} copy={copy} ui={ui} session={session}/>}
-        <div className="ih44-flow-band" aria-hidden="true" data-no-translate="true"><div>{Array.from({length:4},(_,i)=><span key={i}><IH44Mark/>{copy.strip}</span>)}</div></div>
-        <section className="ih44-section ih44-catalog" id="categories" data-world-reveal="seen">
-          <div className="ih44-section-heading" data-no-translate="true"><span className="ih44-kicker">01 / {ui.categories}</span><h2>{copy.section}</h2><p>{english?"Choose a category, then narrow it down to a specialism.":"Wybierz kategorię, potem doprecyzuj specjalizację."}</p></div>
-          <div className="ih44-catalog-content"><HomeCategoryBrowser groups={categoryGroups.length?categoryGroups:categories}/><IH44CommissionPanel/></div>
-        </section>
-        <IH44Jobs jobs={recentJobs} copy={copy} ui={ui} english={english}/>
-        <section className="ih44-section ih44-method" id="how-it-works" data-world-reveal="seen">
-          <div className="ih44-section-heading" data-no-translate="true"><span className="ih44-kicker">02 / {ui.how}</span><h2>{copy.how}</h2><p>{english?"Scope, price and timing. Put the essentials in the agreement.":"Zakres, cena i termin. Zapiszcie najważniejsze rzeczy w ustaleniach."}</p></div>
-          <div className="ih44-steps" data-no-translate="true">{ui.steps.map(([title,description],i)=><HomeStepCard key={title} number={"0"+(i+1)} title={title}>{description}</HomeStepCard>)}</div>
-        </section>
-        <section className="ih44-section ih44-roles" id="for-users" data-world-reveal="seen" data-no-translate="true">
-          <article><span className="ih44-kicker">03 / {ui.roles[0]}</span><h2>{english?"Who can help you with this?":"Kto Ci w tym pomoże?"}</h2><p>{ui.rolesCopy[0]}</p><Link className="ih44-button ih44-primary" to="/find-talent">{ui.find}<IH44Arrow/></Link><IH44Mark/></article>
-          <article><span className="ih44-kicker">04 / {ui.roles[1]}</span><h2>{english?"Show what you know.":"Pokaż, na czym się znasz."}</h2><p>{ui.rolesCopy[1]}</p><Link className="ih44-button" to="/jobs">{ui.work}<IH44Arrow/></Link><IH44Mark/></article>
-        </section>
-        <section className="ih44-section ih44-finale" data-world-reveal="seen" data-no-translate="true"><span className="ih44-kicker">IDEAHIRE</span><h2>{copy.end.map((line,i)=><span key={i}>{line}</span>)}</h2><Link className="ih44-button ih44-primary" to={session?"/account":"/register"}>{session?ui.account:ui.register}<IH44Arrow/></Link></section>
+      <main id="ih45-content">
+        <IH45Hero stage={stage} sceneRef={sceneRef} canvasRef={canvasRef} english={english} copy={copy}/>
+        <section className="ih45-paths" aria-label={english?"Choose your next step":"Wybierz swój następny krok"} data-no-translate="true"><Link to="/find-talent"><IH45Mark/><span><small>{english?"I have a project":"Mam projekt"}</small><strong>{english?"I am looking for a professional.":"Szukam wykonawcy."}</strong></span><IH45Arrow/></Link><Link to="/jobs"><IH45Mark/><span><small>{english?"I have the skills":"Mam umiejętności"}</small><strong>{english?"I am looking for a project.":"Szukam zlecenia."}</strong></span><IH45Arrow/></Link></section>
+        <IH45Categories groups={categoryGroups.length?categoryGroups:categories} english={english} copy={copy}/>
+        <IH45Jobs jobs={recentJobs} english={english} copy={copy}/>
+        <IH45How english={english} copy={copy}/>
+        <IH45Commission english={english} copy={copy}/>
+        <section className="ih45-section ih45-closing" data-reveal data-no-translate="true"><IH45Mark/><h2>{copy.closing.map(line=><span key={line}>{line}</span>)}</h2><Link className="ih45-button ih45-solid" to={session?"/account":"/register"}>{session?copy.account:copy.register}<IH45Arrow/></Link></section>
       </main>
-      <footer className="ih44-footer" data-no-translate="true"><div><Link to="/" className="ih44-footer-logo">IdeaHire<IH44Mark/></Link><p>{ui.summary}</p></div><nav aria-label={ui.legal}>
-        <a href={helpCenterHref()} onClick={event=>{event.currentTarget.href=helpCenterHref();}} referrerPolicy="no-referrer">{english?"Help":"Pomoc"}</a>
-        <Link to="/regulamin">{english?"Terms":"Regulamin"}</Link><Link to="/polityka-prywatnosci">{english?"Privacy":"Prywatność"}</Link><Link to="/polityka-cookies">Cookies</Link>
-        <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">{english?"Report illegal content":"Zgłoś nielegalną treść"}</a>
-      </nav><span>© {new Date().getFullYear()} IdeaHire</span></footer>
+      <footer className="ih45-footer" data-no-translate="true"><div><IH45Brand/><p>{copy.summary}</p></div><nav aria-label={copy.legal}><a href={helpCenterHref()} onClick={e=>{e.currentTarget.href=helpCenterHref();}} referrerPolicy="no-referrer">{copy.help}</a><Link to="/regulamin">{copy.terms}</Link><Link to="/polityka-prywatnosci">{copy.privacy}</Link><Link to="/polityka-cookies">Cookies</Link><a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">{copy.illegal}</a></nav><span>© {new Date().getFullYear()} IdeaHire</span></footer>
     </div>
-  );
+    <IH45Menu open={mobileMenuOpen} onClose={()=>setMobileMenuOpen(false)} rootRef={homeRootRef} triggerRef={mobileMenuButtonRef} site={site} copy={copy} session={session} hasNotifications={hasNotifications} logout={handleLogout}/>
+  </>;
 }
 
 export default App;
