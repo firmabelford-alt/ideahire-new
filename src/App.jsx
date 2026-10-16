@@ -1,4 +1,4 @@
-/* IdeaHire | P43 | Zwarcie | Pełny plik: src/App.jsx | Film 48 s, 14 ujęć, pętla */
+/* IdeaHire | P43 | Premiera | Pełny plik: src/App.jsx | Film 46 s, 14 ujęć, pętla */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,7 +9,7 @@ import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
 const IH43_STYLES=String.raw`
-__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#101d34!important;color:#f2f0de!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
+__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#d35428!important;color:#ffeed8!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
 __IH43__ .ih43-film,__IH43__ .ih43-film * {box-sizing:border-box!important;}
 __IH43__ .ih43-film[data-classic="true"] {background:#121212!important;color:#efefec!important;}
 __IH43__ .ih43-canvas {position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;opacity:0;pointer-events:none!important;}
@@ -32,379 +32,293 @@ __IH43__ .ih43-film[data-failed="true"] .ih43-link-label {position:static!import
 `.replaceAll("__IH43__","#root".repeat(10));
 
 const IH43_FILM={
-  "key": "02-Zwarcie",
-  "name": "Zwarcie",
-  "genre": "network",
-  "period": 48,
+  "key": "03-Premiera",
+  "name": "Premiera",
+  "genre": "reel",
+  "period": 46,
   "palette": {
-    "paper": "#f2f0de",
-    "ink": "#101d34",
-    "accent": "#2857f1",
-    "secondary": "#e0f26b",
+    "paper": "#ffeed8",
+    "ink": "#26141f",
+    "accent": "#d35428",
+    "secondary": "#dc92b9",
     "light": "#ffffff",
-    "muted": "#7e91b9"
+    "muted": "#956960"
   },
   "shots": [
     {
-      "kind": "signal",
+      "kind": "marquee",
+      "duration": 2,
+      "bg": "accent",
+      "motion": "slam"
+    },
+    {
+      "kind": "type",
+      "duration": 2.4,
+      "bg": "paper",
+      "motion": "slam"
+    },
+    {
+      "kind": "poster",
+      "duration": 3.6,
+      "bg": "secondary",
+      "motion": "slam"
+    },
+    {
+      "kind": "type",
       "duration": 1.8,
       "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        0,
-        0,
-        0.78
-      ]
+      "motion": "side"
     },
     {
-      "kind": "signal",
+      "kind": "audio",
+      "duration": 4,
+      "bg": "accent",
+      "motion": "slam"
+    },
+    {
+      "kind": "type",
+      "duration": 1.8,
+      "bg": "paper",
+      "motion": "slam"
+    },
+    {
+      "kind": "store",
+      "duration": 4,
+      "bg": "secondary",
+      "motion": "slam"
+    },
+    {
+      "kind": "marquee",
       "duration": 2.2,
       "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        0,
-        0,
-        1
-      ]
+      "motion": "slam"
     },
     {
-      "kind": "portfolio",
-      "duration": 4,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        0,
-        0,
-        1.06
-      ]
+      "kind": "review",
+      "duration": 3.6,
+      "bg": "accent",
+      "motion": "slam"
     },
     {
-      "kind": "signal",
+      "kind": "type",
+      "duration": 1.6,
+      "bg": "paper",
+      "motion": "letters"
+    },
+    {
+      "kind": "marquee",
       "duration": 2,
       "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        450,
-        -60,
-        0.75
-      ]
+      "motion": "slam"
     },
     {
-      "kind": "board",
-      "duration": 4.5,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        1050,
-        -150,
-        1
-      ]
-    },
-    {
-      "kind": "signal",
-      "duration": 2.5,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        1450,
-        -10,
-        0.8
-      ]
-    },
-    {
-      "kind": "message",
-      "duration": 5,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        2100,
-        110,
-        1.05
-      ]
-    },
-    {
-      "kind": "message",
-      "duration": 3.5,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        2100,
-        110,
-        1.12
-      ]
-    },
-    {
-      "kind": "arrangement",
-      "duration": 4,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        3150,
-        -90,
-        1
-      ]
-    },
-    {
-      "kind": "signal",
-      "duration": 2.5,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        3150,
-        -90,
-        0.88
-      ]
-    },
-    {
-      "kind": "zoom",
+      "kind": "split",
       "duration": 3,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        2000,
-        0,
-        0.34
-      ]
+      "bg": "secondary",
+      "motion": "slam"
     },
     {
-      "kind": "zoom",
-      "duration": 3,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        1500,
-        0,
-        0.28
-      ]
-    },
-    {
-      "kind": "zoom",
-      "duration": 4,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        1050,
-        -100,
-        0.64
-      ]
+      "kind": "split",
+      "duration": 3.6,
+      "bg": "paper",
+      "motion": "slam"
     },
     {
       "kind": "final",
-      "duration": 6.0,
-      "bg": "ink",
-      "motion": "slam",
-      "camera": [
-        0,
-        0,
-        0.7
-      ]
+      "duration": 10.4,
+      "bg": "accent",
+      "motion": "slam"
     }
   ],
   "pl": {
     "cta": [
-      "Przeglądaj ogłoszenia",
-      "Poznaj specjalistów"
+      "Wybierz twórcę",
+      "Sprawdź projekty"
     ],
-    "subtitle": "Portfolio pokazuje robotę. Rozmowa ustawia kierunek.",
-    "disclosure": "Ilustracja działania — fikcyjna korespondencja.",
-    "floating": [
-      "Dopasowanie",
-      "Kontakt",
-      "Decyzja"
+    "subtitle": "Okładka, podcast, sklep. Dopnij szczegóły.",
+    "disclosure": "Demonstracja produktu — makiety autorskie.",
+    "endTags": [
+      "OKŁADKA",
+      "PODCAST",
+      "SKLEP"
     ],
     "ui": {
-      "portfolio": "Portfolio",
-      "works": [
-        "Ruch",
-        "Postać",
-        "Czołówka"
-      ],
-      "caption": "Wybrane realizacje",
-      "inquiries": "Zapytania",
-      "projects": [
-        "Animowany wstęp",
-        "Bohater kampanii",
-        "Intro festiwalu"
-      ],
-      "correspondence": "Korespondencja",
-      "messages": [
-        "Pasuje.",
-        "Kiedy zaczynasz?",
-        "Podeślę próbkę."
-      ],
-      "arrangement": "Współpraca",
-      "points": [
-        "Ustalenia",
-        "Harmonogram",
-        "Rozliczenie"
+      "coverKicker": "SEZON",
+      "coverName": "SIERPIEŃ",
+      "coverFooter": "WYDANIE SPECJALNE",
+      "player": "Odsłuch",
+      "podcast": "POGŁOS",
+      "audioNote": "Audycja demonstracyjna",
+      "shop": "Witryna",
+      "edition": "Wydanie zero",
+      "format": "Wybierz format",
+      "basket": "Do koszyka",
+      "finish": "Dopracowanie",
+      "adjustments": [
+        "Kontrast",
+        "Rytm",
+        "Wykończenie"
       ]
     },
     "ctaMobile": [
-      "Ogłoszenia",
-      "Specjaliści"
+      "Twórcy",
+      "Projekty"
     ],
     "frames": [
       [
-        "UMIESZ",
-        "WIĘCEJ."
+        "MASZ",
+        "COŚ PILNEGO?"
       ],
       [
-        "POKAŻ",
-        "WARSZTAT."
+        "OKŁADKA."
       ],
       [
-        "REALIZACJE",
-        "MÓWIĄ."
+        "NA",
+        "WIDOKU."
       ],
       [
-        "KTOŚ",
-        "SZUKA."
+        "PODCAST."
       ],
       [
-        "WŁAŚNIE",
-        "CIEBIE."
+        "POGŁOS",
+        "ZOSTAJE."
       ],
       [
-        "OFERTA."
+        "SKLEP."
       ],
       [
-        "ROZMOWA."
+        "OTWARTE",
+        "CAŁODOBOWO."
       ],
       [
-        "PASUJE."
+        "PIERWSZA",
+        "WERSJA."
       ],
       [
-        "WSPÓŁPRACA."
+        "OSTATNI",
+        "SZLIF."
       ],
       [
-        "KIEDY",
-        "ZACZYNASZ?"
+        "ZGADZA",
+        "SIĘ?"
       ],
       [
-        "RZEMIOSŁO."
+        "ODPALONE."
       ],
       [
-        "WŁAŚCIWY ADRES."
+        "PUBLIKUJESZ."
       ],
       [
-        "WYBIERASZ",
-        "SAMODZIELNIE."
+        "SZCZEGÓŁY",
+        "DOMKNIĘTE."
       ],
       [
-        "Zarabiaj",
-        "tym, co umiesz."
+        "Niech będzie",
+        "zrobione."
       ]
     ],
     "final": [
-      "Zarabiaj",
-      "tym, co umiesz."
+      "Niech będzie",
+      "zrobione."
     ]
   },
   "en": {
     "cta": [
-      "See opportunities",
-      "Meet professionals"
+      "Order an outcome",
+      "Explore the catalog"
     ],
-    "subtitle": "A portfolio shows the skill. A conversation sets the course.",
-    "disclosure": "Product illustration — fictional correspondence.",
-    "floating": [
-      "Match",
-      "Contact",
-      "Decision"
+    "subtitle": "Cover art, a podcast, a shop. Finish the details.",
+    "disclosure": "Product demonstration — original mockups.",
+    "endTags": [
+      "COVER ART",
+      "PODCAST",
+      "SHOP"
     ],
     "ui": {
-      "portfolio": "Portfolio",
-      "works": [
-        "Motion",
-        "Character",
-        "Opening"
-      ],
-      "caption": "Selected projects",
-      "inquiries": "Inquiries",
-      "projects": [
-        "Animated opening",
-        "Campaign character",
-        "Festival introduction"
-      ],
-      "correspondence": "Correspondence",
-      "messages": [
-        "That fits.",
-        "When can you begin?",
-        "I’ll send a sample."
-      ],
-      "arrangement": "Collaboration",
-      "points": [
-        "Agreements",
-        "Schedule",
-        "Settlement"
+      "coverKicker": "SEASON",
+      "coverName": "AUGUST",
+      "coverFooter": "SPECIAL EDITION",
+      "player": "Listen",
+      "podcast": "REVERB",
+      "audioNote": "Demonstration recording",
+      "shop": "Storefront",
+      "edition": "Edition zero",
+      "format": "Choose a format",
+      "basket": "Add to basket",
+      "finish": "Refinement",
+      "adjustments": [
+        "Contrast",
+        "Rhythm",
+        "Finish"
       ]
     },
     "ctaMobile": [
-      "Listings",
-      "Specialists"
+      "Creators",
+      "Projects"
     ],
     "frames": [
       [
-        "YOU HAVE",
-        "THE SKILLS."
+        "SOMETHING",
+        "URGENT?"
       ],
       [
-        "SHOW",
-        "YOUR CRAFT."
+        "COVER ART."
       ],
       [
-        "LET THE",
-        "WORK SPEAK."
+        "OUT",
+        "IN THE OPEN."
       ],
       [
-        "SOMEONE",
-        "IS LOOKING."
+        "PODCAST."
       ],
       [
-        "FOR",
-        "YOU."
+        "AN ECHO",
+        "THAT LASTS."
       ],
       [
-        "A PROPOSAL."
+        "STOREFRONT."
       ],
       [
-        "A CONVERSATION."
+        "OPEN",
+        "AROUND THE CLOCK."
       ],
       [
-        "THAT FITS."
+        "INITIAL",
+        "VERSION."
       ],
       [
-        "COLLABORATION."
+        "FINAL",
+        "POLISH."
       ],
       [
-        "WHEN",
-        "CAN YOU BEGIN?"
+        "LOOKING",
+        "RIGHT?"
       ],
       [
-        "EXPERTISE."
+        "LAUNCHED."
       ],
       [
-        "THE RIGHT PLACE."
+        "GO LIVE."
       ],
       [
-        "ON",
-        "YOUR TERMS."
+        "DETAILS",
+        "FINALISED."
       ],
       [
-        "Earn",
-        "with your craft."
+        "Let it",
+        "be done."
       ]
     ],
     "final": [
-      "Earn",
-      "with your craft."
+      "Let it",
+      "be done."
     ]
   },
   "paths": [
-    "/jobs",
-    "/find-talent"
+    "/find-talent",
+    "/jobs"
   ],
-  "finalStart": 42.0,
+  "finalStart": 35.6,
   "offer": {
     "percent": 5.5,
     "minimum": 20,
@@ -562,42 +476,58 @@ function ih43Start(canvas,host,state,report){
   }catch{destroy();report({failed:true,ready:true});return{wake(){},destroy,mute(){},replay(){},finale(){},async toggleSound(){return false;}};}
 }
 
-function ih43NetworkCard(c,x,y,w,h,p,label,accent){ih43Panel(c,x,y,w,h,{fill:p.paper,ink:p.ink,label});ih43Box(c,x-w/2+20,y-h/2+59,w-40,5,accent,2);}
-function ih43Portfolio(c,x,y,p,lang,time){
-  ih43NetworkCard(c,x,y,590,325,p,lang.portfolio,p.accent);
-  const colors=[p.accent,p.secondary,p.ink];
-  for(let i=0;i<3;i++){const yy=y-85+Math.sin(time*2+i)*6,xx=x-253+i*168;c.save();c.translate(xx,yy);c.rotate(Math.sin(time+i)*.025);ih43Box(c,0,0,154,174,colors[i],5);const tone=i===1?p.ink:p.paper;ih43Text(c,lang.works[i],16,40,20,tone,800);for(let r=0;r<5;r++){c.globalAlpha=.13+(r%2)*.12;c.fillStyle=tone;c.fillRect(16,70+r*13,88+Math.sin(r+i)*22,4);}c.globalAlpha=1;ih43Text(c,"0"+(i+1),16,153,12,tone,500);c.restore();}
-  ih43Text(c,lang.caption,x-253,y+132,13,p.ink,500);
+function ih43Cover(c,x,y,w,h,p,lang,time,angle=0){
+  c.save();c.translate(x,y);c.rotate(angle);c.shadowColor="rgba(0,0,0,.22)";c.shadowBlur=24;c.shadowOffsetY=12;ih43Box(c,-w/2,-h/2,w,h,p.paper,1);c.shadowColor="transparent";
+  c.save();c.beginPath();c.rect(-w/2,-h/2,w,h);c.clip();
+  c.fillStyle=p.accent;for(let i=0;i<9;i++){const a=i*13+time*5;c.save();c.translate(-w*.25,-h*.20);c.rotate(a*.008);c.fillRect(-w,-h*.015+i*11,w*2,h*.012);c.restore();}
+  ih43Text(c,lang.coverKicker,-w*.39,-h*.35,w*.07,p.ink,600);
+  ih43Lines(c,[lang.coverName.slice(0,4),lang.coverName.slice(4)],{x:-w*.42,y:-h*.18,w:w*.84,h:h*.48},{color:p.ink,progress:1,max:w*.3});
+  ih43Text(c,lang.coverFooter,-w*.39,h*.39,w*.045,p.ink,550);
+  c.restore();c.restore();
 }
-function ih43Requests(c,x,y,p,lang,time){
-  ih43NetworkCard(c,x,y,590,325,p,lang.inquiries,p.secondary);
-  for(let i=0;i<3;i++){const beat=.5+.5*Math.sin(time*2.5+i),xx=x-263+(i===1?beat*8:0),yy=y-84+i*70;ih43Box(c,xx,yy,526,58,i===1?p.accent:null,6,i===1?null:"rgba(10,20,40,.17)");ih43Text(c,lang.projects[i],xx+16,yy+34,20,i===1?p.paper:p.ink,650);ih43Arrow(c,xx+495,yy+29,i===1?p.paper:p.ink,13);}
+function ih43Podcast(c,x,y,w,h,p,lang,time){
+  ih43Panel(c,x,y,w,h,{fill:p.ink,ink:p.paper,label:lang.player});
+  ih43Text(c,lang.podcast,x-w*.42,y-h*.09,w*.10,p.paper,900);
+  const bw=(w*.83)/45;c.save();c.beginPath();c.rect(x-w*.43,y+h*.03,w*.86,h*.27);c.clip();
+  for(let i=0;i<45;i++){const amp=(.15+.85*Math.abs(Math.sin(i*.41+time*4)*Math.cos(i*.17-time*2)))*h*.18;c.fillStyle=i<Math.floor((time*12)%46)?p.accent:p.secondary;c.fillRect(x-w*.42+i*bw,y+h*.17-amp/2,bw*.48,amp);}
+  c.restore();ih43Text(c,lang.audioNote,x-w*.42,y+h*.40,11,p.paper,450);
 }
-function ih43Messages(c,x,y,p,lang,time){
-  ih43NetworkCard(c,x,y,590,325,p,lang.correspondence,p.accent);
-  for(let i=0;i<3;i++){const pulse=IH43.ease(((time*.7+i*.28)%2)/.35),xx=x-251+(i%2?100:0),yy=y-83+i*68;ih43Box(c,xx+(1-pulse)*30,yy,400,54,i%2?p.accent:p.ink,12);ih43Text(c,lang.messages[i],xx+17+(1-pulse)*30,yy+33,18,p.paper,550);}
-}
-function ih43Arrangement(c,x,y,p,lang,time){
-  ih43NetworkCard(c,x,y,590,325,p,lang.arrangement,p.secondary);
-  for(let i=0;i<3;i++){const xx=x-245,yy=y-75+i*63;ih43Text(c,lang.points[i],xx,yy+16,19,p.ink,650);c.strokeStyle=p.accent;c.lineWidth=3;c.beginPath();c.moveTo(xx+440,yy+5);c.lineTo(xx+448,yy+13);c.lineTo(xx+463,yy-5);c.stroke();}
-  const w=110+Math.sin(time*3)*16;ih43Box(c,x-245,y+119,w,5,p.accent,2);
+function ih43Shop(c,x,y,w,h,p,lang,time){
+  ih43Panel(c,x,y,w,h,{fill:p.paper,ink:p.ink,label:lang.shop});
+  const imageW=w*.34,imageH=h*.54;ih43Cover(c,x-w*.23,y+h*.04,imageW,imageH,p,lang,time,Math.sin(time)*.035);
+  ih43Text(c,lang.edition,x+w*.01,y-h*.10,w*.055,p.ink,750);ih43Text(c,lang.format,x+w*.01,y+h*.02,w*.032,p.ink,500);
+  ih43Box(c,x+w*.01,y+h*.14,w*.38,h*.14,p.accent,4);ih43Text(c,lang.basket,x+w*.035,y+h*.235,w*.032,ih43Readable(p.accent,p.paper,p.ink),650);
 }
 function ih43Scene(c,l,p,phase,s,time){
-  const lang=s.english?IH43_FILM.en:IH43_FILM.pl,shot=phase.shot,prev=IH43_FILM.shots[(phase.index-1+IH43_FILM.shots.length)%IH43_FILM.shots.length];
-  const cam=shot.camera||[0,0,1],before=prev.camera||cam,turn=IH43.ease(phase.local/.95),flatten=IH43.mix(["zoom","final"].includes(prev.kind)?.05:1,["zoom","final"].includes(shot.kind)?.05:1,turn),cx=IH43.mix(before[0],cam[0],turn),cy=IH43.mix(before[1],cam[1],turn)*flatten,zoom=IH43.mix(before[2],cam[2],turn);
-  const scale=(l.mobile?Math.min(l.cw/650,l.ch/620):Math.min(l.cw/940,l.ch/620))*zoom;
-  const stageY=l.y+l.ch*.73;
-  c.save();c.translate(l.w/2,stageY);c.scale(scale,scale);c.rotate(s.reduced?0:Math.sin(time*.7)*.012+(1-turn)*.035);c.translate(-cx,-cy);
-  const nodes=[[0,0],[1050,-150*flatten],[2100,110*flatten],[3150,-90*flatten]];
-  c.strokeStyle=p.secondary;c.lineWidth=3;c.setLineDash([9,12]);c.lineDashOffset=-time*75;
-  for(let i=0;i<3;i++){const a=nodes[i],b=nodes[i+1];c.beginPath();c.moveTo(a[0]+295,a[1]);c.bezierCurveTo(a[0]+520,a[1],b[0]-520,b[1],b[0]-295,b[1]);c.stroke();}
-  c.setLineDash([]);
-  for(let i=0;i<3;i++){const t=(time*.28+i*.31)%1,a=nodes[i],b=nodes[i+1],x=IH43.mix(a[0]+315,b[0]-315,t),y=IH43.mix(a[1],b[1],t);ih43Tag(c,lang.floating[i],x,y,{fill:p.secondary,ink:p.ink},-.03,1);}
-  ih43Portfolio(c,...nodes[0],p,lang.ui,time);ih43Requests(c,...nodes[1],p,lang.ui,time);ih43Messages(c,...nodes[2],p,lang.ui,time);ih43Arrangement(c,...nodes[3],p,lang.ui,time);c.restore();
-  const final=shot.kind==="final",height=l.ch*(final?.52:.40),words=lang.frames[phase.index];
-  c.save();if(shot.kind==="zoom"){c.globalAlpha=.9;}
-  ih43Lines(c,words,{x:l.pad,y:l.y-7,w:l.cw,h:height},{color:shot.bg==="paper"?p.ink:p.paper,progress:IH43.clamp(phase.local/.50),mode:phase.index%2?"letters":"side",max:l.mobile?66:138});c.restore();
-  if(final){const yy=l.y+l.ch*.96;ih43Text(c,lang.subtitle,l.pad,yy,l.mobile?11:15,shot.bg==="paper"?p.ink:p.paper,550);}
+  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,words=lang.frames[phase.index],ink=shot.bg==="paper"||shot.bg==="secondary"?p.ink:p.paper;
+  const e=IH43.back(phase.local/.52),main={x:l.pad,y:l.y,w:l.cw,h:l.ch};
+  if(shot.kind==="poster"){
+    const h=Math.min(l.ch*.76,l.mobile?300:385),w=h*.72;c.save();c.translate((1-e)*l.w,0);ih43Cover(c,l.w*(l.mobile?.62:.73),l.y+l.ch*.56,w,h,p,lang.ui,time,-.10+Math.sin(time*2)*.025);c.restore();
+    ih43Lines(c,words,{x:l.pad,y:l.y,w:l.cw*(l.mobile?.60:.57),h:l.ch*.63},{color:ink,progress:IH43.clamp(phase.local/.45),mode:"side",max:l.mobile?58:128});
+  }else if(shot.kind==="audio"||shot.kind==="store"){
+    ih43Lines(c,words,{x:l.pad,y:l.y,w:l.cw,h:l.ch*.25},{color:ink,progress:IH43.clamp(phase.local/.42),mode:"slam",max:l.mobile?54:106});
+    const w=Math.min(l.cw*.87,730),h=l.mobile?200:270,x=l.w/2,y=l.y+l.ch*.64;c.save();c.translate((1-e)*-l.w,0);c.rotate((1-e)*.07);
+    if(shot.kind==="audio")ih43Podcast(c,x,y,w,h,p,lang.ui,time);else ih43Shop(c,x,y,w,h,p,lang.ui,time);c.restore();
+  }else if(shot.kind==="split"){
+    const w=l.mobile?l.cw*.64:l.cw*.30,h=l.ch*.66,spacing=l.mobile?l.cw*.34:l.cw*.33;
+    for(let i=0;i<3;i++){c.save();c.translate(l.w/2+(i-1)*spacing+(1-e)*(i-1)*l.w,l.y+l.ch*.49);c.rotate((i-1)*.07+Math.sin(time+i)*.015);const scale=l.mobile?.85:1;c.scale(scale,scale);
+      if(i===0)ih43Cover(c,0,0,w*.77,h,p,lang.ui,time);else if(i===1)ih43Podcast(c,0,0,w,h*.65,p,lang.ui,time);else ih43Shop(c,0,0,w,h*.65,p,lang.ui,time);c.restore();}
+    ih43Lines(c,words,{x:l.pad,y:l.y+l.ch*.76,w:l.cw,h:l.ch*.23},{color:ink,progress:IH43.clamp((phase.local-.2)/.4),mode:"side",max:l.mobile?42:88});
+  }else if(shot.kind==="review"){
+    const w=Math.min(l.cw*.86,700),h=l.ch*.63;ih43Panel(c,l.w*.5+(1-e)*l.w,l.y+l.ch*.58,w,h,{fill:p.paper,ink:p.ink,label:lang.ui.finish});
+    ih43Lines(c,words,{x:l.pad,y:l.y,w:l.cw,h:l.ch*.25},{color:ink,progress:IH43.clamp(phase.local/.4),mode:"letters",max:l.mobile?46:95});
+    for(let i=0;i<3;i++){const t=(Math.sin(time*2+i)+1)/2,x=l.w*.5-w*.42,y=l.y+l.ch*.43+i*45;ih43Text(c,lang.ui.adjustments[i],x,y,13,p.ink,600);ih43Box(c,x+w*.37,y-8,w*.43,4,p.ink,2);c.fillStyle=p.accent;c.beginPath();c.arc(x+w*(.37+.43*t),y-6,7,0,Math.PI*2);c.fill();}
+  }else if(shot.kind==="final"){
+    if(!s.reduced){const step=Math.floor(phase.local/2.6)%3,phaseMove=(phase.local%2.6)/2.6; c.save();c.globalAlpha=.14;c.translate(l.w*(.82-.18*phaseMove),l.y+l.ch*.47);c.rotate((phaseMove-.5)*.12);
+      if(step===0)ih43Cover(c,0,0,l.cw*.32,l.ch*.78,p,lang.ui,time);else if(step===1)ih43Podcast(c,0,0,l.cw*.68,l.ch*.61,p,lang.ui,time);else ih43Shop(c,0,0,l.cw*.68,l.ch*.61,p,lang.ui,time);c.restore();}
+    ih43Lines(c,words,{x:l.pad,y:l.y-4,w:l.cw,h:l.ch*.70},{color:ink,progress:IH43.clamp(phase.local/.62),mode:"letters",max:l.mobile?75:167});
+    for(let i=0;i<3;i++){const x=l.pad+l.cw*(.17+.33*i),y=l.y+l.ch*.83+Math.sin(time*2+i)*7;ih43Tag(c,lang.endTags[i],x,y,{fill:i===1?p.ink:p.paper,ink:i===1?p.paper:p.ink},(i-1)*.025,l.mobile?.76:1);}
+  }else{
+    if(shot.kind==="marquee"){
+      c.save();c.globalAlpha=.13;const text=words.join(" "),size=l.mobile?64:148;for(let i=0;i<3;i++){const xx=l.pad-((time*(i%2?-65:65))%(l.w*.8)),yy=l.y+l.ch*(.18+.30*i);ih43Text(c,text,xx,yy,size,ink,900);}c.restore();
+    }
+    ih43Lines(c,words,main,{color:ink,progress:IH43.clamp(phase.local/.42),mode:shot.motion||"side",max:l.mobile?94:204});
+  }
 }
 
 function ih43Reduced(){
