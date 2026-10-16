@@ -1,68 +1,7 @@
-/* IdeaHire | P46 Turkus / Czerń i biel | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
-
-
-export const IDEA_HIRE_THEME_IDENTITY=Object.freeze({
-  "pl": {
-    "eyebrow": "IdeaHire / Turkus",
-    "title": "Turkus",
-    "description": "Pełna turkusowa paleta. Przestrzenna typografia i czytelny, uporządkowany układ."
-  },
-  "en": {
-    "eyebrow": "IdeaHire / Turquoise",
-    "title": "Turquoise",
-    "description": "A complete turquoise palette. Spatial typography and a clear, considered layout."
-  }
-});
-
-export const IDEA_HIRE_VISUAL_SYSTEM=Object.freeze({
-  "turquoise": {
-    "bg": "#26c8cc",
-    "paper": "#e1f7f2",
-    "surface": "#d1f1eb",
-    "ink": "#082b2c",
-    "muted": "#1d4b4d",
-    "line": "#75aaab",
-    "accent": "#0a3537",
-    "on": "#f0fffa",
-    "material": "#093e40"
-  },
-  "turquoiseDark": {
-    "bg": "#073a3b",
-    "paper": "#104747",
-    "surface": "#185251",
-    "ink": "#f2fff9",
-    "muted": "#b6d9d3",
-    "line": "#497875",
-    "accent": "#5de8d5",
-    "on": "#082e2a",
-    "material": "#a7c6c4"
-  },
-  "mono": {
-    "bg": "#f4f4ef",
-    "paper": "#ffffff",
-    "surface": "#e8eae5",
-    "ink": "#151a18",
-    "muted": "#505c55",
-    "line": "#bfc6bf",
-    "accent": "#151a18",
-    "on": "#f7faf4",
-    "material": "#292f2d"
-  },
-  "monoDark": {
-    "bg": "#0d1010",
-    "paper": "#191e1c",
-    "surface": "#222927",
-    "ink": "#f1f4ec",
-    "muted": "#b8c1b8",
-    "line": "#465049",
-    "accent": "#e4ece2",
-    "on": "#121915",
-    "material": "#b6c0b9"
-  }
-});
 
 const THEME_KEY = "ideahire_theme";
 const TEMPLATE_KEY = "ideahire_template";
@@ -89,9 +28,6 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
-  "Prezentacja": "Presentation",
-  "Ilustracja": "Illustration",
-  "IdeaHire — strona główna": "IdeaHire — home",
   "Kliknij koło, aby otworzyć funkcje konta.": "Click the circle to open account tools.",
   "Okno ustaleń": "Agreement window",
   "Otwórz okno ustaleń": "Open agreement window",
@@ -225,8 +161,9 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.": "Switch the appearance of the entire site without changing its current layout, data or features.",
   "Szablon strony": "Site template",
   "Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani funkcji IdeaHire.": "Compare two visual styles without changing the IdeaHire layout or features.",
-  "IdeaHire / Turkus": "IdeaHire / Turquoise",
-  "Turkus": "Turquoise",
+  "Granatowy szablon": "Navy template",
+  "Nowoczesny granat": "Modern navy",
+  "Spójny granatowy motyw IdeaHire z czytelnym kontrastem, subtelnymi przejściami i dopracowanymi animacjami.": "A cohesive navy IdeaHire theme with clear contrast, subtle transitions and refined animations.",
   "Klasyczny": "Classic",
   "Czerń i biel": "Black and white",
   "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.": "The complete former IdeaHire look: only black, white and neutral greys, with no blue accents.",
@@ -2267,7 +2204,7 @@ export default function Preferences({
     }
   }
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     document.documentElement.dataset.theme =
       theme;
     document.documentElement.style.colorScheme =
@@ -2284,14 +2221,6 @@ export default function Preferences({
       rememberChosenPreference(TEMPLATE_KEY, template);
     }
   }, [template]);
-
-  // Jedna paleta zasila główną i wszystkie istniejące widoki aplikacji.
-  useLayoutEffect(() => {
-    const key=template==="classic"?(theme==="dark"?"monoDark":"mono"):(theme==="dark"?"turquoiseDark":"turquoise");
-    const p=IDEA_HIRE_VISUAL_SYSTEM[key],root=document.documentElement;
-    const values={bg:p.bg,surface:p.paper,soft:p.surface,ink:p.ink,muted:p.muted,line:p.line,accent:p.accent,on:p.on};
-    Object.entries(values).forEach(([key,value])=>root.style.setProperty("--v-"+key,value,"important"));
-  },[template,theme]);
 
   useEffect(() => {
     document.documentElement.lang =
