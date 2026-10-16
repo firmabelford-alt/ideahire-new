@@ -1,4 +1,4 @@
-/* IdeaHire | P44 Papaya | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | P44 Irys | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
@@ -6,14 +6,14 @@ import React, { createContext, useContext, useEffect, useLayoutEffect, useState,
 
 export const IDEA_HIRE_THEME_IDENTITY = Object.freeze({
   "pl": {
-    "eyebrow": "Papaya / paleta kolorów",
-    "title": "Papaya",
-    "description": "Ciepły papier, wypalona papaja i szałwia. Układ redakcyjny z indeksem oraz przesuwanym pasem stron."
+    "eyebrow": "Irys / paleta kolorów",
+    "title": "Irys",
+    "description": "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu."
   },
   "en": {
-    "eyebrow": "Papaya / colour palette",
-    "title": "Papaya",
-    "description": "Warm paper, baked papaya and sage. An editorial layout with an index and sliding pages."
+    "eyebrow": "Irys / colour palette",
+    "title": "Irys",
+    "description": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen."
   }
 });
 
@@ -176,9 +176,9 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.": "Switch the appearance of the entire site without changing its current layout, data or features.",
   "Szablon strony": "Site template",
   "Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani funkcji IdeaHire.": "Compare two visual styles without changing the IdeaHire layout or features.",
-  "Papaya / paleta kolorów": "Papaya / colour palette",
-  "Papaya": "Papaya",
-  "Ciepły papier, wypalona papaja i szałwia. Układ redakcyjny z indeksem oraz przesuwanym pasem stron.": "Warm paper, baked papaya and sage. An editorial layout with an index and sliding pages.",
+  "Irys / paleta kolorów": "Irys / colour palette",
+  "Irys": "Irys",
+  "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu.": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen.",
   "Klasyczny": "Classic",
   "Czerń i biel": "Black and white",
   "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.": "The complete former IdeaHire look: only black, white and neutral greys, with no blue accents.",
