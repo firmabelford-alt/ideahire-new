@@ -1,155 +1,17 @@
-/* IdeaHire | P48 | Cięcie + ciągłe tło WebGL na całej stronie głównej | Pełny plik src/App.jsx */
-import {useEffect,useLayoutEffect,useMemo,useRef,useState} from "react";
-import {createPortal} from "react-dom";
+/* IdeaHire | P49 | Układ P43 zachowany | 3D dodane do istniejących kart | Pełny plik src/App.jsx */
+
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import "./App.css";
-import {IDEA_HIRE_PUBLIC_OFFER,helpCenterHref} from "./MarketUI";
-import {Link,useNavigate} from "react-router-dom";
-import {supabase} from "./supabase";
-import {useSitePreferences,translateUiText,IDEA_HIRE_VISUAL_SYSTEM} from "./Preferences";
+import { IDEA_HIRE_PUBLIC_OFFER, CommissionStory, HomeStepCard, IdeaHireLogo, MarketIcon, helpCenterHref } from "./MarketUI";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "./supabase";
+import { useSitePreferences, IDEA_HIRE_VISUAL_SYSTEM } from "./Preferences";
 
-const IH47_STYLES=String.raw`:host{display:block;width:100%;font-family:Inter,Arial,sans-serif;font-synthesis:none;color:var(--ink);line-height:1.5;letter-spacing:-.015em;-webkit-font-smoothing:antialiased;}
-*,*::before,*::after{box-sizing:border-box;}
-:where(h1,h2,h3,h4,p,figure){margin:0;}
-:where(button,input,select,a){font:inherit;color:inherit;}
-:where(a){text-decoration:none;}
-:where(button){cursor:pointer;}
-:where(button:disabled){cursor:default;opacity:.5;}
-:where(svg){display:block;}
-:where(a,button,input):focus-visible{outline:3px solid var(--ink);outline-offset:5px;}
-[hidden]{display:none!important;}
-::selection{background:var(--ink);color:var(--paper);}
-.site{position:relative;isolation:isolate;min-height:100svh;background:var(--bg);overflow-x:clip;--pad:clamp(24px,5.4vw,88px);}
-.world{position:fixed;inset:0;width:100%;height:100svh;z-index:0;pointer-events:none;}
-.fallback-world{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:flex-end;padding:0 7vw;color:var(--material);font-size:clamp(100px,18vw,260px);font-weight:800;line-height:.8;letter-spacing:-.09em;transform:perspective(900px) rotateY(-16deg);opacity:.65;}
-.fallback-world>span{display:block;}.site[data-renderer=ready] .fallback-world{display:none;}
-.view{position:relative;z-index:1;}
-.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-.skip{position:fixed;top:12px;left:16px;z-index:500;padding:12px 20px;background:var(--ink);color:var(--paper);transform:translateY(-160%);}
-.skip:focus{transform:none;}
-.header-slot{position:relative;z-index:40;min-height:118px;}
-.masthead{display:block;width:100%;background:var(--bg);border-bottom:1px solid var(--line);}
-.fee-strip{display:flex;align-items:center;justify-content:center;gap:28px;min-height:34px;padding:8px var(--pad);background:var(--ink);color:var(--paper);font-size:12px;line-height:1.4;}
-.fee-strip>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}.fee-strip strong{font-weight:700;}
-.fee-strip svg{width:15px;height:15px;}
-.navigation{display:flex;align-items:center;justify-content:space-between;gap:26px;min-height:84px;padding:16px var(--pad);}
-.brand{display:inline-flex;align-items:center;gap:11px;min-height:44px;flex:0 0 auto;color:var(--ink);font-size:29px;font-weight:750;letter-spacing:-1.8px;line-height:1;}
-.mark{display:grid;grid-template-columns:repeat(2,6px);grid-template-rows:repeat(2,6px);gap:3px;flex:0 0 15px;width:15px;height:15px;}
-.mark i{display:block;width:6px;height:6px;background:currentColor;}.brand .mark{grid-template-columns:repeat(2,7px);grid-template-rows:repeat(2,7px);gap:4px;width:18px;height:18px;flex-basis:18px;}.brand .mark i{width:7px;height:7px;}
-.brand:hover .mark i{animation:pixel-enter .5s cubic-bezier(.16,.8,.2,1) both;}.mark i:nth-child(2){animation-delay:40ms;}.mark i:nth-child(3){animation-delay:80ms;}.mark i:nth-child(4){animation-delay:120ms;}
-.quick-nav{display:flex;align-items:center;gap:28px;}.quick-nav a{display:flex;align-items:center;min-height:44px;font-size:13px;font-weight:550;position:relative;}
-.quick-nav a::after{content:"";position:absolute;left:0;right:0;bottom:7px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .2s;}.quick-nav a:hover::after{transform:scaleX(1);}
-.header-tools{display:flex;align-items:center;gap:20px;}.palette-now{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:var(--ink);font-size:12px;}
-.swatch{width:14px;height:14px;border:1px solid var(--line);background:#26c8cc;display:inline-block;flex:0 0 14px;}.swatch.mono{background:linear-gradient(135deg,#fff 50%,#171a18 50%);}
-.avatar{display:grid;place-items:center;position:relative;width:38px;height:38px;border-radius:50%;background:var(--paper);border:1px solid var(--line);color:var(--ink);font-size:13px;font-weight:600;}.avatar img{width:100%;height:100%;border-radius:inherit;object-fit:cover;}.avatar>i{position:absolute;right:-2px;top:-2px;width:8px;height:8px;border:2px solid var(--bg);border-radius:50%;background:var(--ink);}
-.login-link{display:flex;align-items:center;min-height:44px;font-size:13px;font-weight:550;}
-.menu-trigger,.menu-close{display:flex;align-items:center;justify-content:center;gap:13px;min-width:44px;min-height:44px;padding:0;border:0;background:transparent;color:var(--ink);font-size:12px;font-weight:550;}
-.bars{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:18px;}.bars i{display:block;width:26px;height:2px;background:currentColor;}.bars[data-open=true] i:first-child{transform:translateY(8px) rotate(45deg);}.bars[data-open=true] i:nth-child(2){opacity:0;}.bars[data-open=true] i:last-child{transform:translateY(-8px) rotate(-45deg);}
-.hero{position:relative;padding:25px var(--pad) 0;min-height:calc(100svh - 118px);display:flex;flex-direction:column;}
-.hero-meta{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:40px;}.eyebrow{display:block;font-size:11px;font-weight:600;letter-spacing:.065em;text-transform:uppercase;line-height:1.45;}.hero-meta>.eyebrow{display:flex;align-items:center;gap:10px;}
-.motion{display:flex;align-items:center;gap:8px;}.motion button{display:flex;align-items:center;justify-content:center;gap:9px;min-height:40px;min-width:40px;padding:10px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:11px;font-weight:500;border-radius:2px;}.motion svg{width:16px;height:16px;}
-.hero-stage{display:flex;align-items:center;position:relative;flex:1;min-height:550px;padding:54px 0 72px;}
-.hero-copy{position:relative;z-index:2;width:51%;max-width:660px;}
-.kinetic{font-size:clamp(57px,6.6vw,102px);font-weight:650;line-height:1.02;letter-spacing:-.073em;color:var(--ink);}
-.kinetic>span{display:block;overflow:hidden;padding:0 .06em .07em 0;}.kinetic b{display:block;font-weight:inherit;animation:type-cut .52s cubic-bezier(.16,.85,.2,1) both;animation-delay:calc(var(--line)*60ms);}
-.hero-copy>p{max-width:360px;margin-top:25px;color:var(--muted);font-size:16px;line-height:1.65;}
-.hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:29px;}
-.button{display:inline-flex;align-items:center;justify-content:space-between;gap:25px;min-height:52px;padding:15px 18px;border:1px solid var(--line);border-radius:2px;background:var(--paper);color:var(--ink);font-size:13px;font-weight:550;line-height:1.3;transition:background .2s,border-color .2s;}
-.button svg,.text-link svg{width:20px;height:20px;flex:0 0 20px;transition:transform .2s;}.button:hover svg,.text-link:hover svg{transform:translateX(3px);}.button:hover{border-color:var(--ink);}
-.button.primary{background:var(--accent);color:var(--on);border-color:var(--accent);}.button.primary:hover{background:var(--ink);border-color:var(--ink);color:var(--paper);}
-.frame-caption{position:absolute;right:0;bottom:35px;display:flex;align-items:center;gap:14px;color:var(--ink);font-size:11px;font-weight:550;letter-spacing:.03em;}.frame-caption>span:first-child{color:var(--muted);font-size:10px;}
-.chapters{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);min-height:70px;}
-.film-progress{position:absolute;left:0;right:0;top:-1px;height:2px;transform-origin:left;transform:scaleX(var(--film-progress,0));background:var(--ink);}
-.chapters button{display:flex;align-items:center;gap:14px;min-height:70px;padding:16px 18px 16px 0;border:0;background:none;color:var(--muted);text-align:left;font-size:12px;font-weight:500;}.chapters button>small{font-size:10px;}.chapters button .mark{margin-left:auto;opacity:0;}.chapters button[aria-current=step]{color:var(--ink);font-weight:650;}.chapters button[aria-current=step] .mark{opacity:1;}
-.paths{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper);}
-.paths>a{display:flex;align-items:center;gap:24px;padding:34px var(--pad);min-height:146px;color:var(--ink);}.paths>a+a{border-left:1px solid var(--line);}.paths small{display:block;margin-bottom:8px;font-size:12px;color:var(--muted);}.paths strong{display:block;font-size:clamp(24px,2.2vw,34px);font-weight:550;line-height:1.15;letter-spacing:-.05em;}.paths svg{width:28px;height:28px;margin-left:auto;flex:0 0 28px;}.paths>a:hover{background:var(--surface);}
-.section{padding:90px var(--pad);scroll-margin-top:25px;position:relative;}.section:not(.closing){background:var(--paper);}.section+.section{border-top:1px solid var(--line);}
-.section-heading{display:grid;grid-template-columns:1fr auto;align-items:end;gap:22px 40px;margin-bottom:45px;}.section-heading .eyebrow{grid-column:1/-1;}.section-heading h2{font-size:clamp(38px,4.5vw,67px);font-weight:550;line-height:1.05;letter-spacing:-.066em;}.section-heading h2>span{display:block;}.section-heading>p{max-width:290px;font-size:15px;line-height:1.65;color:var(--muted);}
-.text-link{display:inline-flex;align-items:center;gap:22px;min-height:44px;color:var(--ink);font-size:13px;font-weight:600;}
-.projects{margin:76px var(--pad);padding:46px;border:1px solid var(--line);border-radius:2px;background:var(--paper);}
-.projects .section-heading{margin-bottom:36px;}.projects h2{font-size:clamp(35px,3.6vw,54px);}
-.job-list{border-top:1px solid var(--line);}.job{display:grid;grid-template-columns:24px minmax(0,1fr) auto 22px;align-items:center;gap:23px;min-height:110px;padding:25px 0;border-bottom:1px solid var(--line);color:var(--ink);transition:background .2s;}.job:hover,.job:focus-visible{background:var(--surface);}.job>small{font-size:11px;color:var(--muted);}.job>div{min-width:0;}.job>div>span{display:block;margin-bottom:8px;font-size:12px;color:var(--muted);line-height:1.5;}.job strong{display:block;font-size:clamp(21px,2.2vw,31px);font-weight:550;line-height:1.22;letter-spacing:-.045em;overflow-wrap:anywhere;}.job-price{font-size:14px;font-weight:550;white-space:nowrap;}.job>svg{width:22px;height:22px;}
-.category-workspace{display:grid;grid-template-columns:1fr 1.12fr;gap:55px;}.category-tabs{display:flex;flex-direction:column;}.category-tabs button{display:flex;align-items:center;gap:16px;width:100%;min-height:55px;padding:14px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--muted);text-align:left;}.category-tabs button>small{font-size:10px;flex:0 0 21px;}.category-tabs button>span{flex:1;font-size:14px;line-height:1.45;}.category-tabs button>svg{width:20px;height:20px;opacity:0;}.category-tabs button[aria-selected=true]{color:var(--ink);font-weight:650;}.category-tabs button[aria-selected=true]>svg{opacity:1;transform:rotate(-35deg);}
-.category-detail{min-width:0;padding:35px;background:var(--surface);border:1px solid var(--line);animation:detail-enter .35s ease both;}.category-number{display:flex;justify-content:space-between;align-items:flex-start;font-size:90px;font-weight:450;letter-spacing:-.08em;line-height:1;margin-bottom:30px;}.category-number .mark{margin-top:12px;}.category-detail h3{font-size:clamp(29px,3vw,45px);font-weight:550;line-height:1.1;letter-spacing:-.055em;margin-bottom:17px;}.category-detail>p{max-width:390px;color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:25px;}
-.specialisms{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:26px;}.specialisms>a{display:inline-flex;align-items:center;gap:13px;min-height:43px;padding:10px 12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:12px;line-height:1.4;}.specialisms>a:hover{border-color:var(--ink);}
-.method{display:grid;grid-template-columns:1fr 1fr;gap:65px;}.method .section-heading{display:block;margin-bottom:0;}.method .eyebrow{margin-bottom:24px;}.method h2{font-size:clamp(36px,3.7vw,53px);}.method-list article{border-top:1px solid var(--line);}.method-list h3 button{display:flex;align-items:center;gap:17px;width:100%;min-height:92px;padding:25px 0;border:0;background:none;color:var(--ink);text-align:left;}.method-list h3 small{font-size:11px;font-weight:450;align-self:flex-start;line-height:2.2;color:var(--muted);}.method-list h3 span{flex:1;font-size:23px;font-weight:550;line-height:1.2;letter-spacing:-.04em;}.method-list h3 b{font-weight:350;font-size:24px;}.method-content{position:relative;padding:0 34px 30px 36px;animation:detail-enter .3s ease both;}.method-content p{max-width:360px;font-size:15px;line-height:1.7;color:var(--muted);}.method-content .mark{position:absolute;right:0;bottom:32px;}
-.commission{display:grid;grid-template-columns:1fr 1fr;gap:70px;background:var(--surface)!important;}.commission .section-heading{display:block;margin:0;}.commission .eyebrow{margin-bottom:24px;}.commission .section-heading>p{margin-top:25px;max-width:360px;}
-.fee-rate{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;border-bottom:1px solid var(--line);padding-bottom:30px;margin-bottom:27px;}.fee-rate>strong{font-size:clamp(80px,9vw,128px);font-weight:550;line-height:.85;letter-spacing:-.08em;}.fee-rate>strong>span{font-size:.5em;}.fee-rate>span{font-size:12px;line-height:1.8;color:var(--muted);}.calculator label{display:flex;align-items:center;justify-content:space-between;gap:20px;font-size:14px;}.calculator output{font-size:25px;font-weight:550;letter-spacing:-.035em;}.calculator input{display:block;width:100%;height:44px;margin:16px 0;accent-color:var(--accent);cursor:pointer;}.fee-sum{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding:23px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}.fee-sum>span{font-size:12px;color:var(--muted);}.fee-sum strong{display:block;margin-top:9px;font-size:29px;font-weight:550;color:var(--ink);letter-spacing:-.045em;}.calculator>p{font-size:12px;color:var(--muted);line-height:1.7;margin-top:18px;}
-.closing{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:560px;text-align:center;background:var(--bg);}.closing>.mark{margin-bottom:30px;}.closing h2{font-size:clamp(48px,7.6vw,110px);font-weight:550;line-height:1;letter-spacing:-.075em;margin-bottom:35px;}.closing h2>span{display:block;}
-.footer{display:grid;grid-template-columns:1fr 1fr auto;gap:40px;padding:45px var(--pad) 65px;border-top:1px solid var(--line);background:var(--paper);color:var(--ink);}.footer p{max-width:260px;margin-top:15px;color:var(--muted);font-size:13px;line-height:1.65;}.footer>nav{display:grid;grid-template-columns:1fr 1fr;gap:3px 24px;}.footer nav>a{display:flex;align-items:center;min-height:40px;font-size:12px;}.footer>span{margin-top:15px;font-size:11px;white-space:nowrap;color:var(--muted);}
-.menu{position:fixed;inset:0;z-index:1000;overflow:auto;overscroll-behavior:contain;background:var(--bg);color:var(--ink);padding:24px var(--pad,clamp(24px,5.4vw,88px)) 50px;animation:menu-curtain .45s cubic-bezier(.16,.85,.2,1) both;}
-.menu-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:25px;border-bottom:1px solid var(--line);}.menu-body{display:grid;grid-template-columns:1.5fr 1fr;gap:8vw;max-width:1500px;margin:50px auto 0;}.menu-links{display:flex;flex-direction:column;margin-top:20px;}.menu-links>a{display:flex;align-items:center;gap:22px;min-height:88px;padding:20px 0;border-bottom:1px solid var(--line);color:var(--ink);animation:menu-item .55s cubic-bezier(.16,.85,.2,1) both;animation-delay:calc(var(--index)*45ms);}.menu-links>a>small{font-size:11px;color:var(--muted);align-self:flex-start;margin-top:9px;}.menu-links>a>span{flex:1;font-size:clamp(32px,4vw,60px);font-weight:500;letter-spacing:-.06em;line-height:1.1;}.menu-links>a>svg{width:27px;height:27px;}
-.template-switch{display:flex;flex-direction:column;gap:10px;margin:25px 0;}.template-switch>button{display:flex;align-items:center;gap:14px;width:100%;min-height:56px;padding:14px 16px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:14px;text-align:left;}.template-switch>button[aria-pressed=true]{border-color:var(--ink);background:var(--surface);}.template-switch>button[aria-pressed=true]::after{content:"✓";margin-left:auto;}
-.menu-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;}.menu-options>button{display:flex;align-items:center;justify-content:space-between;gap:15px;min-height:50px;padding:13px 15px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px;}.menu-options svg{width:20px;height:20px;}.menu-account-link,.menu-logout{display:flex;align-items:center;gap:15px;width:100%;min-height:52px;padding:15px 0;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink);font-size:14px;}.menu-account-link{margin-top:25px;}.menu-account-link svg,.menu-logout svg{width:20px;height:20px;margin-left:auto;}.menu-account-link i{width:6px;height:6px;background:var(--ink);border-radius:50%;}.menu-settings>p{max-width:280px;margin-top:40px;color:var(--muted);font-size:14px;line-height:1.7;}.menu-settings>.mark{margin-top:25px;}
-[data-reveal=waiting]{opacity:0;transform:translateY(30px);}[data-reveal]{transition:opacity .6s ease,transform .7s cubic-bezier(.16,.85,.2,1);}
-.site[data-paused=true] *,.site[data-paused=true] *::before,.site[data-paused=true] *::after{animation-play-state:paused!important;}
-@keyframes type-cut{from{transform:translateY(105%) rotate(2deg);opacity:.3;}to{transform:none;opacity:1;}}
-@keyframes detail-enter{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-@keyframes pixel-enter{from{transform:scale(.1) translateY(5px);opacity:0;}to{transform:none;opacity:1;}}
-@keyframes menu-curtain{from{clip-path:inset(0 0 100% 0);}to{clip-path:inset(0);}}
-@keyframes menu-item{from{transform:translateY(30px);opacity:0;}to{transform:none;opacity:1;}}
-@media(min-width:1700px){.site{--pad:max(80px,calc((100vw - 1500px)/2));}}
-@media(max-width:1120px){.quick-nav{gap:19px;}.header-tools{gap:15px;}.palette-now>span:last-child{display:none;}.hero-copy{width:57%;}.hero-copy>p{max-width:330px;}.hero-actions{gap:8px;}.button{padding:14px 15px;gap:15px;font-size:12px;}.category-workspace{gap:35px;}.method,.commission{gap:42px;}.projects{padding:35px;}.menu-body{gap:55px;}}
-@media(max-width:820px){
- .site{--pad:26px;}.header-slot{min-height:106px;}.navigation{min-height:72px;padding:13px var(--pad);}.brand{font-size:27px;}.quick-nav{display:none;}.fee-strip{gap:20px;padding:8px 20px;font-size:11px;}.fee-strip .fee-description{display:none;}.menu-trigger>span:first-child{display:none;}.hero{padding-top:20px;}.hero-meta{min-height:40px;}.hero-meta>.eyebrow{font-size:10px;}.motion button{font-size:10px;padding:10px;min-height:40px;}.hero-stage{align-items:flex-start;min-height:790px;padding-top:48px;padding-bottom:100px;}.hero-copy{width:100%;max-width:520px;}.kinetic{font-size:clamp(54px,8vw,74px);}.hero-copy>p{font-size:15px;max-width:340px;margin-top:20px;}.hero-actions{margin-top:24px;}.hero-actions>.button{font-size:13px;min-height:52px;}.frame-caption{bottom:25px;right:0;}.chapters button{font-size:11px;gap:10px;}.chapters button .mark{display:none;}
- .paths>a{padding:28px 26px;gap:15px;min-height:125px;}.paths strong{font-size:24px;}.paths small{font-size:11px;}.paths .mark{display:none;}.paths svg{width:24px;height:24px;flex-basis:24px;}.section{padding-top:75px;padding-bottom:75px;}.section-heading h2{font-size:45px;}.section-heading>p{font-size:14px;max-width:220px;}.projects{margin-top:60px;margin-bottom:60px;padding:30px;}.projects h2{font-size:41px;}.job{gap:16px;}.job strong{font-size:24px;}.job-price{font-size:13px;}.category-workspace{gap:25px;}.category-tabs button>span{font-size:13px;}.category-detail{padding:27px;}.category-number{font-size:76px;}.category-detail h3{font-size:32px;}.category-detail>p{font-size:13px;}.specialisms>a{font-size:11px;}.method,.commission{grid-template-columns:1fr;gap:35px;}.method h2{font-size:44px;}.commission .section-heading>p{max-width:440px;}.closing{min-height:480px;}.closing h2{font-size:70px;}.footer{grid-template-columns:1fr 1fr;gap:30px;}.footer>span{grid-column:1/-1;margin-top:0;}.footer>nav{grid-template-columns:1fr;}
- .menu{padding-left:26px;padding-right:26px;}.menu-body{grid-template-columns:1.2fr 1fr;gap:35px;margin-top:35px;}.menu-links>a{gap:14px;min-height:78px;}.menu-links>a>span{font-size:33px;}.menu-options{grid-template-columns:1fr;}
-}
-@media(max-width:560px){
- .site{--pad:22px;}.navigation{gap:12px;}.brand{font-size:26px;gap:9px;}.brand .mark{transform:scale(.9);}.header-tools{gap:13px;}.palette-now{min-width:28px;}.login-link{font-size:12px;}.avatar{width:35px;height:35px;font-size:12px;}.hero-meta>.eyebrow>.mark{display:none;}.hero-meta>.eyebrow{font-size:10px;max-width:155px;}.motion{gap:6px;}.motion button{font-size:10px;padding:9px;gap:7px;}.motion svg{width:15px;height:15px;}.hero-stage{min-height:760px;padding-top:35px;}.hero-copy{max-width:100%;}.kinetic{font-size:clamp(47px,11.2vw,63px);line-height:1.03;}.hero-copy>p{font-size:15px;line-height:1.6;max-width:300px;margin-top:17px;}.hero-actions{display:grid;grid-template-columns:1fr;max-width:310px;gap:8px;margin-top:20px;}.hero-actions>.button{font-size:13px;padding:14px 16px;min-height:50px;}.frame-caption{bottom:20px;font-size:10px;gap:10px;}.frame-caption>span:first-child{font-size:9px;}.chapters{min-height:68px;}.chapters button{flex-direction:column;align-items:flex-start;gap:7px;min-height:68px;padding:14px 6px 14px 0;font-size:10px;}.chapters button>small{font-size:9px;}
- .paths{grid-template-columns:1fr;margin-top:16px;}.paths>a{min-height:112px;padding:25px 22px;gap:18px;}.paths>a+a{border-left:0;border-top:1px solid var(--line);}.paths .mark{display:grid;}.paths strong{font-size:26px;}.paths small{font-size:12px;}.section{padding-top:60px;padding-bottom:60px;}.section-heading{grid-template-columns:1fr;gap:18px;margin-bottom:32px;}.section-heading h2,.method h2{font-size:38px;}.section-heading>p{max-width:300px;}.eyebrow{font-size:11px;}.projects{margin:50px 14px;padding:25px 20px;}.projects h2{font-size:34px;}.projects .section-heading{margin-bottom:28px;}.job{grid-template-columns:18px minmax(0,1fr) 20px;gap:12px;align-items:start;padding:24px 0;min-height:135px;}.job>small{margin-top:4px;font-size:10px;}.job>div>span{font-size:11px;line-height:1.5;}.job strong{font-size:23px;}.job-price{grid-column:2;grid-row:2;font-size:13px;}.job>svg{grid-column:3;grid-row:1;align-self:center;width:20px;height:20px;}.category-workspace{grid-template-columns:1fr;gap:24px;}.category-tabs{display:grid;grid-template-columns:1fr 1fr;gap:0 17px;}.category-tabs button{min-height:66px;padding:13px 0;gap:8px;}.category-tabs button>small{flex-basis:18px;font-size:10px;}.category-tabs button>span{font-size:12px;line-height:1.4;}.category-tabs button>svg{display:none;}.category-detail{padding:26px 23px;}.category-number{font-size:72px;margin-bottom:25px;}.category-detail h3{font-size:32px;}.category-detail>p{font-size:14px;}.specialisms>a{min-height:44px;font-size:12px;padding:10px;gap:9px;}.category-detail>.button{width:100%;font-size:13px;}.method-list h3 button{min-height:85px;gap:15px;}.method-list h3 span{font-size:22px;}.method-content{padding-left:30px;}.method-content p{font-size:14px;}.fee-rate>strong{font-size:96px;}.fee-rate>span{font-size:11px;}.calculator output{font-size:24px;}.fee-sum strong{font-size:27px;}.closing{min-height:430px;}.closing h2{font-size:49px;}.closing>.button{min-width:185px;font-size:14px;}.footer{grid-template-columns:1fr;padding-bottom:50px;gap:30px;}.footer>nav{grid-template-columns:1fr 1fr;gap:0 14px;}.footer nav>a{font-size:12px;min-height:44px;}.footer p{font-size:13px;}.footer>span{font-size:11px;}
- .menu{padding:20px 22px 40px;}.menu-top{padding-bottom:18px;}.menu-body{grid-template-columns:1fr;gap:36px;margin-top:28px;}.menu-links{margin-top:15px;}.menu-links>a{min-height:73px;padding:18px 0;}.menu-links>a>span{font-size:34px;}.menu-links>a>small{font-size:10px;margin-top:6px;}.menu-links>a>svg{width:23px;height:23px;}.template-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0;}.template-switch>button{min-height:54px;padding:13px 11px;gap:9px;font-size:12px;}.menu-options{grid-template-columns:1fr 1fr;}.menu-options>button{font-size:12px;padding:13px 11px;}.menu-settings>p{font-size:14px;margin-top:30px;}
-}
-@media(max-width:360px){.site{--pad:16px;}.navigation{gap:8px;}.header-tools{gap:8px;}.login-link{display:none;}.hero-meta>.eyebrow{font-size:9px;max-width:130px;}.motion button{font-size:9px;padding:8px;}.hero-stage{min-height:780px;}.kinetic{font-size:44px;}.hero-copy>p{font-size:14px;}.chapters button{font-size:9px;}.paths>a{padding-left:16px;padding-right:16px;}.paths strong{font-size:24px;}.menu-links>a>span{font-size:30px;}.template-switch>button{font-size:11px;}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}[data-reveal]{opacity:1!important;transform:none!important;}}
-/* P47 — ciągły, tonalny dół. Duża typografia i sceny w prawdziwej perspektywie. */
-:host{font-size:16px;}
-.site{background:var(--bg);}
-.fee-strip{background:var(--surface);color:var(--ink);min-height:36px;font-size:12px;gap:30px;}
-.fee-strip .mark{width:12px;height:12px;grid-template-columns:repeat(2,5px);grid-template-rows:repeat(2,5px);gap:2px;flex-basis:12px;}.fee-strip .mark i{width:5px;height:5px;}
-.masthead{background:var(--bg);}.navigation{min-height:88px;}.brand{font-size:29px;}.quick-nav{gap:30px;}.header-slot{min-height:124px;}
-.swatch{background:#29c6c7;}.swatch.mono{background:linear-gradient(135deg,#f6f5ef 50%,#151c1a 50%);}
-.intro-film{padding:0;}.ih43-film{margin-bottom:0!important;}.film-underbar{display:flex;align-items:center;justify-content:space-between;gap:25px;min-height:76px;padding:20px var(--pad);border-bottom:1px solid var(--line);font-size:12px;}.film-underbar>span{display:flex;align-items:center;gap:12px;}.film-underbar>a{display:flex;align-items:center;gap:16px;font-weight:600;min-height:40px;}.film-underbar svg{width:20px;height:20px;}
-.lower-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px var(--pad) 0;}.lower-heading .eyebrow{font-size:11px;}.pause-all{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:9px 12px;border:1px solid var(--line);background:none;color:var(--ink);font-size:11px;}.pause-all svg{width:15px;height:15px;}
-.chapter{padding:80px var(--pad);scroll-margin-top:24px;border-bottom:1px solid var(--line);background:var(--bg);}
-.chapter .section-heading{margin-bottom:36px;grid-template-columns:minmax(0,1fr) minmax(160px,280px);align-items:end;gap:22px 50px;}.chapter .section-heading h2{font-size:clamp(43px,4.8vw,74px);font-weight:600;letter-spacing:-.065em;line-height:1.04;}.chapter .section-heading .eyebrow{grid-column:1/-1;}.chapter .section-heading>p{max-width:280px;font-size:15px;line-height:1.65;color:var(--muted);}.chapter .section-heading>.text-link{justify-self:end;}
-.chapter.projects{margin:0;border-radius:0;border:0;border-bottom:1px solid var(--line);padding:70px var(--pad) 85px;background:var(--bg);}
-.project-stage,.fee-stage,.process-stage{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:40px;}
-.space{position:relative;height:620px;min-width:0;isolation:isolate;touch-action:pan-y;}.space>canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;}.space-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:30px;color:var(--ink);font-size:100px;font-weight:800;line-height:.85;letter-spacing:-.08em;transform:perspective(900px) rotateY(-15deg);}.space-fallback>span:last-child{font-size:60px;}.space[data-renderer=ready] .space-fallback{display:none;}
-.job-list{border:0;}.job{grid-template-columns:22px minmax(0,1fr) 22px;gap:18px;padding:27px 0;min-height:142px;border-top:1px solid var(--line);border-bottom:0;}.job:last-of-type{border-bottom:1px solid var(--line);}.job>small{align-self:start;margin-top:6px;font-size:11px;}.job>div>span{font-size:12px;margin-bottom:10px;line-height:1.5;}.job strong{font-size:clamp(23px,2.4vw,37px);font-weight:600;letter-spacing:-.045em;line-height:1.2;}.job .job-price{display:block;grid-column:auto;grid-row:auto;margin:14px 0 0;font-size:14px;color:var(--ink);}.job:hover,.job:focus-visible{background:var(--surface);}.caption{font-size:12px;line-height:1.65;color:var(--muted);margin-top:22px;max-width:420px;}
-.category-stage{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:70px;align-items:center;}.category-tabs button{min-height:56px;padding:14px 0;gap:15px;}.category-tabs button>span{font-size:14px;}.category-tabs button[aria-selected=true]>svg{transform:rotate(-35deg);}.category-tabs button:hover{color:var(--ink);}.category-detail{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:70px;margin-top:30px;padding:35px 0 0;border:0;border-top:1px solid var(--line);background:none;animation:detail-enter .3s ease;}.category-detail h3{font-size:clamp(29px,3vw,43px);margin:20px 0 14px;font-weight:600;}.category-detail p{max-width:360px;font-size:14px;line-height:1.65;color:var(--muted);}.specialisms>a{background:var(--bg);font-size:12px;min-height:44px;}.specialisms>a:hover{background:var(--surface);}.specialisms{gap:8px;margin-bottom:25px;}
-.chapter.commission{display:block;background:var(--bg)!important;}.fee-stage{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:65px;}.fee-stage>.space{height:720px;}.fee-rate{padding-bottom:30px;margin-bottom:28px;}.fee-rate>strong{font-size:clamp(100px,11vw,160px);font-weight:600;}.fee-rate>span{font-size:13px;line-height:1.8;}.calculator label{font-size:14px;align-items:center;}.budget-field{display:inline-flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--ink);}.budget-field input{width:115px;min-width:0;padding:0;border:0;background:transparent;color:var(--ink);font-size:30px;font-weight:600;line-height:1.2;letter-spacing:-.05em;}.budget-field>span{font-size:13px;}.budget-field input::-webkit-inner-spin-button,.budget-field input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}.budget-field input[type=number]{-moz-appearance:textfield;}.calculator .budget-range{width:100%;height:44px;margin:18px 0 12px;accent-color:var(--ink);background:transparent;}.budget-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:27px;}.budget-presets>button{min-height:43px;padding:8px 5px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:12px;}.budget-presets>button[aria-pressed=true],.budget-presets>button:hover{border-color:var(--ink);background:var(--surface);}.fee-sum{display:flex;flex-direction:column;gap:0;padding:0;border:0;}.fee-sum>div{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0;border-top:1px solid var(--line);}.fee-sum>div>span{font-size:13px;color:var(--muted);}.fee-sum strong{margin:0;font-size:24px;font-weight:600;color:var(--ink);white-space:nowrap;}.fee-sum>.fee-total{padding-top:22px;border-bottom:1px solid var(--line);padding-bottom:22px;}.fee-total>span{color:var(--ink)!important;}.fee-total strong{font-size:33px;}.calculator>.caption{font-size:12px;line-height:1.65;}
-.chapter.method{display:block;}.process-stage{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:65px;}.process-tabs{display:flex;flex-direction:column;}.process-tabs>button{display:block;width:100%;padding:26px 0;text-align:left;color:var(--muted);border:0;border-top:1px solid var(--line);background:none;}.process-tabs>button:last-child{border-bottom:1px solid var(--line);}.process-tabs>button[aria-selected=true]{color:var(--ink);}.step-index{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;font-size:12px;}.step-index .mark{opacity:0;}.process-tabs>button[aria-selected=true] .mark{opacity:1;}.process-tabs strong{display:block;font-size:clamp(25px,2.7vw,40px);line-height:1.15;font-weight:550;letter-spacing:-.05em;}.process-tabs p{max-width:360px;margin-top:18px;font-size:15px;line-height:1.7;color:var(--muted);animation:detail-enter .3s ease;}
-.closing{min-height:490px;padding:80px var(--pad);background:var(--bg);border-bottom:1px solid var(--line);}.closing h2{font-size:clamp(55px,8.5vw,124px);font-weight:650;letter-spacing:-.075em;}.closing .closing-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}.closing>.mark{margin-bottom:30px;}.paths{margin:0;border:0;background:var(--bg);}.paths>a{padding:35px var(--pad);border-bottom:1px solid var(--line);background:var(--bg);}.paths>a+a{border-left:1px solid var(--line);}.footer{background:var(--bg);border-top:0;}.menu{background:var(--bg);}.template-switch>button,.menu-options>button{background:var(--bg);}.template-switch>button[aria-pressed=true]{background:var(--surface);}.button{background:var(--bg);}.button.primary{background:var(--ink);color:var(--on);border-color:var(--ink);}
-@media(max-width:1120px){.chapter .section-heading h2{font-size:55px;}.project-stage,.fee-stage,.process-stage{gap:30px;}.category-stage,.category-detail{gap:40px;}.space{height:550px;}.fee-stage>.space{height:650px;}.quick-nav{gap:20px;}.chapter{padding-top:65px;padding-bottom:65px;}.chapter.projects{padding-top:60px;padding-bottom:65px;}.job strong{font-size:29px;}}
-@media(max-width:820px){.header-slot{min-height:108px;}.navigation{min-height:72px;}.chapter{padding-top:60px;padding-bottom:60px;}.chapter.projects{padding-top:55px;padding-bottom:60px;}.chapter .section-heading{gap:20px 25px;}.chapter .section-heading h2{font-size:43px;}.chapter .section-heading>p{font-size:14px;}.project-stage,.fee-stage,.process-stage{gap:20px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.space{height:510px;}.fee-stage>.space{height:580px;}.category-stage{gap:30px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.category-tabs button>span{font-size:13px;}.category-tabs button{gap:11px;}.category-detail{gap:30px;}.fee-rate{gap:15px;}.fee-rate>strong{font-size:91px;}.fee-rate>span{font-size:11px;}.budget-field input{width:95px;font-size:27px;}.calculator label{font-size:13px;}.fee-sum strong{font-size:21px;}.fee-total strong{font-size:28px;}.process-tabs strong{font-size:28px;}.process-tabs p{font-size:14px;}.closing{min-height:430px;}.closing h2{font-size:75px;}.film-underbar{min-height:72px;font-size:11px;}}
-@media(max-width:650px){.chapter .section-heading{grid-template-columns:1fr;gap:19px;}.chapter .section-heading h2{font-size:clamp(34px,8.9vw,48px);}.chapter .section-heading>.text-link{justify-self:start;}.project-stage,.fee-stage,.process-stage{grid-template-columns:1fr;gap:0;}.space{height:460px;margin:12px -12px 0;}.project-stage>.space{order:-1;margin-top:-15px;margin-bottom:15px;}.job{min-height:118px;padding:24px 0;}.job strong{font-size:27px;}.job .job-price{font-size:14px;margin-top:13px;}.category-stage{display:flex;flex-direction:column;gap:20px;}.category-stage>.space{width:calc(100% + 24px);height:430px;margin-top:-25px;}.category-tabs{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;width:100%;}.category-tabs button{min-height:67px;padding:14px 0;gap:8px;}.category-tabs button>span{font-size:12px;line-height:1.45;}.category-tabs button>small{font-size:10px;flex-basis:18px;}.category-tabs button>svg{display:none;}.category-detail{grid-template-columns:1fr;gap:25px;margin-top:28px;padding-top:27px;}.category-detail h3{font-size:32px;margin-top:18px;}.category-detail p{font-size:14px;}.specialisms>a{font-size:12px;}.fee-stage>.space{height:460px;order:-1;margin-top:-24px;margin-bottom:20px;}.fee-rate>strong{font-size:116px;}.fee-rate>span{font-size:12px;}.calculator label{font-size:14px;}.budget-field input{width:125px;font-size:33px;}.fee-sum strong{font-size:25px;}.fee-total strong{font-size:34px;}.process-stage>div:last-child{order:-1;}.process-stage .space{height:420px;margin-top:-25px;margin-bottom:15px;}.process-tabs strong{font-size:29px;}.process-tabs p{max-width:100%;font-size:15px;}.process-tabs>button{padding:25px 0;}.closing{min-height:425px;padding-top:65px;padding-bottom:65px;}.closing h2{font-size:clamp(47px,11vw,66px);}.closing-actions{width:100%;}.closing-actions>.button{flex:1;min-width:155px;font-size:13px;}.paths strong{font-size:27px;}.film-underbar{align-items:flex-start;gap:14px;padding-top:20px;padding-bottom:20px;}.film-underbar>span{max-width:220px;font-size:11px;line-height:1.6;}.film-underbar>span>.mark{display:none;}.film-underbar>a{font-size:11px;gap:8px;white-space:nowrap;}.lower-heading{padding-top:25px;}.lower-heading .eyebrow{font-size:10px;}.pause-all{font-size:10px;padding:9px;gap:7px;}.chapter{padding-top:55px;padding-bottom:55px;}.chapter.projects{padding-top:45px;padding-bottom:55px;}}
-@media(max-width:360px){.chapter .section-heading h2{font-size:32px;}.space{height:410px;}.category-stage>.space{height:395px;}.fee-stage>.space{height:430px;}.film-underbar>span{max-width:175px;}.fee-sum strong{font-size:22px;}.fee-total strong{font-size:30px;}.fee-rate>strong{font-size:103px;}.closing h2{font-size:46px;}}
-
-/* P48 — ciągła scena od nagłówka po stopkę, bez odcinających ją pełnych teł. */
-.ih48-world{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;overflow:hidden;background:var(--bg);}
-.ih48-world>canvas{display:block;width:100%;height:100%;}
-.ih48-world[data-renderer=fallback]{background:var(--bg);}
-.view{position:relative;z-index:1;}
-.ih47-home.ih47-home .ih43-film,.ih47-home.ih47-home .ih43-film[data-classic=true]{background:transparent!important;}
-.chapter,.chapter.projects,.chapter.commission,.chapter.method,.closing,.paths,.paths>a,.footer{background:transparent!important;}
-.chapter{position:relative;}
-.chapter .section-heading{position:relative;padding:24px 25px;margin-left:-25px;margin-right:-25px;background:color-mix(in srgb,var(--bg) 89%,transparent);border-radius:3px;}
-.project-stage>.job-list,.category-tabs,.calculator,.process-tabs{position:relative;padding:22px 25px;background:color-mix(in srgb,var(--bg) 94%,transparent);border:1px solid color-mix(in srgb,var(--line) 65%,transparent);border-radius:3px;}
-.category-detail{padding:30px 25px;background:color-mix(in srgb,var(--bg) 94%,transparent);border:1px solid color-mix(in srgb,var(--line) 65%,transparent);border-radius:3px;}
-.film-underbar,.lower-heading,.footer,.paths>a{background:color-mix(in srgb,var(--bg) 93%,transparent)!important;}
-.lower-heading{padding-bottom:25px;}
-.closing{position:relative;isolation:isolate;}
-.closing::before{content:"";position:absolute;inset:35px var(--pad);z-index:-1;background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid color-mix(in srgb,var(--line) 65%,transparent);border-radius:3px;}
-.masthead{background:color-mix(in srgb,var(--bg) 97%,transparent);}
-.fee-strip{background:color-mix(in srgb,var(--bg) 94%,transparent);}
-.space{border:0;}
-@media(max-width:820px){.chapter .section-heading{padding:20px;margin-left:-14px;margin-right:-14px;}.project-stage>.job-list,.category-tabs,.calculator,.process-tabs{padding:20px;}.category-detail{padding:25px 20px;}}
-@media(max-width:650px){.category-tabs{display:grid;gap:0 17px;}.category-detail{gap:24px;}.closing::before{inset:22px 12px;}.chapter .section-heading{padding:18px 14px;margin-left:-8px;margin-right:-8px;}.space{margin-left:-10px;margin-right:-10px;}.project-stage>.job-list,.calculator,.process-tabs{padding:18px 16px;}.category-tabs{padding:16px;}.lower-heading{padding-bottom:20px;}}
-`;
 const IH43_STYLES=String.raw`
-__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:var(--bg)!important;color:var(--ink)!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
+__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#141313!important;color:#eee9df!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
 __IH43__ .ih43-film,__IH43__ .ih43-film * {box-sizing:border-box!important;}
-__IH43__ .ih43-film[data-classic="true"] {background:var(--bg)!important;color:var(--ink)!important;}
+__IH43__ .ih43-film[data-classic="true"] {background:#121212!important;color:#efefec!important;}
 __IH43__ .ih43-canvas {position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;opacity:0;pointer-events:none!important;}
 __IH43__ .ih43-film[data-ready="true"] .ih43-canvas {opacity:1;}
 __IH43__ .ih43-film[data-failed="true"] .ih43-canvas {display:none!important;}
@@ -167,7 +29,7 @@ __IH43__ .ih43-film[data-failed="true"] .ih43-control {display:none!important;}
 __IH43__ .ih43-film[data-failed="true"] .ih43-link {display:flex!important;align-items:center!important;justify-content:center!important;background:#f4f0e5!important;border:1px solid #171717!important;color:#171717!important;-webkit-text-fill-color:#171717!important;}
 __IH43__ .ih43-film[data-failed="true"] .ih43-link-label {position:static!important;width:auto!important;height:auto!important;margin:0!important;padding:8px!important;overflow:visible!important;clip:auto!important;clip-path:none!important;white-space:normal!important;font-size:12px!important;font-weight:700!important;line-height:1.4!important;text-align:center!important;}
 @media(max-width:820px){__IH43__ .ih43-film {--ih43-pad:20px;--ih43-gap:10px;--ih43-button:calc((100% - 50px) / 2);--ih43-toolbar:calc(100% - 168px);height:min(820px,max(680px,calc(100svh - 96px)))!important;min-height:680px!important;margin-bottom:30px!important;}}
-`.replaceAll("__IH43__",".ih47-home");
+`.replaceAll("__IH43__","#root".repeat(10));
 
 const IH43_FILM={
   "key": "01-Ciecie",
@@ -273,7 +135,7 @@ const IH43_FILM={
       "Potrzebuję wykonawcy",
       "Szukam zlecenia"
     ],
-    "subtitle": "Opisz projekt, poznaj wykonawcę i ustalcie szczegóły.",
+    "subtitle": "Krótki opis. Konkretne ustalenia. Można zaczynać.",
     "disclosure": "Sekwencja pokazowa — przykładowe materiały.",
     "endTags": [
       "GRAFIKA",
@@ -282,11 +144,11 @@ const IH43_FILM={
     ],
     "ui": {
       "panel": "Opis / zakres",
-      "project": "Strona Twojej marki",
+      "project": "Znak kawiarni",
       "details": [
-        "Zakres strony",
-        "Termin realizacji",
-        "Budżet projektu"
+        "Identyfikacja",
+        "Oznaczenia",
+        "Pliki źródłowe"
       ],
       "note": "Projekt pokazowy",
       "fee": "Prowizja IdeaHire",
@@ -296,10 +158,10 @@ const IH43_FILM={
       "payer": "Płaci zleceniodawca.",
       "thread": "Uzgodnienia",
       "messages": [
-        "Termin: piątek?",
-        "Tak, dam radę."
+        "Zaczynamy?",
+        "Jasne."
       ],
-      "prompt": "Zapiszcie zakres, kwotę i termin."
+      "prompt": "Konkretne warunki, wspólny start."
     },
     "ctaMobile": [
       "Wykonawcy",
@@ -307,68 +169,61 @@ const IH43_FILM={
     ],
     "frames": [
       [
-        "MASZ",
-        "POMYSŁ."
+        "DOSYĆ",
+        "ODKŁADANIA."
       ],
       [
-        "OPISZ,",
-        "CO ROBIMY."
+        "ZAPISZ",
+        "KONKRET."
       ],
       [
-        "ZAKRES.",
-        "TERMIN.",
-        "BUDŻET."
+        "OPIS",
+        "WYSTARCZY."
       ],
       [
-        "ZNAJDŹ",
-        "SWOJĄ OSOBĘ."
+        "PUŚĆ",
+        "W OBIEG."
       ],
       [
-        "PROJEKT.",
+        "GRAFIKA.",
         "KOD.",
-        "FILM."
+        "MONTAŻ."
       ],
       [
-        "JASNA PROWIZJA."
+        "PROWIZJA."
       ],
       [
-        "SPRAWDŹ",
-        "PORTFOLIO."
+        "PRZEGADAJ."
       ],
       [
-        "ZŁAPCIE",
-        "KONTAKT."
+        "USTAL."
       ],
       [
-        "USTALMY",
-        "SZCZEGÓŁY."
+        "ZACZYNAMY?"
       ],
       [
-        "ZAPISZCIE",
-        "USTALENIA."
+        "JASNE."
       ],
       [
-        "CENA.",
-        "TERMIN.",
-        "REZULTAT."
+        "KONKRETNE",
+        "WARUNKI."
       ],
       [
-        "MOŻNA",
-        "ZACZYNAĆ."
+        "RUSZAJ."
       ],
       [
-        "TWÓJ POMYSŁ.",
-        "JEGO FACH.",
-        "WSPÓLNA PRACA."
+        "KLIENT.",
+        "WYKONAWCA.",
+        "JEDZIEMY."
       ],
       [
-        "Masz pomysł.",
-        "Daj mu życie."
+        "Dobra.",
+        "Robimy."
       ]
     ],
     "final": [
-      "Masz pomysł.",
-      "Daj mu życie."
+      "Dobra.",
+      "Robimy."
     ]
   },
   "en": {
@@ -376,7 +231,7 @@ const IH43_FILM={
       "Commission a task",
       "Browse listings"
     ],
-    "subtitle": "Describe the project, meet the professional and agree on the details.",
+    "subtitle": "Tell us what you need. Choose the right execution.",
     "disclosure": "Illustrative sequence — sample materials.",
     "endTags": [
       "DESIGN",
@@ -385,11 +240,11 @@ const IH43_FILM={
     ],
     "ui": {
       "panel": "Description / scope",
-      "project": "Your brand’s website",
+      "project": "A café identity",
       "details": [
-        "Website scope",
-        "Delivery date",
-        "Project budget"
+        "Visual identity",
+        "Signage",
+        "Source files"
       ],
       "note": "Sample project",
       "fee": "IdeaHire service fee",
@@ -399,10 +254,10 @@ const IH43_FILM={
       "payer": "Paid by the client.",
       "thread": "Agreement",
       "messages": [
-        "Friday delivery?",
-        "Yes, that works."
+        "Shall we start?",
+        "Absolutely."
       ],
-      "prompt": "Record the scope, price and delivery."
+      "prompt": "Clear terms. A shared start."
     },
     "ctaMobile": [
       "Hire talent",
@@ -410,68 +265,61 @@ const IH43_FILM={
     ],
     "frames": [
       [
-        "YOU HAVE",
-        "AN IDEA."
+        "ENOUGH",
+        "PUTTING IT OFF."
       ],
       [
-        "SAY WHAT",
-        "YOU NEED."
+        "GET IT",
+        "DOWN."
       ],
       [
-        "SCOPE.",
-        "TIMING.",
-        "BUDGET."
+        "START",
+        "WITH A NOTE."
       ],
       [
-        "FIND",
-        "YOUR PERSON."
+        "PUT IT",
+        "OUT THERE."
       ],
       [
         "DESIGN.",
         "CODE.",
-        "FILM."
+        "EDITING."
       ],
       [
-        "A CLEAR FEE."
+        "THE FEE."
       ],
       [
-        "SEE THEIR",
-        "PORTFOLIO."
+        "TALK IT THROUGH."
       ],
       [
-        "START A",
-        "CONVERSATION."
+        "AGREE."
       ],
       [
-        "LET’S AGREE",
-        "THE DETAILS."
+        "SHALL WE START?"
       ],
       [
-        "WRITE IT",
-        "DOWN."
+        "ABSOLUTELY."
       ],
       [
-        "PRICE.",
-        "TIMING.",
-        "RESULT."
+        "CLEAR",
+        "TERMS."
       ],
       [
-        "READY",
-        "TO BEGIN."
+        "GO."
       ],
       [
-        "YOUR IDEA.",
-        "THEIR SKILLS.",
-        "SHARED WORK."
+        "CLIENT.",
+        "FREELANCER.",
+        "LET’S DO THIS."
       ],
       [
-        "Have an idea?",
-        "Bring it to life."
+        "All right.",
+        "We’re on."
       ]
     ],
     "final": [
-      "Have an idea?",
-      "Bring it to life."
+      "All right.",
+      "We’re on."
     ]
   },
   "paths": [
@@ -551,20 +399,23 @@ function ih43Panel(c,x,y,w,h,options={}){
   if(options.label)ih43Text(c,options.label,-w/2+21,-h/2+28,11,ink,600);
   c.fillStyle=ink;for(let i=0;i<3;i++){c.globalAlpha*=.8;c.beginPath();c.arc(w/2-23-i*9,-h/2+24,2,0,Math.PI*2);c.fill();}c.restore();
 }
-function ih43Palette(classic,dark=false){
- if(classic)return{...IH43_FILM.palette,paper:"#f6f5ef",ink:"#151c1a",accent:"#727b73",secondary:"#c1c8bd",light:"#ffffff",muted:"#555f56"};
- const p=IDEA_HIRE_VISUAL_SYSTEM[dark?"turquoiseDark":"turquoise"];
- return{paper:p.paper,ink:p.ink,accent:p.bg,secondary:p.surface,light:p.on,muted:p.muted,backgrounds:{paper:p.paper,ink:p.surface,accent:p.bg,secondary:p.surface}};
-}
-function ih43Surface(p,mode){if(p.backgrounds)return p.backgrounds[mode]||p.backgrounds.ink;return mode==="paper"?p.paper:mode==="accent"?p.accent:mode==="secondary"?p.secondary:p.ink;}
+function ih43Palette(classic){const p=IH43_FILM.palette;if(!classic)return p;return{...p,paper:"#efefec",ink:"#121212",accent:"#777777",secondary:"#b0b0ad",light:"#ffffff",muted:"#777777"};}
 function ih43Backdrop(c,l,p,shot,time){
- const mode=shot.bg||"ink",bg=ih43Surface(p,mode);c.save();c.globalAlpha=p.backgrounds?.72:.96;c.fillStyle=bg;c.fillRect(0,0,l.w,l.h);c.restore();
- return{bg,ink:mode==="paper"||mode==="secondary"?p.ink:p.paper};
+  const mode=shot.bg||"ink",bg=mode==="paper"?p.paper:mode==="accent"?p.accent:mode==="secondary"?p.secondary:p.ink;c.fillStyle=bg;c.fillRect(0,0,l.w,l.h);
+  c.save();c.globalAlpha=.055;c.strokeStyle=mode==="paper"?p.ink:p.paper;c.lineWidth=1;
+  if(IH43_FILM.genre==="cut"){
+    const drift=(time*48)%80;for(let x=-100;x<l.w+100;x+=80){c.beginPath();c.moveTo(x+drift,0);c.lineTo(x+drift-l.h*.14,l.h);c.stroke();}
+  }else if(IH43_FILM.genre==="network"){
+    const offset=(time*14)%44;for(let x=-44;x<l.w+44;x+=44)for(let y=-44;y<l.h+44;y+=44)c.fillRect(x+offset,y,1.1,1.1);
+  }else{
+    const band=(time*32)%160;for(let y=-160;y<l.h+160;y+=160)c.fillRect(0,y+band,l.w,1);
+  }
+  c.restore();return{bg,ink:mode==="paper"||mode==="secondary"?p.ink:p.paper};
 }
 function ih43Transition(c,l,p,phase){
   const duration=.32,remaining=phase.shot.duration-phase.local;if(remaining>duration||IH43_FILM.genre==="network")return;
   const progress=IH43.ease(1-remaining/duration),next=IH43_FILM.shots[(phase.index+1)%IH43_FILM.shots.length];
-  const color=ih43Surface(p,next.bg);
+  const color=next.bg==="paper"?p.paper:next.bg==="accent"?p.accent:next.bg==="secondary"?p.secondary:p.ink;
   c.save();c.fillStyle=color;
   if(IH43_FILM.genre==="cut"){
     for(let i=0;i<7;i++){const x=l.w*i/7,shift=IH43.clamp(progress*1.35-i*.045);c.fillRect(x,-l.h+(l.h*2)*shift,l.w/7+2,l.h);}
@@ -572,7 +423,7 @@ function ih43Transition(c,l,p,phase){
   c.restore();
 }
 function ih43Ui(c,l,p,s,phase){
-  const bg=phase.shot.bg||"ink",surface=ih43Surface(p,bg),ink=ih43Readable(surface,p.ink,p.paper),outline=ih43Contrast(surface,"#000000")>=ih43Contrast(surface,"#ffffff")?"rgba(8,35,30,.38)":"rgba(225,250,240,.50)";
+  const bg=phase.shot.bg||"ink",surface=bg==="paper"?p.paper:bg==="accent"?p.accent:bg==="secondary"?p.secondary:p.ink,ink=ih43Readable(surface,p.ink,p.paper),outline=ink===p.ink||ink==="#000000"?"rgba(20,20,20,.35)":"rgba(245,245,235,.45)";
   const language=s.english?IH43_FILM.en:IH43_FILM.pl;
   const brandSize=l.mobile?19:22;ih43Text(c,"IdeaHire",l.pad,52,brandSize,ink,800);
   const progress=phase.cycle/IH43_FILM.period;c.fillStyle=outline;c.fillRect(l.pad,68,l.w-l.pad*2,1);c.fillStyle=ink;c.fillRect(l.pad,68,(l.w-l.pad*2)*progress,2);
@@ -593,8 +444,8 @@ function ih43Ui(c,l,p,s,phase){
   if(!l.mobile){const stamp=String(phase.index+1).padStart(2,"0")+" / "+String(IH43_FILM.shots.length).padStart(2,"0");ih43Text(c,stamp,l.w-l.pad,l.h-26,10,ink,500,"right");}
 }
 function ih43Frame(c,w,h,time,s,includeUi=true){
-  const clock=s.reduced?IH43_FILM.finalStart+2.5:time,l=IH43.layout(w,h),phase=IH43.phase(clock),p=ih43Palette(s.classic,s.dark);
-  c.clearRect(0,0,w,h);c.save();c.beginPath();c.rect(0,0,w,h);c.clip();ih43Backdrop(c,l,p,phase.shot,time);
+  const clock=s.reduced?IH43_FILM.finalStart+2.5:time,l=IH43.layout(w,h),phase=IH43.phase(clock),p=ih43Palette(s.classic);
+  c.save();c.beginPath();c.rect(0,0,w,h);c.clip();ih43Backdrop(c,l,p,phase.shot,time);
   c.save();c.beginPath();c.rect(0,75,w,h-195);c.clip();
   const px=s.reduced?0:(s.pointerX||0)*3,py=s.reduced?0:(s.pointerY||0)*2;c.translate(px,py);
   ih43Scene(c,l,p,phase,s,clock);c.restore();
@@ -623,11 +474,11 @@ function ih43Start(canvas,host,state,report){
   }catch{destroy();report({failed:true,ready:true});}};
   const wake=()=>{if(!disposed&&visible&&!document.hidden&&!frame){last=0;lastDraw=0;frame=requestAnimationFrame(render);}};
   try{
-    c=canvas.getContext("2d",{alpha:true});if(!c)throw new Error("ih43_canvas");
+    c=canvas.getContext("2d",{alpha:false});if(!c)throw new Error("ih43_canvas");
     listen(window,"resize",()=>{dirty=true;wake();},{passive:true});listen(document,"visibilitychange",()=>{last=0;lastDraw=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;stopSound();}else wake();});
     if(typeof ResizeObserver!=="undefined"){resizeObserver=new ResizeObserver(()=>{dirty=true;wake();});resizeObserver.observe(host);}
     if(typeof IntersectionObserver!=="undefined"){observer=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;lastDraw=0;stopSound();}},{rootMargin:"100px"});observer.observe(host);}
-    ih47Fonts().then(()=>{if(!disposed){IH43_MEASURE.clear();wake();}}).catch(()=>{});
+    document.fonts?.ready?.then(()=>{if(!disposed){IH43_MEASURE.clear();wake();}}).catch(()=>{});
     resize();wake();
     return{wake,destroy,mute(){sound=false;state.current.sound=false;stopSound();wake();},replay(){state.current.time=0;previous=-1;wake();},finale(){state.current.time=IH43_FILM.finalStart+1.6;previous=-1;wake();},async toggleSound(){if(disposed||state.current.reduced)return false;try{if(!audio){const Context=window.AudioContext||window.webkitAudioContext;if(!Context)return false;audio=new Context();}if(!sound){await audio.resume();if(disposed||state.current.reduced)return false;sound=true;}else{sound=false;stopSound();}state.current.sound=sound;wake();return sound;}catch{return false;}}};
   }catch{destroy();report({failed:true,ready:true});return{wake(){},destroy,mute(){},replay(){},finale(){},async toggleSound(){return false;}};}
@@ -658,7 +509,7 @@ function ih43CutConversation(c,l,p,phase,words,time){
   const tick=.4+.6*Math.sin(time*5)**2;c.save();c.globalAlpha=tick;ih43Text(c,words.prompt,x,y+height*.40,11,p.ink,500,"center");c.restore();
 }
 function ih43Scene(c,l,p,phase,s,time){
-  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,text=lang.frames[phase.index],ink=ih43Readable(ih43Surface(p,shot.bg),p.ink,p.paper);
+  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,text=lang.frames[phase.index],ink=shot.bg==="paper"||shot.bg==="secondary"?p.ink:p.paper;
   const enter=IH43.clamp(phase.local/.48),shake=s.reduced?0:Math.sin(phase.local*72)*Math.exp(-phase.local*13)*5;
   c.translate(shake,0);
   const titleBox={x:l.pad,y:l.y+13,w:l.cw,h:l.ch-16};
@@ -694,18 +545,18 @@ function ih43Reduced(){
 }
 
 /* Każdy wariant jest alternatywą całego pliku App.jsx. Trasy, płatności i dalsza strona pozostają w części P40. */
-export function IdeaHireCinematicHero({paused=false,onPause=()=>{}}){
-  const setPaused=onPause;
+export function IdeaHireCinematicHero(){
   const site=useSitePreferences();
   const english=site.language==="en",classic=site.template==="classic";
   const copy=english?IH43_FILM.en:IH43_FILM.pl;
   const [reduced,setReduced]=useState(ih43Reduced);
+  const [paused,setPaused]=useState(false);
   const [sound,setSound]=useState(false);
   const [ready,setReady]=useState(false);
   const [failed,setFailed]=useState(false);
   const [scene,setScene]=useState(()=>ih43Reduced()?IH43_FILM.shots.length-1:0);
   const rootRef=useRef(null),canvasRef=useRef(null),engineRef=useRef(null),alive=useRef(false),soundBusy=useRef(false);
-  const motion=useRef({time:0,paused:false,reduced,english,classic,dark:site.theme==="dark",offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
+  const motion=useRef({time:0,paused:false,reduced,english,classic,offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
   const finale=scene===IH43_FILM.shots.length-1;
   const labels=english?{
     region:"IdeaHire — "+IH43_FILM.name,
@@ -724,10 +575,11 @@ export function IdeaHireCinematicHero({paused=false,onPause=()=>{}}){
     return()=>media.removeEventListener?.("change",change);
   },[]);
   useLayoutEffect(()=>{
-    Object.assign(motion.current,{reduced,english,classic,dark:site.theme==="dark",paused,offer:IDEA_HIRE_PUBLIC_OFFER});
+    Object.assign(motion.current,{reduced,english,classic,paused,offer:IDEA_HIRE_PUBLIC_OFFER});
+    IH49_MOTION.paused=paused||reduced;window.dispatchEvent(new CustomEvent("ih49-motion",{detail:{paused:IH49_MOTION.paused}}));
     if(reduced){setSound(false);engineRef.current?.mute();}
     engineRef.current?.wake();
-  },[reduced,english,classic,paused,site.theme]);
+  },[reduced,english,classic,paused]);
   useEffect(()=>{
     alive.current=true;
     const engine=ih43Start(canvasRef.current,rootRef.current,motion,update=>{
@@ -795,202 +647,16 @@ export function IdeaHireCinematicHero({paused=false,onPause=()=>{}}){
   </section>;
 }
 
+/* P40: jeden nagłówek w DOM; przewijanie zabiera cały pas, bezruch odsyła go na górę. */
+const IH40_HEADER_STYLES = String.raw`
+__IH40__ .ih40-header-slot {display:flow-root!important;position:relative!important;width:100%!important;min-width:0!important;overflow:visible!important;}
+__IH40__ .ih40-header-slot > .ih-home-header {position:relative!important;inset:auto!important;translate:0 0!important;}
+__IH40__ .ih40-header-slot .home-nav-links {translate:0 0!important;}
+@media(prefers-reduced-motion:reduce){__IH40__ .ih40-header-slot > .ih-home-header{transition:none!important;}}
+`.replaceAll("__IH40__", "#root".repeat(10));
 
-function ih47Clamp(x,a=0,b=1){return Math.max(a,Math.min(b,x));}
-function ih47Ease(x){x=ih47Clamp(x);return 1-Math.pow(1-x,5);}
-function ih47Mix(a,b,t){return a+(b-a)*t;}
-function ih47Identity(){return [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];}
-function ih47Mul(a,b){const o=Array(16).fill(0);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o;}
-function ih47Transform(x,y,z,rx=0,ry=0,rz=0,scale=1,sy=scale,sz=scale){
- const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),ssy=Math.sin(ry),cz=Math.cos(rz),ssz=Math.sin(rz);
- const X=[1,0,0,0,0,cx,sx,0,0,-sx,cx,0,0,0,0,1],Y=[cy,0,-ssy,0,0,1,0,0,ssy,0,cy,0,0,0,0,1],Z=[cz,ssz,0,0,-ssz,cz,0,0,0,0,1,0,0,0,0,1];
- const m=ih47Mul(ih47Mul(Z,Y),X);for(let r=0;r<3;r++){m[r]*=scale;m[4+r]*=sy;m[8+r]*=sz;}m[12]=x;m[13]=y;m[14]=z;return m;
-}
-function ih47Perspective(fov,aspect,near=.1,far=70){const f=1/Math.tan(fov/2);return[f/aspect,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0];}
-function ih47Look(eye,at){const norm=v=>{const n=Math.hypot(...v)||1;return v.map(x=>x/n);},cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);const z=norm(eye.map((x,i)=>x-at[i])),x=norm(cross([0,1,0],z)),y=cross(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1];}
-function ih47RGB(hex){return[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255);}
-function ih47Fonts(){const fonts=document.fonts;if(!fonts)return Promise.resolve();const tasks=[fonts.ready];if(fonts.load)for(const weight of [400,600,700,800])tasks.push(fonts.load(weight+' 32px Inter','Zażółć gęślą jaźń ąćęłńóśźż 5,5% IdeaHire'));return Promise.allSettled(tasks);}
-
-/* P47 — prawdziwe sceny WebGL: drukowane plansze, głębia, światło i fizyczne krawędzie. */
-const IH47_VERTEX=String.raw`
-precision highp float;
-attribute vec3 aPosition,aNormal;attribute vec2 aUV;attribute float aMaterial;
-uniform mat4 uModel,uVP;varying vec3 vPosition,vNormal;varying vec2 vUV;varying float vMaterial;
-void main(){vec4 p=uModel*vec4(aPosition,1.0);vPosition=p.xyz;vNormal=normalize(mat3(uModel)*aNormal);vUV=aUV;vMaterial=aMaterial;gl_Position=uVP*p;}`;
-const IH47_FRAGMENT=String.raw`
-precision highp float;
-uniform vec3 uEye,uBG,uInk,uBase,uAccent;uniform float uMode,uAlpha;uniform sampler2D uTexture;
-varying vec3 vPosition,vNormal;varying vec2 vUV;varying float vMaterial;
-void main(){
- vec3 n=normalize(vNormal),eye=normalize(uEye-vPosition);if(dot(n,eye)<0.0)n=-n;
- vec3 light=normalize(vec3(-3.0,5.0,6.0)-vPosition);float nl=max(0.0,dot(n,light));
- vec3 col=uBase*(.50+.45*nl);float alpha=uAlpha;
- if(uMode<1.5&&vMaterial<.5){col=texture2D(uTexture,vUV).rgb*(.96+.04*nl);}
- else{float spec=pow(max(0.0,dot(n,normalize(light+eye))),65.0);col+=uAccent*spec*.22;}
- if(uMode>1.5){vec2 p=(vUV-.5)*2.0;alpha*=exp(-4.0*dot(p,p));col=uInk;}
- gl_FragColor=vec4(clamp(col,0.0,1.0),alpha);
-}`;
-function ih47CardMesh(){
- const ring=[],radius=.055,w=1.25,h=1.67;
- for(let corner=0;corner<4;corner++){const cx=corner===0||corner===3?w-radius:-w+radius,cy=corner<2?h-radius:-h+radius;for(let j=0;j<=5;j++){const a=corner*Math.PI/2+j*Math.PI/10;ring.push([cx+radius*Math.cos(a),cy+radius*Math.sin(a)]);}}
- const vertices=[],indices=[],put=(p,n,u,v,m)=>{const i=vertices.length/9;vertices.push(...p,...n,u,v,m);return i;};
- const center=put([0,0,.025],[0,0,1],.5,.5,0),front=[];
- for(const[x,y]of ring)front.push(put([x,y,.025],[0,0,1],(x+w)/(w*2),(y+h)/(h*2),0));
- for(let i=0;i<ring.length;i++)indices.push(center,front[i],front[(i+1)%ring.length]);
- for(let i=0;i<ring.length;i++){const a=ring[i],b=ring[(i+1)%ring.length],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy)||1,n=[dy/length,-dx/length,0];const start=vertices.length/9;for(const[p,z]of [[a,.025],[b,.025],[b,-.025],[a,-.025]])put([p[0],p[1],z],n,0,0,1);indices.push(start,start+1,start+2,start,start+2,start+3);}
- const back=vertices.length/9;for(const p of [[-w,-h],[w,-h],[w,h],[-w,h]])put([...p,-.025],[0,0,-1],0,0,1);indices.push(back,back+2,back+1,back,back+3,back+2);
- return{vertices,indices};
-}
-function ih47ShadowMesh(){return{vertices:[-1,-1,0,0,0,1,0,0,0,1,-1,0,0,0,1,1,0,0,1,1,0,0,0,1,1,1,0,-1,1,0,0,0,1,0,1,0],indices:[0,1,2,0,2,3]};}
-function ih47Fee(amount,offer){return Math.round(Math.max(offer.minimum,Math.min(offer.maximum,amount*offer.percent/100))*100)/100;}
-function ih47Money(value,english){return Number(value).toLocaleString(english?'en-GB':'pl-PL',{maximumFractionDigits:2})+(english?' PLN':' zł');}
-function ih47Texture(state,index){
- const canvas=document.createElement('canvas');canvas.width=900;canvas.height=1200;const c=canvas.getContext('2d'),p=state.palette,en=state.english,mode=state.mode;
- if(mode==='fees'&&index>0){canvas.height=600;c.fillStyle=p.paper;c.fillRect(0,0,900,600);c.strokeStyle=p.line;c.lineWidth=2;c.strokeRect(1,1,898,598);c.fillStyle=p.ink;c.font='600 22px Inter,Arial';c.fillText('IDEAHIRE / '+(index===1?(en?'PROFESSIONAL':'WYKONAWCA'):(en?'CLIENT':'ZLECENIODAWCA')),50,72);c.font='600 51px Inter,Arial';c.fillText(index===1?(en?'The agreed amount.':'Ustalona kwota.'):(en?'A clear total.':'Jasna suma.'),50,225);c.font='700 77px Inter,Arial';c.fillText(ih47Money(index===1?state.amount:state.amount+ih47Fee(state.amount,state.offer),en),50,370);c.font='400 23px Inter,Arial';c.fillText(index===1?(en?'Project remuneration':'Wynagrodzenie za zlecenie'):(en?'Project + IdeaHire fee':'Zlecenie + prowizja IdeaHire'),50,440);c.strokeStyle=p.line;c.beginPath();c.moveTo(50,500);c.lineTo(850,500);c.stroke();c.font='400 19px Inter,Arial';c.fillText(en?'ILLUSTRATIVE CALCULATION':'PRZYKŁADOWE OBLICZENIE',50,550);return canvas;}
- c.fillStyle=p.paper;c.fillRect(0,0,900,1200);c.strokeStyle=p.line;c.lineWidth=2;c.strokeRect(1,1,898,1198);
- const text=(s,x,y,size=25,weight=500,color=p.ink)=>{c.font=weight+' '+size+'px Inter,Arial';c.fillStyle=color;c.fillText(String(s),x,y);};
- const line=y=>{c.strokeStyle=p.line;c.beginPath();c.moveTo(52,y);c.lineTo(848,y);c.stroke();};
- const mark=(x,y)=>{c.fillStyle=p.ink;for(let i=0;i<4;i++)c.fillRect(x+(i%2)*18,y+Math.floor(i/2)*18,12,12);};
- const wrap=(s,y,size=62)=>{c.font='700 '+size+'px Inter,Arial';const words=String(s).split(' ');let row='',count=0;for(const word of words){const value=row?row+' '+word:word;if(c.measureText(value).width>770&&row){text(row,52,y,size,700);y+=size*1.1;count++;row=word;if(count===3)break;}else row=value;}text(row.slice(0,35),52,y,size,700);return y+size*1.1;};
- mark(52,48);text('IDEAHIRE',105,73,23,700);c.textAlign='right';text('0'+(index+1),848,73,22);c.textAlign='left';line(110);
- if(mode==='fees'){
-  const amount=state.amount,offer=state.offer,fee=ih47Fee(amount,offer),n=amount+fee;
-  text(index===0?(en?'YOUR CALCULATION':'TWOJE OBLICZENIE'):index===1?(en?'PROFESSIONAL':'WYKONAWCA'):(en?'CLIENT':'ZLECENIODAWCA'),52,175,22,600);
-  if(index===0){text(offer.percent.toLocaleString(en?'en-GB':'pl-PL')+'%',52,390,180,700);text(en?'IdeaHire service fee':'Prowizja IdeaHire',58,447,27);line(500);
-   for(const[row,value,i]of [[en?'Project value':'Wartość zlecenia',amount,0],[en?'IdeaHire fee':'Prowizja IdeaHire',fee,1],[en?'Client total':'Razem dla klienta',n,2]]){text(row,52,580+i*138,24,500,p.muted);text(ih47Money(value,en),52,642+i*138,46,700);if(i<2)line(675+i*138);}
-  }else{wrap(index===1?(en?'The agreed amount.':'Ustalona kwota.'):(en?'A clear total.':'Jasna suma.'),300,72);text(ih47Money(index===1?amount:n,en),52,635,64,700);text(index===1?(en?'Project remuneration':'Wynagrodzenie za zlecenie'):(en?'Project + IdeaHire fee':'Zlecenie + prowizja IdeaHire'),52,705,26);}
-  line(1045);text(en?'ILLUSTRATIVE CALCULATION':'PRZYKŁADOWE OBLICZENIE',52,1100,20,600);text('min. '+offer.minimum+' / '+(en?'max. ':'maks. ')+offer.maximum+' '+(en?'PLN':'zł'),52,1140,20,500,p.muted);
- }else if(mode==='categories'){
-  text(en?'THE FIELD':'DZIEDZINA',52,180,22,600);const category=state.category;wrap(category?.label||(en?'Your expertise.':'Twój fach.'),310,74);
-  const specs=category?.specialisms||[];for(let i=0;i<Math.min(5,specs.length);i++){const y=620+i*69;line(y-36);text(String(specs[(i+index*2)%specs.length]).slice(0,44),52,y,26,500);text('↗',810,y,30,600);}
-  line(1045);text(en?'CHOOSE A SPECIALISM':'WYBIERZ SPECJALIZACJĘ',52,1100,21,600);text('IDEA / HIRE',52,1140,22,500,p.muted);
- }else if(mode==='process'){
-  const steps=en?[['THE BRIEF','Say what you need.',['Scope','Delivery','Budget']],['THE DETAILS','Agree before starting.',['Price','Revisions','Delivery']],['THE WORK','Make it happen.',['Conversation','Files','Handover']]]:[['OPIS','Powiedz, co robimy.',['Zakres','Termin','Budżet']],['USTALENIA','Zapiszcie konkrety.',['Kwota','Poprawki','Termin']],['WSPÓŁPRACA','Dobra. Do roboty.',['Rozmowa','Pliki','Przekazanie']]];
-  const step=steps[index%3];text(step[0],52,180,22,600);wrap(step[1],330,82);step[2].forEach((item,i)=>{const y=690+i*92;line(y-42);text('0'+(i+1),52,y,22,500,p.muted);text(item,125,y,38,600);});line(1045);text('IDEAHIRE / '+(index+1)+' / 3',52,1110,23,600);
- }else{
-  const job=state.jobs[index%Math.max(1,state.jobs.length)],sample=!ih47RealJob(job),titles=en?['A website for a new brand','A visual identity','Copy for a company website']:['Strona dla nowej marki','Identyfikacja wizualna','Teksty na stronę firmową'];
-  text(en?'PROJECT BRIEF':'ZAKRES PROJEKTU',52,180,22,600);wrap(sample?titles[index%3]:job.title,310,74);
-  const budget=sample?[3000,1800,900][index%3]:(Number(job?.budget)>0?Number(job.budget):null);line(690);text(en?'Project budget':'Budżet projektu',52,750,25,500,p.muted);text(budget===null?(en?'To agree':'Do ustalenia'):ih47Money(budget,en),52,825,69,700);line(910);
-  text(en?'SCOPE / TIMING / RESULT':'ZAKRES / TERMIN / REZULTAT',52,980,23,600);line(1045);text(sample?(en?'ILLUSTRATIVE BRIEF':'PRZYKŁADOWY ZAKRES'):(en?'IDEAHIRE LISTING':'ZLECENIE IDEAHIRE'),52,1100,21,600);text('↗',790,1140,48,500);
- }
- return canvas;
-}
-function ih47SpacePlan(s,width,height){
- const small=width<650,t=s.time,phase=Math.floor(t/5.5)%4,local=t%5.5,cut=s.reduced?1:ih47Ease(local/.6),turn=s.reduced?0:Math.sin(t*.55)*.035;
- const changing=s.reduced?0:1-ih47Ease(s.transition/.65),entry=s.reduced?0:1-ih47Ease(s.enter/.85),yScroll=s.reduced?0:(s.progress-.5)*.42;
- const selected=s.mode==='fees'?0:s.selected??0,mode=s.mode;
- const eye=[small?.1:.45+(s.x||0)*.20,.4+(s.y||0)*.12,small?8.7:8.5],at=[small?0:-.18,0,0],vp=ih47Mul(ih47Perspective(42*Math.PI/180,width/height),ih47Look(eye,at));
- const poses=mode==='fees'?[[.0,0,1.1,-.08,-.10,-.055],[-1.35,.95,-.4,.04,.35,-.13],[1.35,-.75,-.2,-.02,-.25,.10]]:mode==='process'?[[0,0,.8,-.04,-.14,-.04],[-1.35,.05,-.5,.05,.28,-.15],[1.35,.0,-.7,-.06,-.22,.15]]:[[0,0,.8,-.045,-.14,-.045],[-1.5,.15,-.7,.03,.30,-.17],[1.55,.10,-.9,-.02,-.27,.13]];
- const calls=[];
- for(let i=2;i>=0;i--){const rank=(i-selected+3)%3,p=poses[rank],spin=changing*(i%2?-.45:.45),slide=entry*(i-1)*3.5+changing*(i-1)*.25;
-  const rhythm=(which)=>which===0?[0,0,0]:which===1?[rank===1?-.1:rank===2?.15:0,rank===1?.38:rank===2?-.3:0,rank===0?.12:0]:which===2?[rank===1?-.3:rank===2?.30:0,0,rank===0?.20:-.3]:[rank===1?.15:rank===2?-.1:0,rank===1?-.25:rank===2?.2:0,0];
-  const from=rhythm((phase+3)%4),to=rhythm(phase),beat=to.map((v,j)=>ih47Mix(from[j],v,cut));
-  const x=p[0]+slide+beat[0],y=p[1]+yScroll+turn*(i+1)+beat[1],z=p[2]+(rank===0?changing*.3:0)+beat[2],sy=mode==='fees'&&i>0?.46:.92;
-  calls.push({mesh:'card',texture:i,model:ih47Transform(x,y,z,p[3]+(s.y||0)*.04,p[4]+(s.x||0)*.10+spin+(1-cut)*(rank-1)*.18,p[5]+turn,.92,sy,.92),mode:0,alpha:1});}
- calls.unshift({mesh:'shadow',model:ih47Transform(0,-1.84,-.15,-Math.PI/2,0,0,3.2,1.1,1),mode:2,alpha:.20});
- return{eye,vp,calls};
-}
-function ih47SpaceRenderer(canvas){
- const gl=canvas.getContext('webgl',{alpha:true,antialias:true,powerPreference:'low-power'});if(!gl)return null;
- const shaders=[],buffers=[],textures=[];let program=null,signature='',lastUpload=-1000;
- const shader=(kind,source)=>{const sh=gl.createShader(kind);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){gl.deleteShader(sh);throw Error('P47 shader');}shaders.push(sh);return sh;};
- try{program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,IH47_VERTEX));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,IH47_FRAGMENT));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('P47 link');}catch{shaders.forEach(sh=>gl.deleteShader(sh));if(program)gl.deleteProgram(program);return null;}
- gl.useProgram(program);const uniforms={};for(const key of ['uModel','uVP','uEye','uBG','uInk','uBase','uAccent','uMode','uAlpha','uTexture'])uniforms[key]=gl.getUniformLocation(program,key);
- const attributes={};for(const key of ['aPosition','aNormal','aUV','aMaterial'])attributes[key]=gl.getAttribLocation(program,key);
- const meshes={};for(const[name,data]of Object.entries({card:ih47CardMesh(),shadow:ih47ShadowMesh()})){const vb=gl.createBuffer(),ib=gl.createBuffer();buffers.push(vb,ib);gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data.vertices),gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(data.indices),gl.STATIC_DRAW);meshes[name]={vb,ib,count:data.indices.length};}
- for(let i=0;i<3;i++)textures.push(gl.createTexture());gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.uniform1i(uniforms.uTexture,0);
- const vec=(key,value)=>gl.uniform3fv(uniforms[key],new Float32Array(value));
- return{draw(width,height,s){
-  if(gl.isContextLost())return;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  const next=JSON.stringify([s.mode,s.english,s.palette,s.amount,s.category,s.jobs,s.fontCycle]);if(next!==signature&&(s.time-lastUpload>.08||!signature||s.paused||s.reduced)){signature=next;lastUpload=s.time;for(let i=0;i<3;i++){gl.bindTexture(gl.TEXTURE_2D,textures[i]);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,ih47Texture(s,i));for(const[key,value]of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,key,value);}}
-  const plan=ih47SpacePlan(s,s.cssWidth,s.cssHeight),p=s.palette;gl.uniformMatrix4fv(uniforms.uVP,false,new Float32Array(plan.vp));vec('uEye',plan.eye);vec('uBG',ih47RGB(p.bg));vec('uInk',ih47RGB(p.ink));vec('uBase',ih47RGB(p.material));vec('uAccent',ih47RGB(p.paper));
-  for(const call of plan.calls){const mesh=meshes[call.mesh];gl.bindBuffer(gl.ARRAY_BUFFER,mesh.vb);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.ib);for(const[key,size,offset]of [['aPosition',3,0],['aNormal',3,12],['aUV',2,24],['aMaterial',1,32]]){gl.enableVertexAttribArray(attributes[key]);gl.vertexAttribPointer(attributes[key],size,gl.FLOAT,false,36,offset);}gl.uniformMatrix4fv(uniforms.uModel,false,new Float32Array(call.model));gl.uniform1f(uniforms.uMode,call.mode);gl.uniform1f(uniforms.uAlpha,call.alpha);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,textures[call.texture||0]);gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);}
- },destroy(){buffers.forEach(b=>gl.deleteBuffer(b));textures.forEach(t=>gl.deleteTexture(t));shaders.forEach(sh=>gl.deleteShader(sh));gl.deleteProgram(program);}};
-}
-function ih47StartSpace(canvas,host,state){
- let engine=null,dead=false,frame=0,last=0,lastDraw=0,visible=true,dirty=true,observer,resizeObserver;const cleanup=[];
- const listen=(node,event,fn,options)=>{node.addEventListener(event,fn,options);cleanup.push(()=>node.removeEventListener(event,fn,options));};
- const create=()=>{engine?.destroy();try{engine=ih47SpaceRenderer(canvas);}catch{engine=null;}host.dataset.renderer=engine?'ready':'fallback';dirty=true;};
- function tick(now){frame=0;if(dead||!visible||document.hidden)return;const s=state.current,interval=window.innerWidth<821?1000/30:1000/45;if(!s.paused&&!s.reduced&&lastDraw&&now-lastDraw<interval-1){frame=requestAnimationFrame(tick);return;}const dt=last?Math.min(.08,(now-last)/1000):0;last=now;lastDraw=now;
-  if(!s.paused&&!s.reduced){s.time+=dt;s.transition+=dt;s.enter+=dt;s.x+=(s.targetX-s.x)*.12;s.y+=(s.targetY-s.y)*.12;}
-  const b=host.getBoundingClientRect();s.progress=ih47Clamp((window.innerHeight-b.top)/(window.innerHeight+b.height),0,1);
-  if(dirty){s.cssWidth=Math.max(1,b.width);s.cssHeight=Math.max(1,b.height);let dpr=Math.min(window.devicePixelRatio||1,1.6);dpr=Math.min(dpr,Math.sqrt(850000/(s.cssWidth*s.cssHeight)));s.width=Math.max(1,Math.round(s.cssWidth*dpr));s.height=Math.max(1,Math.round(s.cssHeight*dpr));dirty=false;}
-  try{engine?.draw(s.width,s.height,s);}catch{engine?.destroy();engine=null;host.dataset.renderer='fallback';}
-  if(engine&&!s.paused&&!s.reduced)frame=requestAnimationFrame(tick);
- }
- const wake=()=>{if(!dead&&visible&&!document.hidden&&!frame){last=0;lastDraw=0;frame=requestAnimationFrame(tick);}};
- create();listen(window,'resize',()=>{dirty=true;wake();},{passive:true});listen(window,'scroll',wake,{passive:true});listen(host,'pointermove',e=>{if(e.pointerType!=='mouse'||state.current.reduced)return;const b=host.getBoundingClientRect();state.current.targetX=(e.clientX-b.left)/Math.max(1,b.width)*2-1;state.current.targetY=(e.clientY-b.top)/Math.max(1,b.height)*2-1;},{passive:true});listen(host,'pointerleave',()=>{state.current.targetX=0;state.current.targetY=0;});
- listen(document,'visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;last=0;}else wake();});listen(canvas,'webglcontextlost',e=>{e.preventDefault();engine=null;host.dataset.renderer='fallback';cancelAnimationFrame(frame);frame=0;});listen(canvas,'webglcontextrestored',()=>{create();wake();});
- if(typeof IntersectionObserver!=='undefined'){observer=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'100px'});observer.observe(host);}
- if(typeof ResizeObserver!=='undefined'){resizeObserver=new ResizeObserver(()=>{dirty=true;wake();});resizeObserver.observe(host);}
- ih47Fonts().then(()=>{if(!dead){state.current.fontCycle=(state.current.fontCycle||0)+1;wake();}}).catch(()=>{});
- wake();return{wake,destroy(){dead=true;cancelAnimationFrame(frame);cleanup.forEach(fn=>fn());observer?.disconnect();resizeObserver?.disconnect();engine?.destroy();}};
-}
-function IH47Space({mode,selected=0,amount=2200,category=null,jobs=[],palette,english,reduced,paused}){
- const root=useRef(null),canvas=useRef(null),engine=useRef(null),state=useRef({time:0,transition:1,enter:0,x:0,y:0,targetX:0,targetY:0,mode,selected,amount,category,jobs,palette,english,reduced,paused,offer:IDEA_HIRE_PUBLIC_OFFER});
- useLayoutEffect(()=>{const s=state.current;if(s.selected!==selected||s.amount!==amount||s.category!==category)s.transition=0;Object.assign(s,{mode,selected,amount,category,jobs,palette,english,reduced,paused});engine.current?.wake();},[mode,selected,amount,category,jobs,palette,english,reduced,paused]);
- useEffect(()=>{engine.current=ih47StartSpace(canvas.current,root.current,state);return()=>{engine.current?.destroy();engine.current=null;};},[]);
- return <div className="space" ref={root} aria-hidden="true"><canvas ref={canvas}/><div className="space-fallback"><span>IDEA<br/>HIRE</span><span>{mode==='fees'?IDEA_HIRE_PUBLIC_OFFER.percent.toLocaleString(english?'en-GB':'pl-PL')+'%':'↗'}</span></div></div>;
-}
-
-const IH47_COPY={
-  pl:{menu:"Menu",close:"Zamknij menu",how:"Jak to działa",categories:"Kategorie",fee:"Prowizja",account:"Moje konto",login:"Zaloguj się",register:"Dołącz",logout:"Wyloguj się",notices:"Powiadomienia",find:"Znajdź wykonawcę",work:"Znajdź zlecenie",skip:"Pomiń wejście",replay:"Powtórz animację",pause:"Zatrzymaj animacje",play:"Wznów animacje",hero:"Ludzie do Twoich pomysłów.",intro:[ ["Masz","pomysł."],["Ktoś","potrafi."],["Złapcie","kontakt."],["Działajcie","razem."],["Masz pomysł.","Daj mu życie."] ],chapters:["Pomysł","Umiejętności","Rozmowa","Współpraca"],subtitle:"Strona, identyfikacja, film? Znajdź osobę, z którą zrobisz następny krok.",sample:"Przykładowy projekt",all:"Wszystkie zlecenia",go:"Przejrzyj zlecenia",latest:"Do zrobienia",examples:"Przykładowe zakresy",jobsTitle:"Ktoś właśnie szuka\nTwoich umiejętności.",categoriesTitle:"Zacznij od\nswojej dziedziny.",categoryLead:"Wybierz kierunek. Dalej są konkretne specjalizacje.",methodTitle:"Od pierwszej rozmowy\ndo konkretów.",method:[["Opisz, co chcesz zrobić.","Zakres, termin i oczekiwany rezultat. Kilka konkretów ułatwi znalezienie właściwej osoby."],["Sprawdź, z kim pracujesz.","Zobacz profil i portfolio. Zapytaj o doświadczenie przy podobnych projektach."],["Ustalcie warunki.","Porozmawiajcie o cenie, przekazaniu pracy i poprawkach. Zapiszcie ustalenia przed rozpoczęciem."]],closing:["Dobry moment,","żeby zacząć."],summary:"Miejsce spotkania pomysłu z wykonaniem.",legal:"Dokumenty i pomoc",help:"Pomoc",terms:"Regulamin",privacy:"Prywatność",illegal:"Zgłoś nielegalną treść",light:"Tryb jasny",dark:"Tryb ciemny",mono:"Czerń i biel",turquoise:"Turkus",theme:"Szablon strony",language:"Język",more:"Więcej",noOffers:"Przykład — to nie jest aktywne ogłoszenie."},
-  en:{menu:"Menu",close:"Close menu",how:"How it works",categories:"Categories",fee:"Service fee",account:"My account",login:"Sign in",register:"Join",logout:"Sign out",notices:"Notifications",find:"Find a professional",work:"Find a project",skip:"Skip the entrance",replay:"Replay the animation",pause:"Pause animations",play:"Resume animations",hero:"People for your ideas.",intro:[["You have","an idea."],["Someone has","the skills."],["Start a","conversation."],["Make it","together."],["Have an idea?","Bring it to life."]],chapters:["Idea","Skills","Conversation","Collaboration"],subtitle:"A website, identity or film? Find the person for your next step.",sample:"Illustrative project",all:"All projects",go:"Browse projects",latest:"Work to do",examples:"Illustrative briefs",jobsTitle:"Someone is looking\nfor your skills.",categoriesTitle:"Start with\nyour field.",categoryLead:"Choose a field, then explore the specialisms.",methodTitle:"From the first conversation\nto the details.",method:[["Say what you need.","The scope, deadline and expected result. A few clear details help you find the right person."],["Get to know the professional.","Explore their profile and portfolio. Ask about experience with similar projects."],["Agree on the details.","Discuss the price, delivery and revisions. Record your agreement before you begin."]],closing:["A good time","to get started."],summary:"Where an idea meets the skills to make it happen.",legal:"Documents and help",help:"Help",terms:"Terms",privacy:"Privacy",illegal:"Report illegal content",light:"Light mode",dark:"Dark mode",mono:"Black and white",turquoise:"Turquoise",theme:"Site template",language:"Language",more:"More",noOffers:"Illustrative scope — not an active listing."}
-};
-function IH47Arrow(){return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg>;}
-function IH47Mark(){return <span className="mark" aria-hidden="true"><i/><i/><i/><i/></span>;}
-function IH47Burger({open=false}){return <span className="bars" data-open={open} aria-hidden="true"><i/><i/><i/></span>;}
-function IH47Brand({onClick}={}){return <Link onClick={onClick} to="/" className="brand" aria-label="IdeaHire"><IH47Mark/><span>IdeaHire</span></Link>;}
-function IH47ThemeButtons({site,copy}){return <div className="template-switch" role="group" aria-label={copy.theme}><button type="button" aria-pressed={site.template==="classic"} onClick={()=>site.setTemplate("classic")}><i className="swatch mono"/>{copy.mono}</button><button type="button" aria-pressed={site.template!=="classic"} onClick={()=>site.setTemplate("current")}><i className="swatch"/>{copy.turquoise}</button></div>;}
-function IH47Menu({open,onClose,rootRef,triggerRef,site,copy,session,hasNotifications,logout,overlay,onAnchor}){
- const panel=useRef(null),closeRef=useRef(onClose);closeRef.current=onClose;
- useLayoutEffect(()=>{if(!open||!overlay)return;const root=rootRef.current,overflow=document.body.style.overflow,wasInert=root?.hasAttribute("inert"),returnTo=triggerRef.current,dialog=panel.current;document.body.style.overflow="hidden";root?.setAttribute("inert","");dialog?.querySelector("button,a")?.focus({preventScroll:true});
-  const key=e=>{if(e.key==="Escape"){e.preventDefault();closeRef.current();return;}if(e.key!=="Tab")return;const list=[...(dialog?.querySelectorAll('a[href],button:not([disabled]),[tabindex="0"]')||[])].filter(el=>!el.hidden);if(!list.length)return;const active=dialog.getRootNode().activeElement,first=list[0],last=list[list.length-1];if(e.shiftKey&&(active===first||!dialog.contains(active))){e.preventDefault();last.focus();}else if(!e.shiftKey&&(active===last||!dialog.contains(active))){e.preventDefault();first.focus();}};
-  document.addEventListener("keydown",key);return()=>{document.body.style.overflow=overflow;if(!wasInert)root?.removeAttribute("inert");document.removeEventListener("keydown",key);returnTo?.focus({preventScroll:true});};
- },[open,overlay]);
- if(!open||!overlay)return null;const english=site.language==="en",links=[{href:"#how-it-works",name:copy.how},{href:"#categories",name:copy.categories},{to:"/jobs",name:copy.work},{to:"/find-talent",name:copy.find},{to:session?"/account":"/register",name:session?copy.account:copy.register}];
- return createPortal(<div ref={panel} id="ih47-menu" className="menu" role="dialog" aria-modal="true" aria-labelledby="ih47-menu-title" data-no-translate="true"><div className="menu-top"><IH47Brand onClick={onClose}/><button className="menu-close" type="button" onClick={onClose} aria-label={copy.close}><span>{english?"Close":"Zamknij"}</span><IH47Burger open/></button></div><div className="menu-body"><div><span className="eyebrow" id="ih47-menu-title">{copy.menu}</span><nav className="menu-links">{links.map((item,i)=>{const Item=item.to?Link:"a";return <Item key={i} {...(item.to?{to:item.to}:{href:item.href})} style={{"--index":i}} onClick={e=>{onClose();if(item.href){e.preventDefault();requestAnimationFrame(()=>onAnchor(item.href));}}}><small>0{i+1}</small><span>{item.name}</span><IH47Arrow/></Item>;})}</nav></div><div className="menu-settings"><span className="eyebrow">{copy.theme}</span><IH47ThemeButtons site={site} copy={copy}/><div className="menu-options"><button type="button" onClick={()=>site.setTheme(site.theme==="dark"?"light":"dark")}>{site.theme==="dark"?copy.light:copy.dark}<span aria-hidden="true">◐</span></button><button type="button" onClick={()=>site.setLanguage(english?"pl":"en")}>{english?"Polski":"English"}<span aria-hidden="true">{english?"PL":"EN"}</span></button></div>{session?<><Link className="menu-account-link" to="/notifications" onClick={onClose}>{copy.notices}{hasNotifications&&<i/>}<IH47Arrow/></Link><button className="menu-logout" type="button" onClick={()=>{onClose();logout();}}>{copy.logout}<IH47Arrow/></button></>:<Link className="menu-account-link" to="/login" onClick={onClose}>{copy.login}<IH47Arrow/></Link>}<p>{copy.summary}</p><IH47Mark/></div></div></div>,overlay);
-}
-const IH47_CATEGORY_EN={Programowanie:"Web, apps and IT","Grafika i design":"Graphics, UX and 3D",Marketing:"Marketing and sales",Copywriting:"Copy and translation",Video:"Video, motion and audio",Fotografia:"Photography","AI i automatyzacje":"AI and automation","Dane, analizy i research":"Data and research","Biznes i e-commerce":"Business and e-commerce","Architektura, wnętrza i CAD":"Architecture and CAD"};
-const IH47_CATEGORY_COPY={
-  Programowanie:["Strona firmowa, sklep, aplikacja lub techniczne wsparcie.","Company websites, shops, apps and technical support."],
-  "Grafika i design":["Identyfikacja, projekt interfejsu i grafika do publikacji.","Brand identities, interface design and graphics for publication."],
-  Marketing:["Kampanie, komunikacja i promocja Twojej działalności.","Campaigns, communication and promotion for your business."],
-  Copywriting:["Teksty na stronę, artykuły i tłumaczenia.","Website copy, articles and translations."],
-  Video:["Montaż, animacja i dźwięk do Twojego materiału.","Editing, animation and sound for your content."],
-  Fotografia:["Sesje zdjęciowe, retusz i zdjęcia produktów.","Photo shoots, retouching and product photography."],
-  "AI i automatyzacje":["Automatyzacja zadań i połączenie narzędzi, z których korzystasz.","Task automation and connections between the tools you use."],
-  "Dane, analizy i research":["Uporządkowanie danych, analiza i sprawdzenie informacji.","Data organisation, analysis and research."],
-  "Biznes i e-commerce":["Wsparcie w prowadzeniu działalności i sklepu internetowego.","Support for your business and online shop."],
-  "Architektura, wnętrza i CAD":["Projekty przestrzeni, wizualizacje i dokumentacja techniczna.","Space design, visualisations and technical drawings."]
-};
-function ih47RealJob(job){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(job?.id||''));}
-function useIH47Reduced(){const[reduced,setReduced]=useState(()=>typeof window!=='undefined'&&window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false);useEffect(()=>{const m=window.matchMedia?.('(prefers-reduced-motion: reduce)');if(!m)return;const change=()=>setReduced(m.matches);m.addEventListener?.('change',change);return()=>m.removeEventListener?.('change',change);},[]);return reduced;}
-function IH47FeeStrip({english}){const o=IDEA_HIRE_PUBLIC_OFFER,n=x=>x.toLocaleString(english?'en-GB':'pl-PL');return <a className="fee-strip" href="#commission"><span><IH47Mark/><strong>{n(o.percent)}%</strong> {english?'IdeaHire fee':'prowizji IdeaHire'}</span><span>min. {n(o.minimum)} · {english?'max.':'maks.'} {n(o.maximum)} {english?'PLN':'zł'}</span><span className="fee-description">{english?'Calculate your project':'Policz swoje zlecenie'}<IH47Arrow/></span></a>;}
-function IH47Projects({jobs,palette,english,reduced,paused}){
- const[focus,setFocus]=useState(null),actual=jobs.some(ih47RealJob),examples=english?['A website for a new brand','A visual identity','Copy for a company website']:['Strona dla nowej marki','Identyfikacja wizualna','Teksty na stronę firmową'];
- return <section className="chapter projects" id="projects"><div className="section-heading"><span className="eyebrow">01 / {english?'THE PROJECTS':'DO ZROBIENIA'}</span><h2>{english?<>There is work<br/>with your name on it.</>:<>Jest robota.<br/>Może właśnie dla Ciebie.</>}</h2><Link className="text-link" to="/jobs">{english?'All projects':'Wszystkie zlecenia'}<IH47Arrow/></Link></div><div className="project-stage"><div className="job-list">{jobs.slice(0,3).map((job,i)=>{const real=ih47RealJob(job);return <Link className="job" key={job.id||i} to="/jobs" state={real?{lucynaJobId:String(job.id),lucynaTitle:String(job.title)}:undefined} onPointerEnter={()=>setFocus(i)} onPointerLeave={()=>setFocus(null)} onFocus={()=>setFocus(i)} onBlur={()=>setFocus(null)}><small>0{i+1}</small><div><span>{real?(english?'Open listing':'Otwarte zlecenie'):(english?'Illustrative brief':'Przykładowy zakres')}</span><strong>{real?job.title:examples[i]}</strong><span className="job-price">{Number(job.budget)>0?ih47Money(job.budget,english):(english?'To agree':'Do ustalenia')}</span></div><IH47Arrow/></Link>;})}<p className="caption">{actual?(english?'See the listing for the full scope and terms.':'Zakres i warunki sprawdzisz w ogłoszeniu.'):(english?'These examples show the types of projects you can post.':'Przykłady pokazują, co możesz zlecić na IdeaHire.')}</p></div><IH47Space mode="projects" selected={focus??0} jobs={jobs} palette={palette} english={english} reduced={reduced} paused={paused}/></div></section>;
-}
-function IH47Categories({groups,palette,english,reduced,paused}){
- const[selection,setSelection]=useState(groups[0]?.value||'Programowanie'),buttons=useRef([]);const current=Math.max(0,groups.findIndex(x=>x.value===selection)),group=groups[current]||{value:'Programowanie',label:'Strony, aplikacje i IT',subcategories:[]};const label=english?IH47_CATEGORY_EN[group.value]||group.label:group.label;
- const category=useMemo(()=>({label,specialisms:(group.subcategories||[]).map(s=>english?translateUiText(s):s)}),[label,group,english]);
- function key(e,index){if(!['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?groups.length-1:(index+(['ArrowDown','ArrowRight'].includes(e.key)?1:groups.length-1))%groups.length;setSelection(groups[next].value);buttons.current[next]?.focus({preventScroll:true});}
- return <section className="chapter categories" id="categories"><div className="section-heading"><span className="eyebrow">02 / {english?'YOUR FIELD':'TWÓJ FACH'}</span><h2>{english?<>Different skills.<br/>A place to meet.</>:<>Różne umiejętności.<br/>Wspólne miejsce.</>}</h2><p>{english?'Choose a field. Then go straight to the specialism you need.':'Wybierz dziedzinę. Dalej są konkretne specjalizacje.'}</p></div><div className="category-stage"><IH47Space mode="categories" selected={current%3} category={category} palette={palette} english={english} reduced={reduced} paused={paused}/><div className="category-tabs" role="tablist" aria-orientation="vertical" aria-label={english?'Categories':'Kategorie'}>{groups.map((g,i)=><button ref={el=>buttons.current[i]=el} id={'ih47-cat-'+i} type="button" role="tab" aria-selected={i===current} aria-controls="ih47-specialisms" tabIndex={i===current?0:-1} key={g.value} onClick={()=>setSelection(g.value)} onKeyDown={e=>key(e,i)}><small>{String(i+1).padStart(2,'0')}</small><span>{english?IH47_CATEGORY_EN[g.value]||g.label:g.label}</span><IH47Arrow/></button>)}</div></div><div className="category-detail" id="ih47-specialisms" role="tabpanel" aria-labelledby={'ih47-cat-'+current} tabIndex={0}><div><span className="eyebrow">{String(current+1).padStart(2,'0')} / {english?'SPECIALISMS':'SPECJALIZACJE'}</span><h3>{label}</h3><p>{(IH47_CATEGORY_COPY[group.value]||['Znajdź projekt dla siebie.','Find your next project.'])[english?1:0]}</p></div><div><div className="specialisms">{(group.subcategories||[]).map(s=><Link key={s} to={'/jobs?'+new URLSearchParams({category:group.value,subcategory:s})}>{english?translateUiText(s):s}<span aria-hidden="true">↗</span></Link>)}</div><Link className="text-link" to={'/jobs?'+new URLSearchParams({category:group.value})}>{english?'Browse this field':'Przejrzyj tę dziedzinę'}<IH47Arrow/></Link></div></div></section>;
-}
-function IH47Commission({palette,english,reduced,paused}){
- const[value,setValue]=useState('2200'),offer=IDEA_HIRE_PUBLIC_OFFER,amount=Math.max(1,Math.min(offer.orderLimit,Math.round(Number(value)||1))),fee=ih47Fee(amount,offer),money=n=>ih47Money(n,english);
- return <section className="chapter commission" id="commission"><div className="section-heading"><span className="eyebrow">03 / {english?'THE NUMBERS':'POLICZMY TO'}</span><h2>{english?<>Your project.<br/>A clear calculation.</>:<>Twoje zlecenie.<br/>Jasny rachunek.</>}</h2><p>{english?'The client pays the IdeaHire fee. The professional gets the agreed project amount.':'Prowizję IdeaHire płaci zleceniodawca. Wykonawca otrzymuje ustaloną kwotę zlecenia.'}</p></div><div className="fee-stage"><div className="calculator"><div className="fee-rate"><strong>{offer.percent.toLocaleString(english?'en-GB':'pl-PL')}<span>%</span></strong><span>min. {money(offer.minimum)}<br/>{english?'max.':'maks.'} {money(offer.maximum)}</span></div><label htmlFor="ih47-budget">{english?'Project value':'Wartość zlecenia'}<span className="budget-field"><input id="ih47-budget" type="number" inputMode="numeric" min="1" max={offer.orderLimit} step="1" value={value} onChange={e=>setValue(e.target.value)} onBlur={()=>setValue(String(amount))}/><span>{english?'PLN':'zł'}</span></span></label><input className="budget-range" type="range" min="1" max={offer.orderLimit} step="1" value={amount} onChange={e=>setValue(e.target.value)} aria-label={english?'Project value slider':'Suwak wartości zlecenia'} aria-valuetext={money(amount)}/><div className="budget-presets" role="group" aria-label={english?'Example amounts':'Przykładowe kwoty'}>{[500,1500,4000,10000].map(n=><button type="button" key={n} aria-pressed={amount===n} onClick={()=>setValue(String(n))}>{n.toLocaleString(english?'en-GB':'pl-PL')}</button>)}</div><div className="fee-sum" aria-live="polite" aria-atomic="true"><div><span>{english?'Professional receives':'Wykonawca otrzyma'}</span><strong>{money(amount)}</strong></div><div><span>{english?'IdeaHire fee':'Prowizja IdeaHire'}</span><strong>{money(fee)}</strong></div><div className="fee-total"><span>{english?'Client total':'Klient zapłaci'}</span><strong>{money(amount+fee)}</strong></div></div><p className="caption">{english?'Illustrative calculation. The total is confirmed before payment. Projects up to ':'Przykładowe obliczenie. Kwotę potwierdzisz przed płatnością. Zlecenia do '}{money(offer.orderLimit)}.</p></div><IH47Space mode="fees" amount={amount} palette={palette} english={english} reduced={reduced} paused={paused}/></div></section>;
-}
-function IH47Process({palette,english,reduced,paused}){
- const[active,setActive]=useState(0),steps=english?[['Describe the job.','A scope, a deadline and a budget. Start with the things the other person needs to know.'],['Agree on the details.','Get to know the portfolio. Discuss delivery and revisions, then record your agreement.'],['Do the work.','Keep the conversation, files and delivery details together in the project.']]:[['Opisz, co robimy.','Zakres, termin i budżet. Zacznij od rzeczy, które druga osoba powinna wiedzieć.'],['Zapiszcie ustalenia.','Sprawdź portfolio. Omówcie przekazanie pracy i poprawki, a potem zapiszcie warunki.'],['Dobra. Do roboty.','Rozmowa, pliki i szczegóły przekazania pracy zostają w jednym miejscu przy projekcie.']];
- return <section className="chapter method" id="how-it-works"><div className="section-heading"><span className="eyebrow">04 / {english?'HOW IT WORKS':'JAK TO DZIAŁA'}</span><h2>{english?<>From a conversation<br/>to a finished project.</>:<>Od pierwszego „cześć”<br/>do gotowej pracy.</>}</h2></div><div className="process-stage"><div className="process-tabs" role="tablist" aria-label={english?'Collaboration steps':'Etapy współpracy'}>{steps.map(([title,body],i)=><button id={'ih47-step-'+i} type="button" role="tab" aria-selected={active===i} aria-controls="ih47-step-detail" tabIndex={active===i?0:-1} key={title} onClick={()=>setActive(i)} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const next=(i+(e.key==='ArrowDown'?1:2))%3;setActive(next);e.currentTarget.parentElement.children[next]?.focus();}}}><span className="step-index">0{i+1}<IH47Mark/></span><strong>{title}</strong>{active===i&&<p>{body}</p>}</button>)}</div><div id="ih47-step-detail" role="tabpanel" aria-labelledby={'ih47-step-'+active}><IH47Space mode="process" selected={active} palette={palette} english={english} reduced={reduced} paused={paused}/><span className="sr">{steps[active][1]}</span></div></div></section>;
-}
-
-function useIH47Reveals(root,reduced){useEffect(()=>{const items=[...(root.current?.querySelectorAll('.section-heading,.paths,.closing')||[])];if(reduced||typeof IntersectionObserver==='undefined')return;const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.dataset.reveal='seen';observer.unobserve(entry.target);}}),{threshold:.08});items.forEach(item=>{item.dataset.reveal='waiting';observer.observe(item);});return()=>{observer.disconnect();items.forEach(item=>delete item.dataset.reveal);};},[reduced]);}
-
-function useIdeaHireScrollHeader(headerRef, slotRef, enabled=true) {
+function useIdeaHireScrollHeader(headerRef, slotRef) {
   useLayoutEffect(() => {
-    if (!enabled) return undefined;
     const header = headerRef.current, slot = slotRef.current;
     if (!header || !slot) return undefined;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -1067,7 +733,7 @@ function useIdeaHireScrollHeader(headerRef, slotRef, enabled=true) {
       header.removeEventListener("pointerenter",enter);header.removeEventListener("pointerleave",leave);header.removeEventListener("focusin",focus);header.removeEventListener("focusout",blur);
       reduced.removeEventListener?.("change",settings);
     };
-  },[headerRef,slotRef,enabled]);
+  },[headerRef,slotRef]);
 }
 
 const categories = [
@@ -1118,127 +784,626 @@ const fallbackJobs = [
   },
 ];
 
+const HOME_CATEGORY_COPY = {
+  Programowanie: { summary: "Strony, sklepy i aplikacje — od pierwszego projektu po integracje i naprawy.", descriptions: [
+    "Pojedyncza strona prezentująca ofertę i prowadząca do kontaktu lub zakupu.",
+    "Witryna z ofertą firmy, najważniejszymi informacjami i formularzem kontaktowym.",
+    "Sklep z katalogiem produktów, koszykiem i obsługą zamówień.",
+    "Aplikacja działająca w przeglądarce, dopasowana do potrzeb Twoich użytkowników.",
+    "Aplikacja na telefon z funkcjami określonymi w Twoim projekcie.",
+    "Budowa lub rozbudowa strony z wykorzystaniem gotowego systemu i narzędzi no-code.",
+    "Połączenie usług i systemów, które mają wymieniać dane lub wykonywać wspólne zadania.",
+    "Diagnoza i poprawa konkretnych problemów w istniejącej stronie lub aplikacji.",
+    "Sprawdzenie wydajności lub bezpieczeństwa oraz lista zaleceń do wdrożenia.",
+    "Przeniesienie strony, danych lub usług do nowego środowiska.",
+  ] },
+  "Grafika i design": { summary: "Wygląd marki, interfejsy i materiały graficzne dopasowane do Twojego projektu.", descriptions: [
+    "Znak marki przygotowany do użycia w internecie i materiałach drukowanych.",
+    "Spójny zestaw kolorów, typografii i materiałów budujących wygląd marki.",
+    "Projekt ekranów i sposobu korzystania ze strony lub aplikacji.",
+    "Banery i kreacje dopasowane do kampanii oraz formatów reklamowych.",
+    "Zestaw grafik do publikacji na wybranych kanałach społecznościowych.",
+    "Ulotki, plakaty lub inne projekty przygotowane do przekazania drukarni.",
+    "Projekt wyglądu opakowania lub etykiety z uwzględnieniem wymaganych wymiarów.",
+    "Czytelne slajdy z uporządkowaną treścią i spójnym układem.",
+    "Autorska ilustracja do publikacji, produktu lub komunikacji marki.",
+    "Edytowalne projekty, które możesz później samodzielnie uzupełniać w Canvie.",
+    "Model obiektu w trzech wymiarach do dalszej pracy lub prezentacji.",
+    "Obraz produktu pokazujący jego wygląd, materiały i detale.",
+  ] },
+  Marketing: { summary: "Kampanie, treści i analityka pomagające docierać do właściwych odbiorców.", descriptions: [
+    "Plan komunikacji, kanałów i działań dopasowany do celów marki.",
+    "Analiza widoczności strony w wyszukiwarce i lista konkretnych usprawnień.",
+    "Poprawa treści lub elementów wybranych podstron pod określone cele.",
+    "Przygotowanie ustawień i struktury kampanii w Google Ads.",
+    "Przygotowanie kampanii i ustawień reklam w ekosystemie Meta.",
+    "Konfiguracja kampanii reklamowej na TikToku.",
+    "Zestaw publikacji z treścią dopasowaną do marki i jej odbiorców.",
+    "Przygotowanie wiadomości i struktury kampanii do wybranej grupy odbiorców.",
+    "Ustawienie pomiaru zdarzeń i raportów potrzebnych do oceny działań.",
+    "Uporządkowana baza potencjalnych kontaktów według wskazanych kryteriów.",
+    "Treści i materiały ułatwiające prezentację oferty klientom.",
+    "Pomysł i plan współpracy z twórcami w ramach wybranej kampanii.",
+  ] },
+  Copywriting: { summary: "Teksty, redakcja i tłumaczenia — czytelna komunikacja dopasowana do odbiorców.", descriptions: [
+    "Treści na podstrony prezentujące ofertę i pomagające użytkownikowi podjąć decyzję.",
+    "Artykuły o ustalonej tematyce, długości i stylu.",
+    "Opisy przedstawiające cechy, zastosowanie i najważniejsze informacje o produktach.",
+    "Treści odpowiadające na potrzeby odbiorców i wskazane tematy wyszukiwania.",
+    "Krótkie komunikaty do reklam, banerów lub kampanii.",
+    "Zestaw tekstów do publikacji na wybranych profilach społecznościowych.",
+    "Wiadomość do subskrybentów z uporządkowaną treścią i jasnym celem.",
+    "Tekst prowadzący nagranie, reklamę lub inną formę opowieści.",
+    "Poprawa języka, błędów i struktury istniejącego tekstu.",
+    "Redakcja treści AI, sprawdzenie spójności i dopasowanie języka do odbiorców.",
+    "Przekład treści między wskazanymi językami z zachowaniem sensu i stylu.",
+    "Dostosowanie komunikatów i treści produktu do nowego języka oraz odbiorców.",
+    "Przepisanie nagrania do czytelnego tekstu.",
+    "Przygotowanie tekstu i synchronizacji napisów do nagrania.",
+  ] },
+  Video: { summary: "Montaż, animacja i dźwięk — materiały do publikacji, reklamy i prezentacji.", descriptions: [
+    "Uporządkowanie ujęć i montaż nagrania według ustalonego celu i długości.",
+    "Zestaw krótkich filmów dopasowanych do formatów mediów społecznościowych.",
+    "Przygotowanie materiału do publikacji na YouTube.",
+    "Film promujący markę, produkt lub usługę.",
+    "Wideo prezentujące wygląd, działanie lub zastosowanie produktu.",
+    "Animowany materiał objaśniający pomysł lub budujący opowieść.",
+    "Animacja typografii i elementów graficznych do filmu lub kampanii.",
+    "Materiał wideo przygotowany z wykorzystaniem narzędzi generatywnych.",
+    "Dodanie napisów lub przygotowanie wersji filmu w innym języku.",
+    "Montaż odcinka, usunięcie przerw i przygotowanie nagrania do publikacji.",
+    "Czyszczenie, wyrównanie i poprawa jakości dostarczonego dźwięku.",
+    "Nagranie głosu do filmu, prezentacji lub innego materiału.",
+    "Krótki motyw muzyczny lub muzyka do wskazanego zastosowania.",
+    "Dobór i przygotowanie efektów dźwiękowych budujących charakter materiału.",
+  ] },
+  Fotografia: { summary: "Zdjęcia i obróbka materiałów — od sesji produktowej po retusz istniejących ujęć.", descriptions: [
+    "Zdjęcia produktów do katalogu, sklepu lub materiałów promocyjnych.",
+    "Sesja przedstawiająca osoby, zespół lub charakter marki.",
+    "Reportaż fotograficzny z wydarzenia według ustalonego zakresu.",
+    "Zdjęcia lokalu lub budynku do oferty i prezentacji.",
+    "Sesja pojazdu pokazująca jego wygląd i detale.",
+    "Sesja portretowa dopasowana do wybranego stylu i przeznaczenia.",
+    "Zdjęcia produktów przygotowane do spójnego katalogu internetowego.",
+    "Zdjęcia pozwalające oglądać obiekt lub przestrzeń z różnych stron.",
+    "Poprawa szczegółów zdjęcia z zachowaniem uzgodnionego wyglądu.",
+    "Wycięcie obiektu ze zdjęcia i przygotowanie pliku z wybranym tłem.",
+    "Naprawa uszkodzeń i poprawa czytelności starych fotografii.",
+  ] },
+  "AI i automatyzacje": { summary: "Narzędzia AI i integracje, które upraszczają konkretne zadania w Twojej firmie.", descriptions: [
+    "Bot odpowiadający na pytania lub wspierający wybrany proces firmy.",
+    "Asystent wykonujący ustalone zadania z wykorzystaniem modeli AI i narzędzi.",
+    "Połączenie aplikacji w automatyczny przepływ danych i działań.",
+    "Dodanie funkcji AI do istniejącej witryny, aplikacji lub systemu.",
+    "Wyszukiwanie i odpowiedzi oparte na wskazanej bazie dokumentów.",
+    "Asystent obsługujący wybrane zadania za pomocą rozmowy głosowej.",
+    "Automatyczne przetwarzanie dokumentów według ustalonego schematu.",
+    "Usprawnienie powtarzalnych pytań i zadań związanych z obsługą klientów.",
+    "Analiza procesów i wskazanie miejsc, w których można zastosować AI.",
+    "Uporządkowanie i przygotowanie danych do wskazanego zastosowania AI.",
+    "Zestaw instrukcji i szablonów pracy z AI dopasowany do zespołu.",
+  ] },
+  "Dane, analizy i research": { summary: "Porządkowanie informacji, badania i raporty ułatwiające pracę z danymi.", descriptions: [
+    "Usunięcie błędów, duplikatów i niespójności w dostarczonych danych.",
+    "Uporządkowanie struktury, formatów i obliczeń w arkuszu.",
+    "Przeniesienie danych z dokumentu PDF do arkusza nadającego się do dalszej pracy.",
+    "Uzupełnienie danych w uzgodnionym systemie lub pliku.",
+    "Pozyskanie wskazanych danych ze stron zgodnie z ustalonym zakresem.",
+    "Panel raportowy pokazujący wybrane wskaźniki i zestawienia.",
+    "Analiza zbioru danych i przedstawienie wniosków dotyczących zadanych pytań.",
+    "Czytelne wykresy i zestawienia pokazujące zależności w danych.",
+    "Research rynku, odbiorców lub konkurencji w określonym obszarze.",
+    "Opracowanie odpowiedzi i podsumowanie wyników badania ankietowego.",
+    "Uporządkowanie danych lub przeniesienie ich do nowej bazy.",
+    "Oznaczenie przykładów w danych według ustalonej instrukcji.",
+  ] },
+  "Biznes i e-commerce": { summary: "Wsparcie sklepu i organizacji pracy — katalogi, procedury i materiały biznesowe.", descriptions: [
+    "Wprowadzenie produktów, zdjęć i parametrów do katalogu sklepu.",
+    "Opracowanie informacji potrzebnych do publikacji produktów.",
+    "Przygotowanie konta sprzedawcy na wskazanej platformie.",
+    "Ujednolicenie kategorii, parametrów i informacji w katalogu.",
+    "Ustawienie lub uporządkowanie danych i procesów w systemie CRM.",
+    "Przygotowanie i uporządkowanie kontaktów według wybranych kryteriów.",
+    "Zestawienie informacji o ofertach i działaniach wskazanych konkurentów.",
+    "Slajdy przedstawiające ofertę, plan lub wyniki działalności.",
+    "Opis zasad, procesów i instrukcji potrzebnych w codziennej pracy.",
+    "Uporządkowanie etapów, zadań i terminów wybranego projektu.",
+    "Przygotowanie ogłoszeń, formularzy lub innych materiałów rekrutacyjnych.",
+    "Wykonanie ustalonego zestawu zadań administracyjnych.",
+    "Przegląd sklepu i lista usprawnień dotyczących wybranego obszaru.",
+  ] },
+  "Architektura, wnętrza i CAD": { summary: "Projekty przestrzeni, rysunki i modele do prezentacji lub dalszej pracy.", descriptions: [
+    "Projekt aranżacji wnętrza zgodny z potrzebami i zakresem zlecenia.",
+    "Plan rozmieszczenia stref i wyposażenia w pomieszczeniu.",
+    "Obrazy pokazujące planowany wygląd obiektu lub przestrzeni.",
+    "Rysunek techniczny lub projektowy w dwóch wymiarach.",
+    "Model obiektu przygotowany w uzgodnionym narzędziu CAD.",
+    "Projekt mebla z określeniem wymiarów i uzgodnionych detali.",
+    "Model przygotowany do wskazanego procesu druku 3D.",
+    "Rysunki i informacje techniczne potrzebne do produkcji.",
+    "Koncepcja układu i wyglądu przestrzeni lokalu.",
+    "Wizualne przedstawienie budynku, lokalu lub planowanej inwestycji.",
+  ] },
+};
 
-/* P48: jedna ciągła scena WebGL pod całym widokiem głównym. */
-const IH48_WORLD_VERTEX=String.raw`
-precision highp float;
-attribute vec3 aLocal,aNormal;attribute vec2 aCell;attribute float aSeed;
-uniform mat4 uVP;uniform float uTime,uScroll,uChapter,uVelocity;uniform vec2 uPointer;
-varying vec3 vNormal,vPosition;varying vec2 vLocal;varying float vSeed,vFold;
-vec3 rotate(vec3 p,float x,float y){float a=cos(x),b=sin(x),c=cos(y),d=sin(y);p=vec3(p.x,p.y*a-p.z*b,p.y*b+p.z*a);return vec3(p.x*c+p.z*d,p.y,-p.x*d+p.z*c);}
-void main(){
- float t=uTime,chapter=uChapter;
- vec2 cell=aCell;cell.y+=mod(uScroll*.8,1.0)*.64;
- float diagonal=cell.y+cell.x*.43;
- float sweep=13.0-(mod(t,7.5)-1.0)*8.5;
- float ribbon=exp(-pow((diagonal-sweep)/1.45,2.0));
- float second=exp(-pow((cell.x-cell.y*.34-5.5*sin(t*.24+chapter*.5))/2.4,2.0));
- float breath=sin(cell.x*.32+cell.y*.22-t*.55);
- float distanceToPointer=length(cell-uPointer*vec2(9.0,6.0));
- float ripple=sin(distanceToPointer*1.3-t*1.9)*exp(-distanceToPointer*.34)*.16;
- float height=.22*breath+1.15*ribbon+.55*second+ripple;
- float xTurn=.10*cos(cell.y*.3-t*.6)+ribbon*.54+uVelocity*.10;
- float yTurn=.12*sin(cell.x*.33+t*.4)+second*.34;
- float stagger=sin(cell.x*1.7+cell.y*.7+t*.36)*.025;
- vec3 p=rotate(aLocal,xTurn,yTurn);
- p+=vec3(cell.x,cell.y,height+stagger);
- vPosition=p;vNormal=rotate(aNormal,xTurn,yTurn);vLocal=aLocal.xy;vSeed=aSeed;vFold=ribbon;
- gl_Position=uVP*vec4(p,1.0);
-}`;
-const IH48_WORLD_FRAGMENT=String.raw`
-precision highp float;
-uniform vec3 uBG,uLight,uEye;uniform float uDark;
-varying vec3 vNormal,vPosition;varying vec2 vLocal;varying float vSeed,vFold;
-void main(){
- vec3 n=normalize(vNormal),eye=normalize(uEye-vPosition);
- if(dot(n,eye)<0.0)n=-n;
- vec3 light=normalize(vec3(-5.0,8.0,11.0)-vPosition);
- float diffuse=max(dot(n,light),0.0);
- float specular=pow(max(dot(n,normalize(light+eye)),0.0),54.0);
- float edge=smoothstep(.245,.308,max(abs(vLocal.x),abs(vLocal.y)));
- float face=.84+.18*diffuse+specular*.18;
- face-=edge*.11;
- face+=vSeed*.012;
- vec3 col=uBG*face;
- col=mix(col,uLight,specular*(uDark>.5?.10:.08));
- float fog=smoothstep(4.0,16.0,length(vPosition.xy));
- col=mix(col,uBG,fog*.75);
- gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);
-}`;
-function ih48WorldMesh(){
- const vertices=[],indices=[],put=(p,n,x,y,seed)=>{const i=vertices.length/9;vertices.push(...p,...n,x,y,seed);return i;};
- const inner=[[-.288,-.288],[.288,-.288],[.288,.288],[-.288,.288]],outer=[[-.31,-.31],[.31,-.31],[.31,.31],[-.31,.31]];
- for(let row=0;row<36;row++)for(let col=0;col<48;col++){
-  const x=(col-23.5)*.64,y=(row-17.5)*.64,seed=((col*13+row*37)%101)/101;
-  const f=inner.map(p=>put([...p,.035],[0,0,1],x,y,seed));indices.push(f[0],f[1],f[2],f[0],f[2],f[3]);
-  for(let k=0;k<4;k++){
-   const j=(k+1)%4,normal=k===0?[0,-.55,.83]:k===1?[.55,0,.83]:k===2?[0,.55,.83]:[-.55,0,.83];
-   const q=[put([...inner[k],.035],normal,x,y,seed),put([...outer[k],.005],normal,x,y,seed),put([...outer[j],.005],normal,x,y,seed),put([...inner[j],.035],normal,x,y,seed)];indices.push(q[0],q[1],q[2],q[0],q[2],q[3]);
-   const nn=k===0?[0,-1,0]:k===1?[1,0,0]:k===2?[0,1,0]:[-1,0,0];
-   const side=[put([...outer[k],.005],nn,x,y,seed),put([...outer[k],-.055],nn,x,y,seed),put([...outer[j],-.055],nn,x,y,seed),put([...outer[j],.005],nn,x,y,seed)];indices.push(side[0],side[1],side[2],side[0],side[2],side[3]);
+function HomeCategoryBrowser({ groups }) {
+  const [open, setOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || "");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const triggerRef = useRef(null);
+  const group = groups.find((item) => item.value === selectedCategory) || groups[0];
+  const subcategories = group?.subcategories || [];
+  const copy = HOME_CATEGORY_COPY[group?.value];
+  const subIndex = subcategories.indexOf(selectedSubcategory);
+  const description = subIndex >= 0
+    ? copy?.descriptions[subIndex] || copy?.summary
+    : copy?.summary;
+  const count = groups.reduce((total, item) => total + (item.subcategories?.length || 0), 0);
+  const query = new URLSearchParams({ category: group?.value || "" });
+  if (selectedSubcategory) query.set("subcategory", selectedSubcategory);
+
+  function closeBrowser() {
+    setOpen(false);
+    triggerRef.current?.focus({ preventScroll: true });
   }
- }
+
+  function selectCategory(value) {
+    if (value !== selectedCategory) {
+      setSelectedCategory(value);
+      setSelectedSubcategory("");
+    }
+  }
+
+  function onMousePreview(event, action) {
+    if (event.pointerType === "mouse" && window.matchMedia("(hover: hover) and (pointer: fine)").matches) action();
+  }
+
+  return (
+    <div className={`ih-category-browser${open ? " is-open" : ""}`}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && open) { event.preventDefault(); closeBrowser(); }
+      }}>
+      <button ref={triggerRef} type="button" className="ih-category-trigger"
+        aria-expanded={open} aria-controls="ih-category-panel"
+        onClick={() => setOpen((current) => !current)}>
+        <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, "0")} kategorii</span><span className="ih-category-toggle" aria-hidden="true">{open ? "−" : "+"}</span></span>
+        <span className="ih-category-mark" aria-hidden="true"><i /><i /><i /><i /></span>
+        <span className="ih-category-trigger-title">Nasze<br />kategorie</span>
+        <span className="ih-category-trigger-bottom"><span>{open ? "Zwiń katalog" : "Odkryj specjalizacje"}</span><span aria-hidden="true">↗</span></span>
+      </button>
+
+      <section id="ih-category-panel" className="ih-category-panel" hidden={!open} aria-labelledby="ih-category-panel-title">
+        <div className="ih-category-panel-heading">
+          <div><span className="ih-category-kicker">Znajdź swój kierunek</span><h3 id="ih-category-panel-title">Kategorie i specjalizacje</h3><p>{groups.length} kategorii{count > 0 ? ` · ${count} specjalizacji` : ""}. Wybierz to, czego potrzebujesz.</p></div>
+          <button type="button" className="ih-category-close" onClick={closeBrowser} aria-label="Zamknij kategorie">×</button>
+        </div>
+        <div className="ih-category-layout">
+          <div className="ih-category-list" role="group" aria-label="Wybierz kategorię">
+            {groups.map((item, index) => (
+              <button type="button" key={item.value} className="ih-category-option" aria-pressed={item.value === group?.value}
+                onClick={() => selectCategory(item.value)} onFocus={() => selectCategory(item.value)}
+                onPointerEnter={(event) => onMousePreview(event, () => selectCategory(item.value))}>
+                <span className="ih-category-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{item.label}</span><span className="ih-category-option-arrow" aria-hidden="true">↗</span>
+              </button>
+            ))}
+          </div>
+          <div className="ih-category-content">
+            <div className="ih-category-content-heading"><span className="ih-category-kicker">Specjalizacje</span><h4>{group?.label}</h4></div>
+            <div className="ih-subcategory-grid" role="group" aria-label={`Specjalizacje: ${group?.label}`}>
+              {subcategories.map((item) => (
+                <button type="button" className="ih-subcategory-option" key={item} aria-pressed={item === selectedSubcategory} aria-describedby="ih-category-description"
+                  onClick={() => setSelectedSubcategory(item)} onFocus={() => setSelectedSubcategory(item)}
+                  onPointerEnter={(event) => onMousePreview(event, () => setSelectedSubcategory(item))}>
+                  <span>{item}</span><span aria-hidden="true">↗</span>
+                </button>
+              ))}
+            </div>
+            <div className="ih-category-detail" id="ih-category-description">
+              <span className="ih-category-kicker">{selectedSubcategory ? "O tej specjalizacji" : "O tej kategorii"}</span>
+              <strong>{selectedSubcategory || group?.label}</strong><p>{description || "Przejrzyj zlecenia w tej kategorii i znajdź projekt dla siebie."}</p>
+            </div>
+            <div className="ih-category-links">
+              <Link className="ih-category-jobs-link" to={`/jobs?${query.toString()}`}>Pokaż zlecenia <span aria-hidden="true">↗</span></Link>
+              {selectedSubcategory && <Link className="ih-category-all-link" to={`/jobs?${new URLSearchParams({ category: group?.value }).toString()}`}>Cała kategoria</Link>}
+              <Link className="ih-category-all-link" to="/jobs">Wszystkie zlecenia</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+
+function HomeNavItem({ children, order, to, href, notification = false }) {
+  const Item = to ? Link : "a";
+  return (
+    <Item
+      {...(to ? { to } : { href })}
+      className={`ih-nav-item${to === "/notifications" ? " home-notifications-link" : ""}`}
+      style={{ "--ih-nav-order": order }}
+    >
+      <span className="ih-nav-pixels" aria-hidden="true">
+        <i /><i /><i /><i />
+      </span>
+      <span className="ih-nav-label">{children}</span>
+      {notification && <span className="home-notifications-dot" aria-label="Nowe powiadomienia" />}
+    </Item>
+  );
+}
+
+function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef(null);
+  const menuRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!open) return undefined;
+    const viewport = window.visualViewport;
+    let frame = 0;
+    function placeMenu() {
+      frame = 0;
+      const menu = menuRef.current;
+      const trigger = triggerRef.current;
+      if (!menu || !trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const width = viewport?.width || window.innerWidth;
+      const height = viewport?.height || window.innerHeight;
+      const offsetLeft = viewport?.offsetLeft || 0;
+      const offsetTop = viewport?.offsetTop || 0;
+      const menuWidth = Math.max(0, Math.min(300, width - 24));
+      const top = Math.max(offsetTop + 12, Math.min(rect.bottom + 8, offsetTop + height - 160));
+      const left = Math.max(offsetLeft + 12, Math.min(rect.right - menuWidth, offsetLeft + width - menuWidth - 12));
+      menu.style.setProperty("top", `${top}px`);
+      menu.style.setProperty("left", `${left}px`);
+      menu.style.setProperty("width", `${menuWidth}px`);
+      menu.style.setProperty("max-height", `${Math.max(0, offsetTop + height - top - 12)}px`);
+    }
+    function schedule() { if (!frame) frame = window.requestAnimationFrame(placeMenu); }
+    placeMenu();
+    const focusFrame = window.requestAnimationFrame(() => menuRef.current?.querySelector("a")?.focus({ preventScroll: true }));
+    window.addEventListener("resize", schedule, { passive: true });
+    window.addEventListener("scroll", schedule, { passive: true });
+    viewport?.addEventListener("resize", schedule, { passive: true });
+    viewport?.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(focusFrame);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("scroll", schedule);
+      viewport?.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("scroll", schedule);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    function closeOutside(event) {
+      if (!triggerRef.current?.contains(event.target) && !menuRef.current?.contains(event.target)) setOpen(false);
+    }
+    function closeWithKeyboard(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus({ preventScroll: true });
+    }
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeWithKeyboard);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeWithKeyboard);
+    };
+  }, [open]);
+
+  function navigateMenu(event) {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const links = Array.from(menuRef.current?.querySelectorAll("a") || []);
+    if (!links.length) return;
+    event.preventDefault();
+    const index = links.indexOf(document.activeElement);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? links.length - 1 : (index + (event.key === "ArrowDown" ? 1 : -1) + links.length) % links.length;
+    links[next].focus({ preventScroll: true });
+  }
+
+  return <>
+    <button ref={triggerRef} className="home-account-avatar-link ih27-home-account-trigger" type="button"
+      aria-label={open ? "Zamknij menu konta" : "Otwórz menu konta"} aria-expanded={open} aria-controls="ih27-home-account-menu"
+      onClick={() => { if (!open) onOpen?.(); setOpen(value => !value); }}
+      onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); if (open) menuRef.current?.querySelector("a")?.focus({ preventScroll: true }); else { onOpen?.(); setOpen(true); } } }}>
+      <span className="account-mini-avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : initial}</span>
+    </button>
+    {open && createPortal(<nav ref={menuRef} id="ih27-home-account-menu" className="account-menu-dropdown ih18-account-dropdown ih27-home-account-menu"
+      aria-label="Funkcje konta" onKeyDown={navigateMenu}
+      onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget) && !triggerRef.current?.contains(event.relatedTarget)) setOpen(false); }}>
+      <div className="account-menu-identity"><strong>{name}</strong><span>Konto IdeaHire</span></div>
+      <Link to="/account" onClick={() => setOpen(false)}>Moje konto</Link>
+      <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
+        <MarketIcon kind="help" /><span>Pomoc</span>
+      </a>
+    </nav>, document.body)}
+  </>;
+}
+
+function HomeGreeting({ name }) {
+  return (
+    <span className="auth-user home-auth-user ih-welcome" title={`Cześć, ${name}`}>
+      <span className="ih-welcome-readable">Cześć, {name}</span>
+      <span className="ih-welcome-spark" aria-hidden="true"><i /><i /><i /><i /></span>
+      <span className="ih-welcome-copy" aria-hidden="true">
+        <span className="ih-welcome-prefix">Cześć,</span>{" "}
+        <strong className="ih-welcome-name">
+          {Array.from(name).map((letter, index) => (
+            <span key={index} style={{ "--ih-letter-order": Math.min(index, 12) }}>{letter}</span>
+          ))}
+        </strong>
+      </span>
+    </span>
+  );
+}
+
+// Fictional content for the requested visual test. Keep the demo label visible.
+const HOME_DEMO_REVIEWS = [
+  { initial: "A", name: "Aleksandra", role: "zleceniodawczyni", text: "Mam pomysł i od razu wiem, gdzie szukać osoby, która pomoże mi go zrealizować." },
+  { initial: "M", name: "Michał", role: "freelancer", text: "Przejrzyste kategorie i zlecenia w jednym miejscu. Tak lubię szukać nowych projektów." },
+  { initial: "K", name: "Karolina", role: "zleceniodawczyni", text: "Najbardziej podoba mi się prosty układ. Mogę skupić się na swoim projekcie." },
+  { initial: "P", name: "Piotr", role: "freelancer", text: "Od małego zadania po większy projekt — łatwo znaleźć swój kierunek." },
+];
+
+function HomeDemoReviews() {
+  return (
+    <section className="ih-demo-reviews" aria-labelledby="ih-demo-reviews-title">
+      <div className="ih-demo-reviews-heading">
+        <div>
+          <span className="ih-demo-review-caption">Pomysły spotykają ludzi</span>
+          <h2 id="ih-demo-reviews-title">Opinie przykładowe — test wyglądu</h2>
+        </div>
+      </div>
+      <div className="ih-demo-reviews-viewport" tabIndex={0} aria-label="Przykładowe, fikcyjne opinie do testu wyglądu. Najedź kursorem lub ustaw fokus, aby zatrzymać przewijanie.">
+        <div className="ih-demo-reviews-track" id="ih-demo-reviews-track">
+          {[0, 1].map((copy) => (
+            <div className="ih-demo-reviews-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
+              {HOME_DEMO_REVIEWS.map((review) => (
+                <article className="ih-demo-review" key={review.name}>
+                  <span className="ih-demo-review-tag">Opinia testowa</span>
+                  <blockquote>{review.text}</blockquote>
+                  <div className="ih-demo-review-person">
+                    <span className="ih-demo-review-avatar" aria-hidden="true">{review.initial}</span>
+                    <div><strong>{review.name}</strong><span>{review.role}</span></div>
+                    <span className="ih-demo-review-quote" aria-hidden="true">“</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+
+const IH49_STYLES=String.raw`/* P49 — tylko scenografia i zachowanie istniejących kart. Bez nowych układów sekcji. */
+__IH49__{isolation:isolate!important;background:transparent!important;}
+__IH49__ > main,__IH49__ > footer{position:relative;z-index:1;background:transparent!important;}
+__IH49__ > main > :is(.categories.section,.how.section,.split-section.section,.final-cta){background:transparent!important;}
+__IH49__ > .ih49-backdrop{display:block!important;position:fixed!important;inset:0!important;z-index:0!important;width:100%!important;height:100svh!important;pointer-events:none!important;overflow:hidden!important;}
+__IH49__ .ih49-backdrop > canvas{display:block;width:100%;height:100%;pointer-events:none;}
+__IH49__ .ih49-mark-scene{position:absolute!important;left:50%!important;top:50%!important;display:block!important;width:76px!important;height:76px!important;transform:translate(-50%,-50%)!important;pointer-events:none!important;overflow:visible!important;}
+__IH49__ .ih40-step-mark .ih49-mark-scene{width:60px!important;height:60px!important;}
+__IH49__ .ih49-mark-scene>canvas{display:block!important;width:100%!important;height:100%!important;border:0!important;background:transparent!important;pointer-events:none!important;}
+__IH49__ .ih-category-trigger[data-ih49-ready=true] .ih-category-mark > i,__IH49__ .ih40-step[data-ih49-ready=true] .ih40-step-mark > i{opacity:0!important;}
+__IH49__ .ih40-step[data-ih49-ready=true] > .ih40-step-mosaic{display:none!important;}
+__IH49__ [data-ih49-tilt=true]{transform:perspective(1200px) rotateX(var(--ih49-rx,0deg)) rotateY(var(--ih49-ry,0deg))!important;transform-origin:center!important;transition:transform 180ms ease,box-shadow 180ms ease!important;will-change:transform;box-shadow:0 4px 0 -1px var(--ih-home-surface),0 5px 0 var(--ih-home-line),0 18px 32px color-mix(in srgb,var(--ih-home-ink) 12%,transparent)!important;}
+__IH49__ [data-ih49-press=true]{animation:ih49-card-press 650ms cubic-bezier(.2,.8,.2,1) both!important;}
+@keyframes ih49-card-press{0%,100%{transform:perspective(1100px) rotateX(0) rotateY(0);}35%{transform:perspective(1100px) rotateX(3deg) rotateY(-3deg) translateZ(12px);}65%{transform:perspective(1100px) rotateX(-1deg) rotateY(1deg);}}
+__IH49__ .ih49-fee-island{position:absolute!important;inset:0!important;display:flex!important;flex-direction:column!important;color:var(--ih-home-ink)!important;font-family:inherit!important;}
+__IH49__ .ih49-receipt{position:relative!important;flex:1 1 0!important;min-height:40px!important;width:100%!important;}
+__IH49__ .ih49-receipt>canvas{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;pointer-events:none!important;}
+__IH49__ .ih49-receipt-fallback{display:flex;align-items:center;justify-content:center;position:absolute;inset:0;font:700 22px/1.4 Inter,Arial;color:var(--ih-home-ink);}
+__IH49__ .ih49-receipt[data-renderer=ready] .ih49-receipt-fallback{display:none!important;}
+__IH49__ .ih49-fee-controls{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;align-items:end!important;gap:15px!important;padding:4px 7px 0!important;flex:0 0 auto!important;}
+__IH49__ .ih49-fee-controls label,__IH49__ .ih49-fee-controls output{display:flex!important;flex-direction:column!important;gap:2px!important;margin:0!important;font:500 10px/1.2 Inter,Arial!important;color:var(--ih-home-muted)!important;}
+__IH49__ .ih49-fee-controls label>span{display:flex!important;align-items:center!important;gap:6px!important;min-height:30px!important;}
+__IH49__ .ih49-fee-controls input{box-sizing:border-box!important;width:95px!important;min-width:0!important;height:30px!important;padding:4px 7px!important;border:1px solid var(--ih-home-line)!important;border-radius:5px!important;background:var(--ih-home-surface)!important;color:var(--ih-home-ink)!important;font:650 16px/1.3 Inter,Arial!important;}
+__IH49__ .ih49-fee-controls input:focus-visible{outline:2px solid var(--ih-home-ink)!important;outline-offset:2px!important;}
+__IH49__ .ih49-fee-controls output strong{display:block!important;min-height:30px!important;padding-top:4px!important;color:var(--ih-home-ink)!important;font:700 16px/1.3 Inter,Arial!important;white-space:nowrap!important;}
+@media(max-width:380px){__IH49__ .ih49-fee-controls{gap:9px!important;}__IH49__ .ih49-fee-controls output strong{font-size:14px!important;}__IH49__ .ih49-fee-controls input{width:80px!important;}}
+@media(prefers-reduced-motion:reduce){__IH49__ [data-ih49-tilt=true],__IH49__ [data-ih49-press=true]{transform:none!important;transition:none!important;animation:none!important;will-change:auto!important;}}
+body.ih49-active::before,body.ih49-active::after{display:none!important;}
+`.replaceAll("__IH49__","#root".repeat(12)+" .ih49-home");
+function ih49Clamp(x,a=0,b=1){return Math.max(a,Math.min(b,x));}
+function ih49Ease(x){x=ih49Clamp(x);return 1-Math.pow(1-x,5);}
+function ih49Mix(a,b,t){return a+(b-a)*t;}
+function ih49Identity(){return [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];}
+function ih49Mul(a,b){const o=Array(16).fill(0);for(let c=0;c<4;c++)for(let r=0;r<4;r++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o;}
+function ih49Transform(x,y,z,rx=0,ry=0,rz=0,scale=1,sy=scale,sz=scale){
+ const cx=Math.cos(rx),sx=Math.sin(rx),cy=Math.cos(ry),ssy=Math.sin(ry),cz=Math.cos(rz),ssz=Math.sin(rz);
+ const X=[1,0,0,0,0,cx,sx,0,0,-sx,cx,0,0,0,0,1],Y=[cy,0,-ssy,0,0,1,0,0,ssy,0,cy,0,0,0,0,1],Z=[cz,ssz,0,0,-ssz,cz,0,0,0,0,1,0,0,0,0,1];
+ const m=ih49Mul(ih49Mul(Z,Y),X);for(let r=0;r<3;r++){m[r]*=scale;m[4+r]*=sy;m[8+r]*=sz;}m[12]=x;m[13]=y;m[14]=z;return m;
+}
+function ih49Perspective(fov,aspect,near=.1,far=70){const f=1/Math.tan(fov/2);return[f/aspect,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0];}
+function ih49Look(eye,at){const norm=v=>{const n=Math.hypot(...v)||1;return v.map(x=>x/n);},cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);const z=norm(eye.map((x,i)=>x-at[i])),x=norm(cross([0,1,0],z)),y=cross(z,x);return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1];}
+function ih49RGB(hex){return[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255);}
+function ih49Fonts(){const fonts=document.fonts;if(!fonts)return Promise.resolve();const tasks=[fonts.ready];if(fonts.load)for(const weight of [400,600,700,800])tasks.push(fonts.load(weight+' 32px Inter','Zażółć gęślą jaźń ąćęłńóśźż 5,5% IdeaHire'));return Promise.allSettled(tasks);}
+function ih49CardMesh(){
+ const ring=[],radius=.055,w=1.25,h=1.67;
+ for(let corner=0;corner<4;corner++){const cx=corner===0||corner===3?w-radius:-w+radius,cy=corner<2?h-radius:-h+radius;for(let j=0;j<=5;j++){const a=corner*Math.PI/2+j*Math.PI/10;ring.push([cx+radius*Math.cos(a),cy+radius*Math.sin(a)]);}}
+ const vertices=[],indices=[],put=(p,n,u,v,m)=>{const i=vertices.length/9;vertices.push(...p,...n,u,v,m);return i;};
+ const center=put([0,0,.025],[0,0,1],.5,.5,0),front=[];
+ for(const[x,y]of ring)front.push(put([x,y,.025],[0,0,1],(x+w)/(w*2),(y+h)/(h*2),0));
+ for(let i=0;i<ring.length;i++)indices.push(center,front[i],front[(i+1)%ring.length]);
+ for(let i=0;i<ring.length;i++){const a=ring[i],b=ring[(i+1)%ring.length],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy)||1,n=[dy/length,-dx/length,0];const start=vertices.length/9;for(const[p,z]of [[a,.025],[b,.025],[b,-.025],[a,-.025]])put([p[0],p[1],z],n,0,0,1);indices.push(start,start+1,start+2,start,start+2,start+3);}
+ const back=vertices.length/9;for(const p of [[-w,-h],[w,-h],[w,h],[-w,h]])put([...p,-.025],[0,0,-1],0,0,1);indices.push(back,back+2,back+1,back,back+3,back+2);
  return{vertices,indices};
 }
-function ih48WorldPlan(s,width,height){
- const aspect=width/height,small=width<700;
- const distance=small?14.8:13.8;
- const eye=[1.1+s.x*.35+Math.sin(s.time*.12)*.18,1.8+s.y*.22+Math.sin(s.scroll*.35)*.4,distance];
- const aim=[0,0,.15],vp=ih47Mul(ih47Perspective((small?48:44)*Math.PI/180,aspect,.1,65),ih47Look(eye,aim));
- return{eye,vp};
+function ih49ShadowMesh(){return{vertices:[-1,-1,0,0,0,1,0,0,0,1,-1,0,0,0,1,1,0,0,1,1,0,0,0,1,1,1,0,-1,1,0,0,0,1,0,1,0],indices:[0,1,2,0,2,3]};}
+/* P49 — sceny dodane do istniejących kart; żadna scena nie steruje układem. */
+const IH49_VERTEX=String.raw`
+precision highp float;attribute vec3 aPosition,aNormal;attribute vec2 aUV;attribute float aMaterial;
+uniform mat4 uModel,uVP;varying vec3 vPosition,vNormal;varying vec2 vUV;varying float vMaterial;
+void main(){vec4 p=uModel*vec4(aPosition,1.0);vPosition=p.xyz;vNormal=normalize(mat3(uModel)*aNormal);vUV=aUV;vMaterial=aMaterial;gl_Position=uVP*p;}`;
+const IH49_FRAGMENT=String.raw`
+precision highp float;uniform vec3 uEye,uBase,uLight,uBG,uInk;uniform float uKind,uAlpha;uniform sampler2D uTexture;
+varying vec3 vPosition,vNormal;varying vec2 vUV;varying float vMaterial;
+void main(){vec3 n=normalize(vNormal),eye=normalize(uEye-vPosition);if(dot(n,eye)<0.0)n=-n;
+ vec3 light=normalize(vec3(-4.0,6.0,9.0)-vPosition);float diffuse=max(0.0,dot(n,light));float spec=pow(max(0.0,dot(n,normalize(light+eye))),35.0);
+ vec3 col=uBase*(.63+.34*diffuse)+uLight*spec*.16;float alpha=uAlpha;
+ if(uKind<.5&&vMaterial<.5)col=texture2D(uTexture,vUV).rgb*(.98+.02*diffuse);
+ if(uKind>1.5&&uKind<2.5){col=uBG*(.965+.075*diffuse)+uLight*spec*.012;float edge=1.0-smoothstep(.0,.14,min(min(vUV.x,1.0-vUV.x),min(vUV.y,1.0-vUV.y)));col=mix(col,uBG*.975,edge*.30);}
+ if(uKind>2.5){vec2 p=(vUV-.5)*2.0;alpha*=exp(-4.0*dot(p,p));col=uInk;}
+ gl_FragColor=vec4(clamp(col,0.0,1.0),alpha);}`;
+function ih49Fee(amount){const o=IDEA_HIRE_PUBLIC_OFFER;return Math.round(Math.max(o.minimum,Math.min(o.maximum,amount*o.percent/100))*100)/100;}
+function ih49Money(value,english){return Number(value).toLocaleString(english?'en-GB':'pl-PL',{maximumFractionDigits:2})+(english?' PLN':' zł');}
+function ih49Receipt(s){
+ const c=document.createElement('canvas');c.width=1080;c.height=370;const x=c.getContext('2d'),p=s.palette,en=s.english;
+ x.fillStyle=p.paper;x.fillRect(0,0,1080,370);x.strokeStyle=p.line;x.lineWidth=2;x.strokeRect(2,2,1076,366);x.fillStyle=p.ink;
+ x.font='600 22px Inter,Arial';x.fillText('IDEAHIRE / '+(en?'CALCULATION':'OBLICZENIE'),42,51);x.font='700 114px Inter,Arial';x.fillText(en?'5.5%':'5,5%',39,190);
+ x.font='500 25px Inter,Arial';x.fillText(en?'IdeaHire fee':'Prowizja IdeaHire',47,238);x.font='700 40px Inter,Arial';x.fillText(ih49Money(ih49Fee(s.amount),en),47,308);
+ x.strokeStyle=p.line;x.beginPath();x.moveTo(452,95);x.lineTo(452,321);x.stroke();x.font='500 24px Inter,Arial';x.fillText(en?'Professional receives':'Wykonawca otrzymuje',498,134);x.font='700 43px Inter,Arial';x.fillText(ih49Money(s.amount,en),498,195);x.font='500 22px Inter,Arial';x.fillText(en?'Client total':'Klient płaci łącznie',498,259);x.font='700 39px Inter,Arial';x.fillText(ih49Money(s.amount+ih49Fee(s.amount),en),498,315);return c;
 }
-function ih48WorldRenderer(canvas){
- const gl=canvas.getContext('webgl',{alpha:false,antialias:false,powerPreference:'low-power',depth:true});if(!gl)return null;
- const shaders=[],buffers=[];let program;
- try{
-  program=gl.createProgram();for(const[kind,source]of[[gl.VERTEX_SHADER,IH48_WORLD_VERTEX],[gl.FRAGMENT_SHADER,IH48_WORLD_FRAGMENT]]){const sh=gl.createShader(kind);shaders.push(sh);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error('world shader');gl.attachShader(program,sh);}gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('world link');
-  gl.useProgram(program);const mesh=ih48WorldMesh();for(const[target,data]of[[gl.ARRAY_BUFFER,new Float32Array(mesh.vertices)],[gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(mesh.indices)]]){const buffer=gl.createBuffer();buffers.push(buffer);gl.bindBuffer(target,buffer);gl.bufferData(target,data,gl.STATIC_DRAW);}
-  for(const[name,size,offset]of[['aLocal',3,0],['aNormal',3,12],['aCell',2,24],['aSeed',1,32]]){const a=gl.getAttribLocation(program,name);gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,size,gl.FLOAT,false,36,offset);}
-  const uniforms={};for(const name of['uVP','uTime','uScroll','uChapter','uVelocity','uPointer','uBG','uLight','uEye','uDark'])uniforms[name]=gl.getUniformLocation(program,name);
-  gl.enable(gl.DEPTH_TEST);
-  return{draw(width,height,s){
-   if(gl.isContextLost())return;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height);gl.useProgram(program);const p=s.palette,plan=ih48WorldPlan(s,s.cssWidth,s.cssHeight),bg=ih47RGB(p.bg);gl.clearColor(...bg,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-   gl.uniformMatrix4fv(uniforms.uVP,false,new Float32Array(plan.vp));for(const[name,value]of[['uTime',s.time],['uScroll',s.scroll],['uChapter',s.chapter],['uVelocity',s.velocity],['uDark',s.dark?1:0]])gl.uniform1f(uniforms[name],value);
-   gl.uniform2f(uniforms.uPointer,s.x,s.y);for(const[name,value]of[['uBG',bg],['uLight',ih47RGB(s.dark?p.ink:p.paper)],['uEye',plan.eye]])gl.uniform3fv(uniforms[name],new Float32Array(value));gl.drawElements(gl.TRIANGLES,mesh.indices.length,gl.UNSIGNED_SHORT,0);
-  },destroy(){buffers.forEach(b=>gl.deleteBuffer(b));shaders.forEach(sh=>gl.deleteShader(sh));gl.deleteProgram(program);}};
- }catch{buffers.forEach(b=>gl.deleteBuffer(b));shaders.forEach(sh=>gl.deleteShader(sh));if(program)gl.deleteProgram(program);return null;}
-}
-function ih48StartWorld(canvas,host,root,state){
- let renderer=null,frame=0,dead=false,last=0,lastDraw=0,dirty=true,measure=true,visible=true,observer;const listeners=[];
- const listen=(node,event,fn,options)=>{node.addEventListener(event,fn,options);listeners.push(()=>node.removeEventListener(event,fn,options));};
- const create=()=>{renderer?.destroy();renderer=ih48WorldRenderer(canvas);host.dataset.renderer=renderer?'ready':'fallback';};
- function tick(now){
-  frame=0;if(dead||document.hidden||!visible)return;const s=state.current,interval=window.innerWidth<821?1000/30:1000/40;
-  if(!s.paused&&!s.reduced&&lastDraw&&now-lastDraw<interval-1){frame=requestAnimationFrame(tick);return;}
-  const dt=last?Math.min(.08,(now-last)/1000):0;last=now;lastDraw=now;
-  if(measure){const h=Math.max(1,window.innerHeight);s.targetScroll=(window.scrollY||0)/h;const chapters=Array.from(root.current?.querySelectorAll('.chapter')||[]);let chapter=0;chapters.forEach((el,i)=>{if(el.getBoundingClientRect().top<h*.65)chapter=i+1;});s.targetChapter=chapter;measure=false;}
-  if(!s.paused&&!s.reduced){s.time+=dt;s.x+=(s.targetX-s.x)*.10;s.y+=(s.targetY-s.y)*.10;const previous=s.scroll;s.scroll+=(s.targetScroll-s.scroll)*.10;s.velocity=ih47Clamp((s.scroll-previous)*15,-1,1);s.chapter+=(s.targetChapter-s.chapter)*.12;}
-  if(dirty){s.cssWidth=Math.max(1,window.innerWidth);s.cssHeight=Math.max(1,window.innerHeight);const budget=s.cssWidth<821?430000:1000000,dpr=Math.min(window.devicePixelRatio||1,1.4,Math.sqrt(budget/(s.cssWidth*s.cssHeight)));s.width=Math.round(s.cssWidth*dpr);s.height=Math.round(s.cssHeight*dpr);dirty=false;}
-  try{renderer?.draw(s.width,s.height,s);}catch{renderer?.destroy();renderer=null;host.dataset.renderer='fallback';}
-  if(renderer&&!s.paused&&!s.reduced)frame=requestAnimationFrame(tick);
+function ih49ScenePlan(s,w,h){
+ const mode=s.mode,aspect=w/Math.max(1,h),x=s.x||0,y=s.y||0,t=s.time;
+ const eye=mode==='background'?[.4+x*.16,.6+y*.12,12.5]:mode==='mark'?[.15+x*.30,.3+y*.22,5.7]:[.2+x*.25,.5+y*.18,Math.max(2.7,6.0/aspect)];
+ const vp=ih49Mul(ih49Perspective((mode==='background'?45:38)*Math.PI/180,aspect),ih49Look(eye,[0,0,0])),calls=[];
+ if(mode==='background'){
+  const scroll=s.scroll||0,drift=s.reduced?0:Math.sin(t*.12)*.06;
+  const poses=[[-9,-8,-5,.12,-.16,.22,6.8],[9,7,-6,-.14,.12,-.24,6.4],[-11,8,-8,.18,.14,-.25,6],[11,-9,-9,-.16,-.12,.24,7]];
+  poses.forEach((p,i)=>calls.push({mesh:'card',kind:2,alpha:1,model:ih49Transform(p[0]+x*.08,p[1]+Math.sin(scroll*.24+i)*.55,p[2],p[3]+drift,p[4]+y*.015,p[5]+scroll*.006*(i%2?1:-1),p[6],p[6]*.748,p[6])}));
+ }else if(mode==='mark'){
+  const build=s.reduced?1:ih49Ease(s.build/.8),spread=1-build;
+  for(let group=0;group<4;group++)for(let cell=0;cell<16;cell++){
+   const gx=(group%2-.5)*1.17,gy=(.5-Math.floor(group/2))*1.17,cx=(cell%4-1.5)*.245,cy=(1.5-Math.floor(cell/4))*.245;
+   const seed=((cell*17+group*29)%67)/67,delay=ih49Ease((s.build-seed*.13)/.62),splay=s.reduced?0:1-delay;
+   const xx=gx+cx+splay*(cx+gx)*1.2,yy=gy+cy+splay*(cy+gy)*1.2,zz=splay*(.5+seed*.9);
+   calls.push({mesh:'card',kind:1,alpha:1,model:ih49Transform(xx,yy,zz,-.12+y*.09+splay*.6,.18+x*.18+splay*(seed-.5),spread*(seed-.5)*.3,.097,.073,.70)});
+  }
+ }else{
+  const turn=s.reduced?0:Math.sin(t*.55)*.018;
+  calls.push({mesh:'shadow',kind:3,alpha:.14,model:ih49Transform(0,-.89,-.35,-Math.PI/2,0,0,2.4,.65,1)});
+  calls.push({mesh:'card',kind:0,alpha:1,model:ih49Transform(0,.05,0,-.10+y*.035,-.13+x*.09,-.025+turn,1.48,.378,1.1)});
  }
- const wake=()=>{if(!dead&&!document.hidden&&visible&&!frame){last=0;lastDraw=0;frame=requestAnimationFrame(tick);}};
- create();listen(window,'scroll',()=>{measure=true;wake();},{passive:true});listen(window,'resize',()=>{dirty=measure=true;wake();},{passive:true});
- listen(window,'pointermove',e=>{if(e.pointerType!=='mouse'||state.current.paused||state.current.reduced)return;state.current.targetX=e.clientX/Math.max(1,window.innerWidth)*2-1;state.current.targetY=1-e.clientY/Math.max(1,window.innerHeight)*2;wake();},{passive:true});
- listen(document,'visibilitychange',()=>{cancelAnimationFrame(frame);frame=0;last=0;if(!document.hidden)wake();});
- listen(canvas,'webglcontextlost',e=>{e.preventDefault();renderer=null;host.dataset.renderer='fallback';cancelAnimationFrame(frame);frame=0;});listen(canvas,'webglcontextrestored',()=>{create();dirty=true;wake();});
- if(typeof IntersectionObserver!=='undefined'){observer=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}});if(root.current)observer.observe(root.current);}
- wake();return{wake,destroy(){dead=true;cancelAnimationFrame(frame);listeners.forEach(fn=>fn());observer?.disconnect();renderer?.destroy();}};
+ return{eye,vp,calls};
 }
-function IH48World({rootRef,palette,paused,reduced,dark}){
- const host=useRef(null),canvas=useRef(null),engine=useRef(null),state=useRef({time:1.8,x:0,y:0,targetX:0,targetY:0,scroll:0,targetScroll:0,chapter:0,targetChapter:0,velocity:0,palette,paused,reduced,dark});
- useLayoutEffect(()=>{Object.assign(state.current,{palette,paused,reduced,dark});engine.current?.wake();},[palette,paused,reduced,dark]);
- useEffect(()=>{engine.current=ih48StartWorld(canvas.current,host.current,rootRef,state);return()=>{engine.current?.destroy();engine.current=null;};},[]);
- return <div ref={host} className="ih48-world" aria-hidden="true"><canvas ref={canvas}/></div>;
+function ih49Renderer(canvas,mode){
+ const gl=canvas.getContext('webgl',{alpha:mode!=='background',antialias:true,powerPreference:'low-power'});if(!gl)return null;
+ const shaders=[],buffers=[];let program,texture=null,signature='';
+ try{program=gl.createProgram();for(const[type,source]of[[gl.VERTEX_SHADER,IH49_VERTEX],[gl.FRAGMENT_SHADER,IH49_FRAGMENT]]){const sh=gl.createShader(type);shaders.push(sh);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error('scene shader');gl.attachShader(program,sh);}gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('scene link');gl.useProgram(program);
+  const meshes={};for(const[name,data]of Object.entries({card:ih49CardMesh(),shadow:ih49ShadowMesh()})){const vb=gl.createBuffer(),ib=gl.createBuffer();buffers.push(vb,ib);gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data.vertices),gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(data.indices),gl.STATIC_DRAW);meshes[name]={vb,ib,count:data.indices.length};}
+  const uniforms={},attributes={};for(const key of['uModel','uVP','uEye','uBase','uLight','uBG','uInk','uKind','uAlpha','uTexture'])uniforms[key]=gl.getUniformLocation(program,key);for(const key of['aPosition','aNormal','aUV','aMaterial'])attributes[key]=gl.getAttribLocation(program,key);
+  texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([255,255,255,255]));for(const[k,v]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,k,v);gl.uniform1i(uniforms.uTexture,0);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  return{draw(width,height,s){
+   if(gl.isContextLost())return;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height);gl.useProgram(program);const p=s.palette,bg=ih49RGB(p.bg),plan=ih49ScenePlan(s,s.cssWidth,s.cssHeight);gl.clearColor(...(mode==='background'?bg:[0,0,0]),mode==='background'?1:0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+   gl.uniformMatrix4fv(uniforms.uVP,false,new Float32Array(plan.vp));for(const[key,value]of[['uEye',plan.eye],['uBase',s.markColor||ih49RGB(p.material)],['uLight',ih49RGB(p.paper)],['uBG',bg],['uInk',ih49RGB(p.ink)]])gl.uniform3fv(uniforms[key],new Float32Array(value));
+   if(mode==='receipt'){const next=JSON.stringify([p,s.amount,s.english,s.fontCycle]);if(signature!==next){signature=next;gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,ih49Receipt(s));for(const[k,v]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,k,v);}gl.uniform1i(uniforms.uTexture,0);}
+   for(const call of plan.calls){const mesh=meshes[call.mesh];gl.bindBuffer(gl.ARRAY_BUFFER,mesh.vb);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.ib);for(const[key,size,offset]of[['aPosition',3,0],['aNormal',3,12],['aUV',2,24],['aMaterial',1,32]]){const a=attributes[key];gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,size,gl.FLOAT,false,36,offset);}gl.uniformMatrix4fv(uniforms.uModel,false,new Float32Array(call.model));gl.uniform1f(uniforms.uKind,call.kind);gl.uniform1f(uniforms.uAlpha,call.alpha);if(texture)gl.bindTexture(gl.TEXTURE_2D,texture);gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);}
+  },destroy(){buffers.forEach(b=>gl.deleteBuffer(b));shaders.forEach(sh=>gl.deleteShader(sh));if(texture)gl.deleteTexture(texture);gl.deleteProgram(program);}};
+ }catch{buffers.forEach(b=>gl.deleteBuffer(b));shaders.forEach(sh=>gl.deleteShader(sh));if(texture)gl.deleteTexture(texture);if(program)gl.deleteProgram(program);return null;}
+}
+function ih49StartScene(canvas,host,owner,state){
+ let engine=null,dead=false,frame=0,last=0,lastDraw=0,visible=true,dirty=true,observer,resize;const listeners=[];
+ const listen=(node,event,fn,options)=>{node.addEventListener(event,fn,options);listeners.push(()=>node.removeEventListener(event,fn,options));};
+ const create=()=>{engine?.destroy();engine=ih49Renderer(canvas,state.current.mode);host.dataset.renderer=engine?'ready':'fallback';if(state.current.mode==='mark')owner.dataset.ih49Ready=engine?'true':'false';};
+ function tick(now){frame=0;if(dead||!visible||document.hidden)return;const s=state.current,interval=window.innerWidth<821?1000/30:1000/40;
+  if(!s.paused&&!s.reduced&&lastDraw&&now-lastDraw<interval-1){frame=requestAnimationFrame(tick);return;}const dt=last?Math.min(.08,(now-last)/1000):0;last=now;lastDraw=now;
+  if(!s.paused&&!s.reduced){s.time+=dt;s.build+=dt;s.settle+=dt;s.x+=(s.targetX-s.x)*.14;s.y+=(s.targetY-s.y)*.14;s.scroll+=(s.targetScroll-s.scroll)*.10;}
+  if(dirty){const b=host.getBoundingClientRect();s.cssWidth=Math.max(1,b.width);s.cssHeight=Math.max(1,b.height);const budget=s.mode==='background'?(window.innerWidth<821?400000:800000):s.mode==='mark'?30000:220000,dpr=Math.min(window.devicePixelRatio||1,1.6,Math.sqrt(budget/(s.cssWidth*s.cssHeight)));s.width=Math.max(1,Math.round(s.cssWidth*dpr));s.height=Math.max(1,Math.round(s.cssHeight*dpr));dirty=false;}
+  try{engine?.draw(s.width,s.height,s);}catch{engine?.destroy();engine=null;host.dataset.renderer='fallback';if(s.mode==='mark')owner.dataset.ih49Ready='false';}
+  if(engine&&!s.paused&&!s.reduced&&(s.mode!=='mark'||s.active||s.build<1.05||s.settle<.55))frame=requestAnimationFrame(tick);
+ }
+ const wake=()=>{if(!dead&&visible&&!document.hidden&&!frame){last=0;lastDraw=0;frame=requestAnimationFrame(tick);}};
+ const replay=()=>{const s=state.current;if(!s.reduced&&!s.paused){s.build=0;s.settle=0;}wake();};
+ create();listen(window,'resize',()=>{dirty=true;wake();},{passive:true});listen(window,'scroll',()=>{state.current.targetScroll=(window.scrollY||0)/Math.max(1,window.innerHeight);wake();},{passive:true});
+ listen(owner,'pointermove',e=>{if(e.pointerType!=='mouse'||state.current.reduced||state.current.paused)return;const b=owner.getBoundingClientRect();state.current.targetX=(e.clientX-b.left)/Math.max(1,b.width)*2-1;state.current.targetY=(e.clientY-b.top)/Math.max(1,b.height)*2-1;state.current.settle=0;wake();},{passive:true});
+ listen(owner,'pointerenter',e=>{if(e.pointerType==='mouse'){state.current.active=true;replay();}});listen(owner,'pointerleave',()=>{Object.assign(state.current,{active:false,targetX:0,targetY:0,settle:0});wake();});
+ if(state.current.mode==='mark'){listen(owner,'focusin',replay);listen(owner,'click',replay);listen(owner,'focusout',()=>{state.current.active=false;wake();});}
+ listen(window,'ih49-motion',e=>{state.current.paused=!!e.detail?.paused;wake();});
+ listen(document,'visibilitychange',()=>{cancelAnimationFrame(frame);frame=0;last=0;if(!document.hidden)wake();});
+ listen(canvas,'webglcontextlost',e=>{e.preventDefault();engine=null;host.dataset.renderer='fallback';if(state.current.mode==='mark')owner.dataset.ih49Ready='false';cancelAnimationFrame(frame);frame=0;});listen(canvas,'webglcontextrestored',()=>{create();dirty=true;wake();});
+ if(typeof IntersectionObserver!=='undefined'){observer=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:state.current.mode==='background'?'0px':'60px'});observer.observe(state.current.mode==='background'?owner:host);}
+ if(typeof ResizeObserver!=='undefined'){resize=new ResizeObserver(()=>{dirty=true;wake();});resize.observe(host);}
+ if(state.current.mode==='receipt')ih49Fonts().then(()=>{if(!dead){state.current.fontCycle=(state.current.fontCycle||0)+1;wake();}}).catch(()=>{});
+ wake();return{wake,replay,destroy(){dead=true;cancelAnimationFrame(frame);listeners.forEach(fn=>fn());observer?.disconnect();resize?.disconnect();engine?.destroy();if(state.current.mode==='mark')delete owner.dataset.ih49Ready;}};
+}
+function ih49Initial(mode,palette,reduced,english=false,amount=500){return{mode,palette,reduced,english,amount,paused:IH49_MOTION.paused,time:0,build:1.2,settle:1,x:0,y:0,targetX:0,targetY:0,scroll:0,targetScroll:0,active:false};}
+const IH49_MOTION={paused:false};
+function useIH49Reduced(){const[value,setValue]=useState(()=>typeof window!=='undefined'&&!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);useEffect(()=>{const m=window.matchMedia?.('(prefers-reduced-motion: reduce)');if(!m)return;const change=()=>setValue(m.matches);m.addEventListener?.('change',change);return()=>m.removeEventListener?.('change',change);},[]);return value;}
+function ih49Palette(site){return IDEA_HIRE_VISUAL_SYSTEM[site.template==='classic'?(site.theme==='dark'?'monoDark':'mono'):(site.theme==='dark'?'turquoiseDark':'turquoise')];}
+function IH49Backdrop({rootRef}){
+ const host=useRef(null),canvas=useRef(null),site=useSitePreferences(),reduced=useIH49Reduced(),palette=ih49Palette(site);
+ useEffect(()=>{const state={current:ih49Initial('background',palette,reduced)};const engine=ih49StartScene(canvas.current,host.current,rootRef.current,state);return()=>engine.destroy();},[palette,reduced]);
+ return <div className="ih49-backdrop" ref={host} aria-hidden="true"><canvas ref={canvas}/></div>;
+}
+function useIH49LegacyEnhancements(rootRef){
+ const site=useSitePreferences(),reduced=useIH49Reduced(),palette=ih49Palette(site);
+ useEffect(()=>{
+  const root=rootRef.current;if(!root)return;document.body.classList.add('ih49-active');
+  const marks=[],presses=new Map();let frame=0,pending=null,current=null;
+  for(const mark of root.querySelectorAll('.ih-category-mark,.ih40-step-mark')){
+   const owner=mark.closest('.ih-category-trigger,.ih40-step');if(!owner)continue;
+   const host=document.createElement('span'),canvas=document.createElement('canvas');host.className='ih49-mark-scene';host.setAttribute('aria-hidden','true');host.appendChild(canvas);mark.appendChild(host);
+   const state={current:ih49Initial('mark',palette,reduced)};state.current.markColor=ih49RGB(mark.classList.contains('ih-category-mark')?palette.on:palette.ink);const sample=mark.querySelector('i');const color=sample?getComputedStyle(sample).backgroundColor:'';const numbers=color.match(/[\d.]+/g);if(numbers?.length>=3&&(numbers.length<4||Number(numbers[3])>=.5))state.current.markColor=numbers.slice(0,3).map(v=>Number(v)/255);
+   const engine=ih49StartScene(canvas,host,owner,state);marks.push({engine,host,mark});
+  }
+  const reset=()=>{if(current){current.style.removeProperty('--ih49-rx');current.style.removeProperty('--ih49-ry');current.removeAttribute('data-ih49-tilt');current=null;}};
+  const move=e=>{if(e.pointerType!=='mouse'||reduced||IH49_MOTION.paused)return;const target=e.target.closest?.('.ih-category-trigger,.ih40-step > button,.split-card');if(!target){reset();return;}pending={target,x:e.clientX,y:e.clientY};if(!frame)frame=requestAnimationFrame(()=>{frame=0;if(!pending)return;const{target,x,y}=pending,b=target.getBoundingClientRect();if(current!==target)reset();current=target;target.dataset.ih49Tilt='true';target.style.setProperty('--ih49-rx',((.5-(y-b.top)/Math.max(1,b.height))*8).toFixed(2)+'deg');target.style.setProperty('--ih49-ry',(((x-b.left)/Math.max(1,b.width)-.5)*8).toFixed(2)+'deg');});};
+  const clearPresses=()=>{presses.forEach((timer,target)=>{clearTimeout(timer);target.removeAttribute('data-ih49-press');});presses.clear();};
+  const press=e=>{if(e.pointerType==='mouse'||reduced||IH49_MOTION.paused)return;const target=e.target.closest?.('.ih-category-trigger,.ih40-step > button');if(!target)return;clearTimeout(presses.get(target));target.dataset.ih49Press='true';presses.set(target,setTimeout(()=>{target.removeAttribute('data-ih49-press');presses.delete(target);},680));};
+  root.addEventListener('pointermove',move,{passive:true});root.addEventListener('pointerdown',press,{passive:true});root.addEventListener('pointercancel',clearPresses);root.addEventListener('pointerleave',reset);window.addEventListener('blur',reset);
+  return()=>{cancelAnimationFrame(frame);reset();clearPresses();root.removeEventListener('pointermove',move);root.removeEventListener('pointerdown',press);root.removeEventListener('pointercancel',clearPresses);root.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);marks.forEach(({engine,host,mark})=>{engine.destroy();host.remove();delete mark.dataset.ih49Ready;});document.body.classList.remove('ih49-active');};
+ },[rootRef,palette,reduced]);
+}
+function IH49FeeIsland(){
+ const site=useSitePreferences(),palette=ih49Palette(site),english=site.language==='en',reduced=useIH49Reduced(),[draft,setDraft]=useState('500');
+ const amount=ih49Clamp(Number(draft)||1,1,IDEA_HIRE_PUBLIC_OFFER.orderLimit),host=useRef(null),canvas=useRef(null),engine=useRef(null),state=useRef(ih49Initial('receipt',palette,reduced,english,amount));
+ useLayoutEffect(()=>{Object.assign(state.current,{palette,reduced,english,amount});engine.current?.wake();},[palette,reduced,english,amount]);
+ useEffect(()=>{engine.current=ih49StartScene(canvas.current,host.current,host.current,state);return()=>{engine.current?.destroy();engine.current=null;};},[]);
+ return <div className="ih49-fee-island"><div className="ih49-receipt" ref={host} aria-hidden="true"><canvas ref={canvas}/><span className="ih49-receipt-fallback">{ih49Money(amount,english)} + {ih49Money(ih49Fee(amount),english)}</span></div><div className="ih49-fee-controls"><label>{english?'Project value':'Kwota zlecenia'}<span><input type="number" min="1" max={IDEA_HIRE_PUBLIC_OFFER.orderLimit} step="1" inputMode="decimal" value={draft} onChange={e=>setDraft(e.target.value)} onBlur={()=>setDraft(String(amount))}/>{english?'PLN':'zł'}</span></label><output aria-live="polite">{english?'Client total':'Łącznie dla klienta'}<strong>{ih49Money(amount+ih49Fee(amount),english)}</strong></output></div></div>;
+}
+function IH49CommissionStory() {
+  const id = "ih49-commission";
+  const [visible, setVisible] = useState(true);
+  const sceneRef = useRef(null);
+  useEffect(() => {
+    if (!window.IntersectionObserver) return undefined;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.08 });
+    if (sceneRef.current) observer.observe(sceneRef.current);
+    return () => observer.disconnect();
+  }, []);
+  const offer = IDEA_HIRE_PUBLIC_OFFER;
+  return (
+    <aside ref={sceneRef} className="ih5-story" data-paused={!visible} aria-labelledby={`${id}-title`}>
+      <div className="ih5-story-top"><span className="ih5-eyebrow">Od pomysłu do gotowej pracy</span></div>
+      <div className="ih5-story-stage" aria-hidden="true">
+        <IH49FeeIsland />
+      </div>
+      <div className="ih5-story-offer"><div><span>Prowizja IdeaHire</span><h3 id={`${id}-title`}>{offer.percent.toLocaleString("pl-PL", { maximumFractionDigits: 1 })}<span>%</span></h3></div><div className="ih5-story-limits"><strong>maks. {offer.maximum} zł</strong><span>min. {offer.minimum} zł · zlecenia do {offer.orderLimit.toLocaleString("pl-PL")} zł</span></div></div>
+      <p className="ih5-story-footnote">Klient płaci wynagrodzenie wykonawcy + prowizję IdeaHire.</p>
+      <Link className="ih5-story-link" to="/find-talent">Zamień pomysł w projekt <MarketIcon kind="arrow" /></Link>
+    </aside>
+  );
 }
 
-function IH47Page({session,loading,categoryGroups=[],overlay}){
- const homeRootRef=useRef(null),headerRef=useRef(null),headerSlotRef=useRef(null),mobileMenuButtonRef=useRef(null);
- const[mobileMenuOpen,setMobileMenuOpen]=useState(false),[paused,setPaused]=useState(false);
- const site=useSitePreferences(),english=site.language==='en',mono=site.template==='classic',dark=site.theme==='dark',copy=IH47_COPY[english?'en':'pl'];
- const palette=IDEA_HIRE_VISUAL_SYSTEM[mono?(dark?'monoDark':'mono'):(dark?'turquoiseDark':'turquoise')],reduced=useIH47Reduced();
- useIdeaHireScrollHeader(headerRef,headerSlotRef,true);
- useIH47Reveals(homeRootRef,reduced);
+
+function App({ session, loading, categoryGroups = [] }) {
+  const ih49RootRef=useRef(null);
+  useIH49LegacyEnhancements(ih49RootRef);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const headerRef = useRef(null);
+  const headerSlotRef = useRef(null);
+  const mobileMenuButtonRef = useRef(null);
+  const navigationRef = useRef(null);
+  useIdeaHireScrollHeader(headerRef, headerSlotRef);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    navigationRef.current?.querySelector("a")?.focus({ preventScroll: true });
+    function closeOutside(event) {
+      if (!headerRef.current?.contains(event.target)) setMobileMenuOpen(false);
+    }
+    document.addEventListener("pointerdown", closeOutside);
+    return () => document.removeEventListener("pointerdown", closeOutside);
+  }, [mobileMenuOpen]);
+
   const [hasNotifications, setHasNotifications] = useState(false);
   const [recentJobs, setRecentJobs] = useState(fallbackJobs);
   const [activeJobIndex, setActiveJobIndex] = useState(0);
@@ -1677,30 +1842,234 @@ function IH47Page({session,loading,categoryGroups=[],overlay}){
     ).toLocaleString("pl-PL")} zł`;
   }
 
+  return (
+    <div ref={ih49RootRef} className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6 ih-home-v7 ih49-home">
+      <style>{IH49_STYLES}</style>
+      <IH49Backdrop rootRef={ih49RootRef}/>
+      <style>{IH40_HEADER_STYLES}</style>
+      <div ref={headerSlotRef} className="ih40-header-slot">
+      <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
+        data-mobile-menu-open={mobileMenuOpen}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && mobileMenuOpen) {
+            event.preventDefault();
+            setMobileMenuOpen(false);
+            mobileMenuButtonRef.current?.focus({ preventScroll: true });
+          }
+        }}>
+        <IdeaHireLogo className="logo logo-clean" />
 
- function anchor(hash){const id=hash.slice(1).replace(/[^a-z0-9_-]/gi,''),el=homeRootRef.current?.querySelector('[id="'+id+'"]');el?.scrollIntoView({behavior:reduced?'instant':'smooth',block:'start'});if(id==='ih47-content')el?.focus({preventScroll:true});}
- function anchorClick(e){const link=e.target.closest?.('a[href^="#"]');if(link){e.preventDefault();anchor(link.getAttribute('href'));}}
- useEffect(()=>{if(window.location.hash){const frame=requestAnimationFrame(()=>anchor(window.location.hash));return()=>cancelAnimationFrame(frame);}},[]);
- const motionPaused=paused||mobileMenuOpen;
- return <><div ref={homeRootRef} className="site ih47-home" data-no-translate="true" data-paused={paused||reduced} onClick={anchorClick}><IH48World rootRef={homeRootRef} palette={palette} paused={motionPaused} reduced={reduced} dark={dark}/><div className="view"><a className="skip" href="#ih47-content">{english?'Skip to content':'Przejdź do treści'}</a>
- <div ref={headerSlotRef} className="header-slot"><header ref={headerRef} className="masthead"><IH47FeeStrip english={english}/><div className="navigation"><IH47Brand/><nav className="quick-nav" aria-label={copy.menu}><a href="#how-it-works">{copy.how}</a><a href="#categories">{copy.categories}</a><a href="#commission">{copy.fee}</a></nav><div className="header-tools"><button type="button" className="palette-now" onClick={()=>setMobileMenuOpen(true)} aria-label={copy.theme}><i className={'swatch'+(mono?' mono':'')}/><span>{mono?copy.mono:copy.turquoise}</span></button>{loading?<span className="avatar" aria-busy="true"><span className="sr">{english?'Loading account':'Wczytywanie konta'}</span></span>:session?<Link className="avatar" to="/account" aria-label={copy.account}>{avatarUrl?<img src={avatarUrl} alt=""/>:<span>{userInitial}</span>}{hasNotifications&&<i/>}</Link>:<Link className="login-link" to="/login">{copy.login}</Link>}<button ref={mobileMenuButtonRef} className="menu-trigger" type="button" onClick={()=>setMobileMenuOpen(true)} aria-label={copy.menu} aria-expanded={mobileMenuOpen} aria-controls="ih47-menu"><span>{copy.menu}</span><IH47Burger/></button></div></div></header></div>
- <main id="ih47-content" tabIndex={-1}><div className="intro-film"><IdeaHireCinematicHero paused={motionPaused} onPause={setPaused}/></div><div className="film-underbar"><span><IH47Mark/>{english?'An idea is a start. Meet the person who can take it further.':'Pomysł to początek. Poznaj osobę, z którą zrobisz następny krok.'}</span><a href="#projects">{english?'See what is next':'Zobacz, co dalej'}<IH47Arrow/></a></div>
- <div className="lower-heading"><span className="eyebrow">IDEAHIRE / {english?'FROM AN IDEA TO WORK':'OD POMYSŁU DO PRACY'}</span><button className="pause-all" type="button" onClick={()=>setPaused(!paused)} disabled={reduced} aria-pressed={paused||reduced}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={paused?'m8 5 11 7-11 7Z':'M8 5v14M16 5v14'} fill="none" stroke="currentColor" strokeWidth="1.6"/></svg>{paused?(english?'Resume motion':'Wznów ruch'):(english?'Pause motion':'Zatrzymaj ruch')}</button></div>
- <IH47Projects jobs={recentJobs} palette={palette} english={english} reduced={reduced} paused={motionPaused}/><IH47Categories groups={categoryGroups.length?categoryGroups:categories} palette={palette} english={english} reduced={reduced} paused={motionPaused}/><IH47Commission palette={palette} english={english} reduced={reduced} paused={motionPaused}/><IH47Process palette={palette} english={english} reduced={reduced} paused={motionPaused}/>
- <section className="paths" id="for-users" aria-label={english?'Choose your next step':'Wybierz swój następny krok'}><Link to="/find-talent"><IH47Mark/><span><small>{english?'I have a project':'Mam projekt'}</small><strong>{english?'I need a professional.':'Szukam wykonawcy.'}</strong></span><IH47Arrow/></Link><Link to="/jobs"><IH47Mark/><span><small>{english?'I have the skills':'Mam umiejętności'}</small><strong>{english?'I need a project.':'Szukam zlecenia.'}</strong></span><IH47Arrow/></Link></section><section className="closing"><IH47Mark/><h2>{english?<>Your next project.<br/>Start here.</>:<>Twój następny projekt.<br/>Zacznij tutaj.</>}</h2><div className="closing-actions"><Link className="button primary" to={session?'/account':'/register'}>{session?copy.account:copy.register}<IH47Arrow/></Link><Link className="button" to="/jobs">{copy.work}<IH47Arrow/></Link></div></section>
- </main><footer className="footer"><div><IH47Brand/><p>{english?'Where a project meets the skills to make it happen.':'Miejsce spotkania pomysłu z wykonaniem.'}</p></div><nav aria-label={copy.legal}><a href={helpCenterHref()} onClick={e=>{e.currentTarget.href=helpCenterHref();}} referrerPolicy="no-referrer">{copy.help}</a><Link to="/regulamin">{copy.terms}</Link><Link to="/polityka-prywatnosci">{copy.privacy}</Link><Link to="/polityka-cookies">Cookies</Link><a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">{copy.illegal}</a></nav><span>© {new Date().getFullYear()} IdeaHire</span></footer>
- </div></div><IH47Menu open={mobileMenuOpen} onClose={()=>setMobileMenuOpen(false)} rootRef={homeRootRef} triggerRef={mobileMenuButtonRef} site={site} copy={copy} session={session} hasNotifications={hasNotifications} logout={handleLogout} overlay={overlay} onAnchor={anchor}/></>;
-}
+        <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label="Nawigacja strony głównej"
+          onClick={(event) => { if (event.target?.closest?.("a")) setMobileMenuOpen(false); }}>
+          <HomeNavItem href="#how-it-works" order={0}>Jak to działa</HomeNavItem>
+          <HomeNavItem href="#categories" order={1}>Kategorie</HomeNavItem>
+          <HomeNavItem href="#for-users" order={2}>Dla Ciebie</HomeNavItem>
 
-/* Shadow DOM odcina historyczne reguły globalne; kontekst React i routing pozostają wspólne. */
-function App(props){
- const host=useRef(null),[mount,setMount]=useState(null),site=useSitePreferences();
- const mono=site.template==="classic",dark=site.theme==="dark",palette=IDEA_HIRE_VISUAL_SYSTEM[mono?(dark?"monoDark":"mono"):(dark?"turquoiseDark":"turquoise")];
- useLayoutEffect(()=>{const element=host.current,shadow=element.shadowRoot||element.attachShadow({mode:"open"});let view=shadow.querySelector('[data-view-mount]'),overlay=shadow.querySelector('[data-overlay-mount]');if(!view){const style=document.createElement("style");style.textContent=IH47_STYLES;view=document.createElement("div");overlay=document.createElement("div");view.dataset.viewMount="";overlay.dataset.overlayMount="";shadow.append(style,view,overlay);}setMount({view,overlay});
-  const guard=document.createElement("style");guard.textContent='body.ih47-page{margin:0!important;background:var(--v-bg)!important;color:var(--v-ink)!important}body.ih47-page #root{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;text-align:left!important;overflow:visible!important}body.ih47-page [data-ideahire-stage-host]{display:block!important;width:100%!important;min-height:100svh!important;margin:0!important;padding:0!important;transform:none!important;filter:none!important;contain:none!important}body.ih47-page .site-preferences{display:none!important}';document.head.appendChild(guard);document.body.classList.add("ih47-page");return()=>{guard.remove();document.body.classList.remove("ih47-page");};
- },[]);
- useLayoutEffect(()=>{const element=host.current;Object.entries(palette).forEach(([key,value])=>element.style.setProperty("--"+key,value));},[palette]);
- return <div ref={host} data-ideahire-stage-host="p48" data-no-translate="true">{mount&&createPortal(<IH47Page {...props} overlay={mount.overlay}/>,mount.view)}</div>;
+          {session && (
+            <>
+              <HomeNavItem to="/notifications" order={3} notification={hasNotifications}>Powiadomienia</HomeNavItem>
+              <HomeNavItem to="/account" order={4}>Moje konto</HomeNavItem>
+            </>
+          )}
+          {!session && <Link className="ih-mobile-login" to="/login">Zaloguj się</Link>}
+        </nav>
+
+        <div className="nav-actions">
+          {loading ? (
+            <span>Ładowanie...</span>
+          ) : session ? (
+            <>
+              <HomeGreeting name={userName} />
+
+              <HomeAccountMenu name={userName} avatarUrl={avatarUrl} initial={userInitial} onOpen={() => setMobileMenuOpen(false)} />
+
+              <button
+                className="btn btn-dark ih-logout-btn"
+                type="button"
+                onClick={handleLogout}
+                aria-label="Wyloguj się"
+              >
+                <span className="ih-logout-label">Wyloguj się</span>
+                <svg className="ih-logout-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h12" />
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                className="btn btn-ghost"
+                to="/login"
+              >
+                Zaloguj się
+              </Link>
+
+              <Link
+                className="btn btn-dark"
+                to="/register"
+              >
+                Zacznij teraz
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button ref={mobileMenuButtonRef} className="ih-mobile-nav-toggle" type="button"
+          aria-label={mobileMenuOpen ? "Zamknij menu" : "Otwórz menu"}
+          aria-expanded={mobileMenuOpen} aria-controls="ih-home-navigation"
+          onClick={() => setMobileMenuOpen((current) => !current)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={mobileMenuOpen ? "M6 6l12 12M18 6 6 18" : "M4 7h16M4 12h16M4 17h16"} />
+          </svg>
+        </button>
+      </header>
+      </div>
+
+      <main>
+        <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} userKey={session?.user?.id || "guest"} />
+
+        <HomeDemoReviews />
+
+        <section
+          className="categories section"
+          id="categories"
+        >
+          <div className="section-heading home-reveal ih-category-intro">
+            <div>
+              <span className="section-label">Kategorie</span>
+
+              <h2>
+                Znajdź dokładnie to, czego potrzebujesz.
+              </h2>
+            </div>
+
+            <p>
+              Od małych zadań po większe projekty.
+              Wybierz kategorię i zacznij szukać.
+            </p>
+          </div>
+
+          <div className="ih5-category-showcase">
+            <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} />
+            <IH49CommissionStory />
+          </div>
+        </section>
+
+        <section
+          className="how section"
+          id="how-it-works"
+        >
+          <div className="section-heading centered home-reveal">
+            <span className="section-label">
+              Jak to działa
+            </span>
+
+            <h2>Prościej się nie da.</h2>
+
+            <p>
+              Trzy kroki. Jeden konkretny cel.
+            </p>
+          </div>
+
+          <div className="steps">
+            <HomeStepCard number="01" title="Opisz potrzebę">Powiedz nam, czego potrzebujesz i określ podstawowe szczegóły projektu.</HomeStepCard>
+            <HomeStepCard number="02" title="Wybierz osobę">Przejrzyj zgłoszenia i wybierz wykonawcę, który najlepiej pasuje do Twojego projektu.</HomeStepCard>
+            <HomeStepCard number="03" title="Zrealizuj projekt">Ustal szczegóły, rozpocznij współpracę i doprowadź projekt do końca.</HomeStepCard>
+          </div>
+        </section>
+
+        <section
+          className="split-section section home-reveal"
+          id="for-users"
+        >
+          <div className="split-card">
+            <span className="section-label">
+              Dla zlecających
+            </span>
+
+            <h2>Masz coś do zrobienia?</h2>
+
+            <p>
+              Znajdź osobę, która ma odpowiednie umiejętności
+              i może zająć się Twoim projektem.
+            </p>
+
+            <Link
+              className="btn btn-light"
+              to="/find-talent"
+            >
+              Dodaj zlecenie 
+            </Link>
+          </div>
+
+          <div className="split-card light">
+            <span className="section-label">
+              Dla wykonawców
+            </span>
+
+            <h2>Masz coś do zaoferowania?</h2>
+
+            <p>
+              Pokaż swoje umiejętności, znajdź interesujące
+              projekty i rozwijaj swoje portfolio.
+            </p>
+
+            <Link
+              className="btn btn-outline"
+              to="/jobs"
+            >
+              Znajdź zlecenia 
+            </Link>
+          </div>
+        </section>
+
+        <section className="final-cta home-reveal">
+          <span className="section-label">IdeaHire</span>
+
+          <h2 className="final-cta-title">
+            <span>Twój następny projekt</span>
+            <span>zaczyna się tutaj.</span>
+          </h2>
+
+          <Link
+            className="btn btn-light btn-large"
+            to={session ? "/account" : "/register"}
+          >
+            {session
+              ? "Przejdź do konta "
+              : "Zacznij teraz "}
+          </Link>
+        </section>
+      </main>
+
+      <footer className="footer home-reveal">
+        <div>
+          <Link className="logo logo-clean" to="/">
+            Idea<span>Hire</span>
+          </Link>
+
+          <p>Prosto. Szybko. Skutecznie.</p>
+        </div>
+
+        <div className="footer-links">
+          <a href={helpCenterHref()} onClick={event => { event.currentTarget.href = helpCenterHref(); }} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">Pomoc</a>
+          <a href="#how-it-works">Jak to działa</a>
+          <a href="#categories">Kategorie</a>
+          <a href="#for-users">Dla Ciebie</a>
+          <Link to="/regulamin">Regulamin</Link>
+          <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
+          <Link to="/polityka-cookies">Polityka cookies</Link>
+          <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">
+            Zgłoś nielegalną treść
+          </a>
+        </div>
+
+        <span>© 2026 IdeaHire</span>
+      </footer>
+    </div>
+  );
 }
 
 export default App;
+
+
