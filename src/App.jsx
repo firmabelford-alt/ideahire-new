@@ -1,4 +1,4 @@
-/* IdeaHire | P44 | Laguna | Pełny plik: src/App.jsx | Przebudowa całego widoku głównego */
+/* IdeaHire | P44 | Papaya | Pełny plik: src/App.jsx | Przebudowa całego widoku głównego */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,104 +9,104 @@ import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
 const IH44_CONFIG={
-  "key": "01-Laguna",
-  "name": "Laguna",
-  "mode": "lagoon",
-  "hue": 168,
-  "duration": 18,
-  "description": "Turkus, mięta i jasny kamień. Pełny ekran reaguje jak płynąca warstwa światła.",
-  "descriptionEN": "Turquoise, mint and pale stone. The whole screen responds like a moving layer of light.",
+  "key": "02-Papaya",
+  "name": "Papaya",
+  "mode": "editorial",
+  "hue": 16,
+  "duration": 22,
+  "description": "Ciepły papier, wypalona papaja i szałwia. Układ redakcyjny z indeksem oraz przesuwanym pasem stron.",
+  "descriptionEN": "Warm paper, baked papaya and sage. An editorial layout with an index and sliding pages.",
   "light": {
-    "bg": "#eef5f0",
-    "surface": "#fbfcf5",
-    "soft": "#dfefe6",
-    "ink": "#123c35",
-    "muted": "#506b61",
-    "line": "#bfd4c9",
-    "accent": "#087464",
+    "bg": "#f5efe3",
+    "surface": "#fffcf4",
+    "soft": "#eee3d0",
+    "ink": "#38271f",
+    "muted": "#746153",
+    "line": "#d9c9b4",
+    "accent": "#a9422b",
     "on": "#ffffff",
-    "pop": "#c8e99c"
+    "pop": "#d5dbaf"
   },
   "dark": {
-    "bg": "#0b2521",
-    "surface": "#14352e",
-    "soft": "#1d4238",
-    "ink": "#edf6e9",
-    "muted": "#b0c9bd",
-    "line": "#31594b",
-    "accent": "#a3e2c4",
-    "on": "#102b22",
-    "pop": "#c5df8c"
+    "bg": "#261d17",
+    "surface": "#34281f",
+    "soft": "#463227",
+    "ink": "#fff0d8",
+    "muted": "#d0b49a",
+    "line": "#624b37",
+    "accent": "#f1ae86",
+    "on": "#392015",
+    "pop": "#bbc38f"
   },
   "pl": {
     "final": [
-      "Masz temat.",
-      "Znajdź człowieka."
+      "Rzeczy do zrobienia.",
+      "Ludzie do roboty."
     ],
-    "subtitle": "Powiedz, co trzeba zrobić. Sprawdź osoby, porozmawiaj i ustal szczegóły.",
-    "eyebrow": "Miejsce na dobrą współpracę",
+    "subtitle": "Zlecenia, umiejętności i rozmowy. Przejrzyj możliwości po swojemu.",
+    "eyebrow": "Otwarty spis możliwości",
     "acts": [
       [
-        "Zanim",
-        "odłożysz."
+        "Nie wszystko",
+        "zrobisz sam."
       ],
       [
-        "Opisz",
-        "krótko."
+        "Ktoś właśnie",
+        "umie to dobrze."
       ],
       [
-        "Dobierz",
-        "osobę."
+        "Przejrzyj.",
+        "Wybierz."
       ],
       [
-        "Dogadaj",
-        "szczegóły."
+        "Dalej",
+        "po swojemu."
       ]
     ],
-    "strip": "OD POTRZEBY DO WSPÓŁPRACY",
-    "section": "Każda sprawa ma swoją dziedzinę.",
-    "jobs": "Zobacz, co jest do zrobienia.",
-    "how": "Najpierw ustalcie konkrety.",
+    "strip": "OPIS / DOBÓR / ROZMOWA / WYKONANIE",
+    "section": "Przewertuj specjalizacje.",
+    "jobs": "Tematy czekające na wykonanie.",
+    "how": "Dobra robota zaczyna się od rozmowy.",
     "end": [
-      "To co,",
-      "zaczynamy?"
+      "Następna rzecz?",
+      "Bierzmy się za nią."
     ],
-    "themeDescription": "Turkus, mięta i jasny kamień. Pełny ekran reaguje jak płynąca warstwa światła."
+    "themeDescription": "Ciepły papier, wypalona papaja i szałwia. Układ redakcyjny z indeksem oraz przesuwanym pasem stron."
   },
   "en": {
     "final": [
-      "Have a task?",
-      "Find your person."
+      "Things to do.",
+      "People to do them."
     ],
-    "subtitle": "Say what needs doing. Explore people, talk and agree on the details.",
-    "eyebrow": "Room for good collaboration",
+    "subtitle": "Tasks, skills and conversations. Explore the possibilities your way.",
+    "eyebrow": "An open index of possibilities",
     "acts": [
       [
-        "Before you",
-        "put it off."
+        "You cannot",
+        "do it all alone."
       ],
       [
-        "Keep the",
-        "brief short."
+        "Someone knows",
+        "this inside out."
       ],
       [
-        "Find the",
-        "right person."
+        "Browse.",
+        "Choose."
       ],
       [
-        "Talk through",
-        "the details."
+        "Take it",
+        "your way."
       ]
     ],
-    "strip": "FROM A NEED TO A COLLABORATION",
-    "section": "There is a field for every task.",
-    "jobs": "See what needs doing.",
-    "how": "Agree on the details first.",
+    "strip": "BRIEF / SELECTION / CONVERSATION / DELIVERY",
+    "section": "Leaf through the specialisms.",
+    "jobs": "Tasks waiting for a maker.",
+    "how": "Good work starts with a conversation.",
     "end": [
-      "Shall we",
-      "get started?"
+      "What is next?",
+      "Let’s get to it."
     ],
-    "themeDescription": "Turquoise, mint and pale stone. The whole screen responds like a moving layer of light."
+    "themeDescription": "Warm paper, baked papaya and sage. An editorial layout with an index and sliding pages."
   }
 };
 
