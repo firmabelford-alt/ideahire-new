@@ -1,4 +1,4 @@
-/* IdeaHire | P42 | Przejście | Pełny plik: src/App.jsx | Cykl 90 s */
+/* IdeaHire | P42 | Materia | Pełny plik: src/App.jsx | Cykl 78 s */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,7 +9,7 @@ import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
 const IH42_STYLES=String.raw`
-__IH42__ .ih42-hero {--ih42-bg:#100b21;--ih42-ink:#f4eaff;--ih42-muted:#bba8d0;--ih42-accent:#d4b5ff;--ih42-line:rgba(166,190,227,.23);position:relative!important;isolation:isolate!important;display:block!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:var(--ih42-bg)!important;color:var(--ih42-ink)!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;text-align:left!important;box-shadow:none!important;}
+__IH42__ .ih42-hero {--ih42-bg:#19080d;--ih42-ink:#fff0e8;--ih42-muted:#d1ada3;--ih42-accent:#ffb397;--ih42-line:rgba(166,190,227,.23);position:relative!important;isolation:isolate!important;display:block!important;box-sizing:border-box!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;background:var(--ih42-bg)!important;color:var(--ih42-ink)!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;text-align:left!important;box-shadow:none!important;}
 __IH42__ .ih42-hero[data-classic="true"] {--ih42-bg:#0b0b0b;--ih42-accent:#d5d5d5;--ih42-muted:#b6b6b6;--ih42-ink:#f2f2f2;}
 __IH42__ .ih42-hero,__IH42__ .ih42-hero * {box-sizing:border-box!important;}
 __IH42__ .ih42-hero :is(h1,p,span,strong,small,button,a) {font-family:inherit!important;-webkit-text-fill-color:currentColor!important;text-shadow:none!important;}
@@ -23,7 +23,7 @@ __IH42__ .ih42-hero[data-gpu="true"] .ih42-canvas {opacity:1;}
 __IH42__ .ih42-fallback {position:absolute;inset:0;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 70% 42%,color-mix(in srgb,var(--ih42-accent) 14%,transparent),transparent 58%),var(--ih42-bg);}
 __IH42__ .ih42-fallback svg {position:absolute;width:135%;height:80%;right:-18%;bottom:-8%;fill:none;stroke:var(--ih42-accent);stroke-width:.8;opacity:.43;transform:perspective(700px) rotateX(34deg) rotateZ(-12deg);}
 __IH42__ .ih42-hero[data-gpu="true"] .ih42-fallback {opacity:0;transition:opacity 500ms ease;}
-__IH42__ .ih42-shade {position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(16, 11, 33,.75),rgba(16, 11, 33,.42) 31%,transparent 66%),linear-gradient(0deg,rgba(16, 11, 33,.93),transparent 24%,transparent 86%,rgba(16, 11, 33,.30));}
+__IH42__ .ih42-shade {position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(25, 8, 13,.75),rgba(25, 8, 13,.42) 31%,transparent 66%),linear-gradient(0deg,rgba(25, 8, 13,.93),transparent 24%,transparent 86%,rgba(25, 8, 13,.30));}
 __IH42__ .ih42-topline {position:absolute;z-index:7;top:28px;left:clamp(25px,5.6vw,100px);right:clamp(25px,4.6vw,84px);display:flex;align-items:center;justify-content:space-between;gap:15px;}
 __IH42__ .ih42-wordmark {display:inline-flex;align-items:center;gap:12px;color:var(--ih42-ink)!important;font-size:10px!important;font-weight:600!important;letter-spacing:.15em!important;white-space:nowrap;}
 __IH42__ .ih42-wordmark i {display:block;width:5px;height:5px;border-radius:50%;background:var(--ih42-accent);box-shadow:0 0 18px color-mix(in srgb,var(--ih42-accent) 65%,transparent);}
@@ -71,7 +71,7 @@ __IH42__ .ih42-sr {position:absolute!important;width:1px!important;height:1px!im
 @media(max-width:1100px) and (min-width:821px){__IH42__ .ih42-title{font-size:57px!important;}__IH42__ .ih42-act-title{font-size:66px!important;}__IH42__ .ih42-copy,__IH42__ .ih42-titles{width:46%;}__IH42__ .ih42-description{font-size:13px!important;max-width:340px!important;}}
 @media(max-width:820px){
  __IH42__ .ih42-hero{height:clamp(680px,calc(100svh - 100px),800px)!important;min-height:680px!important;margin-bottom:30px!important;}
- __IH42__ .ih42-shade{background:linear-gradient(0deg,rgba(16, 11, 33,.97),rgba(16, 11, 33,.68) 27%,rgba(16, 11, 33,.12) 57%,transparent 74%,rgba(16, 11, 33,.15));}
+ __IH42__ .ih42-shade{background:linear-gradient(0deg,rgba(25, 8, 13,.97),rgba(25, 8, 13,.68) 27%,rgba(25, 8, 13,.12) 57%,transparent 74%,rgba(25, 8, 13,.15));}
  __IH42__ .ih42-topline{top:20px;left:22px;right:22px;gap:8px;}
  __IH42__ .ih42-wordmark{font-size:9px!important;gap:8px;letter-spacing:.12em!important;}
  __IH42__ .ih42-wordmark > span{display:none;}
@@ -114,95 +114,101 @@ __IH42__ .ih42-act-title {font-size:clamp(56px,6.3vw,100px)!important;}
 `.replaceAll("__IH42__", "#root".repeat(10));
 
 const IH42_CONFIG={
-  "key": "03-Przejscie",
-  "name": "Przejście",
-  "period": 90,
-  "intro": 32,
+  "key": "04-Materia",
+  "name": "Materia",
+  "period": 78,
+  "intro": 28,
   "light": false,
-  "material": 1,
+  "material": 2,
   "rgb": {
     "bg": [
-      0.062745,
-      0.043137,
-      0.129412
+      0.098039,
+      0.031373,
+      0.05098
     ],
     "a": [
-      0.576471,
-      0.439216,
-      0.807843
+      0.8,
+      0.160784,
+      0.105882
     ],
     "b": [
-      0.407843,
-      0.780392,
-      0.905882
+      0.988235,
+      0.564706,
+      0.321569
     ]
   },
   "wordsPL": [
-    "Otwórz pomysł.",
-    "Zmień perspektywę.",
-    "Przejdź dalej.",
-    "Zobacz, co\nmożliwe.",
-    "Teraz Twoja kolej."
+    "Zaczyna się\nod myśli.",
+    "Nic nie jest\njeszcze stałe.",
+    "Znajduje\nswoją formę.",
+    "Może stać się\nczymś więcej.",
+    "Daj mu życie."
   ],
   "wordsEN": [
-    "Open an idea.",
-    "Change perspective.",
-    "Go further.",
-    "See what\nis possible.",
-    "Your turn now."
+    "It starts\nwith a thought.",
+    "Nothing is\nfixed yet.",
+    "It finds\nits form.",
+    "It can become\nsomething more.",
+    "Bring it to life."
   ],
   "cuesPL": [
-    "Otwarcie",
-    "Perspektywa",
-    "Przejście",
-    "Horyzont",
-    "Twoja kolej"
+    "Myśl",
+    "Przemiana",
+    "Forma",
+    "Potencjał",
+    "Życie"
   ],
   "cuesEN": [
-    "Opening",
-    "Perspective",
-    "Passage",
-    "Horizon",
-    "Your turn"
+    "Thought",
+    "Change",
+    "Form",
+    "Potential",
+    "Life"
   ]
 };
 
 const IH42_FORMS=String.raw`
-vec3 aperture(vec4 q,float s){
- float angle=q.x*TAU,id=q.z,unit=id/23.,section=q.y*TAU;
- vec2 dir=vec2(cos(angle),sin(angle));
- vec2 edge=dir/pow(pow(abs(dir.x),8.)+pow(abs(dir.y),8.),.125);
- float radius=1.45+.055*cos(id*.6+uTime*3.);
- vec3 p=vec3(edge*(radius+cos(section)*.055),sin(section)*.095);
+vec3 liquid(vec4 q,float s){
+ float a=q.x*TAU,b=q.y*TAU;vec3 p;
  if(s<.5){
-  p*=.68+unit*.48;p.z+=(unit-.5)*5.8;p=rz(sin(unit*PI+uTime)*.22)*p;
+  float r=1.90+.28*sin(a*3.+uTime*2.)*cos(b*2.-uTime);
+  p=unitSphere(q.x,q.y)*r;
+  p+=vec3(sin(b*2.+uTime),cos(a*2.-uTime),sin(a+b))* .15;
  }else if(s<1.5){
-  p=rz((unit-.5)*1.15+sin(uTime)*.20)*p;p.z+=(unit-.5)*6.5;p.y+=sin(unit*TAU+uTime)*.25;
+  float r=1.55+.45*cos(b),z=.50*sin(b);
+  p=vec3(cos(a)*r,sin(a)*r,z);p=rx(.45)*p;
+  p.z+=sin(a*4.+uTime*2.)*.23;
  }else if(s<2.5){
-  p*=.68;p=ry(unit*PI*1.35+uTime*.0)*p;
-  p+=vec3(sin(unit*TAU)*1.45,(unit-.5)*3.9,cos(unit*TAU)*1.2);
+  float r=1.38+.42*cos(b);
+  p=vec3((2.+cos(a*3.))*cos(a*2.),(2.+cos(a*3.))*sin(a*2.),sin(a*3.))* .75;
+  vec3 tangent=normalize(vec3(-sin(a*2.),cos(a*2.),cos(a*3.)));
+  vec3 normal=normalize(cross(tangent,vec3(.1,1.,.1)));
+  p+=(normal*cos(b)+cross(tangent,normal)*sin(b))*.38;
  }else if(s<3.5){
-  p*=.44;p=rx((unit-.5)*PI)*p;
-  p+=vec3((mod(id,6.)-2.5)*.89,(floor(id/6.)-1.5)*.89,sin(id*.7+uTime)*.45);
+  float radius=1.50+.55*cos(a*4.+uTime)*pow(cos((q.y-.5)*PI),2.);
+  p=unitSphere(q.x,q.y)*radius;
+  p.y*=1.35;p.xz*=1.+.16*sin(b*3.+uTime);
  }else if(s<4.5){
-  float a=unit*TAU;
-  p*=.60;p=ry(a)*p;p=rz(sin(a+uTime)*.16)*p;
-  p+=vec3(sin(a)*1.8,cos(a)*1.8,cos(a*2.+uTime)*.35);
+  float side=pow(pow(abs(cos(a)),6.)+pow(abs(sin(a)),6.),1./6.);
+  float r=1.30+.45*cos(b);
+  p=vec3(cos(a)/side*r,sin(a)/side*r,sin(b)*.55);
+  p=ry(sin(uTime)*.35)*p;
  }else{
-  p*=.60+unit*.45;p=rz((unit-.5)*.5)*p;
-  p+=vec3(sin(unit*PI+uTime)*.28,cos(unit*TAU+uTime)*.15,(unit-.5)*5.8);
+  float r=1.55+.45*cos(b);
+  p=vec3(cos(a)*r,sin(a)*r,sin(b)*.50);
+  p=rx(a*.5)*p;p=ry(.5)*p;
  }
- p=ry(sin(uTime)*.18)*p;return p*1.05;
+ float subtle=1.+.04*sin(a*7.+b*3.+uTime*4.);return ry(sin(uTime)*.34)*p*subtle*1.28;
 }
-vec3 form(vec4 q,float stage){return aperture(q,stage);}
-vec3 particle(vec4 q,float stage){return aperture(vec4(q.x,.25,q.z,0.),stage);}
+vec3 form(vec4 q,float stage){return liquid(q,stage);}
+vec3 particle(vec4 q,float stage){return liquid(q,stage)*1.09;}
 `;
 function ih42Geometry(compact){
- const mesh=[],points=[],lines=[],rings=compact?16:24,nu=compact?100:156,nv=compact?6:8;
- for(let j=0;j<rings;j++)for(let v=0;v<nv;v++)for(let u=0;u<nu;u++){
-  const group=j/(rings-1)*23,a=[u/nu,v/nv,group,0],b=[(u+1)/nu,v/nv,group,0],c=[(u+1)/nu,(v+1)/nv,group,0],d=[u/nu,(v+1)/nv,group,0];mesh.push(...a,...b,...c,...a,...c,...d);
+ const mesh=[],points=[],lines=[],nu=compact?168:284,nv=compact?78:136;
+ for(let v=0;v<nv;v++)for(let u=0;u<nu;u++){
+  const a=[u/nu,v/nv,0,0],b=[(u+1)/nu,v/nv,0,0],c=[(u+1)/nu,(v+1)/nv,0,0],d=[u/nu,(v+1)/nv,0,0];mesh.push(...a,...b,...c,...a,...c,...d);
  }
- for(let i=0;i<(compact?120:280);i++)points.push(IH42_M.noise(i),IH42_M.noise(i+300),IH42_M.noise(i+1000),9);
+ for(let i=0;i<(compact?110:260);i++)points.push(IH42_M.noise(i),IH42_M.noise(i+300),IH42_M.noise(i+1000),9);
  return{mesh,points,lines};
 }
 
