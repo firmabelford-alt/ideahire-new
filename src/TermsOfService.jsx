@@ -1,4 +1,7 @@
-import React from "react";
+/* P47 — pełny plik src/TermsOfService.jsx | Treść dokumentów zachowana. */
+import React,{useEffect,useLayoutEffect,useRef,useState} from "react";
+import {createPortal} from "react-dom";
+import {useSitePreferences} from "./Preferences";
 import LucynaPrivacy from "./LucynaPrivacy";
 import { Link } from "react-router-dom";
 
@@ -104,6 +107,25 @@ const DOCUMENT_LABELS = {
   },
 };
 
+const IH47_LEGAL_STYLES=String.raw`:host{display:block;font-family:Inter,Arial,sans-serif;font-size:16px;line-height:1.7;color:#1a2420;background:#fff;font-synthesis:none;-webkit-font-smoothing:antialiased;}
+*,*::before,*::after{box-sizing:border-box;}h1,h2,h3,p{margin:0;}a{color:inherit;text-decoration:none;}button{font:inherit;cursor:pointer;}a:focus-visible,button:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #24685f;outline-offset:5px;}::selection{background:#c7e8df;color:#153b34;}
+.legal-page{min-height:100svh;background:#fff;color:#1a2420;padding:0 5vw 70px;overflow-wrap:anywhere;}.legal-shell{max-width:1320px;margin:0 auto;}.legal-nav{display:flex;justify-content:space-between;align-items:center;gap:30px;min-height:105px;border-bottom:1px solid #d9dfd9;}.legal-logo{display:inline-flex;align-items:center;gap:12px;font-size:29px;font-weight:750;letter-spacing:-1.6px;line-height:1;}.legal-mark{display:grid;grid-template-columns:repeat(2,6px);grid-template-rows:repeat(2,6px);gap:3px;width:15px;height:15px;}.legal-mark i{display:block;background:#203c32;}.legal-actions{display:flex;align-items:center;gap:25px;font-size:13px;}.legal-actions button{min-height:44px;padding:10px 14px;border:1px solid #c9d2ca;background:#fff;color:#203c32;font-size:12px;}.legal-actions a{display:flex;align-items:center;min-height:44px;}.legal-hero{padding:65px 0 37px;max-width:950px;}.legal-eyebrow{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:650;color:#4d6154;margin-bottom:22px;}.legal-hero h1{font-size:clamp(44px,5.8vw,78px);font-weight:600;line-height:1.03;letter-spacing:-.065em;margin:0 0 25px;}.legal-hero>p{font-size:17px;line-height:1.7;max-width:800px;color:#435047;}.legal-meta{display:flex;flex-wrap:wrap;gap:8px 25px;margin-top:28px;color:#526054;font-size:12px;}.legal-warning{display:flex;gap:18px;max-width:1000px;border-left:2px solid #55715c;padding:5px 0 5px 20px;margin:5px 0 35px;font-size:13px;}.legal-warning>span{font-weight:700;font-size:22px;}.legal-warning strong{font-weight:600;}.legal-warning p{margin-top:5px;line-height:1.7;color:#435047;max-width:900px;}.legal-tabs{display:flex;flex-wrap:wrap;gap:10px 28px;border-bottom:1px solid #d9dfd9;padding-bottom:15px;margin-bottom:45px;}.legal-tabs a{display:flex;align-items:center;min-height:44px;font-size:13px;color:#4d5e51;}.legal-tabs a[aria-current=page]{color:#17291e;font-weight:700;box-shadow:0 1px 0 #17291e;}
+.legal-grid{display:grid;grid-template-columns:245px minmax(0,1fr);gap:65px;align-items:start;}.legal-toc{position:sticky;top:24px;max-height:calc(100svh - 55px);overflow:auto;overscroll-behavior:contain;padding:0 15px 10px 0;scrollbar-width:thin;}.legal-toc>strong{display:block;font-size:12px;font-weight:650;margin-bottom:17px;}.legal-toc a{display:block;padding:7px 0;font-size:12px;line-height:1.55;color:#526354;}.legal-toc a:hover{color:#132a1c;text-decoration:underline;text-underline-offset:4px;}.legal-toc-mobile{display:none;}.legal-body{min-width:0;max-width:920px;}.legal-document-content{height:auto;max-height:none;overflow:visible;font-size:16px;line-height:1.85;}.legal-document-content h1,.legal-document-content h2{font-size:27px;line-height:1.25;font-weight:600;letter-spacing:-.03em;margin:45px 0 20px;scroll-margin-top:30px;}.legal-document-content h3{font-size:20px;line-height:1.3;font-weight:600;margin:27px 0 15px;scroll-margin-top:30px;}.legal-document-content p{margin:13px 0;}.legal-document-content>p:first-child{margin-top:0;}.legal-document-content ul,.legal-document-content ol{padding-left:25px;margin:18px 0;}.legal-document-content li{padding-left:5px;}.legal-document-content li>p{margin:9px 0;}.legal-document-content a{color:#215c48;text-decoration:underline;text-underline-offset:3px;}.legal-document-content strong{font-weight:650;}.legal-document-content hr{border:0;border-top:1px solid #d9dfd9;margin:45px 0;}.legal-document-content blockquote{margin:25px 0;padding:5px 0 5px 20px;border-left:2px solid #91ad98;color:#405546;font-size:14px;}.legal-table-scroll{width:100%;overflow-x:auto;margin:27px 0;scrollbar-width:thin;border:1px solid #d9dfd9;}.legal-document-content table{border-collapse:collapse;width:100%;min-width:580px;font-size:14px;line-height:1.65;background:#fff;}.legal-document-content th,.legal-document-content td{padding:14px 16px;text-align:left;vertical-align:top;white-space:normal;overflow-wrap:anywhere;border-bottom:1px solid #d9dfd9;border-right:1px solid #e2e7e0;}.legal-document-content th{background:#f4f6f1;font-weight:650;color:#253d2c;}.legal-document-content tr:last-child td{border-bottom:0;}.legal-document-content td:last-child,.legal-document-content th:last-child{border-right:0;}.legal-document-content code{font-family:ui-monospace,monospace;font-size:.9em;word-break:break-word;}.legal-body>.legal-document-content+section{border-top:1px solid #d9dfd9;margin-top:45px;padding-top:20px;}.legal-footer{display:flex;align-items:center;justify-content:space-between;gap:30px;border-top:1px solid #d9dfd9;margin-top:70px;padding-top:30px;font-size:12px;}.legal-footer>nav{display:flex;flex-wrap:wrap;gap:10px 25px;}.legal-footer a{display:inline-flex;align-items:center;min-height:40px;}.legal-footer>span{color:#526054;}
+@media(max-width:1050px){.legal-grid{grid-template-columns:200px minmax(0,1fr);gap:35px;}.legal-document-content{font-size:15px;}.legal-hero h1{font-size:61px;}}
+@media(max-width:760px){.legal-page{padding:0 23px 45px;}.legal-nav{min-height:90px;gap:20px;}.legal-logo{font-size:26px;}.legal-actions{gap:15px;font-size:12px;}.legal-actions button{font-size:11px;padding:10px;}.legal-hero{padding-top:43px;}.legal-hero h1{font-size:48px;}.legal-hero>p{font-size:15px;}.legal-meta{font-size:11px;gap:8px 18px;}.legal-warning{font-size:12px;padding-left:15px;}.legal-warning>span{font-size:19px;}.legal-tabs{gap:10px 25px;margin-bottom:25px;}.legal-tabs a{font-size:13px;}.legal-grid{display:block;}.legal-toc{display:none;}.legal-toc-mobile{display:block;margin-bottom:35px;border-bottom:1px solid #d9dfd9;}.legal-toc-mobile summary{min-height:48px;padding:10px 0;cursor:pointer;font-size:13px;font-weight:600;}.legal-toc-mobile>nav{padding-bottom:20px;}.legal-toc-mobile a{display:block;font-size:12px;line-height:1.65;padding:7px 0;color:#435e49;}.legal-document-content{font-size:15px;line-height:1.85;}.legal-document-content h1,.legal-document-content h2{font-size:25px;margin-top:35px;}.legal-document-content h3{font-size:19px;}.legal-document-content table{font-size:13px;}.legal-document-content th,.legal-document-content td{padding:12px;}.legal-footer{display:block;margin-top:45px;}.legal-footer>nav{margin:15px 0;gap:5px 22px;}}
+@media(max-width:420px){.legal-nav{gap:12px;}.legal-actions{gap:12px;}.legal-actions>a{max-width:70px;line-height:1.4;}.legal-logo{font-size:23px;gap:8px;}.legal-page{padding-left:18px;padding-right:18px;}.legal-hero h1{font-size:42px;}}
+@media print{.legal-page{padding:0;}.legal-nav,.legal-toc,.legal-toc-mobile,.legal-tabs,.legal-footer,.legal-actions{display:none;}.legal-grid{display:block;}.legal-shell,.legal-body{max-width:none;}.legal-hero{padding:0 0 20px;}.legal-hero h1{font-size:30px;}.legal-meta{font-size:10px;}.legal-warning{font-size:10px;margin-bottom:20px;}.legal-document-content{font-size:11px;line-height:1.6;}.legal-document-content h1,.legal-document-content h2{font-size:17px;break-after:avoid;}.legal-document-content h3{font-size:14px;break-after:avoid;}.legal-table-scroll{overflow:visible;}.legal-document-content table{min-width:0;font-size:10px;}.legal-document-content th,.legal-document-content td{padding:7px;}a{color:inherit;}}
+`;
+function LegalFrame({children}){
+ const host=useRef(null),[mount,setMount]=useState(null);
+ useLayoutEffect(()=>{const element=host.current,shadow=element.shadowRoot||element.attachShadow({mode:'open'});let target=shadow.querySelector('[data-legal-mount]');if(!target){const style=document.createElement('style');style.textContent=IH47_LEGAL_STYLES;target=document.createElement('div');target.dataset.legalMount='';shadow.append(style,target);}setMount(target);
+  const guard=document.createElement('style');guard.textContent='body.ih47-legal{margin:0!important;background:#fff!important;color:#1a2420!important}body.ih47-legal #root{max-width:none!important;width:100%!important;padding:0!important;margin:0!important;text-align:left!important}body.ih47-legal [data-ideahire-legal-host]{display:block!important;width:100%!important;min-height:100svh!important;margin:0!important;padding:0!important;transform:none!important;filter:none!important;contain:none!important}body.ih47-legal .site-preferences{display:none!important}';document.head.append(guard);document.body.classList.add('ih47-legal');return()=>{guard.remove();document.body.classList.remove('ih47-legal');};
+ },[]);
+ useEffect(()=>{if(!mount||!window.location.hash)return;const frame=requestAnimationFrame(()=>mount.getRootNode().getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame);},[mount]);
+ function click(e){const link=e.target.closest?.('a[href^="#"]');if(!link)return;e.preventDefault();const id=decodeURIComponent(link.getAttribute('href').slice(1)),target=mount.getRootNode().getElementById(id);target?.scrollIntoView({behavior:'smooth',block:'start'});const details=link.closest('details');if(details)details.open=false;}
+ return <div ref={host} data-ideahire-legal-host="p47" data-no-translate="true">{mount&&createPortal(<div onClick={click}>{children}</div>,mount)}</div>;
+}
+
 function LegalDocument({ kind, html }) {
   const labels = DOCUMENT_LABELS[kind] || DOCUMENT_LABELS.terms;
   const matchingSupplement =
@@ -126,76 +148,20 @@ function LegalDocument({ kind, html }) {
           )
       : combinedHtml;
 
-  return (
-    <main className={`cookie-policy-page legal-document-page legal-document-${kind}`} data-no-translate="true">
-      <div className="cookie-policy-shell legal-document-shell">
-        <nav className="cookie-policy-nav" aria-label="Nawigacja dokumentów IdeaHire">
-          <Link className="cookie-policy-logo" to="/" aria-label="IdeaHire — strona główna">
-            Idea<span>Hire</span>
-          </Link>
-
-          <div className="legal-document-nav-actions">
-            <button type="button" onClick={() => window.print()}>
-              Drukuj / zapisz PDF
-            </button>
-            <Link className="cookie-policy-back" to="/">
-               Wróć na stronę
-            </Link>
-          </div>
-        </nav>
-
-        <header className="cookie-policy-hero legal-document-hero">
-          <span className="cookie-policy-eyebrow">{labels.eyebrow}</span>
-          <h1>{labels.title}</h1>
-          <p>{labels.description}</p>
-          <div className="cookie-policy-meta">
-            <span>Wersja 0.9 — przedprodukcyjna</span>
-            <span>Stan na 6 września 2026 r.</span>
-            <span>Wersja polska jest wiążąca</span>
-          </div>
-        </header>
-
-        <aside className="legal-document-warning" role="note">
-          <span aria-hidden="true">!</span>
-          <div>
-            <strong>Wersja przygotowana do testów i konsultacji prawnej</strong>
-            <p>
-              Dokument wymaga uzupełnienia danych wskazanych jako „DO UZUPEŁNIENIA” oraz zatwierdzenia przez prawnika przed uruchomieniem komercyjnym i prawdziwych płatności.
-            </p>
-          </div>
-        </aside>
-
-        <nav className="legal-document-tabs" aria-label="Dokumenty prawne">
-          <Link className={kind === "terms" ? "is-active" : ""} to="/regulamin">
-            Regulamin
-          </Link>
-          <Link className={kind === "privacy" ? "is-active" : ""} to="/polityka-prywatnosci">
-            Prywatność
-          </Link>
-          <Link className={kind === "cookies" ? "is-active" : ""} to="/polityka-cookies">
-            Cookies
-          </Link>
-        </nav>
-
-        <article
-          className="legal-document-content"
-          dangerouslySetInnerHTML={{ __html: renderedHtml }}
-        />
-        <LucynaPrivacy kind={kind} />
-
-        <footer className="cookie-policy-footer legal-document-footer">
-          <Link to="/">IdeaHire</Link>
-          <nav aria-label="Pozostałe dokumenty">
-            <Link to="/regulamin">Regulamin</Link>
-            <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
-            <Link to="/polityka-cookies">Polityka cookies</Link>
-          </nav>
-          <span>© 2026</span>
-        </footer>
-      </div>
-    </main>
-  );
+  const english=useSitePreferences().language==='en';
+  const toc=[...renderedHtml.matchAll(/<h[12]\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h[12]>/gi)].map(m=>({id:m[1],title:m[2].replace(/<[^>]+>/g,'').replace(/&amp;/g,'&')}));
+  if(kind==='terms'||kind==='privacy')toc.push({id:'lucyna-informacja',title:english?'Lucyna AI — information':'Lucyna AI — informacja o funkcji'});
+  const bodyHtml=renderedHtml.replace(/<table\b/gi,'<div class="legal-table-scroll" tabindex="0"><table').replace(/<\/table>/gi,'</table></div>');
+  const tocLinks=toc.map(item=><a key={item.id} href={'#'+item.id}>{item.title}</a>);
+  const ui=english?{eyebrow:'IDEAHIRE / DOCUMENTS',title:kind==='privacy'?'Privacy policy':kind==='cookies'?'Cookie policy':'IdeaHire terms',print:'Print / save PDF',back:'Back to IdeaHire',contents:'Contents',terms:'Terms',privacy:'Privacy',cookies:'Cookies'}:{eyebrow:labels.eyebrow,title:labels.title,print:'Drukuj / zapisz PDF',back:'Wróć do IdeaHire',contents:'Spis treści',terms:'Regulamin',privacy:'Prywatność',cookies:'Cookies'};
+  return <LegalFrame><main className="legal-page" data-no-translate="true"><div className="legal-shell"><nav className="legal-nav" aria-label={english?'Document navigation':'Nawigacja dokumentów'}><Link className="legal-logo" to="/" aria-label="IdeaHire"><span className="legal-mark" aria-hidden="true"><i/><i/><i/><i/></span>IdeaHire</Link><div className="legal-actions"><button type="button" onClick={()=>window.print()}>{ui.print}</button><Link to="/">{ui.back} ↗</Link></div></nav>
+  <header className="legal-hero"><span className="legal-eyebrow">{ui.eyebrow}</span><h1>{ui.title}</h1><p>{english?(kind==='privacy'?'What data IdeaHire processes, why it is needed and the rights available to users.':kind==='cookies'?'Cookies, browser storage and similar technologies used by IdeaHire.':'Account, project, collaboration, payment, moderation and dispute rules.'):labels.description}</p><div className="legal-meta"><span>{english?'Version 0.9 — pre-release':'Wersja 0.9 — przedprodukcyjna'}</span><span>{english?'As of 6 September 2026':'Stan na 6 września 2026 r.'}</span><span>{english?'The Polish version is authoritative':'Wersja polska jest wiążąca'}</span></div></header>
+  <aside className="legal-warning" role="note"><span aria-hidden="true">!</span><div><strong>{english?'Prepared for testing and legal review':'Wersja przygotowana do testów i konsultacji prawnej'}</strong><p>{english?'Fields marked “DO UZUPEŁNIENIA” must be completed and the document reviewed by a lawyer before commercial launch and real payments.':'Dokument wymaga uzupełnienia danych wskazanych jako „DO UZUPEŁNIENIA” oraz zatwierdzenia przez prawnika przed uruchomieniem komercyjnym i prawdziwych płatności.'}</p></div></aside>
+  <nav className="legal-tabs" aria-label={english?'Legal documents':'Dokumenty prawne'}><Link aria-current={kind==='terms'?'page':undefined} to="/regulamin">{ui.terms}</Link><Link aria-current={kind==='privacy'?'page':undefined} to="/polityka-prywatnosci">{ui.privacy}</Link><Link aria-current={kind==='cookies'?'page':undefined} to="/polityka-cookies">{ui.cookies}</Link></nav>
+  <details className="legal-toc-mobile"><summary>{ui.contents}</summary><nav>{tocLinks}</nav></details><div className="legal-grid"><nav className="legal-toc" aria-label={ui.contents}><strong>{ui.contents}</strong>{tocLinks}</nav><div className="legal-body"><article className="legal-document-content" dangerouslySetInnerHTML={{__html:bodyHtml}}/><LucynaPrivacy kind={kind}/></div></div>
+  <footer className="legal-footer"><Link to="/">IdeaHire ↗</Link><nav aria-label={english?'Other documents':'Pozostałe dokumenty'}><Link to="/regulamin">{ui.terms}</Link><Link to="/polityka-prywatnosci">{ui.privacy}</Link><Link to="/polityka-cookies">{ui.cookies}</Link></nav><span>© 2026</span></footer></div></main></LegalFrame>;
 }
+
 
 
 export function PrivacyPolicyPage() {
@@ -209,3 +175,4 @@ export function CookiePolicyPage() {
 export default function TermsOfService() {
   return <LegalDocument kind="terms" html={TERMS_HTML} />;
 }
+
