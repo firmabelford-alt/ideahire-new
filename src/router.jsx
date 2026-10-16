@@ -1,3 +1,4 @@
+/* P47 — pełny plik src/router.jsx | Zmieniona wyłącznie karta szablonów. */
 /* IdeaHire | P40 | 2026-10-15 | Oczko hasła i nowe centrum konta. */
 /* IdeaHire | STRIPE 12 | 2026-10-15 | Saldo i wyplaty w profilu. */
 /* IdeaHire | PACZKA 30 | 2026-10-11 | Pełny plik: src/router.jsx */
@@ -32,7 +33,7 @@ import {
 
 import App from "./App";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
-import { useSitePreferences } from "./Preferences";
+import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
 import TermsOfService from "./TermsOfService";
@@ -8198,96 +8199,25 @@ function LimitedAccount() {
    ACCOUNT
 ========================================================= */
 
-const SITE_TEMPLATE_OPTIONS = [
-  {
-    value: "current",
-    eyebrow: "Granatowy szablon",
-    title: "Nowoczesny granat",
-    description:
-      "Spójny granatowy motyw IdeaHire z czytelnym kontrastem, subtelnymi przejściami i dopracowanymi animacjami.",
-  },
-  {
-    value: "classic",
-    eyebrow: "Klasyczny",
-    title: "Czerń i biel",
-    description:
-      "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.",
-  },
-];
-
 function AccountTemplatesCard() {
-  const { template, setTemplate } = useSitePreferences();
-
-  return (
-    <section
-      className="account-card account-template-card"
-      aria-labelledby="account-template-title"
-    >
-      <div className="account-template-heading">
-        <div>
-          <span className="section-label">Wygląd interfejsu</span>
-          <h2 id="account-template-title">Szablon strony</h2>
-        </div>
-        <p>
-          Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani
-          funkcji IdeaHire.
-        </p>
-      </div>
-
-      <div className="account-template-options" role="radiogroup" aria-label="Szablon strony">
-        {SITE_TEMPLATE_OPTIONS.map((option) => {
-          const selected = template === option.value;
-
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              className={`account-template-option is-${option.value}${selected ? " is-selected" : ""}`}
-              onClick={() => setTemplate(option.value)}
-            >
-              <span className="account-template-preview" aria-hidden="true">
-                <span className="account-template-preview-nav">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="account-template-preview-hero">
-                  <span>
-                    <i />
-                    <i />
-                    <i />
-                  </span>
-                  <b />
-                </span>
-                <span className="account-template-preview-cards">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </span>
-
-              <span className="account-template-option-copy">
-                <small>{option.eyebrow}</small>
-                <strong>{option.title}</strong>
-                <span>{option.description}</span>
-              </span>
-
-              <span className="account-template-option-action">
-                <i aria-hidden="true" />
-                {selected ? "Wybrany szablon" : "Użyj tego szablonu"}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <p className="account-template-note">
-        Zmiana jest zapisywana na tym urządzeniu i działa od razu na całej stronie.
-      </p>
-    </section>
-  );
+  const { template, setTemplate, language } = useSitePreferences();
+  const english=language==="en";
+  const identity=IDEA_HIRE_THEME_IDENTITY[english?"en":"pl"];
+  const options=[
+    {value:"current",eyebrow:identity.eyebrow,title:identity.title,description:identity.description},
+    {value:"classic",eyebrow:english?"Classic":"Klasyczny",title:english?"Black and white":"Czerń i biel",description:english?"Neutral black, white and grey. The same functions and the same content.":"Neutralna czerń, biel i szarości. Te same funkcje i ta sama treść."},
+  ];
+  return <section className="account-card account-template-card" aria-labelledby="account-template-title" data-no-translate="true">
+    <div className="account-template-heading"><div><span className="section-label">{english?"Interface appearance":"Wygląd interfejsu"}</span><h2 id="account-template-title">{english?"Site template":"Szablon strony"}</h2></div><p>{english?"Choose your colour palette. Light and dark modes work with either template.":"Wybierz paletę kolorów. Tryb jasny i ciemny działa w obu szablonach."}</p></div>
+    <div className="account-template-options" role="radiogroup" aria-label={english?"Site template":"Szablon strony"}>
+      {options.map(option=>{const selected=template===option.value;return <button key={option.value} type="button" role="radio" aria-checked={selected} className={`account-template-option is-${option.value}${selected?" is-selected":""}`} onClick={()=>setTemplate(option.value)}>
+        <span className="account-template-preview" aria-hidden="true"><span className="account-template-preview-nav"><i/><i/><i/></span><span className="account-template-preview-hero"><span><i/><i/><i/></span><b/></span><span className="account-template-preview-cards"><i/><i/><i/></span></span>
+        <span className="account-template-option-copy"><small>{option.eyebrow}</small><strong>{option.title}</strong><span>{option.description}</span></span>
+        <span className="account-template-option-action"><i aria-hidden="true"/>{selected?(english?"Selected template":"Wybrany szablon"):(english?"Use this template":"Użyj tego szablonu")}</span>
+      </button>;})}
+    </div>
+    <p className="account-template-note">{english?"Your selection is saved on this device and applies across the site immediately.":"Wybór jest zapisywany na tym urządzeniu i od razu działa na całej stronie."}</p>
+  </section>;
 }
 
 const ACCOUNT_WORKSPACE_SECTIONS = [
