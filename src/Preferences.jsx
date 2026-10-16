@@ -1,4 +1,4 @@
-/* IdeaHire | P44 Irys | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | P45 Turkus / Czerń i biel | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
@@ -6,14 +6,14 @@ import React, { createContext, useContext, useEffect, useLayoutEffect, useState,
 
 export const IDEA_HIRE_THEME_IDENTITY = Object.freeze({
   "pl": {
-    "eyebrow": "Irys / paleta kolorów",
-    "title": "Irys",
-    "description": "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu."
+    "eyebrow": "IdeaHire / Turkus",
+    "title": "Turkus",
+    "description": "Nasycony turkus na całej stronie. Autorski monogram iH, przestrzenne przejścia i czytelna typografia."
   },
   "en": {
-    "eyebrow": "Irys / colour palette",
-    "title": "Irys",
-    "description": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen."
+    "eyebrow": "IdeaHire / Turquoise",
+    "title": "Turquoise",
+    "description": "A full turquoise colour system. A custom iH monogram, spatial transitions and clear typography."
   }
 });
 
@@ -42,6 +42,8 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Prezentacja": "Presentation",
+  "Ilustracja": "Illustration",
   "IdeaHire — strona główna": "IdeaHire — home",
   "Kliknij koło, aby otworzyć funkcje konta.": "Click the circle to open account tools.",
   "Okno ustaleń": "Agreement window",
@@ -176,9 +178,8 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.": "Switch the appearance of the entire site without changing its current layout, data or features.",
   "Szablon strony": "Site template",
   "Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani funkcji IdeaHire.": "Compare two visual styles without changing the IdeaHire layout or features.",
-  "Irys / paleta kolorów": "Irys / colour palette",
-  "Irys": "Irys",
-  "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu.": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen.",
+  "IdeaHire / Turkus": "IdeaHire / Turquoise",
+  "Turkus": "Turquoise",
   "Klasyczny": "Classic",
   "Czerń i biel": "Black and white",
   "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.": "The complete former IdeaHire look: only black, white and neutral greys, with no blue accents.",
