@@ -1,4 +1,4 @@
-/* IdeaHire | P43 | Premiera | Pełny plik: src/App.jsx | Film 46 s, 14 ujęć, pętla */
+/* IdeaHire | P44 | Laguna | Pełny plik: src/App.jsx | Przebudowa całego widoku głównego */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -8,633 +8,255 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
-const IH43_STYLES=String.raw`
-__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#d35428!important;color:#ffeed8!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
-__IH43__ .ih43-film,__IH43__ .ih43-film * {box-sizing:border-box!important;}
-__IH43__ .ih43-film[data-classic="true"] {background:#121212!important;color:#efefec!important;}
-__IH43__ .ih43-canvas {position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;opacity:0;pointer-events:none!important;}
-__IH43__ .ih43-film[data-ready="true"] .ih43-canvas {opacity:1;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-canvas {display:none!important;}
-__IH43__ .ih43-hit {position:absolute!important;z-index:3!important;display:block!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;background:transparent!important;background-image:none!important;color:transparent!important;-webkit-text-fill-color:transparent!important;border:0!important;border-radius:8px!important;box-shadow:none!important;text-shadow:none!important;text-decoration:none!important;transform:none!important;transition:none!important;animation:none!important;cursor:pointer!important;touch-action:manipulation;}
-__IH43__ .ih43-hit::before,__IH43__ .ih43-hit::after {content:none!important;}
-__IH43__ .ih43-hit:focus-visible {outline:2px solid #fff!important;outline-offset:4px!important;box-shadow:0 0 0 7px #111!important;}
-__IH43__ .ih43-hit:disabled {cursor:default!important;}
-__IH43__ .ih43-control {left:calc(var(--ih43-toolbar) + var(--ih43-index) * 52px)!important;top:22px!important;width:44px!important;height:44px!important;border-radius:50%!important;}
-__IH43__ .ih43-link {left:calc(var(--ih43-pad) + var(--ih43-index) * (var(--ih43-button) + var(--ih43-gap)))!important;bottom:calc(var(--ih43-bottom) - 52px)!important;width:var(--ih43-button)!important;height:52px!important;}
-__IH43__ .ih43-accessible,__IH43__ .ih43-link-label {position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-accessible {top:18%!important;left:var(--ih43-pad)!important;width:calc(100% - var(--ih43-pad) * 2)!important;height:auto!important;margin:0!important;overflow:visible!important;clip:auto!important;clip-path:none!important;white-space:normal!important;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-accessible h1 {margin:0 0 25px!important;padding:0!important;font-size:clamp(42px,7vw,102px)!important;font-weight:800!important;line-height:1.05!important;letter-spacing:-.05em!important;color:inherit!important;-webkit-text-fill-color:currentColor!important;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-accessible p {max-width:600px!important;margin:0 0 15px!important;font-size:14px!important;line-height:1.6!important;color:inherit!important;-webkit-text-fill-color:currentColor!important;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-control {display:none!important;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-link {display:flex!important;align-items:center!important;justify-content:center!important;background:#f4f0e5!important;border:1px solid #171717!important;color:#171717!important;-webkit-text-fill-color:#171717!important;}
-__IH43__ .ih43-film[data-failed="true"] .ih43-link-label {position:static!important;width:auto!important;height:auto!important;margin:0!important;padding:8px!important;overflow:visible!important;clip:auto!important;clip-path:none!important;white-space:normal!important;font-size:12px!important;font-weight:700!important;line-height:1.4!important;text-align:center!important;}
-@media(max-width:820px){__IH43__ .ih43-film {--ih43-pad:20px;--ih43-gap:10px;--ih43-button:calc((100% - 50px) / 2);--ih43-toolbar:calc(100% - 168px);height:min(820px,max(680px,calc(100svh - 96px)))!important;min-height:680px!important;margin-bottom:30px!important;}}
-`.replaceAll("__IH43__","#root".repeat(10));
-
-const IH43_FILM={
-  "key": "03-Premiera",
-  "name": "Premiera",
-  "genre": "reel",
-  "period": 46,
-  "palette": {
-    "paper": "#ffeed8",
-    "ink": "#26141f",
-    "accent": "#d35428",
-    "secondary": "#dc92b9",
-    "light": "#ffffff",
-    "muted": "#956960"
+const IH44_CONFIG={
+  "key": "01-Laguna",
+  "name": "Laguna",
+  "mode": "lagoon",
+  "hue": 168,
+  "duration": 18,
+  "description": "Turkus, mięta i jasny kamień. Pełny ekran reaguje jak płynąca warstwa światła.",
+  "descriptionEN": "Turquoise, mint and pale stone. The whole screen responds like a moving layer of light.",
+  "light": {
+    "bg": "#eef5f0",
+    "surface": "#fbfcf5",
+    "soft": "#dfefe6",
+    "ink": "#123c35",
+    "muted": "#506b61",
+    "line": "#bfd4c9",
+    "accent": "#087464",
+    "on": "#ffffff",
+    "pop": "#c8e99c"
   },
-  "shots": [
-    {
-      "kind": "marquee",
-      "duration": 2,
-      "bg": "accent",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 2.4,
-      "bg": "paper",
-      "motion": "slam"
-    },
-    {
-      "kind": "poster",
-      "duration": 3.6,
-      "bg": "secondary",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 1.8,
-      "bg": "ink",
-      "motion": "side"
-    },
-    {
-      "kind": "audio",
-      "duration": 4,
-      "bg": "accent",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 1.8,
-      "bg": "paper",
-      "motion": "slam"
-    },
-    {
-      "kind": "store",
-      "duration": 4,
-      "bg": "secondary",
-      "motion": "slam"
-    },
-    {
-      "kind": "marquee",
-      "duration": 2.2,
-      "bg": "ink",
-      "motion": "slam"
-    },
-    {
-      "kind": "review",
-      "duration": 3.6,
-      "bg": "accent",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 1.6,
-      "bg": "paper",
-      "motion": "letters"
-    },
-    {
-      "kind": "marquee",
-      "duration": 2,
-      "bg": "ink",
-      "motion": "slam"
-    },
-    {
-      "kind": "split",
-      "duration": 3,
-      "bg": "secondary",
-      "motion": "slam"
-    },
-    {
-      "kind": "split",
-      "duration": 3.6,
-      "bg": "paper",
-      "motion": "slam"
-    },
-    {
-      "kind": "final",
-      "duration": 10.4,
-      "bg": "accent",
-      "motion": "slam"
-    }
-  ],
+  "dark": {
+    "bg": "#0b2521",
+    "surface": "#14352e",
+    "soft": "#1d4238",
+    "ink": "#edf6e9",
+    "muted": "#b0c9bd",
+    "line": "#31594b",
+    "accent": "#a3e2c4",
+    "on": "#102b22",
+    "pop": "#c5df8c"
+  },
   "pl": {
-    "cta": [
-      "Wybierz twórcę",
-      "Sprawdź projekty"
-    ],
-    "subtitle": "Okładka, podcast, sklep. Dopnij szczegóły.",
-    "disclosure": "Demonstracja produktu — makiety autorskie.",
-    "endTags": [
-      "OKŁADKA",
-      "PODCAST",
-      "SKLEP"
-    ],
-    "ui": {
-      "coverKicker": "SEZON",
-      "coverName": "SIERPIEŃ",
-      "coverFooter": "WYDANIE SPECJALNE",
-      "player": "Odsłuch",
-      "podcast": "POGŁOS",
-      "audioNote": "Audycja demonstracyjna",
-      "shop": "Witryna",
-      "edition": "Wydanie zero",
-      "format": "Wybierz format",
-      "basket": "Do koszyka",
-      "finish": "Dopracowanie",
-      "adjustments": [
-        "Kontrast",
-        "Rytm",
-        "Wykończenie"
-      ]
-    },
-    "ctaMobile": [
-      "Twórcy",
-      "Projekty"
-    ],
-    "frames": [
-      [
-        "MASZ",
-        "COŚ PILNEGO?"
-      ],
-      [
-        "OKŁADKA."
-      ],
-      [
-        "NA",
-        "WIDOKU."
-      ],
-      [
-        "PODCAST."
-      ],
-      [
-        "POGŁOS",
-        "ZOSTAJE."
-      ],
-      [
-        "SKLEP."
-      ],
-      [
-        "OTWARTE",
-        "CAŁODOBOWO."
-      ],
-      [
-        "PIERWSZA",
-        "WERSJA."
-      ],
-      [
-        "OSTATNI",
-        "SZLIF."
-      ],
-      [
-        "ZGADZA",
-        "SIĘ?"
-      ],
-      [
-        "ODPALONE."
-      ],
-      [
-        "PUBLIKUJESZ."
-      ],
-      [
-        "SZCZEGÓŁY",
-        "DOMKNIĘTE."
-      ],
-      [
-        "Niech będzie",
-        "zrobione."
-      ]
-    ],
     "final": [
-      "Niech będzie",
-      "zrobione."
-    ]
+      "Masz temat.",
+      "Znajdź człowieka."
+    ],
+    "subtitle": "Powiedz, co trzeba zrobić. Sprawdź osoby, porozmawiaj i ustal szczegóły.",
+    "eyebrow": "Miejsce na dobrą współpracę",
+    "acts": [
+      [
+        "Zanim",
+        "odłożysz."
+      ],
+      [
+        "Opisz",
+        "krótko."
+      ],
+      [
+        "Dobierz",
+        "osobę."
+      ],
+      [
+        "Dogadaj",
+        "szczegóły."
+      ]
+    ],
+    "strip": "OD POTRZEBY DO WSPÓŁPRACY",
+    "section": "Każda sprawa ma swoją dziedzinę.",
+    "jobs": "Zobacz, co jest do zrobienia.",
+    "how": "Najpierw ustalcie konkrety.",
+    "end": [
+      "To co,",
+      "zaczynamy?"
+    ],
+    "themeDescription": "Turkus, mięta i jasny kamień. Pełny ekran reaguje jak płynąca warstwa światła."
   },
   "en": {
-    "cta": [
-      "Order an outcome",
-      "Explore the catalog"
-    ],
-    "subtitle": "Cover art, a podcast, a shop. Finish the details.",
-    "disclosure": "Product demonstration — original mockups.",
-    "endTags": [
-      "COVER ART",
-      "PODCAST",
-      "SHOP"
-    ],
-    "ui": {
-      "coverKicker": "SEASON",
-      "coverName": "AUGUST",
-      "coverFooter": "SPECIAL EDITION",
-      "player": "Listen",
-      "podcast": "REVERB",
-      "audioNote": "Demonstration recording",
-      "shop": "Storefront",
-      "edition": "Edition zero",
-      "format": "Choose a format",
-      "basket": "Add to basket",
-      "finish": "Refinement",
-      "adjustments": [
-        "Contrast",
-        "Rhythm",
-        "Finish"
-      ]
-    },
-    "ctaMobile": [
-      "Creators",
-      "Projects"
-    ],
-    "frames": [
-      [
-        "SOMETHING",
-        "URGENT?"
-      ],
-      [
-        "COVER ART."
-      ],
-      [
-        "OUT",
-        "IN THE OPEN."
-      ],
-      [
-        "PODCAST."
-      ],
-      [
-        "AN ECHO",
-        "THAT LASTS."
-      ],
-      [
-        "STOREFRONT."
-      ],
-      [
-        "OPEN",
-        "AROUND THE CLOCK."
-      ],
-      [
-        "INITIAL",
-        "VERSION."
-      ],
-      [
-        "FINAL",
-        "POLISH."
-      ],
-      [
-        "LOOKING",
-        "RIGHT?"
-      ],
-      [
-        "LAUNCHED."
-      ],
-      [
-        "GO LIVE."
-      ],
-      [
-        "DETAILS",
-        "FINALISED."
-      ],
-      [
-        "Let it",
-        "be done."
-      ]
-    ],
     "final": [
-      "Let it",
-      "be done."
-    ]
-  },
-  "paths": [
-    "/find-talent",
-    "/jobs"
-  ],
-  "finalStart": 35.6,
-  "offer": {
-    "percent": 5.5,
-    "minimum": 20,
-    "maximum": 229,
-    "orderLimit": 10000
+      "Have a task?",
+      "Find your person."
+    ],
+    "subtitle": "Say what needs doing. Explore people, talk and agree on the details.",
+    "eyebrow": "Room for good collaboration",
+    "acts": [
+      [
+        "Before you",
+        "put it off."
+      ],
+      [
+        "Keep the",
+        "brief short."
+      ],
+      [
+        "Find the",
+        "right person."
+      ],
+      [
+        "Talk through",
+        "the details."
+      ]
+    ],
+    "strip": "FROM A NEED TO A COLLABORATION",
+    "section": "There is a field for every task.",
+    "jobs": "See what needs doing.",
+    "how": "Agree on the details first.",
+    "end": [
+      "Shall we",
+      "get started?"
+    ],
+    "themeDescription": "Turquoise, mint and pale stone. The whole screen responds like a moving layer of light."
   }
 };
 
-/* IdeaHire P43 — montaż typografii i scen interfejsu. Canvas 2D, bez modeli 3D. */
-const IH43={
-  clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),
-  mix:(a,b,t)=>a+(b-a)*t,
-  ease(t){t=this.clamp(t);return 1-Math.pow(1-t,4);},
-  smooth(t){t=this.clamp(t);return t*t*(3-2*t);},
-  back(t){t=this.clamp(t);return 1+2.70158*Math.pow(t-1,3)+1.70158*Math.pow(t-1,2);},
-  phase(time){
-    const cycle=((time%IH43_FILM.period)+IH43_FILM.period)%IH43_FILM.period;
-    let start=0;
-    for(let i=0;i<IH43_FILM.shots.length;i++){const shot=IH43_FILM.shots[i];if(cycle<start+shot.duration||i===IH43_FILM.shots.length-1)return{shot,index:i,local:cycle-start,start,cycle};start+=shot.duration;}
-  },
-  layout(w,h){const mobile=w<=820,pad=mobile?20:Math.max(28,Math.min(72,w*.045)),gap=mobile?10:12,buttonWidth=mobile?(w-pad*2-gap)/2:226;
-    return{w,h,mobile,pad,x:pad,y:84,cw:w-pad*2,ch:Math.max(250,h-244),bottom:h-101,buttonWidth,gap,toolbarX:w-pad-148,toolbarY:22};
-  },
-};
-const IH43_MEASURE=new Map();
-function ih43Contrast(a,b){const lum=s=>{const values=[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return values[0]*.2126+values[1]*.7152+values[2]*.0722;},x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
-function ih43Readable(background,preferred,alternate){if(ih43Contrast(background,preferred)>=4.5)return preferred;if(ih43Contrast(background,alternate)>=4.5)return alternate;return ih43Contrast(background,"#000000")>=ih43Contrast(background,"#ffffff")?"#000000":"#ffffff";}
-function ih43Path(c,x,y,w,h,r=12){r=Math.max(0,Math.min(r,w/2,h/2));c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();}
-function ih43Box(c,x,y,w,h,fill,r=12,stroke=null){ih43Path(c,x,y,w,h,r);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}}
-function ih43Text(c,text,x,y,size,color,weight=600,align="left",tracking=0){
-  weight=Math.round(weight/100)*100;c.font=weight+" "+size+"px Inter, Arial, sans-serif";c.fillStyle=color;c.textAlign=align;c.textBaseline="alphabetic";
-  if(!tracking){c.fillText(String(text),x,y);return;}
-  const chars=Array.from(String(text)),width=chars.reduce((s,ch)=>s+c.measureText(ch).width,0)+(chars.length-1)*tracking;
-  let offset=align==="center"?-width/2:align==="right"?-width:0;c.textAlign="left";
-  for(const ch of chars){c.fillText(ch,x+offset,y);offset+=c.measureText(ch).width+tracking;}
-}
-function ih43Fit(c,lines,width,height,maxSize=180,weight=900){
-  weight=Math.round(weight/100)*100;
-  const key=[lines.join("|"),Math.round(width),Math.round(height),maxSize,weight].join(":");if(IH43_MEASURE.has(key))return IH43_MEASURE.get(key);
-  let size=Math.min(maxSize,height/(lines.length*.94));c.font=weight+" "+size+"px Inter, Arial, sans-serif";
-  const measured=Math.max(1,...lines.map(line=>c.measureText(line).width));size*=Math.min(1,width/measured);
-  if(IH43_MEASURE.size>400)IH43_MEASURE.clear();IH43_MEASURE.set(key,size);return size;
-}
-function ih43Lines(c,lines,box,options={}){
-  const {x,y,w,h}=box,weight=options.weight||900,size=ih43Fit(c,lines,w,h,options.max||190,weight),lineHeight=size*.94;
-  const block=lines.length*lineHeight,top=y+(h-block)*.5,progress=options.progress??1,mode=options.mode||"rise",color=options.color||"#fff";
-  for(let i=0;i<lines.length;i++){
-    const reveal=IH43.ease((progress-i*.065)/.78);c.save();c.globalAlpha*=IH43.clamp(reveal*1.6);
-    let ox=0,oy=0,angle=0,scale=1;
-    if(mode==="slam"){scale=1+(1-reveal)*2.8;angle=(1-reveal)*(i%2?.12:-.10);}
-    else if(mode==="side"){ox=(1-reveal)*(i%2?1:-1)*w*1.2;angle=(1-reveal)*.08;}
-    else if(mode==="letters"){
-      const text=lines[i],chars=Array.from(text);c.font=weight+" "+size+"px Inter, Arial, sans-serif";let offset=0;
-      for(let n=0;n<chars.length;n++){const p=IH43.ease((progress-n*.018-i*.04)/.58);c.save();c.translate(x+offset,top+(i+1)*lineHeight+(1-p)*size*.85);c.rotate((1-p)*(n%2?.2:-.2));c.globalAlpha*=p;ih43Text(c,chars[n],0,0,size,color,weight);c.restore();offset+=c.measureText(chars[n]).width;}
-      c.restore();continue;
-    }else oy=(1-reveal)*size*1.65;
-    const align=options.align||"left",anchor=align==="center"?x+w/2:x;
-    c.translate(anchor+ox,top+(i+1)*lineHeight+oy);c.rotate(angle);c.scale(scale,scale);ih43Text(c,lines[i],0,0,size,color,weight,align,-size*.045);c.restore();
-  }
-  return{size,top,bottom:top+block};
-}
-function ih43Tag(c,text,x,y,colors,angle=0,scale=1){
-  c.save();c.translate(x,y);c.rotate(angle);c.scale(scale,scale);c.font="700 15px Inter, Arial, sans-serif";const w=c.measureText(text).width+36;ih43Box(c,-w/2,-20,w,40,colors.fill,5,colors.stroke);const ink=ih43Readable(colors.fill,colors.ink,"#ffffff");ih43Text(c,text,0,5,15,ink,700,"center");c.restore();return w;
-}
-function ih43Arrow(c,x,y,color,size=14){c.strokeStyle=color;c.lineWidth=1.7;c.lineCap="round";c.beginPath();c.moveTo(x-size*.45,y+size*.45);c.lineTo(x+size*.45,y-size*.45);c.moveTo(x-size*.33,y-size*.45);c.lineTo(x+size*.45,y-size*.45);c.lineTo(x+size*.45,y+size*.33);c.stroke();}
-function ih43Panel(c,x,y,w,h,options={}){
-  const fill=options.fill||"#f5f0e5",ink=options.ink||"#151515";c.save();c.translate(x,y);c.rotate(options.angle||0);c.scale(options.scale||1,options.scale||1);c.globalAlpha*=options.alpha??1;
-  c.shadowColor="rgba(0,0,0,.18)";c.shadowBlur=26;c.shadowOffsetY=10;ih43Box(c,-w/2,-h/2,w,h,fill,10);c.shadowColor="transparent";
-  c.strokeStyle=options.line||"rgba(20,20,20,.16)";c.lineWidth=1;c.beginPath();c.moveTo(-w/2+20,-h/2+43);c.lineTo(w/2-20,-h/2+43);c.stroke();
-  if(options.label)ih43Text(c,options.label,-w/2+21,-h/2+28,11,ink,600);
-  c.fillStyle=ink;for(let i=0;i<3;i++){c.globalAlpha*=.8;c.beginPath();c.arc(w/2-23-i*9,-h/2+24,2,0,Math.PI*2);c.fill();}c.restore();
-}
-function ih43Palette(classic){const p=IH43_FILM.palette;if(!classic)return p;return{...p,paper:"#efefec",ink:"#121212",accent:"#777777",secondary:"#b0b0ad",light:"#ffffff",muted:"#777777"};}
-function ih43Backdrop(c,l,p,shot,time){
-  const mode=shot.bg||"ink",bg=mode==="paper"?p.paper:mode==="accent"?p.accent:mode==="secondary"?p.secondary:p.ink;c.fillStyle=bg;c.fillRect(0,0,l.w,l.h);
-  c.save();c.globalAlpha=.055;c.strokeStyle=mode==="paper"?p.ink:p.paper;c.lineWidth=1;
-  if(IH43_FILM.genre==="cut"){
-    const drift=(time*48)%80;for(let x=-100;x<l.w+100;x+=80){c.beginPath();c.moveTo(x+drift,0);c.lineTo(x+drift-l.h*.14,l.h);c.stroke();}
-  }else if(IH43_FILM.genre==="network"){
-    const offset=(time*14)%44;for(let x=-44;x<l.w+44;x+=44)for(let y=-44;y<l.h+44;y+=44)c.fillRect(x+offset,y,1.1,1.1);
+/* P44 — jedna scenografia pod całym dokumentem; stałe obszary kliknięć. */
+function ih44Reduced(){return typeof window!=="undefined"&&!!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;}
+function ih44WorldFrame(c,w,h,time,s){
+  const p=s.palette,px=s.x||0,py=s.y||0,scroll=s.scroll||0,energy=s.intro?1:.45,mode=IH44_CONFIG.mode;
+  c.clearRect(0,0,w,h);c.save();
+  if(mode==="lagoon"){
+    for(let i=0;i<4;i++){
+      const x=w*(.17+i*.25)+Math.sin(time*.32+i)*w*.13+px*32,y=h*(.16+i*.22)+Math.cos(time*.26+i)*h*.17+py*24-scroll*.035;
+      const gradient=c.createRadialGradient(x,y,0,x,y,w*(.30+i*.035));gradient.addColorStop(0,(i%2?p.pop:p.accent)+(s.dark?"24":"19"));gradient.addColorStop(1,(i%2?p.pop:p.accent)+"00");c.fillStyle=gradient;c.fillRect(0,0,w,h);
+    }
+    c.lineWidth=1.1;c.strokeStyle=p.accent;c.globalAlpha=s.dark?.16:.10;
+    for(let j=0;j<9;j++){c.beginPath();for(let i=0;i<=45;i++){const x=i*w/45,y=h*.62+j*13+Math.sin(i*.15+time*.62+j*.22)*62*energy+Math.cos(i*.10-time*.38)*36+px*10;if(!i)c.moveTo(x,y);else c.lineTo(x,y);}c.stroke();}
+  }else if(mode==="editorial"){
+    c.globalAlpha=.08;c.fillStyle=p.accent;const speed=s.intro?18:5,offset=(time*speed+scroll*.07)%170;
+    for(let i=-2;i<12;i++){c.save();c.translate(w*.72+Math.sin(time*.3)*25+px*20,(i*170+offset));c.rotate(-.20);c.fillRect(-w*.15,-1,w*.65,2);c.restore();}
+    c.globalAlpha=.15;c.strokeStyle=p.line;c.lineWidth=1;c.beginPath();c.moveTo(w*.38+px*7,0);c.lineTo(w*.38+px*7,h);c.moveTo(w*.76,0);c.lineTo(w*.76,h);c.stroke();
   }else{
-    const band=(time*32)%160;for(let y=-160;y<l.h+160;y+=160)c.fillRect(0,y+band,l.w,1);
+    const x=w*(.5+px*.13),y=h*(.48+py*.12),r=Math.max(w,h)*.58;
+    const g=c.createRadialGradient(x,y,1,x,y,r);g.addColorStop(0,p.pop+(s.dark?"1c":"51"));g.addColorStop(.48,p.accent+"0c");g.addColorStop(1,p.accent+"00");c.fillStyle=g;c.fillRect(0,0,w,h);
+    c.globalAlpha=.13;c.strokeStyle=p.accent;c.lineWidth=1;const yy=h*.51+Math.sin(time*.4)*13;
+    c.beginPath();c.moveTo(0,yy);c.lineTo(w,yy);c.moveTo(w*.5+Math.cos(time*.36)*12,0);c.lineTo(w*.5+Math.cos(time*.36)*12,h);c.stroke();
   }
-  c.restore();return{bg,ink:mode==="paper"||mode==="secondary"?p.ink:p.paper};
-}
-function ih43Transition(c,l,p,phase){
-  const duration=.32,remaining=phase.shot.duration-phase.local;if(remaining>duration||IH43_FILM.genre==="network")return;
-  const progress=IH43.ease(1-remaining/duration),next=IH43_FILM.shots[(phase.index+1)%IH43_FILM.shots.length];
-  const color=next.bg==="paper"?p.paper:next.bg==="accent"?p.accent:next.bg==="secondary"?p.secondary:p.ink;
-  c.save();c.fillStyle=color;
-  if(IH43_FILM.genre==="cut"){
-    for(let i=0;i<7;i++){const x=l.w*i/7,shift=IH43.clamp(progress*1.35-i*.045);c.fillRect(x,-l.h+(l.h*2)*shift,l.w/7+2,l.h);}
-  }else{c.translate(l.w*(1-progress),0);c.transform(1,0,-.18,1,0,0);c.fillRect(0,-10,l.w+l.h*.2,l.h+20);}
   c.restore();
 }
-function ih43Ui(c,l,p,s,phase){
-  const bg=phase.shot.bg||"ink",surface=bg==="paper"?p.paper:bg==="accent"?p.accent:bg==="secondary"?p.secondary:p.ink,ink=ih43Readable(surface,p.ink,p.paper),outline=ink===p.ink||ink==="#000000"?"rgba(20,20,20,.35)":"rgba(245,245,235,.45)";
-  const language=s.english?IH43_FILM.en:IH43_FILM.pl;
-  const brandSize=l.mobile?19:22;ih43Text(c,"IdeaHire",l.pad,52,brandSize,ink,800);
-  const progress=phase.cycle/IH43_FILM.period;c.fillStyle=outline;c.fillRect(l.pad,68,l.w-l.pad*2,1);c.fillStyle=ink;c.fillRect(l.pad,68,(l.w-l.pad*2)*progress,2);
-  const icon=(index,type)=>{
-    const x=l.toolbarX+index*52,y=l.toolbarY;c.save();if(s.reduced)c.globalAlpha=.4;ih43Box(c,x,y,44,44,null,22,outline);c.translate(x+22,y+22);c.strokeStyle=ink;c.lineWidth=1.5;c.lineCap="round";
-    if(type==="skip"){c.beginPath();c.moveTo(-7,-7);c.lineTo(3,0);c.lineTo(-7,7);c.closePath();c.stroke();c.beginPath();c.moveTo(7,-7);c.lineTo(7,7);c.stroke();}
-    else if(type==="replay"){c.beginPath();c.arc(0,0,8,-2.6,2.7);c.stroke();c.beginPath();c.moveTo(-7,-8);c.lineTo(-7,-2);c.lineTo(-1,-2);c.stroke();}
-    else if(type==="pause"){if(s.paused||s.reduced){c.beginPath();c.moveTo(-4,-7);c.lineTo(7,0);c.lineTo(-4,7);c.closePath();c.stroke();}else{c.beginPath();c.moveTo(-3,-7);c.lineTo(-3,7);c.moveTo(3,-7);c.lineTo(3,7);c.stroke();}}
-    else{c.beginPath();c.moveTo(-8,-3);c.lineTo(-4,-3);c.lineTo(1,-8);c.lineTo(1,8);c.lineTo(-4,3);c.lineTo(-8,3);c.closePath();c.stroke();if(s.sound){c.beginPath();c.arc(0,0,11,-.65,.65);c.stroke();}else{c.beginPath();c.moveTo(6,-4);c.lineTo(12,4);c.moveTo(12,-4);c.lineTo(6,4);c.stroke();}}
-    c.restore();
-  };icon(0,phase.cycle<IH43_FILM.finalStart?"skip":"replay");icon(1,"pause");icon(2,"sound");
-  for(let i=0;i<2;i++){
-    const x=l.pad+i*(l.buttonWidth+l.gap),y=l.bottom,hover=s.hover===i,fill=i===0?ink:null,textColor=i===0?ih43Readable(ink,p.paper,p.ink):ink;
-    c.save();if(hover){c.shadowColor=ink;c.shadowBlur=14;c.globalAlpha=.95;}ih43Box(c,x,y,l.buttonWidth,52,fill,8,ink);c.shadowColor="transparent";
-    const label=(l.mobile?language.ctaMobile:language.cta)[i],font=ih43Fit(c,[label],l.buttonWidth-57,22,l.mobile?12:13,650);ih43Text(c,label,x+16,y+31,font,textColor,650);ih43Arrow(c,x+l.buttonWidth-22,y+26,textColor,14);c.restore();
-  }
-  ih43Text(c,language.disclosure,l.pad,l.h-26,l.mobile?9:10,ink,450);
-  if(!l.mobile){const stamp=String(phase.index+1).padStart(2,"0")+" / "+String(IH43_FILM.shots.length).padStart(2,"0");ih43Text(c,stamp,l.w-l.pad,l.h-26,10,ink,500,"right");}
-}
-function ih43Frame(c,w,h,time,s,includeUi=true){
-  const clock=s.reduced?IH43_FILM.finalStart+2.5:time,l=IH43.layout(w,h),phase=IH43.phase(clock),p=ih43Palette(s.classic);
-  c.save();c.beginPath();c.rect(0,0,w,h);c.clip();ih43Backdrop(c,l,p,phase.shot,time);
-  c.save();c.beginPath();c.rect(0,75,w,h-195);c.clip();
-  const px=s.reduced?0:(s.pointerX||0)*3,py=s.reduced?0:(s.pointerY||0)*2;c.translate(px,py);
-  ih43Scene(c,l,p,phase,s,clock);c.restore();
-  if(!s.reduced){c.save();c.beginPath();c.rect(0,75,w,h-195);c.clip();ih43Transition(c,l,p,phase);c.restore();}
-  if(includeUi)ih43Ui(c,l,p,s,phase);
-  c.restore();return phase;
-}
-function ih43Start(canvas,host,state,report){
-  let frame=0,disposed=false,visible=true,last=0,lastDraw=0,dirty=true,width=0,height=0,ratio=1,previous=-1,observer,resizeObserver,c,audio=null,sound=false;
-  const listeners=[],audioNodes=new Set();
-  const listen=(node,type,fn,opts)=>{node.addEventListener(type,fn,opts);listeners.push(()=>node.removeEventListener(type,fn,opts));};
-  const stopSound=()=>{for(const node of audioNodes){try{node.stop();}catch{}}audioNodes.clear();};
-  function hit(index){if(!sound||!audio||audio.state!=="running"||state.current.paused||state.current.reduced)return;
-    try{const oscillator=audio.createOscillator(),gain=audio.createGain(),now=audio.currentTime;oscillator.type=IH43_FILM.genre==="network"?"sine":"triangle";oscillator.frequency.setValueAtTime(150+index%3*35,now);oscillator.frequency.exponentialRampToValueAtTime(52+index%2*18,now+.12);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.09,now+.006);gain.gain.exponentialRampToValueAtTime(.0001,now+.17);oscillator.connect(gain);gain.connect(audio.destination);audioNodes.add(oscillator);oscillator.onended=()=>{audioNodes.delete(oscillator);oscillator.disconnect();gain.disconnect();};oscillator.start(now);oscillator.stop(now+.19);}catch{sound=false;state.current.sound=false;report({sound:false});}
-  }
-  const destroy=()=>{if(disposed)return;disposed=true;cancelAnimationFrame(frame);frame=0;listeners.forEach(fn=>fn());observer?.disconnect();resizeObserver?.disconnect();stopSound();if(audio&&audio.state!=="closed")audio.close().catch(()=>{});};
-  const resize=()=>{const rect=host.getBoundingClientRect();if(!rect.width||!rect.height)return;width=rect.width;height=rect.height;ratio=Math.min(window.devicePixelRatio||1,width<=820?1.45:1.6);const budget=width<=820?700000:1800000,px=width*height*ratio*ratio;if(px>budget)ratio*=Math.sqrt(budget/px);canvas.width=Math.max(1,Math.floor(width*ratio));canvas.height=Math.max(1,Math.floor(height*ratio));
-    const l=IH43.layout(width,height);for(const[key,value]of Object.entries({pad:l.pad,bottom:height-l.bottom,button:l.buttonWidth,gap:l.gap,toolbar:l.toolbarX}))host.style.setProperty("--ih43-"+key,value+"px");dirty=false;};
-  const render=now=>{frame=0;if(disposed||!visible||document.hidden)return;try{
-    const s=state.current,interval=width<=820?1000/30:1000/45;if(!s.paused&&!s.reduced&&lastDraw&&now-lastDraw<interval-1){frame=requestAnimationFrame(render);return;}
-    const dt=last?Math.min(.1,(now-last)/1000):0;last=now;lastDraw=now;if(dirty)resize();if(!width||!height){frame=requestAnimationFrame(render);return;}
-    if(!s.paused&&!s.reduced)s.time+=dt;
-    c.setTransform(ratio,0,0,ratio,0,0);const phase=ih43Frame(c,width,height,s.time,s,true);
-    if(phase.index!==previous){previous=phase.index;report({scene:phase.index});hit(phase.index);}if(!s.ready){s.ready=true;report({ready:true});}
+function ih44StartWorld(canvas,root,state,report){
+  let frame=0,last=0,drawn=0,disposed=false,visible=true,width=0,height=0,ratio=1,context=null,dirty=true,previous=-1,resizeObserver=null;
+  const listeners=[],listen=(node,type,fn,opts)=>{node.addEventListener(type,fn,opts);listeners.push(()=>node.removeEventListener(type,fn,opts));};
+  const render=now=>{
+    frame=0;if(disposed||document.hidden||!visible)return;
+    const s=state.current,interval=width<821?1000/28:1000/40;
+    if(!s.paused&&!s.reduced&&drawn&&now-drawn<interval-1){frame=requestAnimationFrame(render);return;}
+    const dt=last?Math.min(.08,(now-last)/1000):0;last=now;drawn=now;
+    if(dirty){width=window.innerWidth;height=window.innerHeight;ratio=Math.min(window.devicePixelRatio||1,1.4);const budget=width<821?600000:1350000,area=width*height*ratio*ratio;if(area>budget)ratio*=Math.sqrt(budget/area);canvas.width=Math.max(1,Math.floor(width*ratio));canvas.height=Math.max(1,Math.floor(height*ratio));dirty=false;}
+    if(!s.paused&&!s.reduced){s.time+=dt;if(s.intro)s.elapsed+=dt;}
+    if(s.reduced){s.intro=false;s.elapsed=IH44_CONFIG.duration;}
+    if(s.elapsed>=IH44_CONFIG.duration)s.intro=false;
+    const act=s.intro?Math.min(3,Math.floor(s.elapsed/(IH44_CONFIG.duration/4))):4;
+    if(act!==previous){previous=act;root.style.setProperty("--ih44-progress",String(act/4));report({act,intro:s.intro});}
+    if(context){try{context.setTransform(ratio,0,0,ratio,0,0);ih44WorldFrame(context,width,height,s.reduced?0:s.time,s);}catch{context=null;}}
     if(!s.paused&&!s.reduced)frame=requestAnimationFrame(render);
-  }catch{destroy();report({failed:true,ready:true});}};
-  const wake=()=>{if(!disposed&&visible&&!document.hidden&&!frame){last=0;lastDraw=0;frame=requestAnimationFrame(render);}};
-  try{
-    c=canvas.getContext("2d",{alpha:false});if(!c)throw new Error("ih43_canvas");
-    listen(window,"resize",()=>{dirty=true;wake();},{passive:true});listen(document,"visibilitychange",()=>{last=0;lastDraw=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;stopSound();}else wake();});
-    if(typeof ResizeObserver!=="undefined"){resizeObserver=new ResizeObserver(()=>{dirty=true;wake();});resizeObserver.observe(host);}
-    if(typeof IntersectionObserver!=="undefined"){observer=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;lastDraw=0;stopSound();}},{rootMargin:"100px"});observer.observe(host);}
-    document.fonts?.ready?.then(()=>{if(!disposed){IH43_MEASURE.clear();wake();}}).catch(()=>{});
-    resize();wake();
-    return{wake,destroy,mute(){sound=false;state.current.sound=false;stopSound();wake();},replay(){state.current.time=0;previous=-1;wake();},finale(){state.current.time=IH43_FILM.finalStart+1.6;previous=-1;wake();},async toggleSound(){if(disposed||state.current.reduced)return false;try{if(!audio){const Context=window.AudioContext||window.webkitAudioContext;if(!Context)return false;audio=new Context();}if(!sound){await audio.resume();if(disposed||state.current.reduced)return false;sound=true;}else{sound=false;stopSound();}state.current.sound=sound;wake();return sound;}catch{return false;}}};
-  }catch{destroy();report({failed:true,ready:true});return{wake(){},destroy,mute(){},replay(){},finale(){},async toggleSound(){return false;}};}
-}
-
-function ih43Cover(c,x,y,w,h,p,lang,time,angle=0){
-  c.save();c.translate(x,y);c.rotate(angle);c.shadowColor="rgba(0,0,0,.22)";c.shadowBlur=24;c.shadowOffsetY=12;ih43Box(c,-w/2,-h/2,w,h,p.paper,1);c.shadowColor="transparent";
-  c.save();c.beginPath();c.rect(-w/2,-h/2,w,h);c.clip();
-  c.fillStyle=p.accent;for(let i=0;i<9;i++){const a=i*13+time*5;c.save();c.translate(-w*.25,-h*.20);c.rotate(a*.008);c.fillRect(-w,-h*.015+i*11,w*2,h*.012);c.restore();}
-  ih43Text(c,lang.coverKicker,-w*.39,-h*.35,w*.07,p.ink,600);
-  ih43Lines(c,[lang.coverName.slice(0,4),lang.coverName.slice(4)],{x:-w*.42,y:-h*.18,w:w*.84,h:h*.48},{color:p.ink,progress:1,max:w*.3});
-  ih43Text(c,lang.coverFooter,-w*.39,h*.39,w*.045,p.ink,550);
-  c.restore();c.restore();
-}
-function ih43Podcast(c,x,y,w,h,p,lang,time){
-  ih43Panel(c,x,y,w,h,{fill:p.ink,ink:p.paper,label:lang.player});
-  ih43Text(c,lang.podcast,x-w*.42,y-h*.09,w*.10,p.paper,900);
-  const bw=(w*.83)/45;c.save();c.beginPath();c.rect(x-w*.43,y+h*.03,w*.86,h*.27);c.clip();
-  for(let i=0;i<45;i++){const amp=(.15+.85*Math.abs(Math.sin(i*.41+time*4)*Math.cos(i*.17-time*2)))*h*.18;c.fillStyle=i<Math.floor((time*12)%46)?p.accent:p.secondary;c.fillRect(x-w*.42+i*bw,y+h*.17-amp/2,bw*.48,amp);}
-  c.restore();ih43Text(c,lang.audioNote,x-w*.42,y+h*.40,11,p.paper,450);
-}
-function ih43Shop(c,x,y,w,h,p,lang,time){
-  ih43Panel(c,x,y,w,h,{fill:p.paper,ink:p.ink,label:lang.shop});
-  const imageW=w*.34,imageH=h*.54;ih43Cover(c,x-w*.23,y+h*.04,imageW,imageH,p,lang,time,Math.sin(time)*.035);
-  ih43Text(c,lang.edition,x+w*.01,y-h*.10,w*.055,p.ink,750);ih43Text(c,lang.format,x+w*.01,y+h*.02,w*.032,p.ink,500);
-  ih43Box(c,x+w*.01,y+h*.14,w*.38,h*.14,p.accent,4);ih43Text(c,lang.basket,x+w*.035,y+h*.235,w*.032,ih43Readable(p.accent,p.paper,p.ink),650);
-}
-function ih43Scene(c,l,p,phase,s,time){
-  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,words=lang.frames[phase.index],ink=shot.bg==="paper"||shot.bg==="secondary"?p.ink:p.paper;
-  const e=IH43.back(phase.local/.52),main={x:l.pad,y:l.y,w:l.cw,h:l.ch};
-  if(shot.kind==="poster"){
-    const h=Math.min(l.ch*.76,l.mobile?300:385),w=h*.72;c.save();c.translate((1-e)*l.w,0);ih43Cover(c,l.w*(l.mobile?.62:.73),l.y+l.ch*.56,w,h,p,lang.ui,time,-.10+Math.sin(time*2)*.025);c.restore();
-    ih43Lines(c,words,{x:l.pad,y:l.y,w:l.cw*(l.mobile?.60:.57),h:l.ch*.63},{color:ink,progress:IH43.clamp(phase.local/.45),mode:"side",max:l.mobile?58:128});
-  }else if(shot.kind==="audio"||shot.kind==="store"){
-    ih43Lines(c,words,{x:l.pad,y:l.y,w:l.cw,h:l.ch*.25},{color:ink,progress:IH43.clamp(phase.local/.42),mode:"slam",max:l.mobile?54:106});
-    const w=Math.min(l.cw*.87,730),h=l.mobile?200:270,x=l.w/2,y=l.y+l.ch*.64;c.save();c.translate((1-e)*-l.w,0);c.rotate((1-e)*.07);
-    if(shot.kind==="audio")ih43Podcast(c,x,y,w,h,p,lang.ui,time);else ih43Shop(c,x,y,w,h,p,lang.ui,time);c.restore();
-  }else if(shot.kind==="split"){
-    const w=l.mobile?l.cw*.64:l.cw*.30,h=l.ch*.66,spacing=l.mobile?l.cw*.34:l.cw*.33;
-    for(let i=0;i<3;i++){c.save();c.translate(l.w/2+(i-1)*spacing+(1-e)*(i-1)*l.w,l.y+l.ch*.49);c.rotate((i-1)*.07+Math.sin(time+i)*.015);const scale=l.mobile?.85:1;c.scale(scale,scale);
-      if(i===0)ih43Cover(c,0,0,w*.77,h,p,lang.ui,time);else if(i===1)ih43Podcast(c,0,0,w,h*.65,p,lang.ui,time);else ih43Shop(c,0,0,w,h*.65,p,lang.ui,time);c.restore();}
-    ih43Lines(c,words,{x:l.pad,y:l.y+l.ch*.76,w:l.cw,h:l.ch*.23},{color:ink,progress:IH43.clamp((phase.local-.2)/.4),mode:"side",max:l.mobile?42:88});
-  }else if(shot.kind==="review"){
-    const w=Math.min(l.cw*.86,700),h=l.ch*.63;ih43Panel(c,l.w*.5+(1-e)*l.w,l.y+l.ch*.58,w,h,{fill:p.paper,ink:p.ink,label:lang.ui.finish});
-    ih43Lines(c,words,{x:l.pad,y:l.y,w:l.cw,h:l.ch*.25},{color:ink,progress:IH43.clamp(phase.local/.4),mode:"letters",max:l.mobile?46:95});
-    for(let i=0;i<3;i++){const t=(Math.sin(time*2+i)+1)/2,x=l.w*.5-w*.42,y=l.y+l.ch*.43+i*45;ih43Text(c,lang.ui.adjustments[i],x,y,13,p.ink,600);ih43Box(c,x+w*.37,y-8,w*.43,4,p.ink,2);c.fillStyle=p.accent;c.beginPath();c.arc(x+w*(.37+.43*t),y-6,7,0,Math.PI*2);c.fill();}
-  }else if(shot.kind==="final"){
-    if(!s.reduced){const step=Math.floor(phase.local/2.6)%3,phaseMove=(phase.local%2.6)/2.6; c.save();c.globalAlpha=.14;c.translate(l.w*(.82-.18*phaseMove),l.y+l.ch*.47);c.rotate((phaseMove-.5)*.12);
-      if(step===0)ih43Cover(c,0,0,l.cw*.32,l.ch*.78,p,lang.ui,time);else if(step===1)ih43Podcast(c,0,0,l.cw*.68,l.ch*.61,p,lang.ui,time);else ih43Shop(c,0,0,l.cw*.68,l.ch*.61,p,lang.ui,time);c.restore();}
-    ih43Lines(c,words,{x:l.pad,y:l.y-4,w:l.cw,h:l.ch*.70},{color:ink,progress:IH43.clamp(phase.local/.62),mode:"letters",max:l.mobile?75:167});
-    for(let i=0;i<3;i++){const x=l.pad+l.cw*(.17+.33*i),y=l.y+l.ch*.83+Math.sin(time*2+i)*7;ih43Tag(c,lang.endTags[i],x,y,{fill:i===1?p.ink:p.paper,ink:i===1?p.paper:p.ink},(i-1)*.025,l.mobile?.76:1);}
-  }else{
-    if(shot.kind==="marquee"){
-      c.save();c.globalAlpha=.13;const text=words.join(" "),size=l.mobile?64:148;for(let i=0;i<3;i++){const xx=l.pad-((time*(i%2?-65:65))%(l.w*.8)),yy=l.y+l.ch*(.18+.30*i);ih43Text(c,text,xx,yy,size,ink,900);}c.restore();
-    }
-    ih43Lines(c,words,main,{color:ink,progress:IH43.clamp(phase.local/.42),mode:shot.motion||"side",max:l.mobile?94:204});
-  }
-}
-
-function ih43Reduced(){
-  return typeof window!=="undefined"&&!!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-}
-
-/* Każdy wariant jest alternatywą całego pliku App.jsx. Trasy, płatności i dalsza strona pozostają w części P40. */
-export function IdeaHireCinematicHero(){
-  const site=useSitePreferences();
-  const english=site.language==="en",classic=site.template==="classic";
-  const copy=english?IH43_FILM.en:IH43_FILM.pl;
-  const [reduced,setReduced]=useState(ih43Reduced);
-  const [paused,setPaused]=useState(false);
-  const [sound,setSound]=useState(false);
-  const [ready,setReady]=useState(false);
-  const [failed,setFailed]=useState(false);
-  const [scene,setScene]=useState(()=>ih43Reduced()?IH43_FILM.shots.length-1:0);
-  const rootRef=useRef(null),canvasRef=useRef(null),engineRef=useRef(null),alive=useRef(false),soundBusy=useRef(false);
-  const motion=useRef({time:0,paused:false,reduced,english,classic,offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
-  const finale=scene===IH43_FILM.shots.length-1;
-  const labels=english?{
-    region:"IdeaHire — "+IH43_FILM.name,
-    skip:"Skip to the final scene",replay:"Replay the film",pause:"Pause the animation",play:"Resume the animation",
-    soundOn:"Enable sound",soundOff:"Mute sound",controls:"Film controls",
-  }:{
-    region:"IdeaHire — "+IH43_FILM.name,
-    skip:"Przejdź do finału",replay:"Odtwórz od początku",pause:"Zatrzymaj animację",play:"Wznów animację",
-    soundOn:"Włącz dźwięk",soundOff:"Wycisz dźwięk",controls:"Sterowanie filmem",
   };
-  useEffect(()=>{
-    const media=window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if(!media)return;
-    const change=()=>setReduced(media.matches);change();
-    media.addEventListener?.("change",change);
-    return()=>media.removeEventListener?.("change",change);
-  },[]);
-  useLayoutEffect(()=>{
-    Object.assign(motion.current,{reduced,english,classic,paused,offer:IDEA_HIRE_PUBLIC_OFFER});
-    if(reduced){setSound(false);engineRef.current?.mute();}
-    engineRef.current?.wake();
-  },[reduced,english,classic,paused]);
-  useEffect(()=>{
-    alive.current=true;
-    const engine=ih43Start(canvasRef.current,rootRef.current,motion,update=>{
-      if(!alive.current)return;
-      if(update.ready)setReady(true);
-      if(update.failed)setFailed(true);
-      if(update.scene!==undefined)setScene(update.scene);
-      if(update.sound!==undefined)setSound(update.sound);
-    });
-    engineRef.current=engine;
-    return()=>{alive.current=false;engine.destroy();engineRef.current=null;};
-  },[]);
-  function cut(){
-    if(reduced||failed)return;
-    if(IH43.phase(motion.current.time).cycle>=IH43_FILM.finalStart){
-      motion.current.paused=false;setPaused(false);engineRef.current?.replay();
-    }else engineRef.current?.finale();
-  }
-  function togglePause(){
-    motion.current.paused=!motion.current.paused;
-    setPaused(motion.current.paused);engineRef.current?.wake();
-  }
-  async function toggleSound(){
-    if(soundBusy.current||reduced||failed)return;
-    soundBusy.current=true;
-    try{const enabled=await engineRef.current?.toggleSound();if(alive.current)setSound(!!enabled);}
-    finally{soundBusy.current=false;}
-  }
-  function hover(index){motion.current.hover=index;engineRef.current?.wake();}
-  function move(event){
-    if(reduced||paused||failed||event.pointerType!=="mouse")return;
-    const rect=event.currentTarget.getBoundingClientRect();
-    motion.current.pointerX=IH43.clamp((event.clientX-rect.left)/rect.width*2-1,-1,1);
-    motion.current.pointerY=IH43.clamp((event.clientY-rect.top)/rect.height*2-1,-1,1);
-  }
-  function leave(){motion.current.pointerX=0;motion.current.pointerY=0;hover(-1);}
-  return <section ref={rootRef} className="ih43-film" data-cinematic-version={"P43-"+IH43_FILM.key}
-    data-ready={ready} data-failed={failed} data-classic={classic} data-no-translate="true"
-    aria-label={labels.region} onPointerMove={move} onPointerLeave={leave}>
-    <style>{IH43_STYLES}</style>
-    <canvas ref={canvasRef} className="ih43-canvas" aria-hidden="true"/>
-    <div className="ih43-accessible">
-      <h1>{copy.final.join(" ")}</h1>
-      <p>{copy.subtitle}</p>
-      <p>{copy.disclosure}</p>
-      {IH43_FILM.genre==="cut"&&<p>{english?"IdeaHire service fee":"Prowizja IdeaHire"}: {IDEA_HIRE_PUBLIC_OFFER.percent}%,
-        {english?" minimum":" min."} {IDEA_HIRE_PUBLIC_OFFER.minimum} {english?"PLN":"zł"},
-        {english?" maximum":" maks."} {IDEA_HIRE_PUBLIC_OFFER.maximum} {english?"PLN":"zł"}.
-        {english?" Orders up to ":" Zlecenia do "}{IDEA_HIRE_PUBLIC_OFFER.orderLimit} {english?"PLN. Paid by the client.":"zł. Płaci zleceniodawca."}</p>}
-    </div>
-    <div role="group" aria-label={labels.controls}>
-      <button type="button" className="ih43-hit ih43-control" style={{"--ih43-index":0}}
-        aria-label={finale?labels.replay:labels.skip} title={finale?labels.replay:labels.skip} disabled={reduced||failed} onClick={cut}/>
-      <button type="button" className="ih43-hit ih43-control" style={{"--ih43-index":1}}
-        aria-label={paused?labels.play:labels.pause} title={paused?labels.play:labels.pause} aria-pressed={paused||reduced}
-        disabled={reduced||failed} onClick={togglePause}/>
-      <button type="button" className="ih43-hit ih43-control" style={{"--ih43-index":2}}
-        aria-label={sound?labels.soundOff:labels.soundOn} title={sound?labels.soundOff:labels.soundOn} aria-pressed={sound}
-        disabled={reduced||failed} onClick={toggleSound}/>
-    </div>
-    {copy.cta.map((label,index)=><Link key={index} className="ih43-hit ih43-link" style={{"--ih43-index":index}}
-      to={IH43_FILM.paths[index]} onMouseEnter={()=>hover(index)} onMouseLeave={()=>hover(-1)} onFocus={()=>hover(index)} onBlur={()=>hover(-1)}>
-      <span className="ih43-link-label">{label}</span>
-    </Link>)}
-  </section>;
+  const wake=()=>{if(!disposed&&!document.hidden&&visible&&!frame){last=0;drawn=0;frame=requestAnimationFrame(render);}};
+  const move=e=>{if(e.pointerType!=="mouse"||state.current.paused||state.current.reduced)return;state.current.x=Math.max(-1,Math.min(1,e.clientX/window.innerWidth*2-1));state.current.y=Math.max(-1,Math.min(1,e.clientY/window.innerHeight*2-1));};
+  const scroll=()=>{state.current.scroll=window.scrollY;if(state.current.paused||state.current.reduced)return;wake();};
+  try{context=canvas.getContext("2d");}catch{/* Strona i jej funkcje działają również bez warstwy canvas. */}
+  listen(window,"resize",()=>{dirty=true;wake();},{passive:true});listen(window,"scroll",scroll,{passive:true});listen(root,"pointermove",move,{passive:true});listen(root,"pointerleave",()=>{state.current.x=0;state.current.y=0;});
+  listen(document,"visibilitychange",()=>{last=0;drawn=0;if(document.hidden){cancelAnimationFrame(frame);frame=0;root.dataset.worldHidden="true";}else{root.dataset.worldHidden="false";wake();}});
+  if(typeof IntersectionObserver!=="undefined"){resizeObserver=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:"100px"});resizeObserver.observe(root);}
+  wake();return{wake,destroy(){disposed=true;cancelAnimationFrame(frame);listeners.forEach(fn=>fn());resizeObserver?.disconnect();},finish(){state.current.intro=false;state.current.elapsed=IH44_CONFIG.duration;wake();},replay(){Object.assign(state.current,{intro:true,elapsed:0,time:0,paused:false});previous=-1;wake();}};
 }
+function useIH44Stage(rootRef,canvasRef,palette,dark){
+  const [reduced,setReduced]=useState(ih44Reduced),[paused,setPaused]=useState(false),[act,setAct]=useState(()=>ih44Reduced()?4:0),[intro,setIntro]=useState(()=>!ih44Reduced()),[cycle,setCycle]=useState(0);
+  const engine=useRef(null),state=useRef({time:0,elapsed:0,intro:!reduced,reduced,paused:false,palette,dark,x:0,y:0,scroll:0});
+  useLayoutEffect(()=>{document.body.classList.add("ih44-page");return()=>document.body.classList.remove("ih44-page");},[]);
+  useLayoutEffect(()=>{Object.assign(state.current,{palette,dark,reduced,paused});engine.current?.wake();},[palette,dark,reduced,paused]);
+  useEffect(()=>{const m=window.matchMedia?.("(prefers-reduced-motion: reduce)");if(!m)return;const change=()=>setReduced(m.matches);m.addEventListener?.("change",change);return()=>m.removeEventListener?.("change",change);},[]);
+  useEffect(()=>{let alive=true;const e=ih44StartWorld(canvasRef.current,rootRef.current,state,u=>{if(alive){setAct(u.act);setIntro(u.intro);}});engine.current=e;return()=>{alive=false;e.destroy();engine.current=null;};},[]);
+  useEffect(()=>{const root=rootRef.current;if(!root)return;const elements=[...root.querySelectorAll("[data-world-reveal]")];if(reduced||typeof IntersectionObserver==="undefined"){elements.forEach(el=>el.dataset.worldReveal="seen");return;}
+    const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.dataset.worldReveal="seen";observer.unobserve(entry.target);} }),{threshold:.08,rootMargin:"0px 0px -30px 0px"});
+    elements.forEach(el=>{el.dataset.worldReveal="waiting";observer.observe(el);});return()=>{observer.disconnect();elements.forEach(el=>el.dataset.worldReveal="seen");};
+  },[reduced]);
+  return{act,intro,paused,reduced,cycle,state,finish(){engine.current?.finish();},replay(){if(reduced)return;setPaused(false);setIntro(true);setAct(0);setCycle(n=>n+1);engine.current?.replay();},toggle(){state.current.paused=!state.current.paused;setPaused(state.current.paused);engine.current?.wake();}};
+}
+
+const IH44_CLASSIC_LIGHT={bg:"#f2f1ed",surface:"#ffffff",soft:"#e8e7e3",ink:"#202020",muted:"#656560",line:"#d0d0cb",accent:"#242424",on:"#ffffff",pop:"#d7d7d0"};
+const IH44_CLASSIC_DARK={bg:"#181818",surface:"#242424",soft:"#303030",ink:"#f6f5ef",muted:"#bdbdb5",line:"#494944",accent:"#f0efe8",on:"#202020",pop:"#c9c9bd"};
+const IH44_UTIL={
+ pl:{menu:"Menu",how:"Jak to działa",categories:"Kategorie",forYou:"Dla Ciebie",notices:"Powiadomienia",account:"Moje konto",login:"Zaloguj się",register:"Dołącz",logout:"Wyloguj się",skip:"Pomiń sekwencję",replay:"Powtórz wejście",pause:"Zatrzymaj ruch",play:"Wznów ruch",next:"Następna strona",previous:"Poprzednia strona",latest:"Ostatnio dodane",sample:"Przykładowy projekt",sampleNote:"Przykład zakresu — nieaktywna oferta",all:"Wszystkie ogłoszenia",find:"Znajdź wykonawcę",work:"Przeglądaj zlecenia",fee:"Zasady rozliczenia",roles:["Zlecam pracę","Szukam zlecenia","Wybieram dziedzinę","Otwieram konto"],rolesCopy:["Przejrzyj specjalistów i opowiedz o zadaniu.","Sprawdź ogłoszenia pasujące do Twoich umiejętności.","Odkryj kategorie i wybierz specjalizację.","Profil, rozmowy i ustalenia w jednym miejscu."],go:"Otwórz",choose:"Wybierz pole",summary:"Pomysł, wykonanie i rozmowa w jednym miejscu.",legal:"Dokumenty i pomoc",steps:[["Opis","Określ zakres, oczekiwany rezultat i termin."],["Wybór","Znajdź osobę z odpowiednimi umiejętnościami."],["Ustalenia","Porozmawiaj o cenie, przekazaniu i szczegółach."]]},
+ en:{menu:"Menu",how:"How it works",categories:"Categories",forYou:"For you",notices:"Notifications",account:"My account",login:"Sign in",register:"Join",logout:"Sign out",skip:"Skip the sequence",replay:"Replay the entrance",pause:"Pause motion",play:"Resume motion",next:"Next page",previous:"Previous page",latest:"Recently added",sample:"Sample project",sampleNote:"Illustrative scope — not an active listing",all:"All listings",find:"Find a professional",work:"Browse projects",fee:"Payment rules",roles:["I need help","I want a project","I choose a field","I open my account"],rolesCopy:["Browse professionals and describe the task.","Explore listings that match your skills.","Discover categories and choose a specialism.","Your profile, conversations and agreements together."],go:"Open",choose:"Choose a field",summary:"Ideas, execution and conversation in one place.",legal:"Documents and help",steps:[["Brief","Define the scope, expected outcome and timing."],["Selection","Find a person with the right skills."],["Agreement","Discuss the price, delivery and details."]]},
+};
+function IH44Arrow({back=false}){return <svg viewBox="0 0 24 24" aria-hidden="true" style={back?{transform:"rotate(180deg)"}:undefined}><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg>;}
+function IH44Mark(){return <span className="ih44-mark" aria-hidden="true"><i/><i/><i/><i/></span>;}
+function IH44Controls({stage,ui}){return <div className="ih44-motion-controls" role="group" aria-label={ui.menu}>
+  <button type="button" onClick={stage.intro?stage.finish:stage.replay} disabled={stage.reduced}>{stage.intro?ui.skip:ui.replay}<span aria-hidden="true">↗</span></button>
+  <button type="button" onClick={stage.toggle} disabled={stage.reduced} aria-pressed={stage.paused||stage.reduced}>{stage.paused?ui.play:ui.pause}<span aria-hidden="true">{stage.paused?"▷":"Ⅱ"}</span></button>
+</div>;}
+function IH44Headline({stage,copy}){return <div className="ih44-headline" data-final={!stage.intro}>
+  <h1 className="ih44-final-title">{copy.final.map((line,i)=><span key={i}>{line}</span>)}</h1>
+  {stage.intro&&<div className="ih44-entrance-title" key={stage.cycle+"-"+stage.act} aria-hidden="true">{copy.acts[Math.min(stage.act,3)].map((line,i)=><span key={i} style={{"--line":i}}>{line}</span>)}</div>}
+</div>;}
+function IH44FeatureArt({index}){const english=useSitePreferences().language==="en";return <div className={"ih44-art ih44-art-"+index} aria-hidden="true">
+  {index===0?<><span className="ih44-art-caption">BRIEF / 01</span><strong>{english?"Small":"Mała"}<br/>{english?"big":"wielka"}<br/>{english?"change.":"zmiana."}</strong><span className="ih44-art-rule"/><i/><i/></>:index===1?<><span className="ih44-art-caption">PORTFOLIO / 02</span><div className="ih44-letter-wall"><b>Aa</b><b>Web</b><b>▶</b></div><span className="ih44-art-rule"/></>:index===2?<><span className="ih44-art-caption">{english?"CATALOG":"KATALOG"} / 03</span><div className="ih44-category-art"><span>WEB</span><span>FILM</span><span>COPY</span><span>DESIGN</span></div></>:<><span className="ih44-art-caption">{english?"CONTACT":"KONTAKT"} / 04</span><div className="ih44-chat-art"><span>{english?"Hi.":"Hej."}</span><span>{english?"Let’s talk.":"Porozmawiajmy."}</span><span>{english?"Sure.":"Jasne."}</span></div></>}
+</div>;}
+function IH44Actions({ui,session}){return <div className="ih44-primary-actions"><Link to="/find-talent" className="ih44-button ih44-primary">{ui.find}<IH44Arrow/></Link><Link to="/jobs" className="ih44-button">{ui.work}<IH44Arrow/></Link></div>;}
+function IH44LagoonLanding({stage,copy,ui,session}){
+ const items=[{to:"/find-talent"},{to:"/jobs"},{href:"#categories"},{to:session?"/account":"/register"}];
+ return <section className="ih44-landing ih44-lagoon-landing" aria-label={copy.eyebrow} data-no-translate="true">
+  <div className="ih44-opening-meta"><span><IH44Mark/>{copy.eyebrow}</span><IH44Controls stage={stage} ui={ui}/></div>
+  <div className="ih44-lagoon-composition">
+   <div className="ih44-leading-copy"><IH44Headline stage={stage} copy={copy}/><p>{copy.subtitle}</p><IH44Actions ui={ui} session={session}/></div>
+   <div className="ih44-function-grid">{items.map((item,i)=>{const Item=item.to?Link:"a";return <Item key={i} {...item} className={"ih44-function ih44-function-"+i} style={{"--tile":i}}>
+    <div className="ih44-function-face"><span className="ih44-function-top"><small>0{i+1}</small><IH44Mark/></span><strong>{ui.roles[i]}</strong><span>{ui.rolesCopy[i]}</span><IH44Arrow/></div>
+   </Item>;})}</div>
+  </div>
+  <div className="ih44-world-caption"><span>{copy.strip}</span><a href="#categories">{ui.categories}<span aria-hidden="true">↓</span></a></div>
+ </section>;
+}
+function IH44PapayaLanding({stage,copy,ui,session}){
+ const rail=useRef(null),manual=useRef(false),hover=useRef(false);const [index,setIndex]=useState(0);
+ function page(next,automatic=false){const el=rail.current;if(!el)return;if(!automatic)manual.current=true;const n=Math.max(0,Math.min(3,next));setIndex(n);el.scrollTo({left:el.children[n].offsetLeft-el.children[0].offsetLeft,behavior:stage.reduced?"instant":"smooth"});}
+ useEffect(()=>{manual.current=false;setIndex(0);rail.current?.scrollTo({left:0,behavior:"instant"});},[stage.cycle]);
+ useEffect(()=>{if(!stage.intro||stage.paused||stage.reduced)return;const id=setInterval(()=>{const el=rail.current;if(!el||manual.current||hover.current||document.hidden||el.contains(document.activeElement))return;const r=el.getBoundingClientRect();if(r.bottom<0||r.top>window.innerHeight)return;const width=el.children[0].getBoundingClientRect().width+18,current=Math.round(el.scrollLeft/width);page((current+1)%4,true);},4800);return()=>clearInterval(id);},[stage.intro,stage.paused,stage.reduced]);
+ return <section className="ih44-landing ih44-editorial-landing" aria-label={copy.eyebrow} data-no-translate="true">
+  <div className="ih44-opening-meta"><span>{copy.eyebrow}</span><IH44Controls stage={stage} ui={ui}/></div>
+  <IH44Headline stage={stage} copy={copy}/><div className="ih44-editorial-intro"><p>{copy.subtitle}</p><span className="ih44-edition">IDEAHIRE / {new Date().getFullYear()}</span></div>
+  <div className="ih44-filmstrip" ref={rail} onPointerEnter={()=>hover.current=true} onPointerLeave={()=>hover.current=false} onPointerDown={()=>manual.current=true} onScroll={()=>{const el=rail.current;if(el)setIndex(Math.max(0,Math.min(3,Math.round(el.scrollLeft/(el.children[0].getBoundingClientRect().width+18)))));}}>
+   {ui.roles.map((label,i)=><article className={"ih44-film-page ih44-film-page-"+i} style={{"--tile":i}} key={label}><IH44FeatureArt index={i}/><div className="ih44-film-page-copy"><small>0{i+1}</small><h2>{label}</h2><p>{ui.rolesCopy[i]}</p>{i===2?<a className="ih44-button" href="#categories">{ui.go}<IH44Arrow/></a>:<Link className="ih44-button" to={i===0?"/find-talent":i===1?"/jobs":session?"/account":"/register"}>{ui.go}<IH44Arrow/></Link>}</div></article>)}
+  </div>
+  <div className="ih44-strip-controls"><span>{copy.strip}</span><div><button type="button" onClick={()=>page(index-1)} disabled={index===0} aria-label={ui.previous}><IH44Arrow back/></button><span>{String(index+1).padStart(2,"0")} / 04</span><button type="button" onClick={()=>page(index+1)} disabled={index===3} aria-label={ui.next}><IH44Arrow/></button></div></div>
+ </section>;
+}
+function IH44IrisLanding({stage,copy,ui,session}){
+ const [active,setActive]=useState(0),buttons=useRef([]),manual=useRef(false);
+ useEffect(()=>{manual.current=false;},[stage.cycle]);
+ useEffect(()=>{if(stage.intro&&!manual.current)setActive(Math.min(3,stage.act));},[stage.act,stage.intro]);
+ function keys(e){if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(e.key))return;e.preventDefault();const next=e.key==="Home"?0:e.key==="End"?3:(active+({ArrowLeft:3,ArrowRight:1,ArrowUp:2,ArrowDown:2}[e.key]))%4;setActive(next);buttons.current[next]?.focus({preventScroll:true});}
+ return <section className="ih44-landing ih44-iris-landing" aria-label={copy.eyebrow} data-no-translate="true">
+  <div className="ih44-opening-meta"><span><IH44Mark/>{copy.eyebrow}</span><IH44Controls stage={stage} ui={ui}/></div>
+  <div className="ih44-iris-heading"><IH44Headline stage={stage} copy={copy}/><p>{copy.subtitle}</p></div>
+  <div className="ih44-quadrants" data-active={active} onKeyDown={keys} aria-label={ui.choose}>
+   {ui.roles.map((title,i)=><article className={"ih44-quadrant ih44-quadrant-"+i+(active===i?" is-active":"")} key={i} style={{"--tile":i}} onPointerEnter={e=>{if(e.pointerType==="mouse"){manual.current=true;setActive(i);}}}>
+    <button type="button" className="ih44-quadrant-pick" ref={el=>buttons.current[i]=el} onClick={()=>{manual.current=true;setActive(i);}} onFocus={()=>{manual.current=true;setActive(i);}} aria-pressed={active===i} aria-controls={"ih44-field-"+i}><span>0{i+1}<IH44Mark/></span><strong>{title}</strong></button>
+    <div className="ih44-quadrant-detail" id={"ih44-field-"+i}><p>{ui.rolesCopy[i]}</p>{i===2?<a className="ih44-button" href="#categories">{ui.go}<IH44Arrow/></a>:<Link className="ih44-button" to={i===0?"/find-talent":i===1?"/jobs":session?"/account":"/register"}>{ui.go}<IH44Arrow/></Link>}</div>
+    <div className="ih44-quadrant-art" aria-hidden="true"><IH44FeatureArt index={i}/></div>
+   </article>)}
+  </div>
+  <div className="ih44-world-caption"><span>{copy.strip}</span><a href="#categories">{ui.categories}<span aria-hidden="true">↓</span></a></div>
+ </section>;
+}
+function ih44RealJob(job){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(job?.id||""));}
+function ih44PublicFee(budget,offer){return Math.round(Math.min(offer.maximum,Math.max(offer.minimum,Number(budget)*offer.percent/100))*100)/100;}
+function IH44CommissionPanel(){
+ const english=useSitePreferences().language==="en",offer=IDEA_HIRE_PUBLIC_OFFER,[budget,setBudget]=useState(2200),fee=ih44PublicFee(budget,offer);
+ const money=value=>Number(value).toLocaleString(english?"en-GB":"pl-PL",{style:"currency",currency:"PLN",maximumFractionDigits:2}),percent=Number(offer.percent).toLocaleString(english?"en-GB":"pl-PL");
+ return <aside className="ih44-fee-panel" data-no-translate="true"><div className="ih44-fee-heading"><span className="ih44-kicker">{english?"IdeaHire service fee":"Prowizja IdeaHire"}</span><IH44Mark/></div><strong className="ih44-fee-rate">{percent}<span>%</span></strong>
+  <p className="ih44-fee-limits">{english?"Minimum":"Minimum"} {money(offer.minimum)} · {english?"maximum":"maksimum"} {money(offer.maximum)}</p>
+  <p>{english?"Orders up to":"Zlecenia do"} {money(offer.orderLimit)}. {english?"Paid by the client.":"Płaci zleceniodawca."}</p>
+  <label className="ih44-fee-slider"><span>{english?"Try a project value":"Sprawdź wartość zlecenia"}<output>{money(budget)}</output></span><input type="range" min="100" max={offer.orderLimit} step="100" value={budget} onChange={e=>setBudget(Number(e.target.value))}/></label>
+  <div className="ih44-fee-result"><span>{english?"Service fee":"Prowizja"}<strong>{money(fee)}</strong></span><span>{english?"Client total":"Razem dla klienta"}<strong>{money(Number(budget)+fee)}</strong></span></div>
+  <small>{english?"Illustrative calculation. You confirm the amount before payment.":"Przykładowe obliczenie. Kwotę potwierdzisz przed płatnością."}</small>
+ </aside>;
+}
+function ih44CategoryLabel(value,english){if(!english)return getCategoryLabel(value);return {Programowanie:"Web, apps and IT","Grafika i design":"Graphics, UX and 3D",Marketing:"Marketing and sales",Copywriting:"Copy and translation",Video:"Video, motion and audio",Fotografia:"Photography","AI i automatyzacje":"AI and automation","Dane, analizy i research":"Data and research","Biznes i e-commerce":"Business and e-commerce","Architektura, wnętrza i CAD":"Architecture and CAD"}[value]||value||"Other";}
+function IH44Jobs({jobs,ui,copy,english}){const real=jobs.some(ih44RealJob);return <section className="ih44-section ih44-jobs" id="projects" data-world-reveal="seen" data-no-translate="true">
+ <div className="ih44-section-heading"><span className="ih44-kicker">{real?ui.latest:ui.sample}</span><h2>{copy.jobs}</h2><Link to="/jobs">{ui.all}<IH44Arrow/></Link></div>
+ <div className="ih44-job-list">{jobs.slice(0,4).map((job,i)=>{const actual=ih44RealJob(job),title=!actual&&english?["A website for a new brand","A visual identity","Copy for a company website"][i%3]:job.title;return <Link className="ih44-job" key={job.id||i} to="/jobs" state={actual?{lucynaJobId:String(job.id),lucynaTitle:String(job.title)}:undefined} style={{"--row":i}}><span className="ih44-job-number">{String(i+1).padStart(2,"0")}</span><div><small>{actual?ih44CategoryLabel(job.category,english):ui.sampleNote}</small><strong>{title}</strong></div><span className="ih44-job-budget">{job.budget?Number(job.budget).toLocaleString(english?"en-GB":"pl-PL")+(english?" PLN":" zł"):"—"}</span><IH44Arrow/></Link>;})}</div>
+ </section>;}
 
 /* P40: jeden nagłówek w DOM; przewijanie zabiera cały pas, bezruch odsyła go na górę. */
 const IH40_HEADER_STYLES = String.raw`
@@ -644,8 +266,9 @@ __IH40__ .ih40-header-slot .home-nav-links {translate:0 0!important;}
 @media(prefers-reduced-motion:reduce){__IH40__ .ih40-header-slot > .ih-home-header{transition:none!important;}}
 `.replaceAll("__IH40__", "#root".repeat(10));
 
-function useIdeaHireScrollHeader(headerRef, slotRef) {
+function useIdeaHireScrollHeader(headerRef, slotRef, enabled=true) {
   useLayoutEffect(() => {
+    if (!enabled) return undefined;
     const header = headerRef.current, slot = slotRef.current;
     if (!header || !slot) return undefined;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -722,7 +345,7 @@ function useIdeaHireScrollHeader(headerRef, slotRef) {
       header.removeEventListener("pointerenter",enter);header.removeEventListener("pointerleave",leave);header.removeEventListener("focusin",focus);header.removeEventListener("focusout",blur);
       reduced.removeEventListener?.("change",settings);
     };
-  },[headerRef,slotRef]);
+  },[headerRef,slotRef,enabled]);
 }
 
 const categories = [
@@ -1022,6 +645,7 @@ function HomeNavItem({ children, order, to, href, notification = false }) {
 }
 
 function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
+  const english=useSitePreferences().language==="en";
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
@@ -1096,18 +720,18 @@ function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
 
   return <>
     <button ref={triggerRef} className="home-account-avatar-link ih27-home-account-trigger" type="button"
-      aria-label={open ? "Zamknij menu konta" : "Otwórz menu konta"} aria-expanded={open} aria-controls="ih27-home-account-menu"
+      aria-label={english?(open?"Close account menu":"Open account menu"):(open?"Zamknij menu konta":"Otwórz menu konta")} aria-expanded={open} aria-controls="ih27-home-account-menu"
       onClick={() => { if (!open) onOpen?.(); setOpen(value => !value); }}
       onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); if (open) menuRef.current?.querySelector("a")?.focus({ preventScroll: true }); else { onOpen?.(); setOpen(true); } } }}>
       <span className="account-mini-avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : initial}</span>
     </button>
     {open && createPortal(<nav ref={menuRef} id="ih27-home-account-menu" className="account-menu-dropdown ih18-account-dropdown ih27-home-account-menu"
-      aria-label="Funkcje konta" onKeyDown={navigateMenu}
+      aria-label={english?"Account tools":"Funkcje konta"} data-no-translate="true" onKeyDown={navigateMenu}
       onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget) && !triggerRef.current?.contains(event.relatedTarget)) setOpen(false); }}>
-      <div className="account-menu-identity"><strong>{name}</strong><span>Konto IdeaHire</span></div>
-      <Link to="/account" onClick={() => setOpen(false)}>Moje konto</Link>
-      <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
-        <MarketIcon kind="help" /><span>Pomoc</span>
+      <div className="account-menu-identity"><strong>{name}</strong><span>{english?"IdeaHire account":"Konto IdeaHire"}</span></div>
+      <Link to="/account" onClick={() => setOpen(false)}>{english?"My account":"Moje konto"}</Link>
+      <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label={english?"Help — Help centre":"Pomoc — Centrum pomocy"}>
+        <MarketIcon kind="help" /><span>{english?"Help":"Pomoc"}</span>
       </a>
     </nav>, document.body)}
   </>;
@@ -1130,53 +754,20 @@ function HomeGreeting({ name }) {
   );
 }
 
-// Fictional content for the requested visual test. Keep the demo label visible.
-const HOME_DEMO_REVIEWS = [
-  { initial: "A", name: "Aleksandra", role: "zleceniodawczyni", text: "Mam pomysł i od razu wiem, gdzie szukać osoby, która pomoże mi go zrealizować." },
-  { initial: "M", name: "Michał", role: "freelancer", text: "Przejrzyste kategorie i zlecenia w jednym miejscu. Tak lubię szukać nowych projektów." },
-  { initial: "K", name: "Karolina", role: "zleceniodawczyni", text: "Najbardziej podoba mi się prosty układ. Mogę skupić się na swoim projekcie." },
-  { initial: "P", name: "Piotr", role: "freelancer", text: "Od małego zadania po większy projekt — łatwo znaleźć swój kierunek." },
-];
-
-function HomeDemoReviews() {
-  return (
-    <section className="ih-demo-reviews" aria-labelledby="ih-demo-reviews-title">
-      <div className="ih-demo-reviews-heading">
-        <div>
-          <span className="ih-demo-review-caption">Pomysły spotykają ludzi</span>
-          <h2 id="ih-demo-reviews-title">Opinie przykładowe — test wyglądu</h2>
-        </div>
-      </div>
-      <div className="ih-demo-reviews-viewport" tabIndex={0} aria-label="Przykładowe, fikcyjne opinie do testu wyglądu. Najedź kursorem lub ustaw fokus, aby zatrzymać przewijanie.">
-        <div className="ih-demo-reviews-track" id="ih-demo-reviews-track">
-          {[0, 1].map((copy) => (
-            <div className="ih-demo-reviews-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
-              {HOME_DEMO_REVIEWS.map((review) => (
-                <article className="ih-demo-review" key={review.name}>
-                  <span className="ih-demo-review-tag">Opinia testowa</span>
-                  <blockquote>{review.text}</blockquote>
-                  <div className="ih-demo-review-person">
-                    <span className="ih-demo-review-avatar" aria-hidden="true">{review.initial}</span>
-                    <div><strong>{review.name}</strong><span>{review.role}</span></div>
-                    <span className="ih-demo-review-quote" aria-hidden="true">“</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function App({ session, loading, categoryGroups = [] }) {
+
+  const homeRootRef=useRef(null),worldCanvasRef=useRef(null);
+  const site=useSitePreferences(),english=site.language==="en",dark=site.theme==="dark";
+  const palette=site.template==="classic"?(dark?IH44_CLASSIC_DARK:IH44_CLASSIC_LIGHT):(dark?IH44_CONFIG.dark:IH44_CONFIG.light);
+  const ui=IH44_UTIL[english?"en":"pl"],copy=IH44_CONFIG[english?"en":"pl"];
+  const stage=useIH44Stage(homeRootRef,worldCanvasRef,palette,dark);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const headerRef = useRef(null);
   const headerSlotRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
   const navigationRef = useRef(null);
-  useIdeaHireScrollHeader(headerRef, headerSlotRef);
+  useIdeaHireScrollHeader(headerRef, headerSlotRef, IH44_CONFIG.mode==="lagoon");
 
   useEffect(() => {
     if (!mobileMenuOpen) return undefined;
@@ -1331,105 +922,6 @@ function App({ session, loading, categoryGroups = [] }) {
       window.clearInterval(interval);
     };
   }, [recentJobs.length]);
-
-  useLayoutEffect(() => {
-    const root = document.querySelector(".app");
-
-    if (!root) return undefined;
-
-    const revealElements = Array.from(
-      root.querySelectorAll(".home-reveal")
-    );
-
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    root.classList.add("home-motion-ready");
-
-    revealElements.forEach((element) => {
-      const group = element.parentElement;
-      const groupedElements = group
-        ? Array.from(group.children).filter((child) =>
-            child.classList.contains("home-reveal")
-          )
-        : [];
-      const position = Math.max(
-        0,
-        groupedElements.indexOf(element)
-      );
-
-      element.style.setProperty(
-        "--home-reveal-delay",
-        `${Math.min(position, 5) * 75}ms`
-      );
-    });
-
-    if (
-      prefersReducedMotion ||
-      !("IntersectionObserver" in window)
-    ) {
-      revealElements.forEach((element) => {
-        element.classList.add("is-visible");
-      });
-
-      return () => {
-        root.classList.remove("home-motion-ready");
-      };
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const element = entry.target;
-
-          if (entry.isIntersecting) {
-            element.classList.add("is-visible");
-            element.classList.remove(
-              "is-above",
-              "is-below"
-            );
-            return;
-          }
-
-          element.classList.remove("is-visible");
-
-          const viewportTop =
-            entry.rootBounds?.top || 0;
-          const viewportBottom =
-            entry.rootBounds?.bottom ||
-            window.innerHeight;
-
-          if (
-            entry.boundingClientRect.bottom <=
-            viewportTop
-          ) {
-            element.classList.add("is-above");
-            element.classList.remove("is-below");
-          } else if (
-            entry.boundingClientRect.top >=
-            viewportBottom
-          ) {
-            element.classList.add("is-below");
-            element.classList.remove("is-above");
-          }
-        });
-      },
-      {
-        threshold: [0, 0.08, 0.18],
-        rootMargin: "-5% 0px -5% 0px",
-      }
-    );
-
-    revealElements.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => {
-      observer.disconnect();
-      root.classList.remove("home-motion-ready");
-    };
-  }, []);
 
   async function checkNotifications(currentSession) {
     const userId = currentSession?.user?.id;
@@ -1627,231 +1119,58 @@ function App({ session, loading, categoryGroups = [] }) {
   }
 
   return (
-    <div className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6 ih-home-v7">
-      <style>{IH40_HEADER_STYLES}</style>
-      <div ref={headerSlotRef} className="ih40-header-slot">
-      <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
-        data-mobile-menu-open={mobileMenuOpen}
-        onKeyDown={(event) => {
-          if (event.key === "Escape" && mobileMenuOpen) {
-            event.preventDefault();
-            setMobileMenuOpen(false);
-            mobileMenuButtonRef.current?.focus({ preventScroll: true });
-          }
-        }}>
-        <IdeaHireLogo className="logo logo-clean" />
-
-        <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label="Nawigacja strony głównej"
-          onClick={(event) => { if (event.target?.closest?.("a")) setMobileMenuOpen(false); }}>
-          <HomeNavItem href="#how-it-works" order={0}>Jak to działa</HomeNavItem>
-          <HomeNavItem href="#categories" order={1}>Kategorie</HomeNavItem>
-          <HomeNavItem href="#for-users" order={2}>Dla Ciebie</HomeNavItem>
-
-          {session && (
-            <>
-              <HomeNavItem to="/notifications" order={3} notification={hasNotifications}>Powiadomienia</HomeNavItem>
-              <HomeNavItem to="/account" order={4}>Moje konto</HomeNavItem>
-            </>
-          )}
-          {!session && <Link className="ih-mobile-login" to="/login">Zaloguj się</Link>}
-        </nav>
-
-        <div className="nav-actions">
-          {loading ? (
-            <span>Ładowanie...</span>
-          ) : session ? (
-            <>
-              <HomeGreeting name={userName} />
-
-              <HomeAccountMenu name={userName} avatarUrl={avatarUrl} initial={userInitial} onOpen={() => setMobileMenuOpen(false)} />
-
-              <button
-                className="btn btn-dark ih-logout-btn"
-                type="button"
-                onClick={handleLogout}
-                aria-label="Wyloguj się"
-              >
-                <span className="ih-logout-label">Wyloguj się</span>
-                <svg className="ih-logout-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h12" />
-                </svg>
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                className="btn btn-ghost"
-                to="/login"
-              >
-                Zaloguj się
-              </Link>
-
-              <Link
-                className="btn btn-dark"
-                to="/register"
-              >
-                Zacznij teraz
-              </Link>
-            </>
-          )}
-        </div>
-
-        <button ref={mobileMenuButtonRef} className="ih-mobile-nav-toggle" type="button"
-          aria-label={mobileMenuOpen ? "Zamknij menu" : "Otwórz menu"}
-          aria-expanded={mobileMenuOpen} aria-controls="ih-home-navigation"
-          onClick={() => setMobileMenuOpen((current) => !current)}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d={mobileMenuOpen ? "M6 6l12 12M18 6 6 18" : "M4 7h16M4 12h16M4 17h16"} />
-          </svg>
-        </button>
-      </header>
+    <div ref={homeRootRef} className="app ih44-home" data-design={IH44_CONFIG.mode} data-intro={stage.intro} data-act={stage.act}
+      data-paused={stage.paused||stage.reduced} data-reduced={stage.reduced} data-cycle={stage.cycle}>
+      <canvas ref={worldCanvasRef} className="ih44-world" aria-hidden="true"/>
+      <a className="ih44-skip-link" href="#ih44-content">{english?"Skip to content":"Przejdź do treści"}</a>
+      <div ref={headerSlotRef} className="ih44-header-slot">
+        <header ref={headerRef} className="ih44-nav" data-auth={session?"member":"guest"} data-mobile-menu-open={mobileMenuOpen}
+          onKeyDown={event=>{if(event.key==="Escape"&&mobileMenuOpen){event.preventDefault();setMobileMenuOpen(false);mobileMenuButtonRef.current?.focus({preventScroll:true});}}}>
+          <div className="ih44-brand"><IdeaHireLogo className="logo logo-clean"/><small>{IH44_CONFIG.name.toUpperCase()}</small></div>
+          <nav ref={navigationRef} id="ih-home-navigation" className="ih44-nav-links" aria-label={ui.menu} data-no-translate="true"
+            onClick={event=>{if(event.target?.closest?.("a"))setMobileMenuOpen(false);}}>
+            <HomeNavItem href="#how-it-works" order={0}>{ui.how}</HomeNavItem>
+            <HomeNavItem href="#categories" order={1}>{ui.categories}</HomeNavItem>
+            <HomeNavItem href="#for-users" order={2}>{ui.forYou}</HomeNavItem>
+            {session&&<><HomeNavItem to="/notifications" order={3} notification={hasNotifications}>{ui.notices}</HomeNavItem><HomeNavItem to="/account" order={4}>{ui.account}</HomeNavItem></>}
+            {!session&&<HomeNavItem to="/jobs" order={3}>{ui.work}</HomeNavItem>}
+            {!session&&<Link className="ih44-menu-login" to="/login">{ui.login}</Link>}
+          </nav>
+          <div className="ih44-user-actions" data-no-translate="true">
+            {loading?<span className="ih44-loading-label">{english?"Loading…":"Ładowanie…"}</span>:session?<>
+              <HomeAccountMenu name={userName} avatarUrl={avatarUrl} initial={userInitial} onOpen={()=>setMobileMenuOpen(false)}/>
+              <button className="ih44-logout" type="button" onClick={handleLogout} aria-label={ui.logout}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h12" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg></button>
+            </>:<><Link className="ih44-login" to="/login">{ui.login}</Link><Link className="ih44-join" to="/register">{ui.register}<IH44Arrow/></Link></>}
+          </div>
+          <button ref={mobileMenuButtonRef} type="button" className="ih44-burger" aria-label={mobileMenuOpen?(english?"Close menu":"Zamknij menu"):(english?"Open menu":"Otwórz menu")}
+            aria-expanded={mobileMenuOpen} aria-controls="ih-home-navigation" onClick={()=>setMobileMenuOpen(v=>!v)}><span aria-hidden="true">{mobileMenuOpen?"×":"☰"}</span></button>
+        </header>
       </div>
-
-      <main>
-        <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} userKey={session?.user?.id || "guest"} />
-
-        <HomeDemoReviews />
-
-        <section
-          className="categories section"
-          id="categories"
-        >
-          <div className="section-heading home-reveal ih-category-intro">
-            <div>
-              <span className="section-label">Kategorie</span>
-
-              <h2>
-                Znajdź dokładnie to, czego potrzebujesz.
-              </h2>
-            </div>
-
-            <p>
-              Od małych zadań po większe projekty.
-              Wybierz kategorię i zacznij szukać.
-            </p>
-          </div>
-
-          <div className="ih5-category-showcase">
-            <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} />
-            <CommissionStory />
-          </div>
+      <main className="ih44-main" id="ih44-content">
+        {IH44_CONFIG.mode==="lagoon"?<IH44LagoonLanding stage={stage} copy={copy} ui={ui} session={session}/>:IH44_CONFIG.mode==="editorial"?<IH44PapayaLanding stage={stage} copy={copy} ui={ui} session={session}/>:<IH44IrisLanding stage={stage} copy={copy} ui={ui} session={session}/>}
+        <div className="ih44-flow-band" aria-hidden="true" data-no-translate="true"><div>{Array.from({length:4},(_,i)=><span key={i}><IH44Mark/>{copy.strip}</span>)}</div></div>
+        <section className="ih44-section ih44-catalog" id="categories" data-world-reveal="seen">
+          <div className="ih44-section-heading" data-no-translate="true"><span className="ih44-kicker">01 / {ui.categories}</span><h2>{copy.section}</h2><p>{english?"Choose a category, then narrow it down to a specialism.":"Wybierz kategorię, potem doprecyzuj specjalizację."}</p></div>
+          <div className="ih44-catalog-content"><HomeCategoryBrowser groups={categoryGroups.length?categoryGroups:categories}/><IH44CommissionPanel/></div>
         </section>
-
-        <section
-          className="how section"
-          id="how-it-works"
-        >
-          <div className="section-heading centered home-reveal">
-            <span className="section-label">
-              Jak to działa
-            </span>
-
-            <h2>Prościej się nie da.</h2>
-
-            <p>
-              Trzy kroki. Jeden konkretny cel.
-            </p>
-          </div>
-
-          <div className="steps">
-            <HomeStepCard number="01" title="Opisz potrzebę">Powiedz nam, czego potrzebujesz i określ podstawowe szczegóły projektu.</HomeStepCard>
-            <HomeStepCard number="02" title="Wybierz osobę">Przejrzyj zgłoszenia i wybierz wykonawcę, który najlepiej pasuje do Twojego projektu.</HomeStepCard>
-            <HomeStepCard number="03" title="Zrealizuj projekt">Ustal szczegóły, rozpocznij współpracę i doprowadź projekt do końca.</HomeStepCard>
-          </div>
+        <IH44Jobs jobs={recentJobs} copy={copy} ui={ui} english={english}/>
+        <section className="ih44-section ih44-method" id="how-it-works" data-world-reveal="seen">
+          <div className="ih44-section-heading" data-no-translate="true"><span className="ih44-kicker">02 / {ui.how}</span><h2>{copy.how}</h2><p>{english?"Scope, price and timing. Put the essentials in the agreement.":"Zakres, cena i termin. Zapiszcie najważniejsze rzeczy w ustaleniach."}</p></div>
+          <div className="ih44-steps" data-no-translate="true">{ui.steps.map(([title,description],i)=><HomeStepCard key={title} number={"0"+(i+1)} title={title}>{description}</HomeStepCard>)}</div>
         </section>
-
-        <section
-          className="split-section section home-reveal"
-          id="for-users"
-        >
-          <div className="split-card">
-            <span className="section-label">
-              Dla zlecających
-            </span>
-
-            <h2>Masz coś do zrobienia?</h2>
-
-            <p>
-              Znajdź osobę, która ma odpowiednie umiejętności
-              i może zająć się Twoim projektem.
-            </p>
-
-            <Link
-              className="btn btn-light"
-              to="/find-talent"
-            >
-              Dodaj zlecenie 
-            </Link>
-          </div>
-
-          <div className="split-card light">
-            <span className="section-label">
-              Dla wykonawców
-            </span>
-
-            <h2>Masz coś do zaoferowania?</h2>
-
-            <p>
-              Pokaż swoje umiejętności, znajdź interesujące
-              projekty i rozwijaj swoje portfolio.
-            </p>
-
-            <Link
-              className="btn btn-outline"
-              to="/jobs"
-            >
-              Znajdź zlecenia 
-            </Link>
-          </div>
+        <section className="ih44-section ih44-roles" id="for-users" data-world-reveal="seen" data-no-translate="true">
+          <article><span className="ih44-kicker">03 / {ui.roles[0]}</span><h2>{english?"Who can help you with this?":"Kto Ci w tym pomoże?"}</h2><p>{ui.rolesCopy[0]}</p><Link className="ih44-button ih44-primary" to="/find-talent">{ui.find}<IH44Arrow/></Link><IH44Mark/></article>
+          <article><span className="ih44-kicker">04 / {ui.roles[1]}</span><h2>{english?"Show what you know.":"Pokaż, na czym się znasz."}</h2><p>{ui.rolesCopy[1]}</p><Link className="ih44-button" to="/jobs">{ui.work}<IH44Arrow/></Link><IH44Mark/></article>
         </section>
-
-        <section className="final-cta home-reveal">
-          <span className="section-label">IdeaHire</span>
-
-          <h2 className="final-cta-title">
-            <span>Twój następny projekt</span>
-            <span>zaczyna się tutaj.</span>
-          </h2>
-
-          <Link
-            className="btn btn-light btn-large"
-            to={session ? "/account" : "/register"}
-          >
-            {session
-              ? "Przejdź do konta "
-              : "Zacznij teraz "}
-          </Link>
-        </section>
+        <section className="ih44-section ih44-finale" data-world-reveal="seen" data-no-translate="true"><span className="ih44-kicker">IDEAHIRE</span><h2>{copy.end.map((line,i)=><span key={i}>{line}</span>)}</h2><Link className="ih44-button ih44-primary" to={session?"/account":"/register"}>{session?ui.account:ui.register}<IH44Arrow/></Link></section>
       </main>
-
-      <footer className="footer home-reveal">
-        <div>
-          <Link className="logo logo-clean" to="/">
-            Idea<span>Hire</span>
-          </Link>
-
-          <p>Prosto. Szybko. Skutecznie.</p>
-        </div>
-
-        <div className="footer-links">
-          <a href={helpCenterHref()} onClick={event => { event.currentTarget.href = helpCenterHref(); }} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">Pomoc</a>
-          <a href="#how-it-works">Jak to działa</a>
-          <a href="#categories">Kategorie</a>
-          <a href="#for-users">Dla Ciebie</a>
-          <Link to="/regulamin">Regulamin</Link>
-          <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
-          <Link to="/polityka-cookies">Polityka cookies</Link>
-          <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">
-            Zgłoś nielegalną treść
-          </a>
-        </div>
-
-        <span>© 2026 IdeaHire</span>
-      </footer>
+      <footer className="ih44-footer" data-no-translate="true"><div><Link to="/" className="ih44-footer-logo">IdeaHire<IH44Mark/></Link><p>{ui.summary}</p></div><nav aria-label={ui.legal}>
+        <a href={helpCenterHref()} onClick={event=>{event.currentTarget.href=helpCenterHref();}} referrerPolicy="no-referrer">{english?"Help":"Pomoc"}</a>
+        <Link to="/regulamin">{english?"Terms":"Regulamin"}</Link><Link to="/polityka-prywatnosci">{english?"Privacy":"Prywatność"}</Link><Link to="/polityka-cookies">Cookies</Link>
+        <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">{english?"Report illegal content":"Zgłoś nielegalną treść"}</a>
+      </nav><span>© {new Date().getFullYear()} IdeaHire</span></footer>
     </div>
   );
 }
 
 export default App;
-
-
