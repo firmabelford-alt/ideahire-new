@@ -1,7 +1,21 @@
-/* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
+/* IdeaHire | P44 Laguna | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useState, useRef, useCallback } from "react";
+
+
+export const IDEA_HIRE_THEME_IDENTITY = Object.freeze({
+  "pl": {
+    "eyebrow": "Laguna / paleta kolorów",
+    "title": "Laguna",
+    "description": "Turkus, mięta i jasny kamień. Pełny ekran reaguje jak płynąca warstwa światła."
+  },
+  "en": {
+    "eyebrow": "Laguna / colour palette",
+    "title": "Laguna",
+    "description": "Turquoise, mint and pale stone. The whole screen responds like a moving layer of light."
+  }
+});
 
 const THEME_KEY = "ideahire_theme";
 const TEMPLATE_KEY = "ideahire_template";
@@ -28,6 +42,7 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "IdeaHire — strona główna": "IdeaHire — home",
   "Kliknij koło, aby otworzyć funkcje konta.": "Click the circle to open account tools.",
   "Okno ustaleń": "Agreement window",
   "Otwórz okno ustaleń": "Open agreement window",
@@ -161,9 +176,9 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.": "Switch the appearance of the entire site without changing its current layout, data or features.",
   "Szablon strony": "Site template",
   "Porównaj dwa warianty szaty wizualnej bez zmieniania układu ani funkcji IdeaHire.": "Compare two visual styles without changing the IdeaHire layout or features.",
-  "Granatowy szablon": "Navy template",
-  "Nowoczesny granat": "Modern navy",
-  "Spójny granatowy motyw IdeaHire z czytelnym kontrastem, subtelnymi przejściami i dopracowanymi animacjami.": "A cohesive navy IdeaHire theme with clear contrast, subtle transitions and refined animations.",
+  "Laguna / paleta kolorów": "Laguna / colour palette",
+  "Laguna": "Laguna",
+  "Turkus, mięta i jasny kamień. Pełny ekran reaguje jak płynąca warstwa światła.": "Turquoise, mint and pale stone. The whole screen responds like a moving layer of light.",
   "Klasyczny": "Classic",
   "Czerń i biel": "Black and white",
   "Pełny dawny wygląd IdeaHire: wyłącznie czerń, biel i neutralne szarości, bez niebieskich akcentów.": "The complete former IdeaHire look: only black, white and neutral greys, with no blue accents.",
@@ -2204,7 +2219,7 @@ export default function Preferences({
     }
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme =
       theme;
     document.documentElement.style.colorScheme =
