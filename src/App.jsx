@@ -1,4 +1,4 @@
-/* IdeaHire | P43 | Cięcie | Pełny plik: src/App.jsx | Film 44 s, 14 ujęć, pętla */
+/* IdeaHire | P43 | Zwarcie | Pełny plik: src/App.jsx | Film 48 s, 14 ujęć, pętla */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,7 +9,7 @@ import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
 const IH43_STYLES=String.raw`
-__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#141313!important;color:#eee9df!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
+__IH43__ .ih43-film {--ih43-pad:28px;--ih43-bottom:101px;--ih43-button:226px;--ih43-gap:12px;--ih43-toolbar:calc(100% - 176px);position:relative!important;isolation:isolate!important;display:block!important;width:100%!important;max-width:none!important;height:clamp(710px,53vw,850px)!important;min-height:710px!important;margin:0 0 44px!important;padding:0!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:#101d34!important;color:#f2f0de!important;font-family:Inter,Arial,sans-serif!important;text-align:left!important;box-shadow:none!important;}
 __IH43__ .ih43-film,__IH43__ .ih43-film * {box-sizing:border-box!important;}
 __IH43__ .ih43-film[data-classic="true"] {background:#121212!important;color:#efefec!important;}
 __IH43__ .ih43-canvas {position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;opacity:0;pointer-events:none!important;}
@@ -32,301 +32,379 @@ __IH43__ .ih43-film[data-failed="true"] .ih43-link-label {position:static!import
 `.replaceAll("__IH43__","#root".repeat(10));
 
 const IH43_FILM={
-  "key": "01-Ciecie",
-  "name": "Cięcie",
-  "genre": "cut",
-  "period": 44,
+  "key": "02-Zwarcie",
+  "name": "Zwarcie",
+  "genre": "network",
+  "period": 48,
   "palette": {
-    "paper": "#eee9df",
-    "ink": "#141313",
-    "accent": "#ed3625",
-    "secondary": "#c8c0ac",
+    "paper": "#f2f0de",
+    "ink": "#101d34",
+    "accent": "#2857f1",
+    "secondary": "#e0f26b",
     "light": "#ffffff",
-    "muted": "#827a70"
+    "muted": "#7e91b9"
   },
   "shots": [
     {
-      "kind": "type",
-      "duration": 1.6,
-      "bg": "ink",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 2,
-      "bg": "accent",
-      "motion": "side"
-    },
-    {
-      "kind": "brief",
-      "duration": 3.8,
-      "bg": "ink",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 1.8,
-      "bg": "paper",
-      "motion": "side"
-    },
-    {
-      "kind": "services",
-      "duration": 3.2,
-      "bg": "accent",
-      "motion": "slam"
-    },
-    {
-      "kind": "fee",
-      "duration": 4.8,
-      "bg": "paper",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
+      "kind": "signal",
       "duration": 1.8,
       "bg": "ink",
-      "motion": "letters"
+      "motion": "slam",
+      "camera": [
+        0,
+        0,
+        0.78
+      ]
     },
     {
-      "kind": "type",
-      "duration": 1.4,
-      "bg": "paper",
-      "motion": "side"
-    },
-    {
-      "kind": "dialogue",
-      "duration": 3.4,
-      "bg": "accent",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 1.5,
+      "kind": "signal",
+      "duration": 2.2,
       "bg": "ink",
-      "motion": "slam"
+      "motion": "slam",
+      "camera": [
+        0,
+        0,
+        1
+      ]
     },
     {
-      "kind": "terms",
-      "duration": 3.8,
-      "bg": "accent",
-      "motion": "slam"
-    },
-    {
-      "kind": "type",
-      "duration": 2,
-      "bg": "paper",
-      "motion": "side"
-    },
-    {
-      "kind": "pair",
+      "kind": "portfolio",
       "duration": 4,
       "bg": "ink",
-      "motion": "slam"
+      "motion": "slam",
+      "camera": [
+        0,
+        0,
+        1.06
+      ]
+    },
+    {
+      "kind": "signal",
+      "duration": 2,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        450,
+        -60,
+        0.75
+      ]
+    },
+    {
+      "kind": "board",
+      "duration": 4.5,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        1050,
+        -150,
+        1
+      ]
+    },
+    {
+      "kind": "signal",
+      "duration": 2.5,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        1450,
+        -10,
+        0.8
+      ]
+    },
+    {
+      "kind": "message",
+      "duration": 5,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        2100,
+        110,
+        1.05
+      ]
+    },
+    {
+      "kind": "message",
+      "duration": 3.5,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        2100,
+        110,
+        1.12
+      ]
+    },
+    {
+      "kind": "arrangement",
+      "duration": 4,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        3150,
+        -90,
+        1
+      ]
+    },
+    {
+      "kind": "signal",
+      "duration": 2.5,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        3150,
+        -90,
+        0.88
+      ]
+    },
+    {
+      "kind": "zoom",
+      "duration": 3,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        2000,
+        0,
+        0.34
+      ]
+    },
+    {
+      "kind": "zoom",
+      "duration": 3,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        1500,
+        0,
+        0.28
+      ]
+    },
+    {
+      "kind": "zoom",
+      "duration": 4,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        1050,
+        -100,
+        0.64
+      ]
     },
     {
       "kind": "final",
-      "duration": 8.9,
-      "bg": "accent",
-      "motion": "slam"
+      "duration": 6.0,
+      "bg": "ink",
+      "motion": "slam",
+      "camera": [
+        0,
+        0,
+        0.7
+      ]
     }
   ],
   "pl": {
     "cta": [
-      "Potrzebuję wykonawcy",
-      "Szukam zlecenia"
+      "Przeglądaj ogłoszenia",
+      "Poznaj specjalistów"
     ],
-    "subtitle": "Krótki opis. Konkretne ustalenia. Można zaczynać.",
-    "disclosure": "Sekwencja pokazowa — przykładowe materiały.",
-    "endTags": [
-      "GRAFIKA",
-      "KOD",
-      "MONTAŻ"
+    "subtitle": "Portfolio pokazuje robotę. Rozmowa ustawia kierunek.",
+    "disclosure": "Ilustracja działania — fikcyjna korespondencja.",
+    "floating": [
+      "Dopasowanie",
+      "Kontakt",
+      "Decyzja"
     ],
     "ui": {
-      "panel": "Opis / zakres",
-      "project": "Znak kawiarni",
-      "details": [
-        "Identyfikacja",
-        "Oznaczenia",
-        "Pliki źródłowe"
+      "portfolio": "Portfolio",
+      "works": [
+        "Ruch",
+        "Postać",
+        "Czołówka"
       ],
-      "note": "Projekt pokazowy",
-      "fee": "Prowizja IdeaHire",
-      "minimum": "min.",
-      "maximum": "maks.",
-      "limit": "Zlecenia do",
-      "payer": "Płaci zleceniodawca.",
-      "thread": "Uzgodnienia",
+      "caption": "Wybrane realizacje",
+      "inquiries": "Zapytania",
+      "projects": [
+        "Animowany wstęp",
+        "Bohater kampanii",
+        "Intro festiwalu"
+      ],
+      "correspondence": "Korespondencja",
       "messages": [
-        "Zaczynamy?",
-        "Jasne."
+        "Pasuje.",
+        "Kiedy zaczynasz?",
+        "Podeślę próbkę."
       ],
-      "prompt": "Konkretne warunki, wspólny start."
+      "arrangement": "Współpraca",
+      "points": [
+        "Ustalenia",
+        "Harmonogram",
+        "Rozliczenie"
+      ]
     },
     "ctaMobile": [
-      "Wykonawcy",
-      "Zlecenia"
+      "Ogłoszenia",
+      "Specjaliści"
     ],
     "frames": [
       [
-        "DOSYĆ",
-        "ODKŁADANIA."
+        "UMIESZ",
+        "WIĘCEJ."
       ],
       [
-        "ZAPISZ",
-        "KONKRET."
+        "POKAŻ",
+        "WARSZTAT."
       ],
       [
-        "OPIS",
-        "WYSTARCZY."
+        "REALIZACJE",
+        "MÓWIĄ."
       ],
       [
-        "PUŚĆ",
-        "W OBIEG."
+        "KTOŚ",
+        "SZUKA."
       ],
       [
-        "GRAFIKA.",
-        "KOD.",
-        "MONTAŻ."
+        "WŁAŚNIE",
+        "CIEBIE."
       ],
       [
-        "PROWIZJA."
+        "OFERTA."
       ],
       [
-        "PRZEGADAJ."
+        "ROZMOWA."
       ],
       [
-        "USTAL."
+        "PASUJE."
       ],
       [
-        "ZACZYNAMY?"
+        "WSPÓŁPRACA."
       ],
       [
-        "JASNE."
+        "KIEDY",
+        "ZACZYNASZ?"
       ],
       [
-        "KONKRETNE",
-        "WARUNKI."
+        "RZEMIOSŁO."
       ],
       [
-        "RUSZAJ."
+        "WŁAŚCIWY ADRES."
       ],
       [
-        "KLIENT.",
-        "WYKONAWCA.",
-        "JEDZIEMY."
+        "WYBIERASZ",
+        "SAMODZIELNIE."
       ],
       [
-        "Dobra.",
-        "Robimy."
+        "Zarabiaj",
+        "tym, co umiesz."
       ]
     ],
     "final": [
-      "Dobra.",
-      "Robimy."
+      "Zarabiaj",
+      "tym, co umiesz."
     ]
   },
   "en": {
     "cta": [
-      "Commission a task",
-      "Browse listings"
+      "See opportunities",
+      "Meet professionals"
     ],
-    "subtitle": "Tell us what you need. Choose the right execution.",
-    "disclosure": "Illustrative sequence — sample materials.",
-    "endTags": [
-      "DESIGN",
-      "CODE",
-      "EDITING"
+    "subtitle": "A portfolio shows the skill. A conversation sets the course.",
+    "disclosure": "Product illustration — fictional correspondence.",
+    "floating": [
+      "Match",
+      "Contact",
+      "Decision"
     ],
     "ui": {
-      "panel": "Description / scope",
-      "project": "A café identity",
-      "details": [
-        "Visual identity",
-        "Signage",
-        "Source files"
+      "portfolio": "Portfolio",
+      "works": [
+        "Motion",
+        "Character",
+        "Opening"
       ],
-      "note": "Sample project",
-      "fee": "IdeaHire service fee",
-      "minimum": "min.",
-      "maximum": "max.",
-      "limit": "Orders up to",
-      "payer": "Paid by the client.",
-      "thread": "Agreement",
+      "caption": "Selected projects",
+      "inquiries": "Inquiries",
+      "projects": [
+        "Animated opening",
+        "Campaign character",
+        "Festival introduction"
+      ],
+      "correspondence": "Correspondence",
       "messages": [
-        "Shall we start?",
-        "Absolutely."
+        "That fits.",
+        "When can you begin?",
+        "I’ll send a sample."
       ],
-      "prompt": "Clear terms. A shared start."
+      "arrangement": "Collaboration",
+      "points": [
+        "Agreements",
+        "Schedule",
+        "Settlement"
+      ]
     },
     "ctaMobile": [
-      "Hire talent",
-      "Find work"
+      "Listings",
+      "Specialists"
     ],
     "frames": [
       [
-        "ENOUGH",
-        "PUTTING IT OFF."
+        "YOU HAVE",
+        "THE SKILLS."
       ],
       [
-        "GET IT",
-        "DOWN."
+        "SHOW",
+        "YOUR CRAFT."
       ],
       [
-        "START",
-        "WITH A NOTE."
+        "LET THE",
+        "WORK SPEAK."
       ],
       [
-        "PUT IT",
-        "OUT THERE."
+        "SOMEONE",
+        "IS LOOKING."
       ],
       [
-        "DESIGN.",
-        "CODE.",
-        "EDITING."
+        "FOR",
+        "YOU."
       ],
       [
-        "THE FEE."
+        "A PROPOSAL."
       ],
       [
-        "TALK IT THROUGH."
+        "A CONVERSATION."
       ],
       [
-        "AGREE."
+        "THAT FITS."
       ],
       [
-        "SHALL WE START?"
+        "COLLABORATION."
       ],
       [
-        "ABSOLUTELY."
+        "WHEN",
+        "CAN YOU BEGIN?"
       ],
       [
-        "CLEAR",
-        "TERMS."
+        "EXPERTISE."
       ],
       [
-        "GO."
+        "THE RIGHT PLACE."
       ],
       [
-        "CLIENT.",
-        "FREELANCER.",
-        "LET’S DO THIS."
+        "ON",
+        "YOUR TERMS."
       ],
       [
-        "All right.",
-        "We’re on."
+        "Earn",
+        "with your craft."
       ]
     ],
     "final": [
-      "All right.",
-      "We’re on."
+      "Earn",
+      "with your craft."
     ]
   },
   "paths": [
-    "/find-talent",
-    "/jobs"
+    "/jobs",
+    "/find-talent"
   ],
-  "finalStart": 35.1,
+  "finalStart": 42.0,
   "offer": {
     "percent": 5.5,
     "minimum": 20,
@@ -484,60 +562,42 @@ function ih43Start(canvas,host,state,report){
   }catch{destroy();report({failed:true,ready:true});return{wake(){},destroy,mute(){},replay(){},finale(){},async toggleSound(){return false;}};}
 }
 
-function ih43Brief(c,l,p,phase,words,time){
-  const enter=IH43.back(phase.local/.58),w=Math.min(l.cw*.78,l.mobile?360:650),h=l.mobile?245:286,x=l.w*.53,y=l.y+l.ch*.57;
-  c.save();c.translate(x+(1-enter)*l.w,y);c.rotate((1-enter)*-.16+Math.sin(time*2)*.012);c.scale(.92+enter*.08,.92+enter*.08);
-  ih43Panel(c,0,0,w,h,{fill:p.paper,ink:p.ink,label:words.panel});
-  ih43Text(c,words.project,-w/2+24,-h/2+86,l.mobile?24:34,p.ink,800);
-  const tags=words.details;for(let i=0;i<tags.length;i++){const t=IH43.ease((phase.local-.18-i*.12)/.4),fill=i%2?p.accent:p.ink;c.save();c.globalAlpha=t;ih43Box(c,-w/2+24,-h/2+113+i*33,(w-48)*t,25,fill,3);ih43Text(c,tags[i],-w/2+35,-h/2+131+i*33,12,ih43Readable(fill,p.paper,p.ink),550);c.restore();}
-  ih43Text(c,words.note,-w/2+24,h/2-23,11,p.ink,450);c.restore();
+function ih43NetworkCard(c,x,y,w,h,p,label,accent){ih43Panel(c,x,y,w,h,{fill:p.paper,ink:p.ink,label});ih43Box(c,x-w/2+20,y-h/2+59,w-40,5,accent,2);}
+function ih43Portfolio(c,x,y,p,lang,time){
+  ih43NetworkCard(c,x,y,590,325,p,lang.portfolio,p.accent);
+  const colors=[p.accent,p.secondary,p.ink];
+  for(let i=0;i<3;i++){const yy=y-85+Math.sin(time*2+i)*6,xx=x-253+i*168;c.save();c.translate(xx,yy);c.rotate(Math.sin(time+i)*.025);ih43Box(c,0,0,154,174,colors[i],5);const tone=i===1?p.ink:p.paper;ih43Text(c,lang.works[i],16,40,20,tone,800);for(let r=0;r<5;r++){c.globalAlpha=.13+(r%2)*.12;c.fillStyle=tone;c.fillRect(16,70+r*13,88+Math.sin(r+i)*22,4);}c.globalAlpha=1;ih43Text(c,"0"+(i+1),16,153,12,tone,500);c.restore();}
+  ih43Text(c,lang.caption,x-253,y+132,13,p.ink,500);
 }
-function ih43CutFee(c,l,p,phase,s,words){
-  const o=s.offer||IH43_FILM.offer,locale=s.english?"en-US":"pl-PL",fmt=n=>Number(n).toLocaleString(locale),pct=fmt(o.percent)+"%",currency=s.english?"PLN":"zł";
-  const color=p.ink,progress=IH43.ease(phase.local/.38);
-  ih43Text(c,words.fee,l.pad,l.y+22,l.mobile?13:16,color,650);
-  ih43Lines(c,[pct],{x:l.pad,y:l.y+28,w:l.cw,h:l.ch*.60},{color,progress,mode:"slam",max:l.mobile?108:230});
-  const y=l.y+l.ch*.68,labels=[words.minimum+" "+fmt(o.minimum)+" "+currency,words.maximum+" "+fmt(o.maximum)+" "+currency];
-  for(let i=0;i<2;i++){const t=IH43.ease((phase.local-.35-i*.12)/.4),w=(l.cw-12)/2;c.save();c.globalAlpha=t;ih43Box(c,l.pad+i*(w+12),y+(1-t)*40,w,47,p.ink,5);ih43Text(c,labels[i],l.pad+i*(w+12)+14,y+30,l.mobile?13:18,p.paper,700);c.restore();}
-  ih43Text(c,words.limit+" "+fmt(o.orderLimit)+" "+currency,l.pad,y+77,l.mobile?11:14,color,550);
-  ih43Text(c,words.payer,l.pad,y+98,l.mobile?10:12,color,450);
+function ih43Requests(c,x,y,p,lang,time){
+  ih43NetworkCard(c,x,y,590,325,p,lang.inquiries,p.secondary);
+  for(let i=0;i<3;i++){const beat=.5+.5*Math.sin(time*2.5+i),xx=x-263+(i===1?beat*8:0),yy=y-84+i*70;ih43Box(c,xx,yy,526,58,i===1?p.accent:null,6,i===1?null:"rgba(10,20,40,.17)");ih43Text(c,lang.projects[i],xx+16,yy+34,20,i===1?p.paper:p.ink,650);ih43Arrow(c,xx+495,yy+29,i===1?p.paper:p.ink,13);}
 }
-function ih43CutConversation(c,l,p,phase,words,time){
-  const width=Math.min(l.cw*.84,660),height=l.mobile?220:250,x=l.w/2,y=l.y+l.ch*.58;
-  const e=IH43.ease(phase.local/.5);ih43Panel(c,x+(1-e)*l.w,y,width,height,{fill:p.paper,ink:p.ink,label:words.thread,angle:(1-e)*.12});
-  for(let i=0;i<2;i++){const a=IH43.back((phase.local-.30-i*.60)/.42);if(a<=0)continue;const bw=width*(i?.65:.70),xx=x-width*.43+(i?width*.22:0),yy=y-height*.25+i*82,fill=i?p.accent:p.ink;c.save();c.globalAlpha=IH43.clamp(a);c.translate(xx,yy+(1-a)*35);ih43Box(c,0,0,bw,60,fill,10);ih43Text(c,words.messages[i],16,36,l.mobile?15:20,ih43Readable(fill,p.paper,p.ink),650);c.restore();}
-  const tick=.4+.6*Math.sin(time*5)**2;c.save();c.globalAlpha=tick;ih43Text(c,words.prompt,x,y+height*.40,11,p.ink,500,"center");c.restore();
+function ih43Messages(c,x,y,p,lang,time){
+  ih43NetworkCard(c,x,y,590,325,p,lang.correspondence,p.accent);
+  for(let i=0;i<3;i++){const pulse=IH43.ease(((time*.7+i*.28)%2)/.35),xx=x-251+(i%2?100:0),yy=y-83+i*68;ih43Box(c,xx+(1-pulse)*30,yy,400,54,i%2?p.accent:p.ink,12);ih43Text(c,lang.messages[i],xx+17+(1-pulse)*30,yy+33,18,p.paper,550);}
+}
+function ih43Arrangement(c,x,y,p,lang,time){
+  ih43NetworkCard(c,x,y,590,325,p,lang.arrangement,p.secondary);
+  for(let i=0;i<3;i++){const xx=x-245,yy=y-75+i*63;ih43Text(c,lang.points[i],xx,yy+16,19,p.ink,650);c.strokeStyle=p.accent;c.lineWidth=3;c.beginPath();c.moveTo(xx+440,yy+5);c.lineTo(xx+448,yy+13);c.lineTo(xx+463,yy-5);c.stroke();}
+  const w=110+Math.sin(time*3)*16;ih43Box(c,x-245,y+119,w,5,p.accent,2);
 }
 function ih43Scene(c,l,p,phase,s,time){
-  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,text=lang.frames[phase.index],ink=shot.bg==="paper"||shot.bg==="secondary"?p.ink:p.paper;
-  const enter=IH43.clamp(phase.local/.48),shake=s.reduced?0:Math.sin(phase.local*72)*Math.exp(-phase.local*13)*5;
-  c.translate(shake,0);
-  const titleBox={x:l.pad,y:l.y+13,w:l.cw,h:l.ch-16};
-  if(shot.kind==="brief"){
-    ih43Lines(c,text,{x:l.pad,y:l.y,w:l.cw,h:l.ch*.27},{color:ink,progress:enter,mode:"side",max:l.mobile?48:72});ih43Brief(c,l,p,phase,lang.ui,time);
-  }else if(shot.kind==="fee")ih43CutFee(c,l,p,phase,s,lang.ui);
-  else if(shot.kind==="dialogue"){
-    ih43Lines(c,text,{x:l.pad,y:l.y,w:l.cw,h:l.ch*.25},{color:ink,progress:enter,mode:"side",max:l.mobile?52:86});ih43CutConversation(c,l,p,phase,lang.ui,time);
-  }else if(shot.kind==="services"){
-    for(let i=0;i<3;i++){
-      const e=IH43.back((phase.local-i*.16)/.48),yy=l.y+l.ch*(.21+i*.29),x=l.pad+(i%2?1-e:e-1)*l.w;
-      c.save();c.translate(x,yy);c.rotate((i-1)*-.028);const sz=ih43Fit(c,[text[i]],l.cw,l.ch*.26,l.mobile?68:145,900);ih43Text(c,text[i],0,sz*.45,sz,ink,900,"left",-sz*.05);c.restore();
-    }
-  }else if(shot.kind==="terms"){
-    const scale=IH43.back(phase.local/.45);c.save();c.translate(l.w/2,l.y+l.ch/2);c.rotate(-.05+(1-scale)*.2);c.scale(scale,scale);ih43Box(c,-l.cw*.44,-l.ch*.36,l.cw*.88,l.ch*.72,p.paper,0);c.strokeStyle=p.ink;c.lineWidth=3;c.strokeRect(-l.cw*.41,-l.ch*.32,l.cw*.82,l.ch*.64);ih43Lines(c,text,{x:-l.cw*.36,y:-l.ch*.29,w:l.cw*.72,h:l.ch*.58},{color:p.ink,progress:1,mode:"rise",max:l.mobile?48:100});c.restore();
-  }else if(shot.kind==="pair"){
-    const two=text.slice(0,2),gap=14,bw=l.mobile?l.cw:(l.cw-gap)/2,bh=l.mobile?l.ch*.30:l.ch*.60;
-    for(let i=0;i<2;i++){const e=IH43.ease((phase.local-i*.16)/.5),x=l.mobile?l.pad:l.pad+i*(bw+gap),y=l.mobile?l.y+i*(bh+16):l.y+l.ch*.05;c.save();c.translate((i?1:-1)*(1-e)*l.w,0);ih43Box(c,x,y,bw,bh,i?p.accent:p.paper,7);ih43Lines(c,[two[i]],{x:x+18,y:y+20,w:bw-36,h:bh-40},{color:i?p.paper:p.ink,progress:1,max:l.mobile?38:68});c.restore();}
-    ih43Lines(c,[text[2]],{x:l.pad,y:l.y+l.ch*.72,w:l.cw,h:l.ch*.27},{color:ink,progress:IH43.ease((phase.local-.55)/.40),mode:"slam",max:l.mobile?55:100});
-  }else if(shot.kind==="final"){
-    const float=s.reduced?0:Math.sin(time*1.6)*3;
-    if(!s.reduced){c.save();c.globalAlpha=.12;const label=lang.endTags[Math.floor(phase.local/2.1)%3],sz=l.mobile?100:245;ih43Text(c,label,l.pad+(1-((phase.local/3)%1))*l.cw,l.y+l.ch*.80,sz,ink,900);c.restore();}
-    ih43Lines(c,text,{...titleBox,y:titleBox.y-25+float,h:l.ch*.72},{color:ink,progress:IH43.clamp(phase.local/.6),mode:"letters",max:l.mobile?85:185});
-    const tags=lang.endTags;for(let i=0;i<3;i++){const x=l.pad+l.cw*(.17+i*.33),y=l.y+l.ch*.85+Math.sin(time*2+i*1.7)*5;ih43Tag(c,tags[i],x,y,{fill:i%2?p.accent:p.paper,ink:i%2?p.paper:p.ink},Math.sin(time+i)*.035,l.mobile?.73:1);}
-  }else ih43Lines(c,text,titleBox,{color:ink,progress:enter,mode:shot.motion||"slam",max:l.mobile?95:220});
-  if(shot.kind!=="fee"&&shot.kind!=="final"){
-    const rail=s.english?"CUT / ":"CIĘCIE / ";c.save();c.globalAlpha=.28;ih43Text(c,rail+String(phase.index+1).padStart(2,"0"),l.w-l.pad,l.y+l.ch-2,9,ink,600,"right",1.2);c.restore();
-  }
+  const lang=s.english?IH43_FILM.en:IH43_FILM.pl,shot=phase.shot,prev=IH43_FILM.shots[(phase.index-1+IH43_FILM.shots.length)%IH43_FILM.shots.length];
+  const cam=shot.camera||[0,0,1],before=prev.camera||cam,turn=IH43.ease(phase.local/.95),flatten=IH43.mix(["zoom","final"].includes(prev.kind)?.05:1,["zoom","final"].includes(shot.kind)?.05:1,turn),cx=IH43.mix(before[0],cam[0],turn),cy=IH43.mix(before[1],cam[1],turn)*flatten,zoom=IH43.mix(before[2],cam[2],turn);
+  const scale=(l.mobile?Math.min(l.cw/650,l.ch/620):Math.min(l.cw/940,l.ch/620))*zoom;
+  const stageY=l.y+l.ch*.73;
+  c.save();c.translate(l.w/2,stageY);c.scale(scale,scale);c.rotate(s.reduced?0:Math.sin(time*.7)*.012+(1-turn)*.035);c.translate(-cx,-cy);
+  const nodes=[[0,0],[1050,-150*flatten],[2100,110*flatten],[3150,-90*flatten]];
+  c.strokeStyle=p.secondary;c.lineWidth=3;c.setLineDash([9,12]);c.lineDashOffset=-time*75;
+  for(let i=0;i<3;i++){const a=nodes[i],b=nodes[i+1];c.beginPath();c.moveTo(a[0]+295,a[1]);c.bezierCurveTo(a[0]+520,a[1],b[0]-520,b[1],b[0]-295,b[1]);c.stroke();}
+  c.setLineDash([]);
+  for(let i=0;i<3;i++){const t=(time*.28+i*.31)%1,a=nodes[i],b=nodes[i+1],x=IH43.mix(a[0]+315,b[0]-315,t),y=IH43.mix(a[1],b[1],t);ih43Tag(c,lang.floating[i],x,y,{fill:p.secondary,ink:p.ink},-.03,1);}
+  ih43Portfolio(c,...nodes[0],p,lang.ui,time);ih43Requests(c,...nodes[1],p,lang.ui,time);ih43Messages(c,...nodes[2],p,lang.ui,time);ih43Arrangement(c,...nodes[3],p,lang.ui,time);c.restore();
+  const final=shot.kind==="final",height=l.ch*(final?.52:.40),words=lang.frames[phase.index];
+  c.save();if(shot.kind==="zoom"){c.globalAlpha=.9;}
+  ih43Lines(c,words,{x:l.pad,y:l.y-7,w:l.cw,h:height},{color:shot.bg==="paper"?p.ink:p.paper,progress:IH43.clamp(phase.local/.50),mode:phase.index%2?"letters":"side",max:l.mobile?66:138});c.restore();
+  if(final){const yy=l.y+l.ch*.96;ih43Text(c,lang.subtitle,l.pad,yy,l.mobile?11:15,shot.bg==="paper"?p.ink:p.paper,550);}
 }
 
 function ih43Reduced(){
