@@ -1,4 +1,4 @@
-/* IdeaHire | P44 | Papaya | Pełny plik: src/App.jsx | Przebudowa całego widoku głównego */
+/* IdeaHire | P44 | Irys | Pełny plik: src/App.jsx | Przebudowa całego widoku głównego */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,104 +9,104 @@ import { supabase } from "./supabase";
 import { useSitePreferences } from "./Preferences";
 
 const IH44_CONFIG={
-  "key": "02-Papaya",
-  "name": "Papaya",
-  "mode": "editorial",
-  "hue": 16,
-  "duration": 22,
-  "description": "Ciepły papier, wypalona papaja i szałwia. Układ redakcyjny z indeksem oraz przesuwanym pasem stron.",
-  "descriptionEN": "Warm paper, baked papaya and sage. An editorial layout with an index and sliding pages.",
+  "key": "03-Irys",
+  "name": "Irys",
+  "mode": "quadrants",
+  "hue": 286,
+  "duration": 20,
+  "description": "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu.",
+  "descriptionEN": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen.",
   "light": {
-    "bg": "#f5efe3",
-    "surface": "#fffcf4",
-    "soft": "#eee3d0",
-    "ink": "#38271f",
-    "muted": "#746153",
-    "line": "#d9c9b4",
-    "accent": "#a9422b",
+    "bg": "#f4eff4",
+    "surface": "#fffcf5",
+    "soft": "#e9dfec",
+    "ink": "#42263f",
+    "muted": "#795e75",
+    "line": "#d7c2d5",
+    "accent": "#79516f",
     "on": "#ffffff",
-    "pop": "#d5dbaf"
+    "pop": "#e5e9ad"
   },
   "dark": {
-    "bg": "#261d17",
-    "surface": "#34281f",
-    "soft": "#463227",
-    "ink": "#fff0d8",
-    "muted": "#d0b49a",
-    "line": "#624b37",
-    "accent": "#f1ae86",
-    "on": "#392015",
-    "pop": "#bbc38f"
+    "bg": "#271b28",
+    "surface": "#352537",
+    "soft": "#473048",
+    "ink": "#f9edf2",
+    "muted": "#d2b4cb",
+    "line": "#654660",
+    "accent": "#ddb8d4",
+    "on": "#392036",
+    "pop": "#d8dea4"
   },
   "pl": {
     "final": [
-      "Rzeczy do zrobienia.",
-      "Ludzie do roboty."
+      "Z czego",
+      "zrobimy coś?"
     ],
-    "subtitle": "Zlecenia, umiejętności i rozmowy. Przejrzyj możliwości po swojemu.",
-    "eyebrow": "Otwarty spis możliwości",
+    "subtitle": "Kliknij pole. Sprawdź zawartość. Wybierz swój następny krok.",
+    "eyebrow": "Cztery wejścia. Własny kierunek.",
     "acts": [
       [
-        "Nie wszystko",
-        "zrobisz sam."
+        "Jeden ekran.",
+        "Wiele możliwości."
       ],
       [
-        "Ktoś właśnie",
-        "umie to dobrze."
+        "Potrzebujesz?",
+        "Poszukaj."
       ],
       [
-        "Przejrzyj.",
-        "Wybierz."
+        "Potrafisz?",
+        "Pokaż."
       ],
       [
-        "Dalej",
-        "po swojemu."
+        "Klik.",
+        "Twój ruch."
       ]
     ],
-    "strip": "OPIS / DOBÓR / ROZMOWA / WYKONANIE",
-    "section": "Przewertuj specjalizacje.",
-    "jobs": "Tematy czekające na wykonanie.",
-    "how": "Dobra robota zaczyna się od rozmowy.",
+    "strip": "POTRZEBA / WARSZTAT / KONTAKT / SZCZEGÓŁY",
+    "section": "Rozwiń właściwe pole.",
+    "jobs": "Wybierz punkt zaczepienia.",
+    "how": "Połącz potrzeby z umiejętnościami.",
     "end": [
-      "Następna rzecz?",
-      "Bierzmy się za nią."
+      "Ten ruch",
+      "należy do Ciebie."
     ],
-    "themeDescription": "Ciepły papier, wypalona papaja i szałwia. Układ redakcyjny z indeksem oraz przesuwanym pasem stron."
+    "themeDescription": "Mleczny lila, śliwka i cytrynowy akcent. Cztery aktywne pola i menu dokowane przy krawędzi ekranu."
   },
   "en": {
     "final": [
-      "Things to do.",
-      "People to do them."
+      "What shall",
+      "we make of it?"
     ],
-    "subtitle": "Tasks, skills and conversations. Explore the possibilities your way.",
-    "eyebrow": "An open index of possibilities",
+    "subtitle": "Click a field. See what is inside. Choose your next move.",
+    "eyebrow": "Four entrances. Your own direction.",
     "acts": [
       [
-        "You cannot",
-        "do it all alone."
+        "One screen.",
+        "Many possibilities."
       ],
       [
-        "Someone knows",
-        "this inside out."
+        "Need it?",
+        "Look for it."
       ],
       [
-        "Browse.",
-        "Choose."
+        "Know how?",
+        "Show it."
       ],
       [
-        "Take it",
-        "your way."
+        "Click.",
+        "Your move."
       ]
     ],
-    "strip": "BRIEF / SELECTION / CONVERSATION / DELIVERY",
-    "section": "Leaf through the specialisms.",
-    "jobs": "Tasks waiting for a maker.",
-    "how": "Good work starts with a conversation.",
+    "strip": "NEED / CRAFT / CONTACT / DETAILS",
+    "section": "Open the right field.",
+    "jobs": "Find a starting point.",
+    "how": "Connect needs with skills.",
     "end": [
-      "What is next?",
-      "Let’s get to it."
+      "This move",
+      "is yours."
     ],
-    "themeDescription": "Warm paper, baked papaya and sage. An editorial layout with an index and sliding pages."
+    "themeDescription": "Milky lilac, plum and a lemon accent. Four active fields with a menu docked at the edge of the screen."
   }
 };
 
