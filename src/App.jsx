@@ -1,6 +1,8 @@
-/* IdeaHire | P53 | Powitanie po Cięciu, historia projektu 3D i dawne karty | Pełny plik src/App.jsx */
+/* IdeaHire | P57 | Film promocyjny odzyskany z podglądu P57 | Pełny plik src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import * as IH57React from "react";
+import * as IH57JSX from "react/jsx-runtime";
 import { createPortal } from "react-dom";
 import "./App.css";
 import { IDEA_HIRE_PUBLIC_OFFER, MarketIcon, helpCenterHref } from "./MarketUI";
@@ -1489,56 +1491,6 @@ __IH53__ .final-cta .btn {border-radius:9px!important;border-color:var(--v-accen
 @media(max-width:380px) {__IH53__ .ih53-project-bottom strong {font-size:21px!important;}__IH53__ .ih53-project-card {padding:18px!important;}__IH53__ .ih53-project-category {width:40px!important;height:40px!important;flex-basis:40px!important;}__IH53__ .ih53-author-avatar {width:44px!important;height:44px!important;flex-basis:44px!important;}__IH53__ .ih53-project-author strong {max-width:155px!important;}}
 @media(prefers-reduced-motion:reduce) {__IH53__ .ih53-welcome-screen,__IH53__ .ih53-welcome-screen * {animation:none!important;}}
 
-__IH53__ .ih53-showcase {display:grid!important;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;align-items:center!important;gap:clamp(36px,6vw,100px)!important;padding-block:65px!important;}
-__IH53__ .ih53-showcase-copy h2 {margin:18px 0 23px!important;font:700 clamp(33px,3.4vw,52px)/1.08 Inter,Arial,sans-serif!important;letter-spacing:-.045em!important;color:var(--v-ink)!important;}
-__IH53__ .ih53-showcase-copy>p {max-width:430px!important;margin:0 0 25px!important;color:var(--v-muted)!important;font:400 14px/1.8 Inter,Arial,sans-serif!important;}
-__IH53__ .ih53-showcase-invitation {display:block!important;max-width:380px!important;color:var(--v-muted)!important;font:450 11px/1.7 Inter,Arial,sans-serif!important;}
-__IH53__ .ih53-showcase-links {display:flex!important;flex-wrap:wrap!important;gap:15px 24px!important;margin-top:23px!important;}
-__IH53__ .ih53-showcase-links>a {display:inline-flex!important;align-items:center!important;gap:18px!important;min-height:44px!important;color:var(--v-ink)!important;font:600 12px/1.5 Inter,Arial,sans-serif!important;text-decoration:underline!important;text-underline-offset:5px!important;}
-__IH53__ .ih53-showcase-tile {position:relative!important;display:block!important;isolation:isolate!important;aspect-ratio:1!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;max-width:560px!important;padding:0!important;overflow:hidden!important;cursor:pointer!important;border:1px solid #d9d0bd!important;border-radius:24px!important;background:#f6eedf!important;color:#402b22!important;text-align:left!important;box-shadow:0 20px 45px #49301b0d!important;}
-__IH53__ .ih53-brand-frame,body .ih53-case-layer .ih53-brand-frame {position:relative!important;display:block!important;width:100%!important;aspect-ratio:1!important;overflow:hidden!important;background:#f6eedf!important;}
-__IH53__ .ih53-brand-frame>canvas,body .ih53-case-layer .ih53-brand-frame>canvas {position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;background:#f6eedf!important;}
-__IH53__ .ih53-brand-fallback,body .ih53-case-layer .ih53-brand-fallback {position:absolute!important;inset:0!important;display:block!important;background:#f6eedf!important;}
-__IH53__ .ih53-brand-fallback>svg,body .ih53-case-layer .ih53-brand-fallback>svg {width:100%!important;height:100%!important;}
-__IH53__ .ih53-brand-frame[data-renderer=ready] .ih53-brand-fallback,body .ih53-case-layer .ih53-brand-frame[data-renderer=ready] .ih53-brand-fallback {display:none!important;}
-__IH53__ .ih53-showcase-tile>.ih53-brand-frame {position:absolute!important;inset:0!important;transform:scale(1)!important;transition:transform 750ms cubic-bezier(.18,.8,.2,1)!important;}
-__IH53__ .ih53-showcase-tile[data-playing=true]>.ih53-brand-frame {transform:scale(1.04)!important;}
-__IH53__ .ih53-tile-top {position:absolute!important;z-index:1!important;inset:25px 25px auto!important;display:flex!important;justify-content:space-between!important;gap:20px!important;color:#543a2d!important;font:650 9px/1.5 Inter,Arial,sans-serif!important;letter-spacing:.04em!important;pointer-events:none!important;}
-__IH53__ .ih53-tile-caption {position:absolute!important;z-index:1!important;inset:auto 25px 25px!important;display:flex!important;align-items:end!important;justify-content:space-between!important;gap:20px!important;color:#402b22!important;pointer-events:none!important;}
-__IH53__ .ih53-tile-caption strong {display:block!important;font:800 38px/1 Inter,Arial,sans-serif!important;letter-spacing:-.07em!important;}
-__IH53__ .ih53-tile-caption small {display:block!important;margin-top:7px!important;font:500 10px/1.4 Inter,Arial,sans-serif!important;}
-__IH53__ .ih53-tile-play {display:grid!important;place-items:center!important;width:50px!important;height:50px!important;border:1px solid #b53426!important;border-radius:50%!important;background:#b53426!important;color:#fff4df!important;}
-__IH53__ .ih53-tile-play>svg {width:21px!important;height:21px!important;fill:currentColor!important;}
-__IH53__ .ih53-showcase-tile:focus-visible {outline:3px solid var(--v-accent)!important;outline-offset:6px!important;}
-body .ih53-case-layer {position:fixed!important;inset:0!important;z-index:1000000!important;overflow:auto!important;overscroll-behavior:contain!important;display:block!important;background:var(--v-bg,#fff)!important;color:var(--v-ink,#192c27)!important;font-family:Inter,Arial,sans-serif!important;animation:ih53-case-open 350ms cubic-bezier(.2,.7,.2,1) both;}
-body .ih53-case-layer * {box-sizing:border-box!important;font-family:inherit!important;}
-body .ih53-case-dialog {width:100%!important;max-width:1500px!important;min-height:100svh!important;margin:0 auto!important;padding:0 clamp(20px,4vw,65px) 40px!important;}
-body .ih53-case-header {display:flex!important;justify-content:space-between!important;align-items:center!important;gap:20px!important;min-height:88px!important;border-bottom:1px solid var(--v-line,#d2dfd8)!important;background:var(--v-bg,#fff)!important;font-size:13px!important;font-weight:600!important;}
-body .ih53-case-header>span>span {margin:0 13px!important;color:var(--v-muted,#4c5f58)!important;font-weight:400!important;}
-body .ih53-case-close {display:grid!important;place-items:center!important;width:46px!important;height:46px!important;padding:11px!important;border:1px solid var(--v-line,#d2dfd8)!important;border-radius:50%!important;background:var(--v-bg,#fff)!important;color:var(--v-ink,#192c27)!important;cursor:pointer!important;}
-body .ih53-case-close svg {display:block!important;width:22px!important;height:22px!important;stroke:currentColor!important;stroke-width:1.6!important;fill:none!important;}
-body .ih53-case-layout {display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;gap:clamp(30px,5vw,90px)!important;align-items:center!important;padding-top:35px!important;}
-body .ih53-case-visual {min-width:0!important;}
-body .ih53-case-visual .ih53-brand-frame {border-radius:20px!important;border:1px solid #d9d0bd!important;}
-body .ih53-case-controls {display:flex!important;align-items:center!important;gap:10px!important;margin-top:15px!important;}
-body .ih53-case-controls>button {display:grid!important;place-items:center!important;width:44px!important;height:44px!important;border:1px solid var(--v-line,#d2dfd8)!important;border-radius:50%!important;background:var(--v-bg,#fff)!important;color:var(--v-ink,#192c27)!important;font-size:21px!important;cursor:pointer!important;}
-body .ih53-case-controls>span {margin-left:8px!important;color:var(--v-muted,#4c5f58)!important;font-size:10px!important;line-height:1.5!important;}
-body .ih53-case-controls>button:disabled {opacity:.45!important;cursor:default!important;}
-body .ih53-case-copy {min-width:0!important;color:var(--v-ink,#192c27)!important;}
-body .ih53-case-eyebrow {font-size:10px!important;font-weight:650!important;letter-spacing:.04em!important;}
-body .ih53-case-copy h2 {min-height:3.24em!important;margin:22px 0 16px!important;color:var(--v-ink,#192c27)!important;font-size:clamp(29px,3.2vw,49px)!important;line-height:1.08!important;font-weight:700!important;letter-spacing:-.05em!important;animation:ih53-case-copy 360ms cubic-bezier(.15,.8,.2,1) both;}
-body .ih53-case-copy>p {min-height:5.1em!important;margin:0 0 24px!important;color:var(--v-muted,#4c5f58)!important;font-size:13px!important;line-height:1.7!important;}
-body .ih53-case-chapters {display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:25px!important;}
-body .ih53-case-chapters>button {display:flex!important;align-items:center!important;gap:10px!important;min-height:44px!important;padding:10px!important;border:1px solid var(--v-line,#d2dfd8)!important;border-radius:6px!important;background:var(--v-bg,#fff)!important;color:var(--v-ink,#192c27)!important;font-size:10px!important;text-align:left!important;cursor:pointer!important;}
-body .ih53-case-chapters>button>span {font-size:9px!important;opacity:.7!important;}
-body .ih53-case-chapters>button[aria-current=step] {background:var(--v-soft,#f3f7f5)!important;border-color:var(--v-accent,#12695d)!important;}
-body .ih53-case-cta {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important;min-height:48px!important;padding:12px 16px!important;border:1px solid var(--v-accent,#12695d)!important;border-radius:7px!important;background:var(--v-accent,#12695d)!important;color:var(--v-on,#fff)!important;font-size:12px!important;font-weight:600!important;text-decoration:none!important;}
-body .ih53-case-copy>small {display:block!important;margin-top:17px!important;color:var(--v-muted,#4c5f58)!important;font-size:10px!important;line-height:1.65!important;}
-body .ih53-case-layer :is(button,a):focus-visible {outline:3px solid var(--v-accent,#12695d)!important;outline-offset:3px!important;}
-@keyframes ih53-case-open {from{clip-path:inset(12% 8% 12% 8% round 24px);opacity:0;}to{clip-path:inset(0 0 0 0 round 0);opacity:1;}}
-@keyframes ih53-case-copy {from{translate:0 17px;opacity:0;}to{translate:0 0;opacity:1;}}
-@media(max-width:820px) {__IH53__ .ih53-showcase {grid-template-columns:1fr!important;gap:26px!important;padding-block:45px!important;}__IH53__ .ih53-showcase-tile {max-width:none!important;}__IH53__ .ih53-showcase-copy h2 {max-width:560px!important;font-size:36px!important;}__IH53__ .ih53-showcase-copy>p {max-width:560px!important;}__IH53__ .ih53-tile-top {inset:20px 20px auto!important;font-size:8px!important;}__IH53__ .ih53-tile-caption {inset:auto 20px 20px!important;}__IH53__ .ih53-tile-caption strong {font-size:32px!important;}body .ih53-case-header {min-height:76px!important;}body .ih53-case-layout {grid-template-columns:1fr!important;gap:28px!important;padding-top:22px!important;}body .ih53-case-visual {max-width:550px!important;width:100%!important;margin:0 auto!important;}body .ih53-case-copy h2 {min-height:0!important;font-size:34px!important;}body .ih53-case-copy>p {min-height:0!important;}body .ih53-case-controls>span {font-size:9px!important;}body .ih53-case-header>span {font-size:11px!important;}}
-@media(prefers-reduced-motion:reduce) {__IH53__ .ih53-showcase-tile>.ih53-brand-frame,body .ih53-case-layer,body .ih53-case-layer * {animation:none!important;transition:none!important;}}
 `.replaceAll("__IH53__","#root".repeat(13)+" .ih53-home");
 function ih53Clamp(x,a=0,b=1){return Math.max(a,Math.min(b,x));}
 function ih53Ease(x){x=ih53Clamp(x);return 1-Math.pow(1-x,5);}
@@ -1761,148 +1713,964 @@ function IH53Welcome({paused,onPause,onDone}){
  useEffect(()=>{if(paused||hidden||!visible)return;let frame=0,last=0,dead=false;function tick(now){if(dead)return;if(last)elapsed.current+=Math.max(0,now-last);last=now;if(elapsed.current>=2800){done.current();return;}frame=requestAnimationFrame(tick);}frame=requestAnimationFrame(tick);return()=>{dead=true;cancelAnimationFrame(frame);};},[paused,hidden,visible]);
  return <div ref={host} className="ih53-welcome-screen" data-paused={paused||hidden||!visible} data-no-translate="true"><div className="ih53-welcome-title" role="status"><span>{en?'WELCOME TO':'WITAMY W'}</span><strong>IDEAHIRE<span aria-hidden="true">.</span></strong></div><div className="ih53-welcome-bottom"><span>{en?'Projects. People. Collaboration.':'Projekty. Ludzie. Współpraca.'}</span><button type="button" onClick={onPause} aria-label={en?(paused?'Resume welcome':'Pause welcome'):(paused?'Wznów powitanie':'Zatrzymaj powitanie')} aria-pressed={paused}>{paused?'▶':'Ⅱ'}</button></div></div>;
 }
-/* Przykładowy projekt RANO: rzeczywista scena WebGL, kubek, kawa i drukowane materiały. */
-const IH53_BRAND_VERTEX=String.raw`
-attribute vec3 aPosition,aNormal;attribute vec2 aUV;
-uniform mat4 uModel,uVP;varying vec3 vPosition,vNormal;varying vec2 vUV;
-void main(){vec4 world=uModel*vec4(aPosition,1.0);vPosition=world.xyz;vNormal=normalize(mat3(uModel)*aNormal);vUV=aUV;gl_Position=uVP*world;}`;
-const IH53_BRAND_FRAGMENT=String.raw`
-precision highp float;uniform sampler2D uTexture;uniform vec3 uEye;uniform float uKind,uAlpha;
-varying vec3 vPosition,vNormal;varying vec2 vUV;
-void main(){
- vec3 n=normalize(vNormal),v=normalize(uEye-vPosition);if(dot(n,v)<0.0)n=-n;
- if(uKind>2.5&&uKind<3.5){vec2 p=(vUV-.5)*2.0;float a=exp(-3.8*dot(p,p))*.23*uAlpha;gl_FragColor=vec4(.24,.16,.11,a);return;}
- vec3 key=normalize(vec3(-3.5,6.0,5.0)-vPosition),fill=normalize(vec3(5.0,2.0,-1.0)-vPosition);
- float light=.49+.43*max(dot(n,key),0.0)+.12*max(dot(n,fill),0.0);
- vec3 base=texture2D(uTexture,vUV).rgb;float rough=uKind<.5?120.0:uKind<1.5?75.0:110.0;
- float shine=pow(max(dot(n,normalize(key+v)),0.0),rough),rim=pow(1.0-max(dot(n,v),0.0),4.0);
- vec3 color=base*light;
- if(uKind>.5)color+=vec3(1.0,.91,.80)*shine*(uKind<1.5?.62:.23)+vec3(.85,.73,.59)*rim*.10;
- gl_FragColor=vec4(clamp(color,0.0,1.0),uAlpha);
-}`;
-function ih53BrandMesh(profile,segments=96){
- const vertices=[],indices=[];
- for(let j=0;j<profile.length;j++){
-  const[r,y]=profile[j],before=profile[Math.max(0,j-1)],after=profile[Math.min(profile.length-1,j+1)],dr=after[0]-before[0],dy=after[1]-before[1],length=Math.hypot(dr,dy)||1;
-  for(let i=0;i<=segments;i++){const a=i/segments*Math.PI*2,c=Math.cos(a),s=Math.sin(a);vertices.push(r*c,y,r*s,dy*c/length,-dr/length,dy*s/length,1-i/segments,(y-.02)/1.255);}
- }
- for(let j=0;j<profile.length-1;j++)for(let i=0;i<segments;i++){const k=j*(segments+1)+i;indices.push(k,k+1,k+segments+1,k+1,k+segments+2,k+segments+1);}return{vertices,indices};
+/* P57: odtwarzacz odzyskany z zachowanego podglądu filmu. */
+var IH57_STYLES = String.raw`@font-face{font-family:IdeaHireFilmText;src:url('/media/ideahire-film-text.woff2') format('woff2');font-weight:400;font-style:normal;font-display:optional;}
+@font-face{font-family:IdeaHireFilmDisplay;src:url('/media/ideahire-film-display.woff2') format('woff2');font-weight:800;font-style:normal;font-display:optional;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-showcase{display:grid!important;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;align-items:center!important;gap:clamp(32px,6vw,100px)!important;padding-block:65px!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-copy h2{margin:18px 0 23px!important;font:700 clamp(33px,3.4vw,52px)/1.08 Inter,Arial,sans-serif!important;letter-spacing:-.045em!important;color:var(--v-ink)!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-copy>p{max-width:430px!important;margin:0 0 25px!important;color:var(--v-muted)!important;font:400 14px/1.8 Inter,Arial,sans-serif!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-invitation{display:block!important;max-width:400px!important;color:var(--v-muted)!important;font:400 12px/1.7 Inter,Arial,sans-serif!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-links{display:flex!important;flex-wrap:wrap!important;gap:15px 24px!important;margin-top:23px!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-links>a{display:inline-flex!important;align-items:center!important;gap:18px!important;min-height:44px!important;color:var(--v-ink)!important;font:600 13px/1.5 Inter,Arial,sans-serif!important;text-decoration:underline!important;text-underline-offset:5px!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile{position:relative!important;display:block!important;isolation:isolate!important;aspect-ratio:1!important;width:100%!important;max-width:560px!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0!important;margin:0!important;overflow:hidden!important;border:1px solid #394342!important;border-radius:24px!important;background:#4b5050!important;color:#fff!important;text-align:left!important;box-shadow:0 18px 45px #1b262618!important;cursor:pointer!important;perspective:1400px!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile *,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema *{box-sizing:border-box!important;-webkit-text-fill-color:currentColor!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture{position:absolute!important;inset:-2px!important;display:block!important;overflow:hidden!important;transform:rotateX(var(--ih57-rx,0deg)) rotateY(var(--ih57-ry,0deg)) scale(1.025)!important;transition:transform 350ms ease!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture>img,#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture>video{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;border:0!important;border-radius:0!important;pointer-events:none!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture>video{opacity:0!important;transition:opacity 250ms!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile[data-preview=true] .ih57-tile-picture>video{opacity:1!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-top{position:absolute!important;z-index:2!important;inset:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;padding:23px!important;background:#151c1b9e!important;color:#fff!important;pointer-events:none!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-brand,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand{display:inline-flex!important;align-items:center!important;flex:none!important;gap:10px!important;white-space:nowrap!important;color:inherit!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-brand>b,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand>b{display:block!important;margin:0!important;font:800 28px/1 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.06em!important;color:inherit!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-sign,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-sign{display:grid!important;grid-template-columns:repeat(2,7px)!important;grid-template-rows:repeat(2,7px)!important;gap:3px!important;transform:rotate(-5deg)!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-sign>i,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-sign>i{display:block!important;width:7px!important;height:7px!important;margin:0!important;border:0!important;border-radius:1px!important;background:currentColor!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-top>span:last-child{font:400 10px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;letter-spacing:.06em!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy{position:absolute!important;z-index:2!important;inset:auto 0 0!important;display:block!important;padding:25px!important;background:#34383ad6!important;color:#fff!important;pointer-events:none!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy>strong{display:block!important;white-space:pre-line!important;margin:0 0 17px!important;color:#fff!important;font:800 clamp(29px,3vw,44px)/1.04 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.045em!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy>span{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;font:400 12px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy i{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;border:1px solid #ffffffa6!important;border-radius:50%!important;background:#ffffff13!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy svg{width:19px!important;height:19px!important;stroke:currentColor!important;fill:currentColor!important;stroke-width:1.5!important;}
+#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile:focus-visible{outline:3px solid var(--v-accent,#12776f)!important;outline-offset:5px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:82px;--ih57-dock:156px;position:fixed!important;inset:0!important;z-index:2147483000!important;isolation:isolate!important;display:block!important;width:100%!important;height:100%!important;height:100dvh!important;min-width:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#343839!important;color:#fff!important;font-family:IdeaHireFilmText,Inter,Arial,sans-serif!important;-webkit-font-smoothing:antialiased;overscroll-behavior:contain!important;animation:ih57-open 720ms cubic-bezier(.16,.78,.17,1) both;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-closing=true]{animation:ih57-close 400ms cubic-bezier(.3,.02,.4,1) both!important;pointer-events:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-poster,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-video{position:absolute!important;z-index:0!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;margin:0!important;border:0!important;border-radius:0!important;background:#343839!important;pointer-events:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-video{opacity:0!important;transition:opacity 220ms!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-ready=true] .ih57-video{opacity:1!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema :is(button,a,input){font-family:inherit!important;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema button{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;min-width:44px!important;min-height:44px!important;margin:0!important;padding:10px!important;border:1px solid #ffffff60!important;border-radius:50%!important;background:#17201e26!important;color:#fff!important;font-size:14px!important;line-height:1.4!important;box-shadow:none!important;text-shadow:none!important;cursor:pointer!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema button:disabled{opacity:.45!important;cursor:default!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema button::before,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema button::after{content:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema svg{display:block!important;flex:none!important;width:21px!important;height:21px!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round!important;stroke-linejoin:round!important;fill:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema svg[data-kind=play]{fill:currentColor!important;stroke-width:1!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema :is(button,a,input):focus-visible{outline:3px solid #fff!important;outline-offset:3px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{position:absolute!important;z-index:4!important;inset:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important;min-height:78px!important;padding:calc(14px + env(safe-area-inset-top,0px)) clamp(20px,4vw,64px) 14px!important;background:#161c1bb8!important;color:#fff!important;backdrop-filter:blur(10px);}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-film-label{margin-right:auto!important;color:#e5ecea!important;font:400 10px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;letter-spacing:.14em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top-actions{display:flex!important;align-items:center!important;flex:none!important;gap:10px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{position:absolute!important;z-index:2!important;inset:var(--ih57-head) 0 var(--ih57-dock)!important;display:flex!important;flex-direction:column!important;min-width:0!important;padding:18px 0 clamp(20px,4vh,52px)!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-width:thin!important;scrollbar-color:#e7eceb #34403b!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy{display:grid!important;flex:none!important;grid-template-columns:minmax(0,1fr)!important;align-items:center!important;gap:34px!important;width:100%!important;margin:auto 0 0!important;padding:30px clamp(24px,4vw,64px) 32px!important;border-block:1px solid #ffffff1c!important;background:#34383acc!important;color:#fff!important;backdrop-filter:blur(6px);animation:ih57-copy-in 480ms cubic-bezier(.16,.8,.2,1) both;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{grid-template-columns:minmax(0,1fr) minmax(270px,350px)!important;gap:clamp(24px,4vw,68px)!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main{min-width:0!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{display:block!important;margin:0 0 19px!important;color:#e5e9e8!important;font:400 11px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;letter-spacing:.09em!important;text-transform:uppercase!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2{display:block!important;min-width:0!important;margin:0!important;padding:0!important;color:#fff!important;font:800 clamp(52px,7vw,108px)/1.025 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.055em!important;text-wrap:balance!important;overflow-wrap:normal!important;word-break:normal!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2>span{display:block!important;color:inherit!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(38px,4.2vw,68px)!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-kind=final] h2>span:first-child{font-size:1.25em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-kind=final] h2>span:last-child{margin-top:13px!important;font-size:.47em!important;line-height:1.12!important;letter-spacing:-.035em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{max-width:620px!important;margin:23px 0 0!important;color:#f1f4f3!important;font:400 16px/1.65 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{display:block!important;min-width:0!important;margin:0!important;padding:24px!important;border:1px solid #ffffff59!important;border-radius:12px!important;background:#f7faf7!important;color:#172723!important;box-shadow:0 14px 40px #0000001c!important;transform:perspective(1100px) rotateY(-3deg) translateZ(6px)!important;animation:ih57-detail-in 650ms cubic-bezier(.16,.8,.2,1) both;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0 0 19px!important;color:#182e28!important;font:800 18px/1.2 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.04em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label small{max-width:145px!important;margin:0!important;color:#4e5e58!important;font:400 9px/1.45 IdeaHireFilmText,Inter,Arial,sans-serif!important;letter-spacing:.035em!important;text-align:right!important;text-transform:uppercase!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{margin:0 0 18px!important;color:#172723!important;font:800 23px/1.12 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.045em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl{margin:0!important;padding:0!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{display:flex!important;align-items:baseline!important;justify-content:space-between!important;gap:14px!important;min-width:0!important;padding:10px 0!important;border-top:1px solid #d2dcd5!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dt{display:block!important;flex:1!important;margin:0!important;color:#53655c!important;font:400 12px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dd{display:block!important;min-width:0!important;max-width:65%!important;margin:0!important;color:#172723!important;font:800 13px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;text-align:right!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio ul{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;margin:0 0 18px!important;padding:0!important;list-style:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio li{display:flex!important;align-items:center!important;gap:12px!important;margin:0!important;padding:0!important;color:#172723!important;font:400 15px/1.4 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio svg{width:18px!important;height:18px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{display:block!important;margin:13px 0 0!important;color:#53655c!important;font:400 11px/1.55 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-messages>p{max-width:92%!important;margin:0 0 10px!important;padding:12px 14px!important;border:1px solid #d1ddd5!important;border-radius:12px 12px 12px 2px!important;background:#e9efeb!important;color:#172723!important;font:400 14px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;animation:ih57-message-in 500ms ease both;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-messages>p+p{margin-left:auto!important;border-radius:12px 12px 2px 12px!important;background:#fff!important;animation-delay:220ms;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate{display:flex!important;align-items:baseline!important;gap:12px!important;margin-bottom:17px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{display:block!important;color:#142d25!important;font:800 74px/.95 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.07em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate strong>span{font-size:.58em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>span{color:#53655c!important;font:400 13px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dl{animation:ih57-value-in 280ms ease both;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dd{font-size:18px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits{display:flex!important;justify-content:space-between!important;gap:12px!important;margin-top:12px!important;color:#53655c!important;font:400 11px/1.6 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits b{display:block!important;color:#172723!important;font:800 14px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{display:flex!important;flex-wrap:wrap!important;gap:12px!important;margin-top:25px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:30px!important;min-height:48px!important;max-width:100%!important;padding:12px 17px!important;border:1px solid #fff!important;border-radius:6px!important;background:#fff!important;color:#192820!important;font:800 14px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;text-decoration:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a+a{background:transparent!important;color:#fff!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock{position:absolute!important;z-index:5!important;inset:auto 0 0!important;display:block!important;min-width:0!important;margin:0!important;padding:20px clamp(20px,4vw,64px) calc(13px + env(safe-area-inset-bottom,0px))!important;background:#f8faf9!important;color:#192a23!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress{position:absolute!important;inset:0 0 auto!important;display:block!important;margin:0!important;padding:0!important;width:100%!important;height:18px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress>input{display:block!important;appearance:none!important;-webkit-appearance:none!important;width:100%!important;height:18px!important;min-height:18px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:linear-gradient(to right,#1b3930 var(--ih57-progress),#bcc8c2 var(--ih57-progress)) center/100% 4px no-repeat!important;color:#1b3930!important;cursor:pointer!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress>input::-webkit-slider-thumb{appearance:none!important;-webkit-appearance:none!important;display:block!important;width:16px!important;height:16px!important;margin:0!important;border:2px solid #fff!important;border-radius:50%!important;background:#1b3930!important;box-shadow:0 0 0 1px #1b3930!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress>input::-moz-range-thumb{width:13px!important;height:13px!important;border:2px solid #fff!important;border-radius:50%!important;background:#1b3930!important;box-shadow:0 0 0 1px #1b3930!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important;min-width:0!important;padding:0 0 12px!important;border-bottom:1px solid #dce3de!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls>div:first-child{display:flex!important;align-items:center!important;flex:none!important;gap:9px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls button{border-color:#bccbc1!important;background:#fff!important;color:#192a23!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-time{margin-left:8px!important;color:#526259!important;font:400 11px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;font-variant-numeric:tabular-nums!important;white-space:nowrap!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut{display:flex!important;flex-direction:row!important;align-items:center!important;gap:11px!important;min-width:0!important;min-height:44px!important;padding:8px 13px!important;border:1px solid #b5c7bc!important;border-radius:6px!important;background:#e9f0ec!important;color:#153529!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut strong{font:800 21px/1 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.04em!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut span{font:400 12px/1.3 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock-cta{display:flex!important;align-items:center!important;gap:20px!important;min-height:44px!important;color:#192a23!important;font:800 13px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;text-decoration:none!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:26px!important;min-width:0!important;padding-top:11px!important;color:#192a23!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon .ih57-brand>b{font-size:24px!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{display:grid!important;flex:1!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;max-width:650px!important;min-width:0!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;min-width:0!important;min-height:44px!important;padding:8px!important;border:0!important;border-radius:4px!important;background:transparent!important;color:#56665d!important;white-space:nowrap!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>span{font:400 10px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>b{display:block!important;min-width:0!important;font:800 12px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button[aria-current=step]{background:#e3ece6!important;color:#163a28!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>small{max-width:135px!important;color:#65726b!important;font:400 10px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock :is(button,a,input):focus-visible{outline-color:#173c2a!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-loading{position:absolute!important;z-index:7!important;top:calc(var(--ih57-head) + 12px)!important;left:24px!important;max-width:calc(100% - 48px)!important;padding:0!important;color:#fff!important;font-size:12px!important;line-height:1.5!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-loading:not(:empty){padding:9px 13px!important;border-radius:5px!important;background:#1e2726ed!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-gate{position:absolute!important;z-index:6!important;top:calc(var(--ih57-head) + 24px)!important;left:50%!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:12px!important;max-width:calc(100% - 40px)!important;padding:14px!important;border:1px solid #ffffff55!important;border-radius:8px!important;background:#212c29ed!important;transform:translateX(-50%)!important;color:#fff!important;text-align:center!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-gate p{margin:0!important;font-size:14px!important;line-height:1.5!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-gate button{min-width:160px!important;border-radius:5px!important;white-space:nowrap!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-sr{position:absolute!important;width:1px!important;height:1px!important;min-width:0!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-playing=false] .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-playing=false] .ih57-detail,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-playing=false] .ih57-messages>p,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-playing=false] .ih57-fee-card dl{animation:none!important;}
+@keyframes ih57-open{from{clip-path:var(--ih57-origin);transform:perspective(1800px) translateZ(-85px) rotateY(-3deg);}to{clip-path:inset(0);transform:none;}}
+@keyframes ih57-close{from{clip-path:inset(0);opacity:1;}to{clip-path:var(--ih57-origin);opacity:0;}}
+@keyframes ih57-copy-in{from{opacity:0;transform:perspective(1400px) translate3d(0,32px,-40px) rotateX(4deg);}to{opacity:1;transform:none;}}
+@keyframes ih57-detail-in{from{opacity:0;transform:perspective(1100px) translate3d(55px,10px,-80px) rotateY(-15deg);}to{opacity:1;transform:perspective(1100px) rotateY(-3deg) translateZ(6px);}}
+@keyframes ih57-message-in{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
+@keyframes ih57-value-in{from{opacity:.4;translate:0 5px;}to{opacity:1;translate:0 0;}}
+@media(max-width:1100px){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>small{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{gap:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{max-width:600px!important;}}
+@media(max-width:820px){
+ #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-showcase{grid-template-columns:1fr!important;gap:28px!important;padding-block:45px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile{max-width:none!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-copy h2{font-size:36px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-copy>p{max-width:560px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-top{padding:20px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy{padding:22px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy>strong{font-size:clamp(30px,8vw,48px)!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-top>span:last-child{font-size:9px!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:76px;--ih57-dock:153px;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{min-height:70px!important;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px!important;gap:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top .ih57-brand>b{font-size:25px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-film-label{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top-actions{gap:8px!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding-top:12px!important;padding-bottom:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{grid-template-columns:minmax(0,1fr)!important;gap:18px!important;padding:22px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{margin-bottom:14px!important;font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2{font-size:clamp(37px,10vw,72px)!important;line-height:1.035!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(30px,7.7vw,52px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{margin-top:15px!important;font-size:14px!important;line-height:1.6!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:17px!important;transform:none!important;border-radius:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{margin-bottom:13px!important;font-size:17px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{margin-bottom:12px!important;font-size:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:7px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio ul{display:flex!important;flex-wrap:wrap!important;gap:11px 16px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio li{font-size:13px!important;gap:6px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{margin-top:9px!important;font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-messages>p{font-size:13px!important;padding:10px 12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate{margin-bottom:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:58px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits{margin-top:8px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits b{display:inline!important;margin-left:5px!important;font-size:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dd{font-size:17px!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{gap:10px!important;margin-top:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{flex:1 1 230px!important;min-height:46px!important;font-size:13px!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock{padding:19px 16px calc(10px + env(safe-area-inset-bottom,0px))!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls{gap:10px!important;padding-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls>div:first-child{gap:6px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-time{font-size:10px!important;margin-left:3px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut{gap:7px!important;padding:7px 9px!important;min-height:44px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut strong{font-size:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut span{max-width:60px!important;font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock-cta{display:none!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{display:flex!important;flex-wrap:wrap!important;gap:8px!important;padding-top:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>.ih57-brand{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{max-width:none!important;width:100%!important;gap:3px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button{flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:1px!important;min-height:44px!important;padding:5px 7px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>span{font-size:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>b{font-size:11px!important;}
 }
-function ih53BrandHandle(){
- const vertices=[],indices=[],aCount=72,bCount=16;
- for(let i=0;i<=aCount;i++)for(let j=0;j<=bCount;j++){const a=i/aCount*Math.PI*2,b=j/bCount*Math.PI*2,r=.285+.068*Math.cos(b),x=Math.cos(a),y=Math.sin(a);vertices.push(.49+r*x,.70+r*y*1.12,.068*Math.sin(b),Math.cos(b)*x,Math.cos(b)*y,Math.sin(b),i/aCount,j/bCount);}
- for(let i=0;i<aCount;i++)for(let j=0;j<bCount;j++){const k=i*(bCount+1)+j;indices.push(k,k+bCount+1,k+1,k+1,k+bCount+1,k+bCount+2);}return{vertices,indices};
+@media(max-width:820px) and (max-height:720px) and (max-aspect-ratio:1/1){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding:12px 0 14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{gap:10px!important;padding:14px 18px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(26px,7vw,40px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{font-size:9px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{font-size:12px!important;line-height:1.45!important;margin-top:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{font-size:16px!important;margin-bottom:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{font-size:18px!important;margin-bottom:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:5px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{font-size:10px!important;margin-top:6px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio ul{gap:8px 12px!important;margin-bottom:7px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio li{font-size:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-messages>p{font-size:12px!important;line-height:1.4!important;padding:8px 10px!important;margin-bottom:8px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card{display:grid!important;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)!important;column-gap:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card>.ih57-detail-label,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card>.ih57-fee-limits,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card>small{grid-column:1/-1!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate{display:block!important;align-self:center!important;margin:0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:47px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>span{font-size:11px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dt{font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dd{font-size:15px!important;}}
+@media(max-height:500px) and (min-aspect-ratio:1/1){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:62px;--ih57-dock:112px;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{min-height:60px!important;padding:8px 22px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top .ih57-brand>b{font-size:23px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding:8px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{grid-template-columns:minmax(0,1fr) minmax(210px,250px)!important;gap:25px!important;padding:18px 24px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy:not([data-detail=true]){grid-template-columns:1fr!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(29px,4vw,47px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{font-size:9px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{font-size:12px!important;line-height:1.5!important;margin-top:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:13px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{font-size:16px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{font-size:18px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:5px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:42px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{font-size:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock{padding:13px 22px calc(7px + env(safe-area-inset-bottom,0px))!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls{padding-bottom:5px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{padding-top:4px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>.ih57-brand{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{max-width:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button{flex-direction:row!important;align-items:center!important;gap:10px!important;padding:4px 7px!important;min-height:36px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{margin-top:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{flex:none!important;min-height:44px!important;padding:8px 12px!important;font-size:12px!important;}}
+@media(prefers-reduced-motion:reduce){#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema *{animation:none!important;transition:none!important;scroll-behavior:auto!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{transform:none!important;}}
+`,
+  IH57_DURATION = 40,
+  IH57_MEDIA = {
+    wide: "/media/ideahire-film-wide.mp4",
+    tall: "/media/ideahire-film-tall.mp4",
+    posterWide: "/media/ideahire-film-poster-wide.jpg",
+    posterTall: "/media/ideahire-film-poster-tall.jpg"
+  },
+  IH57_CHAPTERS = [{
+    start: 0,
+    step: 0,
+    kind: "intro",
+    pl: ["Pomys\u0142 potrzebuje", "ludzi."],
+    en: ["Ideas need", "people."],
+    subPl: "Znajd\u017A wykonawc\u0119 w IdeaHire.",
+    subEn: "Find a professional on IdeaHire.",
+    labelPl: "IdeaHire / Ludzie i projekty",
+    labelEn: "IdeaHire / People and projects"
+  }, {
+    start: 6.7,
+    step: 0,
+    kind: "brief",
+    pl: ["Tw\xF3j projekt.", "Konkretne warunki."],
+    en: ["Your project.", "Clear requirements."],
+    subPl: "Zakres, termin, bud\u017Cet. Dobry pocz\u0105tek wsp\xF3\u0142pracy.",
+    subEn: "Scope, timing, budget. A clear place to start.",
+    labelPl: "Zlecenie w IdeaHire",
+    labelEn: "Your IdeaHire brief"
+  }, {
+    start: 12.7,
+    step: 1,
+    kind: "portfolio",
+    pl: ["Sprawd\u017A portfolio.", "Poznaj umiej\u0119tno\u015Bci."],
+    en: ["Explore portfolios.", "Find the right skills."],
+    subPl: "Na IdeaHire wybierasz, z kim chcesz pracowa\u0107.",
+    subEn: "Choose who you want to work with on IdeaHire.",
+    labelPl: "Wykonawcy w IdeaHire",
+    labelEn: "Professionals on IdeaHire"
+  }, {
+    start: 18.7,
+    step: 2,
+    kind: "messages",
+    pl: ["Ustalcie szczeg\xF3\u0142y.", "Zanim zaczniecie."],
+    en: ["Agree on the details.", "Before you start."],
+    subPl: "Porozmawiajcie o zakresie, materia\u0142ach i terminie.",
+    subEn: "Discuss the scope, materials and deadline.",
+    labelPl: "Rozmowa w IdeaHire",
+    labelEn: "Your conversation on IdeaHire"
+  }, {
+    start: 24.7,
+    step: 2,
+    kind: "fee",
+    pl: ["Prowizja IdeaHire.", "Zobacz wyliczenie."],
+    en: ["The IdeaHire fee.", "See the calculation."],
+    subPl: "Stawka, minimum i limit widoczne przed rozpocz\u0119ciem.",
+    subEn: "The rate, minimum and cap are shown before you start.",
+    labelPl: "Prowizja bez domys\u0142\xF3w",
+    labelEn: "A fee you can calculate"
+  }, {
+    start: 32.7,
+    step: 3,
+    kind: "final",
+    pl: ["IdeaHire.", "Od pomys\u0142u do wsp\xF3\u0142pracy."],
+    en: ["IdeaHire.", "From an idea to working together."],
+    subPl: "Znajd\u017A wykonawc\u0119 albo projekt dla siebie.",
+    subEn: "Find a professional or a project for yourself.",
+    labelPl: "Teraz Tw\xF3j projekt",
+    labelEn: "Your project starts here"
+  }];
+function ih57ChapterIndex(A) {
+  let e = 0;
+  return IH57_CHAPTERS.forEach((t, n) => {
+    A >= t.start && (e = n);
+  }), e;
 }
-function ih53BrandDisk(radius=.48,y=1.185){
- const vertices=[0,y,0,0,1,0,.5,.5],indices=[];for(let i=0;i<=96;i++){const a=i/96*Math.PI*2,c=Math.cos(a),s=Math.sin(a);vertices.push(radius*c,y,radius*s,0,1,0,.5+c*.5,.5+s*.5);if(i<96)indices.push(0,i+1,i+2);}return{vertices,indices};
+function ih57Fee(A, e = IDEA_HIRE_PUBLIC_OFFER) {
+  let t = Math.max(0, Math.min(e.orderLimit, Number(A) || 0));
+  return t > 0 ? Math.round(Math.min(e.maximum, Math.max(e.minimum, t * e.percent / 100)) * 100) / 100 : 0;
 }
-function ih53BrandPlane(){return{vertices:[-.5,-.5,0,0,0,1,0,0,.5,-.5,0,0,0,1,1,0,.5,.5,0,0,0,1,1,1,-.5,.5,0,0,0,1,0,1],indices:[0,1,2,0,2,3]};}
-function ih53BrandTextures(en=false){
- const make=(w,h,draw)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');draw(x,w,h);return c;};
- const red='#b53426',cream='#fff4df',ink='#402b22';
- const cup=make(1024,512,(x,w,h)=>{x.fillStyle=red;x.fillRect(0,0,w,h);x.fillStyle=cream;x.textAlign='center';x.font='800 90px Inter,Arial';x.fillText('RANO',768,258);x.font='600 15px Inter,Arial';x.fillText(en?'COFFEE AT DAWN':'KAWA OD ŚWITU',768,288);});
- const ceramic=make(4,4,x=>{x.fillStyle=red;x.fillRect(0,0,4,4);});
- const coffee=make(512,512,(x,w,h)=>{
-  const g=x.createRadialGradient(232,220,28,256,256,255);g.addColorStop(0,'#d8ad77');g.addColorStop(.7,'#bb7b42');g.addColorStop(1,'#693519');x.fillStyle=g;x.fillRect(0,0,w,h);
-  let seed=41;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
-  for(let i=0;i<1900;i++){const a=rand()*Math.PI*2,r=Math.sqrt(rand())*248;x.fillStyle=i%2?'#ecd3a633':'#6b391c22';x.beginPath();x.arc(256+Math.cos(a)*r,256+Math.sin(a)*r,.4+rand()*1.6,0,Math.PI*2);x.fill();}
-  x.fillStyle='#fff0d2';x.strokeStyle='#fff0d2';x.lineWidth=7;x.lineCap='round';x.beginPath();x.moveTo(256,392);x.bezierCurveTo(236,300,273,185,246,115);x.stroke();
-  for(let i=0;i<9;i++){const y=153+i*22,span=20+i*7;x.beginPath();x.ellipse(256-span*.47,y,span*.60,10,-.33,0,Math.PI*2);x.ellipse(256+span*.47,y+5,span*.60,10,.33,0,Math.PI*2);x.fill();}
- });
- const menu=make(768,1024,(x,w,h)=>{x.fillStyle=cream;x.fillRect(0,0,w,h);x.fillStyle=red;x.font='800 138px Inter,Arial';x.fillText('RANO',55,170);x.font='600 23px Inter,Arial';x.fillText(en?'COFFEE AT DAWN':'KAWA OD ŚWITU',62,218);x.strokeStyle=red;x.lineWidth=2;x.beginPath();x.moveTo(62,270);x.lineTo(706,270);x.stroke();x.fillStyle=ink;x.font='500 32px Inter,Arial';for(const[i,label]of(en?['Espresso','Flat white','Filter coffee','A good start']:['Espresso','Flat white','Kawa przelewowa','Coś na dobry początek']).entries())x.fillText(label,62,360+i*95);x.fillStyle=red;x.font='700 84px Inter,Arial';x.fillText(en?'Good morning.':'Dzień dobry.',62,866);x.font='500 22px Inter,Arial';x.fillText(en?'START WITH GOOD COFFEE.':'ZACZNIJ OD DOBREJ KAWY.',62,923);});
- const brief=make(768,1024,(x,w,h)=>{x.fillStyle='#fffdf6';x.fillRect(0,0,w,h);x.fillStyle=ink;x.font='600 22px Inter,Arial';x.fillText(en?'ILLUSTRATIVE BRIEF':'PRZYKŁADOWY BRIEF',55,78);x.font='700 72px Inter,Arial';x.fillText(en?'I am opening':'Otwieram',55,240);x.fillText(en?'a café.':'kawiarnię.',55,325);x.font='500 25px Inter,Arial';x.fillText(en?'I need:':'Potrzebuję:',55,432);for(const[i,t]of(en?['a visual identity','a printed menu','materials for the opening']:['znaku i identyfikacji','karty z ofertą','materiałów na start']).entries()){x.strokeStyle='#b3a798';x.strokeRect(57,484+i*91,20,20);x.fillText(t,99,505+i*91);}x.fillStyle=red;x.fillRect(55,844,658,3);x.font='600 25px Inter,Arial';x.fillText('IDEAHIRE',55,915);});
- const card=make(768,440,(x,w,h)=>{x.fillStyle=red;x.fillRect(0,0,w,h);x.fillStyle=cream;x.font='800 114px Inter,Arial';x.fillText('RANO',50,176);x.font='500 22px Inter,Arial';x.fillText(en?'COFFEE AND A GOOD START.':'KAWA I DOBRY POCZĄTEK.',54,237);x.lineWidth=2;x.strokeStyle=cream;x.beginPath();x.moveTo(54,312);x.lineTo(710,312);x.stroke();x.font='500 19px Inter,Arial';x.fillText(en?'IDENTITY / EXAMPLE':'IDENTYFIKACJA / PRZYKŁAD',54,370);});
- return{cup,ceramic,coffee,menu,brief,card};
+function ih57Clock(A) {
+  return "00:" + String(Math.floor(Math.max(0, Math.min(40, A || 0)))).padStart(2, "0");
 }
-function ih53BrandPlan(time,width,height,reduced=false){
- const chapter=Math.min(3,Math.floor((time%12)/3)),phase=time%3/3,p=ih53Ease(Math.min(1,phase*3.8));
- const poses=[[[2.1,1.8,5.2],[.15,.70,0]],[[.1,1.6,3.8],[-.3,.60,.1]],[[-2.8,3.7,4.6],[0,.48,0]],[[2.4,2.5,6.0],[.10,.65,0]]];
- const pose=reduced?poses[3]:poses[chapter],previous=poses[(chapter+3)%4],eye=pose[0].map((v,i)=>ih53Mix(previous[0][i],v,reduced?1:p)),target=pose[1].map((v,i)=>ih53Mix(previous[1][i],v,reduced?1:p));
- const aspect=width/Math.max(1,height);eye[2]+=aspect<.85?1.4:0;if(!reduced){eye[0]+=Math.sin(time*.4)*.10;eye[1]+=Math.cos(time*.35)*.05;}
- const vp=ih53Mul(ih53Perspective(36*Math.PI/180,aspect),ih53Look(eye,target)),cup=ih53Transform(-.62,.06,.40,0,chapter===1?-.08+Math.sin(time*.48)*.09:.20,0,1.02);
- const calls=[
-  {mesh:'plane',texture:'ceramic',kind:3,alpha:.64,model:ih53Transform(-.4,.015,.38,-Math.PI/2,0,0,2.25,1.6,1)},
-  {mesh:'plane',texture:'ceramic',kind:3,alpha:.28,model:ih53Transform(.65,.013,-.35,-Math.PI/2,0,0,1.8,.7,1)},
-  {mesh:'cup',texture:'cup',kind:1,alpha:1,model:cup},{mesh:'handle',texture:'ceramic',kind:1,alpha:1,model:cup},{mesh:'coffee',texture:'coffee',kind:2,alpha:1,model:cup},
-  {mesh:'plane',texture:chapter===0?'brief':'menu',kind:0,alpha:1,model:ih53Transform(.66,.905,-.47,-.05,-.20,chapter===0?-.055:.03,1.16,1.75,1)},
-  {mesh:'plane',texture:'card',kind:0,alpha:1,model:ih53Transform(.78,.07,.63,-Math.PI/2,0,-.15,1.12,.64,1)}
- ];
- return{chapter,eye,vp,calls};
+function IH57Icon({
+  kind: A
+}) {
+  let e = {
+    close: "M6 6l12 12M18 6 6 18",
+    play: "m9 5 11 7-11 7Z",
+    pause: "M8 5v14M16 5v14",
+    full: "M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5",
+    arrow: "M4 12h16m-6-6 6 6-6 6",
+    replay: "M4 9a8 8 0 1 1-1 6M4 3v6h6",
+    check: "m5 12 4 4L19 6"
+  };
+  return (0, IH57JSX.jsx)("svg", {
+    viewBox: "0 0 24 24",
+    "aria-hidden": "true",
+    focusable: "false",
+    "data-kind": A,
+    children: (0, IH57JSX.jsx)("path", {
+      d: e[A] || e.play
+    })
+  });
 }
-function ih53BrandRenderer(canvas,english=false){
- const gl=canvas.getContext('webgl',{alpha:false,antialias:true,powerPreference:'low-power'});if(!gl)return null;
- const buffers=[],shaders=[],textures={};let program;
- const destroy=()=>{buffers.forEach(b=>gl.deleteBuffer(b));shaders.forEach(s=>gl.deleteShader(s));Object.values(textures).forEach(t=>gl.deleteTexture(t));if(program)gl.deleteProgram(program);};
- try{
-  program=gl.createProgram();for(const[type,source]of[[gl.VERTEX_SHADER,IH53_BRAND_VERTEX],[gl.FRAGMENT_SHADER,IH53_BRAND_FRAGMENT]]){const sh=gl.createShader(type);shaders.push(sh);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error('brand shader');gl.attachShader(program,sh);}gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('brand link');
-  const shape=ih53BrandMesh([[.32,.02],[.38,.035],[.40,.10],[.43,.43],[.50,1.08],[.515,1.24],[.51,1.27],[.475,1.275],[.47,1.23],[.455,1.12],[.39,.19],[.35,.15]]),meshes={};
-  for(const[name,data]of Object.entries({cup:shape,handle:ih53BrandHandle(),coffee:ih53BrandDisk(),plane:ih53BrandPlane()})){const vb=gl.createBuffer(),ib=gl.createBuffer();buffers.push(vb,ib);gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data.vertices),gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(data.indices),gl.STATIC_DRAW);meshes[name]={vb,ib,count:data.indices.length};}
-  const uniforms={},attributes={};for(const name of['uModel','uVP','uEye','uKind','uAlpha','uTexture'])uniforms[name]=gl.getUniformLocation(program,name);for(const name of['aPosition','aNormal','aUV'])attributes[name]=gl.getAttribLocation(program,name);
-  const upload=()=>{for(const[name,source]of Object.entries(ih53BrandTextures(english))){if(!textures[name])textures[name]=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,textures[name]);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);for(const[key,val]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,key,val);}};upload();
-  return{refresh(value=english){english=value;upload();},draw(width,height,time,reduced){
-   if(gl.isContextLost())return false;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}gl.viewport(0,0,width,height);gl.clearColor(.965,.933,.87,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);const plan=ih53BrandPlan(time,width,height,reduced);gl.uniformMatrix4fv(uniforms.uVP,false,new Float32Array(plan.vp));gl.uniform3fv(uniforms.uEye,new Float32Array(plan.eye));gl.uniform1i(uniforms.uTexture,0);
-   for(const call of plan.calls){const mesh=meshes[call.mesh];gl.bindBuffer(gl.ARRAY_BUFFER,mesh.vb);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.ib);for(const[name,size,offset]of[['aPosition',3,0],['aNormal',3,12],['aUV',2,24]]){gl.enableVertexAttribArray(attributes[name]);gl.vertexAttribPointer(attributes[name],size,gl.FLOAT,false,32,offset);}gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,textures[call.texture]);gl.uniformMatrix4fv(uniforms.uModel,false,new Float32Array(call.model));gl.uniform1f(uniforms.uKind,call.kind);gl.uniform1f(uniforms.uAlpha,call.alpha);gl.drawElements(gl.TRIANGLES,mesh.count,gl.UNSIGNED_SHORT,0);}return true;
-  },destroy};
- }catch{destroy();return null;}
+function IH57Wordmark() {
+  return (0, IH57JSX.jsxs)("span", {
+    className: "ih57-brand",
+    children: [(0, IH57JSX.jsxs)("span", {
+      className: "ih57-sign",
+      "aria-hidden": "true",
+      children: [(0, IH57JSX.jsx)("i", {}), (0, IH57JSX.jsx)("i", {}), (0, IH57JSX.jsx)("i", {}), (0, IH57JSX.jsx)("i", {})]
+    }), (0, IH57JSX.jsx)("b", {
+      children: "IdeaHire"
+    })]
+  });
 }
-function ih53StartBrand(canvas,host,state,report){
- let engine=null,frame=0,last=0,lastDraw=0,dirty=true,dead=false,visible=true,io,ro,chapter=-1;const listeners=[];
- const listen=(node,type,fn,options)=>{node.addEventListener(type,fn,options);listeners.push(()=>node.removeEventListener(type,fn,options));};
- const create=()=>{engine?.destroy();engine=ih53BrandRenderer(canvas,!!state.current.english);host.dataset.renderer=engine?'loading':'fallback';};
- function tick(now){frame=0;if(dead||!visible||document.hidden)return;const s=state.current,playing=s.playing&&!s.paused&&!s.reduced;
-  if(playing&&lastDraw&&now-lastDraw<32){frame=requestAnimationFrame(tick);return;}const dt=last?Math.min(.08,(now-last)/1000):0;last=now;lastDraw=now;if(playing)s.time+=dt;
-  if(dirty){const b=host.getBoundingClientRect(),budget=s.expanded?700000:330000,dpr=Math.min(window.devicePixelRatio||1,1.6,Math.sqrt(budget/(Math.max(1,b.width)*Math.max(1,b.height))));s.width=Math.max(1,Math.round(b.width*dpr));s.height=Math.max(1,Math.round(b.height*dpr));dirty=false;}
-  const next=Math.floor((s.time%12)/3);if(next!==chapter){chapter=next;report(next);}
-  try{if(engine?.draw(s.width,s.height,s.time,s.reduced))host.dataset.renderer='ready';}catch{engine?.destroy();engine=null;host.dataset.renderer='fallback';}
-  if(engine&&playing)frame=requestAnimationFrame(tick);
- }
- const wake=()=>{if(!dead&&visible&&!document.hidden&&!frame){last=0;lastDraw=0;frame=requestAnimationFrame(tick);}};
- create();listen(window,'resize',()=>{dirty=true;wake();},{passive:true});listen(document,'visibilitychange',()=>{cancelAnimationFrame(frame);frame=0;last=0;if(!document.hidden)wake();});
- listen(canvas,'webglcontextlost',e=>{e.preventDefault();engine?.destroy();engine=null;host.dataset.renderer='fallback';cancelAnimationFrame(frame);frame=0;});listen(canvas,'webglcontextrestored',()=>{create();dirty=true;wake();});
- if(typeof IntersectionObserver!=='undefined')try{io=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;if(visible)wake();else{cancelAnimationFrame(frame);frame=0;last=0;}},{rootMargin:'80px'});io.observe(host);}catch{}
- if(typeof ResizeObserver!=='undefined'){ro=new ResizeObserver(()=>{dirty=true;wake();});ro.observe(host);}
- ih53Fonts().then(()=>{if(!dead){engine?.refresh();wake();}}).catch(()=>{});wake();
- return{wake,refresh(){engine?.refresh(!!state.current.english);wake();},destroy(){dead=true;cancelAnimationFrame(frame);listeners.forEach(fn=>fn());io?.disconnect();ro?.disconnect();engine?.destroy();}};
+function useIH57Portrait() {
+  let [A, e] = (0, IH57React.useState)(() => typeof window < "u" && window.innerHeight > window.innerWidth * 1.2);
+  return (0, IH57React.useEffect)(() => {
+    let t = () => e(window.innerHeight > window.innerWidth * 1.2);
+    return window.addEventListener("resize", t, {
+      passive: !0
+    }), window.visualViewport?.addEventListener("resize", t, {
+      passive: !0
+    }), t(), () => {
+      window.removeEventListener("resize", t), window.visualViewport?.removeEventListener("resize", t);
+    };
+  }, []), A;
 }
-function IH53BrandFilm({playing=false,paused=false,expanded=false,seek=null,onChapter}){
- const english=useSitePreferences().language==='en',host=useRef(null),canvas=useRef(null),engine=useRef(null),reduced=useIH53Reduced(),report=useRef(onChapter),state=useRef({time:expanded?0:9.6,playing,paused,reduced,expanded,english});report.current=onChapter;
- useLayoutEffect(()=>{const languageChanged=state.current.english!==english;if(playing&&!state.current.playing&&!expanded)state.current.time=0;Object.assign(state.current,{playing,paused,reduced,expanded,english});if(seek)state.current.time=seek.time;if(languageChanged)engine.current?.refresh();engine.current?.wake();},[playing,paused,reduced,expanded,seek,english]);
- useEffect(()=>{engine.current=ih53StartBrand(canvas.current,host.current,state,chapter=>report.current?.(chapter));return()=>{engine.current?.destroy();engine.current=null;};},[]);
- return <span className="ih53-brand-frame" ref={host} aria-hidden="true"><canvas ref={canvas}/><span className="ih53-brand-fallback"><svg viewBox="0 0 500 500"><defs><linearGradient id={expanded?'ih53-mug-large':'ih53-mug-small'}><stop stopColor="#92291f"/><stop offset=".45" stopColor="#cc4633"/><stop offset="1" stopColor="#9c2a20"/></linearGradient></defs><ellipse cx="248" cy="393" rx="170" ry="24" fill="#513524" opacity=".11"/><path d="M308 222c105-31 112 112 13 106" fill="none" stroke="#b53426" strokeWidth="23"/><path d="m118 201 18 159c5 47 181 47 186 0l17-159Z" fill={'url(#'+(expanded?'ih53-mug-large':'ih53-mug-small')+')'}/><ellipse cx="229" cy="201" rx="110" ry="34" fill="#e6c490"/><ellipse cx="229" cy="201" rx="96" ry="25" fill="#9c612c"/><path d="M192 203c43-35 91 9 38 15-36 5-3-19 26-12" fill="none" stroke="#fae9c3" strokeWidth="6"/><text x="228" y="302" textAnchor="middle" fill="#fff4df" fontFamily="Inter,Arial" fontSize="46" fontWeight="800">RANO</text></svg></span></span>;
+function IH57SceneDetail({
+  kind: A,
+  en: e,
+  time: t
+}) {
+  let n = IDEA_HIRE_PUBLIC_OFFER,
+    r = o => ih53Money(o, e),
+    a = e ? ["Project amount", "IdeaHire fee", "Minimum", "Maximum", "Example calculation"] : ["Kwota zlecenia", "Prowizja IdeaHire", "Minimum", "Maksimum", "Przyk\u0142adowe wyliczenie"];
+  if (A === "brief") return (0, IH57JSX.jsxs)("aside", {
+    className: "ih57-detail ih57-brief",
+    "aria-label": e ? "Illustrative project brief" : "Przyk\u0142adowy opis zlecenia",
+    children: [(0, IH57JSX.jsxs)("span", {
+      className: "ih57-detail-label",
+      children: ["IdeaHire ", (0, IH57JSX.jsx)("small", {
+        children: e ? "ILLUSTRATIVE BRIEF" : "PRZYK\u0141ADOWE ZLECENIE"
+      })]
+    }), (0, IH57JSX.jsx)("h3", {
+      children: e ? "A website for a studio" : "Strona dla pracowni"
+    }), (0, IH57JSX.jsxs)("dl", {
+      children: [(0, IH57JSX.jsxs)("div", {
+        children: [(0, IH57JSX.jsx)("dt", {
+          children: e ? "Scope" : "Zakres"
+        }), (0, IH57JSX.jsx)("dd", {
+          children: e ? "Design and development" : "Projekt i wdro\u017Cenie"
+        })]
+      }), (0, IH57JSX.jsxs)("div", {
+        children: [(0, IH57JSX.jsx)("dt", {
+          children: e ? "Deadline" : "Termin"
+        }), (0, IH57JSX.jsx)("dd", {
+          children: e ? "To be agreed" : "Do ustalenia"
+        })]
+      }), (0, IH57JSX.jsxs)("div", {
+        children: [(0, IH57JSX.jsx)("dt", {
+          children: e ? "Budget" : "Bud\u017Cet"
+        }), (0, IH57JSX.jsx)("dd", {
+          children: r(1e3)
+        })]
+      })]
+    })]
+  });
+  if (A === "portfolio") return (0, IH57JSX.jsxs)("aside", {
+    className: "ih57-detail ih57-portfolio",
+    children: [(0, IH57JSX.jsxs)("span", {
+      className: "ih57-detail-label",
+      children: ["IdeaHire ", (0, IH57JSX.jsx)("small", {
+        children: e ? "BEFORE YOU CHOOSE" : "PRZED WYBOREM"
+      })]
+    }), (0, IH57JSX.jsx)("h3", {
+      children: e ? "See the work behind the profile." : "Zobacz prac\u0119 za profilem."
+    }), (0, IH57JSX.jsx)("ul", {
+      children: (e ? ["Portfolio", "Skills", "Reviews"] : ["Portfolio", "Umiej\u0119tno\u015Bci", "Opinie"]).map(o => (0, IH57JSX.jsxs)("li", {
+        children: [(0, IH57JSX.jsx)(IH57Icon, {
+          kind: "check"
+        }), o]
+      }, o))
+    }), (0, IH57JSX.jsx)("small", {
+      children: e ? "Choose based on the information in the profile." : "Podejmij decyzj\u0119 na podstawie profilu."
+    })]
+  });
+  if (A === "messages") return (0, IH57JSX.jsxs)("aside", {
+    className: "ih57-detail ih57-messages",
+    children: [(0, IH57JSX.jsxs)("span", {
+      className: "ih57-detail-label",
+      children: ["IdeaHire ", (0, IH57JSX.jsx)("small", {
+        children: e ? "ILLUSTRATIVE CONVERSATION" : "PRZYK\u0141ADOWA ROZMOWA"
+      })]
+    }), (0, IH57JSX.jsx)("p", {
+      children: e ? "The scope: design and development." : "Zakres: projekt i wdro\u017Cenie."
+    }), (0, IH57JSX.jsx)("p", {
+      children: e ? "Let\u2019s agree on timing and materials." : "Ustalmy termin i materia\u0142y."
+    }), (0, IH57JSX.jsx)("small", {
+      children: e ? "Details in one conversation." : "Ustalenia w jednej rozmowie."
+    })]
+  });
+  if (A === "fee") {
+    let o = Math.max(0, t - 24.7),
+      i = o < 2.8 ? 250 : o < 5.6 ? 1e3 : n.orderLimit,
+      l = ih57Fee(i);
+    return (0, IH57JSX.jsxs)("aside", {
+      className: "ih57-detail ih57-fee-card",
+      "aria-label": a[4],
+      children: [(0, IH57JSX.jsxs)("span", {
+        className: "ih57-detail-label",
+        children: ["IdeaHire ", (0, IH57JSX.jsx)("small", {
+          children: a[4]
+        })]
+      }), (0, IH57JSX.jsxs)("div", {
+        className: "ih57-fee-rate",
+        children: [(0, IH57JSX.jsxs)("strong", {
+          children: [n.percent.toLocaleString(e ? "en-GB" : "pl-PL"), (0, IH57JSX.jsx)("span", {
+            children: "%"
+          })]
+        }), (0, IH57JSX.jsx)("span", {
+          children: e ? "service fee" : "prowizji"
+        })]
+      }), (0, IH57JSX.jsxs)("dl", {
+        children: [(0, IH57JSX.jsxs)("div", {
+          children: [(0, IH57JSX.jsx)("dt", {
+            children: a[0]
+          }), (0, IH57JSX.jsx)("dd", {
+            children: r(i)
+          })]
+        }), (0, IH57JSX.jsxs)("div", {
+          children: [(0, IH57JSX.jsx)("dt", {
+            children: a[1]
+          }), (0, IH57JSX.jsx)("dd", {
+            children: r(l)
+          })]
+        })]
+      }, i), (0, IH57JSX.jsxs)("div", {
+        className: "ih57-fee-limits",
+        children: [(0, IH57JSX.jsxs)("span", {
+          children: [a[2], " ", (0, IH57JSX.jsx)("b", {
+            children: r(n.minimum)
+          })]
+        }), (0, IH57JSX.jsxs)("span", {
+          children: [a[3], " ", (0, IH57JSX.jsx)("b", {
+            children: r(n.maximum)
+          })]
+        })]
+      }), (0, IH57JSX.jsxs)("small", {
+        children: [e ? "Projects up to " : "Zlecenia do ", r(n.orderLimit)]
+      })]
+    });
+  }
+  return null;
 }
-function IH53CaseDialog({onClose}){
- const en=useSitePreferences().language==='en',reduced=useIH53Reduced(),dialog=useRef(null),close=useRef(null),[paused,setPaused]=useState(false),[chapter,setChapter]=useState(0),[seek,setSeek]=useState(null);
- const words=en?[
-  ['A café is about to open.','A brief defines the result: a visual identity, menu and materials for the opening.'],
-  ['Give it a recognisable character.','A name, lettering and colour become one consistent identity.'],
-  ['Carry it into the details.','The cup, printed menu and cards speak the same visual language.'],
-  ['Your project can start here.','Describe what you need and find someone with the right skills.']
- ]:[
-  ['Kawiarnia przed otwarciem.','Opis zlecenia wyznacza efekt: identyfikację, menu i materiały na otwarcie.'],
-  ['Nadaj jej rozpoznawalny charakter.','Nazwa, liternictwo i kolor składają się w jedną identyfikację.'],
-  ['Przenieś go na każdy detal.','Kubek, drukowane menu i karty mówią tym samym językiem.'],
-  ['Teraz czas na Twój projekt.','Opisz, czego potrzebujesz, i znajdź osobę z odpowiednimi umiejętnościami.']
- ];
- useLayoutEffect(()=>{
-  const origin=document.activeElement,root=document.getElementById('root'),wasInert=root?.hasAttribute('inert'),previous=document.body.style.overflow,padding=document.body.style.paddingRight,gap=Math.max(0,window.innerWidth-document.documentElement.clientWidth);
-  document.body.classList.add('ih53-case-open');document.body.style.overflow='hidden';if(gap&&gap<60)document.body.style.paddingRight=gap+'px';if(root)root.setAttribute('inert','');const frame=requestAnimationFrame(()=>close.current?.focus({preventScroll:true}));
-  const key=e=>{if(e.key==='Escape'){e.preventDefault();onClose();return;}if(e.key!=='Tab')return;const nodes=Array.from(dialog.current?.querySelectorAll('button:not(:disabled),a[href]')||[]),first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}};document.addEventListener('keydown',key);
-  return()=>{cancelAnimationFrame(frame);document.removeEventListener('keydown',key);document.body.classList.remove('ih53-case-open');document.body.style.overflow=previous;document.body.style.paddingRight=padding;if(root&&!wasInert)root.removeAttribute('inert');if(origin?.isConnected)origin.focus({preventScroll:true});};
- },[]);
- const choose=index=>{setPaused(true);setChapter(index);setSeek({time:index*3+.55,token:Date.now()});};
- return createPortal(<div className="ih53-case-layer" data-no-translate="true"><section ref={dialog} className="ih53-case-dialog" role="dialog" aria-modal="true" aria-labelledby="ih53-case-title"><header className="ih53-case-header"><span>IdeaHire <span aria-hidden="true">/</span> {en?'Project story':'Historia projektu'}</span><button ref={close} className="ih53-case-close" type="button" onClick={onClose} aria-label={en?'Close presentation':'Zamknij prezentację'}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
-  <div className="ih53-case-layout"><div className="ih53-case-visual"><IH53BrandFilm expanded playing={!paused} paused={paused} seek={seek} onChapter={setChapter}/><div className="ih53-case-controls"><button type="button" disabled={reduced} onClick={()=>setPaused(!paused)} aria-label={en?(paused?'Play presentation':'Pause presentation'):(paused?'Odtwórz prezentację':'Zatrzymaj prezentację')} aria-pressed={paused}>{paused?'▶':'Ⅱ'}</button><button type="button" disabled={reduced} onClick={()=>{setPaused(false);setSeek({time:0,token:Date.now()});}} aria-label={en?'Replay presentation':'Powtórz prezentację'}>↻</button><span>{en?'12 seconds · illustrative project':'12 sekund · przykładowy projekt'}</span></div></div>
-   <div className="ih53-case-copy"><span className="ih53-case-eyebrow">{en?'From brief to identity':'Od briefu do identyfikacji'}</span><h2 id="ih53-case-title" key={chapter}>{words[chapter][0]}</h2><p>{words[chapter][1]}</p><nav className="ih53-case-chapters" aria-label={en?'Presentation chapters':'Etapy prezentacji'}>{(en?['Brief','Identity','Materials','Your turn']:['Zlecenie','Identyfikacja','Materiały','Twój projekt']).map((name,i)=><button key={name} type="button" aria-current={chapter===i?'step':undefined} onClick={()=>choose(i)}><span>{String(i+1).padStart(2,'0')}</span>{name}</button>)}</nav><Link className="ih53-case-cta" to="/find-talent" onClick={onClose}>{en?'Find a professional':'Znajdź wykonawcę'} <span aria-hidden="true">↗</span></Link><small>{en?'RANO is a fictional brand used to demonstrate a project. This is not a customer case study.':'RANO to fikcyjna marka przygotowana do prezentacji projektu. To nie jest realizacja klienta.'}</small></div>
-  </div></section></div>,document.body);
+function IH57Scene({
+  time: A,
+  en: e,
+  ended: t,
+  onNavigate: n
+}) {
+  let r = t ? 5 : ih57ChapterIndex(A),
+    a = IH57_CHAPTERS[r],
+    o = e ? a.en : a.pl,
+    i = !["intro", "final"].includes(a.kind);
+  return (0, IH57JSX.jsx)("div", {
+    className: "ih57-copy-window",
+    children: (0, IH57JSX.jsxs)("section", {
+      className: "ih57-copy",
+      "data-kind": a.kind,
+      "data-detail": i,
+      "aria-label": e ? "IdeaHire film chapter" : "Rozdzia\u0142 filmu IdeaHire",
+      children: [(0, IH57JSX.jsxs)("div", {
+        className: "ih57-copy-main",
+        children: [(0, IH57JSX.jsx)("span", {
+          className: "ih57-eyebrow",
+          children: e ? a.labelEn : a.labelPl
+        }), (0, IH57JSX.jsx)("h2", {
+          children: o.map((l, f) => (0, IH57JSX.jsx)("span", {
+            children: l
+          }, f))
+        }), (0, IH57JSX.jsx)("p", {
+          children: e ? a.subEn : a.subPl
+        }), a.kind === "final" && (0, IH57JSX.jsxs)("div", {
+          className: "ih57-final-actions",
+          children: [(0, IH57JSX.jsxs)(Link, {
+            to: "/find-talent",
+            onClick: n,
+            children: [e ? "Find a professional" : "Znajd\u017A wykonawc\u0119", (0, IH57JSX.jsx)(IH57Icon, {
+              kind: "arrow"
+            })]
+          }), (0, IH57JSX.jsxs)(Link, {
+            to: "/jobs",
+            onClick: n,
+            children: [e ? "Browse projects" : "Przegl\u0105daj zlecenia", (0, IH57JSX.jsx)(IH57Icon, {
+              kind: "arrow"
+            })]
+          })]
+        })]
+      }), i && (0, IH57JSX.jsx)(IH57SceneDetail, {
+        kind: a.kind,
+        en: e,
+        time: A
+      })]
+    }, r)
+  });
 }
-function IH53Showcase(){
- const en=useSitePreferences().language==='en',reduced=useIH53Reduced(),[hover,setHover]=useState(false),[focused,setFocused]=useState(false),[open,setOpen]=useState(false),[paused,setPaused]=useState(()=>IH53_MOTION.paused),[chapter,setChapter]=useState(3);
- useEffect(()=>{const motion=e=>setPaused(!!e.detail?.paused);window.addEventListener('ih53-motion',motion);return()=>window.removeEventListener('ih53-motion',motion);},[]);
- return <section className="section ih53-showcase" id="how-it-works" data-no-translate="true"><div className="ih53-showcase-copy"><span className="section-label">{en?'See the outcome':'Zobacz efekt'}</span><h2>{en?'An opening starts with a project.':'Otwarcie zaczyna się od projektu.'}</h2><p>{en?'A café needs more than a sign. See how a brief becomes a consistent identity and materials for the opening.':'Kawiarnia potrzebuje więcej niż szyldu. Zobacz, jak opis zlecenia zmienia się w spójną identyfikację i materiały na start.'}</p><span className="ih53-showcase-invitation">{en?'Hover to explore. Open to watch the whole story.':'Najedź, żeby zajrzeć. Otwórz, żeby zobaczyć całą historię.'}</span><div className="ih53-showcase-links"><Link to="/find-talent">{en?'I have a project':'Mam projekt'} <span aria-hidden="true">↗</span></Link><Link to="/jobs">{en?'I am looking for work':'Szukam zlecenia'} <span aria-hidden="true">↗</span></Link></div></div>
-  <button type="button" className="ih53-showcase-tile" aria-label={en?'Open the RANO project presentation':'Otwórz prezentację przykładowego projektu RANO'} aria-haspopup="dialog" onClick={()=>setOpen(true)} onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)} data-playing={(hover||focused)&&!open&&!paused&&!reduced}><IH53BrandFilm playing={(hover||focused)&&!open} paused={paused||open} onChapter={setChapter}/><span className="ih53-tile-top"><span>{en?'ILLUSTRATIVE PROJECT':'PRZYKŁADOWY PROJEKT'}</span><span>{String(chapter+1).padStart(2,'0')} / 04</span></span><span className="ih53-tile-caption"><span><strong>RANO</strong><small>{en?'A café identity':'Identyfikacja kawiarni'}</small></span><span className="ih53-tile-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z"/></svg></span></span></button>
-  {open&&<IH53CaseDialog onClose={()=>{setOpen(false);setHover(false);setFocused(false);}}/>}
- </section>;
+function IH57Cinema({
+  media: A = IH57_MEDIA,
+  onClose: e,
+  origin: t
+}) {
+  let n = useSitePreferences().language === "en",
+    r = useIH53Reduced(),
+    a = useIH57Portrait(),
+    o = (0, IH57React.useRef)(null),
+    i = (0, IH57React.useRef)(null),
+    l = (0, IH57React.useRef)(null),
+    f = (0, IH57React.useRef)(null),
+    d = (0, IH57React.useRef)(null),
+    s = (0, IH57React.useRef)(!1),
+    v = (0, IH57React.useRef)(0),
+    h = (0, IH57React.useRef)(!r && !IH53_MOTION.paused),
+    P = (0, IH57React.useRef)(0),
+    y = (0, IH57React.useRef)(0),
+    L = (0, IH57React.useRef)(!1),
+    [c, u] = (0, IH57React.useState)(0),
+    [p, B] = (0, IH57React.useState)(!1),
+    [Q, x] = (0, IH57React.useState)(!1),
+    [X, g] = (0, IH57React.useState)(!1),
+    [E, O] = (0, IH57React.useState)(!1),
+    [G, Ce] = (0, IH57React.useState)(!1),
+    [Wn, gA] = (0, IH57React.useState)(!1),
+    [DA, dc] = (0, IH57React.useState)(!1),
+    [Xa, cc] = (0, IH57React.useState)(!1),
+    [pc, bl] = (0, IH57React.useState)(""),
+    [Xl, vc] = (0, IH57React.useState)(0),
+    La = a ? A.tall : A.wide,
+    Ll = a ? A.posterTall : A.posterWide,
+    mc = Q ? 5 : ih57ChapterIndex(c),
+    hc = IH57_CHAPTERS[mc].step;
+  function Ie() {
+    h.current = !1, P.current++, f.current?.pause(), B(!1), gA(!1);
+  }
+  function lt() {
+    let Z = f.current;
+    if (!Z || G) return;
+    h.current = !0, O(!1);
+    let w = ++P.current;
+    try {
+      Z.play()?.then(() => {
+        s.current || w !== P.current || !h.current || (B(!Z.paused), gA(!1));
+      }).catch(xA => {
+        s.current || w !== P.current || xA?.name === "AbortError" || (B(!1), gA(!1), O(!0));
+      });
+    } catch {
+      B(!1), O(!0);
+    }
+  }
+  function Gt(Z) {
+    let w = Math.max(0, Math.min(IH57_DURATION - .04, Number(Z) || 0));
+    if (v.current = w, L.current = !1, x(!1), u(w), O(!1), f.current?.readyState >= 1) try {
+      f.current.currentTime = w;
+    } catch {}
+  }
+  function Pc() {
+    Gt(0), h.current = !0, lt();
+  }
+  function yc(Z) {
+    let w = Z.currentTarget;
+    if (!s.current) {
+      if (Ce(!1), g(!1), gA(!1), v.current > 0) try {
+        w.currentTime = Math.min(v.current, Math.max(0, w.duration - .04));
+      } catch {}
+      h.current && lt();
+    }
+  }
+  function Bc(Z) {
+    if (s.current) return;
+    let w = Math.max(0, Math.min(40, Z.currentTarget.currentTime || 0));
+    v.current = w, L.current || u(w);
+  }
+  function bc() {
+    if (!s.current) if (L.current = !0, x(!0), u(40), h.current && !r && !document.hidden) {
+      v.current = 34;
+      try {
+        f.current.currentTime = 34;
+      } catch {}
+      lt();
+    } else Ie();
+  }
+  let Qa = (0, IH57React.useRef)(null);
+  Qa.current || (Qa.current = Z => {
+    let w = f.current;
+    w && w !== Z && (v.current = Number.isFinite(w.currentTime) ? w.currentTime : v.current, w.pause()), f.current = Z;
+  });
+  function qn(Z = !1) {
+    if (!(Xa || s.current)) {
+      if (Ie(), document.fullscreenElement === o.current && document.exitFullscreen?.().catch(() => {}), Z || r) {
+        e();
+        return;
+      }
+      cc(!0), y.current = setTimeout(() => {
+        s.current || e();
+      }, 430);
+    }
+  }
+  async function Xc() {
+    try {
+      document.fullscreenElement === o.current ? await document.exitFullscreen() : o.current?.requestFullscreen ? await o.current.requestFullscreen() : bl(n ? "The film already fills the browser window." : "Film wype\u0142nia ju\u017C ca\u0142y widok przegl\u0105darki.");
+    } catch {
+      bl(n ? "Fullscreen is unavailable. The browser-sized view stays open." : "Pe\u0142ny ekran jest niedost\u0119pny. Film pozostaje na ca\u0142y widok przegl\u0105darki.");
+    }
+  }
+  (0, IH57React.useLayoutEffect)(() => {
+    s.current = !1;
+    let Z = document.activeElement,
+      w = document.getElementById("root"),
+      zA = w?.hasAttribute("inert"),
+      xA = window.scrollX,
+      ft = window.scrollY,
+      _A = document.body,
+      We = document.documentElement,
+      Ql = ["overflow", "paddingRight", "position", "top", "left", "width"],
+      gc = Object.fromEntries(Ql.map(qe => [qe, _A.style[qe]])),
+      xc = We.style.overflow,
+      ga = Math.max(0, window.innerWidth - We.clientWidth);
+    We.style.overflow = "hidden", _A.style.overflow = "hidden", _A.style.position = "fixed", _A.style.top = -ft + "px", _A.style.left = -xA + "px", _A.style.width = "100%", ga && ga < 60 && (_A.style.paddingRight = ga + "px"), w?.setAttribute("inert", "");
+    let kc = requestAnimationFrame(() => d.current?.focus({
+      preventScroll: !0
+    }));
+    return () => {
+      if (s.current = !0, P.current++, clearTimeout(y.current), cancelAnimationFrame(kc), f.current?.pause(), We.style.overflow = xc, Ql.forEach(qe => _A.style[qe] = gc[qe]), w && !zA && w.removeAttribute("inert"), window.scrollX !== xA || window.scrollY !== ft) {
+        let qe = We.style.scrollBehavior;
+        We.style.scrollBehavior = "auto", window.scrollTo(xA, ft), We.style.scrollBehavior = qe;
+      }
+      Z?.isConnected && Z.focus({
+        preventScroll: !0
+      });
+    };
+  }, []), (0, IH57React.useEffect)(() => {
+    let Z = w => {
+      if (w.key === "Escape") {
+        w.preventDefault(), qn();
+        return;
+      }
+      if (w.key === "Tab") {
+        let zA = Array.from(o.current?.querySelectorAll("button:not(:disabled),a[href],input:not(:disabled)") || []).filter(_A => !_A.closest("[hidden]")),
+          xA = zA[0],
+          ft = zA[zA.length - 1];
+        w.shiftKey && document.activeElement === xA ? (w.preventDefault(), ft?.focus()) : !w.shiftKey && document.activeElement === ft && (w.preventDefault(), xA?.focus());
+        return;
+      }
+      w.target?.closest?.("input,button,a,textarea,select") || ((w.key === " " || w.key.toLowerCase() === "k") && (w.preventDefault(), p ? Ie() : lt()), (w.key === "ArrowRight" || w.key === "ArrowLeft") && (w.preventDefault(), Gt(c + (w.key === "ArrowRight" ? 5 : -5))));
+    };
+    return document.addEventListener("keydown", Z), () => document.removeEventListener("keydown", Z);
+  }, [p, c, Xa, n, G, r]), (0, IH57React.useEffect)(() => {
+    let Z = () => {
+        document.hidden && Ie();
+      },
+      w = () => dc(document.fullscreenElement === o.current),
+      zA = xA => {
+        xA.detail?.paused && Ie();
+      };
+    return document.addEventListener("visibilitychange", Z), document.addEventListener("fullscreenchange", w), window.addEventListener("ih53-motion", zA), () => {
+      document.removeEventListener("visibilitychange", Z), document.removeEventListener("fullscreenchange", w), window.removeEventListener("ih53-motion", zA);
+    };
+  }, []), (0, IH57React.useEffect)(() => {
+    r && Ie();
+  }, [r]), (0, IH57React.useLayoutEffect)(() => {
+    let Z = () => {
+      if (!o.current) return;
+      let zA = i.current?.getBoundingClientRect().height,
+        xA = l.current?.getBoundingClientRect().height;
+      zA > 0 && o.current.style.setProperty("--ih57-head", zA + "px"), xA > 0 && o.current.style.setProperty("--ih57-dock", xA + "px");
+    };
+    Z();
+    let w;
+    return typeof ResizeObserver < "u" && (w = new ResizeObserver(Z), i.current && w.observe(i.current), l.current && w.observe(l.current)), window.addEventListener("resize", Z, {
+      passive: !0
+    }), () => {
+      w?.disconnect(), window.removeEventListener("resize", Z);
+    };
+  }, [n, a, Q]), (0, IH57React.useEffect)(() => {
+    if (!h.current || X || G) return;
+    let Z = setTimeout(() => {
+      !s.current && !X && (gA(!1), O(!0));
+    }, 12e3);
+    return () => clearTimeout(Z);
+  }, [La, Xl, X, G]);
+  let Lc = t ? `${Math.max(0, t.top)}px ${Math.max(0, window.innerWidth - t.right)}px ${Math.max(0, window.innerHeight - t.bottom)}px ${Math.max(0, t.left)}px round 24px` : "15% 25% 15% 25% round 24px",
+    Qc = n ? ["Project", "Talent", "Details", "Start"] : ["Projekt", "Wyb\xF3r", "Ustalenia", "Start"];
+  return (0, createPortal)((0, IH57JSX.jsxs)("div", {
+    id: "ih57-cinema",
+    ref: o,
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-labelledby": "ih57-title",
+    "data-no-translate": "true",
+    "data-playing": p,
+    "data-ended": Q,
+    "data-closing": Xa,
+    "data-ready": X,
+    "data-portrait": a,
+    style: {
+      "--ih57-origin": Lc
+    },
+    children: [(0, IH57JSX.jsx)("img", {
+      className: "ih57-poster",
+      src: Ll,
+      alt: ""
+    }), !G && (0, IH57JSX.jsx)("video", {
+      ref: Qa.current,
+      className: "ih57-video",
+      src: La,
+      poster: Ll,
+      playsInline: !0,
+      muted: !0,
+      preload: "auto",
+      "aria-hidden": "true",
+      tabIndex: -1,
+      disablePictureInPicture: !0,
+      onLoadedMetadata: yc,
+      onLoadedData: () => {
+        g(!0), gA(!1);
+      },
+      onCanPlay: () => gA(!1),
+      onPlaying: Z => {
+        !s.current && Z.currentTarget === f.current && (g(!0), O(!1), B(!0), gA(!1));
+      },
+      onPause: Z => {
+        !s.current && Z.currentTarget === f.current && B(!1);
+      },
+      onTimeUpdate: Bc,
+      onEnded: bc,
+      onWaiting: () => {
+        h.current && gA(!0);
+      },
+      onError: () => {
+        s.current || (h.current = !1, Ce(!0), B(!1), gA(!1));
+      }
+    }, La + Xl), (0, IH57JSX.jsxs)("header", {
+      className: "ih57-top",
+      ref: i,
+      children: [(0, IH57JSX.jsx)(IH57Wordmark, {}), (0, IH57JSX.jsx)("span", {
+        className: "ih57-film-label",
+        children: n ? "PEOPLE. PROJECTS. IDEAHIRE." : "LUDZIE. PROJEKTY. IDEAHIRE."
+      }), (0, IH57JSX.jsxs)("div", {
+        className: "ih57-top-actions",
+        children: [(0, IH57JSX.jsx)("button", {
+          type: "button",
+          onClick: Xc,
+          "aria-label": n ? "Toggle fullscreen" : "W\u0142\u0105cz lub wy\u0142\u0105cz pe\u0142ny ekran",
+          "aria-pressed": DA,
+          children: (0, IH57JSX.jsx)(IH57Icon, {
+            kind: "full"
+          })
+        }), (0, IH57JSX.jsx)("button", {
+          type: "button",
+          ref: d,
+          onClick: () => qn(),
+          "aria-label": n ? "Close film" : "Zamknij film",
+          children: (0, IH57JSX.jsx)(IH57Icon, {
+            kind: "close"
+          })
+        })]
+      })]
+    }), (0, IH57JSX.jsx)("h1", {
+      id: "ih57-title",
+      className: "ih57-sr",
+      children: n ? "IdeaHire \u2014 ideas need people" : "IdeaHire \u2014 pomys\u0142 potrzebuje ludzi"
+    }), (0, IH57JSX.jsx)(IH57Scene, {
+      time: c,
+      en: n,
+      ended: Q,
+      onNavigate: () => qn(!0)
+    }), (E || G) && (0, IH57JSX.jsx)("div", {
+      className: "ih57-gate",
+      role: "status",
+      children: G ? (0, IH57JSX.jsxs)(IH57JSX.Fragment, {
+        children: [(0, IH57JSX.jsx)("p", {
+          children: n ? "The film could not be played." : "Nie uda\u0142o si\u0119 odtworzy\u0107 filmu."
+        }), (0, IH57JSX.jsx)("button", {
+          type: "button",
+          onClick: () => {
+            Ce(!1), O(!1), h.current = !0, vc(Z => Z + 1);
+          },
+          children: n ? "Try again" : "Spr\xF3buj ponownie"
+        })]
+      }) : (0, IH57JSX.jsxs)("button", {
+        type: "button",
+        onClick: lt,
+        children: [(0, IH57JSX.jsx)(IH57Icon, {
+          kind: "play"
+        }), n ? "Play film" : "Uruchom film"]
+      })
+    }), (0, IH57JSX.jsx)("div", {
+      className: "ih57-loading",
+      role: "status",
+      "aria-live": "polite",
+      children: Wn && h.current ? n ? "Loading film\u2026" : "\u0141aduj\u0119 film\u2026" : pc
+    }), (0, IH57JSX.jsxs)("footer", {
+      className: "ih57-dock",
+      ref: l,
+      children: [(0, IH57JSX.jsxs)("label", {
+        className: "ih57-progress",
+        children: [(0, IH57JSX.jsx)("span", {
+          className: "ih57-sr",
+          children: n ? "Film position" : "Pozycja filmu"
+        }), (0, IH57JSX.jsx)("input", {
+          type: "range",
+          min: "0",
+          max: "40",
+          step: ".1",
+          value: c,
+          disabled: G,
+          "aria-valuetext": `${ih57Clock(c)} / 00:40`,
+          onChange: Z => Gt(Z.target.value),
+          style: {
+            "--ih57-progress": c / 40 * 100 + "%"
+          }
+        })]
+      }), (0, IH57JSX.jsxs)("div", {
+        className: "ih57-controls",
+        children: [(0, IH57JSX.jsxs)("div", {
+          children: [(0, IH57JSX.jsx)("button", {
+            type: "button",
+            disabled: G,
+            onClick: () => p ? Ie() : lt(),
+            "aria-label": n ? p ? "Pause film" : "Play film" : p ? "Zatrzymaj film" : "Odtw\xF3rz film",
+            children: (0, IH57JSX.jsx)(IH57Icon, {
+              kind: p ? "pause" : "play"
+            })
+          }), (0, IH57JSX.jsx)("button", {
+            type: "button",
+            disabled: G,
+            onClick: Pc,
+            "aria-label": n ? "Replay film" : "Powt\xF3rz film",
+            children: (0, IH57JSX.jsx)(IH57Icon, {
+              kind: "replay"
+            })
+          }), (0, IH57JSX.jsxs)("span", {
+            className: "ih57-time",
+            children: [ih57Clock(c), " / 00:40"]
+          })]
+        }), (0, IH57JSX.jsxs)("button", {
+          type: "button",
+          className: "ih57-fee-shortcut",
+          onClick: () => Gt(24.7),
+          children: [(0, IH57JSX.jsxs)("strong", {
+            children: [IDEA_HIRE_PUBLIC_OFFER.percent.toLocaleString(n ? "en-GB" : "pl-PL"), "%"]
+          }), (0, IH57JSX.jsx)("span", {
+            children: n ? "IdeaHire fee" : "Prowizja IdeaHire"
+          })]
+        }), (0, IH57JSX.jsxs)(Link, {
+          className: "ih57-dock-cta",
+          to: "/find-talent",
+          onClick: () => qn(!0),
+          children: [n ? "Find a professional" : "Znajd\u017A wykonawc\u0119", (0, IH57JSX.jsx)(IH57Icon, {
+            kind: "arrow"
+          })]
+        })]
+      }), (0, IH57JSX.jsxs)("div", {
+        className: "ih57-brand-ribbon",
+        children: [(0, IH57JSX.jsx)(IH57Wordmark, {}), (0, IH57JSX.jsx)("nav", {
+          "aria-label": n ? "Stages of working together" : "Etapy wsp\xF3\u0142pracy",
+          children: Qc.map((Z, w) => (0, IH57JSX.jsxs)("button", {
+            type: "button",
+            onClick: () => Gt([0, 12.7, 18.7, 32.7][w]),
+            "aria-current": hc === w ? "step" : void 0,
+            children: [(0, IH57JSX.jsx)("span", {
+              children: String(w + 1).padStart(2, "0")
+            }), (0, IH57JSX.jsx)("b", {
+              children: Z
+            })]
+          }, Z))
+        }), (0, IH57JSX.jsx)("small", {
+          children: n ? "Illustrative scenes \xB7 silent film" : "Sceny ilustracyjne \xB7 film bez d\u017Awi\u0119ku"
+        })]
+      })]
+    })]
+  }), document.body);
 }
+function IH53Showcase({
+  media: A = IH57_MEDIA
+}) {
+  let e = useSitePreferences().language === "en",
+    t = useIH53Reduced(),
+    n = (0, IH57React.useRef)(null),
+    r = (0, IH57React.useRef)(null),
+    [a, o] = (0, IH57React.useState)(!1),
+    [i, l] = (0, IH57React.useState)(null),
+    [f, d] = (0, IH57React.useState)(!1),
+    [s, v] = (0, IH57React.useState)(!1),
+    [h, P] = (0, IH57React.useState)(!1),
+    [y, L] = (0, IH57React.useState)(() => IH53_MOTION.paused),
+    [c, u] = (0, IH57React.useState)(() => document.hidden),
+    [p, B] = (0, IH57React.useState)(!1),
+    Q = typeof navigator < "u" && navigator.connection?.saveData,
+    x = (f || s) && h && !a && !y && !c && !t && !Q;
+  return (0, IH57React.useEffect)(() => {
+    let X = O => L(!!O.detail?.paused),
+      g = () => u(document.hidden);
+    window.addEventListener("ih53-motion", X), document.addEventListener("visibilitychange", g);
+    let E;
+    return typeof IntersectionObserver < "u" ? (E = new IntersectionObserver(O => P(O.some(G => G.isIntersecting)), {
+      rootMargin: "100px",
+      threshold: .01
+    }), E.observe(n.current)) : P(!0), () => {
+      E?.disconnect(), window.removeEventListener("ih53-motion", X), document.removeEventListener("visibilitychange", g);
+    };
+  }, []), (0, IH57React.useEffect)(() => {
+    if (B(!1), !x) return;
+    let X = !1,
+      g = r.current;
+    try {
+      g?.play()?.catch(() => {
+        X || B(!1);
+      });
+    } catch {}
+    return () => {
+      X = !0, g?.pause();
+    };
+  }, [x]), (0, IH57JSX.jsxs)("section", {
+    className: "section ih53-showcase ih57-showcase",
+    id: "how-it-works",
+    "data-no-translate": "true",
+    children: [(0, IH57JSX.jsx)("style", {
+      children: IH57_STYLES
+    }), (0, IH57JSX.jsxs)("div", {
+      className: "ih53-showcase-copy",
+      children: [(0, IH57JSX.jsx)("span", {
+        className: "section-label",
+        children: e ? "People. Projects. IdeaHire." : "Ludzie. Projekty. IdeaHire."
+      }), (0, IH57JSX.jsx)("h2", {
+        children: e ? "An idea needs the right people." : "Pomys\u0142 potrzebuje w\u0142a\u015Bciwych ludzi."
+      }), (0, IH57JSX.jsx)("p", {
+        children: e ? "Describe the project, explore portfolios and agree on the details. See how you can start working together on IdeaHire." : "Opisz projekt, sprawd\u017A portfolio, ustal szczeg\xF3\u0142y. Zobacz, jak mo\u017Cesz rozpocz\u0105\u0107 wsp\xF3\u0142prac\u0119 w IdeaHire."
+      }), (0, IH57JSX.jsx)("span", {
+        className: "ih53-showcase-invitation",
+        children: e ? "Open the film. Explore the stages in the bottom bar." : "Otw\xF3rz film. Poznaj etapy wsp\xF3\u0142pracy na dolnym pasku."
+      }), (0, IH57JSX.jsxs)("div", {
+        className: "ih53-showcase-links",
+        children: [(0, IH57JSX.jsxs)(Link, {
+          to: "/find-talent",
+          children: [e ? "I have a project" : "Mam projekt", (0, IH57JSX.jsx)("span", {
+            "aria-hidden": "true",
+            children: "\u2197"
+          })]
+        }), (0, IH57JSX.jsxs)(Link, {
+          to: "/jobs",
+          children: [e ? "I am looking for work" : "Szukam zlecenia", (0, IH57JSX.jsx)("span", {
+            "aria-hidden": "true",
+            children: "\u2197"
+          })]
+        })]
+      })]
+    }), (0, IH57JSX.jsxs)("button", {
+      type: "button",
+      ref: n,
+      className: "ih53-showcase-tile ih57-tile",
+      "aria-haspopup": "dialog",
+      "aria-label": e ? "Open the IdeaHire film fullscreen" : "Otw\xF3rz film IdeaHire na ca\u0142y ekran",
+      "data-preview": p && x,
+      onPointerEnter: X => {
+        X.pointerType === "mouse" && d(!0);
+      },
+      onPointerLeave: () => {
+        d(!1), n.current?.style.setProperty("--ih57-rx", "0deg"), n.current?.style.setProperty("--ih57-ry", "0deg");
+      },
+      onPointerMove: X => {
+        if (X.pointerType !== "mouse" || t) return;
+        let g = X.currentTarget.getBoundingClientRect();
+        g.width && g.height && (X.currentTarget.style.setProperty("--ih57-rx", (-(X.clientY - g.top) / g.height + .5) * 2.8 + "deg"), X.currentTarget.style.setProperty("--ih57-ry", ((X.clientX - g.left) / g.width - .5) * 2.8 + "deg"));
+      },
+      onFocus: () => v(!0),
+      onBlur: () => v(!1),
+      onClick: () => {
+        l(n.current.getBoundingClientRect()), o(!0), d(!1);
+      },
+      children: [(0, IH57JSX.jsxs)("span", {
+        className: "ih57-tile-picture",
+        children: [(0, IH57JSX.jsx)("img", {
+          src: A.posterWide,
+          alt: "",
+          loading: "lazy",
+          decoding: "async"
+        }), x && (0, IH57JSX.jsx)("video", {
+          ref: r,
+          src: A.wide,
+          muted: !0,
+          playsInline: !0,
+          preload: "none",
+          "aria-hidden": "true",
+          tabIndex: -1,
+          onPlaying: () => B(!0),
+          onTimeUpdate: X => {
+            X.currentTarget.currentTime > 6.5 && (X.currentTarget.currentTime = 0);
+          },
+          onError: () => B(!1)
+        })]
+      }), (0, IH57JSX.jsxs)("span", {
+        className: "ih57-tile-top",
+        children: [(0, IH57JSX.jsx)(IH57Wordmark, {}), (0, IH57JSX.jsx)("span", {
+          children: e ? "40 SECOND FILM" : "FILM \xB7 40 SEKUND"
+        })]
+      }), (0, IH57JSX.jsxs)("span", {
+        className: "ih57-tile-copy",
+        children: [(0, IH57JSX.jsx)("strong", {
+          children: e ? `Ideas need
+people.` : `Pomys\u0142 potrzebuje
+ludzi.`
+        }), (0, IH57JSX.jsxs)("span", {
+          children: [e ? "Watch fullscreen" : "Obejrzyj na ca\u0142y ekran", (0, IH57JSX.jsx)("i", {
+            "aria-hidden": "true",
+            children: (0, IH57JSX.jsx)(IH57Icon, {
+              kind: "play"
+            })
+          })]
+        })]
+      })]
+    }), a && (0, IH57JSX.jsx)(IH57Cinema, {
+      media: A,
+      origin: i,
+      onClose: () => {
+        o(!1), d(!1), v(!1), B(!1);
+      }
+    })]
+  });
+}
+
 function IH53CategoryIcon({category}){const value=String(category||'').toLowerCase();let drawing=value.includes('program')||value.includes('ai')?<><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-12-2 14"/></>:value.includes('graf')||value.includes('design')?<><path d="m4 17 1-4L15 3l6 6-10 10-4 1Z"/><path d="m13 5 6 6M5 15l4 4"/></>:value.includes('video')||value.includes('foto')?<><rect x="3" y="6" width="14" height="13" rx="3"/><path d="m17 10 4-3v13l-4-3M7 3h6"/></>:value.includes('market')?<><path d="M4 10v5h4l10 5V4L8 10Zm4 5 2 6h3l-2-5M21 9v6"/></>:value.includes('copy')||value.includes('tekst')?<><path d="M6 3h9l4 4v14H6Zm9 0v5h4M9 12h7M9 16h5"/></>:<><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><rect x="3" y="7" width="18" height="14" rx="3"/><path d="M3 12c6 4 12 4 18 0M10 13h4"/></>;return <svg viewBox="0 0 24 24" aria-hidden="true">{drawing}</svg>;}
 function ih53RealJob(job){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(job?.id||''));}
 function IH53JobAuthor({job,en,inactive=false}){
