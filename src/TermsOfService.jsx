@@ -1,6 +1,5 @@
-/* P52 — pełny plik src/TermsOfService.jsx | Treść dokumentów zachowana. */
-import React,{useEffect,useLayoutEffect,useRef,useState} from "react";
-import {createPortal} from "react-dom";
+/* P53 — pełny plik src/TermsOfService.jsx | Dawna forma, spis treści, dokumenty zachowane. */
+import React, {useLayoutEffect} from "react";
 import {useSitePreferences} from "./Preferences";
 import LucynaPrivacy from "./LucynaPrivacy";
 import { Link } from "react-router-dom";
@@ -107,34 +106,64 @@ const DOCUMENT_LABELS = {
   },
 };
 
-const IH47_LEGAL_STYLES=String.raw`:host{display:block;font-family:Inter,Arial,sans-serif;font-size:16px;line-height:1.7;color:#1a2420;background:#fff;font-synthesis:none;-webkit-font-smoothing:antialiased;}
-*,*::before,*::after{box-sizing:border-box;}h1,h2,h3,p{margin:0;}a{color:inherit;text-decoration:none;}button{font:inherit;cursor:pointer;}a:focus-visible,button:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid #24685f;outline-offset:5px;}::selection{background:#c7e8df;color:#153b34;}
-.legal-page{min-height:100svh;background:#fff;color:#1a2420;padding:0 5vw 70px;overflow-wrap:anywhere;}.legal-shell{max-width:1320px;margin:0 auto;}.legal-nav{display:flex;justify-content:space-between;align-items:center;gap:30px;min-height:105px;border-bottom:1px solid #d9dfd9;}.legal-logo{display:inline-flex;align-items:center;gap:12px;font-size:29px;font-weight:750;letter-spacing:-1.6px;line-height:1;}.legal-mark{display:grid;grid-template-columns:repeat(2,6px);grid-template-rows:repeat(2,6px);gap:3px;width:15px;height:15px;}.legal-mark i{display:block;background:#203c32;}.legal-actions{display:flex;align-items:center;gap:25px;font-size:13px;}.legal-actions button{min-height:44px;padding:10px 14px;border:1px solid #c9d2ca;background:#fff;color:#203c32;font-size:12px;}.legal-actions a{display:flex;align-items:center;min-height:44px;}.legal-hero{padding:65px 0 37px;max-width:950px;}.legal-eyebrow{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:650;color:#4d6154;margin-bottom:22px;}.legal-hero h1{font-size:clamp(44px,5.8vw,78px);font-weight:600;line-height:1.03;letter-spacing:-.065em;margin:0 0 25px;}.legal-hero>p{font-size:17px;line-height:1.7;max-width:800px;color:#435047;}.legal-meta{display:flex;flex-wrap:wrap;gap:8px 25px;margin-top:28px;color:#526054;font-size:12px;}.legal-warning{display:flex;gap:18px;max-width:1000px;border-left:2px solid #55715c;padding:5px 0 5px 20px;margin:5px 0 35px;font-size:13px;}.legal-warning>span{font-weight:700;font-size:22px;}.legal-warning strong{font-weight:600;}.legal-warning p{margin-top:5px;line-height:1.7;color:#435047;max-width:900px;}.legal-tabs{display:flex;flex-wrap:wrap;gap:10px 28px;border-bottom:1px solid #d9dfd9;padding-bottom:15px;margin-bottom:45px;}.legal-tabs a{display:flex;align-items:center;min-height:44px;font-size:13px;color:#4d5e51;}.legal-tabs a[aria-current=page]{color:#17291e;font-weight:700;box-shadow:0 1px 0 #17291e;}
-.legal-grid{display:grid;grid-template-columns:245px minmax(0,1fr);gap:65px;align-items:start;}.legal-toc{position:sticky;top:24px;max-height:calc(100svh - 55px);overflow:auto;overscroll-behavior:contain;padding:0 15px 10px 0;scrollbar-width:thin;}.legal-toc>strong{display:block;font-size:12px;font-weight:650;margin-bottom:17px;}.legal-toc a{display:block;padding:7px 0;font-size:12px;line-height:1.55;color:#526354;}.legal-toc a:hover{color:#132a1c;text-decoration:underline;text-underline-offset:4px;}.legal-toc-mobile{display:none;}.legal-body{min-width:0;max-width:920px;}.legal-document-content{height:auto;max-height:none;overflow:visible;font-size:16px;line-height:1.85;}.legal-document-content h1,.legal-document-content h2{font-size:27px;line-height:1.25;font-weight:600;letter-spacing:-.03em;margin:45px 0 20px;scroll-margin-top:30px;}.legal-document-content h3{font-size:20px;line-height:1.3;font-weight:600;margin:27px 0 15px;scroll-margin-top:30px;}.legal-document-content p{margin:13px 0;}.legal-document-content>p:first-child{margin-top:0;}.legal-document-content ul,.legal-document-content ol{padding-left:25px;margin:18px 0;}.legal-document-content li{padding-left:5px;}.legal-document-content li>p{margin:9px 0;}.legal-document-content a{color:#215c48;text-decoration:underline;text-underline-offset:3px;}.legal-document-content strong{font-weight:650;}.legal-document-content hr{border:0;border-top:1px solid #d9dfd9;margin:45px 0;}.legal-document-content blockquote{margin:25px 0;padding:5px 0 5px 20px;border-left:2px solid #91ad98;color:#405546;font-size:14px;}.legal-table-scroll{width:100%;overflow-x:auto;margin:27px 0;scrollbar-width:thin;border:1px solid #d9dfd9;}.legal-document-content table{border-collapse:collapse;width:100%;min-width:580px;font-size:14px;line-height:1.65;background:#fff;}.legal-document-content th,.legal-document-content td{padding:14px 16px;text-align:left;vertical-align:top;white-space:normal;overflow-wrap:anywhere;border-bottom:1px solid #d9dfd9;border-right:1px solid #e2e7e0;}.legal-document-content th{background:#f4f6f1;font-weight:650;color:#253d2c;}.legal-document-content tr:last-child td{border-bottom:0;}.legal-document-content td:last-child,.legal-document-content th:last-child{border-right:0;}.legal-document-content code{font-family:ui-monospace,monospace;font-size:.9em;word-break:break-word;}.legal-body>.legal-document-content+section{border-top:1px solid #d9dfd9;margin-top:45px;padding-top:20px;}.legal-footer{display:flex;align-items:center;justify-content:space-between;gap:30px;border-top:1px solid #d9dfd9;margin-top:70px;padding-top:30px;font-size:12px;}.legal-footer>nav{display:flex;flex-wrap:wrap;gap:10px 25px;}.legal-footer a{display:inline-flex;align-items:center;min-height:40px;}.legal-footer>span{color:#526054;}
-@media(max-width:1050px){.legal-grid{grid-template-columns:200px minmax(0,1fr);gap:35px;}.legal-document-content{font-size:15px;}.legal-hero h1{font-size:61px;}}
-@media(max-width:760px){.legal-page{padding:0 23px 45px;}.legal-nav{min-height:90px;gap:20px;}.legal-logo{font-size:26px;}.legal-actions{gap:15px;font-size:12px;}.legal-actions button{font-size:11px;padding:10px;}.legal-hero{padding-top:43px;}.legal-hero h1{font-size:48px;}.legal-hero>p{font-size:15px;}.legal-meta{font-size:11px;gap:8px 18px;}.legal-warning{font-size:12px;padding-left:15px;}.legal-warning>span{font-size:19px;}.legal-tabs{gap:10px 25px;margin-bottom:25px;}.legal-tabs a{font-size:13px;}.legal-grid{display:block;}.legal-toc{display:none;}.legal-toc-mobile{display:block;margin-bottom:35px;border-bottom:1px solid #d9dfd9;}.legal-toc-mobile summary{min-height:48px;padding:10px 0;cursor:pointer;font-size:13px;font-weight:600;}.legal-toc-mobile>nav{padding-bottom:20px;}.legal-toc-mobile a{display:block;font-size:12px;line-height:1.65;padding:7px 0;color:#435e49;}.legal-document-content{font-size:15px;line-height:1.85;}.legal-document-content h1,.legal-document-content h2{font-size:25px;margin-top:35px;}.legal-document-content h3{font-size:19px;}.legal-document-content table{font-size:13px;}.legal-document-content th,.legal-document-content td{padding:12px;}.legal-footer{display:block;margin-top:45px;}.legal-footer>nav{margin:15px 0;gap:5px 22px;}}
-@media(max-width:420px){.legal-nav{gap:12px;}.legal-actions{gap:12px;}.legal-actions>a{max-width:70px;line-height:1.4;}.legal-logo{font-size:23px;gap:8px;}.legal-page{padding-left:18px;padding-right:18px;}.legal-hero h1{font-size:42px;}}
-
-:host{--legal-accent:#12695d;--legal-soft:#e4f7ef;--legal-line:#cbded3;--legal-muted:#465c50;}
-:host([data-template=classic]){--legal-accent:#242424;--legal-soft:#f2f2f2;--legal-line:#d7d7d7;--legal-muted:#555;}
-.legal-nav{min-height:86px;}.legal-logo{font-size:27px;}.legal-mark i{background:var(--legal-accent);}.legal-hero{padding:38px 0 28px;max-width:950px;animation:ih52-legal-enter 480ms ease-out both;}.legal-eyebrow{margin-bottom:16px;color:var(--legal-accent);}.legal-hero h1{font-size:clamp(35px,4.8vw,64px);letter-spacing:-.055em;margin-bottom:18px;}.legal-hero>p{font-size:15px;color:var(--legal-muted);max-width:760px;}.legal-meta{margin-top:20px;color:var(--legal-muted);}.legal-warning{border-color:var(--legal-accent);background:var(--legal-soft);padding:16px 20px;margin-bottom:25px;border-radius:0 6px 6px 0;}.legal-tabs{gap:8px;padding:7px;border:1px solid var(--legal-line);border-radius:7px;background:#fff;margin-bottom:34px;}.legal-tabs a{padding:8px 14px;border-radius:4px;color:var(--legal-muted);}.legal-tabs a[aria-current=page]{background:var(--legal-soft);color:var(--legal-accent);box-shadow:none;}.legal-toc{border-left:2px solid var(--legal-line);padding-left:18px;}.legal-toc>strong{color:var(--legal-accent);}.legal-toc a{color:var(--legal-muted);}.legal-toc a:hover,.legal-document-content a{color:var(--legal-accent);}.legal-document-content{overflow-wrap:anywhere;}.legal-document-content h2{padding-top:12px;border-top:1px solid var(--legal-line);}.legal-document-content table th{background:var(--legal-soft);color:#243b2d;}.legal-grid{gap:45px;}.legal-table-scroll{max-width:100%;overscroll-behavior-x:contain;}.legal-footer{border-color:var(--legal-line);}
-@keyframes ih52-legal-enter{from{opacity:0;translate:0 14px;}to{opacity:1;translate:0 0;}}
-@media(max-width:760px){.legal-nav{min-height:78px;}.legal-logo{font-size:24px;}.legal-hero{padding:30px 0 24px;}.legal-hero h1{font-size:clamp(34px,7vw,48px);line-height:1.08;}.legal-tabs{gap:4px;}.legal-tabs a{padding:8px 10px;font-size:12px;}.legal-warning{padding:14px;font-size:12px;}.legal-toc-mobile{border-color:var(--legal-line);}.legal-toc-mobile summary{color:var(--legal-accent);}.legal-actions{gap:10px;}}
-@media(prefers-reduced-motion:reduce){.legal-hero{animation:none;}}
-
-@media print{.legal-page{padding:0;}.legal-nav,.legal-toc,.legal-toc-mobile,.legal-tabs,.legal-footer,.legal-actions{display:none;}.legal-grid{display:block;}.legal-shell,.legal-body{max-width:none;}.legal-hero{padding:0 0 20px;}.legal-hero h1{font-size:30px;}.legal-meta{font-size:10px;}.legal-warning{font-size:10px;margin-bottom:20px;}.legal-document-content{font-size:11px;line-height:1.6;}.legal-document-content h1,.legal-document-content h2{font-size:17px;break-after:avoid;}.legal-document-content h3{font-size:14px;break-after:avoid;}.legal-table-scroll{overflow:visible;}.legal-document-content table{min-width:0;font-size:10px;}.legal-document-content th,.legal-document-content td{padding:7px;}a{color:inherit;}}
-`;
-function LegalFrame({children}){
- const host=useRef(null),[mount,setMount]=useState(null),site=useSitePreferences();
- useLayoutEffect(()=>{const element=host.current,shadow=element.shadowRoot||element.attachShadow({mode:'open'});let target=shadow.querySelector('[data-legal-mount]');if(!target){const style=document.createElement('style');style.textContent=IH47_LEGAL_STYLES;target=document.createElement('div');target.dataset.legalMount='';shadow.append(style,target);}setMount(target);
-  const guard=document.createElement('style');guard.textContent='body.ih47-legal{margin:0!important;background:#fff!important;color:#1a2420!important}body.ih47-legal #root{max-width:none!important;width:100%!important;padding:0!important;margin:0!important;text-align:left!important}body.ih47-legal [data-ideahire-legal-host]{display:block!important;width:100%!important;min-height:100svh!important;margin:0!important;padding:0!important;transform:none!important;filter:none!important;contain:none!important}body.ih47-legal .site-preferences{display:none!important}';document.head.append(guard);document.body.classList.add('ih47-legal');return()=>{guard.remove();document.body.classList.remove('ih47-legal');};
- },[]);
- useEffect(()=>{if(!mount||!window.location.hash)return;const frame=requestAnimationFrame(()=>mount.getRootNode().getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame);},[mount]);
- function click(e){const link=e.target.closest?.('a[href^="#"]');if(!link)return;e.preventDefault();const id=decodeURIComponent(link.getAttribute('href').slice(1)),target=mount.getRootNode().getElementById(id);target?.scrollIntoView({behavior:'smooth',block:'start'});const details=link.closest('details');if(details)details.open=false;}
- return <div ref={host} data-ideahire-legal-host="p52" data-template={site.template} data-no-translate="true">{mount&&createPortal(<div onClick={click}>{children}</div>,mount)}</div>;
-}
+const IH53_LEGAL_STYLES=String.raw`/* P53: dawna karta dokumentu, pełna treść i spis punktów. */
+body.ih53-legal #root {max-width:none!important;width:100%!important;padding:0!important;margin:0!important;text-align:left!important;}
+__LEGAL__ {display:block!important;min-height:100svh!important;height:auto!important;max-height:none!important;width:100%!important;margin:0!important;padding:24px clamp(16px,4vw,60px) 45px!important;overflow:visible!important;background:var(--v-bg)!important;color:var(--v-ink)!important;font-family:Inter,Arial,sans-serif!important;transform:none!important;filter:none!important;}
+__LEGAL__,__LEGAL__ * {box-sizing:border-box!important;font-family:inherit!important;}
+__LEGAL__ .cookie-policy-shell {display:block!important;width:min(1160px,100%)!important;max-width:1160px!important;min-width:0!important;height:auto!important;max-height:none!important;margin:0 auto!important;padding:0!important;overflow:visible!important;}
+__LEGAL__ .cookie-policy-nav {display:flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important;min-height:76px!important;height:auto!important;margin:0 0 18px!important;padding:14px 20px!important;border:1px solid var(--v-line)!important;border-radius:18px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;}
+__LEGAL__ .cookie-policy-logo {display:inline-flex!important;font-size:27px!important;font-weight:750!important;line-height:1!important;letter-spacing:-1.5px!important;text-decoration:none!important;color:var(--v-ink)!important;}
+__LEGAL__ .cookie-policy-logo,__LEGAL__ .cookie-policy-logo>span {-webkit-text-fill-color:currentColor!important;}
+__LEGAL__ .legal-document-nav-actions {display:flex!important;align-items:center!important;gap:18px!important;font-size:12px!important;}
+__LEGAL__ .legal-document-nav-actions :is(a,button) {display:flex!important;align-items:center!important;justify-content:center!important;min-height:44px!important;padding:9px 12px!important;border:1px solid var(--v-line)!important;border-radius:8px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;font-size:12px!important;line-height:1.4!important;text-decoration:none!important;cursor:pointer!important;}
+__LEGAL__ .legal-document-hero {display:block!important;position:relative!important;min-height:0!important;height:auto!important;max-height:none!important;padding:clamp(30px,5vw,58px)!important;margin:0!important;border:1px solid var(--v-accent)!important;border-radius:26px!important;overflow:visible!important;background:var(--v-accent)!important;color:var(--v-on)!important;animation:ih53-document-in 420ms ease-out both;}
+__LEGAL__ .legal-document-hero::before,__LEGAL__ .legal-document-hero::after {display:none!important;}
+__LEGAL__ .legal-document-hero :is(h1,p,span) {color:var(--v-on)!important;-webkit-text-fill-color:currentColor!important;}
+__LEGAL__ .cookie-policy-eyebrow {display:block!important;margin:0 0 16px!important;font-size:10px!important;font-weight:650!important;letter-spacing:.06em!important;line-height:1.6!important;}
+__LEGAL__ .legal-document-hero h1 {max-width:100%!important;margin:0 0 18px!important;font-size:clamp(34px,4.7vw,60px)!important;line-height:1.08!important;letter-spacing:-.055em!important;font-weight:700!important;overflow-wrap:anywhere!important;}
+__LEGAL__ .legal-document-hero>p {max-width:780px!important;margin:0!important;font-size:14px!important;line-height:1.8!important;opacity:1!important;}
+__LEGAL__ .cookie-policy-meta {display:flex!important;flex-wrap:wrap!important;gap:8px!important;margin:22px 0 0!important;}
+__LEGAL__ .cookie-policy-meta>span {display:block!important;max-width:100%!important;margin:0!important;padding:7px 10px!important;border:1px solid color-mix(in srgb,var(--v-on) 35%,transparent)!important;border-radius:7px!important;background:transparent!important;font-size:10px!important;line-height:1.5!important;}
+__LEGAL__ .legal-document-warning {display:flex!important;gap:15px!important;margin:20px 0!important;padding:18px 22px!important;border:1px solid var(--v-line)!important;border-radius:16px!important;background:var(--v-soft)!important;color:var(--v-ink)!important;}
+__LEGAL__ .legal-document-warning>span {font-size:23px!important;line-height:1.3!important;font-weight:700!important;}
+__LEGAL__ .legal-document-warning strong {color:var(--v-ink)!important;font-size:12px!important;line-height:1.7!important;}
+__LEGAL__ .legal-document-warning p {margin:4px 0 0!important;color:var(--v-muted)!important;font-size:11px!important;line-height:1.8!important;}
+__LEGAL__ .legal-document-tabs {display:flex!important;flex-wrap:wrap!important;gap:8px!important;margin:0 0 25px!important;padding:9px!important;border:1px solid var(--v-line)!important;border-radius:15px!important;background:var(--v-surface)!important;}
+__LEGAL__ .legal-document-tabs>a {display:flex!important;align-items:center!important;justify-content:center!important;min-height:44px!important;padding:10px 17px!important;border:1px solid transparent!important;border-radius:9px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;font-size:12px!important;font-weight:550!important;line-height:1.4!important;text-decoration:none!important;}
+__LEGAL__ .legal-document-tabs>a.is-active {background:var(--v-accent)!important;color:var(--v-on)!important;border-color:var(--v-accent)!important;}
+__LEGAL__ .ih53-legal-layout {display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;align-items:start!important;gap:24px!important;}
+__LEGAL__ .ih53-legal-toc {position:sticky!important;top:20px!important;max-height:calc(100svh - 40px)!important;overflow:auto!important;overscroll-behavior:contain!important;padding:18px!important;border:1px solid var(--v-line)!important;border-radius:16px!important;background:var(--v-surface)!important;scrollbar-width:thin!important;}
+__LEGAL__ .ih53-legal-toc>strong {display:block!important;margin-bottom:13px!important;font-size:12px!important;line-height:1.5!important;color:var(--v-ink)!important;}
+__LEGAL__ .ih53-legal-toc a,__LEGAL__ .ih53-legal-toc-mobile a {display:block!important;padding:8px 0!important;color:var(--v-muted)!important;font-size:11px!important;line-height:1.6!important;text-decoration:none!important;overflow-wrap:anywhere!important;}
+__LEGAL__ .ih53-legal-toc a:hover,__LEGAL__ .ih53-legal-toc-mobile a:hover {color:var(--v-ink)!important;text-decoration:underline!important;text-underline-offset:4px!important;}
+__LEGAL__ .ih53-legal-body {min-width:0!important;height:auto!important;max-height:none!important;overflow:visible!important;}
+__LEGAL__ .legal-document-content {display:block!important;position:static!important;height:auto!important;max-height:none!important;min-width:0!important;margin:0!important;padding:clamp(20px,3vw,36px)!important;border:1px solid var(--v-line)!important;border-radius:20px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;overflow:visible!important;font-size:14px!important;line-height:1.85!important;overflow-wrap:anywhere!important;}
+__LEGAL__ .legal-document-content :is(h1,h2,h3,p,li,strong,td,th) {color:var(--v-ink)!important;-webkit-text-fill-color:currentColor!important;}
+__LEGAL__ .legal-document-content :is(h1,h2) {margin:32px 0 18px!important;font-size:25px!important;font-weight:650!important;line-height:1.3!important;letter-spacing:-.025em!important;scroll-margin-top:25px!important;}
+__LEGAL__ .legal-document-content h3 {margin:24px 0 14px!important;font-size:19px!important;font-weight:650!important;line-height:1.4!important;scroll-margin-top:25px!important;}
+__LEGAL__ .legal-document-content>h1:first-child,__LEGAL__ .legal-document-content>h2:first-child {margin-top:0!important;}
+__LEGAL__ .legal-document-content p {margin:12px 0!important;font-size:inherit!important;line-height:inherit!important;}
+__LEGAL__ .legal-document-content :is(ul,ol) {padding-left:24px!important;margin:18px 0!important;}
+__LEGAL__ .legal-document-content a {color:var(--v-accent)!important;text-decoration:underline!important;text-underline-offset:3px!important;}
+__LEGAL__ .ih53-legal-table {max-width:100%!important;overflow-x:auto!important;overscroll-behavior-x:contain!important;scrollbar-width:thin!important;margin:25px 0!important;border:1px solid var(--v-line)!important;border-radius:7px!important;}
+__LEGAL__ .legal-document-content table {display:table!important;min-width:580px!important;width:100%!important;margin:0!important;border-collapse:collapse!important;background:var(--v-surface)!important;font-size:12px!important;line-height:1.7!important;}
+__LEGAL__ .legal-document-content :is(td,th) {padding:12px 14px!important;border:1px solid var(--v-line)!important;white-space:normal!important;text-align:left!important;vertical-align:top!important;}
+__LEGAL__ .legal-document-content th {background:var(--v-soft)!important;}
+__LEGAL__ .ih53-legal-toc-mobile {display:none!important;}
+__LEGAL__ .legal-document-footer {display:flex!important;align-items:center!important;justify-content:space-between!important;flex-wrap:wrap!important;gap:15px!important;margin:25px 0 0!important;padding:20px!important;border:1px solid var(--v-line)!important;border-radius:15px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;font-size:11px!important;line-height:1.7!important;}
+__LEGAL__ .legal-document-footer nav {display:flex!important;flex-wrap:wrap!important;gap:10px 20px!important;}
+__LEGAL__ .legal-document-footer a {display:inline-flex!important;align-items:center!important;min-height:40px!important;color:var(--v-ink)!important;text-decoration:none!important;}
+__LEGAL__ :is(a,button,summary,[tabindex]):focus-visible {outline:3px solid var(--v-accent)!important;outline-offset:4px!important;}
+@keyframes ih53-document-in {from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
+@media(max-width:820px) {__LEGAL__ {padding-top:15px!important;}__LEGAL__ .cookie-policy-nav {padding:12px 15px!important;gap:12px!important;}__LEGAL__ .cookie-policy-logo {font-size:25px!important;}__LEGAL__ .legal-document-nav-actions {gap:8px!important;}__LEGAL__ .legal-document-nav-actions :is(a,button) {padding:8px!important;font-size:10px!important;}__LEGAL__ .legal-document-hero {padding:32px 23px!important;border-radius:22px!important;}__LEGAL__ .legal-document-hero h1 {font-size:38px!important;}__LEGAL__ .ih53-legal-layout {display:block!important;}__LEGAL__ .ih53-legal-toc {display:none!important;}__LEGAL__ .ih53-legal-toc-mobile {display:block!important;margin-bottom:20px!important;padding:0 17px!important;border:1px solid var(--v-line)!important;border-radius:13px!important;background:var(--v-surface)!important;}__LEGAL__ .ih53-legal-toc-mobile summary {min-height:48px!important;padding:14px 0!important;font-size:12px!important;font-weight:600!important;cursor:pointer!important;}__LEGAL__ .ih53-legal-toc-mobile a {display:flex!important;align-items:center!important;min-height:44px!important;}__LEGAL__ .ih53-legal-toc-mobile nav {max-height:50svh!important;overflow:auto!important;padding-bottom:15px!important;}__LEGAL__ .legal-document-content {padding:23px!important;font-size:14px!important;}__LEGAL__ .legal-document-warning {padding:16px!important;}__LEGAL__ .legal-document-tabs>a {padding:9px 13px!important;font-size:11px!important;}}
+@media(max-width:380px) {__LEGAL__ .cookie-policy-logo {font-size:23px!important;}__LEGAL__ .legal-document-nav-actions :is(a,button) {max-width:80px!important;text-align:center!important;font-size:9px!important;}__LEGAL__ .legal-document-hero h1 {font-size:33px!important;}__LEGAL__ .cookie-policy-nav {gap:10px!important;}__LEGAL__ .legal-document-content {padding:18px!important;}}
+@media(prefers-reduced-motion:reduce) {__LEGAL__ .legal-document-hero {animation:none!important;}}
+@media print {body.ih53-legal #root {width:100%!important;}__LEGAL__ {padding:0!important;background:#fff!important;color:#111!important;}__LEGAL__ .cookie-policy-shell {max-width:none!important;width:100%!important;}__LEGAL__ :is(.cookie-policy-nav,.legal-document-tabs,.ih53-legal-toc,.ih53-legal-toc-mobile,.legal-document-footer) {display:none!important;}__LEGAL__ .ih53-legal-layout {display:block!important;}__LEGAL__ .legal-document-hero {padding:20px 0!important;border:0!important;background:#fff!important;animation:none!important;}__LEGAL__ .legal-document-hero :is(h1,p,span) {color:#111!important;}__LEGAL__ .legal-document-content {border:0!important;border-radius:0!important;padding:0!important;font-size:11px!important;background:#fff!important;}__LEGAL__ .legal-document-content :is(h1,h2,h3,p,li,strong,td,th) {color:#111!important;}__LEGAL__ .legal-document-content h2 {font-size:18px!important;break-after:avoid!important;}__LEGAL__ .ih53-legal-table {overflow:visible!important;}__LEGAL__ .legal-document-content table {min-width:0!important;font-size:10px!important;}}
+`.replaceAll("__LEGAL__","#root".repeat(13)+" .ih53-legal-page");
 
 function LegalDocument({ kind, html }) {
+  const en=useSitePreferences().language==="en";
+  useLayoutEffect(()=>{document.body.classList.add("ih53-legal");let frame=0;if(window.location.hash)frame=requestAnimationFrame(()=>{try{document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({block:"start"});}catch{}});return()=>{cancelAnimationFrame(frame);document.body.classList.remove("ih53-legal");};},[kind]);
   const labels = DOCUMENT_LABELS[kind] || DOCUMENT_LABELS.terms;
   const matchingSupplement =
     kind === "terms"
@@ -156,20 +185,82 @@ function LegalDocument({ kind, html }) {
           )
       : combinedHtml;
 
-  const english=useSitePreferences().language==='en';
-  const toc=[...renderedHtml.matchAll(/<h[12]\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h[12]>/gi)].map(m=>({id:m[1],title:m[2].replace(/<[^>]+>/g,'').replace(/&amp;/g,'&')}));
-  if(kind==='terms'||kind==='privacy')toc.push({id:'lucyna-informacja',title:english?'Lucyna AI — information':'Lucyna AI — informacja o funkcji'});
-  const bodyHtml=renderedHtml.replace(/<table\b/gi,'<div class="legal-table-scroll" tabindex="0"><table').replace(/<\/table>/gi,'</table></div>');
-  const tocLinks=toc.map(item=><a key={item.id} href={'#'+item.id}>{item.title}</a>);
-  const ui=english?{eyebrow:'IDEAHIRE / DOCUMENTS',title:kind==='privacy'?'Privacy policy':kind==='cookies'?'Cookie policy':'IdeaHire terms',print:'Print / save PDF',back:'Back to IdeaHire',contents:'Contents',terms:'Terms',privacy:'Privacy',cookies:'Cookies'}:{eyebrow:labels.eyebrow,title:labels.title,print:'Drukuj / zapisz PDF',back:'Wróć do IdeaHire',contents:'Spis treści',terms:'Regulamin',privacy:'Prywatność',cookies:'Cookies'};
-  return <LegalFrame><main className="legal-page" data-no-translate="true"><div className="legal-shell"><nav className="legal-nav" aria-label={english?'Document navigation':'Nawigacja dokumentów'}><Link className="legal-logo" to="/" aria-label="IdeaHire"><span className="legal-mark" aria-hidden="true"><i/><i/><i/><i/></span>IdeaHire</Link><div className="legal-actions"><button type="button" onClick={()=>window.print()}>{ui.print}</button><Link to="/">{ui.back} ↗</Link></div></nav>
-  <header className="legal-hero"><span className="legal-eyebrow">{ui.eyebrow}</span><h1>{ui.title}</h1><p>{english?(kind==='privacy'?'What data IdeaHire processes, why it is needed and the rights available to users.':kind==='cookies'?'Cookies, browser storage and similar technologies used by IdeaHire.':'Account, project, collaboration, payment, moderation and dispute rules.'):labels.description}</p><div className="legal-meta"><span>{english?'Version 0.9 — pre-release':'Wersja 0.9 — przedprodukcyjna'}</span><span>{english?'As of 6 September 2026':'Stan na 6 września 2026 r.'}</span><span>{english?'The Polish version is authoritative':'Wersja polska jest wiążąca'}</span></div></header>
-  <aside className="legal-warning" role="note"><span aria-hidden="true">!</span><div><strong>{english?'Prepared for testing and legal review':'Wersja przygotowana do testów i konsultacji prawnej'}</strong><p>{english?'Fields marked “DO UZUPEŁNIENIA” must be completed and the document reviewed by a lawyer before commercial launch and real payments.':'Dokument wymaga uzupełnienia danych wskazanych jako „DO UZUPEŁNIENIA” oraz zatwierdzenia przez prawnika przed uruchomieniem komercyjnym i prawdziwych płatności.'}</p></div></aside>
-  <nav className="legal-tabs" aria-label={english?'Legal documents':'Dokumenty prawne'}><Link aria-current={kind==='terms'?'page':undefined} to="/regulamin">{ui.terms}</Link><Link aria-current={kind==='privacy'?'page':undefined} to="/polityka-prywatnosci">{ui.privacy}</Link><Link aria-current={kind==='cookies'?'page':undefined} to="/polityka-cookies">{ui.cookies}</Link></nav>
-  <details className="legal-toc-mobile"><summary>{ui.contents}</summary><nav>{tocLinks}</nav></details><div className="legal-grid"><nav className="legal-toc" aria-label={ui.contents}><strong>{ui.contents}</strong>{tocLinks}</nav><div className="legal-body"><article className="legal-document-content" dangerouslySetInnerHTML={{__html:bodyHtml}}/><LucynaPrivacy kind={kind}/></div></div>
-  <footer className="legal-footer"><Link to="/">IdeaHire ↗</Link><nav aria-label={english?'Other documents':'Pozostałe dokumenty'}><Link to="/regulamin">{ui.terms}</Link><Link to="/polityka-prywatnosci">{ui.privacy}</Link><Link to="/polityka-cookies">{ui.cookies}</Link></nav><span>© 2026</span></footer></div></main></LegalFrame>;
-}
+  const toc=[...renderedHtml.matchAll(/<h[12]\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h[12]>/gi)].map(m=>({id:m[1],title:m[2].replace(/<[^>]+>/g,"").replace(/&amp;/g,"&")}));
+  if(kind==='terms'||kind==='privacy')toc.push({id:'lucyna-informacja',title:en?'Lucyna AI — information':'Lucyna AI — informacja o funkcji'});
+  const links=toc.map(item=><a key={item.id} href={'#'+item.id}>{item.title}</a>);
+  const bodyHtml=renderedHtml.replace(/<table\b/gi,'<div class="ih53-legal-table" tabindex="0"><table').replace(/<\/table>/gi,'</table></div>');
+  function jump(event){const link=event.target.closest?.('a[href^="#"]');if(!link)return;let id;try{id=decodeURIComponent(link.getAttribute('href').slice(1));}catch{return;}const target=document.getElementById(id);if(!target)return;event.preventDefault();const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;target.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});const detail=link.closest('details');if(detail)detail.open=false;}
 
+  return (
+    <main onClick={jump} className={`cookie-policy-page legal-document-page ih53-legal-page legal-document-${kind}`} data-no-translate="true">
+      <style>{IH53_LEGAL_STYLES}</style>
+      <div className="cookie-policy-shell legal-document-shell">
+        <nav className="cookie-policy-nav" aria-label="Nawigacja dokumentów IdeaHire">
+          <Link className="cookie-policy-logo" to="/" aria-label="IdeaHire — strona główna">
+            Idea<span>Hire</span>
+          </Link>
+
+          <div className="legal-document-nav-actions">
+            <button type="button" onClick={() => window.print()}>
+              {en?"Print / save PDF":"Drukuj / zapisz PDF"}
+            </button>
+            <Link className="cookie-policy-back" to="/">
+               {en?"Back to IdeaHire":"Wróć na stronę"}
+            </Link>
+          </div>
+        </nav>
+
+        <header className="cookie-policy-hero legal-document-hero">
+          <span className="cookie-policy-eyebrow">{en?'IdeaHire documents':labels.eyebrow}</span>
+          <h1>{en?(kind==='terms'?'IdeaHire terms':kind==='privacy'?'Privacy policy':'Cookie policy'):labels.title}</h1>
+          <p>{en?(kind==='terms'?'Account, project, collaboration, payment, moderation and dispute rules.':kind==='privacy'?'What data IdeaHire processes, why it is needed and the rights available to users.':'Cookies, browser storage and similar technologies used by IdeaHire.'):labels.description}</p>
+          <div className="cookie-policy-meta">
+            <span>{en?"Version 0.9 \u2014 pre-release":"Wersja 0.9 — przedprodukcyjna"}</span>
+            <span>{en?"As of 6 September 2026":"Stan na 6 września 2026 r."}</span>
+            <span>{en?"The Polish version is authoritative":"Wersja polska jest wiążąca"}</span>
+          </div>
+        </header>
+
+        <aside className="legal-document-warning" role="note">
+          <span aria-hidden="true">!</span>
+          <div>
+            <strong>{en?"Prepared for testing and legal review":"Wersja przygotowana do testów i konsultacji prawnej"}</strong>
+            <p>
+              {en?"Fields marked DO UZUPEŁNIENIA must be completed and the document reviewed by a lawyer before commercial launch and real payments.":"Dokument wymaga uzupełnienia danych wskazanych jako „DO UZUPEŁNIENIA” oraz zatwierdzenia przez prawnika przed uruchomieniem komercyjnym i prawdziwych płatności."}
+            </p>
+          </div>
+        </aside>
+
+        <nav className="legal-document-tabs" aria-label="Dokumenty prawne">
+          <Link className={kind === "terms" ? "is-active" : ""} to="/regulamin">
+            {en?"Terms":"Regulamin"}
+          </Link>
+          <Link className={kind === "privacy" ? "is-active" : ""} to="/polityka-prywatnosci">
+            {en?"Privacy / GDPR":"Prywatność / RODO"}
+          </Link>
+          <Link className={kind === "cookies" ? "is-active" : ""} to="/polityka-cookies">
+            Cookies
+          </Link>
+        </nav>
+
+        <div className="ih53-legal-layout"><aside className="ih53-legal-toc"><strong>{en?'Contents':'Spis treści'}</strong><nav aria-label={en?'Document sections':'Punkty dokumentu'}>{links}</nav></aside><div className="ih53-legal-body"><details className="ih53-legal-toc-mobile"><summary>{en?'Jump to a section':'Przejdź do punktu dokumentu'}</summary><nav>{links}</nav></details>
+        <article className="legal-document-content" dangerouslySetInnerHTML={{__html:bodyHtml}}/>
+        <LucynaPrivacy kind={kind} />
+        </div></div>
+
+        <footer className="cookie-policy-footer legal-document-footer">
+          <Link to="/">IdeaHire</Link>
+          <nav aria-label="Pozostałe dokumenty">
+            <Link to="/regulamin">{en?"Terms":"Regulamin"}</Link>
+            <Link to="/polityka-prywatnosci">{en?"Privacy policy":"Polityka prywatności"}</Link>
+            <Link to="/polityka-cookies">{en?"Cookie policy":"Polityka cookies"}</Link>
+          </nav>
+          <span>© 2026</span>
+        </footer>
+      </div>
+    </main>
+  );
+}
 
 
 export function PrivacyPolicyPage() {
