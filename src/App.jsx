@@ -1,4 +1,4 @@
-/* IdeaHire | P57 | Film promocyjny odzyskany z podglądu P57 | Pełny plik src/App.jsx */
+/* IdeaHire | P58 | Katalog specjalizacji, spokojne tło, pełne przyciski i film bez dolnego panelu | Pełny plik src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as IH57React from "react";
@@ -947,95 +947,123 @@ const HOME_CATEGORY_COPY = {
   ] },
 };
 
-function HomeCategoryBrowser({ groups }) {
+const IH58_CATEGORY_EN = {
+  Programowanie: 'Websites, apps and IT',
+  'Grafika i design': 'Design, UX and 3D',
+  Marketing: 'Marketing and sales',
+  Copywriting: 'Writing and translation',
+  Video: 'Video, animation and audio',
+  Fotografia: 'Photography and image editing',
+  'AI i automatyzacje': 'AI and automation',
+  'Dane, analizy i research': 'Data, analysis and research',
+  'Biznes i e-commerce': 'Business and e-commerce',
+  'Architektura, wnętrza i CAD': 'Architecture, interiors and CAD',
+};
+const IH58_SUMMARY_EN = {
+  Programowanie: 'Websites, shops and applications. Build, connect or improve the tools your project needs.',
+  'Grafika i design': 'Brand identity, interfaces and visual materials prepared for their intended use.',
+  Marketing: 'Campaigns, content and analytics matched to your audience and business goals.',
+  Copywriting: 'Website copy, articles and translations with an agreed scope and tone.',
+  Video: 'Editing, animation and sound for your film, campaign or publication.',
+  Fotografia: 'Photography and image editing for products, people and places.',
+  'AI i automatyzacje': 'Practical automation and AI integrations for clearly defined tasks.',
+  'Dane, analizy i research': 'Organised data, research and reports that answer specific questions.',
+  'Biznes i e-commerce': 'Product catalogues, presentations and support for everyday business operations.',
+  'Architektura, wnętrza i CAD': 'Space planning, drawings and models for presentation or further design work.',
+};
+function ih58SearchText(value) {
+  return String(value || '').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
+}
+function HomeCategoryBrowser({ groups = [] }) {
+  const en = useSitePreferences().language === 'en';
   const [open, setOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || "");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || '');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
+  const [search, setSearch] = useState('');
   const triggerRef = useRef(null);
-  const group = groups.find((item) => item.value === selectedCategory) || groups[0];
-  const subcategories = group?.subcategories || [];
-  const copy = HOME_CATEGORY_COPY[group?.value];
-  const subIndex = subcategories.indexOf(selectedSubcategory);
-  const description = subIndex >= 0
-    ? copy?.descriptions[subIndex] || copy?.summary
-    : copy?.summary;
-  const count = groups.reduce((total, item) => total + (item.subcategories?.length || 0), 0);
-  const query = new URLSearchParams({ category: group?.value || "" });
-  if (selectedSubcategory) query.set("subcategory", selectedSubcategory);
+  const panelRef = useRef(null);
+  const inputRef = useRef(null);
+  const categoryButtons = useRef(new Map());
+  const group = groups.find(item => item.value === selectedCategory) || groups[0];
+  const label = item => en ? IH58_CATEGORY_EN[item?.value] || translateUiText(item?.label || item?.value || '') : item?.label || item?.value || '';
+  const subLabel = value => en ? translateUiText(value) : value;
+  const count = groups.reduce((sum, item) => sum + (item.subcategories?.length || 0), 0);
+  const rows = groups.flatMap(item => (item.subcategories || []).map((value, index) => ({ group: item, value, index })));
+  const terms = ih58SearchText(search).trim().split(/\s+/).filter(Boolean);
+  const results = terms.length ? rows.filter(item => {
+    const text = ih58SearchText([item.value, subLabel(item.value), item.group.value, label(item.group), HOME_CATEGORY_COPY[item.group.value]?.descriptions[item.index]].join(' '));
+    return terms.every(term => text.includes(term));
+  }) : rows.filter(item => item.group.value === group?.value);
+  const queryFor = (category, subcategory) => {
+    const query = new URLSearchParams({ category: category || '' });
+    if (subcategory) query.set('subcategory', subcategory);
+    return `/jobs?${query.toString()}`;
+  };
+  const groupCopy = HOME_CATEGORY_COPY[group?.value];
+  const selectedIndex = group?.subcategories?.indexOf(selectedSubcategory) ?? -1;
+  const summary = en ? IH58_SUMMARY_EN[group?.value] : groupCopy?.summary;
+  const description = en ? summary : selectedIndex >= 0 ? groupCopy?.descriptions[selectedIndex] || summary : summary;
+  const examples = ['Programowanie', 'Grafika i design', 'Video'].map(value => {
+    const item = groups.find(candidate => candidate.value === value && candidate.subcategories?.length);
+    if (!item) return null;
+    const preferred = item.subcategories.find(sub => value === 'Programowanie' ? /strona firmowa/i.test(sub) : value === 'Video' ? /montaż/i.test(sub) : /^logo$/i.test(sub));
+    return { group: item, value: preferred || item.subcategories[0] };
+  }).filter(Boolean);
 
   function closeBrowser() {
     setOpen(false);
-    triggerRef.current?.focus({ preventScroll: true });
+    if (panelRef.current?.contains(document.activeElement)) triggerRef.current?.focus({ preventScroll: true });
+  }
+  function selectCategory(value, subcategory = '') {
+    setSelectedCategory(value);
+    setSelectedSubcategory(subcategory);
+    setSearch('');
+  }
+  function keyboardCategory(event, index) {
+    if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key) || !groups.length) return;
+    event.preventDefault();
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? groups.length - 1 : (index + (['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1) + groups.length) % groups.length;
+    selectCategory(groups[next].value);
+    categoryButtons.current.get(groups[next].value)?.focus({ preventScroll: true });
   }
 
-  function selectCategory(value) {
-    if (value !== selectedCategory) {
-      setSelectedCategory(value);
-      setSelectedSubcategory("");
-    }
-  }
-
-  function onMousePreview(event, action) {
-    if (event.pointerType === "mouse" && window.matchMedia("(hover: hover) and (pointer: fine)").matches) action();
-  }
-
-  return (
-    <div className={`ih-category-browser${open ? " is-open" : ""}`}
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && open) { event.preventDefault(); closeBrowser(); }
-      }}>
-      <button ref={triggerRef} type="button" className="ih-category-trigger"
-        aria-expanded={open} aria-controls="ih-category-panel"
-        onClick={() => setOpen((current) => !current)}>
-        <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, "0")} kategorii</span><span className="ih-category-toggle" aria-hidden="true">{open ? "−" : "+"}</span></span>
-        <span className="ih-category-mark" aria-hidden="true"><i /><i /><i /><i /></span>
-        <span className="ih-category-trigger-title">Nasze<br />kategorie</span>
-        <span className="ih-category-trigger-bottom"><span>{open ? "Zwiń katalog" : "Odkryj specjalizacje"}</span><span aria-hidden="true">↗</span></span>
-      </button>
-
-      <div className="ih53-category-expansion" data-open={open} aria-hidden={!open} inert={open ? undefined : ""}><div className="ih53-category-clip">
-      <section id="ih-category-panel" className="ih-category-panel" aria-labelledby="ih-category-panel-title">
-        <div className="ih-category-panel-heading">
-          <div><span className="ih-category-kicker">Znajdź swój kierunek</span><h3 id="ih-category-panel-title">Kategorie i specjalizacje</h3><p>{groups.length} kategorii{count > 0 ? ` · ${count} specjalizacji` : ""}. Wybierz to, czego potrzebujesz.</p></div>
-          <button type="button" className="ih-category-close" onClick={closeBrowser} aria-label="Zamknij kategorie">×</button>
-        </div>
-        <div className="ih-category-layout">
-          <div className="ih-category-list" role="group" aria-label="Wybierz kategorię">
-            {groups.map((item, index) => (
-              <button type="button" key={item.value} className="ih-category-option" aria-pressed={item.value === group?.value}
-                onClick={() => selectCategory(item.value)} onFocus={() => selectCategory(item.value)}
-                onPointerEnter={(event) => onMousePreview(event, () => selectCategory(item.value))}>
-                <span className="ih-category-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{item.label}</span><span className="ih-category-option-arrow" aria-hidden="true">↗</span>
-              </button>
-            ))}
+  return <div className={`ih-category-browser ih58-category-browser${open ? ' is-open' : ''}`} data-no-translate="true"
+    onKeyDown={event => { if (event.key === 'Escape' && open) { event.preventDefault(); closeBrowser(); } }}>
+    <button ref={triggerRef} type="button" className="ih-category-trigger ih58-category-trigger" aria-expanded={open} aria-controls="ih-category-panel" onClick={() => open ? closeBrowser() : setOpen(true)}>
+      <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, '0')} {en ? 'fields of work' : 'dziedzin współpracy'}</span><span className="ih-category-toggle" aria-hidden="true">{open ? '−' : '+'}</span></span>
+      <span className="ih-category-trigger-title">{en ? <>What is<br />your project?</> : <>Jaki masz<br />projekt?</>}</span>
+      <span className="ih58-category-teaser">{count > 0 ? `${count} ${en ? 'specialisations. One place to start.' : 'specjalizacji. Jeden punkt wyjścia.'}` : en ? 'Choose the field that fits your project.' : 'Wybierz dziedzinę swojego projektu.'}</span>
+      <span className="ih58-category-lines" aria-hidden="true">{groups.map((item, index) => <i key={item.value} style={{ '--ih58-i': index }} />)}</span>
+      <span className="ih-category-trigger-bottom"><span>{open ? en ? 'Close catalogue' : 'Zwiń katalog' : en ? 'Explore specialisations' : 'Odkryj specjalizacje'}</span><span aria-hidden="true">↗</span></span>
+    </button>
+    <div className="ih53-category-expansion" data-open={open} aria-hidden={!open} inert={open ? undefined : ''}><div className="ih53-category-clip">
+      <section ref={panelRef} id="ih-category-panel" className="ih-category-panel ih58-category-panel" aria-labelledby="ih-category-panel-title">
+        <div className="ih-category-panel-heading"><div><span className="ih-category-kicker">{en ? 'Start with what you need' : 'Zacznij od tego, czego potrzebujesz'}</span><h3 id="ih-category-panel-title">{en ? 'Find your specialisation.' : 'Znajdź swoją specjalizację.'}</h3><p>{en ? `${groups.length} categories · ${count} specialisations. Choose a task and see relevant projects.` : `${groups.length} kategorii · ${count} specjalizacji. Wybierz zadanie i przejdź do odpowiednich zleceń.`}</p></div><button type="button" className="ih-category-close" onClick={closeBrowser} aria-label={en ? 'Close categories' : 'Zamknij kategorie'}>×</button></div>
+        <div className="ih58-search-row"><label className="ih58-category-search"><MarketIcon kind="search" /><span className="ih57-sr">{en ? 'Search all specialisations' : 'Szukaj we wszystkich specjalizacjach'}</span><input ref={inputRef} type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={en ? 'What do you need? e.g. logo, website, editing' : 'Czego potrzebujesz? np. logo, strona, montaż'} autoComplete="off" aria-controls="ih58-specialisations" /></label><Link className="ih58-all-jobs" to="/jobs">{en ? 'All projects' : 'Wszystkie zlecenia'} <span aria-hidden="true">↗</span></Link></div>
+        {!!examples.length && <div className="ih58-category-examples"><span>{en ? 'Try a task:' : 'Przykłady zadań:'}</span>{examples.map(item => <button key={item.group.value} type="button" onClick={() => selectCategory(item.group.value, item.value)}>{subLabel(item.value)} <span aria-hidden="true">↗</span></button>)}</div>}
+        <div className="ih-category-layout ih58-category-layout">
+          <div className="ih-category-list ih58-category-list" role="tablist" aria-orientation="vertical" aria-label={en ? 'Fields of work' : 'Dziedziny współpracy'}>
+            {groups.map((item, index) => <button key={item.value} ref={node => { if (node) categoryButtons.current.set(item.value, node); else categoryButtons.current.delete(item.value); }} type="button" className="ih-category-option ih58-category-option" role="tab" id={`ih58-category-${index}`} aria-controls="ih58-category-content" aria-selected={item.value === group?.value} tabIndex={item.value === group?.value ? 0 : -1} onClick={() => selectCategory(item.value)} onKeyDown={event => keyboardCategory(event, index)}>
+              <span className="ih58-category-icon" aria-hidden="true"><IH53CategoryIcon category={item.value} /></span><span>{label(item)}</span><small>{item.subcategories?.length || 0}</small>
+            </button>)}
           </div>
-          <div className="ih-category-content">
-            <div className="ih-category-content-heading"><span className="ih-category-kicker">Specjalizacje</span><h4>{group?.label}</h4></div>
-            <div className="ih-subcategory-grid" role="group" aria-label={`Specjalizacje: ${group?.label}`}>
-              {subcategories.map((item) => (
-                <button type="button" className="ih-subcategory-option" key={item} aria-pressed={item === selectedSubcategory} aria-describedby="ih-category-description"
-                  onClick={() => setSelectedSubcategory(item)} onFocus={() => setSelectedSubcategory(item)}
-                  onPointerEnter={(event) => onMousePreview(event, () => setSelectedSubcategory(item))}>
-                  <span>{item}</span><span aria-hidden="true">↗</span>
-                </button>
-              ))}
+          <div className="ih-category-content ih58-category-content" id="ih58-category-content" role="tabpanel" aria-labelledby={`ih58-category-${Math.max(0, groups.findIndex(item => item.value === group?.value))}`}>
+            <div className="ih58-category-title" key={terms.length ? 'search' : group?.value}><span className="ih-category-kicker">{terms.length ? en ? 'Across all categories' : 'We wszystkich kategoriach' : en ? 'Your field of work' : 'Twoja dziedzina'}</span><h4>{terms.length ? en ? 'Search results' : 'Wyniki wyszukiwania' : label(group)}</h4><p>{terms.length ? en ? `${results.length} matching specialisations` : `Pasujące specjalizacje: ${results.length}` : summary}</p></div>
+            <div id="ih58-specialisations" className="ih58-specialisations" role="group" aria-label={en ? 'Specialisations' : 'Specjalizacje'}>
+              {results.map((item, index) => <div key={`${item.group.value}/${item.value}`} className="ih58-specialisation" data-selected={item.group.value === group?.value && item.value === selectedSubcategory} style={{ '--ih58-i': Math.min(index, 8) }}>
+                <button type="button" aria-pressed={item.group.value === group?.value && item.value === selectedSubcategory} aria-describedby="ih-category-description" onClick={() => { setSelectedCategory(item.group.value); setSelectedSubcategory(item.value); }}><span>{subLabel(item.value)}</span>{terms.length > 0 && <small>{label(item.group)}</small>}</button><Link to={queryFor(item.group.value, item.value)} aria-label={`${en ? 'View projects:' : 'Pokaż zlecenia:'} ${subLabel(item.value)}`}><span aria-hidden="true">↗</span></Link>
+              </div>)}
+              {!results.length && <div className="ih58-category-empty"><strong>{en ? 'No matching specialisation.' : 'Brak pasującej specjalizacji.'}</strong><p>{en ? 'Try a shorter phrase or browse the categories.' : 'Spróbuj krótszej frazy lub wybierz kategorię.'}</p><button type="button" onClick={() => { setSearch(''); inputRef.current?.focus(); }}>{en ? 'Clear search' : 'Wyczyść wyszukiwanie'}</button></div>}
             </div>
-            <div className="ih-category-detail" id="ih-category-description">
-              <span className="ih-category-kicker">{selectedSubcategory ? "O tej specjalizacji" : "O tej kategorii"}</span>
-              <strong>{selectedSubcategory || group?.label}</strong><p>{description || "Przejrzyj zlecenia w tej kategorii i znajdź projekt dla siebie."}</p>
-            </div>
-            <div className="ih-category-links">
-              <Link className="ih-category-jobs-link" to={`/jobs?${query.toString()}`}>Pokaż zlecenia <span aria-hidden="true">↗</span></Link>
-              {selectedSubcategory && <Link className="ih-category-all-link" to={`/jobs?${new URLSearchParams({ category: group?.value }).toString()}`}>Cała kategoria</Link>}
-              <Link className="ih-category-all-link" to="/jobs">Wszystkie zlecenia</Link>
-            </div>
+            <div className="ih-category-detail ih58-category-detail" id="ih-category-description"><span className="ih-category-kicker">{selectedSubcategory ? en ? 'Your selection' : 'Twój wybór' : en ? 'From choice to a project' : 'Od wyboru do zlecenia'}</span><strong>{selectedSubcategory ? subLabel(selectedSubcategory) : label(group)}</strong><p>{description || (en ? 'Choose a specialisation and browse matching project briefs.' : 'Wybierz specjalizację i przejrzyj pasujące ogłoszenia.')}</p><div className="ih-category-links"><Link className="ih-category-jobs-link" to={queryFor(group?.value, selectedSubcategory)}>{en ? 'View matching projects' : 'Zobacz dopasowane zlecenia'} <span aria-hidden="true">↗</span></Link>{selectedSubcategory && <Link className="ih-category-all-link" to={queryFor(group?.value)}>{en ? 'Whole category' : 'Cała kategoria'}</Link>}</div></div>
           </div>
         </div>
+        <span className="ih57-sr" role="status" aria-live="polite">{open ? `${results.length} ${en ? 'specialisations available' : 'dostępnych specjalizacji'}` : ''}</span>
       </section>
-      </div></div>
-    </div>
-  );
+    </div></div>
+  </div>;
 }
+
 
 
 function HomeNavItem({ children, order, to, href, notification = false }) {
@@ -1204,6 +1232,136 @@ function HomeDemoReviews() {
   );
 }
 
+
+const IH58_STYLES = String.raw`/* P58: spokojne tło, użyteczny katalog i film bez dolnego panelu. */
+__IH58__ {background:var(--v-bg)!important;box-shadow:none!important;}
+__IH58__ > main {background:transparent!important;box-shadow:none!important;}
+__IH58__::before,__IH58__::after,__IH58__ > main::before,__IH58__ > main::after,__IH58__ .footer::before,__IH58__ .footer::after,__IH58__ .section::before,__IH58__ .section::after,__IH58__ .split-card::before,__IH58__ .split-card::after,__IH58__ .final-cta::before,__IH58__ .final-cta::after {content:none!important;display:none!important;}
+__IH58__ :is(.section,.ih5-category-showcase,.ih-category-browser,.ih-category-trigger,.ih5-story,.ih-category-panel,.split-card,.final-cta,.footer,.ih53-showcase-tile,[data-ih53-tilt]) {box-shadow:none!important;filter:none!important;}
+__IH58__ :is(.section,.ih5-category-showcase,.split-section,.footer) {background:transparent!important;background-image:none!important;}
+__IH58__ > .ih53-backdrop {display:none!important;}
+__IH58__ .footer {border-radius:0!important;backdrop-filter:none!important;transform:none!important;translate:none!important;rotate:none!important;clip-path:none!important;}
+__IH58__ .ih53-jobs-finale {position:relative!important;isolation:isolate!important;}
+__IH58__ .ih53-jobs-finale > :not(.ih58-ambient) {position:relative;z-index:1;}
+__IH58__ .ih58-ambient {display:block!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;}
+__IH58__ .ih58-ambient::before,__IH58__ .ih58-ambient::after {content:'';position:absolute;top:0;bottom:0;width:1px;left:55%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--v-muted) 8%,transparent) 40%,transparent);}
+__IH58__ .ih58-ambient::after {left:83%;opacity:.6;}
+__IH58__ .ih58-ambient > i {position:absolute;display:block;top:-25%;left:44%;width:1px;height:130px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--v-ink) 16%,transparent),transparent);animation:ih58-flow 15s linear infinite;}
+__IH58__ .ih58-ambient > i:nth-child(2) {left:55%;height:180px;animation-duration:19s;animation-delay:-7s;}
+__IH58__ .ih58-ambient > i:nth-child(3) {left:83%;height:100px;animation-duration:17s;animation-delay:-11s;}
+__IH58__ .ih58-ambient > b {position:absolute;left:34%;right:0;top:-30%;height:130px;opacity:.45;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--v-muted) 4%,transparent) 75%,transparent);animation:ih58-flow 23s linear infinite;}
+__IH58__ .ih58-ambient[data-paused=true] > * {animation-play-state:paused!important;}
+@keyframes ih58-flow {from{translate:0 0;}to{translate:0 850px;}}
+
+__IH58__ .ih58-category-trigger {transform:none!important;transition:border-color 180ms,background-color 180ms!important;overflow:hidden!important;}
+__IH58__ .ih58-category-trigger .ih-category-trigger-title {display:block!important;margin:18px 0 16px!important;line-height:1.05!important;font-size:clamp(39px,4.2vw,62px)!important;letter-spacing:-.05em!important;}
+__IH58__ .ih58-category-teaser {display:block!important;max-width:360px!important;font:400 13px/1.65 Inter,Arial,sans-serif!important;color:inherit!important;}
+__IH58__ .ih58-category-lines {display:flex!important;gap:6px!important;width:100%!important;max-width:330px!important;margin:28px 0!important;}
+__IH58__ .ih58-category-lines i {display:block!important;flex:1!important;height:3px!important;background:currentColor!important;opacity:.24!important;transform:scaleX(.36);transform-origin:left;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 240ms;transition-delay:calc(var(--ih58-i)*18ms);}
+__IH58__ .ih58-category-trigger:is(:hover,:focus-visible) .ih58-category-lines i,__IH58__ .ih58-category-trigger[aria-expanded=true] .ih58-category-lines i {transform:scaleX(1);opacity:.65!important;}
+__IH58__ .ih58-category-trigger .ih-category-trigger-bottom {margin-top:auto!important;}
+__IH58__ .ih58-category-panel {padding:clamp(22px,3.5vw,44px)!important;border-radius:18px!important;background:var(--v-bg)!important;color:var(--v-ink)!important;}
+__IH58__ .ih58-category-panel * {box-sizing:border-box!important;}
+__IH58__ .ih58-category-panel .ih-category-panel-heading {align-items:flex-start!important;gap:18px!important;margin-bottom:25px!important;}
+__IH58__ .ih58-category-panel h3 {font-size:clamp(27px,3.2vw,42px)!important;line-height:1.1!important;letter-spacing:-.04em!important;margin:10px 0 12px!important;color:var(--v-ink)!important;}
+__IH58__ .ih58-category-panel .ih-category-panel-heading p {font-size:13px!important;line-height:1.65!important;color:var(--v-muted)!important;max-width:650px!important;}
+__IH58__ .ih58-category-panel .ih-category-close {flex:0 0 44px!important;width:44px!important;height:44px!important;border:1px solid var(--v-line)!important;background:var(--v-surface)!important;color:var(--v-ink)!important;border-radius:50%!important;box-shadow:none!important;}
+__IH58__ .ih58-search-row {display:flex!important;gap:14px!important;align-items:stretch!important;margin:0 0 14px!important;}
+__IH58__ .ih58-category-search {display:flex!important;align-items:center!important;gap:12px!important;flex:1!important;min-width:0!important;min-height:54px!important;padding:0 16px!important;border:1px solid var(--v-line)!important;border-radius:8px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;}
+__IH58__ .ih58-category-search:focus-within {outline:2px solid var(--v-accent)!important;outline-offset:2px!important;}
+__IH58__ .ih58-category-search > svg {flex:0 0 20px!important;width:20px!important;height:20px!important;stroke:currentColor!important;fill:none!important;}
+__IH58__ .ih58-category-search input {flex:1!important;width:100%!important;min-width:0!important;min-height:52px!important;padding:10px 0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--v-ink)!important;-webkit-text-fill-color:currentColor!important;font:400 14px/1.5 Inter,Arial,sans-serif!important;box-shadow:none!important;outline:0!important;}
+__IH58__ .ih58-category-search input::placeholder {color:var(--v-muted)!important;opacity:1!important;}
+__IH58__ .ih58-all-jobs {display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:18px!important;min-height:54px!important;padding:12px 18px!important;border:1px solid var(--v-line)!important;border-radius:8px!important;color:var(--v-ink)!important;background:var(--v-bg)!important;font:600 12px/1.5 Inter,Arial,sans-serif!important;text-decoration:none!important;white-space:nowrap!important;}
+__IH58__ .ih58-category-examples {display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:8px!important;margin-bottom:30px!important;color:var(--v-muted)!important;font:400 11px/1.5 Inter,Arial,sans-serif!important;}
+__IH58__ .ih58-category-examples > span {margin-right:4px!important;}
+__IH58__ .ih58-category-examples button {display:inline-flex!important;align-items:center!important;gap:12px!important;min-height:38px!important;padding:7px 11px!important;border:1px solid var(--v-line)!important;border-radius:5px!important;background:var(--v-bg)!important;color:var(--v-ink)!important;font:500 11px/1.5 Inter,Arial,sans-serif!important;cursor:pointer!important;}
+__IH58__ .ih58-category-layout {display:grid!important;grid-template-columns:minmax(210px,.36fr) minmax(0,1fr)!important;gap:clamp(22px,3.5vw,48px)!important;align-items:start!important;}
+__IH58__ .ih58-category-list {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:4px!important;max-height:none!important;overflow:visible!important;padding:0!important;margin:0!important;}
+__IH58__ .ih58-category-option {display:grid!important;grid-template-columns:26px minmax(0,1fr) 24px!important;gap:10px!important;align-items:center!important;min-width:0!important;min-height:58px!important;padding:12px!important;margin:0!important;border:1px solid transparent!important;border-radius:8px!important;background:transparent!important;color:var(--v-muted)!important;font:500 12px/1.45 Inter,Arial,sans-serif!important;text-align:left!important;transform:none!important;transition:background-color 160ms,color 160ms,border-color 160ms!important;box-shadow:none!important;cursor:pointer!important;}
+__IH58__ .ih58-category-option[aria-selected=true] {background:var(--v-ink)!important;color:var(--v-bg)!important;border-color:var(--v-ink)!important;}
+__IH58__ .ih58-category-option:hover:not([aria-selected=true]) {color:var(--v-ink)!important;background:var(--v-surface)!important;}
+__IH58__ .ih58-category-option small {color:inherit!important;text-align:right!important;font:400 10px/1.5 Inter,Arial,sans-serif!important;}
+__IH58__ .ih58-category-icon {display:grid!important;place-items:center!important;}
+__IH58__ .ih58-category-icon svg {display:block!important;width:22px!important;height:22px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.5!important;stroke-linecap:round!important;stroke-linejoin:round!important;}
+__IH58__ .ih58-category-content {min-width:0!important;padding:0!important;}
+__IH58__ .ih58-category-title {padding:0 0 20px!important;animation:ih58-catalog-in 260ms cubic-bezier(.2,.8,.2,1) both;}
+__IH58__ .ih58-category-title h4 {margin:10px 0 12px!important;font:700 clamp(23px,2.6vw,34px)/1.15 Inter,Arial,sans-serif!important;letter-spacing:-.035em!important;color:var(--v-ink)!important;}
+__IH58__ .ih58-category-title p {max-width:650px!important;margin:0!important;font:400 13px/1.7 Inter,Arial,sans-serif!important;color:var(--v-muted)!important;}
+__IH58__ .ih58-specialisations {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
+__IH58__ .ih58-specialisation {display:flex!important;min-width:0!important;align-items:stretch!important;border:1px solid var(--v-line)!important;border-radius:7px!important;overflow:hidden!important;background:var(--v-bg)!important;color:var(--v-ink)!important;animation:ih58-catalog-in 280ms calc(var(--ih58-i)*22ms) both;}
+__IH58__ .ih58-specialisation[data-selected=true] {border-color:var(--v-accent)!important;background:var(--v-surface)!important;}
+__IH58__ .ih58-specialisation button {flex:1!important;min-width:0!important;min-height:59px!important;margin:0!important;padding:12px!important;border:0!important;border-radius:0!important;background:transparent!important;color:inherit!important;font:500 12px/1.5 Inter,Arial,sans-serif!important;text-align:left!important;cursor:pointer!important;overflow-wrap:anywhere!important;box-shadow:none!important;}
+__IH58__ .ih58-specialisation button > small {display:block!important;margin-top:3px!important;font:400 10px/1.45 Inter,Arial,sans-serif!important;color:var(--v-muted)!important;}
+__IH58__ .ih58-specialisation > a {display:grid!important;place-items:center!important;flex:0 0 44px!important;min-height:44px!important;color:var(--v-ink)!important;background:transparent!important;font-size:20px!important;text-decoration:none!important;border-left:1px solid var(--v-line)!important;}
+__IH58__ .ih58-specialisation > a:hover {background:var(--v-ink)!important;color:var(--v-bg)!important;}
+__IH58__ .ih58-category-detail {margin-top:20px!important;padding:22px!important;border:1px solid var(--v-line)!important;border-radius:9px!important;background:var(--v-surface)!important;color:var(--v-ink)!important;}
+__IH58__ .ih58-category-detail strong {display:block!important;margin:9px 0!important;font:650 20px/1.3 Inter,Arial,sans-serif!important;letter-spacing:-.025em!important;color:inherit!important;}
+__IH58__ .ih58-category-detail p {margin:0 0 18px!important;font:400 13px/1.7 Inter,Arial,sans-serif!important;color:var(--v-muted)!important;}
+__IH58__ .ih58-category-detail .ih-category-links {display:flex!important;gap:14px!important;align-items:center!important;flex-wrap:wrap!important;margin:0!important;}
+__IH58__ .ih58-category-detail .ih-category-jobs-link {display:inline-flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important;min-height:48px!important;padding:12px 16px!important;border:1px solid var(--v-ink)!important;border-radius:6px!important;background:var(--v-ink)!important;color:var(--v-bg)!important;font:600 12px/1.5 Inter,Arial,sans-serif!important;text-decoration:none!important;}
+__IH58__ .ih58-category-detail .ih-category-all-link {min-height:44px!important;display:inline-flex!important;align-items:center!important;color:var(--v-ink)!important;font:500 12px/1.5 Inter,Arial,sans-serif!important;}
+__IH58__ .ih58-category-empty {grid-column:1/-1!important;padding:24px!important;border:1px solid var(--v-line)!important;border-radius:7px!important;font:400 13px/1.7 Inter,Arial,sans-serif!important;}
+__IH58__ .ih58-category-empty button {min-height:44px!important;padding:9px 13px!important;border:1px solid var(--v-line)!important;border-radius:5px!important;color:var(--v-ink)!important;background:var(--v-bg)!important;cursor:pointer!important;}
+__IH58__ .ih58-category-panel :is(button,a):focus-visible {outline:2px solid var(--v-accent)!important;outline-offset:3px!important;}
+@keyframes ih58-catalog-in {from{opacity:0;translate:0 9px;}to{opacity:1;translate:0 0;}}
+
+__IH58__ .ih53-showcase-links {display:flex!important;gap:10px!important;flex-wrap:wrap!important;margin-top:24px!important;}
+__IH58__ .ih53-showcase-links > a {display:inline-flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important;min-height:50px!important;padding:13px 19px!important;border:1px solid var(--v-ink)!important;border-radius:6px!important;background:var(--v-ink)!important;color:var(--v-bg)!important;-webkit-text-fill-color:currentColor!important;font:600 13px/1.5 Inter,Arial,sans-serif!important;text-decoration:none!important;box-shadow:none!important;transition:opacity 150ms!important;}
+__IH58__ .ih53-showcase-links > a:last-child {background:var(--v-surface)!important;border-color:var(--v-line)!important;color:var(--v-ink)!important;}
+__IH58__ .ih53-showcase-links > a > span {text-decoration:none!important;}
+__IH58__ .ih53-showcase-links > a::before,__IH58__ .ih53-showcase-links > a::after {content:none!important;}
+__IH58__ .ih53-showcase-links > a:hover {opacity:.85!important;}
+__IH58__ .ih53-showcase-links > a:focus-visible {outline:2px solid var(--v-accent)!important;outline-offset:4px!important;}
+
+__IH58_FILM__ {--ih57-dock:32px;}
+__IH58_FILM__ .ih57-top-actions > button {width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;}
+__IH58_FILM__ .ih57-copy-window {inset:var(--ih57-head) 0 var(--ih57-dock)!important;padding-bottom:24px!important;}
+__IH58_FILM__ .ih58-film-progress {position:absolute!important;z-index:5!important;bottom:0!important;left:0!important;right:0!important;display:block!important;height:calc(30px + env(safe-area-inset-bottom,0px))!important;min-height:0!important;margin:0!important;padding:0 clamp(20px,4vw,60px) env(safe-area-inset-bottom,0px)!important;background:transparent!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;color:#fff!important;}
+__IH58_FILM__ .ih58-film-progress label {position:relative!important;display:block!important;height:30px!important;width:100%!important;margin:0!important;padding:0!important;}
+__IH58_FILM__ .ih58-film-progress input {appearance:none!important;-webkit-appearance:none!important;display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:30px!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;cursor:pointer!important;color:#fff!important;}
+__IH58_FILM__ .ih58-film-progress input::-webkit-slider-runnable-track {height:3px!important;border:0!important;border-radius:0!important;background:linear-gradient(90deg,#e1e4e3 var(--ih57-progress),#747c78 var(--ih57-progress))!important;}
+__IH58_FILM__ .ih58-film-progress input::-webkit-slider-thumb {appearance:none!important;-webkit-appearance:none!important;width:12px!important;height:12px!important;margin-top:-4.5px!important;border:0!important;border-radius:50%!important;background:#fff!important;opacity:0!important;box-shadow:none!important;}
+__IH58_FILM__ .ih58-film-progress input::-moz-range-track {height:3px!important;border:0!important;background:#747c78!important;}
+__IH58_FILM__ .ih58-film-progress input::-moz-range-progress {height:3px!important;background:#e1e4e3!important;}
+__IH58_FILM__ .ih58-film-progress input::-moz-range-thumb {width:12px!important;height:12px!important;border:0!important;border-radius:50%!important;background:#fff!important;opacity:0!important;}
+__IH58_FILM__ .ih58-film-progress input:is(:hover,:focus-visible)::-webkit-slider-thumb {opacity:1!important;}
+__IH58_FILM__ .ih58-film-progress input:is(:hover,:focus-visible)::-moz-range-thumb {opacity:1!important;}
+__IH58_FILM__ .ih58-film-progress input:focus-visible {outline:2px solid #fff!important;outline-offset:0!important;}
+__IH58_FILM__ .ih58-film-progress::before,__IH58_FILM__ .ih58-film-progress::after {content:none!important;}
+
+@media(max-width:820px) {
+ __IH58__ .ih58-category-layout {grid-template-columns:minmax(0,1fr)!important;gap:25px!important;}
+ __IH58__ .ih58-category-list {grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;}
+ __IH58__ .ih58-category-option {min-height:62px!important;grid-template-columns:21px minmax(0,1fr)!important;gap:9px!important;padding:10px!important;font-size:11px!important;}
+ __IH58__ .ih58-category-option small {display:none!important;}
+ __IH58__ .ih58-category-icon svg {width:19px!important;height:19px!important;}
+ __IH58__ .ih58-category-panel {padding:22px!important;}
+ __IH58__ .ih58-category-trigger .ih-category-trigger-title {font-size:46px!important;}
+ __IH58_FILM__ .ih57-top {padding-inline:18px!important;gap:10px!important;}
+ __IH58_FILM__ .ih57-top-actions {gap:5px!important;}
+ __IH58_FILM__ .ih57-top-actions > button {width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important;}
+ __IH58_FILM__ .ih57-top .ih57-brand > b {font-size:23px!important;}
+ __IH58_FILM__ .ih57-top .ih57-sign {width:17px!important;height:17px!important;gap:3px!important;}
+}
+@media(max-width:480px) {
+ __IH58__ .ih58-category-panel {padding:20px 16px!important;}
+ __IH58__ .ih58-search-row {flex-direction:column!important;gap:8px!important;}
+ __IH58__ .ih58-all-jobs {justify-content:space-between!important;min-height:44px!important;font-size:11px!important;}
+ __IH58__ .ih58-category-search {padding-inline:11px!important;gap:8px!important;}
+ __IH58__ .ih58-category-search input {font-size:16px!important;}
+ __IH58__ .ih58-specialisations {grid-template-columns:minmax(0,1fr)!important;}
+ __IH58__ .ih58-category-examples button {min-height:44px!important;}
+ __IH58__ .ih58-category-detail {padding:18px!important;}
+ __IH58__ .ih58-category-detail .ih-category-jobs-link {width:100%!important;}
+ __IH58__ .ih53-showcase-links {display:grid!important;grid-template-columns:minmax(0,1fr)!important;}
+ __IH58__ .ih53-showcase-links > a {width:100%!important;}
+ __IH58__ .ih58-ambient::after,__IH58__ .ih58-ambient > i:nth-child(3) {display:none!important;}
+}
+@media(prefers-reduced-motion:reduce) {
+ __IH58__ .ih58-ambient > *,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
+}
+`.replaceAll("__IH58__", "#root".repeat(26) + " .ih53-home").replaceAll("__IH58_FILM__", "body " + "#ih57-cinema".repeat(6));
 
 const IH53_STYLES=String.raw`/* P53 — scenografia 3D i wejścia istniejących kart. Układ P43 zachowany. */
 __IH53__{isolation:isolate!important;background:transparent!important;}
@@ -1740,7 +1898,7 @@ var IH57_STYLES = String.raw`@font-face{font-family:IdeaHireFilmText;src:url('/m
 #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy i{display:grid!important;place-items:center!important;flex:none!important;width:43px!important;height:43px!important;border:1px solid #ffffffa6!important;border-radius:50%!important;background:#ffffff13!important;}
 #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy svg{width:19px!important;height:19px!important;stroke:currentColor!important;fill:currentColor!important;stroke-width:1.5!important;}
 #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile:focus-visible{outline:3px solid var(--v-accent,#12776f)!important;outline-offset:5px!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:82px;--ih57-dock:156px;position:fixed!important;inset:0!important;z-index:2147483000!important;isolation:isolate!important;display:block!important;width:100%!important;height:100%!important;height:100dvh!important;min-width:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#343839!important;color:#fff!important;font-family:IdeaHireFilmText,Inter,Arial,sans-serif!important;-webkit-font-smoothing:antialiased;overscroll-behavior:contain!important;animation:ih57-open 720ms cubic-bezier(.16,.78,.17,1) both;}
+body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:82px;--ih57-dock:32px;position:fixed!important;inset:0!important;z-index:2147483000!important;isolation:isolate!important;display:block!important;width:100%!important;height:100%!important;height:100dvh!important;min-width:0!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#343839!important;color:#fff!important;font-family:IdeaHireFilmText,Inter,Arial,sans-serif!important;-webkit-font-smoothing:antialiased;overscroll-behavior:contain!important;animation:ih57-open 720ms cubic-bezier(.16,.78,.17,1) both;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-closing=true]{animation:ih57-close 400ms cubic-bezier(.3,.02,.4,1) both!important;pointer-events:none!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-poster,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-video{position:absolute!important;z-index:0!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;margin:0!important;border:0!important;border-radius:0!important;background:#343839!important;pointer-events:none!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-video{opacity:0!important;transition:opacity 220ms!important;}
@@ -1791,28 +1949,6 @@ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits b{display
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{display:flex!important;flex-wrap:wrap!important;gap:12px!important;margin-top:25px!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:30px!important;min-height:48px!important;max-width:100%!important;padding:12px 17px!important;border:1px solid #fff!important;border-radius:6px!important;background:#fff!important;color:#192820!important;font:800 14px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;text-decoration:none!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a+a{background:transparent!important;color:#fff!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock{position:absolute!important;z-index:5!important;inset:auto 0 0!important;display:block!important;min-width:0!important;margin:0!important;padding:20px clamp(20px,4vw,64px) calc(13px + env(safe-area-inset-bottom,0px))!important;background:#f8faf9!important;color:#192a23!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress{position:absolute!important;inset:0 0 auto!important;display:block!important;margin:0!important;padding:0!important;width:100%!important;height:18px!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress>input{display:block!important;appearance:none!important;-webkit-appearance:none!important;width:100%!important;height:18px!important;min-height:18px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:linear-gradient(to right,#1b3930 var(--ih57-progress),#bcc8c2 var(--ih57-progress)) center/100% 4px no-repeat!important;color:#1b3930!important;cursor:pointer!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress>input::-webkit-slider-thumb{appearance:none!important;-webkit-appearance:none!important;display:block!important;width:16px!important;height:16px!important;margin:0!important;border:2px solid #fff!important;border-radius:50%!important;background:#1b3930!important;box-shadow:0 0 0 1px #1b3930!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-progress>input::-moz-range-thumb{width:13px!important;height:13px!important;border:2px solid #fff!important;border-radius:50%!important;background:#1b3930!important;box-shadow:0 0 0 1px #1b3930!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:24px!important;min-width:0!important;padding:0 0 12px!important;border-bottom:1px solid #dce3de!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls>div:first-child{display:flex!important;align-items:center!important;flex:none!important;gap:9px!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls button{border-color:#bccbc1!important;background:#fff!important;color:#192a23!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-time{margin-left:8px!important;color:#526259!important;font:400 11px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;font-variant-numeric:tabular-nums!important;white-space:nowrap!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut{display:flex!important;flex-direction:row!important;align-items:center!important;gap:11px!important;min-width:0!important;min-height:44px!important;padding:8px 13px!important;border:1px solid #b5c7bc!important;border-radius:6px!important;background:#e9f0ec!important;color:#153529!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut strong{font:800 21px/1 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;letter-spacing:-.04em!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut span{font:400 12px/1.3 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock-cta{display:flex!important;align-items:center!important;gap:20px!important;min-height:44px!important;color:#192a23!important;font:800 13px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;text-decoration:none!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:26px!important;min-width:0!important;padding-top:11px!important;color:#192a23!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon .ih57-brand>b{font-size:24px!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{display:grid!important;flex:1!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;max-width:650px!important;min-width:0!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;min-width:0!important;min-height:44px!important;padding:8px!important;border:0!important;border-radius:4px!important;background:transparent!important;color:#56665d!important;white-space:nowrap!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>span{font:400 10px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>b{display:block!important;min-width:0!important;font:800 12px/1.5 IdeaHireFilmDisplay,Inter,Arial,sans-serif!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button[aria-current=step]{background:#e3ece6!important;color:#163a28!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>small{max-width:135px!important;color:#65726b!important;font:400 10px/1.5 IdeaHireFilmText,Inter,Arial,sans-serif!important;}
-body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock :is(button,a,input):focus-visible{outline-color:#173c2a!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-loading{position:absolute!important;z-index:7!important;top:calc(var(--ih57-head) + 12px)!important;left:24px!important;max-width:calc(100% - 48px)!important;padding:0!important;color:#fff!important;font-size:12px!important;line-height:1.5!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-loading:not(:empty){padding:9px 13px!important;border-radius:5px!important;background:#1e2726ed!important;}
 body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-gate{position:absolute!important;z-index:6!important;top:calc(var(--ih57-head) + 24px)!important;left:50%!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:12px!important;max-width:calc(100% - 40px)!important;padding:14px!important;border:1px solid #ffffff55!important;border-radius:8px!important;background:#212c29ed!important;transform:translateX(-50%)!important;color:#fff!important;text-align:center!important;}
@@ -1826,18 +1962,15 @@ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-playing=false] .ih57-
 @keyframes ih57-detail-in{from{opacity:0;transform:perspective(1100px) translate3d(55px,10px,-80px) rotateY(-15deg);}to{opacity:1;transform:perspective(1100px) rotateY(-3deg) translateZ(6px);}}
 @keyframes ih57-message-in{from{opacity:0;translate:0 12px;}to{opacity:1;translate:0 0;}}
 @keyframes ih57-value-in{from{opacity:.4;translate:0 5px;}to{opacity:1;translate:0 0;}}
-@media(max-width:1100px){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>small{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{gap:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{max-width:600px!important;}}
 @media(max-width:820px){
  #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-showcase{grid-template-columns:1fr!important;gap:28px!important;padding-block:45px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile{max-width:none!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-copy h2{font-size:36px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih53-showcase-copy>p{max-width:560px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-top{padding:20px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy{padding:22px!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-copy>strong{font-size:clamp(30px,8vw,48px)!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-top>span:last-child{font-size:9px!important;}
- body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:76px;--ih57-dock:153px;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{min-height:70px!important;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px!important;gap:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top .ih57-brand>b{font-size:25px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-film-label{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top-actions{gap:8px!important;}
+ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:76px;--ih57-dock:32px;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{min-height:70px!important;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px!important;gap:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top .ih57-brand>b{font-size:25px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-film-label{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top-actions{gap:8px!important;}
  body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding-top:12px!important;padding-bottom:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{grid-template-columns:minmax(0,1fr)!important;gap:18px!important;padding:22px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{margin-bottom:14px!important;font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2{font-size:clamp(37px,10vw,72px)!important;line-height:1.035!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(30px,7.7vw,52px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{margin-top:15px!important;font-size:14px!important;line-height:1.6!important;}
  body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:17px!important;transform:none!important;border-radius:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{margin-bottom:13px!important;font-size:17px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{margin-bottom:12px!important;font-size:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:7px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio ul{display:flex!important;flex-wrap:wrap!important;gap:11px 16px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio li{font-size:13px!important;gap:6px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{margin-top:9px!important;font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-messages>p{font-size:13px!important;padding:10px 12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate{margin-bottom:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:58px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits{margin-top:8px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-limits b{display:inline!important;margin-left:5px!important;font-size:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dd{font-size:17px!important;}
  body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{gap:10px!important;margin-top:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{flex:1 1 230px!important;min-height:46px!important;font-size:13px!important;}
- body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock{padding:19px 16px calc(10px + env(safe-area-inset-bottom,0px))!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls{gap:10px!important;padding-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls>div:first-child{gap:6px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-time{font-size:10px!important;margin-left:3px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut{gap:7px!important;padding:7px 9px!important;min-height:44px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut strong{font-size:20px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-shortcut span{max-width:60px!important;font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock-cta{display:none!important;}
- body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{display:flex!important;flex-wrap:wrap!important;gap:8px!important;padding-top:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>.ih57-brand{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{max-width:none!important;width:100%!important;gap:3px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button{flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:1px!important;min-height:44px!important;padding:5px 7px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>span{font-size:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button>b{font-size:11px!important;}
 }
 @media(max-width:820px) and (max-height:720px) and (max-aspect-ratio:1/1){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding:12px 0 14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{gap:10px!important;padding:14px 18px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(26px,7vw,40px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{font-size:9px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{font-size:12px!important;line-height:1.45!important;margin-top:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{font-size:16px!important;margin-bottom:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{font-size:18px!important;margin-bottom:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:5px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{font-size:10px!important;margin-top:6px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio ul{gap:8px 12px!important;margin-bottom:7px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-portfolio li{font-size:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-messages>p{font-size:12px!important;line-height:1.4!important;padding:8px 10px!important;margin-bottom:8px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card{display:grid!important;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)!important;column-gap:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card>.ih57-detail-label,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card>.ih57-fee-limits,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card>small{grid-column:1/-1!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate{display:block!important;align-self:center!important;margin:0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:47px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>span{font-size:11px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dt{font-size:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-card dd{font-size:15px!important;}}
-@media(max-height:500px) and (min-aspect-ratio:1/1){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:62px;--ih57-dock:112px;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{min-height:60px!important;padding:8px 22px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top .ih57-brand>b{font-size:23px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding:8px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{grid-template-columns:minmax(0,1fr) minmax(210px,250px)!important;gap:25px!important;padding:18px 24px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy:not([data-detail=true]){grid-template-columns:1fr!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(29px,4vw,47px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{font-size:9px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{font-size:12px!important;line-height:1.5!important;margin-top:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:13px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{font-size:16px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{font-size:18px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:5px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:42px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{font-size:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-dock{padding:13px 22px calc(7px + env(safe-area-inset-bottom,0px))!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-controls{padding-bottom:5px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon{padding-top:4px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon>.ih57-brand{display:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav{max-width:none!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-brand-ribbon nav>button{flex-direction:row!important;align-items:center!important;gap:10px!important;padding:4px 7px!important;min-height:36px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{margin-top:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{flex:none!important;min-height:44px!important;padding:8px 12px!important;font-size:12px!important;}}
+@media(max-height:500px) and (min-aspect-ratio:1/1){body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema{--ih57-head:62px;--ih57-dock:32px;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top{min-height:60px!important;padding:8px 22px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top .ih57-brand>b{font-size:23px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-window{padding:8px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true]{grid-template-columns:minmax(0,1fr) minmax(210px,250px)!important;gap:25px!important;padding:18px 24px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy:not([data-detail=true]){grid-template-columns:1fr!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy h2,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy[data-detail=true] h2{font-size:clamp(29px,4vw,47px)!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-eyebrow{font-size:9px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-copy-main>p{font-size:12px!important;line-height:1.5!important;margin-top:12px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{padding:13px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail-label{font-size:16px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail h3{font-size:18px!important;margin-bottom:10px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail dl>div{padding:5px 0!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-fee-rate>strong{font-size:42px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail>small{font-size:9px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions{margin-top:14px!important;}body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-final-actions>a{flex:none!important;min-height:44px!important;padding:8px 12px!important;font-size:12px!important;}}
 @media(prefers-reduced-motion:reduce){#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema *{animation:none!important;transition:none!important;scroll-behavior:auto!important;}#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .ih53-home .ih57-tile-picture,body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-detail{transform:none!important;}}
 `,
   IH57_DURATION = 40,
@@ -2332,196 +2465,30 @@ function IH57Cinema({
   }, [La, Xl, X, G]);
   let Lc = t ? `${Math.max(0, t.top)}px ${Math.max(0, window.innerWidth - t.right)}px ${Math.max(0, window.innerHeight - t.bottom)}px ${Math.max(0, t.left)}px round 24px` : "15% 25% 15% 25% round 24px",
     Qc = n ? ["Project", "Talent", "Details", "Start"] : ["Projekt", "Wyb\xF3r", "Ustalenia", "Start"];
-  return (0, createPortal)((0, IH57JSX.jsxs)("div", {
-    id: "ih57-cinema",
-    ref: o,
-    role: "dialog",
-    "aria-modal": "true",
-    "aria-labelledby": "ih57-title",
-    "data-no-translate": "true",
-    "data-playing": p,
-    "data-ended": Q,
-    "data-closing": Xa,
-    "data-ready": X,
-    "data-portrait": a,
-    style: {
-      "--ih57-origin": Lc
-    },
-    children: [(0, IH57JSX.jsx)("img", {
-      className: "ih57-poster",
-      src: Ll,
-      alt: ""
-    }), !G && (0, IH57JSX.jsx)("video", {
-      ref: Qa.current,
-      className: "ih57-video",
-      src: La,
-      poster: Ll,
-      playsInline: !0,
-      muted: !0,
-      preload: "auto",
-      "aria-hidden": "true",
-      tabIndex: -1,
-      disablePictureInPicture: !0,
-      onLoadedMetadata: yc,
-      onLoadedData: () => {
-        g(!0), gA(!1);
-      },
-      onCanPlay: () => gA(!1),
-      onPlaying: Z => {
-        !s.current && Z.currentTarget === f.current && (g(!0), O(!1), B(!0), gA(!1));
-      },
-      onPause: Z => {
-        !s.current && Z.currentTarget === f.current && B(!1);
-      },
-      onTimeUpdate: Bc,
-      onEnded: bc,
-      onWaiting: () => {
-        h.current && gA(!0);
-      },
-      onError: () => {
-        s.current || (h.current = !1, Ce(!0), B(!1), gA(!1));
-      }
-    }, La + Xl), (0, IH57JSX.jsxs)("header", {
-      className: "ih57-top",
-      ref: i,
-      children: [(0, IH57JSX.jsx)(IH57Wordmark, {}), (0, IH57JSX.jsx)("span", {
-        className: "ih57-film-label",
-        children: n ? "PEOPLE. PROJECTS. IDEAHIRE." : "LUDZIE. PROJEKTY. IDEAHIRE."
-      }), (0, IH57JSX.jsxs)("div", {
-        className: "ih57-top-actions",
-        children: [(0, IH57JSX.jsx)("button", {
-          type: "button",
-          onClick: Xc,
-          "aria-label": n ? "Toggle fullscreen" : "W\u0142\u0105cz lub wy\u0142\u0105cz pe\u0142ny ekran",
-          "aria-pressed": DA,
-          children: (0, IH57JSX.jsx)(IH57Icon, {
-            kind: "full"
-          })
-        }), (0, IH57JSX.jsx)("button", {
-          type: "button",
-          ref: d,
-          onClick: () => qn(),
-          "aria-label": n ? "Close film" : "Zamknij film",
-          children: (0, IH57JSX.jsx)(IH57Icon, {
-            kind: "close"
-          })
-        })]
-      })]
-    }), (0, IH57JSX.jsx)("h1", {
-      id: "ih57-title",
-      className: "ih57-sr",
-      children: n ? "IdeaHire \u2014 ideas need people" : "IdeaHire \u2014 pomys\u0142 potrzebuje ludzi"
-    }), (0, IH57JSX.jsx)(IH57Scene, {
-      time: c,
-      en: n,
-      ended: Q,
-      onNavigate: () => qn(!0)
-    }), (E || G) && (0, IH57JSX.jsx)("div", {
-      className: "ih57-gate",
-      role: "status",
-      children: G ? (0, IH57JSX.jsxs)(IH57JSX.Fragment, {
-        children: [(0, IH57JSX.jsx)("p", {
-          children: n ? "The film could not be played." : "Nie uda\u0142o si\u0119 odtworzy\u0107 filmu."
-        }), (0, IH57JSX.jsx)("button", {
-          type: "button",
-          onClick: () => {
-            Ce(!1), O(!1), h.current = !0, vc(Z => Z + 1);
-          },
-          children: n ? "Try again" : "Spr\xF3buj ponownie"
-        })]
-      }) : (0, IH57JSX.jsxs)("button", {
-        type: "button",
-        onClick: lt,
-        children: [(0, IH57JSX.jsx)(IH57Icon, {
-          kind: "play"
-        }), n ? "Play film" : "Uruchom film"]
-      })
-    }), (0, IH57JSX.jsx)("div", {
-      className: "ih57-loading",
-      role: "status",
-      "aria-live": "polite",
-      children: Wn && h.current ? n ? "Loading film\u2026" : "\u0141aduj\u0119 film\u2026" : pc
-    }), (0, IH57JSX.jsxs)("footer", {
-      className: "ih57-dock",
-      ref: l,
-      children: [(0, IH57JSX.jsxs)("label", {
-        className: "ih57-progress",
-        children: [(0, IH57JSX.jsx)("span", {
-          className: "ih57-sr",
-          children: n ? "Film position" : "Pozycja filmu"
-        }), (0, IH57JSX.jsx)("input", {
-          type: "range",
-          min: "0",
-          max: "40",
-          step: ".1",
-          value: c,
-          disabled: G,
-          "aria-valuetext": `${ih57Clock(c)} / 00:40`,
-          onChange: Z => Gt(Z.target.value),
-          style: {
-            "--ih57-progress": c / 40 * 100 + "%"
-          }
-        })]
-      }), (0, IH57JSX.jsxs)("div", {
-        className: "ih57-controls",
-        children: [(0, IH57JSX.jsxs)("div", {
-          children: [(0, IH57JSX.jsx)("button", {
-            type: "button",
-            disabled: G,
-            onClick: () => p ? Ie() : lt(),
-            "aria-label": n ? p ? "Pause film" : "Play film" : p ? "Zatrzymaj film" : "Odtw\xF3rz film",
-            children: (0, IH57JSX.jsx)(IH57Icon, {
-              kind: p ? "pause" : "play"
-            })
-          }), (0, IH57JSX.jsx)("button", {
-            type: "button",
-            disabled: G,
-            onClick: Pc,
-            "aria-label": n ? "Replay film" : "Powt\xF3rz film",
-            children: (0, IH57JSX.jsx)(IH57Icon, {
-              kind: "replay"
-            })
-          }), (0, IH57JSX.jsxs)("span", {
-            className: "ih57-time",
-            children: [ih57Clock(c), " / 00:40"]
-          })]
-        }), (0, IH57JSX.jsxs)("button", {
-          type: "button",
-          className: "ih57-fee-shortcut",
-          onClick: () => Gt(24.7),
-          children: [(0, IH57JSX.jsxs)("strong", {
-            children: [IDEA_HIRE_PUBLIC_OFFER.percent.toLocaleString(n ? "en-GB" : "pl-PL"), "%"]
-          }), (0, IH57JSX.jsx)("span", {
-            children: n ? "IdeaHire fee" : "Prowizja IdeaHire"
-          })]
-        }), (0, IH57JSX.jsxs)(Link, {
-          className: "ih57-dock-cta",
-          to: "/find-talent",
-          onClick: () => qn(!0),
-          children: [n ? "Find a professional" : "Znajd\u017A wykonawc\u0119", (0, IH57JSX.jsx)(IH57Icon, {
-            kind: "arrow"
-          })]
-        })]
-      }), (0, IH57JSX.jsxs)("div", {
-        className: "ih57-brand-ribbon",
-        children: [(0, IH57JSX.jsx)(IH57Wordmark, {}), (0, IH57JSX.jsx)("nav", {
-          "aria-label": n ? "Stages of working together" : "Etapy wsp\xF3\u0142pracy",
-          children: Qc.map((Z, w) => (0, IH57JSX.jsxs)("button", {
-            type: "button",
-            onClick: () => Gt([0, 12.7, 18.7, 32.7][w]),
-            "aria-current": hc === w ? "step" : void 0,
-            children: [(0, IH57JSX.jsx)("span", {
-              children: String(w + 1).padStart(2, "0")
-            }), (0, IH57JSX.jsx)("b", {
-              children: Z
-            })]
-          }, Z))
-        }), (0, IH57JSX.jsx)("small", {
-          children: n ? "Illustrative scenes \xB7 silent film" : "Sceny ilustracyjne \xB7 film bez d\u017Awi\u0119ku"
-        })]
-      })]
-    })]
-  }), document.body);
+  return createPortal(
+  <div id="ih57-cinema" ref={o} role="dialog" aria-modal="true" aria-labelledby="ih57-title" data-no-translate="true" data-playing={p} data-ended={Q} data-closing={Xa} data-ready={X} data-portrait={a} style={{ '--ih57-origin': Lc }}>
+    <img className="ih57-poster" src={Ll} alt="" />
+    {!G && <video key={La + Xl} ref={Qa.current} className="ih57-video" src={La} poster={Ll} playsInline muted preload="auto" aria-hidden="true" tabIndex={-1} disablePictureInPicture
+      onLoadedMetadata={yc} onLoadedData={() => { g(true); gA(false); }} onCanPlay={() => gA(false)}
+      onPlaying={event => { if (!s.current && event.currentTarget === f.current) { g(true); O(false); B(true); gA(false); } }}
+      onPause={event => { if (!s.current && event.currentTarget === f.current) B(false); }}
+      onTimeUpdate={Bc} onEnded={bc} onWaiting={() => { if (h.current) gA(true); }}
+      onError={() => { if (!s.current) { h.current = false; Ce(true); B(false); gA(false); } }} />}
+    <header className="ih57-top" ref={i}>
+      <IH57Wordmark /><span className="ih57-film-label">{n ? 'PEOPLE. PROJECTS. IDEAHIRE.' : 'LUDZIE. PROJEKTY. IDEAHIRE.'}</span>
+      <div className="ih57-top-actions">
+        <button type="button" disabled={G} onClick={() => Q ? Pc() : p ? Ie() : lt()} aria-label={n ? Q ? 'Replay film' : p ? 'Pause film' : 'Play film' : Q ? 'Powtórz film' : p ? 'Zatrzymaj film' : 'Odtwórz film'}><IH57Icon kind={Q ? 'replay' : p ? 'pause' : 'play'} /></button>
+        <button type="button" onClick={Xc} aria-label={n ? 'Toggle fullscreen' : 'Włącz lub wyłącz pełny ekran'} aria-pressed={DA}><IH57Icon kind="full" /></button>
+        <button type="button" ref={d} onClick={() => qn()} aria-label={n ? 'Close film' : 'Zamknij film'}><IH57Icon kind="close" /></button>
+      </div>
+    </header>
+    <h1 id="ih57-title" className="ih57-sr">{n ? 'IdeaHire — ideas need people. Illustrative scenes.' : 'IdeaHire — pomysł potrzebuje ludzi. Sceny ilustracyjne.'}</h1>
+    <IH57Scene time={c} en={n} ended={Q} onNavigate={() => qn(true)} />
+    {(E || G) && <div className="ih57-gate" role="status">{G ? <><p>{n ? 'The film could not be played.' : 'Nie udało się odtworzyć filmu.'}</p><button type="button" onClick={() => { Ce(false); O(false); h.current = true; vc(value => value + 1); }}>{n ? 'Try again' : 'Spróbuj ponownie'}</button></> : <button type="button" onClick={lt}><IH57Icon kind="play" />{n ? 'Play film' : 'Uruchom film'}</button>}</div>}
+    <div className="ih57-loading" role="status" aria-live="polite">{Wn && h.current ? n ? 'Loading film…' : 'Ładuję film…' : pc}</div>
+    <footer ref={l} className="ih58-film-progress"><label><span className="ih57-sr">{n ? 'Film position' : 'Pozycja filmu'}</span><input type="range" min="0" max="40" step=".1" value={c} disabled={G} aria-valuetext={`${ih57Clock(c)} / 00:40`} onChange={event => Gt(event.target.value)} style={{ '--ih57-progress': `${c / 40 * 100}%` }} /></label></footer>
+  </div>, document.body
+);
 }
 function IH53Showcase({
   media: A = IH57_MEDIA
@@ -2580,7 +2547,7 @@ function IH53Showcase({
         children: e ? "Describe the project, explore portfolios and agree on the details. See how you can start working together on IdeaHire." : "Opisz projekt, sprawd\u017A portfolio, ustal szczeg\xF3\u0142y. Zobacz, jak mo\u017Cesz rozpocz\u0105\u0107 wsp\xF3\u0142prac\u0119 w IdeaHire."
       }), (0, IH57JSX.jsx)("span", {
         className: "ih53-showcase-invitation",
-        children: e ? "Open the film. Explore the stages in the bottom bar." : "Otw\xF3rz film. Poznaj etapy wsp\xF3\u0142pracy na dolnym pasku."
+        children: e ? "See how a project starts on IdeaHire." : "Zobacz, jak zaczyna się współpraca w IdeaHire."
       }), (0, IH57JSX.jsxs)("div", {
         className: "ih53-showcase-links",
         children: [(0, IH57JSX.jsxs)(Link, {
@@ -2716,6 +2683,7 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
+  <div className="ih58-ambient" aria-hidden="true" data-paused={stopped}><i/><i/><i/><b/></div>
   <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
   <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/find-talent">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
@@ -3081,7 +3049,7 @@ function App({ session, loading, categoryGroups = [] }) {
   return (
     <div ref={ih53RootRef} className="app ih-home-refresh ih-home-v3 ih-home-v4 ih-home-v6 ih-home-v7 ih53-home">
       <style>{IH53_STYLES}</style>
-      <IH53Backdrop rootRef={ih53RootRef}/>
+      <style>{IH58_STYLES}</style>
       <style>{IH40_HEADER_STYLES}</style>
       <div ref={headerSlotRef} className="ih40-header-slot">
       <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
