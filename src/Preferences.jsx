@@ -1,4 +1,4 @@
-/* P47 — pełny plik src/Preferences.jsx */
+/* P51 — pełny plik src/Preferences.jsx | dopracowany turkus */
 /* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
@@ -19,26 +19,26 @@ export const IDEA_HIRE_THEME_IDENTITY=Object.freeze({
 });
 export const IDEA_HIRE_VISUAL_SYSTEM=Object.freeze({
   "turquoise": {
-    "bg": "#29c6c7",
-    "paper": "#35cccb",
-    "surface": "#24bdbc",
-    "ink": "#093a39",
-    "muted": "#164744",
-    "line": "#209c9b",
-    "accent": "#093a39",
-    "on": "#dffcf3",
-    "material": "#1c9d9b"
+    "bg": "#4ed9d2",
+    "paper": "#7de5dc",
+    "surface": "#62ded5",
+    "ink": "#073b37",
+    "muted": "#164b46",
+    "line": "#2f9e95",
+    "accent": "#073b37",
+    "on": "#dffff4",
+    "material": "#279e96"
   },
   "turquoiseDark": {
-    "bg": "#103e3c",
-    "paper": "#154946",
-    "surface": "#1b5350",
-    "ink": "#e1fbf2",
-    "muted": "#b1d9cf",
-    "line": "#3d7770",
-    "accent": "#7ce0ce",
-    "on": "#0a3531",
-    "material": "#3b9188"
+    "bg": "#0b3534",
+    "paper": "#114541",
+    "surface": "#194e48",
+    "ink": "#e2fbf3",
+    "muted": "#b4dcd1",
+    "line": "#4a8075",
+    "accent": "#91e5cd",
+    "on": "#0b3630",
+    "material": "#317e72"
   },
   "mono": {
     "bg": "#f6f5ef",
