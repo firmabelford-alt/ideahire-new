@@ -1,4 +1,4 @@
-/* P51 — pełny plik src/Preferences.jsx | dopracowany turkus */
+/* P52 — pełny plik src/Preferences.jsx | biała baza i turkusowe karty */
 /* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
 
@@ -9,58 +9,58 @@ export const IDEA_HIRE_THEME_IDENTITY=Object.freeze({
   "pl": {
     "eyebrow": "IdeaHire / Turkus",
     "title": "Turkus",
-    "description": "Jedna turkusowa paleta, rytm Cięcia i przestrzenne sekcje."
+    "description": "Białe tło, turkusowe karty i czytelny układ."
   },
   "en": {
     "eyebrow": "IdeaHire / Turquoise",
     "title": "Turquoise",
-    "description": "One turquoise palette, cinematic cuts and spatial sections."
+    "description": "White backgrounds, turquoise cards and a clear layout."
   }
 });
 export const IDEA_HIRE_VISUAL_SYSTEM=Object.freeze({
   "turquoise": {
-    "bg": "#4ed9d2",
-    "paper": "#7de5dc",
-    "surface": "#62ded5",
-    "ink": "#073b37",
-    "muted": "#164b46",
-    "line": "#2f9e95",
-    "accent": "#073b37",
-    "on": "#dffff4",
-    "material": "#279e96"
+    "bg": "#ffffff",
+    "paper": "#ffffff",
+    "surface": "#f3f7f5",
+    "ink": "#192c27",
+    "muted": "#4c5f58",
+    "line": "#d2dfd8",
+    "accent": "#12695d",
+    "on": "#ffffff",
+    "material": "#b7d6cb"
   },
   "turquoiseDark": {
-    "bg": "#0b3534",
-    "paper": "#114541",
-    "surface": "#194e48",
-    "ink": "#e2fbf3",
-    "muted": "#b4dcd1",
-    "line": "#4a8075",
-    "accent": "#91e5cd",
-    "on": "#0b3630",
-    "material": "#317e72"
+    "bg": "#171e1c",
+    "paper": "#202b26",
+    "surface": "#28362f",
+    "ink": "#f1fbf5",
+    "muted": "#bdd2c5",
+    "line": "#4a6254",
+    "accent": "#9bdfc1",
+    "on": "#163c2c",
+    "material": "#42634f"
   },
   "mono": {
-    "bg": "#f6f5ef",
-    "paper": "#f6f5ef",
-    "surface": "#e9eae4",
-    "ink": "#151c1a",
-    "muted": "#4f5952",
-    "line": "#c2c8bf",
-    "accent": "#151c1a",
-    "on": "#f9fbf5",
-    "material": "#b5bdb3"
+    "bg": "#ffffff",
+    "paper": "#ffffff",
+    "surface": "#f4f4f4",
+    "ink": "#191919",
+    "muted": "#555555",
+    "line": "#d5d5d5",
+    "accent": "#191919",
+    "on": "#ffffff",
+    "material": "#cdcdcd"
   },
   "monoDark": {
-    "bg": "#141917",
-    "paper": "#1b221e",
-    "surface": "#242c27",
-    "ink": "#f0f5ec",
-    "muted": "#b9c4b9",
-    "line": "#47584a",
-    "accent": "#e3ecde",
-    "on": "#172019",
-    "material": "#687867"
+    "bg": "#191919",
+    "paper": "#232323",
+    "surface": "#2c2c2c",
+    "ink": "#fafafa",
+    "muted": "#c6c6c6",
+    "line": "#505050",
+    "accent": "#fafafa",
+    "on": "#191919",
+    "material": "#686868"
   }
 });
 
