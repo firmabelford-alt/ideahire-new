@@ -1,3 +1,4 @@
+/* P63 — two-step specialisations, responsive navigation and a true turquoise palette. */
 /* P61 — a precise trace background and the shared IdeaHire identity. */
 /* P60 — service catalogue, visible wipe background and browsing access. */
 /* P59 — floating light field, typographic categories, bounded calculator. */
@@ -8,8 +9,9 @@ import * as IH57React from "react";
 import * as IH57JSX from "react/jsx-runtime";
 import { createPortal } from "react-dom";
 import "./App.css";
+import "./SitePolish.css";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
-import { BrandSignature, BrandLogo, drawBrandSignature } from "./Brand";
+import { BrandSignature, BrandLogo } from "./Brand";
 import { useBrandReady } from "./BrandOpening";
 import { IDEA_HIRE_PUBLIC_OFFER, MarketIcon, helpCenterHref } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
@@ -417,18 +419,17 @@ function ih43Panel(c,x,y,w,h,options={}){
   if(options.label)ih43Text(c,options.label,-w/2+21,-h/2+28,11,ink,600);
   c.fillStyle=ink;for(let i=0;i<3;i++){c.globalAlpha*=.8;c.beginPath();c.arc(w/2-23-i*9,-h/2+24,2,0,Math.PI*2);c.fill();}c.restore();
 }
-function ih43Palette(classic){const p=IH43_FILM.palette;if(!classic)return p;return{...p,paper:"#efefec",ink:"#121212",accent:"#777777",secondary:"#b0b0ad",light:"#ffffff",muted:"#777777"};}
-function ih43Backdrop(c,l,p,shot,time){
-  const mode=shot.bg||"ink",bg=mode==="paper"?p.paper:mode==="accent"?p.accent:mode==="secondary"?p.secondary:p.ink;c.fillStyle=bg;c.fillRect(0,0,l.w,l.h);
-  c.save();c.globalAlpha=.055;c.strokeStyle=mode==="paper"?p.ink:p.paper;c.lineWidth=1;
-  if(IH43_FILM.genre==="cut"){
-    const drift=(time*48)%80;for(let x=-100;x<l.w+100;x+=80){c.beginPath();c.moveTo(x+drift,0);c.lineTo(x+drift-l.h*.14,l.h);c.stroke();}
-  }else if(IH43_FILM.genre==="network"){
-    const offset=(time*14)%44;for(let x=-44;x<l.w+44;x+=44)for(let y=-44;y<l.h+44;y+=44)c.fillRect(x+offset,y,1.1,1.1);
-  }else{
-    const band=(time*32)%160;for(let y=-160;y<l.h+160;y+=160)c.fillRect(0,y+band,l.w,1);
-  }
-  c.restore();return{bg,ink:mode==="paper"||mode==="secondary"?p.ink:p.paper};
+function ih43Palette(classic) {
+  const p = IH43_FILM.palette;
+  if (classic) return { ...p, paper: "#efefec", ink: "#121212", accent: "#777777", secondary: "#b0b0ad", light: "#ffffff", muted: "#666666" };
+  return { ...p, paper: "#e7fbfc", ink: "#092b30", accent: "#19cbd3", secondary: "#b8edf0", light: "#ffffff", muted: "#497276" };
+}
+function ih43Backdrop(c, l, p, shot) {
+  const mode = shot.bg || "ink";
+  const bg = mode === "paper" ? p.paper : mode === "accent" ? p.accent : mode === "secondary" ? p.secondary : p.ink;
+  c.fillStyle = bg;
+  c.fillRect(0, 0, l.w, l.h);
+  return { bg, ink: ih43Readable(bg, p.ink, p.paper) };
 }
 function ih43Transition(c,l,p,phase){
   const duration=.32,remaining=phase.shot.duration-phase.local;if(remaining>duration||IH43_FILM.genre==="network")return;
@@ -443,7 +444,6 @@ function ih43Transition(c,l,p,phase){
 function ih43Ui(c,l,p,s,phase){
   const bg=phase.shot.bg||"ink",surface=bg==="paper"?p.paper:bg==="accent"?p.accent:bg==="secondary"?p.secondary:p.ink,ink=ih43Readable(surface,p.ink,p.paper),outline=ink===p.ink||ink==="#000000"?"rgba(20,20,20,.35)":"rgba(245,245,235,.45)";
   const language=s.english?IH43_FILM.en:IH43_FILM.pl;
-  drawBrandSignature(c,l.pad,26,l.mobile?26:30,ink);
   const progress=phase.cycle/IH43_FILM.period;c.fillStyle=outline;c.fillRect(l.pad,68,l.w-l.pad*2,1);c.fillStyle=ink;c.fillRect(l.pad,68,(l.w-l.pad*2)*progress,2);
   const icon=(index,type)=>{
     const x=l.toolbarX+index*52,y=l.toolbarY;c.save();if(s.reduced)c.globalAlpha=.4;ih43Box(c,x,y,44,44,null,22,outline);c.translate(x+22,y+22);c.strokeStyle=ink;c.lineWidth=1.5;c.lineCap="round";
@@ -529,7 +529,7 @@ function ih43CutConversation(c,l,p,phase,words,time){
   const tick=.4+.6*Math.sin(time*5)**2;c.save();c.globalAlpha=tick;const promptSize=ih43Fit(c,[words.prompt],width-22,18,l.mobile?10:11,500);ih43Text(c,words.prompt,x,y+height*.61,promptSize,p.ink,500,"center");c.restore();
 }
 function ih43Scene(c,l,p,phase,s,time){
-  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,text=lang.frames[phase.index],ink=shot.bg==="paper"||shot.bg==="secondary"?p.ink:p.paper;
+  const shot=phase.shot,lang=s.english?IH43_FILM.en:IH43_FILM.pl,text=lang.frames[phase.index],surface=shot.bg==="paper"?p.paper:shot.bg==="accent"?p.accent:shot.bg==="secondary"?p.secondary:p.ink,ink=ih43Readable(surface,p.ink,p.paper);
   const enter=IH43.clamp(phase.local/.48),shake=s.reduced?0:Math.sin(phase.local*72)*Math.exp(-phase.local*13)*5;
   c.translate(shake,0);
   const titleBox={x:l.pad,y:l.y+13,w:l.cw,h:l.ch-16};
@@ -547,13 +547,13 @@ function ih43Scene(c,l,p,phase,s,time){
     const scale=IH43.back(phase.local/.45);c.save();c.translate(l.w/2,l.y+l.ch/2);c.rotate(-.05+(1-scale)*.2);c.scale(scale,scale);ih43Box(c,-l.cw*.44,-l.ch*.36,l.cw*.88,l.ch*.72,p.paper,0);c.strokeStyle=p.ink;c.lineWidth=3;c.strokeRect(-l.cw*.41,-l.ch*.32,l.cw*.82,l.ch*.64);ih43Lines(c,text,{x:-l.cw*.36,y:-l.ch*.29,w:l.cw*.72,h:l.ch*.58},{color:p.ink,progress:1,mode:"rise",max:l.mobile?48:100});c.restore();
   }else if(shot.kind==="pair"){
     const two=text.slice(0,2),gap=14,bw=l.mobile?l.cw:(l.cw-gap)/2,bh=l.mobile?l.ch*.30:l.ch*.60;
-    for(let i=0;i<2;i++){const e=IH43.ease((phase.local-i*.16)/.5),x=l.mobile?l.pad:l.pad+i*(bw+gap),y=l.mobile?l.y+i*(bh+16):l.y+l.ch*.05;c.save();c.translate((i?1:-1)*(1-e)*l.w,0);ih43Box(c,x,y,bw,bh,i?p.accent:p.paper,7);ih43Lines(c,[two[i]],{x:x+18,y:y+20,w:bw-36,h:bh-40},{color:i?p.paper:p.ink,progress:1,max:l.mobile?38:68});c.restore();}
+    for(let i=0;i<2;i++){const e=IH43.ease((phase.local-i*.16)/.5),x=l.mobile?l.pad:l.pad+i*(bw+gap),y=l.mobile?l.y+i*(bh+16):l.y+l.ch*.05;c.save();c.translate((i?1:-1)*(1-e)*l.w,0);ih43Box(c,x,y,bw,bh,i?p.accent:p.paper,7);ih43Lines(c,[two[i]],{x:x+18,y:y+20,w:bw-36,h:bh-40},{color:ih43Readable(i?p.accent:p.paper,p.ink,p.paper),progress:1,max:l.mobile?38:68});c.restore();}
     ih43Lines(c,[text[2]],{x:l.pad,y:l.y+l.ch*.72,w:l.cw,h:l.ch*.27},{color:ink,progress:IH43.ease((phase.local-.55)/.40),mode:"slam",max:l.mobile?55:100});
   }else if(shot.kind==="final"){
     const float=s.reduced?0:Math.sin(time*1.6)*3;
     if(!s.reduced){c.save();c.globalAlpha=.12;const label=lang.endTags[Math.floor(phase.local/2.1)%3],sz=l.mobile?100:245;ih43Text(c,label,l.pad+(1-((phase.local/3)%1))*l.cw,l.y+l.ch*.80,sz,ink,900);c.restore();}
     ih43Lines(c,text,{...titleBox,y:titleBox.y-25+float,h:l.ch*.72},{color:ink,progress:IH43.clamp(phase.local/.6),mode:"letters",max:l.mobile?85:185});
-    const tags=lang.endTags;for(let i=0;i<3;i++){const x=l.pad+l.cw*(.17+i*.33),y=l.y+l.ch*.85+Math.sin(time*2+i*1.7)*5;ih43Tag(c,tags[i],x,y,{fill:i%2?p.accent:p.paper,ink:i%2?p.paper:p.ink},Math.sin(time+i)*.035,l.mobile?.73:1);}
+    const tags=lang.endTags;for(let i=0;i<3;i++){const x=l.pad+l.cw*(.17+i*.33),y=l.y+l.ch*.85+Math.sin(time*2+i*1.7)*5;ih43Tag(c,tags[i],x,y,{fill:i%2?p.accent:p.paper,ink:ih43Readable(i%2?p.accent:p.paper,p.ink,p.paper)},Math.sin(time+i)*.035,l.mobile?.73:1);}
   }else ih43Lines(c,text,titleBox,{color:ink,progress:enter,mode:shot.motion||"slam",max:l.mobile?95:220});
   if(shot.kind!=="fee"&&shot.kind!=="final"){
     const rail=s.english?"CUT / ":"CIĘCIE / ";c.save();c.globalAlpha=.28;ih43Text(c,rail+String(phase.index+1).padStart(2,"0"),l.w-l.pad,l.y+l.ch-2,9,ink,600,"right",1.2);c.restore();
@@ -972,6 +972,7 @@ function HomeNavItem({ children, order, to, href, notification = false }) {
 }
 
 function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
+  const en = useSitePreferences().language === "en";
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
@@ -1055,7 +1056,7 @@ function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
       aria-label="Funkcje konta" onKeyDown={navigateMenu}
       onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget) && !triggerRef.current?.contains(event.relatedTarget)) setOpen(false); }}>
       <div className="account-menu-identity"><strong>{name}</strong><span>Konto IdeaHire</span></div>
-      <Link to="/account" onClick={() => setOpen(false)}>Moje konto</Link>
+      <Link to="/account" onClick={() => setOpen(false)}>{en?"My account":"Moje konto"}</Link>
       <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
         <MarketIcon kind="help" /><span>Pomoc</span>
       </a>
@@ -2576,7 +2577,6 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
-  <svg className="ih61-trace-field" viewBox="0 0 1440 720" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-paused={paused||reduced||hidden||!visible}><path d="M-80 100H940L976 118H1520M-80 612H398L434 630H1520"/><path className="ih61-trace-run" d="M-80 100H940L976 118H1520"/><path className="ih61-trace-run" d="M-80 612H398L434 630H1520"/></svg>
   <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
   <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
@@ -2946,7 +2946,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
       <style>{IH58_STYLES}</style>
       <style>{IH40_HEADER_STYLES}</style>
       <div ref={headerSlotRef} className="ih40-header-slot">
-      <header ref={headerRef} className="navbar home-navbar ih-home-header" data-auth={session ? "member" : "guest"}
+      <header id="ih63-home-header" ref={headerRef} className="navbar home-navbar ih-home-header ih63-header" data-auth={session ? "member" : "guest"}
         data-mobile-menu-open={mobileMenuOpen}
         onKeyDown={(event) => {
           if (event.key === "Escape" && mobileMenuOpen) {
@@ -2962,11 +2962,11 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
           {session&&!limitedAccess&&<Link className="ih53-desktop-account" to="/notifications">Powiadomienia{hasNotifications&&<span className="ih53-unread" aria-label="Nowe powiadomienia"/>}</Link>}
           {session&&<Link className="ih53-desktop-account" to="/account">Moje konto</Link>}
         </nav>
-        <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label="Nawigacja strony głównej"
+        <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label={ih53English?"Homepage navigation":"Nawigacja strony głównej"}
           onClick={(event) => { if (event.target?.closest?.("a")) setMobileMenuOpen(false); }}>
           <HomeNavItem href="#how-it-works" order={0}>{ih53English?"Explore IdeaHire":"Poznaj IdeaHire"}</HomeNavItem>
-          <HomeNavItem href="#categories" order={1}>Kategorie</HomeNavItem>
-          <HomeNavItem href="#for-users" order={2}>Dla Ciebie</HomeNavItem>
+          <HomeNavItem href="#categories" order={1}>{ih53English?"Categories":"Kategorie"}</HomeNavItem>
+          <HomeNavItem href="#for-users" order={2}>{ih53English?"For you":"Dla Ciebie"}</HomeNavItem>
 
           {session && (
             <>
@@ -2980,10 +2980,11 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
           <HomeNavItem to="/find-talent" order={6}>Znajdź wykonawcę</HomeNavItem>
           <HomeNavItem to="/regulamin" order={7}>Regulamin</HomeNavItem>
           <a href={helpCenterHref()} referrerPolicy="no-referrer">Centrum pomocy</a>
-          {!session && <Link className="ih-mobile-login" to="/login">Zaloguj się</Link>}
+          {!session && <><Link className="ih-mobile-login" to="/login">{ih53English?"Sign in":"Zaloguj się"}</Link><Link to="/register">{ih53English?"Create an account":"Utwórz konto"}</Link></>}
+          {session && <button type="button" className="ih63-menu-logout" onClick={handleLogout}>{ih53English?"Sign out":"Wyloguj się"}</button>}
         </nav>
 
-        <div className="nav-actions">
+        <div className="nav-actions" data-ih63-auth={session?"member":"guest"}>
           {loading ? (
             <span>Ładowanie...</span>
           ) : session ? (
@@ -3024,7 +3025,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
         </div>
 
         <button ref={mobileMenuButtonRef} className="ih-mobile-nav-toggle" type="button"
-          aria-label={mobileMenuOpen ? "Zamknij menu" : "Otwórz menu"}
+          aria-label={ih53English?(mobileMenuOpen?"Close menu":"Open menu"):(mobileMenuOpen?"Zamknij menu":"Otwórz menu")}
           aria-expanded={mobileMenuOpen} aria-controls="ih-home-navigation" data-notification={hasNotifications}
           onClick={() => setMobileMenuOpen((current) => !current)}>
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -3039,9 +3040,9 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
         <HomeDemoReviews />
 
-        <section className="categories section ih62-specialisations-section" id="categories">
+        <section className="categories section ih63-specialisations-section" id="categories">
           <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} details={HOME_CATEGORY_COPY} />
-          <div className="ih62-fee-placement"><IH53CommissionStory /></div>
+          <div className="ih63-fee-placement"><IH53CommissionStory /></div>
         </section>
 
         <IH53Showcase />

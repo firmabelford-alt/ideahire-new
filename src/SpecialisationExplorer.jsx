@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { translateUiText, useSitePreferences } from "./Preferences";
 import "./SpecialisationExplorer.css";
@@ -196,17 +196,16 @@ export function normaliseSpecialisation(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l").replace(/Ł/g, "L").toLowerCase();
 }
 
-/* P62 — a single-column accordion; one field open at a time. */
+/* P63 — two separate steps. No nested accordion or narrow side panel. */
 export default function SpecialisationExplorer({ groups = [], details = {} }) {
   const { language } = useSitePreferences();
   const en = language === "en";
   const [active, setActive] = useState(null);
   const [search, setSearch] = useState("");
   const searchInput = useRef(null);
-  const triggers = useRef(new Map());
-  const panels = useRef(new Map());
-  const words = normaliseSpecialisation(search).trim().split(/\s+/).filter(Boolean);
-  const searching = words.length > 0;
+  const fieldButtons = useRef(new Map());
+  const detailTitle = useRef(null);
+  const focusAfterChange = useRef(null);
   const label = item => en
     ? EN_FIELDS[item.value] || translateUiText(item.label || item.value)
     : item.label || item.value;
@@ -217,6 +216,9 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
       ? EN_DELIVERABLES[group.value]?.[index] || EN_INTROS[group.value] || ""
       : details[group.value]?.descriptions?.[index] || details[group.value]?.summary || "",
   })));
+  const words = normaliseSpecialisation(search).trim().split(/\s+/).filter(Boolean);
+  const searching = words.length > 0;
+  const selected = groups.find(group => group.value === active);
   const matches = searching ? all.filter(item => {
     const haystack = normaliseSpecialisation([
       item.value, item.title, EN_TASK_NAMES[item.group.value]?.[item.index],
@@ -224,107 +226,127 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
     ].join(" "));
     return words.every(word => haystack.includes(word));
   }) : [];
-  const categoryUrl = (category, subcategory) => {
+
+  useLayoutEffect(() => {
+    const pending = focusAfterChange.current;
+    if (!pending) return;
+    focusAfterChange.current = null;
+    const target = pending === "detail" ? detailTitle.current : fieldButtons.current.get(pending);
+    if (!target) return;
+    target.focus({ preventScroll: true });
+    const bounds = target.getBoundingClientRect();
+    // Scroll only after an explicit step change, and only if its focus is offscreen.
+    if (bounds.top < 88 || bounds.bottom > window.innerHeight - 32) {
+      target.scrollIntoView({ block: "nearest", behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    }
+  }, [active]);
+
+  function categoryUrl(category, subcategory) {
     const params = new URLSearchParams();
     if (category) params.set("category", category);
     if (subcategory) params.set("subcategory", subcategory);
     return "/jobs" + (params.size ? "?" + params : "");
-  };
-
-  function toggle(value) {
-    // Restore focus before hiding a panel, including browsers that do not focus
-    // a button on pointer activation. No programmatic page scrolling.
-    if (active && panels.current.get(active)?.contains(document.activeElement)) {
-      triggers.current.get(value)?.focus({ preventScroll: true });
-    }
-    setActive(previous => previous === value ? null : value);
   }
-  function moveHeader(event, index) {
-    const direction = { ArrowDown: 1, ArrowUp: -1 }[event.key];
-    if (!direction && event.key !== "Home" && event.key !== "End") return;
-    event.preventDefault();
-    const next = event.key === "Home" ? 0 : event.key === "End" ? groups.length - 1
-      : (index + direction + groups.length) % groups.length;
-    triggers.current.get(groups[next]?.value)?.focus();
+  function chooseField(value) {
+    focusAfterChange.current = "detail";
+    setActive(value);
+  }
+  function backToFields() {
+    focusAfterChange.current = active;
+    setActive(null);
   }
   function clearSearch() {
     setSearch("");
     searchInput.current?.focus({ preventScroll: true });
   }
-  function onKeyDown(event) {
-    if (event.key !== "Escape") return;
-    if (search && event.target === searchInput.current) {
-      event.preventDefault();
-      clearSearch();
-    } else if (active && panels.current.get(active)?.contains(event.target)) {
-      event.preventDefault();
-      triggers.current.get(active)?.focus({ preventScroll: true });
-      setActive(null);
-    }
+  function moveField(event, index) {
+    const direction = { ArrowDown: 1, ArrowUp: -1 }[event.key];
+    if (!direction && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    const next = event.key === "Home" ? 0 : event.key === "End" ? groups.length - 1
+      : (index + direction + groups.length) % groups.length;
+    fieldButtons.current.get(groups[next]?.value)?.focus();
   }
   function services(items) {
-    return <ul className="ih62-services">
+    return <ul className="ih63-service-list">
       {items.map(item => <li key={item.group.value + "/" + item.value}>
-        <Link className="ih62-service" to={categoryUrl(item.group.value, item.value)}>
-          <span className="ih62-service-copy"><strong>{item.title}</strong><span>{item.description}</span></span>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 15 15 5M5 5h10v10"/></svg>
+        <Link className="ih63-service" to={categoryUrl(item.group.value, item.value)} title={item.description}>
+          <span>{item.title}</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg>
         </Link>
       </li>)}
     </ul>;
   }
 
-  return <section id="ih62-specialisations" className="ih62-specialisations" aria-labelledby="ih62-title" data-no-translate="true" onKeyDown={onKeyDown}>
-    <header className="ih62-heading">
-      <div><h2 id="ih62-title">{en ? "Specialisations" : "Specjalizacje"}</h2><p>{en ? "Choose a field, then the service you need." : "Wybierz dziedzinę, a potem konkretną usługę."}</p></div>
-      <div className="ih62-search-area">
-        <label className="ih62-search-label" htmlFor="ih62-search">{en ? "Search all services" : "Szukaj we wszystkich usługach"}</label>
-        <div className="ih62-search-box">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-          <input ref={searchInput} id="ih62-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={en ? "E.g. logo, website, retouching" : "Np. logo, strona, retusz"} aria-controls={searching ? "ih62-results" : "ih62-fields"} autoComplete="off" onKeyDown={event => {
-            if (event.key !== "ArrowDown") return;
-            const first = searching ? document.querySelector("#ih62-results .ih62-service") : triggers.current.get(groups[0]?.value);
-            if (first) { event.preventDefault(); first.focus(); }
-          }}/>
-          {search && <button type="button" onClick={clearSearch} aria-label={en ? "Clear search" : "Wyczyść wyszukiwanie"}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8m0-8-8 8"/></svg></button>}
-        </div>
-      </div>
+  return <section id="ih63-specialisations" className="ih63-specialisations" aria-labelledby="ih63-title" data-no-translate="true"
+    onKeyDown={event => {
+      if (event.key !== "Escape") return;
+      if (search) { event.preventDefault(); clearSearch(); }
+      else if (selected) { event.preventDefault(); backToFields(); }
+    }}>
+    <header className="ih63-explorer-heading">
+      <h2 id="ih63-title">{en ? "Specialisations" : "Specjalizacje"}</h2>
+      <p>{en ? "Find the service your project needs." : "Znajdź usługę do swojego projektu."}</p>
     </header>
 
-    <p className="ih62-result-status" role="status" aria-live="polite">{searching
+    <div className="ih63-search-area">
+      <label htmlFor="ih63-search">{en ? "Search all services" : "Szukaj we wszystkich usługach"}</label>
+      <div className="ih63-search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+        <input ref={searchInput} id="ih63-search" type="search" value={search} onChange={event => setSearch(event.target.value)}
+          placeholder={en ? "E.g. logo, website, retouching" : "Np. logo, strona, retusz"} autoComplete="off" aria-controls="ih63-explorer-content"
+          onKeyDown={event => {
+            if (event.key !== "ArrowDown") return;
+            const first = document.querySelector("#ih63-explorer-content :is(a,button)");
+            if (first) { event.preventDefault(); first.focus(); }
+          }}/>
+        {!!search && <button type="button" onClick={clearSearch} aria-label={en ? "Clear search" : "Wyczyść wyszukiwanie"}>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8m0-8-8 8"/></svg>
+        </button>}
+      </div>
+    </div>
+
+    <p className="ih63-result-status" role="status" aria-live="polite">{searching
       ? en ? `${matches.length} matching services` : `Pasujące usługi: ${matches.length}`
-      : en ? `${groups.length} fields, ${all.length} services` : `${groups.length} dziedzin, ${all.length} usług`}</p>
+      : selected
+        ? en ? "Choose a service" : "Wybierz usługę"
+        : en ? `${groups.length} fields · ${all.length} services` : `${groups.length} dziedzin · ${all.length} usług`}</p>
 
-    {searching ? <div className="ih62-results" id="ih62-results">
-      {groups.map(group => {
-        const items = matches.filter(item => item.group.value === group.value);
-        return items.length ? <section className="ih62-result-group" key={group.value} aria-label={label(group)}><h3>{label(group)}</h3>{services(items)}</section> : null;
-      })}
-      {!matches.length && <div className="ih62-empty"><h3>{en ? "No matching service." : "Brak pasującej usługi."}</h3><p>{en ? "Try a shorter phrase or browse the fields." : "Spróbuj krótszej frazy albo przejrzyj dziedziny."}</p><button type="button" onClick={clearSearch}>{en ? "Browse fields" : "Pokaż dziedziny"}</button></div>}
-    </div> : <div className="ih62-fields" id="ih62-fields">
-      {groups.map((group, index) => {
-        const expanded = active === group.value;
-        const items = all.filter(item => item.group.value === group.value);
-        const buttonId = `ih62-field-${index}`;
-        const panelId = `ih62-panel-${index}`;
-        return <article className="ih62-field" key={group.value} data-open={expanded}>
-          <h3 className="ih62-field-heading"><button ref={node => node ? triggers.current.set(group.value, node) : triggers.current.delete(group.value)} id={buttonId} type="button" className="ih62-field-toggle" aria-expanded={expanded} aria-controls={panelId} onClick={() => toggle(group.value)} onKeyDown={event => moveHeader(event, index)}>
-            <span className="ih62-field-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-            <span className="ih62-field-name">{label(group)}</span>
-            <span className="ih62-field-count">{items.length} {en ? "services" : "usług"}</span>
-            <svg className="ih62-plus" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/><path className="ih62-plus-vertical" d="M10 4v12"/></svg>
-          </button></h3>
-          <div ref={node => node ? panels.current.set(group.value, node) : panels.current.delete(group.value)} className="ih62-panel" id={panelId} data-open={expanded} role={expanded ? "region" : undefined} aria-labelledby={buttonId} aria-hidden={!expanded} inert={expanded ? undefined : ""}>
-            <div className="ih62-panel-clip"><div className="ih62-panel-content">
-              <p className="ih62-field-summary">{en ? EN_INTROS[group.value] : details[group.value]?.summary}</p>
-              {services(items)}
-              <Link className="ih62-field-all" to={categoryUrl(group.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<span aria-hidden="true">↗</span></Link>
-            </div></div>
-          </div>
-        </article>;
-      })}
-      {!groups.length && <p className="ih62-unavailable">{en ? "The service list is currently unavailable." : "Lista usług jest teraz niedostępna."}</p>}
-    </div>}
+    <div id="ih63-explorer-content">
+      {searching ? <div className="ih63-stage" key="search">
+        {groups.map(group => {
+          const items = matches.filter(item => item.group.value === group.value);
+          return items.length ? <section className="ih63-result-group" key={group.value} aria-label={label(group)}>
+            <h3>{label(group)}</h3>{services(items)}
+          </section> : null;
+        })}
+        {!matches.length && <div className="ih63-empty">
+          <h3>{en ? "No matching service." : "Brak pasującej usługi."}</h3>
+          <p>{en ? "Try a shorter phrase or browse the fields." : "Spróbuj krótszej frazy albo przejrzyj dziedziny."}</p>
+          <button type="button" onClick={clearSearch}>{en ? "Browse fields" : "Pokaż dziedziny"}</button>
+        </div>}
+      </div> : selected ? <div className="ih63-stage ih63-detail" key={selected.value}>
+        <button className="ih63-back" type="button" onClick={backToFields}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4m5-5-5 5 5 5"/></svg>{en ? "All fields" : "Wszystkie dziedziny"}</button>
+        <h3 ref={detailTitle} className="ih63-detail-title" tabIndex={-1}>{label(selected)}</h3>
+        <p className="ih63-field-intro">{en ? EN_INTROS[selected.value] : details[selected.value]?.summary}</p>
+        {services(all.filter(item => item.group.value === selected.value))}
+        <Link className="ih63-field-all" to={categoryUrl(selected.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<span aria-hidden="true">↗</span></Link>
+      </div> : <div className="ih63-stage" key="fields">
+        <ul className="ih63-field-list">
+          {groups.map((group, index) => <li key={group.value}>
+            <button type="button" className="ih63-field-choice" ref={node => node ? fieldButtons.current.set(group.value, node) : fieldButtons.current.delete(group.value)}
+              onClick={() => chooseField(group.value)} onKeyDown={event => moveField(event, index)}>
+              <span className="ih63-field-copy"><strong>{label(group)}</strong><small>{(group.subcategories || []).length} {en ? "services" : "usług"}</small></span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg>
+            </button>
+          </li>)}
+        </ul>
+        {!groups.length && <p className="ih63-unavailable">{en ? "The service list is currently unavailable." : "Lista usług jest teraz niedostępna."}</p>}
+      </div>}
+    </div>
 
-    <footer className="ih62-footer"><Link to="/jobs">{en ? "All projects" : "Wszystkie zlecenia"}<span aria-hidden="true">↗</span></Link><Link to="/freelancers">{en ? "Browse professionals" : "Przeglądaj wykonawców"}<span aria-hidden="true">↗</span></Link></footer>
+    <footer className="ih63-explorer-footer">
+      <Link to="/jobs">{en ? "All projects" : "Wszystkie zlecenia"}<span aria-hidden="true">↗</span></Link>
+      <Link to="/freelancers">{en ? "Browse professionals" : "Przeglądaj wykonawców"}<span aria-hidden="true">↗</span></Link>
+    </footer>
   </section>;
 }

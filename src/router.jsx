@@ -5347,7 +5347,7 @@ function AccountNavbar() {
 
   return (
     <header
-      className="navbar account-navbar ih11-account-navbar"
+      id="ih63-account-header" className="navbar account-navbar ih11-account-navbar"
       data-ui-release="ideahire-p11-20261005"
     >
       <div className="account-navbar-brand">
@@ -5446,6 +5446,8 @@ function AccountNavbar() {
             <span className="account-mini-name">
               {userName}
             </span>
+
+            <svg className="ih63-account-hamburger" viewBox="0 0 24 24" aria-hidden="true"><path d={accountMenuOpen?"M6 6l12 12M18 6 6 18":"M4 6h16M4 12h16M4 18h16"}/></svg>
 
             <span
               className="account-menu-caret"
@@ -20294,175 +20296,9 @@ function formatInboxDate(value) {
 
 /* P13A: presentation components remain inside the existing router file. */
 // Transparent light clouds move inside a fixed canvas; their edges never cover the page.
+/* P63: a stationary tonal wash. No pointer or scroll animation. */
 function AmbientBackground() {
-  const layerRef = useRef(null);
-  const stateRef = useRef(null);
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    const layer = layerRef.current;
-    const light = layer?.firstElementChild;
-    const shade = layer?.lastElementChild;
-    if (!light || !shade) return;
-    const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    const finePointer = window.matchMedia?.("(hover: hover) and (pointer: fine)");
-    const positions = new WeakMap();
-    const documentScroller = document.scrollingElement || document.documentElement;
-    let frame = 0;
-    let previousTime = 0;
-    let pointerX = 0;
-    let pointerY = 0;
-    let span = Math.max(580, Math.min(1100, window.innerHeight * 0.8));
-    let travel = documentOffset();
-    let target = composition();
-    let current = motion?.matches ? [...target] : [...(stateRef.current || target)];
-    positions.set(documentScroller, travel);
-
-    function documentOffset() {
-      return Math.max(0, documentScroller.scrollTop || 0,
-        document.documentElement.scrollTop || 0, document.body.scrollTop || 0, window.scrollY || 0);
-    }
-
-    function composition() {
-      const phase = motion?.matches ? 0 : travel / span * Math.PI;
-      const x = motion?.matches ? 0 : pointerX;
-      const y = motion?.matches ? 0 : pointerY;
-      return [
-        Math.sin(phase) * 17 + x * 3, Math.cos(phase) * 14 + y * 3,
-        1 + Math.sin(phase * 0.7) * 0.07, 1 + Math.cos(phase * 0.7) * 0.06,
-        0.72 + Math.sin(phase * 0.6 + 0.4) * 0.1,
-        Math.cos(phase * 0.9) * 17 - x * 2, Math.sin(phase * 0.9) * 16 - y * 2,
-        1 + Math.cos(phase * 0.8) * 0.06, 1 + Math.sin(phase * 0.8) * 0.07,
-        0.84 + Math.cos(phase * 0.6) * 0.1
-      ];
-    }
-
-    function write() {
-      // Only transparent, oversized radial clouds move. The opaque base stays fixed.
-      light.style.transform = `translate3d(${current[0].toFixed(3)}vw,${current[1].toFixed(3)}vh,0) scale(${current[2].toFixed(4)},${current[3].toFixed(4)})`;
-      shade.style.transform = `translate3d(${current[5].toFixed(3)}vw,${current[6].toFixed(3)}vh,0) scale(${current[7].toFixed(4)},${current[8].toFixed(4)})`;
-      light.style.opacity = current[4].toFixed(4);
-      shade.style.opacity = current[9].toFixed(4);
-      stateRef.current = [...current];
-    }
-
-    function paint(time) {
-      frame = 0;
-      if (document.hidden) return;
-      const elapsed = previousTime ? Math.min(48, Math.max(1, time - previousTime)) : 16;
-      previousTime = time;
-      const easing = 1 - Math.exp(-elapsed / 160);
-      let settled = true;
-      current = current.map((value, index) => {
-        const next = value + (target[index] - value) * easing;
-        if (Math.abs(target[index] - next) > 0.0005) settled = false;
-        return next;
-      });
-      if (settled) current = [...target];
-      write();
-      if (!settled) schedule();
-      else previousTime = 0;
-    }
-
-    function schedule() {
-      if (!frame && !document.hidden && !motion?.matches) frame = window.requestAnimationFrame(paint);
-    }
-
-    function scroll(event = {}) {
-      const element = !event.target || event.target === window || event.target === document ||
-        event.target === document.documentElement || event.target === document.body
-        ? documentScroller : event.target;
-      if (element !== documentScroller && element?.nodeType !== 1) return;
-      const position = element === documentScroller ? documentOffset() : Math.max(0, element.scrollTop || 0);
-      const previous = positions.get(element) || 0;
-      positions.set(element, position);
-      if (position === previous) return;
-      travel = Math.max(0, travel + position - previous);
-      target = composition();
-      schedule();
-    }
-
-    function pointer(event) {
-      if (motion?.matches || !finePointer?.matches || event.pointerType === "touch") return;
-      pointerX = Math.max(-1, Math.min(1, event.clientX / Math.max(1, window.innerWidth) * 2 - 1));
-      pointerY = Math.max(-1, Math.min(1, event.clientY / Math.max(1, window.innerHeight) * 2 - 1));
-      target = composition();
-      schedule();
-    }
-
-    function resetPointer(event) {
-      if (event?.type === "pointerout" && event.relatedTarget) return;
-      pointerX = 0;
-      pointerY = 0;
-      target = composition();
-      schedule();
-    }
-
-    function resize() {
-      span = Math.max(580, Math.min(1100, window.innerHeight * 0.8));
-      target = composition();
-      schedule();
-    }
-
-    function preference() {
-      pointerX = 0;
-      pointerY = 0;
-      target = composition();
-      if (motion?.matches) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-        previousTime = 0;
-        current = [...target];
-        write();
-      } else schedule();
-    }
-
-    function visibility() {
-      if (document.hidden) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-        previousTime = 0;
-      } else {
-        scroll();
-        schedule();
-      }
-    }
-
-    document.addEventListener("scroll", scroll, { capture: true, passive: true });
-    window.addEventListener("scroll", scroll, { passive: true });
-    window.addEventListener("pointermove", pointer, { passive: true });
-    window.addEventListener("pointerout", resetPointer, { passive: true });
-    window.addEventListener("blur", resetPointer);
-    window.addEventListener("resize", resize, { passive: true });
-    document.addEventListener("visibilitychange", visibility);
-    motion?.addEventListener?.("change", preference);
-    finePointer?.addEventListener?.("change", preference);
-    write();
-    if (current.some((value, index) => Math.abs(target[index] - value) > 0.0005)) schedule();
-
-    return () => {
-      document.removeEventListener("scroll", scroll, true);
-      window.removeEventListener("scroll", scroll);
-      window.removeEventListener("pointermove", pointer);
-      window.removeEventListener("pointerout", resetPointer);
-      window.removeEventListener("blur", resetPointer);
-      window.removeEventListener("resize", resize);
-      document.removeEventListener("visibilitychange", visibility);
-      motion?.removeEventListener?.("change", preference);
-      finePointer?.removeEventListener?.("change", preference);
-      window.cancelAnimationFrame(frame);
-    };
-  }, [pathname]);
-
-  if (pathname === "/") return null;
-
-  return createPortal(
-    <div className="ih13-background" ref={layerRef} aria-hidden="true">
-      <div className="ih13-background-start" />
-      <div className="ih13-background-end" />
-    </div>,
-    document.body
-  );
+  return createPortal(<div className="ih63-page-wash" aria-hidden="true" />, document.body);
 }
 
 const MessengerLayoutContext = createContext(null);
