@@ -3208,6 +3208,11 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
   );
 }
 
+// The account can open the same film without mounting the homepage showcase.
+export function IdeaHirePromoFilm(props) {
+  return <><style>{IH57_STYLES}{IH58_STYLES}</style><IH57Cinema {...props} /></>;
+}
+
 export default App;
 
 

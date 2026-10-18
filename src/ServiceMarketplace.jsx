@@ -13,6 +13,7 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
+import { useSitePreferences } from "./Preferences";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
@@ -337,7 +338,7 @@ function ServiceCard({ service }) {
 
       <div className="ih5-service-card-topline">
         <span className="ih5-service-category-mark" aria-hidden="true">
-          {SERVICE_CATEGORY_MARKS[service.category] || "✦"}
+          <MarketIcon kind="files" />
         </span>
         <span className={`ih5-service-capacity ${capacity.className}`}>
           <i aria-hidden="true" />
@@ -382,6 +383,7 @@ function ServiceShell({ Navbar, children, className = "" }) {
 }
 
 function ServiceList({ supabase, user, navigate, Navbar }) {
+  const english = useSitePreferences().language === "en";
   const location = useLocation();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -436,7 +438,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page">
-      <MarketCatalogHeader eyebrow="Usługi" title="Gotowy pomysł na dobry efekt." description="Wybierz gotową usługę albo przejdź do freelancerów, poznaj ich profile i napisz o projekcie, który chcesz zlecić."
+      <MarketCatalogHeader eyebrow="Usługi" title={english ? "Find a service for your project." : "Znajdź usługę do swojego projektu."} description={english ? "Compare the scope, price and availability. Discuss the details with the freelancer in a conversation." : "Porównaj zakres, cenę i dostępność. Szczegóły ustalisz z wykonawcą w rozmowie."}
         tabs={<MarketplaceSwitch />} count={services.length} noun="services" status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined}
         actions={<><Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link><Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />Dodaj usługę</Link></>}>
         <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług" />
@@ -1006,7 +1008,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
         </header>
 
         <div className="ih5-service-modal-summary">
-          <span>{SERVICE_CATEGORY_MARKS[service.category] || "✦"}</span>
+          <span><MarketIcon kind="files" /></span>
           <div>
             <strong>{service.title}</strong>
             <small>
@@ -1168,7 +1170,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
         <article className="ih5-service-detail-main">
           <header className="ih5-service-detail-header">
             <div className="ih5-service-detail-category">
-              <span aria-hidden="true">{SERVICE_CATEGORY_MARKS[service.category] || "✦"}</span>
+              <span aria-hidden="true"><MarketIcon kind="files" /></span>
               <div>
                 <b>{service.category}</b>
                 <small>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</small>
@@ -1303,6 +1305,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
 }
 
 function MyServices({ supabase, user, Navbar }) {
+  const english = useSitePreferences().language === "en";
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -1352,7 +1355,7 @@ function MyServices({ supabase, user, Navbar }) {
         <div>
           <span className="ih5-service-eyebrow">Panel wykonawcy</span>
           <h1>Twoje usługi</h1>
-          <p>Zarządzaj widocznością, obłożeniem i treścią ofert bez usuwania historii rozmów.</p>
+          <p>{english ? "Edit your offers, check availability and choose which services are visible." : "Edytuj oferty, sprawdzaj ich dostępność i decyduj, które są widoczne."}</p>
         </div>
         <Link className="ih5-service-primary-action" to="/services/new">
           <span>+</span> Dodaj usługę
@@ -1368,7 +1371,7 @@ function MyServices({ supabase, user, Navbar }) {
           {services.map((service) => (
             <article key={service.id}>
               <span className="ih5-service-category-mark" aria-hidden="true">
-                {SERVICE_CATEGORY_MARKS[service.category] || "✦"}
+                <MarketIcon kind="files" />
               </span>
               <div className="ih5-my-service-copy">
                 <span>{service.category}</span>

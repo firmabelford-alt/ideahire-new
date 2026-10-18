@@ -1,0 +1,262 @@
+/* P67 — work listings, service editor, public profiles, calendar and notifications. */
+@layer ideahireWorkspace {
+  body.ih67-workspace #root :is(.ih5-page-heading,.ih26-catalog-header,.ih5-service-form-header,.ih5-my-services-header,.app-page-header,.calendar-hero) { display:block!important; width:100%!important; margin:0 0 28px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; box-shadow:none!important; text-align:left!important; transform:none!important; }
+  body.ih67-workspace #root :is(.ih5-page-heading,.ih26-catalog-intro,.ih5-service-form-header,.ih5-my-services-header,.app-page-header,.calendar-hero) h1 { max-width:850px!important; margin:0 0 12px!important; color:var(--w-ink)!important; font:550 clamp(28px,3.1vw,38px)/1.22 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; text-align:left!important; }
+  body.ih67-workspace #root :is(.ih5-page-heading,.ih26-catalog-intro,.ih5-service-form-header,.ih5-my-services-header,.app-page-header,.calendar-hero) p { max-width:650px!important; margin:0!important; color:var(--w-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; text-align:left!important; }
+  body.ih67-workspace #root :is(.ih5-eyebrow,.ih5-service-eyebrow,.calendar-eyebrow,.section-label) { display:block!important; color:var(--w-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.1em!important; text-transform:uppercase!important; }
+  body.ih67-workspace #root .ih26-catalog-top { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:24px!important; padding:0 0 24px!important; border:0!important; }
+  body.ih67-workspace #root .ih26-catalog-location { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:15px!important; }
+  body.ih67-workspace #root .ih26-catalog-count { display:flex!important; align-items:center!important; gap:12px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--w-muted)!important; }
+  body.ih67-workspace #root .ih26-catalog-count>span { display:none!important; }
+  body.ih67-workspace #root .ih26-catalog-count p { display:flex!important; align-items:center!important; gap:6px!important; margin:0!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih26-catalog-count strong { color:var(--w-ink)!important; font:550 15px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih26-catalog-intro { display:flex!important; align-items:flex-end!important; justify-content:space-between!important; gap:24px!important; margin-bottom:28px!important; padding:0!important; }
+  body.ih67-workspace #root .ih26-catalog-actions { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:10px!important; margin:0!important; }
+  body.ih67-workspace #root .ih26-catalog-filters { padding:0!important; border:0!important; background:none!important; }
+  body.ih67-workspace #root .ih11-market-switch { display:flex!important; width:fit-content!important; max-width:100%!important; gap:4px!important; margin:0!important; padding:4px!important; border:1px solid var(--w-line)!important; border-radius:7px!important; background:var(--w-paper)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih11-market-switch>a { min-height:36px!important; padding:8px 13px!important; border:0!important; border-radius:4px!important; background:none!important; color:var(--w-muted)!important; text-decoration:none!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih11-market-switch>a[aria-current="page"] { background:var(--w-soft)!important; color:var(--w-accent)!important; }
+  body.ih67-workspace #root .ih5-filters { display:grid!important; grid-template-columns:minmax(0,1fr) minmax(170px,.45fr) minmax(160px,.4fr)!important; align-items:end!important; gap:14px!important; width:100%!important; margin:24px 0!important; padding:20px!important; border:1px solid var(--w-line)!important; border-radius:9px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; overflow:visible!important; }
+  body.ih67-workspace #root .ih26-catalog-filters .ih5-filters { grid-template-columns:minmax(0,1fr) minmax(180px,.55fr)!important; }
+  body.ih67-workspace #root .ih5-search { display:flex!important; align-items:center!important; gap:11px!important; min-height:47px!important; width:100%!important; margin:0!important; padding:0 13px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-muted)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-search input { display:block!important; flex:1!important; width:100%!important; min-width:0!important; min-height:45px!important; padding:11px 0!important; margin:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; font:400 14px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-search>svg { flex:none!important; width:18px!important; height:18px!important; }
+  body.ih67-workspace #root .ih7-select { position:relative!important; width:100%!important; min-width:0!important; margin:0!important; }
+  body.ih67-workspace #root .ih7-select-label { display:block!important; margin:0 0 6px!important; color:var(--w-muted)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih7-select-trigger { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:10px!important; width:100%!important; min-height:47px!important; padding:11px 13px!important; margin:0!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:450 13px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; text-align:left!important; cursor:pointer!important; }
+  body.ih67-workspace #root .ih7-select-trigger>svg { flex:none!important; width:16px!important; height:16px!important; stroke:currentColor!important; stroke-width:1.5!important; }
+  body.ih67-workspace #root .ih7-select-menu { position:absolute!important; z-index:70!important; top:calc(100% + 5px)!important; left:0!important; right:0!important; bottom:auto!important; width:100%!important; max-height:var(--ih7-menu-height,320px)!important; margin:0!important; padding:6px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; overflow-y:auto!important; overflow-x:hidden!important; box-shadow:0 8px 20px #10232b0d!important; }
+  body.ih67-workspace #root .ih7-select[data-side="up"] .ih7-select-menu { top:auto!important; bottom:calc(100% + 5px)!important; }
+  body.ih67-workspace #root .ih7-select-menu[aria-hidden="true"] { display:none!important; }
+  body.ih67-workspace #root .ih7-select-option { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:10px!important; width:100%!important; min-height:43px!important; padding:11px!important; margin:0!important; border:0!important; border-radius:4px!important; background:none!important; color:var(--w-ink)!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; text-align:left!important; cursor:pointer!important; }
+  body.ih67-workspace #root .ih7-select-option[aria-selected="true"] { background:var(--w-tint)!important; color:var(--w-accent)!important; }
+  body.ih67-workspace #root .ih7-select-option:disabled { opacity:.5!important; cursor:not-allowed!important; }
+  body.ih67-workspace #root .ih5-jobs-list { display:flex!important; flex-direction:column!important; gap:18px!important; width:100%!important; margin-top:22px!important; padding:0!important; }
+  body.ih67-workspace #root .ih5-job-card { position:relative!important; display:block!important; width:100%!important; min-height:0!important; margin:0!important; padding:26px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; transform:none!important; animation:none!important; overflow:visible!important; }
+  body.ih67-workspace #root .ih5-job-card::before,
+  body.ih67-workspace #root .ih5-job-card::after { display:none!important; }
+  body.ih67-workspace #root .ih5-job-card-top { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:12px!important; margin-bottom:17px!important; padding:0!important; border:0!important; }
+  body.ih67-workspace #root .ih5-job-overview { display:grid!important; grid-template-columns:minmax(0,1fr) 150px!important; align-items:start!important; gap:28px!important; padding:0!important; }
+  body.ih67-workspace #root .ih5-job-title { display:block!important; margin:0 0 10px!important; color:var(--w-ink)!important; font:550 21px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; overflow-wrap:anywhere!important; }
+  body.ih67-workspace #root .ih5-job-summary { display:-webkit-box!important; -webkit-box-orient:vertical!important; -webkit-line-clamp:3!important; overflow:hidden!important; margin:0!important; color:var(--w-muted)!important; font:400 13px/1.8 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-price { display:flex!important; flex-direction:column!important; align-items:flex-end!important; min-width:0!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; text-align:right!important; }
+  body.ih67-workspace #root .ih5-job-price strong { margin:0!important; color:var(--w-accent)!important; font:550 24px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
+  body.ih67-workspace #root .ih5-job-price :is(span,small) { color:var(--w-muted)!important; font:400 10px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-facts { display:flex!important; flex-wrap:wrap!important; gap:12px 22px!important; margin:20px 0!important; padding:14px 0!important; border-block:1px solid var(--w-line)!important; color:var(--w-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-skills { display:flex!important; flex-wrap:wrap!important; gap:7px!important; margin:15px 0!important; }
+  body.ih67-workspace #root .ih5-job-skills>span { padding:4px 8px!important; border:1px solid var(--w-line)!important; border-radius:4px!important; background:var(--w-soft)!important; color:var(--w-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-details { width:100%!important; margin:24px 0!important; padding:24px!important; border:1px solid var(--w-line)!important; border-radius:8px!important; background:var(--w-bg)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-job-actions { display:flex!important; align-items:center!important; justify-content:flex-end!important; flex-wrap:wrap!important; gap:10px!important; margin-top:20px!important; padding:0!important; }
+  body.ih67-workspace #root :is(.ih5-button,.ih5-service-primary-action,.ih11-button,.calendar-primary-action,.calendar-save-button) { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:10px!important; width:auto!important; min-height:44px!important; margin:0!important; padding:11px 16px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; box-shadow:none!important; cursor:pointer!important; transform:none!important; }
+  body.ih67-workspace #root :is(.ih5-button.is-primary,.ih5-service-primary-action,.ih11-button.is-primary,.calendar-primary-action,.calendar-save-button) { border-color:var(--w-accent)!important; background:var(--w-accent)!important; color:var(--w-on)!important; }
+  body.ih67-workspace #root :is(.ih5-button,.ih11-button,.calendar-primary-action) svg { flex:none!important; width:18px!important; height:18px!important; }
+  body.ih67-workspace #root :is(.ih5-button,.ih11-button,.calendar-primary-action):disabled { opacity:.5!important; cursor:not-allowed!important; }
+  body.ih67-workspace #root .ih5-service-card-grid,
+  body.ih67-workspace #root .ih11-freelancer-grid { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:20px!important; margin:24px 0!important; }
+  body.ih67-workspace #root :is(.ih5-service-card,.ih11-freelancer-card) { position:relative!important; display:flex!important; flex-direction:column!important; min-width:0!important; min-height:0!important; margin:0!important; padding:24px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; transform:none!important; }
+  body.ih67-workspace #root .ih5-service-card-copy { flex:1!important; padding:0!important; }
+  body.ih67-workspace #root .ih5-service-card-copy h2 { margin:12px 0!important; color:var(--w-ink)!important; font:550 20px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; overflow-wrap:anywhere!important; }
+  body.ih67-workspace #root .ih5-service-card-copy p { margin:0 0 22px!important; color:var(--w-muted)!important; font:400 13px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-card-category { color:var(--w-muted)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-card-topline { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:14px!important; margin-bottom:22px!important; }
+  body.ih67-workspace #root .ih5-service-category-mark { display:grid!important; place-items:center!important; flex:none!important; width:34px!important; height:34px!important; margin:0!important; padding:8px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-soft)!important; color:var(--w-accent)!important; }
+  body.ih67-workspace #root .ih5-service-card-owner { display:flex!important; align-items:center!important; gap:12px!important; margin:0 0 18px!important; }
+  body.ih67-workspace #root .ih5-service-card-owner>span { flex:1!important; }
+  body.ih67-workspace #root .ih5-service-card-owner strong { color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-card-owner small { display:block!important; margin-top:4px!important; color:var(--w-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-card-footer { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:16px!important; padding:18px 0 0!important; border-top:1px solid var(--w-line)!important; }
+  body.ih67-workspace #root .ih5-service-card-footer strong { color:var(--w-ink)!important; font:550 20px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; }
+  body.ih67-workspace #root .ih5-service-card-footer small { display:block!important; margin-bottom:5px!important; color:var(--w-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-card-arrow { display:grid!important; place-items:center!important; width:36px!important; height:36px!important; border:1px solid var(--w-line)!important; border-radius:50%!important; background:none!important; color:var(--w-accent)!important; font-size:18px!important; }
+  body.ih67-workspace #root .ih5-my-services-header { display:flex!important; align-items:flex-end!important; justify-content:space-between!important; gap:24px!important; }
+  body.ih67-workspace #root .ih5-my-services-list { display:flex!important; flex-direction:column!important; gap:0!important; overflow:hidden!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; }
+  body.ih67-workspace #root .ih5-my-services-list>article { display:grid!important; grid-template-columns:34px minmax(0,1fr) auto!important; align-items:start!important; gap:18px!important; margin:0!important; padding:26px!important; border:0!important; border-bottom:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-my-services-list>article:last-child { border-bottom:0!important; }
+  body.ih67-workspace #root .ih5-my-service-copy>span { color:var(--w-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-my-service-copy h2 { margin:7px 0!important; color:var(--w-ink)!important; font:550 19px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; }
+  body.ih67-workspace #root .ih5-my-service-copy p { max-width:650px!important; margin:0!important; color:var(--w-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-my-service-state { display:flex!important; flex-direction:column!important; align-items:flex-end!important; gap:10px!important; }
+  body.ih67-workspace #root .ih5-my-service-state>span { padding:5px 8px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-soft)!important; color:var(--w-muted)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-my-service-state>span.is-active { background:var(--w-tint)!important; color:var(--w-accent)!important; }
+  body.ih67-workspace #root .ih5-my-service-state small { color:var(--w-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-my-service-actions { grid-column:2/-1!important; display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:10px!important; margin:0!important; }
+  body.ih67-workspace #root .ih5-my-service-actions :is(a,button) { min-height:40px!important; padding:10px 13px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; cursor:pointer!important; }
+  body.ih67-workspace #root :is(.ih5-editor,.ih5-service-editor) { display:flex!important; flex-direction:column!important; gap:28px!important; width:100%!important; max-width:960px!important; margin:0!important; padding:30px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-service-editor-section { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:22px!important; margin:0!important; padding:0 0 28px!important; border:0!important; border-bottom:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; }
+  body.ih67-workspace #root .ih5-service-editor-index { display:none!important; }
+  body.ih67-workspace #root .ih5-service-editor-heading h2 { margin:0 0 7px!important; color:var(--w-ink)!important; font:550 21px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-editor-heading p { margin:0!important; color:var(--w-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root :is(.ih5-job-form-grid,.ih5-service-editor-fields,.ih5-service-modal-fields,.ih12-contact-grid) { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:24px!important; }
+  body.ih67-workspace #root :is(.ih5-editor,.ih5-service-editor,.calendar-form) label:not(.ih5-job-choice-card) { color:var(--w-ink)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root :is(.ih5-editor,.ih5-service-editor,.calendar-form) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) { display:block!important; min-width:0!important; width:100%!important; min-height:47px!important; margin-top:9px!important; padding:12px 14px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:400 14px/1.65 Inter,system-ui,sans-serif!important; box-shadow:none!important; }
+  body.ih67-workspace #root :is(.ih5-editor,.ih5-service-editor) small { display:block!important; margin-top:7px!important; color:var(--w-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-create-progress { display:grid!important; grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:8px!important; max-width:960px!important; margin:0 0 24px!important; padding:0!important; list-style:none!important; }
+  body.ih67-workspace #root .ih5-job-create-progress li { margin:0!important; border:0!important; }
+  body.ih67-workspace #root .ih5-job-create-progress button { display:flex!important; align-items:center!important; gap:9px!important; width:100%!important; min-height:47px!important; padding:10px 13px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-muted)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-job-create-progress .is-active button { background:var(--w-tint)!important; border-color:var(--w-accent)!important; color:var(--w-accent)!important; }
+  body.ih67-workspace #root .ih5-job-create-progress button>span { display:grid!important; place-items:center!important; flex:none!important; width:22px!important; height:22px!important; border:0!important; border-radius:4px!important; background:var(--w-soft)!important; font:550 10px/1 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-create-progress button:disabled { opacity:.5!important; cursor:not-allowed!important; }
+  body.ih67-workspace #root .ih5-job-create-step-heading { display:flex!important; align-items:flex-start!important; gap:14px!important; margin:0 0 28px!important; }
+  body.ih67-workspace #root .ih5-job-create-step-heading h2 { margin:0 0 6px!important; color:var(--w-ink)!important; font:550 23px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.03em!important; }
+  body.ih67-workspace #root .ih5-job-create-step-heading p { margin:0!important; color:var(--w-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-job-create-navigation { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:15px!important; padding-top:25px!important; margin-top:25px!important; border-top:1px solid var(--w-line)!important; }
+  body.ih67-workspace #root .ih5-service-detail-layout { display:grid!important; grid-template-columns:minmax(0,1fr) 290px!important; align-items:start!important; gap:28px!important; }
+  body.ih67-workspace #root .ih5-service-detail-main { padding:30px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; }
+  body.ih67-workspace #root .ih5-service-detail-header h1 { margin:12px 0!important; color:var(--w-ink)!important; font:550 clamp(26px,3vw,36px)/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; }
+  body.ih67-workspace #root .ih5-service-detail-header p { color:var(--w-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-detail-section { margin:26px 0 0!important; padding:24px 0 0!important; border:0!important; border-top:1px solid var(--w-line)!important; background:none!important; }
+  body.ih67-workspace #root .ih5-service-detail-section h2 { margin:0 0 12px!important; color:var(--w-ink)!important; font:550 19px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih5-service-order-card { position:sticky!important; top:calc(var(--w-head) + 24px)!important; margin:0!important; padding:26px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih5-service-order-button { min-height:48px!important; border:1px solid var(--w-accent)!important; border-radius:6px!important; background:var(--w-accent)!important; color:var(--w-on)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; }
+  body.ih67-workspace #root .ih11-freelancer-person { display:flex!important; align-items:center!important; gap:13px!important; margin-bottom:19px!important; }
+  body.ih67-workspace #root .ih11-freelancer-person h2 { margin:0 0 5px!important; color:var(--w-ink)!important; font:550 18px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .ih11-freelancer-about { flex:1!important; color:var(--w-muted)!important; font:400 13px/1.8 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .public-profile-preview { display:flex!important; align-items:center!important; gap:24px!important; margin:0 0 28px!important; padding:0 50px 28px 0!important; border:0!important; border-bottom:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .public-profile-preview .profile-avatar { display:grid!important; place-items:center!important; width:84px!important; height:84px!important; margin:0!important; border:1px solid var(--w-line)!important; border-radius:50%!important; background:var(--w-tint)!important; color:var(--w-accent)!important; font:550 28px/1 Inter,system-ui,sans-serif!important; object-fit:cover!important; box-shadow:none!important; }
+  body.ih67-workspace #root .public-profile-preview .profile-avatar-wrapper { width:84px!important; height:84px!important; min-width:84px!important; min-height:84px!important; }
+  body.ih67-workspace #root .public-profile-preview h1 { margin:0 0 10px!important; color:var(--w-ink)!important; font:550 32px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
+  body.ih67-workspace #root .profile-content-card { display:block!important; margin-top:24px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .profile-about-copy { color:var(--w-muted)!important; font:400 14px/1.85 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .profile-public-portfolio-grid { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:22px!important; }
+  body.ih67-workspace #root .profile-public-portfolio-card { overflow:hidden!important; padding:0!important; margin:0!important; border:1px solid var(--w-line)!important; border-radius:8px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .profile-public-album-cover { display:block!important; width:100%!important; aspect-ratio:4/3!important; height:auto!important; border:0!important; border-radius:0!important; background:var(--w-soft)!important; }
+  body.ih67-workspace #root .profile-public-album-cover-image { object-fit:cover!important; }
+  body.ih67-workspace #root .profile-stats { display:flex!important; flex-wrap:wrap!important; gap:0!important; padding:16px 0!important; margin:24px 0!important; border-block:1px solid var(--w-line)!important; }
+  body.ih67-workspace #root .profile-stat-card { flex:1!important; padding:15px 22px!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  body.ih67-workspace #root .profile-stat-value { font:550 27px/1.3 Inter,system-ui,sans-serif!important; color:var(--w-ink)!important; }
+  body.ih67-workspace #root .profile-reviews-section { margin-top:28px!important; padding:26px 0 0!important; border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; }
+  body.ih67-workspace #root .profile-more-menu>summary { border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-muted)!important; border-color:var(--w-line)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .profile-more-dropdown { border-color:var(--w-line)!important; border-radius:7px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; }
+  body.ih67-workspace #root .profile-more-dropdown button { color:var(--w-ink)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .calendar-hero { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:center!important; gap:25px!important; }
+  body.ih67-workspace #root .calendar-hero-orbit { display:none!important; }
+  body.ih67-workspace #root .calendar-eyebrow { margin-bottom:10px!important; }
+  body.ih67-workspace #root .calendar-hero-stats { grid-column:1/-1!important; display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:26px!important; padding:20px 0!important; margin:0!important; border-block:1px solid var(--w-line)!important; }
+  body.ih67-workspace #root .calendar-hero-stats>article { display:flex!important; align-items:center!important; gap:12px!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; }
+  body.ih67-workspace #root .calendar-hero-stats span { color:var(--w-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .calendar-hero-stats strong { color:var(--w-ink)!important; font:550 18px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .calendar-toolbar { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:20px!important; padding:0!important; margin:0 0 22px!important; border:0!important; background:none!important; }
+  body.ih67-workspace #root .calendar-workspace { display:grid!important; grid-template-columns:minmax(0,1fr) 300px!important; align-items:start!important; gap:24px!important; }
+  body.ih67-workspace #root .calendar-board { overflow:hidden!important; margin:0!important; padding:14px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root :is(.calendar-weekdays,.calendar-grid) { display:grid!important; grid-template-columns:repeat(7,minmax(0,1fr))!important; gap:2px!important; margin:0!important; padding:0!important; }
+  body.ih67-workspace #root .calendar-weekdays>span { padding:13px 0!important; color:var(--w-muted)!important; text-align:center!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .calendar-day { display:flex!important; flex-direction:column!important; align-items:stretch!important; min-width:0!important; min-height:86px!important; padding:4px!important; border:1px solid var(--w-line)!important; border-radius:4px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; }
+  body.ih67-workspace #root .calendar-day.is-selected { background:var(--w-tint)!important; border-color:var(--w-accent)!important; }
+  body.ih67-workspace #root .calendar-day-number { display:flex!important; align-items:center!important; justify-content:center!important; width:100%!important; min-height:32px!important; min-width:0!important; padding:5px!important; border:0!important; border-radius:4px!important; background:none!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  body.ih67-workspace #root .calendar-day.is-outside .calendar-day-number { color:var(--w-muted)!important; opacity:.6!important; }
+  body.ih67-workspace #root :is(.calendar-day-agenda,.calendar-upcoming) { margin:0 0 20px!important; padding:22px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .calendar-sidebar-heading h2 { margin:0!important; color:var(--w-ink)!important; font:550 18px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .calendar-agenda-list { display:flex!important; flex-direction:column!important; gap:12px!important; margin-top:20px!important; }
+  body.ih67-workspace #root .calendar-agenda-actions { display:flex!important; flex-wrap:wrap!important; gap:7px!important; }
+  body.ih67-workspace #root .calendar-agenda-actions button { min-height:40px!important; padding:9px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:450 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root .notifications-page>.account-card { margin-top:24px!important; }
+  body.ih67-workspace #root .notifications-page .jobs-list { display:flex!important; flex-direction:column!important; gap:0!important; }
+  body.ih67-workspace #root .notifications-page .job-card { padding:24px 0!important; margin:0!important; border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root .notification-card-actions { display:flex!important; flex-wrap:wrap!important; gap:10px!important; }
+  body.ih67-workspace #root .notification-card-actions :is(a,button) { min-height:44px!important; padding:10px 14px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+  body.ih67-workspace #root :is(.privacy-center-header,.disputes-page-header,.dispute-detail-header) { margin:0 0 28px!important; padding:0!important; border:0!important; background:none!important; color:var(--w-ink)!important; }
+  body.ih67-workspace #root :is(.privacy-center-header,.disputes-page-header,.dispute-detail-header) h1 { margin:8px 0 12px!important; color:var(--w-ink)!important; font:550 clamp(28px,3vw,36px)/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; }
+  body.ih67-workspace #root :is(.privacy-center-header,.disputes-page-header,.dispute-detail-header) p { color:var(--w-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root :is(.privacy-trust-panel,.privacy-request-form-card,.privacy-rights-card,.privacy-request-card,.dispute-panel,.dispute-state-card) { padding:26px!important; border:1px solid var(--w-line)!important; border-radius:10px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
+  body.ih67-workspace #root :is(.privacy-center-grid,.dispute-detail-grid) { display:grid!important; grid-template-columns:minmax(0,1fr) 290px!important; gap:24px!important; align-items:start!important; }
+  body.ih67-workspace #root :is(.privacy-request-form,.dispute-inline-form) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { min-width:0!important; width:100%!important; min-height:46px!important; padding:12px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; font:400 14px/1.65 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root :is(.privacy-primary-button,.dispute-primary-button,.privacy-accept-button) { min-height:45px!important; padding:11px 16px!important; border:1px solid var(--w-accent)!important; border-radius:6px!important; background:var(--w-accent)!important; color:var(--w-on)!important; box-shadow:none!important; font:550 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih67-workspace #root :is(.privacy-secondary-button,.dispute-secondary-button) { min-height:44px!important; padding:11px 16px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  @media (max-width:1120px) {
+    body.ih67-workspace #root :is(.privacy-center-grid,.dispute-detail-grid) { grid-template-columns:minmax(0,1fr)!important; }
+  }
+  @media (max-width:600px) {
+    body.ih67-workspace #root :is(.privacy-trust-panel,.privacy-request-form-card,.privacy-rights-card,.privacy-request-card,.dispute-panel,.dispute-state-card) { padding:24px 20px!important; }
+    body.ih67-workspace #root :is(.privacy-erasure-choice-grid,.privacy-user-report-grid,.moderation-basis-grid) { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih67-workspace #root :is(.privacy-request-form,.dispute-inline-form) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { min-height:48px!important; font-size:16px!important; }
+  }
+  @media (max-width:1260px) {
+    body.ih67-workspace #root :is(.ih5-service-card-grid,.ih11-freelancer-grid) { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+    body.ih67-workspace #root .ih26-catalog-intro { flex-direction:column!important; align-items:flex-start!important; }
+    body.ih67-workspace #root .calendar-workspace { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih67-workspace #root .calendar-sidebar { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; }
+    body.ih67-workspace #root .ih5-service-detail-layout { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih67-workspace #root .ih5-service-order-card { position:relative!important; top:auto!important; }
+  }
+  @media (max-width:800px) {
+    body.ih67-workspace #root :is(.ih5-filters,.ih26-catalog-filters .ih5-filters) { grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:16px!important; }
+    body.ih67-workspace #root .ih5-search { grid-column:1/-1!important; }
+    body.ih67-workspace #root .ih26-catalog-filters .ih7-select { grid-column:1/-1!important; }
+    body.ih67-workspace #root :is(.ih5-job-form-grid,.ih5-service-editor-fields,.ih5-service-modal-fields,.ih12-contact-grid) { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih67-workspace #root .profile-public-portfolio-grid { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  }
+  @media (max-width:600px) {
+    body.ih67-workspace #root :is(.ih5-page-heading,.ih26-catalog-intro,.ih5-service-form-header,.ih5-my-services-header,.app-page-header,.calendar-hero) h1 { font-size:29px!important; }
+    body.ih67-workspace #root .ih26-catalog-top { flex-wrap:wrap!important; gap:14px!important; padding-bottom:23px!important; }
+    body.ih67-workspace #root .ih26-catalog-location { gap:12px!important; }
+    body.ih67-workspace #root .ih26-catalog-location>.ih5-eyebrow { display:none!important; }
+    body.ih67-workspace #root .ih26-catalog-count { margin-left:auto!important; }
+    body.ih67-workspace #root .ih11-market-switch>a { padding-inline:10px!important; font-size:11px!important; }
+    body.ih67-workspace #root .ih26-catalog-actions { width:100%!important; }
+    body.ih67-workspace #root .ih26-catalog-actions>.ih5-button { flex:1!important; }
+    body.ih67-workspace #root .ih5-filters { padding:18px!important; margin:24px 0!important; gap:17px 12px!important; }
+    body.ih67-workspace #root .ih5-search input { min-height:47px!important; font-size:16px!important; }
+    body.ih67-workspace #root .ih7-select-trigger { min-height:48px!important; padding:12px 10px!important; font-size:12px!important; }
+    body.ih67-workspace #root .ih7-select-option { min-height:46px!important; font-size:14px!important; }
+    body.ih67-workspace #root .ih5-job-card { padding:24px 20px!important; }
+    body.ih67-workspace #root .ih5-job-overview { grid-template-columns:minmax(0,1fr)!important; gap:18px!important; }
+    body.ih67-workspace #root .ih5-job-title { font-size:21px!important; }
+    body.ih67-workspace #root .ih5-job-summary { font-size:14px!important; }
+    body.ih67-workspace #root .ih5-job-price { flex-direction:row!important; justify-content:space-between!important; align-items:center!important; flex-wrap:wrap!important; gap:8px 16px!important; padding:14px 16px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-soft)!important; text-align:left!important; }
+    body.ih67-workspace #root .ih5-job-price strong { font-size:24px!important; }
+    body.ih67-workspace #root .ih5-job-details { padding:20px 16px!important; }
+    body.ih67-workspace #root .ih5-job-facts { gap:12px!important; font-size:11px!important; }
+    body.ih67-workspace #root .ih5-job-actions { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:10px!important; }
+    body.ih67-workspace #root .ih5-job-actions>.ih5-button { width:100%!important; min-height:48px!important; font-size:13px!important; }
+    body.ih67-workspace #root :is(.ih5-service-card-grid,.ih11-freelancer-grid) { grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
+    body.ih67-workspace #root :is(.ih5-service-card,.ih11-freelancer-card) { padding:25px 22px!important; }
+    body.ih67-workspace #root .ih5-service-card-copy h2 { font-size:22px!important; }
+    body.ih67-workspace #root .ih5-service-card-copy p { font-size:14px!important; }
+    body.ih67-workspace #root .ih5-my-services-header { flex-direction:column!important; align-items:flex-start!important; gap:22px!important; }
+    body.ih67-workspace #root .ih5-my-services-header>.ih5-service-primary-action { width:100%!important; min-height:48px!important; }
+    body.ih67-workspace #root .ih5-my-services-list>article { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:17px!important; padding:26px 20px!important; }
+    body.ih67-workspace #root .ih5-my-services-list .ih5-service-category-mark { display:none!important; }
+    body.ih67-workspace #root .ih5-my-service-copy h2 { font-size:21px!important; }
+    body.ih67-workspace #root .ih5-my-service-copy p { font-size:14px!important; }
+    body.ih67-workspace #root .ih5-my-service-state { flex-direction:row!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; }
+    body.ih67-workspace #root .ih5-my-service-actions { gap:8px!important; }
+    body.ih67-workspace #root .ih5-my-service-actions :is(a,button) { flex:1!important; text-align:center!important; min-height:44px!important; padding:10px 8px!important; font-size:12px!important; }
+    body.ih67-workspace #root :is(.ih5-editor,.ih5-service-editor) { padding:25px 20px!important; gap:28px!important; }
+    body.ih67-workspace #root :is(.ih5-editor,.ih5-service-editor,.calendar-form) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) { min-height:48px!important; padding:12px!important; font-size:16px!important; }
+    body.ih67-workspace #root .ih5-job-create-progress { gap:6px!important; }
+    body.ih67-workspace #root .ih5-job-create-progress button { flex-direction:column!important; justify-content:center!important; gap:6px!important; min-height:63px!important; padding:9px 3px!important; }
+    body.ih67-workspace #root .ih5-job-create-progress button>strong { font:500 9px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:0!important; }
+    body.ih67-workspace #root .ih5-job-create-step-heading>span { display:none!important; }
+    body.ih67-workspace #root .ih5-job-create-step-heading h2 { font-size:23px!important; }
+    body.ih67-workspace #root .ih5-job-create-navigation>.ih5-button { min-height:48px!important; min-width:100px!important; }
+    body.ih67-workspace #root :is(.ih5-job-choice-grid.is-four,.ih5-job-choice-grid.is-three,.ih5-job-option-grid,.ih5-collaboration-plan-editor-grid,.ih5-collaboration-plan-check-grid,.ih5-job-collaboration-responsibility-grid,.ih5-job-collaboration-facts,.ih5-job-category-detail-list) { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih67-workspace #root .ih5-service-detail-main { padding:25px 20px!important; }
+    body.ih67-workspace #root .ih5-service-detail-header h1 { font-size:28px!important; }
+    body.ih67-workspace #root .ih5-service-order-card { padding:25px 22px!important; }
+    body.ih67-workspace #root .public-profile-preview { align-items:flex-start!important; gap:16px!important; padding-right:30px!important; }
+    body.ih67-workspace #root .public-profile-preview .profile-avatar,
+    body.ih67-workspace #root .public-profile-preview .profile-avatar-wrapper { width:57px!important; height:57px!important; min-width:57px!important; min-height:57px!important; font-size:22px!important; }
+    body.ih67-workspace #root .public-profile-preview h1 { font-size:26px!important; }
+    body.ih67-workspace #root .profile-public-portfolio-grid { grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
+    body.ih67-workspace #root .profile-stats { flex-direction:column!important; gap:0!important; }
+    body.ih67-workspace #root .profile-stat-card { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:16px!important; padding:15px 0!important; border-bottom:1px solid var(--w-line)!important; }
+    body.ih67-workspace #root .profile-review-card { padding:20px 0!important; border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+    body.ih67-workspace #root .calendar-hero { grid-template-columns:minmax(0,1fr)!important; gap:23px!important; }
+    body.ih67-workspace #root .calendar-hero-stats { gap:14px!important; align-items:flex-start!important; }
+    body.ih67-workspace #root .calendar-hero-stats>article { flex-direction:column!important; align-items:flex-start!important; gap:6px!important; flex:1!important; }
+    body.ih67-workspace #root .calendar-primary-action { width:100%!important; min-height:48px!important; }
+    body.ih67-workspace #root .calendar-toolbar { align-items:flex-start!important; flex-direction:column!important; gap:20px!important; }
+    body.ih67-workspace #root .calendar-month-navigation { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:8px!important; width:100%!important; }
+    body.ih67-workspace #root .calendar-board { padding:10px 7px!important; }
+    body.ih67-workspace #root .calendar-day { min-height:55px!important; padding:1px!important; }
+    body.ih67-workspace #root .calendar-day-number { min-height:36px!important; font-size:12px!important; }
+    body.ih67-workspace #root .calendar-day-events { display:none!important; }
+    body.ih67-workspace #root .calendar-day:has(.calendar-day-events>*):after { content:""!important; display:block!important; align-self:center!important; width:4px!important; height:4px!important; margin:3px 0!important; border-radius:50%!important; background:var(--w-accent)!important; }
+    body.ih67-workspace #root .calendar-sidebar { display:block!important; }
+    body.ih67-workspace #root :is(.calendar-day-agenda,.calendar-upcoming) { padding:25px 20px!important; }
+    body.ih67-workspace #root .calendar-form-row { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
+    body.ih67-workspace #root .calendar-form-actions { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:10px!important; }
+    body.ih67-workspace #root .notification-card-actions { flex-direction:column!important; align-items:stretch!important; }
+    body.ih67-workspace #root .notification-card-actions :is(a,button) { text-align:center!important; }
+  }
+}

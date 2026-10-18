@@ -35,6 +35,7 @@ import {
 
 import App from "./App";
 import { BrandSignature } from "./Brand";
+import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceMessengerStart, WorkspaceIcon } from "./Workspace";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
@@ -5336,6 +5337,18 @@ function AccountNavbar() {
       ?.removeAttribute("open");
   }
 
+  // P67: shared workspace navigation. The full Lucyna view retains its own shell.
+  if (accountLocation.pathname !== "/lucyna") {
+    return <WorkspaceNavigation
+      name={userName} avatarUrl={avatarUrl} onLogout={handleLogout}
+      limited={hasRestrictedAgeAccess || ageAccessLoading}
+      hasMessages={hasMessageNotifications} hasNotifications={hasNotifications}
+      hasDisputes={hasDisputeNotifications} moderationNotice={moderationNotice}
+      helpUrl={helpCenterHref()} assistantEnabled={LUCYNA_VISIBLE}
+      onAssistantOpen={requestLucynaDock}
+    />;
+  }
+
   if (isLimited && !ageAccessLoading) {
     return <LimitedAccountNavigation name={userName} initial={initial} onLogout={handleLogout} helpUrl={helpCenterHref()} showAssistant={LUCYNA_VISIBLE} />;
   }
@@ -8125,7 +8138,7 @@ function LimitedAccount() {
 
   return <div className="page limited-account-page ih60-limited-page">
     <AccountNavbar />
-    <LimitedAccountOverview
+    <WorkspaceLimitedHome
       fullAccessLabel={fullAccessLabel}
       ageRestricted={Boolean(location.state?.ageRestricted)}
       settings={<AccountTemplatesCard />}
@@ -8163,6 +8176,7 @@ function AccountTemplatesCard() {
 const ACCOUNT_WORKSPACE_SECTIONS = [
   {
     key: "profile",
+    english: {"label": "Profile details", "eyebrow": "Public profile", "title": "Profile details", "description": "Set the photo, name, bio and country shown on your public profile."},
     number: "01",
     label: "Dane profilu",
     hash: "account-profile-data",
@@ -8173,6 +8187,7 @@ const ACCOUNT_WORKSPACE_SECTIONS = [
   },
   {
     key: "expertise",
+    english: {"label": "Expertise", "eyebrow": "Freelancer profile", "title": "Skills and expertise", "description": "Choose your fields and describe the experience you bring to projects."},
     number: "02",
     label: "Specjalizacja",
     hash: "account-expertise",
@@ -8183,6 +8198,7 @@ const ACCOUNT_WORKSPACE_SECTIONS = [
   },
   {
     key: "portfolio",
+    english: {"label": "Portfolio", "eyebrow": "Past work", "title": "Projects in your portfolio", "description": "Add and organise the work you want clients to see."},
     number: "03",
     label: "Portfolio",
     hash: "account-portfolio",
@@ -8193,6 +8209,7 @@ const ACCOUNT_WORKSPACE_SECTIONS = [
   },
   {
     key: "jobs",
+    english: {"label": "My listings", "eyebrow": "Your listings", "title": "Published jobs", "description": "Manage your posts and check jobs available for republication."},
     number: "04",
     label: "Zlecenia",
     hash: "account-jobs",
@@ -8203,21 +8220,33 @@ const ACCOUNT_WORKSPACE_SECTIONS = [
   },
   {
     key: "preferences",
+    english: {"label": "Settings", "eyebrow": "Account and privacy", "title": "Account settings", "description": "Adjust recommendations and open your privacy settings and reports."},
     number: "05",
     label: "Ustawienia",
     hash: "account-preferences",
     eyebrow: "Konto i prywatność",
-    title: "Sposób korzystania z IdeaHire",
+    title: "Ustawienia konta",
     description:
       "Dopasuj rekomendacje oraz przejdź do ustawień prywatności i swoich zgłoszeń.",
   },
   {
+    key: "payouts",
+    english: {"label": "Payouts", "eyebrow": "Payments", "title": "Balance and payouts", "description": "Check your Stripe connection, balance and payout history."},
+    number: "07",
+    label: "Wypłaty",
+    hash: "account-payouts",
+    eyebrow: "Rozliczenia",
+    title: "Saldo i wypłaty",
+    description: "Sprawdź połączenie ze Stripe, saldo oraz historię wypłat.",
+  },
+  {
     key: "templates",
+    english: {"label": "Appearance", "eyebrow": "Interface appearance", "title": "Site appearance", "description": "Choose a colour palette for the site. Your content and features stay the same."},
     number: "06",
     label: "Szablony",
     hash: "account-templates",
     eyebrow: "Wygląd interfejsu",
-    title: "Wybierz szatę IdeaHire",
+    title: "Wygląd strony",
     description:
       "Przełącz wygląd całej strony bez zmiany obecnego układu, danych i funkcji.",
   },
@@ -8236,6 +8265,7 @@ function getAccountWorkspaceSection(hash = "") {
     return "preferences";
   }
   if (normalizedHash === "account-templates") return "templates";
+  if (normalizedHash === "account-payouts") return "payouts";
 
   if (normalizedHash === "account-profile-data") return "profile";
   return null;
@@ -8442,6 +8472,16 @@ function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children })
 }
 
 
+function AccountWorkspaceLanding(props) {
+  const inbox = useConversationInbox();
+  return <WorkspaceDashboard {...props} inbox={inbox} />;
+}
+
+function WorkOverview() {
+  const inbox = useConversationInbox();
+  return <div className="page ih67-work-root"><AccountNavbar /><WorkspaceWork inbox={inbox} /></div>;
+}
+
 function Account() {
   const {
     user,
@@ -8449,6 +8489,7 @@ function Account() {
   } = useAuth();
 
   const { isAdult } = useAgeAccess();
+  const accountEnglish = useSitePreferences().language === "en";
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -8567,9 +8608,9 @@ function Account() {
     useState(null);
 
   useEffect(() => {
-    setActiveAccountSection(
-      getAccountWorkspaceSection(location.hash)
-    );
+    const requestedSection = getAccountWorkspaceSection(location.hash);
+    setActiveAccountSection(requestedSection);
+    if (requestedSection) setAccountHubOpen(false);
   }, [location.hash]);
 
   useEffect(() => {
@@ -8968,14 +9009,14 @@ function Account() {
     }
 
     connectReturnHandledRef.current = handledKey;
-    setActiveAccountSection("profile");
+    setActiveAccountSection("payouts");
 
     handleConnectOnboarding({
       redirectToStripe: returnMode === "refresh",
       returningFromStripe: true,
     }).finally(() => {
       if (returnMode === "return") {
-        navigate("/account#account-profile-data", {
+        navigate("/account#account-payouts", {
           replace: true,
         });
       }
@@ -9977,10 +10018,13 @@ function Account() {
     connectCopy[connectStatus] ||
     connectCopy.not_started;
 
-  const activeAccountSectionCopy =
+  const selectedAccountSectionCopy =
     ACCOUNT_WORKSPACE_SECTIONS.find(
       (section) => section.key === activeAccountSection
     ) || ACCOUNT_WORKSPACE_SECTIONS[0];
+  const activeAccountSectionCopy = accountEnglish
+    ? { ...selectedAccountSectionCopy, ...selectedAccountSectionCopy.english }
+    : selectedAccountSectionCopy;
 
   function openAccountSection(section) {
     if (!section) return;
@@ -10002,8 +10046,9 @@ function Account() {
 
   function returnToAccountHub() {
     setAccountHubOpen(true);
+    navigateAccountWorkspace({ pathname: location.pathname, search: location.search, hash: "" }, { replace: true });
     window.requestAnimationFrame(() => {
-      const trigger = document.querySelector(".ih40-hub-home, .ih40-hub-tile");
+      const trigger = document.getElementById("ih67-dashboard-title");
       trigger?.focus({ preventScroll: true });
       trigger?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
     });
@@ -10015,42 +10060,22 @@ function Account() {
 
       <main
         className="app-page account-workspace-page ih6-account-workspace"
+        id="ih67-content"
         data-account-section={activeAccountSection || "home"}
       >
-        <div className="ih16-account-overview ih40-account-overview">
-          <ProfileHub displayName={displayName} sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} open={accountHubOpen} onOpenChange={setAccountHubOpen}>
-          <nav className="ih13-account-shortcuts ih14-account-actions" aria-label="Szybkie działania konta">
-            <section className="ih14-account-action-group">
-              <h2>Zlecam pracę</h2>
-              {isAdult && <Link className="ih14-account-action-primary" to="/find-talent"><MarketIcon kind="plus" /><span>Dodaj zlecenie</span><MarketIcon kind="arrow" /></Link>}
-              <div className="ih14-account-action-links">
-                <Link to="/freelancers"><span>Znajdź freelancera</span><MarketIcon kind="arrow" /></Link>
-                <Link to="/services"><span>Przeglądaj usługi</span><MarketIcon kind="arrow" /></Link>
-              </div>
-            </section>
-            <section className="ih14-account-action-group">
-              <h2>Oferuję usługi</h2>
-              <div className="ih14-account-action-links">
-                {isAdult && <Link to="/services/new"><MarketIcon kind="plus" /><span>Dodaj usługę</span></Link>}
-                {isAdult && <Link to="/services/mine"><span>Moje usługi</span><MarketIcon kind="arrow" /></Link>}
-                <button type="button" onClick={() => openAccountSection(ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === "portfolio"))}><span>Moje portfolio</span><MarketIcon kind="arrow" /></button>
-              </div>
-            </section>
-            <section className="ih14-account-action-group">
-              <h2>Współpraca</h2>
-              <div className="ih14-account-action-links">
-                {isAdult && <Link to="/messages"><span>Wiadomości</span><MarketIcon kind="message" /></Link>}
-                <button type="button" onClick={() => openAccountSection(ACCOUNT_WORKSPACE_SECTIONS.find((section) => section.key === "jobs"))}><span>Moje zlecenia</span><MarketIcon kind="arrow" /></button>
-              </div>
-            </section>
-          </nav>
-          </ProfileHub>
-        </div>
+        {!activeAccountSection || accountHubOpen ? (
+          <AccountWorkspaceLanding name={displayName} avatarUrl={avatarUrl} about={about}
+            specialtyCount={specialtyCategories.length} portfolioCount={portfolioItems.length}
+            jobCount={myJobs.length} jobsLoading={jobsLoading}
+            sections={ACCOUNT_WORKSPACE_SECTIONS} onSelect={openAccountSection} />
+        ) : (
+          <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
+        )}
 
         <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
           <div className="ih6-account-content">
         <section className="account-tab-intro" aria-live="polite">
-          <button type="button" className="ih25-hub-back" onClick={returnToAccountHub}><MarketIcon kind="arrow" /><span>Centrum profilu</span></button>
+          <button type="button" className="ih25-hub-back" onClick={returnToAccountHub}><MarketIcon kind="arrow" /><span>{accountEnglish ? "My account" : "Moje konto"}</span></button>
           <div>
             <span className="section-label">
               {activeAccountSectionCopy.eyebrow}
@@ -10063,7 +10088,7 @@ function Account() {
         <div
           className="account-tab-stage"
           id="account-tab-panel"
-          role="tabpanel"
+          role="region"
           aria-labelledby="account-section-title"
           tabIndex="0"
           key={activeAccountSection}
@@ -10452,7 +10477,7 @@ function Account() {
             </div>
           </form>
 
-          {isAdult && activeAccountSection === "profile" && (
+          {isAdult && activeAccountSection === "payouts" && (
             <StripeAccountPayouts
               userId={user.id}
               onConfigure={() => handleConnectOnboarding()}
@@ -20310,7 +20335,10 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
       if (!element) return;
       const inset = window.matchMedia?.("(max-width: 800px)").matches ? 0 : 12;
       const top = focusMode ? inset : Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0));
-      const height = Math.max(focusMode ? 180 : 240, Math.round((viewport?.height || window.innerHeight) - top - (focusMode ? inset : 24)));
+      const compactViewport = window.matchMedia?.("(max-width: 980px)").matches;
+      const bottomNavigation = element.parentElement?.querySelector(".ih67-mobile-nav");
+      const bottomInset = focusMode ? inset : compactViewport ? (chat ? 0 : Math.ceil(bottomNavigation?.getBoundingClientRect().height || 80)) : 24;
+      const height = Math.max(focusMode ? 180 : 180, Math.round((viewport?.height || window.innerHeight) - top - bottomInset));
       if (focusMode) element.style.setProperty("top", `${(viewport?.offsetTop || 0) + inset}px`, "important");
       else element.style.removeProperty("top");
       element.style.setProperty("height", `${height}px`, "important");
@@ -20322,6 +20350,8 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
     const observer = window.ResizeObserver ? new ResizeObserver(schedule) : null;
     const navbar = frameRef.current?.parentElement?.querySelector(".navbar");
     if (navbar) observer?.observe(navbar);
+    const bottomNavigation = frameRef.current?.parentElement?.querySelector(".ih67-mobile-nav");
+    if (bottomNavigation) observer?.observe(bottomNavigation);
     window.addEventListener("resize", schedule, { passive: true });
     viewport?.addEventListener("resize", schedule, { passive: true });
     viewport?.addEventListener("scroll", schedule, { passive: true });
@@ -20333,7 +20363,7 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
       viewport?.removeEventListener("scroll", schedule);
       window.cancelAnimationFrame(task);
     };
-  }, [focusMode]);
+  }, [focusMode, chat]);
   useEffect(() => {
     if (!chat || !inboxOpen || inboxPersistent) return undefined;
     const panel = frameRef.current?.querySelector(".ih12-inbox");
@@ -20358,7 +20388,7 @@ function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, ch
     return () => {
       document.removeEventListener("keydown", keyboard);
       if (content) content.inert = false;
-      const returnFocus = previous?.isConnected ? previous : frameRef.current?.querySelector(".ih14-conversations-toggle");
+      const returnFocus = previous?.isConnected && previous !== document.body ? previous : frameRef.current?.querySelector(".ih14-conversations-toggle");
       returnFocus?.focus?.({ preventScroll: true });
     };
   }, [chat, inboxOpen, inboxPersistent]);
@@ -20499,29 +20529,7 @@ function InboxPanel({
 }
 
 function MessengerStart() {
-  return (
-    <section className="ih12-inbox-welcome" aria-label="Otwórz rozmowę">
-      <div className="ih13-welcome-copy">
-        <span className="ih12-welcome-icon" aria-hidden="true"><MarketIcon kind="message" /></span>
-        <h2>Wybierz rozmowę</h2>
-        <p>Otwórz ją z listy po lewej. Wiadomości, pliki i ustalenia dotyczące projektu znajdziesz w jednym miejscu.</p>
-        <div className="ih12-welcome-features">
-          <span><MarketIcon kind="message" />Rozmowa</span>
-          <span><MarketIcon kind="files" />Pliki</span>
-          <span><MarketIcon kind="check" />Ustalenia</span>
-        </div>
-      </div>
-      <div className="ih13-start-actions">
-        <p>Chcesz rozpocząć nową współpracę?</p>
-        <nav className="ih17-start-grid" aria-label="Rozpocznij współpracę">
-          <Link className="ih12-button" to="/freelancers"><MarketIcon /><span>Znajdź freelancera</span><MarketIcon kind="arrow" /></Link>
-          <Link className="ih12-button" to="/services"><MarketIcon kind="files" /><span>Przeglądaj usługi</span><MarketIcon kind="arrow" /></Link>
-          <Link className="ih12-button ih17-start-primary" to="/find-talent"><MarketIcon kind="plus" /><span>Dodaj zlecenie</span><MarketIcon kind="arrow" /></Link>
-          <Link className="ih17-browse-jobs" to="/jobs"><span>Przeglądaj zlecenia</span><MarketIcon kind="arrow" /></Link>
-        </nav>
-      </div>
-    </section>
-  );
+  return <WorkspaceMessengerStart />;
 }
 
 function ConversationInbox({ activeId, compact = false }) {
@@ -22357,24 +22365,22 @@ function Chat() {
 
   const [workspaceTab, setWorkspaceTab] =
     useState("conversation");
-  const [focusMode, setFocusMode] = useState(() => !!window.matchMedia?.("(max-width: 800px)").matches);
+  const [focusMode, setFocusMode] = useState(false);
   const workspaceFocusRef = useRef(null);
   const [planPinned, setPlanPinned] = useState(false);
   useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); workspaceFocusRef.current = null; }, [id]);
   function openWorkspace(value) {
     setWorkspaceTab(value);
     setPlanPinned(false);
-    if (value !== "conversation") {
-      if (workspaceFocusRef.current === null) workspaceFocusRef.current = focusMode;
-      setFocusMode(true);
-    } else if (workspaceFocusRef.current !== null) {
-      setFocusMode(workspaceFocusRef.current);
-      workspaceFocusRef.current = null;
-    }
+    window.requestAnimationFrame(() => {
+      if (value === "conversation") composerRef.current?.focus({ preventScroll: true });
+      else document.getElementById(`ih7-chat-panel-${value}`)?.focus({ preventScroll: true });
+    });
   }
+
   useEffect(() => {
     if (!planPinned) return undefined;
-    const query = window.matchMedia?.("(max-width: 980px)");
+    const query = window.matchMedia?.("(max-width: 1499px)");
     const update = () => { if (query?.matches) openWorkspace("plan"); };
     update();
     query?.addEventListener?.("change", update);
@@ -23437,6 +23443,7 @@ function Chat() {
                 <button
                   type="button"
                   className="ih7-chat-back"
+                  aria-label="Wróć do wiadomości"
                   onClick={() =>
                     navigate(
                       "/messages"
@@ -23493,7 +23500,7 @@ function Chat() {
                         {otherName}
                       </strong>
                       <span>
-                        Kliknij, aby zobaczyć profil
+                        Zobacz profil
                       </span>
                     </div>
                   </Link>
@@ -23597,7 +23604,7 @@ function Chat() {
                   </button>
                 ))}
                 {workspaceTab === "conversation" && <button type="button" className="ih15-pin-plan" aria-label="Otwórz plan obok rozmowy"
-                  onClick={() => { if (window.matchMedia?.("(max-width: 980px)").matches) openWorkspace("plan"); else setPlanPinned(value => !value); }} aria-pressed={planPinned}>
+                  onClick={() => { if (window.matchMedia?.("(max-width: 1499px)").matches) openWorkspace("plan"); else setPlanPinned(value => !value); }} aria-pressed={planPinned}>
                   <MarketIcon kind="panels" /><span>Plan obok</span>
                 </button>}
               </div>
@@ -31693,6 +31700,10 @@ function Router() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/work" element={
+            <ProtectedRoute><UserOnlyRoute><WorkOverview /></UserOnlyRoute></ProtectedRoute>
+          } />
 
           <Route
             path="/messages"
