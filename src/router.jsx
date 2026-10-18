@@ -1,3 +1,4 @@
+/* P59 — fullscreen onboarding, visible registration validation, limited account. */
 /* P47 — pełny plik src/router.jsx | Zmieniona wyłącznie karta szablonów. */
 /* IdeaHire | P40 | 2026-10-15 | Oczko hasła i nowe centrum konta. */
 /* IdeaHire | STRIPE 12 | 2026-10-15 | Saldo i wyplaty w profilu. */
@@ -32,6 +33,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
@@ -1608,12 +1610,14 @@ function useDiscoveryPreferences() {
 
 function DiscoveryOnboarding({
   initialPreferences,
+  initialStep = 1,
   canClose = false,
   onClose,
   onComplete,
 }) {
   const { savePreferences } = useDiscoveryPreferences();
-  const [step, setStep] = useState(1);
+  const { isLimited } = useAgeAccess();
+  const [step, setStep] = useState(initialStep);
   const [usagePreference, setUsagePreference] = useState(
     initialPreferences?.usagePreference || "both"
   );
@@ -1652,14 +1656,19 @@ function DiscoveryOnboarding({
   const backdropRef = useRef(null);
   const contentRef = useRef(null);
   const totalSteps = 5;
+  const { moving, direction, move } = useJourneyMotion(contentRef);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     const previousFocus = document.activeElement;
+    const appRoot = document.getElementById("root");
+    const previouslyInert = appRoot?.inert;
+    if (appRoot) appRoot.inert = true;
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      if (appRoot) appRoot.inert = previouslyInert;
       if (previousFocus?.isConnected) previousFocus.focus?.({ preventScroll: true });
     };
   }, []);
@@ -1800,7 +1809,7 @@ function DiscoveryOnboarding({
   }
 
   async function finish(action = "complete") {
-    if (saving) return;
+    if (saving || moving) return;
     setSaving(true);
     setMessage("");
 
@@ -1834,12 +1843,12 @@ function DiscoveryOnboarding({
     event?.stopPropagation();
     if (!validateCurrentStep()) return;
     setMessage("");
-    setStep((current) => Math.min(totalSteps, current + 1));
+    move(() => setStep((current) => Math.min(totalSteps, current + 1)));
   }
 
   function goBack() {
     setMessage("");
-    setStep((current) => Math.max(1, current - 1));
+    move(() => setStep((current) => Math.max(1, current - 1)), "back");
   }
 
   const selectedUsage = DISCOVERY_USAGE_OPTIONS.find(
@@ -1858,20 +1867,22 @@ function DiscoveryOnboarding({
 
   return createPortal((
     <div
-      className="discovery-onboarding-backdrop ih8-onboarding ih9-onboarding"
+      className="discovery-onboarding-backdrop ih59-discovery"
       ref={backdropRef}
       data-step={step}
+      data-moving={moving}
+      data-direction={direction}
     >
       <section
         className="discovery-onboarding-shell"
         role="dialog"
         aria-modal="true"
         aria-labelledby="discovery-onboarding-title"
-        aria-busy={saving}
+        aria-busy={saving || moving}
         onKeyDown={(event) => {
-          if (event.key === "Escape" && canClose && !saving) onClose?.();
+          if (event.key === "Escape" && canClose && !saving && !moving) onClose?.();
           if (event.key !== "Tab") return;
-          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), a[href]:not([tabindex="-1"])'));
+          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href]:not([tabindex="-1"])'));
           const first = controls[0];
           const last = controls.at(-1);
           if (!first) return;
@@ -1902,6 +1913,7 @@ function DiscoveryOnboarding({
               type="button"
               className="discovery-close-button"
               onClick={onClose}
+              disabled={saving || moving}
               aria-label="Zamknij ustawienia preferencji"
             >
               ×
@@ -1925,6 +1937,10 @@ function DiscoveryOnboarding({
           key={step}
           ref={contentRef}
         >
+          <ol className="ih59-discovery-steps" aria-label="Etapy ustawień">
+            {["Kierunek", "Dziedziny", "Cele", "Wyniki", "Podsumowanie"].map((label, index) => <li key={label} aria-current={step === index + 1 ? "step" : undefined}><b>{index + 1 < step ? "✓" : String(index + 1).padStart(2, "0")}</b><span>{label}</span></li>)}
+          </ol>
+          {isLimited && <p className="ih59-limited-discovery-note">Twoje konto 16–17 lat służy do przeglądania platformy. Te ustawienia dopasują treści; nie odblokowują umów ani płatnych zleceń.</p>}
           {step === 1 && (
             <>
               <div className="ih9-discovery-welcome">
@@ -1942,7 +1958,7 @@ function DiscoveryOnboarding({
                 </h1>
                 <p>
                   Wybierz sposób, w jaki najczęściej chcesz działać. Nie
-                  zablokuje to żadnej funkcji i później możesz zmienić wybór.
+                  zmienia to uprawnień konta. Później możesz zmienić wybór.
                 </p>
               </div>
 
@@ -2333,7 +2349,7 @@ function DiscoveryOnboarding({
                 type="button"
                 className="discovery-text-button"
                 onClick={goBack}
-                disabled={saving}
+                disabled={saving || moving}
               >
                  Wstecz
               </button>
@@ -2342,7 +2358,7 @@ function DiscoveryOnboarding({
                 type="button"
                 className="discovery-text-button"
                 onClick={onClose}
-                disabled={saving}
+                disabled={saving || moving}
               >
                 Anuluj
               </button>
@@ -2351,7 +2367,7 @@ function DiscoveryOnboarding({
                 type="button"
                 className="discovery-text-button"
                 onClick={() => finish("skip")}
-                disabled={saving}
+                disabled={saving || moving}
               >
                 Pomiń na razie
               </button>
@@ -2371,7 +2387,7 @@ function DiscoveryOnboarding({
               type="button"
               className="btn btn-dark discovery-primary-button"
               onClick={goForward}
-              disabled={saving}
+              disabled={saving || moving}
               data-action="discovery-next"
             >
               Dalej 
@@ -2381,7 +2397,7 @@ function DiscoveryOnboarding({
               type="button"
               className="btn btn-dark discovery-primary-button"
               onClick={() => finish("complete")}
-              disabled={saving}
+              disabled={saving || moving}
             >
               {saving ? "Zapisywanie..." : "Przejdź do IdeaHire "}
             </button>
@@ -2397,7 +2413,7 @@ function DiscoveryOnboardingLayer() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isStaff, staffLoading } = useStaffRole(user?.id);
-  const { ageRequired, loading: ageLoading } = useAgeAccess();
+  const { ageRequired, isLimited, loading: ageLoading } = useAgeAccess();
   const {
     isRestricted,
     loading: restrictionLoading,
@@ -2437,11 +2453,12 @@ function DiscoveryOnboardingLayer() {
   return (
     <DiscoveryOnboarding
       initialPreferences={preferences}
+      initialStep={user?.user_metadata?.onboarding_source === "registration" ? 2 : 1}
       onComplete={(result) => {
         if (!result?.onboardingCompletedAt) return;
 
         navigate(
-          result?.usagePreference === "hire_talent"
+          isLimited ? "/account" : result?.usagePreference === "hire_talent"
             ? "/talent"
             : "/jobs",
           { replace: true }
@@ -3834,6 +3851,7 @@ function getSafeJobReferenceUrl(value) {
   }
 }
 
+const MIN_JOB_BUDGET = IDEA_HIRE_PUBLIC_OFFER.orderMinimum;
 const MAX_JOB_BUDGET = IDEA_HIRE_PUBLIC_OFFER.orderLimit;
 
 const MAX_JOB_BUDGET_MESSAGE =
@@ -6625,6 +6643,29 @@ function Register() {
     useState("");
 
   const location = useLocation();
+  const [registrationStage, setRegistrationStage] = useState("role");
+  const [confirmationEmail, setConfirmationEmail] = useState("");
+  const registrationRequest = useRef(false);
+  const formTitleRef = useRef(null);
+  const errorRef = useRef(null);
+
+  useEffect(() => {
+    if (registrationStage !== "account") return;
+    window.scrollTo({ top: 0, behavior: "instant" });
+    formTitleRef.current?.focus({ preventScroll: true });
+  }, [registrationStage]);
+
+  useEffect(() => {
+    if (message && registrationStage === "account") {
+      errorRef.current?.focus({ preventScroll: true });
+      errorRef.current?.scrollIntoView({ block: "nearest", behavior: "instant" });
+    }
+  }, [message, registrationStage]);
+
+  function rememberUsagePreference() {
+    try { window.sessionStorage.setItem("ideahire_pending_usage_preference", usagePreference); }
+    catch { /* Storage being disabled must not block authentication. */ }
+  }
 
   useEffect(() => {
     const oauthError = getOAuthErrorFromLocation(location);
@@ -6649,10 +6690,7 @@ function Register() {
     setGoogleLoading(true);
 
     try {
-      window.sessionStorage.setItem(
-        "ideahire_pending_usage_preference",
-        usagePreference
-      );
+      rememberUsagePreference();
 
       const redirectUrl = new URL(
         "/register",
@@ -6687,12 +6725,17 @@ function Register() {
   ) {
     event.preventDefault();
 
-    if (loading) return;
+    if (loading || googleLoading || registrationRequest.current) return;
 
     setMessage("");
 
     if (!usagePreference) {
       setMessage("Wybierz, jak chcesz korzystać z IdeaHire.");
+      return;
+    }
+
+    if (!name.trim()) {
+      setMessage("Podaj imię lub nazwę konta.");
       return;
     }
 
@@ -6719,15 +6762,13 @@ function Register() {
       return;
     }
 
+    registrationRequest.current = true;
     setLoading(true);
 
     try {
       const acceptedAtClient = new Date().toISOString();
 
-      window.sessionStorage.setItem(
-        "ideahire_pending_usage_preference",
-        usagePreference
-      );
+      rememberUsagePreference();
 
       const {
         data,
@@ -6784,9 +6825,8 @@ function Register() {
       }
 
       if (!data.session) {
-        alert(
-          "Konto zostało utworzone. Sprawdź e-mail i potwierdź adres."
-        );
+        setPassword("");
+        setConfirmationEmail(normalizeEmail(email));
       }
     } catch (error) {
       setMessage(
@@ -6796,12 +6836,24 @@ function Register() {
         }`
       );
     } finally {
+      registrationRequest.current = false;
       setLoading(false);
     }
   }
 
   if (authLoading) {
     return <LoadingScreen />;
+  }
+
+  if (confirmationEmail) return <RegistrationSentScreen email={confirmationEmail} />;
+
+  if (registrationStage === "role") {
+    return <RegistrationRoleScreen
+      options={DISCOVERY_USAGE_OPTIONS}
+      value={usagePreference}
+      onChange={(value) => { setUsagePreference(value); setMessage(""); }}
+      onContinue={() => { if (usagePreference) setRegistrationStage("account"); }}
+    />;
   }
 
   return (
@@ -6821,7 +6873,7 @@ function Register() {
             Dołącz do IdeaHire
           </span>
 
-          <h1>
+          <h1 tabIndex={-1} ref={formTitleRef}>
             Utwórz konto
           </h1>
 
@@ -6831,50 +6883,10 @@ function Register() {
           </p>
         </div>
 
-        <section
-          className="registration-role-section"
-          aria-labelledby="registration-role-title"
-        >
-          <div className="registration-role-heading">
-            <span>Twój start</span>
-            <h2 id="registration-role-title">
-              Jak chcesz korzystać z IdeaHire?
-            </h2>
-            <p>
-              To ustawia pierwszy widok i podpowiedzi. Nie ogranicza funkcji
-              konta — wybór zmienisz później.
-            </p>
-          </div>
-
-          <div className="registration-role-grid">
-            {DISCOVERY_USAGE_OPTIONS.map((option) => (
-              <button
-                type="button"
-                className={`registration-role-card${
-                  usagePreference === option.value ? " is-selected" : ""
-                }`}
-                onClick={() => {
-                  setUsagePreference(option.value);
-                  setMessage("");
-                }}
-                aria-pressed={usagePreference === option.value}
-                key={option.value}
-              >
-                <small>{option.icon}</small>
-                <strong>{option.title}</strong>
-                <span>{option.description}</span>
-                <i aria-hidden="true">
-                  {usagePreference === option.value ? "✓" : "+"}
-                </i>
-              </button>
-            ))}
-          </div>
-
-          <p className="registration-role-note">
-            Wybór służy personalizacji. Nie określa statusu przedsiębiorcy,
-            formy zatrudnienia ani sposobu rozliczenia podatku.
-          </p>
-        </section>
+        <div className="ih59-registration-selection">
+          <div><small>Krok 2 z 2 · Twój kierunek</small><strong>{getDiscoveryUsageLabel(usagePreference)}</strong></div>
+          <button type="button" disabled={loading || googleLoading} onClick={() => { setRegistrationStage("role"); setMessage(""); }}>Zmień wybór</button>
+        </div>
 
         <div className="auth-provider-section">
           <GoogleAuthButton
@@ -6896,9 +6908,8 @@ function Register() {
 
         <form
           className="auth-form"
-          onSubmit={
-            handleRegister
-          }
+          onSubmit={handleRegister}
+          aria-busy={loading || googleLoading}
         >
           <label>
             Imię / nazwa
@@ -6945,6 +6956,7 @@ function Register() {
               max={getDateInputBoundary()}
               onChange={(event) => {
                 setBirthDate(event.target.value);
+                setAgeNoticeAcknowledged(false);
                 setMessage("");
               }}
               autoComplete="bday"
@@ -7061,7 +7073,7 @@ function Register() {
           </div>
 
           {message && (
-            <p className="auth-error">
+            <p className="auth-error ih59-registration-error" role="alert" tabIndex={-1} ref={errorRef}>
               {message}
             </p>
           )}
@@ -7069,14 +7081,7 @@ function Register() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={
-              loading ||
-              googleLoading ||
-              !ageNoticeAcknowledged ||
-              !privacyNoticeAcknowledged ||
-              !termsAccepted ||
-              !usagePreference
-            }
+            disabled={loading || googleLoading}
           >
             {loading
               ? "Tworzenie konta..."
@@ -8121,78 +8126,14 @@ function LimitedAccount() {
       })
     : "po ukończeniu 18 lat";
 
-  return (
-    <div className="page limited-account-page">
-      <AccountNavbar />
-
-      <main className="app-page limited-account-shell">
-        <div className="app-page-header account-page-heading">
-          <span className="section-label">Twoje konto</span>
-          <h1>Konto ograniczone</h1>
-          <p>
-            Możesz bezpiecznie poznawać IdeaHire. Funkcje związane z umowami
-            i płatnymi zleceniami zostaną udostępnione po ukończeniu 18 lat.
-          </p>
-        </div>
-
-        {location.state?.ageRestricted && (
-          <p className="limited-account-route-message" role="status">
-            Ta funkcja jest dostępna wyłącznie dla pełnych kont 18+.
-          </p>
-        )}
-
-        <section className="limited-account-hero">
-          <div className="limited-account-status-icon" aria-hidden="true">
-            16+
-          </div>
-          <div>
-            <span>Konto młodzieżowe 16–17</span>
-            <h2>Pełny dostęp od {fullAccessLabel}</h2>
-            <p>
-              Nie musisz ponownie zakładać konta. Wiek jest obliczany
-              automatycznie na podstawie zapisanej, prywatnej daty urodzenia.
-            </p>
-          </div>
-        </section>
-
-        <div className="limited-account-grid">
-          <section className="limited-account-panel is-available">
-            <span className="limited-account-panel-icon" aria-hidden="true">✓</span>
-            <h2>Dostępne teraz</h2>
-            <ul>
-              <li>przeglądanie zleceń,</li>
-              <li>przeglądanie publicznych profili,</li>
-              <li>ustawienia języka i wyglądu strony.</li>
-            </ul>
-            <Link className="btn btn-dark" to="/jobs">
-              Przeglądaj zlecenia 
-            </Link>
-          </section>
-
-          <section className="limited-account-panel is-locked">
-            <span className="limited-account-panel-icon" aria-hidden="true">○</span>
-            <h2>Dostępne od 18 lat</h2>
-            <ul>
-              <li>publikowanie i przyjmowanie zleceń,</li>
-              <li>wiadomości i formularze współpracy,</li>
-              <li>płatności oraz otwieranie nowych sporów.</li>
-            </ul>
-          </section>
-        </div>
-
-        <section className="limited-account-privacy">
-          <strong>Twoja data urodzenia pozostaje prywatna</strong>
-          <p>
-            Nie wyświetlamy jej na profilu ani innym użytkownikom. Jeżeli
-            została podana błędnie, korektę przeprowadzi pomoc IdeaHire.
-          </p>
-          <Link className="privacy-entry-link" to="/privacy-center">
-            Prywatność i moje dane 
-          </Link>
-        </section>
-      </main>
-    </div>
-  );
+  return <div className="page limited-account-page">
+    <AccountNavbar />
+    <LimitedAccountOverview
+      fullAccessLabel={fullAccessLabel}
+      ageRestricted={Boolean(location.state?.ageRestricted)}
+      settings={<AccountTemplatesCard />}
+    />
+  </div>;
 }
 
 /* =========================================================
@@ -12519,8 +12460,8 @@ function FindTalent() {
     if (step === 3) {
       const numericBudget = Number(budget);
 
-      if (!budget || !Number.isInteger(numericBudget) || numericBudget <= 0) {
-        setMessage("Budżet musi być większy od 0.");
+      if (!budget || !Number.isInteger(numericBudget) || numericBudget < MIN_JOB_BUDGET) {
+        setMessage(`Podaj budżet w pełnych złotych, od ${MIN_JOB_BUDGET} do ${MAX_JOB_BUDGET.toLocaleString("pl-PL")} zł.`);
         return false;
       }
 

@@ -572,9 +572,9 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
     if (
       form.priceMode === "fixed" &&
-      (!Number.isFinite(basePrice) || basePrice < 1 || basePrice > IDEA_HIRE_PUBLIC_OFFER.orderLimit)
+      (!Number.isFinite(basePrice) || basePrice < IDEA_HIRE_PUBLIC_OFFER.orderMinimum || basePrice > IDEA_HIRE_PUBLIC_OFFER.orderLimit)
     ) {
-      setMessage("Cena stała musi mieścić się w zakresie od 1 zł do 10 000 zł.");
+      setMessage(`Cena stała musi mieścić się w zakresie od ${IDEA_HIRE_PUBLIC_OFFER.orderMinimum} zł do ${IDEA_HIRE_PUBLIC_OFFER.orderLimit.toLocaleString("pl-PL")} zł.`);
       return;
     }
 
@@ -824,7 +824,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   <span className="ih5-service-price-input">
                     <input
                       type="number"
-                      min="1"
+                      min={IDEA_HIRE_PUBLIC_OFFER.orderMinimum}
                       max={IDEA_HIRE_PUBLIC_OFFER.orderLimit}
                       step="1"
                       inputMode="numeric"
@@ -1532,7 +1532,7 @@ export function validateProfileContact({ mode, title, brief, details, confirmed 
   if (mode !== "project") return "Wybierz rodzaj kontaktu.";
   if (!FREELANCER_CATEGORIES.includes(details.category)) return "Wybierz kategorię projektu.";
   if (String(details.deliverables || "").trim().length < 3 || String(details.deliverables || "").trim().length > 1000) return "Podaj oczekiwany rezultat: od 3 do 1000 znaków.";
-  if (details.budget !== null && (!Number.isFinite(details.budget) || details.budget < 1 || details.budget > IDEA_HIRE_PUBLIC_OFFER.orderLimit || Math.abs(details.budget * 100 - Math.round(details.budget * 100)) > 0.000001)) return "Podaj budżet od 1 do 10 000 zł, z dokładnością do grosza, lub wybierz „Do ustalenia”.";
+  if (details.budget !== null && (!Number.isFinite(details.budget) || details.budget < IDEA_HIRE_PUBLIC_OFFER.orderMinimum || details.budget > IDEA_HIRE_PUBLIC_OFFER.orderLimit || Math.abs(details.budget * 100 - Math.round(details.budget * 100)) > 0.000001)) return `Podaj budżet od ${IDEA_HIRE_PUBLIC_OFFER.orderMinimum} do ${IDEA_HIRE_PUBLIC_OFFER.orderLimit.toLocaleString("pl-PL")} zł, z dokładnością do grosza, lub wybierz „Do ustalenia”.`;
   if (details.deadline) {
     const date = new Date(`${details.deadline}T12:00:00Z`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(details.deadline) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== details.deadline || details.deadline < today) return "Wybierz dzisiejszy lub przyszły termin, albo „Do ustalenia”.";

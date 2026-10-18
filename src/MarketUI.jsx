@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useSitePreferences } from "./Preferences";
 
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
-export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 5.5, minimum: 20, maximum: 229, orderLimit: 10000 });
+export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 5.5, minimum: 20, maximum: 229, orderMinimum: 1, orderLimit: 10000 });
 
 export function IdeaHireLogo({ className = "logo", to = "/" }) {
   const [cycle, setCycle] = useState(0);

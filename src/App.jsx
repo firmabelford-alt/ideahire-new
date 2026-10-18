@@ -1,3 +1,4 @@
+/* P59 — floating light field, typographic categories, bounded calculator. */
 /* IdeaHire | P58 | Katalog specjalizacji, spokojne tło, pełne przyciski i film bez dolnego panelu | Pełny plik src/App.jsx */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -1044,7 +1045,7 @@ function HomeCategoryBrowser({ groups = [] }) {
         <div className="ih-category-layout ih58-category-layout">
           <div className="ih-category-list ih58-category-list" role="tablist" aria-orientation="vertical" aria-label={en ? 'Fields of work' : 'Dziedziny współpracy'}>
             {groups.map((item, index) => <button key={item.value} ref={node => { if (node) categoryButtons.current.set(item.value, node); else categoryButtons.current.delete(item.value); }} type="button" className="ih-category-option ih58-category-option" role="tab" id={`ih58-category-${index}`} aria-controls="ih58-category-content" aria-selected={item.value === group?.value} tabIndex={item.value === group?.value ? 0 : -1} onClick={() => selectCategory(item.value)} onKeyDown={event => keyboardCategory(event, index)}>
-              <span className="ih58-category-icon" aria-hidden="true"><IH53CategoryIcon category={item.value} /></span><span>{label(item)}</span><small>{item.subcategories?.length || 0}</small>
+              <span className="ih59-category-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{label(item)}</span><small>{item.subcategories?.length || 0}</small>
             </button>)}
           </div>
           <div className="ih-category-content ih58-category-content" id="ih58-category-content" role="tabpanel" aria-labelledby={`ih58-category-${Math.max(0, groups.findIndex(item => item.value === group?.value))}`}>
@@ -1242,16 +1243,20 @@ __IH58__ :is(.section,.ih5-category-showcase,.split-section,.footer) {background
 __IH58__ > .ih53-backdrop {display:none!important;}
 __IH58__ .footer {border-radius:0!important;backdrop-filter:none!important;transform:none!important;translate:none!important;rotate:none!important;clip-path:none!important;}
 __IH58__ .ih53-jobs-finale {position:relative!important;isolation:isolate!important;}
-__IH58__ .ih53-jobs-finale > :not(.ih58-ambient) {position:relative;z-index:1;}
-__IH58__ .ih58-ambient {display:block!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;}
-__IH58__ .ih58-ambient::before,__IH58__ .ih58-ambient::after {content:'';position:absolute;top:0;bottom:0;width:1px;left:55%;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--v-muted) 8%,transparent) 40%,transparent);}
-__IH58__ .ih58-ambient::after {left:83%;opacity:.6;}
-__IH58__ .ih58-ambient > i {position:absolute;display:block;top:-25%;left:44%;width:1px;height:130px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--v-ink) 16%,transparent),transparent);animation:ih58-flow 15s linear infinite;}
-__IH58__ .ih58-ambient > i:nth-child(2) {left:55%;height:180px;animation-duration:19s;animation-delay:-7s;}
-__IH58__ .ih58-ambient > i:nth-child(3) {left:83%;height:100px;animation-duration:17s;animation-delay:-11s;}
-__IH58__ .ih58-ambient > b {position:absolute;left:34%;right:0;top:-30%;height:130px;opacity:.45;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--v-muted) 4%,transparent) 75%,transparent);animation:ih58-flow 23s linear infinite;}
-__IH58__ .ih58-ambient[data-paused=true] > * {animation-play-state:paused!important;}
-@keyframes ih58-flow {from{translate:0 0;}to{translate:0 850px;}}
+__IH58__ .ih53-jobs-finale > :not(.ih59-floating-field) {position:relative;z-index:1;}
+__IH58__ .ih59-floating-field {display:block!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;}
+__IH58__ .ih59-floating-field > i {position:absolute;display:block;left:-40%;top:-18%;width:180%;height:84%;background:linear-gradient(138deg,transparent 22%,color-mix(in srgb,var(--v-accent) 5%,transparent) 39%,transparent 58%);animation:ih59-light-drift 18s cubic-bezier(.45,0,.55,1) infinite alternate;}
+__IH58__ .ih59-floating-field > i:nth-child(2) {left:-18%;top:25%;height:90%;background:linear-gradient(32deg,transparent 25%,color-mix(in srgb,var(--v-ink) 3.2%,transparent) 47%,transparent 64%);animation:ih59-light-return 23s ease-in-out -9s infinite alternate;}
+__IH58__ .ih59-floating-field > i:nth-child(3) {left:-55%;top:8%;width:210%;height:110%;background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--v-accent) 3%,transparent) 49%,transparent 60%);animation-duration:27s;animation-delay:-16s;}
+__IH58__ .ih59-floating-field[data-paused=true] > * {animation-play-state:paused!important;}
+@keyframes ih59-light-drift {from{transform:translate3d(-8%,-14%,0) rotate(-5deg);}to{transform:translate3d(14%,23%,0) rotate(6deg);}}
+@keyframes ih59-light-return {from{transform:translate3d(12%,-18%,0) rotate(4deg);}to{transform:translate3d(-15%,15%,0) rotate(-6deg);}}
+__IH58__ .ih59-category-number {font:500 10px/1.4 Inter,Arial,sans-serif!important;font-variant-numeric:tabular-nums!important;color:inherit!important;opacity:.6!important;}
+__IH58__ .ih59-project-category {display:block!important;max-width:45%!important;flex:0 1 auto!important;width:auto!important;height:auto!important;padding:6px 0 6px 12px!important;border:0!important;border-left:1px solid var(--v-line)!important;border-radius:0!important;background:none!important;color:var(--v-muted)!important;font:500 10px/1.5 Inter,Arial,sans-serif!important;text-align:right!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+__IH58__ .ih53-project-top {align-items:flex-start!important;gap:16px!important;}
+__IH58__ .ih53-calculator .ih59-budget-help {display:block!important;margin:10px 0!important;color:var(--v-muted)!important;font:400 11px/1.6 Inter,Arial,sans-serif!important;}
+__IH58__ .ih53-calculator .ih59-budget-range {display:block!important;width:100%!important;height:30px!important;min-height:30px!important;padding:0!important;margin:6px 0 10px!important;accent-color:var(--v-accent)!important;border:0!important;background:transparent!important;cursor:pointer!important;}
+__IH58__ .ih53-calculator .ih53-amount input[aria-invalid=true] {outline:2px solid var(--v-ink)!important;outline-offset:2px!important;}
 
 __IH58__ .ih58-category-trigger {transform:none!important;transition:border-color 180ms,background-color 180ms!important;overflow:hidden!important;}
 __IH58__ .ih58-category-trigger .ih-category-trigger-title {display:block!important;margin:18px 0 16px!important;line-height:1.05!important;font-size:clamp(39px,4.2vw,62px)!important;letter-spacing:-.05em!important;}
@@ -1279,7 +1284,7 @@ __IH58__ .ih58-category-examples button {display:inline-flex!important;align-ite
 __IH58__ .ih58-category-layout {display:grid!important;grid-template-columns:minmax(210px,.36fr) minmax(0,1fr)!important;gap:clamp(22px,3.5vw,48px)!important;align-items:start!important;}
 __IH58__ .ih58-category-list {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:4px!important;max-height:none!important;overflow:visible!important;padding:0!important;margin:0!important;}
 __IH58__ .ih58-category-option {display:grid!important;grid-template-columns:26px minmax(0,1fr) 24px!important;gap:10px!important;align-items:center!important;min-width:0!important;min-height:58px!important;padding:12px!important;margin:0!important;border:1px solid transparent!important;border-radius:8px!important;background:transparent!important;color:var(--v-muted)!important;font:500 12px/1.45 Inter,Arial,sans-serif!important;text-align:left!important;transform:none!important;transition:background-color 160ms,color 160ms,border-color 160ms!important;box-shadow:none!important;cursor:pointer!important;}
-__IH58__ .ih58-category-option[aria-selected=true] {background:var(--v-ink)!important;color:var(--v-bg)!important;border-color:var(--v-ink)!important;}
+__IH58__ .ih58-category-option[aria-selected=true] {background:var(--v-surface)!important;color:var(--v-ink)!important;border-color:var(--v-line)!important;box-shadow:inset 3px 0 0 var(--v-accent)!important;}
 __IH58__ .ih58-category-option:hover:not([aria-selected=true]) {color:var(--v-ink)!important;background:var(--v-surface)!important;}
 __IH58__ .ih58-category-option small {color:inherit!important;text-align:right!important;font:400 10px/1.5 Inter,Arial,sans-serif!important;}
 __IH58__ .ih58-category-icon {display:grid!important;place-items:center!important;}
@@ -1356,10 +1361,10 @@ __IH58_FILM__ .ih58-film-progress::before,__IH58_FILM__ .ih58-film-progress::aft
  __IH58__ .ih58-category-detail .ih-category-jobs-link {width:100%!important;}
  __IH58__ .ih53-showcase-links {display:grid!important;grid-template-columns:minmax(0,1fr)!important;}
  __IH58__ .ih53-showcase-links > a {width:100%!important;}
- __IH58__ .ih58-ambient::after,__IH58__ .ih58-ambient > i:nth-child(3) {display:none!important;}
+ __IH58__ .ih59-project-category {max-width:46%!important;font-size:9px!important;}
 }
 @media(prefers-reduced-motion:reduce) {
- __IH58__ .ih58-ambient > *,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
+ __IH58__ .ih59-floating-field > *,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
 }
 `.replaceAll("__IH58__", "#root".repeat(26) + " .ih53-home").replaceAll("__IH58_FILM__", "body " + "#ih57-cinema".repeat(6));
 
@@ -1856,12 +1861,23 @@ function useIH53LegacyEnhancements(rootRef){
 }
 function IH53CommissionStory(){
  const site=useSitePreferences(),en=site.language==='en',[draft,setDraft]=useState('500');
- const amount=ih53Clamp(Number(draft)||1,1,IDEA_HIRE_PUBLIC_OFFER.orderLimit),fee=ih53Fee(amount);
+ const minimum=IDEA_HIRE_PUBLIC_OFFER.orderMinimum,maximum=IDEA_HIRE_PUBLIC_OFFER.orderLimit;
+ const amount=Number(draft),valid=/^[0-9]+$/.test(draft)&&Number.isInteger(amount)&&amount>=minimum&&amount<=maximum;
+ const fee=valid?ih53Fee(amount):null;
+ const money=value=>valid?ih53Money(value,en):'—';
+ const normalize=()=>setDraft(String(ih53Clamp(Number(draft)||minimum,minimum,maximum)));
+ function changeAmount(event){
+  const next=event.target.value;
+  if(!/^[0-9]*$/.test(next))return;
+  setDraft(next===''?'':String(Math.min(Number(next),maximum)));
+ }
  return <aside className="ih5-story ih53-calculator" data-no-translate="true" aria-labelledby="ih53-fee-title">
-  <div className="ih53-fee-heading"><h3 id="ih53-fee-title">{en?'Know the cost before you start':'Sprawdź koszt przed rozpoczęciem'}</h3><span>{en?'IdeaHire fee':'Prowizja IdeaHire'}</span><strong>{en?'5.5%':'5,5%'}</strong><p>{en?'Minimum PLN 20 · maximum PLN 229':'Minimum 20 zł · maksimum 229 zł'}</p></div>
-  <label className="ih53-amount">{en?'Agreed project amount':'Ustalona kwota zlecenia'}<span><input type="number" min="1" max={IDEA_HIRE_PUBLIC_OFFER.orderLimit} step="1" inputMode="decimal" value={draft} onChange={e=>setDraft(e.target.value)} onBlur={()=>setDraft(String(amount))}/><span>{en?'PLN':'zł'}</span></span></label>
-  <dl className="ih53-fee-breakdown" aria-live="polite"><div><dt>{en?'Freelancer receives':'Wykonawca otrzymuje'}</dt><dd>{ih53Money(amount,en)}</dd></div><div><dt>{en?'IdeaHire fee':'Prowizja IdeaHire'}</dt><dd>{ih53Money(fee,en)}</dd></div><div className="ih53-fee-total"><dt>{en?'Client pays in total':'Zleceniodawca płaci łącznie'}</dt><dd><output>{ih53Money(amount+fee,en)}</output></dd></div></dl>
-  <p className="ih53-fee-note">{en?'The fee is paid only by the client. The freelancer receives the full agreed amount. Projects up to PLN 10,000.':'Prowizję płaci wyłącznie zleceniodawca. Wykonawca otrzymuje całą ustaloną kwotę. Zlecenia do 10 000 zł.'}</p>
+  <div className="ih53-fee-heading"><h3 id="ih53-fee-title">{en?'Know the cost before you start':'Sprawdź koszt przed rozpoczęciem'}</h3><span>{en?'IdeaHire fee':'Prowizja IdeaHire'}</span><strong>{en?'5.5%':'5,5%'}</strong><p>{en?'Minimum fee PLN 20 · maximum PLN 229':'Minimum prowizji 20 zł · maksimum 229 zł'}</p></div>
+  <label className="ih53-amount">{en?'Agreed project amount':'Ustalona kwota zlecenia'}<span><input type="text" inputMode="numeric" pattern="[0-9]*" value={draft} aria-describedby="ih59-budget-help" aria-invalid={draft!==''&&!valid} onChange={changeAmount} onBlur={normalize}/><span>{en?'PLN':'zł'}</span></span></label>
+  <small className="ih59-budget-help" id="ih59-budget-help">{en?'Project budget: ':'Budżet zlecenia: '}{ih53Money(minimum,en)} – {ih53Money(maximum,en)}. {en?'Whole PLN amounts.':'Kwoty w pełnych złotych.'}</small>
+  <input className="ih59-budget-range" type="range" min={minimum} max={maximum} step="1" value={valid?amount:minimum} onChange={event=>setDraft(event.target.value)} aria-label={en?'Choose the project budget':'Wybierz budżet zlecenia'} aria-valuetext={ih53Money(valid?amount:minimum,en)}/>
+  <dl className="ih53-fee-breakdown" aria-live="polite"><div><dt>{en?'Freelancer receives':'Wykonawca otrzymuje'}</dt><dd>{money(amount)}</dd></div><div><dt>{en?'IdeaHire fee':'Prowizja IdeaHire'}</dt><dd>{money(fee)}</dd></div><div className="ih53-fee-total"><dt>{en?'Client pays in total':'Zleceniodawca płaci łącznie'}</dt><dd><output>{money(amount+fee)}</output></dd></div></dl>
+  <p className="ih53-fee-note">{en?'The fee is paid only by the client. The freelancer receives the full agreed amount.':'Prowizję płaci wyłącznie zleceniodawca. Wykonawca otrzymuje całą ustaloną kwotę.'}</p>
  </aside>;
 }
 function IH53Welcome({paused,onPause,onDone}){
@@ -2676,14 +2692,14 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
   const sample=job.preview===true||!ih53RealJob(job),amount=Number(job.budget),category=getCategoryLabel(job.category),label=en?translateUiText(category):category;
   const price=Number.isFinite(amount)&&amount>0?ih53Money(amount,en):(en?'To be agreed':'Do ustalenia');
   return <article className={'ih53-project-card'+(incoming?' is-incoming':'')} key={job.id} aria-hidden={incoming||undefined} inert={incoming?'':undefined} data-new={view.new}>
-   <div className="ih53-project-top"><IH53JobAuthor job={job} en={en} inactive={incoming}/><span className="ih53-project-category" title={label} aria-label={label}><IH53CategoryIcon category={job.category}/></span></div>
+   <div className="ih53-project-top"><IH53JobAuthor job={job} en={en} inactive={incoming}/><span className="ih59-project-category">{label}</span></div>
    <h3 title={job.title}>{String(job.title||'').slice(0,160)}</h3><p>{String(job.description||(en?'Review the scope and requirements in the listing.':'Sprawdź zakres i wymagania w ogłoszeniu.')).slice(0,280)}</p>
    <div className="ih53-project-bottom"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{copy.view} <span aria-hidden="true">↗</span></Link></div>
-   <small className="ih53-project-caption" title={label}>{sample?copy.sample:view.new?copy.new:copy.published} · {label}</small>
+   <small className="ih53-project-caption" title={label}>{sample?copy.sample:view.new?copy.new:copy.published}</small>
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
-  <div className="ih58-ambient" aria-hidden="true" data-paused={stopped}><i/><i/><i/><b/></div>
+  <div className="ih59-floating-field" aria-hidden="true" data-paused={paused||reduced||hidden||!visible}><i/><i/><i/></div>
   <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
   <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/find-talent">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
