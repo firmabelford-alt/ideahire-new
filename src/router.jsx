@@ -1,3 +1,4 @@
+/* P60 — useful onboarding, email actions and site browsing for limited accounts. */
 /* P59 — fullscreen onboarding, visible registration validation, limited account. */
 /* P47 — pełny plik src/router.jsx | Zmieniona wyłącznie karta szablonów. */
 /* IdeaHire | P40 | 2026-10-15 | Oczko hasła i nowe centrum konta. */
@@ -33,7 +34,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, useJourneyMotion } from "./AccountJourney";
+import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
@@ -1617,11 +1618,18 @@ function DiscoveryOnboarding({
 }) {
   const { savePreferences } = useDiscoveryPreferences();
   const { isLimited } = useAgeAccess();
-  const [step, setStep] = useState(initialStep);
+  const en = useSitePreferences().language === "en";
+  const c = (pl, english) => en ? english : pl;
+  const stepOrder = isLimited ? [2, 4, 5] : [1, 2, 3, 4, 5];
+  const [step, setStep] = useState(isLimited ? 2 : initialStep);
+  const stepIndex = Math.max(0, stepOrder.indexOf(step));
+  const currentStep = stepIndex + 1;
+  const stepLabels = isLimited ? c(["Zainteresowania", "Kolejność", "Gotowe"], ["Interests", "Order", "Ready"]) : c(["Kierunek", "Dziedziny", "Cele", "Wyniki", "Podsumowanie"], ["Direction", "Fields", "Goals", "Results", "Summary"]);
   const [usagePreference, setUsagePreference] = useState(
     initialPreferences?.usagePreference || "both"
   );
   const [freelancerCategories, setFreelancerCategories] = useState(
+    (isLimited ? [...new Set([...(initialPreferences?.freelancerCategories || []), ...(initialPreferences?.clientCategories || []), ...(initialPreferences?.preferredCategories || [])])].slice(0, 3) : null) ||
     initialPreferences?.freelancerCategories ||
       (initialPreferences?.usagePreference !== "hire_talent"
         ? initialPreferences?.preferredCategories || []
@@ -1655,7 +1663,7 @@ function DiscoveryOnboarding({
   const titleRef = useRef(null);
   const backdropRef = useRef(null);
   const contentRef = useRef(null);
-  const totalSteps = 5;
+  const totalSteps = stepOrder.length;
   const { moving, direction, move } = useJourneyMotion(contentRef);
 
   useEffect(() => {
@@ -1716,7 +1724,7 @@ function DiscoveryOnboarding({
   function toggleCategory(category, audience = activeCategoryAudience) {
     setMessage("");
     const setCategories =
-      audience === "client"
+      !isLimited && audience === "client"
         ? setClientCategories
         : setFreelancerCategories;
 
@@ -1757,6 +1765,11 @@ function DiscoveryOnboarding({
     }
 
     if (step === 2) {
+      if (isLimited) {
+        if (freelancerCategories.length) return true;
+        setMessage(c("Wybierz co najmniej jedną dziedzinę, którą chcesz przeglądać.", "Choose at least one field to explore."));
+        return false;
+      }
       if (
         usagePreference !== "hire_talent" &&
         freelancerCategories.length === 0
@@ -1817,10 +1830,10 @@ function DiscoveryOnboarding({
       const result = await savePreferences({
         usagePreference,
         freelancerCategories,
-        clientCategories,
-        onboardingGoals,
+        clientCategories: isLimited ? freelancerCategories : clientCategories,
+        onboardingGoals: isLimited ? ["explore_platform"] : onboardingGoals,
         specialtySummary,
-        projectReadiness,
+        projectReadiness: isLimited ? "exploring" : projectReadiness,
         personalizationEnabled,
         action,
       });
@@ -1843,19 +1856,19 @@ function DiscoveryOnboarding({
     event?.stopPropagation();
     if (!validateCurrentStep()) return;
     setMessage("");
-    move(() => setStep((current) => Math.min(totalSteps, current + 1)));
+    move(() => setStep(stepOrder[Math.min(totalSteps - 1, stepIndex + 1)]));
   }
 
   function goBack() {
     setMessage("");
-    move(() => setStep((current) => Math.max(1, current - 1)), "back");
+    move(() => setStep(stepOrder[Math.max(0, stepIndex - 1)]), "back");
   }
 
   const selectedUsage = DISCOVERY_USAGE_OPTIONS.find(
     (option) => option.value === usagePreference
   );
   const activeCategories =
-    activeCategoryAudience === "client"
+    !isLimited && activeCategoryAudience === "client"
       ? clientCategories
       : freelancerCategories;
   const availableGoals = DISCOVERY_GOAL_OPTIONS.filter((option) => {
@@ -1882,7 +1895,7 @@ function DiscoveryOnboarding({
         onKeyDown={(event) => {
           if (event.key === "Escape" && canClose && !saving && !moving) onClose?.();
           if (event.key !== "Tab") return;
-          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href]:not([tabindex="-1"])'));
+          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), summary, a[href]:not([tabindex="-1"])'));
           const first = controls[0];
           const last = controls.at(-1);
           if (!first) return;
@@ -1905,7 +1918,7 @@ function DiscoveryOnboarding({
           </Link>
 
           <div className="discovery-step-count" aria-live="polite">
-            Krok {step} z {totalSteps}
+            {c(`Krok ${currentStep} z ${totalSteps}`, `Step ${currentStep} of ${totalSteps}`)}
           </div>
 
           {canClose && (
@@ -1926,21 +1939,27 @@ function DiscoveryOnboarding({
           role="progressbar"
           aria-valuemin="1"
           aria-valuemax={totalSteps}
-          aria-valuenow={step}
-          aria-label={`Postęp konfiguracji: krok ${step} z ${totalSteps}`}
+          aria-valuenow={currentStep}
+          aria-label={c(`Postęp konfiguracji: krok ${currentStep} z ${totalSteps}`, `Setup progress: step ${currentStep} of ${totalSteps}`)}
         >
-          <span style={{ width: `${(step / totalSteps) * 100}%` }} />
+          <span style={{ width: `${(currentStep / totalSteps) * 100}%` }} />
         </div>
 
+        <div className="ih60-discovery-body">
+          <aside className="ih60-discovery-rail" aria-label={c("Twoja konfiguracja", "Your setup")}>
+            <span>{c("IDEAHIRE / TWÓJ WIDOK", "IDEAHIRE / YOUR VIEW")}</span><h2>{c(<>Ustaw swój<br />punkt startu.</>, <>Choose your<br />starting point.</>)}</h2>
+            <ol>{stepLabels.map((label, index) => <li key={label} aria-current={currentStep === index + 1 ? "step" : undefined}><b>{index < stepIndex ? "✓" : String(index + 1).padStart(2, "0")}</b><span>{label}</span></li>)}</ol>
+            <p>{isLimited ? c("Wybierz interesujące Cię dziedziny. Zaczniesz od treści, które chcesz poznawać.", "Choose your interests to start with content you want to explore.") : c("Kilka wyborów pomoże ułożyć pierwsze podpowiedzi. Zmienisz je później na swoim koncie.", "A few choices will shape your first suggestions. You can change them in your account.")}</p>
+          </aside>
         <div
           className="discovery-onboarding-content"
           key={step}
           ref={contentRef}
         >
           <ol className="ih59-discovery-steps" aria-label="Etapy ustawień">
-            {["Kierunek", "Dziedziny", "Cele", "Wyniki", "Podsumowanie"].map((label, index) => <li key={label} aria-current={step === index + 1 ? "step" : undefined}><b>{index + 1 < step ? "✓" : String(index + 1).padStart(2, "0")}</b><span>{label}</span></li>)}
+            {stepLabels.map((label, index) => <li key={label} aria-current={currentStep === index + 1 ? "step" : undefined}><b>{index < stepIndex ? "✓" : String(index + 1).padStart(2, "0")}</b><span>{label}</span></li>)}
           </ol>
-          {isLimited && <p className="ih59-limited-discovery-note">Twoje konto 16–17 lat służy do przeglądania platformy. Te ustawienia dopasują treści; nie odblokowują umów ani płatnych zleceń.</p>}
+          {isLimited && <details className="ih60-minor-note"><summary>{c("Konto 16–17 lat · ustawienia przeglądania", "Account ages 16–17 · browsing settings")}</summary><p>{c("Możesz przeglądać stronę główną, zlecenia, usługi i profile. Umowy oraz płatne projekty wymagają pełnego konta zgodnie z regulaminem IdeaHire.", "You can browse the homepage, projects, services and profiles. Contracts and paid projects require a full account under the IdeaHire terms.")}</p></details>}
           {step === 1 && (
             <>
               <div className="ih9-discovery-welcome">
@@ -2004,19 +2023,18 @@ function DiscoveryOnboarding({
                   ref={titleRef}
                   tabIndex="-1"
                 >
-                  {usagePreference === "find_work"
+                  {isLimited ? c("Co Cię interesuje?", "What interests you?") : usagePreference === "find_work"
                     ? "Czym się zajmujesz?"
                     : usagePreference === "hire_talent"
                     ? "Jakiej pomocy szukasz?"
                     : "W czym działasz i czego szukasz?"}
                 </h1>
                 <p>
-                  Wybierz maksymalnie trzy kategorie dla każdej aktywnej roli.
-                  Posłużą wyłącznie do lepszego ułożenia wyników i formularzy.
+                  {isLimited ? c("Wybierz do trzech dziedzin. Zobaczysz je wyżej podczas przeglądania zleceń i usług.", "Choose up to three fields. They will appear higher when you browse projects and services.") : "Wybierz maksymalnie trzy kategorie dla każdej aktywnej roli. Posłużą do ułożenia wyników i formularzy."}
                 </p>
               </div>
 
-              {usagePreference === "both" && (
+              {!isLimited && usagePreference === "both" && (
                 <div
                   className="discovery-category-switch"
                   role="tablist"
@@ -2033,7 +2051,7 @@ function DiscoveryOnboarding({
                     }
                     onClick={() => setActiveCategoryAudience("freelancer")}
                   >
-                    <span>Realizuję</span>
+                    <span>{isLimited ? c("Moje dziedziny", "My interests") : "Realizuję"}</span>
                     <strong>{freelancerCategories.length}/3</strong>
                   </button>
                   <button
@@ -2053,7 +2071,7 @@ function DiscoveryOnboarding({
 
               <div className="discovery-category-context">
                 <strong>
-                  {activeCategoryAudience === "freelancer"
+                  {isLimited ? c("Dziedziny, które chcesz poznawać", "Fields you want to explore") : activeCategoryAudience === "freelancer"
                     ? "Obszary, w których chcesz realizować projekty"
                     : "Obszary, w których najczęściej szukasz wykonawców"}
                 </strong>
@@ -2091,7 +2109,7 @@ function DiscoveryOnboarding({
                 Wybrano {activeCategories.length} z 3
               </div>
 
-              {usagePreference !== "hire_talent" &&
+              {!isLimited && usagePreference !== "hire_talent" &&
                 activeCategoryAudience === "freelancer" && (
                   <label className="discovery-specialization-field">
                     <span>Jednym zdaniem: czym się zajmujesz?</span>
@@ -2276,12 +2294,12 @@ function DiscoveryOnboarding({
 
                 <div className="discovery-summary-row">
                   <span>Na początek</span>
-                  <strong>{selectedUsage?.title}</strong>
+                  <strong>{isLimited ? c("Przeglądanie IdeaHire", "Exploring IdeaHire") : selectedUsage?.title}</strong>
                 </div>
 
-                {usagePreference !== "hire_talent" && (
+                {(isLimited || usagePreference !== "hire_talent") && (
                   <div className="discovery-summary-row">
-                    <span>Realizuję</span>
+                    <span>{isLimited ? c("Moje dziedziny", "My interests") : "Realizuję"}</span>
                     <div className="discovery-summary-tags">
                       {freelancerCategories.map((category) => (
                         <strong key={category}>
@@ -2292,7 +2310,7 @@ function DiscoveryOnboarding({
                   </div>
                 )}
 
-                {usagePreference !== "find_work" && (
+                {!isLimited && usagePreference !== "find_work" && (
                   <div className="discovery-summary-row">
                     <span>Szukam pomocy</span>
                     <div className="discovery-summary-tags">
@@ -2305,16 +2323,16 @@ function DiscoveryOnboarding({
                   </div>
                 )}
 
-                <div className="discovery-summary-row">
+                {!isLimited && <div className="discovery-summary-row">
                   <span>Najważniejsze cele</span>
                   <div className="discovery-summary-tags">
                     {onboardingGoals.map((goal) => (
                       <strong key={goal}>{getDiscoveryGoalLabel(goal)}</strong>
                     ))}
                   </div>
-                </div>
+                </div>}
 
-                {usagePreference !== "find_work" && (
+                {!isLimited && usagePreference !== "find_work" && (
                   <div className="discovery-summary-row">
                     <span>Etap projektu</span>
                     <strong>
@@ -2342,9 +2360,10 @@ function DiscoveryOnboarding({
           )}
         </div>
 
+        </div>
         <footer className="discovery-onboarding-footer">
           <div>
-            {step > 1 ? (
+            {stepIndex > 0 ? (
               <button
                 type="button"
                 className="discovery-text-button"
@@ -2382,7 +2401,7 @@ function DiscoveryOnboarding({
             {message}
           </span>
 
-          {step < totalSteps ? (
+          {stepIndex < totalSteps - 1 ? (
             <button
               type="button"
               className="btn btn-dark discovery-primary-button"
@@ -2399,7 +2418,7 @@ function DiscoveryOnboarding({
               onClick={() => finish("complete")}
               disabled={saving || moving}
             >
-              {saving ? "Zapisywanie..." : "Przejdź do IdeaHire "}
+              {saving ? "Zapisywanie..." : isLimited ? c("Przejdź do strony głównej", "Go to the homepage") : "Przejdź do IdeaHire "}
             </button>
           )}
         </footer>
@@ -2458,7 +2477,7 @@ function DiscoveryOnboardingLayer() {
         if (!result?.onboardingCompletedAt) return;
 
         navigate(
-          isLimited ? "/account" : result?.usagePreference === "hire_talent"
+          isLimited ? "/" : result?.usagePreference === "hire_talent"
             ? "/talent"
             : "/jobs",
           { replace: true }
@@ -5321,6 +5340,10 @@ function AccountNavbar() {
       ?.removeAttribute("open");
   }
 
+  if (isLimited && !ageAccessLoading) {
+    return <LimitedAccountNavigation name={userName} initial={initial} onLogout={handleLogout} helpUrl={helpCenterHref()} showAssistant={LUCYNA_VISIBLE} />;
+  }
+
   return (
     <header
       className="navbar account-navbar ih11-account-navbar"
@@ -6845,7 +6868,10 @@ function Register() {
     return <LoadingScreen />;
   }
 
-  if (confirmationEmail) return <RegistrationSentScreen email={confirmationEmail} />;
+  if (confirmationEmail) return <RegistrationSentScreen email={confirmationEmail} helpUrl={helpCenterHref()} onResend={async () => {
+    const { error } = await supabase.auth.resend({ type: "signup", email: confirmationEmail });
+    if (error) throw error;
+  }} />;
 
   if (registrationStage === "role") {
     return <RegistrationRoleScreen
@@ -8126,12 +8152,14 @@ function LimitedAccount() {
       })
     : "po ukończeniu 18 lat";
 
-  return <div className="page limited-account-page">
+  return <div className="page limited-account-page ih60-limited-page">
     <AccountNavbar />
     <LimitedAccountOverview
       fullAccessLabel={fullAccessLabel}
       ageRestricted={Boolean(location.state?.ageRestricted)}
       settings={<AccountTemplatesCard />}
+      helpUrl={helpCenterHref()}
+      showAssistant={LUCYNA_VISIBLE}
     />
   </div>;
 }
@@ -31342,7 +31370,7 @@ function Home() {
     return <Navigate to="/account-status" replace />;
   }
 
-  if (user?.id && (isLimited || ageRequired)) {
+  if (user?.id && ageRequired) {
     return <Navigate to="/account" replace />;
   }
 
@@ -31350,6 +31378,7 @@ function Home() {
     <App
       session={session}
       loading={loading}
+      limitedAccess={isLimited}
       categoryGroups={JOB_CATEGORIES.map((value) => ({
         value,
         label: getJobCategoryLabel(value),

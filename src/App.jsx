@@ -1,3 +1,4 @@
+/* P60 — service catalogue, visible wipe background and browsing access. */
 /* P59 — floating light field, typographic categories, bounded calculator. */
 /* IdeaHire | P58 | Katalog specjalizacji, spokojne tło, pełne przyciski i film bez dolnego panelu | Pełny plik src/App.jsx */
 
@@ -6,6 +7,7 @@ import * as IH57React from "react";
 import * as IH57JSX from "react/jsx-runtime";
 import { createPortal } from "react-dom";
 import "./App.css";
+import HomeCategoryBrowser from "./SpecialisationExplorer";
 import { IDEA_HIRE_PUBLIC_OFFER, MarketIcon, helpCenterHref } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
@@ -948,125 +950,6 @@ const HOME_CATEGORY_COPY = {
   ] },
 };
 
-const IH58_CATEGORY_EN = {
-  Programowanie: 'Websites, apps and IT',
-  'Grafika i design': 'Design, UX and 3D',
-  Marketing: 'Marketing and sales',
-  Copywriting: 'Writing and translation',
-  Video: 'Video, animation and audio',
-  Fotografia: 'Photography and image editing',
-  'AI i automatyzacje': 'AI and automation',
-  'Dane, analizy i research': 'Data, analysis and research',
-  'Biznes i e-commerce': 'Business and e-commerce',
-  'Architektura, wnętrza i CAD': 'Architecture, interiors and CAD',
-};
-const IH58_SUMMARY_EN = {
-  Programowanie: 'Websites, shops and applications. Build, connect or improve the tools your project needs.',
-  'Grafika i design': 'Brand identity, interfaces and visual materials prepared for their intended use.',
-  Marketing: 'Campaigns, content and analytics matched to your audience and business goals.',
-  Copywriting: 'Website copy, articles and translations with an agreed scope and tone.',
-  Video: 'Editing, animation and sound for your film, campaign or publication.',
-  Fotografia: 'Photography and image editing for products, people and places.',
-  'AI i automatyzacje': 'Practical automation and AI integrations for clearly defined tasks.',
-  'Dane, analizy i research': 'Organised data, research and reports that answer specific questions.',
-  'Biznes i e-commerce': 'Product catalogues, presentations and support for everyday business operations.',
-  'Architektura, wnętrza i CAD': 'Space planning, drawings and models for presentation or further design work.',
-};
-function ih58SearchText(value) {
-  return String(value || '').toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ł/g, 'l');
-}
-function HomeCategoryBrowser({ groups = [] }) {
-  const en = useSitePreferences().language === 'en';
-  const [open, setOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(groups[0]?.value || '');
-  const [selectedSubcategory, setSelectedSubcategory] = useState('');
-  const [search, setSearch] = useState('');
-  const triggerRef = useRef(null);
-  const panelRef = useRef(null);
-  const inputRef = useRef(null);
-  const categoryButtons = useRef(new Map());
-  const group = groups.find(item => item.value === selectedCategory) || groups[0];
-  const label = item => en ? IH58_CATEGORY_EN[item?.value] || translateUiText(item?.label || item?.value || '') : item?.label || item?.value || '';
-  const subLabel = value => en ? translateUiText(value) : value;
-  const count = groups.reduce((sum, item) => sum + (item.subcategories?.length || 0), 0);
-  const rows = groups.flatMap(item => (item.subcategories || []).map((value, index) => ({ group: item, value, index })));
-  const terms = ih58SearchText(search).trim().split(/\s+/).filter(Boolean);
-  const results = terms.length ? rows.filter(item => {
-    const text = ih58SearchText([item.value, subLabel(item.value), item.group.value, label(item.group), HOME_CATEGORY_COPY[item.group.value]?.descriptions[item.index]].join(' '));
-    return terms.every(term => text.includes(term));
-  }) : rows.filter(item => item.group.value === group?.value);
-  const queryFor = (category, subcategory) => {
-    const query = new URLSearchParams({ category: category || '' });
-    if (subcategory) query.set('subcategory', subcategory);
-    return `/jobs?${query.toString()}`;
-  };
-  const groupCopy = HOME_CATEGORY_COPY[group?.value];
-  const selectedIndex = group?.subcategories?.indexOf(selectedSubcategory) ?? -1;
-  const summary = en ? IH58_SUMMARY_EN[group?.value] : groupCopy?.summary;
-  const description = en ? summary : selectedIndex >= 0 ? groupCopy?.descriptions[selectedIndex] || summary : summary;
-  const examples = ['Programowanie', 'Grafika i design', 'Video'].map(value => {
-    const item = groups.find(candidate => candidate.value === value && candidate.subcategories?.length);
-    if (!item) return null;
-    const preferred = item.subcategories.find(sub => value === 'Programowanie' ? /strona firmowa/i.test(sub) : value === 'Video' ? /montaż/i.test(sub) : /^logo$/i.test(sub));
-    return { group: item, value: preferred || item.subcategories[0] };
-  }).filter(Boolean);
-
-  function closeBrowser() {
-    setOpen(false);
-    if (panelRef.current?.contains(document.activeElement)) triggerRef.current?.focus({ preventScroll: true });
-  }
-  function selectCategory(value, subcategory = '') {
-    setSelectedCategory(value);
-    setSelectedSubcategory(subcategory);
-    setSearch('');
-  }
-  function keyboardCategory(event, index) {
-    if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key) || !groups.length) return;
-    event.preventDefault();
-    const next = event.key === 'Home' ? 0 : event.key === 'End' ? groups.length - 1 : (index + (['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1) + groups.length) % groups.length;
-    selectCategory(groups[next].value);
-    categoryButtons.current.get(groups[next].value)?.focus({ preventScroll: true });
-  }
-
-  return <div className={`ih-category-browser ih58-category-browser${open ? ' is-open' : ''}`} data-no-translate="true"
-    onKeyDown={event => { if (event.key === 'Escape' && open) { event.preventDefault(); closeBrowser(); } }}>
-    <button ref={triggerRef} type="button" className="ih-category-trigger ih58-category-trigger" aria-expanded={open} aria-controls="ih-category-panel" onClick={() => open ? closeBrowser() : setOpen(true)}>
-      <span className="ih-category-trigger-top"><span>{String(groups.length).padStart(2, '0')} {en ? 'fields of work' : 'dziedzin współpracy'}</span><span className="ih-category-toggle" aria-hidden="true">{open ? '−' : '+'}</span></span>
-      <span className="ih-category-trigger-title">{en ? <>What is<br />your project?</> : <>Jaki masz<br />projekt?</>}</span>
-      <span className="ih58-category-teaser">{count > 0 ? `${count} ${en ? 'specialisations. One place to start.' : 'specjalizacji. Jeden punkt wyjścia.'}` : en ? 'Choose the field that fits your project.' : 'Wybierz dziedzinę swojego projektu.'}</span>
-      <span className="ih58-category-lines" aria-hidden="true">{groups.map((item, index) => <i key={item.value} style={{ '--ih58-i': index }} />)}</span>
-      <span className="ih-category-trigger-bottom"><span>{open ? en ? 'Close catalogue' : 'Zwiń katalog' : en ? 'Explore specialisations' : 'Odkryj specjalizacje'}</span><span aria-hidden="true">↗</span></span>
-    </button>
-    <div className="ih53-category-expansion" data-open={open} aria-hidden={!open} inert={open ? undefined : ''}><div className="ih53-category-clip">
-      <section ref={panelRef} id="ih-category-panel" className="ih-category-panel ih58-category-panel" aria-labelledby="ih-category-panel-title">
-        <div className="ih-category-panel-heading"><div><span className="ih-category-kicker">{en ? 'Start with what you need' : 'Zacznij od tego, czego potrzebujesz'}</span><h3 id="ih-category-panel-title">{en ? 'Find your specialisation.' : 'Znajdź swoją specjalizację.'}</h3><p>{en ? `${groups.length} categories · ${count} specialisations. Choose a task and see relevant projects.` : `${groups.length} kategorii · ${count} specjalizacji. Wybierz zadanie i przejdź do odpowiednich zleceń.`}</p></div><button type="button" className="ih-category-close" onClick={closeBrowser} aria-label={en ? 'Close categories' : 'Zamknij kategorie'}>×</button></div>
-        <div className="ih58-search-row"><label className="ih58-category-search"><MarketIcon kind="search" /><span className="ih57-sr">{en ? 'Search all specialisations' : 'Szukaj we wszystkich specjalizacjach'}</span><input ref={inputRef} type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={en ? 'What do you need? e.g. logo, website, editing' : 'Czego potrzebujesz? np. logo, strona, montaż'} autoComplete="off" aria-controls="ih58-specialisations" /></label><Link className="ih58-all-jobs" to="/jobs">{en ? 'All projects' : 'Wszystkie zlecenia'} <span aria-hidden="true">↗</span></Link></div>
-        {!!examples.length && <div className="ih58-category-examples"><span>{en ? 'Try a task:' : 'Przykłady zadań:'}</span>{examples.map(item => <button key={item.group.value} type="button" onClick={() => selectCategory(item.group.value, item.value)}>{subLabel(item.value)} <span aria-hidden="true">↗</span></button>)}</div>}
-        <div className="ih-category-layout ih58-category-layout">
-          <div className="ih-category-list ih58-category-list" role="tablist" aria-orientation="vertical" aria-label={en ? 'Fields of work' : 'Dziedziny współpracy'}>
-            {groups.map((item, index) => <button key={item.value} ref={node => { if (node) categoryButtons.current.set(item.value, node); else categoryButtons.current.delete(item.value); }} type="button" className="ih-category-option ih58-category-option" role="tab" id={`ih58-category-${index}`} aria-controls="ih58-category-content" aria-selected={item.value === group?.value} tabIndex={item.value === group?.value ? 0 : -1} onClick={() => selectCategory(item.value)} onKeyDown={event => keyboardCategory(event, index)}>
-              <span className="ih59-category-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span>{label(item)}</span><small>{item.subcategories?.length || 0}</small>
-            </button>)}
-          </div>
-          <div className="ih-category-content ih58-category-content" id="ih58-category-content" role="tabpanel" aria-labelledby={`ih58-category-${Math.max(0, groups.findIndex(item => item.value === group?.value))}`}>
-            <div className="ih58-category-title" key={terms.length ? 'search' : group?.value}><span className="ih-category-kicker">{terms.length ? en ? 'Across all categories' : 'We wszystkich kategoriach' : en ? 'Your field of work' : 'Twoja dziedzina'}</span><h4>{terms.length ? en ? 'Search results' : 'Wyniki wyszukiwania' : label(group)}</h4><p>{terms.length ? en ? `${results.length} matching specialisations` : `Pasujące specjalizacje: ${results.length}` : summary}</p></div>
-            <div id="ih58-specialisations" className="ih58-specialisations" role="group" aria-label={en ? 'Specialisations' : 'Specjalizacje'}>
-              {results.map((item, index) => <div key={`${item.group.value}/${item.value}`} className="ih58-specialisation" data-selected={item.group.value === group?.value && item.value === selectedSubcategory} style={{ '--ih58-i': Math.min(index, 8) }}>
-                <button type="button" aria-pressed={item.group.value === group?.value && item.value === selectedSubcategory} aria-describedby="ih-category-description" onClick={() => { setSelectedCategory(item.group.value); setSelectedSubcategory(item.value); }}><span>{subLabel(item.value)}</span>{terms.length > 0 && <small>{label(item.group)}</small>}</button><Link to={queryFor(item.group.value, item.value)} aria-label={`${en ? 'View projects:' : 'Pokaż zlecenia:'} ${subLabel(item.value)}`}><span aria-hidden="true">↗</span></Link>
-              </div>)}
-              {!results.length && <div className="ih58-category-empty"><strong>{en ? 'No matching specialisation.' : 'Brak pasującej specjalizacji.'}</strong><p>{en ? 'Try a shorter phrase or browse the categories.' : 'Spróbuj krótszej frazy lub wybierz kategorię.'}</p><button type="button" onClick={() => { setSearch(''); inputRef.current?.focus(); }}>{en ? 'Clear search' : 'Wyczyść wyszukiwanie'}</button></div>}
-            </div>
-            <div className="ih-category-detail ih58-category-detail" id="ih-category-description"><span className="ih-category-kicker">{selectedSubcategory ? en ? 'Your selection' : 'Twój wybór' : en ? 'From choice to a project' : 'Od wyboru do zlecenia'}</span><strong>{selectedSubcategory ? subLabel(selectedSubcategory) : label(group)}</strong><p>{description || (en ? 'Choose a specialisation and browse matching project briefs.' : 'Wybierz specjalizację i przejrzyj pasujące ogłoszenia.')}</p><div className="ih-category-links"><Link className="ih-category-jobs-link" to={queryFor(group?.value, selectedSubcategory)}>{en ? 'View matching projects' : 'Zobacz dopasowane zlecenia'} <span aria-hidden="true">↗</span></Link>{selectedSubcategory && <Link className="ih-category-all-link" to={queryFor(group?.value)}>{en ? 'Whole category' : 'Cała kategoria'}</Link>}</div></div>
-          </div>
-        </div>
-        <span className="ih57-sr" role="status" aria-live="polite">{open ? `${results.length} ${en ? 'specialisations available' : 'dostępnych specjalizacji'}` : ''}</span>
-      </section>
-    </div></div>
-  </div>;
-}
-
-
-
 function HomeNavItem({ children, order, to, href, notification = false }) {
   const Item = to ? Link : "a";
   return (
@@ -1243,14 +1126,15 @@ __IH58__ :is(.section,.ih5-category-showcase,.split-section,.footer) {background
 __IH58__ > .ih53-backdrop {display:none!important;}
 __IH58__ .footer {border-radius:0!important;backdrop-filter:none!important;transform:none!important;translate:none!important;rotate:none!important;clip-path:none!important;}
 __IH58__ .ih53-jobs-finale {position:relative!important;isolation:isolate!important;}
-__IH58__ .ih53-jobs-finale > :not(.ih59-floating-field) {position:relative;z-index:1;}
-__IH58__ .ih59-floating-field {display:block!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;}
-__IH58__ .ih59-floating-field > i {position:absolute;display:block;left:-40%;top:-18%;width:180%;height:84%;background:linear-gradient(138deg,transparent 22%,color-mix(in srgb,var(--v-accent) 5%,transparent) 39%,transparent 58%);animation:ih59-light-drift 18s cubic-bezier(.45,0,.55,1) infinite alternate;}
-__IH58__ .ih59-floating-field > i:nth-child(2) {left:-18%;top:25%;height:90%;background:linear-gradient(32deg,transparent 25%,color-mix(in srgb,var(--v-ink) 3.2%,transparent) 47%,transparent 64%);animation:ih59-light-return 23s ease-in-out -9s infinite alternate;}
-__IH58__ .ih59-floating-field > i:nth-child(3) {left:-55%;top:8%;width:210%;height:110%;background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--v-accent) 3%,transparent) 49%,transparent 60%);animation-duration:27s;animation-delay:-16s;}
-__IH58__ .ih59-floating-field[data-paused=true] > * {animation-play-state:paused!important;}
-@keyframes ih59-light-drift {from{transform:translate3d(-8%,-14%,0) rotate(-5deg);}to{transform:translate3d(14%,23%,0) rotate(6deg);}}
-@keyframes ih59-light-return {from{transform:translate3d(12%,-18%,0) rotate(4deg);}to{transform:translate3d(-15%,15%,0) rotate(-6deg);}}
+__IH58__ .ih53-jobs-finale > :not(.ih60-wipe-field) {position:relative;z-index:1;}
+__IH58__ .ih60-wipe-field {display:block!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;}
+__IH58__ .ih60-wipe-field > i {position:absolute;display:block;top:-30%;left:-30%;width:22%;height:160%;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--v-ink) 6%,transparent) 16%,color-mix(in srgb,var(--v-accent) 11%,transparent) 70%,transparent 100%);border-right:1px solid color-mix(in srgb,var(--v-ink) 9%,transparent);transform:translate3d(-130%,0,0) skewX(-18deg);animation:ih60-erase-band 17s cubic-bezier(.3,0,.7,1) infinite;will-change:transform;}
+__IH58__ .ih60-wipe-field > i:nth-child(2) {width:15%;animation-duration:21s;animation-delay:-8s;}
+__IH58__ .ih60-wipe-field > i:nth-child(3) {width:28%;animation-duration:24s;animation-delay:-14s;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--v-ink) 7%,transparent) 30%,transparent);}
+__IH58__ .ih60-wipe-field > i:nth-child(4) {width:12%;animation-duration:19s;animation-delay:-4s;}
+__IH58__ .ih60-wipe-field > i:nth-child(5) {width:18%;animation-duration:23s;animation-delay:-19s;}
+__IH58__ .ih60-wipe-field[data-paused=true] > * {animation-play-state:paused!important;}
+@keyframes ih60-erase-band {0%{transform:translate3d(-130%,0,0) skewX(-18deg);opacity:0;}8%{opacity:1;}88%{opacity:1;}100%{transform:translate3d(950%,0,0) skewX(-18deg);opacity:0;}}
 __IH58__ .ih59-category-number {font:500 10px/1.4 Inter,Arial,sans-serif!important;font-variant-numeric:tabular-nums!important;color:inherit!important;opacity:.6!important;}
 __IH58__ .ih59-project-category {display:block!important;max-width:45%!important;flex:0 1 auto!important;width:auto!important;height:auto!important;padding:6px 0 6px 12px!important;border:0!important;border-left:1px solid var(--v-line)!important;border-radius:0!important;background:none!important;color:var(--v-muted)!important;font:500 10px/1.5 Inter,Arial,sans-serif!important;text-align:right!important;white-space:normal!important;overflow-wrap:anywhere!important;}
 __IH58__ .ih53-project-top {align-items:flex-start!important;gap:16px!important;}
@@ -1364,7 +1248,7 @@ __IH58_FILM__ .ih58-film-progress::before,__IH58_FILM__ .ih58-film-progress::aft
  __IH58__ .ih59-project-category {max-width:46%!important;font-size:9px!important;}
 }
 @media(prefers-reduced-motion:reduce) {
- __IH58__ .ih59-floating-field > *,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
+ __IH58__ .ih60-wipe-field > *,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
 }
 `.replaceAll("__IH58__", "#root".repeat(26) + " .ih53-home").replaceAll("__IH58_FILM__", "body " + "#ih57-cinema".repeat(6));
 
@@ -2699,9 +2583,9 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
-  <div className="ih59-floating-field" aria-hidden="true" data-paused={paused||reduced||hidden||!visible}><i/><i/><i/></div>
+  <div className="ih60-wipe-field" aria-hidden="true" data-paused={paused||reduced||hidden||!visible}><i/><i/><i/><i/><i/></div>
   <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
-  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/find-talent">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
+  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
     <div className="ih53-project-window" onPointerDown={e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};}} onPointerCancel={()=>{gesture.current=null;}} onPointerUp={e=>{const first=gesture.current;gesture.current=null;if(!first||view.next)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}>
      <div className="ih53-project-track" data-sliding={view.shift} onTransitionEnd={e=>{if(e.target===e.currentTarget&&e.propertyName==='transform')commit();}}>{active?renderCard(active):<div className="ih53-project-empty"><p>{copy.empty}</p><Link to="/jobs">{copy.jobs}</Link></div>}{view.next&&renderCard(view.next,true)}</div>
@@ -2714,7 +2598,7 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
  </div>;
 }
 
-function App({ session, loading, categoryGroups = [] }) {
+function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
   const ih53English=useSitePreferences().language==="en";
   const ih53RootRef=useRef(null);
   useIH53LegacyEnhancements(ih53RootRef);
@@ -2741,6 +2625,7 @@ function App({ session, loading, categoryGroups = [] }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (limitedAccess) { setHasNotifications(false); return; }
     let mounted = true;
 
     checkNotifications(session);
@@ -2796,7 +2681,7 @@ function App({ session, loading, categoryGroups = [] }) {
         handleStorage
       );
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, limitedAccess]);
 
   useEffect(() => {
     let mounted = true;
@@ -2870,7 +2755,7 @@ function App({ session, loading, categoryGroups = [] }) {
   async function checkNotifications(currentSession) {
     const userId = currentSession?.user?.id;
 
-    if (!userId) {
+    if (!userId || limitedAccess) {
       setHasNotifications(false);
       return;
     }
@@ -3081,7 +2966,7 @@ function App({ session, loading, categoryGroups = [] }) {
 
         <nav className="ih53-primary-nav" aria-label={ih53English?"Main shortcuts":"Główne skróty"} onClick={(event)=>{if(event.target?.closest?.("a"))setMobileMenuOpen(false);}}>
           <a href="#how-it-works">{ih53English?"Explore IdeaHire":"Poznaj IdeaHire"}</a><a href="#categories">{ih53English?"Categories":"Kategorie"}</a><a href="#for-users">{ih53English?"For you":"Dla Ciebie"}</a>
-          {session&&<Link className="ih53-desktop-account" to="/notifications">Powiadomienia{hasNotifications&&<span className="ih53-unread" aria-label="Nowe powiadomienia"/>}</Link>}
+          {session&&!limitedAccess&&<Link className="ih53-desktop-account" to="/notifications">Powiadomienia{hasNotifications&&<span className="ih53-unread" aria-label="Nowe powiadomienia"/>}</Link>}
           {session&&<Link className="ih53-desktop-account" to="/account">Moje konto</Link>}
         </nav>
         <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label="Nawigacja strony głównej"
@@ -3092,7 +2977,7 @@ function App({ session, loading, categoryGroups = [] }) {
 
           {session && (
             <>
-              <HomeNavItem to="/notifications" order={3} notification={hasNotifications}>Powiadomienia</HomeNavItem>
+              {!limitedAccess && <HomeNavItem to="/notifications" order={3} notification={hasNotifications}>Powiadomienia</HomeNavItem>}
               <HomeNavItem to="/account" order={4}>Moje konto</HomeNavItem>
             </>
           )}
@@ -3181,7 +3066,7 @@ function App({ session, loading, categoryGroups = [] }) {
           </div>
 
           <div className="ih5-category-showcase">
-            <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} />
+            <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} details={HOME_CATEGORY_COPY} />
             <IH53CommissionStory />
           </div>
         </section>

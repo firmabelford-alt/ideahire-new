@@ -191,3 +191,139 @@ html body #root #ih59-limited-account { width: min(1120px, calc(100% - 48px)); m
 @media (prefers-reduced-motion: reduce) {
   :is(.ih59-journey, .ih59-limited) *, html:root body .ih59-discovery *, html:root body .ih59-discovery .discovery-onboarding-content { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* P60 — one restrained brand accent, clear selection and compact browsing. */
+html:root body #root#root .page.limited-account-page.ih60-limited-page { display: block !important; width: 100% !important; max-width: none !important; min-height: 100dvh !important; margin: 0 !important; padding: 0 !important; background: var(--ih7-bg, #fff) !important; }
+html:root body #root#root .ih60-limited-page::before, html:root body #root#root .ih60-limited-page::after { display: none !important; content: none !important; }
+:is(.ih59-journey, .ih59-limited, .ih59-discovery, .ih60-browse-header) { --journey-accent: var(--ih7-accent, #12695d) !important; --journey-on: var(--ih7-on-accent, #fff) !important; --journey-soft: color-mix(in srgb, var(--journey-accent) 8%, var(--ih7-surface, #fff)) !important; }
+html[data-template="classic"] :is(.ih59-journey, .ih59-limited, .ih59-discovery, .ih60-browse-header) { --journey-accent: #a83c2c !important; --journey-on: #fff !important; --journey-soft: #fff3ee !important; }
+html[data-template="classic"][data-theme="dark"] :is(.ih59-journey, .ih59-limited, .ih59-discovery, .ih60-browse-header) { --journey-accent: #ffb49f !important; --journey-on: #29150f !important; --journey-soft: #332925 !important; }
+html body #root #ih59-registration:not(.ih59-email-confirmation) { background: linear-gradient(150deg, var(--journey-soft), var(--journey-bg) 64%) !important; }
+html:root body #root#root #ih59-registration .ih59-role-option { border-top: 3px solid color-mix(in srgb, var(--journey-accent) 35%, var(--journey-line)) !important; }
+html:root body #root#root #ih59-registration .ih59-role-option:has(input:checked) { background: var(--journey-accent) !important; color: var(--journey-on) !important; }
+html:root body #root#root #ih59-registration .ih59-role-option:has(input:checked) :is(strong, .ih59-role-number, .ih59-role-eyebrow, .ih59-role-description) { color: var(--journey-on) !important; }
+html:root body #root#root #ih59-registration .ih59-role-option:has(input:checked) .ih59-role-check { background: var(--journey-on) !important; color: var(--journey-accent) !important; border-color: var(--journey-on) !important; }
+html:root body #root#root #ih59-registration .ih60-confirmation-actions { display: flex !important; flex-wrap: wrap !important; gap: 12px !important; align-items: stretch !important; margin-top: 28px !important; }
+html:root body #root#root #ih59-registration .ih60-confirmation-actions .ih59-primary { flex: 1 1 230px !important; min-width: 0 !important; margin: 0 !important; }
+html:root body #root#root #ih59-registration .ih60-secondary { flex: 1 1 210px !important; min-height: 50px !important; border: 1px solid var(--journey-line) !important; border-radius: 10px !important; background: var(--journey-paper) !important; color: var(--journey-ink) !important; padding: 14px 18px !important; font: 600 13px/1.5 Inter, system-ui, sans-serif !important; cursor: pointer !important; }
+html:root body #root#root #ih59-registration .ih60-secondary:disabled { color: var(--journey-muted) !important; background: var(--journey-soft) !important; cursor: default !important; }
+html:root body #root#root #ih59-registration .ih60-confirmation-help { display: flex !important; flex-wrap: wrap !important; gap: 12px 20px !important; border-top: 1px solid var(--journey-line) !important; padding-top: 22px !important; margin-top: 28px !important; font-size: 12px !important; color: var(--journey-muted) !important; }
+html:root body #root#root #ih59-registration .ih60-confirmation-help > span { width: 100% !important; }
+html:root body #root#root #ih59-registration .ih60-confirmation-help a { display: inline-flex !important; gap: 12px !important; color: var(--journey-accent) !important; text-underline-offset: 5px !important; padding-block: 6px !important; }
+html:root body #root#root #ih59-registration .ih60-mail-feedback { padding: 12px 16px !important; border-left: 3px solid var(--journey-accent) !important; color: var(--journey-ink) !important; background: var(--journey-soft) !important; font-size: 12px !important; line-height: 1.7 !important; }
+html:root body .ih59-discovery .ih60-discovery-body { display: grid !important; grid-template-columns: 250px minmax(0, 1fr) !important; width: min(1440px, 100%) !important; height: 100% !important; min-height: 0 !important; margin-inline: auto !important; overflow: hidden !important; background: color-mix(in srgb, var(--journey-accent) 4%, var(--journey-bg)) !important; }
+html:root body .ih59-discovery .ih60-discovery-rail { display: flex !important; flex-direction: column !important; min-width: 0 !important; height: 100% !important; overflow-y: auto !important; padding: 36px 28px !important; background: var(--journey-accent) !important; color: var(--journey-on) !important; }
+html:root body .ih59-discovery .ih60-discovery-rail > span { font-size: 9px !important; letter-spacing: .13em !important; line-height: 1.7 !important; opacity: .8 !important; }
+html:root body .ih59-discovery .ih60-discovery-rail h2 { color: inherit !important; font-size: 31px !important; letter-spacing: -.035em !important; line-height: 1.1 !important; margin: 24px 0 36px !important; }
+html:root body .ih59-discovery .ih60-discovery-rail ol { list-style: none !important; padding: 0 !important; margin: 0 !important; display: grid !important; gap: 14px !important; }
+html:root body .ih59-discovery .ih60-discovery-rail li { display: flex !important; align-items: center !important; gap: 13px !important; font-size: 12px !important; opacity: .65 !important; }
+html:root body .ih59-discovery .ih60-discovery-rail li[aria-current] { opacity: 1 !important; font-weight: 700 !important; }
+html:root body .ih59-discovery .ih60-discovery-rail b { display: grid !important; place-items: center !important; flex: 0 0 29px !important; height: 29px !important; border: 1px solid currentColor !important; border-radius: 50% !important; font-size: 10px !important; font-variant-numeric: tabular-nums !important; }
+html:root body .ih59-discovery .ih60-discovery-rail [aria-current] b { color: var(--journey-accent) !important; background: var(--journey-on) !important; border-color: var(--journey-on) !important; }
+html:root body .ih59-discovery .ih60-discovery-rail p { color: inherit !important; opacity: .85 !important; font-size: 12px !important; line-height: 1.75 !important; padding-top: 30px !important; margin: auto 0 0 !important; }
+html:root body .ih59-discovery .discovery-onboarding-content { width: 100% !important; max-width: 100% !important; padding: clamp(28px, 4vw, 54px) !important; }
+html:root body .ih59-discovery .ih59-discovery-steps { display: none !important; }
+html:root body .ih59-discovery .discovery-category-context { display: grid !important; gap: 7px !important; margin: 18px 0 20px !important; }
+html:root body .ih59-discovery .discovery-category-context strong { color: var(--journey-ink) !important; font-size: 14px !important; line-height: 1.5 !important; }
+html:root body .ih59-discovery .discovery-category-context > span { color: var(--journey-muted) !important; font-size: 12px !important; line-height: 1.6 !important; }
+html:root body .ih59-discovery .discovery-category-switch button { display: inline-flex !important; align-items: center !important; gap: 12px !important; }
+html:root body .ih59-discovery .discovery-category-switch strong { font-size: 11px !important; font-variant-numeric: tabular-nums !important; }
+html:root body .ih59-discovery .discovery-category-card { display: grid !important; grid-template-columns: 25px minmax(0, 1fr) 27px !important; grid-template-rows: auto 1fr !important; gap: 7px 10px !important; min-height: 108px !important; padding: 18px !important; }
+html:root body .ih59-discovery .discovery-category-card > span { grid-column: 1 !important; grid-row: 1 / 3 !important; font-size: 10px !important; }
+html:root body .ih59-discovery .discovery-category-card strong { grid-column: 2 !important; grid-row: 1 !important; font-size: 14px !important; line-height: 1.35 !important; }
+html:root body .ih59-discovery .discovery-category-card small { grid-column: 2 !important; grid-row: 2 !important; font-size: 11px !important; line-height: 1.6 !important; }
+html:root body .ih59-discovery .discovery-category-card > i { grid-column: 3 !important; grid-row: 1 / 3 !important; width: 26px !important; height: 26px !important; }
+html:root body .ih59-discovery :is(.discovery-usage-card, .discovery-category-card, .discovery-goal-card, .discovery-order-card).is-selected { border-color: var(--journey-accent) !important; background: var(--journey-soft) !important; box-shadow: inset 3px 0 0 var(--journey-accent) !important; }
+html:root body .ih59-discovery .discovery-selection-counter { color: var(--journey-accent) !important; background: var(--journey-soft) !important; border: 1px solid color-mix(in srgb, var(--journey-accent) 30%, transparent) !important; }
+html:root body .ih59-discovery .ih60-minor-note { color: var(--journey-muted) !important; font-size: 11px !important; line-height: 1.65 !important; margin: 0 0 24px !important; border: 1px solid var(--journey-line) !important; border-radius: 8px !important; background: var(--journey-paper) !important; padding: 10px 14px !important; }
+html:root body .ih59-discovery .ih60-minor-note summary { color: var(--journey-accent) !important; font-weight: 600 !important; cursor: pointer !important; }
+html:root body .ih59-discovery .ih60-minor-note p { margin: 12px 0 0 !important; }
+html:root body .ih59-discovery .discovery-onboarding-header { border-bottom-color: var(--journey-line) !important; }
+
+#root#root #ih60-browse-header { --journey-ink: var(--ih7-ink, #191919) !important; --journey-line: var(--ih7-line, #d5d5d5) !important; --journey-paper: var(--ih7-surface, #fff) !important; position: sticky !important; top: 0 !important; z-index: 100 !important; display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 18px !important; width: 100% !important; padding: 16px clamp(20px, 4vw, 60px) !important; border-bottom: 1px solid var(--journey-line) !important; background: var(--journey-paper) !important; color: var(--journey-ink) !important; font-family: Inter, system-ui, sans-serif !important; }
+#root#root #ih60-browse-header .ih60-browse-logo { color: inherit !important; font-size: 26px !important; font-weight: 800 !important; letter-spacing: -1.3px !important; text-decoration: none !important; margin-right: auto !important; }
+#root#root #ih60-browse-header .ih60-browse-desktop { display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 16px !important; }
+#root#root #ih60-browse-header .ih60-browse-desktop a { color: var(--journey-ink) !important; font-size: 12px !important; font-weight: 550 !important; line-height: 1.5 !important; text-decoration: none !important; padding: 8px 0 !important; }
+#root#root #ih60-browse-header .ih60-browse-desktop a.is-active { color: var(--journey-accent) !important; box-shadow: 0 2px var(--journey-accent) !important; }
+#root#root #ih60-browse-header .ih60-browse-avatar { display: grid !important; place-items: center !important; flex: 0 0 37px !important; height: 37px !important; color: var(--journey-accent) !important; border: 1px solid var(--journey-line) !important; border-radius: 50% !important; background: var(--journey-soft) !important; font-size: 13px !important; font-weight: 700 !important; text-decoration: none !important; }
+#root#root #ih60-browse-header .ih60-browse-logout { border: 1px solid var(--journey-line) !important; border-radius: 8px !important; padding: 9px 12px !important; background: var(--journey-paper) !important; color: inherit !important; font-size: 11px !important; min-height: 37px !important; cursor: pointer !important; }
+#root#root #ih60-browse-header .ih60-browse-menu { display: none !important; }
+#root#root #ih60-browse-header .ih60-browse-menu:not([open]) > nav { display: none !important; }
+#root#root #ih60-browse-header :is(a, button, summary):focus-visible { outline: 2px solid var(--journey-accent) !important; outline-offset: 3px !important; }
+html body #root #ih59-limited-account.ih60-account { padding: 34px 0 48px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-heading { display: flex !important; justify-content: space-between !important; align-items: flex-start !important; gap: 20px !important; padding-bottom: 26px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-heading h1 { color: var(--journey-ink) !important; font-size: clamp(28px, 3.6vw, 42px) !important; line-height: 1.12 !important; letter-spacing: -.04em !important; font-weight: 730 !important; margin: 14px 0 10px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-heading p { margin: 0 !important; max-width: 580px !important; color: var(--journey-muted) !important; font-size: 13px !important; line-height: 1.7 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-badge { flex-shrink: 0 !important; color: var(--journey-accent) !important; background: var(--journey-soft) !important; border: 1px solid var(--journey-line) !important; border-radius: 999px !important; padding: 8px 12px !important; font-size: 11px !important; font-weight: 600 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-welcome { display: flex !important; justify-content: space-between !important; align-items: center !important; gap: 28px !important; border-radius: 14px !important; padding: 26px 28px !important; color: var(--journey-on) !important; background: var(--journey-accent) !important; margin-bottom: 30px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-welcome > div > span { font-size: 9px !important; letter-spacing: .14em !important; opacity: .8 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-welcome h2 { margin: 12px 0 8px !important; color: inherit !important; font-size: clamp(21px, 2.2vw, 28px) !important; letter-spacing: -.025em !important; line-height: 1.2 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-welcome p { color: inherit !important; opacity: .85 !important; font-size: 12px !important; line-height: 1.7 !important; margin: 0 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-welcome a { display: flex !important; justify-content: space-between !important; align-items: center !important; flex-shrink: 0 !important; gap: 24px !important; min-height: 46px !important; border: 1px solid var(--journey-on) !important; border-radius: 8px !important; color: var(--journey-accent) !important; background: var(--journey-on) !important; text-decoration: none !important; padding: 12px 16px !important; font-size: 12px !important; font-weight: 650 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-layout { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(240px, .43fr) !important; gap: 26px !important; align-items: start !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-catalogues > h2 { color: var(--journey-ink) !important; font-size: 16px !important; margin: 0 0 16px !important; font-weight: 650 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles > a { display: flex !important; flex-direction: column !important; min-width: 0 !important; padding: 22px !important; border: 1px solid var(--journey-line) !important; border-radius: 12px !important; color: var(--journey-ink) !important; background: var(--journey-paper) !important; text-decoration: none !important; transition: border-color 180ms, background 180ms !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles > a > span { display: flex !important; align-items: center !important; justify-content: space-between !important; color: var(--journey-accent) !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles small { font-size: 10px !important; font-variant-numeric: tabular-nums !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles i { font-size: 18px !important; font-style: normal !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles h3 { margin: 20px 0 8px !important; color: var(--journey-ink) !important; font-size: 21px !important; font-weight: 650 !important; line-height: 1.2 !important; letter-spacing: -.025em !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-tiles p { color: var(--journey-muted) !important; font-size: 12px !important; line-height: 1.7 !important; margin: 0 !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-aside { display: grid !important; gap: 14px !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta { padding: 22px !important; border: 1px solid var(--journey-line) !important; border-radius: 12px !important; background: var(--journey-soft) !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta > span { color: var(--journey-muted) !important; font-size: 11px !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta > strong { display: block !important; color: var(--journey-ink) !important; font-size: 24px !important; letter-spacing: -.03em !important; margin-top: 8px !important; font-variant-numeric: tabular-nums !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta p { color: var(--journey-muted) !important; font-size: 11px !important; line-height: 1.7 !important; margin: 10px 0 16px !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta details { border-top: 1px solid var(--journey-line) !important; padding-top: 14px !important; font-size: 11px !important; line-height: 1.7 !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta summary { color: var(--journey-ink) !important; cursor: pointer !important; font-weight: 600 !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta ul { padding-left: 16px !important; color: var(--journey-muted) !important; }
+html:root body #root#root #ih59-limited-account .ih60-access-meta a { color: var(--journey-accent) !important; text-underline-offset: 4px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-support { padding: 20px 22px !important; border: 1px solid var(--journey-line) !important; border-radius: 12px !important; background: var(--journey-paper) !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-support h2 { margin: 0 0 12px !important; font-size: 14px !important; color: var(--journey-ink) !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-support a { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; padding: 11px 0 !important; color: var(--journey-ink) !important; font-size: 11px !important; text-decoration: none !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-settings { margin-top: 28px !important; border: 1px solid var(--journey-line) !important; border-radius: 12px !important; padding: 0 20px !important; background: var(--journey-paper) !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-settings > summary { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; padding: 18px 0 !important; font-size: 13px !important; font-weight: 650 !important; color: var(--journey-ink) !important; cursor: pointer !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-settings > summary > span { color: var(--journey-muted) !important; font-weight: 400 !important; font-size: 11px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-settings[open] > summary { border-bottom: 1px solid var(--journey-line) !important; margin-bottom: 20px !important; }
+html:root body #root#root #ih59-limited-account .ih60-account-settings:not([open]) > :not(summary) { display: none !important; }
+@media (max-width: 1050px) {
+  #root#root #ih60-browse-header { gap: 12px !important; }
+  #root#root #ih60-browse-header .ih60-browse-desktop { gap: 12px !important; }
+  #root#root #ih60-browse-header .ih60-browse-desktop a { font-size: 11px !important; }
+}
+@media (max-width: 800px) {
+  html:root body .ih59-discovery .ih60-discovery-body { grid-template-columns: minmax(0, 1fr) !important; }
+  html:root body .ih59-discovery .ih60-discovery-rail { display: none !important; }
+  html:root body .ih59-discovery .discovery-onboarding-content { padding: 22px 20px !important; }
+  html:root body .ih59-discovery .ih59-discovery-steps { display: flex !important; gap: 8px !important; margin-bottom: 22px !important; align-items: center !important; }
+  html:root body .ih59-discovery .ih59-discovery-steps li { display: flex !important; align-items: center !important; gap: 7px !important; padding: 8px 10px !important; border: 1px solid var(--journey-line) !important; border-radius: 7px !important; background: var(--journey-paper) !important; font-size: 10px !important; }
+  html:root body .ih59-discovery .ih59-discovery-steps [aria-current] { color: var(--journey-on) !important; background: var(--journey-accent) !important; border-color: var(--journey-accent) !important; }
+  html:root body .ih59-discovery .ih59-discovery-steps li:not([aria-current]) span { display: none !important; }
+  html:root body .ih59-discovery .discovery-category-card { min-height: 98px !important; padding: 16px !important; }
+  html:root body .ih59-discovery .discovery-copy h1 { font-size: 28px !important; }
+  #root#root #ih60-browse-header { padding: max(14px, env(safe-area-inset-top)) 20px 14px !important; column-gap: 12px !important; }
+  #root#root #ih60-browse-header .ih60-browse-desktop, #root#root #ih60-browse-header .ih60-browse-logout { display: none !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu { display: block !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu > summary { display: grid !important; place-items: center !important; width: 40px !important; height: 40px !important; border: 1px solid var(--journey-line) !important; border-radius: 50% !important; color: var(--journey-ink) !important; cursor: pointer !important; list-style: none !important; }
+  #root#root #ih60-browse-header summary::-webkit-details-marker { display: none !important; }
+  #root#root #ih60-browse-header summary svg { width: 21px !important; height: 21px !important; fill: none !important; stroke: currentColor !important; stroke-width: 1.8 !important; stroke-linecap: round !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu[open] { display: contents !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu[open] > summary { margin: 0 !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu > nav { flex-basis: 100% !important; width: 100% !important; display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; order: 5 !important; padding-top: 12px !important; border-top: 1px solid var(--journey-line) !important; margin-top: 8px !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu :is(a, button) { min-height: 44px !important; padding: 12px !important; border: 1px solid var(--journey-line) !important; border-radius: 8px !important; background: var(--journey-paper) !important; color: var(--journey-ink) !important; font: 550 12px/1.5 Inter, system-ui, sans-serif !important; text-decoration: none !important; cursor: pointer !important; text-align: left !important; }
+  #root#root #ih60-browse-header .ih60-browse-menu a.is-active { background: var(--journey-soft) !important; border-color: var(--journey-accent) !important; color: var(--journey-accent) !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-heading { flex-direction: column-reverse !important; gap: 16px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-heading h1 { font-size: 30px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-heading .ih59-kicker { display: none !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-welcome { flex-direction: column !important; align-items: stretch !important; padding: 22px !important; gap: 20px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-welcome a { width: 100% !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-layout { grid-template-columns: minmax(0, 1fr) !important; gap: 22px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-aside { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+}
+@media (max-width: 480px) {
+  html body #root #ih59-limited-account.ih60-account { padding-top: 24px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-tiles, html:root body #root#root #ih59-limited-account .ih60-account-aside { grid-template-columns: minmax(0, 1fr) !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-tiles > a { padding: 18px 20px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-tiles h3 { margin-top: 12px !important; }
+  html:root body #root#root #ih59-limited-account .ih60-account-badge { padding: 7px 10px !important; font-size: 10px !important; }
+}
