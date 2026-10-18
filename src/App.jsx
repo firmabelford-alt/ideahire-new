@@ -3039,29 +3039,9 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
         <HomeDemoReviews />
 
-        <section
-          className="categories section"
-          id="categories"
-        >
-          <div className="section-heading home-reveal ih-category-intro">
-            <div>
-              <span className="section-label">Kategorie</span>
-
-              <h2>
-                Znajdź dokładnie to, czego potrzebujesz.
-              </h2>
-            </div>
-
-            <p>
-              Od małych zadań po większe projekty.
-              Wybierz kategorię i zacznij szukać.
-            </p>
-          </div>
-
-          <div className="ih5-category-showcase">
-            <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} details={HOME_CATEGORY_COPY} />
-            <IH53CommissionStory />
-          </div>
+        <section className="categories section ih62-specialisations-section" id="categories">
+          <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} details={HOME_CATEGORY_COPY} />
+          <div className="ih62-fee-placement"><IH53CommissionStory /></div>
         </section>
 
         <IH53Showcase />
