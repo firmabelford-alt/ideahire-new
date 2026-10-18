@@ -2,6 +2,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import LucynaSymbol from "./LucynaSymbol";
 import "./LucynaDock.css";
 
 const Assistant = React.lazy(() => import("./Lucyna"));
@@ -117,7 +118,7 @@ export default function LucynaDock({ supabase, user }) {
       <header className="ih64-dock-heading">
         <button className="ih64-dock-handle" type="button" aria-label="Przesuń okno Lucyny. Użyj przeciągania lub klawiszy strzałek. Home przywraca pozycję."
           onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={() => { drag.current = null; }} onKeyDown={moveWithKeyboard} onDoubleClick={() => setPosition(null)}>
-          <Icon kind="move"/><span><strong id="ih64-lucyna-title">Lucyna <span>AI</span></strong><small>Pomoc w IdeaHire</small></span>
+          <LucynaSymbol/><span><strong id="ih64-lucyna-title">Lucyna <span>AI</span></strong><small>Pomoc w IdeaHire</small></span>
         </button>
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
         <button className="ih64-dock-control" type="button" title="Zamknij i schowaj przycisk" aria-label="Zamknij Lucynę i schowaj przycisk" onClick={() => minimise(true)}><Icon kind="close"/></button>
@@ -125,9 +126,9 @@ export default function LucynaDock({ supabase, user }) {
       <div className="ih64-dock-body"><DockBoundary><React.Suspense fallback={<p className="ih64-dock-status" role="status">Otwieram Lucynę…</p>}><Assistant supabase={supabase} user={user} embedded visible={open}/></React.Suspense></DockBoundary></div>
     </section>}
     {!open && !hidden && <div className="ih64-dock-launcher" style={{ right: 16, bottom: 88 }}>
-      <button ref={launcher} className="ih64-dock-open" type="button" aria-label="Otwórz okno Lucyny AI" aria-expanded="false" aria-controls="ih64-lucyna-window" onClick={show}><span aria-hidden="true">L</span><strong>Lucyna <small>AI</small></strong></button>
+      <button ref={launcher} className="ih64-dock-open" type="button" aria-label="Otwórz okno Lucyny AI" aria-expanded="false" aria-controls="ih64-lucyna-window" onClick={show}><span aria-hidden="true"><LucynaSymbol/></span><strong>Lucyna <small>AI</small></strong></button>
       <button className="ih64-dock-hide" type="button" aria-label="Schowaj przycisk Lucyny" title="Schowaj przycisk" onClick={() => { setHidden(true); requestAnimationFrame(() => returnTab.current?.focus()); }}><Icon kind="close"/></button>
     </div>}
-    {!open && hidden && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz schowaną Lucynę AI" title="Otwórz Lucynę" onClick={show}><Icon kind="return"/><span aria-hidden="true">L</span></button>}
+    {!open && hidden && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz schowaną Lucynę AI" title="Otwórz Lucynę" onClick={show}><Icon kind="return"/><LucynaSymbol/></button>}
   </div>, document.body);
 }

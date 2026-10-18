@@ -8,6 +8,7 @@ import { useLucynaMemory } from "./LucynaMemory";
 import LucynaTools, { ReviewResult } from "./LucynaTools";
 export { containsPrivateInput } from "./LucynaCore";
 import "./Lucyna.css";
+import LucynaSymbol from "./LucynaSymbol";
 
 const CATEGORIES = ["Programowanie", "Grafika i design", "Marketing", "Copywriting", "Video",
   "Fotografia", "AI i automatyzacje", "Dane, analizy i research", "Biznes i e-commerce", "Architektura, wnętrza i CAD"];
@@ -89,7 +90,7 @@ function Icon({ name = "spark", ...props }) {
     strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[name] || paths.spark} /></svg>;
 }
 function Mark({ small = false }) {
-  return <span className={"lu-mark" + (small ? " is-small" : "")} aria-hidden="true"><span className="lu-mark-halo" /><Icon name="spark" /></span>;
+  return <span className={"lu-mark" + (small ? " is-small" : "")} aria-hidden="true"><LucynaSymbol/></span>;
 }
 function ThinkingIndicator({phase = "preparing"}) {
   const [elapsed,setElapsed]=useState(0);

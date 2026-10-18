@@ -10,6 +10,9 @@ import * as IH57JSX from "react/jsx-runtime";
 import { createPortal } from "react-dom";
 import "./App.css";
 import "./SitePolish.css";
+import "./HomeFinishing.css";
+import LucynaSymbol from "./LucynaSymbol";
+import { requestLucynaDock } from "./LucynaDock";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
 import { BrandSignature, BrandLogo } from "./Brand";
 import { useBrandReady } from "./BrandOpening";
@@ -153,25 +156,25 @@ const IH43_FILM={
       "MONTAŻ"
     ],
     "ui": {
-      "panel": "Opis / zakres",
+      "panel": "Przykładowe zlecenie",
       "project": "Twój projekt",
       "details": [
         "Zakres pracy",
         "Termin",
         "Budżet"
       ],
-      "note": "Przykład opisu",
+      "note": "Opis przed publikacją",
       "fee": "Prowizja IdeaHire",
       "minimum": "min.",
       "maximum": "maks.",
       "limit": "Zlecenia do",
       "payer": "Prowizję płaci wyłącznie zleceniodawca.",
-      "thread": "Uzgodnienia",
+      "thread": "Rozmowa o zleceniu",
       "messages": [
-        "Proponuję te warunki.",
-        "Potwierdzam."
+        "Termin: 14 dni.",
+        "Zakres ustalony."
       ],
-      "prompt": "Ustalenia przed rozpoczęciem pracy."
+      "prompt": "Zapiszcie ustalenia w rozmowie."
     },
     "ctaMobile": [
       "Wykonawcy",
@@ -179,20 +182,20 @@ const IH43_FILM={
     ],
     "frames": [
       [
-        "TWÓJ",
+        "MASZ",
         "PROJEKT."
       ],
       [
-        "WŁAŚCIWE",
-        "UMIEJĘTNOŚCI."
+        "POTRZEBUJESZ",
+        "WYKONAWCY."
       ],
       [
-        "OKREŚL",
-        "ZAKRES."
+        "OPISZ",
+        "ZADANIE."
       ],
       [
-        "OPUBLIKUJ",
-        "ZLECENIE."
+        "LUCYNA AI.",
+        "POMOŻE W OPISIE."
       ],
       [
         "PROJEKTOWANIE.",
@@ -208,15 +211,15 @@ const IH43_FILM={
       ],
       [
         "UZGODNIJ",
-        "SZCZEGÓŁY."
+        "WARUNKI."
       ],
       [
         "ROZMOWA",
         "O PROJEKCIE."
       ],
       [
-        "JASNE",
-        "WARUNKI."
+        "USTAL",
+        "KOSZT."
       ],
       [
         "ZAKRES.",
@@ -224,21 +227,22 @@ const IH43_FILM={
         "WYNAGRODZENIE."
       ],
       [
-        "REALIZACJA."
+        "CZAS NA",
+        "REALIZACJĘ."
       ],
       [
         "ZLECAJĄCY.",
         "WYKONAWCA.",
-        "WSPÓŁPRACA."
+        "WSPÓLNA PRACA."
       ],
       [
-        "Znajdź osobę.",
-        "Zrealizuj projekt."
+        "Zleć zadanie.",
+        "Znajdź zlecenie."
       ]
     ],
     "final": [
-      "Znajdź osobę.",
-      "Zrealizuj projekt."
+      "Zleć zadanie.",
+      "Znajdź zlecenie."
     ]
   },
   "en": {
@@ -254,25 +258,25 @@ const IH43_FILM={
       "EDITING"
     ],
     "ui": {
-      "panel": "Description / scope",
+      "panel": "Sample project",
       "project": "Your project",
       "details": [
         "Scope of work",
         "Deadline",
         "Budget"
       ],
-      "note": "Example brief",
+      "note": "Brief before publishing",
       "fee": "IdeaHire service fee",
       "minimum": "min.",
       "maximum": "max.",
       "limit": "Orders up to",
       "payer": "The fee is paid only by the client.",
-      "thread": "Agreement",
+      "thread": "Project conversation",
       "messages": [
-        "I propose these terms.",
-        "Confirmed."
+        "Deadline: 14 days.",
+        "Scope agreed."
       ],
-      "prompt": "Agree on the details before work begins."
+      "prompt": "Keep the details in your conversation."
     },
     "ctaMobile": [
       "Hire talent",
@@ -284,16 +288,16 @@ const IH43_FILM={
         "PROJECT."
       ],
       [
-        "THE RIGHT",
-        "SKILLS."
+        "FIND",
+        "THE RIGHT PERSON."
       ],
       [
-        "DEFINE",
-        "THE SCOPE."
+        "DESCRIBE",
+        "THE TASK."
       ],
       [
-        "PUBLISH",
-        "YOUR BRIEF."
+        "LUCYNA AI.",
+        "HELP WITH YOUR BRIEF."
       ],
       [
         "DESIGN.",
@@ -301,7 +305,7 @@ const IH43_FILM={
         "EDITING."
       ],
       [
-        "THE FEE."
+        "SERVICE FEE."
       ],
       [
         "CHOOSE",
@@ -309,37 +313,38 @@ const IH43_FILM={
       ],
       [
         "AGREE",
-        "THE DETAILS."
+        "ON THE TERMS."
       ],
       [
         "DISCUSS",
         "THE PROJECT."
       ],
       [
-        "CLEAR",
-        "TERMS."
+        "AGREE",
+        "ON THE COST."
       ],
       [
         "SCOPE.",
-        "TIMING.",
+        "DEADLINE.",
         "PAYMENT."
       ],
       [
-        "DELIVERY."
+        "TIME TO",
+        "GET STARTED."
       ],
       [
         "CLIENT.",
-        "FREELANCER.",
-        "COLLABORATION."
+        "PROFESSIONAL.",
+        "WORKING TOGETHER."
       ],
       [
-        "Find the right person.",
-        "Complete your project."
+        "Post a project.",
+        "Find work."
       ]
     ],
     "final": [
-      "Find the right person.",
-      "Complete your project."
+      "Post a project.",
+      "Find work."
     ]
   },
   "paths": [
@@ -422,7 +427,7 @@ function ih43Panel(c,x,y,w,h,options={}){
 function ih43Palette(classic) {
   const p = IH43_FILM.palette;
   if (classic) return { ...p, paper: "#efefec", ink: "#121212", accent: "#777777", secondary: "#b0b0ad", light: "#ffffff", muted: "#666666" };
-  return { ...p, paper: "#e7fbfc", ink: "#092b30", accent: "#19cbd3", secondary: "#b8edf0", light: "#ffffff", muted: "#497276" };
+  return { ...p, paper: "#f6f2ea", ink: "#14292e", accent: "#32b1c7", secondary: "#bfdde0", light: "#ffffff", muted: "#4c6870" };
 }
 function ih43Backdrop(c, l, p, shot) {
   const mode = shot.bg || "ink";
@@ -1882,67 +1887,127 @@ body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema[data-playing=false] .ih57-
     posterWide: "/media/ideahire-film-poster-wide.jpg",
     posterTall: "/media/ideahire-film-poster-tall.jpg"
   },
-  IH57_CHAPTERS = [{
-    start: 0,
-    step: 0,
-    kind: "intro",
-    pl: ["Pomys\u0142 potrzebuje", "ludzi."],
-    en: ["Ideas need", "people."],
-    subPl: "Znajd\u017A wykonawc\u0119 w IdeaHire.",
-    subEn: "Find a professional on IdeaHire.",
-    labelPl: "IdeaHire / Ludzie i projekty",
-    labelEn: "IdeaHire / People and projects"
-  }, {
-    start: 6.7,
-    step: 0,
-    kind: "brief",
-    pl: ["Tw\xF3j projekt.", "Konkretne warunki."],
-    en: ["Your project.", "Clear requirements."],
-    subPl: "Zakres, termin, bud\u017Cet. Dobry pocz\u0105tek wsp\xF3\u0142pracy.",
-    subEn: "Scope, timing, budget. A clear place to start.",
-    labelPl: "Zlecenie w IdeaHire",
-    labelEn: "Your IdeaHire brief"
-  }, {
-    start: 12.7,
-    step: 1,
-    kind: "portfolio",
-    pl: ["Sprawd\u017A portfolio.", "Poznaj umiej\u0119tno\u015Bci."],
-    en: ["Explore portfolios.", "Find the right skills."],
-    subPl: "Na IdeaHire wybierasz, z kim chcesz pracowa\u0107.",
-    subEn: "Choose who you want to work with on IdeaHire.",
-    labelPl: "Wykonawcy w IdeaHire",
-    labelEn: "Professionals on IdeaHire"
-  }, {
-    start: 18.7,
-    step: 2,
-    kind: "messages",
-    pl: ["Ustalcie szczeg\xF3\u0142y.", "Zanim zaczniecie."],
-    en: ["Agree on the details.", "Before you start."],
-    subPl: "Porozmawiajcie o zakresie, materia\u0142ach i terminie.",
-    subEn: "Discuss the scope, materials and deadline.",
-    labelPl: "Rozmowa w IdeaHire",
-    labelEn: "Your conversation on IdeaHire"
-  }, {
-    start: 24.7,
-    step: 2,
-    kind: "fee",
-    pl: ["Prowizja IdeaHire.", "Zobacz wyliczenie."],
-    en: ["The IdeaHire fee.", "See the calculation."],
-    subPl: "Stawka, minimum i limit widoczne przed rozpocz\u0119ciem.",
-    subEn: "The rate, minimum and cap are shown before you start.",
-    labelPl: "Prowizja bez domys\u0142\xF3w",
-    labelEn: "A fee you can calculate"
-  }, {
-    start: 32.7,
-    step: 3,
-    kind: "final",
-    pl: ["IdeaHire.", "Od pomys\u0142u do wsp\xF3\u0142pracy."],
-    en: ["IdeaHire.", "From an idea to working together."],
-    subPl: "Znajd\u017A wykonawc\u0119 albo projekt dla siebie.",
-    subEn: "Find a professional or a project for yourself.",
-    labelPl: "Teraz Tw\xF3j projekt",
-    labelEn: "Your project starts here"
-  }];
+  IH57_CHAPTERS = [
+  {
+    "start": 0,
+    "step": 0,
+    "kind": "intro",
+    "pl": [
+      "Masz projekt.",
+      "Wybierz wykonawcę."
+    ],
+    "en": [
+      "You have a project.",
+      "Find a professional."
+    ],
+    "subPl": "Sprawdź profile i przykłady prac w IdeaHire.",
+    "subEn": "Explore profiles and examples of work on IdeaHire.",
+    "labelPl": "IdeaHire / Zlecenia i wykonawcy",
+    "labelEn": "IdeaHire / Projects and professionals"
+  },
+  {
+    "start": 5.3,
+    "step": 0,
+    "kind": "brief",
+    "pl": [
+      "Opisz zadanie.",
+      "Podaj budżet i termin."
+    ],
+    "en": [
+      "Describe the task.",
+      "Set a budget and deadline."
+    ],
+    "subPl": "Wykonawcy wiedzą, czego potrzebujesz, zanim odpowiedzą.",
+    "subEn": "Let professionals know what you need before they reply.",
+    "labelPl": "Zlecenie w IdeaHire",
+    "labelEn": "Your IdeaHire brief"
+  },
+  {
+    "start": 10.9,
+    "step": 1,
+    "kind": "portfolio",
+    "pl": [
+      "Zobacz ich prace.",
+      "Wybierz, z kim pracujesz."
+    ],
+    "en": [
+      "See their work.",
+      "Choose who you work with."
+    ],
+    "subPl": "Portfolio, umiejętności i opinie pomogą Ci porównać profile.",
+    "subEn": "Compare portfolios, skills and reviews.",
+    "labelPl": "Wykonawcy w IdeaHire",
+    "labelEn": "Professionals on IdeaHire"
+  },
+  {
+    "start": 16.6,
+    "step": 2,
+    "kind": "assistant",
+    "pl": [
+      "Lucyna AI.",
+      "Pomoc przy opisie."
+    ],
+    "en": [
+      "Lucyna AI.",
+      "Help with your brief."
+    ],
+    "subPl": "Doprecyzuj zlecenie albo przygotuj wiadomość z pomocą asystentki.",
+    "subEn": "Refine a brief or draft a message with the assistant.",
+    "labelPl": "Asystentka IdeaHire",
+    "labelEn": "The IdeaHire assistant"
+  },
+  {
+    "start": 22,
+    "step": 2,
+    "kind": "messages",
+    "pl": [
+      "Ustalcie szczegóły.",
+      "Zapiszcie je w rozmowie."
+    ],
+    "en": [
+      "Agree on the details.",
+      "Keep them in the conversation."
+    ],
+    "subPl": "Zakres, materiały i termin — przed rozpoczęciem pracy.",
+    "subEn": "Scope, materials and timing — before work starts.",
+    "labelPl": "Wiadomości w IdeaHire",
+    "labelEn": "Messages on IdeaHire"
+  },
+  {
+    "start": 27,
+    "step": 2,
+    "kind": "fee",
+    "pl": [
+      "Sprawdź prowizję.",
+      "Przed płatnością."
+    ],
+    "en": [
+      "Check the service fee.",
+      "Before you pay."
+    ],
+    "subPl": "Płaci zleceniodawca. Wykonawca otrzymuje całą ustaloną kwotę.",
+    "subEn": "Paid by the client. The professional receives the full agreed amount.",
+    "labelPl": "Koszt współpracy",
+    "labelEn": "The cost of working together"
+  },
+  {
+    "start": 34,
+    "step": 3,
+    "kind": "final",
+    "pl": [
+      "IdeaHire.",
+      "Zlecaj lub realizuj."
+    ],
+    "en": [
+      "IdeaHire.",
+      "Hire or find work."
+    ],
+    "subPl": "Wybierz wykonawcę albo znajdź zlecenie w swojej dziedzinie.",
+    "subEn": "Choose a professional or find a project in your field.",
+    "labelPl": "Wybierz, od czego zaczniesz",
+    "labelEn": "Choose where to start"
+  }
+];
 function ih57ChapterIndex(A) {
   let e = 0;
   return IH57_CHAPTERS.forEach((t, n) => {
@@ -2043,7 +2108,7 @@ function IH57SceneDetail({
         children: e ? "BEFORE YOU CHOOSE" : "PRZED WYBOREM"
       })]
     }), (0, IH57JSX.jsx)("h3", {
-      children: e ? "See the work behind the profile." : "Zobacz prac\u0119 za profilem."
+      children: e ? "Examples of their work." : "Przykłady prac."
     }), (0, IH57JSX.jsx)("ul", {
       children: (e ? ["Portfolio", "Skills", "Reviews"] : ["Portfolio", "Umiej\u0119tno\u015Bci", "Opinie"]).map(o => (0, IH57JSX.jsxs)("li", {
         children: [(0, IH57JSX.jsx)(IH57Icon, {
@@ -2054,6 +2119,12 @@ function IH57SceneDetail({
       children: e ? "Choose based on the information in the profile." : "Podejmij decyzj\u0119 na podstawie profilu."
     })]
   });
+  if (A === "assistant") return <aside className="ih57-detail ih57-messages ih65-assistant-detail" aria-label={e ? "Example assistance from Lucyna AI" : "Przykładowa pomoc Lucyny AI"}>
+    <span className="ih57-detail-label"><span className="ih65-assistant-brand"><LucynaSymbol/>Lucyna AI</span><small>{e ? "EXAMPLE AI ASSISTANCE" : "PRZYKŁAD POMOCY AI"}</small></span>
+    <p>{e ? "I need a website for my studio." : "Potrzebuję strony dla pracowni."}</p>
+    <p>{e ? "Add the number of pages, deadline and budget." : "Dopisz liczbę podstron, termin i budżet."}</p>
+    <small>{e ? "A draft you can edit before publishing." : "Propozycja do poprawienia przed publikacją."}</small>
+  </aside>;
   if (A === "messages") return (0, IH57JSX.jsxs)("aside", {
     className: "ih57-detail ih57-messages",
     children: [(0, IH57JSX.jsxs)("span", {
@@ -2070,8 +2141,8 @@ function IH57SceneDetail({
     })]
   });
   if (A === "fee") {
-    let o = Math.max(0, t - 24.7),
-      i = o < 2.8 ? 250 : o < 5.6 ? 1e3 : n.orderLimit,
+    let o = Math.max(0, t - IH57_CHAPTERS.find(chapter => chapter.kind === "fee").start),
+      i = o < 2.2 ? 250 : o < 4.4 ? 1e3 : n.orderLimit,
       l = ih57Fee(i);
     return (0, IH57JSX.jsxs)("aside", {
       className: "ih57-detail ih57-fee-card",
@@ -2128,7 +2199,7 @@ function IH57Scene({
   ended: t,
   onNavigate: n
 }) {
-  let r = t ? 5 : ih57ChapterIndex(A),
+  let r = t ? IH57_CHAPTERS.length - 1 : ih57ChapterIndex(A),
     a = IH57_CHAPTERS[r],
     o = e ? a.en : a.pl,
     i = !["intro", "final"].includes(a.kind);
@@ -2206,7 +2277,7 @@ function IH57Cinema({
     [Xl, vc] = (0, IH57React.useState)(0),
     La = a ? A.tall : A.wide,
     Ll = a ? A.posterTall : A.posterWide,
-    mc = Q ? 5 : ih57ChapterIndex(c),
+    mc = Q ? IH57_CHAPTERS.length - 1 : ih57ChapterIndex(c),
     hc = IH57_CHAPTERS[mc].step;
   function Ie() {
     h.current = !1, P.current++, f.current?.pause(), B(!1), gA(!1);
@@ -2369,7 +2440,7 @@ function IH57Cinema({
       onTimeUpdate={Bc} onEnded={bc} onWaiting={() => { if (h.current) gA(true); }}
       onError={() => { if (!s.current) { h.current = false; Ce(true); B(false); gA(false); } }} />}
     <header className="ih57-top" ref={i}>
-      <IH57Wordmark /><span className="ih57-film-label">{n ? 'PEOPLE. PROJECTS. IDEAHIRE.' : 'LUDZIE. PROJEKTY. IDEAHIRE.'}</span>
+      <IH57Wordmark /><span className="ih57-film-label">{n ? 'WORKING TOGETHER ON IDEAHIRE' : 'WSPÓŁPRACA W IDEAHIRE'}</span>
       <div className="ih57-top-actions">
         <button type="button" disabled={G} onClick={() => Q ? Pc() : p ? Ie() : lt()} aria-label={n ? Q ? 'Replay film' : p ? 'Pause film' : 'Play film' : Q ? 'Powtórz film' : p ? 'Zatrzymaj film' : 'Odtwórz film'}><IH57Icon kind={Q ? 'replay' : p ? 'pause' : 'play'} /></button>
         <button type="button" onClick={Xc} aria-label={n ? 'Toggle fullscreen' : 'Włącz lub wyłącz pełny ekran'} aria-pressed={DA}><IH57Icon kind="full" /></button>
@@ -2510,9 +2581,9 @@ function IH53Showcase({
       }), (0, IH57JSX.jsxs)("span", {
         className: "ih57-tile-copy",
         children: [(0, IH57JSX.jsx)("strong", {
-          children: e ? `Ideas need
-people.` : `Pomys\u0142 potrzebuje
-ludzi.`
+          children: e ? `Projects and people.
+Meet on IdeaHire.` : `Projekty i ludzie.
+Poznaj IdeaHire.`
         }), (0, IH57JSX.jsxs)("span", {
           children: [e ? "Watch fullscreen" : "Obejrzyj na ca\u0142y ekran", (0, IH57JSX.jsx)("i", {
             "aria-hidden": "true",
@@ -3056,11 +3127,10 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
               Dla zlecających
             </span>
 
-            <h2>Masz coś do zrobienia?</h2>
+            <h2>{ih53English ? "Hire for a specific task." : "Zleć konkretną pracę."}</h2>
 
             <p>
-              Znajdź osobę, która ma odpowiednie umiejętności
-              i może zająć się Twoim projektem.
+              {ih53English ? "Explore portfolios, choose a professional and agree on the scope." : "Sprawdź portfolio, wybierz wykonawcę i ustal zakres prac."}
             </p>
 
             <Link
@@ -3076,11 +3146,10 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
               Dla wykonawców
             </span>
 
-            <h2>Masz coś do zaoferowania?</h2>
+            <h2>{ih53English ? "Find your next project." : "Znajdź zlecenie dla siebie."}</h2>
 
             <p>
-              Pokaż swoje umiejętności, znajdź interesujące
-              projekty i rozwijaj swoje portfolio.
+              {ih53English ? "Add your work to your profile and explore projects in your field." : "Dodaj swoje prace do profilu i sprawdź projekty w Twojej dziedzinie."}
             </p>
 
             <Link
@@ -3090,14 +3159,19 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
               Znajdź zlecenia 
             </Link>
           </div>
+          {import.meta.env.VITE_LUCYNA_ENABLED !== "false" && <div className="ih65-assistant-invitation">
+            <span className="ih65-assistant-sign"><LucynaSymbol/></span>
+            <div><span className="section-label">Lucyna AI / IdeaHire</span><h3>{ih53English ? "Refine your brief with Lucyna." : "Dopracuj opis z Lucyną."}</h3><p>{ih53English ? "Help with project briefs, message drafts and finding projects." : "Pomaga opisać zlecenie, przygotować wiadomość i znaleźć projekty."}</p></div>
+            <Link to="/lucyna" data-no-route-transition="true" onClick={requestLucynaDock}>{ih53English ? "Meet Lucyna AI" : "Poznaj Lucynę AI"} <span aria-hidden="true">↗</span></Link>
+          </div>}
         </section>
 
         <section className="final-cta home-reveal">
           <span className="section-label">IdeaHire</span>
 
           <h2 className="final-cta-title">
-            <span>Twój następny projekt</span>
-            <span>zaczyna się tutaj.</span>
+            <span>{ih53English ? "Join IdeaHire." : "Dołącz do IdeaHire."}</span>
+            <span>{ih53English ? "Hire or find work." : "Zlecaj lub realizuj."}</span>
           </h2>
 
           <Link
@@ -3115,7 +3189,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
         <div>
           <BrandLogo className="logo logo-clean" />
 
-          <p>Prosto. Szybko. Skutecznie.</p>
+          <p>{ih53English ? "Projects, services and professionals." : "Zlecenia, usługi i wykonawcy."}</p>
         </div>
 
         <div className="footer-links">

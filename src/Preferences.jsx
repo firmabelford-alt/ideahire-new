@@ -933,7 +933,7 @@ const EXACT_TRANSLATIONS = Object.freeze({
   "Odrzucić to zgłoszenie? Wykonawca otrzyma informację, że jego zgłoszenie nie zostało zaakceptowane.": "Reject this application? The contractor will be informed that the application was not accepted.",
   "Nie udało się odrzucić zgłoszenia. Odśwież stronę i spróbuj ponownie.": "The application could not be rejected. Refresh the page and try again.",
   "Nie udało się odrzucić zgłoszenia.": "The application could not be rejected.",
-  "Nieprawidłowy adres e-mail lub hasło. Jeśli nie pamiętasz hasła, użyj opcji resetowania poniżej.": "Incorrect email address or password. If you do not remember your password, use the reset option below.",
+  "Nieprawidłowy adres e-mail lub hasło. Jeśli nie pamiętasz hasła, wybierz „Nie pamiętasz hasła?”.": "Incorrect email address or password. Select ‘Forgot your password?’ to reset it.",
   "Adres e-mail nie został jeszcze potwierdzony. Otwórz wiadomość rejestracyjną i potwierdź konto.": "The email address has not been confirmed yet. Open the registration email and confirm your account.",
   "Nie udało się połączyć z serwerem logowania. Sprawdź internet i spróbuj ponownie.": "Could not connect to the sign-in server. Check your internet connection and try again.",
   "/12. Naciśnij Enter lub przecinek, aby szybko dodać pozycję.": "/12. Press Enter or a comma to quickly add an item.",

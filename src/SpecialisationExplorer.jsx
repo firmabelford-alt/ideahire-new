@@ -235,8 +235,14 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
     if (!target) return;
     target.focus({ preventScroll: true });
     const bounds = target.getBoundingClientRect();
-    // Scroll only after an explicit step change, and only if its focus is offscreen.
-    if (bounds.top < 88 || bounds.bottom > window.innerHeight - 32) {
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (pending === "detail") {
+      const header = document.getElementById("ih63-home-header");
+      const offset = Math.max(72, header?.getBoundingClientRect().height || 0) + 20;
+      // Keep the back action visible; the content wrapper itself does not animate.
+      const panel = document.getElementById("ih63-explorer-content") || target;
+      window.scrollTo({ top: Math.max(0, window.scrollY + panel.getBoundingClientRect().top - offset), behavior: reduced ? "auto" : "smooth" });
+    } else if (bounds.top < 88 || bounds.bottom > window.innerHeight - 32) {
       target.scrollIntoView({ block: "nearest", behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     }
   }, [active]);
@@ -326,14 +332,17 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
         </div>}
       </div> : selected ? <div className="ih63-stage ih63-detail" key={selected.value}>
         <button className="ih63-back" type="button" onClick={backToFields}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4m5-5-5 5 5 5"/></svg>{en ? "All fields" : "Wszystkie dziedziny"}</button>
-        <h3 ref={detailTitle} className="ih63-detail-title" tabIndex={-1}>{label(selected)}</h3>
-        <p className="ih63-field-intro">{en ? EN_INTROS[selected.value] : details[selected.value]?.summary}</p>
+        <div className="ih65-field-header" data-tone={groups.indexOf(selected) % 4}>
+          <span className="ih65-field-caption">{en ? "Your field" : "Wybrana dziedzina"}</span>
+          <h3 ref={detailTitle} className="ih63-detail-title" tabIndex={-1}>{label(selected)}</h3>
+          <p className="ih63-field-intro">{en ? EN_INTROS[selected.value] : details[selected.value]?.summary}</p>
+        </div>
         {services(all.filter(item => item.group.value === selected.value))}
         <Link className="ih63-field-all" to={categoryUrl(selected.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<span aria-hidden="true">↗</span></Link>
       </div> : <div className="ih63-stage" key="fields">
         <ul className="ih63-field-list">
           {groups.map((group, index) => <li key={group.value}>
-            <button type="button" className="ih63-field-choice" ref={node => node ? fieldButtons.current.set(group.value, node) : fieldButtons.current.delete(group.value)}
+            <button type="button" className="ih63-field-choice" data-tone={index % 4} ref={node => node ? fieldButtons.current.set(group.value, node) : fieldButtons.current.delete(group.value)}
               onClick={() => chooseField(group.value)} onKeyDown={event => moveField(event, index)}>
               <span className="ih63-field-copy"><strong>{label(group)}</strong><small>{(group.subcategories || []).length} {en ? "services" : "usług"}</small></span>
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg>

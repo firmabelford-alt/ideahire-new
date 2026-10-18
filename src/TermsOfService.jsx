@@ -4,6 +4,7 @@ import { BrandSignature } from "./Brand";
 import {useSitePreferences} from "./Preferences";
 import LucynaPrivacy from "./LucynaPrivacy";
 import { Link } from "react-router-dom";
+import { useRegistrationDocumentReturn } from "./AuthFlow";
 
 /*
  * IdeaHire — komplet dokumentów prawnych w jednym pliku.
@@ -163,6 +164,7 @@ __LEGAL__ :is(a,button,summary,[tabindex]):focus-visible {outline:3px solid var(
 `.replaceAll("__LEGAL__","#root".repeat(13)+" .ih53-legal-page");
 
 function LegalDocument({ kind, html }) {
+  const registrationReturn = useRegistrationDocumentReturn();
   const en=useSitePreferences().language==="en";
   useLayoutEffect(()=>{document.body.classList.add("ih53-legal");let frame=0;if(window.location.hash)frame=requestAnimationFrame(()=>{try{document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({block:"start"});}catch{}});return()=>{cancelAnimationFrame(frame);document.body.classList.remove("ih53-legal");};},[kind]);
   const labels = DOCUMENT_LABELS[kind] || DOCUMENT_LABELS.terms;
@@ -193,7 +195,7 @@ function LegalDocument({ kind, html }) {
   function jump(event){const link=event.target.closest?.('a[href^="#"]');if(!link)return;let id;try{id=decodeURIComponent(link.getAttribute('href').slice(1));}catch{return;}const target=document.getElementById(id);if(!target)return;event.preventDefault();const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;target.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});const detail=link.closest('details');if(detail)detail.open=false;}
 
   return (
-    <main onClick={jump} className={`cookie-policy-page legal-document-page ih53-legal-page legal-document-${kind}`} data-no-translate="true">
+    <main onClick={jump} className={`cookie-policy-page legal-document-page ih53-legal-page legal-document-${kind}`} data-no-translate="true" data-preserve-router-state="true">
       <style>{IH53_LEGAL_STYLES}</style>
       <div className="cookie-policy-shell legal-document-shell">
         <nav className="cookie-policy-nav" aria-label="Nawigacja dokumentów IdeaHire">
@@ -205,8 +207,8 @@ function LegalDocument({ kind, html }) {
             <button type="button" onClick={() => window.print()}>
               {en?"Print / save PDF":"Drukuj / zapisz PDF"}
             </button>
-            <Link className="cookie-policy-back" to="/">
-               {en?"Back to IdeaHire":"Wróć na stronę"}
+            <Link className="cookie-policy-back" to={registrationReturn.to} state={registrationReturn.state}>
+               {registrationReturn.returning ? (en ? "Back to registration" : "Wróć do rejestracji") : (en ? "Back to IdeaHire" : "Wróć na stronę")}
             </Link>
           </div>
         </nav>
@@ -233,13 +235,13 @@ function LegalDocument({ kind, html }) {
         </aside>
 
         <nav className="legal-document-tabs" aria-label="Dokumenty prawne">
-          <Link className={kind === "terms" ? "is-active" : ""} to="/regulamin">
+          <Link className={kind === "terms" ? "is-active" : ""} to="/regulamin" state={registrationReturn.state}>
             {en?"Terms":"Regulamin"}
           </Link>
-          <Link className={kind === "privacy" ? "is-active" : ""} to="/polityka-prywatnosci">
+          <Link className={kind === "privacy" ? "is-active" : ""} to="/polityka-prywatnosci" state={registrationReturn.state}>
             {en?"Privacy / GDPR":"Prywatność / RODO"}
           </Link>
-          <Link className={kind === "cookies" ? "is-active" : ""} to="/polityka-cookies">
+          <Link className={kind === "cookies" ? "is-active" : ""} to="/polityka-cookies" state={registrationReturn.state}>
             Cookies
           </Link>
         </nav>
@@ -252,9 +254,9 @@ function LegalDocument({ kind, html }) {
         <footer className="cookie-policy-footer legal-document-footer">
           <Link to="/">IdeaHire</Link>
           <nav aria-label="Pozostałe dokumenty">
-            <Link to="/regulamin">{en?"Terms":"Regulamin"}</Link>
-            <Link to="/polityka-prywatnosci">{en?"Privacy policy":"Polityka prywatności"}</Link>
-            <Link to="/polityka-cookies">{en?"Cookie policy":"Polityka cookies"}</Link>
+            <Link to="/regulamin" state={registrationReturn.state}>{en?"Terms":"Regulamin"}</Link>
+            <Link to="/polityka-prywatnosci" state={registrationReturn.state}>{en?"Privacy policy":"Polityka prywatności"}</Link>
+            <Link to="/polityka-cookies" state={registrationReturn.state}>{en?"Cookie policy":"Polityka cookies"}</Link>
           </nav>
           <span>© 2026</span>
         </footer>

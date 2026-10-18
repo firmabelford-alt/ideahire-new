@@ -75,3 +75,8 @@
 @keyframes ih64-dock-enter { from { opacity:0; translate:0 6px; } to { opacity:1; translate:0 0; } }
 @media (max-width:360px) { #ih64-lucyna .lu-starter-grid { grid-template-columns:minmax(0,1fr)!important; } }
 @media (prefers-reduced-motion:reduce) { #ih64-lucyna .ih64-dock-window { animation:none; } }
+/* P65 — a dialogue symbol instead of a profile initial. */
+#ih64-lucyna .ih64-dock-open>span { border:1px solid var(--v-line); border-radius:12px; background:var(--v-soft); color:var(--v-accent); }
+#ih64-lucyna .ih65-lucyna-symbol { display:block; width:27px; height:27px; fill:none; stroke:currentColor; stroke-width:2; }
+#ih64-lucyna .ih64-dock-handle>svg.ih65-lucyna-symbol { width:28px; height:28px; color:var(--v-accent); stroke:currentColor; stroke-width:2; }
+#ih64-lucyna .ih64-dock-return>svg.ih65-lucyna-symbol { width:22px; height:22px; color:var(--v-accent); }

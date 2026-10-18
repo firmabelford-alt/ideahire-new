@@ -69,6 +69,7 @@ import {
 } from "./PrivateWork";
 import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction, profileInquiryToJob, localProjectDate } from "./ServiceMarketplace";
 import LucynaDock, { canShowLucynaDock, requestLucynaDock } from "./LucynaDock";
+import { useGoogleAuth, GooglePendingNotice, RegistrationDraftProvider, useRegistrationDraft, RegistrationDocumentLink, LoginOpening, announceLoginSuccess } from "./AuthFlow";
 
 // P30: odrębny moduł. VITE_LUCYNA_ENABLED=false ukrywa wejścia i wyłącza trasę.
 const LUCYNA_VISIBLE = import.meta.env.VITE_LUCYNA_ENABLED !== "false";
@@ -949,9 +950,8 @@ function getOAuthErrorFromLocation(location) {
     hashParams.get("error_description") ||
     "";
 
-  return description
-    ? decodeURIComponent(description.replace(/\+/g, " "))
-    : "";
+  // URLSearchParams already decoded the value, including literal percent signs.
+  return description;
 }
 
 function GoogleLogo() {
@@ -5728,14 +5728,15 @@ function Login() {
   const [loading, setLoading] =
     useState(false);
 
-  const [googleLoading, setGoogleLoading] =
-    useState(false);
-
   const [message, setMessage] =
     useState("");
 
   const [success, setSuccess] =
     useState(false);
+
+  const { pending: googleLoading, start: startGoogleAuth, cancel: cancelGoogleAuth } = useGoogleAuth(supabase, error => {
+    setMessage(`Nie udało się zalogować przez Google: ${error?.message || "Spróbuj ponownie."}`);
+  });
 
   useEffect(() => {
     const oauthError = getOAuthErrorFromLocation(location);
@@ -5773,6 +5774,7 @@ function Login() {
   ]);
 
   function switchToReset() {
+    cancelGoogleAuth();
     setMode("reset");
     setMessage("");
     setSuccess(false);
@@ -5791,6 +5793,7 @@ function Login() {
     event.preventDefault();
 
     if (loading) return;
+    cancelGoogleAuth();
 
     setMessage("");
     setSuccess(false);
@@ -5833,6 +5836,7 @@ function Login() {
        * chronioną. Zapobiega to pętli login -> konto -> login na wolniejszych
        * urządzeniach i przy opóźnionym zdarzeniu SIGNED_IN.
        */
+      announceLoginSuccess();
       adoptSession(
         data.session
       );
@@ -5860,38 +5864,11 @@ function Login() {
 
   async function handleGoogleLogin() {
     if (loading || googleLoading) return;
-
     setMessage("");
     setSuccess(false);
-    setGoogleLoading(true);
-
-    try {
-      const redirectUrl = new URL(
-        "/login",
-        window.location.origin
-      );
-
-      redirectUrl.searchParams.set(
-        "oauth",
-        "google"
-      );
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: redirectUrl.toString(),
-        },
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      setMessage(
-        `Nie udało się zalogować przez Google: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-      setGoogleLoading(false);
-    }
+    const redirectUrl = new URL("/login", window.location.origin);
+    redirectUrl.searchParams.set("oauth", "google");
+    await startGoogleAuth(redirectUrl.toString());
   }
 
   async function handlePasswordReset(
@@ -6079,6 +6056,7 @@ function Login() {
             onClick={handleGoogleLogin}
             loading={googleLoading}
           />
+          <GooglePendingNotice pending={googleLoading} onCancel={() => { cancelGoogleAuth(); document.getElementById("ih65-login-email")?.focus(); }} />
 
           <p className="google-auth-notice">
             Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta.
@@ -6099,6 +6077,7 @@ function Login() {
             Adres e-mail
 
             <input
+              id="ih65-login-email"
               type="email"
               value={email}
               onChange={(event) =>
@@ -6150,7 +6129,7 @@ function Login() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading || googleLoading}
+            disabled={loading}
           >
             {loading
               ? "Logowanie..."
@@ -6634,51 +6613,71 @@ function Register() {
     loading: authLoading,
   } = useAuth();
 
+  const { draft, saveDraft } = useRegistrationDraft();
+  const initialDraft = useRef(draft).current;
+
   const [name, setName] =
-    useState("");
+    useState(initialDraft?.name || "");
 
   const [email, setEmail] =
-    useState("");
+    useState(initialDraft?.email || "");
 
   const [password, setPassword] =
-    useState("");
+    useState(initialDraft?.password || "");
 
   const [birthDate, setBirthDate] =
-    useState("");
+    useState(initialDraft?.birthDate || "");
 
   const [usagePreference, setUsagePreference] =
-    useState("");
+    useState(initialDraft?.usagePreference || "");
 
   const [ageNoticeAcknowledged, setAgeNoticeAcknowledged] =
-    useState(false);
+    useState(initialDraft?.ageNoticeAcknowledged === true);
 
   const [privacyNoticeAcknowledged, setPrivacyNoticeAcknowledged] =
-    useState(false);
+    useState(initialDraft?.privacyNoticeAcknowledged === true);
 
   const [termsAccepted, setTermsAccepted] =
-    useState(false);
+    useState(initialDraft?.termsAccepted === true);
 
   const [loading, setLoading] =
-    useState(false);
-
-  const [googleLoading, setGoogleLoading] =
     useState(false);
 
   const [message, setMessage] =
     useState("");
 
+  const { pending: googleLoading, start: startGoogleAuth, cancel: cancelGoogleAuth } = useGoogleAuth(supabase, error => {
+    setMessage(`Nie udało się kontynuować przez Google: ${error?.message || "Spróbuj ponownie."}`);
+  });
   const location = useLocation();
-  const [registrationStage, setRegistrationStage] = useState("role");
+  const [registrationStage, setRegistrationStage] = useState(initialDraft?.stage === "account" ? "account" : "role");
   const [confirmationEmail, setConfirmationEmail] = useState("");
   const registrationRequest = useRef(false);
   const formTitleRef = useRef(null);
   const errorRef = useRef(null);
-
+  const returnPoint = useRef(initialDraft?.returnPosition || null);
+  const registrationSnapshot = { name, email, password, birthDate, usagePreference,
+    ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, stage: registrationStage };
   useEffect(() => {
+    saveDraft(previous => confirmationEmail ? null : { ...previous, ...registrationSnapshot });
+  }, [name, email, password, birthDate, usagePreference, ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, registrationStage, confirmationEmail, saveDraft]);
+
+  useLayoutEffect(() => {
     if (registrationStage !== "account") return;
-    window.scrollTo({ top: 0, behavior: "instant" });
-    formTitleRef.current?.focus({ preventScroll: true });
-  }, [registrationStage]);
+    const frame = requestAnimationFrame(() => {
+      const point = returnPoint.current;
+      if (point) {
+        window.scrollTo({ top: point.scrollY, behavior: "instant" });
+        document.getElementById(point.focusId)?.focus({ preventScroll: true });
+        returnPoint.current = null;
+        saveDraft(previous => previous ? { ...previous, returnPosition: null } : previous);
+      } else {
+        window.scrollTo({ top: 0, behavior: "instant" });
+        formTitleRef.current?.focus({ preventScroll: true });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [registrationStage, saveDraft]);
 
   useEffect(() => {
     if (message && registrationStage === "account") {
@@ -6704,45 +6703,12 @@ function Register() {
 
   async function handleGoogleRegister() {
     if (loading || googleLoading) return;
-
     setMessage("");
-
-    if (!usagePreference) {
-      setMessage("Wybierz, jak chcesz korzystać z IdeaHire.");
-      return;
-    }
-
-    setGoogleLoading(true);
-
-    try {
-      rememberUsagePreference();
-
-      const redirectUrl = new URL(
-        "/register",
-        window.location.origin
-      );
-
-      redirectUrl.searchParams.set(
-        "oauth",
-        "google"
-      );
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: redirectUrl.toString(),
-        },
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      setMessage(
-        `Nie udało się kontynuować przez Google: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-      setGoogleLoading(false);
-    }
+    if (!usagePreference) { setMessage("Wybierz, jak chcesz korzystać z IdeaHire."); return; }
+    rememberUsagePreference();
+    const redirectUrl = new URL("/register", window.location.origin);
+    redirectUrl.searchParams.set("oauth", "google");
+    await startGoogleAuth(redirectUrl.toString());
   }
 
   async function handleRegister(
@@ -6750,7 +6716,8 @@ function Register() {
   ) {
     event.preventDefault();
 
-    if (loading || googleLoading || registrationRequest.current) return;
+    if (loading || registrationRequest.current) return;
+    cancelGoogleAuth();
 
     setMessage("");
 
@@ -6913,7 +6880,7 @@ function Register() {
 
         <div className="ih59-registration-selection">
           <div><small>Krok 2 z 2 · Twój kierunek</small><strong>{getDiscoveryUsageLabel(usagePreference)}</strong></div>
-          <button type="button" disabled={loading || googleLoading} onClick={() => { setRegistrationStage("role"); setMessage(""); }}>Zmień wybór</button>
+          <button type="button" disabled={loading} onClick={() => { cancelGoogleAuth(); setRegistrationStage("role"); setMessage(""); }}>Zmień wybór</button>
         </div>
 
         <div className="auth-provider-section">
@@ -6921,6 +6888,7 @@ function Register() {
             onClick={handleGoogleRegister}
             loading={googleLoading}
           />
+          <GooglePendingNotice pending={googleLoading} onCancel={() => { cancelGoogleAuth(); document.getElementById("ih65-register-email")?.focus(); }} />
 
           <p className="google-auth-notice">
             Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta.
@@ -6937,7 +6905,7 @@ function Register() {
         <form
           className="auth-form"
           onSubmit={handleRegister}
-          aria-busy={loading || googleLoading}
+          aria-busy={loading}
         >
           <label>
             Imię / nazwa
@@ -6960,6 +6928,7 @@ function Register() {
             Adres e-mail
 
             <input
+              id="ih65-register-email"
               type="email"
               value={email}
               onChange={(event) =>
@@ -7069,9 +7038,9 @@ function Register() {
               </label>
               <small>
                 Dokument wyjaśnia, jak IdeaHire przetwarza i chroni dane. {" "}
-                <Link to="/polityka-prywatnosci" target="_blank">
+                <RegistrationDocumentLink to="/polityka-prywatnosci" id="ih65-register-privacy" snapshot={registrationSnapshot}>
                   Otwórz Politykę prywatności
-                </Link>
+                </RegistrationDocumentLink>
               </small>
             </div>
           </div>
@@ -7093,9 +7062,9 @@ function Register() {
               </label>
               <small>
                 Akceptacja Regulaminu jest wymagana do utworzenia konta. {" "}
-                <Link to="/regulamin" target="_blank" rel="noreferrer">
+                <RegistrationDocumentLink to="/regulamin" id="ih65-register-terms" snapshot={registrationSnapshot}>
                   Otwórz Regulamin — wersja 0.9
-                </Link>
+                </RegistrationDocumentLink>
               </small>
             </div>
           </div>
@@ -7109,7 +7078,7 @@ function Register() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading || googleLoading}
+            disabled={loading}
           >
             {loading
               ? "Tworzenie konta..."
@@ -31253,6 +31222,7 @@ function SmoothRouteTransitions() {
       if (
         !anchor ||
         anchor.hasAttribute("download") ||
+        anchor.closest("[data-preserve-router-state]") ||
         anchor.hasAttribute("data-no-route-transition")
       ) {
         return;
@@ -31446,6 +31416,8 @@ function Router() {
           <AccountRestrictionProvider>
             <AgeAccessProvider>
             <DiscoveryPreferencesProvider>
+            <RegistrationDraftProvider>
+            <LoginOpening />
             <LucynaDockHost />
             <Sorts />
 
@@ -31857,6 +31829,7 @@ function Router() {
             }
           />
         </Routes>
+            </RegistrationDraftProvider>
             </DiscoveryPreferencesProvider>
             </AgeAccessProvider>
           </AccountRestrictionProvider>

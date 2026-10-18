@@ -55,7 +55,7 @@ export function getLoginErrorMessage(error) {
     code === "invalid_credentials" ||
     normalizedMessage.includes("invalid login credentials")
   ) {
-    return "Nieprawidłowy adres e-mail lub hasło. Jeśli nie pamiętasz hasła, użyj opcji resetowania poniżej.";
+    return "Nieprawidłowy adres e-mail lub hasło. Jeśli nie pamiętasz hasła, wybierz „Nie pamiętasz hasła?”.";
   }
 
   if (

@@ -60,7 +60,7 @@ test("turns Supabase login errors into useful Polish messages", () => {
       code: "invalid_credentials",
       message: "Invalid login credentials",
     }),
-    "Nieprawidłowy adres e-mail lub hasło. Jeśli nie pamiętasz hasła, użyj opcji resetowania poniżej."
+    "Nieprawidłowy adres e-mail lub hasło. Jeśli nie pamiętasz hasła, wybierz „Nie pamiętasz hasła?”."
   );
 
   assert.match(
