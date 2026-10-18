@@ -196,7 +196,7 @@ export function normaliseSpecialisation(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l").replace(/Ł/g, "L").toLowerCase();
 }
 
-/* P63 — two separate steps. No nested accordion or narrow side panel. */
+/* P66 — one expandable field at a time, with all choices kept in place. */
 export default function SpecialisationExplorer({ groups = [], details = {} }) {
   const { language } = useSitePreferences();
   const en = language === "en";
@@ -204,7 +204,6 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
   const [search, setSearch] = useState("");
   const searchInput = useRef(null);
   const fieldButtons = useRef(new Map());
-  const detailTitle = useRef(null);
   const focusAfterChange = useRef(null);
   const label = item => en
     ? EN_FIELDS[item.value] || translateUiText(item.label || item.value)
@@ -231,19 +230,15 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
     const pending = focusAfterChange.current;
     if (!pending) return;
     focusAfterChange.current = null;
-    const target = pending === "detail" ? detailTitle.current : fieldButtons.current.get(pending);
+    const target = fieldButtons.current.get(pending);
     if (!target) return;
     target.focus({ preventScroll: true });
     const bounds = target.getBoundingClientRect();
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (pending === "detail") {
-      const header = document.getElementById("ih63-home-header");
-      const offset = Math.max(72, header?.getBoundingClientRect().height || 0) + 20;
-      // Keep the back action visible; the content wrapper itself does not animate.
-      const panel = document.getElementById("ih63-explorer-content") || target;
-      window.scrollTo({ top: Math.max(0, window.scrollY + panel.getBoundingClientRect().top - offset), behavior: reduced ? "auto" : "smooth" });
-    } else if (bounds.top < 88 || bounds.bottom > window.innerHeight - 32) {
-      target.scrollIntoView({ block: "nearest", behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    const header = document.getElementById("ih63-home-header");
+    const offset = Math.max(72, header?.getBoundingClientRect().height || 0) + 16;
+    if (bounds.top < offset || (active && bounds.top > window.innerHeight * .55) || bounds.bottom > window.innerHeight - 32) {
+      window.scrollTo({ top: Math.max(0, window.scrollY + bounds.top - offset), behavior: reduced ? "auto" : "smooth" });
     }
   }, [active]);
 
@@ -254,8 +249,8 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
     return "/jobs" + (params.size ? "?" + params : "");
   }
   function chooseField(value) {
-    focusAfterChange.current = "detail";
-    setActive(value);
+    focusAfterChange.current = value;
+    setActive(previous => previous === value ? null : value);
   }
   function backToFields() {
     focusAfterChange.current = active;
@@ -330,24 +325,31 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
           <p>{en ? "Try a shorter phrase or browse the fields." : "Spróbuj krótszej frazy albo przejrzyj dziedziny."}</p>
           <button type="button" onClick={clearSearch}>{en ? "Browse fields" : "Pokaż dziedziny"}</button>
         </div>}
-      </div> : selected ? <div className="ih63-stage ih63-detail" key={selected.value}>
-        <button className="ih63-back" type="button" onClick={backToFields}><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10H4m5-5-5 5 5 5"/></svg>{en ? "All fields" : "Wszystkie dziedziny"}</button>
-        <div className="ih65-field-header" data-tone={groups.indexOf(selected) % 4}>
-          <span className="ih65-field-caption">{en ? "Your field" : "Wybrana dziedzina"}</span>
-          <h3 ref={detailTitle} className="ih63-detail-title" tabIndex={-1}>{label(selected)}</h3>
-          <p className="ih63-field-intro">{en ? EN_INTROS[selected.value] : details[selected.value]?.summary}</p>
-        </div>
-        {services(all.filter(item => item.group.value === selected.value))}
-        <Link className="ih63-field-all" to={categoryUrl(selected.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<span aria-hidden="true">↗</span></Link>
       </div> : <div className="ih63-stage" key="fields">
         <ul className="ih63-field-list">
-          {groups.map((group, index) => <li key={group.value}>
-            <button type="button" className="ih63-field-choice" data-tone={index % 4} ref={node => node ? fieldButtons.current.set(group.value, node) : fieldButtons.current.delete(group.value)}
-              onClick={() => chooseField(group.value)} onKeyDown={event => moveField(event, index)}>
-              <span className="ih63-field-copy"><strong>{label(group)}</strong><small>{(group.subcategories || []).length} {en ? "services" : "usług"}</small></span>
-              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6"/></svg>
-            </button>
-          </li>)}
+          {groups.map((group, index) => {
+            const open = active === group.value, buttonId = `ih66-field-${index}`, panelId = `ih66-services-${index}`;
+            return <li className="ih66-field" key={group.value} data-open={open}>
+              <h3 className="ih66-field-title"><button id={buttonId} type="button" className="ih63-field-choice" ref={node => node ? fieldButtons.current.set(group.value, node) : fieldButtons.current.delete(group.value)}
+                aria-expanded={open} aria-controls={panelId} onClick={() => chooseField(group.value)} onKeyDown={event => moveField(event, index)}>
+                <span className="ih66-field-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <span className="ih63-field-copy"><strong>{label(group)}</strong><small>{(group.subcategories || []).length} {en ? "services" : "usług"}</small></span>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d={open ? "M4 10h12" : "M4 10h12M10 4v12"}/></svg>
+              </button></h3>
+              <div id={panelId} className="ih66-accordion-panel" role="region" aria-labelledby={buttonId} aria-hidden={!open} inert={open ? undefined : ""} data-open={open}>
+                <div className="ih66-panel-clip"><div className="ih63-detail">
+                  <div className="ih65-field-header">
+                    <span className="ih65-field-caption">{en ? "Choose a service" : "Wybierz usługę"}</span>
+                    <h4 className="ih63-detail-title">{label(group)}</h4>
+                    <p className="ih63-field-intro">{en ? EN_INTROS[group.value] : details[group.value]?.summary}</p>
+                  </div>
+                  {services(all.filter(item => item.group.value === group.value))}
+                  <div className="ih66-panel-actions"><Link className="ih63-field-all" to={categoryUrl(group.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<span aria-hidden="true">↗</span></Link>
+                    <button className="ih63-back" type="button" onClick={backToFields}>{en ? "Collapse field" : "Zwiń kategorię"}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 12 5-5 5 5"/></svg></button></div>
+                </div></div>
+              </div>
+            </li>;
+          })}
         </ul>
         {!groups.length && <p className="ih63-unavailable">{en ? "The service list is currently unavailable." : "Lista usług jest teraz niedostępna."}</p>}
       </div>}

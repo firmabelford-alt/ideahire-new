@@ -12,7 +12,6 @@ import "./App.css";
 import "./SitePolish.css";
 import "./HomeFinishing.css";
 import LucynaSymbol from "./LucynaSymbol";
-import { requestLucynaDock } from "./LucynaDock";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
 import { BrandSignature, BrandLogo } from "./Brand";
 import { useBrandReady } from "./BrandOpening";
@@ -2641,24 +2640,26 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
   const sample=job.preview===true||!ih53RealJob(job),amount=Number(job.budget),category=getCategoryLabel(job.category),label=en?translateUiText(category):category;
   const price=Number.isFinite(amount)&&amount>0?ih53Money(amount,en):(en?'To be agreed':'Do ustalenia');
   return <article className={'ih53-project-card'+(incoming?' is-incoming':'')} key={job.id} aria-hidden={incoming||undefined} inert={incoming?'':undefined} data-new={view.new}>
-   <div className="ih53-project-top"><IH53JobAuthor job={job} en={en} inactive={incoming}/><span className="ih59-project-category">{label}</span></div>
-   <h3 title={job.title}>{String(job.title||'').slice(0,160)}</h3><p>{String(job.description||(en?'Review the scope and requirements in the listing.':'Sprawdź zakres i wymagania w ogłoszeniu.')).slice(0,280)}</p>
-   <div className="ih53-project-bottom"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{copy.view} <span aria-hidden="true">↗</span></Link></div>
-   <small className="ih53-project-caption" title={label}>{sample?copy.sample:view.new?copy.new:copy.published}</small>
+   <div className="ih53-project-top"><IH53JobAuthor job={job} en={en} inactive={incoming}/></div>
+   <span className="ih59-project-category">{label}</span>
+   <div className="ih66-project-description"><h3 title={job.title}>{String(job.title||'').slice(0,160)}</h3><p>{String(job.description||(en?'Review the scope and requirements in the listing.':'Sprawdź zakres i wymagania w ogłoszeniu.')).slice(0,280)}</p></div>
+   {sample&&<small className="ih53-project-caption">{copy.sample}</small>}
+   <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true">↗</span></Link></div>
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
   <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
   <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
+    <div className="ih66-project-heading"><span>{view.new?copy.new:copy.published}</span><span className="ih66-project-count">{String(list.length?index+1:0).padStart(2,'0')}<span aria-hidden="true"> / </span>{String(list.length).padStart(2,'0')}</span></div>
     <div className="ih53-project-window" onPointerDown={e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};}} onPointerCancel={()=>{gesture.current=null;}} onPointerUp={e=>{const first=gesture.current;gesture.current=null;if(!first||view.next)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}>
      <div className="ih53-project-track" data-sliding={view.shift} onTransitionEnd={e=>{if(e.target===e.currentTarget&&e.propertyName==='transform')commit();}}>{active?renderCard(active):<div className="ih53-project-empty"><p>{copy.empty}</p><Link to="/jobs">{copy.jobs}</Link></div>}{view.next&&renderCard(view.next,true)}</div>
     </div>
-    <div className="ih53-project-controls"><span>{String(list.length?index+1:0).padStart(2,'0')} / {String(list.length).padStart(2,'0')}</span><small>{reduced?copy.still:copy.auto}</small><button type="button" className="ih53-project-pause" onClick={onPause} aria-label={paused?copy.play:copy.pause} aria-pressed={paused} disabled={reduced}><span aria-hidden="true">{paused?'▶':'Ⅱ'}</span></button></div>
+    {list.length>1&&<div className="ih66-project-progress" aria-hidden="true" data-transitioning={!!view.next}><span key={view.sequence}/></div>}
+    <div className="ih53-project-controls"><small>{stopped?copy.still:copy.auto}</small><button type="button" className="ih53-project-pause" onClick={onPause} aria-label={paused?copy.play:copy.pause} aria-pressed={paused} disabled={reduced}><span aria-hidden="true">{paused?'▶':'Ⅱ'}</span></button></div>
     <div className="ih53-project-status" aria-live="polite">{pending&&<button type="button" onClick={()=>show(pending.job,true)}>{copy.pending}</button>}</div>
    </div>
   </div>
-  <div className="ih53-finale-fee"><strong>{copy.fee} {IDEA_HIRE_PUBLIC_OFFER.percent.toLocaleString(en?'en-GB':'pl-PL')}%</strong><span>{en?'min. PLN 20 · max. PLN 229':'min. 20 zł · maks. 229 zł'}</span><p>{copy.terms}</p></div>
  </div>;
 }
 
@@ -3159,19 +3160,15 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
               Znajdź zlecenia 
             </Link>
           </div>
-          {import.meta.env.VITE_LUCYNA_ENABLED !== "false" && <div className="ih65-assistant-invitation">
-            <span className="ih65-assistant-sign"><LucynaSymbol/></span>
-            <div><span className="section-label">Lucyna AI / IdeaHire</span><h3>{ih53English ? "Refine your brief with Lucyna." : "Dopracuj opis z Lucyną."}</h3><p>{ih53English ? "Help with project briefs, message drafts and finding projects." : "Pomaga opisać zlecenie, przygotować wiadomość i znaleźć projekty."}</p></div>
-            <Link to="/lucyna" data-no-route-transition="true" onClick={requestLucynaDock}>{ih53English ? "Meet Lucyna AI" : "Poznaj Lucynę AI"} <span aria-hidden="true">↗</span></Link>
-          </div>}
+
         </section>
 
         <section className="final-cta home-reveal">
           <span className="section-label">IdeaHire</span>
 
           <h2 className="final-cta-title">
-            <span>{ih53English ? "Join IdeaHire." : "Dołącz do IdeaHire."}</span>
-            <span>{ih53English ? "Hire or find work." : "Zlecaj lub realizuj."}</span>
+            <span>{ih53English ? "Your next project" : "Twój następny projekt"}</span>
+            <span>{ih53English ? "starts here." : "zaczyna się tutaj."}</span>
           </h2>
 
           <Link
