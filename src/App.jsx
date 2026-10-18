@@ -1,3 +1,4 @@
+/* P61 — a precise trace background and the shared IdeaHire identity. */
 /* P60 — service catalogue, visible wipe background and browsing access. */
 /* P59 — floating light field, typographic categories, bounded calculator. */
 /* IdeaHire | P58 | Katalog specjalizacji, spokojne tło, pełne przyciski i film bez dolnego panelu | Pełny plik src/App.jsx */
@@ -8,6 +9,8 @@ import * as IH57JSX from "react/jsx-runtime";
 import { createPortal } from "react-dom";
 import "./App.css";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
+import { BrandSignature, BrandLogo, drawBrandSignature } from "./Brand";
+import { useBrandReady } from "./BrandOpening";
 import { IDEA_HIRE_PUBLIC_OFFER, MarketIcon, helpCenterHref } from "./MarketUI";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "./supabase";
@@ -440,7 +443,7 @@ function ih43Transition(c,l,p,phase){
 function ih43Ui(c,l,p,s,phase){
   const bg=phase.shot.bg||"ink",surface=bg==="paper"?p.paper:bg==="accent"?p.accent:bg==="secondary"?p.secondary:p.ink,ink=ih43Readable(surface,p.ink,p.paper),outline=ink===p.ink||ink==="#000000"?"rgba(20,20,20,.35)":"rgba(245,245,235,.45)";
   const language=s.english?IH43_FILM.en:IH43_FILM.pl;
-  const brandSize=l.mobile?19:22;ih43Text(c,"IdeaHire",l.pad,52,brandSize,ink,800);
+  drawBrandSignature(c,l.pad,26,l.mobile?26:30,ink);
   const progress=phase.cycle/IH43_FILM.period;c.fillStyle=outline;c.fillRect(l.pad,68,l.w-l.pad*2,1);c.fillStyle=ink;c.fillRect(l.pad,68,(l.w-l.pad*2)*progress,2);
   const icon=(index,type)=>{
     const x=l.toolbarX+index*52,y=l.toolbarY;c.save();if(s.reduced)c.globalAlpha=.4;ih43Box(c,x,y,44,44,null,22,outline);c.translate(x+22,y+22);c.strokeStyle=ink;c.lineWidth=1.5;c.lineCap="round";
@@ -564,6 +567,7 @@ function ih43Reduced(){
 /* Każdy wariant jest alternatywą całego pliku App.jsx. Trasy, płatności i dalsza strona pozostają w części P40. */
 export function IdeaHireCinematicHero({jobs=[]}){
   const site=useSitePreferences();
+  const brandReady=useBrandReady();
   const english=site.language==="en",classic=site.template==="classic";
   const copy=english?IH43_FILM.en:IH43_FILM.pl;
   const [reduced,setReduced]=useState(ih43Reduced);
@@ -575,7 +579,7 @@ export function IdeaHireCinematicHero({jobs=[]}){
   const [welcomed,setWelcomed]=useState(ih43Reduced);
   const [scene,setScene]=useState(()=>ih43Reduced()?IH43_FILM.shots.length-1:0);
   const rootRef=useRef(null),canvasRef=useRef(null),engineRef=useRef(null),alive=useRef(false),soundBusy=useRef(false);
-  const motion=useRef({time:0,paused:false,finished:false,reduced,english,classic,offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
+  const motion=useRef({time:0,paused:!brandReady,finished:false,reduced,english,classic,offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
   const finale=scene===IH43_FILM.shots.length-1;
   const labels=english?{
     region:"IdeaHire — "+IH43_FILM.name,
@@ -594,12 +598,12 @@ export function IdeaHireCinematicHero({jobs=[]}){
     return()=>media.removeEventListener?.("change",change);
   },[]);
   useLayoutEffect(()=>{
-    Object.assign(motion.current,{reduced,english,classic,paused,offer:IDEA_HIRE_PUBLIC_OFFER});
-    IH53_MOTION.paused=paused||reduced;window.dispatchEvent(new CustomEvent("ih53-motion",{detail:{paused:IH53_MOTION.paused}}));
+    Object.assign(motion.current,{reduced,english,classic,paused:paused||!brandReady,offer:IDEA_HIRE_PUBLIC_OFFER});
+    IH53_MOTION.paused=paused||reduced||!brandReady;window.dispatchEvent(new CustomEvent("ih53-motion",{detail:{paused:IH53_MOTION.paused}}));
     if(reduced){motion.current.finished=true;setWelcomed(true);setFinished(true);}
     if(reduced){setSound(false);engineRef.current?.mute();}
     engineRef.current?.wake();
-  },[reduced,english,classic,paused]);
+  },[reduced,english,classic,paused,brandReady]);
   useEffect(()=>{
     alive.current=true;
     const engine=ih43Start(canvasRef.current,rootRef.current,motion,update=>{
@@ -1126,16 +1130,13 @@ __IH58__ :is(.section,.ih5-category-showcase,.split-section,.footer) {background
 __IH58__ > .ih53-backdrop {display:none!important;}
 __IH58__ .footer {border-radius:0!important;backdrop-filter:none!important;transform:none!important;translate:none!important;rotate:none!important;clip-path:none!important;}
 __IH58__ .ih53-jobs-finale {position:relative!important;isolation:isolate!important;}
-__IH58__ .ih53-jobs-finale > :not(.ih60-wipe-field) {position:relative;z-index:1;}
-__IH58__ .ih60-wipe-field {display:block!important;position:absolute!important;inset:0!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;}
-__IH58__ .ih60-wipe-field > i {position:absolute;display:block;top:-30%;left:-30%;width:22%;height:160%;background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--v-ink) 6%,transparent) 16%,color-mix(in srgb,var(--v-accent) 11%,transparent) 70%,transparent 100%);border-right:1px solid color-mix(in srgb,var(--v-ink) 9%,transparent);transform:translate3d(-130%,0,0) skewX(-18deg);animation:ih60-erase-band 17s cubic-bezier(.3,0,.7,1) infinite;will-change:transform;}
-__IH58__ .ih60-wipe-field > i:nth-child(2) {width:15%;animation-duration:21s;animation-delay:-8s;}
-__IH58__ .ih60-wipe-field > i:nth-child(3) {width:28%;animation-duration:24s;animation-delay:-14s;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--v-ink) 7%,transparent) 30%,transparent);}
-__IH58__ .ih60-wipe-field > i:nth-child(4) {width:12%;animation-duration:19s;animation-delay:-4s;}
-__IH58__ .ih60-wipe-field > i:nth-child(5) {width:18%;animation-duration:23s;animation-delay:-19s;}
-__IH58__ .ih60-wipe-field[data-paused=true] > * {animation-play-state:paused!important;}
-@keyframes ih60-erase-band {0%{transform:translate3d(-130%,0,0) skewX(-18deg);opacity:0;}8%{opacity:1;}88%{opacity:1;}100%{transform:translate3d(950%,0,0) skewX(-18deg);opacity:0;}}
-__IH58__ .ih59-category-number {font:500 10px/1.4 Inter,Arial,sans-serif!important;font-variant-numeric:tabular-nums!important;color:inherit!important;opacity:.6!important;}
+__IH58__ .ih53-jobs-finale > :not(.ih61-trace-field) {position:relative;z-index:1;}
+__IH58__ .ih61-trace-field {display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;z-index:0!important;pointer-events:none!important;overflow:hidden!important;contain:paint;background:none!important;filter:none!important;}
+__IH58__ .ih61-trace-field path {fill:none!important;stroke:var(--v-ink)!important;stroke-width:1!important;vector-effect:non-scaling-stroke;stroke-linecap:butt!important;opacity:.10;filter:none!important;}
+__IH58__ .ih61-trace-field .ih61-trace-run {stroke:var(--v-ink)!important;stroke-dasharray:86 2000;stroke-dashoffset:90;opacity:.28;animation:ih61-trace 14s linear infinite;}
+__IH58__ .ih61-trace-field .ih61-trace-run:last-child {animation-duration:19s;animation-delay:-7s;stroke-dasharray:56 2000;}
+__IH58__ .ih61-trace-field[data-paused=true] .ih61-trace-run {animation-play-state:paused!important;}
+@keyframes ih61-trace {to{stroke-dashoffset:-2000;}}
 __IH58__ .ih59-project-category {display:block!important;max-width:45%!important;flex:0 1 auto!important;width:auto!important;height:auto!important;padding:6px 0 6px 12px!important;border:0!important;border-left:1px solid var(--v-line)!important;border-radius:0!important;background:none!important;color:var(--v-muted)!important;font:500 10px/1.5 Inter,Arial,sans-serif!important;text-align:right!important;white-space:normal!important;overflow-wrap:anywhere!important;}
 __IH58__ .ih53-project-top {align-items:flex-start!important;gap:16px!important;}
 __IH58__ .ih53-calculator .ih59-budget-help {display:block!important;margin:10px 0!important;color:var(--v-muted)!important;font:400 11px/1.6 Inter,Arial,sans-serif!important;}
@@ -1248,7 +1249,7 @@ __IH58_FILM__ .ih58-film-progress::before,__IH58_FILM__ .ih58-film-progress::aft
  __IH58__ .ih59-project-category {max-width:46%!important;font-size:9px!important;}
 }
 @media(prefers-reduced-motion:reduce) {
- __IH58__ .ih60-wipe-field > *,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
+ __IH58__ .ih61-trace-field .ih61-trace-run,__IH58__ .ih58-category-lines > i,__IH58__ .ih58-specialisation,__IH58__ .ih58-category-title {animation:none!important;transition:none!important;translate:none!important;}
 }
 `.replaceAll("__IH58__", "#root".repeat(26) + " .ih53-home").replaceAll("__IH58_FILM__", "body " + "#ih57-cinema".repeat(6));
 
@@ -1977,17 +1978,9 @@ function IH57Icon({
   });
 }
 function IH57Wordmark() {
-  return (0, IH57JSX.jsxs)("span", {
-    className: "ih57-brand",
-    children: [(0, IH57JSX.jsxs)("span", {
-      className: "ih57-sign",
-      "aria-hidden": "true",
-      children: [(0, IH57JSX.jsx)("i", {}), (0, IH57JSX.jsx)("i", {}), (0, IH57JSX.jsx)("i", {}), (0, IH57JSX.jsx)("i", {})]
-    }), (0, IH57JSX.jsx)("b", {
-      children: "IdeaHire"
-    })]
-  });
+  return <BrandSignature className="ih57-brand" />;
 }
+
 function useIH57Portrait() {
   let [A, e] = (0, IH57React.useState)(() => typeof window < "u" && window.innerHeight > window.innerWidth * 1.2);
   return (0, IH57React.useEffect)(() => {
@@ -2583,7 +2576,7 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
-  <div className="ih60-wipe-field" aria-hidden="true" data-paused={paused||reduced||hidden||!visible}><i/><i/><i/><i/><i/></div>
+  <svg className="ih61-trace-field" viewBox="0 0 1440 720" preserveAspectRatio="none" aria-hidden="true" focusable="false" data-paused={paused||reduced||hidden||!visible}><path d="M-80 100H940L976 118H1520M-80 612H398L434 630H1520"/><path className="ih61-trace-run" d="M-80 100H940L976 118H1520"/><path className="ih61-trace-run" d="M-80 612H398L434 630H1520"/></svg>
   <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
   <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
@@ -2962,7 +2955,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
             mobileMenuButtonRef.current?.focus({ preventScroll: true });
           }
         }}>
-        <Link className="logo logo-clean" to="/" aria-label="IdeaHire — strona główna">Idea<span>Hire</span></Link>
+        <BrandLogo className="logo logo-clean" />
 
         <nav className="ih53-primary-nav" aria-label={ih53English?"Main shortcuts":"Główne skróty"} onClick={(event)=>{if(event.target?.closest?.("a"))setMobileMenuOpen(false);}}>
           <a href="#how-it-works">{ih53English?"Explore IdeaHire":"Poznaj IdeaHire"}</a><a href="#categories">{ih53English?"Categories":"Kategorie"}</a><a href="#for-users">{ih53English?"For you":"Dla Ciebie"}</a>
@@ -3139,9 +3132,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
       <footer className="footer home-reveal">
         <div>
-          <Link className="logo logo-clean" to="/">
-            Idea<span>Hire</span>
-          </Link>
+          <BrandLogo className="logo logo-clean" />
 
           <p>Prosto. Szybko. Skutecznie.</p>
         </div>

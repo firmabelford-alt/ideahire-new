@@ -1,5 +1,6 @@
 /* P53 — pełny plik src/TermsOfService.jsx | Dawna forma, spis treści, dokumenty zachowane. */
 import React, {useLayoutEffect} from "react";
+import { BrandSignature } from "./Brand";
 import {useSitePreferences} from "./Preferences";
 import LucynaPrivacy from "./LucynaPrivacy";
 import { Link } from "react-router-dom";
@@ -197,7 +198,7 @@ function LegalDocument({ kind, html }) {
       <div className="cookie-policy-shell legal-document-shell">
         <nav className="cookie-policy-nav" aria-label="Nawigacja dokumentów IdeaHire">
           <Link className="cookie-policy-logo" to="/" aria-label="IdeaHire — strona główna">
-            Idea<span>Hire</span>
+            <BrandSignature />
           </Link>
 
           <div className="legal-document-nav-actions">

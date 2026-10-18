@@ -3,31 +3,13 @@ import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "reac
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { useSitePreferences } from "./Preferences";
+import { BrandLogo } from "./Brand";
 
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
 export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 5.5, minimum: 20, maximum: 229, orderMinimum: 1, orderLimit: 10000 });
 
 export function IdeaHireLogo({ className = "logo", to = "/" }) {
-  const [cycle, setCycle] = useState(0);
-  const [active, setActive] = useState(false);
-  const timer = useRef(null);
-  function play() {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    window.clearTimeout(timer.current);
-    setCycle((value) => value + 1);
-    setActive(true);
-    timer.current = window.setTimeout(() => setActive(false), 1050);
-  }
-  useEffect(() => { play(); return () => window.clearTimeout(timer.current); }, []);
-  return (
-    <Link className={`${className} ih6-logo`} to={to} aria-label="IdeaHire — strona główna"
-      onPointerEnter={(event) => { if (event.pointerType === "mouse") play(); }} onFocus={play} onClick={play}>
-      <span className="ih6-logo-word" key={cycle} data-active={active} aria-hidden="true">
-        {Array.from("IdeaHire").map((letter, index) => <span className={`ih6-logo-letter${index > 3 ? " is-hire" : ""}`} key={index} style={{ "--ih6-letter": index }}>{letter}</span>)}
-        {active && <span className="ih6-logo-pixels">{[0, 1, 2, 3].map((index) => <i key={index} style={{ "--ih6-pixel": index }} />)}</span>}
-      </span>
-    </Link>
-  );
+  return <BrandLogo className={className} to={to} />;
 }
 
 /* P40 — Splot: jeden język kwadratów dla strony i centrum konta. */

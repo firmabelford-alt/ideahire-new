@@ -34,6 +34,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import { BrandSignature } from "./Brand";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
@@ -1914,7 +1915,7 @@ function DiscoveryOnboarding({
 
         <header className="discovery-onboarding-header">
           <Link className="logo" to="/" tabIndex={-1}>
-            Idea<span>Hire</span>
+            <BrandSignature />
           </Link>
 
           <div className="discovery-step-count" aria-live="polite">
@@ -5287,7 +5288,7 @@ function AccountNavbar() {
           aria-label="Przejdź do statusu konta"
         >
           <span className="logo">
-            Idea<span>Hire</span>
+            <BrandSignature />
           </span>
           <span className="restricted-navbar-badge">
             {isRestricted
@@ -5630,7 +5631,7 @@ function AdminNavbar() {
     >
       <Link className="admin-navbar-brand" to="/admin">
         <span className="logo">
-          Idea<span>Hire</span>
+          <BrandSignature />
         </span>
         <span className="admin-navbar-label">Administracja</span>
       </Link>
@@ -5962,7 +5963,7 @@ function Login() {
             className="logo"
             to="/"
           >
-            Idea<span>Hire</span>
+            <BrandSignature />
           </Link>
 
           <div className="auth-header">
@@ -6054,7 +6055,7 @@ function Login() {
           className="logo"
           to="/"
         >
-          Idea<span>Hire</span>
+          <BrandSignature />
         </Link>
 
         <div className="auth-header">
@@ -6507,7 +6508,7 @@ function ResetPassword() {
           className="logo"
           to="/"
         >
-          Idea<span>Hire</span>
+          <BrandSignature />
         </Link>
 
         <div className="auth-header">
@@ -6889,7 +6890,7 @@ function Register() {
           className="logo"
           to="/"
         >
-          Idea<span>Hire</span>
+          <BrandSignature />
         </Link>
 
         <div className="ih10-registration-intro" aria-hidden="true"><i /><i /><i /><i /></div>
@@ -20452,6 +20453,8 @@ function AmbientBackground() {
       window.cancelAnimationFrame(frame);
     };
   }, [pathname]);
+
+  if (pathname === "/") return null;
 
   return createPortal(
     <div className="ih13-background" ref={layerRef} aria-hidden="true">
