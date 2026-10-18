@@ -81,7 +81,7 @@ function Icon({ name = "spark", ...props }) {
     copy: "M9 8h12v13H9ZM15 8V3H3v13h6",
     arrow: "M5 12h14m-6-6 6 6-6 6", check: "m5 12 4 4L19 6",
     shield: "m12 3 9 4v5c0 5-9 9-9 9s-9-4-9-9V7ZM8 12l3 3 5-6",
-    exit: "M15 3h6v18h-6M13 8l-4 4 4 4M3 12h14",
+    exit: "m12 5-7 7 7 7M5 12h14",
     download: "M12 3v12m-5-5 5 5 5-5M5 17v4h14v-4",
     trash: "M3 6h18M8 6V3h8v3M6 6l1 15h10l1-15M10 10v7M14 10v7",
   };
@@ -207,8 +207,9 @@ function Results({ mode, items, total }) {
   </div>;
 }
 
-export default function Lucyna({ supabase, user, Navbar }) {
-  const [params] = useSearchParams();
+export default function Lucyna({ supabase, user, Navbar, embedded = false, visible = true }) {
+  const [routeParams] = useSearchParams();
+  const params = useMemo(() => embedded ? new URLSearchParams() : routeParams, [embedded, routeParams]);
   const [conversations, setConversations] = useState(() => [newConversation()]);
   const [activeId, setActiveId] = useState(() => null);
   const active = useMemo(() => conversations.find(c => c.id === activeId) || conversations[0], [activeId, conversations]);
@@ -216,7 +217,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
   const [draft, setDraft] = useState(""); const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState({ loading: true, enabled: false, remaining: null });
   const [notice, setNotice] = useState(""); const [searching, setSearching] = useState(false);
-  const [mobile, setMobile] = useState(() => window.matchMedia("(max-width: 900px)").matches);
+  const [mobile, setMobile] = useState(() => embedded || window.matchMedia("(max-width: 900px)").matches);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false); const [infoOpen, setInfoOpen] = useState(false);
@@ -297,15 +298,18 @@ export default function Lucyna({ supabase, user, Navbar }) {
   },[params,memory.ready,user?.id,busy]);
   useEffect(() => {
     const query = window.matchMedia("(max-width: 900px)");
-    const update = () => { setMobile(query.matches); if (!query.matches) setHistoryOpen(false); };
+    const update = () => { setMobile(embedded || query.matches); if (!embedded && !query.matches) setHistoryOpen(false); };
     query.addEventListener("change", update); return () => query.removeEventListener("change", update);
-  }, []);
+  }, [embedded]);
+  useEffect(() => { if (!visible) { setHistoryOpen(false); setInfoOpen(false); } }, [visible]);
   useEffect(() => {
+    if (embedded) return;
     const bodyOverflow = document.body.style.overflow, htmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden"; document.documentElement.style.overflow = "hidden";
     return () => { document.body.style.overflow = bodyOverflow; document.documentElement.style.overflow = htmlOverflow; };
-  }, []);
+  }, [embedded]);
   useEffect(() => {
+    if (embedded) return;
     const viewport = window.visualViewport;
     let naturalHeight = viewport?.height || window.innerHeight; let previousWidth = window.innerWidth;
     const update = () => {
@@ -324,9 +328,9 @@ export default function Lucyna({ supabase, user, Navbar }) {
     document.addEventListener("focusin", update); document.addEventListener("focusout", update);
     return () => { viewport?.removeEventListener("scroll", update); viewport?.removeEventListener("resize", update); window.removeEventListener("resize", update);
       document.removeEventListener("focusin", update); document.removeEventListener("focusout", update); };
-  }, []);
+  }, [embedded]);
   useEffect(() => {
-    const panel = infoOpen ? infoRef.current : mobile && historyOpen ? sideRef.current : null;
+    const panel = !visible ? null : infoOpen ? infoRef.current : mobile && historyOpen ? sideRef.current : null;
     if (!panel) return;
     const before = document.activeElement; const first = panel.querySelector("button,a,input,select");
     first?.focus({ preventScroll: true });
@@ -340,8 +344,8 @@ export default function Lucyna({ supabase, user, Navbar }) {
       }
     };
     document.addEventListener("keydown", keyboard);
-    return () => { document.removeEventListener("keydown", keyboard); before?.isConnected && before.focus({ preventScroll: true }); };
-  }, [infoOpen, mobile, historyOpen]);
+    return () => { document.removeEventListener("keydown", keyboard); if (before?.isConnected && !pageRef.current?.closest("[hidden]")) before.focus({ preventScroll: true }); };
+  }, [infoOpen, mobile, historyOpen, visible]);
   useEffect(() => {
     if (!textareaRef.current) return;
     textareaRef.current.style.height = "auto";
@@ -571,7 +575,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
               <span>Twoje konto<small>{!memory.ready ? "Wczytuję ustawienia…" : memory.saving ? "Zapisuję rozmowę…" : memory.acknowledged && memory.historyEnabled ? "Historia zapisywana na koncie" : "Rozmowa w bieżącej sesji"}</small></span><Icon name="arrow" /></Link>
           </div>
         </aside>
-        <main className="lu-main" ref={mainRef} inert={mobile && historyOpen || infoOpen ? "" : undefined}>
+        <main className="lu-main" ref={mainRef} role={embedded ? "region" : undefined} aria-label={embedded ? "Rozmowa z Lucyną AI" : undefined} inert={mobile && historyOpen || infoOpen ? "" : undefined}>
           <header className="lu-chat-toolbar">
             <div className="lu-toolbar-identity">
               <button type="button" className="lu-icon-button lu-history-toggle" ref={historyTriggerRef}
@@ -585,7 +589,7 @@ export default function Lucyna({ supabase, user, Navbar }) {
                 aria-label="Narzędzia Lucyny AI" aria-expanded={toolsOpen} aria-controls="lucyna-tools" onClick={() => setToolsOpen(value => !value)}><Icon name="spark" /><span>Narzędzia</span></button>
               <button className="lu-icon-button lu-toolbar-info" type="button" ref={infoTriggerRef}
                 aria-label="Jak działa Lucyna AI i prywatność" onClick={() => setInfoOpen(true)}><Icon name="shield" /></button>
-              <Link to="/account" className="lu-icon-button" aria-label="Wróć do IdeaHire"><Icon name="exit" /></Link>
+              {!embedded && <Link to="/account" className="lu-icon-button" aria-label="Wróć do IdeaHire"><Icon name="exit" /></Link>}
             </div>
           </header>
           {toolsOpen && <div id="lucyna-tools" className="lu-mode-bar" aria-label="Zadanie Lucyny AI">

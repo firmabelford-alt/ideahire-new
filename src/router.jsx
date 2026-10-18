@@ -68,6 +68,7 @@ import {
   WorkDeliveryPanel,
 } from "./PrivateWork";
 import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction, profileInquiryToJob, localProjectDate } from "./ServiceMarketplace";
+import LucynaDock, { canShowLucynaDock, requestLucynaDock } from "./LucynaDock";
 
 // P30: odrębny moduł. VITE_LUCYNA_ENABLED=false ukrywa wejścia i wyłącza trasę.
 const LUCYNA_VISIBLE = import.meta.env.VITE_LUCYNA_ENABLED !== "false";
@@ -4679,12 +4680,6 @@ function AccountNavbar() {
 
   useEffect(() => {
     setAccountMenuOpen(false);
-    const nav = accountNavigationRef.current;
-    const activeLink = nav?.querySelector(".is-active");
-    if (!nav || !activeLink || nav.scrollWidth <= nav.clientWidth) return;
-    const left = activeLink.offsetLeft - nav.offsetLeft;
-    if (left < nav.scrollLeft) nav.scrollLeft = Math.max(0, left - 8);
-    else if (left + activeLink.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = left + activeLink.offsetWidth - nav.clientWidth + 8;
   }, [accountLocation.pathname]);
 
   const userName =
@@ -5357,7 +5352,7 @@ function AccountNavbar() {
           aria-label="Wróć na stronę główną"
           title="Wróć na stronę główną"
         >
-          
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h14" /></svg>
         </Link>
 
         <IdeaHireLogo className="logo" />
@@ -5374,8 +5369,8 @@ function AccountNavbar() {
           <NavLink key={item.to} to={item.to} end={item.end} style={{ "--ih-nav-order": index }}
             className={({ isActive }) => `ih-nav-item${(item.market ? marketplaceActive : isActive) ? " is-active" : ""}`}
             data-lucyna={item.lucyna ? "" : undefined}
+            onClick={item.lucyna ? requestLucynaDock : undefined}
             aria-current={item.market && marketplaceActive ? "page" : undefined}>
-            <span className="ih-nav-pixels" aria-hidden="true"><i /><i /><i /><i /></span>
             <span className="ih-nav-label">{item.label}</span>
             {item.notice && <span className="notification-dot messages-nav-dot" aria-label="Nowa rozmowa lub wiadomość" />}
           </NavLink>
@@ -5427,7 +5422,7 @@ function AccountNavbar() {
         >
           <summary
             className="account-mini"
-            aria-label="Otwórz menu konta"
+            aria-label={accountMenuOpen ? "Zamknij menu konta" : "Otwórz menu konta"}
             aria-expanded={accountMenuOpen}
             aria-controls="ih18-account-menu"
             onClick={(event) => { event.preventDefault(); setAccountMenuOpen(value => !value); }}
@@ -5475,6 +5470,7 @@ function AccountNavbar() {
               className="account-menu-mobile-nav"
               aria-label="Nawigacja mobilna"
             >
+              <NavLink to="/" onClick={closeAccountMenu}>Strona główna</NavLink>
               <NavLink to="/jobs" onClick={closeAccountMenu}>
                 Zlecenia
               </NavLink>
@@ -5492,6 +5488,9 @@ function AccountNavbar() {
                     <span className="notification-dot" />
                   )}
                 </NavLink>
+              )}
+              {!hasRestrictedAgeAccess && (
+                <NavLink to="/notifications" onClick={closeAccountMenu}>Powiadomienia{hasNotifications && <span className="notification-dot" />}</NavLink>
               )}
               {!hasRestrictedAgeAccess && (
                 <NavLink to="/find-talent" onClick={closeAccountMenu}>
@@ -5573,7 +5572,7 @@ function AccountNavbar() {
             </NavLink>
 
             {LUCYNA_VISIBLE && (
-              <NavLink to="/lucyna" onClick={closeAccountMenu}
+              <NavLink to="/lucyna" onClick={event => { closeAccountMenu(event); requestLucynaDock(event); }}
                 className={({ isActive }) => isActive ? "is-active" : ""}>
                 <MarketIcon kind="message" /><span>Lucyna AI</span>
               </NavLink>
@@ -31396,6 +31395,17 @@ function RouteScrollManager() {
    ROUTER
 ========================================================= */
 
+function LucynaDockHost() {
+  const { user, loading: authLoading } = useAuth();
+  const { isAdult, canTransact, loading: ageLoading, errorMessage: ageError } = useAgeAccess();
+  const { isRestricted, loading: restrictionLoading, errorMessage: restrictionError } = useAccountRestriction();
+  const { pathname } = useLocation();
+  if (!canShowLucynaDock({ enabled: LUCYNA_VISIBLE, userId: user?.id, authLoading, ageLoading, ageError,
+    isAdult, canTransact, restrictionLoading, restricted: isRestricted, restrictionError, pathname })) return null;
+  // A new owner receives a fresh window; drafts never survive a switch of account.
+  return <LucynaDock key={user.id} supabase={supabase} user={user} />;
+}
+
 function LucynaRoute() {
   const { user } = useAuth();
   if (!LUCYNA_VISIBLE) return <Navigate to="/account" replace />;
@@ -31436,6 +31446,7 @@ function Router() {
           <AccountRestrictionProvider>
             <AgeAccessProvider>
             <DiscoveryPreferencesProvider>
+            <LucynaDockHost />
             <Sorts />
 
         <DiscoveryOnboardingLayer />

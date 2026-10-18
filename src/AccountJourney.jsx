@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { BrandSignature } from "./Brand";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useSitePreferences } from "./Preferences";
@@ -123,12 +124,53 @@ export function RegistrationSentScreen({ email, onResend, helpUrl = "/help/index
 
 export function LimitedAccountNavigation({ name, initial, onLogout, helpUrl = "/help/index.html", showAssistant = true }) {
   const en = useSitePreferences().language === "en";
-  const location = useLocation(), menu = useRef(null);
+  const location = useLocation();
+  const trigger = useRef(null), menu = useRef(null);
+  const [open, setOpen] = useState(false);
   const links = [["/", en ? "Home" : "Strona główna"], ["/jobs", en ? "Projects" : "Zlecenia"], ["/services", en ? "Services" : "Usługi"], ["/freelancers", en ? "Freelancers" : "Freelancerzy"], ["/calendar", en ? "Calendar" : "Kalendarz"], ...(showAssistant ? [["/lucyna", "Lucyna AI"]] : []), ["/account", en ? "My account" : "Moje konto"]];
-  const close = () => menu.current?.removeAttribute("open");
-  useEffect(close, [location.pathname]);
-  const navLinks = () => links.map(([href, title]) => <NavLink to={href} end={href === "/" || href === "/account"} key={href} onClick={close} className={({ isActive }) => isActive ? "is-active" : ""}>{title}</NavLink>);
-  return <header id="ih60-browse-header" className="ih60-browse-header" data-no-translate="true"><Link className="ih60-browse-logo" to="/"><BrandSignature /></Link><nav className="ih60-browse-desktop" aria-label={en ? "Main navigation" : "Główna nawigacja"}>{navLinks()}</nav><Link className="ih60-browse-avatar" to="/account" aria-label={en ? `Account: ${name}` : `Konto: ${name}`}>{initial || "I"}</Link><details ref={menu} className="ih60-browse-menu" onKeyDown={event => { if (event.key === "Escape") { close(); menu.current?.querySelector("summary")?.focus(); } }}><summary aria-label={en ? "Open navigation menu" : "Otwórz menu nawigacji"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></summary><nav aria-label={en ? "Navigation and support" : "Nawigacja i pomoc"}>{navLinks()}<a href={helpUrl}>{en ? "Help centre" : "Centrum pomocy"}</a><button type="button" onClick={onLogout}>{en ? "Sign out" : "Wyloguj się"}</button></nav></details><button type="button" className="ih60-browse-logout" onClick={onLogout}>{en ? "Sign out" : "Wyloguj się"}</button></header>;
+  useEffect(() => setOpen(false), [location.pathname]);
+  useLayoutEffect(() => {
+    if (!open) return;
+    const viewport = window.visualViewport;
+    const place = () => {
+      const rect = trigger.current?.getBoundingClientRect();
+      if (!rect || !menu.current) return;
+      const width = viewport?.width || window.innerWidth, height = viewport?.height || window.innerHeight;
+      const x = viewport?.offsetLeft || 0, y = viewport?.offsetTop || 0;
+      const menuWidth = Math.min(340, width - 24);
+      const top = Math.max(y + 12, Math.min(rect.bottom + 8, y + height - 160));
+      Object.assign(menu.current.style, { top: `${top}px`, left: `${Math.max(x + 12, Math.min(rect.right - menuWidth, x + width - menuWidth - 12))}px`, width: `${menuWidth}px`, maxHeight: `${Math.max(80, y + height - top - 12)}px` });
+    };
+    place();
+    const frame = requestAnimationFrame(() => menu.current?.querySelector("a")?.focus({ preventScroll: true }));
+    const outside = event => { if (!trigger.current?.contains(event.target) && !menu.current?.contains(event.target)) setOpen(false); };
+    const keyboard = event => { if (event.key === "Escape") { event.preventDefault(); setOpen(false); trigger.current?.focus(); } };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", keyboard);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    viewport?.addEventListener("resize", place);
+    viewport?.addEventListener("scroll", place);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", keyboard);
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+      viewport?.removeEventListener("resize", place);
+      viewport?.removeEventListener("scroll", place);
+    };
+  }, [open]);
+  const navLinks = () => links.map(([href, title]) => <NavLink to={href} end={href === "/" || href === "/account"} key={href} onClick={() => setOpen(false)} className={({ isActive }) => isActive ? "is-active" : ""}>{title}</NavLink>);
+  return <header id="ih60-browse-header" className="ih60-browse-header" data-no-translate="true">
+    <div className="ih64-limited-brand"><Link className="ih64-home-back" to="/" aria-label={en ? "Back to home" : "Wróć na stronę główną"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-7 7 7 7M5 12h14"/></svg></Link><Link className="ih60-browse-logo" to="/"><BrandSignature /></Link></div>
+    <nav className="ih60-browse-desktop" aria-label={en ? "Main navigation" : "Główna nawigacja"}>{navLinks()}</nav>
+    <div className="ih64-limited-actions"><Link className="ih60-browse-avatar" to="/account" aria-label={en ? `Account: ${name}` : `Konto: ${name}`}>{initial || "I"}</Link>
+      <button ref={trigger} type="button" className="ih64-menu-toggle" aria-label={open ? (en ? "Close menu" : "Zamknij menu") : (en ? "Open menu" : "Otwórz menu")} aria-expanded={open} aria-controls="ih64-limited-menu" onClick={() => setOpen(value => !value)}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={open ? "M6 6l12 12M18 6 6 18" : "M4 6h16M4 12h16M4 18h16"}/></svg></button>
+      <button type="button" className="ih60-browse-logout" onClick={onLogout}>{en ? "Sign out" : "Wyloguj się"}</button>
+    </div>
+    {open && createPortal(<nav ref={menu} id="ih64-limited-menu" className="ih64-basic-menu" aria-label={en ? "Navigation and support" : "Nawigacja i pomoc"} data-no-translate="true">{navLinks()}<a href={helpUrl} referrerPolicy="no-referrer">{en ? "Help centre" : "Centrum pomocy"}</a><button type="button" onClick={() => { setOpen(false); onLogout(); }}>{en ? "Sign out" : "Wyloguj się"}</button></nav>, document.body)}
+  </header>;
 }
 
 export function LimitedAccountOverview({ fullAccessLabel, ageRestricted, settings, helpUrl = "/help/index.html", showAssistant = true }) {
