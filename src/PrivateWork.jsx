@@ -1,3 +1,4 @@
+/* P69 — dedicated materials library; storage and delivery operations preserved. */
 /* IdeaHire | Lucyna AI | P35 | Pełny PrivateWork z ProjectFilesPanel i integracją analizy. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -600,7 +601,49 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
   );
 }
 
+function WorkspaceFilesLibrary({
+  groups,
+  items,
+  counts,
+  signedUrls,
+  userId,
+  loading,
+  error,
+  onReport,
+  english
+}) {
+  const [filter, setFilter] = useState('all');
+  const t = (pl, en) => english ? en : pl;
+  const types = [['all', t('Wszystkie', 'All')], ['files', t('Pliki', 'Files')], ['images', t('Zdjęcia', 'Images')], ['links', t('Linki', 'Links')], ['texts', t('Tekst', 'Text')], ['access', t('Dostępy', 'Access')]];
+  const typeOf = item => ({
+    image: 'images',
+    link: 'links',
+    text: 'texts',
+    access: 'access'
+  })[item.item_type] || 'files';
+  const visible = groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => filter === 'all' || typeOf(item) === filter)
+  })).filter(group => group.items.length);
+  if (loading && !items.length) return <p className="ih68-loading" role="status">{t('Pobieranie materiałów…', 'Loading materials…')}</p>;
+  return <section className="ih69-material-library" aria-label={t('Biblioteka materiałów', 'Materials library')}>
+    {error && <p className="ih68-feedback" role="alert">{error}</p>}
+    {!!groups.length && <div className="ih69-library-toolbar"><span>{t('Elementy: ', 'Items: ')}<b>{items.length}</b></span><label><span className="ih68-sr-only">{t('Rodzaj materiałów', 'Material type')}</span><select value={filter} onChange={event => setFilter(event.target.value)}>{types.filter(([key]) => key === 'all' || counts[key] > 0 || key === filter).map(([key, label]) => <option key={key} value={key}>{label}{key !== 'all' ? ' (' + counts[key] + ')' : ''}</option>)}</select></label></div>}
+    {!visible.length ? <div className="ih69-material-empty"><svg viewBox="0 0 144 112" fill="none" aria-hidden="true" focusable="false"><rect x="50" y="13" width="57" height="75" rx="6" fill="currentColor" fillOpacity=".05" stroke="currentColor" strokeOpacity=".5" strokeWidth="1.5" /><path d="M63 32H93M63 43H86" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity=".45" /><path d="M24 47C24 43 27 40 31 40H57L65 49H116C120 49 123 52 122 56L115 94H30L24 47Z" fill="currentColor" fillOpacity=".08" stroke="currentColor" strokeWidth="1.5" /><path d="M67 65V83M58 74H76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg><h3>{groups.length ? t('Brak materiałów tego typu', 'No materials of this type') : t('Jeszcze bez materiałów', 'No materials yet')}</h3><p>{groups.length ? t('Wybierz inny rodzaj materiałów.', 'Choose a different material type.') : t('Dodane pliki i linki pojawią się tutaj. Możecie wrócić do nich w dowolnym momencie.', 'Files and links you share will appear here. You can return to them at any time.')}</p>{groups.length > 0 && <button type="button" className="ih68-text-link" onClick={() => setFilter('all')}>{t('Pokaż wszystkie', 'Show all')}</button>}</div> : <div className="ih69-material-batches">{visible.map(group => {
+        const own = group.senderId === userId;
+        return <article key={group.id} className="ih69-material-batch"><header><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" /><path d="M14 3v6h6M8 13h8M8 17h5" /></svg><strong>{own ? t('Dodane przez Ciebie', 'Shared by you') : t('Dodane przez drugą stronę', 'Shared by the other person')}</strong></span>{group.createdAt && <time dateTime={group.createdAt}>{new Date(group.createdAt).toLocaleString(english ? 'en-GB' : 'pl-PL', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</time>}</header><PrivateMessageMaterials items={group.items} signedUrls={signedUrls} ownMessage={own} onReport={onReport} /></article>;
+      })}</div>}
+  </section>;
+}
+
 export function ProjectFilesPanel({
+  workspace = false,
+  english = false,
   items = [],
   signedUrls = {},
   userId,
@@ -642,6 +685,7 @@ export function ProjectFilesPanel({
     { files: 0, images: 0, links: 0, texts: 0, access: 0 }
   );
 
+  if (workspace) return <WorkspaceFilesLibrary groups={groups} items={activeItems} counts={counts} signedUrls={signedUrls} userId={userId} loading={loading} error={error} onReport={onReport} english={english} />;
   if (loading && !items.length) {
     return <p className="project-files-state">Pobieranie prywatnych materiałów…</p>;
   }
@@ -706,6 +750,9 @@ export function ProjectFilesPanel({
 }
 
 export function PrivateSharePanel({
+  compact = false,
+  openRequest = false,
+  onOpenRequest,
   conversationId,
   userId,
   disabled,
@@ -715,6 +762,11 @@ export function PrivateSharePanel({
   onComplete,
 }) {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!openRequest || disabled) return;
+    setOpen(true);
+    onOpenRequest?.(false);
+  }, [openRequest, onOpenRequest, disabled]);
   const [mode, setMode] = useState("materials");
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState([]);
@@ -967,7 +1019,7 @@ export function PrivateSharePanel({
       <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled || busy}>
         <span aria-hidden="true">＋</span>
         <b>Dodaj materiały</b>
-        <small>Pliki, zdjęcia, linki lub gotowa praca</small>
+        {!compact && <small>Pliki, zdjęcia, linki lub gotowa praca</small>}
       </button>
       {open && createPortal((
         <div ref={backdropRef} className="private-work-share-backdrop ih9-share-dialog" role="presentation" onMouseDown={(event) => {

@@ -1,3 +1,4 @@
+/* P69 — coherent account pages and a touch-first project workspace. */
 /* P60 — useful onboarding, email actions and site browsing for limited accounts. */
 /* P59 — fullscreen onboarding, visible registration validation, limited account. */
 /* P47 — pełny plik src/router.jsx | Zmieniona wyłącznie karta szablonów. */
@@ -10076,7 +10077,7 @@ function Account() {
         <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
           <div className="ih6-account-content">
         <section className="account-tab-intro" aria-live="polite">
-          <button type="button" className="ih25-hub-back" onClick={returnToAccountHub}><MarketIcon kind="arrow" /><span>{accountEnglish ? "My account" : "Moje konto"}</span></button>
+          <button type="button" className="ih25-hub-back" onClick={returnToAccountHub}><WorkspaceIcon kind="back" /><span>{accountEnglish ? "My account" : "Moje konto"}</span></button>
           <div>
             <span className="section-label">
               {activeAccountSectionCopy.eyebrow}
@@ -21124,7 +21125,7 @@ function AgreementPanel({
 
   if (agreement?.status === "accepted") {
     return (
-      <details className="agreement-summary" open>
+      <details className="agreement-summary">
         <summary>
           <span className="agreement-status-icon">
             ✓
@@ -21175,7 +21176,7 @@ function AgreementPanel({
         <span>
           <strong>Warunki współpracy</strong>
           <small>
-            Czat jest aktywny · praca rusza po akceptacji i potwierdzeniu płatności
+            Zakres, cena i termin
           </small>
         </span>
         <span className="ih12-collapse-icon" aria-hidden="true"><MarketIcon kind={expanded ? "close" : "plus"} /></span>
@@ -21184,12 +21185,6 @@ function AgreementPanel({
       {expanded && (
       <section className="agreement-gate">
       <div className="agreement-gate-heading">
-        <span className="agreement-eyebrow">
-          Ustalenia przed rozpoczęciem
-        </span>
-
-        <h2>Ustalcie warunki współpracy</h2>
-
         <p>
           Najpierw zaakceptujcie tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.
         </p>
@@ -21917,137 +21912,30 @@ function ChatPaymentPanel({
   );
 }
 
-function ChatProjectPlan({ job, agreement }) {
-  const plan = hasCollaborationPlan(job?.collaboration_plan)
-    ? job.collaboration_plan
-    : null;
+function ChatProjectPlan({
+  job,
+  agreement
+}) {
+  const en = useSitePreferences().language === 'en';
+  const t = (pl, english) => en ? english : pl;
+  const plan = hasCollaborationPlan(job?.collaboration_plan) ? job.collaboration_plan : null;
   const milestones = cleanCollaborationList(plan?.milestones, 3, 160);
-  const completionCriteria = cleanCollaborationList(
-    plan?.completion_criteria,
-    3,
-    240
-  );
-  const requirements = Array.isArray(plan?.application_requirements)
-    ? plan.application_requirements
-        .map((value) =>
-          getJobOptionLabel(COLLABORATION_APPLICATION_REQUIREMENTS, value, "")
-        )
-        .filter(Boolean)
-    : [];
-
-  return (
-    <section className="chat-project-plan" aria-labelledby="chat-project-plan-title">
-      <header className="chat-project-plan-header">
-        <div>
-          <span className="section-label">Szczegóły zlecenia</span>
-          <h2 id="chat-project-plan-title">Zakres i szczegóły projektu</h2>
-          <p>
-            {agreement?.status === "accepted"
-              ? "Zakres, cena i termin pochodzą z zaakceptowanej wersji warunków. Pozostałe informacje dotyczą planu zlecenia."
-              : agreement ? "Poniżej widzicie aktualną propozycję i informacje ze zlecenia. Propozycja wymaga akceptacji obu stron."
-              : "To plan ze zlecenia lub zapytania. Ostateczne warunki uzgodnijcie i zaakceptujcie w formularzu współpracy."}
-          </p>
-        </div>
-        <span className={`chat-project-plan-status is-${agreement?.status || "draft"}`}>
-          {agreement?.status === "accepted" ? "Ustalenia zaakceptowane" : "Przed akceptacją"}
-        </span>
-      </header>
-
-      <div className="chat-project-plan-grid">
-        <article>
-          <span>Zakres projektu</span>
-          <p className="ih9-plan-scope">{agreement?.scope || job?.description || "Zakres do wspólnego ustalenia"}</p>
-        </article>
-        <article>
-          <span>Co zostanie przekazane</span>
-          <p>{agreement?.deliverables || job?.project_details?.deliverables || "Rezultat do wspólnego ustalenia"}</p>
-        </article>
-        <article>
-          <span>Wynagrodzenie wykonawcy</span>
-          <p>{agreement?.price_amount != null ? formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN") : Number(job?.budget) > 0 ? `${formatChatProjectBudget(job.budget)} (budżet zlecenia)` : "Cena do wspólnego ustalenia"}</p>
-
-        </article>
-        <article>
-          <span>Terminy</span>
-          <dl>
-            <div>
-              <dt>Planowany start</dt>
-              <dd>{formatChatProjectDate(job?.planned_start_date)}</dd>
-            </div>
-            <div>
-              <dt>Termin realizacji</dt>
-              <dd>{formatChatProjectDate(agreement?.deadline || job?.project_deadline)}</dd>
-            </div>
-          </dl>
-        </article>
-      </div>
-
-      {job?.project_details && (
-        <section className="ih17-project-brief" aria-labelledby="ih17-project-brief-title">
-          <h3 id="ih17-project-brief-title">Szczegóły zlecenia</h3>
-          <dl>
-            {job.project_details.deliverables && <div><dt>Oczekiwany rezultat</dt><dd>{job.project_details.deliverables}</dd></div>}
-            {job.project_details.delivery_format && <div><dt>Format przekazania</dt><dd>{job.project_details.delivery_format}</dd></div>}
-            {job.project_details.materials && <div><dt>Materiały od zleceniodawcy</dt><dd>{job.project_details.materials}</dd></div>}
-            {job.project_details.deadline && <div><dt>Termin z zapytania</dt><dd>{formatChatProjectDate(job.project_details.deadline)}</dd></div>}
-          </dl>
-        </section>
-      )}
-
-      {milestones.length > 0 && (
-        <section className="chat-project-plan-section">
-          <div className="chat-project-plan-section-title">
-            <span>01</span>
-            <div><h3>Etapy pracy</h3><p>Kolejność realizacji ustalona przez zleceniodawcę.</p></div>
-          </div>
-          <ol className="chat-project-plan-timeline">
-            {milestones.map((milestone, index) => (
-              <li key={`${milestone}-${index}`}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>{milestone}</strong>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      <section className="chat-project-plan-section">
-        <div className="chat-project-plan-section-title">
-          <span>02</span>
-          <div><h3>Komunikacja i poprawki</h3><p>Proste zasady ograniczające nieporozumienia.</p></div>
-        </div>
-        <dl className="chat-project-plan-facts">
-          <div><dt>Kontakt</dt><dd>{getJobOptionLabel(COLLABORATION_CONTACT_OPTIONS, plan?.contact_frequency)}</dd></div>
-          <div><dt>Informacja zwrotna</dt><dd>{getJobOptionLabel(COLLABORATION_FEEDBACK_OPTIONS, plan?.feedback_time)}</dd></div>
-          <div><dt>Rundy poprawek</dt><dd>{agreement?.revisions != null ? agreement.revisions : getJobOptionLabel(COLLABORATION_REVISION_OPTIONS, plan?.revision_rounds)}</dd></div>
-          <div><dt>Odbiór</dt><dd>{getJobOptionLabel(COLLABORATION_APPROVAL_OPTIONS, plan?.approval_mode)}</dd></div>
-        </dl>
-      </section>
-
-      {(completionCriteria.length > 0 || requirements.length > 0) && (
-        <section className="chat-project-plan-section">
-          <div className="chat-project-plan-section-title">
-            <span>03</span>
-            <div><h3>Warunki zakończenia</h3><p>Co powinno być sprawdzone przed odbiorem pracy.</p></div>
-          </div>
-          <div className="chat-project-plan-checklists">
-            {completionCriteria.length > 0 && (
-              <div><strong>Kryteria odbioru</strong><ul>{completionCriteria.map((item) => <li key={item}>{item}</li>)}</ul></div>
-            )}
-            {requirements.length > 0 && (
-              <div><strong>Wymagane informacje</strong><ul>{requirements.map((item) => <li key={item}>{item}</li>)}</ul></div>
-            )}
-          </div>
-        </section>
-      )}
-
-      <p className="chat-project-plan-note">
-        Plan porządkuje współpracę. Nie zastępuje wymaganej prawem formy
-        przeniesienia autorskich praw majątkowych ani licencji wyłącznej.
-      </p>
-    </section>
-  );
+  const completionCriteria = cleanCollaborationList(plan?.completion_criteria, 3, 240);
+  const requirements = Array.isArray(plan?.application_requirements) ? plan.application_requirements.map(value => getJobOptionLabel(COLLABORATION_APPLICATION_REQUIREMENTS, value, '')).filter(Boolean) : [];
+  const accepted = agreement?.status === 'accepted';
+  const facts = [[t('Kontakt', 'Contact'), getJobOptionLabel(COLLABORATION_CONTACT_OPTIONS, plan?.contact_frequency)], [t('Informacja zwrotna', 'Feedback'), getJobOptionLabel(COLLABORATION_FEEDBACK_OPTIONS, plan?.feedback_time)], [t('Rundy poprawek', 'Revision rounds'), agreement?.revisions != null ? agreement.revisions : getJobOptionLabel(COLLABORATION_REVISION_OPTIONS, plan?.revision_rounds)], [t('Odbiór pracy', 'Approval'), getJobOptionLabel(COLLABORATION_APPROVAL_OPTIONS, plan?.approval_mode)]];
+  return <section className="ih69-project-plan" aria-label={t('Plan i szczegóły zlecenia', 'Project plan and details')}>
+    <div className="ih69-plan-keyfacts"><div><span>{accepted ? t('Wynagrodzenie', 'Agreed price') : t('Proponowany budżet', 'Proposed budget')}</span><strong>{agreement?.price_amount != null ? formatPaymentMoney(agreement.price_amount, agreement.price_currency || 'PLN') : Number(job?.budget) > 0 ? formatChatProjectBudget(job.budget) : t('Do ustalenia', 'To be agreed')}</strong></div><div><span>{t('Termin realizacji', 'Deadline')}</span><strong>{formatChatProjectDate(agreement?.deadline || job?.project_deadline)}</strong></div></div>
+    <p className="ih69-plan-source">{accepted ? t('Cena, termin i zakres pochodzą z zaakceptowanych warunków.', 'Price, deadline and scope come from the accepted terms.') : agreement ? t('To aktualna propozycja. Warunki wymagają akceptacji obu stron.', 'This is the current proposal. Both parties need to accept the terms.') : t('Plan ze zlecenia lub zapytania. Ostateczne warunki ustalcie wspólnie.', 'The plan from the job or inquiry. Agree on the final terms together.')}</p>
+    <dl className="ih69-scope-list"><div><dt>{t('Zakres pracy', 'Scope')}</dt><dd>{agreement?.scope || job?.description || t('Zakres do wspólnego ustalenia', 'Scope to be agreed together')}</dd></div><div><dt>{t('Co zostanie przekazane', 'Deliverables')}</dt><dd>{agreement?.deliverables || job?.project_details?.deliverables || t('Rezultat do wspólnego ustalenia', 'Deliverables to be agreed together')}</dd></div></dl>
+    <section className="ih69-plan-block"><h3>{t('Szczegóły realizacji', 'Project details')}</h3><dl className="ih69-fact-list"><div><dt>{t('Planowany start', 'Planned start')}</dt><dd>{formatChatProjectDate(job?.planned_start_date)}</dd></div>{job?.project_details?.delivery_format && <div><dt>{t('Format przekazania', 'Delivery format')}</dt><dd>{job.project_details.delivery_format}</dd></div>}{job?.project_details?.materials && <div><dt>{t('Materiały od klienta', 'Client materials')}</dt><dd>{job.project_details.materials}</dd></div>}{job?.project_details?.deadline && <div><dt>{t('Termin z zapytania', 'Inquiry deadline')}</dt><dd>{formatChatProjectDate(job.project_details.deadline)}</dd></div>}{job?.project_details?.deliverables && job.project_details.deliverables !== (agreement?.deliverables || job.project_details.deliverables) && <div><dt>{t('Rezultat z zapytania', 'Inquiry deliverables')}</dt><dd>{job.project_details.deliverables}</dd></div>}</dl></section>
+    {milestones.length > 0 && <section className="ih69-plan-block"><h3>{t('Etapy pracy', 'Milestones')}</h3><ol className="ih69-plan-milestones">{milestones.map((item, index) => <li key={index}><span>{index + 1}</span><p>{item}</p></li>)}</ol></section>}
+    <section className="ih69-plan-block"><h3>{t('Kontakt i poprawki', 'Contact & revisions')}</h3><dl className="ih69-fact-list">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd className={value === 'Do ustalenia' ? 'is-pending' : ''}>{value === 'Do ustalenia' ? t('Do ustalenia', 'To be agreed') : value}</dd></div>)}</dl></section>
+    {(completionCriteria.length > 0 || requirements.length > 0) && <section className="ih69-plan-block"><h3>{t('Warunki zakończenia', 'Completion criteria')}</h3>{completionCriteria.length > 0 && <div className="ih69-plan-checklist"><h4>{t('Kryteria odbioru', 'Acceptance criteria')}</h4><ul>{completionCriteria.map(item => <li key={item}><WorkspaceIcon kind="check" /><span>{item}</span></li>)}</ul></div>}{requirements.length > 0 && <div className="ih69-plan-checklist"><h4>{t('Wymagane informacje', 'Required information')}</h4><ul>{requirements.map(item => <li key={item}><WorkspaceIcon kind="check" /><span>{item}</span></li>)}</ul></div>}</section>}
+    <details className="ih69-legal-note"><summary><WorkspaceIcon kind="lock" /><span>{t('Prawa autorskie', 'Copyright')}</span><WorkspaceIcon kind="down" /></summary><p>{t('Plan porządkuje współpracę. Nie zastępuje wymaganej prawem formy przeniesienia autorskich praw majątkowych ani licencji wyłącznej.', 'The plan records the collaboration. It does not replace the legally required form for a transfer of economic copyright or an exclusive licence.')}</p></details>
+  </section>;
 }
+
 
 function Chat() {
   const roomLocation = useLocation();
@@ -22119,15 +22007,20 @@ function Chat() {
 
   const [workspaceTab, setWorkspaceTab] =
     useState("conversation");
+  const [openMaterialDialog, setOpenMaterialDialog] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const workspaceFocusRef = useRef(null);
   const [planPinned, setPlanPinned] = useState(false);
-  useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); workspaceFocusRef.current = null; }, [id]);
+  useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); setOpenMaterialDialog(false); workspaceFocusRef.current = null; }, [id]);
   function openWorkspace(value) {
     setWorkspaceTab(value);
     setPlanPinned(false);
+    if (value !== "files") setOpenMaterialDialog(false);
     window.requestAnimationFrame(() => {
-      if (value === "conversation") composerRef.current?.focus({ preventScroll: true });
+      if (value === "conversation") {
+        if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
+        else document.getElementById("ih69-tab-conversation")?.focus({ preventScroll: true });
+      }
       else document.getElementById(`ih68-room-${value}`)?.focus({ preventScroll: true });
     });
   }
@@ -23207,8 +23100,9 @@ function Chat() {
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);if(messageViewportRef.current)messageViewportRef.current.scrollTop=messageViewportRef.current.scrollHeight;}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
-        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>openWorkspace('files')} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId}/>}
-      materials={<><PrivateSharePanel
+        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>{openWorkspace('files');setOpenMaterialDialog(true);}} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId}/>}
+      materials={<><div className="ih69-material-toolbar"><div><h2 id="ih68-materials-title">{roomCopy('Materiały','Materials')}</h2><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
+                      compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
                       conversationId={id}
                       userId={user?.id}
                       disabled={messagingBlocked || privateWork.loading}
@@ -23218,7 +23112,7 @@ function Chat() {
                       onComplete={async () => {
                         await Promise.all([privateWork.reload(), loadMessages()]);
                       }}
-                    />{paymentConfirmed&&<WorkDeliveryPanel
+                    /></div>{paymentConfirmed&&<WorkDeliveryPanel
                         deliveries={privateWork.deliveries}
                         events={privateWork.events}
                         conversation={conversation}
@@ -23231,6 +23125,7 @@ function Chat() {
                           privateWork.setReportTarget({ type, id: targetId })
                         }
                       />}<ProjectFilesPanel
+                      workspace english={roomEnglish}
                       items={privateWork.items}
                       signedUrls={privateWork.signedUrls}
                       userId={user?.id}
@@ -23239,7 +23134,7 @@ function Chat() {
                       onReport={(type, targetId) =>
                         privateWork.setReportTarget({ type, id: targetId })
                       }
-                    /></>}
+                    /><p className="ih69-material-privacy"><WorkspaceIcon kind="lock" />{roomCopy("Materiały są widoczne wyłącznie dla stron tej współpracy.","Materials are visible only to the people in this project.")}</p></>}
       plan={<><AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
@@ -23265,7 +23160,7 @@ function Chat() {
                       }}
                       onSubmit={handleAgreementSubmit}
                       onAccept={handleAgreementAccept}
-                    /><ChatProjectPlan job={jobDetails} agreement={agreement} />{!agreementsRequired && <section className="ih18-legacy-plan" aria-labelledby="ih18-legacy-plan-title">
+                    /><details className="ih69-project-plan-disclosure" open={!agreementsRequired}><summary><WorkspaceIcon kind="jobs" /><span>{roomCopy("Plan zlecenia","Project plan")}</span><WorkspaceIcon kind="down" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>{!agreementsRequired && <section className="ih18-legacy-plan ih69-legacy-note" aria-labelledby="ih18-legacy-plan-title">
                       <h3 id="ih18-legacy-plan-title">Ustalenia w starszej rozmowie</h3>
                       <p>W tej rozmowie nie można zaakceptować formalnych warunków. Aby uzgodnić zakres, cenę i termin, rozpocznij projekt z tym wykonawcą. Dotychczasowe wiadomości pozostaną dostępne.</p>
                       {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}
