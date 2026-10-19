@@ -1,21 +1,6 @@
-/* P70 — one task at a time, in the shared IdeaHire theme. */
+/* P71 — open workspace, direct navigation and readable correspondence. */
 @layer ih68Workspace {
-/* P69 — inbox, a full-width conversation, and dedicated project views. */
-body.ih68-workspace #root .ih68-mailbox { max-width: 1040px !important; }
-body.ih68-workspace #root .ih68-mailbox-list { margin: 0 !important; padding: 0 !important; border: 0 !important; background: var(--a-paper) !important; }
-body.ih68-workspace #root .ih68-mail-row { display: grid !important; grid-template-columns: 46px minmax(0,1fr) 18px !important; align-items: center !important; gap: 18px !important; width: 100% !important; margin: 0 !important; padding: 23px 24px !important; border: 0 !important; border-bottom: 1px solid var(--a-line) !important; border-radius: 0 !important; background: none !important; color: var(--a-ink) !important; text-decoration: none !important; box-shadow: none !important; transform: none !important; }
-body.ih68-workspace #root .ih68-mail-row:last-child { border-bottom: 0 !important; }
-body.ih68-workspace #root .ih68-mail-row:hover { background: var(--a-soft) !important; }
-body.ih68-workspace #root .ih68-mail-row.is-unread { background: color-mix(in srgb,var(--a-tint) 38%,var(--a-paper)) !important; }
-body.ih68-workspace #root .ih68-mail-person { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; margin: 0 0 4px !important; }
-body.ih68-workspace #root .ih68-mail-person>strong { display: block !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; color: var(--a-ink) !important; font: 600 15px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih68-mail-person>time { flex: none !important; white-space: nowrap !important; color: var(--a-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih68-mail-row.is-unread .ih68-mail-person>strong { font-weight: 750 !important; }
-body.ih68-workspace #root .ih68-mail-copy h2 { display: -webkit-box !important; -webkit-line-clamp: 1 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; color: var(--a-ink) !important; overflow-wrap: anywhere !important; font: 500 13px/1.6 Inter,system-ui,sans-serif !important; letter-spacing: 0 !important; }
-body.ih68-workspace #root .ih68-mail-copy>p { display: -webkit-box !important; -webkit-line-clamp: 1 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; overflow-wrap: anywhere !important; margin: 6px 0 0 !important; color: var(--a-muted) !important; font: 400 13px/1.65 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih68-mail-end { display: flex !important; align-items: center !important; justify-content: center !important; width: 18px !important; color: var(--a-muted) !important; }
-body.ih68-workspace #root .ih68-mail-end>svg { width: 17px !important; height: 17px !important; }
-body.ih68-workspace #root .ih68-mailbox-list>.ih68-start-empty { border: 0 !important; border-radius: 0 !important; }
+
 body.ih68-workspace { --ih7-bg: var(--a-bg) !important; --ih7-surface: var(--a-paper) !important; --ih7-soft: var(--a-soft) !important; --ih7-ink: var(--a-ink) !important; --ih7-muted: var(--a-muted) !important; --ih7-line: var(--a-line) !important; --ih7-accent: var(--a-accent) !important; --ih7-on-accent: var(--a-on) !important; }
 body.ih68-workspace[data-ih68-view="chat"] { overflow: hidden !important; }
 body.ih68-workspace #root .ih68-chat-root { min-height: 0 !important; }
@@ -267,14 +252,6 @@ body.ih68-workspace .private-work-form-actions button.is-primary { border-color:
   body.ih68-workspace #root .ih68-room-person h1 { font-size: 16px !important; }
 }
 @media(max-width:700px) {
-  body.ih68-workspace #root .ih68-mail-row { grid-template-columns: 40px minmax(0,1fr) 12px !important; gap: 12px !important; padding: 20px 16px !important; }
-  body.ih68-workspace #root .ih68-mail-row>.ih68-avatar { width: 40px !important; height: 40px !important; min-width: 40px !important; border-radius: 12px !important; font-size: 15px !important; }
-  body.ih68-workspace #root .ih68-mail-person>strong { font-size: 14px !important; }
-  body.ih68-workspace #root .ih68-mail-person>time { font-size: 10px !important; }
-  body.ih68-workspace #root .ih68-mail-copy h2 { font-size: 12px !important; -webkit-line-clamp: 2 !important; }
-  body.ih68-workspace #root .ih68-mail-copy>p { font-size: 12px !important; }
-  body.ih68-workspace #root .ih68-mail-end { width: 12px !important; }
-  body.ih68-workspace #root .ih68-mail-end>svg { width: 15px !important; height: 15px !important; }
   body.ih68-workspace #root .ih68-room-header-tools { gap: 3px !important; }
   body.ih68-workspace #root .ih68-thread { padding: 20px 16px 10px !important; scrollbar-gutter: auto !important; }
   body.ih68-workspace #root .ih68-day { margin-bottom: 20px !important; font-size: 10px !important; }
@@ -332,7 +309,6 @@ body.ih68-workspace .private-work-form-actions button.is-primary { border-color:
   body.ih68-workspace #root .ih68-room-page { padding-inline: 14px !important; }
   body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle { padding-inline: 10px !important; gap: 5px !important; }
   body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle>b { max-width: 74px !important; }
-  body.ih68-workspace #root .ih68-mail-row { gap: 10px !important; padding-inline: 13px !important; }
 }
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-room-header { min-height: 52px !important; padding-block: 5px !important; }
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-composer { padding-top: 8px !important; }
@@ -345,39 +321,6 @@ body.ih68-workspace #root .ih68-room.is-keyboard .ih68-thread-empty>.ih69-artwor
 @keyframes ih69-view-in { from { opacity: .5; } to { opacity: 1; } }
 
 /* One header, one conversation. The project is a separate, full-width view. */
-body.ih68-workspace #root .ih68-mailbox-list { overflow:hidden !important; border:1px solid var(--a-line) !important; border-radius:16px !important; }
-body.ih68-workspace #root .ih68-mail-row { min-height:124px !important; padding:25px 28px !important; gap:20px !important; }
-body.ih68-workspace #root .ih68-mail-person { margin-bottom:7px !important; }
-body.ih68-workspace #root .ih68-mail-person>strong { font-size:17px !important; }
-body.ih68-workspace #root .ih68-mail-person>time { font-size:12px !important; }
-body.ih68-workspace #root .ih68-mail-copy h2 { font-size:15px !important; }
-body.ih68-workspace #root .ih68-mail-copy>p { margin-top:8px !important; font-size:14px !important; }
-body.ih68-workspace #root .ih68-mailbox-list>.ih70-empty { border:0 !important; border-radius:0 !important; }
-body.ih68-workspace #root .ih70-room .ih68-room-header { min-height:86px !important; border-bottom:1px solid var(--a-line) !important; gap:16px !important; }
-body.ih68-workspace #root .ih70-room-context { display:block !important; margin:5px 0 0 !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--a-muted) !important; font:400 14px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih70-project-open { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:8px !important; flex:none !important; width:auto !important; min-height:46px !important; margin:0 !important; padding:11px 16px !important; border:1px solid var(--a-line) !important; border-radius:10px !important; background:var(--a-paper) !important; color:var(--a-ink) !important; font:550 14px/1.5 Inter,system-ui,sans-serif !important; box-shadow:none !important; cursor:pointer !important; }
-body.ih68-workspace #root .ih70-project-open>svg { width:18px !important; height:18px !important; }
-body.ih68-workspace #root .ih70-options-trigger { width:44px !important; height:44px !important; min-height:44px !important; border:0 !important; background:none !important; }
-body.ih68-workspace #root .ih70-project-page { padding-top:36px !important; }
-body.ih68-workspace #root .ih70-project-heading { margin-bottom:28px !important; }
-body.ih68-workspace #root .ih70-project-heading>p { margin:0 0 14px !important; color:var(--a-muted) !important; font:400 14px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih70-project-heading>p:empty { display:none !important; }
-body.ih68-workspace #root .ih70-project-heading>h2 { margin:0 !important; color:var(--a-ink) !important; font:650 28px/1.3 Inter,system-ui,sans-serif !important; letter-spacing:-.035em !important; overflow-wrap:anywhere !important; }
-body.ih68-workspace #root .ih70-project-price { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:12px 28px !important; margin:0 0 28px !important; padding:20px 0 !important; border-top:1px solid var(--a-line) !important; border-bottom:1px solid var(--a-line) !important; }
-body.ih68-workspace #root .ih70-project-price>span { color:var(--a-muted) !important; font:400 15px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih70-project-price>strong { color:var(--a-accent) !important; font:650 24px/1.3 Inter,system-ui,sans-serif !important; letter-spacing:-.02em !important; overflow-wrap:anywhere !important; }
-body.ih68-workspace #root .ih70-project-choices { display:flex !important; flex-direction:column !important; gap:16px !important; margin:0 0 28px !important; padding:0 !important; }
-body.ih68-workspace #root .ih70-project-choices .ih70-task-link { min-height:106px !important; padding:24px !important; }
-body.ih68-workspace #root .ih70-project-choices .ih70-task-copy>strong { font-size:20px !important; }
-body.ih68-workspace #root .ih70-project-brief { margin-top:0 !important; padding-top:4px !important; border-top:1px solid var(--a-line) !important; }
-body.ih68-workspace #root .ih70-project-brief>summary { display:flex !important; align-items:center !important; justify-content:space-between !important; gap:18px !important; min-height:60px !important; list-style:none !important; cursor:pointer !important; color:var(--a-ink) !important; font:500 15px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih70-project-brief>summary::-webkit-details-marker { display:none !important; }
-body.ih68-workspace #root .ih70-project-brief>summary>svg { width:18px !important; height:18px !important; flex:none !important; }
-body.ih68-workspace #root .ih70-project-brief[open]>summary>svg { transform:rotate(180deg) !important; }
-body.ih68-workspace #root .ih70-project-brief:not([open])>div { display:none !important; }
-body.ih68-workspace #root .ih70-project-brief>div { padding:12px 0 24px !important; color:var(--a-muted) !important; overflow-wrap:anywhere !important; font:400 15px/1.85 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih70-project-brief>div p { margin:0 0 18px !important; font:inherit !important; white-space:pre-wrap !important; }
-body.ih68-workspace #root .ih70-project-brief>div a { display:inline-block !important; min-height:44px !important; padding:10px 0 !important; color:var(--a-accent) !important; }
 body.ih68-workspace #root .ih68-day { font-size:12px !important; }
 body.ih68-workspace #root .ih68-message-content { font-size:16px !important; line-height:1.75 !important; }
 body.ih68-workspace #root .ih69-message-author { font-size:13px !important; }
@@ -428,26 +371,9 @@ body.ih68-workspace .ih68-focus-scrim { backdrop-filter:none !important; }
   body.ih68-workspace #root .ih68-room .ih68-terms.is-pinned :is(.agreement-workspace,.agreement-summary,.chat-payment-panel) { padding:20px !important; }
 }
 @media(max-width:850px) {
-  body.ih68-workspace #root .ih70-room .ih68-room-header { min-height:76px !important; padding:12px 14px !important; gap:12px !important; }
-  body.ih68-workspace #root .ih70-room .ih68-room-back { width:40px !important; height:44px !important; min-height:44px !important; padding:10px !important; }
-  body.ih68-workspace #root .ih70-room .ih68-room-person h1 { font-size:18px !important; line-height:1.4 !important; }
-  body.ih68-workspace #root .ih70-room-context { margin-top:5px !important; font-size:13px !important; }
-  body.ih68-workspace #root .ih70-project-open { min-height:44px !important; padding:10px 12px !important; font-size:14px !important; }
-  body.ih68-workspace #root .ih70-project-open>svg { display:none !important; }
-  body.ih68-workspace #root .ih70-room .ih68-room-header-tools { gap:4px !important; }
   body.ih68-workspace .ih70-sheet .ih68-expand-option { display:none !important; }
-  body.ih68-workspace #root .ih70-room.is-keyboard .ih68-room-header { min-height:54px !important; padding-block:5px !important; }
-  body.ih68-workspace #root .ih70-room.is-keyboard .ih70-room-context, body.ih68-workspace #root .ih70-room.is-keyboard .ih70-project-open { display:none !important; }
 }
 @media(max-width:700px) {
-  body.ih68-workspace #root .ih68-mail-row { grid-template-columns:40px minmax(0,1fr) 14px !important; min-height:114px !important; gap:14px !important; padding:24px 20px !important; }
-  body.ih68-workspace #root .ih68-mail-person { gap:12px !important; margin-bottom:8px !important; }
-  body.ih68-workspace #root .ih68-mail-person>strong { font-size:16px !important; }
-  body.ih68-workspace #root .ih68-mail-person>time { font-size:12px !important; }
-  body.ih68-workspace #root .ih68-mail-copy h2 { font-size:14px !important; line-height:1.65 !important; -webkit-line-clamp:2 !important; }
-  body.ih68-workspace #root .ih68-mail-copy>p { margin-top:8px !important; font-size:14px !important; }
-  body.ih68-workspace #root .ih68-mail-row:not(.is-unread) .ih68-mail-copy>p { display:none !important; }
-  body.ih68-workspace #root .ih68-mail-end { width:14px !important; }
   body.ih68-workspace #root .ih68-thread { padding:24px 18px 14px !important; }
   body.ih68-workspace #root .ih68-day { margin-bottom:24px !important; font-size:12px !important; }
   body.ih68-workspace #root .ih68-message { max-width:92% !important; margin-bottom:20px !important; padding:14px 16px 7px !important; }
@@ -460,11 +386,6 @@ body.ih68-workspace .ih68-focus-scrim { backdrop-filter:none !important; }
   body.ih68-workspace #root .ih68-attach { font-size:14px !important; min-height:44px !important; gap:8px !important; }
   body.ih68-workspace #root .ih68-send { width:44px !important; height:44px !important; min-height:44px !important; }
   body.ih68-workspace #root .ih68-room-page { padding:28px 22px 40px !important; }
-  body.ih68-workspace #root .ih70-project-heading>h2 { font-size:25px !important; line-height:1.4 !important; }
-  body.ih68-workspace #root .ih70-project-heading>p { font-size:14px !important; }
-  body.ih68-workspace #root .ih70-project-choices .ih70-task-link { min-height:112px !important; padding:22px 20px !important; }
-  body.ih68-workspace #root .ih70-project-choices .ih70-task-copy>strong { font-size:19px !important; }
-  body.ih68-workspace #root .ih70-project-choices .ih70-task-icon { display:none !important; }
   body.ih68-workspace #root .ih69-material-toolbar { flex-direction:column !important; align-items:stretch !important; gap:20px !important; margin-bottom:28px !important; }
   body.ih68-workspace #root .ih69-material-toolbar p { margin:0 !important; font-size:15px !important; }
   body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle { width:100% !important; justify-content:center !important; min-height:50px !important; padding:14px 18px !important; font-size:15px !important; }
@@ -496,13 +417,97 @@ body.ih68-workspace .ih68-focus-scrim { backdrop-filter:none !important; }
   body.ih68-workspace #root .ih68-room .chat-payment-breakdown>div { margin-block:12px !important; font-size:14px !important; line-height:1.75 !important; }
 }
 @media(max-width:380px) {
-  body.ih68-workspace #root .ih70-room .ih68-room-header { padding-inline:10px !important; gap:8px !important; }
-  body.ih68-workspace #root .ih70-room .ih69-person-avatar { display:none !important; }
-  body.ih68-workspace #root .ih70-room .ih68-room-person h1 { font-size:17px !important; }
   body.ih68-workspace #root .ih68-room-page { padding-inline:18px !important; }
-  body.ih68-workspace #root .ih70-project-open { padding-inline:11px !important; }
-  body.ih68-workspace #root .ih68-mail-row { padding-inline:18px !important; gap:12px !important; grid-template-columns:minmax(0,1fr) 14px !important; }
-  body.ih68-workspace #root .ih68-mail-row>.ih68-avatar { display:none !important; }
+}
+/* The inbox is a familiar reading surface, with search and previews in the open. */
+body.ih68-workspace #root .ih71-inbox { max-width:920px !important; }
+body.ih68-workspace #root .ih71-new-message { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:7px !important; flex:none !important; min-height:44px !important; margin:0 !important; padding:10px 14px !important; border:0 !important; border-radius:9px !important; background:var(--a-accent) !important; color:var(--a-on) !important; text-decoration:none !important; font:600 14px/1.5 Inter,system-ui,sans-serif !important; box-shadow:none !important; }
+body.ih68-workspace #root .ih71-new-message>svg { width:18px !important; height:18px !important; }
+body.ih68-workspace #root .ih71-inbox-content { margin:0 !important; padding:0 !important; border:0 !important; background:none !important; }
+body.ih68-workspace #root .ih71-mail-rows { display:block !important; min-width:0 !important; margin:0 !important; padding:0 !important; }
+body.ih68-workspace #root .ih71-inbox .ih71-mail-rows { border-top:1px solid var(--desk-line) !important; }
+body.ih68-workspace #root .ih71-mail-row { display:grid !important; grid-template-columns:44px minmax(0,1fr) 12px !important; align-items:center !important; gap:16px !important; width:100% !important; min-width:0 !important; min-height:100px !important; margin:0 !important; padding:18px 5px !important; border:0 !important; border-bottom:1px solid var(--desk-line) !important; border-radius:0 !important; background:none !important; color:var(--a-ink) !important; text-decoration:none !important; box-shadow:none !important; transform:none !important; }
+body.ih68-workspace #root .ih71-mail-row:last-child { border-bottom:0 !important; }
+body.ih68-workspace #root .ih71-mail-row:hover { background:var(--a-soft) !important; }
+body.ih68-workspace #root .ih71-mail-row>.ih68-avatar { display:grid !important; width:44px !important; height:44px !important; min-width:44px !important; border:0 !important; border-radius:50% !important; font-size:17px !important; }
+body.ih68-workspace #root .ih71-mail-copy { min-width:0 !important; }
+body.ih68-workspace #root .ih71-mail-person { display:flex !important; align-items:center !important; justify-content:space-between !important; gap:12px !important; margin:0 0 4px !important; }
+body.ih68-workspace #root .ih71-mail-person>strong { display:block !important; min-width:0 !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--a-ink) !important; font:600 16px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-mail-person>time { flex:none !important; color:var(--a-muted) !important; white-space:nowrap !important; font:400 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-mail-copy>p { display:block !important; min-width:0 !important; margin:0 0 4px !important; padding:0 !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--a-muted) !important; font:400 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-mail-project { display:block !important; min-width:0 !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--a-muted) !important; font:400 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-mail-end { display:grid !important; place-items:center !important; flex:none !important; width:12px !important; color:var(--a-muted) !important; }
+body.ih68-workspace #root .ih71-mail-end>svg { width:16px !important; height:16px !important; }
+body.ih68-workspace #root .ih71-mail-row.is-unread .ih71-mail-person>strong { font-weight:750 !important; }
+body.ih68-workspace #root .ih71-mail-row.is-unread .ih71-mail-copy>p { color:var(--a-ink) !important; font-weight:550 !important; }
+body.ih68-workspace #root .ih71-mail-row.is-unread>.ih68-avatar { background:var(--a-accent) !important; color:var(--a-on) !important; }
+body.ih68-workspace #root .ih71-inbox-empty { padding:56px 20px !important; color:var(--a-ink) !important; text-align:center !important; }
+body.ih68-workspace #root .ih71-inbox-empty>svg { width:32px !important; height:32px !important; margin-bottom:22px !important; color:var(--a-accent) !important; }
+body.ih68-workspace #root .ih71-inbox-empty>h2 { margin:0 !important; color:var(--a-ink) !important; font:650 22px/1.4 Inter,system-ui,sans-serif !important; letter-spacing:-.025em !important; }
+body.ih68-workspace #root .ih71-inbox-empty>p { max-width:360px !important; margin:14px auto 24px !important; color:var(--a-muted) !important; font:400 15px/1.8 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-conversation .ih68-room-header { min-height:78px !important; padding:13px 24px !important; border-bottom:0 !important; }
+body.ih68-workspace #root .ih71-room-context { display:block !important; margin:5px 0 0 !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--a-muted) !important; font:400 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-room-options { border:0 !important; background:none !important; width:44px !important; height:44px !important; min-height:44px !important; }
+body.ih68-workspace #root .ih71-conversation-nav { display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)) !important; align-items:stretch !important; flex:none !important; gap:0 !important; width:100% !important; margin:0 !important; padding:0 24px !important; border:0 !important; border-bottom:1px solid var(--desk-line) !important; background:var(--a-paper) !important; }
+body.ih68-workspace #root .ih71-conversation-nav>button { display:flex !important; align-items:center !important; justify-content:center !important; gap:7px !important; min-width:0 !important; min-height:46px !important; margin:0 0 -1px !important; padding:11px 8px !important; border:0 !important; border-bottom:2px solid transparent !important; border-radius:0 !important; background:none !important; color:var(--a-muted) !important; font:500 14px/1.5 Inter,system-ui,sans-serif !important; box-shadow:none !important; cursor:pointer !important; }
+body.ih68-workspace #root .ih71-conversation-nav>button[aria-current="page"] { color:var(--a-ink) !important; font-weight:650 !important; border-bottom-color:var(--a-accent) !important; }
+body.ih68-workspace #root .ih71-conversation-nav>button>small { display:inline-grid !important; place-items:center !important; min-width:20px !important; height:20px !important; padding:0 4px !important; border-radius:5px !important; background:var(--a-tint) !important; color:var(--a-accent) !important; font:600 11px/1 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-conversation-nav>button>.ih68-dot { width:5px !important; height:5px !important; }
+body.ih68-workspace #root .ih71-pane-title { margin:0 0 18px !important; color:var(--a-ink) !important; font:650 24px/1.35 Inter,system-ui,sans-serif !important; letter-spacing:-.035em !important; }
+body.ih68-workspace #root .ih71-project-description { margin:0 0 24px !important; padding:0 !important; border:1px solid var(--desk-line) !important; border-radius:12px !important; background:var(--a-paper) !important; color:var(--a-ink) !important; }
+body.ih68-workspace #root .ih71-project-description>summary { display:flex !important; justify-content:space-between !important; align-items:center !important; gap:20px !important; min-height:54px !important; padding:16px 20px !important; list-style:none !important; cursor:pointer !important; color:var(--a-ink) !important; font:500 14px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih71-project-description>summary::-webkit-details-marker { display:none !important; }
+body.ih68-workspace #root .ih71-project-description>summary>svg { flex:none !important; width:17px !important; height:17px !important; }
+body.ih68-workspace #root .ih71-project-description[open]>summary>svg { transform:rotate(180deg) !important; }
+body.ih68-workspace #root .ih71-project-description:not([open])>div { display:none !important; }
+body.ih68-workspace #root .ih71-project-description>div { padding:0 20px 22px !important; color:var(--a-muted) !important; font:400 15px/1.85 Inter,system-ui,sans-serif !important; overflow-wrap:anywhere !important; }
+body.ih68-workspace #root .ih71-project-description h3 { margin:0 0 14px !important; color:var(--a-ink) !important; font:600 19px/1.45 Inter,system-ui,sans-serif !important; letter-spacing:-.02em !important; }
+body.ih68-workspace #root .ih71-project-description p { margin:12px 0 !important; font:inherit !important; white-space:pre-wrap !important; }
+body.ih68-workspace #root .ih71-project-description a { color:var(--a-accent) !important; }
+body.ih68-workspace #root .ih71-project-budget { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:12px 20px !important; padding:16px 0 !important; border-block:1px solid var(--desk-line) !important; }
+body.ih68-workspace #root .ih71-project-budget>strong { color:var(--a-ink) !important; font-size:20px !important; font-weight:650 !important; }
+@media(max-width:850px) {
+  body.ih68-workspace #root .ih71-conversation .ih68-room-header { min-height:68px !important; padding:10px 14px !important; gap:12px !important; }
+  body.ih68-workspace #root .ih71-conversation .ih68-room-person h1 { font-size:18px !important; }
+  body.ih68-workspace #root .ih71-conversation .ih68-room-back { width:40px !important; height:44px !important; min-height:44px !important; padding:10px !important; }
+  body.ih68-workspace #root .ih71-conversation .ih68-room-header-tools { gap:2px !important; }
+  body.ih68-workspace #root .ih71-conversation-nav { padding-inline:18px !important; }
+  body.ih68-workspace #root .ih71-conversation-nav>button { min-height:44px !important; padding:10px 6px !important; font-size:14px !important; }
+  body.ih68-workspace #root .ih71-conversation.is-keyboard .ih68-room-header { min-height:54px !important; padding-block:5px !important; }
+  body.ih68-workspace #root .ih71-conversation.is-keyboard .ih71-room-context { display:none !important; }
+  body.ih68-workspace #root .ih71-conversation.is-keyboard[data-view="conversation"] .ih71-conversation-nav { display:none !important; }
+}
+@media(max-width:700px) {
+  body.ih68-workspace #root .ih71-inbox { padding-top:24px !important; }
+  body.ih68-workspace #root .ih71-inbox .ih71-page-heading { margin-bottom:18px !important; }
+  body.ih68-workspace #root .ih71-new-message { min-height:44px !important; padding:10px 12px !important; font-size:14px !important; }
+  body.ih68-workspace #root .ih71-mail-row { grid-template-columns:40px minmax(0,1fr) 10px !important; min-height:96px !important; padding:16px 1px !important; gap:13px !important; }
+  body.ih68-workspace #root .ih71-mail-row>.ih68-avatar { display:grid !important; width:40px !important; height:40px !important; min-width:40px !important; border-radius:50% !important; font-size:16px !important; }
+  body.ih68-workspace #root .ih71-mail-person { gap:10px !important; margin-bottom:4px !important; }
+  body.ih68-workspace #root .ih71-mail-person>strong { font-size:16px !important; }
+  body.ih68-workspace #root .ih71-mail-person>time { font-size:11px !important; }
+  body.ih68-workspace #root .ih71-mail-copy>p { font-size:14px !important; }
+  body.ih68-workspace #root .ih71-mail-project { font-size:12px !important; }
+  body.ih68-workspace #root .ih71-mail-end { width:10px !important; }
+  body.ih68-workspace #root .ih71-mail-end>svg { width:14px !important; height:14px !important; }
+  body.ih68-workspace #root .ih71-desk-messages .ih71-mail-row { gap:11px !important; grid-template-columns:36px minmax(0,1fr) 8px !important; }
+  body.ih68-workspace #root .ih71-desk-messages .ih71-mail-row>.ih68-avatar { width:36px !important; height:36px !important; min-width:36px !important; font-size:15px !important; }
+  body.ih68-workspace #root .ih71-desk-messages .ih71-mail-person>strong { font-size:15px !important; }
+  body.ih68-workspace #root .ih71-desk-messages .ih71-mail-person>time { font-size:11px !important; }
+  body.ih68-workspace #root .ih71-pane-title { font-size:23px !important; margin-bottom:18px !important; }
+  body.ih68-workspace #root .ih71-conversation .ih68-room-page-heading h2 { font-size:23px !important; }
+  body.ih68-workspace #root .ih71-conversation .ih68-room-page-heading p { margin-top:10px !important; font-size:14px !important; }
+}
+@media(max-width:380px) {
+  body.ih68-workspace #root .ih71-conversation .ih68-room-header { padding-inline:10px !important; gap:10px !important; }
+  body.ih68-workspace #root .ih71-conversation .ih69-person-avatar { display:inline-flex !important; }
+  body.ih68-workspace #root .ih71-conversation .ih68-room-person h1 { font-size:17px !important; }
+  body.ih68-workspace #root .ih71-conversation-nav { padding-inline:12px !important; }
+  body.ih68-workspace #root .ih71-conversation-nav>button { font-size:13px !important; gap:4px !important; }
+  body.ih68-workspace #root .ih71-conversation-nav>button>small { display:none !important; }
+  body.ih68-workspace #root .ih71-inbox .ih71-page-heading h1 { font-size:26px !important; }
+  body.ih68-workspace #root .ih71-new-message { gap:5px !important; padding-inline:11px !important; }
+  body.ih68-workspace #root .ih71-mail-row { gap:10px !important; }
 }
 
 }
