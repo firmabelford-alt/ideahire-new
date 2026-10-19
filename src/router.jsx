@@ -35,7 +35,8 @@ import {
 
 import App from "./App";
 import { BrandSignature } from "./Brand";
-import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceMessengerStart, WorkspaceIcon } from "./Workspace";
+import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
+import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
@@ -8479,7 +8480,7 @@ function AccountWorkspaceLanding(props) {
 
 function WorkOverview() {
   const inbox = useConversationInbox();
-  return <div className="page ih67-work-root"><AccountNavbar /><WorkspaceWork inbox={inbox} /></div>;
+  return <div className="page ih68-work-root"><AccountNavbar /><WorkspaceWork inbox={inbox} /></div>;
 }
 
 function Account() {
@@ -10048,7 +10049,7 @@ function Account() {
     setAccountHubOpen(true);
     navigateAccountWorkspace({ pathname: location.pathname, search: location.search, hash: "" }, { replace: true });
     window.requestAnimationFrame(() => {
-      const trigger = document.getElementById("ih67-dashboard-title");
+      const trigger = document.getElementById("ih68-home-title");
       trigger?.focus({ preventScroll: true });
       trigger?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
     });
@@ -10060,7 +10061,7 @@ function Account() {
 
       <main
         className="app-page account-workspace-page ih6-account-workspace"
-        id="ih67-content"
+        id="ih68-content"
         data-account-section={activeAccountSection || "home"}
       >
         {!activeAccountSection || accountHubOpen ? (
@@ -10069,7 +10070,7 @@ function Account() {
             jobCount={myJobs.length} jobsLoading={jobsLoading}
             sections={ACCOUNT_WORKSPACE_SECTIONS} onSelect={openAccountSection} />
         ) : (
-          <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
+          null
         )}
 
         <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
@@ -10080,10 +10081,11 @@ function Account() {
             <span className="section-label">
               {activeAccountSectionCopy.eyebrow}
             </span>
-            <h2 id="account-section-title">{activeAccountSectionCopy.title}</h2>
+            <h1 id="account-section-title">{activeAccountSectionCopy.title}</h1>
           </div>
           <p>{activeAccountSectionCopy.description}</p>
         </section>
+        <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
 
         <div
           className="account-tab-stage"
@@ -20294,262 +20296,11 @@ function AmbientBackground() {
   return createPortal(<div className="ih63-page-wash" aria-hidden="true" />, document.body);
 }
 
-const MessengerLayoutContext = createContext(null);
-
-function MessengerConversationsButton() {
-  const layout = useContext(MessengerLayoutContext);
-  return <button type="button" className="ih14-conversations-toggle" aria-expanded={layout?.inboxOpen || false}
-    aria-controls="ih14-conversation-inbox" aria-label="Pokaż listę rozmów" onClick={() => layout?.setInboxOpen(true)}>
-    <MarketIcon kind="message" /><span>Rozmowy</span>
-  </button>;
-}
-
-function MessengerFocusButton() {
-  const layout = useContext(MessengerLayoutContext);
-  return <button type="button" className="ih12-icon-button ih15-focus-toggle" aria-pressed={layout?.focusMode || false}
-    aria-label={layout?.focusMode ? "Przywróć zwykły widok czatu" : "Rozwiń czat na cały ekran"}
-    title={layout?.focusMode ? "Przywróć widok" : "Rozwiń czat"} onClick={() => layout?.setFocusMode?.(!layout.focusMode)}>
-    <MarketIcon kind={layout?.focusMode ? "collapse" : "expand"} />
-  </button>;
-}
-
-function MessengerFrame({ chat = false, focusMode = false, onFocusModeChange, children }) {
-  const frameRef = useRef(null);
-  const [inboxOpen, setInboxOpen] = useState(false);
-  const [wideLayout, setWideLayout] = useState(() => !!window.matchMedia?.("(min-width: 1120px)").matches);
-  const inboxPersistent = chat && wideLayout && !focusMode;
-  useEffect(() => {
-    const query = window.matchMedia?.("(min-width: 1120px)");
-    const update = () => { setWideLayout(!!query?.matches); setInboxOpen(false); };
-    query?.addEventListener?.("change", update);
-    return () => query?.removeEventListener?.("change", update);
-  }, []);
-  const { pathname } = useLocation();
-  useEffect(() => { setInboxOpen(false); }, [pathname]);
-  useEffect(() => {
-    let task = 0;
-    const viewport = window.visualViewport;
-    function measure() {
-      task = 0;
-      const element = frameRef.current;
-      if (!element) return;
-      const inset = window.matchMedia?.("(max-width: 800px)").matches ? 0 : 12;
-      const top = focusMode ? inset : Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0));
-      const compactViewport = window.matchMedia?.("(max-width: 980px)").matches;
-      const bottomNavigation = element.parentElement?.querySelector(".ih67-mobile-nav");
-      const bottomInset = focusMode ? inset : compactViewport ? (chat ? 0 : Math.ceil(bottomNavigation?.getBoundingClientRect().height || 80)) : 24;
-      const height = Math.max(focusMode ? 180 : 180, Math.round((viewport?.height || window.innerHeight) - top - bottomInset));
-      if (focusMode) element.style.setProperty("top", `${(viewport?.offsetTop || 0) + inset}px`, "important");
-      else element.style.removeProperty("top");
-      element.style.setProperty("height", `${height}px`, "important");
-      element.classList.toggle("is-condensed", height < 420);
-    }
-    function schedule() {
-      if (!task) task = window.requestAnimationFrame(measure);
-    }
-    const observer = window.ResizeObserver ? new ResizeObserver(schedule) : null;
-    const navbar = frameRef.current?.parentElement?.querySelector(".navbar");
-    if (navbar) observer?.observe(navbar);
-    const bottomNavigation = frameRef.current?.parentElement?.querySelector(".ih67-mobile-nav");
-    if (bottomNavigation) observer?.observe(bottomNavigation);
-    window.addEventListener("resize", schedule, { passive: true });
-    viewport?.addEventListener("resize", schedule, { passive: true });
-    viewport?.addEventListener("scroll", schedule, { passive: true });
-    schedule();
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener("resize", schedule);
-      viewport?.removeEventListener("resize", schedule);
-      viewport?.removeEventListener("scroll", schedule);
-      window.cancelAnimationFrame(task);
-    };
-  }, [focusMode, chat]);
-  useEffect(() => {
-    if (!chat || !inboxOpen || inboxPersistent) return undefined;
-    const panel = frameRef.current?.querySelector(".ih12-inbox");
-    const content = frameRef.current?.querySelector(".ih7-chat-shell");
-    const previous = document.activeElement;
-    if (content) content.inert = true;
-    const focusable = () => [...(panel?.querySelectorAll('a[href], button:not([disabled]), input:not([disabled])') || [])];
-    panel?.querySelector('input[type="search"]')?.focus({ preventScroll: true });
-    function keyboard(event) {
-      if (event.key === "Escape") { event.preventDefault(); setInboxOpen(false); return; }
-      if (event.key !== "Tab") return;
-      const elements = focusable();
-      const first = elements[0], last = elements[elements.length - 1];
-      if (!first) return;
-      if (event.shiftKey && (document.activeElement === first || !panel.contains(document.activeElement))) {
-        event.preventDefault(); last.focus();
-      } else if (!event.shiftKey && (document.activeElement === last || !panel.contains(document.activeElement))) {
-        event.preventDefault(); first.focus();
-      }
-    }
-    document.addEventListener("keydown", keyboard);
-    return () => {
-      document.removeEventListener("keydown", keyboard);
-      if (content) content.inert = false;
-      const returnFocus = previous?.isConnected && previous !== document.body ? previous : frameRef.current?.querySelector(".ih14-conversations-toggle");
-      returnFocus?.focus?.({ preventScroll: true });
-    };
-  }, [chat, inboxOpen, inboxPersistent]);
-  useEffect(() => {
-    if (!focusMode) return undefined;
-    const element = frameRef.current;
-    const navbar = element?.parentElement?.querySelector(".account-navbar");
-    const wasInert = navbar?.inert || false;
-    if (navbar) navbar.inert = true;
-    const previous = document.body.style.getPropertyValue("overflow");
-    const priority = document.body.style.getPropertyPriority("overflow");
-    document.body.style.setProperty("overflow", "hidden", "important");
-    function escape(event) {
-      const dialog = event.target.closest?.('[role="dialog"]');
-      if (inboxOpen || event.defaultPrevented || (dialog && dialog !== element)) return;
-      if (event.key === "Escape") { onFocusModeChange?.(false); return; }
-      if (event.key !== "Tab") return;
-      const controls = [...(element?.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),summary,[tabindex="0"]') || [])]
-        .filter(control => control.tabIndex >= 0 && !control.closest('[hidden],[aria-hidden="true"],[inert]') && control.getClientRects().length > 0);
-      const first = controls[0], last = controls[controls.length - 1];
-      if (!first) return;
-      if (event.shiftKey && (document.activeElement === first || !element.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && (document.activeElement === last || !element.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
-    }
-    document.addEventListener("keydown", escape);
-    return () => {
-      if (previous) document.body.style.setProperty("overflow", previous, priority);
-      else document.body.style.removeProperty("overflow");
-      if (navbar) navbar.inert = wasInert;
-      document.removeEventListener("keydown", escape);
-    };
-  }, [focusMode, inboxOpen, onFocusModeChange]);
-  useEffect(() => {
-    if (!focusMode) return undefined;
-    const frame = window.requestAnimationFrame(() => frameRef.current?.querySelector('.ih15-focus-toggle')?.focus({ preventScroll: true }));
-    return () => window.cancelAnimationFrame(frame);
-  }, [focusMode]);
-  return <MessengerLayoutContext.Provider value={{ inboxOpen, setInboxOpen, inboxPersistent, focusMode, setFocusMode: onFocusModeChange }}>
-    {focusMode && createPortal(<div className="ih17-chat-backdrop" aria-hidden="true" />, document.body)}
-    <main ref={frameRef} role={focusMode ? "dialog" : undefined} aria-modal={focusMode ? true : undefined} className={`ih12-messenger${chat ? " ih7-chat-page is-chat ih14-expanded" : " is-index"}${inboxOpen ? " is-inbox-open" : ""}${inboxPersistent ? " is-sidebar-visible" : ""}${focusMode ? " ih15-focus" : ""}`} aria-label="Komunikator IdeaHire">
-      {children}
-      {chat && inboxOpen && !inboxPersistent && <button type="button" tabIndex={-1} className="ih14-inbox-scrim" aria-label="Zamknij listę rozmów" onClick={() => setInboxOpen(false)} />}
-    </main>
-  </MessengerLayoutContext.Provider>;
-}
-
-// Presentation only. Existing inbox, permissions and real-time logic stay in router.jsx.
-function InboxPanel({
-  activeId,
-  compact,
-  user,
-  conversations,
-  visibleConversations,
-  loading,
-  errorMessage,
-  search,
-  setSearch,
-  inboxFilter,
-  setInboxFilter,
-  unreadCount,
-  formatDate,
-  Loader,
-}) {
-  const layout = useContext(MessengerLayoutContext);
-  return (
-    <aside id={compact ? "ih14-conversation-inbox" : undefined} className={`ih12-inbox${compact ? " is-sidebar" : ""}`}
-      role={compact && layout?.inboxOpen && !layout?.inboxPersistent ? "dialog" : undefined} aria-modal={compact && layout?.inboxOpen && !layout?.inboxPersistent ? true : undefined}
-      aria-hidden={compact && !layout?.inboxOpen && !layout?.inboxPersistent ? true : undefined} inert={compact && !layout?.inboxOpen && !layout?.inboxPersistent ? "" : undefined} aria-label="Lista rozmów">
-      <header className="ih12-inbox-heading">
-        <div>
-          <h1>Wiadomości <span aria-label={`Liczba rozmów: ${conversations.length}`}>{conversations.length}</span></h1>
-          <p>Twoje rozmowy i projekty</p>
-        </div>
-        <div className="ih14-inbox-tools">
-          <Link className="ih12-icon-button" to="/freelancers" aria-label="Znajdź freelancera i rozpocznij rozmowę" title="Nowa rozmowa">
-            <MarketIcon kind="plus" />
-          </Link>
-          {compact && <button type="button" className="ih12-icon-button" aria-label="Zamknij panel rozmów" onClick={() => layout?.setInboxOpen(false)}><MarketIcon kind="close" /></button>}
-        </div>
-      </header>
-
-      <label className="ih12-inbox-search">
-        <MarketIcon />
-        <span className="ih5-sr-only">Szukaj rozmowy</span>
-        <input type="search" placeholder="Szukaj osoby lub projektu" value={search} onChange={(event) => setSearch(event.target.value)} maxLength={160} />
-      </label>
-
-      <div className="ih12-inbox-filters" aria-label="Filtr rozmów">
-        <button type="button" aria-pressed={inboxFilter === "all"} onClick={() => setInboxFilter("all")}>Wszystkie</button>
-        <button type="button" aria-pressed={inboxFilter === "unread"} onClick={() => setInboxFilter("unread")}>Nieprzeczytane <b>{unreadCount}</b></button>
-      </div>
-
-      <div className="ih12-inbox-rows">
-        {loading ? (
-          <Loader rows={4} />
-        ) : errorMessage ? (
-          <p className="ih12-feedback" role="alert">{errorMessage}</p>
-        ) : !visibleConversations.length ? (
-          <div className="ih12-inbox-empty">
-            <MarketIcon kind="message" />
-            <h2>{conversations.length ? "Brak pasujących rozmów" : "Nie masz jeszcze rozmów"}</h2>
-            <p>{conversations.length ? "Zmień wyszukiwanie lub filtr." : "Znajdź freelancera i napisz o współpracy."}</p>
-            {conversations.length ? (
-              <button type="button" onClick={() => { setSearch(""); setInboxFilter("all"); }}>Pokaż wszystkie</button>
-            ) : (
-              <Link to="/freelancers">Znajdź freelancera <MarketIcon kind="arrow" /></Link>
-            )}
-          </div>
-        ) : visibleConversations.map((conversation) => {
-          const profile = conversation.otherProfile;
-          const name = profile?.name || "Użytkownik";
-          const message = conversation.lastMessage;
-          const unread = conversation.isUnread && activeId !== conversation.id;
-          const title = conversation.job?.title || "Zapytanie o współpracę";
-          const text = String(message?.content || "").trim();
-          const preview = message
-            ? `${message.sender_id === user?.id ? "Ty: " : ""}${text || "Przesłano załącznik"}`
-            : "Rozmowa jest otwarta. Ustalcie szczegóły.";
-          return (
-            <Link key={conversation.id} to={`/chat/${conversation.id}`} onClick={() => layout?.setInboxOpen(false)} aria-current={activeId === conversation.id ? "page" : undefined} className={`ih12-inbox-row${unread ? " is-unread" : ""}${activeId === conversation.id ? " is-active" : ""}`}>
-              <span className="ih12-avatar" aria-hidden="true">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" /> : Array.from(name)[0].toUpperCase()}
-              </span>
-              <div className="ih12-inbox-copy">
-                <div><strong title={name}>{name}</strong><time dateTime={conversation.sortDate}>{formatDate(conversation.sortDate)}</time></div>
-                <span title={title}>{title}</span>
-                <p title={preview}>{preview}</p>
-              </div>
-              {unread && <i className="ih12-unread-dot" aria-label="Nieprzeczytane wiadomości" />}
-            </Link>
-          );
-        })}
-      </div>
-
-      <footer><MarketIcon kind="message" /><span>Rozmowy, pliki i ustalenia</span></footer>
-    </aside>
-  );
-}
-
-function MessengerStart() {
-  return <WorkspaceMessengerStart />;
-}
-
-function ConversationInbox({ activeId, compact = false }) {
-  const inbox = useConversationInbox();
-  return <InboxPanel {...inbox} activeId={activeId} compact={compact}
-    formatDate={formatInboxDate} Loader={InlineRouteLoader} />;
-}
-
+/* P68 — one mailbox; choosing a conversation opens a separate room. */
 function Messages() {
-  return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications ih25-communications">
-      <AccountNavbar />
-      <MessengerFrame>
-        <ConversationInbox />
-        <MessengerStart />
-      </MessengerFrame>
-    </div>
-  );
+  const inbox = useConversationInbox();
+  return <div className="account-page ih68-messages-root"><AccountNavbar/><WorkspaceInbox {...inbox}/></div>;
 }
-
 
 
 /* =========================================================
@@ -22299,6 +22050,9 @@ function ChatProjectPlan({ job, agreement }) {
 }
 
 function Chat() {
+  const roomLocation = useLocation();
+  const roomEnglish = useSitePreferences().language === 'en';
+  const roomCopy = (pl,en) => roomEnglish ? en : pl;
   const { user } =
     useAuth();
   const { canTransact } = useAgeAccess();
@@ -22374,13 +22128,13 @@ function Chat() {
     setPlanPinned(false);
     window.requestAnimationFrame(() => {
       if (value === "conversation") composerRef.current?.focus({ preventScroll: true });
-      else document.getElementById(`ih7-chat-panel-${value}`)?.focus({ preventScroll: true });
+      else document.getElementById(`ih68-room-${value}`)?.focus({ preventScroll: true });
     });
   }
 
   useEffect(() => {
     if (!planPinned) return undefined;
-    const query = window.matchMedia?.("(max-width: 1499px)");
+    const query = window.matchMedia?.("(max-width: 1399px)");
     const update = () => { if (query?.matches) openWorkspace("plan"); };
     update();
     query?.addEventListener?.("change", update);
@@ -23419,316 +23173,42 @@ function Chat() {
         : conversation.client_id
       : null);
 
-  return (
-    <div className="account-page ih7-communications ih8-communications ih9-communications ih10-communications ih13-communications ih25-communications">
-      <AccountNavbar />
-
-      <MessengerFrame chat focusMode={focusMode} onFocusModeChange={setFocusMode}>
-        <ConversationInbox activeId={id} compact />
-        <div className={`ih7-chat-shell${!loading ? " is-ready" : ""}`} key={id}>
-          {loading ? (
-            <InlineRouteLoader
-              className="ih7-chat-route-loader"
-              rows={5}
-            />
-          ) : errorMessage &&
-            !conversation ? (
-            <div className="ih7-chat-empty">
-              {errorMessage}
-            </div>
-          ) : (
-            <>
-              <header className="ih7-chat-header">
-                <MessengerConversationsButton />
-                <button
-                  type="button"
-                  className="ih7-chat-back"
-                  aria-label="Wróć do wiadomości"
-                  onClick={() =>
-                    navigate(
-                      "/messages"
-                    )
-                  }
-                >
-                  <MarketIcon kind="arrow" />
-                  <b>Wróć</b>
-                </button>
-
-                {messagingBlocked ? (
-                  <Link
-                    className="ih7-chat-profile-link ih7-chat-profile-blocked"
-                    to={`/profile/${otherProfileId}`}
-                    aria-label="Zablokowany użytkownik"
-                  >
-                    <div
-                      className="ih7-chat-avatar ih7-chat-avatar-blocked"
-                      aria-hidden="true"
-                    >
-                      ×
-                    </div>
-
-                    <div className="ih7-chat-person">
-                      <strong>
-                        Zablokowany użytkownik
-                      </strong>
-                      <span>
-                        Kliknij, aby otworzyć ukryty profil
-                      </span>
-                    </div>
-                  </Link>
-                ) : (
-                  <Link
-                    className="ih7-chat-profile-link"
-                    to={`/profile/${otherProfileId}`}
-                    aria-label={`Otwórz profil: ${otherName}`}
-                  >
-                    <div className="ih7-chat-avatar">
-                      {otherProfile?.avatar_url ? (
-                        <img
-                          src={
-                            otherProfile.avatar_url
-                          }
-                          alt=""
-                        />
-                      ) : (
-                        otherInitial
-                      )}
-                    </div>
-
-                    <div className="ih7-chat-person">
-                      <strong>
-                        {otherName}
-                      </strong>
-                      <span>
-                        Zobacz profil
-                      </span>
-                    </div>
-                  </Link>
-                )}
-
-                <div className="ih7-chat-header-actions">
-                  <MessengerFocusButton />
-                  <details className="ih7-chat-actions-menu">
-                    <summary aria-label="Więcej opcji rozmowy" title="Więcej opcji">
-                      <span aria-hidden="true">•••</span>
-                    </summary>
-                    <div className="ih7-chat-actions-popover">
-                      <button
-                        type="button"
-                        disabled={!agreement?.id || agreement.status !== "accepted"}
-                        onClick={(event) => {
-                          event.currentTarget.closest("details")?.removeAttribute("open");
-                          setDisputeOpenRequest((value) => value + 1);
-                        }}
-                      >
-                        <span aria-hidden="true">!</span>
-                        <span>
-                          <b>Zgłoś problem ze współpracą</b>
-                          <small>{agreement?.status === "accepted" ? "Otwórz sprawę do ręcznego rozpatrzenia" : "Dostępne po zaakceptowaniu warunków"}</small>
-                        </span>
-                      </button>
-                      <Link to="/privacy-center" onClick={(event) => event.currentTarget.closest("details")?.removeAttribute("open")}>
-                        <span aria-hidden="true">i</span>
-                        <span>
-                          <b>Prywatność i dane konta</b>
-                          <small>Wnioski o dostęp, usunięcie danych lub zamknięcie konta</small>
-                        </span>
-                      </Link>
-                      <button
-                        type="button"
-                        className="is-danger"
-                        onClick={(event) => {
-                          event.currentTarget.closest("details")?.removeAttribute("open");
-                          handleHideConversation();
-                        }}
-                        disabled={hidingConversation}
-                      >
-                        <span aria-hidden="true">−</span>
-                        <span>
-                          <b>{hidingConversation ? "Ukrywanie…" : "Ukryj rozmowę z listy"}</b>
-                          <small>Nie usuwa historii drugiej stronie</small>
-                        </span>
-                      </button>
-                    </div>
-                  </details>
-                </div>
-              </header>
-
-              <details className="ih7-chat-project" hidden={workspaceTab !== "conversation"}>
-                <summary>
-                  <div className="ih7-chat-project-title"><span className="ih7-eyebrow">{getJobCategoryLabel(jobDetails?.category)}{jobDetails?.subcategory ? ` · ${jobDetails.subcategory}` : ""}</span><h1>{jobTitle || "Projekt IdeaHire"}</h1></div>
-                  <span className="ih7-chat-project-budget"><small>{agreement?.status === "accepted" ? "Uzgodniona cena" : "Proponowany budżet"}</small><strong>{formatChatProjectBudget(agreement?.status === "accepted" ? agreement.price_amount : jobBudget)}</strong></span>
-                  <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
-                </summary>
-                <div className="ih7-chat-project-body">
-                  <strong>{jobTitle || "Projekt IdeaHire"}</strong><p>{jobDetails?.description || "Rozmowa i materiały dotyczące tego projektu."}</p>
-                  {jobDetails?.project_details?.deliverables && <div className="ih12-project-brief"><span>Oczekiwany rezultat</span><p>{jobDetails.project_details.deliverables}</p>{jobDetails.project_details.delivery_format && <p><b>Format: </b>{jobDetails.project_details.delivery_format}</p>}{jobDetails.project_details.materials && <p><b>Materiały od klienta: </b>{jobDetails.project_details.materials}</p>}<p><b>Termin: </b>{formatChatProjectDate(jobDetails.project_details.deadline)}</p></div>}
-                  <dl><div><dt>Plan współpracy</dt><dd>{agreement?.status === "accepted" ? "Zaakceptowane warunki" : agreementsRequired ? "Do uzgodnienia" : "Brak formalnych warunków"}</dd></div><div><dt>Materiały</dt><dd>{privateWork.items.filter((item) => item.moderation_status === "active").length}</dd></div></dl>
-                  {conversation?.origin_type === "service_inquiry" && <div className="ih7-chat-service-context">
-                    <span className="ih7-eyebrow">Zapytanie o usługę</span>
-                    <p>{isClient ? "Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności." : "Przygotuj pierwszą ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny."}</p>
-                    <Link to={`/services/${conversation.origin_id}`}>Zobacz usługę <MarketIcon kind="arrow" /></Link>
-                  </div>}
-                </div>
-              </details>
-
-              <div className="ih7-chat-workspace-tabs" role="tablist" aria-label="Przestrzeń projektu">
-                {[
-                  ["conversation", "Rozmowa", ""],
-                  ["files", "Pliki", privateWork.items.filter((item) => item.moderation_status === "active").length],
-                  ["plan", "Plan współpracy", agreement?.status === "accepted" ? "✓" : ""],
-                ].map(([value, label, count]) => (
-                  <button
-                    type="button"
-                    role="tab"
-                    id={`ih7-chat-tab-${value}`}
-                    aria-controls={`ih7-chat-panel-${value}`}
-                    aria-label={label}
-                    tabIndex={workspaceTab === value ? 0 : -1}
-                    onKeyDown={(event) => {
-                      const keys = ["conversation", "files", "plan"];
-                      const delta = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
-                      if (delta === undefined && event.key !== "Home" && event.key !== "End") return;
-                      event.preventDefault();
-                      const next = event.key === "Home" ? 0 : event.key === "End" ? 2 : (keys.indexOf(value) + delta + 3) % 3;
-                      openWorkspace(keys[next]);
-                      event.currentTarget.parentElement.querySelectorAll('[role="tab"]')[next]?.focus();
-                    }}
-                    aria-selected={workspaceTab === value}
-                    className={workspaceTab === value ? "is-active" : ""}
-                    onClick={() => openWorkspace(value)}
-                    key={value}
-                  >
-                    <span>{label}</span>
-                    {count !== "" && <b>{count}</b>}
-                  </button>
-                ))}
-                {workspaceTab === "conversation" && <button type="button" className="ih15-pin-plan" aria-label="Otwórz plan obok rozmowy"
-                  onClick={() => { if (window.matchMedia?.("(max-width: 1499px)").matches) openWorkspace("plan"); else setPlanPinned(value => !value); }} aria-pressed={planPinned}>
-                  <MarketIcon kind="panels" /><span>Plan obok</span>
-                </button>}
-              </div>
-
-              <ChatDisputePanel
+    const roomReturn = typeof roomLocation.state?.workspaceReturn === 'string' && /^\/(messages|work)(\?|$)/.test(roomLocation.state.workspaceReturn) ? roomLocation.state.workspaceReturn : '/messages';
+  return <div className="account-page ih68-chat-root"><AccountNavbar/>
+    <WorkspaceConversation loading={loading} errorMessage={errorMessage} hasConversation={Boolean(conversation)}
+      otherName={otherName} avatarUrl={otherProfile?.avatar_url} profileId={otherProfileId} blocked={messagingBlocked}
+      jobTitle={jobTitle} category={getJobCategoryLabel(jobDetails?.category)}
+      budget={formatChatProjectBudget(agreement?.status==='accepted'?agreement.price_amount:jobBudget)}
+      materialCount={privateWork.items.filter(item=>item.moderation_status==='active').length} accepted={agreement?.status==='accepted'}
+      view={workspaceTab} onView={openWorkspace} focusMode={focusMode} onFocusMode={setFocusMode}
+      planPinned={planPinned} onPinPlan={()=>{setPlanPinned(true);setWorkspaceTab('conversation');}} onClosePlan={closePlanWindow}
+      backLabel={roomReturn.startsWith('/work')?roomCopy('Praca','Work'):roomCopy('Wiadomości','Messages')}
+      onBack={()=>navigate(roomReturn,{state:{workspaceRestoreScrollY:roomLocation.state?.workspaceScrollY}})}
+      onHide={handleHideConversation} hiding={hidingConversation} canDispute={agreement?.status==='accepted'} onDispute={()=>setDisputeOpenRequest(value=>value+1)}
+      disputePanel={<ChatDisputePanel
                 agreement={agreement}
                 conversation={conversation}
                 openRequest={disputeOpenRequest}
                 launcherHidden
-              />
-
-              <div className={`ih15-workspace${planPinned ? " is-pinned" : ""}`}>
-                <div className="ih7-chat-workspace-panel is-conversation" role="tabpanel" id="ih7-chat-panel-conversation"
-                  aria-labelledby="ih7-chat-tab-conversation" hidden={workspaceTab !== "conversation"}>
-
-
-
-                    <div className="ih7-chat-messages" ref={messageViewportRef} role="log" aria-label="Historia rozmowy" aria-live="polite" aria-relevant="additions text" onScroll={(event) => {
-                      const element = event.currentTarget;
-                      followMessagesRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 100;
-                      setShowLatest(!followMessagesRef.current);
-                    }}>
-                      {messages.length === 0 ? (
-                        <div className="ih7-chat-empty">
-                          Rozmowa została otwarta. Napisz pierwszą wiadomość i ustal szczegóły współpracy.
-                        </div>
-                      ) : (
-                        messages.map((message, index) => (
-                          <React.Fragment key={message.id}>
-                            {(index === 0 || new Date(messages[index - 1].created_at).toDateString() !== new Date(message.created_at).toDateString()) && <time className="ih7-chat-day" dateTime={message.created_at}>{new Date(message.created_at).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}</time>}
-                            <div
-                              className={`ih7-chat-message ${message.sender_id === user.id ? "is-mine" : "is-theirs"}`}
-                            >
-                              {String(message.content || "").trim() && <MessageText text={message.content} />}
-                              <PrivateMessageMaterials
+              />}
+      projectDetails={<><p>{jobDetails?.description||roomCopy('Rozmowa i materiały dotyczące tego projektu.','Conversation and materials for this project.')}</p>
+        {jobDetails?.project_details?.deliverables&&<div className="ih68-brief"><strong>{roomCopy('Oczekiwany rezultat','Expected result')}</strong><p>{jobDetails.project_details.deliverables}</p>{jobDetails.project_details.delivery_format&&<p><b>{roomCopy('Format: ','Format: ')}</b>{jobDetails.project_details.delivery_format}</p>}{jobDetails.project_details.materials&&<p><b>{roomCopy('Materiały od klienta: ','Client materials: ')}</b>{jobDetails.project_details.materials}</p>}<p><b>{roomCopy('Termin: ','Deadline: ')}</b>{formatChatProjectDate(jobDetails.project_details.deadline)}</p></div>}
+        {conversation?.origin_type==='service_inquiry'&&<div><p>{isClient?roomCopy('Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności.','The freelancer will prepare an offer. An inquiry does not reserve a date or start a payment.'):roomCopy('Przygotuj ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny.','Prepare an offer with scope, deadline and price. Sending it reserves availability for 24 hours.')}</p><Link to={'/services/'+conversation.origin_id}>{roomCopy('Zobacz usługę','View service')}</Link></div>}</>}
+      thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef}
+        renderContent={message=><>{String(message.content||'').trim()&&<MessageText text={message.content}/>} <PrivateMessageMaterials
                                 items={privateWork.itemsByMessage[message.id] || []}
                                 signedUrls={privateWork.signedUrls}
                                 ownMessage={message.sender_id === user.id}
                                 onReport={(type, targetId) =>
                                   privateWork.setReportTarget({ type, id: targetId })
                                 }
-                              />
-                              <div className="ih8-chat-message-meta">
-                              {message.sender_id !== user.id && message.moderation_status !== "hidden" && (
-                                <details className="ih7-chat-message-actions">
-                                  <summary aria-label="Opcje wiadomości" title="Opcje wiadomości"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg></summary>
-                                  <button
-                                    type="button"
-                                    onClick={(event) => {
-                                      event.currentTarget.closest("details")?.removeAttribute("open");
-                                      privateWork.setReportTarget({ type: "message", id: message.id });
-                                    }}
-                                  >
-                                    Zgłoś wiadomość
-                                  </button>
-                                </details>
-                              )}
-                              <time dateTime={message.created_at}>
-                                {new Date(message.created_at).toLocaleTimeString("pl-PL", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </time>
-                              </div>
-                            </div>
-                            {message.id === lastReadOwnMessageId && (
-                              <span className="ih7-chat-read-receipt">Wyświetlono</span>
-                            )}
-                          </React.Fragment>
-                        ))
-                      )}
-                    </div>
-
-                    {showLatest && <button type="button" className="ih17-chat-latest" onClick={() => {
-                      followMessagesRef.current = true;
-                      setShowLatest(false);
-                      if (messageViewportRef.current) messageViewportRef.current.scrollTop = messageViewportRef.current.scrollHeight;
-                    }}>Najnowsze wiadomości <MarketIcon kind="chevron" /></button>}
-
-                    {errorMessage && <p className="ih7-chat-error" role="alert">{errorMessage}</p>}
-                    {messagingBlocked && (
-                      <p className="ih7-chat-block-banner">
-                        {blockedByMe
-                          ? "Zablokowałeś tego użytkownika. Otwórz ukryty profil i użyj menu z trzema kropkami, aby go odblokować."
-                          : "Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości w tej rozmowie jest wyłączone."}
-                      </p>
-                    )}
-
-                    <form className="ih7-chat-form" onSubmit={(event) => { followMessagesRef.current = true; handleSend(event); }}>
-                      <button type="button" className="ih8-chat-add" aria-label="Otwórz pliki i dodaj materiały" title="Pliki i zdjęcia" onClick={() => openWorkspace("files")}><MarketIcon kind="plus" /></button>
-                      <textarea
-                        ref={composerRef}
-                        aria-label="Treść wiadomości"
-                        rows={1}
-                        value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
-                        onInput={(event) => { const field = event.currentTarget; field.style.height = "auto"; field.style.height = `${Math.min(field.scrollHeight, 120)}px`; field.style.overflowY = field.scrollHeight > 120 ? "auto" : "hidden"; }}
-                        placeholder="Napisz wiadomość…"
-                        maxLength={4000}
-                        disabled={sending || messagingBlocked}
-                        onKeyDown={(event) => {
-                          if (event.isComposing || event.nativeEvent?.isComposing) return;
-                          if (event.key === "Enter" && !event.shiftKey) {
-                            event.preventDefault();
-                            event.currentTarget.form?.requestSubmit();
-                          }
-                        }}
-                      />
-                      <button
-                        type="submit"
-                        className="ih7-chat-send"
-                        aria-label={sending ? "Wysyłanie wiadomości" : "Wyślij wiadomość"}
-                        disabled={sending || !draft.trim() || messagingBlocked}
-                      >
-                        <span>{sending ? "Wysyłanie…" : "Wyślij"}</span><MarketIcon kind="arrow" />
-                      </button>
-                    </form>
-                    <p className="ih7-chat-composer-hint">Enter wysyła · Shift + Enter dodaje linię · załączniki znajdziesz w zakładce Pliki</p>
-
-                </div>
-                {workspaceTab === "files" && <div className="ih7-chat-workspace-panel is-files" role="tabpanel" id="ih7-chat-panel-files" aria-labelledby="ih7-chat-tab-files" tabIndex={0}>
-                  <header className="ih15-workspace-heading"><h2>Pliki projektu</h2><button type="button" className="ih15-workspace-back" onClick={() => openWorkspace("conversation")}><MarketIcon kind="arrow" /><span>Wróć do rozmowy</span></button></header>
-
-                    <PrivateSharePanel
+                              /></>}
+        onReport={messageId=>privateWork.setReportTarget({type:'message',id:messageId})}
+        onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
+        showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);if(messageViewportRef.current)messageViewportRef.current.scrollTop=messageViewportRef.current.scrollHeight;}}/>}
+      composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
+        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>openWorkspace('files')} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId}/>}
+      materials={<><PrivateSharePanel
                       conversationId={id}
                       userId={user?.id}
                       disabled={messagingBlocked || privateWork.loading}
@@ -23738,9 +23218,7 @@ function Chat() {
                       onComplete={async () => {
                         await Promise.all([privateWork.reload(), loadMessages()]);
                       }}
-                    />
-                    {paymentConfirmed && (
-                      <WorkDeliveryPanel
+                    />{paymentConfirmed&&<WorkDeliveryPanel
                         deliveries={privateWork.deliveries}
                         events={privateWork.events}
                         conversation={conversation}
@@ -23752,9 +23230,7 @@ function Chat() {
                         onReport={(type, targetId) =>
                           privateWork.setReportTarget({ type, id: targetId })
                         }
-                      />
-                    )}
-                    <ProjectFilesPanel
+                      />}<ProjectFilesPanel
                       items={privateWork.items}
                       signedUrls={privateWork.signedUrls}
                       userId={user?.id}
@@ -23763,16 +23239,8 @@ function Chat() {
                       onReport={(type, targetId) =>
                         privateWork.setReportTarget({ type, id: targetId })
                       }
-                    />
-
-                </div>}
-                {(workspaceTab === "plan" || planPinned) && <div className={`ih7-chat-workspace-panel is-plan${planPinned ? " ih15-plan-window" : ""}`} role={planPinned ? "region" : "tabpanel"} id="ih7-chat-panel-plan" aria-labelledby="ih7-chat-tab-plan" tabIndex={0}>
-                  <header className="ih15-workspace-heading"><h2>Plan współpracy</h2><div>
-                    {planPinned && <button type="button" className="ih12-icon-button" aria-label="Rozwiń ustalenia na cały ekran" onClick={() => openWorkspace("plan")}><MarketIcon kind="expand" /></button>}
-                    <button type="button" className="ih15-workspace-back" onClick={() => { if (planPinned) closePlanWindow(); else openWorkspace("conversation"); }}><MarketIcon kind="arrow" /><span>Wróć do rozmowy</span></button>
-                  </div></header>
-
-                    <AgreementPanel
+                    /></>}
+      plan={<><AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
                       loading={agreementLoading}
@@ -23797,40 +23265,26 @@ function Chat() {
                       }}
                       onSubmit={handleAgreementSubmit}
                       onAccept={handleAgreementAccept}
-                    />
-                    <ChatProjectPlan job={jobDetails} agreement={agreement} />
-
-                    {!agreementsRequired && <section className="ih18-legacy-plan" aria-labelledby="ih18-legacy-plan-title">
+                    /><ChatProjectPlan job={jobDetails} agreement={agreement} />{!agreementsRequired && <section className="ih18-legacy-plan" aria-labelledby="ih18-legacy-plan-title">
                       <h3 id="ih18-legacy-plan-title">Ustalenia w starszej rozmowie</h3>
                       <p>W tej rozmowie nie można zaakceptować formalnych warunków. Aby uzgodnić zakres, cenę i termin, rozpocznij projekt z tym wykonawcą. Dotychczasowe wiadomości pozostaną dostępne.</p>
                       {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}
-                    </section>}
-                    <ChatPaymentPanel
+                    </section>}<ChatPaymentPanel
                       agreement={agreement}
                       conversation={conversation}
                       userId={user?.id}
                       blocked={messagingBlocked}
                       serviceOrder={conversation?.origin_type === "service_inquiry"}
                       onStatusChange={setPaymentStatus}
-                    />
-                    
-
-                </div>}
-              </div>
-
-              <PrivateReportDialog
+                    /></>}
+      reportDialog={<PrivateReportDialog
                 target={privateWork.reportTarget}
                 onClose={() =>
                   privateWork.setReportTarget(null)
                 }
                 onSubmitted={privateWork.reload}
-              />
-            </>
-          )}
-        </div>
-      </MessengerFrame>
-    </div>
-  );
+              />}/>
+  </div>;
 }
 
 
@@ -31336,8 +30790,12 @@ function SmoothRouteTransitions() {
 
 function RouteScrollManager() {
   const location = useLocation();
+  const previousPath = useRef(null);
 
   useLayoutEffect(() => {
+    const sameWorkspaceList = previousPath.current === location.pathname && ["/messages", "/work"].includes(location.pathname);
+    previousPath.current = location.pathname;
+    if (sameWorkspaceList) return;
     if (location.hash) {
       const targetId = decodeURIComponent(
         location.hash.slice(1)

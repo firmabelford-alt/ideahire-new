@@ -1,240 +1,221 @@
-/* P67 — profile, portfolio, preferences, payouts and browsing for ages 16–17. */
-@layer ideahireWorkspace {
-  body.ih67-workspace #root .account-workspace-page:not([data-account-section="home"]) { display:grid!important; grid-template-columns:172px minmax(0,1fr)!important; align-items:start!important; gap:28px!important; }
-  body.ih67-workspace #root .ih67-section-nav { position:sticky!important; top:calc(var(--w-head) + 28px)!important; margin:0!important; padding:0 0 24px!important; border:0!important; background:transparent!important; }
-  body.ih67-workspace #root .ih67-section-options { display:flex!important; flex-direction:column!important; gap:5px!important; }
-  body.ih67-workspace #root .ih67-section-toggle { display:none!important; }
-  body.ih67-workspace #root .ih67-section-options>button { display:flex!important; align-items:center!important; gap:11px!important; min-height:45px!important; width:100%!important; margin:0!important; padding:11px!important; border:1px solid transparent!important; border-radius:6px!important; background:none!important; color:var(--w-muted)!important; text-align:left!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; cursor:pointer!important; }
-  body.ih67-workspace #root .ih67-section-options>button svg { flex:none!important; width:17px!important; height:17px!important; }
-  body.ih67-workspace #root .ih67-section-options>button[aria-current="page"] { border-color:var(--w-line)!important; background:var(--w-paper)!important; color:var(--w-accent)!important; font-weight:550!important; }
-  body.ih67-workspace #root .ih25-account-panel { display:block!important; min-width:0!important; width:100%!important; margin:0!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; scroll-margin-top:calc(var(--w-head) + 24px)!important; }
-  body.ih67-workspace #root .ih6-account-content { display:block!important; width:100%!important; max-width:950px!important; padding:0!important; background:none!important; border:0!important; border-radius:0!important; box-shadow:none!important; }
-  body.ih67-workspace #root .account-tab-intro { display:block!important; margin:0 0 28px!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root .ih25-hub-back { display:inline-flex!important; align-items:center!important; gap:7px!important; width:auto!important; min-height:40px!important; margin:0 0 19px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--w-muted)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
-  body.ih67-workspace #root .ih25-hub-back svg { width:16px!important; height:16px!important; transform:rotate(180deg)!important; }
-  body.ih67-workspace #root .account-tab-intro .section-label { display:block!important; margin:0 0 8px!important; color:var(--w-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.12em!important; text-transform:uppercase!important; }
-  body.ih67-workspace #root .account-tab-intro h2 { margin:0!important; color:var(--w-ink)!important; font:550 clamp(25px,2.6vw,34px)/1.25 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; }
-  body.ih67-workspace #root .account-tab-intro>p { margin:12px 0 0!important; max-width:640px!important; color:var(--w-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-tab-stage { display:flex!important; flex-direction:column!important; gap:24px!important; width:100%!important; padding:0!important; margin:0!important; border:0!important; outline:none!important; animation:none!important; transform:none!important; }
-  body.ih67-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) { display:block!important; width:100%!important; height:auto!important; min-height:0!important; min-width:0!important; margin:0!important; padding:28px!important; border:1px solid var(--w-line)!important; border-radius:var(--w-radius)!important; background:var(--w-paper)!important; background-image:none!important; color:var(--w-ink)!important; box-shadow:none!important; transform:none!important; }
-  body.ih67-workspace #root :is(.account-card,.privacy-entry-card)::before,
-  body.ih67-workspace #root :is(.account-card,.privacy-entry-card)::after { display:none!important; }
-  body.ih67-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) h2 { color:var(--w-ink)!important; font:550 20px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; }
-  body.ih67-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) p { color:var(--w-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-profile-workspace { display:flex!important; flex-direction:column!important; gap:0!important; }
-  body.ih67-workspace #root .account-profile-preview { display:flex!important; align-items:center!important; gap:18px!important; padding:0 0 26px!important; margin:0 0 26px!important; border:0!important; border-bottom:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root :is(.profile-avatar-wrapper,.account-profile-preview .profile-avatar) { flex:none!important; width:64px!important; height:64px!important; min-width:64px!important; min-height:64px!important; margin:0!important; padding:0!important; border:0!important; border-radius:50%!important; background:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root .account-profile-preview .profile-avatar { display:grid!important; place-items:center!important; background:var(--w-tint)!important; color:var(--w-accent)!important; border:1px solid var(--w-line)!important; font:550 24px/1 Inter,system-ui,sans-serif!important; object-fit:cover!important; box-shadow:none!important; }
-  body.ih67-workspace #root .profile-info { display:block!important; text-align:left!important; }
-  body.ih67-workspace #root .profile-info h2 { margin:0!important; font-size:20px!important; }
-  body.ih67-workspace #root .profile-info>p { margin:5px 0!important; overflow-wrap:anywhere!important; font-size:12px!important; }
-  body.ih67-workspace #root .profile-meta-row { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:12px!important; margin-top:10px!important; }
-  body.ih67-workspace #root .account-age-status { padding:4px 8px!important; border:0!important; border-radius:4px!important; background:var(--w-soft)!important; color:var(--w-muted)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-form { display:flex!important; flex-direction:column!important; gap:28px!important; width:100%!important; max-width:none!important; margin:0!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root .account-form-section { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:24px!important; margin:0!important; padding:0 0 28px!important; border:0!important; border-bottom:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root .account-form-section-heading { display:block!important; margin:0 0 2px!important; padding:0!important; background:none!important; }
-  body.ih67-workspace #root .account-form-section-heading>span { display:none!important; }
-  body.ih67-workspace #root .account-form-section-heading p { display:none!important; }
-  body.ih67-workspace #root .account-form-section-heading h2 { margin:0 0 6px!important; font:550 17px/1.45 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-form-section-heading small { display:block!important; color:var(--w-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor) label { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:9px!important; width:100%!important; margin:0!important; padding:0!important; color:var(--w-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor,.discovery-preferences-card) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { display:block!important; box-sizing:border-box!important; width:100%!important; min-width:0!important; max-width:100%!important; min-height:46px!important; height:auto!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:400 14px/1.6 Inter,system-ui,sans-serif!important; text-shadow:none!important; box-shadow:none!important; outline-offset:2px!important; }
-  body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor) textarea { min-height:142px!important; resize:vertical!important; }
-  body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor) :is(label,fieldset)>small { display:block!important; color:var(--w-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor) input:disabled { background:var(--w-soft)!important; opacity:.8!important; cursor:not-allowed!important; }
-  body.ih67-workspace #root .ih11-avatar-editor { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:18px!important; padding:20px!important; border:1px solid var(--w-line)!important; border-radius:8px!important; background:var(--w-soft)!important; }
-  body.ih67-workspace #root .ih11-avatar-preview { display:grid!important; place-items:center!important; flex:none!important; width:64px!important; height:64px!important; border:1px solid var(--w-line)!important; border-radius:50%!important; background:var(--w-paper)!important; color:var(--w-accent)!important; overflow:hidden!important; font:550 24px/1 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih11-avatar-preview img { width:100%!important; height:100%!important; object-fit:cover!important; }
-  body.ih67-workspace #root .ih11-avatar-editor>div:last-child { flex:1!important; min-width:160px!important; }
-  body.ih67-workspace #root .ih11-avatar-editor strong { display:block!important; margin-bottom:7px!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih11-avatar-editor .ih11-avatar-upload { display:inline-flex!important; flex-direction:row!important; width:auto!important; min-height:40px!important; margin:0 0 5px!important; padding:8px 12px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; position:relative!important; overflow:hidden!important; }
-  body.ih67-workspace #root .ih11-avatar-upload input[type="file"] { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; opacity:0!important; cursor:pointer!important; }
-  body.ih67-workspace #root .ih11-avatar-editor small { display:block!important; color:var(--w-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-form fieldset { margin:0!important; padding:0!important; border:0!important; background:none!important; }
-  body.ih67-workspace #root .account-form legend { margin:0 0 9px!important; padding:0!important; color:var(--w-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-field-hint { margin:0 0 15px!important; font-size:12px!important; }
-  body.ih67-workspace #root .profile-category-options { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; margin:0 0 10px!important; padding:0!important; }
-  body.ih67-workspace #root .profile-category-option { display:flex!important; align-items:center!important; justify-content:flex-start!important; gap:10px!important; min-height:52px!important; width:100%!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-muted)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; text-align:left!important; cursor:pointer!important; box-shadow:none!important; }
-  body.ih67-workspace #root .profile-category-option.is-selected { border-color:var(--w-accent)!important; background:var(--w-tint)!important; color:var(--w-accent)!important; }
-  body.ih67-workspace #root .profile-category-option>span { display:grid!important; place-items:center!important; flex:none!important; width:20px!important; height:20px!important; padding:0!important; border:1px solid var(--w-line)!important; border-radius:4px!important; font:400 14px/1 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-skill-entry { display:flex!important; gap:10px!important; margin-bottom:12px!important; }
-  body.ih67-workspace #root .profile-skill-entry input { flex:1!important; }
-  body.ih67-workspace #root .profile-add-skill { flex:none!important; min-height:46px!important; margin:0!important; padding:10px 16px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-soft)!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-edit-skill-chips { display:flex!important; flex-wrap:wrap!important; gap:8px!important; margin:12px 0!important; }
-  body.ih67-workspace #root .profile-edit-skill-chip { display:inline-flex!important; align-items:center!important; gap:7px!important; min-height:38px!important; padding:0 0 0 12px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-soft)!important; color:var(--w-ink)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-edit-skill-chip button { display:grid!important; place-items:center!important; width:36px!important; min-width:36px!important; height:38px!important; min-height:38px!important; padding:0!important; border:0!important; background:none!important; color:inherit!important; font:400 18px/1 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-form-actions { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:15px!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
-  body.ih67-workspace #root .account-form-save-copy strong { display:block!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-form-save-copy span { display:block!important; margin-top:4px!important; color:var(--w-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root :is(.account-form-actions,.profile-portfolio-editor)>.btn,
-  body.ih67-workspace #root .account-form-actions>.btn,
-  body.ih67-workspace #root .stripe-connect-button { display:inline-flex!important; align-items:center!important; justify-content:center!important; width:auto!important; min-width:130px!important; min-height:46px!important; margin:0!important; padding:12px 18px!important; border:1px solid var(--w-accent)!important; border-radius:6px!important; background:var(--w-accent)!important; color:var(--w-on)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; cursor:pointer!important; }
-  body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor) button:disabled { opacity:.55!important; cursor:not-allowed!important; }
-  body.ih67-workspace #root .auth-message { width:100%!important; padding:13px!important; border:1px solid var(--w-line)!important; background:var(--w-soft)!important; border-radius:6px!important; color:var(--w-ink)!important; font:400 13px/1.6 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-manager { display:block!important; width:100%!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
-  body.ih67-workspace #root .profile-portfolio-heading { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; gap:20px!important; padding:0 0 20px!important; margin:0!important; }
-  body.ih67-workspace #root .profile-portfolio-heading h2 { margin:5px 0 8px!important; }
-  body.ih67-workspace #root .profile-portfolio-heading p { max-width:590px!important; margin:0!important; font-size:12px!important; }
-  body.ih67-workspace #root .profile-portfolio-count { flex:none!important; padding:6px 9px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-soft)!important; color:var(--w-muted)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-legal-note { display:flex!important; flex-direction:column!important; gap:6px!important; margin:0 0 24px!important; padding:16px!important; border:1px solid var(--w-line)!important; border-radius:7px!important; background:var(--w-soft)!important; color:var(--w-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-legal-note strong { font-weight:550!important; color:var(--w-ink)!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-list { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; margin:0 0 28px!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-card { display:flex!important; flex-direction:column!important; overflow:hidden!important; margin:0!important; padding:0!important; border:1px solid var(--w-line)!important; border-radius:8px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; }
-  body.ih67-workspace #root :is(.profile-portfolio-edit-cover,.profile-portfolio-image-placeholder) { display:block!important; position:relative!important; width:100%!important; height:auto!important; aspect-ratio:4/3!important; margin:0!important; padding:0!important; overflow:hidden!important; border:0!important; border-radius:0!important; background:var(--w-soft)!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-cover img { display:block!important; width:100%!important; height:100%!important; object-fit:cover!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-cover>span { position:absolute!important; right:10px!important; bottom:10px!important; padding:4px 8px!important; border-radius:4px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-copy { flex:1!important; padding:18px 18px 12px!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-copy strong { display:block!important; overflow-wrap:anywhere!important; font:550 15px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-edit-copy>span { display:block!important; margin-top:5px!important; color:var(--w-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-item-actions { display:flex!important; gap:8px!important; margin:0!important; padding:0 18px 15px!important; }
-  body.ih67-workspace #root .profile-portfolio-item-actions button { min-height:40px!important; padding:9px 13px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
-  body.ih67-workspace #root .profile-portfolio-item-actions .is-danger { border-color:transparent!important; color:var(--w-muted)!important; }
-  body.ih67-workspace #root .profile-portfolio-editor { display:flex!important; flex-direction:column!important; gap:24px!important; padding:24px 0 0!important; margin:0!important; border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; }
-  body.ih67-workspace #root .profile-portfolio-editor-heading { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:14px!important; }
-  body.ih67-workspace #root .profile-portfolio-editor h3 { margin:6px 0 0!important; font:550 19px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-editor-grid { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
-  body.ih67-workspace #root .profile-portfolio-media-editor>div { display:grid!important; grid-template-columns:repeat(auto-fill,minmax(110px,1fr))!important; gap:12px!important; }
-  body.ih67-workspace #root .profile-portfolio-media-editor button { position:relative!important; min-height:110px!important; padding:0!important; border:1px solid var(--w-line)!important; border-radius:6px!important; overflow:hidden!important; background:var(--w-soft)!important; }
-  body.ih67-workspace #root .profile-portfolio-media-editor img { width:100%!important; height:110px!important; object-fit:cover!important; }
-  body.ih67-workspace #root .profile-portfolio-new-files>div { display:flex!important; flex-direction:column!important; gap:8px!important; margin-top:12px!important; }
-  body.ih67-workspace #root .profile-portfolio-new-files>div>span { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; padding:7px 12px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-soft)!important; overflow-wrap:anywhere!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .profile-portfolio-new-files button { flex:none!important; width:36px!important; height:36px!important; border:0!important; background:none!important; color:inherit!important; }
-  body.ih67-workspace #root .account-template-options { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; margin-top:24px!important; }
-  body.ih67-workspace #root .account-template-option { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:0!important; padding:0!important; overflow:hidden!important; border:1px solid var(--w-line)!important; border-radius:8px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; text-align:left!important; cursor:pointer!important; }
-  body.ih67-workspace #root .account-template-option.is-selected { border-color:var(--w-accent)!important; outline:1px solid var(--w-accent)!important; outline-offset:0!important; }
-  body.ih67-workspace #root .account-template-preview { height:150px!important; min-height:150px!important; border:0!important; border-bottom:1px solid var(--w-line)!important; border-radius:0!important; box-shadow:none!important; }
-  body.ih67-workspace #root .account-template-option-copy { display:flex!important; flex-direction:column!important; gap:8px!important; padding:20px!important; }
-  body.ih67-workspace #root .account-template-option-copy small { color:var(--w-muted)!important; font:450 9px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.08em!important; }
-  body.ih67-workspace #root .account-template-option-copy strong { color:var(--w-ink)!important; font:550 20px/1.4 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-template-option-copy>span { color:var(--w-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-template-option-action { margin:0!important; padding:14px 20px!important; border-top:1px solid var(--w-line)!important; color:var(--w-accent)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .account-template-option.is-current .account-template-preview { background:#e6f2f3!important; }
-  body.ih67-workspace #root .account-template-option.is-current .account-template-preview-nav { background:#176b77!important; }
-  body.ih67-workspace #root .account-template-option.is-current .account-template-preview-hero b,
-  body.ih67-workspace #root .account-template-option.is-current .account-template-preview-cards i { background:#a4d3d8!important; }
-  body.ih67-workspace #root .account-template-option.is-current .account-template-preview-hero>span>i { background:#176b77!important; }
-  body.ih67-workspace #root .privacy-entry-card { display:flex!important; align-items:flex-start!important; flex-wrap:wrap!important; gap:18px!important; }
-  body.ih67-workspace #root .privacy-entry-icon { display:none!important; }
-  body.ih67-workspace #root .privacy-entry-copy { flex:1!important; min-width:200px!important; }
-  body.ih67-workspace #root .privacy-entry-copy h2 { margin:7px 0!important; }
-  body.ih67-workspace #root .privacy-entry-link { display:inline-flex!important; align-items:center!important; min-height:44px!important; padding:10px 14px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-soft)!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
-  body.ih67-workspace #root .ih-stripe-profile { margin:0!important; }
-  body.ih67-workspace #root .ih-sp-tabs { display:flex!important; flex-wrap:wrap!important; width:fit-content!important; max-width:100%!important; gap:6px!important; margin:0 0 24px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; }
-  body.ih67-workspace #root :is(.ih-sp-tab,.ih-sp-button) { min-height:44px!important; padding:11px 14px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-muted)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih-sp-tab[aria-selected="true"] { border-color:var(--w-accent)!important; background:var(--w-tint)!important; color:var(--w-accent)!important; }
-  body.ih67-workspace #root .ih-sp-panel { margin:0!important; padding:24px!important; border:1px solid var(--w-line)!important; border-radius:9px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; }
-  body.ih67-workspace #root .ih-sp-grid { gap:16px!important; }
-  body.ih67-workspace #root .ih-sp-card { padding:24px!important; border:1px solid var(--w-line)!important; border-radius:8px!important; background:var(--w-soft)!important; color:var(--w-ink)!important; }
-  body.ih67-workspace #root .ih-sp-card strong { font:550 clamp(24px,3vw,34px)/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; font-variant-numeric:tabular-nums!important; }
-  body.ih67-workspace #root .stripe-connect-panel { display:flex!important; align-items:flex-start!important; gap:20px!important; padding:0!important; margin:0!important; border:0!important; background:none!important; border-radius:0!important; box-shadow:none!important; }
-  body.ih67-workspace #root .stripe-connect-icon { flex:none!important; width:40px!important; height:40px!important; min-width:40px!important; padding:0!important; border:0!important; border-radius:7px!important; box-shadow:none!important; }
-  body.ih67-workspace #root .stripe-connect-icon svg { width:40px!important; height:40px!important; }
-  body.ih67-workspace #root .stripe-connect-content { flex:1!important; }
-  body.ih67-workspace #root .stripe-connect-heading { display:flex!important; align-items:flex-start!important; flex-wrap:wrap!important; gap:14px!important; }
-  body.ih67-workspace #root .stripe-connect-heading h2 { font-size:19px!important; margin:6px 0 12px!important; }
-  body.ih67-workspace #root .stripe-connect-eyebrow { color:var(--w-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .stripe-connect-footer { display:flex!important; flex-direction:column!important; align-items:flex-start!important; gap:14px!important; margin-top:20px!important; }
-  body.ih67-workspace #root .stripe-connect-footer small { color:var(--w-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .my-jobs-section>.jobs-list { display:flex!important; flex-direction:column!important; gap:0!important; margin-top:24px!important; }
-  body.ih67-workspace #root .my-jobs-section .job-card { display:block!important; width:100%!important; padding:24px 0!important; margin:0!important; border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root .my-jobs-section .job-card h2 { max-width:none!important; margin:8px 0 12px!important; font-size:18px!important; }
-  body.ih67-workspace #root .my-jobs-section .job-actions { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin-top:16px!important; }
-  body.ih67-workspace #root .my-jobs-section .job-actions :is(a,button) { display:inline-flex!important; align-items:center!important; justify-content:center!important; min-height:44px!important; width:auto!important; padding:10px 15px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; box-shadow:none!important; }
-  body.ih67-workspace #root .ih67-limited-explore { display:grid!important; grid-template-columns:minmax(0,1fr) 280px!important; align-items:center!important; gap:24px!important; margin:0 0 28px!important; padding:32px!important; border:1px solid var(--w-line)!important; border-radius:var(--w-radius)!important; background:var(--w-tint)!important; }
-  body.ih67-workspace #root .ih67-limited-explore h2 { margin:0!important; max-width:450px!important; font:550 30px/1.25 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; }
-  body.ih67-workspace #root .ih67-limited-explore p { margin:12px 0 24px!important; color:var(--w-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-account-badge { display:inline-flex!important; padding:5px 9px!important; margin-bottom:18px!important; border:1px solid var(--w-line)!important; border-radius:5px!important; background:var(--w-paper)!important; color:var(--w-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-limited-links { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:16px!important; margin-bottom:30px!important; }
-  body.ih67-workspace #root .ih67-limited-links>a { display:flex!important; align-items:center!important; gap:12px!important; padding:23px 18px!important; border:1px solid var(--w-line)!important; border-radius:9px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; text-decoration:none!important; }
-  body.ih67-workspace #root .ih67-limited-links>a>span { flex:1!important; }
-  body.ih67-workspace #root .ih67-limited-links strong { display:block!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-limited-links small { display:block!important; margin-top:6px!important; color:var(--w-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-age-info { display:flex!important; align-items:flex-start!important; gap:18px!important; margin-bottom:24px!important; padding:28px!important; border:1px solid var(--w-line)!important; border-radius:var(--w-radius)!important; background:var(--w-paper)!important; }
-  body.ih67-workspace #root .ih67-age-info>svg { flex:none!important; margin-top:4px!important; }
-  body.ih67-workspace #root .ih67-age-info h2 { margin:0!important; font:550 18px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-age-info p { max-width:730px!important; margin:10px 0 18px!important; color:var(--w-muted)!important; font:400 13px/1.8 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-age-info>div>span { display:block!important; font:450 14px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-age-info>div>small { display:block!important; margin-top:8px!important; color:var(--w-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih67-limited-settings { margin-bottom:20px!important; border:1px solid var(--w-line)!important; border-radius:var(--w-radius)!important; background:var(--w-paper)!important; }
-  body.ih67-workspace #root .ih67-limited-settings>summary { display:flex!important; align-items:center!important; gap:13px!important; min-height:64px!important; padding:18px 24px!important; color:var(--w-ink)!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
-  body.ih67-workspace #root .ih67-limited-settings>summary>span { flex:1!important; }
-  body.ih67-workspace #root .ih67-limited-settings>summary::marker { content:""!important; }
-  body.ih67-workspace #root .ih67-limited-settings>summary::-webkit-details-marker { display:none!important; }
-  body.ih67-workspace #root .ih67-limited-settings .account-card { border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; }
-  body.ih67-workspace #root .account-dashboard-block { padding:0!important; border:0!important; background:none!important; }
-  body.ih67-workspace #root .discovery-settings-heading { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; gap:20px!important; margin-bottom:22px!important; }
-  body.ih67-workspace #root .discovery-settings-heading h2 { margin:7px 0 0!important; }
-  body.ih67-workspace #root .discovery-settings-icon { display:none!important; }
-  body.ih67-workspace #root .discovery-settings-summary { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; padding:20px!important; margin:0 0 24px!important; border:1px solid var(--w-line)!important; border-radius:7px!important; background:var(--w-soft)!important; }
-  body.ih67-workspace #root .discovery-settings-summary>div { padding:0!important; border:0!important; background:none!important; }
-  body.ih67-workspace #root .discovery-settings-summary span { display:block!important; color:var(--w-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .discovery-settings-summary strong { display:block!important; margin-top:7px!important; color:var(--w-ink)!important; font:550 15px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .discovery-settings-group { margin:18px 0!important; padding:16px 0 0!important; border-top:1px solid var(--w-line)!important; }
-  body.ih67-workspace #root .discovery-settings-group>strong { display:block!important; margin-bottom:10px!important; color:var(--w-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .discovery-settings-tags { display:flex!important; flex-wrap:wrap!important; gap:8px!important; }
-  body.ih67-workspace #root .discovery-settings-tags>span { padding:6px 9px!important; border:1px solid var(--w-line)!important; border-radius:4px!important; background:var(--w-soft)!important; color:var(--w-muted)!important; font:450 11px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .discovery-settings-actions { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin-top:20px!important; }
-  body.ih67-workspace #root .discovery-settings-actions .btn { min-height:44px!important; padding:11px 16px!important; border:1px solid var(--w-line)!important; border-radius:6px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; box-shadow:none!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .discovery-settings-actions .btn-dark { border-color:var(--w-accent)!important; background:var(--w-accent)!important; color:var(--w-on)!important; }
-  body.ih67-workspace #root .ih11-visibility-panel { margin:28px 0 0!important; padding:28px 0 0!important; border:0!important; border-top:1px solid var(--w-line)!important; border-radius:0!important; background:none!important; color:var(--w-ink)!important; box-shadow:none!important; }
-  body.ih67-workspace #root .ih11-visibility-panel p { font-size:13px!important; }
-  body.ih67-workspace #root .ih11-setting { display:flex!important; align-items:flex-start!important; gap:13px!important; margin:20px 0!important; padding:18px!important; border:1px solid var(--w-line)!important; border-radius:7px!important; background:var(--w-soft)!important; }
-  body.ih67-workspace #root .ih11-setting input { flex:none!important; width:18px!important; height:18px!important; margin:3px 0 0!important; accent-color:var(--w-accent)!important; }
-  body.ih67-workspace #root .ih11-setting b { display:block!important; color:var(--w-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
-  body.ih67-workspace #root .ih11-setting small { display:block!important; margin-top:7px!important; color:var(--w-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
+/* P68 — retained functional form and catalogue controls. */
+@layer ih68Workspace {
+  body.ih68-workspace #root .ih25-account-panel { display:block!important; min-width:0!important; width:100%!important; margin:0!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; scroll-margin-top:calc(var(--a-head) + 24px)!important; }
+  body.ih68-workspace #root .ih6-account-content { display:block!important; width:100%!important; max-width:950px!important; padding:0!important; background:none!important; border:0!important; border-radius:0!important; box-shadow:none!important; }
+  body.ih68-workspace #root .account-tab-intro { display:block!important; margin:0 0 28px!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root .ih25-hub-back { display:inline-flex!important; align-items:center!important; gap:7px!important; width:auto!important; min-height:40px!important; margin:0 0 19px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--a-muted)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  body.ih68-workspace #root .ih25-hub-back svg { width:16px!important; height:16px!important; transform:rotate(180deg)!important; }
+  body.ih68-workspace #root .account-tab-intro .section-label { display:block!important; margin:0 0 8px!important; color:var(--a-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.12em!important; text-transform:uppercase!important; }
+  body.ih68-workspace #root .account-tab-intro h2 { margin:0!important; color:var(--a-ink)!important; font:550 clamp(25px,2.6vw,34px)/1.25 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; }
+  body.ih68-workspace #root .account-tab-intro>p { margin:12px 0 0!important; max-width:640px!important; color:var(--a-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-tab-stage { display:flex!important; flex-direction:column!important; gap:24px!important; width:100%!important; padding:0!important; margin:0!important; border:0!important; outline:none!important; animation:none!important; transform:none!important; }
+  body.ih68-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) { display:block!important; width:100%!important; height:auto!important; min-height:0!important; min-width:0!important; margin:0!important; padding:28px!important; border:1px solid var(--a-line)!important; border-radius:var(--a-radius)!important; background:var(--a-paper)!important; background-image:none!important; color:var(--a-ink)!important; box-shadow:none!important; transform:none!important; }
+  body.ih68-workspace #root :is(.account-card,.privacy-entry-card)::before,
+  body.ih68-workspace #root :is(.account-card,.privacy-entry-card)::after { display:none!important; }
+  body.ih68-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) h2 { color:var(--a-ink)!important; font:550 20px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; }
+  body.ih68-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) p { color:var(--a-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-profile-workspace { display:flex!important; flex-direction:column!important; gap:0!important; }
+  body.ih68-workspace #root .account-profile-preview { display:flex!important; align-items:center!important; gap:18px!important; padding:0 0 26px!important; margin:0 0 26px!important; border:0!important; border-bottom:1px solid var(--a-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root :is(.profile-avatar-wrapper,.account-profile-preview .profile-avatar) { flex:none!important; width:64px!important; height:64px!important; min-width:64px!important; min-height:64px!important; margin:0!important; padding:0!important; border:0!important; border-radius:50%!important; background:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root .account-profile-preview .profile-avatar { display:grid!important; place-items:center!important; background:var(--a-tint)!important; color:var(--a-accent)!important; border:1px solid var(--a-line)!important; font:550 24px/1 Inter,system-ui,sans-serif!important; object-fit:cover!important; box-shadow:none!important; }
+  body.ih68-workspace #root .profile-info { display:block!important; text-align:left!important; }
+  body.ih68-workspace #root .profile-info h2 { margin:0!important; font-size:20px!important; }
+  body.ih68-workspace #root .profile-info>p { margin:5px 0!important; overflow-wrap:anywhere!important; font-size:12px!important; }
+  body.ih68-workspace #root .profile-meta-row { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:12px!important; margin-top:10px!important; }
+  body.ih68-workspace #root .account-age-status { padding:4px 8px!important; border:0!important; border-radius:4px!important; background:var(--a-soft)!important; color:var(--a-muted)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-form { display:flex!important; flex-direction:column!important; gap:28px!important; width:100%!important; max-width:none!important; margin:0!important; padding:0!important; border:0!important; background:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root .account-form-section { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:24px!important; margin:0!important; padding:0 0 28px!important; border:0!important; border-bottom:1px solid var(--a-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root .account-form-section-heading { display:block!important; margin:0 0 2px!important; padding:0!important; background:none!important; }
+  body.ih68-workspace #root .account-form-section-heading>span { display:none!important; }
+  body.ih68-workspace #root .account-form-section-heading p { display:none!important; }
+  body.ih68-workspace #root .account-form-section-heading h2 { margin:0 0 6px!important; font:550 17px/1.45 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-form-section-heading small { display:block!important; color:var(--a-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) label { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:9px!important; width:100%!important; margin:0!important; padding:0!important; color:var(--a-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor,.discovery-preferences-card) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { display:block!important; box-sizing:border-box!important; width:100%!important; min-width:0!important; max-width:100%!important; min-height:46px!important; height:auto!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; font:400 14px/1.6 Inter,system-ui,sans-serif!important; text-shadow:none!important; box-shadow:none!important; outline-offset:2px!important; }
+  body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) textarea { min-height:142px!important; resize:vertical!important; }
+  body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) :is(label,fieldset)>small { display:block!important; color:var(--a-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) input:disabled { background:var(--a-soft)!important; opacity:.8!important; cursor:not-allowed!important; }
+  body.ih68-workspace #root .ih11-avatar-editor { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:18px!important; padding:20px!important; border:1px solid var(--a-line)!important; border-radius:8px!important; background:var(--a-soft)!important; }
+  body.ih68-workspace #root .ih11-avatar-preview { display:grid!important; place-items:center!important; flex:none!important; width:64px!important; height:64px!important; border:1px solid var(--a-line)!important; border-radius:50%!important; background:var(--a-paper)!important; color:var(--a-accent)!important; overflow:hidden!important; font:550 24px/1 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .ih11-avatar-preview img { width:100%!important; height:100%!important; object-fit:cover!important; }
+  body.ih68-workspace #root .ih11-avatar-editor>div:last-child { flex:1!important; min-width:160px!important; }
+  body.ih68-workspace #root .ih11-avatar-editor strong { display:block!important; margin-bottom:7px!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .ih11-avatar-editor .ih11-avatar-upload { display:inline-flex!important; flex-direction:row!important; width:auto!important; min-height:40px!important; margin:0 0 5px!important; padding:8px 12px!important; border:1px solid var(--a-line)!important; border-radius:5px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; position:relative!important; overflow:hidden!important; }
+  body.ih68-workspace #root .ih11-avatar-upload input[type="file"] { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; opacity:0!important; cursor:pointer!important; }
+  body.ih68-workspace #root .ih11-avatar-editor small { display:block!important; color:var(--a-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-form fieldset { margin:0!important; padding:0!important; border:0!important; background:none!important; }
+  body.ih68-workspace #root .account-form legend { margin:0 0 9px!important; padding:0!important; color:var(--a-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-field-hint { margin:0 0 15px!important; font-size:12px!important; }
+  body.ih68-workspace #root .profile-category-options { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; margin:0 0 10px!important; padding:0!important; }
+  body.ih68-workspace #root .profile-category-option { display:flex!important; align-items:center!important; justify-content:flex-start!important; gap:10px!important; min-height:52px!important; width:100%!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-paper)!important; color:var(--a-muted)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; text-align:left!important; cursor:pointer!important; box-shadow:none!important; }
+  body.ih68-workspace #root .profile-category-option.is-selected { border-color:var(--a-accent)!important; background:var(--a-tint)!important; color:var(--a-accent)!important; }
+  body.ih68-workspace #root .profile-category-option>span { display:grid!important; place-items:center!important; flex:none!important; width:20px!important; height:20px!important; padding:0!important; border:1px solid var(--a-line)!important; border-radius:4px!important; font:400 14px/1 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-skill-entry { display:flex!important; gap:10px!important; margin-bottom:12px!important; }
+  body.ih68-workspace #root .profile-skill-entry input { flex:1!important; }
+  body.ih68-workspace #root .profile-add-skill { flex:none!important; min-height:46px!important; margin:0!important; padding:10px 16px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-soft)!important; color:var(--a-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-edit-skill-chips { display:flex!important; flex-wrap:wrap!important; gap:8px!important; margin:12px 0!important; }
+  body.ih68-workspace #root .profile-edit-skill-chip { display:inline-flex!important; align-items:center!important; gap:7px!important; min-height:38px!important; padding:0 0 0 12px!important; border:1px solid var(--a-line)!important; border-radius:5px!important; background:var(--a-soft)!important; color:var(--a-ink)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-edit-skill-chip button { display:grid!important; place-items:center!important; width:36px!important; min-width:36px!important; height:38px!important; min-height:38px!important; padding:0!important; border:0!important; background:none!important; color:inherit!important; font:400 18px/1 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-form-actions { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:15px!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
+  body.ih68-workspace #root .account-form-save-copy strong { display:block!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-form-save-copy span { display:block!important; margin-top:4px!important; color:var(--a-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root :is(.account-form-actions,.profile-portfolio-editor)>.btn,
+  body.ih68-workspace #root .account-form-actions>.btn,
+  body.ih68-workspace #root .stripe-connect-button { display:inline-flex!important; align-items:center!important; justify-content:center!important; width:auto!important; min-width:130px!important; min-height:46px!important; margin:0!important; padding:12px 18px!important; border:1px solid var(--a-accent)!important; border-radius:6px!important; background:var(--a-accent)!important; color:var(--a-on)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; cursor:pointer!important; }
+  body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) button:disabled { opacity:.55!important; cursor:not-allowed!important; }
+  body.ih68-workspace #root .auth-message { width:100%!important; padding:13px!important; border:1px solid var(--a-line)!important; background:var(--a-soft)!important; border-radius:6px!important; color:var(--a-ink)!important; font:400 13px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-manager { display:block!important; width:100%!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
+  body.ih68-workspace #root .profile-portfolio-heading { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; gap:20px!important; padding:0 0 20px!important; margin:0!important; }
+  body.ih68-workspace #root .profile-portfolio-heading h2 { margin:5px 0 8px!important; }
+  body.ih68-workspace #root .profile-portfolio-heading p { max-width:590px!important; margin:0!important; font-size:12px!important; }
+  body.ih68-workspace #root .profile-portfolio-count { flex:none!important; padding:6px 9px!important; border:1px solid var(--a-line)!important; border-radius:5px!important; background:var(--a-soft)!important; color:var(--a-muted)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-legal-note { display:flex!important; flex-direction:column!important; gap:6px!important; margin:0 0 24px!important; padding:16px!important; border:1px solid var(--a-line)!important; border-radius:7px!important; background:var(--a-soft)!important; color:var(--a-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-legal-note strong { font-weight:550!important; color:var(--a-ink)!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-list { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; margin:0 0 28px!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-card { display:flex!important; flex-direction:column!important; overflow:hidden!important; margin:0!important; padding:0!important; border:1px solid var(--a-line)!important; border-radius:8px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; box-shadow:none!important; }
+  body.ih68-workspace #root :is(.profile-portfolio-edit-cover,.profile-portfolio-image-placeholder) { display:block!important; position:relative!important; width:100%!important; height:auto!important; aspect-ratio:4/3!important; margin:0!important; padding:0!important; overflow:hidden!important; border:0!important; border-radius:0!important; background:var(--a-soft)!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-cover img { display:block!important; width:100%!important; height:100%!important; object-fit:cover!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-cover>span { position:absolute!important; right:10px!important; bottom:10px!important; padding:4px 8px!important; border-radius:4px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; font:450 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-copy { flex:1!important; padding:18px 18px 12px!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-copy strong { display:block!important; overflow-wrap:anywhere!important; font:550 15px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-edit-copy>span { display:block!important; margin-top:5px!important; color:var(--a-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-item-actions { display:flex!important; gap:8px!important; margin:0!important; padding:0 18px 15px!important; }
+  body.ih68-workspace #root .profile-portfolio-item-actions button { min-height:40px!important; padding:9px 13px!important; border:1px solid var(--a-line)!important; border-radius:5px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  body.ih68-workspace #root .profile-portfolio-item-actions .is-danger { border-color:transparent!important; color:var(--a-muted)!important; }
+  body.ih68-workspace #root .profile-portfolio-editor { display:flex!important; flex-direction:column!important; gap:24px!important; padding:24px 0 0!important; margin:0!important; border:0!important; border-top:1px solid var(--a-line)!important; border-radius:0!important; background:none!important; }
+  body.ih68-workspace #root .profile-portfolio-editor-heading { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:14px!important; }
+  body.ih68-workspace #root .profile-portfolio-editor h3 { margin:6px 0 0!important; font:550 19px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-editor-grid { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
+  body.ih68-workspace #root .profile-portfolio-media-editor>div { display:grid!important; grid-template-columns:repeat(auto-fill,minmax(110px,1fr))!important; gap:12px!important; }
+  body.ih68-workspace #root .profile-portfolio-media-editor button { position:relative!important; min-height:110px!important; padding:0!important; border:1px solid var(--a-line)!important; border-radius:6px!important; overflow:hidden!important; background:var(--a-soft)!important; }
+  body.ih68-workspace #root .profile-portfolio-media-editor img { width:100%!important; height:110px!important; object-fit:cover!important; }
+  body.ih68-workspace #root .profile-portfolio-new-files>div { display:flex!important; flex-direction:column!important; gap:8px!important; margin-top:12px!important; }
+  body.ih68-workspace #root .profile-portfolio-new-files>div>span { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; padding:7px 12px!important; border:1px solid var(--a-line)!important; border-radius:5px!important; background:var(--a-soft)!important; overflow-wrap:anywhere!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .profile-portfolio-new-files button { flex:none!important; width:36px!important; height:36px!important; border:0!important; background:none!important; color:inherit!important; }
+  body.ih68-workspace #root .account-template-options { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; margin-top:24px!important; }
+  body.ih68-workspace #root .account-template-option { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:0!important; padding:0!important; overflow:hidden!important; border:1px solid var(--a-line)!important; border-radius:8px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; box-shadow:none!important; text-align:left!important; cursor:pointer!important; }
+  body.ih68-workspace #root .account-template-option.is-selected { border-color:var(--a-accent)!important; outline:1px solid var(--a-accent)!important; outline-offset:0!important; }
+  body.ih68-workspace #root .account-template-preview { height:150px!important; min-height:150px!important; border:0!important; border-bottom:1px solid var(--a-line)!important; border-radius:0!important; box-shadow:none!important; }
+  body.ih68-workspace #root .account-template-option-copy { display:flex!important; flex-direction:column!important; gap:8px!important; padding:20px!important; }
+  body.ih68-workspace #root .account-template-option-copy small { color:var(--a-muted)!important; font:450 9px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.08em!important; }
+  body.ih68-workspace #root .account-template-option-copy strong { color:var(--a-ink)!important; font:550 20px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-template-option-copy>span { color:var(--a-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-template-option-action { margin:0!important; padding:14px 20px!important; border-top:1px solid var(--a-line)!important; color:var(--a-accent)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .account-template-option.is-current .account-template-preview { background:#e6f2f3!important; }
+  body.ih68-workspace #root .account-template-option.is-current .account-template-preview-nav { background:#176b77!important; }
+  body.ih68-workspace #root .account-template-option.is-current .account-template-preview-hero b,
+  body.ih68-workspace #root .account-template-option.is-current .account-template-preview-cards i { background:#a4d3d8!important; }
+  body.ih68-workspace #root .account-template-option.is-current .account-template-preview-hero>span>i { background:#176b77!important; }
+  body.ih68-workspace #root .privacy-entry-card { display:flex!important; align-items:flex-start!important; flex-wrap:wrap!important; gap:18px!important; }
+  body.ih68-workspace #root .privacy-entry-icon { display:none!important; }
+  body.ih68-workspace #root .privacy-entry-copy { flex:1!important; min-width:200px!important; }
+  body.ih68-workspace #root .privacy-entry-copy h2 { margin:7px 0!important; }
+  body.ih68-workspace #root .privacy-entry-link { display:inline-flex!important; align-items:center!important; min-height:44px!important; padding:10px 14px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-soft)!important; color:var(--a-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+  body.ih68-workspace #root .ih-stripe-profile { margin:0!important; }
+  body.ih68-workspace #root .ih-sp-tabs { display:flex!important; flex-wrap:wrap!important; width:fit-content!important; max-width:100%!important; gap:6px!important; margin:0 0 24px!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; }
+  body.ih68-workspace #root :is(.ih-sp-tab,.ih-sp-button) { min-height:44px!important; padding:11px 14px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-paper)!important; color:var(--a-muted)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .ih-sp-tab[aria-selected="true"] { border-color:var(--a-accent)!important; background:var(--a-tint)!important; color:var(--a-accent)!important; }
+  body.ih68-workspace #root .ih-sp-panel { margin:0!important; padding:24px!important; border:1px solid var(--a-line)!important; border-radius:9px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; }
+  body.ih68-workspace #root .ih-sp-grid { gap:16px!important; }
+  body.ih68-workspace #root .ih-sp-card { padding:24px!important; border:1px solid var(--a-line)!important; border-radius:8px!important; background:var(--a-soft)!important; color:var(--a-ink)!important; }
+  body.ih68-workspace #root .ih-sp-card strong { font:550 clamp(24px,3vw,34px)/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; font-variant-numeric:tabular-nums!important; }
+  body.ih68-workspace #root .stripe-connect-panel { display:flex!important; align-items:flex-start!important; gap:20px!important; padding:0!important; margin:0!important; border:0!important; background:none!important; border-radius:0!important; box-shadow:none!important; }
+  body.ih68-workspace #root .stripe-connect-icon { flex:none!important; width:40px!important; height:40px!important; min-width:40px!important; padding:0!important; border:0!important; border-radius:7px!important; box-shadow:none!important; }
+  body.ih68-workspace #root .stripe-connect-icon svg { width:40px!important; height:40px!important; }
+  body.ih68-workspace #root .stripe-connect-content { flex:1!important; }
+  body.ih68-workspace #root .stripe-connect-heading { display:flex!important; align-items:flex-start!important; flex-wrap:wrap!important; gap:14px!important; }
+  body.ih68-workspace #root .stripe-connect-heading h2 { font-size:19px!important; margin:6px 0 12px!important; }
+  body.ih68-workspace #root .stripe-connect-eyebrow { color:var(--a-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .stripe-connect-footer { display:flex!important; flex-direction:column!important; align-items:flex-start!important; gap:14px!important; margin-top:20px!important; }
+  body.ih68-workspace #root .stripe-connect-footer small { color:var(--a-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .my-jobs-section>.jobs-list { display:flex!important; flex-direction:column!important; gap:0!important; margin-top:24px!important; }
+  body.ih68-workspace #root .my-jobs-section .job-card { display:block!important; width:100%!important; padding:24px 0!important; margin:0!important; border:0!important; border-top:1px solid var(--a-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root .my-jobs-section .job-card h2 { max-width:none!important; margin:8px 0 12px!important; font-size:18px!important; }
+  body.ih68-workspace #root .my-jobs-section .job-actions { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin-top:16px!important; }
+  body.ih68-workspace #root .my-jobs-section .job-actions :is(a,button) { display:inline-flex!important; align-items:center!important; justify-content:center!important; min-height:44px!important; width:auto!important; padding:10px 15px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; box-shadow:none!important; }
+  body.ih68-workspace #root .account-dashboard-block { padding:0!important; border:0!important; background:none!important; }
+  body.ih68-workspace #root .discovery-settings-heading { display:flex!important; align-items:flex-start!important; justify-content:space-between!important; gap:20px!important; margin-bottom:22px!important; }
+  body.ih68-workspace #root .discovery-settings-heading h2 { margin:7px 0 0!important; }
+  body.ih68-workspace #root .discovery-settings-icon { display:none!important; }
+  body.ih68-workspace #root .discovery-settings-summary { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:20px!important; padding:20px!important; margin:0 0 24px!important; border:1px solid var(--a-line)!important; border-radius:7px!important; background:var(--a-soft)!important; }
+  body.ih68-workspace #root .discovery-settings-summary>div { padding:0!important; border:0!important; background:none!important; }
+  body.ih68-workspace #root .discovery-settings-summary span { display:block!important; color:var(--a-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .discovery-settings-summary strong { display:block!important; margin-top:7px!important; color:var(--a-ink)!important; font:550 15px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .discovery-settings-group { margin:18px 0!important; padding:16px 0 0!important; border-top:1px solid var(--a-line)!important; }
+  body.ih68-workspace #root .discovery-settings-group>strong { display:block!important; margin-bottom:10px!important; color:var(--a-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .discovery-settings-tags { display:flex!important; flex-wrap:wrap!important; gap:8px!important; }
+  body.ih68-workspace #root .discovery-settings-tags>span { padding:6px 9px!important; border:1px solid var(--a-line)!important; border-radius:4px!important; background:var(--a-soft)!important; color:var(--a-muted)!important; font:450 11px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .discovery-settings-actions { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin-top:20px!important; }
+  body.ih68-workspace #root .discovery-settings-actions .btn { min-height:44px!important; padding:11px 16px!important; border:1px solid var(--a-line)!important; border-radius:6px!important; background:var(--a-paper)!important; color:var(--a-ink)!important; box-shadow:none!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .discovery-settings-actions .btn-dark { border-color:var(--a-accent)!important; background:var(--a-accent)!important; color:var(--a-on)!important; }
+  body.ih68-workspace #root .ih11-visibility-panel { margin:28px 0 0!important; padding:28px 0 0!important; border:0!important; border-top:1px solid var(--a-line)!important; border-radius:0!important; background:none!important; color:var(--a-ink)!important; box-shadow:none!important; }
+  body.ih68-workspace #root .ih11-visibility-panel p { font-size:13px!important; }
+  body.ih68-workspace #root .ih11-setting { display:flex!important; align-items:flex-start!important; gap:13px!important; margin:20px 0!important; padding:18px!important; border:1px solid var(--a-line)!important; border-radius:7px!important; background:var(--a-soft)!important; }
+  body.ih68-workspace #root .ih11-setting input { flex:none!important; width:18px!important; height:18px!important; margin:3px 0 0!important; accent-color:var(--a-accent)!important; }
+  body.ih68-workspace #root .ih11-setting b { display:block!important; color:var(--a-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih68-workspace #root .ih11-setting small { display:block!important; margin-top:7px!important; color:var(--a-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
   @media (max-width:700px) {
-    body.ih67-workspace #root .discovery-settings-summary { grid-template-columns:minmax(0,1fr)!important; gap:20px!important; }
-    body.ih67-workspace #root .discovery-settings-actions { flex-direction:column!important; align-items:stretch!important; }
-    body.ih67-workspace #root .discovery-settings-actions .btn { width:100%!important; min-height:48px!important; }
-    body.ih67-workspace #root .ih11-setting { padding:18px 14px!important; }
-  }
-  @media (max-width:1260px) {
-    body.ih67-workspace #root .account-workspace-page:not([data-account-section="home"]) { grid-template-columns:150px minmax(0,1fr)!important; gap:22px!important; }
-    body.ih67-workspace #root .ih67-limited-links { grid-template-columns:minmax(0,1fr)!important; gap:12px!important; }
-  }
-  @media (max-width:1120px) {
-    body.ih67-workspace #root .account-workspace-page:not([data-account-section="home"]) { display:block!important; }
-    body.ih67-workspace #root .ih67-section-nav { position:relative!important; top:auto!important; z-index:20!important; margin-bottom:22px!important; padding:0!important; }
-    body.ih67-workspace #root .ih67-section-toggle { display:flex!important; align-items:center!important; gap:12px!important; width:100%!important; min-height:50px!important; padding:13px 16px!important; margin:0!important; border:1px solid var(--w-line)!important; border-radius:7px!important; background:var(--w-paper)!important; color:var(--w-ink)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
-    body.ih67-workspace #root .ih67-section-toggle>span { flex:1!important; text-align:left!important; }
-    body.ih67-workspace #root .ih67-section-toggle svg { width:18px!important; height:18px!important; }
-    body.ih67-workspace #root .ih67-section-options { display:none!important; }
-    body.ih67-workspace #root .ih67-section-nav.is-open .ih67-section-options { display:flex!important; position:absolute!important; inset:calc(100% + 5px) 0 auto!important; padding:8px!important; border:1px solid var(--w-line)!important; border-radius:7px!important; background:var(--w-paper)!important; box-shadow:0 8px 20px #10232b0a!important; }
-    body.ih67-workspace #root .ih67-section-options>button { font-size:14px!important; min-height:46px!important; }
+    body.ih68-workspace #root .discovery-settings-summary { grid-template-columns:minmax(0,1fr)!important; gap:20px!important; }
+    body.ih68-workspace #root .discovery-settings-actions { flex-direction:column!important; align-items:stretch!important; }
+    body.ih68-workspace #root .discovery-settings-actions .btn { width:100%!important; min-height:48px!important; }
+    body.ih68-workspace #root .ih11-setting { padding:18px 14px!important; }
   }
   @media (max-width:700px) {
-    body.ih67-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) { padding:24px 20px!important; }
-    body.ih67-workspace #root .account-tab-intro h2 { font-size:27px!important; }
-    body.ih67-workspace #root .account-profile-preview { align-items:flex-start!important; gap:15px!important; }
-    body.ih67-workspace #root :is(.profile-avatar-wrapper,.account-profile-preview .profile-avatar) { width:52px!important; min-width:52px!important; height:52px!important; min-height:52px!important; font-size:21px!important; }
-    body.ih67-workspace #root .profile-info h2 { font-size:18px!important; }
-    body.ih67-workspace #root .account-form-section { gap:24px!important; padding-bottom:26px!important; }
-    body.ih67-workspace #root :is(.account-form,.profile-portfolio-editor,.discovery-preferences-card) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { min-height:48px!important; font-size:16px!important; padding:12px!important; }
-    body.ih67-workspace #root .profile-category-options { grid-template-columns:minmax(0,1fr)!important; gap:10px!important; }
-    body.ih67-workspace #root .profile-category-option { min-height:54px!important; font-size:14px!important; }
-    body.ih67-workspace #root .profile-portfolio-edit-list { grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
-    body.ih67-workspace #root .profile-portfolio-heading { flex-direction:column!important; gap:12px!important; }
-    body.ih67-workspace #root .profile-portfolio-count { align-self:flex-start!important; }
-    body.ih67-workspace #root .account-form-actions { flex-direction:column!important; align-items:stretch!important; gap:18px!important; }
-    body.ih67-workspace #root .account-form-actions>.btn { width:100%!important; min-height:48px!important; }
-    body.ih67-workspace #root .account-form-save-copy strong { display:none!important; }
-    body.ih67-workspace #root .profile-portfolio-editor>.btn { width:100%!important; min-height:48px!important; }
-    body.ih67-workspace #root .account-template-options { grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
-    body.ih67-workspace #root .account-template-preview { height:160px!important; min-height:160px!important; }
-    body.ih67-workspace #root .ih-sp-grid { grid-template-columns:minmax(0,1fr)!important; }
-    body.ih67-workspace #root .ih-sp-panel { padding:20px 16px!important; }
-    body.ih67-workspace #root .ih-sp-row { grid-template-columns:minmax(0,1fr)!important; gap:10px!important; }
-    body.ih67-workspace #root .stripe-connect-panel { flex-direction:column!important; }
-    body.ih67-workspace #root .stripe-connect-footer { align-items:stretch!important; }
-    body.ih67-workspace #root .stripe-connect-button { width:100%!important; }
-    body.ih67-workspace #root .ih67-limited-explore { grid-template-columns:minmax(0,1fr)!important; padding:28px 22px!important; }
-    body.ih67-workspace #root .ih67-limited-explore h2 { font-size:27px!important; }
-    body.ih67-workspace #root .ih67-limited-explore>.ih67-drawing { display:none!important; }
-    body.ih67-workspace #root .ih67-limited-explore .ih67-primary { width:100%!important; }
-    body.ih67-workspace #root .ih67-limited-links>a { min-height:90px!important; padding:22px!important; }
-    body.ih67-workspace #root .ih67-age-info { padding:25px 22px!important; gap:14px!important; }
-    body.ih67-workspace #root .ih67-age-info h2 { font-size:17px!important; }
-    body.ih67-workspace #root .ih67-age-info>svg { display:none!important; }
-    body.ih67-workspace #root .ih67-limited-settings>summary { padding:18px 22px!important; }
+    body.ih68-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card) { padding:24px 20px!important; }
+    body.ih68-workspace #root .account-tab-intro h2 { font-size:27px!important; }
+    body.ih68-workspace #root .account-profile-preview { align-items:flex-start!important; gap:15px!important; }
+    body.ih68-workspace #root :is(.profile-avatar-wrapper,.account-profile-preview .profile-avatar) { width:52px!important; min-width:52px!important; height:52px!important; min-height:52px!important; font-size:21px!important; }
+    body.ih68-workspace #root .profile-info h2 { font-size:18px!important; }
+    body.ih68-workspace #root .account-form-section { gap:24px!important; padding-bottom:26px!important; }
+    body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor,.discovery-preferences-card) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select) { min-height:48px!important; font-size:16px!important; padding:12px!important; }
+    body.ih68-workspace #root .profile-category-options { grid-template-columns:minmax(0,1fr)!important; gap:10px!important; }
+    body.ih68-workspace #root .profile-category-option { min-height:54px!important; font-size:14px!important; }
+    body.ih68-workspace #root .profile-portfolio-edit-list { grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
+    body.ih68-workspace #root .profile-portfolio-heading { flex-direction:column!important; gap:12px!important; }
+    body.ih68-workspace #root .profile-portfolio-count { align-self:flex-start!important; }
+    body.ih68-workspace #root .account-form-actions { flex-direction:column!important; align-items:stretch!important; gap:18px!important; }
+    body.ih68-workspace #root .account-form-actions>.btn { width:100%!important; min-height:48px!important; }
+    body.ih68-workspace #root .account-form-save-copy strong { display:none!important; }
+    body.ih68-workspace #root .profile-portfolio-editor>.btn { width:100%!important; min-height:48px!important; }
+    body.ih68-workspace #root .account-template-options { grid-template-columns:minmax(0,1fr)!important; gap:22px!important; }
+    body.ih68-workspace #root .account-template-preview { height:160px!important; min-height:160px!important; }
+    body.ih68-workspace #root .ih-sp-grid { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih68-workspace #root .ih-sp-panel { padding:20px 16px!important; }
+    body.ih68-workspace #root .ih-sp-row { grid-template-columns:minmax(0,1fr)!important; gap:10px!important; }
+    body.ih68-workspace #root .stripe-connect-panel { flex-direction:column!important; }
+    body.ih68-workspace #root .stripe-connect-footer { align-items:stretch!important; }
+    body.ih68-workspace #root .stripe-connect-button { width:100%!important; }
   }
+}
+/* P68 — scoped workspace styles. */
+@layer ih68Workspace {
+body.ih68-workspace #root .account-workspace-page{max-width:920px !important;display:block !important;}
+body.ih68-workspace #root .ih6-account-layout.ih25-account-panel{display:block !important;max-width:760px !important;margin:0 auto !important;padding:0 !important;border:0 !important;background:none !important;}
+body.ih68-workspace #root .ih6-account-content{max-width:760px !important;margin:0 auto !important;}
+body.ih68-workspace #root .account-tab-intro{margin:0 0 26px !important;}
+body.ih68-workspace #root .account-tab-intro .section-label{display:block !important;margin-bottom:12px !important;font:450 12px/1.6 Inter,system-ui,sans-serif !important;color:var(--a-muted) !important;letter-spacing:0 !important;text-transform:none !important;}
+body.ih68-workspace #root .account-tab-intro h1{margin:0 !important;font:550 clamp(29px,3vw,38px)/1.25 Inter,system-ui,sans-serif !important;letter-spacing:-.04em !important;color:var(--a-ink) !important;}
+body.ih68-workspace #root .account-tab-intro>p{max-width:620px !important;margin-top:15px !important;font-size:15px !important;line-height:1.85 !important;}
+body.ih68-workspace #root .ih25-hub-back{min-height:44px !important;margin-bottom:24px !important;font-size:13px !important;}
+body.ih68-workspace #root .ih68-section-switch{display:flex !important;align-items:stretch !important;gap:24px !important;width:fit-content !important;max-width:100% !important;padding:0 !important;margin:0 0 34px !important;border:0 !important;border-bottom:1px solid var(--a-line) !important;background:none !important;}
+body.ih68-workspace #root .ih68-section-switch>button{display:flex !important;align-items:center !important;justify-content:center !important;min-height:48px !important;margin:0 !important;padding:10px 2px !important;border:0 !important;border-bottom:2px solid transparent !important;border-radius:0 !important;background:none !important;color:var(--a-muted) !important;font:450 14px/1.5 Inter,system-ui,sans-serif !important;box-shadow:none !important;cursor:pointer !important;white-space:normal !important;}
+body.ih68-workspace #root .ih68-section-switch>button[aria-current="page"]{border-bottom-color:var(--a-accent) !important;color:var(--a-ink) !important;font-weight:550 !important;}
+body.ih68-workspace #root :is(.account-card,.account-dashboard-block,.privacy-entry-card){padding:0 !important;border:0 !important;border-radius:0 !important;background:none !important;box-shadow:none !important;}
+body.ih68-workspace #root .account-card.account-profile-workspace{padding:0 !important;border:0 !important;background:none !important;}
+body.ih68-workspace #root .account-profile-preview{display:none !important;}
+body.ih68-workspace #root .account-form{gap:32px !important;}
+body.ih68-workspace #root .account-form-section{gap:25px !important;padding-bottom:32px !important;}
+body.ih68-workspace #root .account-form-section-heading h2{font-size:19px !important;line-height:1.55 !important;}
+body.ih68-workspace #root .account-form-section-heading small{font-size:13px !important;line-height:1.75 !important;}
+body.ih68-workspace #root .ih11-avatar-editor{padding:24px !important;background:var(--a-paper) !important;}
+body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) label{font-size:14px !important;}
+body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) :is(label,fieldset)>small{font-size:12px !important;line-height:1.8 !important;}
+body.ih68-workspace #root .ih-sp-panel{padding:28px !important;}
+body.ih68-workspace #root .account-template-options{gap:24px !important;}
+@media(max-width:700px){
+ body.ih68-workspace #root .ih68-section-switch{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:8px !important;width:100% !important;}body.ih68-workspace #root .ih68-section-switch>button{font-size:12px !important;padding:10px 3px !important;}body.ih68-workspace #root .ih68-section-switch[data-sections="2"]{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+ body.ih68-workspace #root .account-tab-intro{margin-bottom:22px !important;}body.ih68-workspace #root .account-tab-intro h1{font-size:29px !important;}body.ih68-workspace #root .account-tab-intro>p{font-size:14px !important;}body.ih68-workspace #root .ih11-avatar-editor{padding:20px 16px !important;gap:16px !important;}body.ih68-workspace #root .profile-category-options{grid-template-columns:minmax(0,1fr) !important;}
+ body.ih68-workspace #root :is(.account-form,.profile-portfolio-editor) :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select){font-size:16px !important;min-height:48px !important;}body.ih68-workspace #root .profile-portfolio-edit-list{grid-template-columns:minmax(0,1fr) !important;}body.ih68-workspace #root .ih-sp-panel{padding:22px 18px !important;}
+}
+
 }
