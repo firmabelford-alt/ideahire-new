@@ -180,7 +180,8 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
     templates: t('Wygląd', 'Appearance'),
   };
   const icons = { profile: 'profile', expertise: 'settings', portfolio: 'portfolio', jobs: 'jobs', preferences: 'settings', payouts: 'payouts', templates: 'palette' };
-  return <div className="ih72-section-navigation">
+  return <aside className="ih72-section-navigation ih75-account-navigation">
+    <Link to="/account" className="ih75-account-return"><WorkspaceIcon kind="back" />{t('Widok konta', 'Account overview')}</Link>
     <p className="ih74-section-nav-title">{t('Twoje konto', 'Your account')}</p>
     <nav className="ih72-section-links" aria-label={t('Sekcje konta', 'Account sections')}>
       {sections.map(section => <button type="button" key={section.key}
@@ -196,7 +197,7 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
         {sections.map(section => <option key={section.key} value={section.key}>{labels[section.key] || section.label}</option>)}
       </select>
     </label>
-  </div>;
+  </aside>;
 }
 export function WorkspaceLoading() {
   const t = useWorkspaceCopy();
@@ -429,3 +430,4 @@ function WorkspaceWorkActions() {
     </nav>
   </div>;
 }
+

@@ -8422,6 +8422,8 @@ function Account() {
   );
 
   const [accountHubOpen, setAccountHubOpen] = useState(false);
+  const [ownedJobSearch, setOwnedJobSearch] = useState("");
+  const [ownedJobFilter, setOwnedJobFilter] = useState("all");
   const accountContentRef = useRef(null);
 
   const connectReturnHandledRef =
@@ -9948,6 +9950,17 @@ function Account() {
     ? { ...selectedAccountSectionCopy, ...selectedAccountSectionCopy.english }
     : selectedAccountSectionCopy;
 
+  const ownedJobCounts = myJobs.reduce((counts, job) => {
+    counts[getJobExpiryInfo(job.expires_at).expired ? "expired" : "active"] += 1;
+    return counts;
+  }, { all: myJobs.length, active: 0, expired: 0 });
+  const ownedJobQuery = ownedJobSearch.trim().toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
+  const visibleOwnedJobs = myJobs.filter(job => {
+    const state = getJobExpiryInfo(job.expires_at).expired ? "expired" : "active";
+    const text = [job.title, job.description, getJobCategoryLabel(job.category)].filter(Boolean).join(" ").toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
+    return (ownedJobFilter === "all" || state === ownedJobFilter) && (!ownedJobQuery || text.includes(ownedJobQuery));
+  });
+
   function openAccountSection(section) {
     if (!section) return;
     setAccountHubOpen(false);
@@ -9994,12 +10007,12 @@ function Account() {
           null
         )}
 
-        <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
-          <div className="ih6-account-content">
+        <div className="ih6-account-layout ih25-account-panel ih75-account-layout" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
+          <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
+          <div className="ih6-account-content ih75-account-main">
         <SubpageHeading titleId="account-section-title" eyebrow={activeAccountSectionCopy.eyebrow}
           title={activeAccountSectionCopy.title} description={activeAccountSectionCopy.description} variant="account"
           actions={activeAccountSection === "jobs" ? <Link to="/find-talent" className="ih5-button is-primary"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link> : undefined} />
-        <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
 
         <div
           className="account-tab-stage"
@@ -10863,46 +10876,43 @@ function Account() {
           </section>
         )}
 
+        <section className="ih75-owned-register" id="account-jobs" hidden={activeAccountSection !== "jobs"} aria-label={accountEnglish ? "Your job listings" : "Twoje ogłoszenia"}>
+          <div className="ih75-register-toolbar">
+            <div className="ih75-register-filters" role="group" aria-label={accountEnglish ? "Listing status" : "Status ogłoszenia"}>
+              {[["all", accountEnglish ? "All" : "Wszystkie"], ["active", accountEnglish ? "Active" : "Aktywne"], ["expired", accountEnglish ? "Expired" : "Wygasłe"]].map(([value, label]) => <button type="button" key={value} aria-pressed={ownedJobFilter === value} onClick={() => setOwnedJobFilter(value)}>{label}<span>{ownedJobCounts[value]}</span></button>)}
+            </div>
+            <label className="ih75-register-search"><MarketIcon kind="search" /><span className="ih5-sr-only">{accountEnglish ? "Search your listings" : "Szukaj w swoich ogłoszeniach"}</span><input type="search" value={ownedJobSearch} onChange={event => setOwnedJobSearch(event.target.value)} maxLength={160} placeholder={accountEnglish ? "Search listings" : "Szukaj ogłoszenia"} />{ownedJobSearch && <button type="button" aria-label={accountEnglish ? "Clear search" : "Wyczyść wyszukiwanie"} onClick={() => setOwnedJobSearch("")}><MarketIcon kind="close" /></button>}</label>
+          </div>
+          {jobsLoading ? <InlineRouteLoader className="embedded-route-loader" rows={3} /> : myJobs.length === 0 ? (
+            <div className="ih75-owned-empty"><WorkspaceIcon kind="jobs" />
+              <h2>{accountEnglish ? "No listings yet" : "Nie masz jeszcze ogłoszeń"}</h2>
+              <p>{accountEnglish ? "Describe the work, set the scope and invite freelancers to reply." : "Opisz pracę, określ zakres i zaproś wykonawców do rozmowy."}</p>
+              <Link className="ih5-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link>
+            </div>
+          ) : <>
+            <p className="ih75-register-count" role="status" aria-live="polite">{accountEnglish ? "Showing " : "Wyświetlasz "}<strong>{visibleOwnedJobs.length}</strong>{accountEnglish ? " of " : " z "}{myJobs.length}{accountEnglish ? " listings" : " ogłoszeń"}</p>
+            <div className="ih75-register-columns" aria-hidden="true"><span>{accountEnglish ? "Project" : "Zlecenie"}</span><span>Status</span><span>{accountEnglish ? "Budget" : "Budżet"}</span><span>{accountEnglish ? "Manage" : "Zarządzaj"}</span></div>
+            <div className="ih75-owned-list">
+              {visibleOwnedJobs.map(job => {
+                const expiry = getJobExpiryInfo(job.expires_at);
+                return <article className="ih75-owned-row" key={job.id}>
+                  <div className="ih75-owned-copy"><p>{accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}</p><h2><Link to={`/edit-job/${job.id}`}>{job.title}</Link></h2><JobListingMeta job={job} compact /></div>
+                  <span className={"ih75-owned-status" + (expiry.expired ? " is-expired" : "")}><i aria-hidden="true" />{expiry.expired ? (accountEnglish ? "Expired" : "Wygasłe") : (accountEnglish ? "Active" : "Aktywne")}</span>
+                  <div className="ih75-owned-budget"><span>{accountEnglish ? "Budget" : "Budżet"}</span><strong>{Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL")} <small>zł</small></strong></div>
+                  <div className="ih75-owned-actions"><Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow" /></Link><button type="button" onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button></div>
+                </article>;
+              })}
+              {visibleOwnedJobs.length === 0 && <div className="ih75-owned-empty"><h2>{accountEnglish ? "No matching listings" : "Brak pasujących ogłoszeń"}</h2><p>{accountEnglish ? "Change the phrase or select another status." : "Zmień frazę albo wybierz inny status."}</p><button type="button" className="ih5-button is-quiet" onClick={() => { setOwnedJobSearch(""); setOwnedJobFilter("all"); }}>{accountEnglish ? "Show all listings" : "Pokaż wszystkie ogłoszenia"}</button></div>}
+            </div>
+          </>}
+        </section>
+
         <div
           className="account-jobs-republication"
           hidden={activeAccountSection !== "jobs"}
         >
           <JobRepublicationPanel />
         </div>
-
-        <section
-          className="account-card my-jobs-section"
-          id="account-jobs"
-          hidden={activeAccountSection !== "jobs"}
-        >
-          <div className="ih74-owned-list-heading">
-            <h2>{accountEnglish ? "Your listings" : "Twoje ogłoszenia"}</h2>
-            {!jobsLoading && <span>{accountEnglish ? "Total: " : "Łącznie: "}{myJobs.length}</span>}
-          </div>
-          {jobsLoading ? <InlineRouteLoader className="embedded-route-loader" rows={3} /> : myJobs.length === 0 ? (
-            <div className="ih74-owned-empty"><WorkspaceIcon kind="jobs" />
-              <h3>{accountEnglish ? "No listings yet" : "Nie masz jeszcze ogłoszeń"}</h3>
-              <p>{accountEnglish ? "Describe your project to find the right freelancer." : "Opisz swój projekt, aby znaleźć wykonawcę."}</p>
-              <Link className="ih5-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{accountEnglish ? "Post your first job" : "Dodaj pierwsze zlecenie"}</Link>
-            </div>
-          ) : <div className="jobs-list ih74-owned-jobs">
-            {myJobs.map(job => <article className="job-card ih74-owned-job" key={job.id}>
-              <div className="ih74-owned-job-copy">
-                <p className="ih74-owned-category">{accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}</p>
-                <h2>{job.title}</h2>
-                <JobListingMeta job={job} compact />
-              </div>
-              <div className="ih74-owned-job-manage">
-                <p className="ih74-owned-budget"><span>{accountEnglish ? "Budget" : "Budżet"}</span><strong>{Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL")} <small>zł</small></strong></p>
-                <div className="job-actions">
-                  <Link className="btn btn-dark" to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}</Link>
-                  <button className="btn btn-outline" type="button" onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button>
-                </div>
-              </div>
-            </article>)}
-          </div>}
-
-        </section>
         </div>
           </div>
         </div>
@@ -12618,6 +12628,9 @@ function FindTalent() {
       <main className="ih-market-shell ih5-editor-shell">
         <MarketHeader eyebrow="Dla zlecających" title="Dodaj zlecenie" description="Cztery krótkie kroki. Opisz projekt, ustal zakres i pokaż wykonawcom jasne warunki." />
 
+        <div className="ih75-editor-workspace">
+        <aside className="ih75-editor-guide" aria-label={formEnglish ? "Project steps" : "Etapy projektu"}>
+        <p className="ih75-guide-label">{formEnglish ? "Your project" : "Twój projekt"}</p>
         <label className="ih73-mobile-step-picker"><span>{formStep} / {JOB_FORM_STEPS.length}</span><select aria-label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={event => { setMessage(""); setFormStep(Number(event.target.value)); }}>{JOB_FORM_STEPS.map((step, index) => <option key={step.number} value={index + 1} disabled={index + 1 > maxStepReached}>{step.number}. {formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label}</option>)}</select></label>
         <ol className="ih5-job-create-progress" aria-label="Postęp dodawania zlecenia">
           {JOB_FORM_STEPS.map((item, index) => {
@@ -12646,7 +12659,8 @@ function FindTalent() {
             );
           })}
         </ol>
-
+        </aside>
+        <div className="ih75-editor-content">
         <form
           className="ih5-editor ih5-job-create-form"
           onSubmit={handleSubmit}
@@ -13508,6 +13522,8 @@ function FindTalent() {
             )}
           </div>
         </form>
+        </div>
+        </div>
       </main>
     </div>
   );
@@ -15599,7 +15615,7 @@ function Jobs() {
       "Wszystkie";
 
   return (
-    <div className="page ih-market-v5 ih5-jobs-page ih10-jobs-page ih25-jobs-page">
+    <div className="page ih-market-v5 ih5-jobs-page ih10-jobs-page ih25-jobs-page ih75-jobs-page">
       <AccountNavbar />
 
       <main className="ih-market-shell">
@@ -15625,7 +15641,7 @@ function Jobs() {
         ================================================= */}
 
 
-        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder} />
+        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder}>
         {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
 
         {!loading &&
@@ -16163,6 +16179,7 @@ function Jobs() {
             }
           )}
         </div>
+        </MarketFilters>
       </main>
     </div>
   );
@@ -16424,6 +16441,7 @@ function createCalendarDraft(dateValue = new Date()) {
 function Calendar() {
   const calendarEnglish = useSitePreferences().language === "en";
   const calendarLocale = calendarEnglish ? "en-GB" : "pl-PL";
+  const [calendarView, setCalendarView] = useState("agenda");
   const { user } =
     useAuth();
 
@@ -16809,23 +16827,15 @@ function Calendar() {
       )
       .slice(0, 8);
 
-  const nextSevenDaysEnd =
-    Date.now() +
-    7 * 24 * 60 * 60 * 1000;
-
-  const nextSevenDaysCount =
-    allEvents.filter((item) => {
-      const timestamp =
-        new Date(
-          item.starts_at
-        ).getTime();
-
-      return (
-        !item.completed_at &&
-        timestamp >= Date.now() &&
-        timestamp <= nextSevenDaysEnd
-      );
-    }).length;
+  const selectedWeekStart = new Date(selectedDate);
+  selectedWeekStart.setDate(selectedWeekStart.getDate() - (selectedWeekStart.getDay() + 6) % 7);
+  selectedWeekStart.setHours(0, 0, 0, 0);
+  const selectedWeekEnd = new Date(selectedWeekStart);
+  selectedWeekEnd.setDate(selectedWeekEnd.getDate() + 7);
+  const selectedWeekCount = allEvents.filter(item => {
+    const timestamp = new Date(item.starts_at).getTime();
+    return !item.completed_at && timestamp >= selectedWeekStart.getTime() && timestamp < selectedWeekEnd.getTime();
+  }).length;
 
   const activeEmailReminders =
     customEvents.filter(
@@ -16929,25 +16939,26 @@ function Calendar() {
     );
   }
 
-  function changeMonth(offset) {
-    setMonthDirection(
-      offset > 0
-        ? "next"
-        : "previous"
-    );
+  function selectCalendarDate(value) {
+    const next = new Date(value);
+    if (!Number.isFinite(next.getTime())) return;
+    next.setHours(12, 0, 0, 0);
+    setMonthDirection(next < selectedDate ? "previous" : "next");
+    setSelectedDate(next);
+    setCurrentMonth(current => current.getMonth() === next.getMonth() && current.getFullYear() === next.getFullYear() ? current : getCalendarMonthStart(next));
+  }
 
-    setCurrentMonth(
-      (current) =>
-        new Date(
-          current.getFullYear(),
-          current.getMonth() + offset,
-          1,
-          12,
-          0,
-          0,
-          0
-        )
-    );
+  function moveCalendarDay(offset) {
+    const next = new Date(selectedDate);
+    next.setDate(next.getDate() + offset);
+    selectCalendarDate(next);
+  }
+
+  function changeMonth(offset) {
+    const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1, 12);
+    setMonthDirection(offset > 0 ? "next" : "previous");
+    setCurrentMonth(getCalendarMonthStart(next));
+    setSelectedDate(next);
   }
 
   function goToToday() {
@@ -17340,7 +17351,7 @@ function Calendar() {
           actions={<button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" />{calendarEnglish ? "Add an event" : "Dodaj termin"}</button>}
         />
         <SubpageMetrics items={[
-          { label: calendarEnglish ? "Next 7 days" : "Najbliższe 7 dni", value: nextSevenDaysCount },
+          { label: calendarEnglish ? "Selected week" : "Wybrany tydzień", value: selectedWeekCount },
           { label: calendarEnglish ? "Email reminders" : "Przypomnienia e-mail", value: activeEmailReminders },
           { label: calendarEnglish ? "Completed this month" : "Wykonane w miesiącu", value: completedThisMonth },
         ]} />
@@ -17367,9 +17378,31 @@ function Calendar() {
           </div>
         )}
 
-        <div className="calendar-workspace">
+        <div className="ih75-calendar-controls">
+          <div className="ih75-view-switch" role="group" aria-label={calendarEnglish ? "Calendar view" : "Widok kalendarza"}>
+            <button type="button" aria-pressed={calendarView === "agenda"} onClick={() => setCalendarView("agenda")}><WorkspaceIcon kind="jobs" />{calendarEnglish ? "Day plan" : "Plan dnia"}</button>
+            <button type="button" aria-pressed={calendarView === "month"} onClick={() => setCalendarView("month")}><WorkspaceIcon kind="calendar" />{calendarEnglish ? "Month" : "Miesiąc"}</button>
+          </div>
+          <div className="ih75-day-navigation">
+            <button type="button" onClick={() => moveCalendarDay(-1)} aria-label={calendarEnglish ? "Previous day" : "Poprzedni dzień"}><MarketIcon kind="back" /></button>
+            <label><span className="ih5-sr-only">{calendarEnglish ? "Choose a date" : "Wybierz datę"}</span><input type="date" value={getCalendarDateKey(selectedDate)} onChange={event => { if (event.target.value) selectCalendarDate(getCalendarDateOnlyValue(event.target.value)); }} /></label>
+            <button type="button" onClick={() => moveCalendarDay(1)} aria-label={calendarEnglish ? "Next day" : "Następny dzień"}><MarketIcon kind="arrow" /></button>
+            <button type="button" onClick={goToToday}>{calendarEnglish ? "Today" : "Dzisiaj"}</button>
+          </div>
+        </div>
+        {calendarView === "agenda" && <nav className="ih75-week-strip" aria-label={calendarEnglish ? "Days of the week" : "Dni tygodnia"}>
+          {Array.from({ length: 7 }, (_, index) => {
+            const day = new Date(selectedDate);
+            day.setDate(day.getDate() - (day.getDay() + 6) % 7 + index);
+            const key = getCalendarDateKey(day);
+            const count = allEvents.filter(item => getCalendarDateKey(item.starts_at) === key).length;
+            return <button key={key} type="button" aria-pressed={key === selectedKey} aria-current={key === getCalendarDateKey(new Date()) ? "date" : undefined} aria-label={`${getCalendarDayLabel(day, calendarLocale)}, ${count} ${calendarEnglish ? "events" : "wydarzeń"}`} onClick={() => selectCalendarDate(day)}><span>{new Intl.DateTimeFormat(calendarLocale, { weekday: "short" }).format(day)}</span><strong>{day.getDate()}</strong><i aria-hidden="true">{loading ? "" : count > 0 ? count : ""}</i></button>;
+          })}
+        </nav>}
+        <div className="ih75-calendar-workspace" data-view={calendarView}>
+          {calendarView === "month" && <>
           <section
-            className="calendar-board"
+            className="calendar-board ih75-month-board"
             aria-label={calendarEnglish ? "Monthly calendar" : "Kalendarz miesięczny"}
           >
             <section className="calendar-toolbar">
@@ -17385,7 +17418,7 @@ function Calendar() {
                 </button>
 
                 <div>
-                  <span>Widok miesiąca</span>
+                  <span>{calendarEnglish ? "Month view" : "Widok miesiąca"}</span>
                   <h2>
                     {getCalendarMonthLabel(currentMonth, calendarLocale)}
                   </h2>
@@ -17495,7 +17528,7 @@ function Calendar() {
                         className="calendar-day-number"
                         type="button"
                         onClick={() => {
-                          setSelectedDate(day);
+                          selectCalendarDate(day);
 
                           if (isOutside) {
                             setMonthDirection(
@@ -17543,7 +17576,7 @@ function Calendar() {
                               }`}
                               type="button"
                               onClick={() => {
-                                setSelectedDate(day);
+                                selectCalendarDate(day);
 
                                 if (!item.read_only) {
                                   openEditDialog(item);
@@ -17577,82 +17610,14 @@ function Calendar() {
             )}
           </section>
 
-          <aside className="calendar-sidebar">
-            <section className="calendar-day-agenda">
-              <div className="calendar-sidebar-heading">
-                <div className="ih74-agenda-heading">
-                  <span>{calendarEnglish ? "Selected day" : "Wybrany dzień"}</span>
-                  <div className="ih74-agenda-date"><strong>{selectedDate.getDate()}</strong><div>
-                    <p>{new Intl.DateTimeFormat(calendarLocale, { weekday: "long" }).format(selectedDate)}</p>
-                    <h2>{new Intl.DateTimeFormat(calendarLocale, { month: "long", year: "numeric" }).format(selectedDate)}</h2>
-                  </div></div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    openCreateDialog(
-                      selectedDate
-                    )
-                  }
-                  aria-label={calendarEnglish ? "Add an event for this day" : "Dodaj termin w wybranym dniu"}
-                >
-                  +
-                </button>
-              </div>
-
-              {selectedDayEvents.length === 0 ? (
-                <div className="calendar-empty-state">
-                  <WorkspaceIcon kind="calendar" aria-hidden="true" />
-                  <strong>{calendarEnglish ? "No events planned" : "Brak zaplanowanych terminów"}</strong>
-                  <p>{calendarEnglish ? "Add a task, meeting or reminder for this day." : "Dodaj zadanie, spotkanie lub przypomnienie na ten dzień."}</p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openCreateDialog(
-                        selectedDate
-                      )
-                    }
-                  >
-                    Dodaj termin
-                  </button>
-                </div>
-              ) : (
-                <div className="calendar-agenda-list">
-                  {selectedDayEvents.map(
-                    (item) =>
-                      renderAgendaItem(
-                        item
-                      )
-                  )}
-                </div>
-              )}
-            </section>
-
-            <section className="calendar-upcoming">
-              <div className="calendar-sidebar-heading is-small">
-                <div>
-                  <span>{calendarEnglish ? "Your schedule" : "Twój terminarz"}</span>
-                  <h2>{calendarEnglish ? "Coming up" : "Nadchodzące terminy"}</h2>
-                </div>
-              </div>
-
-              {upcomingEvents.length === 0 ? (
-                <p className="calendar-upcoming-empty">
-                  Brak kolejnych terminów w tym widoku.
-                </p>
-              ) : (
-                <div className="calendar-upcoming-list">
-                  {upcomingEvents.map(
-                    (item) =>
-                      renderAgendaItem(
-                        item,
-                        true
-                      )
-                  )}
-                </div>
-              )}
-            </section>
+          </>}
+          <section className="ih75-day-plan" aria-labelledby="ih75-day-plan-title" aria-busy={loading}>
+            <header className="ih75-day-plan-heading"><div><p>{new Intl.DateTimeFormat(calendarLocale, { day: "numeric", month: "long", year: "numeric" }).format(selectedDate)}</p><h2 id="ih75-day-plan-title">{new Intl.DateTimeFormat(calendarLocale, { weekday: "long" }).format(selectedDate)}</h2></div><button type="button" onClick={() => openCreateDialog(selectedDate)} aria-label={calendarEnglish ? "Add an event for this day" : "Dodaj termin w wybranym dniu"}><MarketIcon kind="plus" /></button></header>
+            {loading ? <InlineRouteLoader label={calendarEnglish ? "Loading your schedule…" : "Pobieramy Twój plan…"} rows={3} /> : selectedDayEvents.length ? <div className="calendar-agenda-list">{selectedDayEvents.map(item => renderAgendaItem(item))}</div> : <div className="ih75-day-empty"><WorkspaceIcon kind="calendar" /><h3>{calendarEnglish ? "No events planned" : "Brak zaplanowanych terminów"}</h3><p>{calendarEnglish ? "Add a task, meeting or project deadline." : "Dodaj zadanie, spotkanie albo termin projektu."}</p><button type="button" className="ih5-button is-quiet" onClick={() => openCreateDialog(selectedDate)}><MarketIcon kind="plus" />{calendarEnglish ? "Add an event" : "Dodaj termin"}</button></div>}
+          </section>
+          <aside className="ih75-calendar-upcoming" aria-label={calendarEnglish ? "Upcoming events" : "Nadchodzące terminy"}>
+            <header><p>{calendarEnglish ? "In this calendar view" : "W tym widoku kalendarza"}</p><h2>{calendarEnglish ? "Coming up" : "Nadchodzące"}</h2></header>
+            {loading ? <InlineRouteLoader rows={2} /> : upcomingEvents.length ? <div className="calendar-upcoming-list">{upcomingEvents.map(item => renderAgendaItem(item, true))}</div> : <p className="calendar-upcoming-empty">{calendarEnglish ? "No upcoming events in this view." : "Brak nadchodzących terminów w tym widoku."}</p>}
           </aside>
         </div>
       </main>
@@ -30989,3 +30954,4 @@ function Router() {
 }
 
 export default Router;
+

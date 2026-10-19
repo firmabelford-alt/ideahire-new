@@ -369,26 +369,38 @@ export function MarketSelect({ id, label, value, options, onChange }) {
   );
 }
 
-export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, kind = 'zleceń' }) {
+export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, kind = 'zleceń', children }) {
   const id = useId();
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const categoriesToggleRef = useRef(null);
   const en = useSitePreferences().language === 'en';
   const people = kind === 'freelancerów';
   const services = kind === 'usług';
   const label = people ? (en ? 'Search freelancers' : 'Szukaj freelancerów') : services ? (en ? 'Search services' : 'Szukaj usług') : (en ? 'Search jobs' : 'Szukaj zleceń');
-  return <section className="ih73-filters" aria-label={label}>
-    <label className="ih73-catalog-search" htmlFor={id + '-search'}><MarketIcon kind="search" /><span className="ih5-sr-only">{label}</span>
-      <input id={id + '-search'} type="search" value={search} onChange={event => onSearch(event.target.value)} maxLength={160}
-        placeholder={people ? (en ? 'Name, skills or specialisation' : 'Imię, umiejętności lub specjalizacja') : services ? (en ? 'Service, field or result' : 'Usługa, dziedzina lub rezultat') : (en ? 'Project, field or skill' : 'Projekt, dziedzina lub umiejętność')} />
-      {search && <button type="button" onClick={() => onSearch('')} aria-label={en ? 'Clear search' : 'Wyczyść wyszukiwanie'}><MarketIcon kind="close" /></button>}
-    </label>
-    <div className="ih73-filter-options">
-      <MarketSelect id={id + '-category'} label={en ? 'Field' : 'Dziedzina'} value={category} onChange={onCategory}
-        options={[{ value: 'Wszystkie', label: en ? 'All fields' : 'Wszystkie dziedziny' }, ...categories.filter(value => value !== 'Wszystkie').map(value => ({ value, label: en ? translateUiText(categoryLabel(value)) : categoryLabel(value) }))]} />
-      {onSort && <MarketSelect id={id + '-sort'} label={en ? 'Sort by' : 'Kolejność'} value={sort} onChange={onSort}
-        options={[{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' }, { value: 'matched', label: en ? 'Matched to me' : 'Dopasowane do mnie', disabled: !matchedAvailable }]} />}
+  const fields = ['Wszystkie', ...categories.filter(value => value !== 'Wszystkie')];
+  const fieldLabel = value => value === 'Wszystkie' ? (en ? 'All fields' : 'Wszystkie dziedziny') : en ? translateUiText(categoryLabel(value)) : categoryLabel(value);
+  return <div className="ih75-catalog">
+    <aside className={'ih75-catalog-sidebar' + (categoriesOpen ? ' is-open' : '')} aria-label={en ? 'Filter by field' : 'Filtruj według dziedziny'}>
+      <h2>{en ? 'Fields' : 'Dziedziny'}</h2>
+      <button type="button" ref={categoriesToggleRef} className="ih75-categories-toggle" aria-expanded={categoriesOpen} aria-controls={id + '-fields'} onClick={() => setCategoriesOpen(value => !value)}><span>{fieldLabel(category)}</span><MarketIcon kind="chevron" /></button>
+      <nav id={id + '-fields'} className="ih75-category-list" aria-label={en ? 'Fields' : 'Dziedziny'}>
+        {fields.map(value => <button type="button" key={value} aria-pressed={category === value} onClick={() => { onCategory(value); if (categoriesOpen) categoriesToggleRef.current?.focus(); setCategoriesOpen(false); }}><span>{fieldLabel(value)}</span>{category === value && <MarketIcon kind="check" />}</button>)}
+      </nav>
       {(search || category !== 'Wszystkie') && <button type="button" className="ih73-clear-filters" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
+    </aside>
+    <div className="ih75-catalog-main">
+      <section className="ih75-catalog-controls" aria-label={label}>
+        <label className="ih73-catalog-search" htmlFor={id + '-search'}><MarketIcon kind="search" /><span className="ih5-sr-only">{label}</span>
+          <input id={id + '-search'} type="search" value={search} onChange={event => onSearch(event.target.value)} maxLength={160}
+            placeholder={people ? (en ? 'Name, skills or specialisation' : 'Imię, umiejętności lub specjalizacja') : services ? (en ? 'Service, field or result' : 'Usługa, dziedzina lub rezultat') : (en ? 'Project, field or skill' : 'Projekt, dziedzina lub umiejętność')} />
+          {search && <button type="button" onClick={() => onSearch('')} aria-label={en ? 'Clear search' : 'Wyczyść wyszukiwanie'}><MarketIcon kind="close" /></button>}
+        </label>
+        {onSort && <MarketSelect id={id + '-sort'} label={en ? 'Sort by' : 'Kolejność'} value={sort} onChange={onSort}
+          options={[{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' }, { value: 'matched', label: en ? 'Matched to me' : 'Dopasowane do mnie', disabled: !matchedAvailable }]} />}
+      </section>
+      <div className="ih75-catalog-results">{children}</div>
     </div>
-  </section>;
+  </div>;
 }
 
 const STEP_TILES = Array.from({ length: 320 }, (_, index) => {
@@ -674,3 +686,4 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     </div>, document.body)}
   </span>;
 }
+

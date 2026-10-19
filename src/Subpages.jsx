@@ -1,4 +1,4 @@
-/* P74 — clear page identities, readable type and direct navigation. */
+/* P75 — task-specific subpages, with shared navigation and type. */
 import React, { useLayoutEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid, CalendarDays, FileText, UserRound, Settings, Wallet, Image, SlidersHorizontal, Bell, ShieldCheck, MessageSquare, BriefcaseBusiness, Check } from 'lucide-react';
@@ -56,13 +56,15 @@ export function SubpageTheme() {
   const page = getSubpage(location, en);
   useLayoutEffect(() => {
     if (!page) return;
-    document.body.classList.add('ih73-subpage');
+    document.body.classList.add('ih73-subpage', 'ih75-subpage');
     document.body.dataset.ih73Page = page.kind;
+    document.body.dataset.ih75Section = page.kind === 'account' ? location.hash.slice(1) : page.kind;
     return () => {
-      document.body.classList.remove('ih73-subpage');
+      document.body.classList.remove('ih73-subpage', 'ih75-subpage');
       delete document.body.dataset.ih73Page;
+      delete document.body.dataset.ih75Section;
     };
-  }, [page?.kind, location.pathname]);
+  }, [page?.kind, location.pathname, location.hash]);
   return page && ['access', 'legal'].includes(page.kind) ? <SubpageNavigation standalone /> : null;
 }
 
@@ -93,8 +95,8 @@ export function SubpageNavigation({ standalone = false }) {
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
   if (!page) return null;
-  return <nav className={'ih73-route-navigation' + (standalone ? ' is-standalone' : '')}
-    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P74">
+  return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
+    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P75">
     <SubpageHistoryControls parent={page.parent} />
     <span className="ih73-route-label"><span>IdeaHire</span><i aria-hidden="true">/</i><strong>{page.label}</strong></span>
     <Link to={['access', 'legal'].includes(page.kind) ? '/' : page.kind === 'admin' ? '/admin' : '/account'} className="ih73-panel-link"><LayoutGrid size={17} strokeWidth={1.65} aria-hidden="true" /><span>{['access', 'legal'].includes(page.kind) ? (en ? 'Home' : 'Strona główna') : (en ? 'Dashboard' : 'Panel')}</span></Link>
@@ -123,10 +125,11 @@ export function SubpageHeading({ eyebrow, title, titleId, description, actions, 
     'Nowe wiadomości, zgłoszenia do zleceń i decyzje dotyczące współpracy.': 'New messages, applications and project decisions.',
   };
   const text = value => en && typeof value === 'string' ? copy[value] || translateUiText(value) : value;
-  return <header className={'ih73-page-heading is-' + variant}>
-    <div className="ih74-heading-main">
-      <span className="ih74-heading-symbol" aria-hidden="true" data-page-motion-stage="true"><Icon size={26} strokeWidth={1.7} /></span>
-      <div className="ih73-heading-copy">{eyebrow && <p className="ih73-eyebrow">{text(eyebrow)}</p>}<h1 id={titleId}>{text(title)}</h1>{description && <p className="ih73-description">{text(description)}</p>}</div>
+  return <header className={'ih73-page-heading ih75-page-heading is-' + variant}>
+    <div className="ih73-heading-copy">
+      <p className="ih73-eyebrow"><Icon size={16} strokeWidth={1.7} aria-hidden="true" /><span>{text(eyebrow || page?.label || 'IdeaHire')}</span></p>
+      <h1 id={titleId}>{text(title)}</h1>
+      {description && <p className="ih73-description">{text(description)}</p>}
     </div>
     {actions && <div className="ih73-heading-actions">{actions}</div>}
     {children}
@@ -147,3 +150,4 @@ export function SubpageCatalogTabs({ active }) {
     {[['jobs', '/jobs', en ? 'Jobs' : 'Zlecenia'], ['people', '/freelancers', en ? 'Freelancers' : 'Freelancerzy'], ['services', '/services', en ? 'Services' : 'Usługi']].map(([key, to, label]) => <Link key={key} to={to} aria-current={active === key ? 'page' : undefined}>{label}<ArrowUpRight size={15} strokeWidth={1.6} aria-hidden="true" /></Link>)}
   </nav>;
 }
+

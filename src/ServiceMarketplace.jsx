@@ -402,12 +402,12 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   }
 
   return (
-    <ServiceShell Navbar={Navbar} className="ih5-service-list-page">
+    <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page">
       <MarketCatalogHeader eyebrow={english ? "For your project" : "Dla Twojego projektu"} title={english ? "Services" : "Usługi"} description={english ? "Compare the scope, price and availability. Discuss the details with the freelancer in a conversation." : "Porównaj zakres, cenę i dostępność. Szczegóły ustalisz z wykonawcą w rozmowie."}
         tabs={<MarketplaceSwitch />} count={services.length} noun="services" status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined}
-        actions={<><Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link><Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />Dodaj usługę</Link></>}>
-        <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług" />
-      </MarketCatalogHeader>
+        actions={<><Link className="ih5-button is-quiet" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />{english ? "Add a service" : "Dodaj usługę"}</Link></>} />
+
+      <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług">
 
       <section className="ih5-service-results" aria-live="polite">
 <h2 className="ih5-sr-only">{selectedCategory === "Wszystkie" ? "Wszystkie usługi" : selectedCategory}</h2>
@@ -441,6 +441,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
           </div>
         )}
       </section>
+      </MarketFilters>
     </ServiceShell>
   );
 }
@@ -1699,13 +1700,12 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
     }, 220);
     return () => { current = false; window.clearTimeout(timer); };
   }, [supabase, search, category, page, refresh]);
-  return <div className="page ih-market-v5 ih5-service-page ih11-freelancers">
+  return <div className="page ih-market-v5 ih5-service-page ih11-freelancers ih75-people-page">
     <Navbar /><main className="ih-market-shell">
       <MarketCatalogHeader eyebrow={english ? "People for your project" : "Ludzie do Twojego projektu"} title={english ? "Freelancers" : "Freelancerzy"} description={english ? "Compare skills, experience and portfolios. Agree on the details in a conversation." : "Porównaj umiejętności, doświadczenie i portfolio. Szczegóły ustalisz w rozmowie."}
         tabs={<MarketplaceSwitch active="freelancers" />} count={result.total} noun="profiles" status={loading ? "Szukamy freelancerów…" : error ? "Wyniki niedostępne" : undefined}
-        actions={<Link className="ih11-button is-quiet" to="/account#account-profile-data">Mój profil</Link>}>
-        <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów" />
-      </MarketCatalogHeader>
+        actions={<Link className="ih11-button is-quiet" to="/account#account-profile-data">{english ? "My profile" : "Mój profil"}</Link>} />
+      <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów">
       <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
         <h2 className="ih5-sr-only">{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2>
         {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
@@ -1719,7 +1719,9 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
         </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Tu spotkają się pomysły i umiejętności."}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
         {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}
       </section>
+      </MarketFilters>
       {selected && <ProjectInquiryDialog key={selected.mode} mode={selected.mode} profile={selected.profile} supabase={supabase} navigate={navigate} onClose={() => setSelected(null)} />}
     </main>
   </div>;
 }
+
