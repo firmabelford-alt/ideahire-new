@@ -1,4 +1,4 @@
-/* P69 — coherent account pages and a touch-first project workspace. */
+/* P70 — one task per screen and project details opened on demand. */
 /* P60 — useful onboarding, email actions and site browsing for limited accounts. */
 /* P59 — fullscreen onboarding, visible registration validation, limited account. */
 /* P47 — pełny plik src/router.jsx | Zmieniona wyłącznie karta szablonów. */
@@ -22019,7 +22019,7 @@ function Chat() {
     window.requestAnimationFrame(() => {
       if (value === "conversation") {
         if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
-        else document.getElementById("ih69-tab-conversation")?.focus({ preventScroll: true });
+        else document.getElementById("ih70-room-options")?.focus({ preventScroll: true });
       }
       else document.getElementById(`ih68-room-${value}`)?.focus({ preventScroll: true });
     });
@@ -23101,7 +23101,7 @@ function Chat() {
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);if(messageViewportRef.current)messageViewportRef.current.scrollTop=messageViewportRef.current.scrollHeight;}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
         onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>{openWorkspace('files');setOpenMaterialDialog(true);}} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId}/>}
-      materials={<><div className="ih69-material-toolbar"><div><h2 id="ih68-materials-title">{roomCopy('Materiały','Materials')}</h2><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
+      materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
                       compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
                       conversationId={id}
                       userId={user?.id}

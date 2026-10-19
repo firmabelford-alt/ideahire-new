@@ -1,16 +1,7 @@
-/* P69 — scoped IdeaHire workspace styles. */
+/* P70 — one task at a time, in the shared IdeaHire theme. */
 @layer ih68Workspace {
 /* P69 — inbox, a full-width conversation, and dedicated project views. */
 body.ih68-workspace #root .ih68-mailbox { max-width: 1040px !important; }
-body.ih68-workspace #root .ih68-mailbox-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 24px !important; margin: 0 0 28px !important; }
-body.ih68-workspace #root .ih68-new-conversation { flex: none !important; }
-body.ih68-workspace #root .ih69-inbox-surface { overflow: hidden !important; border: 1px solid var(--a-line) !important; border-radius: 18px !important; background: var(--a-paper) !important; }
-body.ih68-workspace #root .ih68-mailbox-toolbar { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 16px !important; padding: 20px 24px !important; border-bottom: 1px solid var(--a-line) !important; }
-body.ih68-workspace #root .ih68-mailbox-toolbar .ih68-search { flex: 1 !important; max-width: 410px !important; background: var(--a-bg) !important; }
-body.ih68-workspace #root .ih69-mail-filters { display: flex !important; align-items: center !important; gap: 5px !important; }
-body.ih68-workspace #root .ih69-mail-filters>button { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important; min-height: 40px !important; width: auto !important; margin: 0 !important; padding: 9px 13px !important; border: 1px solid transparent !important; border-radius: 8px !important; background: none !important; color: var(--a-muted) !important; font: 500 12px/1.6 Inter,system-ui,sans-serif !important; box-shadow: none !important; cursor: pointer !important; }
-body.ih68-workspace #root .ih69-mail-filters>button[aria-pressed="true"] { background: var(--a-tint) !important; color: var(--a-accent) !important; }
-body.ih68-workspace #root .ih69-mail-filters>button>span { display: inline-grid !important; place-items: center !important; min-width: 19px !important; min-height: 19px !important; padding: 0 5px !important; border-radius: 5px !important; background: var(--a-accent) !important; color: var(--a-on) !important; font-size: 10px !important; font-weight: 650 !important; }
 body.ih68-workspace #root .ih68-mailbox-list { margin: 0 !important; padding: 0 !important; border: 0 !important; background: var(--a-paper) !important; }
 body.ih68-workspace #root .ih68-mail-row { display: grid !important; grid-template-columns: 46px minmax(0,1fr) 18px !important; align-items: center !important; gap: 18px !important; width: 100% !important; margin: 0 !important; padding: 23px 24px !important; border: 0 !important; border-bottom: 1px solid var(--a-line) !important; border-radius: 0 !important; background: none !important; color: var(--a-ink) !important; text-decoration: none !important; box-shadow: none !important; transform: none !important; }
 body.ih68-workspace #root .ih68-mail-row:last-child { border-bottom: 0 !important; }
@@ -37,36 +28,7 @@ body.ih68-workspace #root .ih69-person-avatar { display: inline-flex !important;
 body.ih68-workspace #root .ih68-room-person { display: block !important; flex: 1 !important; min-width: 0 !important; }
 body.ih68-workspace #root .ih68-room-person>a { display: block !important; width: fit-content !important; max-width: 100% !important; color: var(--a-ink) !important; text-decoration: none !important; }
 body.ih68-workspace #root .ih68-room-person h1 { overflow: hidden !important; max-width: 100% !important; margin: 0 !important; text-overflow: ellipsis !important; white-space: nowrap !important; color: var(--a-ink) !important; font: 650 17px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
-body.ih68-workspace #root .ih68-project-trigger { display: flex !important; align-items: center !important; gap: 5px !important; max-width: 100% !important; min-height: 26px !important; margin: 0 !important; padding: 2px 0 !important; border: 0 !important; border-radius: 3px !important; background: none !important; color: var(--a-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; cursor: pointer !important; box-shadow: none !important; text-align: left !important; }
-body.ih68-workspace #root .ih68-project-trigger>span { overflow: hidden !important; white-space: nowrap !important; text-overflow: ellipsis !important; }
-body.ih68-workspace #root .ih68-project-trigger>svg { width: 13px !important; height: 13px !important; flex: none !important; }
 body.ih68-workspace #root .ih68-room-header-tools { display: flex !important; align-items: center !important; gap: 8px !important; flex: none !important; }
-body.ih68-workspace #root .ih68-room-options { z-index: 230 !important; }
-body.ih68-workspace #root .ih68-room-options>summary { display: grid !important; place-items: center !important; width: 42px !important; height: 42px !important; min-height: 42px !important; padding: 0 !important; border: 1px solid var(--a-line) !important; border-radius: 10px !important; color: var(--a-ink) !important; }
-body.ih68-workspace #root .ih68-room-options>summary>svg { width: 21px !important; height: 21px !important; }
-body.ih68-workspace #root .ih68-room-options>nav { width: 300px !important; max-height: min(65dvh,calc(var(--ih68-room-height,600px) - 78px)) !important; }
-body.ih68-workspace #root .ih68-room-options .is-danger { color: var(--a-muted) !important; }
-body.ih68-workspace #root .ih69-menu-separator { height: 1px !important; margin: 6px 8px !important; background: var(--a-line) !important; }
-body.ih68-workspace #root .ih69-room-preferences>div { display: flex !important; align-items: center !important; gap: 4px !important; padding: 4px 6px !important; }
-body.ih68-workspace #root .ih68-room-options .ih69-room-preferences>div>button { display: inline-flex !important; justify-content: center !important; min-width: 38px !important; width: 38px !important; min-height: 38px !important; padding: 5px !important; font-size: 11px !important; }
-body.ih68-workspace #root .ih68-room-options .ih69-room-preferences>div>button[aria-pressed="true"] { background: var(--a-tint) !important; color: var(--a-accent) !important; }
-body.ih68-workspace #root .ih68-room-options .ih69-room-preferences>div>a { justify-content: flex-end !important; flex: 1 !important; min-height: 38px !important; padding: 5px !important; font-size: 11px !important; }
-body.ih68-workspace #root .ih68-room-options .ih69-room-preferences>div>a>svg { width: 13px !important; height: 13px !important; }
-body.ih68-workspace #root .ih69-room-views { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; flex: none !important; width: 100% !important; margin: 0 !important; padding: 0 24px 12px !important; gap: 8px !important; border: 0 !important; border-bottom: 1px solid var(--a-line) !important; background: var(--a-paper) !important; }
-body.ih68-workspace #root .ih69-room-views>button { display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; min-height: 42px !important; width: 100% !important; margin: 0 !important; padding: 9px 12px !important; border: 1px solid transparent !important; border-radius: 9px !important; background: none !important; color: var(--a-muted) !important; font: 500 13px/1.6 Inter,system-ui,sans-serif !important; cursor: pointer !important; box-shadow: none !important; }
-body.ih68-workspace #root .ih69-room-views>button[aria-selected="true"] { background: var(--a-tint) !important; color: var(--a-accent) !important; font-weight: 650 !important; }
-body.ih68-workspace #root .ih69-room-views>button:hover { background: var(--a-soft) !important; }
-body.ih68-workspace #root .ih69-room-views>button>svg { width: 17px !important; height: 17px !important; flex: none !important; }
-body.ih68-workspace #root .ih69-room-views>button>small { display: inline-grid !important; place-items: center !important; min-width: 18px !important; height: 18px !important; padding: 0 4px !important; border-radius: 5px !important; background: var(--a-soft) !important; color: var(--a-muted) !important; font: 550 10px/1 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih69-room-views>button>.ih68-dot { width: 5px !important; height: 5px !important; }
-body.ih68-workspace #root .ih68-project-details { position: absolute !important; top: 82px !important; left: 20px !important; right: 20px !important; z-index: 190 !important; max-height: min(65dvh,calc(var(--ih68-room-height,600px) - 100px)) !important; margin: 0 !important; padding: 24px !important; overflow-y: auto !important; border: 1px solid var(--a-line) !important; border-radius: 14px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; box-shadow: 0 8px 28px #142d211a !important; }
-body.ih68-workspace #root .ih68-project-details>header { display: flex !important; justify-content: space-between !important; align-items: flex-start !important; gap: 20px !important; margin-bottom: 16px !important; }
-body.ih68-workspace #root .ih68-project-details h2 { margin: 0 !important; font: 650 22px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
-body.ih68-workspace #root .ih68-project-details p { margin: 14px 0 !important; color: var(--a-muted) !important; white-space: pre-wrap !important; overflow-wrap: anywhere !important; font: 400 14px/1.75 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih68-project-details a { color: var(--a-accent) !important; }
-body.ih68-workspace #root .ih68-project-amount { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; margin-bottom: 18px !important; padding: 14px 16px !important; border-radius: 10px !important; background: var(--a-soft) !important; }
-body.ih68-workspace #root .ih68-project-amount>span { color: var(--a-muted) !important; font: 450 12px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih68-workspace #root .ih68-project-amount>strong { font: 650 20px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih68-workspace #root .ih68-room-body { display: flex !important; flex: 1 !important; min-height: 0 !important; border-radius: 0 0 20px 20px !important; overflow: hidden !important; }
 body.ih68-workspace #root .ih68-correspondence { display: flex !important; flex-direction: column !important; flex: 1 !important; width: 100% !important; min-width: 0 !important; min-height: 0 !important; padding: 0 !important; overflow: hidden !important; background: var(--a-bg) !important; }
 body.ih68-workspace #root .ih68-thread-wrap { position: relative !important; flex: 1 !important; min-height: 0 !important; }
@@ -301,23 +263,10 @@ body.ih68-workspace .private-work-form-actions button.is-primary { border-color:
   body.ih68-workspace #root .ih68-room-body { border-radius: 0 !important; }
   body.ih68-workspace #root .ih68-room.is-focus { inset: 0 0 auto !important; width: 100% !important; border: 0 !important; }
   body.ih68-workspace #root .ih68-expand-option { display: none !important; }
-  body.ih68-workspace #root .ih69-room-views { padding: 0 16px 10px !important; gap: 5px !important; }
-  body.ih68-workspace #root .ih69-room-views>button { min-height: 42px !important; padding: 8px 9px !important; font-size: 12px !important; }
   body.ih68-workspace #root .ih68-room-header .ih68-room-back { width: 34px !important; height: 40px !important; min-height: 40px !important; padding: 6px !important; background: none !important; }
   body.ih68-workspace #root .ih68-room-person h1 { font-size: 16px !important; }
-  body.ih68-workspace #root .ih68-project-trigger { font-size: 11px !important; }
-  body.ih68-workspace #root .ih68-project-details { top: 68px !important; left: 12px !important; right: 12px !important; padding: 22px !important; }
-  body.ih68-workspace #root .ih68-project-details h2 { font-size: 21px !important; }
-  body.ih68-workspace #root .ih68-room-options>nav { max-width: calc(100vw - 32px) !important; }
 }
 @media(max-width:700px) {
-  body.ih68-workspace #root .ih68-mailbox-heading { align-items: flex-start !important; gap: 16px !important; margin-bottom: 22px !important; }
-  body.ih68-workspace #root .ih68-mailbox-heading .ih68-overline { display: none !important; }
-  body.ih68-workspace #root .ih68-new-conversation { min-width: 78px !important; min-height: 44px !important; padding: 10px 12px !important; font-size: 12px !important; }
-  body.ih68-workspace #root .ih68-mailbox-toolbar { align-items: stretch !important; flex-direction: column !important; gap: 12px !important; padding: 16px !important; }
-  body.ih68-workspace #root .ih68-mailbox-toolbar .ih68-search { flex: auto !important; max-width: none !important; }
-  body.ih68-workspace #root .ih69-mail-filters { gap: 4px !important; }
-  body.ih68-workspace #root .ih69-mail-filters>button { min-height: 40px !important; padding: 8px 12px !important; font-size: 12px !important; }
   body.ih68-workspace #root .ih68-mail-row { grid-template-columns: 40px minmax(0,1fr) 12px !important; gap: 12px !important; padding: 20px 16px !important; }
   body.ih68-workspace #root .ih68-mail-row>.ih68-avatar { width: 40px !important; height: 40px !important; min-width: 40px !important; border-radius: 12px !important; font-size: 15px !important; }
   body.ih68-workspace #root .ih68-mail-person>strong { font-size: 14px !important; }
@@ -380,19 +329,12 @@ body.ih68-workspace .private-work-form-actions button.is-primary { border-color:
   body.ih68-workspace #root .ih68-room-header { gap: 8px !important; padding-inline: 10px !important; }
   body.ih68-workspace #root .ih68-room-header .ih68-avatar { width: 30px !important; height: 30px !important; min-width: 30px !important; border-radius: 10px !important; font-size: 12px !important; }
   body.ih68-workspace #root .ih68-room-person h1 { font-size: 15px !important; }
-  body.ih68-workspace #root .ih68-room-options>summary { width: 38px !important; height: 38px !important; min-height: 38px !important; }
-  body.ih68-workspace #root .ih69-room-views { padding-inline: 12px !important; gap: 3px !important; }
-  body.ih68-workspace #root .ih69-room-views>button { gap: 5px !important; padding-inline: 5px !important; font-size: 11px !important; }
-  body.ih68-workspace #root .ih69-room-views>button>svg { width: 15px !important; height: 15px !important; }
-  body.ih68-workspace #root .ih69-room-views>button>small { display: none !important; }
   body.ih68-workspace #root .ih68-room-page { padding-inline: 14px !important; }
   body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle { padding-inline: 10px !important; gap: 5px !important; }
   body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle>b { max-width: 74px !important; }
   body.ih68-workspace #root .ih68-mail-row { gap: 10px !important; padding-inline: 13px !important; }
 }
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-room-header { min-height: 52px !important; padding-block: 5px !important; }
-body.ih68-workspace #root .ih68-room.is-keyboard .ih68-project-trigger { display: none !important; }
-body.ih68-workspace #root .ih68-room.is-keyboard[data-view="conversation"] .ih69-room-views { display: none !important; }
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-composer { padding-top: 8px !important; }
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-composer textarea { max-height: 80px !important; min-height: 30px !important; padding-bottom: 3px !important; }
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-composer-area { padding-bottom: 7px !important; }
@@ -401,5 +343,166 @@ body.ih68-workspace #root .ih68-room.is-keyboard .ih68-thread { padding-block: 1
 body.ih68-workspace #root .ih68-room.is-keyboard .ih68-thread-empty>.ih69-artwork { display: none !important; }
 @media(prefers-reduced-motion:no-preference) { body.ih68-workspace #root .ih68-room-page { animation: ih69-view-in 150ms ease-out !important; } }
 @keyframes ih69-view-in { from { opacity: .5; } to { opacity: 1; } }
+
+/* One header, one conversation. The project is a separate, full-width view. */
+body.ih68-workspace #root .ih68-mailbox-list { overflow:hidden !important; border:1px solid var(--a-line) !important; border-radius:16px !important; }
+body.ih68-workspace #root .ih68-mail-row { min-height:124px !important; padding:25px 28px !important; gap:20px !important; }
+body.ih68-workspace #root .ih68-mail-person { margin-bottom:7px !important; }
+body.ih68-workspace #root .ih68-mail-person>strong { font-size:17px !important; }
+body.ih68-workspace #root .ih68-mail-person>time { font-size:12px !important; }
+body.ih68-workspace #root .ih68-mail-copy h2 { font-size:15px !important; }
+body.ih68-workspace #root .ih68-mail-copy>p { margin-top:8px !important; font-size:14px !important; }
+body.ih68-workspace #root .ih68-mailbox-list>.ih70-empty { border:0 !important; border-radius:0 !important; }
+body.ih68-workspace #root .ih70-room .ih68-room-header { min-height:86px !important; border-bottom:1px solid var(--a-line) !important; gap:16px !important; }
+body.ih68-workspace #root .ih70-room-context { display:block !important; margin:5px 0 0 !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--a-muted) !important; font:400 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih70-project-open { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:8px !important; flex:none !important; width:auto !important; min-height:46px !important; margin:0 !important; padding:11px 16px !important; border:1px solid var(--a-line) !important; border-radius:10px !important; background:var(--a-paper) !important; color:var(--a-ink) !important; font:550 14px/1.5 Inter,system-ui,sans-serif !important; box-shadow:none !important; cursor:pointer !important; }
+body.ih68-workspace #root .ih70-project-open>svg { width:18px !important; height:18px !important; }
+body.ih68-workspace #root .ih70-options-trigger { width:44px !important; height:44px !important; min-height:44px !important; border:0 !important; background:none !important; }
+body.ih68-workspace #root .ih70-project-page { padding-top:36px !important; }
+body.ih68-workspace #root .ih70-project-heading { margin-bottom:28px !important; }
+body.ih68-workspace #root .ih70-project-heading>p { margin:0 0 14px !important; color:var(--a-muted) !important; font:400 14px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih70-project-heading>p:empty { display:none !important; }
+body.ih68-workspace #root .ih70-project-heading>h2 { margin:0 !important; color:var(--a-ink) !important; font:650 28px/1.3 Inter,system-ui,sans-serif !important; letter-spacing:-.035em !important; overflow-wrap:anywhere !important; }
+body.ih68-workspace #root .ih70-project-price { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:12px 28px !important; margin:0 0 28px !important; padding:20px 0 !important; border-top:1px solid var(--a-line) !important; border-bottom:1px solid var(--a-line) !important; }
+body.ih68-workspace #root .ih70-project-price>span { color:var(--a-muted) !important; font:400 15px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih70-project-price>strong { color:var(--a-accent) !important; font:650 24px/1.3 Inter,system-ui,sans-serif !important; letter-spacing:-.02em !important; overflow-wrap:anywhere !important; }
+body.ih68-workspace #root .ih70-project-choices { display:flex !important; flex-direction:column !important; gap:16px !important; margin:0 0 28px !important; padding:0 !important; }
+body.ih68-workspace #root .ih70-project-choices .ih70-task-link { min-height:106px !important; padding:24px !important; }
+body.ih68-workspace #root .ih70-project-choices .ih70-task-copy>strong { font-size:20px !important; }
+body.ih68-workspace #root .ih70-project-brief { margin-top:0 !important; padding-top:4px !important; border-top:1px solid var(--a-line) !important; }
+body.ih68-workspace #root .ih70-project-brief>summary { display:flex !important; align-items:center !important; justify-content:space-between !important; gap:18px !important; min-height:60px !important; list-style:none !important; cursor:pointer !important; color:var(--a-ink) !important; font:500 15px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih70-project-brief>summary::-webkit-details-marker { display:none !important; }
+body.ih68-workspace #root .ih70-project-brief>summary>svg { width:18px !important; height:18px !important; flex:none !important; }
+body.ih68-workspace #root .ih70-project-brief[open]>summary>svg { transform:rotate(180deg) !important; }
+body.ih68-workspace #root .ih70-project-brief:not([open])>div { display:none !important; }
+body.ih68-workspace #root .ih70-project-brief>div { padding:12px 0 24px !important; color:var(--a-muted) !important; overflow-wrap:anywhere !important; font:400 15px/1.85 Inter,system-ui,sans-serif !important; }
+body.ih68-workspace #root .ih70-project-brief>div p { margin:0 0 18px !important; font:inherit !important; white-space:pre-wrap !important; }
+body.ih68-workspace #root .ih70-project-brief>div a { display:inline-block !important; min-height:44px !important; padding:10px 0 !important; color:var(--a-accent) !important; }
+body.ih68-workspace #root .ih68-day { font-size:12px !important; }
+body.ih68-workspace #root .ih68-message-content { font-size:16px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih69-message-author { font-size:13px !important; }
+body.ih68-workspace #root .ih69-message-meta, body.ih68-workspace #root .ih68-read-receipt { font-size:11px !important; }
+body.ih68-workspace #root .ih68-composer textarea { font-size:16px !important; }
+body.ih68-workspace #root .ih68-attach { min-height:44px !important; font-size:14px !important; }
+body.ih68-workspace #root .ih68-send { min-height:44px !important; font-size:14px !important; }
+body.ih68-workspace #root .ih68-compose-hint { font-size:12px !important; }
+body.ih68-workspace #root .ih68-message-options>summary { width:40px !important; height:36px !important; min-height:36px !important; }
+body.ih68-workspace #root .ih68-message-options>button { font-size:14px !important; }
+body.ih68-workspace #root .ih68-thread-empty p { font-size:15px !important; }
+body.ih68-workspace #root .ih68-thread-empty>svg { width:32px !important; height:32px !important; margin-bottom:24px !important; color:var(--a-accent) !important; }
+body.ih68-workspace #root .ih68-room-page { padding-bottom:40px !important; }
+body.ih68-workspace #root :is(.ih68-room-page-heading,.ih69-material-toolbar) p { margin-top:0 !important; font-size:15px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih69-material-toolbar { gap:20px !important; margin-bottom:28px !important; }
+body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle { min-height:48px !important; padding:13px 18px !important; font-size:15px !important; }
+body.ih68-workspace #root .ih69-library-toolbar>span, body.ih68-workspace #root .ih69-library-toolbar select { font-size:14px !important; }
+body.ih68-workspace #root .ih69-library-toolbar select { min-height:46px !important; }
+body.ih68-workspace #root .ih69-material-empty { min-height:260px !important; border-style:solid !important; }
+body.ih68-workspace #root .ih69-material-empty h3 { font-size:21px !important; }
+body.ih68-workspace #root .ih69-material-empty p { font-size:15px !important; }
+body.ih68-workspace #root .ih69-material-batches { gap:24px !important; }
+body.ih68-workspace #root .ih69-material-batch { padding:24px !important; }
+body.ih68-workspace #root .ih69-project-plan-disclosure>summary { min-height:72px !important; padding:20px 24px !important; }
+body.ih68-workspace #root .ih69-project-plan { padding:0 24px 24px !important; }
+body.ih68-workspace #root .ih69-fact-list>div { gap:20px !important; padding-block:16px !important; }
+body.ih68-workspace #root .ih69-fact-list dt, body.ih68-workspace #root .ih69-fact-list dd, body.ih68-workspace #root .ih69-scope-list dd { font-size:14px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih69-plan-milestones p, body.ih68-workspace #root .ih69-plan-checklist li { font-size:15px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih69-scope-list dt { font-size:15px !important; }
+body.ih68-workspace #root .ih69-legal-note>summary { min-height:44px !important; font-size:13px !important; }
+body.ih68-workspace #root .ih69-legal-note p { font-size:13px !important; }
+body.ih68-workspace #root .ih68-room :is(.agreement-workspace,.agreement-summary,.chat-payment-panel,.private-work-delivery) { padding:28px !important; margin-bottom:24px !important; }
+body.ih68-workspace #root .ih68-room .agreement-workspace-toggle strong { font-size:18px !important; }
+body.ih68-workspace #root .ih68-room .agreement-workspace-toggle small { margin-top:8px !important; font-size:14px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih68-room :is(.agreement-gate-heading>p,.agreement-form-heading>p,.agreement-field>small,.agreement-detail>span,.agreement-summary-copy small) { font-size:14px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih68-room .agreement-field { gap:12px !important; }
+body.ih68-workspace #root .ih68-room .agreement-field>span { font-size:15px !important; }
+body.ih68-workspace #root .ih68-room .agreement-form-grid { gap:28px !important; }
+body.ih68-workspace #root .ih68-room .agreement-form-grid :is(input:not([type="checkbox"]),textarea,select) { min-height:50px !important; font-size:16px !important; }
+body.ih68-workspace #root .ih68-room .ih12-form-section { margin-top:16px !important; padding-top:24px !important; font-size:16px !important; }
+body.ih68-workspace #root .ih68-room :is(.agreement-confirmation span,.agreement-message,.agreement-blocked-note,.agreement-waiting-note,.agreement-legal-note,.chat-payment-message,.chat-payment-empty,.chat-payment-panel>p,.private-work-delivery p) { font-size:14px !important; line-height:1.85 !important; }
+body.ih68-workspace #root .ih68-room .agreement-detail { padding-block:20px !important; }
+body.ih68-workspace #root .ih68-room .agreement-detail>strong, body.ih68-workspace #root .ih68-room .agreement-detail>p { font-size:16px !important; line-height:1.75 !important; }
+body.ih68-workspace #root .ih68-room :is(.agreement-primary-button,.agreement-secondary-button,.chat-payment-button) { min-height:50px !important; font-size:15px !important; }
+body.ih68-workspace .ih68-focus-scrim { backdrop-filter:none !important; }
+@media(min-width:1400px) {
+  body.ih68-workspace #root .ih68-room .ih68-terms.is-pinned { padding:26px 20px !important; }
+  body.ih68-workspace #root .ih68-room .ih68-terms.is-pinned :is(.agreement-workspace,.agreement-summary,.chat-payment-panel) { padding:20px !important; }
+}
+@media(max-width:850px) {
+  body.ih68-workspace #root .ih70-room .ih68-room-header { min-height:76px !important; padding:12px 14px !important; gap:12px !important; }
+  body.ih68-workspace #root .ih70-room .ih68-room-back { width:40px !important; height:44px !important; min-height:44px !important; padding:10px !important; }
+  body.ih68-workspace #root .ih70-room .ih68-room-person h1 { font-size:18px !important; line-height:1.4 !important; }
+  body.ih68-workspace #root .ih70-room-context { margin-top:5px !important; font-size:13px !important; }
+  body.ih68-workspace #root .ih70-project-open { min-height:44px !important; padding:10px 12px !important; font-size:14px !important; }
+  body.ih68-workspace #root .ih70-project-open>svg { display:none !important; }
+  body.ih68-workspace #root .ih70-room .ih68-room-header-tools { gap:4px !important; }
+  body.ih68-workspace .ih70-sheet .ih68-expand-option { display:none !important; }
+  body.ih68-workspace #root .ih70-room.is-keyboard .ih68-room-header { min-height:54px !important; padding-block:5px !important; }
+  body.ih68-workspace #root .ih70-room.is-keyboard .ih70-room-context, body.ih68-workspace #root .ih70-room.is-keyboard .ih70-project-open { display:none !important; }
+}
+@media(max-width:700px) {
+  body.ih68-workspace #root .ih68-mail-row { grid-template-columns:40px minmax(0,1fr) 14px !important; min-height:114px !important; gap:14px !important; padding:24px 20px !important; }
+  body.ih68-workspace #root .ih68-mail-person { gap:12px !important; margin-bottom:8px !important; }
+  body.ih68-workspace #root .ih68-mail-person>strong { font-size:16px !important; }
+  body.ih68-workspace #root .ih68-mail-person>time { font-size:12px !important; }
+  body.ih68-workspace #root .ih68-mail-copy h2 { font-size:14px !important; line-height:1.65 !important; -webkit-line-clamp:2 !important; }
+  body.ih68-workspace #root .ih68-mail-copy>p { margin-top:8px !important; font-size:14px !important; }
+  body.ih68-workspace #root .ih68-mail-row:not(.is-unread) .ih68-mail-copy>p { display:none !important; }
+  body.ih68-workspace #root .ih68-mail-end { width:14px !important; }
+  body.ih68-workspace #root .ih68-thread { padding:24px 18px 14px !important; }
+  body.ih68-workspace #root .ih68-day { margin-bottom:24px !important; font-size:12px !important; }
+  body.ih68-workspace #root .ih68-message { max-width:92% !important; margin-bottom:20px !important; padding:14px 16px 7px !important; }
+  body.ih68-workspace #root .ih68-message-content { font-size:16px !important; line-height:1.75 !important; }
+  body.ih68-workspace #root .ih69-message-author { display:none !important; }
+  body.ih68-workspace #root .ih69-message-meta, body.ih68-workspace #root .ih68-read-receipt { font-size:11px !important; }
+  body.ih68-workspace #root .ih68-composer-area { padding:8px 14px calc(14px + env(safe-area-inset-bottom,0px)) !important; }
+  body.ih68-workspace #root .ih68-composer { padding:14px 14px 8px !important; }
+  body.ih68-workspace #root .ih68-composer textarea { min-height:36px !important; padding-bottom:8px !important; font-size:16px !important; }
+  body.ih68-workspace #root .ih68-attach { font-size:14px !important; min-height:44px !important; gap:8px !important; }
+  body.ih68-workspace #root .ih68-send { width:44px !important; height:44px !important; min-height:44px !important; }
+  body.ih68-workspace #root .ih68-room-page { padding:28px 22px 40px !important; }
+  body.ih68-workspace #root .ih70-project-heading>h2 { font-size:25px !important; line-height:1.4 !important; }
+  body.ih68-workspace #root .ih70-project-heading>p { font-size:14px !important; }
+  body.ih68-workspace #root .ih70-project-choices .ih70-task-link { min-height:112px !important; padding:22px 20px !important; }
+  body.ih68-workspace #root .ih70-project-choices .ih70-task-copy>strong { font-size:19px !important; }
+  body.ih68-workspace #root .ih70-project-choices .ih70-task-icon { display:none !important; }
+  body.ih68-workspace #root .ih69-material-toolbar { flex-direction:column !important; align-items:stretch !important; gap:20px !important; margin-bottom:28px !important; }
+  body.ih68-workspace #root .ih69-material-toolbar p { margin:0 !important; font-size:15px !important; }
+  body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle { width:100% !important; justify-content:center !important; min-height:50px !important; padding:14px 18px !important; font-size:15px !important; }
+  body.ih68-workspace #root .ih69-material-toolbar .private-work-share-toggle>b { max-width:none !important; }
+  body.ih68-workspace #root .ih69-library-toolbar { margin-bottom:20px !important; gap:16px !important; }
+  body.ih68-workspace #root .ih69-library-toolbar>span { font-size:14px !important; }
+  body.ih68-workspace #root .ih69-library-toolbar select { max-width:170px !important; font-size:16px !important; }
+  body.ih68-workspace #root .ih69-material-empty { min-height:230px !important; padding:30px 22px !important; }
+  body.ih68-workspace #root .ih69-material-empty>svg { width:92px !important; height:74px !important; margin-bottom:20px !important; }
+  body.ih68-workspace #root .ih69-material-batch { padding:22px 20px !important; }
+  body.ih68-workspace #root .ih69-project-plan-disclosure>summary { padding:20px !important; }
+  body.ih68-workspace #root .ih69-project-plan { padding:0 20px 22px !important; }
+  body.ih68-workspace #root .ih69-plan-keyfacts { grid-template-columns:minmax(0,1fr) !important; gap:20px !important; padding:20px !important; }
+  body.ih68-workspace #root .ih69-plan-keyfacts>div+div { padding:20px 0 0 !important; border-left:0 !important; border-top:1px solid var(--a-line) !important; }
+  body.ih68-workspace #root .ih69-plan-keyfacts span { font-size:12px !important; }
+  body.ih68-workspace #root .ih69-plan-keyfacts strong { font-size:20px !important; }
+  body.ih68-workspace #root .ih69-fact-list>div { grid-template-columns:minmax(0,1fr) !important; gap:7px !important; padding-block:18px !important; }
+  body.ih68-workspace #root .ih69-fact-list dt { font-size:14px !important; }
+  body.ih68-workspace #root .ih69-fact-list dd { margin:0 !important; font-size:16px !important; line-height:1.75 !important; text-align:left !important; }
+  body.ih68-workspace #root .ih69-scope-list dd { font-size:15px !important; line-height:1.85 !important; }
+  body.ih68-workspace #root .ih68-room :is(.agreement-workspace,.agreement-summary,.chat-payment-panel,.private-work-delivery) { padding:24px 20px !important; }
+  body.ih68-workspace #root .ih68-room .agreement-form-grid { gap:28px !important; }
+  body.ih68-workspace #root .ih68-room .agreement-progress { padding:16px !important; gap:10px !important; }
+  body.ih68-workspace #root .ih68-room .agreement-progress>span { font-size:12px !important; }
+  body.ih68-workspace #root .ih68-room .agreement-form-actions { gap:14px !important; margin-top:28px !important; }
+  body.ih68-workspace #root .ih68-room :is(.agreement-primary-button,.agreement-secondary-button,.chat-payment-button) { min-height:50px !important; }
+  body.ih68-workspace #root .ih68-room.is-keyboard .ih68-thread-empty>svg { display:none !important; }
+  body.ih68-workspace #root .ih68-room .chat-payment-breakdown { padding:20px 16px !important; }
+  body.ih68-workspace #root .ih68-room .chat-payment-breakdown>div { margin-block:12px !important; font-size:14px !important; line-height:1.75 !important; }
+}
+@media(max-width:380px) {
+  body.ih68-workspace #root .ih70-room .ih68-room-header { padding-inline:10px !important; gap:8px !important; }
+  body.ih68-workspace #root .ih70-room .ih69-person-avatar { display:none !important; }
+  body.ih68-workspace #root .ih70-room .ih68-room-person h1 { font-size:17px !important; }
+  body.ih68-workspace #root .ih68-room-page { padding-inline:18px !important; }
+  body.ih68-workspace #root .ih70-project-open { padding-inline:11px !important; }
+  body.ih68-workspace #root .ih68-mail-row { padding-inline:18px !important; gap:12px !important; grid-template-columns:minmax(0,1fr) 14px !important; }
+  body.ih68-workspace #root .ih68-mail-row>.ih68-avatar { display:none !important; }
+}
 
 }
