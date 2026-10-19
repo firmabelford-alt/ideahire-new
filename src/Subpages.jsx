@@ -1,7 +1,7 @@
-/* P73 — shared structure for every page beyond the account landing. */
+/* P74 — clear page identities, readable type and direct navigation. */
 import React, { useLayoutEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid, CalendarDays, FileText, UserRound, Settings, Wallet, Image, SlidersHorizontal, Bell, ShieldCheck, MessageSquare, BriefcaseBusiness, Check } from 'lucide-react';
 import { useSitePreferences, translateUiText } from './Preferences';
 import './Subpages.css';
 
@@ -12,7 +12,19 @@ export function getSubpage(location, en = false) {
   const copy = (pl, english) => en ? english : pl;
   const accountSections = ['#account-expertise', '#account-portfolio', '#account-jobs', '#account-preferences', '#account-privacy', '#account-templates', '#account-payouts', '#account-profile-data'];
   if (path === '/' || path === '/account' && !accountSections.includes(location.hash)) return null;
-  if (path === '/account') return { kind: 'account', label: copy('Moje konto', 'My account'), parent: '/account' };
+  if (path === '/account') {
+    const labels = {
+      '#account-profile-data': ['Dane profilu', 'Profile details'],
+      '#account-expertise': ['Umiejętności', 'Skills'],
+      '#account-portfolio': ['Portfolio', 'Portfolio'],
+      '#account-jobs': ['Moje zlecenia', 'My listings'],
+      '#account-preferences': ['Ustawienia', 'Settings'],
+      '#account-privacy': ['Ustawienia', 'Settings'],
+      '#account-payouts': ['Saldo i wypłaty', 'Balance & payouts'],
+      '#account-templates': ['Wygląd strony', 'Appearance'],
+    };
+    return { kind: 'account', label: copy(...labels[location.hash]), parent: '/account' };
+  }
   if (path === '/jobs') return { kind: 'jobs', label: copy('Znajdź zlecenie', 'Find a job'), parent: '/work' };
   if (path === '/find-talent') return { kind: 'editor', label: copy('Zleć pracę', 'Post a job'), parent: '/work' };
   if (path.startsWith('/edit-job/')) return { kind: 'editor', label: copy('Edytuj zlecenie', 'Edit job'), parent: '/account#account-jobs' };
@@ -69,7 +81,7 @@ export function SubpageHistoryControls({ parent = '/account' }) {
   return <div className="ih73-history-controls">
     <button type="button" onClick={() => {
       if ((window.history.state?.idx || 0) > 0) navigate(-1);
-      else navigate(parent === location.pathname ? '/' : parent);
+      else navigate(parent === location.pathname + location.search + location.hash ? '/' : parent);
     }} aria-label={en ? 'Go back' : 'Wróć'} title={en ? 'Go back' : 'Wróć'}><ArrowLeft size={20} strokeWidth={1.7} aria-hidden="true" /></button>
     <button type="button" disabled={!forward} onClick={() => navigate(1)}
       aria-label={en ? 'Go forward' : 'Przejdź dalej'} title={en ? 'Go forward' : 'Przejdź dalej'}><ArrowRight size={20} strokeWidth={1.7} aria-hidden="true" /></button>
@@ -82,15 +94,20 @@ export function SubpageNavigation({ standalone = false }) {
   const page = getSubpage(location, en);
   if (!page) return null;
   return <nav className={'ih73-route-navigation' + (standalone ? ' is-standalone' : '')}
-    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P73">
+    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P74">
     <SubpageHistoryControls parent={page.parent} />
     <span className="ih73-route-label"><span>IdeaHire</span><i aria-hidden="true">/</i><strong>{page.label}</strong></span>
     <Link to={['access', 'legal'].includes(page.kind) ? '/' : page.kind === 'admin' ? '/admin' : '/account'} className="ih73-panel-link"><LayoutGrid size={17} strokeWidth={1.65} aria-hidden="true" /><span>{['access', 'legal'].includes(page.kind) ? (en ? 'Home' : 'Strona główna') : (en ? 'Dashboard' : 'Panel')}</span></Link>
   </nav>;
 }
 
-export function SubpageHeading({ eyebrow, title, description, actions, children, variant = 'default' }) {
+export function SubpageHeading({ eyebrow, title, titleId, description, actions, children, variant = 'default' }) {
   const en = useSitePreferences().language === 'en';
+  const location = useLocation();
+  const page = getSubpage(location, en);
+  const sectionIcons = { '#account-profile-data': UserRound, '#account-expertise': SlidersHorizontal, '#account-portfolio': Image, '#account-jobs': FileText, '#account-preferences': Settings, '#account-privacy': ShieldCheck, '#account-payouts': Wallet, '#account-templates': LayoutGrid };
+  const pageIcons = { jobs: FileText, editor: FileText, people: UserRound, services: LayoutGrid, 'service-editor': LayoutGrid, 'my-services': LayoutGrid, calendar: CalendarDays, notifications: Bell, privacy: ShieldCheck, status: ShieldCheck, disputes: ShieldCheck, case: ShieldCheck, inbox: MessageSquare, work: BriefcaseBusiness };
+  const Icon = page?.kind === 'account' ? sectionIcons[location.hash] || UserRound : pageIcons[page?.kind] || LayoutGrid;
   const copy = {
     'Prywatność i moje dane': 'Privacy & my data',
     'Centrum prywatności': 'Privacy centre',
@@ -107,16 +124,21 @@ export function SubpageHeading({ eyebrow, title, description, actions, children,
   };
   const text = value => en && typeof value === 'string' ? copy[value] || translateUiText(value) : value;
   return <header className={'ih73-page-heading is-' + variant}>
-    <div className="ih73-heading-copy">{eyebrow && <p className="ih73-eyebrow">{text(eyebrow)}</p>}<h1>{text(title)}</h1>{description && <p className="ih73-description">{text(description)}</p>}{actions && <div className="ih73-heading-actions">{actions}</div>}</div>
-    <div className="ih73-heading-art" aria-hidden="true" data-page-motion-stage="true">
-      <svg viewBox="0 0 220 160" fill="none" focusable="false"><path className="ih73-art-guide" d="M12 132H208M44 16V148M176 12V148" /><path className="ih73-art-frame" d="M60 28H160V128H60Z" /><path className="ih73-art-fold" d="M60 96H128V28M92 128V60H160" /><rect className="ih73-art-square" x="112" y="80" width="48" height="48" /><rect className="ih73-art-dot" x="39" y="127" width="10" height="10" /><path className="ih73-art-arrow" d="M151 45H183V77M183 45L139 89" /></svg>
+    <div className="ih74-heading-main">
+      <span className="ih74-heading-symbol" aria-hidden="true" data-page-motion-stage="true"><Icon size={26} strokeWidth={1.7} /></span>
+      <div className="ih73-heading-copy">{eyebrow && <p className="ih73-eyebrow">{text(eyebrow)}</p>}<h1 id={titleId}>{text(title)}</h1>{description && <p className="ih73-description">{text(description)}</p>}</div>
     </div>
+    {actions && <div className="ih73-heading-actions">{actions}</div>}
     {children}
   </header>;
 }
 
 export function SubpageMetrics({ items }) {
-  return <dl className="ih73-page-metrics">{items.map(item => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>;
+  const icons = [CalendarDays, Bell, Check];
+  return <dl className="ih73-page-metrics">{items.map((item, index) => {
+    const Icon = icons[index % icons.length];
+    return <div key={item.label}><span aria-hidden="true"><Icon size={20} strokeWidth={1.7} /></span><dt>{item.label}</dt><dd>{item.value}</dd></div>;
+  })}</dl>;
 }
 
 export function SubpageCatalogTabs({ active }) {

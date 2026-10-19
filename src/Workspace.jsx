@@ -179,11 +179,13 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
     payouts: t('Wypłaty', 'Payouts'),
     templates: t('Wygląd', 'Appearance'),
   };
+  const icons = { profile: 'profile', expertise: 'settings', portfolio: 'portfolio', jobs: 'jobs', preferences: 'settings', payouts: 'payouts', templates: 'palette' };
   return <div className="ih72-section-navigation">
+    <p className="ih74-section-nav-title">{t('Twoje konto', 'Your account')}</p>
     <nav className="ih72-section-links" aria-label={t('Sekcje konta', 'Account sections')}>
       {sections.map(section => <button type="button" key={section.key}
         aria-current={active === section.key ? 'page' : undefined}
-        onClick={() => onSelect(section)}>{labels[section.key] || section.label}</button>)}
+        onClick={() => onSelect(section)}><WorkspaceIcon kind={icons[section.key] || 'settings'} /><span>{labels[section.key] || section.label}</span><WorkspaceIcon kind="next" /></button>)}
     </nav>
     <label className="ih72-section-select">
       <span>{t('Sekcja konta', 'Account section')}</span>

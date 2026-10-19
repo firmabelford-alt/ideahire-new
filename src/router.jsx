@@ -41,7 +41,7 @@ import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceCompos
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
-import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
+import { useSitePreferences, translateUiText, IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
 import TermsOfService from "./TermsOfService";
@@ -2494,140 +2494,61 @@ function DiscoveryOnboardingLayer() {
 }
 
 function DiscoveryPreferencesCard() {
-  const { preferences, loading, errorMessage } =
-    useDiscoveryPreferences();
+  const { preferences, loading, errorMessage } = useDiscoveryPreferences();
   const [editing, setEditing] = useState(false);
+  const english = useSitePreferences().language === "en";
+  const t = (pl, en) => english ? en : pl;
+  const label = value => english ? translateUiText(value) : value;
 
   if (loading) {
-    return (
-      <section className="account-card discovery-settings-card">
-        <span className="section-label">Dopasowanie</span>
-        <InlineRouteLoader
-          className="embedded-route-loader"
-          rows={2}
-        />
-      </section>
-    );
+    return <section className="account-card discovery-settings-card ih74-preferences-card">
+      <h2>{t("Dopasowanie", "Recommendations")}</h2>
+      <InlineRouteLoader className="embedded-route-loader" rows={2} />
+    </section>;
   }
 
-  return (
-    <>
-      <section className="account-card discovery-settings-card">
-        <div className="discovery-settings-heading">
-          <div>
-            <span className="section-label">Dopasowanie</span>
-            <h2>Twój sposób korzystania</h2>
-          </div>
-          <span className="discovery-settings-icon" aria-hidden="true">
-            ✦
-          </span>
+  return <>
+    <section className="account-card discovery-settings-card ih74-preferences-card">
+      <header className="discovery-settings-heading">
+        <div><h2>{t("Twój sposób korzystania", "How you use IdeaHire")}</h2>
+          <p>{t("Ustaw, jakie projekty i usługi chcesz widzieć.", "Choose the projects and services you want to see.")}</p>
         </div>
-
-        {errorMessage ? (
-          <p className="auth-error">{errorMessage}</p>
-        ) : (
-          <>
-            <div className="discovery-settings-summary">
-              <div>
-                <span>Preferowany początek</span>
-                <strong>
-                  {getDiscoveryUsageLabel(
-                    preferences?.usagePreference || "both"
-                  )}
-                </strong>
-              </div>
-              <div>
-                <span>Kolejność wyników</span>
-                <strong>
-                  {preferences?.personalizationEnabled !== false
-                    ? "Dopasowane dla Ciebie"
-                    : "Najnowsze"}
-                </strong>
-              </div>
-            </div>
-
-            {preferences?.usagePreference !== "hire_talent" && (
-              <div className="discovery-settings-group">
-                <strong>Realizuję</strong>
-                <div className="discovery-settings-tags">
-                  {(preferences?.freelancerCategories || []).map(
-                    (category) => (
-                      <span key={category}>
-                        {getJobCategoryLabel(category)}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-            )}
-
-            {preferences?.usagePreference !== "find_work" && (
-              <div className="discovery-settings-group">
-                <strong>Szukam pomocy</strong>
-                <div className="discovery-settings-tags">
-                  {(preferences?.clientCategories || []).map((category) => (
-                    <span key={category}>{getJobCategoryLabel(category)}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(preferences?.onboardingGoals || []).length > 0 && (
-              <div className="discovery-settings-group">
-                <strong>Moje cele</strong>
-                <div className="discovery-settings-tags is-secondary">
-                  {preferences.onboardingGoals.map((goal) => (
-                    <span key={goal}>{getDiscoveryGoalLabel(goal)}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {preferences?.usagePreference !== "find_work" &&
-              preferences?.projectReadiness && (
-                <div className="discovery-settings-readiness">
-                  <span>Etap projektu</span>
-                  <strong>
-                    {getDiscoveryReadinessLabel(
-                      preferences.projectReadiness
-                    )}
-                  </strong>
-                </div>
-              )}
-
-            <p className="discovery-settings-note">
-              To ustawienie nie ogranicza funkcji konta. Nadal możesz zlecać
-              pracę i realizować projekty.
-            </p>
-
-            <div className="discovery-settings-actions">
-              <Link className="btn btn-dark" to="/services">
-                Przeglądaj usługi
-              </Link>
-              <Link className="btn btn-outline" to="/jobs">
-                Znajdź zlecenie
-              </Link>
-              <button
-                type="button"
-                className="btn btn-outline"
-                onClick={() => setEditing(true)}
-              >
-                Zmień preferencje
-              </button>
-            </div>
-          </>
-        )}
-      </section>
-
-      {editing && (
-        <DiscoveryOnboarding
-          initialPreferences={preferences}
-          canClose
-          onClose={() => setEditing(false)}
-        />
-      )}
-    </>
-  );
+        {!errorMessage && <button type="button" className="ih74-edit-preferences" onClick={() => setEditing(true)}><WorkspaceIcon kind="settings" />{t("Zmień", "Edit")}</button>}
+      </header>
+      {errorMessage ? <p className="auth-error">{errorMessage}</p> : <>
+        <dl className="discovery-settings-summary">
+          <div><dt>{t("Najczęściej", "Main use")}</dt><dd>{label(getDiscoveryUsageLabel(preferences?.usagePreference || "both"))}</dd></div>
+          <div><dt>{t("Kolejność wyników", "Result order")}</dt><dd>{preferences?.personalizationEnabled !== false ? t("Dopasowane dla Ciebie", "Matched to you") : t("Najnowsze", "Newest first")}</dd></div>
+        </dl>
+        {preferences?.usagePreference !== "hire_talent" && <div className="discovery-settings-group">
+          <h3>{t("Realizuję", "My fields")}</h3><div className="discovery-settings-tags">
+            {(preferences?.freelancerCategories || []).map(category => <span key={category}>{label(getJobCategoryLabel(category))}</span>)}
+            {!(preferences?.freelancerCategories || []).length && <p>{t("Nie wybrano dziedzin.", "No fields selected.")}</p>}
+          </div>
+        </div>}
+        {preferences?.usagePreference !== "find_work" && <div className="discovery-settings-group">
+          <h3>{t("Szukam pomocy", "I need help with")}</h3><div className="discovery-settings-tags">
+            {(preferences?.clientCategories || []).map(category => <span key={category}>{label(getJobCategoryLabel(category))}</span>)}
+            {!(preferences?.clientCategories || []).length && <p>{t("Nie wybrano dziedzin.", "No fields selected.")}</p>}
+          </div>
+        </div>}
+        {(preferences?.onboardingGoals || []).length > 0 && <div className="discovery-settings-group">
+          <h3>{t("Moje cele", "My goals")}</h3><div className="discovery-settings-tags is-secondary">
+            {preferences.onboardingGoals.map(goal => <span key={goal}>{label(getDiscoveryGoalLabel(goal))}</span>)}
+          </div>
+        </div>}
+        {preferences?.usagePreference !== "find_work" && preferences?.projectReadiness && <dl className="discovery-settings-readiness">
+          <dt>{t("Etap projektu", "Project stage")}</dt><dd><WorkspaceIcon kind="check" />{label(getDiscoveryReadinessLabel(preferences.projectReadiness))}</dd>
+        </dl>}
+        <p className="discovery-settings-note">{t("Te ustawienia pomagają dopasować wyniki. Nadal możesz zlecać pracę i realizować projekty.", "These settings personalise your results. You can still hire people and work on projects.")}</p>
+        <nav className="discovery-settings-actions" aria-label={t("Przeglądaj według preferencji", "Browse with your preferences")}>
+          <Link className="btn btn-dark" to="/services">{t("Przeglądaj usługi", "Browse services")}<WorkspaceIcon kind="arrow" /></Link>
+          <Link className="btn btn-outline" to="/jobs">{t("Znajdź zlecenie", "Find a job")}<WorkspaceIcon kind="arrow" /></Link>
+        </nav>
+      </>}
+    </section>
+    {editing && <DiscoveryOnboarding initialPreferences={preferences} canClose onClose={() => setEditing(false)} />}
+  </>;
 }
 
 function JobRepublicationPanel() {
@@ -10037,7 +9958,7 @@ function Account() {
         search: location.search,
         hash: `#${section.hash}`,
       },
-      { replace: true }
+      { replace: false }
     );
     window.requestAnimationFrame(() => {
       accountContentRef.current?.focus({ preventScroll: true });
@@ -10075,16 +9996,9 @@ function Account() {
 
         <div className="ih6-account-layout ih25-account-panel" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
           <div className="ih6-account-content">
-        <section className="account-tab-intro" aria-live="polite">
-          <button type="button" className="ih25-hub-back" onClick={returnToAccountHub}><WorkspaceIcon kind="back" /><span>{accountEnglish ? "My account" : "Moje konto"}</span></button>
-          <div>
-            <span className="section-label">
-              {activeAccountSectionCopy.eyebrow}
-            </span>
-            <h1 id="account-section-title">{activeAccountSectionCopy.title}</h1>
-          </div>
-          <p>{activeAccountSectionCopy.description}</p>
-        </section>
+        <SubpageHeading titleId="account-section-title" eyebrow={activeAccountSectionCopy.eyebrow}
+          title={activeAccountSectionCopy.title} description={activeAccountSectionCopy.description} variant="account"
+          actions={activeAccountSection === "jobs" ? <Link to="/find-talent" className="ih5-button is-primary"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link> : undefined} />
         <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
 
         <div
@@ -10961,82 +10875,33 @@ function Account() {
           id="account-jobs"
           hidden={activeAccountSection !== "jobs"}
         >
-          <span className="section-label">
-            Moje zlecenia
-          </span>
-
-          <h2>
-            Zlecenia, które
-            opublikowałeś
-          </h2>
-
-          {jobsLoading ? (
-            <InlineRouteLoader
-              className="embedded-route-loader"
-              rows={3}
-            />
-          ) : myJobs.length ===
-            0 ? (
-            <p>
-              Nie masz jeszcze
-              żadnych zleceń.
-            </p>
-          ) : (
-            <div className="jobs-list">
-              {myJobs.map(
-                (job) => (
-                  <article
-                    className="job-card"
-                    key={job.id}
-                  >
-                    <span className="section-label">
-                      {getJobCategoryLabel(job.category)}
-                    </span>
-
-                    <h2>
-                      {job.title}
-                    </h2>
-
-                    <JobListingMeta job={job} compact />
-
-                    <p>
-                      Budżet:{" "}
-                      <strong>
-                        {Number(
-                          job.budget ||
-                            0
-                        ).toLocaleString(
-                          "pl-PL"
-                        )}{" "}
-                        zł
-                      </strong>
-                    </p>
-
-                    <div className="job-actions">
-                      <Link
-                        className="btn btn-dark"
-                        to={`/edit-job/${job.id}`}
-                      >
-                        Edytuj
-                      </Link>
-
-                      <button
-                        className="btn btn-outline"
-                        type="button"
-                        onClick={() =>
-                          handleDeleteJob(
-                            job.id
-                          )
-                        }
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  </article>
-                )
-              )}
+          <div className="ih74-owned-list-heading">
+            <h2>{accountEnglish ? "Your listings" : "Twoje ogłoszenia"}</h2>
+            {!jobsLoading && <span>{accountEnglish ? "Total: " : "Łącznie: "}{myJobs.length}</span>}
+          </div>
+          {jobsLoading ? <InlineRouteLoader className="embedded-route-loader" rows={3} /> : myJobs.length === 0 ? (
+            <div className="ih74-owned-empty"><WorkspaceIcon kind="jobs" />
+              <h3>{accountEnglish ? "No listings yet" : "Nie masz jeszcze ogłoszeń"}</h3>
+              <p>{accountEnglish ? "Describe your project to find the right freelancer." : "Opisz swój projekt, aby znaleźć wykonawcę."}</p>
+              <Link className="ih5-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{accountEnglish ? "Post your first job" : "Dodaj pierwsze zlecenie"}</Link>
             </div>
-          )}
+          ) : <div className="jobs-list ih74-owned-jobs">
+            {myJobs.map(job => <article className="job-card ih74-owned-job" key={job.id}>
+              <div className="ih74-owned-job-copy">
+                <p className="ih74-owned-category">{accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}</p>
+                <h2>{job.title}</h2>
+                <JobListingMeta job={job} compact />
+              </div>
+              <div className="ih74-owned-job-manage">
+                <p className="ih74-owned-budget"><span>{accountEnglish ? "Budget" : "Budżet"}</span><strong>{Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL")} <small>zł</small></strong></p>
+                <div className="job-actions">
+                  <Link className="btn btn-dark" to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}</Link>
+                  <button className="btn btn-outline" type="button" onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button>
+                </div>
+              </div>
+            </article>)}
+          </div>}
+
         </section>
         </div>
           </div>
@@ -16412,9 +16277,9 @@ function getCalendarType(type) {
   );
 }
 
-function getCalendarMonthLabel(value) {
+function getCalendarMonthLabel(value, locale = "pl-PL") {
   return new Intl.DateTimeFormat(
-    "pl-PL",
+    locale,
     {
       month: "long",
       year: "numeric",
@@ -16422,9 +16287,9 @@ function getCalendarMonthLabel(value) {
   ).format(value);
 }
 
-function getCalendarDayLabel(value) {
+function getCalendarDayLabel(value, locale = "pl-PL") {
   return new Intl.DateTimeFormat(
-    "pl-PL",
+    locale,
     {
       weekday: "long",
       day: "numeric",
@@ -16434,16 +16299,16 @@ function getCalendarDayLabel(value) {
   ).format(value);
 }
 
-function getCalendarEventDateLabel(value, allDay = false) {
+function getCalendarEventDateLabel(value, allDay = false, locale = "pl-PL") {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Nieprawidłowy termin";
+    return locale.startsWith("en") ? "Invalid date" : "Nieprawidłowy termin";
   }
 
   const datePart =
     new Intl.DateTimeFormat(
-      "pl-PL",
+      locale,
       {
         day: "numeric",
         month: "short",
@@ -16457,7 +16322,7 @@ function getCalendarEventDateLabel(value, allDay = false) {
 
   const timePart =
     new Intl.DateTimeFormat(
-      "pl-PL",
+      locale,
       {
         hour: "2-digit",
         minute: "2-digit",
@@ -16467,9 +16332,9 @@ function getCalendarEventDateLabel(value, allDay = false) {
   return `${datePart}, ${timePart}`;
 }
 
-function getCalendarTimeLabel(value, allDay = false) {
+function getCalendarTimeLabel(value, allDay = false, locale = "pl-PL") {
   if (allDay) {
-    return "Termin zlecenia";
+    return locale.startsWith("en") ? "Job deadline" : "Termin zlecenia";
   }
 
   const date = new Date(value);
@@ -16479,7 +16344,7 @@ function getCalendarTimeLabel(value, allDay = false) {
   }
 
   return new Intl.DateTimeFormat(
-    "pl-PL",
+    locale,
     {
       hour: "2-digit",
       minute: "2-digit",
@@ -16558,6 +16423,7 @@ function createCalendarDraft(dateValue = new Date()) {
 
 function Calendar() {
   const calendarEnglish = useSitePreferences().language === "en";
+  const calendarLocale = calendarEnglish ? "en-GB" : "pl-PL";
   const { user } =
     useAuth();
 
@@ -17371,7 +17237,7 @@ function Calendar() {
 
         <div className="calendar-agenda-copy">
           <span className="calendar-agenda-meta">
-            {type.shortLabel}
+            {calendarEnglish ? translateUiText(type.shortLabel) : type.shortLabel}
             {eventItem.source === "job" && (
               <em>Zlecenie</em>
             )}
@@ -17387,14 +17253,8 @@ function Calendar() {
             }
           >
             {compact
-              ? getCalendarEventDateLabel(
-                  eventItem.starts_at,
-                  eventItem.all_day
-                )
-              : getCalendarTimeLabel(
-                  eventItem.starts_at,
-                  eventItem.all_day
-                )}
+              ? getCalendarEventDateLabel(eventItem.starts_at, eventItem.all_day, calendarLocale)
+              : getCalendarTimeLabel(eventItem.starts_at, eventItem.all_day, calendarLocale)}
           </time>
 
           {!compact &&
@@ -17507,68 +17367,65 @@ function Calendar() {
           </div>
         )}
 
-        <section className="calendar-toolbar">
-          <div className="calendar-month-navigation">
-            <button
-              type="button"
-              onClick={() =>
-                changeMonth(-1)
-              }
-              aria-label="Poprzedni miesiąc"
-            >
-              <MarketIcon kind="back" />
-            </button>
-
-            <div>
-              <span>Widok miesiąca</span>
-              <h2>
-                {getCalendarMonthLabel(
-                  currentMonth
-                )}
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                changeMonth(1)
-              }
-              aria-label="Następny miesiąc"
-            >
-              <MarketIcon kind="arrow" />
-            </button>
-          </div>
-
-          <button
-            className="calendar-today-button"
-            type="button"
-            onClick={goToToday}
-          >
-            Dzisiaj
-          </button>
-
-          <div className="calendar-legend" aria-label="Legenda kalendarza">
-            {CALENDAR_EVENT_TYPES.map(
-              (type) => (
-                <span
-                  key={type.value}
-                  className={`is-${type.value}`}
-                >
-                  <i aria-hidden="true" />
-                  {type.shortLabel}
-                </span>
-              )
-            )}
-          </div>
-        </section>
-
         <div className="calendar-workspace">
           <section
             className="calendar-board"
-            aria-label="Kalendarz miesięczny"
+            aria-label={calendarEnglish ? "Monthly calendar" : "Kalendarz miesięczny"}
           >
+            <section className="calendar-toolbar">
+              <div className="calendar-month-navigation">
+                <button
+                  type="button"
+                  onClick={() =>
+                    changeMonth(-1)
+                  }
+                  aria-label={calendarEnglish ? "Previous month" : "Poprzedni miesiąc"}
+                >
+                  <MarketIcon kind="back" />
+                </button>
+
+                <div>
+                  <span>Widok miesiąca</span>
+                  <h2>
+                    {getCalendarMonthLabel(currentMonth, calendarLocale)}
+                  </h2>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    changeMonth(1)
+                  }
+                  aria-label={calendarEnglish ? "Next month" : "Następny miesiąc"}
+                >
+                  <MarketIcon kind="arrow" />
+                </button>
+              </div>
+
+              <button
+                className="calendar-today-button"
+                type="button"
+                onClick={goToToday}
+              >
+                {calendarEnglish ? "Today" : "Dzisiaj"}
+              </button>
+
+              <div className="calendar-legend" aria-label={calendarEnglish ? "Calendar legend" : "Legenda kalendarza"}>
+                {CALENDAR_EVENT_TYPES.map(
+                  (type) => (
+                    <span
+                      key={type.value}
+                      className={`is-${type.value}`}
+                    >
+                      <i aria-hidden="true" />
+                      {calendarEnglish ? translateUiText(type.shortLabel) : type.shortLabel}
+                    </span>
+                  )
+                )}
+              </div>
+            </section>
             <div className="calendar-weekdays" role="row">
-              {CALENDAR_WEEKDAYS.map(
+              {(calendarEnglish ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] : CALENDAR_WEEKDAYS).map(
                 (weekday) => (
                   <span
                     key={weekday}
@@ -17656,18 +17513,20 @@ function Calendar() {
                         onDoubleClick={() =>
                           openCreateDialog(day)
                         }
+                        aria-pressed={isSelected}
+                        aria-current={isToday ? "date" : undefined}
                         aria-label={`${
-                          getCalendarDayLabel(day)
+                          getCalendarDayLabel(day, calendarLocale)
                         }. ${
                           dayEvents.length
-                        } wydarzeń`}
+                        } ${calendarEnglish ? "events" : "wydarzeń"}`}
                       >
                         <span>
                           {day.getDate()}
                         </span>
                         <small className="ih73-calendar-event-count" aria-hidden="true">{dayEvents.length > 0 ? dayEvents.length : ""}</small>
                         {isToday && (
-                          <em>Dziś</em>
+                          <em>{calendarEnglish ? "Today" : "Dziś"}</em>
                         )}
                       </button>
 
@@ -17721,13 +17580,12 @@ function Calendar() {
           <aside className="calendar-sidebar">
             <section className="calendar-day-agenda">
               <div className="calendar-sidebar-heading">
-                <div>
-                  <span>Wybrany dzień</span>
-                  <h2>
-                    {getCalendarDayLabel(
-                      selectedDate
-                    )}
-                  </h2>
+                <div className="ih74-agenda-heading">
+                  <span>{calendarEnglish ? "Selected day" : "Wybrany dzień"}</span>
+                  <div className="ih74-agenda-date"><strong>{selectedDate.getDate()}</strong><div>
+                    <p>{new Intl.DateTimeFormat(calendarLocale, { weekday: "long" }).format(selectedDate)}</p>
+                    <h2>{new Intl.DateTimeFormat(calendarLocale, { month: "long", year: "numeric" }).format(selectedDate)}</h2>
+                  </div></div>
                 </div>
 
                 <button
@@ -17737,7 +17595,7 @@ function Calendar() {
                       selectedDate
                     )
                   }
-                  aria-label="Dodaj termin w wybranym dniu"
+                  aria-label={calendarEnglish ? "Add an event for this day" : "Dodaj termin w wybranym dniu"}
                 >
                   +
                 </button>
@@ -17745,11 +17603,9 @@ function Calendar() {
 
               {selectedDayEvents.length === 0 ? (
                 <div className="calendar-empty-state">
-                  <span aria-hidden="true">○</span>
-                  <strong>Spokojny dzień</strong>
-                  <p>
-                    Nie masz jeszcze żadnych terminów. Dodaj pierwszy, aby otrzymać przypomnienie.
-                  </p>
+                  <WorkspaceIcon kind="calendar" aria-hidden="true" />
+                  <strong>{calendarEnglish ? "No events planned" : "Brak zaplanowanych terminów"}</strong>
+                  <p>{calendarEnglish ? "Add a task, meeting or reminder for this day." : "Dodaj zadanie, spotkanie lub przypomnienie na ten dzień."}</p>
                   <button
                     type="button"
                     onClick={() =>
@@ -17776,8 +17632,8 @@ function Calendar() {
             <section className="calendar-upcoming">
               <div className="calendar-sidebar-heading is-small">
                 <div>
-                  <span>Następne terminy</span>
-                  <h2>Plan działania</h2>
+                  <span>{calendarEnglish ? "Your schedule" : "Twój terminarz"}</span>
+                  <h2>{calendarEnglish ? "Coming up" : "Nadchodzące terminy"}</h2>
                 </div>
               </div>
 
