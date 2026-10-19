@@ -13,7 +13,8 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom";
-import { useSitePreferences } from "./Preferences";
+import { useSitePreferences, translateUiText } from "./Preferences";
+import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
@@ -326,51 +327,15 @@ function ServiceAvatar({ service, size = "normal" }) {
 
 function ServiceCard({ service }) {
   const capacity = serviceCapacity(service);
-  const isCustom = service.price_mode === "custom";
-
-  return (
-    <article className="ih5-service-card">
-      <Link
-        className="ih5-service-card-hitbox"
-        to={`/services/${service.id}`}
-        aria-label={`Zobacz usługę: ${service.title}`}
-      />
-
-      <div className="ih5-service-card-topline">
-        <span className="ih5-service-category-mark" aria-hidden="true">
-          <MarketIcon kind="files" />
-        </span>
-        <span className={`ih5-service-capacity ${capacity.className}`}>
-          <i aria-hidden="true" />
-          {capacity.label}
-        </span>
-      </div>
-
-      <div className="ih5-service-card-copy">
-        <span className="ih5-service-card-category">{service.category}</span>
-        <h2>{service.title}</h2>
-        <p>{service.summary}</p>
-      </div>
-
-      <div className="ih5-service-card-owner">
-        <ServiceAvatar service={service} />
-        <span>
-          <strong>{service.owner_name || "Wykonawca IdeaHire"}</strong>
-          <small>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</small>
-        </span>
-      </div>
-
-      <footer className="ih5-service-card-footer">
-        <span>
-          <small>{isCustom ? "Wycena" : "Cena usługi"}</small>
-          <strong>
-            {isCustom ? "Indywidualna" : `od ${formatMoney(service.base_price)}`}
-          </strong>
-        </span>
-        <span className="ih5-service-card-arrow" aria-hidden="true">→</span>
-      </footer>
-    </article>
-  );
+  const isCustom = service.price_mode === 'custom';
+  const en = useSitePreferences().language === 'en';
+  return <article className="ih5-service-card ih73-service-card">
+    <Link className="ih5-service-card-hitbox" to={'/services/' + service.id} aria-label={(en ? 'View service: ' : 'Zobacz usługę: ') + service.title} />
+    <div className="ih73-service-mark"><MarketIcon kind="files" /><span>{en ? translateUiText(service.category) : service.category}</span><MarketIcon kind="diagonal" /></div>
+    <div className="ih5-service-card-copy"><h2>{service.title}</h2><p>{service.summary}</p></div>
+    <div className="ih73-service-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</small></span></div>
+    <footer className="ih73-service-footer"><div><span>{isCustom ? (en ? 'Quote' : 'Wycena') : (en ? 'Starting at' : 'Cena od')}</span><strong>{isCustom ? (en ? 'On request' : 'Indywidualna') : formatMoney(service.base_price)}</strong></div><span className={'ih5-service-capacity ' + capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</span></footer>
+  </article>;
 }
 
 function ServiceShell({ Navbar, children, className = "" }) {
@@ -438,7 +403,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page">
-      <MarketCatalogHeader eyebrow="Usługi" title={english ? "Find a service for your project." : "Znajdź usługę do swojego projektu."} description={english ? "Compare the scope, price and availability. Discuss the details with the freelancer in a conversation." : "Porównaj zakres, cenę i dostępność. Szczegóły ustalisz z wykonawcą w rozmowie."}
+      <MarketCatalogHeader eyebrow={english ? "For your project" : "Dla Twojego projektu"} title={english ? "Services" : "Usługi"} description={english ? "Compare the scope, price and availability. Discuss the details with the freelancer in a conversation." : "Porównaj zakres, cenę i dostępność. Szczegóły ustalisz z wykonawcą w rozmowie."}
         tabs={<MarketplaceSwitch />} count={services.length} noun="services" status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined}
         actions={<><Link className="ih5-button is-quiet" to="/services/mine">Moje usługi</Link><Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />Dodaj usługę</Link></>}>
         <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług" />
@@ -481,6 +446,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 }
 
 function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
+  const english = useSitePreferences().language === "en";
   const { id } = useParams();
   const [form, setForm] = useState(EMPTY_SERVICE_FORM);
   const [loading, setLoading] = useState(editing);
@@ -645,18 +611,10 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-form-page">
-      <header className="ih5-service-form-header ih7-service-centered-header">
-        <Link to={editing ? `/services/${id}` : "/services"} aria-label="Wróć">←</Link>
-        <div>
-          <span className="ih5-service-eyebrow">Dla wykonawców</span>
-          <h1>{editing ? "Dopracuj swoją usługę" : "Pokaż, co potrafisz zrobić."}</h1>
-          <p>
-            Jedna czytelna oferta, konkretny rezultat i realna dostępność.
-            Lokalizacja nie jest wymagana — podajesz tylko informacje potrzebne
-            do jednorazowej realizacji.
-          </p>
-        </div>
-      </header>
+      <SubpageHeading eyebrow={english ? "For freelancers" : "Dla wykonawców"}
+        title={editing ? (english ? "Edit your service" : "Edytuj usługę") : (english ? "Add a service" : "Dodaj usługę")}
+        description={english ? "Describe the result, scope, price and availability." : "Opisz rezultat, zakres, cenę i dostępność swojej usługi."}
+        variant="editor" />
 
       {loading ? (
         <div className="ih5-service-form-loading" aria-label="Ładowanie formularza" />
@@ -1351,16 +1309,10 @@ function MyServices({ supabase, user, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-my-services-page">
-      <header className="ih5-my-services-header ih7-service-centered-header">
-        <div>
-          <span className="ih5-service-eyebrow">Panel wykonawcy</span>
-          <h1>Twoje usługi</h1>
-          <p>{english ? "Edit your offers, check availability and choose which services are visible." : "Edytuj oferty, sprawdzaj ich dostępność i decyduj, które są widoczne."}</p>
-        </div>
-        <Link className="ih5-service-primary-action" to="/services/new">
-          <span>+</span> Dodaj usługę
-        </Link>
-      </header>
+      <SubpageHeading eyebrow={english ? "Freelancer workspace" : "Panel wykonawcy"}
+        title={english ? "My services" : "Moje usługi"}
+        description={english ? "Edit your offers, check availability and manage visibility." : "Edytuj oferty, sprawdzaj dostępność i zarządzaj widocznością."}
+        actions={<Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />{english ? "Add a service" : "Dodaj usługę"}</Link>} />
 
       {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 
@@ -1556,11 +1508,7 @@ export function profileInquiryToJob(inquiry) {
 }
 
 export function MarketplaceSwitch({ active = "services" }) {
-  return <nav className="ih11-market-switch" aria-label="Usługi i freelancerzy">
-    <Link to="/services" aria-current={active === "services" ? "page" : undefined} className={active === "services" ? "is-active" : ""}>Usługi</Link>
-    <span aria-hidden="true">/</span>
-    <Link to="/freelancers" aria-current={active === "freelancers" ? "page" : undefined} className={active === "freelancers" ? "is-active" : ""}>Freelancerzy <span aria-hidden="true">↗</span></Link>
-  </nav>;
+  return <SubpageCatalogTabs active={active === 'freelancers' ? 'people' : active} />;
 }
 
 export function ProjectInquiryDialog({ profile, supabase, navigate, onClose, mode = "project" }) {
@@ -1719,6 +1667,7 @@ export function FreelancerVisibility({ supabase, user, canContact = true }) {
 }
 
 export function FreelancerDirectory({ supabase, user, navigate, Navbar, canContact = true }) {
+  const english = useSitePreferences().language === "en";
   const location = useLocation();
   const requestedCategory = new URLSearchParams(location.search).get("category");
   const category = FREELANCER_CATEGORIES.includes(requestedCategory) ? requestedCategory : "Wszystkie";
@@ -1752,7 +1701,7 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
   }, [supabase, search, category, page, refresh]);
   return <div className="page ih-market-v5 ih5-service-page ih11-freelancers">
     <Navbar /><main className="ih-market-shell">
-      <MarketCatalogHeader eyebrow="Freelancerzy" title="Dobry projekt zaczyna się od dobrego kontaktu." description="Znajdź osobę po nazwie, umiejętnościach lub kategorii. Zobacz jej profil i portfolio, a potem napisz, co chcesz zlecić."
+      <MarketCatalogHeader eyebrow={english ? "People for your project" : "Ludzie do Twojego projektu"} title={english ? "Freelancers" : "Freelancerzy"} description={english ? "Compare skills, experience and portfolios. Agree on the details in a conversation." : "Porównaj umiejętności, doświadczenie i portfolio. Szczegóły ustalisz w rozmowie."}
         tabs={<MarketplaceSwitch active="freelancers" />} count={result.total} noun="profiles" status={loading ? "Szukamy freelancerów…" : error ? "Wyniki niedostępne" : undefined}
         actions={<Link className="ih11-button is-quiet" to="/account#account-profile-data">Mój profil</Link>}>
         <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów" />
@@ -1760,12 +1709,12 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
       <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
         <h2 className="ih5-sr-only">{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2>
         {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
-          {result.items.map((profile, index) => <article className="ih11-freelancer-card" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
+          {result.items.map((profile, index) => <article className="ih11-freelancer-card ih73-person-card" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
             <div className="ih11-freelancer-person"><Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`Profil: ${profile.name || "freelancer"}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || "F")[0]}</span>}</Link><div><h3><Link to={`/profile/${profile.id}`}>{profile.name || "Freelancer"}</Link></h3><p>{profile.specialization || "Tworzę i realizuję projekty."}</p></div></div>
             <p className="ih11-freelancer-about">{profile.about || "Poznaj doświadczenie i portfolio na profilu."}</p>
             <div className="ih11-freelancer-skills">{(Array.isArray(profile.skills) ? profile.skills : []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div>
             <div className="ih11-freelancer-meta"><span>{Number(profile.completed_jobs) || 0} zakończonych zleceń</span><span>{Number(profile.positive_reviews) || 0} pozytywnych opinii</span></div>
-            <footer className="ih12-directory-contact"><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#account-profile-data">Edytuj profil</Link> : <div className="ih12-contact-actions"><button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "message" })} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Zapytaj o współpracę"}><MarketIcon kind="message" />Napisz wiadomość</button><button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "project" })}><MarketIcon kind="plus" />Zleć pracę</button></div>}</footer>
+            <footer className="ih12-directory-contact ih73-person-contact"><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#account-profile-data">Edytuj profil</Link> : <div className="ih12-contact-actions"><button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "message" })} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Zapytaj o współpracę"}><MarketIcon kind="message" />Napisz wiadomość</button><button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "project" })}><MarketIcon kind="plus" />Zleć pracę</button></div>}</footer>
           </article>)}
         </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Tu spotkają się pomysły i umiejętności."}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
         {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}

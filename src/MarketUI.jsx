@@ -1,8 +1,9 @@
 /* IdeaHire | P40 | 2026-10-15 | Pełny plik: src/MarketUI.jsx | Moduły, mikrokwadraty i widoczność haseł */
 import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
-import { useSitePreferences } from "./Preferences";
+import { Link, useLocation } from "react-router-dom";
+import { useSitePreferences, translateUiText } from "./Preferences";
+import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { BrandLogo } from "./Brand";
 
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
@@ -207,6 +208,8 @@ export function MarketIcon({ kind = "search", ...props }) {
   const paths = {
     search: "m20 20-4.2-4.2M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z",
     arrow: "M5 12h14m-6-6 6 6-6 6",
+    back: "M19 12H5m6-6-6 6 6 6",
+    diagonal: "M6 18 18 6M6 6h12v12",
     close: "m6 6 12 12M18 6 6 18",
     plus: "M12 5v14M5 12h14",
     check: "m5 12 4 4L19 6",
@@ -226,32 +229,41 @@ export function MarketIcon({ kind = "search", ...props }) {
 }
 
 export function MarketHeader({ eyebrow, title, description, children }) {
-  return (
-    <header className="ih5-page-heading">
-      <div><span className="ih5-eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></div>
-      {children && <div className="ih5-heading-actions">{children}</div>}
-    </header>
-  );
+  const en = useSitePreferences().language === 'en';
+  const location = useLocation();
+  const jobs = location.pathname === '/jobs';
+  const creating = location.pathname === '/find-talent';
+  const editing = location.pathname.startsWith('/edit-job/');
+  const heading = jobs ? {
+    eyebrow: en ? 'For freelancers' : 'Dla wykonawców',
+    title: en ? 'Find a job' : 'Znajdź zlecenie',
+    description: en ? 'Browse projects by field, scope and budget.' : 'Przeglądaj projekty według dziedziny, zakresu i budżetu.',
+  } : creating ? {
+    eyebrow: en ? 'For clients' : 'Dla zlecających',
+    title: en ? 'Post a job' : 'Zleć pracę',
+    description: en ? 'Describe the project, scope and terms in four steps.' : 'Opisz projekt, zakres i warunki współpracy w czterech krokach.',
+  } : editing ? {
+    eyebrow: en ? 'Your listing' : 'Twoje ogłoszenie',
+    title: en ? 'Edit your job' : 'Edytuj zlecenie',
+    description: en ? 'Update the details that freelancers need to prepare an offer.' : 'Zaktualizuj szczegóły potrzebne wykonawcom do przygotowania oferty.',
+  } : { eyebrow, title, description };
+  return <><SubpageHeading {...heading} actions={children} variant={jobs ? 'catalog' : 'editor'} />{jobs && <SubpageCatalogTabs active="jobs" />}</>;
 }
 
-export function MarketCatalogHeader({ eyebrow, title, description, count, noun = "jobs", status, tabs, actions, children }) {
+export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
+  const en = useSitePreferences().language === 'en';
   const value = Math.max(0, Number(count) || 0);
-  const words = { jobs: ["zlecenie", "zlecenia", "zleceń"], services: ["usługa", "usługi", "usług"], profiles: ["profil", "profile", "profili"] }[noun] || ["wynik", "wyniki", "wyników"];
-  const suffix = value === 1 ? words[0] : value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 12 || value % 100 > 14) ? words[1] : words[2];
-  return <header className="ih26-catalog-header">
-    <div className="ih26-catalog-top">
-      <div className="ih26-catalog-location">{tabs}<span className="ih5-eyebrow">{eyebrow}</span></div>
-      <div className="ih26-catalog-count" role="status" aria-live="polite" aria-atomic="true">
-        <span>Wyniki wyszukiwania</span>
-        {status ? <p>{status}</p> : <p><strong>{new Intl.NumberFormat("pl-PL").format(value)}</strong><span>{suffix}</span></p>}
-      </div>
+  const words = { jobs: ['zlecenie', 'zlecenia', 'zleceń'], services: ['usługa', 'usługi', 'usług'], profiles: ['profil', 'profile', 'profili'] }[noun] || ['wynik', 'wyniki', 'wyników'];
+  const polish = value === 1 ? words[0] : value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 12 || value % 100 > 14) ? words[1] : words[2];
+  const english = { jobs: 'job', services: 'service', profiles: 'profile' }[noun] || 'result';
+  const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
+  return <div className="ih73-catalog-header">
+    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
+    <div className="ih73-catalog-context">{tabs || <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />}
+      <p className="ih73-result-count" role="status" aria-live="polite" aria-atomic="true">{statusCopy || <><strong>{new Intl.NumberFormat(en ? 'en-GB' : 'pl-PL').format(value)}</strong><span>{en ? english + (value === 1 ? '' : 's') : polish}</span></>}</p>
     </div>
-    <div className="ih26-catalog-intro">
-      <div><h1>{title}</h1><p>{description}</p></div>
-      {actions && <nav className="ih26-catalog-actions" aria-label="Działania katalogu">{actions}</nav>}
-    </div>
-    {children && <div className="ih26-catalog-filters">{children}</div>}
-  </header>;
+    {children}
+  </div>;
 }
 
 // Only visual preferences travel to the public help site. Never forward a session,
@@ -357,20 +369,26 @@ export function MarketSelect({ id, label, value, options, onChange }) {
   );
 }
 
-export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = (value) => value, sort, onSort, matchedAvailable = false, kind = "zleceń" }) {
+export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, kind = 'zleceń' }) {
   const id = useId();
-  return (
-    <section className="ih5-filters" aria-label={`Wyszukiwanie ${kind}`}>
-      <label className="ih5-search" htmlFor={`${id}-search`}>
-        <MarketIcon /><span className="ih5-sr-only">Szukaj {kind}</span>
-        <input id={`${id}-search`} type="search" value={search} onChange={(event) => onSearch(event.target.value)} placeholder={kind === "usług" ? "Usługa, specjalizacja lub rezultat…" : "Tytuł, specjalizacja lub umiejętność…"} maxLength={160} />
-      </label>
-      <MarketSelect id={`${id}-category`} label="Kategoria" value={category} onChange={onCategory}
-        options={[{ value: "Wszystkie", label: "Wszystkie kategorie" }, ...categories.map((value) => ({ value, label: categoryLabel(value) }))]} />
-      {onSort && <MarketSelect id={`${id}-sort`} label="Kolejność" value={sort} onChange={onSort}
-        options={[{ value: "latest", label: "Najnowsze" }, { value: "matched", label: "Dopasowane do mnie", disabled: !matchedAvailable }]} />}
-    </section>
-  );
+  const en = useSitePreferences().language === 'en';
+  const people = kind === 'freelancerów';
+  const services = kind === 'usług';
+  const label = people ? (en ? 'Search freelancers' : 'Szukaj freelancerów') : services ? (en ? 'Search services' : 'Szukaj usług') : (en ? 'Search jobs' : 'Szukaj zleceń');
+  return <section className="ih73-filters" aria-label={label}>
+    <label className="ih73-catalog-search" htmlFor={id + '-search'}><MarketIcon kind="search" /><span className="ih5-sr-only">{label}</span>
+      <input id={id + '-search'} type="search" value={search} onChange={event => onSearch(event.target.value)} maxLength={160}
+        placeholder={people ? (en ? 'Name, skills or specialisation' : 'Imię, umiejętności lub specjalizacja') : services ? (en ? 'Service, field or result' : 'Usługa, dziedzina lub rezultat') : (en ? 'Project, field or skill' : 'Projekt, dziedzina lub umiejętność')} />
+      {search && <button type="button" onClick={() => onSearch('')} aria-label={en ? 'Clear search' : 'Wyczyść wyszukiwanie'}><MarketIcon kind="close" /></button>}
+    </label>
+    <div className="ih73-filter-options">
+      <MarketSelect id={id + '-category'} label={en ? 'Field' : 'Dziedzina'} value={category} onChange={onCategory}
+        options={[{ value: 'Wszystkie', label: en ? 'All fields' : 'Wszystkie dziedziny' }, ...categories.filter(value => value !== 'Wszystkie').map(value => ({ value, label: en ? translateUiText(categoryLabel(value)) : categoryLabel(value) }))]} />
+      {onSort && <MarketSelect id={id + '-sort'} label={en ? 'Sort by' : 'Kolejność'} value={sort} onChange={onSort}
+        options={[{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' }, { value: 'matched', label: en ? 'Matched to me' : 'Dopasowane do mnie', disabled: !matchedAvailable }]} />}
+      {(search || category !== 'Wszystkie') && <button type="button" className="ih73-clear-filters" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
+    </div>
+  </section>;
 }
 
 const STEP_TILES = Array.from({ length: 320 }, (_, index) => {

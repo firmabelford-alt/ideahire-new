@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { helpCenterHref } from "./MarketUI";
+import { SubpageHistoryControls } from "./Subpages";
 import { containsPrivateInput, conversationContext, downloadLucynaExport, LUCYNA_NOTICE_VERSION, LUCYNA_BUILD_VERSION } from "./LucynaCore";
 import { LUCYNA_GUIDE } from "./LucynaKnowledge";
 import { useLucynaMemory } from "./LucynaMemory";
@@ -579,6 +580,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
         <main className="lu-main" ref={mainRef} role={embedded ? "region" : undefined} aria-label={embedded ? "Rozmowa z Lucyną AI" : undefined} inert={mobile && historyOpen || infoOpen ? "" : undefined}>
           <header className="lu-chat-toolbar">
             <div className="lu-toolbar-identity">
+              {!embedded && <SubpageHistoryControls parent="/account" />}
               <button type="button" className="lu-icon-button lu-history-toggle" ref={historyTriggerRef}
                 aria-label={mobile ? "Otwórz historię rozmów" : sidebarCollapsed ? "Pokaż historię rozmów" : "Ukryj historię rozmów"}
                 aria-expanded={mobile ? historyOpen : !sidebarCollapsed}

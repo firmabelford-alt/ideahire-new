@@ -38,6 +38,7 @@ import App from "./App";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
+import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences,IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
@@ -5641,6 +5642,7 @@ function AdminNavbar() {
   }
 
   return (
+    <>
     <header
       className="navbar admin-navbar"
       data-ui-release="ideahire-v5-5-20260919"
@@ -5711,6 +5713,8 @@ function AdminNavbar() {
         </button>
       </div>
     </header>
+    <SubpageNavigation />
+    </>
   );
 }
 
@@ -7798,14 +7802,9 @@ function AccountStatus() {
       <AccountNavbar />
 
       <main className="app-page moderation-user-shell">
-        <header className="moderation-user-header">
-          <span className="section-label">Bezpieczeństwo i moderacja</span>
-          <h1>Status Twojego konta</h1>
-          <p>
-            Tutaj znajdziesz decyzję administracji, jej podstawę, czas
-            obowiązywania oraz bezpłatną możliwość odwołania.
-          </p>
-        </header>
+        <SubpageHeading eyebrow="Bezpieczeństwo i moderacja" title="Status Twojego konta"
+          description="Decyzje administracji, ich uzasadnienia oraz możliwość odwołania."
+          variant="status" />
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
@@ -11655,19 +11654,9 @@ function PrivacyCenter() {
       <AccountNavbar />
 
       <main className="privacy-center-shell">
-        <header className="privacy-center-header">
-          <div>
-            <span className="section-label">Prywatność i moje dane</span>
-            <h1>Centrum prywatności</h1>
-            <p>
-              Wyślij wniosek dotyczący swoich danych i śledź jego realizację
-              bezpośrednio na koncie IdeaHire.
-            </p>
-          </div>
-          <Link className="privacy-back-link" to="/account">
-             Wróć do konta
-          </Link>
-        </header>
+        <SubpageHeading eyebrow="Prywatność i moje dane" title="Centrum prywatności"
+          description="Wyślij wniosek dotyczący swoich danych i śledź jego realizację bezpośrednio na koncie IdeaHire."
+          variant="privacy" />
 
         <section className="privacy-trust-panel">
           <div className="privacy-trust-mark" aria-hidden="true">✓</div>
@@ -12249,6 +12238,7 @@ function PrivacyCenter() {
 ========================================================= */
 
 function FindTalent() {
+  const formEnglish = useSitePreferences().language === "en";
   const navigate =
     useNavigate();
 
@@ -12763,6 +12753,7 @@ function FindTalent() {
       <main className="ih-market-shell ih5-editor-shell">
         <MarketHeader eyebrow="Dla zlecających" title="Dodaj zlecenie" description="Cztery krótkie kroki. Opisz projekt, ustal zakres i pokaż wykonawcom jasne warunki." />
 
+        <label className="ih73-mobile-step-picker"><span>{formStep} / {JOB_FORM_STEPS.length}</span><select aria-label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={event => { setMessage(""); setFormStep(Number(event.target.value)); }}>{JOB_FORM_STEPS.map((step, index) => <option key={step.number} value={index + 1} disabled={index + 1 > maxStepReached}>{step.number}. {formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label}</option>)}</select></label>
         <ol className="ih5-job-create-progress" aria-label="Postęp dodawania zlecenia">
           {JOB_FORM_STEPS.map((item, index) => {
             const stepNumber = index + 1;
@@ -15875,9 +15866,6 @@ function Jobs() {
             LISTA ZLECEŃ
         ================================================= */}
 
-        {!loading && !message && displayedJobs.length > 0 && (
-          <JobsSpotlight jobs={displayedJobs} formatBudget={formatBudget} />
-        )}
 
         <div className="ih5-jobs-list">
           {displayedJobs.map(
@@ -15939,7 +15927,7 @@ function Jobs() {
 
               return (
                 <article
-                  className={`ih5-job-card${isOpen ? " is-open" : ""}`}
+                  className={`ih5-job-card ih73-job-row${isOpen ? " is-open" : ""}`}
                   style={{ "--ih-job-order": Math.min(jobIndex, 5) }}
                   id={`ih10-job-${job.id}`}
                   tabIndex={-1}
@@ -16569,6 +16557,7 @@ function createCalendarDraft(dateValue = new Date()) {
 }
 
 function Calendar() {
+  const calendarEnglish = useSitePreferences().language === "en";
   const { user } =
     useAuth();
 
@@ -17483,56 +17472,18 @@ function Calendar() {
       <AccountNavbar />
 
       <main className="app-page calendar-shell">
-        <header className="calendar-hero">
-          <div className="calendar-hero-orbit" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-
-          <div className="calendar-hero-copy">
-            <span className="calendar-eyebrow">
-              ORGANIZACJA PRACY
-            </span>
-            <h1>Kalendarz</h1>
-            <p>
-              Terminy zleceń, własne zadania i przypomnienia e-mail
-              w jednym prywatnym miejscu.
-            </p>
-          </div>
-
-          <button
-            className="calendar-primary-action"
-            type="button"
-            onClick={() =>
-              openCreateDialog()
-            }
-          >
-            <span aria-hidden="true">+</span>
-            Dodaj termin
-          </button>
-
-          <div className="calendar-hero-stats">
-            <article>
-              <span>Najbliższe 7 dni</span>
-              <strong>
-                {nextSevenDaysCount}
-              </strong>
-            </article>
-            <article>
-              <span>Przypomnienia e-mail</span>
-              <strong>
-                {activeEmailReminders}
-              </strong>
-            </article>
-            <article>
-              <span>Wykonane w miesiącu</span>
-              <strong>
-                {completedThisMonth}
-              </strong>
-            </article>
-          </div>
-        </header>
+        <SubpageHeading
+          eyebrow={calendarEnglish ? "Your schedule" : "Twój terminarz"}
+          title={calendarEnglish ? "Calendar" : "Kalendarz"}
+          description={calendarEnglish ? "Project deadlines, your tasks and email reminders." : "Terminy projektów, Twoje zadania i przypomnienia e-mail."}
+          variant="calendar"
+          actions={<button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" />{calendarEnglish ? "Add an event" : "Dodaj termin"}</button>}
+        />
+        <SubpageMetrics items={[
+          { label: calendarEnglish ? "Next 7 days" : "Najbliższe 7 dni", value: nextSevenDaysCount },
+          { label: calendarEnglish ? "Email reminders" : "Przypomnienia e-mail", value: activeEmailReminders },
+          { label: calendarEnglish ? "Completed this month" : "Wykonane w miesiącu", value: completedThisMonth },
+        ]} />
 
         {(message || successMessage) && (
           <div
@@ -17565,7 +17516,7 @@ function Calendar() {
               }
               aria-label="Poprzedni miesiąc"
             >
-              ←
+              <MarketIcon kind="back" />
             </button>
 
             <div>
@@ -17584,7 +17535,7 @@ function Calendar() {
               }
               aria-label="Następny miesiąc"
             >
-              →
+              <MarketIcon kind="arrow" />
             </button>
           </div>
 
@@ -17714,6 +17665,7 @@ function Calendar() {
                         <span>
                           {day.getDate()}
                         </span>
+                        <small className="ih73-calendar-event-count" aria-hidden="true">{dayEvents.length > 0 ? dayEvents.length : ""}</small>
                         {isToday && (
                           <em>Dziś</em>
                         )}
@@ -19203,22 +19155,9 @@ function Notifications() {
       <AccountNavbar />
 
       <main className="app-page notifications-page">
-        <div className="app-page-header">
-          <span className="section-label">
-            Skrzynka odbiorcza
-          </span>
-
-          <h1>
-            Powiadomienia
-          </h1>
-
-          <p>
-            Tutaj znajdziesz zgłoszenia
-            wykonawców oraz decyzje
-            dotyczące Twoich własnych
-            zgłoszeń.
-          </p>
-        </div>
+        <SubpageHeading eyebrow="Skrzynka odbiorcza" title="Powiadomienia"
+          description="Nowe wiadomości, zgłoszenia do zleceń i decyzje dotyczące współpracy."
+          variant="notifications" />
 
         {loading && (
           <InlineRouteLoader
@@ -23405,21 +23344,10 @@ function Disputes() {
       <AccountNavbar />
 
       <main className="disputes-shell">
-        <header className="disputes-page-header">
-          <div>
-            <span className="section-label">Bezpieczna współpraca</span>
-            <h1>Centrum sporów</h1>
-            <p>
-              Tutaj znajdziesz zgłoszone problemy, wyjaśnienia, dowody i decyzje administratora.
-            </p>
-          </div>
-
-          {isStaff && (
-            <Link className="dispute-primary-button" to="/admin">
-              Otwórz panel administratora
-            </Link>
-          )}
-        </header>
+        <SubpageHeading eyebrow="Bezpieczna współpraca" title="Sprawy i zgłoszenia"
+          description="Zgłoszone problemy, wyjaśnienia, dowody i decyzje administratora."
+          variant="disputes"
+          actions={isStaff ? <Link className="dispute-primary-button" to="/admin">Otwórz panel administratora</Link> : null} />
 
         <div className="disputes-filter-bar" role="group" aria-label="Filtr spraw">
           {[
@@ -30771,6 +30699,7 @@ function Router() {
       <AmbientBackground />
       <SmoothRouteTransitions />
       <RouteScrollManager />
+      <SubpageTheme />
       <AuthProvider>
         <StaffRoleProvider>
           <AccountRestrictionProvider>

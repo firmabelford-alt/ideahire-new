@@ -7,6 +7,7 @@ import LucynaSymbol from './LucynaSymbol';
 import { useSitePreferences } from './Preferences';
 import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
+import { SubpageNavigation, SubpageHeading } from './Subpages';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -154,6 +155,7 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
         </div>
       </div>
     </header>
+    <SubpageNavigation />
     <WorkspaceSheet id="ih70-account-menu" open={open} onClose={() => setOpen(false)} title={t('Menu IdeaHire', 'IdeaHire menu')}>
       <nav className="ih70-menu-list" aria-label={t('Pozostałe strony', 'More pages')}>
         {extras.map(([to,label,icon]) => <Link key={to} to={to} onClick={() => setOpen(false)} className="ih70-menu-link" aria-current={current(to) ? 'page' : undefined}><WorkspaceIcon kind={icon} /><span>{label}</span>{((to === '/notifications' && hasNotifications) || (to === '/disputes' && hasDisputes)) && <i className="ih68-dot" />}<WorkspaceIcon kind="next" /></Link>)}
@@ -339,7 +341,7 @@ export function WorkspaceWork({ inbox }) {
     navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
   }
   return <main className="ih68-page ih72-work-page" id="ih68-content">
-    <header className="ih72-page-heading"><div><p className="ih72-eyebrow">{t('Panel pracy', 'Workspace')}</p><h1>{t('Twoja praca.', 'Your work.')}</h1><p>{t('Współprace, rozmowy i kolejne kroki.', 'Projects, conversations and next steps.')}</p></div><Link to="/calendar" className="ih68-text-link"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link></header>
+    <SubpageHeading eyebrow={t('Panel pracy', 'Workspace')} title={t('Twoja praca', 'Your work')} description={t('Współprace, rozmowy i kolejne kroki.', 'Projects, conversations and next steps.')} actions={<Link to="/calendar" className="ih68-text-link"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>} />
     <WorkspaceWorkActions />
     <section className="ih72-projects" aria-labelledby="ih72-projects-title">
       <div className="ih72-section-heading"><h2 id="ih72-projects-title">{t('Twoje współprace', 'Your projects')}{!inbox?.loading && <span className="ih72-count">{visible.length}</span>}</h2></div>

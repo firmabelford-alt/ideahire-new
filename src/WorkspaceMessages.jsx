@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSitePreferences } from './Preferences';
+import { SubpageHeading } from './Subpages';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { WorkspaceAvatar, WorkspaceConversationRows, WorkspaceIcon, WorkspaceLoading, useWorkspaceCopy } from './Workspace';
 export function WorkspaceInbox({
@@ -29,7 +30,7 @@ export function WorkspaceInbox({
     navigate('/messages', { replace: true });
   }
   return <main className="ih68-page ih72-inbox" id="ih68-content">
-    <header className="ih72-page-heading"><div><p className="ih72-eyebrow">{t('Twoje rozmowy', 'Your conversations')}</p><h1>{t('Wiadomości.', 'Messages.')}</h1><p>{t('Wiadomości i ustalenia dotyczące Twoich projektów.', 'Conversations and terms for your projects.')}</p></div><Link to="/freelancers" className="ih72-new-conversation"><WorkspaceIcon kind="plus" /><span>{t('Nowa rozmowa', 'New conversation')}</span></Link></header>
+    <SubpageHeading eyebrow={t('Twoje rozmowy', 'Your conversations')} title={t('Wiadomości', 'Messages')} description={t('Wiadomości i ustalenia dotyczące Twoich projektów.', 'Conversations and terms for your projects.')} actions={<Link to="/freelancers" className="ih72-new-conversation"><WorkspaceIcon kind="plus" /><span>{t('Nowa rozmowa', 'New conversation')}</span></Link>} />
     <div className="ih72-list-toolbar">
       <div className="ih72-filters" role="group" aria-label={t('Filtr rozmów', 'Conversation filter')}>
         <button type="button" aria-pressed={inboxFilter === 'all'} onClick={() => update('unread', '')}>{t('Wszystkie', 'All')}{!loading && <span>{conversations.length}</span>}</button>
