@@ -325,159 +325,20 @@ function ServiceAvatar({ service, size = "normal" }) {
   );
 }
 
-const SERVICE_ART_KINDS = {
-  Programowanie: 'code',
-  'Grafika i design': 'design',
-  Marketing: 'marketing',
-  Copywriting: 'writing',
-  Video: 'video',
-  Fotografia: 'photo',
-  'AI i automatyzacje': 'automation',
-  'Dane, analizy i research': 'data',
-  'Biznes i e-commerce': 'business',
-  'Architektura, wnętrza i CAD': 'architecture',
-};
-
-/* Original category illustrations. These describe a field, not a seller's work. */
-function ServiceArtwork({ category, signature = false }) {
-  const kind = signature ? 'idea' : SERVICE_ART_KINDS[category] || 'idea';
-  let drawing;
-  switch (kind) {
-    case 'code':
-      drawing = <>
-        <rect data-fill="muted" x="89" y="42" width="192" height="132" rx="18" transform="rotate(7 185 108)" />
-        <rect data-fill="paper" x="70" y="39" width="198" height="133" rx="15" transform="rotate(-5 169 105)" />
-        <path data-line="ink" d="m77 67 186-16M87 53h2m10-1h2m10-1h2" />
-        <path data-line="accent" d="m132 91-23 20 23 16m77-43 24 15-21 20m-44-31-11 43" />
-        <rect data-fill="accent" x="227" y="135" width="57" height="42" rx="11" />
-        <path data-line="on" d="m242 155 8 8 17-18" />
-      </>;
-      break;
-    case 'design':
-      drawing = <>
-        <rect data-fill="paper" x="74" y="55" width="122" height="121" rx="8" transform="rotate(-9 135 115)" />
-        <path data-fill="accent" d="M206 43c19 0 31 16 25 35 21-7 38 5 38 24s-17 31-38 24c6 20-6 36-25 36s-31-16-25-36c-21 7-38-5-38-24s17-31 38-24c-6-19 6-35 25-35Z" />
-        <circle data-fill="paper" cx="206" cy="102" r="13" />
-        <path data-line="ink" d="M98 88h49v50H98zM90 81v-8h9m55 8h9v9m-9 58v9h-9m-55-9h-9v-9" />
-        <circle data-fill="ink" cx="262" cy="167" r="12" />
-      </>;
-      break;
-    case 'marketing':
-      drawing = <>
-        <path data-fill="muted" d="M68 142a81 81 0 1 1 162 0Z" />
-        <path data-fill="paper" d="m107 90 115-44v117l-115-39Z" />
-        <path data-fill="accent" d="M104 88h25v45h-25c-13 0-23-9-23-22s10-23 23-23Zm17 43 20 3 11 45h-24Z" />
-        <path data-line="ink" d="m222 46 1 117m22-90 23-13m-19 45h28m-31 31 23 13" />
-        <circle data-fill="accent" cx="279" cy="166" r="7" />
-      </>;
-      break;
-    case 'writing':
-      drawing = <>
-        <rect data-fill="muted" x="92" y="43" width="148" height="141" rx="10" transform="rotate(8 166 113)" />
-        <path data-fill="paper" d="M98 35h124l24 25v119H98Z" />
-        <path data-line="ink" d="M222 35v25h24M116 147h78m-78 13h53" />
-        <path data-line="accent" d="m118 124 23-54 23 54m-38-17h30m42-4c-20-10-28 0-28 11 0 15 22 17 28 0m0-18v28" />
-        <path data-fill="accent" d="m224 126 12-9 29 40-13 9Z" />
-        <path data-fill="ink" d="m252 166 13-9 3 18Z" />
-      </>;
-      break;
-    case 'video':
-      drawing = <>
-        <circle data-fill="muted" cx="122" cy="113" r="70" />
-        <rect data-fill="paper" x="92" y="45" width="187" height="130" rx="17" transform="rotate(6 185 110)" />
-        <path data-fill="accent" d="m173 82 43 29-43 28Z" />
-        <path data-line="ink" d="m109 63 10 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1M102 150l12 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1m14 1 10 1" />
-        <path data-fill="accent" d="M68 144h37v37H68z" />
-        <path data-fill="paper" d="m81 154 13 9-13 9Z" />
-      </>;
-      break;
-    case 'photo':
-      drawing = <>
-        <rect data-fill="paper" x="197" y="36" width="88" height="116" rx="7" transform="rotate(12 241 94)" />
-        <path data-fill="muted" d="m215 112 19-29 13 15 10-10 13 30Z" />
-        <circle data-fill="accent" cx="258" cy="66" r="10" />
-        <path data-fill="accent" d="M91 78h30l11-20h49l11 20h35v97H91Z" />
-        <circle data-fill="paper" cx="158" cy="125" r="36" />
-        <circle data-fill="ink" cx="158" cy="125" r="25" />
-        <path data-line="paper" d="M144 123c0-9 6-15 14-15" />
-        <path data-line="on" d="M201 92h11" />
-      </>;
-      break;
-    case 'automation':
-      drawing = <>
-        <path data-line="accent" d="M117 72h64c40 0 40 79 77 79M115 152h57c38 0 40-78 85-78" />
-        <rect data-fill="paper" x="74" y="50" width="59" height="47" rx="12" />
-        <rect data-fill="paper" x="75" y="127" width="58" height="47" rx="12" />
-        <rect data-fill="accent" x="230" y="53" width="58" height="123" rx="16" />
-        <path data-line="ink" d="m94 74 7 7 15-17m-20 78h16m-16 10h10" />
-        <path data-line="on" d="m251 105 9-20-3 21h13l-13 27 4-28Z" />
-        <circle data-fill="ink" cx="181" cy="111" r="15" />
-        <circle data-fill="paper" cx="181" cy="111" r="5" />
-      </>;
-      break;
-    case 'data':
-      drawing = <>
-        <rect data-fill="paper" x="76" y="43" width="209" height="134" rx="17" transform="rotate(-4 180 110)" />
-        <path data-fill="muted" d="M101 124h31v30h-31Zm43-26h31v56h-31Z" />
-        <path data-fill="accent" d="M187 71h31v83h-31Z" />
-        <path data-line="ink" d="m104 103 37-21 35 3 54-35m-10 0h10v10M95 157h141" />
-        <circle data-fill="accent" cx="263" cy="154" r="28" />
-        <path data-line="on" d="m252 154 8 8 15-18" />
-      </>;
-      break;
-    case 'business':
-      drawing = <>
-        <path data-fill="paper" d="m95 84 60-32 62 32v71l-62 31-60-31Z" />
-        <path data-fill="muted" d="m155 116 62-32v71l-62 31Z" />
-        <path data-line="ink" d="m95 84 60 32v70m-30-118 60 32-1 25" />
-        <path data-fill="accent" d="M215 88h61l8 88h-78Z" />
-        <path data-line="on" d="M232 100V81c0-18 25-18 25 0v19" />
-        <path data-line="ink" d="M81 52h18m-9-9v18" />
-      </>;
-      break;
-    case 'architecture':
-      drawing = <>
-        <path data-fill="paper" d="m76 113 99-64 102 62-101 64Z" />
-        <path data-fill="muted" d="m76 135 100 64 101-64v-23l-101 64-100-64Z" />
-        <path data-fill="accent" d="m133 99 43-51 43 51v43l-43 27-43-28Z" />
-        <path data-line="ink" d="m133 99 43 25 43-25m-43 25v45m-20-14v-22l14 8v22" />
-        <path data-line="paper" d="m187 128 13-8v16l-13 8Z" />
-        <path data-line="accent" d="m81 168 18 11m151-123 15 9m-8-21v26" />
-      </>;
-      break;
-    default:
-      drawing = <>
-        <path data-fill="muted" d="M75 58h92v92H75z" transform="rotate(-12 121 104)" />
-        <path data-fill="accent" d="M149 38h72v45h45v72h-72v-45h-45Z" transform="rotate(9 208 96)" />
-        <path data-fill="paper" d="M102 100h72v44h44v55h-72v-44h-44Z" transform="rotate(-8 160 150)" />
-        <path data-line="ink" d="m126 138 14 14 29-34" />
-        <path data-line="accent" d="m268 56 17-6m-12-7 7 17M77 173l-12 10m2-13 10 14" />
-      </>;
-  }
-  return <svg className={'ih77-service-art is-' + kind} viewBox="0 0 360 220" aria-hidden="true" focusable="false">
-    <ellipse data-fill="wash" cx="181" cy="192" rx="101" ry="8" />
-    {drawing}
-  </svg>;
-}
-
-function ServiceCard({ service, index = 0 }) {
+function ServiceCard({ service }) {
   const capacity = serviceCapacity(service);
   const isCustom = service.price_mode === 'custom';
   const en = useSitePreferences().language === 'en';
   const category = en ? translateUiText(service.category) : service.category;
-  return <article className={'ih77-service-offer' + (index % 2 ? ' is-offset' : '')} data-art={SERVICE_ART_KINDS[service.category] || 'idea'}>
-    <div className="ih77-service-visual">
-      <span className="ih77-offer-field">{category}</span>
-      <ServiceArtwork category={service.category} />
-      <span className="ih77-offer-open"><MarketIcon kind="diagonal" /></span>
-    </div>
-    <div className="ih77-offer-copy">
+  return <article className="ih78-service-offer">
+    <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
+    <div className="ih78-offer-copy">
       <h2><Link to={'/services/' + service.id}>{service.title}</Link></h2>
       <p>{service.summary}</p>
     </div>
-    <footer className="ih77-offer-footer">
-      <div className="ih77-offer-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small className={capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</small></span></div>
-      <div className="ih77-offer-price"><span>{isCustom ? (en ? 'Quote' : 'Wycena') : (en ? 'From' : 'Od')}</span><strong>{isCustom ? (en ? 'On request' : 'Indywidualna') : formatMoney(service.base_price)}</strong></div>
+    <footer className="ih78-offer-footer">
+      <div className="ih78-offer-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small className={capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</small></span></div>
+      <div className="ih78-offer-price"><span>{isCustom ? (en ? 'Quote' : 'Wycena') : (en ? 'From' : 'Od')}</span><strong>{isCustom ? (en ? 'On request' : 'Indywidualna') : formatMoney(service.base_price)}</strong></div>
     </footer>
   </article>;
 }
@@ -550,59 +411,52 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const hasFilters = Boolean(search.trim()) || selectedCategory !== "Wszystkie";
 
   return (
-    <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page ih77-services-page">
-      <div className="ih77-services-navigation">
-        <MarketplaceSwitch />
-        <Link className="ih77-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link>
-      </div>
+    <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page ih78-services-page">
+      <div className="ih78-services-navigation"><MarketplaceSwitch /></div>
 
-      <header className="ih77-services-hero">
-        <div className="ih77-services-intro">
-          <h1>{english ? "Services" : "Usługi"}<em>{english ? "with a spark." : "z pomysłem."}</em></h1>
-          <p>{english ? "Choose a service. Discuss the scope and details with the freelancer." : "Wybierz usługę. Zakres i szczegóły ustalisz z wykonawcą."}</p>
-        </div>
-        <div className="ih77-services-signature"><ServiceArtwork signature /></div>
+      <header className="ih78-services-hero">
+        <h1>{english ? "Services" : "Usługi"}</h1>
+        <Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link>
       </header>
 
-      <section className="ih77-services-discovery" aria-label={english ? "Find a service" : "Znajdź usługę"}>
-        <label className="ih77-service-search" htmlFor={searchId}>
+      <section className="ih78-services-discovery" aria-label={english ? "Find a service" : "Znajdź usługę"}>
+        <label className="ih78-service-search" htmlFor={searchId}>
           <MarketIcon kind="search" />
           <span className="ih5-sr-only">{english ? "Search services" : "Szukaj usług"}</span>
           <input id={searchId} type="search" value={search} onChange={event => setSearch(event.target.value)} maxLength={160}
-            placeholder={english ? "A logo, a website, a film…" : "Logo, strona, montaż filmu…"} />
+            placeholder={english ? "Search services" : "Szukaj usługi"} />
           {search && <button type="button" aria-label={english ? "Clear search" : "Wyczyść wyszukiwanie"} onClick={() => setSearch("")}><MarketIcon kind="close" /></button>}
         </label>
-        <div className="ih77-discovery-bottom">
-          <label className="ih77-service-field" htmlFor={searchId + '-field'}>
+        <div className="ih78-discovery-bottom">
+          <label className="ih78-service-field" htmlFor={searchId + '-field'}>
             <MarketIcon kind="talent" /><span className="ih5-sr-only">{english ? "Field" : "Dziedzina"}</span>
             <select id={searchId + '-field'} value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
               <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
               {SERVICE_CATEGORIES.map(category => <option key={category} value={category}>{english ? translateUiText(category) : category}</option>)}
             </select>
           </label>
-          <Link className="ih77-my-services" to="/services/mine">{english ? "My services" : "Moje usługi"}<MarketIcon kind="diagonal" /></Link>
+          <Link className="ih78-my-services" to="/services/mine">{english ? "My services" : "Moje usługi"}<MarketIcon kind="diagonal" /></Link>
         </div>
       </section>
 
-      <section className="ih77-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>
-        <header className="ih77-results-heading">
+      <section className="ih78-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>
+        <header className="ih78-results-heading">
           <p role="status" aria-live="polite" aria-atomic="true">{loading ? (english ? "Finding services…" : "Szukamy usług…") : message ? (english ? "Results unavailable" : "Wyniki niedostępne") : <><strong>{services.length}</strong> {resultNoun}</>}</p>
           {hasFilters && <button type="button" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}><MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}</button>}
         </header>
         {message ? (
-          <div className="ih77-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
+          <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
         ) : loading ? (
-          <div className="ih77-service-grid is-loading" aria-hidden="true">
-            {[0, 1, 2, 3].map(item => <div className={'ih77-service-skeleton' + (item % 2 ? ' is-offset' : '')} key={item}><span /><i /><i /></div>)}
+          <div className="ih78-service-grid is-loading" aria-hidden="true">
+            {[0, 1].map(item => <div className="ih78-service-skeleton" key={item}><span /><i /><i /></div>)}
           </div>
         ) : services.length > 0 ? (
-          <div className="ih77-service-grid">
-            {services.map((service, index) => <ServiceCard key={service.id} service={service} index={index} />)}
+          <div className="ih78-service-grid">
+            {services.map(service => <ServiceCard key={service.id} service={service} />)}
           </div>
         ) : (
-          <div className="ih77-services-empty">
-            <ServiceArtwork signature />
-            <div><h2>{english ? "There's room for a new idea." : "Tu jest miejsce na nowy pomysł."}</h2><p>{english ? "We haven't found this service yet. Try another phrase or field." : "Nie znaleźliśmy takiej usługi. Spróbuj innej frazy lub dziedziny."}</p><Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link></div>
+          <div className="ih78-services-empty">
+            <div><h2>{english ? "No services found" : "Nie znaleźliśmy usług"}</h2><p>{english ? "We haven't found this service yet. Try another phrase or field." : "Nie znaleźliśmy takiej usługi. Spróbuj innej frazy lub dziedziny."}</p><Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link></div>
           </div>
         )}
       </section>
@@ -1287,36 +1141,23 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
-      <nav className="ih5-service-detail-breadcrumb" aria-label="Okruszki">
-        <Link to="/services">Usługi</Link>
-        <span>/</span>
-        <Link to={`/services?category=${encodeURIComponent(service.category)}`}>
-          {service.category}
-        </Link>
-      </nav>
+      <header className="ih5-service-detail-header">
+        <div className="ih5-service-detail-category">
+          <Link to={`/services?category=${encodeURIComponent(service.category)}`}>{service.category}</Link>
+          <span>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</span>
+        </div>
+        <h1>{service.title}</h1>
+        <p>{service.summary}</p>
+      </header>
 
       <div className="ih5-service-detail-layout">
         <article className="ih5-service-detail-main">
-          <header className="ih5-service-detail-header">
-            <div className="ih5-service-detail-category">
-              <span aria-hidden="true"><MarketIcon kind="files" /></span>
-              <div>
-                <b>{service.category}</b>
-                <small>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</small>
-              </div>
-            </div>
-            <h1>{service.title}</h1>
-            <p>{service.summary}</p>
-          </header>
-
           <section className="ih5-service-detail-section">
-            <span className="ih5-service-eyebrow">O usłudze</span>
-            <h2>Jasny zakres od pierwszej rozmowy.</h2>
+            <h2>Opis usługi</h2>
             <div className="ih5-service-rich-copy">{service.description}</div>
           </section>
 
           <section className="ih5-service-detail-section">
-            <span className="ih5-service-eyebrow">Rezultat</span>
             <h2>Co otrzymasz</h2>
             <ul className="ih5-service-check-list">
               {deliverables.map((item, index) => (
@@ -1327,8 +1168,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
 
           {requirements.length > 0 && (
             <section className="ih5-service-detail-section">
-              <span className="ih5-service-eyebrow">Dobry start</span>
-              <h2>Co przygotować przed rozmową</h2>
+              <h2>Materiały od Ciebie</h2>
               <ol className="ih5-service-requirement-list">
                 {requirements.map((item, index) => (
                   <li key={`${item}-${index}`}>
@@ -1341,7 +1181,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           )}
 
           <section className="ih5-service-process">
-            <span className="ih5-service-eyebrow">Jak zaczynamy</span>
+            <h2>Jak zamówić</h2>
             <div>
               <article><i>01</i><h3>Wyślij brief</h3><p>Otwierasz rozmowę bez opłaty i rezerwacji miejsca.</p></article>
               <article><i>02</i><h3>Odbierz ofertę</h3><p>Wykonawca zapisuje zakres, termin i cenę. Miejsce czeka 24 godziny.</p></article>

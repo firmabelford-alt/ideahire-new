@@ -963,7 +963,7 @@ function HomeNavItem({ children, order, to, href, notification = false }) {
   return (
     <Item
       {...(to ? { to } : { href })}
-      className={`ih-nav-item${to === "/notifications" ? " home-notifications-link" : ""}`}
+      className={`ih-nav-item${to === "/notifications" ? " home-notifications-link" : ""}${["/jobs", "/freelancers", "/services"].includes(to) ? " ih78-home-catalog-link" : ""}`}
       style={{ "--ih-nav-order": order }}
     >
       <span className="ih-nav-pixels" aria-hidden="true">
@@ -3030,27 +3030,29 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
         <BrandLogo className="logo logo-clean" />
 
         <nav className="ih53-primary-nav" aria-label={ih53English?"Main shortcuts":"Główne skróty"} onClick={(event)=>{if(event.target?.closest?.("a"))setMobileMenuOpen(false);}}>
-          <a href="#how-it-works">{ih53English?"Explore IdeaHire":"Poznaj IdeaHire"}</a><a href="#categories">{ih53English?"Categories":"Kategorie"}</a><a href="#for-users">{ih53English?"For you":"Dla Ciebie"}</a>
+          <Link className="ih78-home-catalog-link" to="/jobs">{ih53English?"Jobs":"Zlecenia"}</Link><Link className="ih78-home-catalog-link" to="/freelancers">{ih53English?"Freelancers":"Freelancerzy"}</Link><Link className="ih78-home-catalog-link" to="/services">{ih53English?"Services":"Usługi"}</Link>
           {session&&!limitedAccess&&<Link className="ih53-desktop-account" to="/notifications">Powiadomienia{hasNotifications&&<span className="ih53-unread" aria-label="Nowe powiadomienia"/>}</Link>}
           {session&&<Link className="ih53-desktop-account" to="/account">Moje konto</Link>}
         </nav>
         <nav ref={navigationRef} id="ih-home-navigation" className="nav-links home-nav-links" aria-label={ih53English?"Homepage navigation":"Nawigacja strony głównej"}
           onClick={(event) => { if (event.target?.closest?.("a")) setMobileMenuOpen(false); }}>
-          <HomeNavItem href="#how-it-works" order={0}>{ih53English?"Explore IdeaHire":"Poznaj IdeaHire"}</HomeNavItem>
-          <HomeNavItem href="#categories" order={1}>{ih53English?"Categories":"Kategorie"}</HomeNavItem>
-          <HomeNavItem href="#for-users" order={2}>{ih53English?"For you":"Dla Ciebie"}</HomeNavItem>
+          <HomeNavItem to="/jobs" order={0}>{ih53English?"Jobs":"Zlecenia"}</HomeNavItem>
+          <HomeNavItem to="/freelancers" order={1}>{ih53English?"Freelancers":"Freelancerzy"}</HomeNavItem>
+          <HomeNavItem to="/services" order={2}>{ih53English?"Services":"Usługi"}</HomeNavItem>
+          <HomeNavItem href="#how-it-works" order={3}>{ih53English?"Explore IdeaHire":"Poznaj IdeaHire"}</HomeNavItem>
+          <HomeNavItem href="#categories" order={4}>{ih53English?"Categories":"Kategorie"}</HomeNavItem>
+          <HomeNavItem href="#for-users" order={5}>{ih53English?"For you":"Dla Ciebie"}</HomeNavItem>
 
           {session && (
             <>
-              {!limitedAccess && <HomeNavItem to="/notifications" order={3} notification={hasNotifications}>Powiadomienia</HomeNavItem>}
-              <HomeNavItem to="/account" order={4}>Moje konto</HomeNavItem>
+              {!limitedAccess && <HomeNavItem to="/notifications" order={6} notification={hasNotifications}>Powiadomienia</HomeNavItem>}
+              <HomeNavItem to="/account" order={7}>Moje konto</HomeNavItem>
             </>
           )}
           <span className="ih53-menu-divider" aria-hidden="true"/>
           <span className="ih53-menu-label">{ih53English?"Explore":"Odkrywaj"}</span>
-          <HomeNavItem to="/jobs" order={5}>Wszystkie zlecenia</HomeNavItem>
-          <HomeNavItem to="/find-talent" order={6}>Znajdź wykonawcę</HomeNavItem>
-          <HomeNavItem to="/regulamin" order={7}>Regulamin</HomeNavItem>
+          <HomeNavItem to="/find-talent" order={8}>Znajdź wykonawcę</HomeNavItem>
+          <HomeNavItem to="/regulamin" order={9}>Regulamin</HomeNavItem>
           <a href={helpCenterHref()} referrerPolicy="no-referrer">Centrum pomocy</a>
           {!session && <><Link className="ih-mobile-login" to="/login">{ih53English?"Sign in":"Zaloguj się"}</Link><Link to="/register">{ih53English?"Create an account":"Utwórz konto"}</Link></>}
           {session && <button type="button" className="ih63-menu-logout" onClick={handleLogout}>{ih53English?"Sign out":"Wyloguj się"}</button>}

@@ -74,11 +74,11 @@ body.ih75-subpage #root .ih73-eyebrow > svg { width: 16px !important; height: 16
 body.ih75-subpage #root .ih75-page-heading h1 { margin: 0 !important; color: var(--p-ink) !important; font: 600 clamp(30px,3.4vw,46px)/1.14 Inter,system-ui,sans-serif !important; letter-spacing: -.045em !important; text-wrap: balance !important; }
 body.ih75-subpage #root .ih73-description { max-width: 650px !important; margin: 18px 0 0 !important; color: var(--p-muted) !important; font: 400 16px/1.75 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih73-heading-actions { display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 10px !important; margin: 0 !important; padding: 0 0 4px !important; }
-body.ih75-subpage #root .ih73-catalog-context { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; flex-wrap: wrap !important; margin-bottom: 32px !important; border-bottom: 1px solid var(--p-line) !important; }
-body.ih75-subpage #root .ih73-catalog-tabs { display: flex !important; align-items: stretch !important; gap: 28px !important; width: auto !important; margin: 0 0 32px !important; padding: 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; background: transparent !important; }
+body.ih75-subpage #root .ih73-catalog-context { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; flex-wrap: wrap !important; margin-bottom: 32px !important; border-bottom: 0 !important; }
+body.ih75-subpage #root .ih73-catalog-tabs { display: flex !important; align-items: stretch !important; gap: 28px !important; width: auto !important; margin: 0 0 32px !important; padding: 0 !important; border: 0 !important; border-bottom: 0 !important; background: transparent !important; }
 body.ih75-subpage #root .ih73-catalog-context .ih73-catalog-tabs { margin: 0 !important; border-bottom: 0 !important; }
-body.ih75-subpage #root .ih73-catalog-tabs > a { display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 9px !important; min-height: 52px !important; margin: 0 0 -1px !important; padding: 12px 0 !important; border: 0 !important; border-bottom: 2px solid transparent !important; border-radius: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 500 14px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih73-catalog-tabs > a[aria-current="page"] { color: var(--p-ink) !important; border-bottom-color: var(--p-accent) !important; }
+body.ih75-subpage #root .ih73-catalog-tabs > a { display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 9px !important; min-height: 52px !important; margin: 0 0 -1px !important; padding: 12px 0 !important; border: 0 !important; border-bottom: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 800 19px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; text-decoration: none !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih73-catalog-tabs > a[aria-current="page"] { color: var(--p-accent) !important; font-weight: 900 !important; border-bottom: 0 !important; }
 body.ih75-subpage #root .ih73-result-count { display: flex !important; align-items: baseline !important; gap: 6px !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih73-result-count > strong { color: var(--p-ink) !important; font-weight: 600 !important; font-variant-numeric: tabular-nums !important; }
 
@@ -248,18 +248,18 @@ body.ih75-subpage #root .ih5-service-editor-index { position: static !important;
 body.ih75-subpage #root .ih5-service-editor-heading { padding: 0 !important; margin: 0 0 22px !important; }
 body.ih75-subpage #root .ih5-service-editor-heading p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.65 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-service-editor-fields { width: 100% !important; }
-body.ih75-subpage #root .ih5-service-detail-layout { display: grid !important; grid-template-columns: minmax(0,1fr) 330px !important; align-items: start !important; gap: 48px !important; width: 100% !important; margin: 24px 0 0 !important; }
+body.ih75-subpage #root .ih5-service-detail-layout { display: grid !important; grid-template-columns: minmax(0,1fr) 330px !important; align-items: start !important; gap: 48px !important; width: 100% !important; margin: 34px 0 0 !important; }
 body.ih75-subpage #root .ih5-service-detail-main { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih5-service-detail-header { margin: 0 0 34px !important; padding: 0 0 30px !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; background: transparent !important; }
-body.ih75-subpage #root .ih5-service-detail-header h1 { margin: 22px 0 18px !important; color: var(--p-ink) !important; font: 600 clamp(30px,3.4vw,42px)/1.16 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih75-subpage #root .ih5-service-detail-header { max-width: 960px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih5-service-detail-header h1 { margin: 22px 0 20px !important; color: var(--p-ink) !important; font: 850 clamp(36px,4.8vw,64px)/1.07 Inter,system-ui,sans-serif !important; letter-spacing: -.045em !important; overflow-wrap: anywhere !important; }
 body.ih75-subpage #root .ih5-service-detail-header p { margin: 0 !important; color: var(--p-muted) !important; font: 400 17px/1.75 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih5-service-detail-section { margin: 0 !important; padding: 28px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; background: transparent !important; }
-body.ih75-subpage #root .ih5-service-detail-section h2 { margin: 10px 0 22px !important; color: var(--p-ink) !important; font: 550 25px/1.35 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
-body.ih75-subpage #root .ih5-service-rich-copy { color: var(--p-muted) !important; font: 400 16px/1.9 Inter,system-ui,sans-serif !important; white-space: pre-wrap !important; }
-body.ih75-subpage #root .ih5-service-order-card { position: sticky !important; top: calc(var(--a-head,76px) + 24px) !important; margin: 0 !important; padding: 26px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih5-service-order-price strong { color: var(--p-ink) !important; font: 600 34px/1.2 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih75-subpage #root .ih5-service-detail-section { margin: 0 0 38px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih5-service-detail-section h2 { margin: 0 0 18px !important; color: var(--p-ink) !important; font: 800 29px/1.15 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
+body.ih75-subpage #root .ih5-service-rich-copy { width: 100% !important; max-width: 100% !important; min-width: 0 !important; color: var(--p-muted) !important; font: 400 16px/1.8 Inter,system-ui,sans-serif !important; white-space: pre-wrap !important; overflow-wrap: anywhere !important; word-break: normal !important; }
+body.ih75-subpage #root .ih5-service-order-card { position: sticky !important; top: calc(var(--a-head,76px) + 24px) !important; margin: 0 !important; padding: 26px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih5-service-order-price strong { color: var(--p-ink) !important; font: 850 38px/1.1 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
 body.ih75-subpage #root .ih5-service-order-price small { color: var(--p-muted) !important; font: 400 13px/1.75 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih5-service-order-button { display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 52px !important; margin-top: 22px !important; padding: 14px 18px !important; border: 0 !important; border-radius: 8px !important; background: var(--p-accent) !important; color: var(--p-on) !important; font: 550 15px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih5-service-order-button { display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 52px !important; margin-top: 22px !important; padding: 14px 18px !important; border: 0 !important; border-radius: 8px !important; background: var(--p-accent) !important; color: var(--p-on) !important; font: 800 16px/1.4 Inter,system-ui,sans-serif !important; text-decoration: none !important; box-shadow: none !important; }
 body.ih75-subpage #root .ih5-my-services-list { display: flex !important; flex-direction: column !important; gap: 0 !important; border-top: 1px solid var(--p-line) !important; }
 body.ih75-subpage #root .ih5-my-services-list > article { display: grid !important; grid-template-columns: 40px minmax(0,1fr) auto !important; gap: 22px !important; align-items: start !important; margin: 0 !important; padding: 28px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
 body.ih75-subpage #root .ih5-my-service-actions { grid-column: 2/-1 !important; display: flex !important; flex-wrap: wrap !important; gap: 12px !important; margin: 0 !important; }
@@ -744,8 +744,8 @@ body.ih75-subpage #root .account-template-note { margin: 18px 0 0 !important; co
   body.ih75-subpage #root .ih73-heading-actions { width: 100% !important; padding: 0 !important; }
   body.ih75-subpage #root .ih73-heading-actions > :is(a,button) { flex: 1 !important; min-height: 48px !important; }
   body.ih75-subpage #root .ih73-catalog-context { gap: 12px !important; margin-bottom: 24px !important; }
-  body.ih75-subpage #root .ih73-catalog-tabs { justify-content: space-between !important; gap: 12px !important; width: 100% !important; margin-bottom: 24px !important; }
-  body.ih75-subpage #root .ih73-catalog-tabs > a { min-height: 48px !important; gap: 5px !important; font-size: 13px !important; }
+  body.ih75-subpage #root .ih73-catalog-tabs { justify-content: space-between !important; gap: 14px !important; width: 100% !important; margin-bottom: 24px !important; }
+  body.ih75-subpage #root .ih73-catalog-tabs > a { min-height: 48px !important; gap: 5px !important; font-size: 18px !important; }
   body.ih75-subpage #root .ih73-catalog-tabs > a > svg { display: none !important; }
   body.ih75-subpage #root .ih73-result-count { padding-bottom: 12px !important; font-size: 13px !important; }
   body.ih75-subpage #root .ih75-catalog { grid-template-columns: minmax(0,1fr) !important; gap: 0 !important; }
@@ -806,7 +806,7 @@ body.ih75-subpage #root .account-template-note { margin: 18px 0 0 !important; co
   body.ih75-subpage #root :is(.ih5-job-category-questions,.ih5-collaboration-plan,.ih5-job-create-summary) { padding: 20px !important; }
   body.ih75-subpage #root .ih5-service-detail-layout { grid-template-columns: minmax(0,1fr) !important; gap: 26px !important; }
   body.ih75-subpage #root .ih5-service-order-card { position: static !important; width: 100% !important; }
-  body.ih75-subpage #root .ih5-service-detail-header h1 { font-size: 30px !important; line-height: 1.3 !important; }
+  body.ih75-subpage #root .ih5-service-detail-header h1 { font-size: 38px !important; line-height: 1.08 !important; }
   body.ih75-subpage #root .ih5-my-services-list > article { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; }
   body.ih75-subpage #root .ih73-page-metrics { gap: 12px 24px !important; margin-bottom: 24px !important; padding-bottom: 22px !important; }
   body.ih75-subpage #root .ih73-page-metrics > div { gap: 8px !important; }
@@ -908,163 +908,128 @@ body.ih75-subpage #root .account-template-note { margin: 18px 0 0 !important; co
   body.ih75-subpage #root :is(.ih75-page-heading,.ih73-job-row,.ih73-service-card,.ih73-person-card,.ih75-owned-row,.calendar-agenda-item) { animation: none !important; transition: none !important; }
 }
 
-/* P77 — the service catalogue is an illustrated, open gallery. */
-body.ih75-subpage[data-ih73-page="services"] #root .ih77-services-page .ih-market-shell {
-  max-width: 1280px !important;
-  padding: 24px 48px 104px !important;
-}
-body.ih75-subpage #root .ih77-services-page :is(.ih77-services-navigation,.ih77-services-hero,.ih77-services-discovery,.ih77-service-results,.ih77-service-offer,.ih77-offer-copy,.ih77-offer-footer) {
-  min-width: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-body.ih75-subpage #root .ih77-services-page .ih77-services-navigation { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; margin-bottom: 34px !important; }
-body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs { flex: 1 !important; gap: 30px !important; width: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs > a { min-height: 44px !important; gap: 7px !important; margin: 0 !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs > a[aria-current="page"] { color: var(--p-accent) !important; font-weight: 600 !important; }
-body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs > a[aria-current="page"]::after { content: '' !important; display: block !important; width: 5px !important; height: 5px !important; border-radius: 1px !important; background: currentColor !important; }
-body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs > a > svg { display: none !important; }
-body.ih75-subpage #root .ih77-services-page .ih77-add-service { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; flex: none !important; min-height: 44px !important; padding: 10px 16px !important; border: 0 !important; border-radius: 14px 4px 14px 14px !important; background: var(--p-accent) !important; color: var(--p-on) !important; font: 500 13px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
-body.ih75-subpage #root .ih77-services-page .ih77-add-service > svg { width: 18px !important; height: 18px !important; }
 
-body.ih75-subpage #root .ih77-services-page .ih77-services-hero { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) 340px !important; align-items: center !important; gap: 32px !important; margin-bottom: 42px !important; }
-body.ih75-subpage #root .ih77-services-intro h1 { margin: 0 !important; padding: 0 !important; color: var(--p-ink) !important; font: 600 clamp(52px,6vw,78px)/.99 Inter,system-ui,sans-serif !important; letter-spacing: -.065em !important; overflow-wrap: normal !important; }
-body.ih75-subpage #root .ih77-services-intro h1 > em { display: block !important; color: var(--p-accent) !important; font-family: inherit !important; font-size: inherit !important; font-weight: 420 !important; font-style: italic !important; line-height: 1.08 !important; letter-spacing: -.065em !important; }
-body.ih75-subpage #root .ih77-services-intro > p { max-width: 420px !important; margin: 22px 0 0 !important; color: var(--p-muted) !important; font: 400 15px/1.75 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-services-signature { width: 340px !important; max-width: 100% !important; height: 230px !important; pointer-events: none !important; }
-body.ih75-subpage #root .ih77-services-signature > svg { display: block !important; width: 100% !important; height: 100% !important; }
+/* P78 — service titles, scope and prices carry the composition. */
+body.ih75-subpage[data-ih73-page="services"] #root .ih78-services-page .ih-market-shell { max-width: 1240px !important; padding: 22px 48px 88px !important; }
+body.ih75-subpage #root .ih78-services-page :is(.ih78-services-navigation,.ih78-services-hero,.ih78-services-discovery,.ih78-service-results,.ih78-service-offer,.ih78-offer-copy) { min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih78-services-page .ih78-services-navigation { margin-bottom: 32px !important; }
+body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs { display: flex !important; align-items: center !important; gap: 32px !important; width: 100% !important; margin: 0 !important; border: 0 !important; }
+body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs > a { min-height: 48px !important; margin: 0 !important; padding: 8px 0 !important; border: 0 !important; font-size: 20px !important; }
+body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs > a > svg { display: none !important; }
+body.ih75-subpage #root .ih78-services-page .ih78-services-hero { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 22px !important; margin-bottom: 32px !important; }
+body.ih75-subpage #root .ih78-services-hero h1 { min-width: 0 !important; margin: 0 !important; color: var(--p-ink) !important; font: 900 clamp(58px,8vw,94px)/.96 Inter,system-ui,sans-serif !important; letter-spacing: -.065em !important; }
+body.ih75-subpage #root .ih78-add-service { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 9px !important; flex: none !important; min-height: 48px !important; margin: 0 !important; padding: 12px 18px !important; border: 0 !important; border-radius: 8px !important; background: var(--p-accent) !important; color: var(--p-on) !important; font: 750 15px/1.4 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
+body.ih75-subpage #root .ih78-add-service > svg { width: 20px !important; height: 20px !important; }
+body.ih75-subpage #root .ih78-services-page .ih78-services-discovery { margin-bottom: 20px !important; }
+body.ih75-subpage #root .ih78-service-search { display: flex !important; align-items: center !important; gap: 14px !important; width: 100% !important; min-width: 0 !important; min-height: 60px !important; margin: 0 !important; padding: 0 20px !important; border: 0 !important; border-radius: 8px !important; background: var(--p-soft) !important; color: var(--p-muted) !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih78-service-search:focus-within { outline: 2px solid var(--p-accent) !important; outline-offset: 3px !important; }
+body.ih75-subpage #root .ih78-service-search > svg { width: 20px !important; height: 20px !important; flex: none !important; }
+body.ih75-subpage #root .ih78-service-search > input { display: block !important; flex: 1 !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important; min-height: 58px !important; margin: 0 !important; padding: 14px 0 !important; border: 0 !important; border-radius: 0 !important; outline: 0 !important; background: transparent !important; color: var(--p-ink) !important; font: 500 17px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih78-service-search > input::placeholder { color: var(--p-muted) !important; opacity: 1 !important; }
+body.ih75-subpage #root .ih78-service-search > input::-webkit-search-cancel-button { appearance: none !important; }
+body.ih75-subpage #root .ih78-service-search > button { display: grid !important; place-items: center !important; flex: none !important; width: 44px !important; min-height: 44px !important; padding: 12px !important; border: 0 !important; border-radius: 6px !important; background: transparent !important; color: var(--p-muted) !important; }
+body.ih75-subpage #root .ih78-discovery-bottom { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; margin-top: 8px !important; }
+body.ih75-subpage #root .ih78-service-field { display: flex !important; align-items: center !important; flex: 0 1 340px !important; gap: 9px !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 0 !important; color: var(--p-muted) !important; }
+body.ih75-subpage #root .ih78-service-field > svg { width: 16px !important; height: 16px !important; flex: none !important; }
+body.ih75-subpage #root .ih78-service-field > select { box-sizing: border-box !important; display: block !important; width: 100% !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 8px 4px !important; border: 0 !important; border-radius: 4px !important; background: var(--p-bg) !important; color: var(--p-ink) !important; font: 650 16px/1.4 Inter,system-ui,sans-serif !important; appearance: auto !important; box-shadow: none !important; }
+html[data-theme="dark"] body.ih75-subpage #root .ih78-service-field > select { color-scheme: dark !important; }
+body.ih75-subpage #root .ih78-my-services { display: inline-flex !important; align-items: center !important; gap: 7px !important; flex: none !important; min-height: 44px !important; padding: 8px 0 !important; color: var(--p-ink) !important; font: 700 13px/1.4 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
+body.ih75-subpage #root .ih78-my-services > svg { width: 15px !important; height: 15px !important; }
+body.ih75-subpage #root .ih78-results-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; min-height: 36px !important; margin: 0 0 26px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih78-results-heading > p { margin: 0 !important; color: var(--p-muted) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-results-heading > p > strong { color: var(--p-ink) !important; font-weight: 800 !important; }
+body.ih75-subpage #root .ih78-results-heading > button { display: inline-flex !important; align-items: center !important; gap: 6px !important; min-height: 44px !important; margin: 0 !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 500 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-results-heading > button > svg { width: 14px !important; height: 14px !important; }
+body.ih75-subpage #root .ih78-service-grid { display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 52px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+body.ih75-subpage #root .ih78-services-page .ih78-service-offer { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) 232px !important; align-items: start !important; gap: 16px 44px !important; width: 100% !important; color: var(--p-ink) !important; }
+body.ih75-subpage #root .ih78-offer-field { grid-column: 1 !important; display: flex !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 6px 14px !important; min-width: 0 !important; }
+body.ih75-subpage #root .ih78-offer-field > span { color: var(--p-accent) !important; font: 750 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-offer-field > small { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-offer-copy { grid-column: 1 !important; }
+body.ih75-subpage #root .ih78-offer-copy h2 { margin: 0 0 16px !important; color: var(--p-ink) !important; font: 850 clamp(28px,3vw,38px)/1.12 Inter,system-ui,sans-serif !important; letter-spacing: -.04em !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih78-offer-copy h2 > a { color: inherit !important; font: inherit !important; letter-spacing: inherit !important; line-height: inherit !important; text-decoration: none !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih78-offer-copy h2 > a::after { content: '' !important; position: absolute !important; inset: 0 !important; z-index: 2 !important; border-radius: 4px !important; }
+body.ih75-subpage #root .ih78-offer-copy h2 > a:focus-visible { outline: none !important; }
+body.ih75-subpage #root .ih78-offer-copy h2 > a:focus-visible::after { outline: 2px solid var(--p-accent) !important; outline-offset: 6px !important; }
+body.ih75-subpage #root .ih78-offer-copy > p { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; min-width: 0 !important; max-width: 100% !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 15px/1.8 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih78-offer-footer { grid-column: 2 !important; grid-row: 1/3 !important; display: flex !important; align-items: stretch !important; flex-direction: column-reverse !important; gap: 24px !important; min-width: 0 !important; margin: 0 !important; padding: 22px !important; border: 0 !important; border-radius: 8px !important; background: var(--p-soft) !important; }
+body.ih75-subpage #root .ih78-offer-person { display: flex !important; align-items: center !important; gap: 10px !important; min-width: 0 !important; }
+body.ih75-subpage #root .ih78-offer-person .ih5-service-avatar { display: grid !important; place-items: center !important; width: 34px !important; height: 34px !important; min-width: 34px !important; flex: none !important; overflow: hidden !important; border: 0 !important; border-radius: 50% !important; background: var(--p-paper) !important; color: var(--p-accent) !important; font: 750 13px/1 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-offer-person .ih5-service-avatar > img { display: block !important; width: 100% !important; height: 100% !important; object-fit: cover !important; }
+body.ih75-subpage #root .ih78-offer-person > span:last-child { display: flex !important; flex-direction: column !important; gap: 4px !important; min-width: 0 !important; }
+body.ih75-subpage #root .ih78-offer-person strong { color: var(--p-ink) !important; font: 700 13px/1.4 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih78-offer-person small { display: flex !important; align-items: center !important; gap: 5px !important; color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-offer-person small > i { display: block !important; width: 4px !important; height: 4px !important; flex: none !important; border-radius: 50% !important; background: var(--p-accent) !important; }
+body.ih75-subpage #root .ih78-offer-person small.is-full > i { background: var(--p-muted) !important; }
+body.ih75-subpage #root .ih78-offer-price { display: flex !important; flex-direction: column !important; gap: 5px !important; min-width: 0 !important; }
+body.ih75-subpage #root .ih78-offer-price > span { color: var(--p-muted) !important; font: 500 12px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-offer-price > strong { color: var(--p-ink) !important; font: 850 32px/1.1 Inter,system-ui,sans-serif !important; letter-spacing: -.04em !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih78-service-skeleton { display: flex !important; flex-direction: column !important; gap: 16px !important; padding: 20px 0 !important; }
+body.ih75-subpage #root .ih78-service-skeleton > :is(span,i) { display: block !important; width: 85% !important; height: 30px !important; border-radius: 4px !important; background: var(--p-soft) !important; }
+body.ih75-subpage #root .ih78-service-skeleton > i { width: 65% !important; height: 14px !important; }
+body.ih75-subpage #root .ih78-service-skeleton > i:last-child { width: 40% !important; }
+body.ih75-subpage #root .ih78-services-empty { max-width: 620px !important; margin: 24px 0 !important; padding: 20px 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih78-services-empty h2 { margin: 0 0 16px !important; color: var(--p-ink) !important; font: 800 30px/1.15 Inter,system-ui,sans-serif !important; letter-spacing: -.04em !important; }
+body.ih75-subpage #root .ih78-services-empty p { margin: 0 0 20px !important; color: var(--p-muted) !important; font: 400 15px/1.75 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih78-services-empty a,
+body.ih75-subpage #root .ih78-services-error > button { display: inline-flex !important; align-items: center !important; gap: 10px !important; min-height: 44px !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-accent) !important; font: 750 15px/1.4 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
+body.ih75-subpage #root .ih78-services-error { margin: 18px 0 !important; padding: 24px !important; border: 0 !important; border-radius: 8px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
+body.ih75-subpage #root .ih78-services-error > p { margin: 0 0 12px !important; font: 400 15px/1.75 Inter,system-ui,sans-serif !important; }
 
-body.ih75-subpage #root .ih77-services-page .ih77-services-discovery { margin-bottom: 22px !important; }
-body.ih75-subpage #root .ih77-services-page .ih77-service-search { display: flex !important; align-items: center !important; gap: 14px !important; width: 100% !important; min-width: 0 !important; min-height: 62px !important; margin: 0 !important; padding: 0 22px !important; border: 0 !important; border-radius: 16px 16px 16px 4px !important; background: var(--p-soft) !important; color: var(--p-accent) !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih77-service-search:focus-within { outline: 2px solid var(--p-accent) !important; outline-offset: 3px !important; }
-body.ih75-subpage #root .ih77-service-search > svg { flex: none !important; width: 20px !important; height: 20px !important; }
-body.ih75-subpage #root .ih77-service-search > input { display: block !important; flex: 1 !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; min-height: 60px !important; margin: 0 !important; padding: 14px 0 !important; border: 0 !important; border-radius: 0 !important; outline: 0 !important; background: transparent !important; color: var(--p-ink) !important; font: 400 17px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih77-service-search > input::placeholder { color: var(--p-muted) !important; opacity: 1 !important; }
-body.ih75-subpage #root .ih77-service-search > input::-webkit-search-cancel-button { appearance: none !important; }
-body.ih75-subpage #root .ih77-service-search > button { display: grid !important; place-items: center !important; flex: none !important; width: 44px !important; height: 44px !important; margin: 0 -8px 0 0 !important; padding: 12px !important; border: 0 !important; border-radius: 50% !important; background: var(--p-paper) !important; color: var(--p-muted) !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih77-discovery-bottom { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px !important; margin-top: 10px !important; }
-body.ih75-subpage #root .ih77-service-field { display: flex !important; align-items: center !important; gap: 9px !important; flex: 0 1 320px !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; }
-body.ih75-subpage #root .ih77-service-field > svg { width: 16px !important; height: 16px !important; flex: none !important; }
-body.ih75-subpage #root .ih77-service-field > select { display: block !important; box-sizing: border-box !important; width: 100% !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 8px 4px !important; border: 0 !important; border-radius: 4px !important; background: var(--p-bg) !important; color: var(--p-ink) !important; font: 450 14px/1.5 Inter,system-ui,sans-serif !important; appearance: auto !important; box-shadow: none !important; }
-html[data-theme="dark"] body.ih75-subpage #root .ih77-service-field > select { color-scheme: dark !important; }
-body.ih75-subpage #root .ih77-my-services { display: inline-flex !important; align-items: center !important; gap: 7px !important; flex: none !important; min-height: 44px !important; padding: 8px 0 !important; color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
-body.ih75-subpage #root .ih77-my-services > svg { width: 14px !important; height: 14px !important; }
-body.ih75-subpage #root .ih77-results-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; min-height: 36px !important; margin: 0 0 24px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
-body.ih75-subpage #root .ih77-results-heading > p { margin: 0 !important; color: var(--p-muted) !important; font: 400 13px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-results-heading > p > strong { color: var(--p-ink) !important; font-weight: 600 !important; font-variant-numeric: tabular-nums !important; }
-body.ih75-subpage #root .ih77-results-heading > button { display: inline-flex !important; align-items: center !important; gap: 6px !important; min-height: 44px !important; margin: 0 !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-results-heading > button > svg { width: 14px !important; height: 14px !important; }
-
-body.ih75-subpage #root .ih77-service-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; align-items: start !important; gap: 64px 52px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-body.ih75-subpage #root .ih77-services-page .ih77-service-offer { position: relative !important; display: flex !important; flex-direction: column !important; gap: 22px !important; width: 100% !important; color: var(--p-ink) !important; }
-body.ih75-subpage #root .ih77-services-page .ih77-service-offer.is-offset,
-body.ih75-subpage #root .ih77-service-skeleton.is-offset { padding-top: 62px !important; }
-body.ih75-subpage #root .ih77-service-visual { position: relative !important; display: block !important; width: 100% !important; height: 232px !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; border: 0 !important; border-radius: 24px 24px 54px 5px !important; background: color-mix(in srgb,var(--p-accent) 8%,var(--p-paper)) !important; }
-body.ih75-subpage #root .ih77-service-offer.is-offset .ih77-service-visual { border-radius: 54px 5px 24px 24px !important; background: var(--p-soft) !important; }
-body.ih75-subpage #root .ih77-service-offer[data-art="design"] .ih77-service-visual,
-body.ih75-subpage #root .ih77-service-offer[data-art="writing"] .ih77-service-visual { background: color-mix(in srgb,var(--p-accent) 4%,var(--p-paper)) !important; }
-body.ih75-subpage #root .ih77-offer-field { position: absolute !important; z-index: 1 !important; top: 18px !important; left: 20px !important; right: 20px !important; display: block !important; padding: 0 !important; color: var(--p-muted) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-service-visual > .ih77-service-art { position: absolute !important; top: 26px !important; left: 0 !important; display: block !important; width: 100% !important; height: calc(100% - 26px) !important; }
-body.ih75-subpage #root .ih77-service-art { overflow: visible !important; fill: none !important; stroke: none !important; }
-body.ih75-subpage #root .ih77-service-art [data-fill] { stroke: none !important; }
-body.ih75-subpage #root .ih77-service-art [data-fill="paper"] { fill: var(--p-paper) !important; }
-body.ih75-subpage #root .ih77-service-art [data-fill="accent"] { fill: var(--p-accent) !important; }
-body.ih75-subpage #root .ih77-service-art [data-fill="ink"] { fill: var(--p-ink) !important; }
-body.ih75-subpage #root .ih77-service-art [data-fill="muted"] { fill: color-mix(in srgb,var(--p-accent) 24%,var(--p-paper)) !important; }
-body.ih75-subpage #root .ih77-service-art [data-fill="wash"] { fill: color-mix(in srgb,var(--p-accent) 5%,transparent) !important; }
-body.ih75-subpage #root .ih77-service-art [data-line] { fill: none !important; stroke-width: 2.5px !important; stroke-linecap: round !important; stroke-linejoin: round !important; }
-body.ih75-subpage #root .ih77-service-art [data-line="ink"] { stroke: var(--p-ink) !important; }
-body.ih75-subpage #root .ih77-service-art [data-line="accent"] { stroke: var(--p-accent) !important; }
-body.ih75-subpage #root .ih77-service-art [data-line="on"] { stroke: var(--p-on) !important; }
-body.ih75-subpage #root .ih77-service-art [data-line="paper"] { stroke: var(--p-paper) !important; }
-body.ih75-subpage #root .ih77-offer-open { position: absolute !important; right: 16px !important; bottom: 16px !important; display: grid !important; place-items: center !important; width: 36px !important; height: 36px !important; border-radius: 50% !important; background: var(--p-paper) !important; color: var(--p-accent) !important; }
-body.ih75-subpage #root .ih77-offer-open > svg { width: 18px !important; height: 18px !important; }
-body.ih75-subpage #root .ih77-offer-copy h2 { margin: 0 0 12px !important; color: var(--p-ink) !important; font: 550 26px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; overflow-wrap: anywhere !important; }
-body.ih75-subpage #root .ih77-offer-copy h2 > a { color: inherit !important; text-decoration: none !important; }
-body.ih75-subpage #root .ih77-offer-copy h2 > a::after { content: '' !important; position: absolute !important; inset: 0 !important; z-index: 2 !important; border-radius: 5px !important; }
-body.ih75-subpage #root .ih77-offer-copy h2 > a:focus-visible { outline: none !important; }
-body.ih75-subpage #root .ih77-offer-copy h2 > a:focus-visible::after { outline: 2px solid var(--p-accent) !important; outline-offset: 6px !important; }
-body.ih75-subpage #root .ih77-offer-copy > p { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.8 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-services-page .ih77-offer-footer { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 16px 22px !important; }
-body.ih75-subpage #root .ih77-offer-person { display: flex !important; align-items: center !important; gap: 10px !important; flex: 1 1 160px !important; min-width: 0 !important; }
-body.ih75-subpage #root .ih77-offer-person .ih5-service-avatar { display: grid !important; place-items: center !important; width: 34px !important; height: 34px !important; min-width: 34px !important; flex: none !important; overflow: hidden !important; border: 0 !important; border-radius: 50% !important; background: var(--p-soft) !important; color: var(--p-accent) !important; font: 550 13px/1 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-offer-person .ih5-service-avatar > img { display: block !important; width: 100% !important; height: 100% !important; object-fit: cover !important; }
-body.ih75-subpage #root .ih77-offer-person > span { display: flex !important; flex-direction: column !important; gap: 4px !important; min-width: 0 !important; }
-body.ih75-subpage #root .ih77-offer-person strong { color: var(--p-ink) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
-body.ih75-subpage #root .ih77-offer-person small { display: flex !important; align-items: center !important; gap: 5px !important; color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-offer-person small > i { display: block !important; width: 4px !important; height: 4px !important; flex: none !important; border-radius: 50% !important; background: var(--p-accent) !important; }
-body.ih75-subpage #root .ih77-offer-person small.is-full > i { background: var(--p-muted) !important; }
-body.ih75-subpage #root .ih77-offer-price { display: flex !important; flex-direction: column !important; gap: 2px !important; max-width: 100% !important; color: var(--p-ink) !important; text-align: right !important; }
-body.ih75-subpage #root .ih77-offer-price > span { color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-offer-price > strong { color: var(--p-ink) !important; font: 550 22px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; font-variant-numeric: tabular-nums !important; overflow-wrap: anywhere !important; }
-body.ih75-subpage #root .ih77-service-skeleton { display: flex !important; flex-direction: column !important; gap: 16px !important; width: 100% !important; }
-body.ih75-subpage #root .ih77-service-skeleton > span { display: block !important; height: 232px !important; border-radius: 24px 24px 54px 5px !important; background: var(--p-soft) !important; }
-body.ih75-subpage #root .ih77-service-skeleton > i { display: block !important; width: 80% !important; height: 16px !important; border-radius: 4px !important; background: var(--p-soft) !important; }
-body.ih75-subpage #root .ih77-service-skeleton > i:last-child { width: 55% !important; height: 10px !important; }
-body.ih75-subpage #root .ih77-services-empty { display: grid !important; grid-template-columns: 160px minmax(0,1fr) !important; align-items: center !important; gap: 24px !important; max-width: 620px !important; margin: 26px auto 0 !important; padding: 28px 0 !important; border: 0 !important; background: transparent !important; }
-body.ih75-subpage #root .ih77-services-empty > svg { display: block !important; width: 160px !important; height: 120px !important; }
-body.ih75-subpage #root .ih77-services-empty h2 { margin: 0 0 12px !important; color: var(--p-ink) !important; font: 550 25px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
-body.ih75-subpage #root .ih77-services-empty p { margin: 0 0 16px !important; color: var(--p-muted) !important; font: 400 14px/1.75 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih77-services-empty a,
-body.ih75-subpage #root .ih77-services-error > button { display: inline-flex !important; align-items: center !important; gap: 10px !important; min-height: 44px !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-accent) !important; font: 500 14px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
-body.ih75-subpage #root .ih77-services-error { margin: 18px 0 !important; padding: 24px !important; border: 0 !important; border-radius: 16px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
-body.ih75-subpage #root .ih77-services-error > p { margin: 0 0 12px !important; font: 400 14px/1.75 Inter,system-ui,sans-serif !important; }
-
-@media (hover:hover) {
-  body.ih75-subpage #root .ih77-service-offer:hover .ih77-offer-copy h2 { color: var(--p-accent) !important; }
-  body.ih75-subpage #root .ih77-service-offer:hover .ih77-offer-open { background: var(--p-accent) !important; color: var(--p-on) !important; }
-}
-@media (max-width:1000px) {
-  body.ih75-subpage #root .ih77-services-page .ih77-services-hero { grid-template-columns: minmax(0,1fr) 240px !important; gap: 20px !important; }
-  body.ih75-subpage #root .ih77-services-signature { width: 240px !important; height: 180px !important; }
-  body.ih75-subpage #root .ih77-service-grid { gap: 54px 32px !important; }
-  body.ih75-subpage #root .ih77-service-visual { height: 206px !important; }
-  body.ih75-subpage #root .ih77-offer-copy h2 { font-size: 23px !important; }
-}
+/* Details keep the actual offer and its scope ahead of decorative headings. */
+body.ih75-subpage #root .ih5-service-detail-category { display: flex !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 8px 16px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih5-service-detail-category > a { color: var(--p-accent) !important; font: 750 13px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
+body.ih75-subpage #root .ih5-service-detail-category > span { display: block !important; width: auto !important; height: auto !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-service-detail-page :is(.ih5-service-check-list,.ih5-service-requirement-list) { display: flex !important; flex-direction: column !important; gap: 16px !important; margin: 0 !important; padding: 0 !important; list-style: none !important; }
+body.ih75-subpage #root .ih5-service-detail-page :is(.ih5-service-check-list,.ih5-service-requirement-list) > li { display: grid !important; grid-template-columns: 24px minmax(0,1fr) !important; align-items: start !important; gap: 12px !important; min-width: 0 !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; color: var(--p-ink) !important; font: 400 16px/1.75 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih5-service-detail-page :is(.ih5-service-check-list,.ih5-service-requirement-list) > li > span { color: var(--p-accent) !important; font-weight: 800 !important; }
+body.ih75-subpage #root .ih5-service-process { margin: 8px 0 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih5-service-process > h2 { margin: 0 0 22px !important; color: var(--p-ink) !important; font: 800 29px/1.15 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
+body.ih75-subpage #root .ih5-service-process > div { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 28px !important; }
+body.ih75-subpage #root .ih5-service-process article { margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih5-service-process article > i { display: block !important; margin: 0 0 12px !important; color: var(--p-accent) !important; font: 850 24px/1.1 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-service-process h3 { margin: 0 0 10px !important; font: 750 17px/1.3 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-service-process p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.75 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-service-order-owner strong { color: var(--p-ink) !important; font: 750 17px/1.4 Inter,system-ui,sans-serif !important; }
+@media (hover:hover) { body.ih75-subpage #root .ih78-service-offer:hover .ih78-offer-copy h2 { color: var(--p-accent) !important; } }
 @media (max-width:700px) {
-  body.ih75-subpage[data-ih73-page="services"] #root .ih77-services-page .ih-market-shell { padding: 14px 20px 72px !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-services-navigation { gap: 14px !important; margin-bottom: 32px !important; }
-  body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs { justify-content: flex-start !important; gap: 20px !important; }
-  body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs > a { min-height: 44px !important; gap: 5px !important; font-size: 12px !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-add-service { width: 44px !important; height: 44px !important; padding: 12px !important; }
-  body.ih75-subpage #root .ih77-add-service > span { display: none !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-services-hero { display: block !important; margin-bottom: 28px !important; }
-  body.ih75-subpage #root .ih77-services-intro h1 { font-size: clamp(40px,12.8vw,54px) !important; line-height: 1 !important; }
-  body.ih75-subpage #root .ih77-services-intro > p { max-width: 340px !important; margin-top: 16px !important; font-size: 14px !important; line-height: 1.7 !important; }
-  body.ih75-subpage #root .ih77-services-signature { position: absolute !important; top: -26px !important; right: 0 !important; width: 112px !important; height: 68px !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-services-discovery { margin-bottom: 18px !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-service-search { min-height: 56px !important; padding: 0 16px !important; gap: 11px !important; border-radius: 14px 14px 14px 4px !important; }
-  body.ih75-subpage #root .ih77-service-search > input { min-height: 54px !important; font-size: 16px !important; }
-  body.ih75-subpage #root .ih77-discovery-bottom { gap: 14px !important; margin-top: 8px !important; }
-  body.ih75-subpage #root .ih77-service-field { flex: 1 !important; gap: 6px !important; }
-  body.ih75-subpage #root .ih77-service-field > select { font-size: 16px !important; }
-  body.ih75-subpage #root .ih77-my-services { gap: 4px !important; font-size: 11px !important; }
-  body.ih75-subpage #root .ih77-results-heading { margin-bottom: 20px !important; }
-  body.ih75-subpage #root .ih77-service-grid { grid-template-columns: minmax(0,1fr) !important; gap: 58px !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-service-offer { gap: 20px !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-service-offer.is-offset,
-  body.ih75-subpage #root .ih77-service-skeleton.is-offset { padding-top: 0 !important; }
-  body.ih75-subpage #root .ih77-service-visual { height: 190px !important; border-radius: 22px 22px 42px 4px !important; }
-  body.ih75-subpage #root .ih77-service-offer.is-offset .ih77-service-visual { width: calc(100% - 18px) !important; margin-left: 18px !important; border-radius: 42px 4px 22px 22px !important; }
-  body.ih75-subpage #root .ih77-offer-copy h2 { margin-bottom: 12px !important; font-size: 24px !important; }
-  body.ih75-subpage #root .ih77-offer-copy > p { font-size: 14px !important; line-height: 1.8 !important; }
-  body.ih75-subpage #root .ih77-services-page .ih77-offer-footer { gap: 14px !important; }
-  body.ih75-subpage #root .ih77-offer-person { flex-basis: 150px !important; }
-  body.ih75-subpage #root .ih77-offer-price > strong { font-size: 21px !important; }
-  body.ih75-subpage #root .ih77-service-skeleton > span { height: 190px !important; }
-  body.ih75-subpage #root .ih77-services-empty { grid-template-columns: minmax(0,1fr) !important; gap: 12px !important; margin-top: 10px !important; padding-top: 0 !important; }
-  body.ih75-subpage #root .ih77-services-empty > svg { width: 132px !important; height: 100px !important; }
+  body.ih75-subpage[data-ih73-page="services"] #root .ih78-services-page .ih-market-shell { padding: 16px 20px 72px !important; }
+  body.ih75-subpage #root .ih78-services-page .ih78-services-navigation { margin-bottom: 26px !important; }
+  body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs { justify-content: space-between !important; gap: 14px !important; }
+  body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs > a { font-size: 18px !important; }
+  body.ih75-subpage #root .ih78-services-page .ih78-services-hero { gap: 16px !important; margin-bottom: 28px !important; }
+  body.ih75-subpage #root .ih78-services-hero h1 { font-size: clamp(44px,15vw,62px) !important; }
+  body.ih75-subpage #root .ih78-add-service { width: 48px !important; min-height: 48px !important; padding: 14px !important; }
+  body.ih75-subpage #root .ih78-add-service > span { display: none !important; }
+  body.ih75-subpage #root .ih78-service-search { min-height: 56px !important; padding: 0 16px !important; gap: 11px !important; }
+  body.ih75-subpage #root .ih78-service-search > input { min-height: 54px !important; font-size: 16px !important; }
+  body.ih75-subpage #root .ih78-discovery-bottom { gap: 14px !important; }
+  body.ih75-subpage #root .ih78-service-field { flex: 1 !important; gap: 6px !important; }
+  body.ih75-subpage #root .ih78-my-services { gap: 4px !important; font-size: 12px !important; }
+  body.ih75-subpage #root .ih78-service-grid { gap: 46px !important; }
+  body.ih75-subpage #root .ih78-services-page .ih78-service-offer { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; }
+  body.ih75-subpage #root .ih78-offer-copy h2 { margin-bottom: 14px !important; font-size: 30px !important; }
+  body.ih75-subpage #root .ih78-offer-copy > p { font-size: 14px !important; line-height: 1.75 !important; }
+  body.ih75-subpage #root .ih78-offer-footer { grid-column: 1 !important; grid-row: auto !important; flex-direction: row !important; flex-wrap: wrap !important; align-items: center !important; justify-content: space-between !important; gap: 18px !important; padding: 18px !important; }
+  body.ih75-subpage #root .ih78-offer-person { flex: 1 1 140px !important; }
+  body.ih75-subpage #root .ih78-offer-price { max-width: 100% !important; }
+  body.ih75-subpage #root .ih78-offer-price > strong { font-size: 28px !important; }
+  body.ih75-subpage #root .ih78-services-empty h2 { font-size: 27px !important; }
+  body.ih75-subpage #root .ih5-service-detail-layout { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 34px !important; margin-top: 28px !important; }
+  body.ih75-subpage #root .ih5-service-detail-main { order: 2 !important; }
+  body.ih75-subpage #root .ih5-service-order-card { order: 1 !important; padding: 24px !important; }
+  body.ih75-subpage #root .ih5-service-detail-header p { font-size: 16px !important; line-height: 1.75 !important; }
+  body.ih75-subpage #root .ih5-service-detail-section h2,
+  body.ih75-subpage #root .ih5-service-process > h2 { font-size: 27px !important; }
+  body.ih75-subpage #root .ih5-service-process > div { grid-template-columns: minmax(0,1fr) !important; gap: 28px !important; }
 }
 @media (max-width:360px) {
-  body.ih75-subpage[data-ih73-page="services"] #root .ih77-services-page .ih-market-shell { padding-inline: 18px !important; }
-  body.ih75-subpage #root .ih77-services-navigation .ih73-catalog-tabs { gap: 14px !important; }
-  body.ih75-subpage #root .ih77-services-signature { width: 96px !important; height: 58px !important; top: -18px !important; }
-  body.ih75-subpage #root .ih77-discovery-bottom { gap: 8px !important; }
-  body.ih75-subpage #root .ih77-service-field > select { font-size: 16px !important; }
+  body.ih75-subpage[data-ih73-page="services"] #root .ih78-services-page .ih-market-shell { padding-inline: 18px !important; }
+  body.ih75-subpage #root .ih73-catalog-tabs { gap: 10px !important; }
+  body.ih75-subpage #root .ih73-catalog-tabs > a { font-size: 17px !important; }
+  body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs { gap: 10px !important; }
+  body.ih75-subpage #root .ih78-services-navigation .ih73-catalog-tabs > a { font-size: 17px !important; }
+  body.ih75-subpage #root .ih78-discovery-bottom { gap: 8px !important; }
 }
 
 }
