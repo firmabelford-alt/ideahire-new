@@ -1,21 +1,47 @@
-/* P71 — an open inbox and direct access to project materials and terms. */
+/* P72 — a quiet inbox and a conversation that has the space it needs. */
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSitePreferences } from './Preferences';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { WorkspaceAvatar, WorkspaceConversationRows, WorkspaceIcon, WorkspaceLoading, useWorkspaceCopy } from './Workspace';
-export function WorkspaceInbox({ user, conversations = [], visibleConversations = [], loading, errorMessage, search, setSearch, inboxFilter, setInboxFilter, unreadCount }) {
+export function WorkspaceInbox({
+  user, conversations = [], visibleConversations = [], loading, errorMessage,
+  search, setSearch, inboxFilter, setInboxFilter, unreadCount,
+}) {
   const t = useWorkspaceCopy();
-  const location = useLocation(), navigate = useNavigate();
-  useEffect(() => { const p = new URLSearchParams(location.search); setSearch(p.get('q') || ''); setInboxFilter(p.get('unread') === '1' ? 'unread' : 'all'); },[location.search,setSearch,setInboxFilter]);
-  function update(key,value) { const p = new URLSearchParams(location.search); if(value) p.set(key,value); else p.delete(key); if(key === 'q') setSearch(value); else setInboxFilter(value === '1' ? 'unread' : 'all'); navigate({pathname:'/messages',search:p.toString() ? '?' + p : ''},{replace:true,state:{}}); }
-  function reset() { setSearch(''); setInboxFilter('all'); navigate('/messages',{replace:true}); }
-  return <main className="ih68-page ih71-inbox" id="ih68-content">
-    <header className="ih71-page-heading"><h1>{t('Wiadomości','Messages')}</h1><Link to="/freelancers" className="ih71-new-message" aria-label={t('Nowa rozmowa — znajdź wykonawcę','New conversation — find a freelancer')}><WorkspaceIcon kind="plus" /><span>{t('Nowa','New')}</span></Link></header>
-    <label className="ih71-search"><span className="ih68-sr-only">{t('Szukaj rozmowy','Find a conversation')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q',event.target.value)} placeholder={t('Szukaj osoby, projektu lub wiadomości','Search people, projects or messages')} />{search && <button type="button" aria-label={t('Wyczyść wyszukiwanie','Clear search')} onClick={() => update('q','')}><WorkspaceIcon kind="close" /></button>}</label>
-    <div className="ih71-filter-row" role="group" aria-label={t('Filtr rozmów','Conversation filter')}><button type="button" aria-pressed={inboxFilter === 'all'} onClick={() => update('unread','')}>{t('Wszystkie','All')}</button><button type="button" aria-pressed={inboxFilter === 'unread'} onClick={() => update('unread','1')}>{t('Nieprzeczytane','Unread')}{unreadCount > 0 && <span>{unreadCount}</span>}</button></div>
-    <section className="ih71-inbox-content" aria-label={t('Lista rozmów','Conversation list')}>{loading ? <WorkspaceLoading /> : errorMessage ? <p className="ih68-feedback" role="alert">{errorMessage}</p> : visibleConversations.length ? <WorkspaceConversationRows conversations={visibleConversations} user={user} loading={loading} /> : <div className="ih71-inbox-empty"><WorkspaceIcon kind="message" /><h2>{conversations.length ? t('Brak pasujących rozmów','No matching conversations') : t('Jeszcze bez rozmów','No conversations yet')}</h2><p>{conversations.length ? t('Zmień wyszukiwanie lub pokaż wszystkie rozmowy.','Change your search or show all conversations.') : t('Napisz do wykonawcy albo odpowiedz na zlecenie.','Contact a freelancer or reply to a job.')}</p>{conversations.length ? <button type="button" className="ih68-secondary" onClick={reset}>{t('Pokaż wszystkie','Show all')}</button> : <Link to="/freelancers" className="ih68-primary">{t('Znajdź wykonawcę','Find a freelancer')}<WorkspaceIcon kind="arrow" /></Link>}</div>}</section>
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearch(params.get('q') || '');
+    setInboxFilter(params.get('unread') === '1' ? 'unread' : 'all');
+  }, [location.search, setSearch, setInboxFilter]);
+  function update(key, value) {
+    const params = new URLSearchParams(location.search);
+    if (value) params.set(key, value); else params.delete(key);
+    if (key === 'q') setSearch(value); else setInboxFilter(value === '1' ? 'unread' : 'all');
+    navigate({ pathname: '/messages', search: params.toString() ? '?' + params : '' }, { replace: true, state: {} });
+  }
+  function reset() {
+    setSearch('');
+    setInboxFilter('all');
+    navigate('/messages', { replace: true });
+  }
+  return <main className="ih68-page ih72-inbox" id="ih68-content">
+    <header className="ih72-page-heading"><div><p className="ih72-eyebrow">{t('Twoje rozmowy', 'Your conversations')}</p><h1>{t('Wiadomości.', 'Messages.')}</h1><p>{t('Wiadomości i ustalenia dotyczące Twoich projektów.', 'Conversations and terms for your projects.')}</p></div><Link to="/freelancers" className="ih72-new-conversation"><WorkspaceIcon kind="plus" /><span>{t('Nowa rozmowa', 'New conversation')}</span></Link></header>
+    <div className="ih72-list-toolbar">
+      <div className="ih72-filters" role="group" aria-label={t('Filtr rozmów', 'Conversation filter')}>
+        <button type="button" aria-pressed={inboxFilter === 'all'} onClick={() => update('unread', '')}>{t('Wszystkie', 'All')}{!loading && <span>{conversations.length}</span>}</button>
+        <button type="button" aria-pressed={inboxFilter === 'unread'} onClick={() => update('unread', '1')}>{t('Nieprzeczytane', 'Unread')}{unreadCount > 0 && <span>{unreadCount}</span>}</button>
+      </div>
+      <label className="ih72-search"><span className="ih68-sr-only">{t('Szukaj osoby, projektu lub wiadomości', 'Search people, projects or messages')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q', event.target.value)} placeholder={t('Szukaj w rozmowach', 'Search conversations')} />{search && <button type="button" aria-label={t('Wyczyść wyszukiwanie', 'Clear search')} onClick={() => update('q', '')}><WorkspaceIcon kind="close" /></button>}</label>
+    </div>
+    <section className="ih72-inbox-content" aria-label={t('Lista rozmów', 'Conversation list')}>
+      {loading ? <WorkspaceLoading /> : errorMessage ? <p className="ih68-feedback" role="alert">{errorMessage}</p> : visibleConversations.length ?
+        <WorkspaceConversationRows conversations={visibleConversations} user={user} loading={loading} /> :
+        <div className="ih72-empty"><WorkspaceIcon kind="message" /><h2>{conversations.length ? t('Nie ma takich rozmów.', 'No matching conversations.') : t('Zacznij od rozmowy.', 'Start with a conversation.')}</h2><p>{conversations.length ? t('Zmień wyszukiwanie lub pokaż wszystkie rozmowy.', 'Change your search or show all conversations.') : t('Znajdź wykonawcę albo odpowiedz na zlecenie. Resztę ustalicie tutaj.', 'Find a freelancer or reply to a job. You can agree on the details here.')}</p>{conversations.length ? <button type="button" className="ih68-secondary" onClick={reset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/freelancers" className="ih68-primary">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
+    </section>
   </main>;
 }
 
@@ -124,20 +150,28 @@ export function WorkspaceComposer({
   }, [composerRef, blocked]);
   return <div className="ih68-composer-area">
     {errorMessage && <p className="ih68-feedback" role="alert">{errorMessage}</p>}
-    {blocked ? <p className="ih68-block-note"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości w tej rozmowie jest wyłączone.', 'Sending messages in this conversation is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> : <form className="ih68-composer" onSubmit={onSubmit}>
-      <label className="ih68-sr-only" htmlFor="ih68-message-draft">{t('Treść wiadomości', 'Message text')}</label>
-      <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending} onChange={e => setDraft(e.target.value)} onKeyDown={e => {
-        if (e.isComposing || e.nativeEvent?.isComposing) return;
-        if (e.key === 'Enter' && !e.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) {
-          e.preventDefault();
-          e.currentTarget.form?.requestSubmit();
-        }
-      }} />
-      <div className="ih68-compose-tools"><button type="button" className="ih68-attach" onClick={onMaterials} disabled={sending}><WorkspaceIcon kind="attachment" /><span>{t('Dodaj plik lub link', 'Add a file or link')}</span></button><button type="submit" className="ih68-send" disabled={sending || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><WorkspaceIcon kind="send" /></button></div>
-    </form>}
-    <p className="ih68-compose-hint">{t('Enter wysyła · Shift + Enter dodaje linię', 'Enter to send · Shift + Enter for a new line')}</p>
+    {blocked ? <p className="ih68-block-note"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości w tej rozmowie jest wyłączone.', 'Sending messages in this conversation is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> :
+      <form className="ih68-composer ih72-composer" onSubmit={onSubmit} aria-busy={sending}>
+        <button type="button" className="ih68-attach" onClick={onMaterials} disabled={sending}
+          aria-label={t('Dodaj plik lub link', 'Add a file or link')} title={t('Dodaj plik lub link', 'Add a file or link')}><WorkspaceIcon kind="attachment" /></button>
+        <label className="ih68-sr-only" htmlFor="ih68-message-draft">{t('Treść wiadomości', 'Message text')}</label>
+        <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000}
+          placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
+          onChange={event => setDraft(event.target.value)} onKeyDown={event => {
+            if (event.isComposing || event.nativeEvent?.isComposing) return;
+            if (event.key === 'Enter' && !event.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) {
+              event.preventDefault();
+              event.currentTarget.form?.requestSubmit();
+            }
+          }} />
+        <button type="submit" className="ih68-send" disabled={sending || !draft.trim()}
+          aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}
+          title={sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}><WorkspaceIcon kind="send" /></button>
+      </form>}
+    {!blocked && <p className="ih68-compose-hint">{t('Enter wysyła · Shift + Enter dodaje linię', 'Enter to send · Shift + Enter for a new line')}</p>}
   </div>;
 }
+
 export function WorkspaceConversation({
   loading,
   errorMessage,
@@ -175,6 +209,15 @@ export function WorkspaceConversation({
   const t = useWorkspaceCopy();
   const frameRef = useRef(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width: 1100px)').matches ?? true);
+  useLayoutEffect(() => {
+    const media = window.matchMedia?.('(max-width: 1100px)');
+    if (!media) return;
+    const update = () => setCompact(media.matches);
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
   useLayoutEffect(() => {
     let task = 0,
       scrollTask = 0;
@@ -269,52 +312,61 @@ export function WorkspaceConversation({
       });
     };
   }, [focusMode, onFocusMode]);
-  useEffect(() => {
-    if (!planPinned) return;
-    const media = window.matchMedia?.('(max-width:1399px)'),
-      update = () => {
-        if (media?.matches) onView('plan');
-      };
-    update();
-    media?.addEventListener?.('change', update);
-    return () => media?.removeEventListener?.('change', update);
-  }, [planPinned, onView]);
   const closeMenu = () => setOptionsOpen(false);
+  const showPlan = view === 'plan' || (planPinned && view === 'conversation');
+  const showContext = view === 'files' || showPlan;
+  const closeContext = () => {
+    if (planPinned) onClosePlan();
+    if (view !== 'conversation') onView('conversation');
+  };
   return <>
-    {focusMode && createPortal(<div className="ih68-focus-scrim" aria-hidden="true" />,document.body)}
-    <main ref={frameRef} id="ih68-content" data-view={view} role={focusMode ? 'dialog' : undefined} aria-modal={focusMode ? true : undefined} aria-label={t('Rozmowa IdeaHire','IdeaHire conversation')} className={'ih68-room ih71-conversation' + (focusMode ? ' is-focus' : '') + (planPinned ? ' has-pinned-plan' : '')}>
-      {loading ? <WorkspaceLoading /> : !hasConversation ? <section className="ih68-room-error"><h1>{t('Nie można otworzyć rozmowy','Unable to open this conversation')}</h1><p role="alert">{errorMessage}</p><button type="button" className="ih68-secondary" onClick={onBack}><WorkspaceIcon kind="back" />{backLabel}</button></section> : <>
+    {focusMode && createPortal(<div className="ih68-focus-scrim" aria-hidden="true" />, document.body)}
+    <main ref={frameRef} id="ih68-content" data-view={view}
+      role={focusMode ? 'dialog' : undefined} aria-modal={focusMode ? true : undefined}
+      aria-label={t('Rozmowa IdeaHire', 'IdeaHire conversation')}
+      className={'ih68-room ih72-room' + (focusMode ? ' is-focus' : '') + (showContext && !compact ? ' has-context' : '')}>
+      {loading ? <WorkspaceLoading /> : !hasConversation ?
+        <section className="ih68-room-error"><h1>{t('Nie można otworzyć rozmowy', 'Unable to open this conversation')}</h1><p role="alert">{errorMessage}</p><button type="button" className="ih68-secondary" onClick={onBack}><WorkspaceIcon kind="back" />{backLabel}</button></section> : <>
         <header className="ih68-room-header">
-          <button type="button" className="ih68-room-back ih68-icon-button" onClick={onBack} aria-label={t('Wróć: ','Back to: ') + backLabel}><WorkspaceIcon kind="back" /></button>
-          <Link className="ih69-person-avatar" to={'/profile/' + profileId} aria-label={t('Profil: ','Profile: ') + otherName}><WorkspaceAvatar name={otherName} url={blocked ? null : avatarUrl} small /></Link>
-          <div className="ih68-room-person"><Link to={'/profile/' + profileId}><h1>{blocked ? t('Zablokowany użytkownik','Blocked user') : otherName}</h1></Link><p className="ih71-room-context">{jobTitle || t('Zapytanie o współpracę','Project inquiry')}</p></div>
-          <div className="ih68-room-header-tools">{focusMode && <button type="button" className="ih68-focus-exit ih68-icon-button" aria-label={t('Przywróć widok','Restore view')} onClick={() => onFocusMode(false)}><WorkspaceIcon kind="collapse" /></button>}<button type="button" id="ih70-room-options" className="ih68-icon-button ih71-room-options" aria-haspopup="dialog" aria-label={t('Opcje rozmowy','Conversation options')} onClick={() => setOptionsOpen(true)}><WorkspaceIcon kind="more" /></button></div>
+          <button type="button" className="ih68-room-back ih68-icon-button" onClick={onBack} aria-label={t('Wróć: ', 'Back to: ') + backLabel}><WorkspaceIcon kind="back" /></button>
+          <Link className="ih69-person-avatar" to={'/profile/' + profileId} aria-label={t('Profil: ', 'Profile: ') + otherName}><WorkspaceAvatar name={otherName} url={blocked ? null : avatarUrl} small /></Link>
+          <div className="ih68-room-person"><Link to={'/profile/' + profileId}><h1>{blocked ? t('Zablokowany użytkownik', 'Blocked user') : otherName}</h1></Link><p className="ih72-room-context">{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</p></div>
+          <div className="ih68-room-header-tools">
+            {focusMode && <button type="button" className="ih68-focus-exit ih68-icon-button" aria-label={t('Przywróć widok', 'Restore view')} onClick={() => onFocusMode(false)}><WorkspaceIcon kind="collapse" /></button>}
+            <button type="button" id="ih70-room-options" className="ih68-icon-button" aria-haspopup="dialog" aria-expanded={optionsOpen} aria-label={t('Opcje rozmowy', 'Conversation options')} onClick={() => setOptionsOpen(true)}><WorkspaceIcon kind="more" /></button>
+          </div>
         </header>
-        <nav className="ih71-conversation-nav" aria-label={t('Rozmowa i współpraca','Conversation and project')}>
-          <button type="button" aria-current={view === 'conversation' ? 'page' : undefined} aria-controls="ih69-conversation-panel" onClick={() => onView('conversation')}>{t('Rozmowa','Conversation')}</button>
-          <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}>{t('Materiały','Materials')}{materialCount > 0 && <small>{materialCount}</small>}</button>
-          <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}>{t('Ustalenia','Terms')}{accepted && <i className="ih68-dot" aria-label={t('Warunki zaakceptowane','Terms accepted')} />}</button>
+        <nav className="ih72-room-nav" aria-label={t('Rozmowa i współpraca', 'Conversation and project')}>
+          <button type="button" aria-current={view === 'conversation' ? 'page' : undefined} aria-controls="ih69-conversation-panel" onClick={() => onView('conversation')}><WorkspaceIcon kind="message" /><span>{t('Rozmowa', 'Chat')}</span></button>
+          <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Pliki', 'Files')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
+          <button type="button" aria-current={showPlan ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
+          <span className="ih72-room-budget"><small>{accepted ? t('Uzgodniona cena', 'Agreed price') : t('Budżet', 'Budget')}</small><strong>{budget}</strong></span>
         </nav>
         {disputePanel}
-        <div className={'ih68-room-body' + (planPinned ? ' is-split' : '')}>
-          <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa','Conversation')} hidden={view !== 'conversation'}>{thread}{composer}</section>
-          <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu','Project materials')}>{view === 'files' && <><h2 className="ih71-pane-title">{t('Materiały','Materials')}</h2>{materials}</>}</section>
-          <section hidden={view !== 'plan' && !planPinned} className={'ih68-room-page ih68-terms' + (planPinned ? ' is-pinned' : '')} id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia i płatność','Terms and payment')}>{(view === 'plan' || planPinned) && <>
-            <header className="ih68-room-page-heading"><div><h2>{t('Ustalenia i płatność','Terms & payment')}</h2><p>{t('Zakres pracy, warunki i rozliczenie.','Scope, terms and payment.')}</p></div>{planPinned ? <button type="button" className="ih68-text-link" onClick={onClosePlan}><WorkspaceIcon kind="close" />{t('Zamknij','Close')}</button> : <button type="button" className="ih68-pin-option ih68-text-link" onClick={onPinPlan}><WorkspaceIcon kind="pin" />{t('Przy rozmowie','Beside conversation')}</button>}</header>
-            <details className="ih71-project-description"><summary>{t('Zlecenie i jego opis','Project and description')}<WorkspaceIcon kind="down" /></summary><div><h3>{jobTitle || t('Zapytanie o współpracę','Project inquiry')}</h3>{category && <p>{category}</p>}<p className="ih71-project-budget"><span>{accepted ? t('Uzgodniona cena','Agreed price') : t('Proponowany budżet','Proposed budget')}</span><strong>{budget}</strong></p>{projectDetails}</div></details>
-            {plan}
-          </>}</section>
+        <div className="ih68-room-body">
+          <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={compact && view !== 'conversation'}>{thread}{composer}</section>
+          <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu', 'Project materials')}>
+            {view === 'files' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Pliki i materiały', 'Files & materials')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij materiały', 'Close materials')}><WorkspaceIcon kind="close" /></button></header>{materials}</>}
+          </section>
+          <section hidden={!showPlan} className="ih68-room-page ih68-terms" id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia i płatność', 'Terms and payment')}>
+            {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia i płatność', 'Terms & payment')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij ustalenia', 'Close terms')}><WorkspaceIcon kind="close" /></button></header>
+              <div className="ih72-project-facts"><span>{accepted ? t('Uzgodniona cena', 'Agreed price') : t('Proponowany budżet', 'Proposed budget')}</span><strong>{budget}</strong>{accepted && <small><WorkspaceIcon kind="check" />{t('Warunki zaakceptowane', 'Terms accepted')}</small>}</div>
+              <details className="ih72-project-description"><summary>{t('Zlecenie i jego opis', 'Project and description')}<WorkspaceIcon kind="down" /></summary><div><h3>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h3>{category && <p>{category}</p>}{projectDetails}</div></details>
+              {plan}
+              {!planPinned && <button type="button" className="ih68-pin-option ih68-text-link" onClick={onPinPlan}><WorkspaceIcon kind="pin" />{t('Przypnij przy rozmowie', 'Pin beside conversation')}</button>}
+            </>}
+          </section>
         </div>
-        <WorkspaceSheet open={optionsOpen} onClose={closeMenu} title={t('Opcje rozmowy','Conversation options')}>
+        <WorkspaceSheet open={optionsOpen} onClose={closeMenu} title={t('Opcje rozmowy', 'Conversation options')}>
           <nav className="ih70-menu-list">
-            <Link to={'/profile/' + profileId} className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="profile" /><span>{t('Profil i opcje blokowania','Profile and blocking options')}</span><WorkspaceIcon kind="next" /></Link>
-            <button type="button" className="ih70-menu-link" disabled={!canDispute} onClick={() => { closeMenu(); onDispute(); }}><WorkspaceIcon kind="lock" /><span>{t('Zgłoś problem ze współpracą','Report a project issue')}</span></button>
-            <button type="button" className="ih70-menu-link" disabled={hiding} onClick={() => { closeMenu(); onHide(); }}><WorkspaceIcon kind="close" /><span>{hiding ? t('Ukrywanie…','Hiding…') : t('Ukryj rozmowę z listy','Hide conversation from list')}</span></button>
-            <Link to="/work" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="work" /><span>{t('Moja praca','My work')}</span><WorkspaceIcon kind="next" /></Link>
-            <Link to="/messages" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="message" /><span>{t('Wszystkie rozmowy','All conversations')}</span><WorkspaceIcon kind="next" /></Link>
-            <Link to="/account" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="home" /><span>{t('Moje konto','My account')}</span><WorkspaceIcon kind="next" /></Link>
-            <Link to="/privacy-center" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="lock" /><span>{t('Prywatność i dane','Privacy & data')}</span><WorkspaceIcon kind="next" /></Link>
-            <button type="button" className="ih70-menu-link ih68-expand-option" onClick={() => { closeMenu(); onFocusMode(!focusMode); }}><WorkspaceIcon kind={focusMode ? 'collapse' : 'expand'} /><span>{focusMode ? t('Przywróć widok','Restore view') : t('Powiększ rozmowę','Expand conversation')}</span></button>
+            <Link to={'/profile/' + profileId} className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="profile" /><span>{t('Profil i opcje blokowania', 'Profile and blocking options')}</span><WorkspaceIcon kind="next" /></Link>
+            <button type="button" className="ih70-menu-link" disabled={!canDispute} onClick={() => { closeMenu(); onDispute(); }}><WorkspaceIcon kind="lock" /><span>{t('Zgłoś problem ze współpracą', 'Report a project issue')}</span></button>
+            <button type="button" className="ih70-menu-link" disabled={hiding} onClick={() => { closeMenu(); onHide(); }}><WorkspaceIcon kind="close" /><span>{hiding ? t('Ukrywanie…', 'Hiding…') : t('Ukryj rozmowę z listy', 'Hide conversation from list')}</span></button>
+            <Link to="/work" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="work" /><span>{t('Moja praca', 'My work')}</span><WorkspaceIcon kind="next" /></Link>
+            <Link to="/messages" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="message" /><span>{t('Wszystkie rozmowy', 'All conversations')}</span><WorkspaceIcon kind="next" /></Link>
+            <Link to="/account" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="home" /><span>{t('Moje konto', 'My account')}</span><WorkspaceIcon kind="next" /></Link>
+            <Link to="/privacy-center" className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="lock" /><span>{t('Prywatność i dane', 'Privacy & data')}</span><WorkspaceIcon kind="next" /></Link>
+            <button type="button" className="ih70-menu-link ih68-expand-option" onClick={() => { closeMenu(); onFocusMode(!focusMode); }}><WorkspaceIcon kind={focusMode ? 'collapse' : 'expand'} /><span>{focusMode ? t('Przywróć widok', 'Restore view') : t('Powiększ rozmowę', 'Expand conversation')}</span></button>
             <WorkspaceDisplaySettings onNavigate={closeMenu} />
           </nav>
         </WorkspaceSheet>

@@ -1,4 +1,4 @@
-/* P71 — an open desk, direct actions and visible navigation. */
+/* P72 — one open workspace, with direct actions and room to work. */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, ArrowUp, Bell, BriefcaseBusiness, CalendarDays, Check, ChevronDown, ChevronRight, FileText, FolderOpen, Wallet, Home, Image, LayoutGrid, LogOut, Menu, MessageSquare, MoreHorizontal, Palette, Paperclip, Play, Plus, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound, X, Maximize2, Minimize2, Pin } from 'lucide-react';
@@ -142,10 +142,10 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
   const extras = [['/', t('Strona główna', 'Site home'), 'home'], ['/jobs', t('Przeglądaj zlecenia', 'Browse jobs'), 'jobs'], ['/freelancers', t('Freelancerzy', 'Freelancers'), 'people'], ['/services', t('Usługi', 'Services'), 'services'], ['/calendar', t('Kalendarz', 'Calendar'), 'calendar'], ...(!limited ? [['/notifications', t('Powiadomienia', 'Notifications'), 'bell'], ['/disputes', t('Sprawy i zgłoszenia', 'Disputes & reports'), 'lock']] : []), ['/privacy-center', t('Prywatność i dane', 'Privacy & data'), 'lock']];
   return <>
     <a className="ih68-skip" href="#ih68-content">{t('Przejdź do treści', 'Skip to content')}</a>
-    <header className="navbar account-navbar ih68-header ih71-header" data-workspace-release="P71">
+    <header className="navbar account-navbar ih68-header ih72-header" data-workspace-release="P72">
       <div className="ih68-header-inner">
         <Link to="/" className="ih68-brand" aria-label={t('IdeaHire — strona główna', 'IdeaHire — site home')}><BrandSignature /></Link>
-        <nav className="ih68-top-nav ih71-primary-nav" aria-label={t('Panel konta', 'Account navigation')}>
+        <nav className="ih68-top-nav" aria-label={t('Panel konta', 'Account navigation')}>
           {primary.map(([to,label,icon]) => <Link key={to} to={to} className="ih68-top-link" aria-current={current(to) ? 'page' : undefined}><WorkspaceIcon kind={icon} /><span>{label}</span>{to === '/messages' && hasMessages && <i className="ih68-dot" />}</Link>)}
         </nav>
         <div className="ih68-header-actions">
@@ -168,9 +168,31 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
 }
 export function WorkspaceSectionNav({ sections, active, onSelect }) {
   const t = useWorkspaceCopy();
-  const group = ['profile','expertise','portfolio'].includes(active) ? ['profile','expertise','portfolio'] : ['preferences','templates','payouts'].includes(active) ? ['preferences','templates','payouts'] : [];
-  const labels = { profile:t('Dane','Details'), expertise:t('Specjalizacje','Skills'), portfolio:'Portfolio', preferences:t('Ustawienia','Settings'), templates:t('Wygląd','Appearance'), payouts:t('Wypłaty','Payouts') };
-  return group.length ? <nav className="ih71-related-nav" aria-label={t('Sekcje konta','Account sections')}>{sections.filter(s => group.includes(s.key)).map(section => <button type="button" key={section.key} aria-current={active === section.key ? 'page' : undefined} onClick={() => onSelect(section)}>{labels[section.key]}</button>)}</nav> : null;
+  const labels = {
+    profile: t('Dane profilu', 'Profile details'),
+    expertise: t('Umiejętności', 'Skills'),
+    portfolio: 'Portfolio',
+    jobs: t('Moje zlecenia', 'My listings'),
+    preferences: t('Ustawienia', 'Settings'),
+    payouts: t('Wypłaty', 'Payouts'),
+    templates: t('Wygląd', 'Appearance'),
+  };
+  return <div className="ih72-section-navigation">
+    <nav className="ih72-section-links" aria-label={t('Sekcje konta', 'Account sections')}>
+      {sections.map(section => <button type="button" key={section.key}
+        aria-current={active === section.key ? 'page' : undefined}
+        onClick={() => onSelect(section)}>{labels[section.key] || section.label}</button>)}
+    </nav>
+    <label className="ih72-section-select">
+      <span>{t('Sekcja konta', 'Account section')}</span>
+      <select value={active || ''} onChange={event => {
+        const section = sections.find(item => item.key === event.target.value);
+        if (section) onSelect(section);
+      }}>
+        {sections.map(section => <option key={section.key} value={section.key}>{labels[section.key] || section.label}</option>)}
+      </select>
+    </label>
+  </div>;
 }
 export function WorkspaceLoading() {
   const t = useWorkspaceCopy();
@@ -210,43 +232,127 @@ function IntroFilm() {
       setOpen(true);
     }}><WorkspaceIcon kind="play" /><span>{t('Jak działa IdeaHire', 'How IdeaHire works')}</span></button>{open && <IdeaHirePromoFilm origin={origin} onClose={() => setOpen(false)} />}</>;
 }
-export function WorkspaceDashboard({ name, avatarUrl, specialtyCount = 0, portfolioCount = 0, sections, onSelect, inbox }) {
+export function WorkspaceDashboard({
+  name, avatarUrl, specialtyCount = 0, portfolioCount = 0,
+  jobCount = 0, jobsLoading = false, sections, onSelect, inbox,
+}) {
   const t = useWorkspaceCopy();
+  const [profileOpen, setProfileOpen] = useState(false);
   const conversations = inbox?.conversations || [];
   const unread = conversations.filter(item => item.isUnread).length;
-  const select = key => onSelect(sections.find(section => section.key === key));
-  return <div className="ih71-dashboard">
-    <header className="ih71-desk-heading"><div><h1 id="ih68-home-title" tabIndex={-1}>{t('Moje konto','My account')}</h1><p>{name || 'IdeaHire'}</p></div>{inbox?.user?.id && <Link to={'/profile/' + inbox.user.id} className="ih71-own-avatar" aria-label={t('Zobacz swój profil','View your profile')}><WorkspaceAvatar name={name} url={avatarUrl} /></Link>}</header>
-    <div className="ih71-desk-grid">
-      <section className="ih71-desk-work"><div className="ih71-module-heading"><h2>{t('Moja praca','My work')}</h2><Link to="/work">{t('Projekty','Projects')}<WorkspaceIcon kind="next" /></Link></div><WorkspaceWorkActions /><nav className="ih71-discover-links" aria-label={t('Szukaj na platformie','Browse the platform')}><Link to="/jobs"><WorkspaceIcon kind="search" />{t('Zlecenia','Browse jobs')}</Link><Link to="/freelancers">{t('Wykonawcy','Freelancers')}<WorkspaceIcon kind="diagonal" /></Link></nav></section>
-      <section className="ih71-profile-module"><div className="ih71-module-heading"><h2>{t('Mój profil','My profile')}</h2>{inbox?.user?.id && <Link to={'/profile/' + inbox.user.id}>{t('Zobacz','View')}<WorkspaceIcon kind="diagonal" /></Link>}</div><div className="ih71-direct-list">
-        <button type="button" onClick={() => select('profile')}><WorkspaceIcon kind="profile" /><span>{t('Edytuj profil','Edit profile')}</span><WorkspaceIcon kind="next" /></button>
-        <button type="button" onClick={() => select('expertise')}><WorkspaceIcon kind="services" /><span>{t('Specjalizacje','Skills & expertise')}</span>{specialtyCount > 0 && <small>{specialtyCount}</small>}<WorkspaceIcon kind="next" /></button>
-        <button type="button" onClick={() => select('portfolio')}><WorkspaceIcon kind="portfolio" /><span>Portfolio</span>{portfolioCount > 0 && <small>{portfolioCount}</small>}<WorkspaceIcon kind="next" /></button>
-      </div></section>
-      <section className="ih71-desk-messages"><div className="ih71-module-heading"><h2>{t('Ostatnie rozmowy','Recent conversations')}{unread > 0 && <span className="ih71-unread-count" aria-label={t('Nieprzeczytane: ','Unread: ') + unread}>{unread}</span>}</h2><Link to="/messages">{t('Wszystkie','All')}<WorkspaceIcon kind="next" /></Link></div>
-        {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : conversations.length ? <WorkspaceConversationRows conversations={conversations.slice(0,3)} user={inbox?.user} /> : <div className="ih71-quiet-empty"><WorkspaceIcon kind="message" /><p>{t('Tutaj pojawią się Twoje rozmowy.','Your conversations will appear here.')}<Link to="/freelancers">{t('Znajdź wykonawcę','Find a freelancer')}<WorkspaceIcon kind="next" /></Link></p></div>}
-      </section>
-      <section className="ih71-settings-module"><div className="ih71-module-heading"><h2>{t('Ustawienia konta','Account settings')}</h2></div><div className="ih71-direct-list"><button type="button" onClick={() => select('preferences')}><WorkspaceIcon kind="settings" /><span>{t('Powiadomienia i prywatność','Notifications & privacy')}</span><WorkspaceIcon kind="next" /></button><button type="button" onClick={() => select('templates')}><WorkspaceIcon kind="palette" /><span>{t('Wygląd strony','Site appearance')}</span><WorkspaceIcon kind="next" /></button><button type="button" onClick={() => select('payouts')}><WorkspaceIcon kind="payouts" /><span>{t('Saldo i wypłaty','Balance & payouts')}</span><WorkspaceIcon kind="next" /></button></div></section>
-    </div>
-    <footer className="ih71-desk-footer"><IntroFilm /></footer>
+  const select = key => {
+    const section = sections.find(item => item.key === key);
+    if (section) onSelect(section);
+  };
+  return <div className="ih72-dashboard">
+    <section className="ih72-identity" aria-labelledby="ih68-home-title">
+      <p className="ih72-eyebrow">{t('Moje konto', 'My account')}</p>
+      <button type="button" className={'ih72-profile-orbit' + (profileOpen ? ' is-open' : '')}
+        aria-expanded={profileOpen} aria-controls="ih72-profile-shortcuts"
+        aria-label={t('Pokaż opcje edycji profilu', 'Show profile editing options')}
+        onClick={() => setProfileOpen(value => !value)}>
+        <WorkspaceAvatar name={name} url={avatarUrl} />
+        <span className="ih72-orbit-control"><WorkspaceIcon kind={profileOpen ? 'close' : 'plus'} /></span>
+      </button>
+      <h1 id="ih68-home-title" tabIndex={-1}>{name || t('Twoja przestrzeń', 'Your space')}</h1>
+      <div className="ih72-identity-links">
+        <button type="button" aria-expanded={profileOpen} aria-controls="ih72-profile-shortcuts"
+          onClick={() => setProfileOpen(value => !value)}>{t('Edytuj profil', 'Edit profile')}<WorkspaceIcon kind="down" /></button>
+        {inbox?.user?.id && <Link to={'/profile/' + inbox.user.id}>{t('Zobacz profil', 'View profile')}<WorkspaceIcon kind="diagonal" /></Link>}
+      </div>
+      <nav id="ih72-profile-shortcuts" className="ih72-profile-shortcuts" hidden={!profileOpen}
+        aria-label={t('Edycja profilu', 'Edit profile')}>
+        {[['profile', 'profile', t('Dane profilu', 'Profile details')],
+          ['expertise', 'services', t('Umiejętności', 'Skills')],
+          ['portfolio', 'portfolio', 'Portfolio']].map(([key, icon, label]) =>
+          <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span>{label}</span><WorkspaceIcon kind="next" /></button>)}
+      </nav>
+      <div className="ih72-account-facts" aria-label={t('Twój profil w liczbach', 'Your profile at a glance')}>
+        <button type="button" onClick={() => select('jobs')}><strong>{jobsLoading ? '—' : jobCount}</strong><span>{t('Zlecenia', 'Listings')}</span></button>
+        <button type="button" onClick={() => select('portfolio')}><strong>{portfolioCount}</strong><span>Portfolio</span></button>
+        <button type="button" onClick={() => select('expertise')}><strong>{specialtyCount}</strong><span>{t('Specjalizacje', 'Skills')}</span></button>
+      </div>
+    </section>
+
+    <section className="ih72-launchpad" aria-labelledby="ih72-work-title">
+      <div className="ih72-section-heading"><div><p className="ih72-eyebrow">{t('Zlecenia i usługi', 'Jobs & services')}</p><h2 id="ih72-work-title">{t('Twoja praca', 'Your work')}</h2></div><Link to="/work" className="ih68-text-link">{t('Współprace', 'Projects')}<WorkspaceIcon kind="diagonal" /></Link></div>
+      <WorkspaceWorkActions />
+    </section>
+
+    <section className="ih72-activity" aria-labelledby="ih72-recent-title">
+      <div className="ih72-section-heading"><h2 id="ih72-recent-title">{t('Ostatnie rozmowy', 'Recent conversations')}{!inbox?.loading && unread > 0 && <span className="ih72-count">{unread}<span className="ih68-sr-only">{t(' nieprzeczytanych', ' unread')}</span></span>}</h2><Link to="/messages" className="ih68-text-link">{t('Wszystkie', 'View all')}<WorkspaceIcon kind="arrow" /></Link></div>
+      {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : conversations.length ?
+        <WorkspaceConversationRows conversations={conversations.slice(0, 3)} user={inbox?.user} /> :
+        <div className="ih72-empty-inline"><WorkspaceIcon kind="message" /><div><h3>{t('Nie masz jeszcze rozmów.', 'No conversations yet.')}</h3><p>{t('Tutaj znajdziesz wiadomości dotyczące Twoich projektów.', 'Your project conversations will appear here.')}</p><Link to="/freelancers" className="ih68-text-link">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="diagonal" /></Link></div></div>}
+    </section>
+
+    <section className="ih72-account-tools" aria-labelledby="ih72-account-tools-title">
+      <div className="ih72-section-heading"><h2 id="ih72-account-tools-title">{t('Twoje konto', 'Your account')}</h2></div>
+      <div className="ih72-setting-links">
+        {[['payouts', 'payouts', t('Saldo i wypłaty', 'Balance & payouts'), t('Stripe i historia rozliczeń', 'Stripe and payout history')],
+          ['preferences', 'settings', t('Ustawienia konta', 'Account settings'), t('Powiadomienia, prywatność i preferencje', 'Notifications, privacy and preferences')],
+          ['templates', 'palette', t('Wygląd strony', 'Site appearance'), t('Twój szablon i kolory', 'Your template and colours')]].map(([key, icon, label, detail]) =>
+          <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span><strong>{label}</strong><small>{detail}</small></span><WorkspaceIcon kind="next" /></button>)}
+      </div>
+    </section>
+    <footer className="ih72-desk-footer"><nav aria-label={t('Odkrywaj IdeaHire', 'Explore IdeaHire')}><Link to="/freelancers">{t('Freelancerzy', 'Freelancers')}</Link><Link to="/services">{t('Usługi', 'Services')}</Link><Link to="/privacy-center">{t('Prywatność i dane', 'Privacy & data')}</Link></nav><IntroFilm /></footer>
   </div>;
 }
+
+function WorkspaceProjectCards({ conversations, user, loading = false }) {
+  const t = useWorkspaceCopy();
+  const en = useSitePreferences().language === 'en';
+  const open = useWorkspaceListNavigation(loading);
+  return <div className="ih72-project-grid">{conversations.map(item => {
+    const name = item.otherProfile?.name || t('Użytkownik', 'User');
+    const hiring = item.client_id === user?.id;
+    const message = item.lastMessage;
+    const preview = message ? (message.sender_id === user?.id ? t('Ty: ', 'You: ') : '') +
+      (String(message.content || '').trim() || t('Przesłano materiały', 'Materials shared')) :
+      t('Otwórz rozmowę i ustal kolejne kroki.', 'Open the conversation and agree on next steps.');
+    return <Link key={item.id} className={'ih72-project-card' + (item.isUnread ? ' is-unread' : '')}
+      to={'/chat/' + item.id} onClick={event => open(event, item.id)}>
+      <div className="ih72-project-top"><span className="ih72-role"><WorkspaceIcon kind={hiring ? 'jobs' : 'work'} />{hiring ? t('Zlecam', 'Hiring') : t('Realizuję', 'Providing')}</span>{item.isUnread && <span className="ih72-project-unread"><i className="ih68-dot" />{t('Nowa wiadomość', 'New message')}</span>}</div>
+      <h3>{item.job?.title || t('Zapytanie o współpracę', 'Project inquiry')}</h3>
+      <div className="ih72-project-person"><WorkspaceAvatar small name={name} url={item.otherProfile?.avatar_url} /><span>{name}</span></div>
+      <p className="ih72-project-preview">{preview}</p>
+      <div className="ih72-project-bottom"><time dateTime={item.sortDate || undefined}>{workspaceDate(item.sortDate, en)}</time><span>{t('Otwórz projekt', 'Open project')}<WorkspaceIcon kind="diagonal" /></span></div>
+    </Link>;
+  })}</div>;
+}
+
 export function WorkspaceWork({ inbox }) {
   const t = useWorkspaceCopy();
-  const location = useLocation(), navigate = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
-  const filter = ['client','contractor'].includes(params.get('role')) ? params.get('role') : 'all';
+  const filter = ['client', 'contractor'].includes(params.get('role')) ? params.get('role') : 'all';
   const search = params.get('q') || '';
   const rows = inbox?.conversations || [];
-  const visible = useMemo(() => rows.filter(item => (filter === 'all' || (filter === 'client' ? item.client_id : item.contractor_id) === inbox?.user?.id) && (!search.trim() || [item.job?.title,item.otherProfile?.name,item.lastMessage?.content].filter(Boolean).join(' ').toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))), [rows,filter,search,inbox?.user?.id]);
-  function update(key,value) { const next = new URLSearchParams(location.search); if(value && value !== 'all') next.set(key,value); else next.delete(key); navigate({pathname:'/work',search:next.toString() ? '?' + next : ''},{replace:true,state:{}}); }
-  const reset = () => navigate('/work',{replace:true});
-  return <main className="ih68-page ih71-work-page" id="ih68-content"><header className="ih71-page-heading"><h1>{t('Moja praca','My work')}</h1><Link to="/jobs" className="ih68-text-link">{t('Szukaj zleceń','Find jobs')}<WorkspaceIcon kind="diagonal" /></Link></header><WorkspaceWorkActions />
-    <section className="ih71-project-list" aria-labelledby="ih71-project-list-title"><div className="ih71-module-heading"><h2 id="ih71-project-list-title">{t('Twoje współprace','Your projects')}{!inbox?.loading && <small>{visible.length}</small>}</h2></div>
-      <label className="ih71-search"><span className="ih68-sr-only">{t('Szukaj projektu lub osoby','Search for a project or person')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q',event.target.value)} placeholder={t('Szukaj projektu lub osoby','Search projects or people')} /></label>
-      <div className="ih71-filter-row" role="group" aria-label={t('Twoja rola w projekcie','Your project role')}>{[['all',t('Wszystkie','All')],['client',t('Zlecam','Hiring')],['contractor',t('Realizuję','Providing')]].map(([value,label]) => <button type="button" key={value} aria-pressed={filter === value} onClick={() => update('role',value)}>{label}</button>)}</div>
-      {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : visible.length ? <RecentRows conversations={visible} user={inbox?.user} loading={inbox?.loading} preview={false} /> : <div className="ih71-quiet-empty"><WorkspaceIcon kind="work" /><p>{rows.length ? t('Brak pasujących projektów.','No matching projects.') : t('Rozmowy o Twoich projektach pojawią się tutaj.','Your project conversations will appear here.')}{rows.length ? <button type="button" onClick={reset}>{t('Wyczyść filtry','Clear filters')}</button> : <Link to="/jobs">{t('Przeglądaj zlecenia','Browse jobs')}<WorkspaceIcon kind="next" /></Link>}</p></div>}
+  const visible = useMemo(() => rows.filter(item =>
+    (filter === 'all' || (filter === 'client' ? item.client_id : item.contractor_id) === inbox?.user?.id) &&
+    (!search.trim() || [item.job?.title, item.otherProfile?.name, item.lastMessage?.content].filter(Boolean).join(' ').toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))),
+    [rows, filter, search, inbox?.user?.id]);
+  function update(key, value) {
+    const next = new URLSearchParams(location.search);
+    if (value && value !== 'all') next.set(key, value); else next.delete(key);
+    navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
+  }
+  return <main className="ih68-page ih72-work-page" id="ih68-content">
+    <header className="ih72-page-heading"><div><p className="ih72-eyebrow">{t('Panel pracy', 'Workspace')}</p><h1>{t('Twoja praca.', 'Your work.')}</h1><p>{t('Współprace, rozmowy i kolejne kroki.', 'Projects, conversations and next steps.')}</p></div><Link to="/calendar" className="ih68-text-link"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link></header>
+    <WorkspaceWorkActions />
+    <section className="ih72-projects" aria-labelledby="ih72-projects-title">
+      <div className="ih72-section-heading"><h2 id="ih72-projects-title">{t('Twoje współprace', 'Your projects')}{!inbox?.loading && <span className="ih72-count">{visible.length}</span>}</h2></div>
+      <div className="ih72-list-toolbar">
+        <div className="ih72-filters" role="group" aria-label={t('Twoja rola', 'Your role')}>
+          {[['all', t('Wszystkie', 'All')], ['client', t('Zlecam', 'Hiring')], ['contractor', t('Realizuję', 'Providing')]].map(([value, label]) =>
+            <button type="button" key={value} aria-pressed={filter === value} onClick={() => update('role', value)}>{label}</button>)}
+        </div>
+        <label className="ih72-search"><span className="ih68-sr-only">{t('Szukaj projektu lub osoby', 'Search projects or people')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q', event.target.value)} placeholder={t('Szukaj projektu lub osoby', 'Search projects or people')} />{search && <button type="button" onClick={() => update('q', '')} aria-label={t('Wyczyść wyszukiwanie', 'Clear search')}><WorkspaceIcon kind="close" /></button>}</label>
+      </div>
+      {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : visible.length ?
+        <WorkspaceProjectCards conversations={visible} user={inbox?.user} loading={inbox?.loading} /> :
+        <div className="ih72-empty"><WorkspaceIcon kind="work" /><h3>{rows.length ? t('Nie ma takich projektów.', 'No matching projects.') : t('Nie masz jeszcze współprac.', 'No projects yet.')}</h3><p>{rows.length ? t('Zmień wyszukiwanie lub wybraną rolę.', 'Change your search or selected role.') : t('Gdy rozpoczniesz współpracę, znajdziesz ją tutaj.', 'Your projects will appear here when you start a collaboration.')}</p>{rows.length ? <button type="button" className="ih68-secondary" onClick={() => navigate('/work', { replace: true })}>{t('Wyczyść filtry', 'Clear filters')}</button> : <Link to="/jobs" className="ih68-primary">{t('Znajdź zlecenie', 'Find a job')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
     </section>
   </main>;
 }
@@ -281,24 +387,41 @@ export function WorkspaceConversationRows({ conversations, user, loading = false
   const open = useWorkspaceListNavigation(loading);
   const date = value => {
     const d = new Date(value);
-    return !value || Number.isNaN(d.getTime()) ? '' : d.toDateString() === new Date().toDateString() ? d.toLocaleTimeString(en ? 'en-GB' : 'pl-PL',{hour:'2-digit',minute:'2-digit'}) : workspaceDate(value,en);
+    if (!value || Number.isNaN(d.getTime())) return '';
+    return d.toDateString() === new Date().toDateString()
+      ? d.toLocaleTimeString(en ? 'en-GB' : 'pl-PL', { hour: '2-digit', minute: '2-digit' })
+      : workspaceDate(value, en);
   };
-  return <div className="ih71-mail-rows">{conversations.map(item => {
-    const name = item.otherProfile?.name || t('Użytkownik','User');
+  return <div className="ih72-conversation-list">{conversations.map(item => {
+    const name = item.otherProfile?.name || t('Użytkownik', 'User');
     const message = item.lastMessage;
-    const preview = message ? (message.sender_id === user?.id ? t('Ty: ','You: ') : '') + (String(message.content || '').trim() || t('Przesłano materiały','Materials shared')) : t('Rozpocznij rozmowę','Start a conversation');
-    return <Link key={item.id} to={'/chat/' + item.id} onClick={event => open(event,item.id)} className={'ih71-mail-row' + (item.isUnread ? ' is-unread' : '')}>
+    const preview = message ? (message.sender_id === user?.id ? t('Ty: ', 'You: ') : '') +
+      (String(message.content || '').trim() || t('Przesłano materiały', 'Materials shared')) : t('Rozpocznij rozmowę', 'Start a conversation');
+    return <Link key={item.id} to={'/chat/' + item.id} onClick={event => open(event, item.id)}
+      className={'ih72-conversation-row' + (item.isUnread ? ' is-unread' : '')}>
       <WorkspaceAvatar name={name} url={item.otherProfile?.avatar_url} />
-      <div className="ih71-mail-copy"><div className="ih71-mail-person"><strong>{name}</strong><time dateTime={item.sortDate || undefined}>{date(item.sortDate)}</time></div><p>{preview}</p><span className="ih71-mail-project">{item.job?.title || t('Zapytanie o współpracę','Project inquiry')}</span></div>
-      <span className="ih71-mail-end">{item.isUnread ? <i className="ih68-dot" aria-label={t('Nieprzeczytana rozmowa','Unread conversation')} /> : <WorkspaceIcon kind="next" />}</span>
+      <div className="ih72-conversation-copy">
+        <div className="ih72-conversation-person"><strong>{name}</strong><time dateTime={item.sortDate || undefined}>{date(item.sortDate)}</time></div>
+        <span className="ih72-conversation-project">{item.job?.title || t('Zapytanie o współpracę', 'Project inquiry')}</span>
+        <p>{preview}</p>
+      </div>
+      <span className="ih72-conversation-end">{item.isUnread ? <i className="ih68-dot" aria-label={t('Nieprzeczytana rozmowa', 'Unread conversation')} /> : <WorkspaceIcon kind="next" />}</span>
     </Link>;
   })}</div>;
 }
 
 function WorkspaceWorkActions() {
   const t = useWorkspaceCopy();
-  return <section className="ih71-work-actions" aria-label={t('Zlecenia i usługi','Jobs and services')}>
-    <div className="ih71-action-pair"><Link to="/find-talent" className="ih68-primary"><WorkspaceIcon kind="plus" />{t('Zleć pracę','Post a job')}</Link><Link to="/services/new" className="ih68-secondary"><WorkspaceIcon kind="plus" />{t('Dodaj usługę','Add a service')}</Link></div>
-    <nav className="ih71-work-links" aria-label={t('Twoje ogłoszenia i terminarz','Your listings and calendar')}><Link to="/account#account-jobs">{t('Moje zlecenia','My listings')}</Link><Link to="/services/mine">{t('Moje usługi','My services')}</Link><Link to="/calendar">{t('Kalendarz','Calendar')}</Link></nav>
-  </section>;
+  return <div className="ih72-work-actions">
+    <div className="ih72-main-actions">
+      <Link to="/find-talent" className="ih68-primary"><WorkspaceIcon kind="plus" /><span>{t('Zleć pracę', 'Post a job')}</span><WorkspaceIcon kind="diagonal" /></Link>
+      <Link to="/jobs" className="ih68-secondary"><WorkspaceIcon kind="search" /><span>{t('Znajdź zlecenie', 'Find a job')}</span><WorkspaceIcon kind="diagonal" /></Link>
+    </div>
+    <nav className="ih72-work-links" aria-label={t('Twoje ogłoszenia i terminarz', 'Your listings and calendar')}>
+      <Link to="/account#account-jobs"><WorkspaceIcon kind="jobs" />{t('Moje zlecenia', 'My listings')}</Link>
+      <Link to="/services/mine"><WorkspaceIcon kind="services" />{t('Moje usługi', 'My services')}</Link>
+      <Link to="/services/new"><WorkspaceIcon kind="plus" />{t('Dodaj usługę', 'Add a service')}</Link>
+      <Link to="/calendar"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>
+    </nav>
+  </div>;
 }
