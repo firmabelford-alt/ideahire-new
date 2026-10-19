@@ -371,8 +371,6 @@ export function MarketSelect({ id, label, value, options, onChange }) {
 
 export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, kind = 'zleceń', children }) {
   const id = useId();
-  const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const categoriesToggleRef = useRef(null);
   const en = useSitePreferences().language === 'en';
   const people = kind === 'freelancerów';
   const services = kind === 'usług';
@@ -380,11 +378,10 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
   const fields = ['Wszystkie', ...categories.filter(value => value !== 'Wszystkie')];
   const fieldLabel = value => value === 'Wszystkie' ? (en ? 'All fields' : 'Wszystkie dziedziny') : en ? translateUiText(categoryLabel(value)) : categoryLabel(value);
   return <div className="ih75-catalog">
-    <aside className={'ih75-catalog-sidebar' + (categoriesOpen ? ' is-open' : '')} aria-label={en ? 'Filter by field' : 'Filtruj według dziedziny'}>
+    <aside className="ih75-catalog-sidebar" aria-label={en ? 'Filter by field' : 'Filtruj według dziedziny'}>
       <h2>{en ? 'Fields' : 'Dziedziny'}</h2>
-      <button type="button" ref={categoriesToggleRef} className="ih75-categories-toggle" aria-expanded={categoriesOpen} aria-controls={id + '-fields'} onClick={() => setCategoriesOpen(value => !value)}><span>{fieldLabel(category)}</span><MarketIcon kind="chevron" /></button>
       <nav id={id + '-fields'} className="ih75-category-list" aria-label={en ? 'Fields' : 'Dziedziny'}>
-        {fields.map(value => <button type="button" key={value} aria-pressed={category === value} onClick={() => { onCategory(value); if (categoriesOpen) categoriesToggleRef.current?.focus(); setCategoriesOpen(false); }}><span>{fieldLabel(value)}</span>{category === value && <MarketIcon kind="check" />}</button>)}
+        {fields.map(value => <button type="button" key={value} aria-pressed={category === value} onClick={() => onCategory(value)}><span>{fieldLabel(value)}</span>{category === value && <MarketIcon kind="check" />}</button>)}
       </nav>
       {(search || category !== 'Wszystkie') && <button type="button" className="ih73-clear-filters" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
     </aside>
@@ -395,8 +392,22 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
             placeholder={people ? (en ? 'Name, skills or specialisation' : 'Imię, umiejętności lub specjalizacja') : services ? (en ? 'Service, field or result' : 'Usługa, dziedzina lub rezultat') : (en ? 'Project, field or skill' : 'Projekt, dziedzina lub umiejętność')} />
           {search && <button type="button" onClick={() => onSearch('')} aria-label={en ? 'Clear search' : 'Wyczyść wyszukiwanie'}><MarketIcon kind="close" /></button>}
         </label>
-        {onSort && <MarketSelect id={id + '-sort'} label={en ? 'Sort by' : 'Kolejność'} value={sort} onChange={onSort}
-          options={[{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' }, { value: 'matched', label: en ? 'Matched to me' : 'Dopasowane do mnie', disabled: !matchedAvailable }]} />}
+        <div className="ih76-catalog-refinements">
+          <label className="ih76-native-select ih76-category-select" htmlFor={id + '-category'}>
+            <span>{en ? 'Field' : 'Dziedzina'}</span>
+            <select id={id + '-category'} value={category} onChange={event => onCategory(event.target.value)}>
+              {fields.map(value => <option key={value} value={value}>{value === 'Wszystkie' ? (en ? 'All fields' : 'Wszystkie') : fieldLabel(value)}</option>)}
+            </select>
+          </label>
+          {onSort && <label className="ih76-native-select" htmlFor={id + '-sort'}>
+            <span>{en ? 'Sort by' : 'Kolejność'}</span>
+            <select id={id + '-sort'} value={sort} onChange={event => onSort(event.target.value)}>
+              <option value="latest">{en ? 'Newest first' : 'Najnowsze'}</option>
+              <option value="matched" disabled={!matchedAvailable}>{en ? 'Matched to me' : 'Dopasowane do mnie'}</option>
+            </select>
+          </label>}
+        </div>
+        {(search || category !== 'Wszystkie') && <button type="button" className="ih76-mobile-clear" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
       </section>
       <div className="ih75-catalog-results">{children}</div>
     </div>

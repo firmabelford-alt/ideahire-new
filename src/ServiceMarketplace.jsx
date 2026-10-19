@@ -620,12 +620,14 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
       {loading ? (
         <div className="ih5-service-form-loading" aria-label="Ładowanie formularza" />
       ) : (
-        <form className="ih5-service-editor" onSubmit={handleSubmit}>
-          <section className="ih5-service-editor-section">
-            <div className="ih5-service-editor-index">01</div>
+        <form className="ih5-service-editor" onSubmit={handleSubmit} onInvalidCapture={event => { const section = event.target.closest("details"); if (section) section.open = true; }}>
+          <details className="ih5-service-editor-section" open>
+            <summary className="ih76-service-step">
+              <span className="ih5-service-editor-index">01</span>
+              <span><strong>{english ? "Your service" : "Twoja oferta"}</strong><small>{english ? "Name, field and description" : "Nazwa, dziedzina i opis"}</small></span>
+              <MarketIcon kind="chevron" />
+            </summary>
             <div className="ih5-service-editor-heading">
-              <span>Podstawa</span>
-              <h2>Co dokładnie oferujesz?</h2>
               <p>Zacznij od efektu, który zleceniodawca łatwo zrozumie.</p>
             </div>
             <div className="ih5-service-editor-fields">
@@ -696,13 +698,15 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 <small>{form.description.length}/4000</small>
               </label>
             </div>
-          </section>
+          </details>
 
-          <section className="ih5-service-editor-section">
-            <div className="ih5-service-editor-index">02</div>
+          <details className="ih5-service-editor-section">
+            <summary className="ih76-service-step">
+              <span className="ih5-service-editor-index">02</span>
+              <span><strong>{english ? "Deliverables" : "Rezultaty pracy"}</strong><small>{english ? "Scope and client materials" : "Zakres i materiały od klienta"}</small></span>
+              <MarketIcon kind="chevron" />
+            </summary>
             <div className="ih5-service-editor-heading">
-              <span>Zakres</span>
-              <h2>Co otrzyma klient?</h2>
               <p>Krótkie punkty są łatwiejsze do porównania niż ściana tekstu.</p>
             </div>
             <div className="ih5-service-editor-fields">
@@ -739,13 +743,15 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 />
               </label>
             </div>
-          </section>
+          </details>
 
-          <section className="ih5-service-editor-section">
-            <div className="ih5-service-editor-index">03</div>
+          <details className="ih5-service-editor-section">
+            <summary className="ih76-service-step">
+              <span className="ih5-service-editor-index">03</span>
+              <span><strong>{english ? "Delivery terms" : "Warunki realizacji"}</strong><small>{english ? "Price, timing and availability" : "Cena, terminy i dostępność"}</small></span>
+              <MarketIcon kind="chevron" />
+            </summary>
             <div className="ih5-service-editor-heading">
-              <span>Warunki</span>
-              <h2>Cena, czas i obłożenie</h2>
               <p>Rozmowa nie blokuje miejsca. Rezerwacja powstaje dopiero po wysłaniu oferty.</p>
             </div>
             <div className="ih5-service-editor-fields">
@@ -850,7 +856,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 </b>
               </label>
             </div>
-          </section>
+          </details>
 
           {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 

@@ -18,6 +18,8 @@ body.ih68-workspace {
   background: var(--a-bg) !important;
   color: var(--a-ink) !important;
   font-family: Inter, system-ui, sans-serif !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 body.ih68-workspace #root { isolation: auto !important; z-index: auto !important; transform: none !important; filter: none !important; contain: none !important; }
 body.ih68-workspace .ih63-page-wash { display: none !important; }
@@ -29,7 +31,7 @@ body.ih68-workspace #root :is(h1, h2, h3, h4, p) { color: inherit !important; ov
 body.ih68-workspace #root :is(.app-page, .ih68-page, .ih68-room, .ih-market-shell, .ih68-header) :is(h1,h2,h3,h4,p,span,strong,small,label,summary,a,button,input,textarea,select) { font-family: Inter, system-ui, sans-serif !important; text-shadow: none !important; -webkit-text-fill-color: currentColor !important; }
 body.ih68-workspace #root :is(button, a, input, textarea, select, summary):focus-visible { outline: 2px solid var(--a-accent) !important; outline-offset: 3px !important; }
 body.ih68-workspace #root .ih68-header { position: sticky !important; top: 0 !important; z-index: 200 !important; display: block !important; width: 100% !important; height: var(--a-head) !important; min-height: var(--a-head) !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-bottom: 1px solid var(--a-line) !important; border-radius: 0 !important; background: var(--a-paper) !important; background-image: none !important; color: var(--a-ink) !important; box-shadow: none !important; backdrop-filter: none !important; transform: none !important; overflow: visible !important; }
-body.ih68-workspace #root .ih68-header-inner { display: grid !important; grid-template-columns: 1fr auto 1fr !important; align-items: center !important; width: 100% !important; max-width: 1320px !important; height: 100% !important; margin: 0 auto !important; padding: 0 40px !important; gap: 32px !important; }
+body.ih68-workspace #root .ih68-header-inner { display: grid !important; grid-template-columns: minmax(0,1fr) auto minmax(88px,1fr) !important; align-items: center !important; width: 100% !important; max-width: 1320px !important; height: 100% !important; margin: 0 auto !important; padding: 0 40px !important; gap: 24px !important; }
 body.ih68-workspace #root .ih68-brand { display: inline-flex !important; align-items: center !important; width: fit-content !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; color: var(--a-ink) !important; text-decoration: none !important; }
 body.ih68-workspace #root .ih68-brand .ih-brand-signature { display: inline-flex !important; align-items: center !important; gap: 8px !important; color: inherit !important; }
 body.ih68-workspace #root .ih68-brand .ih-brand-mark { width: 29px !important; height: 29px !important; }
@@ -105,8 +107,6 @@ body.ih68-workspace #root .ih68-account-note p { margin: 10px 0 !important; colo
 /* One quiet preferences control. Remove the inherited wrapper and halo. */
 @media(max-width:850px) {
   body.ih68-workspace { --a-head: 68px !important; }
-  body.ih68-workspace #root .ih68-header-inner { display: flex !important; justify-content: space-between !important; padding: 0 22px !important; gap: 18px !important; }
-  body.ih68-workspace #root .ih68-top-nav { display: none !important; }
   body.ih68-workspace #root .ih68-header-actions { gap: 10px !important; }
   body.ih68-workspace #root .ih68-menu-trigger { width: 44px !important; justify-content: center !important; border: 1px solid var(--a-line) !important; }
   body.ih68-workspace #root :is(.ih68-desktop-avatar,.ih68-menu-trigger>svg) { display: none !important; }
@@ -209,9 +209,16 @@ body.ih68-workspace {
   --a-radius: 14px !important;
 }
 body.ih68-workspace #root :is(.ih72-dashboard, .ih72-work-page) {
+  display: block !important;
+  position: relative !important;
+  inset: auto !important;
   width: 100% !important;
+  min-width: 0 !important;
   max-width: 1160px !important;
+  margin-block: 0 !important;
   margin-inline: auto !important;
+  padding: 0 !important;
+  transform: none !important;
 }
 body.ih68-workspace #root :is(.ih72-identity, .ih72-launchpad, .ih72-activity, .ih72-account-tools, .ih72-projects) {
   display: block !important;
@@ -269,10 +276,7 @@ body.ih68-workspace #root .ih72-profile-orbit::before {
   border-right-color: var(--a-accent) !important;
   border-radius: 50% !important;
   pointer-events: none !important;
-  transition: transform 600ms cubic-bezier(.2,.7,.2,1) !important;
-}
-body.ih68-workspace #root .ih72-profile-orbit.is-open::before {
-  transform: rotate(145deg) !important;
+  transform: rotate(-35deg);
 }
 body.ih68-workspace #root .ih72-profile-orbit .ih68-avatar {
   width: 108px !important;
@@ -312,6 +316,8 @@ body.ih68-workspace #root .ih72-identity-links {
   align-items: center !important;
   justify-content: center !important;
   flex-wrap: wrap !important;
+  width: 100% !important;
+  max-width: 430px !important;
   gap: 0 24px !important;
   margin: 7px 0 0 !important;
 }
@@ -321,6 +327,9 @@ body.ih68-workspace #root .ih72-identity-links > :is(a, button) {
   justify-content: center !important;
   gap: 6px !important;
   width: auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  white-space: normal !important;
   min-height: 44px !important;
   margin: 0 !important;
   padding: 8px 0 !important;
@@ -396,6 +405,9 @@ body.ih68-workspace #root .ih72-account-facts > button {
   justify-content: center !important;
   gap: 6px !important;
   min-height: 58px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow-wrap: anywhere !important;
   margin: 0 !important;
   padding: 0 14px !important;
   border: 0 !important;
@@ -993,6 +1005,7 @@ body.ih68-workspace #root .account-tab-intro h1 {
     --a-head: 112px !important;
   }
   body.ih68-workspace #root .ih72-header .ih68-header-inner {
+    display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
     grid-template-rows: 64px 48px !important;
     gap: 0 !important;
@@ -1001,13 +1014,15 @@ body.ih68-workspace #root .account-tab-intro h1 {
   body.ih68-workspace #root .ih72-header .ih68-brand {
     grid-column: 1 !important;
     grid-row: 1 !important;
-    margin-left: 24px !important;
+    margin: 0 0 0 20px !important;
+    justify-self: start !important;
   }
   body.ih68-workspace #root .ih72-header .ih68-header-actions {
     grid-column: 2 !important;
     grid-row: 1 !important;
     gap: 8px !important;
-    margin-right: 20px !important;
+    margin: 0 16px 0 0 !important;
+    justify-self: end !important;
   }
   body.ih68-workspace #root .ih72-header .ih68-menu-trigger {
     width: 44px !important;
@@ -1025,8 +1040,11 @@ body.ih68-workspace #root .account-tab-intro h1 {
     gap: 0 !important;
     width: 100% !important;
     height: 48px !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
     padding: 0 18px !important;
-    border-top: 1px solid var(--desk-line) !important;
+    border: 0 !important;
     background: var(--a-paper) !important;
   }
   body.ih68-workspace #root .ih72-header .ih68-top-link {
@@ -1036,15 +1054,13 @@ body.ih68-workspace #root .account-tab-intro h1 {
     margin: 0 !important;
     padding: 11px 6px !important;
     border: 0 !important;
-    border-bottom: 2px solid transparent !important;
-    border-radius: 0 !important;
+    border-radius: 10px !important;
     background: transparent !important;
     font-size: 14px !important;
   }
   body.ih68-workspace #root .ih72-header .ih68-top-link[aria-current="page"] {
-    border-bottom-color: var(--a-accent) !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    border-radius: 10px 10px 0 0 !important;
+    background: var(--a-tint) !important;
     color: var(--a-ink) !important;
     font-weight: 600 !important;
   }
@@ -1065,7 +1081,7 @@ body.ih68-workspace #root .account-tab-intro h1 {
     padding: 28px 24px 60px !important;
   }
   body.ih68-workspace #root .ih72-identity {
-    padding-top: 2px !important;
+    padding-top: 12px !important;
     padding-bottom: 30px !important;
   }
   body.ih68-workspace #root .ih72-profile-orbit,
@@ -1081,6 +1097,14 @@ body.ih68-workspace #root .account-tab-intro h1 {
   }
   body.ih68-workspace #root .ih72-account-facts {
     margin-top: 19px !important;
+    max-width: 360px !important;
+  }
+  body.ih68-workspace #root .ih72-account-facts > button {
+    padding-inline: 5px !important;
+    font-size: 11px !important;
+  }
+  body.ih68-workspace #root .ih72-identity-links {
+    column-gap: 18px !important;
   }
   body.ih68-workspace #root .ih72-launchpad {
     padding-top: 28px !important;
@@ -1272,9 +1296,16 @@ body.ih68-workspace #root .account-tab-intro h1 {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
+  body.ih68-workspace #root .ih72-profile-orbit::before {
+    animation: ih76-profile-orbit 80s linear infinite;
+  }
   body.ih68-workspace #root .ih72-profile-shortcuts:not([hidden]) {
     animation: ih72-profile-reveal 240ms ease-out both !important;
   }
+}
+@keyframes ih76-profile-orbit {
+  from { transform: rotate(-35deg); }
+  to { transform: rotate(325deg); }
 }
 @keyframes ih72-profile-reveal {
   from { opacity: 0; transform: translateY(-6px); }

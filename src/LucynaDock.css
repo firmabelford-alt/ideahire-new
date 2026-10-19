@@ -80,3 +80,9 @@
 #ih64-lucyna .ih65-lucyna-symbol { display:block; width:27px; height:27px; fill:none; stroke:currentColor; stroke-width:2; }
 #ih64-lucyna .ih64-dock-handle>svg.ih65-lucyna-symbol { width:28px; height:28px; color:var(--v-accent); stroke:currentColor; stroke-width:2; }
 #ih64-lucyna .ih64-dock-return>svg.ih65-lucyna-symbol { width:22px; height:22px; color:var(--v-accent); }
+/* P76 — the collapsed assistant keeps one quiet target at the bottom edge. */
+@media (max-width:700px) {
+  #ih64-lucyna .ih64-dock-return { right:10px; bottom:calc(14px + env(safe-area-inset-bottom,0px)); display:grid; place-items:center; width:44px; height:44px; padding:10px; border:1px solid var(--v-line); border-radius:13px; box-shadow:0 2px 8px #11111108; }
+  #ih64-lucyna .ih64-dock-return>svg:not(.ih65-lucyna-symbol) { display:none; }
+  #ih64-lucyna .ih64-dock-launcher { right:10px!important; bottom:calc(14px + env(safe-area-inset-bottom,0px))!important; }
+}

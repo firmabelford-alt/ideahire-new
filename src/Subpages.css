@@ -1,4 +1,4 @@
-/* P75 — separate page compositions; shared field and action styles. */
+/* P76 — mobile compositions for project briefs, offers and the personal planner. */
 @layer ih68Visibility, ih68Workspace;
 @layer ih68Visibility {
   body.ih75-subpage [hidden] { display: none !important; }
@@ -30,7 +30,7 @@ body.ih75-subpage {
   font-family: Inter, system-ui, sans-serif !important;
   font-size: 16px !important;
 }
-body.ih75-subpage #root :where(main, section, article, aside, form, fieldset, nav, header, footer, div) {
+body.ih75-subpage #root :where(main, section, article, aside, form, fieldset, details, summary, nav, header, footer, div) {
   box-sizing: border-box !important;
   min-width: 0 !important;
 }
@@ -39,7 +39,7 @@ body.ih75-subpage #root :where(h1,h2,h3,h4,p,a,label) { overflow-wrap: anywhere 
 body.ih75-subpage #root :where(button,a,input,textarea,select,summary):focus-visible { outline: 2px solid var(--p-accent) !important; outline-offset: 4px !important; }
 body.ih75-subpage #root :where(button,input,textarea,select):disabled { cursor: not-allowed !important; }
 body.ih75-subpage #root :is(.page,.account-page) { background: var(--p-bg) !important; color: var(--p-ink) !important; }
-body.ih75-subpage #root .ih68-header-inner { width: 100% !important; max-width: 1360px !important; padding-inline: 48px !important; }
+
 body.ih75-subpage:not([data-ih73-page="conversation"]):not([data-ih73-page="assistant"]) #root :is(.app-page,.ih-market-shell,.ih68-page,.privacy-center-shell,.disputes-shell,.admin-shell) {
   display: block !important;
   width: 100% !important;
@@ -91,20 +91,20 @@ body.ih75-subpage #root .ih75-category-list > button { display: flex !important;
 body.ih75-subpage #root .ih75-category-list > button:hover { background: var(--p-soft) !important; color: var(--p-ink) !important; }
 body.ih75-subpage #root .ih75-category-list > button[aria-pressed="true"] { border-left-color: var(--p-accent) !important; background: var(--p-tint) !important; color: var(--p-ink) !important; font-weight: 550 !important; }
 body.ih75-subpage #root .ih75-category-list svg { width: 16px !important; height: 16px !important; flex: none !important; }
-body.ih75-subpage #root .ih75-categories-toggle { display: none !important; }
+
 body.ih75-subpage #root .ih73-clear-filters { display: flex !important; align-items: center !important; gap: 8px !important; min-height: 44px !important; margin: 16px 0 0 !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; cursor: pointer !important; }
 body.ih75-subpage #root .ih75-catalog-main { min-width: 0 !important; }
-body.ih75-subpage #root .ih75-catalog-controls { display: flex !important; align-items: flex-end !important; gap: 16px !important; margin: 0 0 22px !important; }
-body.ih75-subpage #root .ih73-catalog-search { display: flex !important; align-items: center !important; flex: 1 !important; gap: 12px !important; width: 100% !important; min-height: 54px !important; margin: 0 !important; padding: 0 17px !important; border: 1px solid var(--p-line) !important; border-radius: 8px !important; background: var(--p-paper) !important; color: var(--p-muted) !important; }
+body.ih75-subpage #root .ih75-catalog-controls { display: flex !important; align-items: flex-end !important; flex-wrap: wrap !important; gap: 12px !important; margin: 0 0 24px !important; }
+body.ih75-subpage #root .ih73-catalog-search { display: flex !important; align-items: center !important; flex: 1 1 240px !important; gap: 12px !important; width: 100% !important; min-height: 52px !important; margin: 0 !important; padding: 0 16px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; color: var(--p-muted) !important; }
 body.ih75-subpage #root .ih73-catalog-search:focus-within { border-color: var(--p-accent) !important; outline: 1px solid var(--p-accent) !important; }
 body.ih75-subpage #root .ih73-catalog-search > svg { width: 19px !important; height: 19px !important; flex: none !important; }
-body.ih75-subpage #root .ih73-catalog-search > input { display: block !important; flex: 1 !important; width: 100% !important; min-width: 0 !important; min-height: 52px !important; margin: 0 !important; padding: 12px 0 !important; border: 0 !important; border-radius: 0 !important; outline: 0 !important; background: transparent !important; color: var(--p-ink) !important; font: 400 16px/1.6 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih73-catalog-search > input { display: block !important; flex: 1 !important; width: 100% !important; min-width: 0 !important; min-height: 50px !important; margin: 0 !important; padding: 11px 0 !important; border: 0 !important; border-radius: 0 !important; outline: 0 !important; background: transparent !important; color: var(--p-ink) !important; font: 400 16px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
 body.ih75-subpage #root .ih73-catalog-search > input::placeholder { color: var(--p-muted) !important; opacity: 1 !important; }
 body.ih75-subpage #root .ih73-catalog-search > input::-webkit-search-cancel-button { appearance: none !important; }
 body.ih75-subpage #root .ih73-catalog-search > button { display: grid !important; place-items: center !important; flex: none !important; width: 40px !important; min-height: 44px !important; margin: 0 -8px 0 0 !important; padding: 10px !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih75-catalog-controls > .ih7-select { width: 195px !important; flex: none !important; margin: 0 !important; }
-body.ih75-subpage #root .ih75-catalog-controls .ih7-select-label { margin: 0 0 7px !important; color: var(--p-muted) !important; font: 450 12px/1.4 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih75-catalog-controls .ih7-select-trigger { min-height: 54px !important; border: 1px solid var(--p-line) !important; border-radius: 8px !important; padding: 13px 15px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 450 14px/1.5 Inter,system-ui,sans-serif !important; }
+
+
+
 body.ih75-subpage #root .ih7-select-menu { z-index: 100 !important; background: var(--p-paper) !important; border-color: var(--p-line) !important; border-radius: 8px !important; }
 body.ih75-subpage #root .ih7-select-option { min-height: 46px !important; padding: 12px !important; color: var(--p-ink) !important; font-size: 14px !important; }
 
@@ -117,26 +117,26 @@ body.ih75-subpage #root .ih5-jobs-results-header { display: flex !important; ali
 body.ih75-subpage #root .ih5-jobs-results-copy { display: flex !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 8px !important; color: var(--p-muted) !important; font: 400 14px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-jobs-results-copy > strong { color: var(--p-ink) !important; font: 550 14px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-jobs-clear-filters { min-height: 44px !important; padding: 8px 0 !important; border: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih5-jobs-list { display: flex !important; flex-direction: column !important; gap: 0 !important; margin: 0 !important; padding: 0 !important; border-top: 1px solid var(--p-line) !important; }
-body.ih75-subpage #root .ih73-job-row { display: grid !important; grid-template-columns: minmax(0,1fr) 145px !important; align-items: start !important; gap: 20px 30px !important; width: 100% !important; margin: 0 !important; padding: 30px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; background: transparent !important; color: var(--p-ink) !important; box-shadow: none !important; transform: none !important; }
+body.ih75-subpage #root .ih5-jobs-list { display: flex !important; flex-direction: column !important; gap: 20px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih75-subpage #root .ih73-job-row { display: grid !important; grid-template-columns: minmax(0,1fr) 164px !important; align-items: start !important; gap: 20px 26px !important; width: 100% !important; margin: 0 !important; padding: 26px !important; border: 0 !important; border-radius: 18px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; box-shadow: none !important; transform: none !important; }
 body.ih75-subpage #root .ih73-job-row::after { display: none !important; }
 body.ih75-subpage #root .ih5-job-card-top { grid-column: 1/-1 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; margin: 0 !important; }
 body.ih75-subpage #root .ih5-job-card-top .ih5-eyebrow { color: var(--p-muted) !important; font: 500 12px/1.6 Inter,system-ui,sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }
-body.ih75-subpage #root .ih5-job-active-badge { padding: 0 !important; border: 0 !important; background: transparent !important; color: var(--p-accent) !important; font: 500 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-job-active-badge { display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 5px 8px !important; border: 0 !important; border-radius: 6px !important; background: var(--p-paper) !important; color: var(--p-accent) !important; font: 500 11px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-job-overview { display: contents !important; }
 body.ih75-subpage #root .ih5-job-copy { grid-column: 1 !important; grid-row: 2 !important; }
-body.ih75-subpage #root .ih5-job-title { margin: 0 0 12px !important; color: var(--p-ink) !important; font: 600 23px/1.35 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih75-subpage #root .ih5-job-title { margin: 0 0 10px !important; color: var(--p-ink) !important; font: 600 23px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
 body.ih75-subpage #root .ih5-job-summary { display: -webkit-box !important; -webkit-line-clamp: 3 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 15px/1.8 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .is-open .ih5-job-summary { display: block !important; -webkit-line-clamp: unset !important; overflow: visible !important; white-space: pre-wrap !important; }
-body.ih75-subpage #root .ih5-job-price { grid-column: 2 !important; grid-row: 2 !important; display: flex !important; align-items: flex-end !important; flex-direction: column !important; gap: 5px !important; width: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; text-align: right !important; }
+body.ih75-subpage #root .ih5-job-price { grid-column: 2 !important; grid-row: 2 !important; display: flex !important; align-items: flex-start !important; flex-direction: column !important; gap: 5px !important; width: 100% !important; margin: 0 !important; padding: 14px 16px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-paper) !important; text-align: left !important; }
 body.ih75-subpage #root .ih5-job-price > strong { color: var(--p-ink) !important; font: 600 23px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.03em !important; font-variant-numeric: tabular-nums !important; }
 body.ih75-subpage #root .ih5-job-price > :is(span,small) { color: var(--p-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih5-job-facts { grid-column: 1 !important; display: flex !important; align-items: flex-start !important; flex-wrap: wrap !important; gap: 18px 28px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih5-job-facts { grid-column: 1 !important; display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; align-items: start !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
 body.ih75-subpage #root .ih5-job-facts > div { display: flex !important; flex-direction: column !important; gap: 4px !important; }
 body.ih75-subpage #root .ih5-job-facts :is(span,small) { color: var(--p-muted) !important; font: 400 12px/1.55 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-job-facts strong { color: var(--p-ink) !important; font: 450 13px/1.55 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-job-skills { grid-column: 1 !important; display: flex !important; flex-wrap: wrap !important; gap: 6px !important; margin: 0 !important; }
-body.ih75-subpage #root .ih5-job-skills > span { padding: 5px 8px !important; border: 0 !important; border-radius: 4px !important; background: var(--p-soft) !important; color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-job-skills > span { padding: 4px 8px !important; border: 0 !important; border-radius: 5px !important; background: var(--p-paper) !important; color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-job-actions { grid-column: 2 !important; grid-row: 3/5 !important; display: flex !important; align-items: stretch !important; flex-direction: column !important; gap: 8px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
 body.ih75-subpage #root :is(.ih5-job-details,.ih5-job-footer,.ih5-job-card-footer) { grid-column: 1/-1 !important; }
 body.ih75-subpage #root .ih5-job-details { margin: 6px 0 0 !important; padding: 26px !important; border: 1px solid var(--p-line) !important; border-radius: 8px !important; background: var(--p-soft) !important; }
@@ -144,18 +144,18 @@ body.ih75-subpage #root .ih5-job-footer { display: flex !important; align-items:
 
 /* Services are offers; people are profiles. They use different compositions. */
 body.ih75-subpage #root .ih5-service-card-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 20px !important; }
-body.ih75-subpage #root .ih73-service-card { display: flex !important; flex-direction: column !important; gap: 22px !important; min-height: 0 !important; margin: 0 !important; padding: 26px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; text-decoration: none !important; box-shadow: none !important; transform: none !important; }
+body.ih75-subpage #root .ih73-service-card { position: relative !important; display: flex !important; flex-direction: column !important; gap: 22px !important; min-height: 0 !important; margin: 0 !important; padding: 24px !important; border: 1px solid var(--p-line) !important; border-radius: 20px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; text-decoration: none !important; box-shadow: none !important; transform: none !important; }
 body.ih75-subpage #root .ih73-service-card:hover { border-color: var(--p-accent) !important; }
-body.ih75-subpage #root .ih73-service-mark { display: none !important; }
+body.ih75-subpage #root .ih73-service-mark { display: flex !important; align-items: center !important; gap: 9px !important; min-height: 0 !important; height: auto !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--p-accent) !important; font: 500 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih5-service-card-copy { display: block !important; padding: 0 !important; }
-body.ih75-subpage #root .ih5-service-card-copy h2 { margin: 12px 0 !important; color: var(--p-ink) !important; font: 550 23px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih75-subpage #root .ih5-service-card-copy h2 { margin: 0 0 12px !important; color: var(--p-ink) !important; font: 550 23px/1.35 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
 body.ih75-subpage #root .ih5-service-card-copy p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.8 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih73-service-person { display: flex !important; align-items: center !important; gap: 12px !important; margin-top: auto !important; }
 body.ih75-subpage #root .ih73-service-person .ih5-service-avatar { width: 40px !important; height: 40px !important; flex: none !important; border-radius: 50% !important; }
 body.ih75-subpage #root .ih73-service-person > span { display: flex !important; flex-direction: column !important; gap: 3px !important; }
 body.ih75-subpage #root .ih73-service-person strong { color: var(--p-ink) !important; font: 500 14px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih73-service-person small { color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih73-service-footer { display: flex !important; align-items: flex-end !important; justify-content: space-between !important; gap: 12px !important; margin: 0 !important; padding: 20px 0 0 !important; border-top: 1px solid var(--p-line) !important; }
+body.ih75-subpage #root .ih73-service-footer { display: flex !important; align-items: flex-end !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; margin: 0 !important; padding: 16px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-soft) !important; }
 body.ih75-subpage #root .ih73-service-footer > div { display: flex !important; flex-direction: column !important; gap: 5px !important; }
 body.ih75-subpage #root .ih73-service-footer > div > span { color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih73-service-footer > div > strong { color: var(--p-ink) !important; font: 550 21px/1.4 Inter,system-ui,sans-serif !important; }
@@ -242,13 +242,12 @@ body.ih75-subpage #root :is(.ih5-job-category-questions, .ih5-collaboration-plan
 body.ih75-subpage #root .ih5-job-category-questions-heading { margin-bottom: 24px !important; }
 body.ih75-subpage #root .ih5-job-category-questions-heading h3 { margin: 8px 0 0 !important; color: var(--p-ink) !important; font: 550 20px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
 body.ih75-subpage #root :is(.ih5-editor-actions, .ih5-job-create-actions, .ih5-service-editor-actions) { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 16px !important; width: 100% !important; margin: 36px 0 0 !important; padding: 26px 0 0 !important; border: 0 !important; border-top: 1px solid var(--p-line) !important; background: transparent !important; }
-body.ih75-subpage #root .ih5-service-editor-section { display: grid !important; grid-template-columns: 210px minmax(0,1fr) !important; align-items: start !important; gap: 12px 44px !important; margin: 0 !important; padding: 32px 0 !important; border: 0 !important; border-top: 1px solid var(--p-line) !important; border-radius: 0 !important; background: transparent !important; }
-body.ih75-subpage #root .ih5-service-editor-section:first-child { padding-top: 0 !important; border-top: 0 !important; }
-body.ih75-subpage #root .ih5-service-editor-index { position: static !important; grid-column: 1 !important; grid-row: 1 !important; display: grid !important; place-items: center !important; width: 34px !important; height: 34px !important; margin: 0 0 10px !important; border: 1px solid var(--p-line) !important; border-radius: 6px !important; background: var(--p-paper) !important; color: var(--p-accent) !important; font: 500 13px/1 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih5-service-editor-heading { grid-column: 1 !important; grid-row: 2 !important; padding: 0 !important; }
-body.ih75-subpage #root .ih5-service-editor-heading h2 { margin: 8px 0 14px !important; color: var(--p-ink) !important; font: 550 24px/1.35 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
-body.ih75-subpage #root .ih5-service-editor-heading p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.8 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih5-service-editor-fields { grid-column: 2 !important; grid-row: 1/4 !important; }
+body.ih75-subpage #root .ih5-service-editor-section { display: block !important; width: 100% !important; margin: 0 0 14px !important; padding: 0 24px 24px !important; border: 1px solid var(--p-line) !important; border-radius: 16px !important; background: var(--p-paper) !important; }
+body.ih75-subpage #root .ih5-service-editor-section:first-child { padding-top: 0 !important; border-top: 1px solid var(--p-line) !important; }
+body.ih75-subpage #root .ih5-service-editor-index { position: static !important; display: grid !important; place-items: center !important; flex: none !important; width: 32px !important; height: 32px !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 8px !important; background: var(--p-tint) !important; color: var(--p-accent) !important; font: 550 12px/1 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-service-editor-heading { padding: 0 !important; margin: 0 0 22px !important; }
+body.ih75-subpage #root .ih5-service-editor-heading p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.65 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih5-service-editor-fields { width: 100% !important; }
 body.ih75-subpage #root .ih5-service-detail-layout { display: grid !important; grid-template-columns: minmax(0,1fr) 330px !important; align-items: start !important; gap: 48px !important; width: 100% !important; margin: 24px 0 0 !important; }
 body.ih75-subpage #root .ih5-service-detail-main { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
 body.ih75-subpage #root .ih5-service-detail-header { margin: 0 0 34px !important; padding: 0 0 30px !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; background: transparent !important; }
@@ -484,59 +483,54 @@ body.ih75-subpage #root .ih73-page-metrics > div { display: flex !important; ali
 body.ih75-subpage #root .ih73-page-metrics > div > span { display: none !important; }
 body.ih75-subpage #root .ih73-page-metrics dt { color: var(--p-muted) !important; font: 400 13px/1.6 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .ih73-page-metrics dd { order: -1 !important; margin: 0 !important; color: var(--p-ink) !important; font: 550 24px/1.4 Inter,system-ui,sans-serif !important; font-variant-numeric: tabular-nums !important; }
-body.ih75-subpage #root .ih75-calendar-controls { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 18px !important; margin: 0 0 24px !important; }
-body.ih75-subpage #root .ih75-view-switch { display: flex !important; gap: 3px !important; padding: 4px !important; border: 1px solid var(--p-line) !important; border-radius: 8px !important; background: var(--p-soft) !important; }
-body.ih75-subpage #root .ih75-view-switch > button { display: flex !important; align-items: center !important; gap: 8px !important; min-height: 42px !important; padding: 10px 15px !important; border: 1px solid transparent !important; border-radius: 5px !important; background: transparent !important; color: var(--p-muted) !important; font: 450 14px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
-body.ih75-subpage #root .ih75-view-switch > button[aria-pressed="true"] { border-color: var(--p-line) !important; background: var(--p-paper) !important; color: var(--p-ink) !important; }
+body.ih75-subpage #root .ih75-calendar-controls { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; margin: 0 0 18px !important; }
+body.ih75-subpage #root .ih75-view-switch { display: flex !important; gap: 2px !important; padding: 3px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-soft) !important; }
+body.ih75-subpage #root .ih75-view-switch > button { display: flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important; min-height: 44px !important; padding: 10px 14px !important; border: 0 !important; border-radius: 9px !important; background: transparent !important; color: var(--p-muted) !important; font: 500 13px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih75-view-switch > button[aria-pressed="true"] { background: var(--p-paper) !important; color: var(--p-ink) !important; }
 body.ih75-subpage #root .ih75-view-switch svg { width: 17px !important; height: 17px !important; }
 body.ih75-subpage #root .ih75-day-navigation { display: flex !important; align-items: center !important; gap: 6px !important; }
-body.ih75-subpage #root .ih75-day-navigation > button { display: grid !important; place-items: center !important; min-width: 44px !important; min-height: 44px !important; padding: 10px !important; border: 1px solid var(--p-line) !important; border-radius: 6px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih75-day-navigation input { width: 170px !important; max-width: 100% !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 9px 12px !important; border: 1px solid var(--p-line) !important; border-radius: 6px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 400 16px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih75-day-navigation > button { display: grid !important; place-items: center !important; min-width: 44px !important; min-height: 44px !important; padding: 10px !important; border: 0 !important; border-radius: 9px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih75-day-navigation input { width: 165px !important; max-width: 100% !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 9px 10px !important; border: 0 !important; border-radius: 9px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 400 16px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
 html[data-theme="dark"] body.ih75-subpage #root .ih75-day-navigation input { color-scheme: dark !important; }
-body.ih75-subpage #root .ih75-week-strip { display: grid !important; grid-template-columns: repeat(7,minmax(0,1fr)) !important; gap: 10px !important; margin: 0 0 30px !important; padding: 0 !important; }
-body.ih75-subpage #root .ih75-week-strip > button { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; min-width: 0 !important; min-height: 112px !important; padding: 15px 18px !important; border: 1px solid var(--p-line) !important; border-radius: 8px !important; background: var(--p-paper) !important; color: var(--p-muted) !important; box-shadow: none !important; }
+body.ih75-subpage #root .ih75-week-strip { display: grid !important; grid-template-columns: repeat(7,minmax(0,1fr)) !important; gap: 6px !important; margin: 0 0 28px !important; padding: 0 !important; }
+body.ih75-subpage #root .ih75-week-strip > button { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 6px !important; min-width: 0 !important; min-height: 88px !important; padding: 12px 6px !important; border: 0 !important; border-radius: 14px !important; background: transparent !important; color: var(--p-muted) !important; box-shadow: none !important; }
 body.ih75-subpage #root .ih75-week-strip > button > span { font: 450 12px/1.4 Inter,system-ui,sans-serif !important; text-transform: capitalize !important; }
 body.ih75-subpage #root .ih75-week-strip > button > strong { color: var(--p-ink) !important; font: 550 26px/1.2 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih75-week-strip > button > i { min-height: 14px !important; font: 500 11px/1.3 Inter,system-ui,sans-serif !important; font-style: normal !important; }
-body.ih75-subpage #root .ih75-week-strip > button[aria-current="date"] { border-bottom: 3px solid var(--p-accent) !important; }
-body.ih75-subpage #root .ih75-week-strip > button[aria-pressed="true"] { border-color: var(--p-accent) !important; background: var(--p-accent) !important; color: var(--p-on) !important; }
+body.ih75-subpage #root .ih75-week-strip > button > i { display: block !important; width: 5px !important; height: 5px !important; min-height: 0 !important; overflow: hidden !important; border-radius: 50% !important; background: currentColor !important; font-size: 0 !important; font-style: normal !important; }
+body.ih75-subpage #root .ih75-week-strip > button[aria-current="date"] { box-shadow: inset 0 0 0 1px var(--p-line) !important; }
+body.ih75-subpage #root .ih75-week-strip > button[aria-pressed="true"] { background: var(--p-accent) !important; color: var(--p-on) !important; box-shadow: none !important; }
 body.ih75-subpage #root .ih75-week-strip > button[aria-pressed="true"] > strong { color: var(--p-on) !important; }
 body.ih75-subpage #root .ih75-calendar-workspace { display: grid !important; grid-template-columns: minmax(0,1fr) 285px !important; align-items: start !important; gap: 36px !important; }
 body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] { grid-template-columns: minmax(0,1fr) 330px !important; }
-body.ih75-subpage #root .ih75-day-plan { min-height: 250px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
-body.ih75-subpage #root .ih75-day-plan-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 18px !important; margin: 0 0 12px !important; padding: 0 0 22px !important; border-bottom: 1px solid var(--p-line) !important; }
-body.ih75-subpage #root .ih75-day-plan-heading p { margin: 0 0 8px !important; color: var(--p-muted) !important; font: 400 13px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih75-day-plan-heading h2 { margin: 0 !important; color: var(--p-ink) !important; font: 550 29px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.03em !important; text-transform: capitalize !important; }
-body.ih75-subpage #root .ih75-day-plan-heading > button { display: grid !important; place-items: center !important; flex: none !important; width: 44px !important; min-height: 44px !important; padding: 12px !important; border: 1px solid var(--p-line) !important; border-radius: 7px !important; background: var(--p-paper) !important; color: var(--p-accent) !important; }
-body.ih75-subpage #root .ih75-day-empty { padding: 30px 8px !important; color: var(--p-muted) !important; }
-body.ih75-subpage #root .ih75-day-empty > svg { width: 30px !important; height: 30px !important; margin-bottom: 10px !important; }
-body.ih75-subpage #root .ih75-day-empty h3 { margin: 12px 0 !important; color: var(--p-ink) !important; font: 550 22px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
-body.ih75-subpage #root .ih75-day-empty p { margin: 0 0 24px !important; font: 400 15px/1.8 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih75-calendar-upcoming { margin: 0 !important; padding: 24px !important; border: 1px solid var(--p-line) !important; border-radius: 9px !important; background: var(--p-soft) !important; }
+body.ih75-subpage #root .ih75-day-plan { min-height: 0 !important; margin: 0 !important; padding: 24px !important; border: 0 !important; border-radius: 20px !important; background: var(--p-soft) !important; }
+body.ih75-subpage #root .ih75-day-plan-heading { display: flex !important; align-items: center !important; gap: 16px !important; margin: 0 0 22px !important; padding: 0 !important; border: 0 !important; }
+body.ih75-subpage #root .ih75-day-plan-heading p { margin: 0 0 3px !important; color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; text-transform: capitalize !important; }
+body.ih75-subpage #root .ih75-day-plan-heading h2 { margin: 0 !important; color: var(--p-ink) !important; font: 550 25px/1.2 Inter,system-ui,sans-serif !important; letter-spacing: -.03em !important; text-transform: capitalize !important; }
+body.ih75-subpage #root .ih75-day-empty { padding: 6px 0 10px !important; color: var(--p-muted) !important; }
+body.ih75-subpage #root .ih75-day-empty > svg { display: none !important; }
+body.ih75-subpage #root .ih75-day-empty h3 { margin: 0 0 8px !important; color: var(--p-ink) !important; font: 550 19px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih75-subpage #root .ih75-day-empty p { margin: 0 0 16px !important; font: 400 14px/1.7 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih75-calendar-upcoming { margin: 0 !important; padding: 12px 0 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; }
 body.ih75-subpage #root .ih75-calendar-upcoming > header > p { margin: 0 0 8px !important; color: var(--p-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .ih75-calendar-upcoming h2 { margin: 0 0 22px !important; color: var(--p-ink) !important; font: 550 21px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih75-subpage #root .ih75-calendar-upcoming h2 { margin: 0 0 18px !important; color: var(--p-ink) !important; font: 550 21px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
 body.ih75-subpage #root .calendar-upcoming-empty { color: var(--p-muted) !important; font: 400 14px/1.8 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .calendar-agenda-list,
-body.ih75-subpage #root .calendar-upcoming-list { display: flex !important; flex-direction: column !important; gap: 0 !important; }
-body.ih75-subpage #root .calendar-agenda-item { display: grid !important; grid-template-columns: 5px minmax(0,1fr) !important; gap: 14px 18px !important; margin: 0 !important; padding: 22px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
-body.ih75-subpage #root .calendar-agenda-marker { display: block !important; grid-column: 1 !important; grid-row: 1/-1 !important; width: 3px !important; min-height: 36px !important; height: 100% !important; border: 0 !important; border-radius: 2px !important; background: var(--p-accent) !important; }
+body.ih75-subpage #root .calendar-upcoming-list { display: flex !important; flex-direction: column !important; gap: 12px !important; }
+body.ih75-subpage #root .calendar-agenda-item { display: grid !important; grid-template-columns: 4px minmax(0,1fr) !important; gap: 12px !important; margin: 0 !important; padding: 18px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-paper) !important; box-shadow: none !important; }
+body.ih75-subpage #root .calendar-agenda-marker { display: block !important; grid-column: 1 !important; grid-row: 1 !important; width: 4px !important; height: 4px !important; min-height: 0 !important; margin-top: 10px !important; border: 0 !important; border-radius: 50% !important; background: var(--p-accent) !important; box-shadow: none !important; }
 body.ih75-subpage #root .is-meeting .calendar-agenda-marker { background: var(--p-ink) !important; }
 body.ih75-subpage #root .is-reminder .calendar-agenda-marker { background: repeating-linear-gradient(to bottom,var(--p-accent) 0 5px,transparent 5px 8px) !important; }
-body.ih75-subpage #root .calendar-agenda-copy { display: grid !important; grid-template-columns: 94px minmax(0,1fr) !important; align-items: start !important; gap: 8px 18px !important; min-width: 0 !important; }
-body.ih75-subpage #root .calendar-agenda-meta { grid-column: 2 !important; grid-row: 1 !important; display: flex !important; align-items: center !important; gap: 8px !important; color: var(--p-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih75-subpage #root .calendar-agenda-meta > em { font: inherit !important; padding: 1px 5px !important; border: 1px solid var(--p-line) !important; border-radius: 3px !important; }
-body.ih75-subpage #root .calendar-agenda-copy > strong { grid-column: 2 !important; grid-row: 2 !important; color: var(--p-ink) !important; font: 550 18px/1.5 Inter,system-ui,sans-serif !important; letter-spacing: -.02em !important; }
-body.ih75-subpage #root .calendar-agenda-copy > time { grid-column: 1 !important; grid-row: 1/3 !important; margin: 0 !important; color: var(--p-ink) !important; font: 500 17px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .calendar-agenda-copy { display: grid !important; grid-template-columns: 80px minmax(0,1fr) !important; align-items: start !important; gap: 7px 14px !important; min-width: 0 !important; }
+body.ih75-subpage #root .calendar-agenda-meta { grid-column: 2 !important; grid-row: 1 !important; display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 6px !important; color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.ih75-subpage #root .calendar-agenda-meta > em { font: inherit !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; color: var(--p-accent) !important; }
+body.ih75-subpage #root .calendar-agenda-copy > strong { grid-column: 2 !important; grid-row: 2 !important; color: var(--p-ink) !important; font: 550 17px/1.5 Inter,system-ui,sans-serif !important; letter-spacing: -.02em !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .calendar-agenda-copy > time { grid-column: 1 !important; grid-row: 1/3 !important; min-width: 0 !important; margin: 0 !important; color: var(--p-ink) !important; font: 500 17px/1.6 Inter,system-ui,sans-serif !important; white-space: normal !important; overflow-wrap: anywhere !important; }
 body.ih75-subpage #root .calendar-agenda-copy > p { grid-column: 2 !important; margin: 2px 0 !important; color: var(--p-muted) !important; font: 400 14px/1.8 Inter,system-ui,sans-serif !important; white-space: pre-wrap !important; }
 body.ih75-subpage #root .calendar-email-state { grid-column: 2 !important; display: flex !important; align-items: center !important; gap: 7px !important; color: var(--p-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .calendar-email-state svg { width: 15px !important; height: 15px !important; fill: none !important; stroke: currentColor !important; stroke-width: 1.5 !important; }
-body.ih75-subpage #root .calendar-agenda-actions { grid-column: 2 !important; display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px !important; padding-left: 112px !important; }
-body.ih75-subpage #root .calendar-agenda-actions > button { min-height: 44px !important; padding: 10px 13px !important; border: 1px solid var(--p-line) !important; border-radius: 6px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .calendar-agenda-actions { grid-column: 2 !important; display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px !important; padding-left: 94px !important; }
+body.ih75-subpage #root .calendar-agenda-actions > button { min-height: 44px !important; padding: 9px 10px !important; border: 0 !important; border-radius: 7px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih75-subpage #root .calendar-agenda-item.is-completed .calendar-agenda-copy > strong { color: var(--p-muted) !important; text-decoration: line-through !important; }
-body.ih75-subpage #root .calendar-agenda-item.is-compact { padding: 16px 0 !important; gap: 12px !important; }
-body.ih75-subpage #root .calendar-agenda-item.is-compact .calendar-agenda-copy { display: flex !important; flex-direction: column !important; gap: 6px !important; }
-body.ih75-subpage #root .calendar-agenda-item.is-compact .calendar-agenda-copy > strong { font-size: 15px !important; }
-body.ih75-subpage #root .calendar-agenda-item.is-compact .calendar-agenda-copy > time { font: 400 12px/1.6 Inter,system-ui,sans-serif !important; color: var(--p-muted) !important; }
 body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] > .ih75-calendar-upcoming { grid-column: 1/-1 !important; }
 body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] > .ih75-calendar-upcoming .calendar-upcoming-list { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 0 30px !important; }
 body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] .ih75-day-plan .calendar-agenda-copy { grid-template-columns: minmax(0,1fr) !important; }
@@ -612,6 +606,87 @@ body.ih75-subpage #root .ih72-work-page .ih72-project-card { padding: 28px 0 !im
 body.ih75-subpage #root .ih72-work-page .ih72-project-card:hover { background: transparent !important; }
 body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-width: none !important; }
 
+
+/* P76: small shared controls, with page-specific visual identities. */
+body.ih75-subpage { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body.ih75-subpage #root .ih76-catalog-refinements { display: flex !important; gap: 10px !important; flex: 0 1 190px !important; min-width: 0 !important; }
+body.ih75-subpage #root .ih76-native-select { display: flex !important; flex-direction: column !important; gap: 4px !important; min-width: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih76-native-select > span { position: static !important; margin: 0 !important; padding: 0 !important; color: var(--p-muted) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-native-select > select { position: static !important; box-sizing: border-box !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; min-height: 44px !important; height: auto !important; margin: 0 !important; padding: 10px 30px 10px 12px !important; border: 0 !important; border-radius: 9px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 400 16px/1.5 Inter,system-ui,sans-serif !important; appearance: auto !important; box-shadow: none !important; }
+html[data-theme="dark"] body.ih75-subpage #root .ih76-native-select > select { color-scheme: dark !important; }
+body.ih75-subpage #root :is(.ih76-category-select,.ih76-mobile-clear) { display: none !important; }
+body.ih75-subpage #root .ih5-job-active-badge::before { content: '' !important; display: block !important; width: 5px !important; height: 5px !important; flex: none !important; border-radius: 50% !important; background: currentColor !important; }
+body.ih75-subpage #root .ih5-job-facts :is(strong,span,small) { min-width: 0 !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih5-job-actions .is-secondary { border-color: transparent !important; background: transparent !important; }
+body.ih75-subpage #root .ih73-service-mark > svg { width: 18px !important; height: 18px !important; flex: none !important; }
+body.ih75-subpage #root .ih73-service-mark > svg:first-child { box-sizing: content-box !important; padding: 9px !important; border-radius: 10px !important; background: var(--p-tint) !important; }
+body.ih75-subpage #root .ih73-service-mark > span { flex: 1 !important; min-width: 0 !important; }
+body.ih75-subpage #root .ih73-service-person :is(strong,small) { overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih5-service-capacity { display: inline-flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 6px !important; padding: 0 !important; border: 0 !important; background: transparent !important; color: var(--p-accent) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage[data-ih73-page="services"] #root .ih75-page-heading { padding: 26px 30px !important; border-radius: 22px !important; background: var(--p-tint) !important; }
+body.ih75-subpage[data-ih73-page="service-editor"] #root .ih75-page-heading { margin-bottom: 24px !important; }
+body.ih75-subpage[data-ih73-page="service-editor"] #root .ih75-page-heading .ih73-eyebrow { display: none !important; }
+body.ih75-subpage #root .ih5-service-editor-section:not([open]) { padding-bottom: 0 !important; }
+body.ih75-subpage #root .ih5-service-editor-section:not([open]) > :not(summary) { display: none !important; }
+body.ih75-subpage #root .ih76-service-step { display: grid !important; grid-template-columns: 32px minmax(0,1fr) 18px !important; align-items: center !important; gap: 14px !important; width: 100% !important; min-height: 88px !important; margin: 0 !important; padding: 18px 0 !important; list-style: none !important; cursor: pointer !important; }
+body.ih75-subpage #root .ih76-service-step::marker { content: '' !important; }
+body.ih75-subpage #root .ih76-service-step::-webkit-details-marker { display: none !important; }
+body.ih75-subpage #root .ih76-service-step > span:nth-child(2) { display: flex !important; flex-direction: column !important; gap: 3px !important; }
+body.ih75-subpage #root .ih76-service-step strong { color: var(--p-ink) !important; font: 550 17px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-service-step small { color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-service-step > svg { width: 18px !important; height: 18px !important; color: var(--p-muted) !important; }
+body.ih75-subpage #root .ih5-service-editor-section[open] > .ih76-service-step > svg { transform: rotate(180deg) !important; }
+body.ih75-subpage #root .ih5-service-editor-section[open] .ih5-service-editor-index { background: var(--p-accent) !important; color: var(--p-on) !important; }
+
+body.ih75-subpage #root .ih76-planner-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; margin: 0 0 28px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+body.ih75-subpage #root .ih76-planner-heading p { margin: 0 0 8px !important; color: var(--p-muted) !important; font: 400 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-planner-heading h1 { margin: 0 !important; color: var(--p-ink) !important; font: 600 clamp(30px,3.4vw,46px)/1.1 Inter,system-ui,sans-serif !important; letter-spacing: -.045em !important; }
+body.ih75-subpage #root .ih76-planner-datebar { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; margin: 0 0 14px !important; }
+body.ih75-subpage #root .ih76-planner-datebar > p { margin: 0 !important; color: var(--p-ink) !important; font: 550 21px/1.4 Inter,system-ui,sans-serif !important; text-transform: capitalize !important; letter-spacing: -.02em !important; }
+body.ih75-subpage #root .ih76-planner-datebar > button { min-height: 44px !important; margin: 0 !important; padding: 8px 4px !important; border: 0 !important; border-radius: 5px !important; background: transparent !important; color: var(--p-accent) !important; font: 500 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih75-week-strip > button > i:empty { visibility: hidden !important; }
+body.ih75-subpage #root .ih76-day-number { flex: none !important; color: var(--p-accent) !important; font: 500 66px/1 Inter,system-ui,sans-serif !important; letter-spacing: -.06em !important; font-variant-numeric: tabular-nums !important; }
+body.ih75-subpage #root .ih75-day-plan-heading small { display: block !important; margin-top: 6px !important; color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-upcoming-event { display: grid !important; grid-template-columns: 48px minmax(0,1fr) 16px !important; align-items: start !important; gap: 12px !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; padding: 10px 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--p-ink) !important; text-align: left !important; box-shadow: none !important; cursor: pointer !important; }
+body.ih75-subpage #root .ih76-date-stamp { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2px !important; width: 48px !important; min-height: 57px !important; margin: 0 !important; padding: 7px 4px !important; border: 0 !important; border-radius: 10px !important; background: var(--p-soft) !important; color: var(--p-accent) !important; }
+body.ih75-subpage #root .ih76-date-stamp > strong { font: 550 22px/1.1 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-date-stamp > span { font: 450 10px/1.3 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .ih76-upcoming-copy { display: flex !important; flex-direction: column !important; gap: 4px !important; min-width: 0 !important; padding-top: 2px !important; }
+body.ih75-subpage #root .ih76-upcoming-copy > :is(small,span) { color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; text-transform: none !important; letter-spacing: 0 !important; }
+body.ih75-subpage #root .ih76-upcoming-copy > strong { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; color: var(--p-ink) !important; font: 550 14px/1.5 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
+body.ih75-subpage #root .ih76-upcoming-event > svg { width: 16px !important; height: 16px !important; margin-top: 20px !important; color: var(--p-muted) !important; }
+body.ih75-subpage #root .ih76-upcoming-event:hover .ih76-upcoming-copy > strong { color: var(--p-accent) !important; }
+body.ih75-subpage #root .ih76-planner-notes { margin: 28px 0 0 !important; padding: 20px 0 0 !important; border-top: 1px solid var(--p-line) !important; }
+body.ih75-subpage #root .ih76-planner-notes .ih73-page-metrics { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih75-subpage #root .ih76-planner-notes .ih73-page-metrics > div { flex-direction: column !important; gap: 3px !important; }
+body.ih75-subpage #root .ih76-planner-notes .ih73-page-metrics dt { font-size: 11px !important; }
+body.ih75-subpage #root .ih76-planner-notes .ih73-page-metrics dd { font-size: 22px !important; }
+
+body.ih75-subpage #root .account-template-heading { display: block !important; margin: 0 0 22px !important; padding: 0 !important; border: 0 !important; }
+body.ih75-subpage #root .account-template-heading h2 { margin: 0 0 8px !important; color: var(--p-ink) !important; font: 550 21px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .account-template-heading p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.7 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .account-template-options { display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 14px !important; }
+body.ih75-subpage #root .account-template-option { display: grid !important; grid-template-columns: 100px minmax(0,1fr) 22px !important; align-items: center !important; gap: 20px !important; width: 100% !important; min-height: 144px !important; margin: 0 !important; padding: 18px !important; border: 1px solid var(--p-line) !important; border-radius: 16px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; text-align: left !important; box-shadow: none !important; transform: none !important; }
+body.ih75-subpage #root .account-template-option[aria-checked="true"] { border-color: var(--p-accent) !important; background: var(--p-tint) !important; }
+body.ih75-subpage #root .account-template-option::before,
+body.ih75-subpage #root .account-template-option::after { display: none !important; }
+body.ih75-subpage #root .account-template-option-copy { display: flex !important; flex-direction: column !important; gap: 7px !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; }
+body.ih75-subpage #root .account-template-option-copy > strong { color: var(--p-ink) !important; font: 550 19px/1.3 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .account-template-option-copy > span { color: var(--p-muted) !important; font: 400 13px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih75-subpage #root .account-template-option-copy > small { color: var(--p-accent) !important; font: 500 11px/1.5 Inter,system-ui,sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }
+body.ih75-subpage #root .ih76-palette-check { display: grid !important; place-items: center !important; width: 22px !important; height: 22px !important; border: 1px solid var(--p-line) !important; border-radius: 50% !important; background: var(--p-paper) !important; color: var(--p-on) !important; }
+body.ih75-subpage #root .account-template-option[aria-checked="true"] .ih76-palette-check { border-color: var(--p-accent) !important; background: var(--p-accent) !important; }
+body.ih75-subpage #root .ih76-palette-check > svg { width: 14px !important; height: 14px !important; }
+body.ih75-subpage #root .ih76-palette-preview { --swatch: #0d7078; --swatch-soft: #e4f2f2; display: grid !important; grid-template-columns: minmax(0,1fr) 25px !important; align-content: start !important; gap: 12px 8px !important; width: 100px !important; height: 94px !important; padding: 10px !important; border: 1px solid #dce4e3 !important; border-radius: 12px !important; background: #fff !important; }
+body.ih75-subpage #root .is-classic .ih76-palette-preview { --swatch: #202020; --swatch-soft: #eeeeeb; }
+body.ih75-subpage #root .ih76-palette-preview > i { grid-column: 1/-1 !important; display: block !important; height: 8px !important; border-radius: 2px !important; background: var(--swatch) !important; }
+body.ih75-subpage #root .ih76-palette-preview > span { display: flex !important; flex-direction: column !important; gap: 5px !important; padding-top: 2px !important; }
+body.ih75-subpage #root .ih76-palette-preview > span > i { display: block !important; height: 4px !important; border-radius: 2px !important; background: var(--swatch) !important; }
+body.ih75-subpage #root .ih76-palette-preview > span > i:nth-child(2) { width: 75% !important; opacity: .3 !important; }
+body.ih75-subpage #root .ih76-palette-preview > span > i:last-child { width: 55% !important; height: 12px !important; margin-top: 3px !important; border-radius: 3px !important; }
+body.ih75-subpage #root .ih76-palette-preview > b { display: block !important; width: 25px !important; height: 34px !important; border-radius: 6px !important; background: var(--swatch-soft) !important; }
+body.ih75-subpage #root .account-template-note { margin: 18px 0 0 !important; color: var(--p-muted) !important; font: 400 12px/1.7 Inter,system-ui,sans-serif !important; }
+
 /* Editors and document views retain their existing fields and action handlers. */
 @media (max-width:1100px) {
   body.ih75-subpage #root :is(.ih75-catalog,.ih75-account-layout,.ih75-editor-workspace) { grid-template-columns: 170px minmax(0,1fr) !important; gap: 30px !important; }
@@ -629,7 +704,7 @@ body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-wi
   body.ih75-subpage #root .ih5-service-detail-layout { grid-template-columns: minmax(0,1fr) 285px !important; gap: 30px !important; }
 }
 @media (max-width:950px) {
-  body.ih75-subpage #root .ih68-header-inner { padding-inline: 30px !important; }
+
   body.ih75-subpage:not([data-ih73-page="conversation"]):not([data-ih73-page="assistant"]) #root :is(.app-page,.ih-market-shell,.ih68-page,.privacy-center-shell,.disputes-shell,.admin-shell) { padding-inline: 30px !important; }
   body.ih75-subpage .ih73-route-navigation { padding-inline: 30px !important; }
   body.ih75-subpage #root :is(.ih75-account-layout,.ih75-editor-workspace) { grid-template-columns: minmax(0,1fr) !important; gap: 26px !important; }
@@ -648,20 +723,20 @@ body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-wi
   body.ih75-subpage #root .ih73-person-card { grid-template-columns: minmax(0,1fr) !important; gap: 16px !important; }
   body.ih75-subpage #root .ih73-person-card > :is(.ih11-freelancer-person,.ih11-freelancer-about,.ih11-freelancer-skills,.ih11-freelancer-meta,.ih73-person-contact) { grid-column: 1 !important; grid-row: auto !important; }
   body.ih75-subpage #root .ih75-catalog-controls { flex-wrap: wrap !important; }
-  body.ih75-subpage #root .ih75-catalog-controls > .ih7-select { width: 100% !important; }
+
   body.ih75-subpage #root .privacy-center-grid { grid-template-columns: minmax(0,1fr) !important; gap: 26px !important; }
   body.ih75-subpage[data-ih73-page="profile"] #root .profile-card-with-menu { grid-template-columns: 220px minmax(0,1fr) !important; gap: 24px 30px !important; }
 }
 @media (max-width:700px) {
-  body.ih75-subpage #root .ih68-header-inner { padding-inline: 20px !important; }
-  body.ih75-subpage:not([data-ih73-page="conversation"]):not([data-ih73-page="assistant"]) #root :is(.app-page,.ih-market-shell,.ih68-page,.privacy-center-shell,.disputes-shell,.admin-shell) { padding: 22px 20px calc(48px + env(safe-area-inset-bottom,0px)) !important; }
-  body.ih75-subpage .ih73-route-navigation { gap: 12px !important; min-height: 62px !important; padding: 10px 20px !important; }
+
+  body.ih75-subpage:not([data-ih73-page="conversation"]):not([data-ih73-page="assistant"]) #root :is(.app-page,.ih-market-shell,.ih68-page,.privacy-center-shell,.disputes-shell,.admin-shell) { padding: 18px 20px calc(48px + env(safe-area-inset-bottom,0px)) !important; }
+  body.ih75-subpage .ih73-route-navigation { gap: 12px !important; min-height: 46px !important; padding: 2px 20px !important; }
   body.ih75-subpage .ih73-route-label { gap: 6px !important; font-size: 12px !important; }
   body.ih75-subpage .ih73-route-label > span,
   body.ih75-subpage .ih73-route-label > i,
   body.ih75-subpage .ih73-panel-link > span { display: none !important; }
   body.ih75-subpage .ih73-panel-link { justify-content: center !important; width: 44px !important; padding: 10px !important; border: 1px solid var(--p-line) !important; border-radius: 7px !important; }
-  body.ih75-subpage #root .ih75-page-heading { align-items: flex-start !important; gap: 20px !important; margin-bottom: 26px !important; }
+  body.ih75-subpage #root .ih75-page-heading { align-items: flex-start !important; gap: 20px !important; margin-bottom: 24px !important; }
   body.ih75-subpage #root .ih73-heading-copy { flex-basis: 100% !important; }
   body.ih75-subpage #root .ih75-page-heading h1 { font-size: 32px !important; line-height: 1.2 !important; }
   body.ih75-subpage #root .ih73-eyebrow { margin-bottom: 12px !important; font-size: 12px !important; }
@@ -673,29 +748,28 @@ body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-wi
   body.ih75-subpage #root .ih73-catalog-tabs > a { min-height: 48px !important; gap: 5px !important; font-size: 13px !important; }
   body.ih75-subpage #root .ih73-catalog-tabs > a > svg { display: none !important; }
   body.ih75-subpage #root .ih73-result-count { padding-bottom: 12px !important; font-size: 13px !important; }
-  body.ih75-subpage #root .ih75-catalog { grid-template-columns: minmax(0,1fr) !important; gap: 20px !important; }
-  body.ih75-subpage #root .ih75-catalog-sidebar { position: static !important; width: 100% !important; padding: 0 !important; }
+  body.ih75-subpage #root .ih75-catalog { grid-template-columns: minmax(0,1fr) !important; gap: 0 !important; }
+  body.ih75-subpage #root .ih75-catalog-sidebar { display: none !important; }
   body.ih75-subpage #root .ih75-catalog-sidebar > h2 { display: none !important; }
-  body.ih75-subpage #root .ih75-categories-toggle { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; width: 100% !important; min-height: 50px !important; padding: 12px 15px !important; border: 1px solid var(--p-line) !important; border-radius: 7px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 500 14px/1.6 Inter,system-ui,sans-serif !important; }
+
   body.ih75-subpage #root .ih75-category-list { display: none !important; max-height: 330px !important; padding: 12px 0 !important; }
-  body.ih75-subpage #root .ih75-catalog-sidebar.is-open .ih75-category-list { display: flex !important; }
   body.ih75-subpage #root .ih75-catalog-sidebar > .ih73-clear-filters { margin-top: 8px !important; }
-  body.ih75-subpage #root .ih75-catalog-controls { gap: 12px !important; margin-bottom: 20px !important; }
-  body.ih75-subpage #root .ih75-catalog-controls > .ih7-select { width: 100% !important; }
-  body.ih75-subpage #root .ih73-job-row { grid-template-columns: minmax(0,1fr) !important; gap: 20px !important; padding: 25px 0 !important; }
+  body.ih75-subpage #root .ih75-catalog-controls { gap: 12px !important; margin-bottom: 22px !important; }
+
+  body.ih75-subpage #root .ih73-job-row { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; padding: 20px !important; border-radius: 16px !important; }
   body.ih75-subpage #root .ih73-job-row > .ih5-job-card-top { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
   body.ih75-subpage #root .ih5-job-copy { grid-column: 1 !important; grid-row: auto !important; }
   body.ih75-subpage #root .ih5-job-title { font-size: 22px !important; }
-  body.ih75-subpage #root .ih5-job-summary { font-size: 14px !important; }
-  body.ih75-subpage #root .ih5-job-price { grid-column: 1 !important; grid-row: auto !important; align-items: flex-start !important; text-align: left !important; }
-  body.ih75-subpage #root .ih5-job-price > strong { font-size: 24px !important; }
-  body.ih75-subpage #root .ih5-job-facts { gap: 14px 22px !important; }
+  body.ih75-subpage #root .ih5-job-summary { -webkit-line-clamp: 2 !important; font-size: 14px !important; line-height: 1.7 !important; }
+  body.ih75-subpage #root .ih5-job-price { grid-column: 1 !important; grid-row: auto !important; display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; align-items: center !important; gap: 2px 12px !important; padding: 12px 14px !important; text-align: left !important; }
+  body.ih75-subpage #root .ih5-job-price > strong { grid-column: 2 !important; grid-row: 1/3 !important; font-size: 22px !important; overflow-wrap: anywhere !important; }
+  body.ih75-subpage #root .ih5-job-facts { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 12px !important; }
   body.ih75-subpage #root .ih5-job-actions { grid-column: 1 !important; grid-row: auto !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 10px !important; }
   body.ih75-subpage #root .ih5-job-actions > button { flex: 1 !important; min-width: 0 !important; min-height: 48px !important; }
   body.ih75-subpage #root .ih5-job-details { padding: 20px !important; }
   body.ih75-subpage #root :is(.ih5-job-collaboration-responsibility-grid,.ih5-job-collaboration-facts,.ih5-job-category-detail-list) { grid-template-columns: minmax(0,1fr) !important; }
   body.ih75-subpage #root .ih5-service-card-grid { grid-template-columns: minmax(0,1fr) !important; }
-  body.ih75-subpage #root .ih73-service-card { padding: 22px !important; }
+  body.ih75-subpage #root .ih73-service-card { padding: 20px !important; }
   body.ih75-subpage #root .ih73-person-card { gap: 16px !important; }
   body.ih75-subpage #root .ih73-person-contact { align-items: stretch !important; flex-direction: column !important; gap: 10px !important; }
   body.ih75-subpage #root .ih12-contact-actions { display: grid !important; grid-template-columns: minmax(0,1fr) !important; width: 100% !important; gap: 10px !important; }
@@ -727,7 +801,7 @@ body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-wi
   body.ih75-subpage #root .ih75-editor-content .ih5-job-create-step-heading { gap: 12px !important; padding-bottom: 22px !important; }
   body.ih75-subpage #root .ih75-editor-content .ih5-job-create-step-heading h2 { font-size: 22px !important; }
   body.ih75-subpage #root :is(.ih5-job-create-step-panel,.ih5-job-form-grid,.ih5-editor-grid,.ih5-service-editor-fields,.ih5-job-choice-grid) { grid-template-columns: minmax(0,1fr) !important; gap: 22px !important; }
-  body.ih75-subpage #root .ih5-service-editor-section { grid-template-columns: minmax(0,1fr) !important; gap: 16px !important; padding-block: 26px !important; }
+  body.ih75-subpage #root .ih5-service-editor-section { padding: 0 18px 20px !important; border-radius: 14px !important; }
   body.ih75-subpage #root .ih5-service-editor-section > :is(.ih5-service-editor-index,.ih5-service-editor-heading,.ih5-service-editor-fields) { grid-column: 1 !important; grid-row: auto !important; }
   body.ih75-subpage #root :is(.ih5-job-category-questions,.ih5-collaboration-plan,.ih5-job-create-summary) { padding: 20px !important; }
   body.ih75-subpage #root .ih5-service-detail-layout { grid-template-columns: minmax(0,1fr) !important; gap: 26px !important; }
@@ -738,24 +812,24 @@ body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-wi
   body.ih75-subpage #root .ih73-page-metrics > div { gap: 8px !important; }
   body.ih75-subpage #root .ih73-page-metrics dt { font-size: 12px !important; }
   body.ih75-subpage #root .ih73-page-metrics dd { font-size: 21px !important; }
-  body.ih75-subpage #root .ih75-calendar-controls { align-items: stretch !important; gap: 16px !important; }
-  body.ih75-subpage #root .ih75-view-switch { width: 100% !important; }
+  body.ih75-subpage #root .ih75-calendar-controls { align-items: stretch !important; gap: 12px !important; }
+  body.ih75-subpage #root .ih75-view-switch { width: auto !important; }
   body.ih75-subpage #root .ih75-view-switch > button { flex: 1 !important; justify-content: center !important; }
-  body.ih75-subpage #root .ih75-day-navigation { width: 100% !important; justify-content: space-between !important; }
+  body.ih75-subpage #root .ih75-day-navigation { display: grid !important; grid-template-columns: 44px minmax(0,1fr) 44px !important; gap: 6px !important; width: 100% !important; }
   body.ih75-subpage #root .ih75-day-navigation > label { flex: 1 !important; min-width: 0 !important; }
   body.ih75-subpage #root .ih75-day-navigation input { width: 100% !important; }
-  body.ih75-subpage #root .ih75-week-strip { gap: 5px !important; margin-bottom: 26px !important; }
-  body.ih75-subpage #root .ih75-week-strip > button { align-items: center !important; gap: 7px !important; min-height: 92px !important; padding: 12px 4px !important; border-radius: 5px !important; }
+  body.ih75-subpage #root .ih75-week-strip { gap: 2px !important; margin-bottom: 20px !important; }
+  body.ih75-subpage #root .ih75-week-strip > button { align-items: center !important; gap: 6px !important; min-height: 80px !important; padding: 11px 3px !important; border-radius: 12px !important; }
   body.ih75-subpage #root .ih75-week-strip > button > strong { font-size: 22px !important; }
   body.ih75-subpage #root .ih75-week-strip > button > span { font-size: 10px !important; }
-  body.ih75-subpage #root .ih75-day-plan-heading h2 { font-size: 26px !important; }
-  body.ih75-subpage #root .calendar-agenda-copy { grid-template-columns: 68px minmax(0,1fr) !important; gap: 7px 12px !important; }
+  body.ih75-subpage #root .ih75-day-plan-heading h2 { font-size: 23px !important; }
+  body.ih75-subpage #root .calendar-agenda-copy { grid-template-columns: 58px minmax(0,1fr) !important; gap: 7px 10px !important; }
   body.ih75-subpage #root .calendar-agenda-copy > time { font-size: 14px !important; }
   body.ih75-subpage #root .calendar-agenda-copy > strong { font-size: 17px !important; }
-  body.ih75-subpage #root .calendar-agenda-actions { padding-left: 80px !important; }
-  body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] .ih75-day-plan .calendar-agenda-copy { grid-template-columns: 68px minmax(0,1fr) !important; }
-  body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] .ih75-day-plan .calendar-agenda-actions { padding-left: 80px !important; }
-  body.ih75-subpage #root .ih75-calendar-upcoming { padding: 22px !important; }
+  body.ih75-subpage #root .calendar-agenda-actions { padding-left: 0 !important; }
+  body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] .ih75-day-plan .calendar-agenda-copy { grid-template-columns: 58px minmax(0,1fr) !important; }
+  body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] .ih75-day-plan .calendar-agenda-actions { padding-left: 0 !important; }
+  body.ih75-subpage #root .ih75-calendar-upcoming { padding: 0 !important; }
   body.ih75-subpage #root .ih75-calendar-upcoming .calendar-upcoming-list,
   body.ih75-subpage #root .ih75-calendar-workspace[data-view="month"] > .ih75-calendar-upcoming .calendar-upcoming-list { display: flex !important; flex-direction: column !important; gap: 0 !important; }
   body.ih75-subpage #root .ih75-month-board { padding: 12px !important; }
@@ -782,10 +856,45 @@ body.ih75-subpage[data-ih73-page="conversation"] .ih73-route-navigation { max-wi
   body.ih75-subpage[data-ih73-page="access"] #root .ih59-journey { padding: 20px 20px 48px !important; }
   body.ih75-subpage[data-ih73-page="access"] #root .ih59-role-options { grid-template-columns: minmax(0,1fr) !important; }
   body.ih75-subpage[data-ih73-page="legal"] #root :is(.terms-document,.privacy-document,.cookie-policy-shell) { padding: 22px 20px 48px !important; }
+
+  body.ih75-subpage .ih73-history-controls > button { border: 0 !important; background: transparent !important; }
+  body.ih75-subpage .ih73-history-controls > button:nth-child(2) { display: none !important; }
+  body.ih75-subpage .ih73-panel-link { border: 0 !important; background: transparent !important; }
+  body.ih75-subpage #root .ih76-catalog-refinements { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; flex-basis: 100% !important; width: 100% !important; gap: 12px !important; }
+  body.ih75-subpage #root .ih76-catalog-refinements:not(:has(label:nth-child(2))) { grid-template-columns: minmax(0,1fr) !important; }
+  body.ih75-subpage #root .ih76-category-select { display: flex !important; }
+  body.ih75-subpage #root .ih76-mobile-clear { display: inline-flex !important; align-items: center !important; gap: 6px !important; min-height: 44px !important; padding: 8px 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih75-subpage #root .ih76-mobile-clear > svg { width: 14px !important; height: 14px !important; }
+  body.ih75-subpage #root .ih5-job-card-top .ih5-eyebrow { font-size: 11px !important; }
+  body.ih75-subpage #root .ih5-job-facts :is(span,small) { font-size: 11px !important; }
+  body.ih75-subpage #root .ih5-job-facts strong { font-size: 13px !important; }
+  body.ih75-subpage #root .ih5-job-price > span { display: block !important; font-size: 11px !important; }
+  body.ih75-subpage #root .ih5-job-price > small { font-size: 10px !important; }
+  body.ih75-subpage[data-ih73-page="services"] #root .ih75-page-heading { padding: 22px !important; }
+  body.ih75-subpage[data-ih73-page="service-editor"] #root .ih73-description { margin-top: 10px !important; font-size: 14px !important; }
+  body.ih75-subpage #root .ih76-service-step { gap: 12px !important; min-height: 80px !important; }
+  body.ih75-subpage #root .ih76-service-step strong { font-size: 16px !important; }
+  body.ih75-subpage #root .ih5-service-editor-fields > label > small { text-align: right !important; font-size: 11px !important; margin-top: -5px !important; }
+  body.ih75-subpage #root .ih76-planner-heading { align-items: flex-end !important; gap: 12px !important; margin-bottom: 24px !important; }
+  body.ih75-subpage #root .ih76-planner-heading p { max-width: 150px !important; margin-bottom: 6px !important; font-size: 11px !important; }
+  body.ih75-subpage #root .ih76-planner-heading h1 { font-size: 31px !important; }
+  body.ih75-subpage #root .ih76-planner-heading .calendar-primary-action { gap: 5px !important; padding: 10px !important; min-height: 44px !important; font-size: 12px !important; border-radius: 10px !important; white-space: normal !important; flex: none !important; }
+  body.ih75-subpage #root .ih76-planner-heading .calendar-primary-action > svg { width: 16px !important; height: 16px !important; }
+  body.ih75-subpage #root .ih76-planner-datebar > p { font-size: 19px !important; }
+  body.ih75-subpage #root .ih75-day-plan { padding: 20px 18px !important; border-radius: 16px !important; }
+  body.ih75-subpage #root .ih76-day-number { font-size: 58px !important; }
+  body.ih75-subpage #root .calendar-agenda-item { gap: 9px !important; padding: 14px 12px !important; }
+  body.ih75-subpage #root .account-template-option { grid-template-columns: 72px minmax(0,1fr) 20px !important; gap: 12px !important; min-height: 128px !important; padding: 14px !important; }
+  body.ih75-subpage #root .account-template-option-copy > strong { font-size: 16px !important; }
+  body.ih75-subpage #root .account-template-option-copy > span { font-size: 12px !important; }
+  body.ih75-subpage #root .ih76-palette-check { width: 20px !important; height: 20px !important; }
+  body.ih75-subpage #root .ih76-palette-preview { grid-template-columns: minmax(0,1fr) 18px !important; gap: 10px 6px !important; width: 72px !important; height: 80px !important; padding: 8px !important; }
+  body.ih75-subpage #root .ih76-palette-preview > b { width: 18px !important; height: 31px !important; }
+  body.ih75-subpage #root .ih5-job-facts > div:last-child { grid-column: 1/-1 !important; flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 5px 8px !important; }
+  body.ih75-subpage #root .ih5-job-facts > div:last-child strong { font-size: 11px !important; }
 }
 @media (max-width:420px) {
-  body.ih75-subpage #root .ih75-day-navigation { display: grid !important; grid-template-columns: 44px minmax(0,1fr) 44px !important; gap: 7px !important; }
-  body.ih75-subpage #root .ih75-day-navigation > button:last-child { grid-column: 1/-1 !important; background: var(--p-soft) !important; }
+
   body.ih75-subpage #root .ih75-register-filters { justify-content: space-between !important; gap: 2px !important; }
   body.ih75-subpage #root .ih75-register-filters > button { padding: 9px 8px !important; gap: 6px !important; }
   body.ih75-subpage #root .ih75-account-main .ih11-avatar-editor { flex-direction: column !important; }

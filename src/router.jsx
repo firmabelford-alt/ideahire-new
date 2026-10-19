@@ -8076,22 +8076,33 @@ function LimitedAccount() {
 
 function AccountTemplatesCard() {
   const { template, setTemplate, language } = useSitePreferences();
-  const english=language==="en";
-  const identity=IDEA_HIRE_THEME_IDENTITY[english?"en":"pl"];
-  const options=[
-    {value:"current",eyebrow:identity.eyebrow,title:identity.title,description:identity.description},
-    {value:"classic",eyebrow:english?"Classic":"Klasyczny",title:english?"Black and white":"Czerń i biel",description:english?"Neutral black, white and grey. The same functions and the same content.":"Neutralna czerń, biel i szarości. Te same funkcje i ta sama treść."},
+  const english = language === "en";
+  const identity = IDEA_HIRE_THEME_IDENTITY[english ? "en" : "pl"];
+  const options = [
+    { value: "current", title: identity.title, description: english ? "The IdeaHire turquoise palette." : "Turkusowa paleta IdeaHire." },
+    { value: "classic", title: english ? "Black and white" : "Czerń i biel", description: english ? "A quiet, monochrome palette." : "Spokojna, monochromatyczna paleta." },
   ];
   return <section className="account-card account-template-card" aria-labelledby="account-template-title" data-no-translate="true">
-    <div className="account-template-heading"><div><span className="section-label">{english?"Interface appearance":"Wygląd interfejsu"}</span><h2 id="account-template-title">{english?"Site template":"Szablon strony"}</h2></div><p>{english?"Choose your colour palette. Light and dark modes work with either template.":"Wybierz paletę kolorów. Tryb jasny i ciemny działa w obu szablonach."}</p></div>
-    <div className="account-template-options" role="radiogroup" aria-label={english?"Site template":"Szablon strony"}>
-      {options.map(option=>{const selected=template===option.value;return <button key={option.value} type="button" role="radio" aria-checked={selected} className={`account-template-option is-${option.value}${selected?" is-selected":""}`} onClick={()=>setTemplate(option.value)}>
-        <span className="account-template-preview" aria-hidden="true"><span className="account-template-preview-nav"><i/><i/><i/></span><span className="account-template-preview-hero"><span><i/><i/><i/></span><b/></span><span className="account-template-preview-cards"><i/><i/><i/></span></span>
-        <span className="account-template-option-copy"><small>{option.eyebrow}</small><strong>{option.title}</strong><span>{option.description}</span></span>
-        <span className="account-template-option-action"><i aria-hidden="true"/>{selected?(english?"Selected template":"Wybrany szablon"):(english?"Use this template":"Użyj tego szablonu")}</span>
-      </button>;})}
+    <div className="account-template-heading"><div><h2 id="account-template-title">{english ? "Colour palette" : "Paleta kolorów"}</h2></div><p>{english ? "Both palettes work in light and dark mode." : "Obie palety działają w trybie jasnym i ciemnym."}</p></div>
+    <div className="account-template-options" role="radiogroup" aria-label={english ? "Colour palette" : "Paleta kolorów"}>
+      {options.map((option, index) => {
+        const selected = template === option.value;
+        return <button key={option.value} type="button" role="radio" aria-checked={selected} tabIndex={selected ? 0 : -1}
+          className={`account-template-option is-${option.value}${selected ? " is-selected" : ""}`}
+          onClick={() => setTemplate(option.value)} onKeyDown={event => {
+            if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+            event.preventDefault();
+            const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + options.length) % options.length;
+            setTemplate(options[next].value);
+            event.currentTarget.parentElement.children[next]?.focus();
+          }}>
+          <span className="ih76-palette-preview" aria-hidden="true"><i /><span><i /><i /><i /></span><b /></span>
+          <span className="account-template-option-copy"><strong>{option.title}</strong><span>{option.description}</span><small>{selected ? (english ? "Selected" : "Wybrana paleta") : (english ? "Choose palette" : "Wybierz paletę")}</small></span>
+          <span className="ih76-palette-check" aria-hidden="true">{selected && <MarketIcon kind="check" />}</span>
+        </button>;
+      })}
     </div>
-    <p className="account-template-note">{english?"Your selection is saved on this device and applies across the site immediately.":"Wybór jest zapisywany na tym urządzeniu i od razu działa na całej stronie."}</p>
+    <p className="account-template-note">{english ? "Your choice is saved automatically on this device." : "Twój wybór zapisuje się automatycznie na tym urządzeniu."}</p>
   </section>;
 }
 
@@ -16817,15 +16828,14 @@ function Calendar() {
         ) === selectedKey
     );
 
-  const upcomingEvents =
-    allEvents
-      .filter(
-        (item) =>
-          !item.completed_at &&
-          new Date(item.starts_at).getTime() >=
-            Date.now() - 60 * 60 * 1000
-      )
-      .slice(0, 8);
+  const upcomingStart = new Date(selectedDate);
+  upcomingStart.setHours(0, 0, 0, 0);
+  upcomingStart.setDate(upcomingStart.getDate() + 1);
+  const upcomingEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+  const upcomingEvents = allEvents.filter(item => {
+    const timestamp = new Date(item.starts_at).getTime();
+    return !item.completed_at && timestamp >= upcomingStart.getTime() && timestamp < upcomingEnd.getTime();
+  }).slice(0, 6);
 
   const selectedWeekStart = new Date(selectedDate);
   selectedWeekStart.setDate(selectedWeekStart.getDate() - (selectedWeekStart.getDay() + 6) % 7);
@@ -17228,6 +17238,16 @@ function Calendar() {
         eventItem.event_type
       );
 
+    if (compact) {
+      const eventDate = new Date(eventItem.starts_at);
+      return <button type="button" key={eventItem.id} className="ih76-upcoming-event" onClick={() => { selectCalendarDate(eventDate); setCalendarView("agenda"); }}
+        aria-label={`${eventItem.title}, ${getCalendarEventDateLabel(eventItem.starts_at, eventItem.all_day, calendarLocale)}`}>
+        <time className="ih76-date-stamp" dateTime={eventItem.starts_at}><strong>{eventDate.getDate()}</strong><span>{new Intl.DateTimeFormat(calendarLocale, { month: "short" }).format(eventDate)}</span></time>
+        <span className="ih76-upcoming-copy"><small>{calendarEnglish ? translateUiText(type.shortLabel) : type.shortLabel}{eventItem.source === "job" ? (calendarEnglish ? " · Job" : " · Zlecenie") : ""}</small><strong>{eventItem.title}</strong><span>{getCalendarTimeLabel(eventItem.starts_at, eventItem.all_day, calendarLocale)}</span></span>
+        <WorkspaceIcon kind="next" />
+      </button>;
+    }
+
     return (
       <article
         key={eventItem.id}
@@ -17343,18 +17363,10 @@ function Calendar() {
       <AccountNavbar />
 
       <main className="app-page calendar-shell">
-        <SubpageHeading
-          eyebrow={calendarEnglish ? "Your schedule" : "Twój terminarz"}
-          title={calendarEnglish ? "Calendar" : "Kalendarz"}
-          description={calendarEnglish ? "Project deadlines, your tasks and email reminders." : "Terminy projektów, Twoje zadania i przypomnienia e-mail."}
-          variant="calendar"
-          actions={<button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" />{calendarEnglish ? "Add an event" : "Dodaj termin"}</button>}
-        />
-        <SubpageMetrics items={[
-          { label: calendarEnglish ? "Selected week" : "Wybrany tydzień", value: selectedWeekCount },
-          { label: calendarEnglish ? "Email reminders" : "Przypomnienia e-mail", value: activeEmailReminders },
-          { label: calendarEnglish ? "Completed this month" : "Wykonane w miesiącu", value: completedThisMonth },
-        ]} />
+        <header className="ih76-planner-heading">
+          <div><p>{calendarEnglish ? "Your time, in order" : "Twój czas, poukładany"}</p><h1>{calendarEnglish ? "Calendar" : "Kalendarz"}</h1></div>
+          <button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" /><span>{calendarEnglish ? "Add event" : "Dodaj termin"}</span></button>
+        </header>
 
         {(message || successMessage) && (
           <div
@@ -17378,17 +17390,17 @@ function Calendar() {
           </div>
         )}
 
+        <div className="ih76-planner-datebar"><p>{new Intl.DateTimeFormat(calendarLocale, { month: "long", year: "numeric" }).format(selectedDate)}</p><button type="button" onClick={goToToday}>{calendarEnglish ? "Today" : "Dzisiaj"}</button></div>
         <div className="ih75-calendar-controls">
           <div className="ih75-view-switch" role="group" aria-label={calendarEnglish ? "Calendar view" : "Widok kalendarza"}>
             <button type="button" aria-pressed={calendarView === "agenda"} onClick={() => setCalendarView("agenda")}><WorkspaceIcon kind="jobs" />{calendarEnglish ? "Day plan" : "Plan dnia"}</button>
             <button type="button" aria-pressed={calendarView === "month"} onClick={() => setCalendarView("month")}><WorkspaceIcon kind="calendar" />{calendarEnglish ? "Month" : "Miesiąc"}</button>
           </div>
-          <div className="ih75-day-navigation">
+          {calendarView === "agenda" && <div className="ih75-day-navigation">
             <button type="button" onClick={() => moveCalendarDay(-1)} aria-label={calendarEnglish ? "Previous day" : "Poprzedni dzień"}><MarketIcon kind="back" /></button>
             <label><span className="ih5-sr-only">{calendarEnglish ? "Choose a date" : "Wybierz datę"}</span><input type="date" value={getCalendarDateKey(selectedDate)} onChange={event => { if (event.target.value) selectCalendarDate(getCalendarDateOnlyValue(event.target.value)); }} /></label>
             <button type="button" onClick={() => moveCalendarDay(1)} aria-label={calendarEnglish ? "Next day" : "Następny dzień"}><MarketIcon kind="arrow" /></button>
-            <button type="button" onClick={goToToday}>{calendarEnglish ? "Today" : "Dzisiaj"}</button>
-          </div>
+          </div>}
         </div>
         {calendarView === "agenda" && <nav className="ih75-week-strip" aria-label={calendarEnglish ? "Days of the week" : "Dni tygodnia"}>
           {Array.from({ length: 7 }, (_, index) => {
@@ -17434,14 +17446,6 @@ function Calendar() {
                   <MarketIcon kind="arrow" />
                 </button>
               </div>
-
-              <button
-                className="calendar-today-button"
-                type="button"
-                onClick={goToToday}
-              >
-                {calendarEnglish ? "Today" : "Dzisiaj"}
-              </button>
 
               <div className="calendar-legend" aria-label={calendarEnglish ? "Calendar legend" : "Legenda kalendarza"}>
                 {CALENDAR_EVENT_TYPES.map(
@@ -17612,13 +17616,20 @@ function Calendar() {
 
           </>}
           <section className="ih75-day-plan" aria-labelledby="ih75-day-plan-title" aria-busy={loading}>
-            <header className="ih75-day-plan-heading"><div><p>{new Intl.DateTimeFormat(calendarLocale, { day: "numeric", month: "long", year: "numeric" }).format(selectedDate)}</p><h2 id="ih75-day-plan-title">{new Intl.DateTimeFormat(calendarLocale, { weekday: "long" }).format(selectedDate)}</h2></div><button type="button" onClick={() => openCreateDialog(selectedDate)} aria-label={calendarEnglish ? "Add an event for this day" : "Dodaj termin w wybranym dniu"}><MarketIcon kind="plus" /></button></header>
+            <header className="ih75-day-plan-heading"><time className="ih76-day-number" dateTime={selectedKey} aria-label={getCalendarDayLabel(selectedDate, calendarLocale)}>{selectedDate.getDate()}</time><div><p>{new Intl.DateTimeFormat(calendarLocale, { month: "long", year: "numeric" }).format(selectedDate)}</p><h2 id="ih75-day-plan-title">{new Intl.DateTimeFormat(calendarLocale, { weekday: "long" }).format(selectedDate)}</h2><small>{loading ? (calendarEnglish ? "Loading…" : "Ładowanie…") : `${calendarEnglish ? "Planned" : "W planie"}: ${selectedDayEvents.length}`}</small></div></header>
             {loading ? <InlineRouteLoader label={calendarEnglish ? "Loading your schedule…" : "Pobieramy Twój plan…"} rows={3} /> : selectedDayEvents.length ? <div className="calendar-agenda-list">{selectedDayEvents.map(item => renderAgendaItem(item))}</div> : <div className="ih75-day-empty"><WorkspaceIcon kind="calendar" /><h3>{calendarEnglish ? "No events planned" : "Brak zaplanowanych terminów"}</h3><p>{calendarEnglish ? "Add a task, meeting or project deadline." : "Dodaj zadanie, spotkanie albo termin projektu."}</p><button type="button" className="ih5-button is-quiet" onClick={() => openCreateDialog(selectedDate)}><MarketIcon kind="plus" />{calendarEnglish ? "Add an event" : "Dodaj termin"}</button></div>}
           </section>
           <aside className="ih75-calendar-upcoming" aria-label={calendarEnglish ? "Upcoming events" : "Nadchodzące terminy"}>
-            <header><p>{calendarEnglish ? "In this calendar view" : "W tym widoku kalendarza"}</p><h2>{calendarEnglish ? "Coming up" : "Nadchodzące"}</h2></header>
-            {loading ? <InlineRouteLoader rows={2} /> : upcomingEvents.length ? <div className="calendar-upcoming-list">{upcomingEvents.map(item => renderAgendaItem(item, true))}</div> : <p className="calendar-upcoming-empty">{calendarEnglish ? "No upcoming events in this view." : "Brak nadchodzących terminów w tym widoku."}</p>}
+            <header><p>{new Intl.DateTimeFormat(calendarLocale, { month: "long" }).format(selectedDate)}</p><h2>{calendarEnglish ? "Later this month" : "Dalej w miesiącu"}</h2></header>
+            {loading ? <InlineRouteLoader rows={2} /> : upcomingEvents.length ? <div className="calendar-upcoming-list">{upcomingEvents.map(item => renderAgendaItem(item, true))}</div> : <p className="calendar-upcoming-empty">{calendarEnglish ? "No more events in this month." : "Nie masz kolejnych terminów w tym miesiącu."}</p>}
           </aside>
+        </div>
+        <div className="ih76-planner-notes">
+          <SubpageMetrics items={[
+            { label: calendarEnglish ? "Selected week" : "Wybrany tydzień", value: selectedWeekCount },
+            { label: calendarEnglish ? "Email reminders" : "Przypomnienia e-mail", value: activeEmailReminders },
+            { label: calendarEnglish ? "Completed" : "Wykonane w miesiącu", value: completedThisMonth },
+          ]} />
         </div>
       </main>
 
