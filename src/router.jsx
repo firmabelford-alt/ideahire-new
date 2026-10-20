@@ -40,7 +40,7 @@ import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, Workspace
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences, translateUiText, IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -12250,9 +12250,7 @@ function FindTalent() {
     preferences?.preferredCategories?.[0],
   ]);
 
-  function handleCategoryChange(event) {
-    const nextCategory = event.target.value;
-
+  function handleCategoryChange(nextCategory) {
     setCategory(nextCategory);
     setSubcategory(JOB_SUBCATEGORIES[nextCategory]?.[0] || "");
     setCategoryDetails({});
@@ -12634,7 +12632,7 @@ function FindTalent() {
         <div className="ih75-editor-workspace">
         <aside className="ih75-editor-guide" aria-label={formEnglish ? "Project steps" : "Etapy projektu"}>
         <p className="ih75-guide-label">{formEnglish ? "Your project" : "Twój projekt"}</p>
-        <label className="ih73-mobile-step-picker"><span>{formStep} / {JOB_FORM_STEPS.length}</span><select aria-label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={event => { setMessage(""); setFormStep(Number(event.target.value)); }}>{JOB_FORM_STEPS.map((step, index) => <option key={step.number} value={index + 1} disabled={index + 1 > maxStepReached}>{step.number}. {formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label}</option>)}</select></label>
+        <div className="ih73-mobile-step-picker"><span>{formStep} / {JOB_FORM_STEPS.length}</span><MarketSelect label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={value => { setMessage(""); setFormStep(value); }} options={JOB_FORM_STEPS.map((step, index) => ({ value: index + 1, disabled: index + 1 > maxStepReached, label: `${step.number}. ${formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label}` }))} /></div>
         <ol className="ih5-job-create-progress" aria-label="Postęp dodawania zlecenia">
           {JOB_FORM_STEPS.map((item, index) => {
             const stepNumber = index + 1;
@@ -12693,26 +12691,11 @@ function FindTalent() {
                   <small>{title.length}/120</small>
                 </label>
 
-                <label>
-                  Kategoria
-                  <select value={category} onChange={handleCategoryChange}>
-                    {JOB_CATEGORIES.map((item) => (
-                      <option key={item} value={item}>{getJobCategoryLabel(item)}</option>
-                    ))}
-                  </select>
-                </label>
+                <MarketSelect label={formEnglish ? "Category" : "Kategoria"} value={category}
+                  onChange={handleCategoryChange} options={JOB_CATEGORIES.map(item => ({ value: item, label: getJobCategoryLabel(item) }))} />
 
-                <label>
-                  Podkategoria
-                  <select
-                    value={subcategory}
-                    onChange={(event) => setSubcategory(event.target.value)}
-                  >
-                    {subcategories.map((item) => (
-                      <option key={item} value={item}>{item}</option>
-                    ))}
-                  </select>
-                </label>
+                <MarketSelect label={formEnglish ? "Subcategory" : "Podkategoria"} value={subcategory}
+                  onChange={setSubcategory} options={subcategories.map(item => ({ value: item, label: item }))} />
 
                 <fieldset className="ih5-job-compact-fieldset is-wide">
                   <legend>Na jakim etapie jest projekt?</legend>
@@ -14160,6 +14143,7 @@ function Profile() {
         
 
         <section className="account-card profile-card-with-menu">
+          <header className="ih85-profile-intro">
           {isOtherProfile && (
             <details className="profile-more-menu">
               <summary
@@ -14246,6 +14230,7 @@ function Profile() {
             <ProfileContactAction profile={profile} user={user} supabase={supabase} navigate={profileNavigate}
               disabled={blockedByMe || blockedMe} canContact={!profileAgeLoading && canContactProfile} />
           )}
+          </header>
 
           {isOtherProfile && (
               <>
@@ -14263,7 +14248,21 @@ function Profile() {
               </>
             )}
 
-          {!profileHidden && !hasExpertiseDetails && !profile.specialization?.trim() && <section className="profile-expertise-card"><h2>Specjalizacja</h2><p className="ih20-profile-empty">Ten freelancer nie uzupełnił jeszcze specjalizacji i umiejętności.</p></section>}
+          {!profileHidden && (
+            <section className="profile-stats" aria-label="Doświadczenie i opinie">
+              <div className="profile-stat-card">
+                <div className="profile-stat-top"><strong>Wykonane zlecenia</strong><span className="profile-stat-value">{completedJobs}</span></div>
+                <div className="profile-stat-breakdown"><span>Zakończone: <strong>{completedJobs}</strong></span><span>Sporne: <strong>{disputedJobs}</strong></span></div>
+              </div>
+              <div className="profile-stat-card">
+                <div className="profile-stat-top"><strong>Opinie</strong><span className="profile-stat-value">{totalReviews}</span></div>
+                <div className="profile-stat-breakdown"><span>Pozytywne: <strong>{positiveReviews}</strong></span><span>Neutralne: <strong>{neutralReviews}</strong></span><span>Negatywne: <strong>{negativeReviews}</strong></span></div>
+              </div>
+            </section>
+          )}
+
+          {!profileHidden && <div className="ih85-profile-details">
+          {!hasExpertiseDetails && !profile.specialization?.trim() && <section className="profile-expertise-card"><h2>Specjalizacja</h2><p className="ih20-profile-empty">Ten freelancer nie uzupełnił jeszcze specjalizacji i umiejętności.</p></section>}
 
           {!profileHidden &&
             profile.about?.trim() && (
@@ -14338,6 +14337,8 @@ function Profile() {
               </div>
             )}
 
+          </div>}
+
           {!profileHidden && (
             <section
               className="profile-public-portfolio"
@@ -14353,7 +14354,7 @@ function Profile() {
                 </span>
               </div>
 
-              {portfolioError ? <p className="ih20-profile-empty is-error" role="status">{portfolioError}</p> : portfolioItems.length === 0 && <div className="ih20-profile-empty"><MarketIcon kind="files" /><div><h3>Portfolio jeszcze się pojawi</h3><p>Ten freelancer nie dodał jeszcze realizacji do portfolio. Możesz zapytać o przykłady jego pracy w wiadomości.</p></div></div>}
+              {portfolioError ? <p className="ih20-profile-empty is-error" role="status">{portfolioError}</p> : portfolioItems.length === 0 && <div className="ih20-profile-empty"><MarketIcon kind="files" /><div><h3>Brak dodanych realizacji</h3><p>Ten freelancer nie dodał jeszcze realizacji do portfolio. Możesz zapytać o przykłady jego pracy w wiadomości.</p></div></div>}
 
               {portfolioReportMessage && (
                 <p className="profile-public-report-message" role="status">
@@ -14474,56 +14475,6 @@ function Profile() {
                 </div>
               )}
             </section>
-          )}          {!profileHidden && (
-            <div className="profile-stats">
-              <div className="profile-stat-card">
-                <div className="profile-stat-top">
-                  <strong>
-                    Wykonane zlecenia
-                  </strong>
-
-                  <span className="profile-stat-value">
-                    {completedJobs}
-                  </span>
-                </div>
-
-                <div className="profile-stat-breakdown">
-                  <span>
-                    Zakończone: {completedJobs}
-                  </span>
-
-                  <span>
-                    Sporne: {disputedJobs}
-                  </span>
-                </div>
-              </div>
-
-              <div className="profile-stat-card">
-                <div className="profile-stat-top">
-                  <strong>
-                    Opinie
-                  </strong>
-
-                  <span className="profile-stat-value">
-                    {totalReviews}
-                  </span>
-                </div>
-
-                <div className="profile-stat-breakdown">
-                  <span>
-                    Pozytywne: {positiveReviews}
-                  </span>
-
-                  <span>
-                    Neutralne: {neutralReviews}
-                  </span>
-
-                  <span>
-                    Negatywne: {negativeReviews}
-                  </span>
-                </div>
-              </div>
-            </div>
           )}
 
           {!profileHidden && (

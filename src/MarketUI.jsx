@@ -290,6 +290,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
   const selectId = id || generatedId;
   const rootRef = useRef(null);
   const triggerRef = useRef(null);
+  const menuRef = useRef(null);
   const optionRefs = useRef([]);
   const typeahead = useRef({ text: "", time: 0 });
   const [open, setOpen] = useState(false);
@@ -300,8 +301,13 @@ export function MarketSelect({ id, label, value, options, onChange }) {
   const enabled = options.map((option, index) => !option.disabled ? index : -1).filter((index) => index >= 0);
   useEffect(() => {
     if (!open) return undefined;
-    optionRefs.current[focused]?.focus({ preventScroll: true });
-    optionRefs.current[focused]?.scrollIntoView?.({ block: "nearest" });
+    const option = optionRefs.current[focused], menu = menuRef.current;
+    option?.focus({ preventScroll: true });
+    if (option && menu) {
+      const item = option.getBoundingClientRect(), list = menu.getBoundingClientRect();
+      if (item.top < list.top + 6) menu.scrollTop += item.top - list.top - 6;
+      else if (item.bottom > list.bottom - 6) menu.scrollTop += item.bottom - list.bottom + 6;
+    }
   }, [open, focused]);
   useEffect(() => {
     if (!open) return undefined;
@@ -315,10 +321,17 @@ export function MarketSelect({ id, label, value, options, onChange }) {
     if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
   }
   function show(last = false) {
+    if (!enabled.length) return;
     const rect = triggerRef.current?.getBoundingClientRect();
     if (rect) {
-      const below = (window.visualViewport?.height || window.innerHeight) - rect.bottom - 16;
-      const above = rect.top - 16;
+      const viewport = window.visualViewport;
+      const top = viewport?.offsetTop || 0;
+      let bottom = top + (viewport?.height || window.innerHeight);
+      const navigation = document.querySelector('.ih68-top-nav');
+      if (navigation && getComputedStyle(navigation).position === 'fixed') bottom = Math.min(bottom, navigation.getBoundingClientRect().top);
+      const header = document.querySelector('.ih68-header');
+      const above = rect.top - Math.max(top, header?.getBoundingClientRect().bottom || top) - 12;
+      const below = bottom - rect.bottom - 12;
       const up = below < 220 && above > below;
       setMenuLayout({ side: up ? "up" : "down", height: Math.max(80, Math.min(320, up ? above : below)) });
     }
@@ -345,7 +358,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
       typeahead.current = { text: typed, time: now };
       const normalize = (text) => text.toLocaleLowerCase("pl-PL").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l");
       const next = enabled.find((index) => normalize(options[index].label).startsWith(normalize(typed)));
-      if (next !== undefined) { setFocused(next); setOpen(true); }
+      if (next !== undefined) { if (!open) show(); setFocused(next); }
     }
   }
   return (
@@ -358,7 +371,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
         <span id={`${selectId}-value`}>{selectedOption?.label || "Wybierz"}</span>
         <svg viewBox="0 0 20 20" aria-hidden="true" fill="none"><path d="m5 7 5 5 5-5" /></svg>
       </button>
-      <div className="ih7-select-menu" role="listbox" id={`${selectId}-options`} aria-labelledby={`${selectId}-label`}
+      <div ref={menuRef} className="ih7-select-menu" role="listbox" id={`${selectId}-options`} aria-labelledby={`${selectId}-label`}
         aria-hidden={!open} inert={open ? undefined : ""}>
         {options.map((option, index) => <button type="button" role="option" key={option.value}
           ref={(element) => { optionRefs.current[index] = element; }} tabIndex={open && focused === index ? 0 : -1}

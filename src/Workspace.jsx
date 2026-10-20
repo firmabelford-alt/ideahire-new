@@ -256,10 +256,6 @@ export function WorkspaceDashboard({
     if (section) onSelect(section);
   };
   return <div className="ih72-dashboard">
-    <nav className="ih80-account-catalogs" aria-label={t('Odkrywaj IdeaHire', 'Explore IdeaHire')}>
-      <Link to="/services"><span>{t('Usługi', 'Services')}</span></Link>
-      <Link to="/freelancers"><span>{t('Freelancerzy', 'Freelancers')}</span></Link>
-    </nav>
     <section className="ih72-identity" aria-labelledby="ih68-home-title">
       <p className="ih72-eyebrow">{t('Moje konto', 'My account')}</p>
       <button type="button" className={'ih72-profile-orbit' + (profileOpen ? ' is-open' : '')}
@@ -292,6 +288,10 @@ export function WorkspaceDashboard({
     <section className="ih72-launchpad" aria-labelledby="ih72-work-title">
       <div className="ih72-section-heading"><div><p className="ih72-eyebrow">{t('Zlecenia i usługi', 'Jobs & services')}</p><h2 id="ih72-work-title">{t('Twoja praca', 'Your work')}</h2></div><Link to="/work" className="ih68-text-link">{t('Współprace', 'Projects')}</Link></div>
       <WorkspaceWorkActions />
+      <nav className="ih80-account-catalogs" aria-label={t('Odkrywaj IdeaHire', 'Explore IdeaHire')}>
+        <Link to="/services"><WorkspaceIcon kind="services" /><span><strong>{t('Usługi', 'Services')}</strong><small>{t('Poznaj oferty wykonawców', 'Explore freelancer offers')}</small></span><WorkspaceIcon kind="arrow" /></Link>
+        <Link to="/freelancers"><WorkspaceIcon kind="people" /><span><strong>{t('Freelancerzy', 'Freelancers')}</strong><small>{t('Znajdź osobę do projektu', 'Find someone for your project')}</small></span><WorkspaceIcon kind="arrow" /></Link>
+      </nav>
     </section>
 
     <section className="ih72-activity" aria-labelledby="ih72-recent-title">
