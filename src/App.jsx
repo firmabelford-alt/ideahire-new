@@ -415,7 +415,7 @@ function ih43Lines(c,lines,box,options={}){
 function ih43Tag(c,text,x,y,colors,angle=0,scale=1){
   c.save();c.translate(x,y);c.rotate(angle);c.scale(scale,scale);c.font="700 15px Inter, Arial, sans-serif";const w=c.measureText(text).width+36;ih43Box(c,-w/2,-20,w,40,colors.fill,5,colors.stroke);const ink=ih43Readable(colors.fill,colors.ink,"#ffffff");ih43Text(c,text,0,5,15,ink,700,"center");c.restore();return w;
 }
-function ih43Arrow(c,x,y,color,size=14){c.strokeStyle=color;c.lineWidth=1.7;c.lineJoin="round";c.beginPath();c.moveTo(x-size*.32,y-size*.5);c.lineTo(x+size*.32,y-size*.5);c.lineTo(x+size*.32,y+size*.5);c.lineTo(x,y+size*.2);c.lineTo(x-size*.32,y+size*.5);c.closePath();c.stroke();}
+function ih43Arrow(c,x,y,color,size=14){c.strokeStyle=color;c.lineWidth=1.7;c.lineCap="round";c.lineJoin="round";c.beginPath();c.moveTo(x-size*.5,y);c.lineTo(x+size*.5,y);c.moveTo(x+size*.1,y-size*.4);c.lineTo(x+size*.5,y);c.lineTo(x+size*.1,y+size*.4);c.stroke();}
 function ih43Panel(c,x,y,w,h,options={}){
   const fill=options.fill||"#f5f0e5",ink=options.ink||"#151515";c.save();c.translate(x,y);c.rotate(options.angle||0);c.scale(options.scale||1,options.scale||1);c.globalAlpha*=options.alpha??1;
   c.shadowColor="rgba(0,0,0,.18)";c.shadowBlur=26;c.shadowOffsetY=10;ih43Box(c,-w/2,-h/2,w,h,fill,10);c.shadowColor="transparent";
@@ -2632,12 +2632,12 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
    <span className="ih59-project-category">{label}</span>
    <div className="ih66-project-description"><h3 title={job.title}>{String(job.title||'').slice(0,160)}</h3><p>{String(job.description||(en?'Review the scope and requirements in the listing.':'Sprawdź zakres i wymagania w ogłoszeniu.')).slice(0,280)}</p></div>
    {sample&&<small className="ih53-project-caption">{copy.sample}</small>}
-   <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true"><MarketIcon kind="bookmark"/></span></Link></div>
+   <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link></div>
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
   
-  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true"><MarketIcon kind="bookmark"/></span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true"><MarketIcon kind="bookmark"/></span></Link></div></div>
+  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
     <div className="ih66-project-heading"><span>{view.new?copy.new:copy.published}</span><span className="ih66-project-count">{String(list.length?index+1:0).padStart(2,'0')}<span aria-hidden="true"> / </span>{String(list.length).padStart(2,'0')}</span></div>
     <div className="ih53-project-window" onPointerDown={e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};}} onPointerCancel={()=>{gesture.current=null;}} onPointerUp={e=>{const first=gesture.current;gesture.current=null;if(!first||view.next)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}>

@@ -347,7 +347,7 @@ function ServiceCard({ service }) {
     </div>
     <footer className="ih78-offer-footer">
       <div className="ih78-offer-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small className={capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</small></span></div>
-      <span className="ih80-offer-open" aria-hidden="true"><span>{en ? 'View service' : 'Zobacz usługę'}</span><MarketIcon kind="bookmark" /></span>
+      <span className="ih80-offer-open" aria-hidden="true"><span>{en ? 'View service' : 'Zobacz usługę'}</span></span>
     </footer>
   </article>;
 }
@@ -1183,7 +1183,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               <small>Usługę realizuje</small>
               <strong>{service.owner_name || "Wykonawca IdeaHire"}</strong>
             </span>
-            <Link to={`/profile/${service.freelancer_id}`} aria-label="Zobacz profil"><MarketIcon kind="bookmark"/></Link>
+            <Link to={`/profile/${service.freelancer_id}`} aria-label="Zobacz profil"><MarketIcon kind="arrow"/></Link>
           </div>
 
           <div className={"ih5-service-order-price " + (service.price_mode === "fixed" ? "is-fixed" : "is-custom")}>
@@ -1227,7 +1227,6 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
                   ? "Zamów usługę"
                   : "Zapytaj o realizację"
                 : "Zapytaj o następny termin"}
-              <MarketIcon kind="bookmark"/>
             </button>
           ) : (
             <button type="button" className="ih5-service-order-button" disabled>

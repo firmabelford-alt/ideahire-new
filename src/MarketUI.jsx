@@ -205,12 +205,12 @@ export function ProfileHub({ sections, active, onSelect, children, open: control
 }
 
 export function MarketIcon({ kind = "search", ...props }) {
+  if (kind === "bookmark") return null;
   const paths = {
     search: "m20 20-4.2-4.2M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z",
-    arrow: "M7 3h10v18l-5-4-5 4V3Z",
-    bookmark: "M7 3h10v18l-5-4-5 4V3Z",
+    arrow: "M5 12h14m-6-6 6 6-6 6",
     back: "M19 12H5m6-6-6 6 6 6",
-    diagonal: "M7 3h10v18l-5-4-5 4V3Z",
+    diagonal: "M5 12h14m-6-6 6 6-6 6",
     close: "m6 6 12 12M18 6 6 18",
     plus: "M12 5v14M5 12h14",
     check: "m5 12 4 4L19 6",
@@ -237,8 +237,8 @@ export function MarketHeader({ eyebrow, title, description, children }) {
   const editing = location.pathname.startsWith('/edit-job/');
   const heading = jobs ? {
     eyebrow: en ? 'For freelancers' : 'Dla wykonawców',
-    title: en ? 'Jobs' : 'Zlecenia',
-    description: null,
+    title: en ? 'Find a job' : 'Znajdź zlecenie',
+    description: en ? 'Check the brief, budget and deadline. Choose a project for yourself.' : 'Sprawdź zakres, budżet i termin. Wybierz projekt dla siebie.',
   } : creating ? {
     eyebrow: en ? 'For clients' : 'Dla zlecających',
     title: en ? 'Post a job' : 'Zleć pracę',

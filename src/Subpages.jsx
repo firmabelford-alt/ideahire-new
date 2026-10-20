@@ -169,8 +169,8 @@ export function SubpageCount({ value, loading = false }) {
       const origin = performance.now();
       const tick = now => {
         if (dead) return;
-        const progress = Math.min(1, (now - origin) / 760);
-        setShown(Math.round(target * (1 - Math.pow(1 - progress, 3))));
+        const progress = Math.min(1, (now - origin) / 1800);
+        setShown(Math.round(target * (1 - Math.pow(1 - progress, 1.35))));
         if (progress < 1) frame = requestAnimationFrame(tick);
       };
       frame = requestAnimationFrame(tick);

@@ -459,32 +459,55 @@ body.ih79-app #root .ih5-jobs-results-copy > span { display: none !important; }
 body.ih79-app #root :is(.ih5-jobs-results-copy strong,.ih78-results-heading strong) { color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root :is(.ih5-jobs-clear-filters,.ih78-results-heading > button) { display: inline-flex !important; align-items: center !important; gap: 6px !important; min-height: 36px !important; padding: 6px 0 !important; border: 0 !important; background: none !important; color: var(--p-muted) !important; font: 600 12px/1.4 Inter,system-ui,sans-serif !important; }
 
-/* Jobs: brief, budget and deadline are visible before opening the scope. */
-body.ih79-app #root .ih5-jobs-list { display: flex !important; flex-direction: column !important; gap: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-body.ih79-app #root .ih79-job { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) 180px !important; align-items: start !important; gap: 16px 26px !important; width: 100% !important; margin: 0 !important; padding: 28px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; color: var(--p-ink) !important; box-shadow: none !important; scroll-margin-top: 90px !important; }
-body.ih79-app #root .ih79-job::before, body.ih79-app #root .ih79-job::after { display: none !important; }
-body.ih79-app #root .ih5-job-card-top { grid-column: 1/-1 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 8px 20px !important; margin: 0 !important; }
-body.ih79-app #root .ih5-job-card-top .ih5-eyebrow { display: block !important; margin: 0 !important; padding: 0 !important; color: var(--p-accent) !important; font: 650 12px/1.5 Inter,system-ui,sans-serif !important; text-transform: none !important; letter-spacing: 0 !important; }
-body.ih79-app #root .ih5-job-active-badge { display: inline-flex !important; align-items: center !important; gap: 5px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; color: var(--p-muted) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-overview { grid-column: 1/-1 !important; display: grid !important; grid-template-columns: minmax(0,1fr) 180px !important; align-items: start !important; gap: 26px !important; }
-body.ih79-app #root .ih5-job-title { display: block !important; margin: 0 0 12px !important; font: 800 26px/1.2 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; color: var(--p-ink) !important; -webkit-line-clamp: unset !important; max-height: none !important; overflow: visible !important; }
-body.ih79-app #root .ih5-job-summary { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 3 !important; max-width: 620px !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.65 Inter,system-ui,sans-serif !important; }
+/* Job discovery: one reading axis, with a filter rail only on laptop. */
+body.ih79-app #root .ih5-jobs-page { background: color-mix(in srgb,var(--p-soft) 55%,var(--p-bg)) !important; }
+body.ih79-app #root .ih5-jobs-page .ih73-catalog-tabs { gap: 32px !important; margin-bottom: 32px !important; }
+body.ih79-app #root .ih5-jobs-page .ih75-page-heading { align-items: center !important; gap: 20px 32px !important; margin-bottom: 36px !important; }
+body.ih79-app #root .ih5-jobs-page .ih73-heading-copy { max-width: 720px !important; }
+body.ih79-app #root .ih5-jobs-page .ih75-page-heading h1 { font: 800 44px/1.15 Inter,system-ui,sans-serif !important; letter-spacing: -.04em !important; }
+body.ih79-app #root .ih5-jobs-page .ih73-description { max-width: 54ch !important; margin-top: 14px !important; font-size: 15px !important; line-height: 1.7 !important; }
+body.ih79-app #root .ih5-jobs-page .ih73-heading-actions > a { border-color: var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; }
+body.ih79-app #root .ih80-catalog-jobs { grid-template-columns: 220px minmax(0,1fr) !important; gap: 32px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih75-catalog-sidebar { padding: 20px 12px !important; border-radius: 16px !important; background: var(--p-paper) !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih75-catalog-sidebar h2 { margin: 0 10px 16px !important; font-size: 15px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih75-category-list { gap: 5px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih75-category-list button { min-height: 44px !important; padding: 11px 10px !important; border-radius: 8px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih73-clear-filters { margin-left: 10px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih75-catalog-controls { display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; align-items: stretch !important; gap: 14px !important; margin-bottom: 24px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih73-catalog-search { width: 100% !important; min-height: 56px !important; padding-inline: 18px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih73-catalog-search:focus-within { border-color: var(--p-accent) !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih76-native-select { flex-direction: column !important; align-items: stretch !important; justify-content: center !important; gap: 0 !important; padding: 5px 12px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih76-category-select { display: none !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih76-native-select > span { font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih76-native-select select { min-height: 28px !important; padding: 2px 18px 2px 0 !important; background: transparent !important; font: 650 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih5-jobs-results-header { min-height: 24px !important; margin-bottom: 18px !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih5-jobs-results-copy strong { font: 650 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-jobs-list { display: flex !important; flex-direction: column !important; gap: 24px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .ih79-job { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) 180px !important; grid-template-rows: auto !important; grid-template-areas: none !important; align-items: start !important; gap: 24px 28px !important; width: 100% !important; margin: 0 !important; padding: 30px !important; border: 1px solid color-mix(in srgb,var(--p-line) 45%,var(--p-paper)) !important; border-radius: 18px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; box-shadow: none !important; scroll-margin-top: 90px !important; }
+body.ih79-app #root .ih79-job::before, body.ih79-app #root .ih79-job::after { display: none !important; content: none !important; }
+body.ih79-app #root .ih5-job-card-top { grid-column: 1/-1 !important; grid-row: auto !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 8px 20px !important; margin: 0 !important; }
+body.ih79-app #root .ih5-job-card-top .ih5-eyebrow { display: block !important; margin: 0 !important; padding: 0 !important; color: var(--p-muted) !important; font: 600 12px/1.6 Inter,system-ui,sans-serif !important; text-transform: none !important; letter-spacing: 0 !important; }
+body.ih79-app #root .ih5-job-active-badge { display: inline-flex !important; align-items: center !important; gap: 7px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; color: var(--p-accent) !important; font: 550 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-overview { grid-column: 1/-1 !important; grid-row: auto !important; grid-template-areas: none !important; display: grid !important; grid-template-columns: minmax(0,1fr) 180px !important; align-items: start !important; gap: 28px !important; }
+body.ih79-app #root .ih5-job-copy { width: 100% !important; max-width: none !important; }
+body.ih79-app #root .ih5-job-title { display: block !important; margin: 0 0 16px !important; font: 750 26px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; color: var(--p-ink) !important; word-break: normal !important; -webkit-line-clamp: unset !important; max-height: none !important; overflow: visible !important; }
+body.ih79-app #root .ih5-job-summary { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 3 !important; max-width: 65ch !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 15px/1.75 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih79-job.is-open .ih5-job-summary { display: block !important; white-space: pre-wrap !important; overflow: visible !important; }
-body.ih79-app #root .ih5-job-price { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 5px !important; margin: 0 !important; padding: 16px !important; border: 0 !important; border-radius: 4px 14px 4px 4px !important; background: var(--p-tint) !important; text-align: left !important; }
-body.ih79-app #root .ih5-job-price > span { color: var(--p-muted) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-price > strong { display: block !important; color: var(--p-ink) !important; font: 800 27px/1.15 Inter,system-ui,sans-serif !important; letter-spacing: -.04em !important; font-variant-numeric: tabular-nums !important; }
-body.ih79-app #root .ih5-job-price > small { color: var(--p-muted) !important; font: 400 11px/1.45 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-facts { grid-column: 1 !important; display: flex !important; flex-wrap: wrap !important; gap: 14px 24px !important; margin: 0 !important; padding: 4px 0 0 !important; border: 0 !important; }
-body.ih79-app #root .ih5-job-facts > div { display: flex !important; flex-direction: column !important; gap: 3px !important; min-width: 82px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-body.ih79-app #root .ih5-job-facts span { color: var(--p-muted) !important; font: 400 11px/1.4 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-facts strong { color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-expiry { color: var(--p-muted) !important; font: 400 10px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-skills { grid-column: 1 !important; display: flex !important; flex-wrap: wrap !important; gap: 6px !important; margin: 0 !important; }
-body.ih79-app #root .ih5-job-skills > span { padding: 4px 8px !important; border: 0 !important; border-radius: 3px !important; background: var(--p-soft) !important; color: var(--p-muted) !important; font: 500 11px/1.4 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-job-actions { grid-column: 2 !important; grid-row: 3/5 !important; display: flex !important; flex-direction: column-reverse !important; align-self: end !important; gap: 7px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-body.ih79-app #root .ih5-job-actions > .ih5-button { width: 100% !important; min-height: 42px !important; padding: 10px 12px !important; font-size: 12px !important; }
-body.ih79-app #root .ih5-job-actions > .is-quiet { border: 0 !important; background: none !important; color: var(--p-muted) !important; }
-body.ih79-app #root .ih5-job-details { grid-column: 1/-1 !important; width: 100% !important; margin: 8px 0 0 !important; padding: 24px 0 0 !important; border: 0 !important; border-top: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; }
+body.ih79-app #root .ih5-job-price { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 7px !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; text-align: left !important; }
+body.ih79-app #root .ih5-job-price > span { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-price > strong { display: block !important; color: var(--p-accent) !important; font: 750 26px/1.25 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
+body.ih79-app #root .ih5-job-price > small { color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-facts { grid-column: 1 !important; grid-row: auto !important; display: flex !important; flex-wrap: wrap !important; gap: 18px 24px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .ih5-job-facts > div { display: flex !important; flex-direction: column !important; gap: 5px !important; min-width: 82px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .ih5-job-facts span { color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-facts strong { color: var(--p-ink) !important; font: 600 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-expiry { color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-skills { grid-column: 1 !important; grid-row: auto !important; display: flex !important; flex-wrap: wrap !important; gap: 7px !important; margin: 0 !important; }
+body.ih79-app #root .ih5-job-skills > span { padding: 4px 8px !important; border: 0 !important; border-radius: 5px !important; background: var(--p-soft) !important; color: var(--p-muted) !important; font: 500 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-job-actions { grid-column: 2 !important; grid-row: 3/5 !important; display: flex !important; flex-direction: column-reverse !important; align-self: end !important; gap: 8px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .ih5-job-actions > .ih5-button { width: 100% !important; min-height: 46px !important; padding: 12px 14px !important; border-radius: 10px !important; font-size: 13px !important; }
+body.ih79-app #root .ih5-job-actions > .is-quiet { border: 1px solid var(--p-line) !important; background: none !important; color: var(--p-ink) !important; }
+body.ih79-app #root .ih5-job-details { grid-column: 1/-1 !important; grid-row: auto !important; width: 100% !important; margin: 4px 0 0 !important; padding: 28px 0 0 !important; border: 0 !important; border-top: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; }
 body.ih79-app #root .ih5-job-collaboration-header { display: block !important; margin: 0 0 22px !important; padding: 0 !important; border: 0 !important; background: none !important; }
 body.ih79-app #root .ih5-job-collaboration-header-icon, body.ih79-app #root .ih5-job-collaboration-header p { display: none !important; }
 body.ih79-app #root .ih5-job-collaboration-section { margin: 0 0 24px !important; padding: 0 !important; border: 0 !important; background: none !important; }
@@ -702,7 +725,7 @@ body.ih79-app #root .ih72-account-facts { display: grid !important; grid-templat
 body.ih79-app #root .ih72-account-facts > button { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 6px !important; min-height: 58px !important; padding: 0 12px !important; border: 0 !important; border-right: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; color: var(--p-ink) !important; }
 body.ih79-app #root .ih72-account-facts > button:last-child { border-right: 0 !important; }
 body.ih79-app #root .ih72-account-facts strong { font: 650 24px/1.2 Inter,system-ui,sans-serif !important; font-variant-numeric: tabular-nums !important; }
-body.ih79-app #root .ih72-account-facts span { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih72-account-facts > button > span { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih72-launchpad { padding-top: 32px !important; }
 body.ih79-app #root .ih72-launchpad .ih72-main-actions { max-width: 720px !important; }
 body.ih79-app #root .ih72-section-heading h2 { margin: 0 !important; font: 750 26px/1.25 Inter,system-ui,sans-serif !important; }
@@ -850,11 +873,12 @@ body.ih79-app #root .ih75-owned-actions :is(a,button) { display: flex !important
 body.ih79-app #root .ih5-my-services-list { display: flex !important; flex-direction: column !important; gap: 0 !important; margin: 0 !important; border: 0 !important; }
 body.ih79-app #root .ih5-my-services-list > article { display: grid !important; grid-template-columns: minmax(0,1fr) 150px !important; align-items: start !important; gap: 14px 26px !important; margin: 0 !important; padding: 24px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; }
 body.ih79-app #root .ih5-my-services-list .ih5-service-category-mark { display: none !important; }
-body.ih79-app #root .ih5-my-service-copy { grid-column: 1 !important; }
+body.ih79-app #root .ih5-my-services-list > article::before, body.ih79-app #root .ih5-my-services-list > article::after { content: none !important; display: none !important; }
+body.ih79-app #root .ih5-my-service-copy { grid-column: 1 !important; grid-row: 1 !important; width: 100% !important; max-width: none !important; }
 body.ih79-app #root .ih5-my-service-copy h2 { margin: 6px 0 10px !important; font: 800 22px/1.3 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih5-my-service-copy p { font-size: 13px !important; }
-body.ih79-app #root .ih5-my-service-state { display: flex !important; flex-direction: column !important; gap: 8px !important; color: var(--p-muted) !important; font: 600 12px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-my-service-actions { grid-column: 1/-1 !important; display: flex !important; flex-wrap: wrap !important; gap: 8px !important; margin: 0 !important; }
+body.ih79-app #root .ih5-my-service-state { grid-column: 2 !important; grid-row: 1 !important; display: flex !important; flex-direction: column !important; gap: 8px !important; color: var(--p-muted) !important; font: 600 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-my-service-actions { grid-column: 1/-1 !important; grid-row: 2 !important; display: flex !important; flex-wrap: wrap !important; gap: 8px !important; margin: 0 !important; }
 body.ih79-app[data-ih73-page="profile"] #root .profile-card-with-menu { position: relative !important; display: grid !important; grid-template-columns: 260px minmax(0,1fr) !important; align-items: start !important; gap: 30px 44px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
 body.ih79-app[data-ih73-page="profile"] #root .profile-card-with-menu > :not(.public-profile-preview):not(.ih11-profile-contact):not(.profile-more-menu):not(.profile-public-portfolio):not(.profile-block-notice):not(.profile-block-message) { grid-column: 2 !important; }
 body.ih79-app[data-ih73-page="profile"] #root .public-profile-preview { grid-column: 1 !important; grid-row: 1 !important; display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 18px !important; margin: 0 !important; padding: 0 30px 0 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; }
@@ -899,7 +923,7 @@ body.ih79-app #root .ih75-week-strip i { min-height: 5px !important; color: inhe
 body.ih79-app #root .ih75-calendar-workspace { display: grid !important; grid-template-columns: minmax(0,1fr) 300px !important; align-items: start !important; gap: 40px !important; }
 body.ih79-app #root .ih75-calendar-workspace[data-view="month"] { grid-template-columns: minmax(0,1fr) 300px !important; }
 @media (min-width:851px) {
-  body.ih79-app #root .ih75-calendar-workspace[data-view="month"] .calendar-agenda-item { grid-template-columns: minmax(0,1fr) !important; }
+  body.ih79-app #root .ih75-calendar-workspace[data-view="month"] .calendar-agenda-item { display: flex !important; flex-direction: column !important; align-items: stretch !important; }
   body.ih79-app #root .ih75-calendar-workspace[data-view="month"] .calendar-agenda-copy { display: flex !important; flex-direction: column !important; gap: 7px !important; }
   body.ih79-app #root .ih75-calendar-workspace[data-view="month"] .calendar-agenda-copy > time { order: -1 !important; }
   body.ih79-app #root .ih75-calendar-workspace[data-view="month"] .calendar-agenda-actions { flex-direction: row !important; flex-wrap: wrap !important; }
@@ -935,16 +959,17 @@ body.ih79-app #root .ih75-day-plan-heading h2 { margin: 0 0 3px !important; font
 body.ih79-app #root .ih75-day-plan-heading small { color: var(--p-muted) !important; font: 450 11px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .calendar-agenda-list { display: flex !important; flex-direction: column !important; gap: 12px !important; }
 body.ih79-app #root .calendar-agenda-item { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; align-items: start !important; gap: 16px !important; margin: 0 !important; padding: 20px 0 !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; }
+body.ih79-app #root .calendar-agenda-item::before, body.ih79-app #root .calendar-agenda-item::after { content: none !important; display: none !important; }
 body.ih79-app #root .calendar-agenda-marker { display: none !important; }
 body.ih79-app #root .calendar-agenda-meta { display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 8px !important; margin: 0 0 7px !important; color: var(--p-accent) !important; font: 650 10px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }
 body.ih79-app #root .calendar-agenda-meta em { padding: 0 !important; border: 0 !important; font: inherit !important; color: var(--p-muted) !important; }
-body.ih79-app #root .calendar-agenda-copy { display: grid !important; grid-template-columns: 68px minmax(0,1fr) !important; align-items: start !important; gap: 7px 16px !important; }
+body.ih79-app #root .calendar-agenda-copy { grid-column: 1 !important; grid-row: 1 !important; width: 100% !important; max-width: none !important; display: grid !important; grid-template-columns: 68px minmax(0,1fr) !important; align-items: start !important; gap: 7px 16px !important; }
 body.ih79-app #root .calendar-agenda-copy > :not(time) { grid-column: 2 !important; }
 body.ih79-app #root .calendar-agenda-copy > .calendar-agenda-meta { margin: 0 !important; }
 body.ih79-app #root .calendar-agenda-copy > strong { display: block !important; color: var(--p-ink) !important; font: 750 17px/1.35 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .calendar-agenda-copy > time { grid-column: 1 !important; grid-row: 1/4 !important; display: block !important; margin: 0 !important; color: var(--p-accent) !important; font: 750 14px/1.5 Inter,system-ui,sans-serif !important; font-variant-numeric: tabular-nums !important; }
 body.ih79-app #root .calendar-agenda-copy > p { margin: 9px 0 0 !important; font-size: 13px !important; }
-body.ih79-app #root .calendar-agenda-actions { display: flex !important; flex-direction: column !important; gap: 5px !important; }
+body.ih79-app #root .calendar-agenda-actions { grid-column: 2 !important; grid-row: 1 !important; display: flex !important; flex-direction: column !important; gap: 5px !important; }
 body.ih79-app #root .calendar-agenda-actions button { min-height: 36px !important; padding: 7px 10px !important; border: 0 !important; border-radius: 4px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 600 11px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .calendar-agenda-item.is-completed .calendar-agenda-copy > strong { text-decoration: line-through !important; opacity: .6 !important; }
 body.ih79-app #root .ih75-calendar-upcoming { margin: 0 !important; padding: 24px !important; border: 0 !important; border-radius: 4px 18px 4px 4px !important; background: var(--p-tint) !important; }
@@ -1129,8 +1154,9 @@ body.ih79-app #root .ih76-service-step::-webkit-details-marker, body.ih79-app #r
 
 body.ih79-app #root .profile-more-menu summary, body.ih79-app #root .profile-more-dropdown { background: var(--p-paper) !important; color: var(--p-ink) !important; border-color: var(--p-line) !important; box-shadow: none !important; }
 body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !important; }
-body.ih79-app #root .ih81-count { display: inline-block !important; font: inherit !important; color: inherit !important; font-variant-numeric: tabular-nums !important; }
-body.ih79-app #root .ih81-count > span { font: inherit !important; color: inherit !important; }
+body.ih79-app #root .ih81-count { display: inline-block !important; }
+body.ih79-app #root :is(strong,dd,.ih79-count) > .ih81-count { display: inline-block !important; font: inherit !important; color: inherit !important; letter-spacing: inherit !important; font-variant-numeric: inherit !important; }
+body.ih79-app #root :is(strong,dd,.ih79-count) > .ih81-count > span { font: inherit !important; color: inherit !important; letter-spacing: inherit !important; }
 body.ih79-app #root .ih81-sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; }
 body.ih79-app #root .ih81-work-shortcuts { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
 body.ih79-app #root .ih81-work-shortcuts > summary { display: none !important; }
@@ -1207,16 +1233,30 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih76-native-select > span { font-size: 10px !important; }
   body.ih79-app #root .ih76-native-select select { width: 100% !important; min-width: 0 !important; max-width: 100% !important; min-height: 42px !important; padding: 8px 4px !important; font-size: 16px !important; }
   body.ih79-app #root .ih76-mobile-clear { display: inline-flex !important; align-items: center !important; gap: 6px !important; min-height: 36px !important; padding: 6px 0 !important; border: 0 !important; background: none !important; color: var(--p-muted) !important; font: 600 11px/1.4 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root .ih5-jobs-page .ih73-catalog-tabs { gap: 12px !important; margin-bottom: 28px !important; }
+  body.ih79-app #root .ih5-jobs-page .ih73-catalog-tabs > a { font-size: 16px !important; letter-spacing: -.02em !important; }
+  body.ih79-app #root .ih5-jobs-page .ih75-page-heading { flex-direction: column !important; align-items: stretch !important; gap: 16px !important; margin-bottom: 28px !important; }
+  body.ih79-app #root .ih5-jobs-page .ih75-page-heading h1 { font-size: 34px !important; line-height: 1.2 !important; }
+  body.ih79-app #root .ih5-jobs-page .ih73-description { max-width: 40ch !important; margin-top: 12px !important; font-size: 15px !important; }
+  body.ih79-app #root .ih5-jobs-page .ih73-heading-actions { justify-content: flex-start !important; }
+  body.ih79-app #root .ih5-jobs-page .ih73-heading-actions > a { min-height: 40px !important; padding: 9px 12px !important; font-size: 12px !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih75-catalog-controls { grid-template-columns: minmax(0,1fr) !important; gap: 14px !important; margin-bottom: 28px !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih73-catalog-search { min-height: 56px !important; padding-inline: 16px !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih76-category-select { display: flex !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih76-catalog-refinements { align-items: stretch !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih76-native-select { padding: 9px 12px !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih76-native-select:only-child { grid-column: auto !important; }
+  body.ih79-app #root .ih80-catalog-jobs .ih76-native-select select { min-height: 34px !important; font-size: 16px !important; }
   body.ih79-app #root .ih5-jobs-results-header .ih5-jobs-clear-filters { display: none !important; }
-  body.ih79-app #root .ih79-job { display: flex !important; flex-direction: column !important; gap: 18px !important; padding: 26px 0 !important; }
+  body.ih79-app #root .ih79-job { display: flex !important; flex-direction: column !important; gap: 24px !important; padding: 24px !important; }
   body.ih79-app #root .ih5-job-card-top { width: 100% !important; align-items: baseline !important; flex-direction: row !important; gap: 6px 14px !important; }
-  body.ih79-app #root .ih5-job-overview { display: flex !important; flex-direction: column !important; gap: 18px !important; width: 100% !important; }
-  body.ih79-app #root .ih5-job-title { margin-bottom: 10px !important; font-size: 24px !important; line-height: 1.2 !important; }
-  body.ih79-app #root .ih5-job-summary { font-size: 14px !important; -webkit-line-clamp: 3 !important; }
-  body.ih79-app #root .ih5-job-price { display: flex !important; flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 4px 10px !important; width: fit-content !important; max-width: 100% !important; padding: 12px 16px !important; text-align: left !important; }
+  body.ih79-app #root .ih5-job-overview { display: flex !important; flex-direction: column !important; gap: 24px !important; width: 100% !important; }
+  body.ih79-app #root .ih5-job-title { margin-bottom: 14px !important; font-size: 23px !important; line-height: 1.35 !important; }
+  body.ih79-app #root .ih5-job-summary { font-size: 15px !important; line-height: 1.75 !important; -webkit-line-clamp: 3 !important; }
+  body.ih79-app #root .ih5-job-price { display: flex !important; flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 6px 12px !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; text-align: left !important; }
   body.ih79-app #root .ih5-job-price > span { display: none !important; }
-  body.ih79-app #root .ih5-job-price > strong { font-size: 27px !important; }
-  body.ih79-app #root .ih5-job-price > small { font-size: 10px !important; }
+  body.ih79-app #root .ih5-job-price > strong { font-size: 26px !important; }
+  body.ih79-app #root .ih5-job-price > small { font-size: 12px !important; }
   body.ih79-app #root .ih5-job-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 18px !important; width: 100% !important; padding: 0 !important; }
   body.ih79-app #root .ih5-job-facts > div:last-child { grid-column: 1/-1 !important; display: flex !important; flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 5px 10px !important; }
   body.ih79-app #root .ih5-job-facts > div { min-width: 0 !important; }
@@ -1224,7 +1264,7 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih5-job-facts span { font-size: 11px !important; }
   body.ih79-app #root .ih5-job-expiry { font-size: 11px !important; }
   body.ih79-app #root .ih5-job-actions { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; align-self: stretch !important; gap: 8px !important; width: 100% !important; }
-  body.ih79-app #root .ih5-job-actions > .ih5-button { min-height: 44px !important; font-size: 12px !important; }
+  body.ih79-app #root .ih5-job-actions > .ih5-button { min-height: 46px !important; font-size: 13px !important; }
   body.ih79-app #root .ih5-job-actions > .is-quiet { border: 1px solid var(--p-line) !important; }
   body.ih79-app #root .ih5-job-collaboration-facts, body.ih79-app #root .ih5-job-category-detail-list, body.ih79-app #root .ih5-job-collaboration-responsibility-grid { grid-template-columns: minmax(0,1fr) !important; gap: 16px !important; }
   body.ih79-app #root .ih78-service-grid { grid-template-columns: minmax(0,1fr) !important; gap: 48px !important; }
@@ -1339,7 +1379,7 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih72-identity h1 { font-size: 34px !important; }
   body.ih79-app #root .ih72-account-facts { margin-top: 20px !important; }
   body.ih79-app #root .ih72-account-facts > button { padding-inline: 6px !important; }
-  body.ih79-app #root .ih72-account-facts span { font-size: 11px !important; }
+  body.ih79-app #root .ih72-account-facts > button > span { font-size: 11px !important; }
   body.ih79-app #root .ih72-launchpad { padding-top: 26px !important; }
   body.ih79-app #root .ih72-section-heading h2 { font-size: 23px !important; }
   body.ih79-app #root .ih72-launchpad .ih72-main-actions { grid-template-columns: minmax(0,1fr) !important; max-width: none !important; gap: 12px !important; }
@@ -1405,10 +1445,10 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih75-owned-budget { grid-column: 2 !important; }
   body.ih79-app #root .ih75-owned-actions { grid-column: 1/-1 !important; flex-direction: row !important; gap: 18px !important; }
   body.ih79-app #root .ih75-owned-actions :is(a,button) { min-height: 40px !important; gap: 10px !important; }
-  body.ih79-app #root .ih5-my-services-list > article { grid-template-columns: minmax(0,1fr) !important; gap: 12px !important; }
+  body.ih79-app #root .ih5-my-services-list > article { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 18px !important; }
   body.ih79-app #root .ih5-my-service-state { flex-direction: row !important; flex-wrap: wrap !important; gap: 10px 18px !important; }
-  body.ih79-app #root .ih5-my-service-actions { gap: 8px !important; }
-  body.ih79-app #root .ih5-my-service-actions > :is(a,button) { min-height: 42px !important; padding: 10px 12px !important; font-size: 12px !important; }
+  body.ih79-app #root .ih5-my-service-actions { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; width: 100% !important; gap: 8px !important; }
+  body.ih79-app #root .ih5-my-service-actions > :is(a,button) { width: 100% !important; white-space: normal !important; word-break: normal !important; min-height: 44px !important; padding: 10px 12px !important; font-size: 12px !important; }
   body.ih79-app[data-ih73-page="profile"] #root .profile-card-with-menu { display: flex !important; flex-direction: column !important; gap: 28px !important; }
   body.ih79-app[data-ih73-page="profile"] #root .profile-card-with-menu > :not(.profile-more-menu) { width: 100% !important; }
   body.ih79-app[data-ih73-page="profile"] #root .public-profile-preview { order: 0 !important; flex-direction: row !important; align-items: center !important; gap: 16px !important; padding-right: 28px !important; }
@@ -1435,9 +1475,10 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih75-calendar-workspace > :is(section,aside) { width: 100% !important; }
   body.ih79-app #root .ih75-day-plan-heading { gap: 14px !important; margin-bottom: 20px !important; }
   body.ih79-app #root .ih76-day-number { font-size: 48px !important; }
-  body.ih79-app #root .calendar-agenda-item { grid-template-columns: minmax(0,1fr) !important; gap: 12px !important; padding: 18px 0 !important; }
-  body.ih79-app #root .calendar-agenda-copy { grid-template-columns: 62px minmax(0,1fr) !important; gap: 7px 14px !important; }
-  body.ih79-app #root .calendar-agenda-actions { flex-direction: row !important; flex-wrap: wrap !important; gap: 8px !important; padding-inline-start: 76px !important; }
+  body.ih79-app #root .calendar-agenda-item { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 18px !important; padding: 24px 0 !important; }
+  body.ih79-app #root .calendar-agenda-copy { display: flex !important; flex-direction: column !important; gap: 10px !important; }
+  body.ih79-app #root .calendar-agenda-copy > * { position: static !important; grid-column: auto !important; grid-row: auto !important; max-width: 100% !important; }
+  body.ih79-app #root .calendar-agenda-actions { flex-direction: row !important; flex-wrap: wrap !important; width: 100% !important; gap: 8px !important; padding-inline-start: 0 !important; }
   body.ih79-app #root .calendar-agenda-actions button { min-height: 44px !important; padding: 10px 12px !important; }
   body.ih79-app #root .ih75-calendar-upcoming { padding: 20px !important; }
   body.ih79-app #root .calendar-weekdays { gap: 4px !important; }
@@ -1478,7 +1519,7 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih73-catalog-tabs { gap: 9px !important; }
   body.ih79-app #root .ih73-catalog-tabs > a { font-size: 16px !important; }
   body.ih79-app #root .ih75-page-heading h1, body.ih79-app #root .ih78-services-hero h1 { font-size: 29px !important; }
-  body.ih79-app #root .ih79-job { padding: 24px 0 !important; }
+  body.ih79-app #root .ih79-job { padding: 20px !important; }
   body.ih79-app #root .ih5-job-facts { gap: 9px !important; }
   body.ih79-app #root .ih80-account-catalogs > a { font-size: 20px !important; }
   body.ih79-app #root .ih80-offer-terms { grid-template-columns: minmax(0,1fr) !important; }
