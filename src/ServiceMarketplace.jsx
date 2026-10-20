@@ -355,7 +355,6 @@ function ServiceShell({ Navbar, children, className = "" }) {
 function ServiceList({ supabase, user, navigate, Navbar }) {
   const english = useSitePreferences().language === "en";
   const location = useLocation();
-  const searchId = useId();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -416,29 +415,10 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
       <header className="ih78-services-hero">
         <h1>{english ? "Services" : "Usługi"}</h1>
-        <Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link>
+        <div className="ih79-service-actions"><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></div>
       </header>
 
-      <section className="ih78-services-discovery" aria-label={english ? "Find a service" : "Znajdź usługę"}>
-        <label className="ih78-service-search" htmlFor={searchId}>
-          <MarketIcon kind="search" />
-          <span className="ih5-sr-only">{english ? "Search services" : "Szukaj usług"}</span>
-          <input id={searchId} type="search" value={search} onChange={event => setSearch(event.target.value)} maxLength={160}
-            placeholder={english ? "Search services" : "Szukaj usługi"} />
-          {search && <button type="button" aria-label={english ? "Clear search" : "Wyczyść wyszukiwanie"} onClick={() => setSearch("")}><MarketIcon kind="close" /></button>}
-        </label>
-        <div className="ih78-discovery-bottom">
-          <label className="ih78-service-field" htmlFor={searchId + '-field'}>
-            <MarketIcon kind="talent" /><span className="ih5-sr-only">{english ? "Field" : "Dziedzina"}</span>
-            <select id={searchId + '-field'} value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
-              <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
-              {SERVICE_CATEGORIES.map(category => <option key={category} value={category}>{english ? translateUiText(category) : category}</option>)}
-            </select>
-          </label>
-          <Link className="ih78-my-services" to="/services/mine">{english ? "My services" : "Moje usługi"}<MarketIcon kind="diagonal" /></Link>
-        </div>
-      </section>
-
+      <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług">
       <section className="ih78-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>
         <header className="ih78-results-heading">
           <p role="status" aria-live="polite" aria-atomic="true">{loading ? (english ? "Finding services…" : "Szukamy usług…") : message ? (english ? "Results unavailable" : "Wyniki niedostępne") : <><strong>{services.length}</strong> {resultNoun}</>}</p>
@@ -460,6 +440,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
           </div>
         )}
       </section>
+      </MarketFilters>
     </ServiceShell>
   );
 }
@@ -1141,6 +1122,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
+      <div className="ih5-service-detail-layout">
       <header className="ih5-service-detail-header">
         <div className="ih5-service-detail-category">
           <Link to={`/services?category=${encodeURIComponent(service.category)}`}>{service.category}</Link>
@@ -1150,7 +1132,6 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
         <p>{service.summary}</p>
       </header>
 
-      <div className="ih5-service-detail-layout">
         <article className="ih5-service-detail-main">
           <section className="ih5-service-detail-section">
             <h2>Opis usługi</h2>
@@ -1180,14 +1161,14 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             </section>
           )}
 
-          <section className="ih5-service-process">
-            <h2>Jak zamówić</h2>
+          <details className="ih5-service-process">
+            <summary>Jak zamówić<MarketIcon kind="chevron" /></summary>
             <div>
               <article><i>01</i><h3>Wyślij brief</h3><p>Otwierasz rozmowę bez opłaty i rezerwacji miejsca.</p></article>
               <article><i>02</i><h3>Odbierz ofertę</h3><p>Wykonawca zapisuje zakres, termin i cenę. Miejsce czeka 24 godziny.</p></article>
               <article><i>03</i><h3>Zaakceptuj i zapłać</h3><p>Po zgodzie obu stron płatność w IdeaHire uruchamia realizację.</p></article>
             </div>
-          </section>
+          </details>
         </article>
 
         <aside className="ih5-service-order-card">
@@ -1200,7 +1181,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             <Link to={`/profile/${service.freelancer_id}`} aria-label="Zobacz profil">↗</Link>
           </div>
 
-          <div className="ih5-service-order-price">
+          <div className={"ih5-service-order-price " + (service.price_mode === "fixed" ? "is-fixed" : "is-custom")}>
             <span>{service.price_mode === "fixed" ? "Cena usługi" : "Sposób wyceny"}</span>
             <strong>
               {service.price_mode === "fixed"
@@ -1214,10 +1195,10 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             </small>
           </div>
 
-          <div className="ih5-service-order-facts">
-            <span><i>◷</i><b>{service.delivery_days} dni</b><small>standardowy czas</small></span>
-            <span><i>↻</i><b>{service.revisions}</b><small>poprawki w cenie</small></span>
-          </div>
+          <dl className="ih5-service-order-facts">
+            <div><dt>Realizacja</dt><dd>{service.delivery_days} dni</dd></div>
+            <div><dt>Poprawki w cenie</dt><dd>{service.revisions}</dd></div>
+          </dl>
 
           <span className={`ih5-service-capacity ${capacity.className}`}>
             <i aria-hidden="true" />
@@ -1665,7 +1646,7 @@ export function FreelancerVisibility({ supabase, user, canContact = true }) {
     finally { setSaving(false); }
   }
   return <section className="ih11-visibility-panel" aria-label="Widoczność i zapytania o współpracę">
-    <span className="ih11-eyebrow">Twój profil w katalogu</span><h2>Daj się znaleźć.</h2>
+    <span className="ih11-eyebrow">Twój profil w katalogu</span><h2>Widoczność i kontakt</h2>
     <p>Pokaż swój profil osobom szukającym pomocy. To Ty wybierasz, czy mogą pisać do Ciebie w sprawie współpracy i projektów do zlecenia.</p>
     <form onSubmit={save}>
       <label className="ih11-setting"><input type="checkbox" checked={settings.directory_visible} disabled={loading || saving || failed || !canContact} onChange={(event) => setSettings((previous) => ({ ...previous, directory_visible: event.target.checked }))} /><span><b>Pokaż mnie w przeglądzie freelancerów</b><small>Widoczne będą dane publicznego profilu. E-mail i data urodzenia pozostają prywatne.</small></span></label>
@@ -1719,14 +1700,14 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
       <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
         <h2 className="ih5-sr-only">{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2>
         {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
-          {result.items.map((profile, index) => <article className="ih11-freelancer-card ih73-person-card" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
-            <div className="ih11-freelancer-person"><Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`Profil: ${profile.name || "freelancer"}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || "F")[0]}</span>}</Link><div><h3><Link to={`/profile/${profile.id}`}>{profile.name || "Freelancer"}</Link></h3><p>{profile.specialization || "Tworzę i realizuję projekty."}</p></div></div>
+          {result.items.map((profile, index) => <article className="ih11-freelancer-card ih73-person-card ih79-person" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
+            <div className="ih11-freelancer-person"><Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`Profil: ${profile.name || "freelancer"}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || "F")[0]}</span>}</Link><div><h3><Link to={`/profile/${profile.id}`}>{profile.name || "Freelancer"}</Link></h3><p>{profile.specialization || "Wykonawca IdeaHire"}</p></div></div>
             <p className="ih11-freelancer-about">{profile.about || "Poznaj doświadczenie i portfolio na profilu."}</p>
             <div className="ih11-freelancer-skills">{(Array.isArray(profile.skills) ? profile.skills : []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div>
             <div className="ih11-freelancer-meta"><span>{Number(profile.completed_jobs) || 0} zakończonych zleceń</span><span>{Number(profile.positive_reviews) || 0} pozytywnych opinii</span></div>
             <footer className="ih12-directory-contact ih73-person-contact"><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#account-profile-data">Edytuj profil</Link> : <div className="ih12-contact-actions"><button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "message" })} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Zapytaj o współpracę"}><MarketIcon kind="message" />Napisz wiadomość</button><button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "project" })}><MarketIcon kind="plus" />Zleć pracę</button></div>}</footer>
           </article>)}
-        </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Tu spotkają się pomysły i umiejętności."}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
+        </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Brak dostępnych profili"}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
         {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}
       </section>
       </MarketFilters>

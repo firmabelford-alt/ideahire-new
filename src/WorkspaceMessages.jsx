@@ -30,7 +30,8 @@ export function WorkspaceInbox({
     navigate('/messages', { replace: true });
   }
   return <main className="ih68-page ih72-inbox" id="ih68-content">
-    <SubpageHeading eyebrow={t('Twoje rozmowy', 'Your conversations')} title={t('Wiadomości', 'Messages')} description={t('Wiadomości i ustalenia dotyczące Twoich projektów.', 'Conversations and terms for your projects.')} actions={<Link to="/freelancers" className="ih72-new-conversation"><WorkspaceIcon kind="plus" /><span>{t('Nowa rozmowa', 'New conversation')}</span></Link>} />
+    <SubpageHeading title={t('Wiadomości', 'Messages')} actions={<Link to="/freelancers" className="ih72-new-conversation"><WorkspaceIcon kind="plus" /><span>{t('Nowa rozmowa', 'New conversation')}</span></Link>} />
+    <div className="ih79-inbox-layout"><aside className="ih79-inbox-context"><h2>{t('Skrzynka', 'Inbox')}</h2><p>{t('Rozmowy dotyczące zleceń i współprac.', 'Conversations about your jobs and projects.')}</p><Link to="/work" className="ih68-text-link">{t('Panel pracy', 'Workspace')}<WorkspaceIcon kind="diagonal" /></Link></aside><div className="ih79-inbox-list">
     <div className="ih72-list-toolbar">
       <div className="ih72-filters" role="group" aria-label={t('Filtr rozmów', 'Conversation filter')}>
         <button type="button" aria-pressed={inboxFilter === 'all'} onClick={() => update('unread', '')}>{t('Wszystkie', 'All')}{!loading && <span>{conversations.length}</span>}</button>
@@ -41,8 +42,9 @@ export function WorkspaceInbox({
     <section className="ih72-inbox-content" aria-label={t('Lista rozmów', 'Conversation list')}>
       {loading ? <WorkspaceLoading /> : errorMessage ? <p className="ih68-feedback" role="alert">{errorMessage}</p> : visibleConversations.length ?
         <WorkspaceConversationRows conversations={visibleConversations} user={user} loading={loading} /> :
-        <div className="ih72-empty"><WorkspaceIcon kind="message" /><h2>{conversations.length ? t('Nie ma takich rozmów.', 'No matching conversations.') : t('Zacznij od rozmowy.', 'Start with a conversation.')}</h2><p>{conversations.length ? t('Zmień wyszukiwanie lub pokaż wszystkie rozmowy.', 'Change your search or show all conversations.') : t('Znajdź wykonawcę albo odpowiedz na zlecenie. Resztę ustalicie tutaj.', 'Find a freelancer or reply to a job. You can agree on the details here.')}</p>{conversations.length ? <button type="button" className="ih68-secondary" onClick={reset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/freelancers" className="ih68-primary">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
+        <div className="ih79-empty"><h2>{conversations.length ? t('Brak pasujących rozmów', 'No matching conversations') : t('Brak rozmów', 'No conversations')}</h2><p>{conversations.length ? t('Zmień wyszukiwanie lub pokaż wszystkie rozmowy.', 'Change your search or show all conversations.') : t('Znajdź wykonawcę albo odpowiedz na zlecenie. Wiadomości znajdziesz tutaj.', 'Find a freelancer or reply to a job. Your messages will appear here.')}</p>{conversations.length ? <button type="button" className="ih68-secondary" onClick={reset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/freelancers" className="ih68-primary">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
     </section>
+    </div></div>
   </main>;
 }
 

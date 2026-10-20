@@ -1,4 +1,4 @@
-/* P72 — one open workspace, with direct actions and room to work. */
+/* P79 — account, workspace and navigation with separate phone and laptop layouts. */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ArrowUpRight, ArrowUp, Bell, BriefcaseBusiness, CalendarDays, Check, ChevronDown, ChevronRight, FileText, FolderOpen, Wallet, Home, Image, LayoutGrid, LogOut, Menu, MessageSquare, MoreHorizontal, Palette, Paperclip, Play, Plus, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound, X, Maximize2, Minimize2, Pin } from 'lucide-react';
@@ -139,11 +139,16 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
   const primary = limited
     ? [['/account', t('Konto', 'Account'), 'profile'], ['/jobs', t('Zlecenia', 'Jobs'), 'jobs'], ['/services', t('Usługi', 'Services'), 'services']]
     : [['/account', t('Konto', 'Account'), 'home'], ['/work', t('Praca', 'Work'), 'work'], ['/messages', t('Wiadomości', 'Messages'), 'message']];
-  const current = to => to === '/messages' ? view === 'chat' || view === 'messages' : location.pathname === to;
+  const current = to => {
+    if (to === '/messages') return view === 'chat' || view === 'messages';
+    if (to === '/work') return ['/work', '/jobs', '/freelancers', '/find-talent', '/calendar'].includes(location.pathname) || location.pathname.startsWith('/services') || location.pathname.startsWith('/edit-job/');
+    if (to === '/services') return location.pathname.startsWith('/services');
+    return location.pathname === to;
+  };
   const extras = [['/', t('Strona główna', 'Site home'), 'home'], ['/jobs', t('Przeglądaj zlecenia', 'Browse jobs'), 'jobs'], ['/freelancers', t('Freelancerzy', 'Freelancers'), 'people'], ['/services', t('Usługi', 'Services'), 'services'], ['/calendar', t('Kalendarz', 'Calendar'), 'calendar'], ...(!limited ? [['/notifications', t('Powiadomienia', 'Notifications'), 'bell'], ['/disputes', t('Sprawy i zgłoszenia', 'Disputes & reports'), 'lock']] : []), ['/privacy-center', t('Prywatność i dane', 'Privacy & data'), 'lock']];
   return <>
     <a className="ih68-skip" href="#ih68-content">{t('Przejdź do treści', 'Skip to content')}</a>
-    <header className="navbar account-navbar ih68-header ih72-header" data-workspace-release="P72">
+    <header className="navbar account-navbar ih68-header ih72-header" data-workspace-release="P79">
       <div className="ih68-header-inner">
         <Link to="/" className="ih68-brand" aria-label={t('IdeaHire — strona główna', 'IdeaHire — site home')}><BrandSignature /></Link>
         <nav className="ih68-top-nav" aria-label={t('Panel konta', 'Account navigation')}>
@@ -249,58 +254,46 @@ export function WorkspaceDashboard({
     const section = sections.find(item => item.key === key);
     if (section) onSelect(section);
   };
-  return <div className="ih72-dashboard">
-    <section className="ih72-identity" aria-labelledby="ih68-home-title">
-      <p className="ih72-eyebrow">{t('Moje konto', 'My account')}</p>
-      <button type="button" className={'ih72-profile-orbit' + (profileOpen ? ' is-open' : '')}
-        aria-expanded={profileOpen} aria-controls="ih72-profile-shortcuts"
-        aria-label={t('Pokaż opcje edycji profilu', 'Show profile editing options')}
-        onClick={() => setProfileOpen(value => !value)}>
-        <WorkspaceAvatar name={name} url={avatarUrl} />
-        <span className="ih72-orbit-control"><WorkspaceIcon kind={profileOpen ? 'close' : 'plus'} /></span>
-      </button>
-      <h1 id="ih68-home-title" tabIndex={-1}>{name || t('Twoja przestrzeń', 'Your space')}</h1>
-      <div className="ih72-identity-links">
-        <button type="button" aria-expanded={profileOpen} aria-controls="ih72-profile-shortcuts"
-          onClick={() => setProfileOpen(value => !value)}>{t('Edytuj profil', 'Edit profile')}<WorkspaceIcon kind="down" /></button>
-        {inbox?.user?.id && <Link to={'/profile/' + inbox.user.id}>{t('Zobacz profil', 'View profile')}<WorkspaceIcon kind="diagonal" /></Link>}
+  return <div className="ih79-dashboard">
+    <section className="ih79-account-identity" aria-labelledby="ih68-home-title">
+      <div className="ih79-identity-top">
+        <button type="button" className={'ih72-profile-orbit' + (profileOpen ? ' is-open' : '')}
+          aria-expanded={profileOpen} aria-controls="ih72-profile-shortcuts"
+          aria-label={t('Opcje edycji profilu', 'Profile editing options')}
+          onClick={() => setProfileOpen(value => !value)}>
+          <WorkspaceAvatar name={name} url={avatarUrl} />
+          <span className="ih72-orbit-control"><WorkspaceIcon kind={profileOpen ? 'close' : 'plus'} /></span>
+        </button>
+        <div><p className="ih79-label">{t('Moje konto', 'My account')}</p><h1 id="ih68-home-title" tabIndex={-1}>{name || t('Twoje konto', 'Your account')}</h1>
+          <div className="ih79-identity-links"><button type="button" aria-expanded={profileOpen} aria-controls="ih72-profile-shortcuts" onClick={() => setProfileOpen(value => !value)}>{t('Edytuj profil', 'Edit profile')}<WorkspaceIcon kind="down" /></button>
+          {inbox?.user?.id && <Link to={'/profile/' + inbox.user.id}>{t('Zobacz profil', 'View profile')}<WorkspaceIcon kind="diagonal" /></Link>}</div>
+        </div>
       </div>
-      <nav id="ih72-profile-shortcuts" className="ih72-profile-shortcuts" hidden={!profileOpen}
-        aria-label={t('Edycja profilu', 'Edit profile')}>
-        {[['profile', 'profile', t('Dane profilu', 'Profile details')],
-          ['expertise', 'services', t('Umiejętności', 'Skills')],
-          ['portfolio', 'portfolio', 'Portfolio']].map(([key, icon, label]) =>
+      <nav id="ih72-profile-shortcuts" className="ih72-profile-shortcuts" hidden={!profileOpen} aria-label={t('Edycja profilu', 'Profile editing')}>
+        {[['profile', 'profile', t('Dane profilu', 'Profile details')], ['expertise', 'services', t('Umiejętności', 'Skills')], ['portfolio', 'portfolio', 'Portfolio']].map(([key, icon, label]) =>
           <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span>{label}</span><WorkspaceIcon kind="next" /></button>)}
       </nav>
-      <div className="ih72-account-facts" aria-label={t('Twój profil w liczbach', 'Your profile at a glance')}>
+      <div className="ih79-account-facts" aria-label={t('Twój profil w liczbach', 'Your profile at a glance')}>
         <button type="button" onClick={() => select('jobs')}><strong>{jobsLoading ? '—' : jobCount}</strong><span>{t('Zlecenia', 'Listings')}</span></button>
         <button type="button" onClick={() => select('portfolio')}><strong>{portfolioCount}</strong><span>Portfolio</span></button>
         <button type="button" onClick={() => select('expertise')}><strong>{specialtyCount}</strong><span>{t('Specjalizacje', 'Skills')}</span></button>
       </div>
+      <nav className="ih79-account-settings" aria-label={t('Zarządzaj kontem', 'Manage account')}>
+        {[['payouts', 'payouts', t('Saldo i wypłaty', 'Balance & payouts')], ['preferences', 'settings', t('Ustawienia', 'Settings')], ['templates', 'palette', t('Wygląd strony', 'Appearance')]].map(([key, icon, label]) =>
+          <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span>{label}</span><WorkspaceIcon kind="next" /></button>)}
+      </nav>
     </section>
-
-    <section className="ih72-launchpad" aria-labelledby="ih72-work-title">
-      <div className="ih72-section-heading"><div><p className="ih72-eyebrow">{t('Zlecenia i usługi', 'Jobs & services')}</p><h2 id="ih72-work-title">{t('Twoja praca', 'Your work')}</h2></div><Link to="/work" className="ih68-text-link">{t('Współprace', 'Projects')}<WorkspaceIcon kind="diagonal" /></Link></div>
+    <section className="ih79-account-launch" aria-labelledby="ih79-launch-title">
+      <div className="ih79-section-title"><h2 id="ih79-launch-title">{t('Przejdź do pracy', 'Get to work')}</h2><Link to="/work" className="ih68-text-link">{t('Panel pracy', 'Workspace')}<WorkspaceIcon kind="diagonal" /></Link></div>
       <WorkspaceWorkActions />
     </section>
-
-    <section className="ih72-activity" aria-labelledby="ih72-recent-title">
-      <div className="ih72-section-heading"><h2 id="ih72-recent-title">{t('Ostatnie rozmowy', 'Recent conversations')}{!inbox?.loading && unread > 0 && <span className="ih72-count">{unread}<span className="ih68-sr-only">{t(' nieprzeczytanych', ' unread')}</span></span>}</h2><Link to="/messages" className="ih68-text-link">{t('Wszystkie', 'View all')}<WorkspaceIcon kind="arrow" /></Link></div>
+    <section className="ih79-account-inbox" aria-labelledby="ih72-recent-title">
+      <div className="ih79-section-title"><h2 id="ih72-recent-title">{t('Ostatnie rozmowy', 'Recent conversations')}{unread > 0 && <span className="ih79-count">{unread}</span>}</h2><Link to="/messages" className="ih68-text-link">{t('Wszystkie', 'View all')}<WorkspaceIcon kind="arrow" /></Link></div>
       {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : conversations.length ?
-        <WorkspaceConversationRows conversations={conversations.slice(0, 3)} user={inbox?.user} /> :
-        <div className="ih72-empty-inline"><WorkspaceIcon kind="message" /><div><h3>{t('Nie masz jeszcze rozmów.', 'No conversations yet.')}</h3><p>{t('Tutaj znajdziesz wiadomości dotyczące Twoich projektów.', 'Your project conversations will appear here.')}</p><Link to="/freelancers" className="ih68-text-link">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="diagonal" /></Link></div></div>}
+        <WorkspaceConversationRows conversations={conversations.slice(0, 4)} user={inbox?.user} /> :
+        <div className="ih79-empty"><h3>{t('Brak rozmów', 'No conversations')}</h3><p>{t('Wiadomości dotyczące Twoich projektów pojawią się tutaj.', 'Your project messages will appear here.')}</p><Link to="/freelancers" className="ih68-text-link">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="diagonal" /></Link></div>}
     </section>
-
-    <section className="ih72-account-tools" aria-labelledby="ih72-account-tools-title">
-      <div className="ih72-section-heading"><h2 id="ih72-account-tools-title">{t('Twoje konto', 'Your account')}</h2></div>
-      <div className="ih72-setting-links">
-        {[['payouts', 'payouts', t('Saldo i wypłaty', 'Balance & payouts'), t('Stripe i historia rozliczeń', 'Stripe and payout history')],
-          ['preferences', 'settings', t('Ustawienia konta', 'Account settings'), t('Powiadomienia, prywatność i preferencje', 'Notifications, privacy and preferences')],
-          ['templates', 'palette', t('Wygląd strony', 'Site appearance'), t('Twój szablon i kolory', 'Your template and colours')]].map(([key, icon, label, detail]) =>
-          <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span><strong>{label}</strong><small>{detail}</small></span><WorkspaceIcon kind="next" /></button>)}
-      </div>
-    </section>
-    <footer className="ih72-desk-footer"><nav aria-label={t('Odkrywaj IdeaHire', 'Explore IdeaHire')}><Link to="/freelancers">{t('Freelancerzy', 'Freelancers')}</Link><Link to="/services">{t('Usługi', 'Services')}</Link><Link to="/privacy-center">{t('Prywatność i dane', 'Privacy & data')}</Link></nav><IntroFilm /></footer>
+    <footer className="ih79-account-footer"><Link to="/privacy-center">{t('Prywatność i dane', 'Privacy & data')}</Link><IntroFilm /></footer>
   </div>;
 }
 
@@ -334,6 +327,9 @@ export function WorkspaceWork({ inbox }) {
   const filter = ['client', 'contractor'].includes(params.get('role')) ? params.get('role') : 'all';
   const search = params.get('q') || '';
   const rows = inbox?.conversations || [];
+  const unread = rows.filter(item => item.isUnread).length;
+  const hiring = rows.filter(item => item.client_id === inbox?.user?.id).length;
+  const providing = rows.filter(item => item.contractor_id === inbox?.user?.id).length;
   const visible = useMemo(() => rows.filter(item =>
     (filter === 'all' || (filter === 'client' ? item.client_id : item.contractor_id) === inbox?.user?.id) &&
     (!search.trim() || [item.job?.title, item.otherProfile?.name, item.lastMessage?.content].filter(Boolean).join(' ').toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))),
@@ -344,21 +340,28 @@ export function WorkspaceWork({ inbox }) {
     navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
   }
   return <main className="ih68-page ih72-work-page" id="ih68-content">
-    <SubpageHeading eyebrow={t('Panel pracy', 'Workspace')} title={t('Twoja praca', 'Your work')} description={t('Współprace, rozmowy i kolejne kroki.', 'Projects, conversations and next steps.')} actions={<Link to="/calendar" className="ih68-text-link"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>} />
-    <WorkspaceWorkActions />
-    <section className="ih72-projects" aria-labelledby="ih72-projects-title">
-      <div className="ih72-section-heading"><h2 id="ih72-projects-title">{t('Twoje współprace', 'Your projects')}{!inbox?.loading && <span className="ih72-count">{visible.length}</span>}</h2></div>
-      <div className="ih72-list-toolbar">
-        <div className="ih72-filters" role="group" aria-label={t('Twoja rola', 'Your role')}>
-          {[['all', t('Wszystkie', 'All')], ['client', t('Zlecam', 'Hiring')], ['contractor', t('Realizuję', 'Providing')]].map(([value, label]) =>
-            <button type="button" key={value} aria-pressed={filter === value} onClick={() => update('role', value)}>{label}</button>)}
+    <SubpageHeading title={t('Panel pracy', 'Workspace')} actions={<Link to="/calendar" className="ih79-button"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>} />
+    <div className="ih79-work-overview" aria-label={t('Podsumowanie współprac', 'Project overview')}>
+      <Link to="/messages?unread=1" className={unread ? 'has-unread' : ''}><span>{t('Nieprzeczytane rozmowy', 'Unread conversations')}</span><strong>{inbox?.loading ? '—' : unread}</strong><WorkspaceIcon kind="arrow" /></Link>
+      <button type="button" onClick={() => update('role', 'client')}><span>{t('Zlecam', 'Hiring')}</span><strong>{inbox?.loading ? '—' : hiring}</strong><WorkspaceIcon kind="diagonal" /></button>
+      <button type="button" onClick={() => update('role', 'contractor')}><span>{t('Realizuję', 'Providing')}</span><strong>{inbox?.loading ? '—' : providing}</strong><WorkspaceIcon kind="diagonal" /></button>
+    </div>
+    <div className="ih79-work-layout">
+      <section className="ih72-projects" aria-labelledby="ih72-projects-title">
+        <div className="ih79-section-title"><h2 id="ih72-projects-title">{t('Współprace', 'Projects')}<span className="ih79-count">{inbox?.loading ? '—' : visible.length}</span></h2></div>
+        <div className="ih72-list-toolbar">
+          <div className="ih72-filters" role="group" aria-label={t('Twoja rola', 'Your role')}>
+            {[['all', t('Wszystkie', 'All')], ['client', t('Zlecam', 'Hiring')], ['contractor', t('Realizuję', 'Providing')]].map(([value, label]) =>
+              <button type="button" key={value} aria-pressed={filter === value} onClick={() => update('role', value)}>{label}</button>)}
+          </div>
+          <label className="ih72-search"><span className="ih68-sr-only">{t('Szukaj projektu lub osoby', 'Search projects or people')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q', event.target.value)} placeholder={t('Projekt lub osoba', 'Project or person')} />{search && <button type="button" onClick={() => update('q', '')} aria-label={t('Wyczyść wyszukiwanie', 'Clear search')}><WorkspaceIcon kind="close" /></button>}</label>
         </div>
-        <label className="ih72-search"><span className="ih68-sr-only">{t('Szukaj projektu lub osoby', 'Search projects or people')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q', event.target.value)} placeholder={t('Szukaj projektu lub osoby', 'Search projects or people')} />{search && <button type="button" onClick={() => update('q', '')} aria-label={t('Wyczyść wyszukiwanie', 'Clear search')}><WorkspaceIcon kind="close" /></button>}</label>
-      </div>
-      {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : visible.length ?
-        <WorkspaceProjectCards conversations={visible} user={inbox?.user} loading={inbox?.loading} /> :
-        <div className="ih72-empty"><WorkspaceIcon kind="work" /><h3>{rows.length ? t('Nie ma takich projektów.', 'No matching projects.') : t('Nie masz jeszcze współprac.', 'No projects yet.')}</h3><p>{rows.length ? t('Zmień wyszukiwanie lub wybraną rolę.', 'Change your search or selected role.') : t('Gdy rozpoczniesz współpracę, znajdziesz ją tutaj.', 'Your projects will appear here when you start a collaboration.')}</p>{rows.length ? <button type="button" className="ih68-secondary" onClick={() => navigate('/work', { replace: true })}>{t('Wyczyść filtry', 'Clear filters')}</button> : <Link to="/jobs" className="ih68-primary">{t('Znajdź zlecenie', 'Find a job')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
-    </section>
+        {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : visible.length ?
+          <WorkspaceProjectCards conversations={visible} user={inbox?.user} loading={inbox?.loading} /> :
+          <div className="ih79-empty"><h3>{rows.length ? t('Brak pasujących współprac', 'No matching projects') : t('Nie masz jeszcze współprac', 'No projects yet')}</h3><p>{rows.length ? t('Zmień frazę lub wybraną rolę.', 'Change the phrase or selected role.') : t('Odpowiedz na zlecenie albo napisz do wykonawcy. Rozmowę i ustalenia znajdziesz tutaj.', 'Reply to a job or contact a freelancer. Your conversations and terms will appear here.')}</p>{rows.length ? <button type="button" className="ih79-button" onClick={() => navigate('/work', { replace: true })}>{t('Wyczyść filtry', 'Clear filters')}</button> : <Link to="/jobs" className="ih79-button is-primary">{t('Znajdź zlecenie', 'Find a job')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
+      </section>
+      <aside className="ih79-work-tools" aria-label={t('Zlecenia i usługi', 'Jobs and services')}><WorkspaceWorkActions /></aside>
+    </div>
   </main>;
 }
 export function WorkspaceLimitedHome({

@@ -92,9 +92,7 @@ class LucynaBoundary extends React.Component {
   }
 }
 
-/* =========================================================
-   FLUID NAVIGATION ENGINE
-========================================================= */
+/* FLUID NAVIGATION ENGINE */
 
 const ROUTE_LOADING_SELECTOR =
   "[data-route-loading='true']";
@@ -235,9 +233,7 @@ function useNavigate() {
   );
 }
 
-/* =========================================================
-   AUTH CONTEXT
-========================================================= */
+/* AUTH CONTEXT */
 
 const AuthContext = createContext(null);
 
@@ -665,9 +661,7 @@ function useAuth() {
   return useContext(AuthContext);
 }
 
-/* =========================================================
-   ACCOUNT RESTRICTION CONTEXT
-========================================================= */
+/* ACCOUNT RESTRICTION CONTEXT */
 
 const AccountRestrictionContext = createContext(null);
 const ACCOUNT_RESTRICTION_STATUS_RPC =
@@ -896,9 +890,7 @@ function useAccountRestriction() {
   };
 }
 
-/* =========================================================
-   AGE ACCESS
-========================================================= */
+/* AGE ACCESS */
 
 const MIN_ACCOUNT_AGE = 16;
 const FULL_ACCOUNT_AGE = 18;
@@ -1228,9 +1220,7 @@ function useAgeAccess() {
   };
 }
 
-/* =========================================================
-   DISCOVERY PREFERENCES
-========================================================= */
+/* DISCOVERY PREFERENCES */
 
 const DiscoveryPreferencesContext = createContext(null);
 
@@ -2674,9 +2664,7 @@ function JobRepublicationPanel() {
   );
 }
 
-/* =========================================================
-   LOADING
-========================================================= */
+/* LOADING */
 
 function LoadingScreen() {
   return (
@@ -2710,9 +2698,7 @@ function InlineRouteLoader({
   );
 }
 
-/* =========================================================
-   PROTECTED ROUTE
-========================================================= */
+/* PROTECTED ROUTE */
 
 function ProtectedRoute({
   children,
@@ -2746,9 +2732,7 @@ function ProtectedRoute({
   return children;
 }
 
-/* =========================================================
-   PUBLIC ONLY
-========================================================= */
+/* PUBLIC ONLY */
 
 function PublicOnlyRoute({
   children,
@@ -2799,9 +2783,7 @@ function PublicOnlyRoute({
   return children;
 }
 
-/* =========================================================
-   ACCOUNT MODE ROUTES
-========================================================= */
+/* ACCOUNT MODE ROUTES */
 
 function UserOnlyRoute({
   children,
@@ -3224,9 +3206,7 @@ class AdminModerationErrorBoundary extends React.Component {
   }
 }
 
-/* =========================================================
-   JOB CATEGORIES
-========================================================= */
+/* JOB CATEGORIES */
 
 const JOB_CATEGORIES = [
   "Programowanie",
@@ -4513,9 +4493,7 @@ function markConversationSeen(
   );
 }
 
-/* =========================================================
-   NAVBAR
-========================================================= */
+/* NAVBAR */
 
 function AccountNavbar() {
   const accountLocation = useLocation();
@@ -5639,9 +5617,7 @@ function AdminNavbar() {
   );
 }
 
-/* =========================================================
-   LOGIN
-========================================================= */
+/* LOGIN */
 
 function Login() {
   const navigate =
@@ -6089,9 +6065,7 @@ function Login() {
   );
 }
 
-/* =========================================================
-   RESET PASSWORD
-========================================================= */
+/* RESET PASSWORD */
 
 function ResetPassword() {
   const navigate =
@@ -6543,9 +6517,7 @@ function ResetPassword() {
 }
 
 
-/* =========================================================
-   REGISTER
-========================================================= */
+/* REGISTER */
 
 function Register() {
   const {
@@ -7038,9 +7010,7 @@ function Register() {
   );
 }
 
-/* =========================================================
-   AVATAR
-========================================================= */
+/* AVATAR */
 
 async function resizeAndConvertImage(
   file
@@ -8070,9 +8040,7 @@ function LimitedAccount() {
   </div>;
 }
 
-/* =========================================================
-   ACCOUNT
-========================================================= */
+/* ACCOUNT */
 
 function AccountTemplatesCard() {
   const { template, setTemplate, language } = useSitePreferences();
@@ -10932,9 +10900,7 @@ function Account() {
   );
 }
 
-/* =========================================================
-   PRIVACY CENTER — USER
-========================================================= */
+/* PRIVACY CENTER — USER */
 
 function formatPrivacyRequestNumber(value) {
   return `RODO-${String(value || 0).padStart(6, "0")}`;
@@ -12119,9 +12085,7 @@ function PrivacyCenter() {
   );
 }
 
-/* =========================================================
-   FIND TALENT
-========================================================= */
+/* FIND TALENT */
 
 function FindTalent() {
   const formEnglish = useSitePreferences().language === "en";
@@ -13540,9 +13504,7 @@ function FindTalent() {
   );
 }
 
-/* =========================================================
-   EDIT JOB
-========================================================= */
+/* EDIT JOB */
 
 function EditJob() {
   const { id } =
@@ -13834,9 +13796,7 @@ function EditJob() {
   );
 }
 
-/* =========================================================
-   PROFILE
-========================================================= */
+/* PROFILE */
 
 function Profile() {
   const profileNavigate = useNavigate();
@@ -14169,281 +14129,7 @@ function Profile() {
       <AccountNavbar />
 
       <main className="app-page">
-        <style>{`
-          .profile-card-with-menu {
-            position: relative;
-          }
-
-          .profile-card-with-menu .profile-preview {
-            padding-right: 58px;
-          }
-
-          .profile-more-menu {
-            position: absolute;
-            z-index: 20;
-            top: 18px;
-            right: 18px;
-          }
-
-          .profile-more-menu summary {
-            width: 42px;
-            height: 42px;
-            display: grid;
-            place-items: center;
-            border: 1px solid #e2e2de;
-            border-radius: 50%;
-            background: #fff;
-            color: #555550;
-            font-size: 21px;
-            font-weight: 800;
-            line-height: 1;
-            letter-spacing: 2px;
-            cursor: pointer;
-            list-style: none;
-            box-shadow: 0 6px 18px rgba(20,20,20,.06);
-          }
-
-          .profile-more-menu summary::-webkit-details-marker {
-            display: none;
-          }
-
-          .profile-more-menu summary:hover,
-          .profile-more-menu[open] summary {
-            border-color: #cfcfca;
-            background: #f7f7f4;
-          }
-
-          .profile-more-dropdown {
-            position: absolute;
-            top: 49px;
-            right: 0;
-            width: max-content;
-            min-width: 210px;
-            padding: 7px;
-            border: 1px solid #e4e4df;
-            border-radius: 14px;
-            background: #fff;
-            box-shadow: 0 16px 38px rgba(20,20,20,.14);
-          }
-
-          .profile-more-dropdown button {
-            width: 100%;
-            min-height: 42px;
-            padding: 10px 12px;
-            border: 0;
-            border-radius: 10px;
-            background: transparent;
-            color: #8e352b;
-            font: inherit;
-            font-size: 13px;
-            font-weight: 700;
-            text-align: left;
-            cursor: pointer;
-          }
-
-          .profile-more-dropdown button.is-unblock {
-            color: #315b35;
-          }
-
-          .profile-more-dropdown button:hover {
-            background: #f7f7f4;
-          }
-
-          .profile-more-dropdown button:disabled {
-            cursor: wait;
-            opacity: .6;
-          }
-
-          .profile-hidden-avatar {
-            display: grid;
-            place-items: center;
-            background: #dfdfda;
-            color: #74746f;
-            font-size: 38px;
-            font-weight: 400;
-          }
-
-          .profile-hidden-copy h1 {
-            color: #555550;
-          }
-
-          .profile-hidden-copy p {
-            max-width: 540px;
-            margin: 8px 0 0;
-            color: #85857f;
-            font-size: 13px;
-            line-height: 1.6;
-          }
-
-          .profile-expertise {
-            display: grid;
-            grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr);
-            gap: 18px;
-            margin-top: 26px;
-            padding-top: 24px;
-            border-top: 1px solid #ededeb;
-          }
-
-          .profile-stats {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            margin-top: 2px;
-          }
-
-          .profile-stat-card {
-            min-width: 0;
-            padding: 19px 20px;
-            border: 1px solid #e7e7e2;
-            border-radius: 18px;
-            background: #fafaf8;
-          }
-
-          .profile-stat-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-          }
-
-          .profile-stat-top strong {
-            color: #33332f;
-            font-size: 14px;
-          }
-
-          .profile-stat-value {
-            color: #171717;
-            font-size: 27px;
-            font-weight: 850;
-            line-height: 1;
-          }
-
-          .profile-stat-breakdown {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px 13px;
-            margin-top: 13px;
-            color: #85857f;
-            font-size: 11px;
-            line-height: 1.4;
-          }
-
-          .profile-content-card {
-            min-width: 0;
-            margin-top: 18px;
-            padding: 20px;
-            border: 1px solid #e8e8e3;
-            border-radius: 18px;
-            background: #fafaf8;
-          }
-
-          .profile-about-copy {
-            margin: 0;
-            color: #555550;
-            font-size: 14px;
-            line-height: 1.7;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-          }
-
-          .profile-expertise-card {
-            min-width: 0;
-            padding: 20px;
-            border: 1px solid #e8e8e3;
-            border-radius: 18px;
-            background: #fafaf8;
-          }
-
-          .profile-expertise-label {
-            display: block;
-            margin-bottom: 12px;
-            color: #888882;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-          }
-
-          .profile-specialty-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-          }
-
-          .profile-specialty-chip {
-            display: inline-flex;
-            align-items: center;
-            min-height: 34px;
-            padding: 7px 11px;
-            border: 1px solid #dcdcd6;
-            border-radius: 999px;
-            background: #fff;
-            color: #33332f;
-            font-size: 12px;
-            font-weight: 700;
-          }
-
-          .profile-specialization-copy {
-            margin: 0;
-            color: #555550;
-            font-size: 14px;
-            line-height: 1.7;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-          }
-
-          .profile-specialization-card {
-            margin-top: 18px;
-          }
-
-          .profile-block-notice,
-          .profile-block-message {
-            margin: 14px 0 0;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: #f7f7f4;
-            color: #666;
-            font-size: 13px;
-            line-height: 1.55;
-          }
-
-          @media (max-width: 600px) {
-            .profile-card-with-menu .profile-preview {
-              padding-right: 46px;
-            }
-
-            .profile-more-menu {
-              top: 13px;
-              right: 13px;
-            }
-
-            .profile-more-menu summary {
-              width: 38px;
-              height: 38px;
-            }
-
-            .profile-more-dropdown {
-              top: 45px;
-            }
-
-            .profile-expertise {
-              grid-template-columns: 1fr;
-            }
-
-            .profile-expertise-card {
-              padding: 17px;
-            }
-
-            .profile-stats {
-              grid-template-columns: 1fr;
-            }
-
-            .profile-stat-card,
-            .profile-content-card {
-              padding: 17px;
-            }
-          }
-        `}</style>
+        
 
         <section className="account-card profile-card-with-menu">
           {isOtherProfile && (
@@ -15032,9 +14718,7 @@ function Profile() {
   );
 }
 
-/* =========================================================
-   JOBS
-========================================================= */
+/* JOBS */
 
 function JobsSpotlight({ jobs, formatBudget }) {
   const [activeId, setActiveId] = useState(jobs[0]?.id || "");
@@ -15162,10 +14846,8 @@ function Jobs() {
     setAppliedJobIds,
   ] = useState([]);
 
-  /* =======================================================
-     NOWE:
-     WYSZUKIWANIE
-  ======================================================= */
+  /* NOWE:
+     WYSZUKIWANIE */
 
   const [search, setSearch] =
     useState("");
@@ -15370,9 +15052,7 @@ function Jobs() {
     );
   }
 
-  /* =======================================================
-     ZGŁOSZENIE DO ZLECENIA
-  ======================================================= */
+  /* ZGŁOSZENIE DO ZLECENIA */
 
   async function handleApply(
     job
@@ -15499,9 +15179,7 @@ function Jobs() {
     }
   }
 
-  /* =======================================================
-     WYSZUKIWANIE
-  ======================================================= */
+  /* WYSZUKIWANIE */
 
   const normalizedSearch =
     search
@@ -15647,9 +15325,7 @@ function Jobs() {
         )}
 
 
-        {/* =================================================
-            WYSZUKIWARKA
-        ================================================= */}
+        {/* WYSZUKIWARKA */}
 
 
         <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder}>
@@ -15680,9 +15356,7 @@ function Jobs() {
 
         {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
 
-        {/* =================================================
-            WYNIKI
-        ================================================= */}
+        {/* WYNIKI */}
 
 
 
@@ -15754,9 +15428,7 @@ function Jobs() {
             </section>
           )}
 
-        {/* =================================================
-            LISTA ZLECEŃ
-        ================================================= */}
+        {/* LISTA ZLECEŃ */}
 
 
         <div className="ih5-jobs-list">
@@ -15819,7 +15491,7 @@ function Jobs() {
 
               return (
                 <article
-                  className={`ih5-job-card ih73-job-row${isOpen ? " is-open" : ""}`}
+                  className={`ih5-job-card ih73-job-row ih79-job${isOpen ? " is-open" : ""}`}
                   style={{ "--ih-job-order": Math.min(jobIndex, 5) }}
                   id={`ih10-job-${job.id}`}
                   tabIndex={-1}
@@ -15866,10 +15538,10 @@ function Jobs() {
                           </svg>
                         </span>
                         <div>
-                          <span className="ih5-eyebrow">Czytelne ustalenia przed startem</span>
+                          
                           <h3 id={`ih-job-plan-title-${job.id}`}>Plan współpracy</h3>
                           <p>
-                            Zakres, sposób realizacji i informacje potrzebne do przygotowania trafnego zgłoszenia.
+                            Szczegóły zlecenia i wymagania.
                           </p>
                         </div>
                       </header>
@@ -16196,9 +15868,7 @@ function Jobs() {
   );
 }
 
-/* =========================================================
-   TALENT DIRECTORY — POMOCNE DOPASOWANIE, BEZ BLOKAD RÓL
-========================================================= */
+/* TALENT DIRECTORY — POMOCNE DOPASOWANIE, BEZ BLOKAD RÓL */
 
 function calendarPad(value) {
   return String(value).padStart(2, "0");
@@ -17364,7 +17034,7 @@ function Calendar() {
 
       <main className="app-page calendar-shell">
         <header className="ih76-planner-heading">
-          <div><p>{calendarEnglish ? "Your time, in order" : "Twój czas, poukładany"}</p><h1>{calendarEnglish ? "Calendar" : "Kalendarz"}</h1></div>
+          <div><h1>{calendarEnglish ? "Calendar" : "Kalendarz"}</h1></div>
           <button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" /><span>{calendarEnglish ? "Add event" : "Dodaj termin"}</span></button>
         </header>
 
@@ -17948,11 +17618,12 @@ function Calendar() {
   );
 }
 
-/* =========================================================
-   NOTIFICATIONS
-========================================================= */
+/* NOTIFICATIONS */
 
 function Notifications() {
+  const notificationEnglish = useSitePreferences().language === 'en';
+  const nt = (pl, en) => notificationEnglish ? en : pl;
+  const [notificationView, setNotificationView] = useState('all');
   const { user } =
     useAuth();
 
@@ -18982,714 +18653,59 @@ function Notifications() {
     blockNotifications.length === 0 &&
     messageNotifications.length === 0;
 
-  return (
-    <div className="page">
-      <AccountNavbar />
-
-      <main className="app-page notifications-page">
-        <SubpageHeading eyebrow="Skrzynka odbiorcza" title="Powiadomienia"
-          description="Nowe wiadomości, zgłoszenia do zleceń i decyzje dotyczące współpracy."
-          variant="notifications" />
-
-        {loading && (
-          <InlineRouteLoader
-            className="notifications-route-loader"
-            rows={3}
-          />
-        )}
-
-        {!loading &&
-          message && (
-            <p className="auth-error">
-              {message}
-            </p>
-          )}
-
-        {!loading &&
-          !message &&
-          isInboxEmpty && (
-            <section className="account-card">
-              <span className="section-label">
-                Skrzynka jest pusta
-              </span>
-
-              <h2>
-                Nie masz nowych
-                powiadomień.
-              </h2>
-
-              <p>
-                Gdy ktoś zgłosi się
-                do Twojego zlecenia
-                albo pojawi się decyzja
-                dotycząca Twojego
-                zgłoszenia, zobaczysz
-                ją tutaj.
-              </p>
-            </section>
-          )}
-
-        <style>{`
-          .notification-person {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            min-width: 0;
-            margin-bottom: 24px;
-          }
-
-          .notification-avatar {
-            width: 56px;
-            height: 56px;
-            flex: 0 0 56px;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            border: 1px solid #e2e2de;
-            border-radius: 50%;
-            background: #f3f3f0;
-            color: #111;
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-          }
-
-          .notification-avatar img {
-            width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: cover;
-            object-position: center;
-          }
-
-          .notification-person > div:last-child {
-            min-width: 0;
-          }
-
-          .notification-person strong {
-            display: block;
-            margin: 0 0 5px;
-            color: #111;
-            font-size: 15px;
-            font-weight: 700;
-            line-height: 1.35;
-            overflow-wrap: anywhere;
-          }
-
-          .notification-person p {
-            margin: 0;
-            color: #777;
-            font-size: 13px;
-            line-height: 1.5;
-          }
-
-          .notification-job {
-            min-width: 0;
-            margin-bottom: 18px;
-            padding-top: 20px;
-            border-top: 1px solid #ededeb;
-          }
-
-          .notification-job .section-label {
-            margin-bottom: 8px;
-          }
-
-          .notification-job h2 {
-            margin: 0 0 9px;
-            font-size: 21px;
-            line-height: 1.3;
-            letter-spacing: -0.5px;
-            overflow-wrap: anywhere;
-          }
-
-          .notification-job small {
-            display: block;
-            color: #999;
-            font-size: 12px;
-            line-height: 1.5;
-          }
-
-          .notification-card-actions {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-          }
-
-          .notification-card-actions > .btn {
-            width: fit-content;
-          }
-
-          .notification-section-title {
-            margin: 30px 0 14px;
-          }
-
-          .notification-toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin: 4px 0 10px;
-          }
-
-          .notification-clear-button {
-            min-height: 42px;
-            padding: 10px 16px;
-            border: 1px solid #deded9;
-            border-radius: 12px;
-            background: #fff;
-            color: #555;
-            font: inherit;
-            font-size: 13px;
-            font-weight: 650;
-            transition:
-              color 0.18s ease,
-              border-color 0.18s ease,
-              background 0.18s ease,
-              transform 0.18s ease;
-          }
-
-          .notification-clear-button:hover {
-            transform: translateY(-1px);
-            border-color: #bdbdb7;
-            background: #f7f7f4;
-            color: #171717;
-          }
-
-          .notification-decision-card {
-            border-color: #eadfdc;
-            background:
-              linear-gradient(
-                180deg,
-                #fff 0%,
-                #fffaf8 100%
-              );
-          }
-
-          .notification-decision-icon {
-            width: 42px;
-            height: 42px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 14px;
-            border-radius: 50%;
-            background: #f7e9e5;
-            color: #9c392d;
-            font-size: 18px;
-            font-weight: 800;
-          }
-
-          .notification-decision-card h2 {
-            margin: 0 0 9px;
-            font-size: 20px;
-            line-height: 1.3;
-          }
-
-          .notification-decision-card p {
-            margin: 0;
-            color: #666;
-            line-height: 1.65;
-          }
-
-          .notification-decision-job {
-            margin-top: 14px;
-            color: #333;
-            font-size: 14px;
-          }
-
-          .notification-accepted-card {
-            border-color: #dfe7df;
-            background:
-              linear-gradient(
-                180deg,
-                #fff 0%,
-                #f8fbf7 100%
-              );
-          }
-
-          .notification-accepted-icon {
-            width: 42px;
-            height: 42px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 14px;
-            border-radius: 50%;
-            background: #e8f1e7;
-            color: #315b35;
-            font-size: 18px;
-            font-weight: 800;
-          }
-
-          .notification-chat-button {
-            display: inline-flex;
-            margin-top: 18px;
-          }
-
-          .notification-block-card {
-            border-color: #e4dedc;
-            background:
-              linear-gradient(
-                180deg,
-                #fff 0%,
-                #fbf8f7 100%
-              );
-          }
-
-          .notification-block-icon {
-            width: 42px;
-            height: 42px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 14px;
-            border-radius: 50%;
-            background: #efe9e7;
-            color: #704a43;
-            font-size: 17px;
-            font-weight: 800;
-          }
-
-          .notification-block-card h2 {
-            margin: 0 0 9px;
-            font-size: 20px;
-            line-height: 1.35;
-          }
-
-          .notification-block-card p {
-            margin: 0;
-            color: #666;
-            line-height: 1.65;
-          }
-
-          @media (max-width: 600px) {
-            .notification-person {
-              gap: 12px;
-              margin-bottom: 20px;
-            }
-
-            .notification-avatar {
-              width: 48px;
-              height: 48px;
-              flex-basis: 48px;
-            }
-
-            .notification-job {
-              margin-bottom: 16px;
-              padding-top: 16px;
-            }
-
-            .notification-job h2 {
-              font-size: 18px;
-            }
-
-            .notification-card-actions {
-              display: grid;
-              grid-template-columns: 1fr;
-            }
-
-            .notification-card-actions > .btn {
-              width: 100%;
-            }
-
-            .notification-toolbar {
-              margin-top: 8px;
-            }
-
-            .notification-clear-button {
-              width: 100%;
-            }
-          }
-        `}</style>
-
-        {!loading &&
-          !message &&
-          (rejectedDecisions.length > 0 ||
-            acceptedDecisions.length > 0 ||
-            blockNotifications.length > 0 ||
-            messageNotifications.length > 0) && (
-            <div className="notification-toolbar">
-              <button
-                type="button"
-                className="notification-clear-button"
-                onClick={
-                  handleClearNotifications
-                }
-              >
-                Wyczyść przeczytane
-              </button>
-            </div>
-          )}
-
-        {!loading &&
-          !message &&
-          notifications.length >
-            0 && (
-            <>
-              <div className="notification-section-title">
-                <span className="section-label">
-                  Zgłoszenia do Twoich zleceń
-                </span>
-              </div>
-
-              <div className="jobs-list">
-                {notifications.map(
-                  (notification) => {
-                    const applicant =
-                      notification.applicant;
-
-                    const applicantName =
-                      applicant?.name ||
-                      "Użytkownik";
-
-                    const initial =
-                      applicantName
-                        .charAt(0)
-                        .toUpperCase();
-
-                    return (
-                      <article
-                        className="job-card"
-                        key={
-                          notification.id
-                        }
-                      >
-                        <Link
-                          to={`/profile/${notification.applicant_id}`}
-                          className="notification-person"
-                        >
-                          <div className="notification-avatar">
-                            {applicant?.avatar_url ? (
-                              <img
-                                src={
-                                  applicant.avatar_url
-                                }
-                                alt={
-                                  applicantName
-                                }
-                              />
-                            ) : (
-                              initial
-                            )}
-                          </div>
-
-                          <div>
-                            <strong>
-                              {
-                                applicantName
-                              }
-                            </strong>
-
-                            <p>
-                              chce wykonać
-                              Twoje zlecenie
-                            </p>
-                          </div>
-                        </Link>
-
-                        <div className="notification-job">
-                          <span className="section-label">
-                            Zlecenie
-                          </span>
-
-                          <h2>
-                            {
-                              notification
-                                .job
-                                ?.title
-                            }
-                          </h2>
-
-                          <small>
-                            Zgłoszenie:{" "}
-                            {formatDate(
-                              notification.created_at
-                            )}
-                          </small>
-                        </div>
-
-                        <div className="notification-card-actions">
-                          <Link
-                            className="btn btn-outline"
-                            to={`/profile/${notification.applicant_id}`}
-                          >
-                            Zobacz profil 
-                          </Link>
-
-                          <ApplicationActions
-                            applicationId={
-                              notification.id
-                            }
-                            onAccepted={
-                              handleAccepted
-                            }
-                            onRejected={
-                              handleRejected
-                            }
-                          />
-                        </div>
-                      </article>
-                    );
-                  }
-                )}
-              </div>
-            </>
-          )}
-
-        {!loading &&
-          !message &&
-          blockNotifications.length >
-            0 && (
-            <>
-              <div className="notification-section-title">
-                <span className="section-label">
-                  Informacje o profilach
-                </span>
-              </div>
-
-              <div className="jobs-list">
-                {blockNotifications.map(
-                  (block) => {
-                    const blockerName =
-                      block.blocker?.name ||
-                      "Użytkownik";
-
-                    return (
-                      <article
-                        className="job-card notification-block-card"
-                        key={`blocked-${block.id}`}
-                      >
-                        <div className="notification-block-icon">
-                          !
-                        </div>
-
-                        <span className="section-label">
-                          Zmiana możliwości kontaktu
-                        </span>
-
-                        <h2>
-                          {blockerName} zablokował Twój profil
-                        </h2>
-
-                        <p>
-                          Nie możecie obecnie wysyłać sobie wiadomości. Informację możesz usunąć przyciskiem „Wyczyść przeczytane”.
-                        </p>
-
-                        <Link
-                          className="btn btn-outline notification-chat-button"
-                          to={`/profile/${block.blocker_id}`}
-                        >
-                          Zobacz profil 
-                        </Link>
-                      </article>
-                    );
-                  }
-                )}
-              </div>
-            </>
-          )}
-
-        {!loading &&
-          !message &&
-          messageNotifications.length >
-            0 && (
-            <>
-              <div className="notification-section-title">
-                <span className="section-label">
-                  Nowe wiadomości
-                </span>
-              </div>
-
-              <div className="jobs-list">
-                {messageNotifications.map(
-                  (messageItem) => {
-                    const senderName =
-                      messageItem.otherProfile?.name ||
-                      "Użytkownik";
-
-                    return (
-                      <article
-                        className="job-card notification-message-card"
-                        key={`message-${messageItem.id}`}
-                      >
-                        <div className="notification-message-icon" aria-hidden="true">
-                          
-                        </div>
-
-                        <span className="section-label">
-                          Nowa wiadomość
-                        </span>
-
-                        <h2>
-                          {senderName} napisał w sprawie zlecenia
-                        </h2>
-
-                        <div className="notification-decision-job">
-                          <strong>Zlecenie:</strong>{" "}
-                          {messageItem.job?.title ||
-                            "Rozmowa dotycząca zlecenia"}
-                        </div>
-
-                        <p className="notification-message-preview">
-                          {messageItem.content}
-                        </p>
-
-                        <Link
-                          className="btn btn-dark notification-chat-button"
-                          to={`/chat/${messageItem.conversation_id}`}
-                        >
-                          Otwórz rozmowę 
-                        </Link>
-                      </article>
-                    );
-                  }
-                )}
-              </div>
-            </>
-          )}
-
-        {!loading &&
-          !message &&
-          acceptedDecisions.length >
-            0 && (
-            <>
-              <div className="notification-section-title">
-                <span className="section-label">
-                  Zaakceptowane zgłoszenia
-                </span>
-              </div>
-
-              <div className="jobs-list">
-                {acceptedDecisions.map(
-                  (decision) => (
-                    <article
-                      className="job-card notification-accepted-card"
-                      key={
-                        `accepted-${decision.id}`
-                      }
-                    >
-                      <div className="notification-accepted-icon">
-                        ✓
-                      </div>
-
-                      <span className="section-label">
-                        Dobra wiadomość
-                      </span>
-
-                      <h2>
-                        Twoje zgłoszenie zostało zaakceptowane
-                      </h2>
-
-                      <p>
-                        Zleceniodawca wybrał Cię do realizacji
-                        tego zlecenia. Możecie teraz ustalić
-                        szczegóły współpracy w prywatnej rozmowie.
-                      </p>
-
-                      <div className="notification-decision-job">
-                        <strong>Zlecenie:</strong>{" "}
-                        {decision.job?.title ||
-                          "Zlecenie"}
-                      </div>
-
-                      {decision.conversation?.id ? (
-                        <Link
-                          className="btn btn-dark notification-chat-button"
-                          to={`/chat/${decision.conversation.id}`}
-                        >
-                          Przejdź do rozmowy 
-                        </Link>
-                      ) : (
-                        <p
-                          style={{
-                            marginTop: "14px",
-                            color: "#8a6b24",
-                            fontSize: "13px",
-                          }}
-                        >
-                          Rozmowa jest przygotowywana. Odśwież
-                          powiadomienia za chwilę.
-                        </p>
-                      )}
-                    </article>
-                  )
-                )}
-              </div>
-            </>
-          )}
-
-        {!loading &&
-          !message &&
-          rejectedDecisions.length >
-            0 && (
-            <>
-              <div className="notification-section-title">
-                <span className="section-label">
-                  Decyzje dotyczące Twoich zgłoszeń
-                </span>
-              </div>
-
-              <div className="jobs-list">
-                {rejectedDecisions.map(
-                  (decision) => (
-                    <article
-                      className="job-card notification-decision-card"
-                      key={
-                        `rejected-${decision.id}`
-                      }
-                    >
-                      <div className="notification-decision-icon">
-                        ×
-                      </div>
-
-                      <span className="section-label">
-                        Decyzja dotycząca zgłoszenia
-                      </span>
-
-                      <h2>
-                        Twoje zgłoszenie nie zostało zaakceptowane
-                      </h2>
-
-                      <p>
-                        Zleceniodawca zdecydował się
-                        nie kontynuować współpracy
-                        w ramach tego zgłoszenia.
-                        Możesz nadal przeglądać
-                        pozostałe zlecenia i zgłaszać
-                        się do kolejnych ofert.
-                      </p>
-
-                      <div className="notification-decision-job">
-                        <strong>
-                          Zlecenie:
-                        </strong>{" "}
-                        {decision.job?.title ||
-                          "Zlecenie"}
-                      </div>
-
-                      <small
-                        style={{
-                          display: "block",
-                          marginTop: "10px",
-                          color: "#999",
-                        }}
-                      >
-                        Zgłoszenie wysłano:{" "}
-                        {formatDate(
-                          decision.created_at
-                        )}
-                      </small>
-                    </article>
-                  )
-                )}
-              </div>
-            </>
-          )}
-      </main>
-    </div>
-  );
+  const decisionCount = acceptedDecisions.length + rejectedDecisions.length + blockNotifications.length;
+  const notificationCount = notifications.length + messageNotifications.length + decisionCount;
+  const clearable = decisionCount + messageNotifications.length > 0;
+  const showGroup = kind => notificationView === 'all' || notificationView === kind;
+  const filterCount = notificationView === 'applications' ? notifications.length : notificationView === 'messages' ? messageNotifications.length : notificationView === 'decisions' ? decisionCount : notificationCount;
+  return <div className="page">
+    <AccountNavbar />
+    <main className="app-page notifications-page">
+      <SubpageHeading title={nt('Powiadomienia', 'Notifications')} variant="notifications" actions={!loading && !message && clearable ? <button type="button" className="ih79-button" onClick={handleClearNotifications}>{nt('Wyczyść przeczytane', 'Clear read notifications')}</button> : undefined} />
+      <div className="ih79-notifications-layout">
+        <nav className="ih79-notification-filters" aria-label={nt('Rodzaj powiadomień', 'Notification type')}>
+          {[['all', nt('Wszystkie', 'All'), notificationCount], ['applications', nt('Do decyzji', 'To review'), notifications.length], ['messages', nt('Wiadomości', 'Messages'), messageNotifications.length], ['decisions', nt('Decyzje', 'Decisions'), decisionCount]].map(([value, label, count]) => <button key={value} type="button" aria-pressed={notificationView === value} onClick={() => setNotificationView(value)}>{label}<span>{loading ? '—' : count}</span></button>)}
+        </nav>
+        <div className="ih79-notification-stream" aria-live="polite" aria-busy={loading}>
+          {loading ? <InlineRouteLoader rows={3} /> : message ? <p className="ih79-feedback is-error" role="alert">{message}</p> : <>
+            {(isInboxEmpty || filterCount === 0) && <div className="ih79-empty"><h2>{nt('Brak powiadomień', 'No notifications')}</h2><p>{nt('Nowe zgłoszenia, wiadomości i decyzje pojawią się tutaj.', 'New applications, messages and decisions will appear here.')}</p></div>}
+            {showGroup('applications') && notifications.length > 0 && <section className="ih79-notice-group" aria-labelledby="ih79-applications-title">
+              <h2 id="ih79-applications-title">{nt('Zgłoszenia do Twoich zleceń', 'Applications to your jobs')}<span>{notifications.length}</span></h2>
+              {notifications.map(notification => <article className="ih79-notice is-application" key={notification.id}>
+                <Link className="ih79-notice-person" to={'/profile/' + notification.applicant_id}><span className="ih79-person-avatar" aria-hidden="true">{notification.applicant?.avatar_url ? <img src={notification.applicant.avatar_url} alt="" loading="lazy" /> : Array.from(notification.applicant?.name || 'U')[0]}</span><span><strong>{notification.applicant?.name || nt('Użytkownik', 'User')}</strong><small>{nt('chce wykonać Twoje zlecenie', 'applied to your job')}</small></span></Link>
+                <h3>{notification.job?.title || nt('Zlecenie', 'Job')}</h3><time dateTime={notification.created_at}>{formatDate(notification.created_at)}</time>
+                <div className="ih79-notice-actions"><Link className="ih79-button" to={'/profile/' + notification.applicant_id}>{nt('Zobacz profil', 'View profile')}</Link><ApplicationActions applicationId={notification.id} onAccepted={handleAccepted} onRejected={handleRejected} /></div>
+              </article>)}
+            </section>}
+            {showGroup('messages') && messageNotifications.length > 0 && <section className="ih79-notice-group" aria-labelledby="ih79-messages-title">
+              <h2 id="ih79-messages-title">{nt('Nowe wiadomości', 'New messages')}<span>{messageNotifications.length}</span></h2>
+              {messageNotifications.map(item => <article className="ih79-notice is-message" key={'message-' + item.id}>
+                <p className="ih79-notice-state"><WorkspaceIcon kind="message" />{item.otherProfile?.name || nt('Użytkownik', 'User')}</p><h3>{item.job?.title || nt('Rozmowa dotycząca współpracy', 'Project conversation')}</h3>
+                <p className="ih79-notice-preview">{item.content}</p><Link className="ih79-button is-primary" to={'/chat/' + item.conversation_id}>{nt('Otwórz rozmowę', 'Open conversation')}<WorkspaceIcon kind="arrow" /></Link>
+              </article>)}
+            </section>}
+            {showGroup('decisions') && decisionCount > 0 && <section className="ih79-notice-group" aria-labelledby="ih79-decisions-title">
+              <h2 id="ih79-decisions-title">{nt('Decyzje i informacje', 'Decisions and updates')}<span>{decisionCount}</span></h2>
+              {acceptedDecisions.map(item => <article className="ih79-notice is-accepted" key={'accepted-' + item.id}>
+                <p className="ih79-notice-state"><WorkspaceIcon kind="check" />{nt('Zgłoszenie zaakceptowane', 'Application accepted')}</p><h3>{item.job?.title || nt('Zlecenie', 'Job')}</h3><p>{nt('Zleceniodawca wybrał Cię do realizacji. Ustal szczegóły w rozmowie.', 'The client selected you. Discuss the details in the conversation.')}</p>
+                {item.conversation?.id ? <Link className="ih79-button is-primary" to={'/chat/' + item.conversation.id}>{nt('Przejdź do rozmowy', 'Open conversation')}<WorkspaceIcon kind="arrow" /></Link> : <p className="ih79-feedback">{nt('Rozmowa jest przygotowywana. Odśwież powiadomienia za chwilę.', 'Your conversation is being prepared. Refresh shortly.')}</p>}
+              </article>)}
+              {rejectedDecisions.map(item => <article className="ih79-notice is-decision" key={'rejected-' + item.id}>
+                <p className="ih79-notice-state">{nt('Zgłoszenie niezaakceptowane', 'Application not accepted')}</p><h3>{item.job?.title || nt('Zlecenie', 'Job')}</h3><p>{nt('Zleceniodawca nie zdecydował się na współpracę przy tym projekcie.', 'The client did not select you for this project.')}</p><time dateTime={item.created_at}>{formatDate(item.created_at)}</time>
+              </article>)}
+              {blockNotifications.map(item => <article className="ih79-notice is-contact" key={'blocked-' + item.id}>
+                <p className="ih79-notice-state">{nt('Zmiana możliwości kontaktu', 'Contact update')}</p><h3>{item.blocker?.name || nt('Użytkownik', 'User')}</h3><p>{nt('Ten użytkownik zablokował Twój profil. Wysyłanie wiadomości między Wami jest niedostępne.', 'This user has blocked your profile. Messaging between you is unavailable.')}</p><Link className="ih79-button" to={'/profile/' + item.blocker_id}>{nt('Zobacz profil', 'View profile')}</Link>
+              </article>)}
+            </section>}
+          </>}
+        </div>
+      </div>
+    </main>
+  </div>;
 }
 
 
-/* =========================================================
-   MESSAGES / CONVERSATION LIST
-========================================================= */
+/* MESSAGES / CONVERSATION LIST */
 
 function useConversationInbox() {
   const { user } =
@@ -20075,9 +19091,7 @@ function Messages() {
 }
 
 
-/* =========================================================
-   CHAT
-========================================================= */
+/* CHAT */
 
 const EMPTY_DISPUTE_FORM = {
   reason: "",
@@ -22954,9 +21968,7 @@ function Chat() {
 }
 
 
-/* =========================================================
-   DISPUTES AND ADMINISTRATION
-========================================================= */
+/* DISPUTES AND ADMINISTRATION */
 
 const DISPUTE_WRITABLE_STATUSES = [
   "awaiting_response",
@@ -30244,9 +29256,7 @@ function AdminPanel() {
   );
 }
 
-/* =========================================================
-   HOME
-========================================================= */
+/* HOME */
 
 function Home() {
   const {
@@ -30311,9 +29321,7 @@ function Home() {
   );
 }
 
-/* =========================================================
-   SMOOTH ROUTE TRANSITIONS
-========================================================= */
+/* SMOOTH ROUTE TRANSITIONS */
 
 function SmoothRouteTransitions() {
   const navigate = useRouterNavigate();
@@ -30481,9 +29489,7 @@ function RouteScrollManager() {
   return null;
 }
 
-/* =========================================================
-   ROUTER
-========================================================= */
+/* ROUTER */
 
 function LucynaDockHost() {
   const { user, loading: authLoading } = useAuth();
@@ -30544,62 +29550,7 @@ function Router() {
 
         <DiscoveryOnboardingLayer />
 
-        <style>{`
-          .ideahire-multiline-field {
-            display: block;
-            width: 100%;
-            max-width: 100%;
-            min-width: 0;
-            box-sizing: border-box;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-            line-height: 1.55;
-            resize: vertical;
-            overflow-x: hidden;
-          }
-
-          .ideahire-title-field {
-            min-height: 62px;
-          }
-
-          .ideahire-about-field,
-          .ideahire-description-field {
-            min-height: 150px;
-          }
-
-          .job-card,
-          .job-card h1,
-          .job-card h2,
-          .job-card h3,
-          .job-card p,
-          .profile-about,
-          .profile-about p {
-            min-width: 0;
-            max-width: 100%;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            word-break: break-word;
-          }
-
-          @media (max-width: 600px) {
-            .ideahire-multiline-field {
-              width: 100%;
-              max-width: 100%;
-              font-size: 16px;
-              line-height: 1.5;
-            }
-
-            .ideahire-title-field {
-              min-height: 68px;
-            }
-
-            .ideahire-about-field,
-            .ideahire-description-field {
-              min-height: 175px;
-            }
-          }
-        `}</style>
+        
 
         <Routes>
           <Route

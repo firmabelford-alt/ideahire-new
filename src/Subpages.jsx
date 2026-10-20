@@ -1,7 +1,7 @@
-/* P75 — task-specific subpages, with shared navigation and type. */
+/* P79 — one navigation system, with layouts built for each kind of work. */
 import React, { useLayoutEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowUpRight, LayoutGrid, CalendarDays, FileText, UserRound, Settings, Wallet, Image, SlidersHorizontal, Bell, ShieldCheck, MessageSquare, BriefcaseBusiness, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, LayoutGrid, CalendarDays, Bell, Check } from 'lucide-react';
 import { useSitePreferences, translateUiText } from './Preferences';
 import './Subpages.css';
 
@@ -11,7 +11,8 @@ export function getSubpage(location, en = false) {
   const path = location.pathname.replace(/\/$/, '') || '/';
   const copy = (pl, english) => en ? english : pl;
   const accountSections = ['#account-expertise', '#account-portfolio', '#account-jobs', '#account-preferences', '#account-privacy', '#account-templates', '#account-payouts', '#account-profile-data'];
-  if (path === '/' || path === '/account' && !accountSections.includes(location.hash)) return null;
+  if (path === '/') return null;
+  if (path === '/account' && !accountSections.includes(location.hash)) return { kind: 'dashboard', label: copy('Moje konto', 'My account'), parent: '/' };
   if (path === '/account') {
     const labels = {
       '#account-profile-data': ['Dane profilu', 'Profile details'],
@@ -56,11 +57,11 @@ export function SubpageTheme() {
   const page = getSubpage(location, en);
   useLayoutEffect(() => {
     if (!page) return;
-    document.body.classList.add('ih73-subpage', 'ih75-subpage');
+    document.body.classList.add('ih73-subpage', 'ih75-subpage', 'ih79-app');
     document.body.dataset.ih73Page = page.kind;
     document.body.dataset.ih75Section = page.kind === 'account' ? location.hash.slice(1) : page.kind;
     return () => {
-      document.body.classList.remove('ih73-subpage', 'ih75-subpage');
+      document.body.classList.remove('ih73-subpage', 'ih75-subpage', 'ih79-app');
       delete document.body.dataset.ih73Page;
       delete document.body.dataset.ih75Section;
     };
@@ -94,9 +95,9 @@ export function SubpageNavigation({ standalone = false }) {
   const location = useLocation();
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
-  if (!page) return null;
+  if (!page || ['dashboard', 'work', 'inbox', 'conversation'].includes(page.kind)) return null;
   return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
-    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P75">
+    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P79">
     <SubpageHistoryControls parent={page.parent} />
     <span className="ih73-route-label"><span>IdeaHire</span><i aria-hidden="true">/</i><strong>{page.label}</strong></span>
     <Link to={['access', 'legal'].includes(page.kind) ? '/' : page.kind === 'admin' ? '/admin' : '/account'} className="ih73-panel-link"><LayoutGrid size={17} strokeWidth={1.65} aria-hidden="true" /><span>{['access', 'legal'].includes(page.kind) ? (en ? 'Home' : 'Strona główna') : (en ? 'Dashboard' : 'Panel')}</span></Link>
@@ -105,11 +106,6 @@ export function SubpageNavigation({ standalone = false }) {
 
 export function SubpageHeading({ eyebrow, title, titleId, description, actions, children, variant = 'default' }) {
   const en = useSitePreferences().language === 'en';
-  const location = useLocation();
-  const page = getSubpage(location, en);
-  const sectionIcons = { '#account-profile-data': UserRound, '#account-expertise': SlidersHorizontal, '#account-portfolio': Image, '#account-jobs': FileText, '#account-preferences': Settings, '#account-privacy': ShieldCheck, '#account-payouts': Wallet, '#account-templates': LayoutGrid };
-  const pageIcons = { jobs: FileText, editor: FileText, people: UserRound, services: LayoutGrid, 'service-editor': LayoutGrid, 'my-services': LayoutGrid, calendar: CalendarDays, notifications: Bell, privacy: ShieldCheck, status: ShieldCheck, disputes: ShieldCheck, case: ShieldCheck, inbox: MessageSquare, work: BriefcaseBusiness };
-  const Icon = page?.kind === 'account' ? sectionIcons[location.hash] || UserRound : pageIcons[page?.kind] || LayoutGrid;
   const copy = {
     'Prywatność i moje dane': 'Privacy & my data',
     'Centrum prywatności': 'Privacy centre',
@@ -127,7 +123,6 @@ export function SubpageHeading({ eyebrow, title, titleId, description, actions, 
   const text = value => en && typeof value === 'string' ? copy[value] || translateUiText(value) : value;
   return <header className={'ih73-page-heading ih75-page-heading is-' + variant}>
     <div className="ih73-heading-copy">
-      <p className="ih73-eyebrow"><Icon size={16} strokeWidth={1.7} aria-hidden="true" /><span>{text(eyebrow || page?.label || 'IdeaHire')}</span></p>
       <h1 id={titleId}>{text(title)}</h1>
       {description && <p className="ih73-description">{text(description)}</p>}
     </div>
@@ -147,7 +142,7 @@ export function SubpageMetrics({ items }) {
 export function SubpageCatalogTabs({ active }) {
   const en = useSitePreferences().language === 'en';
   return <nav className="ih73-catalog-tabs" aria-label={en ? 'Explore IdeaHire' : 'Przeglądaj IdeaHire'}>
-    {[['jobs', '/jobs', en ? 'Jobs' : 'Zlecenia'], ['people', '/freelancers', en ? 'Freelancers' : 'Freelancerzy'], ['services', '/services', en ? 'Services' : 'Usługi']].map(([key, to, label]) => <Link key={key} to={to} aria-current={active === key ? 'page' : undefined}>{label}<ArrowUpRight size={15} strokeWidth={1.6} aria-hidden="true" /></Link>)}
+    {[['jobs', '/jobs', en ? 'Jobs' : 'Zlecenia'], ['people', '/freelancers', en ? 'Freelancers' : 'Freelancerzy'], ['services', '/services', en ? 'Services' : 'Usługi']].map(([key, to, label]) => <Link key={key} to={to} aria-current={active === key ? 'page' : undefined}>{label}</Link>)}
   </nav>;
 }
 

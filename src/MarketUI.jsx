@@ -236,8 +236,8 @@ export function MarketHeader({ eyebrow, title, description, children }) {
   const editing = location.pathname.startsWith('/edit-job/');
   const heading = jobs ? {
     eyebrow: en ? 'For freelancers' : 'Dla wykonawców',
-    title: en ? 'Find a job' : 'Znajdź zlecenie',
-    description: en ? 'Browse projects by field, scope and budget.' : 'Przeglądaj projekty według dziedziny, zakresu i budżetu.',
+    title: en ? 'Jobs' : 'Zlecenia',
+    description: null,
   } : creating ? {
     eyebrow: en ? 'For clients' : 'Dla zlecających',
     title: en ? 'Post a job' : 'Zleć pracę',
@@ -247,7 +247,7 @@ export function MarketHeader({ eyebrow, title, description, children }) {
     title: en ? 'Edit your job' : 'Edytuj zlecenie',
     description: en ? 'Update the details that freelancers need to prepare an offer.' : 'Zaktualizuj szczegóły potrzebne wykonawcom do przygotowania oferty.',
   } : { eyebrow, title, description };
-  return <><SubpageHeading {...heading} actions={children} variant={jobs ? 'catalog' : 'editor'} />{jobs && <SubpageCatalogTabs active="jobs" />}</>;
+  return <>{jobs && <SubpageCatalogTabs active="jobs" />}<SubpageHeading {...heading} actions={children || (jobs ? <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link> : undefined)} variant={jobs ? 'catalog' : 'editor'} /></>;
 }
 
 export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
@@ -258,8 +258,9 @@ export function MarketCatalogHeader({ eyebrow, title, description, count, noun =
   const english = { jobs: 'job', services: 'service', profiles: 'profile' }[noun] || 'result';
   const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
   return <div className="ih73-catalog-header">
-    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
-    <div className="ih73-catalog-context">{tabs || <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />}
+    {tabs || <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />}
+    <SubpageHeading title={title} actions={actions} variant="catalog" />
+    <div className="ih73-catalog-context">
       <p className="ih73-result-count" role="status" aria-live="polite" aria-atomic="true">{statusCopy || <><strong>{new Intl.NumberFormat(en ? 'en-GB' : 'pl-PL').format(value)}</strong><span>{en ? english + (value === 1 ? '' : 's') : polish}</span></>}</p>
     </div>
     {children}
