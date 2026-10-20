@@ -1,5 +1,5 @@
 /* P64 — a quiet assistant window. All dimensions are bounded by the visible viewport. */
-#ih64-lucyna { position:relative; z-index:900; color:var(--v-ink,#191919); font:400 14px/1.5 Inter,Arial,sans-serif; }
+#ih64-lucyna { --ih84-safe-bottom: env(safe-area-inset-bottom,0px); position:relative; z-index:900; color:var(--v-ink,#191919); font:400 14px/1.5 Inter,Arial,sans-serif; }
 #ih64-lucyna *, #ih64-lucyna *::before, #ih64-lucyna *::after { box-sizing:border-box; }
 #ih64-lucyna [hidden] { display:none!important; }
 #ih64-lucyna button { font:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
@@ -93,15 +93,13 @@
 
 /* A compact AI tab is the only resting state; the assistant opens on request. */
 @layer ih81Dock {
-  #ih64-lucyna .ih64-dock-return { position: fixed !important; right: 16px !important; bottom: 22px !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important; width: auto !important; min-width: 66px !important; height: 44px !important; padding: 8px 11px !important; border: 1px solid var(--v-accent) !important; border-radius: 10px 10px 3px 10px !important; background: var(--v-accent) !important; color: var(--v-on) !important; font: 750 13px/1 Inter,system-ui,sans-serif !important; box-shadow: none !important; cursor: pointer !important; }
+  #ih64-lucyna .ih64-dock-return { position: fixed !important; left: var(--ih84-launcher-x) !important; top: var(--ih84-launcher-y) !important; right: auto !important; bottom: auto !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important; width: var(--ih84-launcher-width,72px) !important; min-width: 0 !important; height: 44px !important; padding: 8px 11px !important; border: 1px solid var(--v-accent) !important; border-radius: 10px 10px 3px 10px !important; background: var(--v-accent) !important; color: var(--v-on) !important; font: 750 13px/1 Inter,system-ui,sans-serif !important; box-shadow: none !important; cursor: grab !important; touch-action: none !important; user-select: none !important; -webkit-user-select: none !important; transition: background-color .16s ease !important; }
   #ih64-lucyna .ih64-dock-return strong { font: inherit !important; color: inherit !important; }
   #ih64-lucyna .ih64-dock-return svg { width: 18px !important; height: 18px !important; color: inherit !important; }
   #ih64-lucyna .ih64-dock-return:focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: 4px !important; }
   #ih64-lucyna .ih64-dock-window { animation: ih81-dock-in .24s cubic-bezier(.22,.7,.25,1) both !important; }
-  @media (max-width:850px) {
-    #ih64-lucyna .ih64-dock-return { right: 12px !important; bottom: calc(82px + env(safe-area-inset-bottom,0px)) !important; }
-    body.ih53-active #ih64-lucyna .ih64-dock-return { bottom: calc(16px + env(safe-area-inset-bottom,0px)) !important; }
-  }
+  #ih64-lucyna[data-dragging="launcher"] .ih64-dock-return, #ih64-lucyna[data-dragging="window"] .ih64-dock-handle { cursor: grabbing !important; }
+  #ih64-lucyna .ih64-dock-return > * { pointer-events: none !important; }
   @media (prefers-reduced-motion:reduce) {
     #ih64-lucyna .ih64-dock-window { animation: none !important; }
   }

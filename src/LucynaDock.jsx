@@ -1,7 +1,7 @@
 /* P64 — a movable, non-modal window for the existing Lucyna assistant. */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Assistant from "./Lucyna";
 import LucynaSymbol from "./LucynaSymbol";
 import "./LucynaDock.css";
@@ -20,22 +20,47 @@ export function canShowLucynaDock({ enabled, userId, authLoading, ageLoading, ag
 
 function viewportBounds() {
   const viewport = window.visualViewport;
-  return { x: viewport?.offsetLeft || 0, y: viewport?.offsetTop || 0,
-    width: viewport?.width || window.innerWidth, height: viewport?.height || window.innerHeight };
+  const x = viewport?.offsetLeft || 0, y = viewport?.offsetTop || 0;
+  const width = viewport?.width || window.innerWidth, height = viewport?.height || window.innerHeight;
+  const navigation = document.querySelector(".ih68-top-nav");
+  const rect = navigation?.getBoundingClientRect();
+  const navigationInset = rect?.width > 0 && window.getComputedStyle(navigation).position === "fixed"
+    && rect.top >= y && rect.top < y + height && rect.bottom >= y + height - 1 ? y + height - rect.top : 0;
+  const host = document.getElementById("ih64-lucyna");
+  const safeInset = host ? parseFloat(window.getComputedStyle(host).getPropertyValue("--ih84-safe-bottom")) || 0 : 0;
+  return { x, y, width, height, bottomInset: Math.max(navigationInset, safeInset) };
 }
 
 export function dockLayout(bounds, position) {
   const margin = Math.min(12, bounds.width / 10);
   const width = Math.min(408, Math.max(1, bounds.width - margin * 2));
-  const availableHeight = Math.max(1, bounds.height - margin * 2);
+  const reservedBottom = Math.max(margin, (bounds.bottomInset || 0) + margin);
+  const availableHeight = Math.max(1, bounds.height - margin - reservedBottom);
   const height = Math.min(bounds.width <= 640 ? 520 : 560,
     bounds.height < 520 ? availableHeight : Math.round(bounds.height * (bounds.width <= 640 ? .66 : .72)), availableHeight);
-  const bottom = bounds.height < 520 ? margin : 88;
+  const bottom = Math.min(reservedBottom + 56, bounds.height - height - margin);
   const x = position?.x ?? bounds.x + bounds.width - width - margin;
   const y = position?.y ?? bounds.y + bounds.height - height - bottom;
   return { width, height,
     x: Math.max(bounds.x + margin, Math.min(x, bounds.x + bounds.width - width - margin)),
-    y: Math.max(bounds.y + margin, Math.min(y, bounds.y + bounds.height - height - margin)) };
+    y: Math.max(bounds.y + margin, Math.min(y, bounds.y + bounds.height - height - reservedBottom)) };
+}
+
+function launcherLayout(bounds, position) {
+  const margin = Math.min(12, bounds.width / 10);
+  const width = Math.min(72, Math.max(1, bounds.width - margin * 2));
+  const height = 44;
+  const bottom = Math.max(22, (bounds.bottomInset || 0) + 12);
+  return { width, height,
+    x: Math.max(bounds.x + margin, Math.min(position?.x ?? bounds.x + bounds.width - width - margin, bounds.x + bounds.width - width - margin)),
+    y: Math.max(bounds.y + margin, Math.min(position?.y ?? bounds.y + bounds.height - height - bottom, bounds.y + bounds.height - height - bottom)) };
+}
+
+function windowNearLauncher(bounds, launcher) {
+  const size = dockLayout(bounds);
+  const above = launcher.y - size.height - 10;
+  return { x: launcher.x + launcher.width - size.width,
+    y: above >= bounds.y + 12 ? above : launcher.y + launcher.height + 10 };
 }
 
 function Icon({ kind }) {
@@ -52,11 +77,15 @@ class DockBoundary extends React.Component {
 }
 
 export default function LucynaDock({ supabase, user }) {
+  const { pathname } = useLocation();
   const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [bounds, setBounds] = useState(viewportBounds), [position, setPosition] = useState(null);
+  const [launcherPosition, setLauncherPosition] = useState(null), [dragging, setDragging] = useState(null);
   const panel = useRef(null), returnTab = useRef(null), drag = useRef(null);
-  const layout = dockLayout(bounds, position);
+  const suppressLauncherClick = useRef(false);
+  const launcher = launcherLayout(bounds, launcherPosition);
+  const layout = dockLayout(bounds, position || (launcherPosition ? windowNearLauncher(bounds, launcher) : null));
   useEffect(() => {
     const viewport = window.visualViewport;
     const update = () => setBounds(viewportBounds());
@@ -70,45 +99,73 @@ export default function LucynaDock({ supabase, user }) {
     };
   }, []);
   useLayoutEffect(() => {
+    setBounds(viewportBounds());
+  }, [pathname, open]);
+  useLayoutEffect(() => {
     if (open) panel.current?.focus({ preventScroll: true });
   }, [open]);
   useEffect(() => {
-    const openFromMenu = () => { setLoaded(true); setOpen(true); };
+    const openFromMenu = () => show();
     window.addEventListener("ideahire:lucyna-open", openFromMenu);
     return () => window.removeEventListener("ideahire:lucyna-open", openFromMenu);
   }, []);
-  function show() { setLoaded(true); setOpen(true); }
+  function show(event) {
+    if (event && suppressLauncherClick.current) {
+      suppressLauncherClick.current = false;
+      event.preventDefault();
+      return;
+    }
+    suppressLauncherClick.current = false;
+    setBounds(viewportBounds());
+    setLoaded(true);
+    setOpen(true);
+  }
   function minimise() {
     // A hidden chat must not keep a mobile keyboard over the page.
     if (panel.current?.contains(document.activeElement)) document.activeElement?.blur();
     setOpen(false);
     requestAnimationFrame(() => returnTab.current?.focus({ preventScroll: true }));
   }
-  function beginDrag(event) {
-    if (event.button !== 0 || !event.isPrimary) return;
-    drag.current = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: layout.x, startY: layout.y };
+  function beginDrag(event, kind) {
+    if (event.button !== 0 || event.isPrimary === false) return;
+    suppressLauncherClick.current = false;
+    const current = kind === "launcher" ? launcher : layout;
+    drag.current = { id: event.pointerId, kind, x: event.clientX, y: event.clientY, startX: current.x, startY: current.y, moved: false };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   }
   function moveDrag(event) {
     const start = drag.current;
     if (!start || start.id !== event.pointerId) return;
-    const next = dockLayout(viewportBounds(), { x: start.startX + event.clientX - start.x, y: start.startY + event.clientY - start.y });
-    setPosition({ x: next.x, y: next.y });
+    if (!start.moved && Math.hypot(event.clientX - start.x, event.clientY - start.y) < 6) return;
+    start.moved = true;
+    setDragging(start.kind);
+    if (start.kind === "launcher") suppressLauncherClick.current = true;
+    const next = (start.kind === "launcher" ? launcherLayout : dockLayout)(viewportBounds(),
+      { x: start.startX + event.clientX - start.x, y: start.startY + event.clientY - start.y });
+    (start.kind === "launcher" ? setLauncherPosition : setPosition)({ x: next.x, y: next.y });
   }
   function endDrag(event) {
     if (drag.current?.id !== event.pointerId) return;
     drag.current = null;
+    setDragging(null);
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   }
-  function moveWithKeyboard(event) {
+  function cancelDrag() {
+    drag.current = null;
+    setDragging(null);
+  }
+  function moveWithKeyboard(event, kind) {
+    suppressLauncherClick.current = false;
     const delta = { ArrowLeft: [-16, 0], ArrowRight: [16, 0], ArrowUp: [0, -16], ArrowDown: [0, 16] }[event.key];
-    if (event.key === "Home") { event.preventDefault(); setPosition(null); }
+    const updatePosition = kind === "launcher" ? setLauncherPosition : setPosition;
+    if (event.key === "Home") { event.preventDefault(); updatePosition(null); }
     if (!delta) return;
     event.preventDefault();
-    const next = dockLayout(bounds, { x: layout.x + delta[0], y: layout.y + delta[1] });
-    setPosition({ x: next.x, y: next.y });
+    const current = kind === "launcher" ? launcher : layout;
+    const next = (kind === "launcher" ? launcherLayout : dockLayout)(bounds, { x: current.x + delta[0], y: current.y + delta[1] });
+    updatePosition({ x: next.x, y: next.y });
   }
-  return createPortal(<div id="ih64-lucyna" data-no-translate="true">
+  return createPortal(<div id="ih64-lucyna" data-no-translate="true" data-dragging={dragging || undefined}>
     {loaded && <section ref={panel} id="ih64-lucyna-window" className="ih64-dock-window" role="dialog" aria-modal="false" aria-labelledby="ih64-lucyna-title" tabIndex={-1} hidden={!open}
       style={{ left: layout.x, top: layout.y, width: layout.width, height: layout.height }}
       onKeyDown={event => {
@@ -117,7 +174,7 @@ export default function LucynaDock({ supabase, user }) {
       }}>
       <header className="ih64-dock-heading">
         <button className="ih64-dock-handle" type="button" aria-label="Przesuń okno Lucyny. Użyj przeciągania lub klawiszy strzałek. Home przywraca pozycję."
-          onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={() => { drag.current = null; }} onKeyDown={moveWithKeyboard} onDoubleClick={() => setPosition(null)}>
+          onPointerDown={event => beginDrag(event, "window")} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={cancelDrag} onKeyDown={event => moveWithKeyboard(event, "window")} onDoubleClick={() => setPosition(null)}>
           <LucynaSymbol/><span><strong id="ih64-lucyna-title">Lucyna <span>AI</span></strong><small>Asystent AI IdeaHire</small></span>
         </button>
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
@@ -125,6 +182,8 @@ export default function LucynaDock({ supabase, user }) {
       </header>
       <div className="ih64-dock-body"><DockBoundary key={attempt} onRetry={() => setAttempt(value => value + 1)}><Assistant supabase={supabase} user={user} embedded visible={open}/></DockBoundary></div>
     </section>}
-    {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI" aria-haspopup="dialog" aria-expanded="false" aria-controls="ih64-lucyna-window" title="Lucyna — asystent AI" onClick={show}><strong>AI</strong><LucynaSymbol/></button>}
+    {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI. Przeciągnij, aby przesunąć przycisk, lub użyj klawiszy strzałek. Home przywraca pozycję." aria-haspopup="dialog" aria-expanded="false" aria-controls={loaded ? "ih64-lucyna-window" : undefined} title="Lucyna AI — kliknij, aby otworzyć; przeciągnij, aby przesunąć"
+      style={{ "--ih84-launcher-x": launcher.x + "px", "--ih84-launcher-y": launcher.y + "px", "--ih84-launcher-width": launcher.width + "px" }}
+      onPointerDown={event => beginDrag(event, "launcher")} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={cancelDrag} onKeyDown={event => moveWithKeyboard(event, "launcher")} onClick={show}><strong>AI</strong><LucynaSymbol/></button>}
   </div>, document.body);
 }
