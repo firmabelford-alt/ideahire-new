@@ -8172,7 +8172,7 @@ function getAccountWorkspaceSection(hash = "") {
   return null;
 }
 
-/* STRIPE 12: private balance and bank payout view, PL / EN. */
+/* Stripe: private balance and bank payout view, PL / EN. */
 async function stripeProfileRequest(action, userId) {
   const session = await supabase.auth.getSession();
   if (session.error || !session.data?.session?.access_token || session.data.session.user?.id !== userId) {
@@ -8231,6 +8231,27 @@ function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children })
     });
     return () => { generation.current += 1; };
   }, [tab, userId, refresh, onStatusChange]);
+  useEffect(() => {
+    if (tab !== "payouts" || !userId) return;
+    let lastRefresh = 0;
+    function refreshVisiblePayouts() {
+      if (document.visibilityState === "hidden" || Date.now() - lastRefresh < 1000) return;
+      lastRefresh = Date.now();
+      setRefresh(value => value + 1);
+    }
+    const timer = window.setInterval(refreshVisiblePayouts, 30000);
+    window.addEventListener("focus", refreshVisiblePayouts);
+    window.addEventListener("pageshow", refreshVisiblePayouts);
+    window.addEventListener("ideahire:payment-updated", refreshVisiblePayouts);
+    document.addEventListener("visibilitychange", refreshVisiblePayouts);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshVisiblePayouts);
+      window.removeEventListener("pageshow", refreshVisiblePayouts);
+      window.removeEventListener("ideahire:payment-updated", refreshVisiblePayouts);
+      document.removeEventListener("visibilitychange", refreshVisiblePayouts);
+    };
+  }, [tab, userId]);
   const data = record?.userId === userId ? record.data : null;
   const errorCode = issue?.userId === userId ? issue.code : "";
   const money = (grosz, currency = "PLN") => Number.isSafeInteger(grosz)
@@ -8239,10 +8260,17 @@ function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children })
     ? new Intl.DateTimeFormat(en ? "en-GB" : "pl-PL", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(seconds * 1000)) : "—";
   const statuses = {
     pending: c("Oczekuje na wysłanie", "Waiting to be sent"),
-    in_transit: c("W drodze do banku", "On the way to the bank"),
-    paid: c("Zrealizowana", "Completed"),
+    in_transit: c("Wysłana do banku", "Sent to the bank"),
+    paid: c("Zrealizowana przez Stripe", "Completed by Stripe"),
     failed: c("Nieudana", "Failed"),
     canceled: c("Anulowana", "Canceled"),
+  };
+  const payoutDescriptions = {
+    pending: c("Stripe przygotował wypłatę. Środki czekają na wysłanie do banku.", "Stripe has prepared the payout. The funds are waiting to be sent to the bank."),
+    in_transit: c("Stripe wysłał środki do banku. Przewidywana data dotyczy ich dotarcia na rachunek.", "Stripe has sent the funds to the bank. The expected date is when they should reach the account."),
+    paid: c("Stripe oznaczył tę wypłatę jako zrealizowaną.", "Stripe has marked this payout as completed."),
+    failed: c("Wypłata nie powiodła się. Sprawdź przyczynę i dane rachunku w Stripe.", "The payout failed. Check the reason and bank details in Stripe."),
+    canceled: c("Ta wypłata została anulowana.", "This payout was canceled."),
   };
   const errors = {
     invalid_session: c("Sesja wygasła. Zaloguj się ponownie.", "Your session expired. Sign in again."),
@@ -8361,8 +8389,8 @@ function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children })
           <div className="ih-sp-setting"><div><h3>{c("Harmonogram", "Schedule")}</h3><p>{intervals[schedule?.interval] || intervals.unknown}{scheduleDays ? ` · ${scheduleDays}` : ""}</p><p className="ih-sp-muted">{schedule?.interval === "manual" ? c("Automatyczne wypłaty są wyłączone. Wypłatę zlecisz w panelu Stripe, jeśli ta funkcja jest dostępna.", "Automatic payouts are off. Request a payout in Stripe if this option is available.") : c("Wypłaty obejmują dostępne środki. Termin dotarcia do banku potwierdza Stripe.", "Payouts use available funds. Stripe confirms their expected bank arrival.")}</p>{Number.isSafeInteger(schedule?.minimum_balance_grosz) && schedule.minimum_balance_grosz > 0 && <p className="ih-sp-muted">{c("Minimalne saldo pozostawiane w Stripe:", "Minimum balance kept in Stripe:")} {money(schedule.minimum_balance_grosz)}</p>}</div></div>
           <div className="ih-sp-history"><h3>{c("Ostatnie wypłaty bankowe", "Recent bank payouts")}</h3>
             {data.payouts.length === 0 ? <p className="ih-sp-muted">{c("Stripe nie utworzył jeszcze wypłaty bankowej. Przekazanie wynagrodzenia na saldo Stripe zobaczysz powyżej.", "Stripe has not created a bank payout yet. Earnings transferred to your Stripe balance appear above.")}</p> : <ul className="ih-sp-list">{data.payouts.map(payout => <li className="ih-sp-row" key={payout.id}>
-              <div><strong>{money(payout.amount_grosz, payout.currency)}</strong><small>{c("Utworzona:", "Created:")} {date(payout.created)}{["pending", "in_transit"].includes(payout.status) ? <> · {c("Planowane dotarcie:", "Expected arrival:")} {date(payout.arrival_date)}</> : null}</small></div>
-              <span className="ih-sp-badge">{statuses[payout.status] || c("Sprawdź w Stripe", "Check in Stripe")}</span>
+              <div><strong>{money(payout.amount_grosz, payout.currency)}</strong><small>{c("Utworzona:", "Created:")} {date(payout.created)}{["pending", "in_transit"].includes(payout.status) ? <> · {c("Przewidywane dotarcie do banku:", "Expected bank arrival:")} {date(payout.arrival_date)}</> : null}</small><small>{payoutDescriptions[payout.status]}</small><small>{c("Numer wypłaty:", "Payout reference:")} {payout.id}</small></div>
+              <span className="ih-sp-badge">{data.livemode === false ? c("Test · ", "Test · ") : ""}{statuses[payout.status] || c("Sprawdź w Stripe", "Check in Stripe")}</span>
             </li>)}</ul>}
           </div>
           <p className="ih-sp-muted">{c("Przekazanie wynagrodzenia po odbiorze pracy zasila saldo Stripe. Wypłata bankowa jest osobną operacją. Rachunkiem zarządzasz bezpośrednio w Stripe.", "Accepting work transfers earnings to your Stripe balance. A bank payout is a separate operation. Manage your bank account directly in Stripe.")}</p>
@@ -20352,11 +20380,11 @@ const PAYMENT_STATUS_COPY = {
     tone: "success",
   },
   release_pending: {
-    label: "Wypłata przygotowywana",
-    tone: "success",
+    label: "Przekazywanie wynagrodzenia do wykonawcy",
+    tone: "pending",
   },
   release_failed: {
-    label: "Wypłata wymaga ponowienia",
+    label: "Przekazanie wynagrodzenia wymaga sprawdzenia",
     tone: "error",
   },
   released: {
@@ -20397,6 +20425,13 @@ const PAYMENT_WORK_ENABLED_STATUSES = new Set([
   "released",
 ]);
 
+const PAYMENT_CHECKOUT_STATUSES = new Set([
+  "awaiting_payment", "checkout_open", "failed", "cancelled",
+]);
+const PAYMENT_POLLING_STATUSES = new Set([
+  "checkout_open", "processing", "release_pending", "refund_pending",
+]);
+
 function formatPaymentMoney(value, currency = "PLN") {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return "—";
@@ -20434,17 +20469,26 @@ function ChatPaymentPanel({
 }) {
   const { language: paymentLanguage } = useSitePreferences();
   const location = useLocation();
-  const [summary, setSummary] = useState(null);
+  const [summaryRecord, setSummaryRecord] = useState(null);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
   const [message, setMessage] = useState("");
+  const requestGeneration = useRef(0);
+  const checkoutInFlight = useRef(false);
+  const paymentScope = `${userId || ""}:${conversation?.id || ""}:${agreement?.id || ""}:${agreement?.status || ""}`;
+  const currentPaymentScope = useRef(paymentScope);
+  currentPaymentScope.current = paymentScope;
+  const summary = summaryRecord?.scope === paymentScope ? summaryRecord.data : null;
 
   const isClient = conversation?.client_id === userId;
   const paymentReturn = new URLSearchParams(location.search).get("payment");
 
   const loadSummary = useCallback(async () => {
+    const requestId = ++requestGeneration.current;
+    const isCurrent = () => requestId === requestGeneration.current
+      && currentPaymentScope.current === paymentScope;
     if (!conversation?.id || agreement?.status !== "accepted") {
-      setSummary(null);
+      setSummaryRecord(null);
       setLoading(false);
       onStatusChange?.("");
       return null;
@@ -20459,11 +20503,12 @@ function ChatPaymentPanel({
       );
 
       if (error) throw error;
+      if (!isCurrent()) return null;
 
       let nextSummary = data?.[0] || null;
       if (isClient && nextSummary
         && nextSummary.agreement_id === agreement.id
-        && ["awaiting_payment", "checkout_open", "failed", "cancelled"].includes(nextSummary.payment_status)
+        && PAYMENT_CHECKOUT_STATUSES.has(nextSummary.payment_status)
         && nextSummary.pricing_rule_code !== "PLN_5_5_MIN20_MAX229_V3") {
         // Kwoty wyswietlamy dopiero po ich rzeczywistym przeliczeniu w bazie.
         const { data: refreshed, error: refreshError } = await supabase.functions.invoke(
@@ -20483,12 +20528,36 @@ function ChatPaymentPanel({
         if (updatedError) throw updatedError;
         nextSummary = updated?.[0] || null;
       }
-      setSummary(nextSummary);
+      if (!isCurrent()) return null;
+      if (nextSummary && (nextSummary.agreement_id !== agreement.id
+        || nextSummary.client_id !== conversation.client_id
+        || nextSummary.contractor_id !== conversation.contractor_id)) {
+        throw new Error("Podsumowanie nie odpowiada aktualnym ustaleniom. Odśwież rozmowę.");
+      }
+      if (nextSummary) {
+        const amounts = [nextSummary.work_amount, nextSummary.platform_fee, nextSummary.total_amount, nextSummary.contractor_amount];
+        if (nextSummary.currency !== "PLN" || amounts.some(value => value == null || value === ""
+          || !Number.isFinite(Number(value)) || Number(value) < 0
+          || !Number.isSafeInteger(Math.round(Number(value) * 100))
+          || Math.abs(Number(value) * 100 - Math.round(Number(value) * 100)) > 0.000001)
+          || Math.round(Number(nextSummary.work_amount) * 100) + Math.round(Number(nextSummary.platform_fee) * 100)
+            !== Math.round(Number(nextSummary.total_amount) * 100)
+          || Math.round(Number(nextSummary.contractor_amount) * 100) !== Math.round(Number(nextSummary.work_amount) * 100)
+          || Number(nextSummary.work_amount) <= 0) {
+          throw new Error("Kwoty płatności wymagają sprawdzenia. Nie rozpoczynaj ponownej płatności.");
+        }
+        if (isClient && PAYMENT_CHECKOUT_STATUSES.has(nextSummary.payment_status)
+          && nextSummary.pricing_rule_code !== "PLN_5_5_MIN20_MAX229_V3") {
+          throw new Error("Serwer nie potwierdził aktualnego cennika. Odśwież status płatności.");
+        }
+      }
+      setSummaryRecord({ scope: paymentScope, data: nextSummary });
       if (PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status)) setMessage("");
       onStatusChange?.(nextSummary?.payment_status || "");
       return nextSummary;
     } catch (error) {
-      setSummary(null);
+      if (!isCurrent()) return null;
+      setSummaryRecord(null);
       setMessage(
         cleanSupabaseError(
           error,
@@ -20498,13 +20567,40 @@ function ChatPaymentPanel({
       onStatusChange?.("");
       return null;
     } finally {
-      setLoading(false);
+      if (isCurrent()) setLoading(false);
     }
-  }, [agreement?.id, agreement?.status, conversation?.id, isClient, onStatusChange]);
+  }, [agreement?.id, agreement?.status, conversation?.id, conversation?.client_id, conversation?.contractor_id,
+    isClient, onStatusChange, paymentScope]);
 
   useEffect(() => {
+    currentPaymentScope.current = paymentScope;
+    checkoutInFlight.current = false;
+    setPaying(false);
+    setMessage("");
     loadSummary();
+    return () => {
+      requestGeneration.current += 1;
+      currentPaymentScope.current = null;
+    };
   }, [loadSummary]);
+
+  useEffect(() => {
+    if (!conversation?.id || agreement?.status !== "accepted") return;
+    let lastRefresh = 0;
+    function refreshVisiblePayment() {
+      if (document.visibilityState === "hidden" || Date.now() - lastRefresh < 1000) return;
+      lastRefresh = Date.now();
+      loadSummary();
+    }
+    window.addEventListener("focus", refreshVisiblePayment);
+    window.addEventListener("pageshow", refreshVisiblePayment);
+    document.addEventListener("visibilitychange", refreshVisiblePayment);
+    return () => {
+      window.removeEventListener("focus", refreshVisiblePayment);
+      window.removeEventListener("pageshow", refreshVisiblePayment);
+      document.removeEventListener("visibilitychange", refreshVisiblePayment);
+    };
+  }, [agreement?.status, conversation?.id, loadSummary]);
 
   useEffect(() => {
     function handlePaymentUpdate(event) {
@@ -20523,40 +20619,44 @@ function ChatPaymentPanel({
       );
     } else if (paymentReturn === "cancelled") {
       setMessage(
-        "Płatność została przerwana. Nie pobraliśmy nowej opłaty — możesz spróbować ponownie."
+        "Sprawdzamy aktualny status rozliczenia po powrocie z okna Stripe."
       );
     }
   }, [paymentReturn]);
 
   useEffect(() => {
     const shouldPoll =
-      paymentReturn === "success" ||
-      ["checkout_open", "processing", "release_pending"].includes(summary?.payment_status);
+      agreement?.status === "accepted" && (PAYMENT_POLLING_STATUSES.has(summary?.payment_status)
+        || paymentReturn === "success" && (!summary || summary.payment_status === "awaiting_payment"));
 
     if (!shouldPoll) return undefined;
 
     let attempts = 0;
-    const interval = window.setInterval(async () => {
-      attempts += 1;
-      const nextSummary = await loadSummary();
-
-      if (
-        PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status) ||
-        ["failed", "cancelled", "refunded", "disputed", "release_failed"].includes(
-          nextSummary?.payment_status
-        ) ||
-        attempts >= 15
-      ) {
-        window.clearInterval(interval);
+    let stopped = false;
+    let timer;
+    async function poll() {
+      if (stopped) return;
+      if (document.visibilityState !== "hidden") {
+        attempts += 1;
+        const nextSummary = await loadSummary();
+        if (stopped) return;
+        if (nextSummary && !PAYMENT_POLLING_STATUSES.has(nextSummary.payment_status)
+          && !(paymentReturn === "success" && nextSummary.payment_status === "awaiting_payment")) return;
       }
-    }, 2000);
+      timer = window.setTimeout(poll, attempts < 15 ? 2000 : 15000);
+    }
+    timer = window.setTimeout(poll, 2000);
 
-    return () => window.clearInterval(interval);
-  }, [paymentReturn, summary?.payment_status, loadSummary]);
+    return () => { stopped = true; window.clearTimeout(timer); };
+  }, [agreement?.status, paymentReturn, summary?.payment_status, loadSummary]);
 
   async function handleCheckout() {
-    if (!agreement?.id || paying || blocked) return;
+    if (!agreement?.id || !isClient || loading || paying || blocked || checkoutInFlight.current
+      || !summary || summary.agreement_id !== agreement.id
+      || !PAYMENT_CHECKOUT_STATUSES.has(summary.payment_status)) return;
 
+    const checkoutScope = paymentScope;
+    checkoutInFlight.current = true;
     setPaying(true);
     setMessage("");
 
@@ -20577,15 +20677,19 @@ function ChatPaymentPanel({
         throw new Error(functionMessage || error.message);
       }
 
+      if (currentPaymentScope.current !== checkoutScope) return;
+
       const checkoutUrl = String(data?.url || "");
       const parsedUrl = new URL(checkoutUrl);
 
-      if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== "checkout.stripe.com") {
+      if (parsedUrl.protocol !== "https:" || parsedUrl.hostname !== "checkout.stripe.com"
+        || parsedUrl.username || parsedUrl.password || parsedUrl.port) {
         throw new Error("Serwer zwrócił nieprawidłowy adres płatności.");
       }
 
       window.location.assign(checkoutUrl);
     } catch (error) {
+      if (currentPaymentScope.current !== checkoutScope) return;
       setMessage(
         cleanSupabaseError(
           error,
@@ -20594,6 +20698,11 @@ function ChatPaymentPanel({
       );
       setPaying(false);
       await loadSummary();
+    } finally {
+      if (currentPaymentScope.current === checkoutScope) {
+        checkoutInFlight.current = false;
+        setPaying(false);
+      }
     }
   }
 
@@ -20653,6 +20762,14 @@ function ChatPaymentPanel({
                 ? paymentLanguage === "en"
                   ? "The earnings have been transferred to the freelancer's Stripe balance. The freelancer can check bank payouts in their profile."
                   : "Wynagrodzenie przekazano na saldo Stripe wykonawcy. Informacje o wypłatach bankowych wykonawca znajdzie w swoim profilu."
+                : summary.payment_status === "release_pending"
+                ? "Trwa przekazywanie wynagrodzenia na saldo Stripe wykonawcy. Czekamy na potwierdzenie."
+                : summary.payment_status === "release_failed"
+                ? "Nie potwierdzono przekazania wynagrodzenia. Sprawdź status odbioru pracy przed ponowieniem tej samej operacji."
+                : summary.payment_status === "refund_pending"
+                ? "Zwrot jest przygotowywany. Sprawdzamy jego status w Stripe."
+                : ["refunded", "partially_refunded", "disputed"].includes(summary.payment_status)
+                ? "Rozliczenie obejmuje zwrot lub spór. Szczegóły sprawdź w aktualnym statusie sprawy."
                 : workEnabled
                 ? "Stripe potwierdził środki. Realizacja zlecenia może się rozpocząć."
                 : isClient
@@ -20661,21 +20778,15 @@ function ChatPaymentPanel({
             </p>
           </div>
 
-          {isClient && !workEnabled && ![
-            "refunded",
-            "partially_refunded",
-            "disputed",
-          ].includes(summary.payment_status) && (
+          {isClient && PAYMENT_CHECKOUT_STATUSES.has(summary.payment_status) && (
             <button
               type="button"
               className="chat-payment-button"
               onClick={handleCheckout}
-              disabled={loading || paying || blocked || summary.payment_status === "processing"}
+              disabled={loading || paying || blocked}
             >
               {paying
                 ? "Otwieranie Stripe…"
-                : summary.payment_status === "processing"
-                ? "Stripe potwierdza płatność…"
                 : serviceOrder
                 ? `Zamawiam i płacę ${formatPaymentMoney(summary.total_amount, summary.currency)}`
                 : `Zapłać ${formatPaymentMoney(summary.total_amount, summary.currency)} — zamówienie z obowiązkiem zapłaty`}
@@ -21902,6 +22013,7 @@ function Chat() {
                         events={privateWork.events}
                         conversation={conversation}
                         userId={user?.id}
+                        paymentStatus={paymentStatus}
                         disabled={messagingBlocked}
                         onComplete={async () => {
                           await Promise.all([privateWork.reload(), loadMessages()]);

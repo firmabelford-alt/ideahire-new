@@ -1175,7 +1175,7 @@ export function PrivateSharePanel({
   );
 }
 
-export function WorkDeliveryPanel({ deliveries, events, conversation, userId, disabled, onComplete, onReport }) {
+export function WorkDeliveryPanel({ deliveries, events, conversation, userId, paymentStatus, disabled, onComplete, onReport }) {
   const [changes, setChanges] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -1194,6 +1194,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
   const [releaseLoading, setReleaseLoading] = useState(false);
   const [reviewedWork, setReviewedWork] = useState(false);
   const [confirmRelease, setConfirmRelease] = useState(false);
+  const releaseInFlight = useRef(false);
   const latest = deliveries[0];
 
   const loadReviewState = useCallback(async () => {
@@ -1285,6 +1286,11 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
       if (!summary || !["work_submitted", "release_pending", "release_failed"].includes(summary.payment_status)) {
         throw new Error("Płatność nie jest gotowa do zwolnienia po odbiorze pracy.");
       }
+      if (summary.currency !== "PLN" || !Number.isFinite(Number(summary.contractor_amount))
+        || Number(summary.contractor_amount) <= 0
+        || latest.payment_id && summary.payment_id !== latest.payment_id) {
+        throw new Error("Nie potwierdzono kwoty lub płatności za tę wersję pracy. Odśwież status.");
+      }
       setReleaseSummary(summary);
       setReviewedWork(false);
       setConfirmRelease(false);
@@ -1297,7 +1303,8 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
   }
 
   async function acceptAndRelease() {
-    if (busy || disabled || !reviewedWork || !confirmRelease || !latest?.id) return;
+    if (busy || releaseInFlight.current || disabled || !isClient || !reviewedWork || !confirmRelease || !latest?.id) return;
+    releaseInFlight.current = true;
     setBusy(true);
     setMessage("");
     try {
@@ -1320,15 +1327,22 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
         throw new Error(serverMessage || error.message);
       }
       if (!data?.ok) throw new Error(data?.error || "Stripe nie potwierdził zwolnienia środków.");
+      if (data.status !== "released" || !/^tr_[A-Za-z0-9]+$/.test(String(data.transfer_id || ""))) {
+        window.dispatchEvent(new CustomEvent("ideahire:payment-updated", {
+          detail: { conversationId: conversation.id },
+        }));
+        throw new Error("Odbiór wymaga potwierdzenia przekazania wynagrodzenia. Sprawdź aktualny status płatności.");
+      }
       setReleaseOpen(false);
       setMessage(data.message || "Praca została zaakceptowana, a wynagrodzenie przekazane wykonawcy.");
       window.dispatchEvent(new CustomEvent("ideahire:payment-updated", {
-        detail: { conversationId: conversation.id, status: "released" },
+        detail: { conversationId: conversation.id },
       }));
       await onComplete?.();
     } catch (releaseError) {
-      setMessage(readableError(releaseError, "Nie udało się zwolnić środków. Operację można bezpiecznie ponowić."));
+      setMessage(readableError(releaseError, "Nie udało się potwierdzić przekazania wynagrodzenia. Sprawdź aktualny status tej płatności."));
     } finally {
+      releaseInFlight.current = false;
       setBusy(false);
     }
   }
@@ -1426,8 +1440,10 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, di
         <div className="private-work-completion" role="status">
           <span aria-hidden="true">✓</span>
           <div>
-            <strong>Zlecenie zakończone</strong>
-            <p>Współpraca została zapisana jako wykonana, a wynagrodzenie przekazane na saldo Stripe wykonawcy.</p>
+            <strong>{paymentStatus === "released" ? "Zlecenie zakończone" : "Praca zaakceptowana"}</strong>
+            <p>{paymentStatus === "released"
+              ? "Współpraca została zapisana jako wykonana, a wynagrodzenie przekazane na saldo Stripe wykonawcy."
+              : "Odbiór pracy został zapisany. Aktualny etap rozliczenia sprawdź w statusie płatności."}</p>
           </div>
         </div>
       )}
