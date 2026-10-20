@@ -2,10 +2,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
+import Assistant from "./Lucyna";
 import LucynaSymbol from "./LucynaSymbol";
 import "./LucynaDock.css";
-
-const Assistant = React.lazy(() => import("./Lucyna"));
 
 export function requestLucynaDock(event) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !document.getElementById("ih64-lucyna")) return;
@@ -48,12 +47,13 @@ class DockBoundary extends React.Component {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
-    return this.state.failed ? <div className="ih64-dock-status" role="status"><strong>Nie udało się otworzyć Lucyny.</strong><p>Możesz wrócić do pracy i spróbować ponownie.</p><Link to="/lucyna">Otwórz pełny widok</Link></div> : this.props.children;
+    return this.state.failed ? <div className="ih64-dock-status" role="alert"><strong>Nie udało się otworzyć Lucyny.</strong><p>Otwórz rozmowę ponownie albo przejdź do pełnego widoku.</p><button type="button" onClick={this.props.onRetry}>Spróbuj ponownie</button><Link to="/lucyna">Otwórz pełny widok</Link></div> : this.props.children;
   }
 }
 
 export default function LucynaDock({ supabase, user }) {
   const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const [bounds, setBounds] = useState(viewportBounds), [position, setPosition] = useState(null);
   const panel = useRef(null), returnTab = useRef(null), drag = useRef(null);
   const layout = dockLayout(bounds, position);
@@ -123,7 +123,7 @@ export default function LucynaDock({ supabase, user }) {
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
         <button className="ih64-dock-control" type="button" title="Zamknij okno" aria-label="Zamknij okno Lucyny AI" onClick={() => minimise()}><Icon kind="close"/></button>
       </header>
-      <div className="ih64-dock-body"><DockBoundary><React.Suspense fallback={<p className="ih64-dock-status" role="status">Otwieram Lucynę…</p>}><Assistant supabase={supabase} user={user} embedded visible={open}/></React.Suspense></DockBoundary></div>
+      <div className="ih64-dock-body"><DockBoundary key={attempt} onRetry={() => setAttempt(value => value + 1)}><Assistant supabase={supabase} user={user} embedded visible={open}/></DockBoundary></div>
     </section>}
     {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI" aria-haspopup="dialog" aria-expanded="false" aria-controls="ih64-lucyna-window" title="Lucyna — asystent AI" onClick={show}><strong>AI</strong><LucynaSymbol/></button>}
   </div>, document.body);

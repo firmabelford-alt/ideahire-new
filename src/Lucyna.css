@@ -1,4 +1,5 @@
 /* IdeaHire | Lucyna AI | P35 | 2026-10-14. Style ograniczone do modułu Lucyny. */
+@layer ih68Visibility, ih68Workspace;
 .lucyna-root {
   --lu-surface: var(--ih7-surface, #fff);
   --lu-soft: var(--ih7-soft, #f4f6fa);
@@ -616,3 +617,92 @@ html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-compose
 }
 .lucyna-root .lu-thinking small { margin-left: auto; font-size: 11px; color: var(--lu-muted); font-variant-numeric: tabular-nums; }
 .lucyna-root .lu-result-card { content-visibility: auto; contain-intrinsic-size: auto 150px; }
+
+/* P82 — the full-screen chat owns its layout; workspace page rules stay outside it. */
+@layer ih68Workspace.ih75Subpages {
+  body.ih79-app #root .lucyna-root[data-embedded="false"] { --lu-surface:var(--v-surface,#fff)!important; --lu-soft:var(--v-soft,#f2f5f4)!important; --lu-ink:var(--v-ink,#142f32)!important; --lu-muted:var(--v-muted,#516568)!important; --lu-line:var(--v-line,#dce5e4)!important; --lu-accent:var(--v-accent,#0c7378)!important; --lu-on-accent:var(--v-on,#fff)!important; position:fixed!important; inset:var(--lu-offset-top,0px) 0 auto!important; z-index:400!important; display:block!important; width:100%!important; max-width:none!important; height:var(--lu-viewport,100dvh)!important; max-height:var(--lu-viewport,100dvh)!important; min-height:0!important; margin:0!important; padding:0!important; overflow:hidden!important; background:var(--lu-surface)!important; color:var(--lu-ink)!important; font:400 14px/1.6 Inter,system-ui,sans-serif!important; animation:none!important; transform:none!important; translate:none!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-shell { position:relative!important; display:grid!important; grid-template-columns:260px minmax(0,1fr)!important; grid-template-rows:minmax(0,1fr)!important; width:100%!important; height:100%!important; min-height:0!important; max-height:100%!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:var(--lu-surface)!important; overflow:hidden!important; box-shadow:none!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-shell::before { display:none!important; content:none!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-sidebar { position:relative!important; inset:auto!important; display:flex!important; flex-direction:column!important; gap:0!important; width:100%!important; height:100%!important; min-width:0!important; min-height:0!important; margin:0!important; padding:20px 14px 14px!important; border:0!important; border-right:1px solid var(--lu-line)!important; background:var(--lu-soft)!important; overflow:hidden!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-sidebar-brand { flex:none!important; min-width:0!important; padding-bottom:20px!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-history-list { display:block!important; flex:1 1 0!important; width:100%!important; min-height:0!important; margin:0!important; padding:10px 0!important; overflow-y:auto!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-sidebar-bottom { flex:0 0 auto!important; min-height:0!important; max-height:45%!important; margin-top:auto!important; overflow-y:auto!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"].is-sidebar-hidden .lu-shell { grid-template-columns:0 minmax(0,1fr)!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"].is-sidebar-hidden .lu-sidebar { visibility:hidden!important; pointer-events:none!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-main { position:relative!important; display:flex!important; flex-direction:column!important; gap:0!important; width:100%!important; height:100%!important; max-width:none!important; min-width:0!important; min-height:0!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:var(--lu-surface)!important; overflow:hidden!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-main h1 { margin:0!important; color:var(--lu-ink)!important; font:750 20px/1.25 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-main h2 { margin:0 0 12px!important; color:var(--lu-ink)!important; font:750 24px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-main :is(h3,h4) { margin:0 0 10px!important; color:var(--lu-ink)!important; font:700 16px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-main p { margin:0!important; color:var(--lu-muted)!important; font:400 14px/1.65 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar { position:relative!important; inset:auto!important; z-index:2!important; display:flex!important; align-items:center!important; justify-content:space-between!important; flex:0 0 auto!important; flex-wrap:wrap!important; gap:12px 16px!important; width:100%!important; height:auto!important; min-height:78px!important; margin:0!important; padding:14px 24px!important; border:0!important; border-bottom:1px solid var(--lu-line)!important; background:var(--lu-surface)!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity { display:flex!important; align-items:center!important; flex:1 1 auto!important; gap:10px!important; min-width:0!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity > div { min-width:0!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity p { margin:3px 0 0!important; font:400 12px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-actions { display:flex!important; align-items:center!important; flex:0 0 auto!important; flex-wrap:nowrap!important; gap:6px!important; margin:0!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar .ih73-history-controls { flex:none!important; gap:2px!important; margin:0!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar .ih73-history-controls > button { width:auto!important; min-width:44px!important; height:44px!important; min-height:44px!important; padding:8px!important; font:650 12px/1.3 Inter,system-ui,sans-serif!important; white-space:nowrap!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-icon-button { display:inline-grid!important; place-items:center!important; flex:0 0 44px!important; width:44px!important; min-width:44px!important; height:44px!important; min-height:44px!important; margin:0!important; padding:11px!important; border:1px solid var(--lu-line)!important; border-radius:10px!important; background:var(--lu-surface)!important; color:var(--lu-ink)!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-tools-toggle { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:7px!important; min-height:44px!important; margin:0!important; padding:10px 12px!important; border:1px solid var(--lu-line)!important; border-radius:10px!important; background:var(--lu-surface)!important; color:var(--lu-ink)!important; font:650 12px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-mode-bar { display:flex!important; align-items:center!important; flex:0 0 auto!important; flex-wrap:nowrap!important; gap:6px!important; width:100%!important; max-height:100px!important; margin:0!important; padding:8px 24px!important; border-bottom:1px solid var(--lu-line)!important; overflow:auto!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-mode-bar > button { flex:none!important; min-height:44px!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-messages { display:block!important; flex:1 1 0!important; width:100%!important; min-width:0!important; min-height:0!important; margin:0!important; padding:28px max(24px,calc((100% - 850px)/2))!important; overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-messages.is-empty { display:flex!important; flex-direction:column!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-welcome { flex:none!important; width:100%!important; max-width:760px!important; margin:auto!important; padding:24px 0!important; text-align:center!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-welcome h2 { margin:0!important; font:750 clamp(32px,3.5vw,49px)/1.16 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-welcome > p { margin:14px 0 24px!important; font-size:13px!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-starter-grid { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:12px!important; width:100%!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-starter-grid > button { min-width:0!important; min-height:104px!important; padding:18px!important; text-align:left!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-starter-grid > button > strong { font:700 14px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-starter-grid > button > span { font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-first-notice { flex:none!important; width:100%!important; max-width:760px!important; margin:0 auto 24px!important; padding:18px!important; border:1px solid var(--lu-line)!important; border-radius:12px!important; background:var(--lu-soft)!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-first-notice p { margin:10px 0 14px!important; font-size:13px!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-first-notice .lu-check { font-size:12px!important; line-height:1.6!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-tool-heading h2 { margin:6px 0 8px!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-primary { min-height:44px!important; font:650 13px/1.4 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-message { width:100%!important; min-width:0!important; max-width:850px!important; margin:0 auto 28px!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-answer-text p { margin:0 0 14px!important; color:inherit!important; font:inherit!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-answer-text p:last-child { margin-bottom:0!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer-area { position:relative!important; inset:auto!important; flex:0 0 auto!important; width:100%!important; min-width:0!important; margin:0!important; padding:10px max(24px,calc((100% - 850px)/2)) max(12px,env(safe-area-inset-bottom,0px))!important; background:var(--lu-surface)!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer { display:flex!important; align-items:flex-end!important; gap:10px!important; width:100%!important; max-width:850px!important; min-height:60px!important; margin:0 auto!important; padding:9px 10px 9px 16px!important; border:1px solid var(--lu-line)!important; border-radius:16px!important; background:var(--lu-soft)!important; box-shadow:none!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer textarea { display:block!important; flex:1 1 0!important; width:100%!important; min-width:0!important; min-height:38px!important; max-height:144px!important; margin:0!important; padding:8px 0!important; border:0!important; border-radius:0!important; background:transparent!important; color:var(--lu-ink)!important; font:400 16px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer-meta { display:flex!important; flex-wrap:wrap!important; align-items:flex-start!important; gap:4px 16px!important; max-width:850px!important; margin:8px auto 0!important; padding:0!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer-meta > span { min-width:0!important; max-width:100%!important; white-space:normal!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-notice { max-height:88px!important; margin:0 auto 8px!important; overflow-y:auto!important; }
+  body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-notice > p { min-width:0!important; margin:0!important; font-size:12px!important; line-height:1.5!important; }
+  @media (min-width:901px) and (max-width:1100px) {
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-shell { grid-template-columns:225px minmax(0,1fr)!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar { padding-inline:18px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-free-badge { display:none!important; }
+  }
+  @media (max-width:900px) {
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-shell, body.ih79-app #root .lucyna-root[data-embedded="false"].is-sidebar-hidden .lu-shell { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-sidebar { position:absolute!important; inset:0 auto 0 0!important; z-index:12!important; width:min(310px,calc(100% - 16px))!important; height:100%!important; background:var(--lu-surface)!important; visibility:hidden!important; transform:translateX(-105%)!important; pointer-events:none!important; transition:transform .24s ease,visibility .24s ease!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-sidebar.is-open { visibility:visible!important; transform:translateX(0)!important; pointer-events:auto!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar { min-height:64px!important; padding:10px 12px!important; gap:8px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity { flex:1 1 auto!important; gap:8px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity > .lu-mark, body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-free-badge, body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-actions > a.lu-icon-button { display:none!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity h1 { font-size:18px!important; white-space:nowrap!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-mode-bar { padding:8px 12px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-messages { padding:20px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer-area { padding:8px 16px max(10px,env(safe-area-inset-bottom,0px))!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer textarea { max-height:96px!important; }
+  }
+  @media (max-width:560px) {
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-toolbar-identity p, body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar .ih73-history-controls > button:nth-child(2) { display:none!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-tools-toggle { flex:0 0 44px!important; width:44px!important; padding:11px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-tools-toggle > span { display:none!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-messages { padding:20px 16px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-welcome { padding:20px 0!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-welcome h2 { font-size:32px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-starter-grid { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-starter-grid > button { min-height:88px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-first-notice { padding:16px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-first-notice .lu-tool-actions { flex-wrap:wrap!important; }
+  }
+  @media (max-height:500px) {
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-chat-toolbar { min-height:54px!important; padding-block:5px!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-composer-meta { display:none!important; }
+    body.ih79-app #root .lucyna-root[data-embedded="false"] .lu-notice { max-height:60px!important; }
+  }
+  body.ih79-app #root .lucyna-root[data-embedded="false"][data-keyboard="true"] .lu-composer-meta { display:none!important; }
+}

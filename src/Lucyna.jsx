@@ -315,14 +315,12 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     const viewport = window.visualViewport;
     let naturalHeight = viewport?.height || window.innerHeight; let previousWidth = window.innerWidth;
     const update = () => {
-      const header = pageRef.current?.parentElement?.querySelector(".account-navbar");
       const height = viewport?.height || window.innerHeight;
       const focused = document.activeElement === textareaRef.current;
       if (!focused || Math.abs(window.innerWidth - previousWidth) > 100) naturalHeight = height;
       previousWidth = window.innerWidth;
       pageRef.current?.style.setProperty("--lu-viewport", height + "px");
       pageRef.current?.style.setProperty("--lu-offset-top", (viewport?.offsetTop || 0) + "px");
-      pageRef.current?.style.setProperty("--lu-navbar", (header?.getBoundingClientRect().height ?? 170) + "px");
       if (pageRef.current) pageRef.current.dataset.keyboard = String(window.matchMedia("(max-width:900px)").matches
         && focused && height < naturalHeight - 120);
     };
@@ -544,9 +542,9 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   const isSearch = ["freelancers", "jobs"].includes(active.mode);
   function useToolDraft(text) {send(null,{text:text.slice(0,6000),mode:active.mode});}
   function useCorrection(text) {send(null,{text:"Przygotuj uprzejmą wiadomość o poprawkach na podstawie powyższej analizy. Zachowaj ustalenia i konkretne punkty.\n\n"+text,mode:"message"});}
-  return <div className="lucyna-route">
+  return <div className="lucyna-route" data-embedded={embedded}>
     <section className={"lucyna-root" + (sidebarCollapsed ? " is-sidebar-hidden" : "")}
-      ref={pageRef} data-lucyna-version={LUCYNA_BUILD_VERSION} aria-label="Lucyna AI — asystentka IdeaHire">
+      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} aria-label="Lucyna AI — asystentka IdeaHire">
       <div className="lu-shell">
         {mobile && historyOpen && <button className="lu-drawer-shade" type="button"
           aria-label="Zamknij historię rozmów" onClick={() => setHistoryOpen(false)} />}
