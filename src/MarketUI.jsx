@@ -378,7 +378,7 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
   const label = people ? (en ? 'Search freelancers' : 'Szukaj freelancerów') : services ? (en ? 'Search services' : 'Szukaj usług') : (en ? 'Search jobs' : 'Szukaj zleceń');
   const fields = ['Wszystkie', ...categories.filter(value => value !== 'Wszystkie')];
   const fieldLabel = value => value === 'Wszystkie' ? (en ? 'All fields' : 'Wszystkie dziedziny') : en ? translateUiText(categoryLabel(value)) : categoryLabel(value);
-  return <div className="ih75-catalog">
+  return <div className={"ih75-catalog ih80-catalog-" + (people ? "people" : services ? "services" : "jobs")}>
     <aside className="ih75-catalog-sidebar" aria-label={en ? 'Filter by field' : 'Filtruj według dziedziny'}>
       <h2>{en ? 'Fields' : 'Dziedziny'}</h2>
       <nav id={id + '-fields'} className="ih75-category-list" aria-label={en ? 'Fields' : 'Dziedziny'}>

@@ -330,15 +330,24 @@ function ServiceCard({ service }) {
   const isCustom = service.price_mode === 'custom';
   const en = useSitePreferences().language === 'en';
   const category = en ? translateUiText(service.category) : service.category;
+  const days = Number(service.delivery_days);
+  const revisions = Number(service.revisions);
   return <article className="ih78-service-offer">
     <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
     <div className="ih78-offer-copy">
       <h2><Link to={'/services/' + service.id}>{service.title}</Link></h2>
       <p>{service.summary}</p>
     </div>
+    <div className="ih80-offer-terms">
+      <div className={'ih78-offer-price' + (isCustom ? ' is-custom' : '')}><span>{isCustom ? (en ? 'Quote' : 'Wycena') : (en ? 'From' : 'Od')}</span><strong>{isCustom ? (en ? 'On request' : 'Indywidualna') : formatMoney(service.base_price)}</strong></div>
+      <dl className="ih80-offer-facts">
+        {service.delivery_days != null && days > 0 && <div><dt>{en ? 'Delivery' : 'Realizacja'}</dt><dd>{days} {en ? (days === 1 ? 'day' : 'days') : (days === 1 ? 'dzień' : 'dni')}</dd></div>}
+        {service.revisions != null && revisions >= 0 && <div><dt>{en ? 'Revisions' : 'Poprawki'}</dt><dd>{revisions}</dd></div>}
+      </dl>
+    </div>
     <footer className="ih78-offer-footer">
       <div className="ih78-offer-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small className={capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</small></span></div>
-      <div className="ih78-offer-price"><span>{isCustom ? (en ? 'Quote' : 'Wycena') : (en ? 'From' : 'Od')}</span><strong>{isCustom ? (en ? 'On request' : 'Indywidualna') : formatMoney(service.base_price)}</strong></div>
+      <span className="ih80-offer-open" aria-hidden="true"><MarketIcon kind="diagonal" /></span>
     </footer>
   </article>;
 }
@@ -709,7 +718,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
               <p>Krótkie punkty są łatwiejsze do porównania niż ściana tekstu.</p>
             </div>
             <div className="ih5-service-editor-fields">
-              <label className="is-wide">
+              <label>
                 <span>Rezultaty pracy * <em>jeden w wierszu</em></span>
                 <textarea
                   value={form.deliverables}
@@ -721,7 +730,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 />
               </label>
 
-              <label className="is-wide">
+              <label>
                 <span>Czego potrzebujesz od klienta? <em>jeden punkt w wierszu</em></span>
                 <textarea
                   value={form.clientRequirements}
@@ -1138,28 +1147,24 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             <div className="ih5-service-rich-copy">{service.description}</div>
           </section>
 
-          <section className="ih5-service-detail-section">
-            <h2>Co otrzymasz</h2>
-            <ul className="ih5-service-check-list">
-              {deliverables.map((item, index) => (
-                <li key={`${item}-${index}`}><span>✓</span>{item}</li>
-              ))}
-            </ul>
-          </section>
-
-          {requirements.length > 0 && (
-            <section className="ih5-service-detail-section">
+          {(deliverables.length > 0 || requirements.length > 0) && <div className="ih80-service-scope">
+            {deliverables.length > 0 && <section className="ih5-service-detail-section">
+              <h2>Co otrzymasz</h2>
+              <ul className="ih5-service-check-list">
+                {deliverables.map((item, index) => (
+                  <li key={`${item}-${index}`}><span aria-hidden="true">✓</span>{item}</li>
+                ))}
+              </ul>
+            </section>}
+            {requirements.length > 0 && <section className="ih5-service-detail-section ih80-scope-inputs">
               <h2>Materiały od Ciebie</h2>
               <ol className="ih5-service-requirement-list">
                 {requirements.map((item, index) => (
-                  <li key={`${item}-${index}`}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>
-                    {item}
-                  </li>
+                  <li key={`${item}-${index}`}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{item}</li>
                 ))}
               </ol>
-            </section>
-          )}
+            </section>}
+          </div>}
 
           <details className="ih5-service-process">
             <summary>Jak zamówić<MarketIcon kind="chevron" /></summary>
@@ -1182,12 +1187,14 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           </div>
 
           <div className={"ih5-service-order-price " + (service.price_mode === "fixed" ? "is-fixed" : "is-custom")}>
-            <span>{service.price_mode === "fixed" ? "Cena usługi" : "Sposób wyceny"}</span>
-            <strong>
-              {service.price_mode === "fixed"
-                ? formatMoney(service.base_price)
-                : "Indywidualna"}
-            </strong>
+            <div className="ih80-order-amount">
+              <span>{service.price_mode === "fixed" ? "Cena usługi" : "Sposób wyceny"}</span>
+              <strong>
+                {service.price_mode === "fixed"
+                  ? formatMoney(service.base_price)
+                  : "Indywidualna"}
+              </strong>
+            </div>
             <small>
               {service.price_mode === "fixed"
                 ? "Pełna kwota dla wykonawcy. Opłatę IdeaHire zobaczysz przed płatnością."
@@ -1700,14 +1707,36 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
       <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
         <h2 className="ih5-sr-only">{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2>
         {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
-          {result.items.map((profile, index) => <article className="ih11-freelancer-card ih73-person-card ih79-person" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
-            <div className="ih11-freelancer-person"><Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`Profil: ${profile.name || "freelancer"}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || "F")[0]}</span>}</Link><div><h3><Link to={`/profile/${profile.id}`}>{profile.name || "Freelancer"}</Link></h3><p>{profile.specialization || "Wykonawca IdeaHire"}</p></div></div>
-            <p className="ih11-freelancer-about">{profile.about || "Poznaj doświadczenie i portfolio na profilu."}</p>
-            <div className="ih11-freelancer-skills">{(Array.isArray(profile.skills) ? profile.skills : []).slice(0, 3).map((skill) => <span key={skill}>{skill}</span>)}</div>
-            <div className="ih11-freelancer-meta"><span>{Number(profile.completed_jobs) || 0} zakończonych zleceń</span><span>{Number(profile.positive_reviews) || 0} pozytywnych opinii</span></div>
-            <footer className="ih12-directory-contact ih73-person-contact"><Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>Zobacz profil<MarketIcon kind="arrow" /></Link>{profile.id === user?.id ? <Link className="ih11-button is-primary" to="/account#account-profile-data">Edytuj profil</Link> : <div className="ih12-contact-actions"><button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "message" })} title={!canContact ? "Wymagane pełnoletnie konto" : !profile.allow_project_inquiries ? "Nowe zapytania są wyłączone" : "Zapytaj o współpracę"}><MarketIcon kind="message" />Napisz wiadomość</button><button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: "project" })}><MarketIcon kind="plus" />Zleć pracę</button></div>}</footer>
-          </article>)}
-        </div> : <div className="ih11-empty"><span aria-hidden="true">↗</span><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Brak dostępnych profili"}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
+          {result.items.map((profile, index) => {
+            const completed = Math.max(0, Number(profile.completed_jobs) || 0);
+            const reviews = Math.max(0, Number(profile.positive_reviews) || 0);
+            const plural = (value, one, few, many) => value === 1 ? one : value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 12 || value % 100 > 14) ? few : many;
+            const own = profile.id === user?.id;
+            const skills = (Array.isArray(profile.skills) ? profile.skills : []).slice(0, 3);
+            return <article className="ih11-freelancer-card ih73-person-card ih79-person" key={profile.id} style={{ "--ih11-order": Math.min(index, 5) }}>
+              <div className="ih80-person-main">
+                <div className="ih11-freelancer-person">
+                  <Link className="ih11-freelancer-avatar" to={`/profile/${profile.id}`} aria-label={`${english ? 'Profile' : 'Profil'}: ${profile.name || 'freelancer'}`}>{profile.avatar_url ? <img src={profile.avatar_url} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>{Array.from(profile.name || 'F')[0]}</span>}</Link>
+                  <div><h3><Link to={`/profile/${profile.id}`}>{profile.name || 'Freelancer'}</Link></h3>{profile.specialization && <p>{profile.specialization}</p>}</div>
+                </div>
+                {profile.about && <p className="ih11-freelancer-about">{profile.about}</p>}
+                {skills.length > 0 && <div className="ih11-freelancer-skills" aria-label={english ? 'Skills' : 'Umiejętności'}>{skills.map(skill => <span key={skill}>{skill}</span>)}</div>}
+              </div>
+              <dl className="ih11-freelancer-meta" aria-label={english ? 'Experience on IdeaHire' : 'Doświadczenie na IdeaHire'}>
+                <div><dt>{english ? 'Completed jobs' : plural(completed, 'Zakończone zlecenie', 'Zakończone zlecenia', 'Zakończonych zleceń')}</dt><dd>{completed}</dd></div>
+                <div><dt>{english ? 'Positive reviews' : plural(reviews, 'Pozytywna opinia', 'Pozytywne opinie', 'Pozytywnych opinii')}</dt><dd>{reviews}</dd></div>
+              </dl>
+              <footer className="ih12-directory-contact ih73-person-contact">
+                <Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>{english ? 'View profile' : 'Zobacz profil'}<MarketIcon kind="arrow" /></Link>
+                {own ? <Link className="ih11-button is-primary" to="/account#account-profile-data">{english ? 'Edit profile' : 'Edytuj profil'}</Link> : <div className="ih12-contact-actions">
+                  <button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: 'message' })} title={!canContact ? (english ? 'An adult account is required' : 'Wymagane pełnoletnie konto') : !profile.allow_project_inquiries ? (english ? 'New inquiries are turned off' : 'Nowe zapytania są wyłączone') : (english ? 'Ask about collaboration' : 'Zapytaj o współpracę')}><MarketIcon kind="message" />{english ? 'Write a message' : 'Wiadomość'}</button>
+                  <button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: 'project' })}><MarketIcon kind="plus" />{english ? 'Hire' : 'Zleć pracę'}</button>
+                </div>}
+                {!own && (!canContact || !profile.allow_project_inquiries) && <small className="ih80-contact-note">{!canContact ? (english ? 'Contact requires an adult account.' : 'Kontakt wymaga pełnoletniego konta.') : (english ? 'New project inquiries are turned off.' : 'Nowe zapytania o projekt są wyłączone.')}</small>}
+              </footer>
+            </article>;
+          })}
+        </div> : <div className="ih11-empty"><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Brak dostępnych profili"}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
         {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}
       </section>
       </MarketFilters>
