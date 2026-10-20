@@ -1,13 +1,13 @@
 /* P79 — account, workspace and navigation with separate phone and laptop layouts. */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ArrowUpRight, ArrowUp, Bell, BriefcaseBusiness, CalendarDays, Check, ChevronDown, ChevronRight, FileText, FolderOpen, Wallet, Home, Image, LayoutGrid, LogOut, Menu, MessageSquare, MoreHorizontal, Palette, Paperclip, Play, Plus, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound, X, Maximize2, Minimize2, Pin } from 'lucide-react';
+import { ArrowLeft, ArrowUp, Bookmark, Bell, BriefcaseBusiness, CalendarDays, Check, ChevronDown, FileText, FolderOpen, Wallet, Home, Image, LayoutGrid, LogOut, Menu, MessageSquare, MoreHorizontal, Palette, Paperclip, Play, Plus, Search, Settings, ShieldCheck, SlidersHorizontal, UserRound, X, Maximize2, Minimize2, Pin } from 'lucide-react';
 import { BrandSignature } from './Brand';
 import LucynaSymbol from './LucynaSymbol';
 import { useSitePreferences } from './Preferences';
 import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
-import { SubpageNavigation, SubpageHeading } from './Subpages';
+import { SubpageNavigation, SubpageHeading, SubpageCount } from './Subpages';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -33,15 +33,15 @@ export function WorkspaceIcon({
     settings: Settings,
     palette: Palette,
     payouts: Wallet,
-    arrow: ArrowRight,
+    arrow: Bookmark,
     back: ArrowLeft,
-    diagonal: ArrowUpRight,
+    diagonal: Bookmark,
     send: ArrowUp,
     plus: Plus,
     close: X,
     search: Search,
     down: ChevronDown,
-    next: ChevronRight,
+    next: Bookmark,
     files: FolderOpen,
     bell: Bell,
     lock: ShieldCheck,
@@ -55,7 +55,7 @@ export function WorkspaceIcon({
     pin: Pin,
     menu: Menu,
     logout: LogOut
-  }[kind] || ArrowRight;
+  }[kind] || Bookmark;
   return <Icon size={20} strokeWidth={1.65} aria-hidden="true" focusable="false" {...props} />;
 }
 export function WorkspaceAvatar({
@@ -186,7 +186,7 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
   };
   const icons = { profile: 'profile', expertise: 'settings', portfolio: 'portfolio', jobs: 'jobs', preferences: 'settings', payouts: 'payouts', templates: 'palette' };
   return <aside className="ih72-section-navigation ih75-account-navigation">
-    <Link to="/account" className="ih75-account-return"><WorkspaceIcon kind="back" />{t('Widok konta', 'Account overview')}</Link>
+    <Link to="/account" className="ih75-account-return"><WorkspaceIcon kind="diagonal" />{t('Widok konta', 'Account overview')}</Link>
     <p className="ih74-section-nav-title">{t('Twoje konto', 'Your account')}</p>
     <nav className="ih72-section-links" aria-label={t('Sekcje konta', 'Account sections')}>
       {sections.map(section => <button type="button" key={section.key}
@@ -282,9 +282,9 @@ export function WorkspaceDashboard({
           <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span>{label}</span><WorkspaceIcon kind="next" /></button>)}
       </nav>
       <div className="ih72-account-facts" aria-label={t('Twój profil w liczbach', 'Your profile at a glance')}>
-        <button type="button" onClick={() => select('jobs')}><strong>{jobsLoading ? '—' : jobCount}</strong><span>{t('Zlecenia', 'Listings')}</span></button>
-        <button type="button" onClick={() => select('portfolio')}><strong>{portfolioCount}</strong><span>Portfolio</span></button>
-        <button type="button" onClick={() => select('expertise')}><strong>{specialtyCount}</strong><span>{t('Specjalizacje', 'Skills')}</span></button>
+        <button type="button" onClick={() => select('jobs')}><strong><SubpageCount value={jobCount} loading={jobsLoading} /></strong><span>{t('Zlecenia', 'Listings')}</span></button>
+        <button type="button" onClick={() => select('portfolio')}><strong><SubpageCount value={portfolioCount} /></strong><span>Portfolio</span></button>
+        <button type="button" onClick={() => select('expertise')}><strong><SubpageCount value={specialtyCount} /></strong><span>{t('Specjalizacje', 'Skills')}</span></button>
       </div>
     </section>
 
@@ -342,6 +342,14 @@ export function WorkspaceWork({ inbox }) {
   const params = new URLSearchParams(location.search);
   const filter = ['client', 'contractor'].includes(params.get('role')) ? params.get('role') : 'all';
   const search = params.get('q') || '';
+  const [wide, setWide] = useState(() => window.matchMedia('(min-width:851px)').matches);
+  useEffect(() => {
+    const media = window.matchMedia('(min-width:851px)');
+    const change = () => setWide(media.matches);
+    media.addEventListener?.('change', change);
+    return () => media.removeEventListener?.('change', change);
+  }, []);
+
   const rows = inbox?.conversations || [];
   const unread = rows.filter(item => item.isUnread).length;
   const hiring = rows.filter(item => item.client_id === inbox?.user?.id).length;
@@ -358,13 +366,13 @@ export function WorkspaceWork({ inbox }) {
   return <main className="ih68-page ih72-work-page" id="ih68-content">
     <SubpageHeading title={t('Panel pracy', 'Workspace')} actions={<Link to="/calendar" className="ih79-button"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>} />
     <div className="ih79-work-overview" aria-label={t('Podsumowanie współprac', 'Project overview')}>
-      <Link to="/messages?unread=1" className={unread ? 'has-unread' : ''}><span>{t('Nieprzeczytane rozmowy', 'Unread conversations')}</span><strong>{inbox?.loading ? '—' : unread}</strong><WorkspaceIcon kind="arrow" /></Link>
-      <button type="button" aria-pressed={filter === 'client'} onClick={() => update('role', 'client')}><span>{t('Zlecam', 'Hiring')}</span><strong>{inbox?.loading ? '—' : hiring}</strong><WorkspaceIcon kind="diagonal" /></button>
-      <button type="button" aria-pressed={filter === 'contractor'} onClick={() => update('role', 'contractor')}><span>{t('Realizuję', 'Providing')}</span><strong>{inbox?.loading ? '—' : providing}</strong><WorkspaceIcon kind="diagonal" /></button>
+      <Link to="/messages?unread=1" className={unread ? 'has-unread' : ''}><span>{t('Nieprzeczytane rozmowy', 'Unread conversations')}</span><strong><SubpageCount value={unread} loading={inbox?.loading} /></strong><WorkspaceIcon kind="arrow" /></Link>
+      <button type="button" aria-pressed={filter === 'client'} onClick={() => update('role', 'client')}><span>{t('Zlecam', 'Hiring')}</span><strong><SubpageCount value={hiring} loading={inbox?.loading} /></strong><WorkspaceIcon kind="diagonal" /></button>
+      <button type="button" aria-pressed={filter === 'contractor'} onClick={() => update('role', 'contractor')}><span>{t('Realizuję', 'Providing')}</span><strong><SubpageCount value={providing} loading={inbox?.loading} /></strong><WorkspaceIcon kind="diagonal" /></button>
     </div>
     <div className="ih79-work-layout">
       <section className="ih72-projects" aria-labelledby="ih72-projects-title">
-        <div className="ih79-section-title"><h2 id="ih72-projects-title">{t('Współprace', 'Projects')}<span className="ih79-count">{inbox?.loading ? '—' : visible.length}</span></h2></div>
+        <div className="ih79-section-title"><h2 id="ih72-projects-title">{t('Współprace', 'Projects')}<span className="ih79-count"><SubpageCount value={visible.length} loading={inbox?.loading} /></span></h2></div>
         <div className="ih72-list-toolbar">
           <div className="ih72-filters" role="group" aria-label={t('Twoja rola', 'Your role')}>
             {[['all', t('Wszystkie', 'All')], ['client', t('Zlecam', 'Hiring')], ['contractor', t('Realizuję', 'Providing')]].map(([value, label]) =>
@@ -376,7 +384,12 @@ export function WorkspaceWork({ inbox }) {
           <WorkspaceProjectCards conversations={visible} user={inbox?.user} loading={inbox?.loading} /> :
           <div className="ih79-empty"><h3>{rows.length ? t('Brak pasujących współprac', 'No matching projects') : t('Nie masz jeszcze współprac', 'No projects yet')}</h3><p>{rows.length ? t('Zmień frazę lub wybraną rolę.', 'Change the phrase or selected role.') : t('Odpowiedz na zlecenie albo napisz do wykonawcy. Rozmowę i ustalenia znajdziesz tutaj.', 'Reply to a job or contact a freelancer. Your conversations and terms will appear here.')}</p>{rows.length ? <button type="button" className="ih79-button" onClick={() => navigate('/work', { replace: true })}>{t('Wyczyść filtry', 'Clear filters')}</button> : <Link to="/jobs" className="ih79-button is-primary">{t('Znajdź zlecenie', 'Find a job')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
       </section>
-      <aside className="ih79-work-tools" aria-label={t('Zlecenia i usługi', 'Jobs and services')}><WorkspaceWorkActions /></aside>
+      <aside className="ih79-work-tools" aria-label={t('Zlecenia i usługi', 'Jobs and services')}>
+        <details className="ih81-work-shortcuts" open={wide}>
+          <summary><span>{t('Narzędzia pracy', 'Work tools')}</span><WorkspaceIcon kind="plus" /></summary>
+          <div className="ih81-work-shortcuts-body"><WorkspaceWorkActions /></div>
+        </details>
+      </aside>
     </div>
   </main>;
 }

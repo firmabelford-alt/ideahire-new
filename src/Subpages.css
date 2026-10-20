@@ -396,7 +396,7 @@ body.ih79-app #root .ih68-dot { display: inline-block !important; width: 6px !im
 body.ih79-app #root .ih68-notifications .ih68-dot { position: absolute !important; top: 8px !important; right: 8px !important; }
 body.ih79-app .ih73-route-navigation { display: flex !important; align-items: center !important; gap: 14px !important; width: 100% !important; max-width: 1280px !important; min-height: 52px !important; margin: 0 auto !important; padding: 8px 40px 0 !important; border: 0 !important; background: none !important; color: var(--p-muted) !important; }
 body.ih79-app .ih73-history-controls { display: flex !important; align-items: center !important; gap: 2px !important; flex: none !important; }
-body.ih79-app .ih73-history-controls > button { display: grid !important; place-items: center !important; width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; margin: 0 !important; padding: 10px !important; border: 0 !important; border-radius: 6px !important; background: transparent !important; color: var(--p-ink) !important; box-shadow: none !important; }
+body.ih79-app .ih73-history-controls > button { display: grid !important; place-items: center !important; width: auto !important; height: 40px !important; min-width: 48px !important; min-height: 40px !important; margin: 0 !important; padding: 10px 8px !important; border: 0 !important; border-radius: 6px !important; background: transparent !important; color: var(--p-ink) !important; font: 650 12px/1.4 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
 body.ih79-app .ih73-history-controls > button:disabled { display: none !important; }
 body.ih79-app .ih73-route-label { display: flex !important; align-items: center !important; flex: 1 !important; gap: 10px !important; color: var(--p-muted) !important; font: 400 13px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app .ih73-route-label > i { font-style: normal !important; opacity: .5 !important; }
@@ -875,6 +875,9 @@ body.ih79-app #root .profile-stat-card { border-color: var(--p-line) !important;
 
 /* Calendar: the selected date, the day's agenda and nearby deadlines. */
 body.ih79-app #root .ih76-planner-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 18px !important; margin: 0 0 26px !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .ih76-planner-heading > .calendar-primary-action { position: static !important; inset: auto !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: 0 0 auto !important; width: auto !important; min-width: max-content !important; max-width: 100% !important; height: auto !important; min-height: 44px !important; padding: 12px 16px !important; overflow: visible !important; white-space: nowrap !important; transform: none !important; }
+body.ih79-app #root .ih76-planner-heading > .calendar-primary-action > span { display: inline !important; width: auto !important; max-width: none !important; height: auto !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; white-space: nowrap !important; overflow: visible !important; font: inherit !important; }
+body.ih79-app #root .ih76-planner-heading > .calendar-primary-action > svg { width: 18px !important; height: 18px !important; flex: none !important; }
 body.ih79-app #root .ih76-planner-heading h1 { margin: 0 !important; font: 800 40px/1.12 Inter,system-ui,sans-serif !important; letter-spacing: -.05em !important; }
 body.ih79-app #root .ih76-planner-datebar { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important; margin: 0 0 16px !important; }
 body.ih79-app #root .ih76-planner-datebar > p { margin: 0 !important; color: var(--p-ink) !important; font: 700 17px/1.4 Inter,system-ui,sans-serif !important; text-transform: capitalize !important; }
@@ -884,8 +887,8 @@ body.ih79-app #root .ih75-view-switch { display: flex !important; align-items: c
 body.ih79-app #root .ih75-view-switch > button { display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; min-height: 40px !important; margin: 0 !important; padding: 9px 14px !important; border: 0 !important; border-radius: 4px !important; background: none !important; color: var(--p-muted) !important; font: 650 12px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih75-view-switch > button[aria-pressed="true"] { background: var(--p-paper) !important; color: var(--p-ink) !important; }
 body.ih79-app #root .ih75-view-switch svg { width: 16px !important; height: 16px !important; }
-body.ih79-app #root .ih75-day-navigation { display: grid !important; grid-template-columns: 40px minmax(0,1fr) 40px !important; gap: 6px !important; max-width: 300px !important; }
-body.ih79-app #root .ih75-day-navigation > button { display: grid !important; place-items: center !important; min-width: 0 !important; width: 40px !important; min-height: 44px !important; padding: 10px !important; border: 0 !important; border-radius: 5px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
+body.ih79-app #root .ih75-day-navigation { display: grid !important; grid-template-columns: 54px minmax(0,1fr) 54px !important; gap: 6px !important; max-width: 340px !important; }
+body.ih79-app #root .ih75-day-navigation > button { display: grid !important; place-items: center !important; min-width: 0 !important; width: 54px !important; min-height: 44px !important; padding: 8px 4px !important; font: 650 11px/1.3 Inter,system-ui,sans-serif !important; border: 0 !important; border-radius: 5px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
 body.ih79-app #root .ih75-day-navigation input { display: block !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important; min-height: 44px !important; margin: 0 !important; padding: 8px 10px !important; border: 1px solid var(--p-line) !important; border-radius: 5px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 600 16px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih75-week-strip { display: grid !important; grid-template-columns: repeat(7,minmax(0,1fr)) !important; gap: 7px !important; margin: 0 0 30px !important; padding: 0 !important; border: 0 !important; }
 body.ih79-app #root .ih75-week-strip > button { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 6px !important; width: 100% !important; min-width: 0 !important; min-height: 80px !important; margin: 0 !important; padding: 10px 4px !important; border: 0 !important; border-radius: 6px !important; background: none !important; color: var(--p-muted) !important; }
@@ -903,16 +906,26 @@ body.ih79-app #root .ih75-calendar-workspace[data-view="month"] { grid-template-
 }
 body.ih79-app #root .ih75-calendar-workspace[data-view="month"] .ih75-calendar-upcoming { grid-column: 1/-1 !important; }
 body.ih79-app #root .ih75-month-board { margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; }
-body.ih79-app #root .calendar-toolbar { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; margin: 0 0 16px !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .calendar-toolbar { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important; margin: 0 0 16px !important; padding: 0 !important; border: 0 !important; }
 body.ih79-app #root .calendar-month-navigation { display: flex !important; align-items: center !important; gap: 10px !important; }
-body.ih79-app #root .calendar-month-navigation > button { width: 40px !important; min-height: 44px !important; padding: 10px !important; border: 0 !important; border-radius: 5px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
+body.ih79-app #root .calendar-month-navigation > button { flex: 0 0 54px !important; width: 54px !important; min-height: 44px !important; padding: 8px 4px !important; font: 650 11px/1.3 Inter,system-ui,sans-serif !important; border: 0 !important; border-radius: 5px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
 body.ih79-app #root .calendar-month-navigation > div > span { display: none !important; }
 body.ih79-app #root .calendar-month-navigation h2 { margin: 0 !important; font: 700 16px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root :is(.calendar-weekdays,.calendar-grid) { display: grid !important; grid-template-columns: repeat(7,minmax(0,1fr)) !important; gap: 4px !important; }
 body.ih79-app #root .calendar-weekdays { margin: 0 0 8px !important; padding: 0 !important; }
+body.ih79-app #root .calendar-grid { animation: ih79-enter .24s cubic-bezier(.22,.7,.25,1) both !important; transform: none !important; }
 body.ih79-app #root .calendar-weekdays > span { color: var(--p-muted) !important; font: 600 11px/1.4 Inter,system-ui,sans-serif !important; text-align: center !important; }
-body.ih79-app #root .calendar-day { display: flex !important; flex-direction: column !important; gap: 6px !important; width: 100% !important; min-width: 0 !important; min-height: 90px !important; margin: 0 !important; padding: 9px !important; border: 0 !important; border-radius: 5px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; text-align: left !important; }
-body.ih79-app #root .calendar-day.is-selected { outline: 2px solid var(--p-accent) !important; outline-offset: -2px !important; background: var(--p-tint) !important; }
+body.ih79-app #root .calendar-day { position: relative !important; isolation: isolate !important; transform: none !important; animation: none !important; transition: background-color .18s ease, box-shadow .18s ease !important; display: flex !important; flex-direction: column !important; gap: 6px !important; width: 100% !important; min-width: 0 !important; min-height: 90px !important; margin: 0 !important; padding: 9px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; text-align: left !important; }
+body.ih79-app #root .calendar-day.is-selected { outline: 0 !important; box-shadow: inset 0 0 0 2px var(--p-accent) !important; background: var(--p-tint) !important; }
+body.ih79-app #root .calendar-day:focus-within { outline: 2px solid var(--p-accent) !important; outline-offset: 2px !important; }
+body.ih79-app #root .calendar-day::before, body.ih79-app #root .calendar-day::after { content: none !important; display: none !important; }
+body.ih79-app #root .calendar-day > .calendar-day-number { position: static !important; transform: none !important; animation: none !important; flex-wrap: nowrap !important; justify-content: space-between !important; cursor: pointer !important; outline: 0 !important; }
+body.ih79-app #root .calendar-day > .calendar-day-number::after { content: '' !important; position: absolute !important; display: block !important; inset: 0 !important; z-index: 1 !important; border: 0 !important; border-radius: 12px !important; background: transparent !important; pointer-events: auto !important; }
+body.ih79-app #root .calendar-day-number > :is(span,small) { position: relative !important; z-index: 2 !important; flex: none !important; pointer-events: none !important; }
+body.ih79-app #root .calendar-day-number > em { display: none !important; }
+body.ih79-app #root .calendar-day.is-today .calendar-day-number > span { display: grid !important; place-items: center !important; width: 26px !important; height: 26px !important; border-radius: 50% !important; background: var(--p-accent) !important; color: var(--p-on) !important; }
+body.ih79-app #root .calendar-day-events { position: relative !important; z-index: 2 !important; pointer-events: none !important; }
+body.ih79-app #root .calendar-day-events > button { position: relative !important; pointer-events: auto !important; }
 body.ih79-app #root .calendar-day.is-outside { opacity: .5 !important; }
 body.ih79-app #root .ih75-day-plan { margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
 body.ih79-app #root .ih75-day-plan-heading { display: flex !important; align-items: center !important; gap: 16px !important; margin: 0 0 22px !important; padding: 0 !important; border: 0 !important; }
@@ -998,6 +1011,22 @@ body.ih79-app #root .discovery-settings-tags > span { padding: 5px 8px !importan
 /* Dialogs use the same fields and adapt to the available viewport. */
 body.ih79-app :is(.calendar-dialog-backdrop,.ih5-service-modal-backdrop,.ih12-contact-backdrop) { position: fixed !important; inset: 0 !important; z-index: 1600 !important; display: flex !important; align-items: center !important; justify-content: center !important; margin: 0 !important; padding: 20px !important; background: color-mix(in srgb,var(--p-ink) 40%,transparent) !important; overflow: auto !important; }
 body.ih79-app :is(.calendar-dialog,.ih5-service-inquiry-modal,.ih12-contact-dialog) { box-sizing: border-box !important; width: 100% !important; max-width: 640px !important; min-width: 0 !important; max-height: calc(100dvh - 40px) !important; margin: 0 !important; padding: 28px !important; border: 0 !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important; overflow: auto !important; overscroll-behavior: contain !important; box-shadow: 0 20px 70px #0002 !important; }
+body.ih79-app .calendar-dialog-heading { max-height: none !important; overflow: visible !important; backdrop-filter: none !important; position: static !important; inset: auto !important; z-index: auto !important; display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 18px !important; width: 100% !important; height: auto !important; min-height: 0 !important; margin: 0 0 26px !important; padding: 0 !important; border: 0 !important; background: none !important; transform: none !important; }
+body.ih79-app .calendar-dialog-heading::before, body.ih79-app .calendar-dialog-heading::after { content: none !important; display: none !important; }
+body.ih79-app .calendar-dialog-heading > div { flex: 1 !important; min-width: 0 !important; }
+body.ih79-app .calendar-dialog-heading > div > span { display: block !important; color: var(--p-muted) !important; font: 600 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app .calendar-dialog-heading h2 { margin: 7px 0 0 !important; }
+body.ih79-app .calendar-dialog-heading > button { position: static !important; display: grid !important; place-items: center !important; flex: 0 0 44px !important; width: 44px !important; height: 44px !important; min-height: 44px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 8px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 400 27px/1 Inter,system-ui,sans-serif !important; }
+body.ih79-app .calendar-dialog .calendar-form { position: static !important; display: flex !important; flex-direction: column !important; gap: 22px !important; height: auto !important; max-height: none !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker { position: static !important; inset: auto !important; z-index: auto !important; transform: none !important; height: auto !important; max-height: none !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker > div { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 10px !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker label { display: flex !important; align-items: center !important; gap: 8px !important; min-height: 44px !important; min-width: 0 !important; padding: 12px !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker label { border: 1px solid var(--p-line) !important; border-radius: 8px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; transform: none !important; transition: background-color .18s ease, border-color .18s ease !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker label.is-selected { border-color: var(--p-accent) !important; background: var(--p-tint) !important; box-shadow: inset 0 0 0 1px var(--p-accent) !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker label:focus-within { outline: 2px solid var(--p-accent) !important; outline-offset: 2px !important; }
+body.ih79-app .calendar-dialog .calendar-type-picker label span { color: inherit !important; font: 600 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app .calendar-dialog .calendar-form-actions { position: static !important; inset: auto !important; z-index: auto !important; display: flex !important; align-items: center !important; justify-content: flex-end !important; flex-wrap: wrap !important; gap: 10px !important; margin: 0 !important; padding: 8px 0 0 !important; background: none !important; }
+body.ih79-app .calendar-dialog .calendar-form-actions button { min-height: 44px !important; padding: 11px 16px !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; border-radius: 7px !important; transform: none !important; }
 body.ih79-app :is(.calendar-dialog,.ih5-service-inquiry-modal,.ih12-contact-dialog) :is(div,form,label,fieldset,header,footer) { box-sizing: border-box !important; min-width: 0 !important; }
 body.ih79-app :is(.calendar-dialog,.ih5-service-inquiry-modal,.ih12-contact-dialog) :is(h2,h3,p,strong,span,a) { overflow-wrap: anywhere !important; }
 body.ih79-app :is(.calendar-dialog,.ih5-service-inquiry-modal,.ih12-contact-dialog) h2 { margin: 0 0 12px !important; color: var(--p-ink) !important; font: 800 25px/1.25 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
@@ -1011,8 +1040,8 @@ body.ih79-app #root .calendar-event-chip { display: flex !important; align-items
 body.ih79-app #root .calendar-event-chip span { overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
 body.ih79-app #root .calendar-event-chip i { display: none !important; }
 body.ih79-app #root .calendar-more-events { min-height: 24px !important; padding: 3px !important; border: 0 !important; background: none !important; color: var(--p-accent) !important; font: 600 10px/1.4 Inter,system-ui,sans-serif !important; }
-/* The assistant remains in the menu; its launcher no longer covers page actions. */
-body.ih79-app #ih64-lucyna :is(.ih64-dock-return,.ih64-dock-launcher) { display: none !important; }
+/* The assistant rests as a compact, explicitly labelled AI tab. */
+body.ih79-app #ih64-lucyna .ih64-dock-launcher { display: none !important; }
 
 /* Access pages, documents and the full assistant keep their existing content. */
 body.ih75-subpage[data-ih73-page="access"] #root .page { min-height: calc(100svh - 110px) !important; margin: 0 !important; padding: 24px 24px 60px !important; background: var(--p-bg) !important; color: var(--p-ink) !important; }
@@ -1100,6 +1129,18 @@ body.ih79-app #root .ih76-service-step::-webkit-details-marker, body.ih79-app #r
 
 body.ih79-app #root .profile-more-menu summary, body.ih79-app #root .profile-more-dropdown { background: var(--p-paper) !important; color: var(--p-ink) !important; border-color: var(--p-line) !important; box-shadow: none !important; }
 body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !important; }
+body.ih79-app #root .ih81-count { display: inline-block !important; font: inherit !important; color: inherit !important; font-variant-numeric: tabular-nums !important; }
+body.ih79-app #root .ih81-count > span { font: inherit !important; color: inherit !important; }
+body.ih79-app #root .ih81-sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; }
+body.ih79-app #root .ih81-work-shortcuts { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+body.ih79-app #root .ih81-work-shortcuts > summary { display: none !important; }
+body.ih79-app #root .ih81-work-shortcuts-body { padding: 0 !important; }
+body.ih79-app .ih70-sheet-heading > .ih81-sheet-back { width: auto !important; min-width: 54px !important; padding: 10px !important; font: 650 12px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih11-pagination .ih11-icon-button { width: auto !important; min-width: 64px !important; min-height: 44px !important; padding: 9px 12px !important; font: 650 12px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih80-offer-open { display: inline-flex !important; align-items: center !important; gap: 8px !important; width: auto !important; min-height: 44px !important; height: auto !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--p-accent) !important; font: 700 12px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih80-offer-open > span { font: inherit !important; }
+body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root .ih78-service-offer:hover .ih80-offer-open > svg { transform: none !important; }
+
 /* Smaller laptops retain columns, with a narrower rail rather than scaled text. */
 @media (min-width:851px) and (max-width:1100px) {
   body.ih79-app #root .ih68-header-inner { padding-inline: 28px !important; gap: 18px !important; }
@@ -1143,7 +1184,7 @@ body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !importa
   body.ih79-app[data-ih73-page="conversation"] #root .ih68-top-nav { display: none !important; }
   body.ih79-app:not([data-ih73-page="conversation"]):not([data-ih73-page="assistant"]) #root :is(.app-page,.ih-market-shell,.ih68-page,.privacy-center-shell,.disputes-shell,.admin-shell) { padding: 22px 20px 44px !important; width: 100% !important; max-width: 720px !important; }
   body.ih79-app .ih73-route-navigation { min-height: 44px !important; max-width: 720px !important; gap: 8px !important; padding: 2px 16px 0 !important; }
-  body.ih79-app .ih73-history-controls > button { width: 36px !important; min-width: 36px !important; height: 40px !important; min-height: 40px !important; padding: 8px !important; }
+  body.ih79-app .ih73-history-controls > button { width: auto !important; min-width: 50px !important; height: 44px !important; min-height: 44px !important; padding: 8px !important; white-space: nowrap !important; }
   body.ih79-app .ih73-history-controls > button:nth-child(2), body.ih79-app .ih73-route-label > :is(span,i), body.ih79-app .ih73-panel-link { display: none !important; }
   body.ih79-app .ih73-route-label { font-size: 12px !important; }
   body.ih79-app #root .ih75-page-heading { align-items: flex-start !important; flex-wrap: nowrap !important; gap: 12px !important; margin-bottom: 24px !important; }
@@ -1176,7 +1217,8 @@ body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !importa
   body.ih79-app #root .ih5-job-price > span { display: none !important; }
   body.ih79-app #root .ih5-job-price > strong { font-size: 27px !important; }
   body.ih79-app #root .ih5-job-price > small { font-size: 10px !important; }
-  body.ih79-app #root .ih5-job-facts { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 12px !important; width: 100% !important; padding: 0 !important; }
+  body.ih79-app #root .ih5-job-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 18px !important; width: 100% !important; padding: 0 !important; }
+  body.ih79-app #root .ih5-job-facts > div:last-child { grid-column: 1/-1 !important; display: flex !important; flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 5px 10px !important; }
   body.ih79-app #root .ih5-job-facts > div { min-width: 0 !important; }
   body.ih79-app #root .ih5-job-facts strong { font-size: 13px !important; }
   body.ih79-app #root .ih5-job-facts span { font-size: 11px !important; }
@@ -1185,15 +1227,33 @@ body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !importa
   body.ih79-app #root .ih5-job-actions > .ih5-button { min-height: 44px !important; font-size: 12px !important; }
   body.ih79-app #root .ih5-job-actions > .is-quiet { border: 1px solid var(--p-line) !important; }
   body.ih79-app #root .ih5-job-collaboration-facts, body.ih79-app #root .ih5-job-category-detail-list, body.ih79-app #root .ih5-job-collaboration-responsibility-grid { grid-template-columns: minmax(0,1fr) !important; gap: 16px !important; }
-  body.ih79-app #root .ih78-service-grid { grid-template-columns: minmax(0,1fr) !important; gap: 34px !important; }
+  body.ih79-app #root .ih78-service-grid { grid-template-columns: minmax(0,1fr) !important; gap: 48px !important; }
   body.ih79-app #root .ih78-services-hero { gap: 12px !important; margin-bottom: 24px !important; }
   body.ih79-app #root .ih79-service-actions { gap: 12px !important; }
   body.ih79-app #root .ih80-catalog-services .ih76-mobile-clear { display: none !important; }
   body.ih79-app #root .ih79-service-actions > .ih79-text-action { font-size: 11px !important; }
   body.ih79-app #root .ih78-add-service { width: 42px !important; min-height: 42px !important; padding: 11px !important; }
   body.ih79-app #root .ih78-add-service > span { display: none !important; }
-  body.ih79-app #root .ih78-offer-copy h2 { font-size: 26px !important; }
-  body.ih79-app #root .ih80-offer-terms { gap: 12px !important; padding: 18px !important; }
+  body.ih79-app #root .ih78-service-offer { gap: 20px !important; height: auto !important; }
+  body.ih79-app #root .ih78-offer-field { flex-direction: column !important; gap: 5px !important; }
+  body.ih79-app #root .ih78-offer-field > :is(span,small) { font-size: 12px !important; }
+  body.ih79-app #root .ih78-offer-copy h2 { display: -webkit-box !important; -webkit-line-clamp: 3 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin-bottom: 14px !important; font-size: 25px !important; line-height: 1.24 !important; }
+  body.ih79-app #root .ih78-offer-copy p { line-height: 1.75 !important; }
+  body.ih79-app #root .ih80-offer-terms { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; padding: 0 !important; border-radius: 0 !important; background: none !important; color: var(--p-ink) !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price { flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 5px 12px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price > span { color: var(--p-muted) !important; font-size: 12px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price > strong { color: var(--p-ink) !important; font-size: 26px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price.is-custom > strong { font-size: 22px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 20px !important; width: 100% !important; padding: 16px !important; border-radius: 8px !important; background: var(--p-soft) !important; }
+  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts dt { color: var(--p-muted) !important; font-size: 12px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts dd { color: var(--p-ink) !important; font-size: 16px !important; }
+  body.ih79-app #root .ih78-offer-footer { flex-wrap: wrap !important; gap: 14px 18px !important; }
+  body.ih79-app #root .ih78-offer-person { flex: 1 1 150px !important; }
+  body.ih79-app #root .ih78-offer-person strong { font-size: 14px !important; }
+  body.ih79-app #root .ih78-offer-person small { font-size: 12px !important; }
+  body.ih79-app #root .ih78-offer-person .ih5-service-avatar { width: 40px !important; height: 40px !important; min-width: 40px !important; }
+  body.ih79-app #root .ih80-offer-open { flex: 0 0 auto !important; }
+
   body.ih79-app #root .ih78-offer-price > strong { font-size: 28px !important; }
   body.ih79-app #root .ih78-offer-price.is-custom > strong { font-size: 20px !important; }
   body.ih79-app #root .ih80-offer-facts { gap: 10px !important; }
@@ -1234,9 +1294,25 @@ body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !importa
   body.ih79-app #root .ih79-work-overview > :is(a,button) > span { font-size: 12px !important; line-height: 1.4 !important; }
   body.ih79-app #root .ih79-work-overview > :is(a,button) > strong { font-size: 28px !important; }
   body.ih79-app #root .ih79-work-overview > :is(a,button) > svg { right: 10px !important; bottom: 15px !important; width: 15px !important; height: 15px !important; }
-  body.ih79-app #root .ih79-work-layout { display: flex !important; flex-direction: column !important; gap: 34px !important; }
+  body.ih79-app #root .ih79-work-layout { display: flex !important; flex-direction: column !important; gap: 30px !important; }
   body.ih79-app #root .ih79-work-layout > :is(section,aside) { width: 100% !important; }
-  body.ih79-app #root .ih79-work-tools { position: static !important; padding-top: 24px !important; border-top: 1px solid var(--p-line) !important; }
+  body.ih79-app #root .ih79-work-tools { position: static !important; order: -1 !important; padding: 0 !important; border: 0 !important; }
+  body.ih79-app #root .ih81-work-shortcuts { padding: 0 16px !important; border-radius: 10px !important; background: var(--p-soft) !important; }
+  body.ih79-app #root .ih81-work-shortcuts > summary { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; min-height: 56px !important; margin: 0 !important; padding: 14px 0 !important; list-style: none !important; color: var(--p-ink) !important; font: 700 15px/1.4 Inter,system-ui,sans-serif !important; cursor: pointer !important; }
+  body.ih79-app #root .ih81-work-shortcuts > summary::-webkit-details-marker { display: none !important; }
+  body.ih79-app #root .ih81-work-shortcuts > summary > svg { width: 18px !important; height: 18px !important; flex: none !important; transition: transform .24s ease !important; }
+  body.ih79-app #root .ih81-work-shortcuts[open] > summary > svg { transform: rotate(45deg) !important; }
+  body.ih79-app #root .ih81-work-shortcuts-body { padding: 4px 0 18px !important; }
+  body.ih79-app #root .ih72-work-page .ih75-page-heading { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; margin-bottom: 28px !important; }
+  body.ih79-app #root .ih72-work-page .ih73-heading-copy { flex: none !important; width: 100% !important; }
+  body.ih79-app #root .ih72-work-page .ih73-heading-actions { width: 100% !important; justify-content: flex-start !important; }
+  body.ih79-app #root .ih72-work-page .ih73-heading-actions > a { min-height: 44px !important; }
+  body.ih79-app #root .ih72-work-page .ih72-list-toolbar { gap: 16px !important; margin-bottom: 8px !important; }
+  body.ih79-app #root .ih72-work-page .ih72-project-card { padding-block: 26px !important; gap: 14px !important; }
+  body.ih79-app #root .ih72-work-page .ih72-project-card h3 { line-height: 1.3 !important; }
+  body.ih79-app #root .ih72-work-page .ih72-project-bottom { align-items: center !important; flex-wrap: wrap !important; gap: 12px 20px !important; }
+  body.ih79-app #root .ih72-work-page .ih72-project-preview { line-height: 1.7 !important; }
+  body.ih79-app #root .ih72-work-page .ih72-project-person { margin: 0 !important; }
   body.ih79-app #root .ih79-work-tools .ih72-main-actions { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
   body.ih79-app #root .ih79-work-tools .ih72-work-links { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
   body.ih79-app #root .ih72-main-actions > a { min-height: 72px !important; padding: 15px 12px !important; font-size: 14px !important; gap: 7px !important; }
@@ -1368,6 +1444,9 @@ body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !importa
   body.ih79-app #root .calendar-grid { gap: 4px !important; }
   body.ih79-app #root .calendar-day { min-height: 68px !important; padding: 5px !important; }
   body.ih79-app #root .calendar-day-number { min-height: 34px !important; font-size: 12px !important; }
+  body.ih79-app #root .calendar-day > .calendar-day-number { justify-content: center !important; gap: 0 !important; }
+  body.ih79-app #root .calendar-day-number > small.ih73-calendar-event-count { position: absolute !important; inset: auto 3px 7px !important; display: block !important; width: auto !important; height: 12px !important; margin: 0 !important; color: var(--p-accent) !important; font: 700 9px/12px Inter,system-ui,sans-serif !important; text-align: center !important; }
+  body.ih79-app #root .calendar-day-number > small.ih73-calendar-event-count:empty { display: none !important; }
   body.ih79-app #root .calendar-day-number em { display: none !important; }
   body.ih79-app #root .calendar-day-events { display: none !important; }
   body.ih79-app #root .calendar-month-navigation { gap: 8px !important; }
@@ -1413,7 +1492,7 @@ body.ih79-app #root .profile-more-dropdown button { color: var(--p-ink) !importa
 }
 @keyframes ih79-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes ih79-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-body.ih79-app #root :is(.ih79-job,.ih78-service-offer,.ih79-person,.ih79-notice,.ih72-project-card,.ih5-job-details) { animation: ih79-enter .22s ease-out both !important; animation-delay: calc(var(--ih-job-order,0) * 20ms) !important; }
+body.ih79-app #root :is(.ih79-job,.ih78-service-offer,.ih79-person,.ih79-notice,.ih72-project-card,.ih5-job-details) { animation: ih79-enter .24s cubic-bezier(.22,.7,.25,1) both !important; animation-delay: calc(var(--ih-job-order,0) * 20ms) !important; }
 body.ih79-app #root .ih79-person { animation-delay: calc(var(--ih11-order,0) * 25ms) !important; }
 body.ih79-app #root :is(.ih68-top-link,.ih75-category-list button,.ih79-button,.ih5-button,.ih11-button,.ih72-conversation-row) { transition: background-color .16s ease, color .16s ease, border-color .16s ease !important; }
 body.ih79-app #root :is(.ih80-offer-open,.ih80-account-catalogs > a) > svg { transition: transform .2s ease !important; }
@@ -1421,7 +1500,7 @@ body.ih79-app #root :is(.ih80-offer-open,.ih80-account-catalogs > a) > svg { tra
   body.ih79-app #root :is(.ih68-top-link,.ih75-category-list button,.ih72-conversation-row):hover { background: var(--p-tint) !important; color: var(--p-accent) !important; }
   body.ih79-app #root .ih79-work-overview > button:hover { border-color: var(--p-accent) !important; color: var(--p-accent) !important; }
   body.ih79-app #root .ih80-account-catalogs > a:hover, body.ih79-app #root .ih11-freelancer-person h3 a:hover { color: var(--p-accent) !important; }
-  body.ih79-app #root .ih78-service-offer:hover .ih80-offer-open > svg, body.ih79-app #root .ih80-account-catalogs > a:hover > svg { transform: translate(2px,-2px) !important; }
+
   body.ih79-app #root .ih78-service-offer:hover .ih78-offer-copy h2, body.ih79-app #root .ih72-project-card:hover h3 { color: var(--p-accent) !important; }
   body.ih79-app #root :is(.ih79-button,.ih5-button,.ih11-button).is-primary:hover { background: color-mix(in srgb,var(--p-accent) 90%,var(--p-ink)) !important; }
 }

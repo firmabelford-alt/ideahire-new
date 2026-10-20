@@ -3,11 +3,45 @@
   #root #ih63-home-header .ih78-home-catalog-link { font:800 18px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
   #root #ih63-home-header .ih78-home-catalog-link .ih-nav-label { font:inherit!important; letter-spacing:inherit!important; }
   #root #ih63-home-header .home-nav-links .ih78-home-catalog-link { min-height:56px!important; font-size:23px!important; }
+  /* P81: these two shortcuts change typography only. */
+  #root #ih63-home-header .ih53-desktop-account { font:800 18px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
+  #root #ih63-home-header .home-nav-links .ih-nav-item:is([href="/notifications"],[href="/account"]) { font:800 23px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
+  #root #ih63-home-header .home-nav-links .ih-nav-item:is([href="/notifications"],[href="/account"]) .ih-nav-label { font:inherit!important; letter-spacing:inherit!important; }
   @media (max-width:1180px) and (min-width:981px) {
     #root #ih63-home-header .ih53-primary-nav { gap:16px!important; }
     #root #ih63-home-header .ih53-primary-nav .ih78-home-catalog-link { font-size:17px!important; }
   }
 }
+/* P81 — a readable greeting and an account menu that fits its contents. */
+@layer ih78HomeNavigation {
+  #root #ih63-home-header .ih27-home-account-trigger { box-sizing:border-box!important; display:inline-flex!important; align-items:center!important; justify-content:flex-start!important; flex:0 0 auto!important; width:auto!important; min-width:0!important; max-width:160px!important; height:44px!important; min-height:44px!important; margin:0!important; padding:0 0 0 14px!important; border:0!important; border-left:1px solid var(--ih-home-line,#dfe4e1)!important; border-radius:0!important; background:transparent!important; color:var(--ih-home-ink,#191d1c)!important; box-shadow:none!important; overflow:hidden!important; cursor:pointer!important; }
+  #root #ih63-home-header .ih81-home-greeting { display:inline-flex!important; align-items:baseline!important; gap:4px!important; min-width:0!important; max-width:100%!important; margin:0!important; padding:0!important; color:inherit!important; font:700 14px/1.35 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; white-space:nowrap!important; animation:ih81-greeting-in .3s cubic-bezier(.22,.7,.25,1) both!important; }
+  #root #ih63-home-header .ih81-home-greeting > :is(span,strong) { display:block!important; min-width:0!important; margin:0!important; color:inherit!important; -webkit-text-fill-color:currentColor!important; font:inherit!important; letter-spacing:inherit!important; white-space:nowrap!important; }
+  #root #ih63-home-header .ih81-home-greeting > span { flex:none!important; }
+  #root #ih63-home-header .ih81-home-greeting > strong { overflow:hidden!important; text-overflow:ellipsis!important; }
+  body .ih27-home-account-menu { box-sizing:border-box!important; position:fixed!important; right:auto!important; bottom:auto!important; display:grid!important; grid-template-columns:minmax(0,1fr)!important; grid-auto-rows:max-content!important; align-content:start!important; justify-content:stretch!important; gap:4px!important; height:auto!important; min-height:0!important; margin:0!important; padding:12px!important; border:1px solid var(--v-line,#dfe4e1)!important; border-radius:12px!important; background:var(--v-surface,#fff)!important; color:var(--v-ink,#191d1c)!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain!important; backdrop-filter:none!important; transform:none!important; translate:none!important; box-shadow:0 10px 32px #00000012!important; animation:ih81-greeting-in .24s cubic-bezier(.22,.7,.25,1) both!important; z-index:1400!important; }
+  body .ih27-home-account-menu .account-menu-identity { position:static!important; display:flex!important; flex-direction:column!important; gap:3px!important; align-self:start!important; width:100%!important; height:auto!important; min-height:0!important; margin:0 0 4px!important; padding:8px 10px 14px!important; border:0!important; border-bottom:1px solid var(--v-line,#dfe4e1)!important; background:none!important; }
+  body .ih27-home-account-menu .account-menu-identity > strong { margin:0!important; color:var(--v-ink,#191d1c)!important; font:750 16px/1.4 Inter,system-ui,sans-serif!important; }
+  body .ih27-home-account-menu .account-menu-identity > span { margin:0!important; color:var(--v-muted,#4f5754)!important; font:450 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body .ih27-home-account-menu > a { position:static!important; box-sizing:border-box!important; display:flex!important; align-items:center!important; justify-content:flex-start!important; gap:10px!important; align-self:start!important; width:100%!important; height:auto!important; min-height:46px!important; margin:0!important; padding:10px!important; border:0!important; border-radius:6px!important; background:none!important; color:var(--v-ink,#191d1c)!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; transform:none!important; }
+  body .ih27-home-account-menu > a > span { color:inherit!important; -webkit-text-fill-color:currentColor!important; font:inherit!important; }
+  body .ih27-home-account-menu > a > svg { width:18px!important; height:18px!important; flex:none!important; color:inherit!important; }
+  body .ih27-home-account-menu > a:is(:hover,:focus-visible) { background:var(--v-soft,#f1f3f2)!important; outline:2px solid var(--v-accent,#191d1c)!important; outline-offset:-2px!important; }
+  #root :is(.ih53-project-link,.ih53-finale-link) svg { width:18px!important; height:18px!important; flex:none!important; }
+  @media (max-width:980px) {
+    #root #ih63-home-header .ih27-home-account-trigger { max-width:108px!important; padding-left:12px!important; }
+    #root #ih63-home-header .ih81-home-greeting { flex-direction:column!important; align-items:flex-start!important; justify-content:center!important; gap:1px!important; font-size:13px!important; }
+    #root #ih63-home-header .ih81-home-greeting > strong { max-width:100%!important; }
+  }
+  @media (max-width:370px) {
+    #root #ih63-home-header .ih27-home-account-trigger { max-width:84px!important; padding-left:9px!important; }
+    #root #ih63-home-header .ih81-home-greeting { font-size:12px!important; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    #root #ih63-home-header .ih81-home-greeting, body .ih27-home-account-menu { animation:none!important; }
+  }
+}
+@keyframes ih81-greeting-in { from { opacity:0; translate:0 4px; } to { opacity:1; translate:0 0; } }
 /* P65 — warm paper and a bluer turquoise in the films, without changing the site theme. */
 html:root:not([data-template="classic"]) body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema { --ih65-film-paper:#f6f2ea; --ih65-film-ink:#14292e; --ih65-film-accent:#32b1c7; }
 html:root:not([data-template="classic"]) body #ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema#ih57-cinema .ih57-top { background:#14292ee8!important; color:#f6f2ea!important; }

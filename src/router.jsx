@@ -14772,9 +14772,9 @@ function JobsSpotlight({ jobs, formatBudget }) {
         <span><i aria-hidden="true" />Odkryj zlecenie</span>
         {jobs.length > 1 && (
           <div className="ih10-spotlight-controls" aria-label="Sterowanie podglądem">
-            <button type="button" onClick={() => changeJob(-1)} aria-label="Poprzednie zlecenie">←</button>
+            <button type="button" onClick={() => changeJob(-1)} aria-label="Poprzednie zlecenie">Wstecz</button>
             <span aria-label={`Zlecenie ${activeIndex + 1} z ${jobs.length}`}>{activeIndex + 1} / {jobs.length}</span>
-            <button type="button" onClick={() => changeJob(1)} aria-label="Następne zlecenie">→</button>
+            <button type="button" onClick={() => changeJob(1)} aria-label="Następne zlecenie">Dalej</button>
           </div>
         )}
       </header>
@@ -14796,7 +14796,7 @@ function JobsSpotlight({ jobs, formatBudget }) {
             target.focus({ preventScroll: true });
             target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
           }}
-        >Pokaż w liście <span aria-hidden="true">↘</span></a>
+        >Pokaż w liście <MarketIcon kind="bookmark" /></a>
       </footer>
       {jobs.length > 1 && <div className="ih16-spotlight-progress" aria-hidden="true"><i key={`${job.id}:${stopped}`} /></div>}
     </section>
@@ -16623,7 +16623,7 @@ function Calendar() {
     const next = new Date(value);
     if (!Number.isFinite(next.getTime())) return;
     next.setHours(12, 0, 0, 0);
-    setMonthDirection(next < selectedDate ? "previous" : "next");
+    if (next.getMonth() !== currentMonth.getMonth() || next.getFullYear() !== currentMonth.getFullYear()) setMonthDirection(next < currentMonth ? "previous" : "next");
     setSelectedDate(next);
     setCurrentMonth(current => current.getMonth() === next.getMonth() && current.getFullYear() === next.getFullYear() ? current : getCalendarMonthStart(next));
   }
@@ -17067,9 +17067,9 @@ function Calendar() {
             <button type="button" aria-pressed={calendarView === "month"} onClick={() => setCalendarView("month")}><WorkspaceIcon kind="calendar" />{calendarEnglish ? "Month" : "Miesiąc"}</button>
           </div>
           {calendarView === "agenda" && <div className="ih75-day-navigation">
-            <button type="button" onClick={() => moveCalendarDay(-1)} aria-label={calendarEnglish ? "Previous day" : "Poprzedni dzień"}><MarketIcon kind="back" /></button>
+            <button type="button" onClick={() => moveCalendarDay(-1)} aria-label={calendarEnglish ? "Previous day" : "Poprzedni dzień"}>{calendarEnglish ? "Prev." : "Poprz."}</button>
             <label><span className="ih5-sr-only">{calendarEnglish ? "Choose a date" : "Wybierz datę"}</span><input type="date" value={getCalendarDateKey(selectedDate)} onChange={event => { if (event.target.value) selectCalendarDate(getCalendarDateOnlyValue(event.target.value)); }} /></label>
-            <button type="button" onClick={() => moveCalendarDay(1)} aria-label={calendarEnglish ? "Next day" : "Następny dzień"}><MarketIcon kind="arrow" /></button>
+            <button type="button" onClick={() => moveCalendarDay(1)} aria-label={calendarEnglish ? "Next day" : "Następny dzień"}>{calendarEnglish ? "Next" : "Nast."}</button>
           </div>}
         </div>
         {calendarView === "agenda" && <nav className="ih75-week-strip" aria-label={calendarEnglish ? "Days of the week" : "Dni tygodnia"}>
@@ -17096,7 +17096,7 @@ function Calendar() {
                   }
                   aria-label={calendarEnglish ? "Previous month" : "Poprzedni miesiąc"}
                 >
-                  <MarketIcon kind="back" />
+                  {calendarEnglish ? "Prev." : "Poprz."}
                 </button>
 
                 <div>
@@ -17113,7 +17113,7 @@ function Calendar() {
                   }
                   aria-label={calendarEnglish ? "Next month" : "Następny miesiąc"}
                 >
-                  <MarketIcon kind="arrow" />
+                  {calendarEnglish ? "Next" : "Nast."}
                 </button>
               </div>
 
@@ -20677,7 +20677,7 @@ function ChatPaymentPanel({
                 : summary.payment_status === "processing"
                 ? "Stripe potwierdza płatność…"
                 : serviceOrder
-                ? `Zamawiam i płacę ${formatPaymentMoney(summary.total_amount, summary.currency)} →`
+                ? `Zamawiam i płacę ${formatPaymentMoney(summary.total_amount, summary.currency)}`
                 : `Zapłać ${formatPaymentMoney(summary.total_amount, summary.currency)} — zamówienie z obowiązkiem zapłaty`}
             </button>
           )}

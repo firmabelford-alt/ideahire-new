@@ -2,7 +2,7 @@
 import React, { useId, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useSitePreferences } from './Preferences';
 
 export function WorkspaceSheet({ open, onClose, title, children, id, onBack }) {
@@ -10,6 +10,7 @@ export function WorkspaceSheet({ open, onClose, title, children, id, onBack }) {
   const titleId = generated + '-title';
   const dialogRef = useRef(null);
   const fromOutside = useRef(false);
+  const closing = useRef(null);
   const en = useSitePreferences().language === 'en';
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -18,6 +19,10 @@ export function WorkspaceSheet({ open, onClose, title, children, id, onBack }) {
     const overflow = document.body.style.getPropertyValue('overflow');
     const priority = document.body.style.getPropertyPriority('overflow');
     if (!dialog.open) dialog.showModal();
+    const entrance = !window.matchMedia('(prefers-reduced-motion:reduce)').matches && dialog.animate?.(
+      [{ opacity: 0, translate: '0 8px' }, { opacity: 1, translate: '0 0' }],
+      { duration: 240, easing: 'cubic-bezier(.22,.7,.25,1)' }
+    );
     document.body.style.setProperty('overflow', 'hidden', 'important');
     const viewport = window.visualViewport;
     function measure() {
@@ -33,6 +38,8 @@ export function WorkspaceSheet({ open, onClose, title, children, id, onBack }) {
       viewport?.removeEventListener('resize', measure);
       viewport?.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
+      entrance?.cancel?.();
+      if (closing.current) { closing.current.onfinish = null; closing.current.cancel(); closing.current = null; }
       if (dialog.open) dialog.close();
       if (overflow) document.body.style.setProperty('overflow', overflow, priority);
       else document.body.style.removeProperty('overflow');
@@ -51,8 +58,17 @@ export function WorkspaceSheet({ open, onClose, title, children, id, onBack }) {
     const box = event.currentTarget.getBoundingClientRect();
     return event.target === event.currentTarget && (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom);
   }
-  return createPortal(<dialog ref={dialogRef} id={id} className="ih70-sheet" role="dialog" aria-modal="true" aria-labelledby={titleId} onCancel={event => { event.preventDefault(); onClose(); }} onPointerDown={event => { fromOutside.current = outside(event); }} onPointerUp={event => { if (fromOutside.current && outside(event)) onClose(); fromOutside.current = false; }}>
-    <header className="ih70-sheet-heading">{onBack && <button type="button" onClick={onBack} aria-label={en ? 'Back' : 'Wstecz'}><ArrowLeft size={21} strokeWidth={1.7} aria-hidden="true" /></button>}<h2 id={titleId} tabIndex={-1}>{title}</h2><button type="button" onClick={onClose} aria-label={en ? 'Close' : 'Zamknij'}><X size={22} strokeWidth={1.7} aria-hidden="true" /></button></header>
+  function close() {
+    const dialog = dialogRef.current;
+    if (closing.current) return;
+    if (!dialog?.open || !dialog.animate || window.matchMedia('(prefers-reduced-motion:reduce)').matches) { onClose(); return; }
+    const style = getComputedStyle(dialog);
+    const animation = dialog.animate([{ opacity: style.opacity, translate: style.translate }, { opacity: 0, translate: '0 8px' }], { duration: 180, easing: 'cubic-bezier(.22,.7,.25,1)', fill: 'forwards' });
+    closing.current = animation;
+    animation.onfinish = () => onClose();
+  }
+  return createPortal(<dialog ref={dialogRef} id={id} className="ih70-sheet" role="dialog" aria-modal="true" aria-labelledby={titleId} onCancel={event => { event.preventDefault(); close(); }} onPointerDown={event => { fromOutside.current = outside(event); }} onPointerUp={event => { if (fromOutside.current && outside(event)) close(); fromOutside.current = false; }}>
+    <header className="ih70-sheet-heading">{onBack && <button className="ih81-sheet-back" type="button" onClick={onBack}>{en ? 'Back' : 'Wstecz'}</button>}<h2 id={titleId} tabIndex={-1}>{title}</h2><button type="button" onClick={close} aria-label={en ? 'Close' : 'Zamknij'}><X size={22} strokeWidth={1.7} aria-hidden="true" /></button></header>
     <div className="ih70-sheet-body">{children}</div>
   </dialog>, document.body);
 }

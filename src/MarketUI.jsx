@@ -207,9 +207,10 @@ export function ProfileHub({ sections, active, onSelect, children, open: control
 export function MarketIcon({ kind = "search", ...props }) {
   const paths = {
     search: "m20 20-4.2-4.2M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z",
-    arrow: "M5 12h14m-6-6 6 6-6 6",
+    arrow: "M7 3h10v18l-5-4-5 4V3Z",
+    bookmark: "M7 3h10v18l-5-4-5 4V3Z",
     back: "M19 12H5m6-6-6 6 6 6",
-    diagonal: "M6 18 18 6M6 6h12v12",
+    diagonal: "M7 3h10v18l-5-4-5 4V3Z",
     close: "m6 6 12 12M18 6 6 18",
     plus: "M12 5v14M5 12h14",
     check: "m5 12 4 4L19 6",

@@ -1,7 +1,7 @@
 /* P79 — one navigation system, with layouts built for each kind of work. */
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, LayoutGrid, CalendarDays, Bell, Check } from 'lucide-react';
+import { LayoutGrid, CalendarDays, Bell, Check } from 'lucide-react';
 import { useSitePreferences, translateUiText } from './Preferences';
 import './Subpages.css';
 
@@ -55,6 +55,8 @@ export function SubpageTheme() {
   const location = useLocation();
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
+  useIdeaHireActivityCycle();
+  useSubpageDisclosureMotion();
   useLayoutEffect(() => {
     if (!page) return;
     document.body.classList.add('ih73-subpage', 'ih75-subpage', 'ih79-app');
@@ -85,9 +87,9 @@ export function SubpageHistoryControls({ parent = '/account' }) {
     <button type="button" onClick={() => {
       if ((window.history.state?.idx || 0) > 0) navigate(-1);
       else navigate(parent === location.pathname + location.search + location.hash ? '/' : parent);
-    }} aria-label={en ? 'Go back' : 'Wróć'} title={en ? 'Go back' : 'Wróć'}><ArrowLeft size={20} strokeWidth={1.7} aria-hidden="true" /></button>
+    }} aria-label={en ? 'Go back' : 'Wróć'} title={en ? 'Go back' : 'Wróć'}>{en ? 'Back' : 'Wróć'}</button>
     <button type="button" disabled={!forward} onClick={() => navigate(1)}
-      aria-label={en ? 'Go forward' : 'Przejdź dalej'} title={en ? 'Go forward' : 'Przejdź dalej'}><ArrowRight size={20} strokeWidth={1.7} aria-hidden="true" /></button>
+      aria-label={en ? 'Go forward' : 'Przejdź dalej'} title={en ? 'Go forward' : 'Przejdź dalej'}>{en ? 'Next' : 'Dalej'}</button>
   </div>;
 }
 
@@ -135,7 +137,7 @@ export function SubpageMetrics({ items }) {
   const icons = [CalendarDays, Bell, Check];
   return <dl className="ih73-page-metrics">{items.map((item, index) => {
     const Icon = icons[index % icons.length];
-    return <div key={item.label}><span aria-hidden="true"><Icon size={20} strokeWidth={1.7} /></span><dt>{item.label}</dt><dd>{item.value}</dd></div>;
+    return <div key={item.label}><span aria-hidden="true"><Icon size={20} strokeWidth={1.7} /></span><dt>{item.label}</dt><dd>{typeof item.value === 'number' ? <SubpageCount value={item.value} /> : item.value}</dd></div>;
   })}</dl>;
 }
 
@@ -146,3 +148,127 @@ export function SubpageCatalogTabs({ active }) {
   </nav>;
 }
 
+
+// One motion rhythm for numeric summaries and expanding working sections.
+export function SubpageCount({ value, loading = false }) {
+  const number = Number(value);
+  const target = Number.isFinite(number) ? Math.max(0, Math.floor(number)) : 0;
+  const ref = useRef(null);
+  const [shown, setShown] = useState(target);
+  useLayoutEffect(() => {
+    if (loading || target === 0 || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      setShown(target);
+      return;
+    }
+    let frame = 0, observer, started = false, dead = false;
+    setShown(0);
+    const start = () => {
+      if (started || dead) return;
+      started = true;
+      observer?.disconnect();
+      const origin = performance.now();
+      const tick = now => {
+        if (dead) return;
+        const progress = Math.min(1, (now - origin) / 760);
+        setShown(Math.round(target * (1 - Math.pow(1 - progress, 3))));
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+    if (typeof IntersectionObserver === 'function' && ref.current) {
+      observer = new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting)) start(); }, { threshold: .15 });
+      observer.observe(ref.current);
+    } else start();
+    return () => { dead = true; cancelAnimationFrame(frame); observer?.disconnect(); };
+  }, [target, loading]);
+  return <span ref={ref} className="ih81-count" style={{ minInlineSize: loading ? '1ch' : String(target).length + 'ch' }}>
+    <span className="ih81-sr-only">{loading ? '—' : target}</span>
+    <span aria-hidden="true">{loading ? '—' : shown}</span>
+  </span>;
+}
+
+function useSubpageDisclosureMotion() {
+  useEffect(() => {
+    const active = new Map();
+    const selector = 'details.ih5-service-editor-section,details.ih5-service-process,details.ih81-work-shortcuts,details.ih68-account-note,details.ih75-owned-job-details,details.ih70-display';
+    const restore = (element, record) => {
+      element.style.height = record.height;
+      element.style.overflow = record.overflow;
+      active.delete(element);
+    };
+    const click = event => {
+      const summary = event.target.closest?.('summary');
+      const element = summary?.parentElement;
+      if (!element?.matches(selector) || event.defaultPrevented || event.target.closest?.('a,button,input,select,textarea') || !element.animate || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+      if (element.classList.contains('ih81-work-shortcuts') && window.matchMedia('(min-width:851px)').matches) return;
+      event.preventDefault();
+      const previous = active.get(element);
+      const from = element.getBoundingClientRect().height;
+      const opening = previous ? !previous.opening : !element.open;
+      const height = previous?.height ?? element.style.height;
+      const overflow = previous?.overflow ?? element.style.overflow;
+      if (previous) { previous.animation.oncancel = null; previous.animation.onfinish = null; previous.animation.cancel(); active.delete(element); }
+      element.style.height = height;
+      element.style.overflow = overflow;
+      element.open = true;
+      const style = getComputedStyle(element);
+      const border = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+      const closed = summary.getBoundingClientRect().height + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) + border;
+      const to = opening ? element.getBoundingClientRect().height : closed;
+      element.style.height = from + 'px';
+      element.style.overflow = 'hidden';
+      const animation = element.animate([{ height: from + 'px' }, { height: to + 'px' }], { duration: 240, easing: 'cubic-bezier(.22,.7,.25,1)', fill: 'both' });
+      const record = { animation, height, overflow, opening };
+      active.set(element, record);
+      animation.onfinish = () => {
+        element.open = opening;
+        animation.oncancel = null;
+        animation.cancel();
+        restore(element, record);
+      };
+      animation.oncancel = () => restore(element, record);
+    };
+    document.addEventListener('click', click);
+    return () => {
+      document.removeEventListener('click', click);
+      for (const [element, record] of active) {
+        record.animation.onfinish = null; record.animation.oncancel = null;
+        record.animation.cancel(); element.style.height = record.height; element.style.overflow = record.overflow;
+      }
+    };
+  }, []);
+}
+
+function useIdeaHireActivityCycle() {
+  useEffect(() => {
+    const key = 'ideahire_intro_active_ms';
+    let elapsed = 0, lastTick = Date.now(), lastActivity = Date.now();
+    try { elapsed = Math.min(1800000, Math.max(0, Number(sessionStorage.getItem(key)) || 0)); } catch {}
+    const save = () => { try { sessionStorage.setItem(key, String(Math.min(elapsed, 1800000))); } catch {} };
+    const tick = () => {
+      const now = Date.now();
+      if (!document.hidden && document.hasFocus()) elapsed += Math.max(0, Math.min(now, lastActivity + 120000) - Math.max(lastTick, now - 10000));
+      lastTick = now;
+      save();
+      if (elapsed >= 1800000) window.dispatchEvent(new Event('ideahire:intro-due'));
+    };
+    const activity = () => { lastActivity = Date.now(); };
+    const visibility = () => { lastTick = Date.now(); if (!document.hidden) activity(); save(); };
+    const replayed = () => { elapsed = 0; lastTick = Date.now(); save(); };
+    const events = ['pointerdown', 'pointermove', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(type => window.addEventListener(type, activity, { passive: true }));
+    document.addEventListener('visibilitychange', visibility);
+    window.addEventListener('focus', visibility);
+    window.addEventListener('pagehide', save);
+    window.addEventListener('ideahire:intro-replayed', replayed);
+    const timer = window.setInterval(tick, 5000);
+    return () => {
+      clearInterval(timer); save();
+      events.forEach(type => window.removeEventListener(type, activity));
+      document.removeEventListener('visibilitychange', visibility);
+      window.removeEventListener('focus', visibility);
+      window.removeEventListener('pagehide', save);
+      window.removeEventListener('ideahire:intro-replayed', replayed);
+    };
+  }, []);
+}

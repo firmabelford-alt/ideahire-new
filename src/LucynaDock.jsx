@@ -53,9 +53,9 @@ class DockBoundary extends React.Component {
 }
 
 export default function LucynaDock({ supabase, user }) {
-  const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false), [hidden, setHidden] = useState(false);
+  const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false);
   const [bounds, setBounds] = useState(viewportBounds), [position, setPosition] = useState(null);
-  const panel = useRef(null), launcher = useRef(null), returnTab = useRef(null), drag = useRef(null);
+  const panel = useRef(null), returnTab = useRef(null), drag = useRef(null);
   const layout = dockLayout(bounds, position);
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -73,16 +73,16 @@ export default function LucynaDock({ supabase, user }) {
     if (open) panel.current?.focus({ preventScroll: true });
   }, [open]);
   useEffect(() => {
-    const openFromMenu = () => { setHidden(false); setLoaded(true); setOpen(true); };
+    const openFromMenu = () => { setLoaded(true); setOpen(true); };
     window.addEventListener("ideahire:lucyna-open", openFromMenu);
     return () => window.removeEventListener("ideahire:lucyna-open", openFromMenu);
   }, []);
-  function show() { setHidden(false); setLoaded(true); setOpen(true); }
-  function minimise(hideLauncher = false) {
+  function show() { setLoaded(true); setOpen(true); }
+  function minimise() {
     // A hidden chat must not keep a mobile keyboard over the page.
     if (panel.current?.contains(document.activeElement)) document.activeElement?.blur();
-    setOpen(false); setHidden(hideLauncher);
-    requestAnimationFrame(() => (hideLauncher ? returnTab : launcher).current?.focus({ preventScroll: true }));
+    setOpen(false);
+    requestAnimationFrame(() => returnTab.current?.focus({ preventScroll: true }));
   }
   function beginDrag(event) {
     if (event.button !== 0 || !event.isPrimary) return;
@@ -118,17 +118,13 @@ export default function LucynaDock({ supabase, user }) {
       <header className="ih64-dock-heading">
         <button className="ih64-dock-handle" type="button" aria-label="Przesuń okno Lucyny. Użyj przeciągania lub klawiszy strzałek. Home przywraca pozycję."
           onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={() => { drag.current = null; }} onKeyDown={moveWithKeyboard} onDoubleClick={() => setPosition(null)}>
-          <LucynaSymbol/><span><strong id="ih64-lucyna-title">Lucyna <span>AI</span></strong><small>Pomoc w IdeaHire</small></span>
+          <LucynaSymbol/><span><strong id="ih64-lucyna-title">Lucyna <span>AI</span></strong><small>Asystent AI IdeaHire</small></span>
         </button>
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
-        <button className="ih64-dock-control" type="button" title="Zamknij i schowaj przycisk" aria-label="Zamknij Lucynę i schowaj przycisk" onClick={() => minimise(true)}><Icon kind="close"/></button>
+        <button className="ih64-dock-control" type="button" title="Zamknij okno" aria-label="Zamknij okno Lucyny AI" onClick={() => minimise()}><Icon kind="close"/></button>
       </header>
       <div className="ih64-dock-body"><DockBoundary><React.Suspense fallback={<p className="ih64-dock-status" role="status">Otwieram Lucynę…</p>}><Assistant supabase={supabase} user={user} embedded visible={open}/></React.Suspense></DockBoundary></div>
     </section>}
-    {!open && !hidden && <div className="ih64-dock-launcher" style={{ right: 16, bottom: 88 }}>
-      <button ref={launcher} className="ih64-dock-open" type="button" aria-label="Otwórz okno Lucyny AI" aria-expanded="false" aria-controls="ih64-lucyna-window" onClick={show}><span aria-hidden="true"><LucynaSymbol/></span><strong>Lucyna <small>AI</small></strong></button>
-      <button className="ih64-dock-hide" type="button" aria-label="Schowaj przycisk Lucyny" title="Schowaj przycisk" onClick={() => { setHidden(true); requestAnimationFrame(() => returnTab.current?.focus()); }}><Icon kind="close"/></button>
-    </div>}
-    {!open && hidden && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz schowaną Lucynę AI" title="Otwórz Lucynę" onClick={show}><Icon kind="return"/><LucynaSymbol/></button>}
+    {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI" aria-haspopup="dialog" aria-expanded="false" aria-controls="ih64-lucyna-window" title="Lucyna — asystent AI" onClick={show}><strong>AI</strong><LucynaSymbol/></button>}
   </div>, document.body);
 }

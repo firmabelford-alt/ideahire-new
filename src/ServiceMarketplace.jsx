@@ -46,7 +46,7 @@ const SERVICE_CATEGORY_COPY = {
 const SERVICE_CATEGORY_MARKS = {
   Programowanie: "</>",
   "Grafika i design": "◇",
-  Marketing: "↗",
+  Marketing: "◎",
   Copywriting: "Aa",
   Video: "▶",
   Fotografia: "◎",
@@ -347,7 +347,7 @@ function ServiceCard({ service }) {
     </div>
     <footer className="ih78-offer-footer">
       <div className="ih78-offer-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small className={capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</small></span></div>
-      <span className="ih80-offer-open" aria-hidden="true"><MarketIcon kind="diagonal" /></span>
+      <span className="ih80-offer-open" aria-hidden="true"><span>{en ? 'View service' : 'Zobacz usługę'}</span><MarketIcon kind="bookmark" /></span>
     </footer>
   </article>;
 }
@@ -1183,7 +1183,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               <small>Usługę realizuje</small>
               <strong>{service.owner_name || "Wykonawca IdeaHire"}</strong>
             </span>
-            <Link to={`/profile/${service.freelancer_id}`} aria-label="Zobacz profil">↗</Link>
+            <Link to={`/profile/${service.freelancer_id}`} aria-label="Zobacz profil"><MarketIcon kind="bookmark"/></Link>
           </div>
 
           <div className={"ih5-service-order-price " + (service.price_mode === "fixed" ? "is-fixed" : "is-custom")}>
@@ -1227,7 +1227,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
                   ? "Zamów usługę"
                   : "Zapytaj o realizację"
                 : "Zapytaj o następny termin"}
-              <span aria-hidden="true">→</span>
+              <MarketIcon kind="bookmark"/>
             </button>
           ) : (
             <button type="button" className="ih5-service-order-button" disabled>
@@ -1737,7 +1737,7 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
             </article>;
           })}
         </div> : <div className="ih11-empty"><h3>{search || category !== "Wszystkie" ? "Spróbuj innego wyszukiwania." : "Brak dostępnych profili"}</h3><p>{search || category !== "Wszystkie" ? "Zmień nazwę, umiejętność lub kategorię." : "Freelancerzy pojawią się tu po włączeniu widoczności na swoim koncie."}</p><Link className="ih11-button is-quiet" to="/account#account-profile-data">Ustaw widoczność profilu</Link></div>}
-        {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">←</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">→</button></nav>}
+        {result.total > pageSize && !loading && !error && <nav className="ih11-pagination" aria-label="Strony freelancerów"><button className="ih11-icon-button" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="Poprzednia strona">Wstecz</button><span>{page + 1} / {Math.ceil(result.total / pageSize)}</span><button className="ih11-icon-button" disabled={(page + 1) * pageSize >= result.total} onClick={() => setPage((value) => value + 1)} aria-label="Następna strona">Dalej</button></nav>}
       </section>
       </MarketFilters>
       {selected && <ProjectInquiryDialog key={selected.mode} mode={selected.mode} profile={selected.profile} supabase={supabase} navigate={navigate} onClose={() => setSelected(null)} />}

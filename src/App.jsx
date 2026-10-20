@@ -415,7 +415,7 @@ function ih43Lines(c,lines,box,options={}){
 function ih43Tag(c,text,x,y,colors,angle=0,scale=1){
   c.save();c.translate(x,y);c.rotate(angle);c.scale(scale,scale);c.font="700 15px Inter, Arial, sans-serif";const w=c.measureText(text).width+36;ih43Box(c,-w/2,-20,w,40,colors.fill,5,colors.stroke);const ink=ih43Readable(colors.fill,colors.ink,"#ffffff");ih43Text(c,text,0,5,15,ink,700,"center");c.restore();return w;
 }
-function ih43Arrow(c,x,y,color,size=14){c.strokeStyle=color;c.lineWidth=1.7;c.lineCap="round";c.beginPath();c.moveTo(x-size*.45,y+size*.45);c.lineTo(x+size*.45,y-size*.45);c.moveTo(x-size*.33,y-size*.45);c.lineTo(x+size*.45,y-size*.45);c.lineTo(x+size*.45,y+size*.33);c.stroke();}
+function ih43Arrow(c,x,y,color,size=14){c.strokeStyle=color;c.lineWidth=1.7;c.lineJoin="round";c.beginPath();c.moveTo(x-size*.32,y-size*.5);c.lineTo(x+size*.32,y-size*.5);c.lineTo(x+size*.32,y+size*.5);c.lineTo(x,y+size*.2);c.lineTo(x-size*.32,y+size*.5);c.closePath();c.stroke();}
 function ih43Panel(c,x,y,w,h,options={}){
   const fill=options.fill||"#f5f0e5",ink=options.ink||"#151515";c.save();c.translate(x,y);c.rotate(options.angle||0);c.scale(options.scale||1,options.scale||1);c.globalAlpha*=options.alpha??1;
   c.shadowColor="rgba(0,0,0,.18)";c.shadowBlur=26;c.shadowOffsetY=10;ih43Box(c,-w/2,-h/2,w,h,fill,10);c.shadowColor="transparent";
@@ -448,15 +448,6 @@ function ih43Transition(c,l,p,phase){
 function ih43Ui(c,l,p,s,phase){
   const bg=phase.shot.bg||"ink",surface=bg==="paper"?p.paper:bg==="accent"?p.accent:bg==="secondary"?p.secondary:p.ink,ink=ih43Readable(surface,p.ink,p.paper),outline=ink===p.ink||ink==="#000000"?"rgba(20,20,20,.35)":"rgba(245,245,235,.45)";
   const language=s.english?IH43_FILM.en:IH43_FILM.pl;
-  const progress=phase.cycle/IH43_FILM.period;c.fillStyle=outline;c.fillRect(l.pad,68,l.w-l.pad*2,1);c.fillStyle=ink;c.fillRect(l.pad,68,(l.w-l.pad*2)*progress,2);
-  const icon=(index,type)=>{
-    const x=l.toolbarX+index*52,y=l.toolbarY;c.save();if(s.reduced)c.globalAlpha=.4;ih43Box(c,x,y,44,44,null,22,outline);c.translate(x+22,y+22);c.strokeStyle=ink;c.lineWidth=1.5;c.lineCap="round";
-    if(type==="skip"){c.beginPath();c.moveTo(-7,-7);c.lineTo(3,0);c.lineTo(-7,7);c.closePath();c.stroke();c.beginPath();c.moveTo(7,-7);c.lineTo(7,7);c.stroke();}
-    else if(type==="replay"){c.beginPath();c.arc(0,0,8,-2.6,2.7);c.stroke();c.beginPath();c.moveTo(-7,-8);c.lineTo(-7,-2);c.lineTo(-1,-2);c.stroke();}
-    else if(type==="pause"){if(s.paused||s.reduced){c.beginPath();c.moveTo(-4,-7);c.lineTo(7,0);c.lineTo(-4,7);c.closePath();c.stroke();}else{c.beginPath();c.moveTo(-3,-7);c.lineTo(-3,7);c.moveTo(3,-7);c.lineTo(3,7);c.stroke();}}
-    else{c.beginPath();c.moveTo(-8,-3);c.lineTo(-4,-3);c.lineTo(1,-8);c.lineTo(1,8);c.lineTo(-4,3);c.lineTo(-8,3);c.closePath();c.stroke();if(s.sound){c.beginPath();c.arc(0,0,11,-.65,.65);c.stroke();}else{c.beginPath();c.moveTo(6,-4);c.lineTo(12,4);c.moveTo(12,-4);c.lineTo(6,4);c.stroke();}}
-    c.restore();
-  };icon(0,phase.cycle<IH43_FILM.finalStart?"skip":"replay");icon(1,"pause");icon(2,"sound");
   for(let i=0;i<2;i++){
     const x=l.pad+i*(l.buttonWidth+l.gap),y=l.bottom,hover=s.hover===i,fill=i===0?ink:null,textColor=i===0?ih43Readable(ink,p.paper,p.ink):ink;
     c.save();if(hover){c.shadowColor=ink;c.shadowBlur=14;c.globalAlpha=.95;}ih43Box(c,x,y,l.buttonWidth,52,fill,8,ink);c.shadowColor="transparent";
@@ -579,11 +570,12 @@ export function IdeaHireCinematicHero({jobs=[]}){
   const [sound,setSound]=useState(false);
   const [ready,setReady]=useState(false);
   const [failed,setFailed]=useState(false);
-  const [finished,setFinished]=useState(ih43Reduced);
-  const [welcomed,setWelcomed]=useState(ih43Reduced);
-  const [scene,setScene]=useState(()=>ih43Reduced()?IH43_FILM.shots.length-1:0);
+  const playOnEntry=useRef((()=>{try{return !ih43Reduced()&&(sessionStorage.getItem('ideahire_intro_seen')!=='1'||Number(sessionStorage.getItem('ideahire_intro_active_ms'))>=1800000);}catch{return !ih43Reduced();}})()).current;
+  const [finished,setFinished]=useState(()=>!playOnEntry);
+  const [welcomed,setWelcomed]=useState(()=>!playOnEntry);
+  const [scene,setScene]=useState(()=>playOnEntry?0:IH43_FILM.shots.length-1);
   const rootRef=useRef(null),canvasRef=useRef(null),engineRef=useRef(null),alive=useRef(false),soundBusy=useRef(false);
-  const motion=useRef({time:0,paused:!brandReady,finished:false,reduced,english,classic,offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
+  const motion=useRef({time:playOnEntry?0:IH43_FILM.period-.001,paused:!brandReady,finished:!playOnEntry,reduced,english,classic,offer:IDEA_HIRE_PUBLIC_OFFER,ready:false,sound:false,pointerX:0,pointerY:0,hover:-1});
   const finale=scene===IH43_FILM.shots.length-1;
   const labels=english?{
     region:"IdeaHire — "+IH43_FILM.name,
@@ -610,6 +602,7 @@ export function IdeaHireCinematicHero({jobs=[]}){
   },[reduced,english,classic,paused,brandReady]);
   useEffect(()=>{
     alive.current=true;
+    if(playOnEntry){try{sessionStorage.setItem('ideahire_intro_seen','1');sessionStorage.setItem('ideahire_intro_active_ms','0');}catch{}window.dispatchEvent(new Event('ideahire:intro-replayed'));}
     const engine=ih43Start(canvasRef.current,rootRef.current,motion,update=>{
       if(!alive.current)return;
       if(update.ready)setReady(true);
@@ -621,6 +614,21 @@ export function IdeaHireCinematicHero({jobs=[]}){
     engineRef.current=engine;
     return()=>{alive.current=false;engine.destroy();engineRef.current=null;};
   },[]);
+  useEffect(()=>{
+    const replayWhenVisible=()=>{
+      if(reduced||failed||!brandReady||document.hidden||!motion.current.finished)return;
+      const box=rootRef.current?.getBoundingClientRect();
+      if(!box||box.bottom<=0||box.top>=window.innerHeight||document.activeElement?.matches('input,textarea,select,[contenteditable="true"]'))return;
+      let due=false;try{due=Number(sessionStorage.getItem('ideahire_intro_active_ms'))>=1800000;}catch{}
+      if(!due)return;
+      replayIntro();
+      try{sessionStorage.setItem('ideahire_intro_seen','1');sessionStorage.setItem('ideahire_intro_active_ms','0');}catch{}
+      window.dispatchEvent(new Event('ideahire:intro-replayed'));
+    };
+    window.addEventListener('ideahire:intro-due',replayWhenVisible);
+    replayWhenVisible();
+    return()=>window.removeEventListener('ideahire:intro-due',replayWhenVisible);
+  },[reduced,failed,brandReady]);
   function cut(){
     if(reduced||failed)return;
     if(IH43.phase(motion.current.time).cycle>=IH43_FILM.finalStart){
@@ -661,16 +669,6 @@ export function IdeaHireCinematicHero({jobs=[]}){
         {english?" minimum":" min."} {IDEA_HIRE_PUBLIC_OFFER.minimum} {english?"PLN":"zł"},
         {english?" maximum":" maks."} {IDEA_HIRE_PUBLIC_OFFER.maximum} {english?"PLN":"zł"}.
         {english?" Orders up to ":" Zlecenia do "}{IDEA_HIRE_PUBLIC_OFFER.orderLimit} {english?"PLN. Paid by the client.":"zł. Płaci zleceniodawca."}</p>}
-    </div>
-    <div role="group" aria-label={labels.controls}>
-      <button type="button" className="ih43-hit ih43-control" style={{"--ih43-index":0}}
-        aria-label={finale?labels.replay:labels.skip} title={finale?labels.replay:labels.skip} disabled={reduced||failed} onClick={cut}/>
-      <button type="button" className="ih43-hit ih43-control" style={{"--ih43-index":1}}
-        aria-label={paused?labels.play:labels.pause} title={paused?labels.play:labels.pause} aria-pressed={paused||reduced}
-        disabled={reduced||failed} onClick={togglePause}/>
-      <button type="button" className="ih43-hit ih43-control" style={{"--ih43-index":2}}
-        aria-label={sound?labels.soundOff:labels.soundOn} title={sound?labels.soundOff:labels.soundOn} aria-pressed={sound}
-        disabled={reduced||failed} onClick={toggleSound}/>
     </div>
     {copy.cta.map((label,index)=><Link key={index} className="ih43-hit ih43-link" style={{"--ih43-index":index}}
       to={IH43_FILM.paths[index]} onMouseEnter={()=>hover(index)} onMouseLeave={()=>hover(-1)} onFocus={()=>hover(index)} onBlur={()=>hover(-1)}>
@@ -1054,13 +1052,13 @@ function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
       aria-label={open ? "Zamknij menu konta" : "Otwórz menu konta"} aria-expanded={open} aria-controls="ih27-home-account-menu"
       onClick={() => { if (!open) onOpen?.(); setOpen(value => !value); }}
       onKeyDown={event => { if (event.key === "ArrowDown") { event.preventDefault(); if (open) menuRef.current?.querySelector("a")?.focus({ preventScroll: true }); else { onOpen?.(); setOpen(true); } } }}>
-      <span className="account-mini-avatar">{avatarUrl ? <img src={avatarUrl} alt="" /> : initial}</span>
+      <HomeGreeting name={name} />
     </button>
     {open && createPortal(<nav ref={menuRef} id="ih27-home-account-menu" className="account-menu-dropdown ih18-account-dropdown ih27-home-account-menu"
       aria-label="Funkcje konta" onKeyDown={navigateMenu}
       onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget) && !triggerRef.current?.contains(event.relatedTarget)) setOpen(false); }}>
       <div className="account-menu-identity"><strong>{name}</strong><span>Konto IdeaHire</span></div>
-      <Link to="/account" onClick={() => setOpen(false)}>{en?"My account":"Moje konto"}</Link>
+      <Link to="/account" onClick={() => setOpen(false)}><MarketIcon kind="account"/><span>{en?"My account":"Moje konto"}</span></Link>
       <a href={helpCenterHref()} onClick={() => setOpen(false)} referrerPolicy="no-referrer" aria-label="Pomoc — Centrum pomocy">
         <MarketIcon kind="help" /><span>Pomoc</span>
       </a>
@@ -1069,20 +1067,10 @@ function HomeAccountMenu({ name, avatarUrl, initial, onOpen }) {
 }
 
 function HomeGreeting({ name }) {
-  return (
-    <span className="auth-user home-auth-user ih-welcome" title={`Cześć, ${name}`}>
-      <span className="ih-welcome-readable">Cześć, {name}</span>
-      <span className="ih-welcome-spark" aria-hidden="true"><i /><i /><i /><i /></span>
-      <span className="ih-welcome-copy" aria-hidden="true">
-        <span className="ih-welcome-prefix">Cześć,</span>{" "}
-        <strong className="ih-welcome-name">
-          {Array.from(name).map((letter, index) => (
-            <span key={index} style={{ "--ih-letter-order": Math.min(index, 12) }}>{letter}</span>
-          ))}
-        </strong>
-      </span>
-    </span>
-  );
+  const en=useSitePreferences().language==='en';
+  return <span className="ih81-home-greeting" title={(en?'Welcome, ':'Witaj, ')+name}>
+    <span>{en?'Welcome,':'Witaj,'}</span><strong>{name}</strong>
+  </span>;
 }
 
 // Fictional content for the requested visual test. Keep the demo label visible.
@@ -1775,7 +1763,7 @@ function IH53Welcome({paused,onPause,onDone}){
  useEffect(()=>{const change=()=>setHidden(document.hidden);document.addEventListener('visibilitychange',change);return()=>document.removeEventListener('visibilitychange',change);},[]);
  useEffect(()=>{if(typeof IntersectionObserver==='undefined')return;let io;try{io=new IntersectionObserver(entries=>setVisible(!!entries[0]?.isIntersecting),{threshold:0});io.observe(host.current);}catch{}return()=>io?.disconnect();},[]);
  useEffect(()=>{if(paused||hidden||!visible)return;let frame=0,last=0,dead=false;function tick(now){if(dead)return;if(last)elapsed.current+=Math.max(0,now-last);last=now;if(elapsed.current>=2800){done.current();return;}frame=requestAnimationFrame(tick);}frame=requestAnimationFrame(tick);return()=>{dead=true;cancelAnimationFrame(frame);};},[paused,hidden,visible]);
- return <div ref={host} className="ih53-welcome-screen" data-paused={paused||hidden||!visible} data-no-translate="true"><div className="ih53-welcome-title" role="status"><span>{en?'WELCOME TO':'WITAMY W'}</span><strong>IDEAHIRE<span aria-hidden="true">.</span></strong></div><div className="ih53-welcome-bottom"><span>{en?'Projects. People. Collaboration.':'Projekty. Ludzie. Współpraca.'}</span><button type="button" onClick={onPause} aria-label={en?(paused?'Resume welcome':'Pause welcome'):(paused?'Wznów powitanie':'Zatrzymaj powitanie')} aria-pressed={paused}>{paused?'▶':'Ⅱ'}</button></div></div>;
+ return <div ref={host} className="ih53-welcome-screen" data-paused={paused||hidden||!visible} data-no-translate="true"><div className="ih53-welcome-title" role="status"><span>{en?'WELCOME TO':'WITAMY W'}</span><strong>IDEAHIRE<span aria-hidden="true">.</span></strong></div><div className="ih53-welcome-bottom"><span>{en?'Projects. People. Collaboration.':'Projekty. Ludzie. Współpraca.'}</span></div></div>;
 }
 /* P57: odtwarzacz odzyskany z zachowanego podglądu filmu. */
 var IH57_STYLES = String.raw`@font-face{font-family:IdeaHireFilmText;src:url('/media/ideahire-film-text.woff2') format('woff2');font-weight:400;font-style:normal;font-display:optional;}
@@ -2644,19 +2632,18 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
    <span className="ih59-project-category">{label}</span>
    <div className="ih66-project-description"><h3 title={job.title}>{String(job.title||'').slice(0,160)}</h3><p>{String(job.description||(en?'Review the scope and requirements in the listing.':'Sprawdź zakres i wymagania w ogłoszeniu.')).slice(0,280)}</p></div>
    {sample&&<small className="ih53-project-caption">{copy.sample}</small>}
-   <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true">↗</span></Link></div>
+   <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true"><MarketIcon kind="bookmark"/></span></Link></div>
   </article>;
  }
  return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
-  <div className="ih53-finale-top"><button type="button" className="ih53-replay" disabled={!canReplay} onClick={onReplay}><span aria-hidden="true">↻</span><span>{copy.replay}</span></button></div>
-  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true">↗</span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true">↗</span></Link></div></div>
+  
+  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true"><MarketIcon kind="bookmark"/></span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true"><MarketIcon kind="bookmark"/></span></Link></div></div>
    <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
     <div className="ih66-project-heading"><span>{view.new?copy.new:copy.published}</span><span className="ih66-project-count">{String(list.length?index+1:0).padStart(2,'0')}<span aria-hidden="true"> / </span>{String(list.length).padStart(2,'0')}</span></div>
     <div className="ih53-project-window" onPointerDown={e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};}} onPointerCancel={()=>{gesture.current=null;}} onPointerUp={e=>{const first=gesture.current;gesture.current=null;if(!first||view.next)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}>
      <div className="ih53-project-track" data-sliding={view.shift} onTransitionEnd={e=>{if(e.target===e.currentTarget&&e.propertyName==='transform')commit();}}>{active?renderCard(active):<div className="ih53-project-empty"><p>{copy.empty}</p><Link to="/jobs">{copy.jobs}</Link></div>}{view.next&&renderCard(view.next,true)}</div>
     </div>
-    {list.length>1&&<div className="ih66-project-progress" aria-hidden="true" data-transitioning={!!view.next}><span key={view.sequence}/></div>}
-    <div className="ih53-project-controls"><small>{stopped?copy.still:copy.auto}</small><button type="button" className="ih53-project-pause" onClick={onPause} aria-label={paused?copy.play:copy.pause} aria-pressed={paused} disabled={reduced}><span aria-hidden="true">{paused?'▶':'Ⅱ'}</span></button></div>
+
     <div className="ih53-project-status" aria-live="polite">{pending&&<button type="button" onClick={()=>show(pending.job,true)}>{copy.pending}</button>}</div>
    </div>
   </div>
