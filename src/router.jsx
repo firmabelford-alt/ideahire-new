@@ -35,6 +35,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import DisputePaymentPanel from "./DisputePayments";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
@@ -20479,7 +20480,9 @@ function ChatPaymentPanel({
           || Math.abs(Number(value) * 100 - Math.round(Number(value) * 100)) > 0.000001)
           || Math.round(Number(nextSummary.work_amount) * 100) + Math.round(Number(nextSummary.platform_fee) * 100)
             !== Math.round(Number(nextSummary.total_amount) * 100)
-          || Math.round(Number(nextSummary.contractor_amount) * 100) !== Math.round(Number(nextSummary.work_amount) * 100)
+          || (Math.round(Number(nextSummary.contractor_amount) * 100) > Math.round(Number(nextSummary.work_amount) * 100)
+            || (!["refunded", "partially_refunded"].includes(nextSummary.payment_status)
+              && Math.round(Number(nextSummary.contractor_amount) * 100) !== Math.round(Number(nextSummary.work_amount) * 100)))
           || Number(nextSummary.work_amount) <= 0) {
           throw new Error("Kwoty płatności wymagają sprawdzenia. Nie rozpoczynaj ponownej płatności.");
         }
@@ -23164,16 +23167,19 @@ function DisputeDetails() {
                     )}
                   </strong>
                 )}
+                {["full_refund", "partial_refund"].includes(currentDecision.outcome) && <p>Kwota decyzji dotyczy wynagrodzenia. Zwrot klientowi obejmuje również całą prowizję IdeaHire przy pełnym zwrocie lub jej proporcjonalną część przy zwrocie częściowym.</p>}
                 <p>{currentDecision.rationale}</p>
                 <div className="dispute-decision-meta">
                   <span>Wersja {currentDecision.version}</span>
                   <span>Wydano: {formatDisputeDate(currentDecision.issued_at)}</span>
                   <span>
-                    Operacja płatnicza: {currentDecision.payment_action_status === "not_connected"
-                      ? "operator płatności nie jest jeszcze podłączony"
-                      : "nie jest wymagana"}
+                    Operacja płatnicza: {{ not_connected: "wymaga uruchomienia rozliczenia", pending: "oczekuje na wykonanie lub potwierdzenie Stripe", completed: "potwierdzona przez Stripe", failed: "wymaga kontroli operatora", not_required: "nie jest wymagana" }[currentDecision.payment_action_status] || "sprawdź aktualny status"}
                   </span>
                 </div>
+                {isStaff && ["owner", "admin"].includes(staffRole) && (
+                  <DisputePaymentPanel client={supabase} decision={currentDecision} userId={user.id}
+                    conversationId={dispute.conversation_id} onSettled={() => loadCase(false)} />
+                )}
                 {dispute.appeal_deadline_at && dispute.status === "decision_issued" && (
                   <p className="dispute-deadline-note">
                     Termin odwołania: {formatDisputeDate(dispute.appeal_deadline_at)}

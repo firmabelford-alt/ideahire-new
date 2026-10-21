@@ -1394,9 +1394,12 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, pa
     <section className={`private-work-delivery is-${latest.status}`}>
       <div className="private-work-delivery-heading">
         <div><span>Odbiór pracy · wersja {latest.version}</span><h3>{DELIVERY_LABELS[latest.status] || latest.status}</h3></div>
-        {!isClient && latest.status !== "blocked" && <small>{latest.status === "submitted" ? "Czekamy na decyzję zleceniodawcy" : "Status formalnego przekazania"}</small>}
+        {!isClient && latest.status !== "blocked" && <small>{["refunded", "partially_refunded"].includes(paymentStatus) ? "Rozliczenie obejmuje zwrot" : latest.status === "submitted" ? "Czekamy na decyzję zleceniodawcy" : "Status formalnego przekazania"}</small>}
       </div>
       <p>{latest.summary}</p>
+      {latest.acceptance_source === "auto" && <p>Praca została odebrana automatycznie po upływie terminu. Nie jest to zapis ręcznego potwierdzenia zleceniodawcy.</p>}
+      {["refunded", "partially_refunded"].includes(paymentStatus) && <p>Rozliczenie obejmuje zwrot. Aktualne kwoty i wynik decyzji sprawdź w panelu płatności oraz centrum sporów.</p>}
+      {latest.status === "submitted" && <p>Na odbiór pracy, zgłoszenie poprawek lub otwarcie sporu przewidziano 10 dni od przekazania. Automatyczny odbiór obejmuje prace przekazane po włączeniu tej funkcji. Aktywny spór wstrzymuje przekazanie wynagrodzenia.</p>}
       {import.meta.env.VITE_LUCYNA_ENABLED !== "false" && !disabled && latest.status !== "blocked" && (
         <p className="private-work-lucyna-link"><Link to={"/lucyna?mode=review&delivery="+encodeURIComponent(latest.id)}>
           Sprawdź rezultat względem kryteriów z Lucyną AI
@@ -1406,7 +1409,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, pa
       {history.length > 0 && (
         <details><summary>Historia odbioru ({history.length})</summary>{history.map((event) => <p key={event.id}><time>{new Date(event.created_at).toLocaleString("pl-PL")}</time>{event.message}</p>)}</details>
       )}
-      {isClient && latest.status === "submitted" && (
+      {isClient && latest.status === "submitted" && ["work_submitted", "release_pending", "release_failed"].includes(paymentStatus) && (
         <div className="private-work-delivery-actions">
           <textarea value={changes} onChange={(event) => setChanges(event.target.value)} minLength={20} maxLength={4000} rows={3} placeholder="Jeśli potrzebujesz zmian, opisz je konkretnie…" />
           <div>
