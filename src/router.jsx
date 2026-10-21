@@ -41,7 +41,7 @@ import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, Workspace
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref, getSafeWebUrl } from "./MarketUI";
 import { useSitePreferences, translateUiText, IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -3747,14 +3747,7 @@ function getJobCategoryFieldLabel(category, key) {
 }
 
 function getSafeJobReferenceUrl(value) {
-  if (!value) return "";
-
-  try {
-    const url = new URL(String(value).trim());
-    return ["http:", "https:"].includes(url.protocol) ? url.toString() : "";
-  } catch {
-    return "";
-  }
+  return getSafeWebUrl(value);
 }
 
 const MIN_JOB_BUDGET = IDEA_HIRE_PUBLIC_OFFER.orderMinimum;
@@ -7227,8 +7220,8 @@ function normalizePortfolioUrl(value) {
     throw new Error("Wpisz prawidłowy link do projektu.");
   }
 
-  if (parsedUrl.protocol !== "https:") {
-    throw new Error("Link do projektu musi rozpoczynać się od https://.");
+  if (parsedUrl.protocol !== "https:" || parsedUrl.username || parsedUrl.password) {
+    throw new Error("Link do projektu musi używać HTTPS i nie może zawierać loginu ani hasła.");
   }
 
   return parsedUrl.toString();
@@ -7415,7 +7408,7 @@ function PortfolioLightbox({ album, initialIndex, canReport, onClose, onReport }
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" /></svg>
             <span>{downloading ? "Pobieranie…" : "Pobierz zdjęcie"}</span>
           </button>
-          {downloadError && <p className="ih8-portfolio-error" role="status">{downloadError} <a href={activeMedia.image_url} target="_blank" rel="noopener noreferrer">Otwórz oryginał</a></p>}
+          {downloadError && <p className="ih8-portfolio-error" role="status">{downloadError} <a href={getSafeWebUrl(activeMedia.image_url) || undefined} target="_blank" rel="noopener noreferrer">Otwórz oryginał</a></p>}
         </div>
         <footer>
           <div className="portfolio-lightbox-thumbnails" aria-label="Zdjęcia w albumie">
@@ -14437,7 +14430,8 @@ function Profile() {
                           {item.description && <p>{item.description}</p>}
                           <a
                             className="profile-public-project-link"
-                            href={item.project_url}
+                            href={getSafeWebUrl(item.project_url) || undefined}
+                            aria-disabled={!getSafeWebUrl(item.project_url)}
                             target="_blank"
                             rel="noopener noreferrer nofollow"
                             title={item.project_url}
@@ -25692,13 +25686,14 @@ function AdminModeration() {
                             {privateReportEvidence[
                               report.id
                             ].items.map((item, index) => {
-                              const evidenceUrl =
+                              const evidenceUrl = getSafeWebUrl(
                                 item.external_url ||
                                 privateReportEvidence[
                                   report.id
                                 ].signedUrls[
                                   item.storage_path
-                                ];
+                                ]
+                              );
                               return (
                                 <a
                                   key={
@@ -25757,7 +25752,8 @@ function AdminModeration() {
                         </button>
                       ) : (
                         <a
-                          href={report.content_location}
+                          href={getSafeWebUrl(report.content_location, { allowRelative: true }) || undefined}
+                          aria-disabled={!getSafeWebUrl(report.content_location, { allowRelative: true })}
                           target="_blank"
                           rel="noopener noreferrer"
                         >

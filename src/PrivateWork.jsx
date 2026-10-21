@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { IdeaHireDateField } from "./MarketUI";
+import { IdeaHireDateField, getSafeWebUrl } from "./MarketUI";
 import { supabase } from "./supabase";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
@@ -533,16 +533,19 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
         <section className="private-work-material-group">
           <div className="private-work-section-title"><strong>Linki</strong><span>{links.length}</span></div>
           <div className="private-work-links">
-          {links.map((item) => (
+          {links.map((item) => {
+            const externalUrl = getSafeWebUrl(item.external_url);
+            return (
             <div className="private-work-link-row" key={item.id}>
-              <a href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">
+              <a href={externalUrl || undefined} target="_blank" rel="noopener noreferrer nofollow" aria-disabled={!externalUrl}>
                 <span aria-hidden="true"></span>
                 <b>{item.display_name}</b>
-                <small>{new URL(item.external_url).hostname}</small>
+                <small>{externalUrl ? new URL(externalUrl).hostname : "Nieprawidłowy link"}</small>
               </a>
               {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
             </div>
-          ))}
+            );
+          })}
           </div>
         </section>
       )}
@@ -565,17 +568,19 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
           <div className="private-work-section-title"><strong>Dane dostępowe</strong><span>{accessItems.length}</span></div>
           {accessItems.map((item) => {
             const metadata = item.metadata || {};
+            const serviceUrl = getSafeWebUrl(metadata.service_url);
+            const secureUrl = getSafeWebUrl(item.external_url);
             return (
               <article className="private-work-access-item" key={item.id}>
                 <div className="private-work-access-heading">
                   <span aria-hidden="true">⌁</span>
                   <div><b>{item.display_name}</b><small>Hasło nie jest przechowywane w czacie IdeaHire</small></div>
                 </div>
-                {metadata.service_url && <a href={metadata.service_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz stronę logowania </a>}
+                {serviceUrl && <a href={serviceUrl} target="_blank" rel="noopener noreferrer nofollow">Otwórz stronę logowania </a>}
                 {metadata.login_identifier && <p><span>Login lub e-mail</span><code>{metadata.login_identifier}</code></p>}
                 {metadata.instructions && <p><span>Instrukcja</span>{metadata.instructions}</p>}
                 {metadata.expires_at && <small>Link zadeklarowany jako ważny do: {new Date(metadata.expires_at).toLocaleString("pl-PL")}</small>}
-                <a className="private-work-secure-access-button" href={item.external_url} target="_blank" rel="noopener noreferrer nofollow">Otwórz bezpieczny link do sekretu </a>
+                <a className="private-work-secure-access-button" href={secureUrl || undefined} target="_blank" rel="noopener noreferrer nofollow" aria-disabled={!secureUrl}>Otwórz bezpieczny link do sekretu </a>
                 {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
               </article>
             );

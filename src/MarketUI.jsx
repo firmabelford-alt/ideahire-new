@@ -6,6 +6,21 @@ import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { BrandLogo } from "./Brand";
 
+// Validate stored/user-supplied links again at the point of navigation.
+export function getSafeWebUrl(value, { allowRelative = false } = {}) {
+  if (typeof value !== "string" || !value.trim()) return "";
+
+  try {
+    const url = allowRelative
+      ? new URL(value.trim(), window.location.href)
+      : new URL(value.trim());
+    const webProtocol = url.protocol === "https:" || url.protocol === "http:";
+    return webProtocol && !url.username && !url.password ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
 // The agreed public offer. Charging stays in the server's payment-summary RPC.
 export const IDEA_HIRE_PUBLIC_OFFER = Object.freeze({ percent: 5.5, minimum: 20, maximum: 229, orderMinimum: 1, orderLimit: 10000 });
 
