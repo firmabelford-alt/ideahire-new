@@ -332,6 +332,46 @@ body.ih79-app .ideahire-description-field {
     body.ih79-app *, body.ih79-app *::before, body.ih79-app *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   }
 }
+/* P88: one type hierarchy within the shared subpage layer. */
+@layer ih68Workspace.ih75Subpages.ih88Type {
+body.ih79-app { --ih-title-page: 38px; --ih-title-section: 24px; --ih-title-card: 22px; --ih-title-small: 18px; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main :is(h1,h2,h3,h4) { max-width: 100% !important; margin-top: 0 !important; font-family: Inter,system-ui,sans-serif !important; font-style: normal !important; text-align: start !important; text-transform: none !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: normal !important; text-shadow: none !important; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main h1 { font-size: var(--ih-title-page) !important; font-weight: 800 !important; line-height: 1.2 !important; letter-spacing: -.03em !important; }
+body.ih79-app[data-ih73-page="dashboard"] #root .ih72-identity h1 { text-align: center !important; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main h2 { font-size: var(--ih-title-section) !important; font-weight: 750 !important; line-height: 1.3 !important; letter-spacing: -.02em !important; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main h3 { font-size: var(--ih-title-small) !important; font-weight: 700 !important; line-height: 1.4 !important; letter-spacing: -.015em !important; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main h4 { font-size: 16px !important; font-weight: 700 !important; line-height: 1.4 !important; letter-spacing: -.01em !important; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main :is(.ih5-job-title,.ih78-offer-copy h2,.ih72-project-card h3,.ih79-notice h3,.ih11-freelancer-person h3) { font-size: var(--ih-title-card) !important; font-weight: 750 !important; line-height: 1.35 !important; letter-spacing: -.02em !important; }
+body.ih79-app:not([data-ih73-page="conversation"]) #root main :is(.calendar-month-navigation h2,.ih75-calendar-upcoming h2) { font-size: var(--ih-title-small) !important; line-height: 1.4 !important; letter-spacing: -.015em !important; }
+body.ih79-app :is(.calendar-dialog,.ih5-service-inquiry-modal,.ih12-contact-dialog,.private-work-share-form,.private-work-report-dialog,.private-work-release-dialog,.ih70-sheet) :is(h2,h3) { max-width: 100% !important; margin-top: 0 !important; font: 750 var(--ih-title-section)/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.02em !important; white-space: normal !important; overflow-wrap: anywhere !important; word-break: normal !important; }
+body.ih79-app :is(.calendar-dialog,.ih5-service-inquiry-modal,.ih12-contact-dialog,.private-work-share-form,.private-work-report-dialog,.private-work-release-dialog,.ih70-sheet) h3 { font-size: var(--ih-title-small) !important; font-weight: 700 !important; line-height: 1.4 !important; }
+body.ih79-app #root :is(.ih75-page-heading,.ih78-services-hero,.ih76-planner-heading) { display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; align-items: start !important; justify-content: normal !important; gap: 18px 28px !important; margin: 0 0 32px !important; }
+body.ih79-app #root .ih73-heading-copy { width: 100% !important; min-width: 0 !important; max-width: 720px !important; }
+body.ih79-app #root :is(.ih75-page-heading,.ih78-services-hero,.ih76-planner-heading) h1 { margin: 0 !important; }
+body.ih79-app #root .ih73-description { max-width: 58ch !important; margin: 12px 0 0 !important; font: 400 15px/1.65 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root :is(.ih73-heading-actions,.ih79-service-actions) { display: flex !important; align-items: center !important; justify-content: flex-start !important; flex-wrap: wrap !important; gap: 12px !important; min-width: 0 !important; margin: 0 !important; padding-top: 2px !important; }
+body.ih79-app #root :is(.ih73-heading-actions,.ih79-service-actions) > :is(a,button) { flex: 0 0 auto !important; width: auto !important; min-width: max-content !important; max-width: 100% !important; min-height: 44px !important; font-size: 14px !important; line-height: 1.4 !important; white-space: nowrap !important; word-break: normal !important; overflow-wrap: normal !important; }
+body.ih79-app #root .ih78-add-service { width: auto !important; min-width: max-content !important; min-height: 44px !important; padding: 12px 16px !important; white-space: nowrap !important; }
+body.ih79-app #root .ih78-add-service > span { position: static !important; display: inline !important; flex: 0 0 auto !important; width: auto !important; height: auto !important; margin: 0 !important; padding: 0 !important; font: inherit !important; white-space: nowrap !important; }
+body.ih79-app #root .account-template-heading { display: block !important; width: 100% !important; margin: 0 0 24px !important; padding: 0 !important; border: 0 !important; }
+body.ih79-app #root .account-template-heading > div { width: 100% !important; max-width: none !important; }
+body.ih79-app #root .account-template-heading h2 { width: 100% !important; margin: 0 0 8px !important; }
+body.ih79-app #root .account-template-heading > p { max-width: 60ch !important; margin: 0 !important; font: 400 14px/1.65 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih72-section-links > button { justify-content: flex-start !important; width: 100% !important; text-align: left !important; }
+body.ih79-app #root .ih72-section-links > button > svg { flex: 0 0 18px !important; width: 18px !important; height: 18px !important; }
+body.ih79-app #root .ih72-section-links > button > span { flex: 1 1 0 !important; text-align: left !important; }
+@media (max-width:850px) {
+  body.ih79-app { --ih-title-page: 30px; --ih-title-section: 22px; --ih-title-card: 21px; --ih-title-small: 17px; }
+  body.ih79-app #root :is(.ih75-page-heading,.ih78-services-hero,.ih76-planner-heading) { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; margin-bottom: 28px !important; }
+  body.ih79-app #root :is(.ih73-heading-actions,.ih79-service-actions) { width: 100% !important; padding-top: 0 !important; }
+}
+/* Conversation geometry and type on phones stay as before. */
+@media (min-width:851px) {
+  body.ih79-app[data-ih73-page="conversation"] #root .ih68-room-person h1 { font: 750 18px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.015em !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih68-room-page h2 { font: 750 var(--ih-title-section)/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.02em !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih68-room-page h3 { font: 700 var(--ih-title-small)/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.015em !important; }
+}
+}
 @layer ih68Workspace.ih75Subpages {
 body.ih79-app {
   --p-bg: var(--v-bg, #fff) !important;
@@ -1784,6 +1824,85 @@ html body[data-ih87-route-loading="true"] #root .ih87-loading { visibility: hidd
 @keyframes ih87-loading-progress { from { transform: translateX(0); } to { transform: translateX(38px); } }
 @media (prefers-reduced-motion:reduce) {
   html body .ih87-loading-mark > i::after, html body .ih87-route-status { animation: none !important; }
+}
+
+/* Status colour belongs to small markers; the surrounding interface stays calm. */
+body.ih79-app { --ih-status-teal: #167d72; --ih-status-blue: #4a70a5; --ih-status-amber: #a66b24; --ih-status-violet: #8465a4; }
+html[data-theme="dark"] body.ih79-app { --ih-status-teal: #66bcae; --ih-status-blue: #8caee0; --ih-status-amber: #d8aa66; --ih-status-violet: #b49bce; }
+body.ih79-app :is(.calendar-legend > span,.calendar-event-chip,.calendar-agenda-item,.calendar-type-picker label).is-deadline { --ih-event-colour: var(--ih-status-teal); }
+body.ih79-app :is(.calendar-legend > span,.calendar-event-chip,.calendar-agenda-item,.calendar-type-picker label).is-meeting { --ih-event-colour: var(--ih-status-blue); }
+body.ih79-app :is(.calendar-legend > span,.calendar-event-chip,.calendar-agenda-item,.calendar-type-picker label).is-payment { --ih-event-colour: var(--ih-status-amber); }
+body.ih79-app :is(.calendar-legend > span,.calendar-event-chip,.calendar-agenda-item,.calendar-type-picker label).is-personal { --ih-event-colour: var(--ih-status-violet); }
+body.ih79-app #root .calendar-legend { display: flex !important; align-items: center !important; justify-content: flex-start !important; flex-wrap: wrap !important; gap: 10px 18px !important; min-width: 0 !important; }
+body.ih79-app #root .calendar-legend > span { display: inline-flex !important; align-items: center !important; gap: 7px !important; color: var(--p-muted) !important; font: 500 12px/1.5 Inter,system-ui,sans-serif !important; white-space: nowrap !important; }
+body.ih79-app #root .calendar-legend i, body.ih79-app #root .calendar-event-chip > i, body.ih79-app .calendar-type-picker label > i { display: block !important; flex: 0 0 7px !important; width: 7px !important; height: 7px !important; margin: 0 !important; border: 0 !important; border-radius: 50% !important; background: var(--ih-event-colour,var(--ih-status-teal)) !important; box-shadow: none !important; filter: none !important; }
+body.ih79-app #root .calendar-agenda-meta::before { content: '' !important; display: inline-block !important; flex: 0 0 7px !important; width: 7px !important; height: 7px !important; border-radius: 50% !important; background: var(--ih-event-colour,var(--ih-status-teal)) !important; }
+body.ih79-app #root :is(.ih68-dot,.ih5-service-capacity i), body.ih79-app #root .ih5-job-active-badge::before { background: var(--ih-status-teal) !important; box-shadow: none !important; }
+body.ih79-app #root .ih5-service-capacity:is(.is-full,.is-last) i { background: var(--ih-status-amber) !important; }
+
+/* Desktop inbox: one list, with sender, project, preview and time in fixed roles. */
+@media (min-width:851px) {
+  body.ih79-app[data-ih73-page="inbox"] #root main.ih68-page.ih72-inbox { max-width: 1120px !important; padding: 32px 40px 64px !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih79-inbox-layout { display: block !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih79-inbox-context { display: none !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-list-toolbar { display: grid !important; grid-template-columns: minmax(0,1fr) minmax(240px,340px) !important; align-items: center !important; gap: 24px !important; margin: 0 0 22px !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-search { width: 100% !important; max-width: none !important; margin: 0 !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-inbox-content { padding: 0 !important; border: 1px solid var(--p-line) !important; border-radius: 14px !important; background: var(--p-paper) !important; overflow: hidden !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-list { gap: 0 !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-row { grid-template-columns: 44px minmax(0,1fr) 10px !important; align-items: center !important; gap: 18px !important; min-height: 92px !important; padding: 18px 20px !important; border: 0 !important; border-bottom: 1px solid var(--p-line) !important; border-radius: 0 !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-row:last-child { border-bottom: 0 !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-row > .ih68-avatar { width: 44px !important; height: 44px !important; min-width: 44px !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-end { width: 10px !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-row:focus-visible { outline-offset: -3px !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-copy { display: grid !important; grid-template-columns: minmax(120px,.65fr) minmax(0,1.7fr) auto !important; grid-template-areas: 'person project time' 'person preview time' !important; align-items: center !important; gap: 4px 24px !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-person { display: contents !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-person > strong { grid-area: person !important; display: block !important; min-width: 0 !important; max-width: 100% !important; font: 700 15px/1.5 Inter,system-ui,sans-serif !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-person > time { grid-area: time !important; align-self: start !important; padding-top: 2px !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-project { grid-area: project !important; margin: 0 !important; font: 600 14px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih79-app[data-ih73-page="inbox"] #root .ih72-conversation-copy > p { grid-area: preview !important; display: block !important; margin: 0 !important; font: 400 13px/1.6 Inter,system-ui,sans-serif !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+
+  /* A bounded conversation, with a readable message column and a matching composer. */
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room:not(.is-focus) { width: calc(100% - 64px) !important; max-width: 1120px !important; margin: 24px auto 0 !important; border: 1px solid var(--p-line) !important; border-radius: 16px !important; background: var(--p-paper) !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih68-room-header { min-height: 76px !important; padding: 16px 24px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih72-room-nav { padding-inline: 24px !important; border-bottom: 1px solid var(--p-line) !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih68-thread { padding: 28px 28px 16px !important; background: var(--p-paper) !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih68-thread-inner { max-width: 800px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih68-composer-area { width: 100% !important; max-width: 856px !important; padding: 12px 28px 16px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih72-composer { min-height: 58px !important; background: var(--p-soft) !important; }
+  /* Tabs open a full working page; only an explicitly pinned plan stays beside chat. */
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room:is([data-view="files"],[data-view="plan"]) .ih68-room-body { display: grid !important; grid-template-columns: minmax(0,1fr) !important; grid-template-rows: minmax(0,1fr) !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room:is([data-view="files"],[data-view="plan"]) .ih68-correspondence { display: none !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room:is([data-view="files"],[data-view="plan"]) .ih68-room-page { width: 100% !important; min-width: 0 !important; min-height: 0 !important; padding: 28px max(28px,calc((100% - 880px)/2)) 40px !important; border: 0 !important; overflow-y: auto !important; overscroll-behavior: contain !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room:is([data-view="files"],[data-view="plan"]) .ih72-panel-back { display: inline-flex !important; align-items: center !important; gap: 7px !important; min-height: 36px !important; margin: 0 0 12px !important; padding: 4px 0 !important; border: 0 !important; background: none !important; color: var(--p-muted) !important; font: 550 13px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih72-panel-back > svg { flex: none !important; width: 16px !important; height: 16px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih72-panel-heading { gap: 20px !important; margin-bottom: 28px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih69-material-toolbar > div > p { max-width: 60ch !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih68-room-page :is(p,dd,dt,summary) { max-width: 100% !important; overflow-wrap: anywhere !important; word-break: normal !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room .ih69-material-toolbar .private-work-share-toggle { min-width: max-content !important; white-space: nowrap !important; }
+}
+
+/* Material upload: a scrollable body with its actions inside the visible viewport. */
+body.ih79-app .private-work-share-backdrop.ih9-share-dialog { box-sizing: border-box !important; position: fixed !important; inset: 0 !important; display: grid !important; place-items: center !important; width: 100% !important; height: var(--ih9-share-viewport-height,100dvh) !important; max-height: 100dvh !important; padding: 20px !important; overflow: hidden !important; }
+body.ih79-app .private-work-share-backdrop .private-work-share-form { display: grid !important; grid-template-rows: auto auto minmax(0,1fr) auto !important; width: 100% !important; max-width: 760px !important; height: min(820px,calc(var(--ih9-share-viewport-height,100dvh) - 40px)) !important; min-height: 0 !important; max-height: calc(var(--ih9-share-viewport-height,100dvh) - 40px) !important; margin: 0 !important; padding: 0 !important; border: 1px solid var(--p-line) !important; border-radius: 16px !important; background: var(--p-paper) !important; overflow: hidden !important; }
+body.ih79-app .private-work-share-form .private-work-share-heading { display: flex !important; flex: none !important; align-items: start !important; justify-content: space-between !important; gap: 20px !important; margin: 0 !important; padding: 24px 28px 16px !important; border: 0 !important; background: var(--p-paper) !important; }
+body.ih79-app .private-work-share-form .private-work-tabs { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 8px !important; margin: 0 28px 20px !important; }
+body.ih79-app .private-work-share-form .private-work-tabs > button { min-width: 0 !important; white-space: normal !important; }
+body.ih79-app .private-work-share-form fieldset.ih9-share-body { box-sizing: border-box !important; width: 100% !important; height: auto !important; min-width: 0 !important; min-height: 0 !important; max-height: none !important; margin: 0 !important; padding: 0 28px 24px !important; border: 0 !important; overflow-x: hidden !important; overflow-y: auto !important; overscroll-behavior: contain !important; scrollbar-width: thin !important; scrollbar-color: var(--p-line) transparent !important; }
+body.ih79-app .private-work-share-form .ih9-share-footer { margin: 0 !important; padding: 16px 28px !important; border-top: 1px solid var(--p-line) !important; background: var(--p-paper) !important; }
+body.ih79-app .private-work-share-form :is(.private-work-field,.private-work-picker-row,.private-work-link-inputs,.private-work-access-editor) { min-width: 0 !important; max-width: 100% !important; }
+body.ih79-app .private-work-share-form :is(label,p,small,b,span,summary) { overflow-wrap: anywhere !important; }
+body.ih79-app .private-work-share-form :is(input,textarea,select) { max-width: 100% !important; font-size: 16px !important; }
+@media (max-width:850px) {
+  body.ih79-app .private-work-share-backdrop.ih9-share-dialog { padding: 12px !important; }
+  body.ih79-app .private-work-share-backdrop .private-work-share-form { display: block !important; height: auto !important; max-height: calc(var(--ih9-share-viewport-height,100dvh) - 24px) !important; overflow-y: auto !important; }
+  body.ih79-app .private-work-share-form .private-work-share-heading { padding: 20px 18px 16px !important; }
+  body.ih79-app .private-work-share-form .private-work-tabs { margin-inline: 18px !important; }
+  body.ih79-app .private-work-share-form fieldset.ih9-share-body { padding-inline: 18px !important; overflow: visible !important; }
+  body.ih79-app .private-work-share-form .ih9-share-footer { padding: 14px 18px max(14px,env(safe-area-inset-bottom,0px)) !important; }
+}
+@media (max-height:560px) {
+  body.ih79-app .private-work-share-backdrop .private-work-share-form { display: block !important; height: auto !important; overflow-y: auto !important; }
+  body.ih79-app .private-work-share-form fieldset.ih9-share-body { overflow: visible !important; }
 }
 
 }
