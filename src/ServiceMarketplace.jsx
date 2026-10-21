@@ -332,22 +332,28 @@ function ServiceCard({ service }) {
   const category = en ? translateUiText(service.category) : service.category;
   const days = Number(service.delivery_days);
   const revisions = Number(service.revisions);
+  const serviceUrl = '/services/' + service.id;
+  const ownerName = service.owner_name || service.freelancer_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire');
+  const Owner = service.freelancer_id ? Link : 'div';
   return <article className="ih78-service-offer">
-    <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
+    <header className="ih86-offer-heading">
+      <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
+      <span className={'ih86-offer-availability ' + capacity.className}>{en ? translateUiText(capacity.label) : capacity.label}</span>
+    </header>
     <div className="ih78-offer-copy">
-      <h2><Link to={'/services/' + service.id}>{service.title}</Link></h2>
-      <p>{service.summary}</p>
+      <h2><Link to={serviceUrl}>{service.title}</Link></h2>
+      {service.summary && <p>{service.summary}</p>}
     </div>
     <div className="ih80-offer-terms">
       <div className={'ih78-offer-price' + (isCustom ? ' is-custom' : '')}><span>{isCustom ? (en ? 'Quote' : 'Wycena') : (en ? 'From' : 'Od')}</span><strong>{isCustom ? (en ? 'On request' : 'Indywidualna') : formatMoney(service.base_price)}</strong></div>
       <dl className="ih80-offer-facts">
         {service.delivery_days != null && days > 0 && <div><dt>{en ? 'Delivery' : 'Realizacja'}</dt><dd>{days} {en ? (days === 1 ? 'day' : 'days') : (days === 1 ? 'dzień' : 'dni')}</dd></div>}
-        {service.revisions != null && revisions >= 0 && <div><dt>{en ? 'Revisions' : 'Poprawki'}</dt><dd>{revisions}</dd></div>}
+        {service.revisions != null && revisions >= 0 && <div><dt>{en ? 'Included revisions' : 'Poprawki w cenie'}</dt><dd>{revisions}</dd></div>}
       </dl>
     </div>
     <footer className="ih78-offer-footer">
-      <div className="ih78-offer-person"><ServiceAvatar service={service} /><span><strong>{service.owner_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire')}</strong><small className={capacity.className}><i aria-hidden="true" />{en ? translateUiText(capacity.label) : capacity.label}</small></span></div>
-      <span className="ih80-offer-open" aria-hidden="true"><span>{en ? 'View service' : 'Zobacz usługę'}</span></span>
+      <Owner className="ih78-offer-person" {...(service.freelancer_id ? { to: '/profile/' + service.freelancer_id } : {})}><ServiceAvatar service={service} /><span><strong>{ownerName}</strong><small>{en ? 'Freelancer' : 'Wykonawca'}</small></span></Owner>
+      <Link to={serviceUrl} className="ih80-offer-open" aria-label={(en ? 'Service details: ' : 'Szczegóły usługi: ') + service.title}><span>{en ? 'Details' : 'Szczegóły'}</span><MarketIcon kind="arrow" /></Link>
     </footer>
   </article>;
 }

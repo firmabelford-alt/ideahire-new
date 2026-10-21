@@ -12451,6 +12451,12 @@ function FindTalent() {
   ) {
     event.preventDefault();
 
+    if (saving) return;
+    if (formStep < JOB_FORM_STEPS.length) {
+      goToNextStep();
+      return;
+    }
+
     setMessage("");
     setSuccess(false);
 
@@ -12632,7 +12638,8 @@ function FindTalent() {
         <div className="ih75-editor-workspace">
         <aside className="ih75-editor-guide" aria-label={formEnglish ? "Project steps" : "Etapy projektu"}>
         <p className="ih75-guide-label">{formEnglish ? "Your project" : "Twój projekt"}</p>
-        <div className="ih73-mobile-step-picker"><span>{formStep} / {JOB_FORM_STEPS.length}</span><MarketSelect label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={value => { setMessage(""); setFormStep(value); }} options={JOB_FORM_STEPS.map((step, index) => ({ value: index + 1, disabled: index + 1 > maxStepReached, label: `${step.number}. ${formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label}` }))} /></div>
+        <div className="ih73-mobile-step-picker"><span>{formEnglish ? "Step" : "Krok"} {formStep} / {JOB_FORM_STEPS.length}</span><MarketSelect label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={value => { setMessage(""); setFormStep(value); }} options={JOB_FORM_STEPS.map((step, index) => ({ value: index + 1, disabled: index + 1 > maxStepReached, label: formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label }))} /></div>
+        <div className="ih86-form-progress" aria-hidden="true">{JOB_FORM_STEPS.map((step, index) => <i key={step.number} data-reached={index + 1 <= formStep} />)}</div>
         <ol className="ih5-job-create-progress" aria-label="Postęp dodawania zlecenia">
           {JOB_FORM_STEPS.map((item, index) => {
             const stepNumber = index + 1;
@@ -12673,22 +12680,22 @@ function FindTalent() {
                 <span>01</span>
                 <div>
                   <h2 tabIndex={-1} id="job-step-1-title">Podstawowe informacje</h2>
-                  <p>Najpierw pokaż wykonawcom, czego dotyczy projekt.</p>
+                  <p>{formEnglish ? "A title, field and brief description of your project." : "Tytuł, dziedzina i krótki opis projektu."}</p>
                 </div>
               </div>
 
               <div className="ih5-job-form-grid">
-                <label className="is-wide">
-                  Czego potrzebujesz?
-                  <textarea
-                    className="ideahire-multiline-field ideahire-title-field"
-                    rows="2"
+                <label className="is-wide ih86-title-field">
+                  {formEnglish ? "Job title" : "Tytuł zlecenia"}
+                  <input
+                    type="text"
+                    enterKeyHint="next"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    placeholder="Np. projekt i wykonanie strony dla restauracji"
+                    placeholder={formEnglish ? "E.g. a website for a restaurant" : "Np. strona internetowa dla restauracji"}
                     maxLength={120}
                   />
-                  <small>{title.length}/120</small>
+                  <small className="ih86-field-note"><span>{formEnglish ? "Name the result you need." : "Krótko nazwij oczekiwany efekt."}</span><span>{title.length}/120</span></small>
                 </label>
 
                 <MarketSelect label={formEnglish ? "Category" : "Kategoria"} value={category}
@@ -12721,7 +12728,7 @@ function FindTalent() {
                   Opisz swój projekt
                   <textarea
                     className="ideahire-multiline-field ideahire-description-field"
-                    rows="7"
+                    rows="5"
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
                     placeholder="Opisz cel, najważniejsze założenia i czego oczekujesz od wykonawcy."
@@ -12739,7 +12746,7 @@ function FindTalent() {
                 <span>02</span>
                 <div>
                   <h2 tabIndex={-1} id="job-step-2-title">Zakres i wymagania</h2>
-                  <p>Wyświetlamy tylko pytania potrzebne w wybranej kategorii.</p>
+                  <p>{formEnglish ? "Set out the result, materials and requirements." : "Określ rezultat, materiały i wymagania dla wykonawcy."}</p>
                 </div>
               </div>
 

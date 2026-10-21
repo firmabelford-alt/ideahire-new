@@ -539,35 +539,38 @@ body.ih79-app #root .ih78-services-navigation { margin: 0 !important; }
 body.ih79-app #root .ih78-services-hero { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 16px 24px !important; margin: 0 0 28px !important; padding: 0 !important; border: 0 !important; background: none !important; }
 body.ih79-app #root .ih78-services-hero h1 { margin: 0 !important; font: 800 40px/1.12 Inter,system-ui,sans-serif !important; letter-spacing: -.05em !important; }
 body.ih79-app #root .ih79-service-actions { display: flex !important; align-items: center !important; gap: 18px !important; }
-body.ih79-app #root .ih78-service-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; align-items: stretch !important; gap: 24px !important; margin: 0 !important; padding: 0 !important; }
-body.ih79-app #root .ih78-service-offer { position: relative !important; display: flex !important; flex-direction: column !important; gap: 24px !important; width: 100% !important; height: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 30px !important; border: 1px solid color-mix(in srgb,var(--p-line) 45%,var(--p-paper)) !important; border-radius: 18px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; box-shadow: none !important; }
-body.ih79-app #root .ih78-offer-field { display: flex !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 4px 10px !important; }
-body.ih79-app #root .ih78-offer-field > span { color: var(--p-accent) !important; font: 750 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih78-service-grid { display: grid !important; grid-template-columns: minmax(0,1fr) !important; align-items: stretch !important; gap: 22px !important; margin: 0 !important; padding: 0 !important; }
+body.ih79-app #root .ih78-service-offer { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) 260px !important; align-items: start !important; gap: 22px 32px !important; width: 100% !important; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 28px !important; border: 1px solid var(--p-line) !important; border-radius: 18px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; box-shadow: none !important; }
+body.ih79-app #root .ih86-offer-heading { grid-column: 1/-1 !important; display: flex !important; align-items: flex-start !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px 20px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+body.ih79-app #root .ih78-offer-field { display: flex !important; flex: 1 1 230px !important; flex-direction: column !important; align-items: flex-start !important; gap: 3px !important; }
+body.ih79-app #root .ih78-offer-field > span { color: var(--p-muted) !important; font: 650 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih78-offer-field > small { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih78-offer-copy { flex: 1 !important; }
-body.ih79-app #root .ih78-offer-copy h2 { margin: 0 0 16px !important; font: 750 26px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+body.ih79-app #root .ih86-offer-availability { flex: 0 1 auto !important; max-width: 100% !important; min-height: 28px !important; padding: 5px 10px !important; border: 0 !important; border-radius: 7px !important; background: var(--p-tint) !important; color: var(--p-accent) !important; font: 600 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih86-offer-availability.is-full { background: var(--p-soft) !important; color: var(--p-muted) !important; }
+body.ih79-app #root .ih78-offer-copy { grid-column: 1 !important; grid-row: 2 !important; }
+body.ih79-app #root .ih78-offer-copy h2 { margin: 0 0 12px !important; font: 800 26px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
 body.ih79-app #root .ih78-offer-copy h2 > a { font: inherit !important; letter-spacing: inherit !important; color: inherit !important; text-decoration: none !important; }
-body.ih79-app #root .ih78-offer-copy h2 > a::after { content: '' !important; position: absolute !important; inset: 0 !important; z-index: 1 !important; border-radius: 18px !important; }
-body.ih79-app #root .ih78-offer-copy h2 > a:focus-visible { outline: 0 !important; }
-body.ih79-app #root .ih78-offer-copy h2 > a:focus-visible::after { outline: 2px solid var(--p-accent) !important; outline-offset: 6px !important; }
-body.ih79-app #root .ih78-offer-copy p { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; font: 400 15px/1.75 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih80-offer-terms { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 22px !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--p-ink) !important; }
+body.ih79-app #root .ih78-offer-copy h2 > a::after { content: none !important; display: none !important; }
+body.ih79-app #root .ih78-offer-copy h2 > a:focus-visible { outline: 2px solid var(--p-accent) !important; outline-offset: 3px !important; }
+body.ih79-app #root .ih78-offer-copy p { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.7 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih80-offer-terms { grid-column: 2 !important; grid-row: 2 !important; display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 16px !important; margin: 0 !important; padding: 20px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
 body.ih79-app #root .ih78-offer-price { display: flex !important; flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 6px 12px !important; }
 body.ih79-app #root .ih78-offer-price > span { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih78-offer-price > strong { color: var(--p-accent) !important; font: 750 26px/1.25 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
-body.ih79-app #root .ih78-offer-price.is-custom > strong { font-size: 24px !important; }
-body.ih79-app #root .ih80-offer-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; align-items: start !important; gap: 20px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+body.ih79-app #root .ih78-offer-price > strong { color: var(--p-ink) !important; font: 750 26px/1.25 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; }
+body.ih79-app #root .ih78-offer-price.is-custom > strong { font-size: 21px !important; letter-spacing: -.025em !important; }
+body.ih79-app #root .ih80-offer-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; align-items: start !important; gap: 14px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
 body.ih79-app #root .ih80-offer-facts:empty { display: none !important; }
-body.ih79-app #root .ih80-offer-facts > div { display: flex !important; flex-direction: column !important; gap: 5px !important; }
-body.ih79-app #root .ih80-offer-facts dt { color: var(--p-muted) !important; font: 450 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih80-offer-facts > div { display: flex !important; flex-direction: column !important; gap: 4px !important; }
+body.ih79-app #root .ih80-offer-facts dt { color: var(--p-muted) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih80-offer-facts dd { margin: 0 !important; color: var(--p-ink) !important; font: 650 14px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih78-offer-footer { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 14px 18px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; }
-body.ih79-app #root .ih78-offer-person { display: flex !important; align-items: center !important; gap: 10px !important; flex: 1 !important; }
+body.ih79-app #root .ih78-offer-footer { grid-column: 1/-1 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 16px !important; margin: 0 !important; padding: 20px 0 0 !important; border: 0 !important; border-top: 1px solid var(--p-line) !important; border-radius: 0 !important; background: none !important; }
+body.ih79-app #root .ih78-offer-person { display: flex !important; align-items: center !important; gap: 10px !important; flex: 1 1 120px !important; color: var(--p-ink) !important; text-decoration: none !important; }
 body.ih79-app #root .ih78-offer-person > span:last-child { display: flex !important; flex-direction: column !important; gap: 3px !important; }
 body.ih79-app #root .ih78-offer-person strong { color: var(--p-ink) !important; font: 700 13px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih78-offer-person small { display: inline-flex !important; align-items: center !important; gap: 5px !important; color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih78-offer-person small i { width: 4px !important; height: 4px !important; flex: none !important; border-radius: 50% !important; background: var(--p-accent) !important; }
-body.ih79-app #root .ih80-offer-open { display: grid !important; place-items: center !important; flex: none !important; width: 36px !important; height: 36px !important; border-radius: 50% !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
+body.ih79-app #root .ih80-offer-open { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; flex: none !important; width: auto !important; min-height: 44px !important; height: auto !important; padding: 10px 16px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 650 14px/1.5 Inter,system-ui,sans-serif !important; text-decoration: none !important; }
+body.ih79-app #root .ih80-offer-open > span { font: inherit !important; }
 body.ih79-app #root .ih80-offer-open svg { width: 17px !important; height: 17px !important; }
 @media (min-width:851px) {
   body.ih79-app #root .ih80-catalog-services { display: block !important; }
@@ -834,23 +837,44 @@ body.ih79-app #root .ih5-job-create-progress .is-active button { color: var(--p-
 body.ih79-app #root .ih73-mobile-step-picker { display: none !important; }
 body.ih79-app #root .ih75-editor-content { max-width: 820px !important; }
 /* The project form uses IdeaHire's own option list, with no text entry. */
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select { position: relative !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih7-select { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 8px !important; width: 100% !important; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-open="true"] { z-index: 80 !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-label { display: block !important; margin: 0 0 8px !important; color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; width: 100% !important; min-height: 52px !important; margin: 0 !important; padding: 13px 16px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 550 16px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; box-shadow: none !important; cursor: pointer !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger > span { flex: 1 !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih7-select-label { position: static !important; inset: auto !important; display: block !important; width: auto !important; height: auto !important; margin: 0 !important; padding: 0 !important; color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; transform: none !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger { position: relative !important; display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; width: 100% !important; height: auto !important; min-height: 52px !important; margin: 0 !important; padding: 13px 16px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 450 16px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; box-shadow: none !important; transform: none !important; cursor: pointer !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger > span { flex: 1 !important; overflow: visible !important; text-overflow: clip !important; white-space: normal !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger > svg { flex: none !important; width: 18px !important; height: 18px !important; stroke: currentColor !important; stroke-width: 1.7 !important; transition: transform .18s ease !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-open="true"] .ih7-select-trigger { border-color: var(--p-accent) !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-open="true"] .ih7-select-trigger > svg { transform: rotate(180deg) !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-menu { position: absolute !important; z-index: 80 !important; inset: calc(100% + 6px) 0 auto !important; width: 100% !important; max-height: var(--ih7-menu-height,320px) !important; margin: 0 !important; padding: 6px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; overflow: auto !important; overscroll-behavior: contain !important; box-shadow: 0 12px 28px color-mix(in srgb,var(--p-ink) 10%,transparent) !important; animation: ih85-menu-in .16s ease both !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih7-select-menu { position: absolute !important; z-index: 80 !important; inset: calc(100% + 6px) 0 auto !important; display: flex !important; flex-direction: column !important; gap: 3px !important; width: 100% !important; max-height: var(--ih7-menu-height,320px) !important; margin: 0 !important; padding: 6px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; overflow: auto !important; overscroll-behavior: contain !important; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto !important; box-shadow: 0 12px 28px color-mix(in srgb,var(--p-ink) 10%,transparent) !important; animation: ih85-menu-in .16s ease both !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-side="up"] .ih7-select-menu { top: auto !important; bottom: calc(100% + 6px) !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select-menu[aria-hidden="true"] { display: none !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; width: 100% !important; min-height: 46px !important; margin: 0 !important; padding: 12px !important; border: 0 !important; border-radius: 7px !important; background: none !important; color: var(--p-ink) !important; font: 450 15px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; box-shadow: none !important; cursor: pointer !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option { display: flex !important; flex: none !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; width: 100% !important; min-height: 46px !important; margin: 0 !important; padding: 12px !important; border: 0 !important; border-radius: 7px !important; background: none !important; color: var(--p-ink) !important; font: 450 15px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; transform: none !important; box-shadow: none !important; cursor: pointer !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option > svg { flex: none !important; width: 18px !important; height: 18px !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option[aria-selected="true"] { background: var(--p-tint) !important; color: var(--p-accent) !important; font-weight: 650 !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option:not(:disabled):hover { background: var(--p-soft) !important; }
 body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option:focus-visible { outline-offset: -2px !important; }
 @keyframes ih85-menu-in { from { opacity: 0; } to { opacity: 1; } }
+/* Job editor: one field rhythm and a separate step rail on larger screens. */
+body.ih79-app[data-ih73-page="editor"] #root .ih75-editor-workspace { grid-template-columns: 220px minmax(0,1fr) !important; gap: 48px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih75-guide-label { margin-bottom: 18px !important; color: var(--p-muted) !important; font: 500 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-progress { gap: 8px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-progress button { min-height: 56px !important; padding: 12px !important; border-radius: 10px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-progress button > strong { font-size: 14px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih86-form-progress { display: none !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-step-heading { margin-bottom: 28px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-step-heading h2 { font: 750 26px/1.25 Inter,system-ui,sans-serif !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-form-grid { gap: 26px 24px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-form :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,select) { min-height: 52px !important; height: auto !important; padding: 13px 16px !important; border-radius: 10px !important; font: 450 16px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-form textarea { min-height: 144px !important; line-height: 1.6 !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih86-field-note { display: flex !important; align-items: baseline !important; justify-content: space-between !important; gap: 12px !important; width: 100% !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih86-field-note > span:last-child { flex: none !important; font-variant-numeric: tabular-nums !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-choice-grid { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 12px !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-form .ih5-job-choice-card { display: flex !important; align-items: center !important; gap: 10px !important; min-height: 60px !important; padding: 14px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; font: 550 14px/1.5 Inter,system-ui,sans-serif !important; transition: background .18s ease,border-color .18s ease !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-form .ih5-job-choice-card.is-selected { border-color: var(--p-accent) !important; background: var(--p-tint) !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-form .ih5-job-choice-card > input { flex: none !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-navigation { display: flex !important; align-items: center !important; justify-content: flex-end !important; gap: 12px !important; margin: 28px 0 0 !important; padding: 24px 0 0 !important; border-top: 1px solid var(--p-line) !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-navigation > button { min-width: 140px !important; min-height: 48px !important; padding: 12px 20px !important; border-radius: 10px !important; font: 650 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-navigation > .is-primary { margin-left: auto !important; }
 body.ih79-app #root .ih5-job-create-step-panel { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; }
 body.ih79-app #root .ih5-job-create-step-heading { display: flex !important; align-items: start !important; gap: 14px !important; margin: 0 0 28px !important; padding: 0 !important; border: 0 !important; }
 body.ih79-app #root .ih5-job-create-step-heading > span { display: none !important; }
@@ -1226,8 +1250,6 @@ body.ih79-app #root .ih81-work-shortcuts > summary { display: none !important; }
 body.ih79-app #root .ih81-work-shortcuts-body { padding: 0 !important; }
 body.ih79-app .ih70-sheet-heading > .ih81-sheet-back { width: auto !important; min-width: 54px !important; padding: 10px !important; font: 650 12px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih11-pagination .ih11-icon-button { width: auto !important; min-width: 64px !important; min-height: 44px !important; padding: 9px 12px !important; font: 650 12px/1.4 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih80-offer-open { display: inline-flex !important; align-items: center !important; gap: 8px !important; width: auto !important; min-height: 44px !important; height: auto !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--p-accent) !important; font: 700 12px/1.4 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih80-offer-open > span { font: inherit !important; }
 body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root .ih78-service-offer:hover .ih80-offer-open > svg { transform: none !important; }
 
 /* Smaller laptops retain columns, with a narrower rail rather than scaled text. */
@@ -1337,25 +1359,26 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih79-service-actions > .ih79-text-action { font-size: 11px !important; }
   body.ih79-app #root .ih78-add-service { width: 42px !important; min-height: 42px !important; padding: 11px !important; }
   body.ih79-app #root .ih78-add-service > span { display: none !important; }
-  body.ih79-app #root .ih78-service-offer { gap: 24px !important; height: auto !important; padding: 24px !important; }
-  body.ih79-app #root .ih78-offer-field { flex-direction: column !important; gap: 5px !important; }
+  body.ih79-app #root .ih78-service-offer { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 20px !important; height: auto !important; padding: 24px !important; }
+  body.ih79-app #root .ih86-offer-heading { gap: 10px 12px !important; }
+  body.ih79-app #root .ih78-offer-field { flex: 1 1 130px !important; gap: 3px !important; }
   body.ih79-app #root .ih78-offer-field > :is(span,small) { font-size: 12px !important; }
-  body.ih79-app #root .ih78-offer-copy h2 { display: -webkit-box !important; -webkit-line-clamp: 3 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin-bottom: 14px !important; font-size: 23px !important; line-height: 1.35 !important; }
-  body.ih79-app #root .ih78-offer-copy p { line-height: 1.75 !important; }
-  body.ih79-app #root .ih80-offer-terms { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; padding: 0 !important; border-radius: 0 !important; background: none !important; color: var(--p-ink) !important; }
-  body.ih79-app #root .ih80-offer-terms .ih78-offer-price { flex-direction: row !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 5px 12px !important; }
+  body.ih79-app #root .ih78-offer-copy h2 { display: -webkit-box !important; -webkit-line-clamp: 3 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin-bottom: 12px !important; font-size: 23px !important; line-height: 1.3 !important; }
+  body.ih79-app #root .ih78-offer-copy p { font-size: 14px !important; line-height: 1.7 !important; }
+  body.ih79-app #root .ih80-offer-terms { gap: 14px !important; padding: 18px !important; border-radius: 12px !important; background: var(--p-soft) !important; color: var(--p-ink) !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price { gap: 5px 10px !important; }
   body.ih79-app #root .ih80-offer-terms .ih78-offer-price > span { color: var(--p-muted) !important; font-size: 12px !important; }
-  body.ih79-app #root .ih80-offer-terms .ih78-offer-price > strong { color: var(--p-accent) !important; font-size: 26px !important; }
-  body.ih79-app #root .ih80-offer-terms .ih78-offer-price.is-custom > strong { font-size: 22px !important; }
-  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 20px !important; width: 100% !important; padding: 0 !important; border-radius: 0 !important; background: none !important; }
-  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts dt { color: var(--p-muted) !important; font-size: 12px !important; }
-  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts dd { color: var(--p-ink) !important; font-size: 16px !important; }
-  body.ih79-app #root .ih78-offer-footer { flex-wrap: wrap !important; gap: 14px 18px !important; }
-  body.ih79-app #root .ih78-offer-person { flex: 1 1 150px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price > strong { color: var(--p-ink) !important; font-size: 25px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih78-offer-price.is-custom > strong { font-size: 20px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts { gap: 16px !important; width: 100% !important; padding: 0 !important; border-radius: 0 !important; background: none !important; }
+  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts dt { font-size: 11px !important; }
+  body.ih79-app #root .ih80-offer-terms .ih80-offer-facts dd { font-size: 15px !important; }
+  body.ih79-app #root .ih78-offer-footer { gap: 14px !important; padding-top: 18px !important; }
+  body.ih79-app #root .ih78-offer-person { flex: 1 1 100px !important; }
   body.ih79-app #root .ih78-offer-person strong { font-size: 14px !important; }
-  body.ih79-app #root .ih78-offer-person small { font-size: 12px !important; }
+  body.ih79-app #root .ih78-offer-person small { font-size: 11px !important; }
   body.ih79-app #root .ih78-offer-person .ih5-service-avatar { width: 40px !important; height: 40px !important; min-width: 40px !important; }
-  body.ih79-app #root .ih80-offer-open { flex: 0 0 auto !important; }
+  body.ih79-app #root .ih80-offer-open { flex: none !important; margin-left: auto !important; padding-inline: 12px !important; font-size: 13px !important; }
 
   body.ih79-app #root .ih78-offer-price > strong { font-size: 28px !important; }
   body.ih79-app #root .ih78-offer-price.is-custom > strong { font-size: 20px !important; }
@@ -1491,6 +1514,18 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih73-mobile-step-picker > .ih7-select { flex: 1 !important; }
   body.ih79-app #root .ih73-mobile-step-picker .ih7-select-label { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; clip-path: inset(50%) !important; white-space: nowrap !important; }
   body.ih79-app #root .ih73-mobile-step-picker .ih7-select-trigger { min-height: 50px !important; background: var(--p-tint) !important; font-weight: 700 !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih75-editor-workspace { display: block !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih75-editor-guide { margin-bottom: 28px !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih73-mobile-step-picker { gap: 16px !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih73-mobile-step-picker > span { color: var(--p-muted) !important; font: 550 12px/1.5 Inter,system-ui,sans-serif !important; white-space: nowrap !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih73-mobile-step-picker > .ih7-select { flex: 1 1 0 !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih73-mobile-step-picker .ih7-select-trigger { min-height: 48px !important; padding: 10px 14px !important; border: 0 !important; background: var(--p-soft) !important; font: 650 15px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih86-form-progress { display: grid !important; grid-template-columns: repeat(4,minmax(0,1fr)) !important; gap: 6px !important; margin-top: 14px !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih86-form-progress > i { display: block !important; height: 3px !important; border-radius: 3px !important; background: var(--p-line) !important; transition: background .18s ease !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih86-form-progress > i[data-reached="true"] { background: var(--p-accent) !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-step-heading h2 { font-size: 23px !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-form .ih5-job-choice-card { min-height: 62px !important; padding: 12px !important; gap: 8px !important; font-size: 13px !important; }
+  body.ih79-app[data-ih73-page="editor"] #root .ih5-job-create-navigation > button { flex: 1 !important; min-width: 0 !important; }
   body.ih79-app #root .ih5-job-create-step-heading { margin-bottom: 22px !important; }
   body.ih79-app #root .ih5-job-create-step-heading h2 { font-size: 22px !important; }
   body.ih79-app #root .ih76-service-step { min-height: 76px !important; padding: 18px 0 !important; gap: 12px !important; }
@@ -1596,7 +1631,9 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih79-job { padding: 20px !important; }
   body.ih79-app #root .ih5-job-facts { gap: 9px !important; }
   body.ih79-app #root .ih80-account-catalogs > a { font-size: 20px !important; }
-  body.ih79-app #root .ih80-offer-terms { grid-template-columns: minmax(0,1fr) !important; }
+  body.ih79-app #root .ih78-offer-footer { flex-direction: column !important; align-items: stretch !important; }
+  body.ih79-app #root .ih78-offer-footer > .ih78-offer-person { flex: none !important; }
+  body.ih79-app #root .ih78-offer-footer > .ih80-offer-open { width: 100% !important; margin: 0 !important; }
   body.ih79-app #root .ih80-offer-facts { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
   body.ih79-app #root .ih11-freelancer-person h3 { font-size: 24px !important; }
   body.ih79-app #root .ih5-job-title { font-size: 23px !important; }

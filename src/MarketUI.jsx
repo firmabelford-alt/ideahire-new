@@ -330,7 +330,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
       const navigation = document.querySelector('.ih68-top-nav');
       if (navigation && getComputedStyle(navigation).position === 'fixed') bottom = Math.min(bottom, navigation.getBoundingClientRect().top);
       const header = document.querySelector('.ih68-header');
-      const above = rect.top - Math.max(top, header?.getBoundingClientRect().bottom || top) - 12;
+      const above = (rootRef.current?.getBoundingClientRect().top ?? rect.top) - Math.max(top, header?.getBoundingClientRect().bottom || top) - 12;
       const below = bottom - rect.bottom - 12;
       const up = below < 220 && above > below;
       setMenuLayout({ side: up ? "up" : "down", height: Math.max(80, Math.min(320, up ? above : below)) });
