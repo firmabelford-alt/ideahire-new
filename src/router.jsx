@@ -38,7 +38,7 @@ import App from "./App";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
-import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics } from "./Subpages";
+import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref } from "./MarketUI";
 import { useSitePreferences, translateUiText, IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
@@ -2667,35 +2667,14 @@ function JobRepublicationPanel() {
 /* LOADING */
 
 function LoadingScreen() {
-  return (
-    <div
-      className="route-loading-canvas"
-      data-route-loading="true"
-      aria-busy="true"
-      aria-label="Przygotowywanie widoku"
-    />
-  );
+  return <SubpageLoading screen />;
 }
 
 function InlineRouteLoader({
   className = "",
-  rows = 3,
+  label,
 }) {
-  return (
-    <div
-      className={`route-inline-loader ${className}`.trim()}
-      data-route-loading="true"
-      aria-busy="true"
-      aria-label="Przygotowywanie zawartości"
-    >
-      {Array.from(
-        { length: rows },
-        (_, index) => (
-          <span key={index} />
-        )
-      )}
-    </div>
-  );
+  return <SubpageLoading className={className} label={label} />;
 }
 
 /* PROTECTED ROUTE */

@@ -7,7 +7,7 @@ import LucynaSymbol from './LucynaSymbol';
 import { useSitePreferences } from './Preferences';
 import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
-import { SubpageNavigation, SubpageHeading, SubpageCount } from './Subpages';
+import { SubpageNavigation, SubpageHeading, SubpageCount, SubpageLoading } from './Subpages';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -207,7 +207,7 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
 }
 export function WorkspaceLoading() {
   const t = useWorkspaceCopy();
-  return <p className="ih68-loading" role="status">{t('Ładowanie…', 'Loading…')}</p>;
+  return <SubpageLoading label={t('Przygotowujemy widok…', 'Loading your page…')} />;
 }
 function RecentRows({
   conversations,

@@ -14,7 +14,7 @@ import {
   useParams,
 } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
-import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
+import { SubpageHeading, SubpageCatalogTabs, SubpageLoading } from "./Subpages";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
@@ -442,9 +442,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
         {message ? (
           <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
         ) : loading ? (
-          <div className="ih78-service-grid is-loading" aria-hidden="true">
-            {[0, 1].map(item => <div className="ih78-service-skeleton" key={item}><span /><i /><i /></div>)}
-          </div>
+          <SubpageLoading label={english ? "Finding services…" : "Szukamy usług…"} />
         ) : services.length > 0 ? (
           <div className="ih78-service-grid">
             {services.map(service => <ServiceCard key={service.id} service={service} />)}
@@ -632,7 +630,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
         variant="editor" />
 
       {loading ? (
-        <div className="ih5-service-form-loading" aria-label="Ładowanie formularza" />
+        <SubpageLoading label="Przygotowujemy formularz…" />
       ) : (
         <form className="ih5-service-editor" onSubmit={handleSubmit} onInvalidCapture={event => { const section = event.target.closest("details"); if (section) section.open = true; }}>
           <details className="ih5-service-editor-section" open>
@@ -905,7 +903,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
     const previous = document.activeElement;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    modalRef.current?.querySelector("textarea")?.focus({ preventScroll: true });
+    modalRef.current?.querySelector("#service-inquiry-title")?.focus({ preventScroll: true });
     return () => {
       document.body.style.overflow = oldOverflow;
       previous?.focus?.({ preventScroll: true });
@@ -966,14 +964,16 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="service-inquiry-title"
+        aria-describedby="service-inquiry-description"
         onKeyDown={(event) => {
           if (event.key !== "Tab") return;
-          const controls = Array.from(modalRef.current?.querySelectorAll("a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled)") || []);
+          const controls = Array.from(modalRef.current?.querySelectorAll("a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled)") || [])
+            .filter(control => control.tabIndex >= 0 && control.getClientRects().length);
           if (!controls.length) return;
           const first = controls[0];
           const last = controls[controls.length - 1];
-          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+          if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && (document.activeElement === last || !controls.includes(document.activeElement))) { event.preventDefault(); first.focus(); }
         }}
       >
         <header>
@@ -981,7 +981,8 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
             <span className="ih5-service-eyebrow">
               {isFull ? "Następny wolny termin" : "Zapytanie o realizację"}
             </span>
-            <h2 id="service-inquiry-title">Opowiedz krótko o swoim celu.</h2>
+            <h2 id="service-inquiry-title" tabIndex={-1}>Zapytaj wykonawcę</h2>
+            <p id="service-inquiry-description">Opisz, czego potrzebujesz. Szczegóły realizacji ustalisz w rozmowie.</p>
           </div>
           <button type="button" onClick={onClose} disabled={saving} aria-label="Zamknij">×</button>
         </header>
@@ -992,31 +993,32 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
             <strong>{service.title}</strong>
             <small>
               {service.price_mode === "fixed"
-                ? formatMoney(service.base_price)
-                : "Wycena po poznaniu zakresu"}
+                ? `Cena usługi: ${formatMoney(service.base_price)}`
+                : "Wycena po ustaleniu zakresu"}
             </small>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
           <label>
-            <span>Co chcesz osiągnąć? *</span>
+            <span>Co ma powstać? <small>(wymagane)</small></span>
             <textarea
-              autoFocus
+              id="service-inquiry-brief"
+              aria-describedby="service-inquiry-count"
               value={brief}
               onChange={(event) => setBrief(event.target.value)}
-              placeholder="Opisz rezultat, najważniejszy zakres i to, po czym poznasz, że praca jest wykonana dobrze."
+              placeholder="Opisz oczekiwany efekt, zakres i odbiorców projektu."
               minLength={30}
               maxLength={2500}
-              rows={7}
+              rows={6}
               required
             />
-            <small>{brief.length}/2500</small>
+            <small id="service-inquiry-count">{brief.length}/2500 · minimum 30 znaków</small>
           </label>
 
           <div className="ih5-service-modal-fields">
             <label>
-              <span>Preferowany termin</span>
+              <span>Preferowany termin <small>(opcjonalnie)</small></span>
               <IdeaHireDateField
                 aria-label="Preferowany termin realizacji"
                 type="date"
@@ -1026,7 +1028,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
               />
             </label>
             <label>
-              <span>Materiały, które już masz</span>
+              <span>Materiały, które już masz <small>(opcjonalnie)</small></span>
               <input
                 value={materials}
                 onChange={(event) => setMaterials(event.target.value)}
@@ -1037,13 +1039,10 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
           </div>
 
           <div className="ih5-service-inquiry-rules">
-            <span aria-hidden="true">i</span>
-            <p>
-              To niewiążące zapytanie i otwarcie czatu — bez płatności i bez
-              rezerwacji miejsca. Miejsce zostanie czasowo zarezerwowane dopiero,
-              gdy wykonawca wyśle ofertę. Współpraca ruszy po akceptacji warunków
-              przez obie strony i opłaceniu zamówienia.
-            </p>
+            <strong>Co dzieje się po wysłaniu?</strong>
+            <p>Otworzysz rozmowę z wykonawcą. Zapytanie jest bezpłatne i nie rezerwuje miejsca.</p>
+            <p>Miejsce zostaje czasowo zarezerwowane po wysłaniu oferty przez wykonawcę.
+              Realizacja rusza po akceptacji warunków przez obie strony i płatności.</p>
           </div>
 
           <label className="ih5-service-modal-confirmation">
@@ -1052,7 +1051,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
               checked={confirmed}
               onChange={(event) => setConfirmed(event.target.checked)}
             />
-            <span>Rozumiem, że samo wysłanie zapytania nie jest zamówieniem ani płatnością.</span>
+            <span>Rozumiem, że wysyłam zapytanie, a nie zamówienie.</span>
           </label>
 
           {message && <p className="ih5-service-modal-message" role="alert">{message}</p>}
@@ -1064,7 +1063,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
                 ? "Otwieranie rozmowy…"
                 : isFull
                 ? "Zapytaj o następny termin"
-                : "Wyślij zapytanie i otwórz czat"}
+                : "Wyślij zapytanie"}
             </button>
           </footer>
         </form>
@@ -1111,7 +1110,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
   if (loading) {
     return (
       <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
-        <div className="ih5-service-detail-loading" aria-label="Ładowanie usługi" />
+        <SubpageLoading label="Przygotowujemy usługę…" />
       </ServiceShell>
     );
   }
@@ -1229,9 +1228,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               onClick={() => setInquiryOpen(true)}
             >
               {capacity.available > 0
-                ? service.price_mode === "fixed"
-                  ? "Zamów usługę"
-                  : "Zapytaj o realizację"
+                ? "Zapytaj o realizację"
                 : "Zapytaj o następny termin"}
             </button>
           ) : (
@@ -1241,8 +1238,8 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           )}
 
           <p className="ih5-service-order-legal">
-            Pierwszy formularz jest niewiążącym zapytaniem. Zamówienie powstaje
-            dopiero po zaakceptowaniu zapisanych warunków i płatności.
+            Najpierw ustalasz zakres w rozmowie. Realizacja rusza po akceptacji
+            warunków przez obie strony i płatności.
           </p>
 
           {skills.length > 0 && (
@@ -1321,7 +1318,7 @@ function MyServices({ supabase, user, Navbar }) {
       {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 
       {loading ? (
-        <div className="ih5-service-form-loading" aria-label="Ładowanie usług" />
+        <SubpageLoading label={english ? "Loading your services…" : "Przygotowujemy Twoje usługi…"} />
       ) : services.length > 0 ? (
         <div className="ih5-my-services-list">
           {services.map((service) => (
@@ -1711,7 +1708,7 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
       <MarketFilters search={search} onSearch={setSearch} categories={FREELANCER_CATEGORIES} category={category} onCategory={(value) => { setPage(0); navigate(value === "Wszystkie" ? "/freelancers" : `/freelancers?category=${encodeURIComponent(value)}`, { replace: true }); }} kind="freelancerów">
       <section className="ih11-directory-results" aria-busy={loading} aria-label="Wyniki wyszukiwania freelancerów">
         <h2 className="ih5-sr-only">{category === "Wszystkie" ? "Poznaj freelancerów" : category}</h2>
-        {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <div className="ih11-freelancer-grid" aria-hidden="true">{[0, 1, 2].map((value) => <div className="ih11-freelancer-skeleton" key={value}><i /><i /><i /></div>)}</div> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
+        {error ? <div className="ih11-empty" role="alert"><h3>Spróbujmy jeszcze raz.</h3><p>{error}</p><button className="ih11-button is-quiet" onClick={() => setRefresh((value) => value + 1)}>Odśwież</button></div> : loading ? <SubpageLoading label={english ? "Finding freelancers…" : "Szukamy freelancerów…"} /> : result.items.length ? <div className="ih11-freelancer-grid" key={`${page}-${category}-${normalizeFreelancerSearch(search)}`}>
           {result.items.map((profile, index) => {
             const completed = Math.max(0, Number(profile.completed_jobs) || 0);
             const reviews = Math.max(0, Number(profile.positive_reviews) || 0);

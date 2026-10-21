@@ -312,8 +312,15 @@ export function MarketSelect({ id, label, value, options, onChange }) {
   useEffect(() => {
     if (!open) return undefined;
     const outside = (event) => { if (!rootRef.current?.contains(event.target)) setOpen(false); };
+    const resized = () => setOpen(false);
     document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
+    window.addEventListener("resize", resized);
+    window.visualViewport?.addEventListener("resize", resized);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      window.removeEventListener("resize", resized);
+      window.visualViewport?.removeEventListener("resize", resized);
+    };
   }, [open]);
   function close(restoreFocus = false) {
     setOpen(false);
@@ -408,19 +415,15 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
           {search && <button type="button" onClick={() => onSearch('')} aria-label={en ? 'Clear search' : 'Wyczyść wyszukiwanie'}><MarketIcon kind="close" /></button>}
         </label>
         <div className="ih76-catalog-refinements">
-          <label className="ih76-native-select ih76-category-select" htmlFor={id + '-category'}>
-            <span>{en ? 'Field' : 'Dziedzina'}</span>
-            <select id={id + '-category'} value={category} onChange={event => onCategory(event.target.value)}>
-              {fields.map(value => <option key={value} value={value}>{value === 'Wszystkie' ? (en ? 'All fields' : 'Wszystkie') : fieldLabel(value)}</option>)}
-            </select>
-          </label>
-          {onSort && <label className="ih76-native-select" htmlFor={id + '-sort'}>
-            <span>{en ? 'Sort by' : 'Kolejność'}</span>
-            <select id={id + '-sort'} value={sort} onChange={event => onSort(event.target.value)}>
-              <option value="latest">{en ? 'Newest first' : 'Najnowsze'}</option>
-              <option value="matched" disabled={!matchedAvailable}>{en ? 'Matched to me' : 'Dopasowane do mnie'}</option>
-            </select>
-          </label>}
+          <div className="ih87-catalog-select ih76-category-select">
+            <MarketSelect id={id + '-category'} label={en ? 'Field' : 'Dziedzina'} value={category}
+              options={fields.map(value => ({ value, label: fieldLabel(value) }))} onChange={onCategory} />
+          </div>
+          {onSort && <div className="ih87-catalog-select">
+            <MarketSelect id={id + '-sort'} label={en ? 'Sort by' : 'Kolejność'} value={sort} onChange={onSort}
+              options={[{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' },
+                { value: 'matched', label: en ? 'Matched to me' : 'Dopasowane do mnie', disabled: !matchedAvailable }]} />
+          </div>}
         </div>
         {(search || category !== 'Wszystkie') && <button type="button" className="ih76-mobile-clear" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
       </section>

@@ -369,7 +369,11 @@ body.ih79-app #root :where(main h1) { margin: 0 0 16px !important; font: 800 40p
 body.ih79-app #root :where(main h2) { margin: 0 0 16px !important; font: 750 23px/1.25 Inter,system-ui,sans-serif !important; letter-spacing: -.03em !important; color: var(--p-ink) !important; }
 body.ih79-app #root :where(main h3,main h4) { margin: 0 0 10px !important; font: 700 18px/1.35 Inter,system-ui,sans-serif !important; letter-spacing: -.02em !important; color: var(--p-ink) !important; }
 body.ih79-app #root :where(main p) { margin: 0 0 14px !important; color: var(--p-muted) !important; font: 400 15px/1.65 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root :where(button,a,input,textarea,select,summary):focus-visible { outline: 2px solid var(--p-accent) !important; outline-offset: 3px !important; }
+body.ih79-app #root :where(button,a,select,summary,input[type="checkbox"],input[type="radio"]):focus-visible { outline: 2px solid var(--p-accent) !important; outline-offset: 3px !important; }
+/* Editable fields use their own border; composers focus as one control. */
+html body :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,[contenteditable="true"]):is(:focus,:focus-visible) { outline: 0 !important; outline-offset: 0 !important; box-shadow: none !important; }
+html body :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),textarea,[contenteditable="true"]):focus { border-color: var(--v-accent,#0c7378) !important; }
+html body .lucyna-root .lu-composer:focus-within { border-color: var(--lu-accent) !important; outline: 0 !important; box-shadow: none !important; }
 body.ih79-app #root :where(button,input,textarea,select):disabled { opacity: .5 !important; cursor: not-allowed !important; }
 body.ih79-app #root :is(.page,.account-page) { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: var(--p-bg) !important; background-image: none !important; color: var(--p-ink) !important; }
 body.ih79-app #root :is(.page,.account-page)::before, body.ih79-app #root :is(.page,.account-page)::after { display: none !important; }
@@ -625,14 +629,14 @@ body.ih79-app #root .ih5-service-rich-copy { width: 100% !important; max-width: 
 body.ih79-app #root :is(.ih5-service-check-list,.ih5-service-requirement-list) { display: flex !important; flex-direction: column !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; list-style: none !important; }
 body.ih79-app #root :is(.ih5-service-check-list,.ih5-service-requirement-list) > li { display: grid !important; grid-template-columns: 22px minmax(0,1fr) !important; gap: 10px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; color: var(--p-ink) !important; font: 450 15px/1.65 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
 body.ih79-app #root :is(.ih5-service-check-list,.ih5-service-requirement-list) > li > span { color: var(--p-accent) !important; font: 750 12px/2 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-service-order-card { grid-area: order !important; position: sticky !important; top: 96px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; color: var(--p-ink) !important; box-shadow: none !important; }
+body.ih79-app #root .ih5-service-order-card { grid-area: order !important; position: sticky !important; top: 96px !important; width: 100% !important; margin: 0 !important; padding: 24px !important; border: 1px solid var(--p-line) !important; border-radius: 16px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; box-shadow: none !important; }
 body.ih79-app #root .ih5-service-order-owner { display: grid !important; grid-template-columns: 42px minmax(0,1fr) 24px !important; align-items: center !important; gap: 10px !important; margin: 0 0 22px !important; padding: 0 !important; border: 0 !important; }
 body.ih79-app #root .ih5-service-order-owner .ih5-service-avatar { width: 42px !important; height: 42px !important; }
 body.ih79-app #root .ih5-service-order-owner > span { display: flex !important; flex-direction: column !important; gap: 2px !important; }
 body.ih79-app #root .ih5-service-order-owner small { color: var(--p-muted) !important; font: 400 11px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih5-service-order-owner strong { color: var(--p-ink) !important; font: 750 16px/1.4 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih5-service-order-owner > a { display: grid !important; place-items: center !important; min-height: 36px !important; color: var(--p-ink) !important; text-decoration: none !important; }
-body.ih79-app #root .ih80-order-amount { display: flex !important; flex-direction: column !important; gap: 9px !important; margin: 0 0 8px !important; padding: 20px !important; border-radius: 4px 18px 4px 4px !important; background: var(--p-accent) !important; color: var(--p-on) !important; }
+body.ih79-app #root .ih80-order-amount { display: flex !important; flex-direction: column !important; gap: 9px !important; margin: 0 0 8px !important; padding: 20px !important; border-radius: 12px !important; background: var(--p-accent) !important; color: var(--p-on) !important; }
 body.ih79-app #root .ih80-service-scope { display: grid !important; grid-template-columns: minmax(0,1fr) !important; align-items: start !important; gap: 28px !important; margin: 0 0 32px !important; }
 body.ih79-app #root .ih80-service-scope > .ih5-service-detail-section { margin: 0 !important; }
 body.ih79-app #root .ih80-service-scope > .ih80-scope-inputs { padding: 20px !important; border-radius: 4px 16px 4px 4px !important; background: var(--p-tint) !important; }
@@ -645,13 +649,13 @@ body.ih79-app #root .ih80-order-amount > span { color: var(--p-on) !important; f
 body.ih79-app #root .ih80-order-amount > strong { color: var(--p-on) !important; font: 800 32px/1.15 Inter,system-ui,sans-serif !important; letter-spacing: -.04em !important; }
 body.ih79-app #root .ih5-service-order-price.is-custom .ih80-order-amount > strong { font-size: 25px !important; }
 body.ih79-app #root .ih5-service-order-price > small { color: var(--p-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-service-order-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 16px !important; margin: 0 0 18px !important; padding: 0 !important; border: 0 !important; }
-body.ih79-app #root .ih5-service-order-facts dt { color: var(--p-muted) !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-service-order-facts dd { margin: 3px 0 0 !important; color: var(--p-ink) !important; font: 750 17px/1.4 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih5-service-capacity { display: flex !important; align-items: center !important; gap: 6px !important; margin: 0 0 16px !important; color: var(--p-muted) !important; font: 550 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-service-order-facts { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 16px !important; margin: 0 0 18px !important; padding: 18px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-soft) !important; }
+body.ih79-app #root .ih5-service-order-facts dt { color: var(--p-muted) !important; font: 500 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-service-order-facts dd { margin: 3px 0 0 !important; color: var(--p-ink) !important; font: 750 21px/1.3 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-service-capacity { display: flex !important; align-items: center !important; gap: 6px !important; margin: 0 0 18px !important; padding: 0 !important; border: 0 !important; background: none !important; color: var(--p-muted) !important; font: 550 12px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih5-service-capacity i { width: 5px !important; height: 5px !important; border-radius: 50% !important; background: var(--p-accent) !important; }
 body.ih79-app #root .ih5-service-order-button { display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; width: 100% !important; min-height: 48px !important; margin: 0 !important; padding: 13px 16px !important; border: 0 !important; border-radius: 6px !important; background: var(--p-accent) !important; color: var(--p-on) !important; font: 750 14px/1.4 Inter,system-ui,sans-serif !important; text-decoration: none !important; box-shadow: none !important; }
-body.ih79-app #root .ih5-service-order-legal { margin: 12px 0 0 !important; color: var(--p-muted) !important; font: 400 11px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih5-service-order-legal { margin: 12px 0 0 !important; color: var(--p-muted) !important; font: 400 12px/1.65 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih5-service-skill-list { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; margin-top: 18px !important; }
 body.ih79-app #root .ih5-service-skill-list span { font: 500 11px/1.5 Inter,system-ui,sans-serif !important; color: var(--p-muted) !important; }
 body.ih79-app #root .ih5-service-process { margin: 0 !important; padding: 16px 0 !important; border: 0 !important; border-top: 1px solid var(--p-line) !important; background: none !important; }
@@ -755,15 +759,15 @@ body.ih79-app #root .ih79-inbox-context { position: sticky !important; top: 100p
 body.ih79-app #root .ih79-inbox-context h2 { font-size: 16px !important; }
 body.ih79-app #root .ih79-inbox-context p { font-size: 13px !important; }
 body.ih79-app #root .ih72-inbox-content { margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; }
-body.ih79-app #root .ih72-conversation-list { display: flex !important; flex-direction: column !important; gap: 5px !important; margin: 0 !important; padding: 0 !important; }
-body.ih79-app #root .ih72-conversation-row { display: grid !important; grid-template-columns: 40px minmax(0,1fr) 16px !important; align-items: center !important; gap: 14px !important; margin: 0 !important; padding: 18px 12px !important; border: 0 !important; border-radius: 6px !important; background: none !important; color: var(--p-ink) !important; text-decoration: none !important; }
+body.ih79-app #root .ih72-conversation-list { display: flex !important; flex-direction: column !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; }
+body.ih79-app #root .ih72-conversation-row { display: grid !important; grid-template-columns: 40px minmax(0,1fr) 16px !important; align-items: center !important; gap: 14px !important; margin: 0 !important; padding: 20px !important; border: 1px solid var(--p-line) !important; border-radius: 14px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; text-decoration: none !important; }
 body.ih79-app #root .ih72-conversation-row.is-unread { background: var(--p-tint) !important; }
 body.ih79-app #root .ih72-conversation-copy { width: 100% !important; }
 body.ih79-app #root .ih72-conversation-person { display: flex !important; align-items: baseline !important; justify-content: space-between !important; gap: 12px !important; margin: 0 0 5px !important; }
-body.ih79-app #root .ih72-conversation-person strong { color: var(--p-ink) !important; font: 750 15px/1.35 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih72-conversation-person time { flex: none !important; color: var(--p-muted) !important; font: 450 10px/1.4 Inter,system-ui,sans-serif !important; white-space: nowrap !important; }
+body.ih79-app #root .ih72-conversation-person strong { color: var(--p-ink) !important; font: 700 16px/1.4 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih72-conversation-person time { flex: none !important; color: var(--p-muted) !important; font: 450 11px/1.4 Inter,system-ui,sans-serif !important; white-space: nowrap !important; }
 body.ih79-app #root .ih72-conversation-project { display: block !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; max-width: 100% !important; margin: 0 0 4px !important; color: var(--p-ink) !important; font: 600 12px/1.5 Inter,system-ui,sans-serif !important; }
-body.ih79-app #root .ih72-conversation-copy > p { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 12px/1.55 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih72-conversation-copy > p { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .ih72-conversation-end { display: grid !important; place-items: center !important; width: 16px !important; color: var(--p-muted) !important; }
 body.ih79-app #root .ih72-conversation-end svg { width: 16px !important; height: 16px !important; }
 body.ih79-app[data-ih73-page="conversation"] #root .ih72-room { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
@@ -821,7 +825,7 @@ body.ih79-app #root :is(.account-form-grid,.profile-portfolio-editor-grid,.ih5-j
 body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) label { display: block !important; color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),textarea,select) { display: block !important; width: 100% !important; max-width: 100% !important; min-height: 48px !important; margin: 8px 0 0 !important; padding: 12px 14px !important; border: 1px solid var(--p-line) !important; border-radius: 6px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 400 16px/1.5 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
 body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) textarea { resize: vertical !important; line-height: 1.65 !important; }
-body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) :is(input,textarea,select):focus { border-color: var(--p-accent) !important; outline: 2px solid color-mix(in srgb,var(--p-accent) 20%,transparent) !important; outline-offset: 1px !important; }
+body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) :is(input,textarea,select):focus { border-color: var(--p-accent) !important; outline: 0 !important; outline-offset: 0 !important; box-shadow: none !important; }
 body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) input:is([type="checkbox"],[type="radio"]) { width: 18px !important; height: 18px !important; min-width: 18px !important; margin: 2px 0 !important; accent-color: var(--p-accent) !important; }
 body.ih79-app #root :is(.account-form,.profile-portfolio-editor,.ih5-editor,.ih5-service-editor) label > small { display: block !important; margin-top: 7px !important; color: var(--p-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
 body.ih79-app #root .account-form-actions { position: static !important; display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin: 8px 0 0 !important; padding: 16px 0 !important; border: 0 !important; background: var(--p-bg) !important; }
@@ -836,23 +840,23 @@ body.ih79-app #root .ih5-job-create-progress button > strong { font: 650 13px/1.
 body.ih79-app #root .ih5-job-create-progress .is-active button { color: var(--p-accent) !important; background: var(--p-tint) !important; }
 body.ih79-app #root .ih73-mobile-step-picker { display: none !important; }
 body.ih79-app #root .ih75-editor-content { max-width: 820px !important; }
-/* The project form uses IdeaHire's own option list, with no text entry. */
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 8px !important; width: 100% !important; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-open="true"] { z-index: 80 !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-label { position: static !important; inset: auto !important; display: block !important; width: auto !important; height: auto !important; margin: 0 !important; padding: 0 !important; color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; transform: none !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger { position: relative !important; display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; width: 100% !important; height: auto !important; min-height: 52px !important; margin: 0 !important; padding: 13px 16px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 450 16px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; box-shadow: none !important; transform: none !important; cursor: pointer !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger > span { flex: 1 !important; overflow: visible !important; text-overflow: clip !important; white-space: normal !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-trigger > svg { flex: none !important; width: 18px !important; height: 18px !important; stroke: currentColor !important; stroke-width: 1.7 !important; transition: transform .18s ease !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-open="true"] .ih7-select-trigger { border-color: var(--p-accent) !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-open="true"] .ih7-select-trigger > svg { transform: rotate(180deg) !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-menu { position: absolute !important; z-index: 80 !important; inset: calc(100% + 6px) 0 auto !important; display: flex !important; flex-direction: column !important; gap: 3px !important; width: 100% !important; max-height: var(--ih7-menu-height,320px) !important; margin: 0 !important; padding: 6px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; overflow: auto !important; overscroll-behavior: contain !important; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto !important; box-shadow: 0 12px 28px color-mix(in srgb,var(--p-ink) 10%,transparent) !important; animation: ih85-menu-in .16s ease both !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select[data-side="up"] .ih7-select-menu { top: auto !important; bottom: calc(100% + 6px) !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-menu[aria-hidden="true"] { display: none !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option { display: flex !important; flex: none !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; width: 100% !important; min-height: 46px !important; margin: 0 !important; padding: 12px !important; border: 0 !important; border-radius: 7px !important; background: none !important; color: var(--p-ink) !important; font: 450 15px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; transform: none !important; box-shadow: none !important; cursor: pointer !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option > svg { flex: none !important; width: 18px !important; height: 18px !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option[aria-selected="true"] { background: var(--p-tint) !important; color: var(--p-accent) !important; font-weight: 650 !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option:not(:disabled):hover { background: var(--p-soft) !important; }
-body.ih79-app[data-ih73-page="editor"] #root .ih7-select-option:focus-visible { outline-offset: -2px !important; }
+/* A shared IdeaHire option list for catalogues and forms. */
+body.ih79-app #root .ih7-select { position: relative !important; display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 8px !important; width: 100% !important; height: auto !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+body.ih79-app #root .ih7-select[data-open="true"] { z-index: 80 !important; }
+body.ih79-app #root .ih7-select-label { position: static !important; inset: auto !important; display: block !important; width: auto !important; height: auto !important; margin: 0 !important; padding: 0 !important; color: var(--p-ink) !important; font: 650 13px/1.5 Inter,system-ui,sans-serif !important; transform: none !important; }
+body.ih79-app #root .ih7-select-trigger { position: relative !important; display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 14px !important; width: 100% !important; height: auto !important; min-height: 52px !important; margin: 0 !important; padding: 13px 16px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 450 16px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; box-shadow: none !important; transform: none !important; cursor: pointer !important; }
+body.ih79-app #root .ih7-select-trigger > span { flex: 1 !important; overflow: visible !important; text-overflow: clip !important; white-space: normal !important; }
+body.ih79-app #root .ih7-select-trigger > svg { flex: none !important; width: 18px !important; height: 18px !important; stroke: currentColor !important; stroke-width: 1.7 !important; transition: transform .18s ease !important; }
+body.ih79-app #root .ih7-select[data-open="true"] .ih7-select-trigger { border-color: var(--p-accent) !important; }
+body.ih79-app #root .ih7-select[data-open="true"] .ih7-select-trigger > svg { transform: rotate(180deg) !important; }
+body.ih79-app #root .ih7-select-menu { position: absolute !important; z-index: 80 !important; inset: calc(100% + 6px) 0 auto !important; display: flex !important; flex-direction: column !important; gap: 3px !important; width: 100% !important; max-height: var(--ih7-menu-height,320px) !important; margin: 0 !important; padding: 6px !important; border: 1px solid var(--p-line) !important; border-radius: 12px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; overflow: auto !important; overscroll-behavior: contain !important; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto !important; box-shadow: 0 12px 28px color-mix(in srgb,var(--p-ink) 10%,transparent) !important; animation: ih85-menu-in .16s ease both !important; }
+body.ih79-app #root .ih7-select[data-side="up"] .ih7-select-menu { top: auto !important; bottom: calc(100% + 6px) !important; }
+body.ih79-app #root .ih7-select-menu[aria-hidden="true"] { display: none !important; }
+body.ih79-app #root .ih7-select-option { display: flex !important; flex: none !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; width: 100% !important; min-height: 46px !important; margin: 0 !important; padding: 12px !important; border: 0 !important; border-radius: 7px !important; background: none !important; color: var(--p-ink) !important; font: 450 15px/1.5 Inter,system-ui,sans-serif !important; text-align: left !important; white-space: normal !important; transform: none !important; box-shadow: none !important; cursor: pointer !important; }
+body.ih79-app #root .ih7-select-option > svg { flex: none !important; width: 18px !important; height: 18px !important; }
+body.ih79-app #root .ih7-select-option[aria-selected="true"] { background: var(--p-tint) !important; color: var(--p-accent) !important; font-weight: 650 !important; }
+body.ih79-app #root .ih7-select-option:not(:disabled):hover { background: var(--p-soft) !important; }
+body.ih79-app #root .ih7-select-option:focus-visible { outline-offset: -2px !important; }
 @keyframes ih85-menu-in { from { opacity: 0; } to { opacity: 1; } }
 /* Job editor: one field rhythm and a separate step rail on larger screens. */
 body.ih79-app[data-ih73-page="editor"] #root .ih75-editor-workspace { grid-template-columns: 220px minmax(0,1fr) !important; gap: 48px !important; }
@@ -1401,13 +1405,13 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih5-service-detail-header h1 { margin-bottom: 16px !important; font-size: 29px !important; line-height: 1.18 !important; letter-spacing: -.035em !important; }
   body.ih79-app #root .ih5-service-detail-header > p { font-size: 14px !important; line-height: 1.65 !important; }
   body.ih79-app #root .ih5-service-detail-category { margin-bottom: 14px !important; gap: 4px 10px !important; }
-  body.ih79-app #root .ih5-service-order-card { position: static !important; top: auto !important; padding: 0 !important; }
+  body.ih79-app #root .ih5-service-order-card { position: static !important; top: auto !important; padding: 20px !important; }
   body.ih79-app #root .ih5-service-order-owner { margin-bottom: 18px !important; }
   body.ih79-app #root .ih5-service-order-price { margin-bottom: 16px !important; }
   body.ih79-app #root .ih5-service-order-price.is-custom .ih80-order-amount > strong { font-size: 24px !important; }
   body.ih79-app #root .ih5-service-order-price.is-fixed .ih80-order-amount > strong { font-size: 29px !important; }
-  body.ih79-app #root .ih5-service-order-price > small { max-width: 410px !important; font-size: 11px !important; }
-  body.ih79-app #root .ih5-service-order-legal { font-size: 10px !important; }
+  body.ih79-app #root .ih5-service-order-price > small { max-width: 410px !important; font-size: 12px !important; }
+  body.ih79-app #root .ih5-service-order-legal { font-size: 12px !important; }
   body.ih79-app #root .ih5-service-detail-section h2 { font-size: 22px !important; }
   body.ih79-app #root .ih5-service-process > div { grid-template-columns: minmax(0,1fr) !important; gap: 18px !important; }
   body.ih79-app #root .ih79-work-overview { grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 12px !important; margin-bottom: 28px !important; }
@@ -1474,10 +1478,10 @@ body.ih79-app #root .ih80-account-catalogs > a:hover > svg, body.ih79-app #root 
   body.ih79-app #root .ih72-launchpad .ih72-work-links > a { min-height: 48px !important; font-size: 14px !important; }
   body.ih79-app #root .ih79-inbox-layout { display: block !important; }
   body.ih79-app #root .ih79-inbox-context { display: none !important; }
-  body.ih79-app #root .ih72-conversation-row { gap: 11px !important; padding: 16px 8px !important; }
-  body.ih79-app #root .ih72-conversation-person strong { font-size: 14px !important; }
-  body.ih79-app #root .ih72-conversation-person time { font-size: 9px !important; }
-  body.ih79-app #root .ih72-conversation-copy > p { font-size: 12px !important; }
+  body.ih79-app #root .ih72-conversation-row { gap: 12px !important; padding: 18px 16px !important; }
+  body.ih79-app #root .ih72-conversation-person strong { font-size: 16px !important; }
+  body.ih79-app #root .ih72-conversation-person time { font-size: 11px !important; }
+  body.ih79-app #root .ih72-conversation-copy > p { font-size: 14px !important; }
   body.ih79-app #root .ih79-notifications-layout { display: block !important; }
   body.ih79-app #root .notifications-page .ih75-page-heading { flex-wrap: wrap !important; gap: 10px !important; margin-bottom: 18px !important; }
   body.ih79-app #root .notifications-page .ih73-heading-copy { flex-basis: 100% !important; }
@@ -1678,4 +1682,108 @@ body.ih79-app #root :is(.ih80-offer-open,.ih80-account-catalogs > a) > svg { tra
   body.ih79-app #root .ih78-service-offer:hover .ih78-offer-copy h2, body.ih79-app #root .ih72-project-card:hover h3 { color: var(--p-accent) !important; }
   body.ih79-app #root :is(.ih79-button,.ih5-button,.ih11-button).is-primary:hover { background: color-mix(in srgb,var(--p-accent) 90%,var(--p-ink)) !important; }
 }
+/* The same category and sort controls on phone and laptop. */
+body.ih79-app #root :is(.ih75-catalog-controls,.ih76-catalog-refinements,.ih87-catalog-select) { overflow: visible !important; }
+body.ih79-app #root .ih75-catalog-controls { align-items: flex-end !important; }
+body.ih79-app #root .ih80-catalog-jobs .ih75-catalog-controls { align-items: end !important; }
+body.ih79-app #root .ih87-catalog-select { width: 200px !important; max-width: 100% !important; min-width: 0 !important; }
+body.ih79-app #root .ih87-catalog-select.ih76-category-select { width: 280px !important; }
+body.ih79-app #root .ih87-catalog-select .ih7-select { gap: 6px !important; }
+body.ih79-app #root .ih87-catalog-select .ih7-select-label { color: var(--p-muted) !important; font: 500 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app #root .ih87-catalog-select .ih7-select-trigger { min-height: 56px !important; padding: 14px !important; border-radius: 12px !important; font-weight: 600 !important; }
+body.ih79-app #root .ih7-select-option:disabled { opacity: .45 !important; cursor: not-allowed !important; }
+@media (max-width:850px) {
+  body.ih79-app #root .ih76-catalog-refinements { grid-template-columns: minmax(0,1fr) !important; align-items: start !important; gap: 16px !important; }
+  body.ih79-app #root :is(.ih87-catalog-select,.ih87-catalog-select.ih76-category-select) { display: block !important; width: 100% !important; }
+  body.ih79-app #root .ih87-catalog-select .ih7-select-trigger { min-height: 54px !important; }
+}
+@media (min-width:560px) and (max-width:850px) {
+  body.ih79-app #root .ih80-catalog-jobs .ih76-catalog-refinements { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+}
+
+/* Inquiry: a readable service summary, a short brief and a clear next action. */
+body.ih79-app .ih5-service-modal-backdrop { position: fixed !important; z-index: 12000 !important; inset: 0 !important; display: grid !important; place-items: center !important; width: 100% !important; height: 100dvh !important; margin: 0 !important; padding: 24px !important; background: #0006 !important; overflow: hidden !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) { max-width: 680px !important; max-height: calc(100dvh - 48px) !important; padding: 28px !important; border-radius: 18px !important; scrollbar-width: thin !important; scrollbar-color: var(--p-line) transparent !important; animation: ih79-enter .18s ease both !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) > header { display: grid !important; grid-template-columns: minmax(0,1fr) 40px !important; align-items: start !important; gap: 16px !important; margin: 0 0 24px !important; padding: 0 !important; border: 0 !important; background: none !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-eyebrow { display: block !important; margin: 0 0 8px !important; color: var(--p-muted) !important; font: 550 11px/1.5 Inter,system-ui,sans-serif !important; letter-spacing: .06em !important; text-transform: uppercase !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) h2 { margin: 0 0 10px !important; color: var(--p-ink) !important; font: 800 28px/1.2 Inter,system-ui,sans-serif !important; letter-spacing: -.035em !important; outline: 0 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) header p { margin: 0 !important; color: var(--p-muted) !important; font: 400 14px/1.65 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) > header > button { display: grid !important; place-items: center !important; width: 40px !important; height: 40px !important; min-height: 40px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 50% !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 400 24px/1 Inter,system-ui,sans-serif !important; cursor: pointer !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary { display: grid !important; grid-template-columns: 32px minmax(0,1fr) !important; align-items: start !important; gap: 14px !important; margin: 0 0 28px !important; padding: 18px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-soft) !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary > span { display: grid !important; place-items: center !important; width: 32px !important; height: 32px !important; margin: 0 !important; padding: 0 !important; background: none !important; color: var(--p-accent) !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary svg { display: block !important; width: 24px !important; height: 24px !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary > div { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 6px !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary strong { display: block !important; width: 100% !important; margin: 0 !important; color: var(--p-ink) !important; font: 700 16px/1.45 Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary small { display: block !important; width: 100% !important; margin: 0 !important; color: var(--p-muted) !important; font: 400 13px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) form { display: flex !important; flex-direction: column !important; gap: 24px !important; margin: 0 !important; padding: 0 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) form > label, body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-fields > label { position: static !important; display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 8px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) label > span:not(.ih20-date-field) { position: static !important; display: block !important; margin: 0 !important; padding: 0 !important; color: var(--p-ink) !important; font: 650 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) label > span:not(.ih20-date-field) > small { color: var(--p-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) :is(textarea,input:not([type="checkbox"])) { min-height: 50px !important; margin: 0 !important; padding: 12px 14px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 400 16px/1.6 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) :is(textarea,input:not([type="checkbox"])):focus { border-color: var(--p-accent) !important; outline: 0 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) textarea { display: block !important; height: 176px !important; min-height: 176px !important; max-height: 320px !important; resize: none !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) :is(textarea,input)::placeholder { color: var(--p-muted) !important; opacity: .9 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) label > small { margin: 0 !important; color: var(--p-muted) !important; font: 450 11px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-fields { display: grid !important; grid-template-columns: minmax(0,1fr) minmax(0,1.3fr) !important; align-items: start !important; gap: 20px !important; margin: 0 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-fields .ih20-date-field { position: relative !important; display: block !important; margin: 0 !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-fields .ih20-date-field > input:first-child { padding-right: 44px !important; }
+html body .ih20-date-field > input.ih20-date-validator, body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih20-date-field > input.ih20-date-validator { position: absolute !important; inset: 0 auto auto 0 !important; width: 1px !important; min-width: 0 !important; max-width: 1px !important; height: 1px !important; min-height: 0 !important; max-height: 1px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; opacity: 0 !important; clip-path: inset(50%) !important; overflow: hidden !important; pointer-events: none !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih20-date-icon { position: absolute !important; inset: 50% 14px auto auto !important; display: block !important; width: 18px !important; height: 18px !important; margin: 0 !important; color: var(--p-muted) !important; transform: translateY(-50%) !important; pointer-events: none !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih20-date-icon svg { display: block !important; width: 18px !important; height: 18px !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-inquiry-rules { display: flex !important; flex-direction: column !important; gap: 8px !important; margin: 0 !important; padding: 18px !important; border: 0 !important; border-radius: 12px !important; background: var(--p-tint) !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-inquiry-rules > strong { display: block !important; margin: 0 !important; color: var(--p-ink) !important; font: 700 14px/1.5 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-inquiry-rules > p { margin: 0 !important; color: var(--p-muted) !important; font: 400 13px/1.65 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) form > .ih5-service-modal-confirmation { display: grid !important; grid-template-columns: 18px minmax(0,1fr) !important; align-items: start !important; gap: 11px !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-confirmation > input[type="checkbox"] { width: 18px !important; height: 18px !important; min-height: 0 !important; margin: 2px 0 0 !important; padding: 0 !important; accent-color: var(--p-accent) !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) form > label.ih5-service-modal-confirmation > span { font: 500 13px/1.6 Inter,system-ui,sans-serif !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) form > footer { display: grid !important; grid-template-columns: auto minmax(0,1fr) !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) footer > button { display: flex !important; align-items: center !important; justify-content: center !important; width: 100% !important; min-height: 48px !important; margin: 0 !important; padding: 12px 18px !important; border: 1px solid var(--p-line) !important; border-radius: 10px !important; background: var(--p-paper) !important; color: var(--p-ink) !important; font: 650 14px/1.5 Inter,system-ui,sans-serif !important; white-space: normal !important; cursor: pointer !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) footer > button[type="submit"] { border-color: var(--p-accent) !important; background: var(--p-accent) !important; color: var(--p-on) !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) button:disabled { opacity: .5 !important; cursor: not-allowed !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) :is(button,input[type="checkbox"]):focus-visible { outline: 2px solid var(--p-accent) !important; outline-offset: 2px !important; }
+body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-message { margin: 0 !important; padding: 12px !important; border-left: 3px solid var(--p-accent) !important; background: var(--p-soft) !important; color: var(--p-ink) !important; font: 550 13px/1.6 Inter,system-ui,sans-serif !important; }
+
+/* Conversation text keeps the contrast of its own bubble, including links. */
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-thread { background: var(--p-soft) !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message { max-width: min(80%,640px) !important; border: 1px solid var(--p-line) !important; background: var(--p-paper) !important; color: var(--p-ink) !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message.is-own { border-color: transparent !important; background: var(--p-accent) !important; color: var(--p-on) !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message-content { color: inherit !important; font: 400 15px/1.7 Inter,system-ui,sans-serif !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message-content > :is(.message-text,.ih5-message-text,.private-work-message-text) { margin: 0 !important; padding: 0 !important; color: inherit !important; -webkit-text-fill-color: currentColor !important; font: inherit !important; opacity: 1 !important; white-space: pre-wrap !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message-content > :is(.message-text,.ih5-message-text,.private-work-message-text) a { color: var(--p-accent) !important; -webkit-text-fill-color: currentColor !important; text-decoration: underline !important; text-underline-offset: 3px !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message.is-own .ih68-message-content > :is(.message-text,.ih5-message-text,.private-work-message-text) a { color: var(--p-on) !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih68-message.is-own .ih69-message-meta { color: color-mix(in srgb,var(--p-on) 85%,var(--p-accent)) !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih69-message-meta time { color: inherit !important; font: inherit !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih72-room-nav { gap: 6px !important; padding-block: 8px !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih72-room-nav > button { min-height: 42px !important; margin: 0 !important; padding: 10px 14px !important; border: 0 !important; border-radius: 8px !important; font-weight: 600 !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih72-room-nav > button[aria-current="page"] { background: var(--p-tint) !important; color: var(--p-accent) !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih72-composer { border: 1px solid var(--p-line) !important; border-radius: 16px !important; background: var(--p-paper) !important; outline: 0 !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih72-composer:focus-within { border-color: var(--p-accent) !important; box-shadow: none !important; }
+body.ih79-app[data-ih73-page="conversation"] #root .ih72-composer textarea:is(:focus,:focus-visible) { border: 0 !important; outline: 0 !important; box-shadow: none !important; }
+@media (max-width:850px) {
+  body.ih79-app .ih5-service-modal-backdrop { padding: 12px !important; }
+  body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) { max-height: calc(100dvh - 24px) !important; padding: 22px 18px !important; border-radius: 16px !important; }
+  body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) h2 { font-size: 26px !important; }
+  body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-fields { grid-template-columns: minmax(0,1fr) !important; gap: 24px !important; }
+  body.ih79-app :is(#root .ih5-service-inquiry-modal,.ih5-service-inquiry-modal) .ih5-service-modal-summary { padding: 16px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih68-message { max-width: 90% !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih68-message-content { font-size: 16px !important; line-height: 1.65 !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room-nav { gap: 4px !important; padding-inline: 12px !important; }
+  body.ih79-app[data-ih73-page="conversation"] #root .ih72-room-nav > button { padding-inline: 8px !important; }
+}
+
+/* One IH loading signature for full routes and local data refreshes. */
+html body .ih87-loading { box-sizing: border-box !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 18px !important; width: 100% !important; min-width: 0 !important; min-height: 200px !important; margin: 0 !important; padding: 32px 20px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--v-accent,#0c7378) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; text-align: center !important; box-shadow: none !important; }
+html body .ih87-loading.is-screen { min-height: 100dvh !important; background: var(--v-bg,#fff) !important; }
+html body .ih87-loading-mark { position: relative !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 16px !important; width: 64px !important; margin: 0 !important; padding: 0 !important; color: inherit !important; }
+html body .ih87-loading-mark > svg { display: block !important; width: 46px !important; height: 46px !important; color: inherit !important; }
+html body .ih87-loading-mark > i { position: relative !important; display: block !important; width: 64px !important; height: 3px !important; border-radius: 3px !important; background: color-mix(in srgb,currentColor 15%,transparent) !important; overflow: hidden !important; }
+html body .ih87-loading-mark > i::after { position: absolute !important; content: '' !important; inset: 0 auto 0 0 !important; width: 26px !important; border-radius: inherit !important; background: currentColor !important; animation: ih87-loading-progress 1.15s ease-in-out infinite alternate !important; }
+html body .ih87-loading-label { display: block !important; width: auto !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; color: var(--v-muted,#516568) !important; font: 450 13px/1.5 Inter,system-ui,sans-serif !important; }
+html body .ih87-route-status { position: fixed !important; z-index: 11000 !important; inset: 0 !important; display: grid !important; place-items: center !important; margin: 0 !important; padding: 20px !important; background: var(--v-bg,#fff) !important; pointer-events: none !important; animation: ih85-menu-in .12s ease both !important; }
+html body[data-ih87-route-loading="true"] #root .ih87-loading { visibility: hidden !important; }
+@keyframes ih87-loading-progress { from { transform: translateX(0); } to { transform: translateX(38px); } }
+@media (prefers-reduced-motion:reduce) {
+  html body .ih87-loading-mark > i::after, html body .ih87-route-status { animation: none !important; }
+}
+
 }
