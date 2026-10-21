@@ -1,0 +1,26 @@
+# Local configuration and secrets. Only sanitized examples belong in git.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.envrc
+.pgpass
+
+# Private keys, credential bundles, and local database backups.
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+*.dump
+*.sql.gz
+
+# Dependencies, generated output, local service state, and logs.
+node_modules/
+dist/
+.vite/
+.wrangler/
+supabase/.temp/
+*.log
