@@ -164,7 +164,7 @@
     .private-work-delivery-heading h3, .private-work-review-form h3,
     .project-files-library-header h3, .ih-sp-setting h3, .ih-sp-history h3,
     .ih53-fee-heading h3, .lu-answer-text h3, .lu-result-card h3,
-    .contacts h3
+    .ih-demo-reviews-heading h2, .ih63-result-group h3, .contacts h3
   ) {
     font-size: 1rem !important;
     font-weight: 700 !important;
@@ -182,7 +182,15 @@
     font-weight: 750 !important;
     line-height: 1.35 !important;
     letter-spacing: -.02em !important;
-    text-wrap: pretty !important;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+    text-wrap: nowrap !important;
+  }
+
+  .ih40-hub[data-expanded="false"] .ih40-hub-heading h1 {
+    font-size: var(--ih-heading-card) !important;
+    line-height: 1.4 !important;
+    letter-spacing: -.02em !important;
   }
 
   .lu-toolbar-identity h1 > span {
@@ -220,8 +228,13 @@
     line-height: 1.65 !important;
   }
 
-  :where(.legal-document-content h2) {
+  /* Imported legal documents use h1 for numbered sections as well. */
+  :where(.legal-document-content h1, .legal-document-content h2) {
     margin: 2rem 0 .875rem !important;
+    font-size: var(--ih-heading-section) !important;
+    font-weight: 750 !important;
+    line-height: 1.3 !important;
+    letter-spacing: -.025em !important;
   }
 
   :where(.legal-document-content h3) {
@@ -272,6 +285,20 @@
     :where(.ih73-description, .ih68-page-heading > p, .account-tab-intro > p) {
       margin-top: .625rem !important;
       font-size: .9375rem !important;
+    }
+  }
+
+  @media print {
+    .legal-document-hero h1 {
+      font-size: 24pt !important;
+    }
+
+    .legal-document-content :where(h1, h2) {
+      font-size: 16pt !important;
+    }
+
+    .legal-document-content :where(h3, h4, h5, h6) {
+      font-size: 12pt !important;
     }
   }
 }
