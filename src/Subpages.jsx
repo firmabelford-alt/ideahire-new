@@ -162,8 +162,15 @@ export function SubpageNavigation({ standalone = false }) {
   </nav>;
 }
 
-export function SubpageHeading({ eyebrow, title, titleId, description, actions, children, variant = 'default' }) {
+export function SubpageHeading({ eyebrow, title, titleId, description, actions, children, variant = 'default', className = '' }) {
   const en = useSitePreferences().language === 'en';
+  const location = useLocation();
+  const page = getSubpage(location, en);
+  const context = {
+    work: en ? 'Projects and collaboration' : 'Projekty i współpraca',
+    inbox: en ? 'Your conversations' : 'Twoje rozmowy',
+    notifications: en ? 'Stay up to date' : 'Na bieżąco',
+  };
   const copy = {
     'Prywatność i moje dane': 'Privacy & my data',
     'Centrum prywatności': 'Privacy centre',
@@ -179,8 +186,10 @@ export function SubpageHeading({ eyebrow, title, titleId, description, actions, 
     'Nowe wiadomości, zgłoszenia do zleceń i decyzje dotyczące współpracy.': 'New messages, applications and project decisions.',
   };
   const text = value => en && typeof value === 'string' ? copy[value] || translateUiText(value) : value;
-  return <header className={'ih73-page-heading ih75-page-heading is-' + variant}>
+  const label = eyebrow || context[page?.kind];
+  return <header key={location.pathname + location.hash} className={'ih73-page-heading ih75-page-heading ih-page-heading is-' + variant + (className ? ' ' + className : '')}>
     <div className="ih73-heading-copy">
+      {label && <p className="ih-heading-kicker">{text(label)}</p>}
       <h1 id={titleId}>{text(title)}</h1>
       {description && <p className="ih73-description">{text(description)}</p>}
     </div>

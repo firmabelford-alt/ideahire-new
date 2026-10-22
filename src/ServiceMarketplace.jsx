@@ -428,10 +428,11 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page ih78-services-page">
       <div className="ih78-services-navigation"><MarketplaceSwitch /></div>
 
-      <header className="ih78-services-hero">
-        <h1>{english ? "Services" : "Usługi"}</h1>
-        <div className="ih79-service-actions"><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></div>
-      </header>
+      <SubpageHeading className="ih78-services-hero" variant="catalog"
+        eyebrow={english ? "Offers from freelancers" : "Oferty wykonawców"}
+        title={english ? "Services" : "Usługi"}
+        description={english ? "Compare the scope, price and delivery time. Choose a service for your project." : "Porównaj zakres, cenę i termin. Wybierz usługę do swojego projektu."}
+        actions={<><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></>} />
 
       <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług">
       <section className="ih78-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>

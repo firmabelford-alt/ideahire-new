@@ -1,15 +1,35 @@
-/* Shared heading hierarchy for the app and the standalone help centre.
-   Keep this link before the app styles: important declarations in this first
-   layer replace legacy specificity overrides without changing their colours,
-   visibility rules, or the layout of the surrounding content. */
+/* Heading composition shared by every route and the help centre.
+   Load this first layer before legacy styles so route-specific specificity
+   cannot break the hierarchy. Visibility and application state stay separate. */
 @layer ideahireHeadings {
   :root {
     --ih-heading-font: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --ih-heading-page: clamp(2.125rem, 1.5rem + 2.4vw, 3.25rem);
+    --ih-heading-page: clamp(2.125rem, 1.3rem + 3.2vw, 3.75rem);
     --ih-heading-section: clamp(1.375rem, 1.2rem + .65vw, 1.75rem);
     --ih-heading-card: clamp(1.125rem, 1.04rem + .35vw, 1.375rem);
     --ih-heading-display: clamp(2rem, 1.3rem + 2.6vw, 3rem);
     --ih-heading-dialog: clamp(1.375rem, 1.2rem + .6vw, 1.75rem);
+    --ih-heading-ink: #102e31;
+    --ih-heading-muted: #3d6366;
+    --ih-heading-accent: #076f76;
+  }
+
+  :root[data-theme="dark"] {
+    --ih-heading-ink: #edfcfd;
+    --ih-heading-muted: #b5dadd;
+    --ih-heading-accent: #56dbe0;
+  }
+
+  :root[data-template="classic"] {
+    --ih-heading-ink: #191919;
+    --ih-heading-muted: #555;
+    --ih-heading-accent: #191919;
+  }
+
+  :root[data-template="classic"][data-theme="dark"] {
+    --ih-heading-ink: #fafafa;
+    --ih-heading-muted: #c6c6c6;
+    --ih-heading-accent: #fafafa;
   }
 
   /* The cinematic opening, rate display and accordion button wrappers keep
@@ -35,8 +55,8 @@
   :where(h1):not(:where(.ih43-accessible *, .ih57-sr, .ih53-finale-copy h1)) {
     font-size: var(--ih-heading-page) !important;
     font-weight: 800 !important;
-    line-height: 1.14 !important;
-    letter-spacing: -.04em !important;
+    line-height: 1.08 !important;
+    letter-spacing: -.045em !important;
   }
 
   :where(h2) {
@@ -66,17 +86,73 @@
     text-wrap: inherit !important;
   }
 
-  /* Page titles share the same baseline, space for actions and description. */
-  :where(.ih75-page-heading, .ih78-services-hero, .ih76-planner-heading) {
+  /* One open layout: context, title and short description; actions alongside.
+     No enclosing cards, giant empty hero areas, or fixed title heights. */
+  :where(
+    .ih-page-heading, .ih76-planner-heading, .admin-page-header,
+    .privacy-center-header, .disputes-page-header, .dispute-detail-header,
+    .erasure-account-header, .ih60-account-heading
+  ) {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    align-items: start !important;
-    gap: 1rem 1.5rem !important;
-    margin: 0 0 2rem !important;
+    grid-template-columns: minmax(0, 1fr) fit-content(38%) !important;
+    align-items: center !important;
+    gap: 1.25rem 2rem !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    max-width: 100% !important;
+    margin: 0 0 1.75rem !important;
+    padding: .5rem 0 1.5rem !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
   }
 
-  :where(.ih73-heading-copy, .ih76-planner-heading > div) {
+  .ih-page-heading:not(:has(> .ih73-heading-actions)) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :where(.ih68-page-heading, .account-tab-intro) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: .75rem !important;
+    min-height: 0 !important;
+    margin: 0 0 1.75rem !important;
+    padding: .5rem 0 1.5rem !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  :where(.ih73-heading-copy, .ih76-planner-heading > div,
+    .admin-page-header > div, .dispute-detail-header > div) {
+    display: grid !important;
+    justify-items: start !important;
+    align-content: start !important;
+    gap: .75rem !important;
+    width: 100% !important;
     min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .ih-page-heading > :not(.ih73-heading-copy, .ih73-heading-actions) {
+    grid-column: 1 / -1 !important;
+  }
+
+  :where(.ih-heading-kicker, .admin-page-header .section-label,
+    .ih60-account-heading .ih59-kicker, .legal-document-hero .cookie-policy-eyebrow) {
+    display: block !important;
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--ih-heading-accent) !important;
+    font: 750 .6875rem/1.5 var(--ih-heading-font) !important;
+    letter-spacing: .12em !important;
+    text-transform: uppercase !important;
+    white-space: normal !important;
   }
 
   :where(
@@ -91,22 +167,114 @@
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    color: var(--ih-heading-ink) !important;
+    -webkit-text-fill-color: currentColor !important;
+    background: none !important;
     text-align: start !important;
     text-overflow: clip !important;
+    overflow-wrap: break-word !important;
   }
 
-  :where(.ih73-description, .ih68-page-heading > p, .account-tab-intro > p) {
-    max-width: 60ch !important;
-    margin: .75rem 0 0 !important;
-    font: 400 1rem/1.65 var(--ih-heading-font) !important;
+  :where(.ih73-description, .ih68-page-heading > p, .account-tab-intro > p,
+    .admin-page-header > div > p, .dispute-detail-header > div > p) {
+    display: block !important;
+    width: 100% !important;
+    max-width: 56ch !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--ih-heading-muted) !important;
+    font: 400 .96875rem/1.7 var(--ih-heading-font) !important;
     text-wrap: pretty !important;
   }
 
   :where(.ih73-heading-actions, .ih79-service-actions) {
+    display: flex !important;
     min-width: 0 !important;
-    align-self: start !important;
+    max-width: 100% !important;
+    align-self: center !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
     flex-wrap: wrap !important;
     gap: .75rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  :where(.ih73-heading-actions, .ih79-service-actions) > :where(a, button) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 1 auto !important;
+    gap: .5rem !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 2.75rem !important;
+    padding: .75rem 1rem !important;
+    border-radius: .75rem !important;
+    font: 700 .875rem/1.4 var(--ih-heading-font) !important;
+    white-space: normal !important;
+    text-align: center !important;
+    overflow-wrap: break-word !important;
+  }
+
+  :where(.ih73-heading-actions, .ih79-service-actions) > :where(a, button) > svg {
+    flex: 0 0 1.125rem !important;
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+  }
+
+  .ih73-catalog-header > .ih-page-heading {
+    margin-bottom: 1.25rem !important;
+    padding-bottom: 0 !important;
+  }
+
+  .ih73-catalog-tabs {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: .5rem 1.75rem !important;
+    margin: 0 0 1.75rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  .ih73-catalog-tabs > a {
+    position: relative !important;
+    min-width: 0 !important;
+    min-height: 2.75rem !important;
+    margin: 0 !important;
+    padding: .625rem 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--ih-heading-muted) !important;
+    background: none !important;
+    box-shadow: none !important;
+    font: 750 .9375rem/1.5 var(--ih-heading-font) !important;
+    text-decoration: none !important;
+  }
+
+  .ih73-catalog-tabs > a[aria-current="page"] {
+    color: var(--ih-heading-ink) !important;
+  }
+
+  .ih73-catalog-tabs > a::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: auto auto 0 0 !important;
+    width: 1.5rem !important;
+    height: .1875rem !important;
+    border-radius: 1rem !important;
+    background: var(--ih-heading-accent) !important;
+    transform: scaleX(0) !important;
+    transform-origin: left !important;
+  }
+
+  .ih73-catalog-tabs > a:is([aria-current="page"], :hover, :focus-visible)::after {
+    transform: scaleX(1) !important;
   }
 
   /* Section titles also cover all account tabs, privacy and admin screens. */
@@ -134,6 +302,22 @@
 
   :where(.account-form-section-heading, .ih5-job-create-step-heading) h2 {
     font-size: clamp(1.25rem, 1.1rem + .5vw, 1.5rem) !important;
+  }
+
+  :where(.ih72-section-heading, .ih79-section-title, .profile-portfolio-heading,
+    .profile-public-portfolio-heading, .profile-reviews-heading, .privacy-section-heading) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: .75rem 1.25rem !important;
+    margin: 0 0 1.25rem !important;
+  }
+
+  :where(.ih72-section-heading, .ih79-section-title, .profile-portfolio-heading,
+    .profile-public-portfolio-heading, .profile-reviews-heading, .privacy-section-heading) h2 {
+    min-width: 0 !important;
+    line-height: 1.25 !important;
   }
 
   :where(
@@ -217,10 +401,44 @@
     margin: 0 !important;
   }
 
-  :where(.auth-header h1, .ih59-role-heading h1, .ih59-confirmation-content h1,
-    .discovery-copy h1, .age-access-card h1, .article-body h1) {
-    font-size: clamp(1.875rem, 1.5rem + 1.4vw, 2.5rem) !important;
+  :where(.auth-header h1, .age-access-card h1, .article-body h1) {
+    font-size: clamp(2rem, 1.4rem + 2vw, 2.75rem) !important;
     margin: 0 0 .75rem !important;
+  }
+
+  :where(.ih59-role-heading h1, .ih59-confirmation-content h1, .discovery-copy h1) {
+    font-size: clamp(2.125rem, 1.3rem + 3vw, 3.25rem) !important;
+    margin: 0 0 1rem !important;
+    line-height: 1.12 !important;
+  }
+
+  :where(.public-profile-info h1, .ih72-identity h1) {
+    font-size: clamp(2.125rem, 1.3rem + 2.4vw, 3rem) !important;
+    margin: 0 !important;
+    line-height: 1.16 !important;
+  }
+
+  .auth-header {
+    margin-bottom: 1.75rem !important;
+    text-align: start !important;
+  }
+
+  .auth-header::before {
+    margin-bottom: .75rem !important;
+    font: 750 .6875rem/1.5 var(--ih-heading-font) !important;
+    letter-spacing: .12em !important;
+  }
+
+  .legal-document-hero {
+    min-height: 0 !important;
+    padding-block: clamp(2rem, 4vw, 3.5rem) !important;
+  }
+
+  .legal-document-hero h1 {
+    margin: .75rem 0 1rem !important;
+    color: var(--ih-heading-ink) !important;
+    -webkit-text-fill-color: currentColor !important;
+    background: none !important;
   }
 
   :where(.auth-header > p, .legal-document-hero > p) {
@@ -270,25 +488,99 @@
     font-size: var(--ih-heading-section) !important;
   }
 
-  @media (max-width: 850px) {
-    :where(.ih75-page-heading, .ih78-services-hero, .ih76-planner-heading) {
+  /* A short entrance on route/tab changes. Content keeps its final layout;
+     only opacity and a ten-pixel translation move, once, without looping. */
+  @keyframes ih-heading-arrive {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :where(.ih-page-heading, .ih76-planner-heading, .admin-page-header,
+      .ih60-account-heading, .dispute-detail-header, .erasure-account-header,
+      .ih68-page-heading, .auth-header, .ih59-role-heading,
+      .ih59-confirmation-content, .discovery-copy, .legal-document-hero,
+      .public-profile-info, .ih72-identity, .hero) h1,
+    :where(.ih63-explorer-heading, .ih53-showcase-copy, .split-card,
+      .final-cta, .lu-welcome) h2 {
+      animation: ih-heading-arrive 560ms cubic-bezier(.2, .7, .2, 1) both !important;
+    }
+
+    .ih-heading-kicker {
+      animation: ih-heading-arrive 360ms ease-out both !important;
+    }
+
+    :where(.ih73-description, .ih73-heading-actions) {
+      animation: ih-heading-arrive 460ms 70ms cubic-bezier(.2, .7, .2, 1) both !important;
+    }
+
+    .ih73-catalog-tabs > a::after {
+      transition: transform 180ms ease-out !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(h1, h2, .ih-heading-kicker, .ih73-description, .ih73-heading-actions) {
+      animation: none !important;
+    }
+
+    .ih73-catalog-tabs > a::after {
+      transition: none !important;
+    }
+  }
+
+  @media (max-width: 900px) {
+    :where(.ih-page-heading, .ih76-planner-heading, .admin-page-header,
+      .privacy-center-header, .disputes-page-header, .dispute-detail-header,
+      .erasure-account-header, .ih60-account-heading) {
       grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    :where(.ih73-heading-actions, .ih79-service-actions) {
+      justify-content: flex-start !important;
+      justify-self: start !important;
+      width: 100% !important;
     }
   }
 
   @media (max-width: 640px) {
-    :where(.ih75-page-heading, .ih78-services-hero, .ih76-planner-heading) {
-      gap: .875rem !important;
+    :where(.ih-page-heading, .ih76-planner-heading, .admin-page-header,
+      .privacy-center-header, .disputes-page-header, .dispute-detail-header,
+      .erasure-account-header, .ih60-account-heading) {
+      gap: 1.25rem !important;
       margin-bottom: 1.5rem !important;
+      padding: .25rem 0 .75rem !important;
+    }
+
+    .ih73-heading-copy {
+      gap: .625rem !important;
+    }
+
+    .ih-heading-kicker {
+      font-size: .625rem !important;
+      letter-spacing: .1em !important;
     }
 
     :where(.ih73-description, .ih68-page-heading > p, .account-tab-intro > p) {
-      margin-top: .625rem !important;
+      margin: 0 !important;
       font-size: .9375rem !important;
+    }
+
+    .ih73-catalog-tabs {
+      gap: .25rem 1.25rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+
+    .ih73-catalog-tabs > a {
+      font-size: .875rem !important;
     }
   }
 
   @media print {
+    :where(h1, h2, .ih-heading-kicker, .ih73-description, .ih73-heading-actions) {
+      animation: none !important;
+    }
+
     .legal-document-hero h1 {
       font-size: 24pt !important;
     }

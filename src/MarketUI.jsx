@@ -275,7 +275,7 @@ export function MarketCatalogHeader({ eyebrow, title, description, count, noun =
   const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
   return <div className="ih73-catalog-header">
     {tabs || <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />}
-    <SubpageHeading title={title} actions={actions} variant="catalog" />
+    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
     <div className="ih73-catalog-context">
       <p className="ih73-result-count" role="status" aria-live="polite" aria-atomic="true">{statusCopy || <><strong>{new Intl.NumberFormat(en ? 'en-GB' : 'pl-PL').format(value)}</strong><span>{en ? english + (value === 1 ? '' : 's') : polish}</span></>}</p>
     </div>
