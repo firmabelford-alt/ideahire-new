@@ -148,32 +148,44 @@ export function MessageText({ text }) {
   );
 }
 
+const EMPTY_PRIVATE_WORK = {
+  items: [], deliveries: [], events: [], signedUrls: {}, loading: false, error: "",
+};
+
 export function usePrivateWork(conversationId, userId, enabled = true) {
-  const [items, setItems] = useState([]);
-  const [deliveries, setDeliveries] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [signedUrls, setSignedUrls] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [reportTarget, setReportTarget] = useState(null);
+  // A new scope also invalidates a previous visit to the same conversation.
+  const scope = useMemo(() => (
+    enabled && conversationId && userId ? { conversationId, userId } : null
+  ), [conversationId, enabled, userId]);
+  const scopeRef = useRef(scope);
+  const requestRef = useRef(0);
+  const [snapshot, setSnapshot] = useState(null);
+  const [report, setReport] = useState(null);
+  scopeRef.current = scope;
 
   const load = useCallback(async () => {
-    if (!enabled || !conversationId || !userId) return;
-    setLoading(true);
+    if (!scope || scopeRef.current !== scope) return;
+    const request = ++requestRef.current;
+    const isCurrent = () => scopeRef.current === scope && requestRef.current === request;
+    setSnapshot((previous) => ({
+      ...(previous?.scope === scope ? previous : EMPTY_PRIVATE_WORK),
+      scope, loading: true, error: "",
+    }));
     try {
       const [itemsResult, deliveriesResult] = await Promise.all([
         supabase
           .from("ideahire_shared_items")
           .select("*")
-          .eq("conversation_id", conversationId)
+          .eq("conversation_id", scope.conversationId)
           .order("created_at", { ascending: true })
           .order("display_order", { ascending: true }),
         supabase
           .from("ideahire_work_deliveries")
           .select("*")
-          .eq("conversation_id", conversationId)
+          .eq("conversation_id", scope.conversationId)
           .order("version", { ascending: false }),
       ]);
+      if (!isCurrent()) return;
       if (itemsResult.error) throw itemsResult.error;
       if (deliveriesResult.error) throw deliveriesResult.error;
 
@@ -185,6 +197,7 @@ export function usePrivateWork(conversationId, userId, enabled = true) {
           .select("*")
           .in("delivery_id", deliveryRows.map((row) => row.id))
           .order("created_at", { ascending: true });
+        if (!isCurrent()) return;
         if (eventsResult.error) throw eventsResult.error;
         eventRows = eventsResult.data || [];
       }
@@ -198,61 +211,84 @@ export function usePrivateWork(conversationId, userId, enabled = true) {
         const { data: urlRows, error: urlError } = await supabase.storage
           .from(PRIVATE_WORK_BUCKET)
           .createSignedUrls(activePaths, 3600);
+        if (!isCurrent()) return;
         if (urlError) throw urlError;
         (urlRows || []).forEach((row, index) => {
           if (row?.signedUrl) urlMap[activePaths[index]] = row.signedUrl;
         });
       }
 
-      setItems(itemRows);
-      setDeliveries(deliveryRows);
-      setEvents(eventRows);
-      setSignedUrls(urlMap);
-      setError("");
+      if (!isCurrent()) return;
+      setSnapshot({
+        scope, items: itemRows, deliveries: deliveryRows, events: eventRows,
+        signedUrls: urlMap, loading: false, error: "",
+      });
     } catch (loadError) {
-      setError(readableError(loadError, "Nie udało się pobrać prywatnych materiałów."));
-    } finally {
-      setLoading(false);
+      if (!isCurrent()) return;
+      setSnapshot({
+        ...EMPTY_PRIVATE_WORK, scope,
+        error: readableError(loadError, "Nie udało się pobrać prywatnych materiałów."),
+      });
     }
-  }, [conversationId, enabled, userId]);
+  }, [scope]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    scopeRef.current = scope;
+    setReport(null);
+    if (scope) load();
+    else setSnapshot(null);
+    return () => {
+      requestRef.current += 1;
+      if (scopeRef.current === scope) scopeRef.current = null;
+    };
+  }, [load, scope]);
 
   useEffect(() => {
-    if (!enabled || !conversationId || !userId) return undefined;
+    if (!scope) return undefined;
     const refresh = () => load();
     const channel = supabase
-      .channel(`private-work:${conversationId}:${userId}`)
+      .channel(`private-work:${scope.conversationId}:${scope.userId}`)
       .on("postgres_changes", {
         event: "*", schema: "public", table: "ideahire_shared_items",
-        filter: `conversation_id=eq.${conversationId}`,
+        filter: `conversation_id=eq.${scope.conversationId}`,
       }, refresh)
       .on("postgres_changes", {
         event: "*", schema: "public", table: "ideahire_work_deliveries",
-        filter: `conversation_id=eq.${conversationId}`,
+        filter: `conversation_id=eq.${scope.conversationId}`,
       }, refresh)
       .subscribe();
-    return () => supabase.removeChannel(channel);
-  }, [conversationId, enabled, load, userId]);
+    return () => { supabase.removeChannel(channel); };
+  }, [load, scope]);
+
+  // Hide previous data during render, before effects start the next request.
+  const data = scope && snapshot?.scope === scope ? snapshot : EMPTY_PRIVATE_WORK;
+  const reportTarget = scope && report?.scope === scope ? report.target : null;
+  const setReportTarget = useCallback((target) => {
+    if (!scope || scopeRef.current !== scope) return;
+    setReport((previous) => ({
+      scope,
+      target: typeof target === "function"
+        ? target(previous?.scope === scope ? previous.target : null)
+        : target,
+    }));
+  }, [scope]);
 
   const itemsByMessage = useMemo(() => {
     const result = {};
-    items.forEach((item) => {
+    data.items.forEach((item) => {
       (result[item.message_id] ||= []).push(item);
     });
     return result;
-  }, [items]);
+  }, [data.items]);
 
   return {
-    items,
+    items: data.items,
     itemsByMessage,
-    deliveries,
-    events,
-    signedUrls,
-    loading,
-    error,
+    deliveries: data.deliveries,
+    events: data.events,
+    signedUrls: data.signedUrls,
+    loading: Boolean(scope) && (snapshot?.scope !== scope || snapshot.loading),
+    error: data.error,
     reload: load,
     reportTarget,
     setReportTarget,
