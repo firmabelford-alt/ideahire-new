@@ -16993,10 +16993,11 @@ function Calendar() {
       <AccountNavbar />
 
       <main className="app-page calendar-shell">
-        <header className="ih76-planner-heading">
-          <div><h1>{calendarEnglish ? "Calendar" : "Kalendarz"}</h1></div>
-          <button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" /><span>{calendarEnglish ? "Add event" : "Dodaj termin"}</span></button>
-        </header>
+        <SubpageHeading className="ih76-planner-heading" variant="calendar"
+          eyebrow={calendarEnglish ? "Your schedule" : "Twój terminarz"}
+          title={calendarEnglish ? "Calendar" : "Kalendarz"}
+          description={calendarEnglish ? "Keep project deadlines and your own plans in order." : "Uporządkuj terminy projektów i własne plany."}
+          actions={<button className="calendar-primary-action" type="button" onClick={() => openCreateDialog()}><MarketIcon kind="plus" /><span>{calendarEnglish ? "Add event" : "Dodaj termin"}</span></button>} />
 
         {(message || successMessage) && (
           <div
@@ -29374,6 +29375,15 @@ function Home() {
 
 /* SMOOTH ROUTE TRANSITIONS */
 
+function getRouteScrollTarget(pathname, hash) {
+  // Account hashes select tabs. Scroll to their heading rather than the
+  // matching form section further down the page, which hides the title.
+  if (pathname === "/account" && getAccountWorkspaceSection(hash)) {
+    return document.querySelector(".ih75-account-layout:not([hidden])");
+  }
+  return document.getElementById(decodeURIComponent(hash.slice(1)));
+}
+
 function SmoothRouteTransitions() {
   const navigate = useRouterNavigate();
   const location = useLocation();
@@ -29445,17 +29455,12 @@ function SmoothRouteTransitions() {
       if (isSameDocument && nextUrl.hash) {
         event.preventDefault();
 
-        const targetId = decodeURIComponent(
-          nextUrl.hash.slice(1)
-        );
-
         if (nextAddress !== currentAddress) {
           navigate(nextAddress);
         }
 
         window.requestAnimationFrame(() => {
-          document
-            .getElementById(targetId)
+          getRouteScrollTarget(nextUrl.pathname, nextUrl.hash)
             ?.scrollIntoView({
               block: "start",
               behavior: "smooth",
@@ -29511,13 +29516,8 @@ function RouteScrollManager() {
     previousPath.current = location.pathname;
     if (sameWorkspaceList) return;
     if (location.hash) {
-      const targetId = decodeURIComponent(
-        location.hash.slice(1)
-      );
-
       window.requestAnimationFrame(() => {
-        document
-          .getElementById(targetId)
+        getRouteScrollTarget(location.pathname, location.hash)
           ?.scrollIntoView({
             block: "start",
             behavior: "auto",

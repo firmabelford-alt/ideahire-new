@@ -56,7 +56,7 @@
     font-size: var(--ih-heading-page) !important;
     font-weight: 800 !important;
     line-height: 1.08 !important;
-    letter-spacing: -.045em !important;
+    letter-spacing: -.025em !important;
   }
 
   :where(h2) {
@@ -111,6 +111,10 @@
 
   .ih-page-heading:not(:has(> .ih73-heading-actions)) {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .ih75-account-layout {
+    scroll-margin-block-start: calc(var(--a-head, 72px) + 24px) !important;
   }
 
   :where(.ih68-page-heading, .account-tab-intro) {
@@ -516,6 +520,11 @@
 
     .ih73-catalog-tabs > a::after {
       transition: transform 180ms ease-out !important;
+    }
+
+    html[data-ih-boot] :where(h1, h2, .ih-heading-kicker, .ih73-description, .ih73-heading-actions),
+    body[data-ih87-route-loading="true"] :where(h1, h2, .ih-heading-kicker, .ih73-description, .ih73-heading-actions) {
+      animation-play-state: paused !important;
     }
   }
 
