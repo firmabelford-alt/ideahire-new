@@ -17,6 +17,20 @@ export function startBrandOpening() {
   const root = document.getElementById("root");
   if (!boot || !root) return () => {};
   const html = document.documentElement;
+  // Only the home document gets the branded opening. Deep links reveal
+  // immediately and use the destination's own data status.
+  if (window.location.pathname !== "/") {
+    window.clearTimeout(window.__ihBootWatchdog);
+    boot.remove();
+    root.removeAttribute("inert");
+    root.removeAttribute("aria-hidden");
+    root.removeAttribute("aria-busy");
+    html.removeAttribute("data-ih-boot");
+    window.__ihBrandReady = true;
+    window.dispatchEvent(new Event("ih:brand-ready"));
+    return () => {};
+  }
+
   const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
   let cancelled = false, completed = false, prepared = false, opening = false, staged = false;
   let stable = 0, frame = 0, fontTimer = 0, finishTimer = 0;

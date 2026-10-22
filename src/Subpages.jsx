@@ -1,9 +1,7 @@
 /* P79 — one navigation system, with layouts built for each kind of work. */
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { LayoutGrid, CalendarDays, Bell, Check } from 'lucide-react';
-import { BrandMark } from './Brand';
 import { useSitePreferences, translateUiText } from './Preferences';
 import './Subpages.css';
 
@@ -71,7 +69,6 @@ export function SubpageTheme() {
     };
   }, [page?.kind, location.pathname, location.hash]);
   return <>
-    <SubpageRouteLoading />
     {page && ['access', 'legal'].includes(page.kind) && <SubpageNavigation standalone />}
   </>;
 }
@@ -80,51 +77,8 @@ export function SubpageLoading({ label, className = '', screen = false, pending 
   const en = useSitePreferences().language === 'en';
   return <div className={'ih87-loading' + (screen ? ' is-screen' : '') + (className ? ' ' + className : '')}
     data-route-loading={pending ? 'true' : undefined} role="status" aria-busy={pending || undefined}>
-    <span className="ih87-loading-mark" aria-hidden="true"><BrandMark /><i /></span>
     <span className="ih87-loading-label">{label || (en ? 'Loading your page…' : 'Przygotowujemy widok…')}</span>
   </div>;
-}
-
-function SubpageRouteLoading() {
-  const { pathname } = useLocation();
-  const [visible, setVisible] = useState(false);
-  useLayoutEffect(() => {
-    const root = document.getElementById('root');
-    if (!root) return;
-    let showTimer = 0, finishTimer = 0, shownAt = 0, seenLoading = false, finished = false;
-    setVisible(false);
-    function finish() {
-      finished = true;
-      observer.disconnect();
-      clearTimeout(showTimer);
-      clearTimeout(finishTimer);
-      delete document.body.dataset.ih87RouteLoading;
-      setVisible(false);
-    }
-    function sync() {
-      if (finished) return;
-      clearTimeout(finishTimer);
-      if (root.querySelector('[data-route-loading="true"]')) {
-        seenLoading = true;
-        if (!shownAt && !showTimer) showTimer = window.setTimeout(() => {
-          showTimer = 0;
-          shownAt = performance.now();
-          document.body.dataset.ih87RouteLoading = 'true';
-          setVisible(true);
-        }, 120);
-      } else {
-        clearTimeout(showTimer);
-        showTimer = 0;
-        // Once the destination is ready, later filter refreshes stay inside the page.
-        finishTimer = window.setTimeout(finish, shownAt ? Math.max(0, 220 - (performance.now() - shownAt)) : seenLoading ? 32 : 120);
-      }
-    }
-    const observer = new MutationObserver(sync);
-    observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-route-loading'] });
-    sync();
-    return finish;
-  }, [pathname]);
-  return visible ? createPortal(<div className="ih87-route-status"><SubpageLoading pending={false} /></div>, document.body) : null;
 }
 
 export function SubpageHistoryControls({ parent = '/account' }) {

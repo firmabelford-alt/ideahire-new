@@ -18,7 +18,7 @@
       }());
     </script>
     <link rel="icon" type="image/svg+xml" href="/brand/ideahire-mark.svg" />
-    <link rel="stylesheet" href="/headings.css?v=20261022-3" />
+    <link rel="stylesheet" href="/headings.css?v=20261023-1" />
     <link rel="stylesheet" href="/src/Brand.css" />
   </head>
   <body>
@@ -37,6 +37,15 @@
     <script>
       (function () {
         window.__ihBootStarted = performance.now();
+        if (location.pathname !== '/') {
+          document.getElementById('ih-brand-boot').style.setProperty('display', 'none', 'important');
+          var root = document.getElementById('root');
+          root.removeAttribute('inert');
+          root.removeAttribute('aria-hidden');
+          root.removeAttribute('aria-busy');
+          document.documentElement.removeAttribute('data-ih-boot');
+        }
+
         function stalled() {
           var boot = document.getElementById('ih-brand-boot');
           if (boot && boot.dataset.state === 'loading') boot.dataset.state = 'error';
