@@ -479,6 +479,13 @@
     letter-spacing: inherit !important;
   }
 
+  /* The floating assistant is a narrow surface even on a wide monitor. */
+  .lucyna-root[data-embedded="true"] .lu-welcome h2 {
+    font-size: 1.875rem !important;
+    line-height: 1.2 !important;
+    letter-spacing: -.025em !important;
+  }
+
   .ih63-field-copy > strong {
     font-family: var(--ih-heading-font) !important;
     font-size: var(--ih-heading-card) !important;
@@ -553,6 +560,10 @@
   }
 
   @media (max-width: 640px) {
+    .lucyna-root[data-embedded="true"] .lu-welcome h2 {
+      font-size: 1.625rem !important;
+    }
+
     :where(.ih-page-heading, .ih76-planner-heading, .admin-page-header,
       .privacy-center-header, .disputes-page-header, .dispute-detail-header,
       .erasure-account-header, .ih60-account-heading) {
