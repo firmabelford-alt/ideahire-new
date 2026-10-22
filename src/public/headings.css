@@ -479,6 +479,12 @@
     letter-spacing: inherit !important;
   }
 
+  .lu-welcome h2 {
+    max-width: 18ch !important;
+    margin: 0 auto 1rem !important;
+    text-align: center !important;
+  }
+
   /* The floating assistant is a narrow surface even on a wide monitor. */
   .lucyna-root[data-embedded="true"] .lu-welcome h2 {
     font-size: 1.875rem !important;
