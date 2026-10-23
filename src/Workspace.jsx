@@ -8,6 +8,7 @@ import { useSitePreferences } from './Preferences';
 import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { SubpageNavigation, SubpageHeading, SubpageCount, SubpageLoading } from './Subpages';
+import { MarketSelect } from './MarketUI';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -194,15 +195,15 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
         aria-current={active === section.key ? 'page' : undefined}
         onClick={() => onSelect(section)}><WorkspaceIcon kind={icons[section.key] || 'settings'} /><span>{labels[section.key] || section.label}</span></button>)}
     </nav>
-    <label className="ih72-section-select">
-      <span>{t('Sekcja konta', 'Account section')}</span>
-      <select value={active || ''} onChange={event => {
-        const section = sections.find(item => item.key === event.target.value);
-        if (section) onSelect(section);
-      }}>
-        {sections.map(section => <option key={section.key} value={section.key}>{labels[section.key] || section.label}</option>)}
-      </select>
-    </label>
+    <div className="ih72-section-select">
+      <MarketSelect id="ih-account-section" label={t('Sekcja konta', 'Account section')}
+        value={active || sections[0]?.key || ''}
+        options={sections.map(section => ({ value: section.key, label: labels[section.key] || section.label }))}
+        onChange={value => {
+          const section = sections.find(item => item.key === value);
+          if (section) onSelect(section);
+        }} />
+    </div>
   </aside>;
 }
 export function WorkspaceLoading() {

@@ -9948,7 +9948,6 @@ function Account() {
               <header className="account-form-section-heading">
                 <span aria-hidden="true">01</span>
                 <div>
-                  <p>Podstawowe dane</p>
                   <h2 id="account-profile-data-title">Jak widzą Cię inni</h2>
                   <small>Zdjęcie, nazwa i krótki opis Twojego profilu.</small>
                 </div>
@@ -10017,7 +10016,6 @@ function Account() {
               <header className="account-form-section-heading">
                 <span aria-hidden="true">02</span>
                 <div>
-                  <p>Oferta i doświadczenie</p>
                   <h2 id="account-expertise-title">Twoja specjalizacja</h2>
                   <small>Wybierz dziedziny i pokaż konkretne umiejętności.</small>
                 </div>
@@ -10194,7 +10192,6 @@ function Account() {
               <header className="account-form-section-heading">
                 <span aria-hidden="true">03</span>
                 <div>
-                  <p>Konto i lokalizacja</p>
                   <h2 id="account-contact-title">Dane kontaktowe</h2>
                   <small>Adres logowania jest chroniony, a kraj widoczny na profilu.</small>
                 </div>
@@ -10374,8 +10371,7 @@ function Account() {
           >
             <div className="profile-portfolio-heading">
               <div>
-                <span className="section-label">Twoje realizacje</span>
-                <h2 id="portfolio-manager-title">Portfolio</h2>
+                <h2 id="portfolio-manager-title">{accountEnglish ? "Your albums" : "Twoje albumy"}</h2>
                 <p>
                   Pokaż maksymalnie {MAX_PORTFOLIO_ITEMS} projektów. Każdy projekt
                   jest osobnym albumem z maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
@@ -10383,9 +10379,7 @@ function Account() {
                 </p>
               </div>
 
-              <span className="profile-portfolio-count">
-                {portfolioItems.length}/{MAX_PORTFOLIO_ITEMS}
-              </span>
+              <span className="profile-portfolio-count" aria-label={accountEnglish ? `Albums: ${portfolioItems.length} of ${MAX_PORTFOLIO_ITEMS}` : `Albumy: ${portfolioItems.length} z ${MAX_PORTFOLIO_ITEMS}`}><strong>{portfolioItems.length}</strong><span>/ {MAX_PORTFOLIO_ITEMS}</span></span>
             </div>
 
             <div className="profile-portfolio-legal-note">
@@ -10738,7 +10732,7 @@ function Account() {
         <section className="ih75-owned-register" id="account-jobs" hidden={activeAccountSection !== "jobs"} aria-label={accountEnglish ? "Your job listings" : "Twoje ogłoszenia"}>
           <div className="ih75-register-toolbar">
             <div className="ih75-register-filters" role="group" aria-label={accountEnglish ? "Listing status" : "Status ogłoszenia"}>
-              {[["all", accountEnglish ? "All" : "Wszystkie"], ["active", accountEnglish ? "Active" : "Aktywne"], ["expired", accountEnglish ? "Expired" : "Wygasłe"]].map(([value, label]) => <button type="button" key={value} aria-pressed={ownedJobFilter === value} onClick={() => setOwnedJobFilter(value)}>{label}<span>{ownedJobCounts[value]}</span></button>)}
+              {[["all", accountEnglish ? "All" : "Wszystkie"], ["active", accountEnglish ? "Active" : "Aktywne"], ["expired", accountEnglish ? "Expired" : "Wygasłe"]].map(([value, label]) => <button type="button" key={value} aria-pressed={ownedJobFilter === value} onClick={() => setOwnedJobFilter(value)}><span className="ih-account-filter-label">{label}</span><span className="ih-account-filter-count">{ownedJobCounts[value]}</span></button>)}
             </div>
             <label className="ih75-register-search"><MarketIcon kind="search" /><span className="ih5-sr-only">{accountEnglish ? "Search your listings" : "Szukaj w swoich ogłoszeniach"}</span><input type="search" value={ownedJobSearch} onChange={event => setOwnedJobSearch(event.target.value)} maxLength={160} placeholder={accountEnglish ? "Search listings" : "Szukaj ogłoszenia"} />{ownedJobSearch && <button type="button" aria-label={accountEnglish ? "Clear search" : "Wyczyść wyszukiwanie"} onClick={() => setOwnedJobSearch("")}><MarketIcon kind="close" /></button>}</label>
           </div>

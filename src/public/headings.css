@@ -760,3 +760,296 @@
     .calendar-page .ih76-planner-datebar > p { min-width: 0 !important; font-size: 17px !important; overflow-wrap: anywhere !important; }
   }
 }
+
+@layer ideahireHeadings {
+  /* Readable catalog details and shared number tracks. */
+  :is(.ih78-service-offer, .ih79-person, .ih79-job) {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+  }
+  :is(.ih78-offer-field, .ih5-job-card-top) { min-width: 0 !important; }
+  :is(.ih78-offer-field > span, .ih78-offer-field > small, .ih86-offer-availability,
+      .ih5-job-card-top .ih5-eyebrow, .ih5-job-active-badge,
+      .ih5-job-price > span, .ih5-job-price > small, .ih5-job-facts span,
+      .ih5-job-facts small, .ih78-offer-person small, .ih80-contact-note) {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    letter-spacing: 0 !important;
+    white-space: normal !important;
+  }
+  :is(.ih78-offer-copy, .ih80-person-main, .ih5-job-copy) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  :is(.ih78-offer-copy h2, .ih79-person h3, .ih5-job-title) {
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    text-wrap: pretty !important;
+    line-height: 1.35 !important;
+    padding-block-end: 2px !important;
+  }
+  .ih80-offer-terms { gap: 20px !important; }
+  .ih80-offer-facts {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: auto auto !important;
+    align-items: start !important;
+    gap: 6px 20px !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  .ih80-offer-facts > div {
+    display: grid !important;
+    grid-template-rows: subgrid !important;
+    grid-row: span 2 !important;
+    gap: 6px !important;
+    align-content: start !important;
+    min-width: 0 !important;
+  }
+  .ih80-offer-facts dt { grid-row: 1 !important; font: 500 13px/1.5 var(--ih-heading-font) !important; margin: 0 !important; }
+  .ih80-offer-facts dd { grid-row: 2 !important; font: 750 19px/1.35 var(--ih-heading-font) !important; margin: 0 !important; font-variant-numeric: tabular-nums lining-nums !important; }
+  .ih11-freelancer-meta {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 20px !important;
+  }
+  .ih11-freelancer-meta > div {
+    display: grid !important;
+    grid-template-rows: 38px auto !important;
+    align-content: start !important;
+    justify-items: start !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+  }
+  .ih11-freelancer-meta dd {
+    grid-row: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 750 30px/38px var(--ih-heading-font) !important;
+    font-variant-numeric: tabular-nums lining-nums !important;
+  }
+  .ih11-freelancer-meta dt {
+    grid-row: 2 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    font: 500 13px/1.5 var(--ih-heading-font) !important;
+  }
+  :is(.ih78-offer-price strong, .ih5-job-price strong) { font-variant-numeric: tabular-nums lining-nums !important; }
+  :is(.ih78-offer-copy > p, .ih11-freelancer-about, .ih11-freelancer-person p, .ih5-job-summary) { font-size: 15px !important; line-height: 1.7 !important; }
+
+  .ih11-freelancer-skills > span, .ih5-job-skills > span { font-size: 13px !important; line-height: 1.5 !important; padding: 6px 10px !important; }
+  .ih11-freelancer-avatar > span { font: inherit !important; }
+  .ih73-person-contact :is(a, button), .ih80-offer-open { font-size: 14px !important; min-height: 44px !important; }
+  @supports not (grid-template-rows: subgrid) {
+    .ih80-offer-facts > div { grid-template-rows: minmax(39px, auto) auto !important; }
+  }
+
+  /* Account editors share a rhythm, with separate layouts for each task. */
+  .ih75-account-layout {
+    --ih-edit-paper: var(--p-paper, #fff);
+    --ih-edit-wash: var(--p-soft, #edf5f3);
+    --ih-edit-line: var(--p-line, #c9dedb);
+    --ih-edit-ink: var(--p-ink, #102e31);
+    --ih-edit-muted: var(--p-muted, #456568);
+    --ih-edit-accent: var(--p-accent, #076f76);
+    display: grid !important;
+    align-items: start !important;
+    grid-template-columns: 220px minmax(0, 1fr) !important;
+    gap: 36px !important;
+  }
+  .ih75-account-main { min-width: 0 !important; max-width: 920px !important; }
+  .ih75-account-main > .ih-page-heading {
+    margin-bottom: 28px !important;
+    padding: 0 !important;
+    gap: 20px !important;
+  }
+  .ih75-account-main > .ih-page-heading h1 { font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem) !important; line-height: 1.12 !important; text-wrap: pretty !important; }
+  .ih75-account-main > .ih-page-heading .ih73-description { max-width: 58ch !important; font-size: 15px !important; line-height: 1.65 !important; }
+  .ih75-account-navigation { min-width: 0 !important; }
+  .ih75-account-navigation .ih72-section-links { gap: 6px !important; }
+  .ih75-account-navigation .ih72-section-links > button {
+    min-height: 48px !important;
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    font: 650 14px/1.45 var(--ih-heading-font) !important;
+    gap: 12px !important;
+  }
+  .ih75-account-navigation .ih72-section-links > button[aria-current="page"] { background: var(--ih-edit-ink) !important; color: var(--ih-edit-paper) !important; }
+  .ih75-account-navigation .ih72-section-links > button[aria-current="page"] svg { color: inherit !important; }
+  .ih75-account-navigation .ih72-section-links > button:focus-visible { outline: 2px solid var(--ih-edit-accent) !important; outline-offset: 2px !important; }
+  .ih75-account-layout .account-tab-stage { gap: 24px !important; min-width: 0 !important; outline-offset: 6px !important; }
+  .ih75-account-layout .account-profile-preview:not([hidden]) {
+    display: flex !important; align-items: center !important; gap: 16px !important;
+    margin: 0 0 24px !important; padding: 20px !important;
+    border: 0 !important; border-radius: 16px !important; background: var(--ih-edit-wash) !important;
+  }
+  .ih75-account-layout .account-profile-preview .profile-avatar { width: 64px !important; height: 64px !important; border-radius: 16px !important; }
+  .ih75-account-layout .account-profile-preview h2 { font-size: 22px !important; margin: 0 0 4px !important; }
+  .ih75-account-layout .account-profile-preview p { margin: 0 !important; font-size: 14px !important; overflow-wrap: anywhere !important; }
+  .ih75-account-layout .profile-info { min-width: 0 !important; }
+  .ih75-account-layout .account-form { gap: 28px !important; }
+  .ih75-account-layout .account-form-section:not([hidden]) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 24px !important;
+    margin: 0 !important;
+    padding: 26px !important;
+    border: 1px solid var(--ih-edit-line) !important;
+    border-radius: 18px !important;
+    background: var(--ih-edit-paper) !important;
+    box-shadow: none !important;
+  }
+  .ih75-account-layout .account-form-section-heading {
+    grid-column: 1 / -1 !important;
+    display: flex !important; align-items: flex-start !important; gap: 12px !important;
+    margin: 0 !important; padding: 0 !important;
+  }
+  .ih75-account-layout .account-form-section-heading > span {
+    display: grid !important; place-items: center !important; flex: 0 0 34px !important;
+    width: 34px !important; height: 34px !important; margin: 0 !important;
+    border: 0 !important; border-radius: 10px !important;
+    background: var(--ih-edit-wash) !important; color: var(--ih-edit-accent) !important;
+    font: 750 12px/1 var(--ih-heading-font) !important;
+  }
+  .ih75-account-layout .account-form-section-heading h2 { margin: 0 0 6px !important; font-size: 23px !important; }
+  .ih75-account-layout .account-form-section-heading small { display: block !important; color: var(--ih-edit-muted) !important; font-size: 14px !important; line-height: 1.6 !important; }
+  .ih75-account-layout .account-form-section-identity > .ih11-avatar-editor {
+    margin: 0 !important; padding: 0 !important; background: none !important; gap: 14px !important;
+  }
+  .ih75-account-layout .ih11-avatar-preview { width: 64px !important; height: 64px !important; flex: 0 0 64px !important; border-radius: 16px !important; overflow: hidden !important; }
+  .ih75-account-layout .account-form-section-identity > label:last-child,
+  .ih75-account-layout .account-form-section-expertise > label { grid-column: 1 / -1 !important; }
+  .ih75-account-layout .account-form label { font-size: 14px !important; line-height: 1.5 !important; }
+  .ih75-account-layout :is(.account-form, .profile-portfolio-editor) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea) {
+    box-sizing: border-box !important; min-height: 48px !important; padding: 12px 14px !important;
+    border-radius: 10px !important; font-size: 16px !important; line-height: 1.6 !important;
+    color: var(--ih-edit-ink) !important; background: var(--ih-edit-paper) !important;
+  }
+  .ih75-account-layout :is(.account-form, .profile-portfolio-editor) :is(input, textarea):focus-visible {
+    outline: 2px solid var(--ih-edit-accent) !important; outline-offset: 2px !important;
+  }
+  .ih75-account-layout :is(.account-form, .profile-portfolio-editor) :is(label > small, fieldset > small, .profile-field-hint) { font-size: 13px !important; line-height: 1.6 !important; color: var(--ih-edit-muted) !important; }
+  .ih75-account-layout :is(.profile-specialties-field, .profile-skills-field) {
+    min-width: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important;
+  }
+  .ih75-account-layout :is(.profile-specialties-field, .profile-skills-field) > legend { margin-bottom: 8px !important; padding: 0 !important; font: 750 16px/1.5 var(--ih-heading-font) !important; }
+  .ih75-account-layout .profile-field-hint { margin: 0 0 16px !important; }
+  .ih75-account-layout .profile-category-options { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
+  .ih75-account-layout .profile-category-option {
+    display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 10px !important;
+    min-height: 48px !important; padding: 12px !important; margin: 0 !important;
+    border: 1px solid var(--ih-edit-line) !important; border-radius: 10px !important;
+    font: 600 14px/1.5 var(--ih-heading-font) !important; text-align: left !important;
+  }
+  .ih75-account-layout .profile-category-option > span {
+    display: grid !important; place-items: center !important;
+    width: 22px !important; height: 22px !important; flex: 0 0 22px !important;
+    border-radius: 6px !important; border: 0 !important;
+    color: var(--ih-edit-muted) !important; background: var(--ih-edit-wash) !important; font: 700 14px/1 var(--ih-heading-font) !important;
+  }
+  .ih75-account-layout .profile-category-option.is-selected { border-color: var(--ih-edit-accent) !important; background: var(--ih-edit-wash) !important; color: var(--ih-edit-ink) !important; }
+  .ih75-account-layout .profile-category-option.is-selected > span { background: var(--ih-edit-accent) !important; color: var(--p-on, #fff) !important; }
+  .ih75-account-layout .profile-skill-entry { display: flex !important; align-items: stretch !important; gap: 8px !important; }
+  .ih75-account-layout .profile-skill-entry > input { min-width: 0 !important; margin: 0 !important; }
+  .ih75-account-layout .profile-add-skill { flex: 0 0 auto !important; min-height: 48px !important; padding: 10px 16px !important; border-radius: 10px !important; font-size: 14px !important; }
+  .ih75-account-layout .profile-edit-skill-chips { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; margin-block: 16px !important; }
+  .ih75-account-layout .profile-edit-skill-chip { display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 4px 4px 4px 12px !important; border-radius: 10px !important; font-size: 14px !important; }
+  .ih75-account-layout .profile-edit-skill-chip > button { min-width: 36px !important; min-height: 36px !important; font-size: 20px !important; }
+  .ih75-account-layout .account-form-actions {
+    display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 16px !important;
+    margin: 0 !important; padding: 20px 0 !important; background: none !important;
+  }
+  .ih75-account-layout .account-form-save-copy { display: grid !important; gap: 4px !important; max-width: 40ch !important; }
+  .ih75-account-layout .account-form-save-copy strong { font-size: 16px !important; }
+  .ih75-account-layout .account-form-save-copy span { font-size: 13px !important; line-height: 1.55 !important; }
+  .ih75-account-layout .account-form-actions > button { min-height: 48px !important; border-radius: 12px !important; font-size: 15px !important; }
+
+  /* Portfolio: album grid, a separate editor, and a compact legal notice. */
+  .ih75-account-layout .profile-portfolio-manager:not([hidden]) { display: grid !important; gap: 24px !important; margin: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; }
+  .ih75-account-layout .profile-portfolio-heading {
+    display: grid !important; grid-template-columns: minmax(0, 1fr) auto !important; align-items: start !important;
+    gap: 16px !important; margin: 0 !important; padding: 0 !important;
+  }
+  .ih75-account-layout .profile-portfolio-heading h2 { margin: 0 0 8px !important; font-size: 24px !important; }
+  .ih75-account-layout .profile-portfolio-heading p { margin: 0 !important; max-width: 58ch !important; font-size: 14px !important; line-height: 1.65 !important; }
+  .ih75-account-layout .profile-portfolio-count { display: inline-flex !important; align-items: baseline !important; gap: 4px !important; margin: 0 !important; padding: 10px 14px !important; border: 0 !important; border-radius: 12px !important; background: var(--ih-edit-wash) !important; white-space: nowrap !important; font: 600 14px/1.5 var(--ih-heading-font) !important; font-variant-numeric: tabular-nums !important; }
+  .ih75-account-layout .profile-portfolio-count strong { font-size: 22px !important; }
+  .ih75-account-layout .profile-portfolio-legal-note { display: grid !important; gap: 6px !important; padding: 16px 20px !important; margin: 0 !important; border: 0 !important; border-inline-start: 3px solid var(--ih-edit-accent) !important; border-radius: 0 12px 12px 0 !important; background: var(--ih-edit-wash) !important; font-size: 13px !important; line-height: 1.7 !important; }
+  .ih75-account-layout .profile-portfolio-legal-note strong { font-size: 14px !important; }
+  .ih75-account-layout .profile-portfolio-edit-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 16px !important; }
+  .ih75-account-layout .profile-portfolio-edit-card { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 14px !important; padding: 0 0 16px !important; border-radius: 16px !important; overflow: hidden !important; }
+  .ih75-account-layout :is(.profile-portfolio-edit-cover, .profile-portfolio-image-placeholder) { width: 100% !important; height: auto !important; aspect-ratio: 16 / 10 !important; border-radius: 0 !important; }
+  .ih75-account-layout .profile-portfolio-edit-cover img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+  .ih75-account-layout :is(.profile-portfolio-edit-copy, .profile-portfolio-item-actions) { margin: 0 !important; padding-inline: 16px !important; min-width: 0 !important; }
+  .ih75-account-layout .profile-portfolio-edit-copy strong { display: block !important; font-size: 17px !important; line-height: 1.4 !important; overflow-wrap: anywhere !important; }
+  .ih75-account-layout .profile-portfolio-edit-copy > span { display: block !important; margin-top: 6px !important; font-size: 13px !important; }
+  .ih75-account-layout .profile-portfolio-item-actions { display: flex !important; gap: 8px !important; }
+  .ih75-account-layout .profile-portfolio-item-actions button { flex: 1 !important; min-height: 44px !important; border-radius: 9px !important; font-size: 14px !important; }
+  .ih75-account-layout .profile-portfolio-editor { padding: 24px !important; gap: 20px !important; border: 1px solid var(--ih-edit-line) !important; border-radius: 18px !important; background: var(--ih-edit-paper) !important; }
+  .ih75-account-layout .profile-portfolio-editor-heading { margin: 0 !important; }
+  .ih75-account-layout .profile-portfolio-editor-heading h3 { margin: 6px 0 0 !important; font-size: 23px !important; }
+
+  /* Listing counters remain separate from their labels at every width. */
+  .ih75-register-filters { gap: 6px !important; }
+  .ih75-register-filters > button { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; min-height: 44px !important; padding: 10px 12px !important; border-radius: 10px !important; font-size: 14px !important; }
+  .ih75-register-filters .ih-account-filter-label { font: inherit !important; background: none !important; color: inherit !important; padding: 0 !important; }
+  .ih75-register-filters .ih-account-filter-count { display: inline-flex !important; align-items: center !important; justify-content: center !important; min-width: 24px !important; height: 24px !important; margin: 0 !important; padding: 0 5px !important; border-radius: 7px !important; background: color-mix(in srgb, currentColor 9%, transparent) !important; font: 750 12px/24px var(--ih-heading-font) !important; font-variant-numeric: tabular-nums !important; }
+  .ih75-register-count { font-size: 14px !important; line-height: 1.5 !important; }
+  .ih75-owned-copy > p, .ih75-owned-status { font-size: 13px !important; line-height: 1.5 !important; }
+  .ih75-owned-actions :is(a, button) { min-height: 44px !important; font-size: 14px !important; }
+
+  /* Preferences use readable summaries; appearance keeps its visual choices. */
+  .ih75-account-layout :is(.discovery-settings-card, .account-template-card):not([hidden]) { margin: 0 !important; padding: 24px !important; border: 1px solid var(--ih-edit-line) !important; border-radius: 18px !important; background: var(--ih-edit-paper) !important; }
+  .ih75-account-layout :is(.discovery-settings-summary, .discovery-settings-readiness) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 16px !important; margin: 20px 0 !important; padding: 16px !important; border-radius: 12px !important; background: var(--ih-edit-wash) !important; }
+  .ih75-account-layout .discovery-settings-summary dt { font-size: 13px !important; margin-bottom: 6px !important; }
+  .ih75-account-layout .discovery-settings-summary dd { margin: 0 !important; font-size: 17px !important; line-height: 1.4 !important; font-weight: 700 !important; }
+  .ih75-account-layout .discovery-settings-tags { gap: 8px !important; }
+  .ih75-account-layout .discovery-settings-tags > span { font-size: 13px !important; padding: 8px 12px !important; border-radius: 9px !important; }
+  .ih75-account-layout .privacy-entry-card { padding: 24px 0 !important; margin: 0 !important; border-top: 0 !important; }
+  .ih75-account-layout .account-template-options { gap: 16px !important; }
+  .ih75-account-layout .account-template-option { min-width: 0 !important; padding: 18px !important; border-radius: 14px !important; }
+  .ih75-account-layout .account-template-option-copy strong { font-size: 19px !important; }
+  .ih75-account-layout :is(.account-template-option-copy > span, .account-template-note, .discovery-settings-note) { font-size: 14px !important; line-height: 1.65 !important; }
+
+  @media (max-width: 1000px) {
+    .ih75-account-layout { grid-template-columns: 190px minmax(0, 1fr) !important; gap: 24px !important; }
+    .ih75-account-layout .account-form-section:not([hidden]) { grid-template-columns: minmax(0, 1fr) !important; }
+  }
+  @media (max-width: 760px) {
+    .ih11-freelancer-meta { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .ih75-account-layout { grid-template-columns: minmax(0, 1fr) !important; gap: 24px !important; }
+    .ih75-account-navigation { position: relative !important; top: auto !important; z-index: 85 !important; }
+    .ih75-account-navigation :is(.ih75-account-return, .ih74-section-nav-title, .ih72-section-links) { display: none !important; }
+    .ih75-account-navigation .ih72-section-select { display: block !important; margin: 0 !important; padding: 0 !important; }
+    .ih72-section-select .ih7-select { display: grid !important; gap: 8px !important; }
+    .ih72-section-select .ih7-select-label { display: block !important; font: 600 12px/1.5 var(--ih-heading-font) !important; color: var(--ih-edit-muted) !important; }
+    .ih72-section-select .ih7-select-trigger { min-height: 52px !important; padding: 12px 16px !important; border-radius: 12px !important; border: 1px solid var(--ih-edit-line) !important; background: var(--ih-edit-wash) !important; font: 750 16px/1.5 var(--ih-heading-font) !important; }
+    .ih72-section-select .ih7-select-option { min-height: 48px !important; padding: 12px !important; font-size: 15px !important; }
+    .ih75-account-layout .account-profile-preview:not([hidden]) { padding: 16px !important; }
+    .ih75-account-layout .account-form-section:not([hidden]), .ih75-account-layout .profile-portfolio-editor { padding: 20px !important; gap: 20px !important; border-radius: 16px !important; }
+    .ih75-account-layout .profile-portfolio-heading p { font-size: 14px !important; }
+    .ih75-account-layout .profile-portfolio-count { padding: 8px 10px !important; }
+    .ih75-account-layout .profile-portfolio-edit-list { grid-template-columns: minmax(0, 1fr) !important; }
+    .ih75-account-layout .profile-portfolio-legal-note { padding: 14px 16px !important; }
+    .ih75-account-layout :is(.discovery-settings-card, .account-template-card):not([hidden]) { padding: 20px !important; }
+    .ih75-account-layout .discovery-settings-summary { grid-template-columns: minmax(0, 1fr) !important; }
+    .ih75-account-layout .account-form-actions { align-items: stretch !important; }
+    .ih75-account-layout .account-form-actions > button { width: 100% !important; }
+  }
+  @media (max-width: 640px) {
+    .ih75-account-main > .ih-page-heading h1 { font-size: 32px !important; }
+    .ih75-account-main > .ih-page-heading .ih73-description { font-size: 15px !important; }
+    .ih75-account-layout .account-form-section-heading h2 { font-size: 21px !important; }
+    .ih75-register-filters { width: 100% !important; flex-wrap: nowrap !important; }
+    .ih75-register-filters > button { flex: 1 1 0 !important; min-width: 0 !important; padding-inline: 8px !important; gap: 6px !important; font-size: 13px !important; }
+    .ih75-account-layout .account-template-options { grid-template-columns: minmax(0, 1fr) !important; }
+    .ih80-offer-facts { column-gap: 16px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ih72-section-select .ih7-select-menu { animation: none !important; }
+  }
+  /* Keep inactive editors out of layout even in the first cascade layer. */
+  body .ih75-account-layout[hidden], body .ih75-account-layout [hidden] { display: none !important; }
+}
