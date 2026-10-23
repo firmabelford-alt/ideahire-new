@@ -1613,3 +1613,304 @@
   @media (pointer: coarse) { body .ih-structured-room .ih68-compose-hint { display: none !important; } }
   body .ih-account-editor-layout[hidden], body .ih-account-editor-layout [hidden] { display: none !important; }
 }
+/* A conversation is a document on desktop; the phone keeps its chat viewport. */
+@layer ideahireHeadings {
+  body .ih73-page-heading.ih-page-heading.ih-heading-unified {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 20px !important;
+    width: 100% !important;
+    margin-inline: auto !important;
+    padding-block: 24px 32px !important;
+    text-align: center !important;
+  }
+  body .ih73-page-heading.ih-page-heading.ih-heading-unified .ih73-heading-copy {
+    display: grid !important;
+    justify-items: center !important;
+    gap: 14px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 900px !important;
+    margin-inline: auto !important;
+    text-align: center !important;
+  }
+  body .ih73-page-heading.ih-page-heading.ih-heading-unified h1 {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 800 clamp(32px, 3.5vw, 52px)/1.15 var(--ih-heading-font) !important;
+    letter-spacing: -.04em !important;
+    text-align: center !important;
+    text-wrap: balance !important;
+  }
+  body .ih73-page-heading.ih-page-heading.ih-heading-unified .ih73-description {
+    max-width: 64ch !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 450 16px/1.7 var(--ih-heading-font) !important;
+    text-align: center !important;
+    text-wrap: pretty !important;
+  }
+  body .ih73-page-heading.ih-page-heading.ih-heading-unified .ih73-heading-actions {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body .ih72-desk-footer > nav { display: flex !important; flex-wrap: wrap !important; gap: 16px 28px !important; align-items: center !important; }
+  body .ih72-desk-footer .ih-account-help-link { color: var(--p-ink, #172b2d) !important; font-weight: 650 !important; }
+  body :is(.ih72-search, .ih73-catalog-search, .ih75-register-search) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    min-height: 50px !important;
+    padding: 0 14px !important;
+    border: 1px solid var(--p-line, #cbd3d3) !important;
+    border-radius: 10px !important;
+    background: var(--p-paper, #fff) !important;
+    box-shadow: none !important;
+  }
+  body :is(.ih72-search, .ih73-catalog-search, .ih75-register-search) > input {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    flex: 1 1 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 10px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: var(--p-ink, #172b2d) !important;
+    font: 450 16px/1.6 var(--ih-heading-font) !important;
+    box-shadow: none !important;
+  }
+  body :is(.ih72-search, .ih73-catalog-search, .ih75-register-search):focus-within { outline: 2px solid var(--p-accent, #172b2d) !important; outline-offset: 2px !important; }
+  body :is(.ih72-search, .ih73-catalog-search, .ih75-register-search) input::-webkit-search-cancel-button { -webkit-appearance: none !important; }
+  body .privacy-request-form .ih7-select { position: relative !important; width: 100% !important; min-width: 0 !important; }
+  body .privacy-request-form .ih7-select-trigger { width: 100% !important; min-height: 52px !important; font: 500 16px/1.6 var(--ih-heading-font) !important; }
+  body .privacy-request-form .ih7-select-label { font: 650 14px/1.5 var(--ih-heading-font) !important; }
+  body .privacy-request-form .ih7-select-menu { z-index: 100 !important; }
+
+  body .ih-message-workspace .ih72-room-nav { flex-wrap: wrap !important; }
+  body .ih-message-workspace .ih72-room-nav > .ih-message-payment-control {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin-inline-start: auto !important;
+    padding: 10px 0 10px 24px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--a-ink, #172b2d) !important;
+    font: 500 12px/1.5 var(--ih-heading-font) !important;
+  }
+  body .ih-message-workspace .ih-message-payment-control > span { color: var(--a-muted, #526162) !important; font: inherit !important; }
+  body .ih-message-workspace .ih-message-payment-control > strong { max-width: 38ch !important; font: 650 12px/1.5 var(--ih-heading-font) !important; }
+  body .ih-message-workspace .ih72-panel-heading { padding: 0 !important; margin: 0 0 32px !important; }
+  body .ih-message-workspace .ih72-panel-heading h2 { font: 750 28px/1.3 var(--ih-heading-font) !important; }
+  body .ih-message-workspace .agreement-progress {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 24px 0 !important;
+    padding: 16px 0 !important;
+    border: 0 !important;
+    border-top: 1px solid var(--a-line, #d8dfdf) !important;
+    border-bottom: 1px solid var(--a-line, #d8dfdf) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  body .ih-message-workspace .agreement-progress > span {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font: 550 14px/1.5 var(--ih-heading-font) !important;
+  }
+  body .ih-message-workspace .agreement-progress > b { width: 1px !important; height: 28px !important; }
+  body .ih-message-workspace .agreement-waiting-card {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 24px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  body .ih-message-workspace .agreement-waiting-card p,
+  body .ih-message-workspace .agreement-gate-heading > p { max-width: 82ch !important; margin: 12px 0 0 !important; font: 450 15px/1.8 var(--ih-heading-font) !important; text-align: start !important; }
+  body .ih-message-workspace .ih69-plan-keyfacts {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 32px !important;
+    margin: 0 0 20px !important;
+    padding: 24px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--a-line, #d8dfdf) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  body .ih-message-workspace .ih69-plan-keyfacts > div { display: grid !important; gap: 8px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+  body .ih-message-workspace .ih69-plan-keyfacts strong { font: 700 22px/1.4 var(--ih-heading-font) !important; }
+  body .ih-message-workspace :is(.ih69-plan-source, .ih69-scope-list dd, .ih69-fact-list dd) { font-size: 15px !important; line-height: 1.8 !important; }
+  body .ih-message-workspace .ih69-scope-list > div { padding: 20px 0 !important; border: 0 !important; background: transparent !important; }
+  body .ih-message-workspace .ih69-plan-block { margin: 0 !important; padding: 24px 0 !important; border: 0 !important; border-top: 1px solid var(--a-line, #d8dfdf) !important; border-radius: 0 !important; background: transparent !important; }
+  body .ih-message-workspace .ih69-fact-list { gap: 16px 32px !important; }
+  body .ih-message-workspace .ih69-fact-list > div { padding: 0 !important; border: 0 !important; background: transparent !important; }
+
+  @media (min-width: 851px) {
+    body.ih79-app[data-ih73-page="conversation"],
+    body.ih79-app[data-ih73-page="conversation"] #root,
+    body.ih79-app[data-ih73-page="conversation"] .ih68-chat-root {
+      height: auto !important;
+      min-height: 100dvh !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    body .ih-message-workspace:not(.is-focus) {
+      position: relative !important;
+      display: flex !important;
+      flex-direction: column !important;
+      box-sizing: border-box !important;
+      width: calc(100% - 64px) !important;
+      max-width: 1600px !important;
+      height: auto !important;
+      min-height: calc(100dvh - 120px) !important;
+      max-height: none !important;
+      margin: 16px auto 32px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+    }
+    body .ih-message-workspace .ih68-room-header { min-height: 64px !important; padding: 12px 32px !important; }
+    body .ih-message-workspace .ih72-room-nav { gap: 4px !important; padding: 0 32px !important; }
+    body .ih-message-workspace .ih72-room-nav > button:not(.ih-message-payment-control) { flex: 0 0 auto !important; min-height: 48px !important; padding: 12px 16px !important; }
+    body .ih-message-workspace:not(.is-focus) .ih68-room-body,
+    body .ih-message-workspace:not(.is-focus) .ih68-correspondence:not([hidden]) {
+      display: block !important;
+      flex: 1 0 auto !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    body .ih-message-workspace:not(.is-focus) .ih68-thread-wrap {
+      display: block !important;
+      height: auto !important;
+      min-height: 280px !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    body .ih-message-workspace:not(.is-focus) .ih68-thread {
+      display: block !important;
+      height: auto !important;
+      min-height: 280px !important;
+      max-height: none !important;
+      padding: 32px !important;
+      overflow: visible !important;
+    }
+    body .ih-message-workspace .ih68-thread-inner { width: 100% !important; max-width: none !important; margin: 0 !important; }
+    body .ih-message-workspace .ih68-message { max-width: min(88%, 1120px) !important; }
+    body .ih-message-workspace :is(.ih68-message, .ih68-message-content, .message-text, .ih5-message-text) { height: auto !important; max-height: none !important; overflow: visible !important; scroll-margin-top: 100px !important; }
+    body .ih-message-workspace .ih68-message-content { font-size: 16px !important; line-height: 1.8 !important; }
+    body .ih-message-workspace:not(.is-focus) .ih68-composer-area { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 24px 32px 16px !important; border-top: 1px solid var(--a-line, #d8dfdf) !important; }
+    body .ih-message-workspace:not(.is-focus) .ih68-composer {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      align-items: end !important;
+      gap: 12px !important;
+      width: 100% !important;
+      min-height: 0 !important;
+      padding: 16px !important;
+      border: 1px solid var(--a-line, #d8dfdf) !important;
+      border-radius: 12px !important;
+      background: var(--a-paper, #fff) !important;
+    }
+    body .ih-message-workspace:not(.is-focus) .ih68-composer textarea {
+      grid-column: 1 / -1 !important;
+      grid-row: 1 !important;
+      width: 100% !important;
+      min-height: 112px !important;
+      max-height: none !important;
+      padding: 4px 2px !important;
+      overflow-y: hidden !important;
+      font: 450 16px/1.75 var(--ih-heading-font) !important;
+    }
+    body .ih-message-workspace:not(.is-focus) .ih68-attach { grid-row: 2 !important; grid-column: 1 !important; justify-self: start !important; }
+    body .ih-message-workspace:not(.is-focus) .ih68-send { grid-row: 2 !important; grid-column: 2 !important; justify-self: end !important; }
+    body .ih-message-workspace:not(.is-focus) .ih68-room-page:not([hidden]) {
+      display: block !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      padding: 32px !important;
+      overflow: visible !important;
+      scroll-margin-top: 100px !important;
+    }
+    body .ih-message-workspace .agreement-gate { width: 100% !important; max-width: none !important; max-height: none !important; overflow: visible !important; }
+    body .ih-message-workspace .agreement-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 24px 32px !important; }
+    body .ih-message-workspace .ih69-fact-list { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    body .ih-message-workspace:not(.is-focus) .ih68-latest { position: fixed !important; inset: auto 32px 24px auto !important; transform: none !important; }
+    body .ih-message-workspace.is-focus .ih68-composer textarea { max-height: 240px !important; }
+    body .ih75-editor-workspace {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 32px !important;
+      max-width: 1100px !important;
+      margin-inline: auto !important;
+    }
+    body .ih75-editor-workspace .ih75-editor-guide { position: static !important; top: auto !important; width: 100% !important; padding: 0 !important; }
+    body .ih75-editor-workspace :is(.ih75-guide-label, .ih86-form-progress) { display: none !important; }
+    body .ih75-editor-workspace .ih5-job-create-progress { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; }
+    body .ih75-editor-workspace .ih5-job-create-progress li { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    body .ih75-editor-workspace .ih5-job-create-progress button { display: flex !important; align-items: center !important; gap: 10px !important; min-height: 52px !important; padding: 12px !important; }
+    body .ih75-editor-workspace .ih75-editor-content { width: 100% !important; max-width: none !important; margin: 0 !important; }
+    body .ih75-editor-workspace .ih5-job-create-step-heading { margin: 0 0 28px !important; padding: 0 !important; }
+    body .ih75-editor-workspace .ih5-job-create-step-heading h2 { font-size: 26px !important; line-height: 1.4 !important; }
+  }
+  @media (min-width: 851px) and (max-width: 1100px) {
+    body .ih-message-workspace .ih72-room-nav > .ih-message-payment-control { gap: 6px !important; padding-inline-start: 10px !important; }
+    body .ih-message-workspace .ih-message-payment-control > span { display: none !important; }
+    body .ih-message-workspace .ih-message-payment-control > strong { max-width: 28ch !important; }
+    body .ih-message-workspace .ih72-room-nav > button:not(.ih-message-payment-control) { padding-inline: 10px !important; font-size: 13px !important; }
+  }
+  @media (max-width: 850px) {
+    body .ih73-page-heading.ih-page-heading.ih-heading-unified { padding-block: 12px 24px !important; gap: 16px !important; }
+    body .ih73-page-heading.ih-page-heading.ih-heading-unified h1 { font-size: 32px !important; }
+    body .ih73-page-heading.ih-page-heading.ih-heading-unified .ih73-description { font-size: 15px !important; line-height: 1.65 !important; }
+    body .ih-message-workspace .ih72-room-nav { padding-inline: 0 !important; gap: 0 !important; }
+    body .ih-message-workspace .ih72-room-nav > button:not(.ih-message-payment-control) { flex: 1 1 25% !important; max-width: 25% !important; }
+    body .ih-message-workspace .ih72-room-nav > .ih-message-payment-control { flex: 0 0 100% !important; width: 100% !important; max-width: none !important; min-height: 42px !important; margin: 0 !important; padding: 8px 16px !important; border-top: 1px solid var(--a-line, #d8dfdf) !important; background: var(--a-soft, #f4f6f6) !important; }
+    body .ih-message-workspace .ih-message-payment-control > span { flex: 1 !important; text-align: start !important; }
+    body .ih-message-workspace .ih-message-payment-control > strong { max-width: 60% !important; text-align: end !important; }
+    body .ih-message-workspace.is-keyboard .ih72-room-nav > .ih-message-payment-control { display: none !important; }
+    body .ih-message-workspace .agreement-progress { gap: 10px !important; }
+    body .ih-message-workspace .agreement-progress > span { font-size: 12px !important; gap: 7px !important; }
+    body .ih-message-workspace .ih69-plan-keyfacts { gap: 20px !important; }
+  }
+  body .ih-message-workspace [hidden] { display: none !important; }
+}

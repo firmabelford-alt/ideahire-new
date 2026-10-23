@@ -8,7 +8,7 @@ import { useSitePreferences } from './Preferences';
 import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { SubpageNavigation, SubpageHeading, SubpageCount, SubpageLoading } from './Subpages';
-import { MarketSelect } from './MarketUI';
+import { MarketSelect, helpCenterHref } from './MarketUI';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -311,7 +311,7 @@ export function WorkspaceDashboard({
           <button type="button" key={key} onClick={() => select(key)}><WorkspaceIcon kind={icon} /><span><strong>{label}</strong><small>{detail}</small></span></button>)}
       </div>
     </section>
-    <footer className="ih72-desk-footer"><nav aria-label={t('Odkrywaj IdeaHire', 'Explore IdeaHire')}><Link to="/privacy-center">{t('Prywatność i dane', 'Privacy & data')}</Link></nav><IntroFilm /></footer>
+    <footer className="ih72-desk-footer"><nav aria-label={t('Pomoc i informacje', 'Help and information')}><a className="ih-account-help-link" href={helpCenterHref()}>{t('Przejdź do centrum pomocy', 'Visit the help centre')}</a><Link to="/privacy-center">{t('Prywatność i dane', 'Privacy & data')}</Link></nav><IntroFilm /></footer>
   </div>;
 }
 

@@ -63,6 +63,19 @@ export function WorkspaceThread({
   const t = useWorkspaceCopy();
   const en = useSitePreferences().language === 'en';
   const optionsRoot = useRef(null);
+  const scrollCallback = useRef(onScroll);
+  scrollCallback.current = onScroll;
+  useEffect(() => {
+    const pageScroll = () => {
+      const room = optionsRoot.current?.closest('.ih-message-workspace');
+      if (!room || room.classList.contains('is-focus') || !window.matchMedia('(min-width:851px)').matches) return;
+      if (room.dataset.view === 'conversation' && document.scrollingElement) {
+        scrollCallback.current?.({ currentTarget: document.scrollingElement });
+      }
+    };
+    window.addEventListener('scroll', pageScroll, { passive: true });
+    return () => window.removeEventListener('scroll', pageScroll);
+  }, []);
   useEffect(() => {
     const close = event => {
       optionsRoot.current?.querySelectorAll('.ih68-message-options[open]').forEach(details => {
@@ -111,7 +124,8 @@ export function WorkspaceThread({
 }
 function fitWorkspaceDraft(field) {
   if (!field || !field.getClientRects().length) return;
-  const limit = Math.min(128, parseFloat(getComputedStyle(field).maxHeight) || 128);
+  const maximum = parseFloat(getComputedStyle(field).maxHeight);
+  const limit = Number.isFinite(maximum) ? maximum : Infinity;
   field.style.setProperty('height', 'auto', 'important');
   const height = field.scrollHeight;
   field.style.setProperty('height', Math.min(height, limit) + 'px', 'important');
@@ -195,9 +209,6 @@ export function WorkspaceConversation({
   onView,
   focusMode,
   onFocusMode,
-  planPinned,
-  onPinPlan,
-  onClosePlan,
   onBack,
   backLabel,
   onHide,
@@ -218,15 +229,6 @@ export function WorkspaceConversation({
   const t = useWorkspaceCopy();
   const frameRef = useRef(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width: 1399px)').matches ?? true);
-  useLayoutEffect(() => {
-    const media = window.matchMedia?.('(max-width: 1399px)');
-    if (!media) return;
-    const update = () => setCompact(media.matches);
-    update();
-    media.addEventListener?.('change', update);
-    return () => media.removeEventListener?.('change', update);
-  }, []);
   useLayoutEffect(() => {
     let task = 0,
       scrollTask = 0;
@@ -235,6 +237,12 @@ export function WorkspaceConversation({
     function measure() {
       task = 0;
       if (!element) return;
+      if (!focusMode && window.matchMedia?.('(min-width:851px)').matches) {
+        element.style.removeProperty('--ih68-room-height');
+        element.style.removeProperty('top');
+        element.classList.remove('is-keyboard');
+        return;
+      }
       const narrow = window.matchMedia?.('(max-width:850px)').matches,
         inset = focusMode ? narrow ? 0 : 16 : 0,
         top = focusMode || narrow ? inset : Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0)),
@@ -322,18 +330,14 @@ export function WorkspaceConversation({
     };
   }, [focusMode, onFocusMode]);
   const closeMenu = () => setOptionsOpen(false);
-  const showPlan = view === 'plan' || (planPinned && !compact && view === 'conversation');
-  const showContext = planPinned && !compact && view === 'conversation';
-  const closeContext = () => {
-    if (planPinned) onClosePlan();
-    if (view !== 'conversation') onView('conversation');
-  };
+  const showPlan = view === 'plan';
+  const closeContext = () => onView('conversation');
   return <>
     {focusMode && createPortal(<div className="ih68-focus-scrim" aria-hidden="true" />, document.body)}
     <main ref={frameRef} id="ih68-content" data-view={view}
       role={focusMode ? 'dialog' : undefined} aria-modal={focusMode ? true : undefined}
       aria-label={t('Rozmowa IdeaHire', 'IdeaHire conversation')}
-      className={'ih68-room ih72-room ih-structured-room' + (focusMode ? ' is-focus' : '') + (showContext ? ' has-context' : '')}>
+      className={'ih68-room ih72-room ih-structured-room ih-message-workspace' + (focusMode ? ' is-focus' : '')}>
       {loading ? <WorkspaceLoading /> : !hasConversation ?
         <section className="ih68-room-error"><h1>{t('Nie można otworzyć rozmowy', 'Unable to open this conversation')}</h1><p role="alert">{errorMessage}</p><button type="button" className="ih68-secondary" onClick={onBack}><WorkspaceIcon kind="back" />{backLabel}</button></section> : <>
         <header className="ih68-room-header">
@@ -350,10 +354,10 @@ export function WorkspaceConversation({
           <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Pliki', 'Files')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
           <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
           <button type="button" aria-current={view === 'payment' ? 'page' : undefined} aria-controls="ih68-room-payment" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność', 'Payment')}</span></button>
-        </nav>
-        <button type="button" className={'ih-room-payment-status is-' + (paymentOverview?.tone || 'neutral')} onClick={() => onView('payment')} aria-controls="ih68-room-payment">
+        <button type="button" className={'ih-room-payment-status ih-message-payment-control is-' + (paymentOverview?.tone || 'neutral')} onClick={() => onView('payment')} aria-controls="ih68-room-payment">
           <span>{t('Status płatności', 'Payment status')}</span><strong role="status" aria-live="polite" aria-atomic="true">{paymentOverview?.label || t('Sprawdzanie…', 'Checking…')}</strong><WorkspaceIcon kind="next" />
         </button>
+        </nav>
         {disputePanel}
         <div className="ih68-room-body">
           <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={view !== 'conversation'}>{thread}{composer}</section>
@@ -365,7 +369,6 @@ export function WorkspaceConversation({
               <details className="ih72-project-description"><summary>{t('Zlecenie i jego opis', 'Project and description')}<WorkspaceIcon kind="down" /></summary><div><h3>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h3>{category && <p>{category}</p>}{projectDetails}</div></details>
               {projectAction}
               {plan}
-              {!compact && !planPinned && <button type="button" className="ih68-pin-option ih68-text-link" onClick={onPinPlan}><WorkspaceIcon kind="pin" />{t('Przypnij przy rozmowie', 'Pin beside conversation')}</button>}
             </>}
           </section>
           <section hidden={view !== 'payment'} className="ih68-room-page ih-room-payment-page" id="ih68-room-payment" tabIndex={-1} aria-label={t('Płatność', 'Payment')}>

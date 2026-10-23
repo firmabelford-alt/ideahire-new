@@ -302,7 +302,7 @@ export function helpCenterHref() {
   return address.origin === window.location.origin ? `${address.pathname}${address.search}` : address.href;
 }
 
-export function MarketSelect({ id, label, value, options, onChange }) {
+export function MarketSelect({ id, label, value, options, onChange, disabled = false }) {
   const generatedId = useId();
   const selectId = id || generatedId;
   const rootRef = useRef(null);
@@ -316,6 +316,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
   const [focused, setFocused] = useState(selected);
   const selectedOption = options[selected];
   const enabled = options.map((option, index) => !option.disabled ? index : -1).filter((index) => index >= 0);
+  useEffect(() => { if (disabled) setOpen(false); }, [disabled]);
   useEffect(() => {
     if (!open) return undefined;
     const option = optionRefs.current[focused], menu = menuRef.current;
@@ -345,7 +346,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
     if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
   }
   function show(last = false) {
-    if (!enabled.length) return;
+    if (disabled || !enabled.length) return;
     const rect = triggerRef.current?.getBoundingClientRect();
     if (rect) {
       const viewport = window.visualViewport;
@@ -362,8 +363,9 @@ export function MarketSelect({ id, label, value, options, onChange }) {
     setFocused(last ? enabled[enabled.length - 1] : enabled.includes(selected) ? selected : enabled[0]);
     setOpen(true);
   }
-  function choose(index) { if (options[index]?.disabled) return; onChange(options[index].value); close(true); }
+  function choose(index) { if (disabled || options[index]?.disabled) return; onChange(options[index].value); close(true); }
   function keyboard(event) {
+    if (disabled) return;
     if (event.key === "Escape" && open) { event.preventDefault(); event.stopPropagation(); close(true); return; }
     if (event.key === "Tab") { close(); return; }
     if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
@@ -389,7 +391,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
     <div className="ih7-select" ref={rootRef} data-open={open} data-side={menuLayout.side} style={{ "--ih7-menu-height": `${menuLayout.height}px` }} onKeyDown={keyboard}
       onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }}>
       <span id={`${selectId}-label`} className="ih7-select-label">{label}</span>
-      <button type="button" id={selectId} ref={triggerRef} className="ih7-select-trigger" aria-haspopup="listbox"
+      <button type="button" id={selectId} ref={triggerRef} disabled={disabled} className="ih7-select-trigger" aria-haspopup="listbox"
         aria-expanded={open} aria-controls={`${selectId}-options`} aria-labelledby={`${selectId}-label ${selectId}-value`}
         onClick={() => open ? close() : show()}>
         <span id={`${selectId}-value`}>{selectedOption?.label || "Wybierz"}</span>
@@ -399,7 +401,7 @@ export function MarketSelect({ id, label, value, options, onChange }) {
         aria-hidden={!open} inert={open ? undefined : ""}>
         {options.map((option, index) => <button type="button" role="option" key={option.value}
           ref={(element) => { optionRefs.current[index] = element; }} tabIndex={open && focused === index ? 0 : -1}
-          aria-selected={option.value === value} aria-disabled={Boolean(option.disabled)} disabled={option.disabled}
+          aria-selected={option.value === value} aria-disabled={Boolean(disabled || option.disabled)} disabled={disabled || option.disabled}
           className="ih7-select-option" onFocus={() => setFocused(index)} onClick={() => choose(index)}>
           <span>{option.label}</span>{option.value === value && <MarketIcon kind="check" />}
         </button>)}

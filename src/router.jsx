@@ -11362,42 +11362,14 @@ function PrivacyCenter() {
             </p>
 
             <form className="privacy-request-form" onSubmit={handleSubmit}>
-              <label>
-                Rodzaj wniosku
-                <select
-                  value={form.requestType}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      requestType: event.target.value,
-                      requestedErasureAction: "",
-                    }))
-                  }
-                  disabled={Boolean(busy)}
-                >
-                  {PRIVACY_REQUEST_TYPES.map(([value, label]) => (
-                    <option value={value} key={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Preferowany format odpowiedzi
-                <select
-                  value={form.preferredFormat}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      preferredFormat: event.target.value,
-                    }))
-                  }
-                  disabled={Boolean(busy)}
-                >
-                  {PRIVACY_RESPONSE_FORMATS.map(([value, label]) => (
-                    <option value={value} key={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
+              <MarketSelect id="privacy-request-type" label="Rodzaj wniosku" value={form.requestType}
+                options={PRIVACY_REQUEST_TYPES.map(([value, label]) => ({ value, label }))}
+                onChange={value => setForm(current => ({ ...current, requestType: value, requestedErasureAction: "" }))}
+                disabled={Boolean(busy)} />
+              <MarketSelect id="privacy-response-format" label="Preferowany format odpowiedzi" value={form.preferredFormat}
+                options={PRIVACY_RESPONSE_FORMATS.map(([value, label]) => ({ value, label }))}
+                onChange={value => setForm(current => ({ ...current, preferredFormat: value }))}
+                disabled={Boolean(busy)} />
 
               <label>
                 Opis wniosku
@@ -12629,17 +12601,7 @@ function FindTalent() {
                   </label>
                 )}
 
-                <label>
-                  Poziom doświadczenia
-                  <select
-                    value={experienceLevel}
-                    onChange={(event) => setExperienceLevel(event.target.value)}
-                  >
-                    {JOB_EXPERIENCE_LEVELS.map((option) => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </label>
+                <MarketSelect label="Poziom doświadczenia" value={experienceLevel} options={JOB_EXPERIENCE_LEVELS} onChange={value => setExperienceLevel(value)} />
 
                 <label>
                   Najważniejsze umiejętności <em>Opcjonalnie</em>
@@ -12780,56 +12742,11 @@ function FindTalent() {
                               ))}
                             </fieldset>
 
-                            <label>
-                              Sposób zatwierdzania
-                              <select
-                                value={collaborationPlan.approvalMode}
-                                onChange={(event) =>
-                                  updateCollaborationPlan("approvalMode", event.target.value)
-                                }
-                              >
-                                {COLLABORATION_APPROVAL_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
+                            <MarketSelect label="Sposób zatwierdzania" value={collaborationPlan.approvalMode} options={COLLABORATION_APPROVAL_OPTIONS} onChange={value => updateCollaborationPlan("approvalMode", value)} />
 
-                            <label>
-                              Częstotliwość kontaktu
-                              <select
-                                value={collaborationPlan.contactFrequency}
-                                onChange={(event) =>
-                                  updateCollaborationPlan(
-                                    "contactFrequency",
-                                    event.target.value
-                                  )
-                                }
-                              >
-                                {COLLABORATION_CONTACT_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
+                            <MarketSelect label="Częstotliwość kontaktu" value={collaborationPlan.contactFrequency} options={COLLABORATION_CONTACT_OPTIONS} onChange={value => updateCollaborationPlan("contactFrequency", value)} />
 
-                            <label>
-                              Czas na przekazanie uwag
-                              <select
-                                value={collaborationPlan.feedbackTime}
-                                onChange={(event) =>
-                                  updateCollaborationPlan("feedbackTime", event.target.value)
-                                }
-                              >
-                                {COLLABORATION_FEEDBACK_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
+                            <MarketSelect label="Czas na przekazanie uwag" value={collaborationPlan.feedbackTime} options={COLLABORATION_FEEDBACK_OPTIONS} onChange={value => updateCollaborationPlan("feedbackTime", value)} />
                           </div>
                         </section>
 
@@ -12843,21 +12760,7 @@ function FindTalent() {
                           </div>
 
                           <div className="ih5-collaboration-plan-fields">
-                            <label>
-                              Liczba rund poprawek
-                              <select
-                                value={collaborationPlan.revisionRounds}
-                                onChange={(event) =>
-                                  updateCollaborationPlan("revisionRounds", event.target.value)
-                                }
-                              >
-                                {COLLABORATION_REVISION_OPTIONS.map((option) => (
-                                  <option key={option.value} value={option.value}>
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
+                            <MarketSelect label="Liczba rund poprawek" value={collaborationPlan.revisionRounds} options={COLLABORATION_REVISION_OPTIONS} onChange={value => updateCollaborationPlan("revisionRounds", value)} />
 
                             <fieldset className="ih5-collaboration-plan-fieldset">
                               <legend>Kiedy zlecenie jest ukończone? <em>maks. 3</em></legend>
@@ -20790,36 +20693,30 @@ function Chat() {
   const [openMaterialDialog, setOpenMaterialDialog] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const workspaceFocusRef = useRef(null);
-  const [planPinned, setPlanPinned] = useState(false);
-  useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); setOpenMaterialDialog(false); workspaceFocusRef.current = null; }, [id]);
+  const conversationPageScroll = useRef(null);
+  useEffect(() => { setWorkspaceTab("conversation"); setOpenMaterialDialog(false); workspaceFocusRef.current = null; conversationPageScroll.current = null; }, [id]);
   useEffect(() => {
     const paymentReturn = new URLSearchParams(roomLocation.search).get("payment");
     if (paymentReturn === "success" || paymentReturn === "cancelled") setWorkspaceTab("payment");
   }, [id, roomLocation.search]);
   function openWorkspace(value) {
+    const pageFlow = window.matchMedia("(min-width:851px)").matches && !focusMode;
+    if (pageFlow && workspaceTab === "conversation") conversationPageScroll.current = window.scrollY;
     setWorkspaceTab(value);
-    setPlanPinned(false);
     if (value !== "files") setOpenMaterialDialog(false);
     window.requestAnimationFrame(() => {
       if (value === "conversation") {
-        if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
+        if (pageFlow && !followMessagesRef.current && conversationPageScroll.current !== null) {
+          window.scrollTo({ top: conversationPageScroll.current, behavior: "instant" });
+          messageViewportRef.current?.focus({ preventScroll: true });
+        } else if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
         else document.getElementById("ih70-room-options")?.focus({ preventScroll: true });
+      } else {
+        const panel = document.getElementById(`ih68-room-${value}`);
+        panel?.focus({ preventScroll: true });
+        if (pageFlow) panel?.scrollIntoView({ block: "start", behavior: "instant" });
       }
-      else document.getElementById(`ih68-room-${value}`)?.focus({ preventScroll: true });
     });
-  }
-
-  useEffect(() => {
-    if (!planPinned) return undefined;
-    const query = window.matchMedia?.("(max-width: 1399px)");
-    const update = () => { if (query?.matches) openWorkspace("plan"); };
-    update();
-    query?.addEventListener?.("change", update);
-    return () => query?.removeEventListener?.("change", update);
-  }, [planPinned, focusMode]);
-  function closePlanWindow() {
-    setPlanPinned(false);
-    window.requestAnimationFrame(() => composerRef.current?.focus({ preventScroll: true }));
   }
 
   const messageViewportRef = useRef(null);
@@ -20833,10 +20730,22 @@ function Chat() {
     }
   }, [draft]);
   useEffect(() => { followMessagesRef.current = true; setShowLatest(false); }, [id]);
-  useEffect(() => {
+  function scrollToLatestMessage(revealComposer = false) {
     const element = messageViewportRef.current;
-    if (element && followMessagesRef.current) element.scrollTop = element.scrollHeight;
-  }, [messages, workspaceTab, loading]);
+    if (!element) return;
+    if (window.matchMedia("(min-width:851px)").matches && !focusMode) {
+      const lastMessage = element.querySelector(".ih68-message:last-child");
+      const target = revealComposer || draft ? composerRef.current?.closest(".ih68-composer-area") : lastMessage;
+      (target || composerRef.current?.closest(".ih68-composer-area"))?.scrollIntoView({
+        block: target === lastMessage ? "start" : "end", behavior: "instant",
+      });
+    } else element.scrollTop = element.scrollHeight;
+  }
+  useEffect(() => {
+    if (loading || workspaceTab !== "conversation" || !followMessagesRef.current) return;
+    const frame = window.requestAnimationFrame(() => scrollToLatestMessage());
+    return () => window.cancelAnimationFrame(frame);
+  }, [messages, workspaceTab, loading, focusMode]);
 
   const [agreement, setAgreement] =
     useState(null);
@@ -21870,7 +21779,6 @@ function Chat() {
       jobTitle={jobTitle} category={getJobCategoryLabel(jobDetails?.category)}
       materialCount={privateWork.items.filter(item=>item.moderation_status==='active').length} accepted={agreement?.status==='accepted'} paymentOverview={paymentOverview}
       view={workspaceTab} onView={openWorkspace} focusMode={focusMode} onFocusMode={setFocusMode}
-      planPinned={planPinned} onPinPlan={()=>{setPlanPinned(true);setWorkspaceTab('conversation');}} onClosePlan={closePlanWindow}
       backLabel={roomReturn.startsWith('/work')?roomCopy('Praca','Work'):roomCopy('Wiadomości','Messages')}
       onBack={()=>navigate(roomReturn,{state:{workspaceRestoreScrollY:roomLocation.state?.workspaceScrollY}})}
       onHide={handleHideConversation} hiding={hidingConversation} canDispute={agreement?.status==='accepted'} onDispute={()=>setDisputeOpenRequest(value=>value+1)}
@@ -21894,7 +21802,7 @@ function Chat() {
                               /></>}
         onReport={messageId=>privateWork.setReportTarget({type:'message',id:messageId})}
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
-        showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);if(messageViewportRef.current)messageViewportRef.current.scrollTop=messageViewportRef.current.scrollHeight;}}/>}
+        showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);scrollToLatestMessage(true);}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
         onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>{openWorkspace('files');setOpenMaterialDialog(true);}} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
       materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
