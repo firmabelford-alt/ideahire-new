@@ -108,10 +108,11 @@ export function SubpageNavigation({ standalone = false }) {
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
   if (!page || ['dashboard', 'work', 'inbox', 'conversation'].includes(page.kind)) return null;
+  const catalog = ['jobs', 'people', 'services'].includes(page.kind);
   return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
     aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P79">
     <SubpageHistoryControls parent={page.parent} />
-    <span className="ih73-route-label"><span>IdeaHire</span><i aria-hidden="true">/</i><strong>{page.label}</strong></span>
+    {!catalog && <span className="ih73-route-label"><span>IdeaHire</span><i aria-hidden="true">/</i><strong>{page.label}</strong></span>}
     <Link to={['access', 'legal'].includes(page.kind) ? '/' : page.kind === 'admin' ? '/admin' : '/account'} className="ih73-panel-link"><LayoutGrid size={17} strokeWidth={1.65} aria-hidden="true" /><span>{['access', 'legal'].includes(page.kind) ? (en ? 'Home' : 'Strona główna') : (en ? 'Dashboard' : 'Panel')}</span></Link>
   </nav>;
 }

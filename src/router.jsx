@@ -15169,7 +15169,7 @@ function Jobs() {
             <div className="ih5-jobs-results-header">
               <div className="ih5-jobs-results-copy" role="status" aria-live="polite">
                 <span>Wyniki</span>
-                <strong>{formatPolishJobsCount(filteredJobs.length)}</strong>
+                <strong><span className="ih-results-number">{filteredJobs.length.toLocaleString("pl-PL")}</span><span className="ih-results-noun">{formatPolishJobsCount(filteredJobs.length).replace(/^\d+\s*/, "")}</span></strong>
               </div>
 
               {hasFilters && (
@@ -21341,6 +21341,11 @@ function Chat() {
       return;
     }
 
+    if (waitingForProfileReply) {
+      setAgreementMessage("Najpierw poczekaj na odpowiedź wykonawcy w rozmowie.");
+      return;
+    }
+
     const price =
       parseAgreementPrice(
         jobBudgetNegotiable
@@ -21749,6 +21754,12 @@ function Chat() {
     conversation?.client_id ===
     user?.id;
 
+  const isProfileMessage = conversation?.origin_type === "profile" && jobDetails?.contact_kind === "message";
+  const profileReplyReceived = messages.some(message => message.conversation_id === id && message.sender_id === conversation?.contractor_id
+    && (!message.moderation_status || message.moderation_status === "active") && !message.hidden_at
+    && String(message.content || "").trim());
+  const waitingForProfileReply = isProfileMessage && !conversation?.job_id && !agreement && !profileReplyReceived;
+
   const currentUserAccepted =
     !agreementsRequired ||
     (isClient
@@ -21840,7 +21851,8 @@ function Chat() {
                         privateWork.setReportTarget({ type, id: targetId })
                       }
                     /><p className="ih69-material-privacy"><WorkspaceIcon kind="lock" />{roomCopy("Materiały są widoczne wyłącznie dla stron tej współpracy.","Materials are visible only to the people in this project.")}</p></>}
-      plan={<><AgreementPanel
+      projectAction={isProfileMessage && !conversation?.job_id && !agreement ? <div className="ih-profile-project-step"><div><strong>{roomCopy('Najpierw rozmowa, potem zlecenie', 'Chat first, then prepare the project')}</strong><p>{profileReplyReceived ? roomCopy('Możecie teraz przygotować zakres, cenę i termin w panelu zlecenia.', 'You can now prepare scope, price and deadline in the project panel.') : roomCopy('Panel zlecenia będzie dostępny po odpowiedzi wykonawcy.', 'The project panel becomes available after the freelancer replies.')}</p></div>{isClient && <button type="button" disabled={waitingForProfileReply || messagingBlocked || !canTransact} onClick={() => { openAgreementForm(); openWorkspace('plan'); }}><WorkspaceIcon kind="plus" />{roomCopy('Przygotuj zlecenie', 'Prepare project')}</button>}</div> : null}
+      plan={waitingForProfileReply ? <section className="ih-profile-project-wait"><h3>{roomCopy('Zacznijcie od rozmowy', 'Start with a conversation')}</h3><p>{roomCopy('Po odpowiedzi wykonawcy zleceniodawca może przygotować propozycję zakresu, ceny i terminu. Warunki wymagają osobnej akceptacji.', 'After the freelancer replies, the client can propose scope, price and deadline. Terms require a separate acceptance.')}</p><button type="button" className="ih68-secondary" onClick={() => openWorkspace('conversation')}>{roomCopy('Wróć do rozmowy', 'Back to conversation')}</button></section> : <><AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
                       loading={agreementLoading}

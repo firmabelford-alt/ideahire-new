@@ -891,6 +891,25 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
   );
 }
 
+function ServiceOrderProcess() {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const en = useSitePreferences().language === "en";
+  const steps = en ? [
+    ["Discuss your project", "Send a brief and check availability. An inquiry does not reserve a place or start payment."],
+    ["Review the offer", "The freelancer proposes scope, price and deadline. An offer reserves a place for 24 hours."],
+    ["Agree and pay", "Review the final terms together. Payment through IdeaHire starts the project."],
+  ] : [
+    ["Porozmawiaj o projekcie", "Wyślij opis i zapytaj o dostępność. Samo zapytanie nie rezerwuje miejsca i nie uruchamia płatności."],
+    ["Sprawdź ofertę", "Wykonawca proponuje zakres, cenę i termin. Po wysłaniu oferty miejsce czeka 24 godziny."],
+    ["Potwierdź i opłać", "Sprawdźcie ostateczne warunki. Płatność przez IdeaHire uruchamia realizację."],
+  ];
+  return <section className="ih5-service-process" data-expanded={open}>
+    <button type="button" id={`${id}-trigger`} aria-expanded={open} aria-controls={`${id}-content`} onClick={() => setOpen(value => !value)}><span><strong>{en ? "How to order" : "Jak zamówić"}</strong><small>{en ? "From a conversation to a finished project" : "Od rozmowy do realizacji"}</small></span><MarketIcon kind="chevron" /></button>
+    <div id={`${id}-content`} className="ih-service-process-collapse" role="region" aria-labelledby={`${id}-trigger`} aria-hidden={!open} inert={open ? undefined : ""}><div className="ih-service-process-clip"><div className="ih-service-process-steps">{steps.map(([title, description], index) => <article key={title}><span className="ih-service-step-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><div><h3>{title}</h3><p>{description}</p></div></article>)}</div></div></div>
+  </section>;
+}
+
 function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
   const capacity = serviceCapacity(service);
   const isFull = capacity.available === 0;
@@ -1150,14 +1169,14 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
       </header>
 
         <article className="ih5-service-detail-main">
-          <section className="ih5-service-detail-section">
+          <section className="ih5-service-detail-section ih-service-description">
             <h2>Opis usługi</h2>
             <div className="ih5-service-rich-copy">{service.description}</div>
           </section>
 
           {(deliverables.length > 0 || requirements.length > 0) && <div className="ih80-service-scope">
             {deliverables.length > 0 && <section className="ih5-service-detail-section">
-              <h2>Co otrzymasz</h2>
+              <header className="ih-service-section-title"><span aria-hidden="true">01</span><div><h2>Co otrzymasz</h2><p>Rezultaty opisane przez wykonawcę</p></div></header>
               <ul className="ih5-service-check-list">
                 {deliverables.map((item, index) => (
                   <li key={`${item}-${index}`}><span aria-hidden="true">✓</span>{item}</li>
@@ -1165,7 +1184,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               </ul>
             </section>}
             {requirements.length > 0 && <section className="ih5-service-detail-section ih80-scope-inputs">
-              <h2>Materiały od Ciebie</h2>
+              <header className="ih-service-section-title"><span aria-hidden="true">02</span><div><h2>Materiały od Ciebie</h2><p>Przygotuj je przed rozpoczęciem realizacji</p></div></header>
               <ol className="ih5-service-requirement-list">
                 {requirements.map((item, index) => (
                   <li key={`${item}-${index}`}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{item}</li>
@@ -1174,14 +1193,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
             </section>}
           </div>}
 
-          <details className="ih5-service-process">
-            <summary>Jak zamówić<MarketIcon kind="chevron" /></summary>
-            <div>
-              <article><i>01</i><h3>Wyślij brief</h3><p>Otwierasz rozmowę bez opłaty i rezerwacji miejsca.</p></article>
-              <article><i>02</i><h3>Odbierz ofertę</h3><p>Wykonawca zapisuje zakres, termin i cenę. Miejsce czeka 24 godziny.</p></article>
-              <article><i>03</i><h3>Zaakceptuj i zapłać</h3><p>Po zgodzie obu stron płatność w IdeaHire uruchamia realizację.</p></article>
-            </div>
-          </details>
+          <ServiceOrderProcess />
         </article>
 
         <aside className="ih5-service-order-card">
@@ -1515,7 +1527,95 @@ export function MarketplaceSwitch({ active = "services" }) {
   return <SubpageCatalogTabs active={active === 'freelancers' ? 'people' : active} />;
 }
 
-export function ProjectInquiryDialog({ profile, supabase, navigate, onClose, mode = "project" }) {
+export function ProjectInquiryDialog(props) {
+  return props.mode === "message" ? <ProfileMessageDialog {...props} /> : <ProjectInquiryFormDialog {...props} />;
+}
+
+function ProfileMessageDialog({ profile, supabase, navigate, onClose }) {
+  const id = useId();
+  const en = useSitePreferences().language === "en";
+  const copy = (pl, english) => en ? english : pl;
+  const rootRef = useRef(null), draftRef = useRef(null), requestRef = useRef(null), sendingRef = useRef(false);
+  const [draft, setDraft] = useState("");
+  const [confirmed, setConfirmed] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    const app = document.getElementById("root"), inert = app?.inert;
+    document.body.style.overflow = "hidden";
+    if (app) app.inert = true;
+    const viewport = window.visualViewport;
+    const measure = () => {
+      rootRef.current?.style.setProperty("--ih-contact-height", `${viewport?.height || window.innerHeight}px`);
+      rootRef.current?.style.setProperty("--ih-contact-top", `${viewport?.offsetTop || 0}px`);
+      if (rootRef.current) rootRef.current.dataset.compact = String((viewport?.height || window.innerHeight) < 500);
+    };
+    measure();
+    viewport?.addEventListener("resize", measure);
+    viewport?.addEventListener("scroll", measure);
+    rootRef.current?.querySelector("button")?.focus({ preventScroll: true });
+    return () => {
+      document.body.style.overflow = overflow;
+      if (app) app.inert = Boolean(inert);
+      viewport?.removeEventListener("resize", measure);
+      viewport?.removeEventListener("scroll", measure);
+      previous?.focus?.({ preventScroll: true });
+    };
+  }, []);
+  function keyboard(event) {
+    if (event.key === "Escape" && !sendingRef.current) { event.preventDefault(); onClose(); }
+    if (event.key !== "Tab") return;
+    const items = [...(rootRef.current?.querySelectorAll("button:not(:disabled),textarea:not(:disabled),input:not(:disabled),a[href]") || [])].filter(item => item.getClientRects().length);
+    if (!items.length) return;
+    if (event.shiftKey && document.activeElement === items[0]) { event.preventDefault(); items.at(-1).focus(); }
+    else if (!event.shiftKey && document.activeElement === items.at(-1)) { event.preventDefault(); items[0].focus(); }
+  }
+  async function submit(event) {
+    event.preventDefault();
+    if (sendingRef.current) return;
+    const brief = draft.trim();
+    const title = copy("Rozmowa o projekcie", "Project conversation");
+    const invalid = validateProjectInquiry(title, brief, confirmed);
+    if (invalid) { setError(invalid); return; }
+    sendingRef.current = true; setSending(true); setError("");
+    try {
+      const signature = JSON.stringify([profile.id, title, brief]);
+      if (requestRef.current?.signature !== signature) requestRef.current = { signature, id: window.crypto.randomUUID() };
+      const { data, error: rpcError } = await supabase.rpc("create_ideahire_profile_contact", {
+        p_recipient_id: profile.id, p_title: title, p_brief: brief, p_project_only: confirmed,
+        p_request_id: requestRef.current.id, p_contact_kind: "message", p_project_details: {},
+      });
+      if (rpcError) throw rpcError;
+      const conversationId = getInquiryConversationId(data);
+      if (!conversationId) throw new Error("Missing conversation");
+      onClose(); navigate(`/chat/${conversationId}`);
+    } catch (rpcError) { setError(getInquiryError(rpcError)); setSending(false); sendingRef.current = false; }
+  }
+  return createPortal(<div className="ih-profile-chat-backdrop" ref={rootRef} onKeyDown={keyboard} onClick={event => { if (event.target === event.currentTarget && !sendingRef.current) onClose(); }}>
+    <section className="ih-profile-chat" role="dialog" aria-modal="true" aria-labelledby={`${id}-title`} aria-describedby={`${id}-intro`}>
+      <header className="ih-profile-chat-header">
+        <span className="ih-profile-chat-avatar" aria-hidden="true">{profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : Array.from(profile.name || "F")[0]}</span>
+        <div><h2 id={`${id}-title`}>{profile.name || "Freelancer"}</h2><p>{copy("Rozmowa o projekcie", "Project conversation")}</p></div>
+        <button type="button" onClick={onClose} disabled={sending} aria-label={copy("Zamknij rozmowę", "Close conversation")}><MarketIcon kind="close" /></button>
+      </header>
+      <div className="ih-profile-chat-content">
+        <p id={`${id}-intro`} className="ih-profile-chat-notice">{copy("Zapytaj o zakres i dostępność. Po wysłaniu przejdziesz do rozmowy w IdeaHire.", "Ask about scope and availability. Sending opens your IdeaHire conversation.")}</p>
+        <div className="ih-profile-chat-empty"><MarketIcon kind="message" /><h3>{copy("Tu zaczyna się współpraca", "Start with a conversation")}</h3><p>{copy("Opisz, czego potrzebujesz. Szczegóły ustalicie w rozmowie.", "Describe what you need. Discuss the details together.")}</p></div>
+        <div className="ih-profile-chat-next"><MarketIcon kind="plus" /><div><strong>{copy("Najpierw rozmowa, potem zlecenie", "Chat first, then prepare the project")}</strong><p>{copy("Po odpowiedzi wykonawcy możesz otworzyć panel zakresu, ceny i terminu.", "After the freelancer replies, you can prepare scope, price and deadline.")}</p></div></div>
+      </div>
+      <form className="ih-profile-chat-form" onSubmit={submit}>
+        <label className="ih-profile-chat-confirm"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} disabled={sending} required /><span>{copy("Piszę w sprawie projektu. Nie wysyłam reklam ani ofert własnych usług.", "I am asking about a project, not sending ads or selling my own services.")}</span></label>
+        <div className="ih-profile-chat-composer"><label className="ih5-sr-only" htmlFor={`${id}-draft`}>{copy("Twoja wiadomość", "Your message")}</label><textarea id={`${id}-draft`} ref={draftRef} rows={3} value={draft} onChange={event => setDraft(event.target.value)} minLength={30} maxLength={2000} required disabled={sending} aria-describedby={`${id}-count`} placeholder={copy("Napisz, w czym potrzebujesz pomocy…", "Tell them what you need help with…")} /><button type="submit" disabled={sending || !confirmed || draft.trim().length < 30} aria-label={copy("Wyślij wiadomość", "Send message")}>{sending ? <span aria-hidden="true">…</span> : <MarketIcon kind="arrow" />}</button></div>
+        <div className="ih-profile-chat-foot"><small id={`${id}-count`}>{draft.trim().length} / 2000 · {copy("minimum 30 znaków", "at least 30 characters")}</small><small>{copy("Warunki i płatność ustalicie w panelu zlecenia.", "Agree on terms and payment in the project panel.")}</small></div>
+        {error && <p role="alert" className="ih-profile-chat-error">{error}</p>}
+      </form>
+    </section>
+  </div>, document.body);
+}
+
+function ProjectInquiryFormDialog({ profile, supabase, navigate, onClose, mode = "project" }) {
   const id = useId();
   const rootRef = useRef(null);
   const requestId = useRef(null);
@@ -1621,7 +1721,7 @@ export function ProfileContactAction({ profile, user, supabase, navigate, disabl
   }, [profile?.id, user?.id, disabled, supabase]);
   if (profile?.id === user?.id || disabled) return null;
   return <div className="ih11-profile-contact">
-    <div className="ih12-contact-actions"><button className="ih11-button is-quiet" type="button" disabled={!resolved || !available || !canContact} onClick={() => setOpen("message")}><MarketIcon kind="message" />Napisz wiadomość</button><button className="ih11-button is-primary" type="button" disabled={!resolved || !available || !canContact} onClick={() => setOpen("project")}><MarketIcon kind="plus" />Zleć pracę</button></div>
+    <div className="ih12-contact-actions"><button className="ih11-button is-primary" type="button" disabled={!resolved || !available || !canContact} onClick={() => setOpen("message")}><MarketIcon kind="message" />Napisz wiadomość</button></div>
     <small>{!resolved ? "Sprawdzanie dostępności…" : !canContact ? "Zapytania o współpracę są dostępne dla pełnoletnich kont." : available ? "Napisz o projekcie i ustal szczegóły w rozmowie." : "Ta osoba nie przyjmuje teraz nowych zapytań o projekt."}</small>
     {open && <ProjectInquiryDialog key={open} mode={open} profile={profile} supabase={supabase} navigate={navigate} onClose={() => setOpen(null)} />}
   </div>;
@@ -1734,8 +1834,8 @@ export function FreelancerDirectory({ supabase, user, navigate, Navbar, canConta
               <footer className="ih12-directory-contact ih73-person-contact">
                 <Link className="ih11-button is-quiet" to={`/profile/${profile.id}`}>{english ? 'View profile' : 'Zobacz profil'}<MarketIcon kind="arrow" /></Link>
                 {own ? <Link className="ih11-button is-primary" to="/account#account-profile-data">{english ? 'Edit profile' : 'Edytuj profil'}</Link> : <div className="ih12-contact-actions">
-                  <button type="button" className="ih11-button is-quiet" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: 'message' })} title={!canContact ? (english ? 'An adult account is required' : 'Wymagane pełnoletnie konto') : !profile.allow_project_inquiries ? (english ? 'New inquiries are turned off' : 'Nowe zapytania są wyłączone') : (english ? 'Ask about collaboration' : 'Zapytaj o współpracę')}><MarketIcon kind="message" />{english ? 'Write a message' : 'Wiadomość'}</button>
-                  <button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: 'project' })}><MarketIcon kind="plus" />{english ? 'Hire' : 'Zleć pracę'}</button>
+                  <button type="button" className="ih11-button is-primary" disabled={!canContact || !profile.allow_project_inquiries} onClick={() => setSelected({ profile, mode: 'message' })} title={!canContact ? (english ? 'An adult account is required' : 'Wymagane pełnoletnie konto') : !profile.allow_project_inquiries ? (english ? 'New inquiries are turned off' : 'Nowe zapytania są wyłączone') : (english ? 'Ask about collaboration' : 'Zapytaj o współpracę')}><MarketIcon kind="message" />{english ? 'Write a message' : 'Wiadomość'}</button>
+
                 </div>}
                 {!own && (!canContact || !profile.allow_project_inquiries) && <small className="ih80-contact-note">{!canContact ? (english ? 'Contact requires an adult account.' : 'Kontakt wymaga pełnoletniego konta.') : (english ? 'New project inquiries are turned off.' : 'Nowe zapytania o projekt są wyłączone.')}</small>}
               </footer>

@@ -207,7 +207,8 @@ export function WorkspaceConversation({
   materials,
   plan,
   disputePanel,
-  reportDialog
+  reportDialog,
+  projectAction
 }) {
   const t = useWorkspaceCopy();
   const frameRef = useRef(null);
@@ -346,6 +347,7 @@ export function WorkspaceConversation({
           <span className="ih72-room-budget"><small>{accepted ? t('Uzgodniona cena', 'Agreed price') : t('Budżet', 'Budget')}</small><strong>{budget}</strong></span>
         </nav>
         {disputePanel}
+        {projectAction}
         <div className="ih68-room-body">
           <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={compact && view !== 'conversation'}>{thread}{composer}</section>
           <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu', 'Project materials')}>
