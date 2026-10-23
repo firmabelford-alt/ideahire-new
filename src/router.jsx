@@ -19662,23 +19662,27 @@ function AgreementPanel({
       {expanded && (
       <section className="agreement-gate">
       <div className="agreement-gate-heading">
+        <strong className="ih-agreement-intro">Ustalcie zakres, cenę i termin.</strong>
         <p>
-          Najpierw zaakceptujcie tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.
+          Obie strony akceptują tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.
         </p>
 
-        <div className="agreement-progress" aria-label="Postęp akceptacji">
-          <span className={currentUserAccepted ? "is-complete" : ""}>
-            <i>{currentUserAccepted ? "✓" : "1"}</i>
-            Twoja akceptacja
-          </span>
-
-          <b aria-hidden="true" />
-
-          <span className={otherUserAccepted ? "is-complete" : ""}>
-            <i>{otherUserAccepted ? "✓" : "2"}</i>
-            Akceptacja drugiej strony
-          </span>
-        </div>
+        <ul className="ih-agreement-approvals" aria-label="Akceptacja tej wersji warunków">
+          {[
+            ["Twoja akceptacja", currentUserAccepted],
+            ["Akceptacja drugiej strony", otherUserAccepted],
+          ].map(([label, accepted]) => (
+            <li key={label} className={accepted && mode !== "form" ? "is-complete" : ""}>
+              <span className="ih-agreement-approval-icon" aria-hidden="true">
+                <WorkspaceIcon kind={accepted && mode !== "form" ? "check" : "profile"} />
+              </span>
+              <div>
+                <strong>{label}</strong>
+                <span>{mode === "form" ? "Nowa propozycja wymaga akceptacji" : accepted ? "Zaakceptowano tę wersję" : agreement ? "Oczekuje na akceptację" : "Po otrzymaniu propozycji"}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {mode === "form" ? (
@@ -19702,7 +19706,7 @@ function AgreementPanel({
           </div>
 
           <div className="agreement-form-grid">
-            <h4 className="ih12-form-section"><span>01</span> Zakres i rezultat</h4>
+            <h4 className="ih12-form-section ih-agreement-section"><span>01</span> Zakres i rezultat</h4>
             <label className="agreement-field agreement-field-wide">
               <span>Nazwa zlecenia *</span>
               <input
@@ -19752,7 +19756,7 @@ function AgreementPanel({
               />
             </label>
 
-            <h4 className="ih12-form-section"><span>02</span> Cena, termin i przekazanie</h4>
+            <h4 className="ih12-form-section ih-agreement-section"><span>02</span> Cena, termin i przekazanie</h4>
             <label className="agreement-field">
               <span>Cena zlecenia *</span>
               <div className="agreement-price-input">
@@ -19837,7 +19841,7 @@ function AgreementPanel({
               />
             </label>
 
-            <h4 className="ih12-form-section"><span>03</span> Odbiór i zasady współpracy</h4>
+            <h4 className="ih12-form-section ih-agreement-section"><span>03</span> Odbiór i zasady współpracy</h4>
             <label className="agreement-field agreement-field-wide">
               <span>Sposób odbioru pracy *</span>
               <textarea
@@ -21804,9 +21808,9 @@ function Chat() {
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);scrollToLatestMessage(true);}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
-        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>{openWorkspace('files');setOpenMaterialDialog(true);}} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
+        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>setOpenMaterialDialog(true)} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
       materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
-                      compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
+                      key={id} compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
                       conversationId={id} recipientName={otherName}
                       userId={user?.id}
                       disabled={messagingBlocked || privateWork.loading}

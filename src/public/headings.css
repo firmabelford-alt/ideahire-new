@@ -1721,32 +1721,6 @@
   body .ih-message-workspace .ih-message-payment-control > strong { max-width: 38ch !important; font: 650 12px/1.5 var(--ih-heading-font) !important; }
   body .ih-message-workspace .ih72-panel-heading { padding: 0 !important; margin: 0 0 32px !important; }
   body .ih-message-workspace .ih72-panel-heading h2 { font: 750 28px/1.3 var(--ih-heading-font) !important; }
-  body .ih-message-workspace .agreement-progress {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr) !important;
-    align-items: center !important;
-    gap: 20px !important;
-    width: 100% !important;
-    max-width: none !important;
-    margin: 24px 0 !important;
-    padding: 16px 0 !important;
-    border: 0 !important;
-    border-top: 1px solid var(--a-line, #d8dfdf) !important;
-    border-bottom: 1px solid var(--a-line, #d8dfdf) !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-  }
-  body .ih-message-workspace .agreement-progress > span {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 10px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    font: 550 14px/1.5 var(--ih-heading-font) !important;
-  }
-  body .ih-message-workspace .agreement-progress > b { width: 1px !important; height: 28px !important; }
   body .ih-message-workspace .agreement-waiting-card {
     width: 100% !important;
     max-width: none !important;
@@ -1792,8 +1766,8 @@
       display: flex !important;
       flex-direction: column !important;
       box-sizing: border-box !important;
-      width: calc(100% - 64px) !important;
-      max-width: 1600px !important;
+      width: calc(100% - 48px) !important;
+      max-width: 1680px !important;
       height: auto !important;
       min-height: calc(100dvh - 120px) !important;
       max-height: none !important;
@@ -1908,8 +1882,6 @@
     body .ih-message-workspace .ih-message-payment-control > span { flex: 1 !important; text-align: start !important; }
     body .ih-message-workspace .ih-message-payment-control > strong { max-width: 60% !important; text-align: end !important; }
     body .ih-message-workspace.is-keyboard .ih72-room-nav > .ih-message-payment-control { display: none !important; }
-    body .ih-message-workspace .agreement-progress { gap: 10px !important; }
-    body .ih-message-workspace .agreement-progress > span { font-size: 12px !important; gap: 7px !important; }
     body .ih-message-workspace .ih69-plan-keyfacts { gap: 20px !important; }
   }
   body .ih-message-workspace [hidden] { display: none !important; }

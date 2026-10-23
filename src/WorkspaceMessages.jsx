@@ -189,7 +189,7 @@ export function WorkspaceComposer({
           aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}
           title={sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}><span className="ih-compose-action-label">{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><WorkspaceIcon kind="send" /></button>
       </form>}
-    {!blocked && <p className="ih68-compose-hint">{t('Enter wysyła · Shift + Enter dodaje linię', 'Enter to send · Shift + Enter for a new line')}</p>}
+    {!blocked && <div className="ih-compose-help"><p className="ih68-compose-hint">{t('Enter wysyła · Shift + Enter dodaje linię', 'Enter to send · Shift + Enter for a new line')}</p><span className="ih-compose-count" aria-label={t('Liczba znaków wiadomości', 'Message character count')}>{draft.length.toLocaleString()} / 4 000</span></div>}
   </div>;
 }
 
@@ -362,7 +362,7 @@ export function WorkspaceConversation({
         <div className="ih68-room-body">
           <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={view !== 'conversation'}>{thread}{composer}</section>
           <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu', 'Project materials')}>
-            {view === 'files' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Pliki i linki', 'Files & links')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij materiały', 'Close materials')}><WorkspaceIcon kind="close" /></button></header>{materials}</>}
+            <header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Pliki i linki', 'Files & links')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij materiały', 'Close materials')}><WorkspaceIcon kind="close" /></button></header>{materials}
           </section>
           <section hidden={!showPlan} className="ih68-room-page ih68-terms" id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia', 'Terms')}>
             {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia', 'Terms')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij ustalenia', 'Close terms')}><WorkspaceIcon kind="close" /></button></header>

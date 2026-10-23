@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { IdeaHireDateField, getSafeWebUrl } from "./MarketUI";
+import { Upload, Link2, FileText, ShieldCheck, X, Plus, Paperclip, ChevronDown, File as FileIcon } from "lucide-react";
+import { IdeaHireDateField, MarketSelect, getSafeWebUrl } from "./MarketUI";
 import { supabase } from "./supabase";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
@@ -790,6 +791,21 @@ export function ProjectFilesPanel({
   );
 }
 
+function SelectedMaterialFile({ file, onRemove }) {
+  const [preview, setPreview] = useState("");
+  useEffect(() => {
+    if (!["jpg", "jpeg", "png", "webp"].includes(fileExtension(file.name))) return;
+    const url = URL.createObjectURL(file);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  return <li className="ih-material-file">
+    <span className="ih-material-file-preview" aria-hidden="true">{preview ? <img src={preview} alt="" onError={() => setPreview("")} /> : <FileIcon size={22} />}</span>
+    <div><strong>{file.name}</strong><span>{formatBytes(file.size)} · {fileExtension(file.name).toUpperCase()}</span></div>
+    <button type="button" className="ih-material-icon-button" onClick={onRemove} aria-label={`Usuń plik ${file.name}`}><X size={18} /></button>
+  </li>;
+}
+
 export function PrivateSharePanel({
   compact = false,
   openRequest = false,
@@ -825,15 +841,31 @@ export function PrivateSharePanel({
   const [outcomeUnknown, setOutcomeUnknown] = useState(false);
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
+  const [selectionMessage, setSelectionMessage] = useState("");
+  const [dragging, setDragging] = useState(false);
   const imageCount = files.filter((file) => ["jpg", "jpeg", "png", "webp"].includes(fileExtension(file.name))).length;
+  const fileBytes = files.reduce((sum, file) => sum + file.size, 0);
+  const accessCount = accessEntries.filter((entry) => Object.values(entry).some((value) => String(value).trim())).length;
+  const materialCount = files.length + links.filter((link) => link.url.trim()).length + accessCount + (writtenText.trim() ? 1 : 0);
+  const occupiedSlots = files.length + links.length + accessCount + (writtenText.trim() ? 1 : 0);
+  const canDeliver = agreementAccepted && paymentConfirmed && isContractor;
+  const deliveryHint = !isContractor ? "Gotową pracę przekazuje wykonawca. Jako zleceniodawca możesz dodawać materiały do rozmowy." : !agreementAccepted ? "Przekazanie gotowej pracy będzie dostępne po akceptacji warunków przez obie strony i potwierdzeniu płatności." : !paymentConfirmed ? "Przekazanie gotowej pracy będzie dostępne po potwierdzeniu płatności w tej rozmowie." : "";
   const dialogRef = useRef(null);
   const backdropRef = useRef(null);
+
+  useEffect(() => {
+    if (!open || outcomeUnknown) return;
+    setMessage("");
+    setSelectionMessage("");
+    setProgress(0);
+  }, [open, outcomeUnknown]);
 
   useEffect(() => {
     if (!open) return undefined;
     const viewport = window.visualViewport;
     function updateHeight() {
       backdropRef.current?.style.setProperty("--ih9-share-viewport-height", `${Math.round(viewport?.height || window.innerHeight)}px`);
+      backdropRef.current?.style.setProperty("--ih-material-viewport-top", `${Math.round(viewport?.offsetTop || 0)}px`);
     }
     updateHeight();
     viewport?.addEventListener("resize", updateHeight);
@@ -847,42 +879,80 @@ export function PrivateSharePanel({
   useEffect(() => {
     if (!open) return undefined;
     const previousFocus = document.activeElement;
-    dialogRef.current?.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+    dialogRef.current?.querySelector('h2')?.focus({ preventScroll: true });
     return () => {
-      if (previousFocus?.isConnected) previousFocus.focus?.({ preventScroll: true });
+      window.requestAnimationFrame(() => {
+        if (previousFocus?.isConnected) previousFocus.focus?.({ preventScroll: true });
+      });
     };
   }, [open]);
 
   useEffect(() => {
     if (!open) return undefined;
     function closeOnEscape(event) {
-      if (event.key === "Escape" && !busy) setOpen(false);
+      if (event.key === "Escape" && !event.defaultPrevented && !busy) setOpen(false);
     }
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const background = document.getElementById("root");
+    const previousInert = background?.inert;
+    if (background) background.inert = true;
+    const previousOverflow = document.body.style.getPropertyValue("overflow");
+    const previousPriority = document.body.style.getPropertyPriority("overflow");
+    document.body.style.setProperty("overflow", "hidden", "important");
     window.addEventListener("keydown", closeOnEscape);
     return () => {
-      document.body.style.overflow = previousOverflow;
+      if (previousOverflow) document.body.style.setProperty("overflow", previousOverflow, previousPriority);
+      else document.body.style.removeProperty("overflow");
+      if (background) background.inert = !!previousInert;
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [busy, open]);
 
-  function handleFiles(event) {
-    const next = Array.from(event.target.files || []);
+  function addFiles(next) {
+    if (busy || disabled || outcomeUnknown) return;
     const valid = [];
+    const errors = [];
+    let bytes = fileBytes;
     for (const file of next) {
       if (!ALLOWED_EXTENSIONS.has(fileExtension(file.name))) {
-        setMessage(`Plik „${file.name}” ma niedozwolony format.`);
+        errors.push(`„${file.name}”: niedozwolony format.`);
         continue;
       }
       if (file.size < 1 || file.size > MAX_FILE_BYTES) {
-        setMessage(`Plik „${file.name}” musi mieć maksymalnie 50 MB.`);
+        errors.push(`„${file.name}”: plik musi być niepusty i mieć do 50 MB.`);
+        continue;
+      }
+      if ([...files, ...valid].some((item) => item.name === file.name && item.size === file.size && item.lastModified === file.lastModified)) {
+        errors.push(`„${file.name}” jest już na liście.`);
+        continue;
+      }
+      if (occupiedSlots + valid.length >= MAX_ITEMS) {
+        errors.push(`„${file.name}”: osiągnięto limit 24 materiałów.`);
+        continue;
+      }
+      if (bytes + file.size > MAX_BATCH_BYTES) {
+        errors.push(`„${file.name}”: przekroczono łączny limit 150 MB.`);
         continue;
       }
       valid.push(file);
+      bytes += file.size;
     }
-    setFiles((current) => [...current, ...valid].slice(0, MAX_ITEMS));
+    setFiles((current) => [...current, ...valid]);
+    setSelectionMessage(errors.slice(0, 3).join(" ") + (errors.length > 3 ? ` Pozostałe pominięte pliki: ${errors.length - 3}.` : ""));
+    setMessage("");
+  }
+
+  function handleFiles(event) {
+    addFiles(Array.from(event.target.files || []));
     event.target.value = "";
+  }
+
+  function addLink() {
+    if (occupiedSlots >= MAX_ITEMS) {
+      setSelectionMessage("Możesz wysłać maksymalnie 24 materiały naraz. Usuń pozycję, aby dodać link.");
+      return;
+    }
+    setLinks((current) => [...current, { id: crypto.randomUUID(), url: "", label: "" }]);
+    window.requestAnimationFrame(() => dialogRef.current?.querySelector('.ih-material-links > :last-child input[type="url"]')?.focus());
   }
 
   async function submit(event) {
@@ -1058,159 +1128,120 @@ export function PrivateSharePanel({
 
   return (
     <section className={`private-work-share ${open ? "is-open" : ""}`}>
-      <button type="button" className="private-work-share-toggle" onClick={() => setOpen((value) => !value)} disabled={disabled || busy}>
-        <span aria-hidden="true">＋</span>
-        <b>Dodaj materiały</b>
+      <button type="button" className="private-work-share-toggle" onClick={() => setOpen(true)} disabled={disabled || busy}>
+        <span aria-hidden="true">＋</span><b>Dodaj materiały</b>
         {!compact && <small>Pliki, zdjęcia, linki lub gotowa praca</small>}
       </button>
       {open && createPortal((
-        <div ref={backdropRef} className="private-work-share-backdrop ih9-share-dialog" role="presentation" onMouseDown={(event) => {
+        <div ref={backdropRef} className="private-work-share-backdrop ih9-share-dialog ih-material-backdrop" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget && !busy) setOpen(false);
         }}>
-        <form ref={dialogRef} onSubmit={submit} className="private-work-share-form" role="dialog" aria-modal="true" aria-labelledby="private-work-share-title" onKeyDown={(event) => {
-          if (event.key !== "Tab") return;
-          const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary')).filter((control) => control.tabIndex !== -1 && !control.closest('fieldset[disabled]') && !control.closest('details:not([open]) .private-work-extra-body'));
-          const first = controls[0]; const last = controls.at(-1);
-          if (!first) return;
-          const active = document.activeElement;
-          if (event.shiftKey && (active === first || !controls.includes(active))) { event.preventDefault(); last.focus(); }
-          else if (!event.shiftKey && (active === last || !controls.includes(active))) { event.preventDefault(); first.focus(); }
-        }}>
-          <div className="private-work-share-heading">
-            <div>
-              <h2 id="private-work-share-title">Dodaj materiały</h2>
-              {recipientName && <p className="ih-share-recipient">Rozmowa z <strong>{recipientName}</strong></p>}
-            </div>
-            <button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="Zamknij okno dodawania materiałów">×</button>
-          </div>
-          <div className="private-work-tabs" role="tablist" aria-label="Sposób wysyłki" onKeyDown={(event) => {
-            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-            event.preventDefault();
-            if (busy || outcomeUnknown) return;
-            const nextMode = agreementAccepted && paymentConfirmed && isContractor && (event.key === "End" || (event.key !== "Home" && mode === "materials")) ? "delivery" : "materials";
-            setMode(nextMode);
-            event.currentTarget.querySelector(`#ih9-share-tab-${nextMode}`)?.focus();
+          <form ref={dialogRef} onSubmit={submit} noValidate className="ih-material-dialog" role="dialog" aria-modal="true" aria-labelledby="private-work-share-title" aria-describedby="ih-material-recipient" aria-busy={busy} onKeyDown={(event) => {
+            if (event.key !== "Tab") return;
+            const controls = Array.from(event.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], summary')).filter((control) => control.tabIndex !== -1 && !control.closest('[inert], fieldset[disabled]') && control.getClientRects().length > 0);
+            const first = controls[0]; const last = controls.at(-1);
+            if (!first) return;
+            const active = document.activeElement;
+            if (event.shiftKey && (active === first || !controls.includes(active))) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && (active === last || !controls.includes(active))) { event.preventDefault(); first.focus(); }
           }}>
-            <button type="button" role="tab" id="ih9-share-tab-materials" aria-controls="ih9-share-panel" aria-selected={mode === "materials"} tabIndex={mode === "materials" ? 0 : -1} className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")} disabled={busy || outcomeUnknown}>Materiały do rozmowy</button>
-            <button
-              type="button"
-              role="tab"
-              id="ih9-share-tab-delivery"
-              aria-controls="ih9-share-panel"
-              aria-selected={mode === "delivery"}
-              tabIndex={mode === "delivery" ? 0 : -1}
-              className={mode === "delivery" ? "is-active" : ""}
-              onClick={() => setMode("delivery")}
-              disabled={!agreementAccepted || !paymentConfirmed || !isContractor || busy || outcomeUnknown}
-              title={!agreementAccepted ? "Najpierw zaakceptujcie Formularz współpracy" : !isContractor ? "Pracę przekazuje wykonawca" : !paymentConfirmed ? "Pracę możesz przekazać po potwierdzeniu płatności" : ""}
-            >
-              Przekaż pracę
-            </button>
-          </div>
-
-          <fieldset className="ih9-share-body" role="tabpanel" id="ih9-share-panel" aria-labelledby={`ih9-share-tab-${mode}`} disabled={busy || outcomeUnknown}>
-          <div className="private-work-field">
-            <label htmlFor="private-work-caption">{mode === "delivery" ? "Co przekazujesz i jak sprawdzić rezultat?" : "Wiadomość do materiałów (opcjonalnie)"}</label>
-            <textarea id="private-work-caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz gotową pracę, zawartość plików i sposób ich weryfikacji…" : "Dodaj krótki kontekst…"} />
-          </div>
-
-          <div className="private-work-picker-row">
-            <label className="private-work-file-picker">
-              <input type="file" multiple accept={FILE_ACCEPT} onChange={handleFiles} />
-              <span>{mode === "delivery" ? "Pliki gotowej pracy" : "Wybierz pliki"}</span>
-              <small>Obrazy, dokumenty, kod, ZIP, audio lub wideo · do 50 MB</small>
-            </label>
-            <button type="button" className="private-work-add-link" onClick={() => setLinks((current) => current.length + files.length < MAX_ITEMS ? [...current, { url: "", label: "" }] : current)}>
-              + Dodaj kolejny link
-            </button>
-          </div>
-
-          {files.length > 0 && (
-            <div className="private-work-selected-files">
-              {files.map((file, index) => (
-                <span key={`${file.name}-${file.lastModified}-${index}`}>
-                  <b>{file.name}</b><small>{formatBytes(file.size)}</small>
-                  <button type="button" onClick={() => setFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Usuń ${file.name}`}>×</button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {imageCount > 1 && (
-            <div className="private-work-field private-work-album-name-field">
-              <label htmlFor="private-work-album-title">Nazwa zestawu zdjęć (opcjonalnie)</label>
-              <input id="private-work-album-title" type="text" value={albumTitle} onChange={(event) => setAlbumTitle(event.target.value)} maxLength={120} placeholder="Np. Grafiki na Instagram — wersja finalna" />
-              <small>{imageCount} {imageCount < 5 ? "zdjęcia" : "zdjęć"} zostanie pokazanych jako jedna schludna galeria.</small>
-            </div>
-          )}
-
-          <div className="private-work-link-inputs">
-            {links.map((link, index) => (
-              <div key={index}>
-                <input type="url" value={link.url} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item))} placeholder="https://link-do-pracy.pl" />
-                <input type="text" value={link.label} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item))} placeholder="Nazwa linku (opcjonalnie)" maxLength={180} />
-                <select value={link.materialKind || "link"} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, materialKind: event.target.value } : item))} aria-label="Rodzaj linku">
-                  <option value="link">Link do materiału</option>
-                  <option value="preview">Podgląd lub wersja testowa</option>
-                  <option value="repository">Repozytorium kodu</option>
-                </select>
-                <button type="button" onClick={() => setLinks((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label="Usuń link">×</button>
+            <header className="ih-material-header">
+              <div><h2 id="private-work-share-title" tabIndex={-1}>{mode === "delivery" ? "Przekaż gotową pracę" : "Dodaj materiały"}</h2>
+                <p id="ih-material-recipient">Do rozmowy z <strong>{recipientName || "drugą stroną"}</strong></p>
               </div>
-            ))}
-          </div>
+              <button type="button" className="ih-material-icon-button" onClick={() => setOpen(false)} disabled={busy} aria-label="Zamknij okno materiałów"><X size={22} /></button>
+            </header>
 
-          <details className="private-work-extra-section" open={mode === "delivery"}>
-            <summary>Praca pisemna lub tekst bez osobnego pliku</summary>
-            <div className="private-work-extra-body">
-              <input type="text" value={writtenTitle} onChange={(event) => setWrittenTitle(event.target.value)} maxLength={180} placeholder="Tytuł, np. Tekst na stronę główną" />
-              <textarea value={writtenText} onChange={(event) => setWrittenText(event.target.value)} maxLength={20000} rows={7} placeholder="Wklej tutaj gotowy tekst, opis, copywriting albo instrukcję…" />
-              <small>{writtenText.length}/20 000 znaków</small>
+            <div className="ih-material-body">
+              <div className="ih-material-modes" role="tablist" aria-label="Co chcesz wysłać?" onKeyDown={(event) => {
+                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key) || busy || outcomeUnknown) return;
+                event.preventDefault();
+                const nextMode = canDeliver && (event.key === "End" || (event.key !== "Home" && mode === "materials")) ? "delivery" : "materials";
+                setMode(nextMode);
+                event.currentTarget.querySelector(`#ih9-share-tab-${nextMode}`)?.focus();
+              }}>
+                <button type="button" role="tab" id="ih9-share-tab-materials" aria-controls="ih9-share-panel" aria-selected={mode === "materials"} tabIndex={mode === "materials" ? 0 : -1} className={mode === "materials" ? "is-active" : ""} onClick={() => setMode("materials")} disabled={busy || outcomeUnknown}>
+                  <Paperclip size={21} aria-hidden="true" /><span><strong>Materiały do rozmowy</strong><small>Załączniki, inspiracje, wersje robocze</small></span>
+                </button>
+                <button type="button" role="tab" id="ih9-share-tab-delivery" aria-controls="ih9-share-panel" aria-selected={mode === "delivery"} aria-describedby={!canDeliver ? "ih-material-delivery-hint" : undefined} tabIndex={mode === "delivery" ? 0 : -1} className={mode === "delivery" ? "is-active" : ""} onClick={() => setMode("delivery")} disabled={!canDeliver || busy || outcomeUnknown}>
+                  <ShieldCheck size={21} aria-hidden="true" /><span><strong>Gotowa praca</strong><small>Przekazanie do odbioru przez klienta</small></span>
+                </button>
+              </div>
+              {deliveryHint && <p className="ih-material-delivery-hint" id="ih-material-delivery-hint">{deliveryHint}</p>}
+
+              <fieldset className="ih-material-fields" role="tabpanel" id="ih9-share-panel" aria-labelledby={`ih9-share-tab-${mode}`} disabled={busy || outcomeUnknown}>
+                <legend className="ih68-sr-only">{mode === "delivery" ? "Materiały gotowej pracy" : "Materiały do rozmowy"}</legend>
+                <section className="ih-material-section" aria-labelledby="ih-material-add-title">
+                  <div className="ih-material-section-heading"><h3 id="ih-material-add-title">{mode === "delivery" ? "Co przekazujesz?" : "Wybierz materiały"}</h3><span>{materialCount} / 24</span></div>
+                  <label className={'ih-material-dropzone' + (dragging ? ' is-dragging' : '')} onDragOver={(event) => {
+                    event.preventDefault(); if (!busy && !outcomeUnknown) setDragging(true);
+                  }} onDragLeave={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setDragging(false);
+                  }} onDrop={(event) => {
+                    event.preventDefault(); setDragging(false); addFiles(Array.from(event.dataTransfer.files || []));
+                  }}>
+                    <input className="ih-material-file-input" type="file" multiple accept={FILE_ACCEPT} onChange={handleFiles} aria-label="Wybierz pliki do przesłania" />
+                    <Upload size={28} aria-hidden="true" />
+                    <span><strong>{files.length ? "Dodaj następne pliki" : "Wybierz pliki"}</strong><span className="ih-material-drop-hint"> lub przeciągnij je tutaj</span></span>
+                    <small>Zdjęcia, dokumenty, kod, archiwa, audio i wideo</small>
+                    <small>Do 50 MB na plik · 150 MB łącznie · maksymalnie 24 materiały</small>
+                  </label>
+                  {selectionMessage && <p className="ih-material-notice" role="status">{selectionMessage}</p>}
+                  {files.length > 0 && <ul className="ih-material-files" aria-label="Wybrane pliki">{files.map((file, index) => <SelectedMaterialFile key={`${file.name}-${file.size}-${file.lastModified}`} file={file} onRemove={() => { setFiles((current) => current.filter((_, itemIndex) => itemIndex !== index)); setSelectionMessage(""); }} />)}</ul>}
+                  {imageCount > 1 && <label className="ih-material-field"><span>Nazwa zestawu zdjęć <small>opcjonalnie</small></span><input type="text" value={albumTitle} onChange={(event) => setAlbumTitle(event.target.value)} maxLength={120} placeholder="Np. Grafiki na stronę — wersja finalna" /><small>{imageCount} zdjęć będzie widocznych jako jedna galeria.</small></label>}
+                  <div className="ih-material-links">{links.map((link, index) => <div className="ih-material-link" key={link.id || index}>
+                    <div className="ih-material-item-heading"><strong><Link2 size={17} aria-hidden="true" />Link {index + 1}</strong><button type="button" className="ih-material-icon-button" onClick={() => setLinks((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Usuń link ${index + 1}`}><X size={18} /></button></div>
+                    <label className="ih-material-field"><span>Adres HTTPS</span><input type="url" value={link.url} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item))} placeholder="https://…" autoComplete="off" /></label>
+                    <div className="ih-material-two-fields"><label className="ih-material-field"><span>Nazwa linku <small>opcjonalnie</small></span><input type="text" value={link.label} onChange={(event) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item))} placeholder="Np. Podgląd projektu" maxLength={180} /></label>
+                      <MarketSelect label="Rodzaj linku" value={link.materialKind || "link"} disabled={busy || outcomeUnknown} options={[{value:"link",label:"Link do materiału"},{value:"preview",label:"Podgląd / wersja testowa"},{value:"repository",label:"Repozytorium kodu"}]} onChange={(value) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? {...item,materialKind:value} : item))} />
+                    </div>
+                  </div>)}</div>
+                  <button type="button" className="ih-material-add-link" onClick={addLink} disabled={occupiedSlots >= MAX_ITEMS}><Plus size={18} aria-hidden="true" /><Link2 size={18} aria-hidden="true" />{links.length ? "Dodaj następny link" : "Dodaj link zamiast pliku"}</button>
+                </section>
+
+                <details className="ih-material-extra" open={mode === "delivery" || undefined}>
+                  <summary><FileText size={20} aria-hidden="true" /><span><strong>Tekst bez pliku</strong><small>Wklej treść, copywriting lub instrukcję</small></span><ChevronDown size={18} aria-hidden="true" /></summary>
+                  <div className="ih-material-extra-body">
+                    <label className="ih-material-field"><span>Tytuł tekstu <small>opcjonalnie</small></span><input type="text" value={writtenTitle} onChange={(event) => setWrittenTitle(event.target.value)} maxLength={180} placeholder="Np. Tekst na stronę główną" /></label>
+                    <label className="ih-material-field"><span>Treść</span><textarea value={writtenText} onChange={(event) => setWrittenText(event.target.value)} maxLength={20000} rows={7} placeholder="Wklej tekst, który chcesz przekazać…" /><small>{writtenText.length.toLocaleString()} / 20 000 znaków</small></label>
+                  </div>
+                </details>
+
+                <details className="ih-material-extra">
+                  <summary><ShieldCheck size={20} aria-hidden="true" /><span><strong>Bezpieczny dostęp</strong><small>Przekaż dostęp przez wygasający link</small></span><ChevronDown size={18} aria-hidden="true" /></summary>
+                  <div className="ih-material-extra-body">
+                    <p>Hasło umieść w jednorazowym lub wygasającym linku z menedżera haseł. Tutaj podaj link i instrukcję, bez jawnego hasła.</p>
+                    {accessEntries.map((entry, index) => <div className="ih-material-access" key={index}>
+                      <div className="ih-material-item-heading"><strong>Dostęp {index + 1}</strong>{accessEntries.length > 1 && <button type="button" className="ih-material-icon-button" onClick={() => setAccessEntries((current) => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={`Usuń dostęp ${index + 1}`}><X size={18} /></button>}</div>
+                      {[['label', 'Nazwa dostępu', 'text', 'Np. Panel WordPress', 180], ['serviceUrl', 'Adres usługi', 'url', 'https://adres-logowania.pl'], ['login', 'Login lub e-mail', 'text', 'Login do usługi', 320], ['secureUrl', 'Bezpieczny link do hasła', 'url', 'https://…']].map(([field, label, type, placeholder, maxLength]) => <label className="ih-material-field" key={field}><span>{label}</span><input type={type} value={entry[field]} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? {...item,[field]:event.target.value} : item))} maxLength={maxLength} placeholder={placeholder} autoComplete="off" /></label>)}
+                      <label className="ih-material-field"><span>Link ważny do <small>opcjonalnie</small></span><IdeaHireDateField aria-label={`Termin ważności dostępu ${index + 1}`} type="datetime-local" value={entry.expiresAt} disabled={busy || outcomeUnknown} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? {...item,expiresAt:event.target.value} : item))} /></label>
+                      <label className="ih-material-field ih-material-field-wide"><span>Instrukcja logowania <small>opcjonalnie</small></span><textarea value={entry.instructions} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? {...item,instructions:event.target.value} : item))} maxLength={2000} rows={3} placeholder="Instrukcja bez hasła, tokenu ani kodu 2FA" /></label>
+                    </div>)}
+                    <button type="button" className="ih-material-add-link" disabled={accessEntries.length >= 5 || occupiedSlots >= MAX_ITEMS} onClick={() => setAccessEntries((current) => current.length < 5 ? [...current, {label:"",serviceUrl:"",login:"",secureUrl:"",expiresAt:"",instructions:""}] : current)}><Plus size={18} aria-hidden="true" />Dodaj następny dostęp</button>
+                  </div>
+                </details>
+
+                <section className="ih-material-section ih-material-caption">
+                  <label className="ih-material-field" htmlFor="private-work-caption"><span>{mode === "delivery" ? "Opis gotowej pracy" : "Wiadomość do materiałów"}{mode !== "delivery" && <small>opcjonalnie</small>}</span><textarea id="private-work-caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz zawartość materiałów i sposób sprawdzenia rezultatu…" : "Napisz, co wysyłasz i na co zwrócić uwagę…"} /><small>{mode === "delivery" ? "Minimum 20 znaków. Klient otrzyma te materiały do odbioru pracy." : "Materiały pojawią się w rozmowie i zakładce Pliki. Gotową pracę przekażesz osobno w trybie „Gotowa praca”."}</small></label>
+                </section>
+
+                {mode === "delivery" && <div className="ih-material-confirmations">
+                  <label><input type="checkbox" checked={rightsConfirmed} onChange={(event) => setRightsConfirmed(event.target.checked)} /><span>Mam prawa lub wymagane zgody do przekazywanych materiałów.</span></label>
+                  <label><input type="checkbox" checked={safetyConfirmed} onChange={(event) => setSafetyConfirmed(event.target.checked)} /><span>Nie dołączam świadomie złośliwego kodu ani danych, których nie wolno mi ujawniać.</span></label>
+                </div>}
+                <details className="ih-material-safety"><summary><ShieldCheck size={17} aria-hidden="true" /><span>Nie wysyłaj haseł, kodów 2FA, kluczy API ani danych kart.</span><ChevronDown size={16} aria-hidden="true" /></summary><p>Nie wysyłaj haseł, kodów 2FA, kluczy API ani danych kart. Do sekretów używaj menedżera haseł z dostępem czasowym. IdeaHire sprawdza format i sygnaturę pliku, ale nie gwarantuje, że każdy plik jest wolny od złośliwego kodu.</p></details>
+              </fieldset>
             </div>
-          </details>
 
-          <details className="private-work-extra-section">
-            <summary>Bezpieczne przekazanie dostępu</summary>
-            <div className="private-work-extra-body">
-              <p>Wpisz login, ale hasło umieść w jednorazowym lub wygasającym linku z menedżera haseł. Nie zapisujemy jawnego hasła w czacie.</p>
-              {accessEntries.map((entry, index) => (
-                <div className="private-work-access-editor" key={index}>
-                  <input type="text" value={entry.label} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, label: event.target.value } : item))} maxLength={180} placeholder="Nazwa dostępu, np. Panel WordPress" />
-                  <input type="url" value={entry.serviceUrl} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, serviceUrl: event.target.value } : item))} placeholder="https://adres-logowania.pl" />
-                  <input type="text" value={entry.login} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, login: event.target.value } : item))} maxLength={320} placeholder="Login lub e-mail" />
-                  <input type="url" value={entry.secureUrl} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, secureUrl: event.target.value } : item))} placeholder="https://bezpieczny-link-do-hasla…" />
-                  <label>Link ważny do<IdeaHireDateField aria-label="Termin ważności bezpiecznego linku" type="datetime-local" value={entry.expiresAt} disabled={busy || outcomeUnknown} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, expiresAt: event.target.value } : item))} /></label>
-                  <textarea value={entry.instructions} onChange={(event) => setAccessEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, instructions: event.target.value } : item))} maxLength={2000} rows={3} placeholder="Instrukcja logowania bez hasła, tokenu i kodu 2FA" />
-                  {accessEntries.length > 1 && <button type="button" onClick={() => setAccessEntries((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Usuń ten dostęp</button>}
-                </div>
-              ))}
-              <button type="button" className="private-work-add-link" onClick={() => setAccessEntries((current) => current.length < 5 ? [...current, { label: "", serviceUrl: "", login: "", secureUrl: "", expiresAt: "", instructions: "" }] : current)}>+ Dodaj kolejny dostęp</button>
-            </div>
-          </details>
-
-          <aside className="private-work-security-note">
-            <b>Nie wysyłaj haseł, kodów 2FA, kluczy API ani danych kart.</b>
-            <span>Do sekretów używaj osobnego menedżera haseł z dostępem czasowym. IdeaHire sprawdza format i sygnaturę pliku, ale nie gwarantuje, że każdy plik jest wolny od złośliwego kodu.</span>
-          </aside>
-
-          {mode === "delivery" && (
-            <div className="private-work-confirmations">
-              <label><input type="checkbox" checked={rightsConfirmed} onChange={(event) => setRightsConfirmed(event.target.checked)} /> Mam prawa lub wymagane zgody do przekazywanych materiałów.</label>
-              <label><input type="checkbox" checked={safetyConfirmed} onChange={(event) => setSafetyConfirmed(event.target.checked)} /> Nie dołączam świadomie złośliwego kodu ani danych, których nie wolno mi ujawniać.</label>
-            </div>
-          )}
-
-          {busy && <div className="private-work-progress"><span style={{ width: `${progress}%` }} /></div>}
-          </fieldset>
-          <div className="ih9-share-footer">
-          {message && <p className="private-work-form-message" role="status">{message}</p>}
-          <div className="private-work-form-actions">
-            <button type="button" onClick={async () => { setOpen(false); if (outcomeUnknown) { try { await onComplete?.(); } catch { /* Retry through the conversation's reload control. */ } } }} disabled={busy}>{outcomeUnknown ? "Wróć do rozmowy" : "Anuluj"}</button>
-            <button type="submit" className="is-primary" disabled={busy || disabled || outcomeUnknown}>
-              {busy ? "Sprawdzanie i wysyłanie…" : mode === "delivery" ? "Przekaż pracę do odbioru" : "Wyślij materiały"}
-            </button>
-          </div>
-          </div>
-        </form>
+            <footer className="ih-material-footer">
+              {materialCount > MAX_ITEMS && <p className="ih-material-notice" role="alert">Przekroczono limit 24 materiałów. Usuń nadmiarowe pozycje przed wysłaniem.</p>}
+              {message && <p className={'ih-material-notice' + (progress === 100 && !outcomeUnknown ? ' is-success' : '')} role={progress === 100 && !outcomeUnknown ? "status" : "alert"}>{message}</p>}
+              {busy && <div className="ih-material-progress" role="progressbar" aria-label="Wysyłanie materiałów" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:`${progress}%`}} /></div>}
+              <div className="ih-material-footer-row"><div className="ih-material-summary" aria-live="polite" aria-atomic="true"><strong>{materialCount ? `Do wysłania: ${materialCount} z 24 materiałów` : "Dodaj plik, link lub tekst"}</strong><span>{files.length ? `Pliki: ${formatBytes(fileBytes)} / 150 MB` : recipientName ? `Odbiorca: ${recipientName}` : "Materiały do tej rozmowy"}</span></div>
+                <div className="ih-material-actions"><button type="button" onClick={async () => { setOpen(false); if (outcomeUnknown) { try { await onComplete?.(); } catch { /* Retry through the conversation reload control. */ } } }} disabled={busy}>{outcomeUnknown ? "Wróć do rozmowy" : "Anuluj"}</button><button type="submit" className="is-primary" disabled={busy || disabled || outcomeUnknown || materialCount < 1 || materialCount > MAX_ITEMS || (mode === "delivery" && !canDeliver)}>{busy ? `Wysyłanie… ${progress}%` : mode === "delivery" ? "Przekaż do odbioru" : "Wyślij materiały"}</button></div>
+              </div>
+            </footer>
+          </form>
         </div>
       ), document.body)}
     </section>
