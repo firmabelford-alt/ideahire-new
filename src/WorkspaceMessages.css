@@ -1514,6 +1514,7 @@ body .ih-message-workspace .agreement-form-heading { display: flex !important; f
 body .ih-message-workspace .agreement-form-heading h3 { margin: 8px 0 0 !important; font-size: 22px !important; }
 body .ih-message-workspace .agreement-form-heading > p { margin: 0 !important; color: var(--a-muted) !important; font: 400 13px/1.6 Inter,system-ui,sans-serif !important; }
 body .ih-message-workspace .ih-agreement-intro { display: block !important; color: var(--a-ink) !important; font: 650 17px/1.5 Inter,system-ui,sans-serif !important; }
+body .ih-message-workspace .agreement-waiting-card { box-shadow: none !important; }
 body .ih-message-workspace .agreement-gate-heading { width: 100% !important; max-width: none !important; }
 body .ih-message-workspace .agreement-form-grid > .ih-agreement-section {
   display: flex !important; align-items: center !important; gap: 12px !important;
@@ -1569,6 +1570,7 @@ body .ih-material-dialog {
 }
 :root[data-theme="dark"] body .ih-material-dialog { color-scheme: dark; }
 body .ih-material-dialog *, body .ih-material-dialog *::before, body .ih-material-dialog *::after { box-sizing: border-box !important; }
+body .ih-material-dialog .ih68-sr-only { position: absolute !important; width: 1px !important; height: 1px !important; margin: -1px !important; padding: 0 !important; border: 0 !important; overflow: hidden !important; clip-path: inset(50%) !important; white-space: nowrap !important; }
 body .ih-material-header { display: flex !important; align-items: start !important; justify-content: space-between !important; gap: 20px !important; padding: 24px 28px 20px !important; border-bottom: 1px solid var(--a-line) !important; }
 body .ih-material-header > div { min-width: 0 !important; }
 body .ih-material-header h2 { margin: 0 !important; color: var(--a-ink) !important; font: 750 25px/1.3 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; text-wrap: pretty !important; }
@@ -1629,15 +1631,24 @@ body .ih-material-link, body .ih-material-access { display: grid !important; gap
 body .ih-material-item-heading { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; }
 body .ih-material-item-heading > strong { display: inline-flex !important; align-items: center !important; gap: 8px !important; color: var(--a-ink) !important; font: 600 14px/1.5 Inter,system-ui,sans-serif !important; }
 body .ih-material-field { display: grid !important; gap: 7px !important; min-width: 0 !important; margin: 0 !important; color: var(--a-ink) !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important; }
-body .ih-material-field > span { display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 5px !important; font-weight: 600 !important; }
+body .ih-material-field > span:not(.ih20-date-field) { display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 5px !important; font-weight: 600 !important; }
 body .ih-material-field small { color: var(--a-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
-body .ih-material-field > :is(input:not([type="checkbox"]), textarea) { appearance: none !important; display: block !important; width: 100% !important; min-width: 0 !important; min-height: 46px !important; margin: 0 !important; padding: 11px 12px !important; border: 1px solid var(--a-line) !important; border-radius: 8px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; font: 400 15px/1.6 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
+body .ih-material-field > :is(input:not([type="checkbox"]), textarea), body .ih-material-field .ih20-date-field > input:first-child { appearance: none !important; display: block !important; width: 100% !important; min-width: 0 !important; min-height: 46px !important; margin: 0 !important; padding: 11px 12px !important; border: 1px solid var(--a-line) !important; border-radius: 8px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; font: 400 15px/1.6 Inter,system-ui,sans-serif !important; box-shadow: none !important; }
 body .ih-material-field > textarea { min-height: 100px !important; resize: vertical !important; }
 body .ih-material-two-fields, body .ih-material-access { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; align-items: start !important; gap: 16px !important; }
 body .ih-material-access > .ih-material-item-heading, body .ih-material-field-wide { grid-column: 1 / -1 !important; }
-body .ih-material-dialog .ih7-select-label { font: 600 14px/1.6 Inter,system-ui,sans-serif !important; color: var(--a-ink) !important; margin-bottom: 7px !important; }
-body .ih-material-dialog .ih7-select-trigger { min-height: 46px !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important; border-radius: 8px !important; }
-body .ih-material-dialog .ih7-select-menu { max-height: min(220px, var(--ih7-menu-height, 220px)) !important; }
+body .ih-material-dialog .ih7-select { position: relative !important; display: grid !important; gap: 7px !important; width: 100% !important; min-width: 0 !important; margin: 0 !important; }
+body .ih-material-dialog .ih7-select-label { display: block !important; margin: 0 !important; font: 600 14px/1.6 Inter,system-ui,sans-serif !important; color: var(--a-ink) !important; }
+body .ih-material-dialog .ih7-select-trigger { position: relative !important; display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; width: 100% !important; height: auto !important; min-height: 46px !important; margin: 0 !important; padding: 11px 12px !important; border: 1px solid var(--a-line) !important; border-radius: 8px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; font: 400 14px/1.6 Inter,system-ui,sans-serif !important; text-align: start !important; box-shadow: none !important; cursor: pointer !important; }
+body .ih-material-dialog .ih7-select-trigger > span { min-width: 0 !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+body .ih-material-dialog .ih7-select-trigger > svg { flex: none !important; width: 16px !important; height: 16px !important; stroke: currentColor !important; stroke-width: 1.5 !important; }
+body .ih-material-dialog .ih7-select[data-open="true"] .ih7-select-trigger { border-color: var(--a-accent) !important; }
+body .ih-material-dialog .ih7-select-menu { position: absolute !important; z-index: 100 !important; inset: calc(100% + 6px) 0 auto !important; display: none !important; flex-direction: column !important; gap: 3px !important; width: 100% !important; max-height: min(220px, var(--ih7-menu-height, 220px)) !important; margin: 0 !important; padding: 6px !important; overflow: auto !important; overscroll-behavior: contain !important; border: 1px solid var(--a-line) !important; border-radius: 10px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; box-shadow: 0 10px 24px #10232b1a !important; }
+body .ih-material-dialog .ih7-select[data-side="up"] .ih7-select-menu { top: auto !important; bottom: calc(100% + 6px) !important; }
+body .ih-material-dialog .ih7-select[data-open="true"] .ih7-select-menu { display: flex !important; }
+body .ih-material-dialog .ih7-select-option { display: flex !important; flex: none !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; width: 100% !important; min-height: 42px !important; margin: 0 !important; padding: 10px !important; border: 0 !important; border-radius: 6px !important; background: transparent !important; color: var(--a-ink) !important; font: 400 14px/1.5 Inter,system-ui,sans-serif !important; text-align: start !important; white-space: normal !important; cursor: pointer !important; }
+body .ih-material-dialog .ih7-select-option:is(:hover, :focus-visible, [aria-selected="true"]) { background: var(--a-tint) !important; color: var(--a-accent) !important; }
+body .ih-material-dialog .ih7-select-option > svg { flex: none !important; width: 17px !important; height: 17px !important; }
 body .ih-material-extra { margin: 0 !important; padding: 0 !important; border: 1px solid var(--a-line) !important; border-radius: 10px !important; background: var(--a-paper) !important; }
 body .ih-material-extra > summary { display: flex !important; align-items: center !important; gap: 12px !important; min-height: 76px !important; padding: 15px 16px !important; color: var(--a-ink) !important; cursor: pointer !important; list-style: none !important; }
 body .ih-material-extra > summary > svg { flex: none !important; color: var(--a-muted) !important; }
@@ -1699,7 +1710,7 @@ body .ih-material-header h2:focus { outline: none !important; }
   body .ih-material-dropzone { min-height: 154px !important; padding-inline: 12px !important; }
   body .ih-material-drop-hint { display: none !important; }
   body .ih-material-two-fields, body .ih-material-access { grid-template-columns: minmax(0, 1fr) !important; }
-  body .ih-material-field > :is(input:not([type="checkbox"]), textarea) { font-size: 16px !important; }
+  body .ih-material-field > :is(input:not([type="checkbox"]), textarea), body .ih-material-field .ih20-date-field > input:first-child { font-size: 16px !important; }
   body .ih-material-footer { padding: 14px 18px max(14px, env(safe-area-inset-bottom)) !important; }
   body .ih-material-footer-row { display: grid !important; gap: 12px !important; }
   body .ih-material-summary { grid-template-columns: minmax(0, 1fr) !important; }

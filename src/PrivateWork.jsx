@@ -869,9 +869,11 @@ export function PrivateSharePanel({
     }
     updateHeight();
     viewport?.addEventListener("resize", updateHeight);
+    viewport?.addEventListener("scroll", updateHeight);
     window.addEventListener("resize", updateHeight);
     return () => {
       viewport?.removeEventListener("resize", updateHeight);
+      viewport?.removeEventListener("scroll", updateHeight);
       window.removeEventListener("resize", updateHeight);
     };
   }, [open]);
