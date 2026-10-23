@@ -35,7 +35,7 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
-import DisputePaymentPanel from "./DisputePayments";
+import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
@@ -8228,6 +8228,7 @@ function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children })
             {data?.connected && data.dashboard_available && <button type="button" className="ih-sp-button" disabled={opening} onClick={openStripe}>{opening ? c("Otwieranie…", "Opening…") : c("Zarządzaj w Stripe", "Manage in Stripe")}</button>}
           </div>
         </div>
+        <p className="ih-sp-notice">{c("Zwroty zapłat wracają do metody płatności klienta i nie powiększają tego salda wypłat wykonawcy. Kwotę i etap zwrotu sprawdzisz w szczegółach sprawy.", "Payment refunds return to the client's original payment method and do not increase this freelancer payout balance. Check the refund amount and progress in the case details.")} <Link to="/disputes">{c("Moje sprawy", "My cases")}</Link></p>
         {errorCode && <p className="ih-sp-notice ih-sp-error" role="alert">{errors[errorCode] || c("Nie udało się pobrać danych ze Stripe. Spróbuj odświeżyć podgląd.", "Stripe details could not be loaded. Try refreshing this view.")}</p>}
         {loading && !data && <p role="status">{c("Pobieramy saldo i historię wypłat ze Stripe…", "Loading your Stripe balance and payout history…")}</p>}
         {data?.connected === false && <div className="ih-sp-notice"><p>{c("Połącz konto Stripe, aby otrzymywać wynagrodzenie i sprawdzać wypłaty.", "Connect Stripe to receive earnings and view payouts.")}</p><button type="button" className="ih-sp-button" onClick={() => { setTab("connection"); onConfigure?.(); }}>{c("Połącz konto Stripe", "Connect Stripe account")}</button></div>}
@@ -20543,7 +20544,7 @@ function ChatPaymentPanel({
         <>
           <div className="chat-payment-breakdown">
             <div>
-              <span>Wynagrodzenie wykonawcy</span>
+              <span>Uzgodnione wynagrodzenie wykonawcy</span>
               <strong>
                 {formatPaymentMoney(summary.work_amount, summary.currency)}
               </strong>
@@ -20556,12 +20557,18 @@ function ChatPaymentPanel({
               <small>Kwota zgodna z podsumowaniem płatności.</small>
             </div>
             <div className="is-total">
-              <span>{isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</span>
+              <span>{summary.paid_at ? "Zapłacono łącznie" : isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</span>
               <strong>
                 {formatPaymentMoney(summary.total_amount, summary.currency)}
               </strong>
             </div>
           </div>
+          {Number(summary.refunded_amount) > 0 && (
+            <p className="chat-payment-message">
+              Kwota zwrotu odnotowana w rozliczeniu: <strong>{formatPaymentMoney(summary.refunded_amount, summary.currency)}</strong>.
+              {" "}Zwrot trafia do metody płatności klienta. Aktualne potwierdzenie sprawdzisz w szczegółach sprawy.
+            </p>
+          )}
 
           <div className="chat-payment-explainer">
             <span aria-hidden="true">✓</span>
@@ -20575,9 +20582,9 @@ function ChatPaymentPanel({
                 : summary.payment_status === "release_failed"
                 ? "Nie potwierdzono przekazania wynagrodzenia. Sprawdź status odbioru pracy przed ponowieniem tej samej operacji."
                 : summary.payment_status === "refund_pending"
-                ? "Zwrot jest przygotowywany. Sprawdzamy jego status w Stripe."
+                ? "Rozliczenie zwrotu jest w toku. Czekamy na potwierdzenie Stripe. Kwota i etap zwrotu są w szczegółach sprawy."
                 : ["refunded", "partially_refunded", "disputed"].includes(summary.payment_status)
-                ? "Rozliczenie obejmuje zwrot lub spór. Szczegóły sprawdź w aktualnym statusie sprawy."
+                ? "Rozliczenie obejmuje zwrot lub spór. Zwrot zapłaty wraca do metody płatności klienta. Szczegóły i potwierdzenie Stripe sprawdź w aktualnym statusie sprawy."
                 : workEnabled
                 ? "Stripe potwierdził środki. Realizacja zlecenia może się rozpocząć."
                 : isClient
@@ -23052,10 +23059,12 @@ function DisputeDetails() {
                 <div className="dispute-decision-meta">
                   <span>Wersja {currentDecision.version}</span>
                   <span>Wydano: {formatDisputeDate(currentDecision.issued_at)}</span>
-                  <span>
-                    Operacja płatnicza: {{ not_connected: "wymaga uruchomienia rozliczenia", pending: "oczekuje na wykonanie lub potwierdzenie Stripe", completed: "potwierdzona przez Stripe", failed: "wymaga kontroli operatora", not_required: "nie jest wymagana" }[currentDecision.payment_action_status] || "sprawdź aktualny status"}
-                  </span>
+                  {!["full_refund", "partial_refund", "release_payment"].includes(currentDecision.outcome) && (
+                    <span>Operacja płatnicza: nie jest wymagana</span>
+                  )}
                 </div>
+                <DisputeSettlementStatus client={supabase} decision={currentDecision} dispute={dispute}
+                  appeals={appeals} userId={user.id} />
                 {isStaff && ["owner", "admin"].includes(staffRole) && (
                   <DisputePaymentPanel client={supabase} decision={currentDecision} userId={user.id}
                     conversationId={dispute.conversation_id} onSettled={() => loadCase(false)} />
