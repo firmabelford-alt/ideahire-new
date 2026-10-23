@@ -7929,45 +7929,45 @@ function AccountTemplatesCard() {
 const ACCOUNT_WORKSPACE_SECTIONS = [
   {
     key: "profile",
-    english: {"label": "Profile details", "eyebrow": "Public profile", "title": "Profile details", "description": "Set the photo, name, bio and country shown on your public profile."},
+    english: {"label": "Profile details", "eyebrow": "Public profile", "title": "Edit profile", "description": "Set the photo, name, bio and country shown on your public profile."},
     number: "01",
     label: "Dane profilu",
     hash: "account-profile-data",
     eyebrow: "Profil publiczny",
-    title: "Podstawowe dane",
+    title: "Edytuj profil",
     description:
       "Ustaw zdjęcie, nazwę, opis i kraj widoczny dla innych użytkowników.",
   },
   {
     key: "expertise",
-    english: {"label": "Expertise", "eyebrow": "Freelancer profile", "title": "Skills and expertise", "description": "Choose your fields and describe the experience you bring to projects."},
+    english: {"label": "Expertise", "eyebrow": "Freelancer profile", "title": "Skills", "description": "Choose your fields and describe the experience you bring to projects."},
     number: "02",
     label: "Specjalizacja",
     hash: "account-expertise",
     eyebrow: "Oferta wykonawcy",
-    title: "Specjalizacja i umiejętności",
+    title: "Umiejętności",
     description:
       "Wybierz dziedziny i opisz doświadczenie, z którym chcesz być kojarzony.",
   },
   {
     key: "portfolio",
-    english: {"label": "Portfolio", "eyebrow": "Past work", "title": "Projects in your portfolio", "description": "Add and organise the work you want clients to see."},
+    english: {"label": "Portfolio", "eyebrow": "Past work", "title": "Portfolio", "description": "Add and organise the work you want clients to see."},
     number: "03",
     label: "Portfolio",
     hash: "account-portfolio",
     eyebrow: "Twoje realizacje",
-    title: "Projekty w portfolio",
+    title: "Portfolio",
     description:
       "Dodawaj i porządkuj realizacje, które najlepiej pokazują jakość Twojej pracy.",
   },
   {
     key: "jobs",
-    english: {"label": "My listings", "eyebrow": "Your listings", "title": "Published jobs", "description": "Manage your posts and check jobs available for republication."},
+    english: {"label": "My listings", "eyebrow": "Your listings", "title": "My listings", "description": "Manage your posts and check jobs available for republication."},
     number: "04",
     label: "Zlecenia",
     hash: "account-jobs",
     eyebrow: "Twoja aktywność",
-    title: "Opublikowane zlecenia",
+    title: "Moje zlecenia",
     description:
       "Zarządzaj własnymi ogłoszeniami i sprawdzaj zlecenia gotowe do ponownej publikacji.",
   },
@@ -9854,7 +9854,7 @@ function Account() {
       <AccountNavbar />
 
       <main
-        className="app-page account-workspace-page ih6-account-workspace"
+        className={`app-page account-workspace-page ih6-account-workspace${activeAccountSection && !accountHubOpen ? " ih-account-editor-page" : ""}`}
         id="ih68-content"
         data-account-section={activeAccountSection || "home"}
       >
@@ -9867,10 +9867,10 @@ function Account() {
           null
         )}
 
-        <div className="ih6-account-layout ih25-account-panel ih75-account-layout" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
+        <div className="ih6-account-layout ih25-account-panel ih75-account-layout ih-account-editor-layout" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
           <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
           <div className="ih6-account-content ih75-account-main">
-        <SubpageHeading titleId="account-section-title" eyebrow={activeAccountSectionCopy.eyebrow}
+        <SubpageHeading titleId="account-section-title"
           title={activeAccountSectionCopy.title} description={activeAccountSectionCopy.description} variant="account"
           actions={activeAccountSection === "jobs" ? <Link to="/find-talent" className="ih5-button is-primary"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link> : undefined} />
 
@@ -9891,47 +9891,6 @@ function Account() {
             activeAccountSection === "templates"
           }
         >
-          <div
-            className="profile-preview account-profile-preview"
-            hidden={activeAccountSection !== "profile"}
-          >
-            <div className="profile-avatar-wrapper">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Zdjęcie profilowe"
-                  className="profile-avatar"
-                />
-              ) : (
-                <div className="profile-avatar profile-avatar-placeholder">
-                  {initial}
-                </div>
-              )}
-            </div>
-
-            <div className="profile-info">
-              <h2>
-                {displayName}
-              </h2>
-
-              <p>
-                {user.email}
-              </p>
-
-              <div className="profile-meta-row">
-                {countryCode && (
-                  <CountryBadge
-                    countryCode={countryCode}
-                  />
-                )}
-
-                {isAdult && (
-                  <span className="account-age-status">Pełne konto · 18+</span>
-                )}
-              </div>
-            </div>
-          </div>
-
           <form
             className="auth-form account-form ih11-profile-form"
             onSubmit={handleSave}
@@ -9947,10 +9906,8 @@ function Account() {
               hidden={activeAccountSection !== "profile"}
             >
               <header className="account-form-section-heading">
-                <span aria-hidden="true">01</span>
                 <div>
-                  <h2 id="account-profile-data-title">Jak widzą Cię inni</h2>
-                  <small>Zdjęcie, nazwa i krótki opis Twojego profilu.</small>
+                  <h2 id="account-profile-data-title">Twój profil</h2>
                 </div>
               </header>
 
@@ -10015,10 +9972,8 @@ function Account() {
               hidden={activeAccountSection !== "expertise"}
             >
               <header className="account-form-section-heading">
-                <span aria-hidden="true">02</span>
                 <div>
                   <h2 id="account-expertise-title">Twoja specjalizacja</h2>
-                  <small>Wybierz dziedziny i pokaż konkretne umiejętności.</small>
                 </div>
               </header>
 
@@ -10191,7 +10146,6 @@ function Account() {
               hidden={activeAccountSection !== "profile"}
             >
               <header className="account-form-section-heading">
-                <span aria-hidden="true">03</span>
                 <div>
                   <h2 id="account-contact-title">Dane kontaktowe</h2>
                   <small>Adres logowania jest chroniony, a kraj widoczny na profilu.</small>
@@ -10276,7 +10230,7 @@ function Account() {
               <a className="stripe-connect-icon ih5-stripe-brand" href="https://stripe.com" target="_blank" rel="noopener noreferrer" aria-label="Stripe — operator wypłat">
                 <svg width="48" height="48" aria-hidden="true" focusable="false" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clipPath="url(#ih5-stripe-connect-clip)">
-<rect width="512" height="512" fill="#533AFD"/>
+<rect width="512" height="512" fill="#635BFF"/>
 <path fillRule="evenodd" clipRule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
 </g>
 <defs>
@@ -20239,6 +20193,121 @@ const PAYMENT_POLLING_STATUSES = new Set([
   "checkout_open", "processing", "release_pending", "refund_pending",
 ]);
 
+const PAYMENT_OVERVIEW_EN = {
+  awaiting_payment: "Awaiting payment",
+  checkout_open: "Payment started",
+  processing: "Stripe is confirming payment",
+  funds_secured: "Payment confirmed",
+  work_submitted: "Work submitted",
+  release_pending: "Transferring earnings to the freelancer",
+  release_failed: "Earnings transfer needs review",
+  released: "Transferred to the freelancer’s Stripe balance",
+  refund_pending: "Refund being prepared",
+  partially_refunded: "Partially refunded",
+  refunded: "Payment refunded",
+  disputed: "Payment on hold",
+  failed: "Payment failed",
+  cancelled: "Payment cancelled",
+};
+
+// The conversation header only reads payment state. Checkout remains in its own panel.
+function useConversationPaymentOverview({ conversation, conversationId, agreement, agreementLoading, userId, english }) {
+  const [record, setRecord] = useState(null);
+  const clientId = conversation?.client_id;
+  const contractorId = conversation?.contractor_id;
+  const agreementId = agreement?.id;
+  const scope = [userId, conversationId, conversation?.id, clientId, contractorId,
+    agreementId, agreement?.conversation_id, agreement?.status, agreementLoading].join(":");
+  const activeScope = useRef(scope);
+  activeScope.current = scope;
+  const generation = useRef(0);
+  const accepted = !agreementLoading && conversation?.id === conversationId
+    && agreement?.conversation_id === conversationId && agreement?.status === "accepted"
+    && (userId === clientId || userId === contractorId);
+
+  const refresh = useCallback(async () => {
+    const request = ++generation.current;
+    if (!accepted) return;
+    try {
+      const { data, error } = await supabase.rpc("get_ideahire_payment_summary", {
+        p_conversation_id: conversationId,
+      });
+      if (activeScope.current !== scope || request !== generation.current) return;
+      if (error || !Array.isArray(data)) throw new Error("payment_overview_unavailable");
+      const row = data[0] || null;
+      if (row && (row.agreement_id !== agreementId || row.client_id !== clientId
+        || row.contractor_id !== contractorId || !Object.prototype.hasOwnProperty.call(PAYMENT_STATUS_COPY, row.payment_status))) {
+        throw new Error("payment_overview_mismatch");
+      }
+      // Keep the same amount checks as the payment panel before enabling work delivery.
+      if (row) {
+        const amounts = [row.work_amount, row.platform_fee, row.total_amount, row.contractor_amount];
+        if (row.currency !== "PLN" || amounts.some(value => value == null || value === ""
+          || !Number.isFinite(Number(value)) || Number(value) < 0
+          || !Number.isSafeInteger(Math.round(Number(value) * 100))
+          || Math.abs(Number(value) * 100 - Math.round(Number(value) * 100)) > 0.000001)
+          || Math.round(Number(row.work_amount) * 100) + Math.round(Number(row.platform_fee) * 100)
+            !== Math.round(Number(row.total_amount) * 100)
+          || (Math.round(Number(row.contractor_amount) * 100) > Math.round(Number(row.work_amount) * 100)
+            || (!["refunded", "partially_refunded"].includes(row.payment_status)
+              && Math.round(Number(row.contractor_amount) * 100) !== Math.round(Number(row.work_amount) * 100)))
+          || Number(row.work_amount) <= 0) throw new Error("payment_overview_amount_mismatch");
+      }
+      setRecord({ scope, status: row?.payment_status || "", error: false });
+    } catch {
+      if (activeScope.current === scope && request === generation.current) {
+        setRecord({ scope, status: "", error: true });
+      }
+    }
+  }, [accepted, conversationId, agreementId, clientId, contractorId, scope]);
+
+  useEffect(() => {
+    refresh();
+    if (!accepted) return () => { generation.current += 1; };
+    let lastRefresh = 0;
+    const visibleRefresh = () => {
+      if (document.visibilityState === "hidden" || Date.now() - lastRefresh < 1000) return;
+      lastRefresh = Date.now();
+      refresh();
+    };
+    const paymentUpdated = event => {
+      if (!event?.detail?.conversationId || event.detail.conversationId === conversationId) refresh();
+    };
+    const timer = window.setInterval(visibleRefresh, 30000);
+    window.addEventListener("focus", visibleRefresh);
+    window.addEventListener("pageshow", visibleRefresh);
+    document.addEventListener("visibilitychange", visibleRefresh);
+    window.addEventListener("ideahire:payment-updated", paymentUpdated);
+    return () => {
+      generation.current += 1;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", visibleRefresh);
+      window.removeEventListener("pageshow", visibleRefresh);
+      document.removeEventListener("visibilitychange", visibleRefresh);
+      window.removeEventListener("ideahire:payment-updated", paymentUpdated);
+    };
+  }, [accepted, conversationId, refresh]);
+
+  const current = record?.scope === scope ? record : null;
+  const status = accepted && current && !current.error ? current.status : "";
+  const copy = status ? PAYMENT_STATUS_COPY[status] : null;
+  let label;
+  if (agreementLoading || conversation?.id !== conversationId || accepted && !current) {
+    label = english ? "Checking…" : "Sprawdzanie…";
+  } else if (!conversation?.agreements_required) {
+    label = english ? "Payment unavailable in this conversation" : "Płatność niedostępna w tej rozmowie";
+  } else if (!accepted) {
+    label = english ? "Terms need to be agreed" : "Warunki do uzgodnienia";
+  } else if (current.error) {
+    label = english ? "Status unavailable — open payment" : "Status niedostępny — otwórz płatność";
+  } else if (copy) {
+    label = english ? PAYMENT_OVERVIEW_EN[status] : copy.label;
+  } else {
+    label = english ? "Payment not started" : "Płatność nierozpoczęta";
+  }
+  return { status, label, tone: copy?.tone || "neutral", refresh };
+}
+
 function formatPaymentMoney(value, currency = "PLN") {
   const amount = Number(value);
   if (!Number.isFinite(amount)) return "—";
@@ -20723,6 +20792,10 @@ function Chat() {
   const workspaceFocusRef = useRef(null);
   const [planPinned, setPlanPinned] = useState(false);
   useEffect(() => { setPlanPinned(false); setWorkspaceTab("conversation"); setOpenMaterialDialog(false); workspaceFocusRef.current = null; }, [id]);
+  useEffect(() => {
+    const paymentReturn = new URLSearchParams(roomLocation.search).get("payment");
+    if (paymentReturn === "success" || paymentReturn === "cancelled") setWorkspaceTab("payment");
+  }, [id, roomLocation.search]);
   function openWorkspace(value) {
     setWorkspaceTab(value);
     setPlanPinned(false);
@@ -20780,8 +20853,10 @@ function Chat() {
   const [agreementMessage, setAgreementMessage] =
     useState("");
 
-  const [paymentStatus, setPaymentStatus] =
-    useState("");
+  const paymentOverview = useConversationPaymentOverview({
+    conversation, conversationId: id, agreement, agreementLoading, userId: user?.id, english: roomEnglish,
+  });
+  const paymentStatus = paymentOverview.status;
 
   const [agreementForm, setAgreementForm] =
     useState(EMPTY_AGREEMENT_FORM);
@@ -21793,8 +21868,7 @@ function Chat() {
     <WorkspaceConversation loading={loading} errorMessage={errorMessage} hasConversation={Boolean(conversation)}
       otherName={otherName} avatarUrl={otherProfile?.avatar_url} profileId={otherProfileId} blocked={messagingBlocked}
       jobTitle={jobTitle} category={getJobCategoryLabel(jobDetails?.category)}
-      budget={formatChatProjectBudget(agreement?.status==='accepted'?agreement.price_amount:jobBudget)}
-      materialCount={privateWork.items.filter(item=>item.moderation_status==='active').length} accepted={agreement?.status==='accepted'}
+      materialCount={privateWork.items.filter(item=>item.moderation_status==='active').length} accepted={agreement?.status==='accepted'} paymentOverview={paymentOverview}
       view={workspaceTab} onView={openWorkspace} focusMode={focusMode} onFocusMode={setFocusMode}
       planPinned={planPinned} onPinPlan={()=>{setPlanPinned(true);setWorkspaceTab('conversation');}} onClosePlan={closePlanWindow}
       backLabel={roomReturn.startsWith('/work')?roomCopy('Praca','Work'):roomCopy('Wiadomości','Messages')}
@@ -21822,10 +21896,10 @@ function Chat() {
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);if(messageViewportRef.current)messageViewportRef.current.scrollTop=messageViewportRef.current.scrollHeight;}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
-        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>{openWorkspace('files');setOpenMaterialDialog(true);}} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId}/>}
+        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>{openWorkspace('files');setOpenMaterialDialog(true);}} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
       materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
                       compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
-                      conversationId={id}
+                      conversationId={id} recipientName={otherName}
                       userId={user?.id}
                       disabled={messagingBlocked || privateWork.loading}
                       agreementAccepted={agreement?.status === "accepted"}
@@ -21858,7 +21932,7 @@ function Chat() {
                         privateWork.setReportTarget({ type, id: targetId })
                       }
                     /><p className="ih69-material-privacy"><WorkspaceIcon kind="lock" />{roomCopy("Materiały są widoczne wyłącznie dla stron tej współpracy.","Materials are visible only to the people in this project.")}</p></>}
-      projectAction={isProfileMessage && !conversation?.job_id && !agreement ? <div className="ih-profile-project-step"><div><strong>{roomCopy('Najpierw rozmowa, potem zlecenie', 'Chat first, then prepare the project')}</strong><p>{profileReplyReceived ? roomCopy('Możecie teraz przygotować zakres, cenę i termin w panelu zlecenia.', 'You can now prepare scope, price and deadline in the project panel.') : roomCopy('Panel zlecenia będzie dostępny po odpowiedzi wykonawcy.', 'The project panel becomes available after the freelancer replies.')}</p></div>{isClient && <button type="button" disabled={waitingForProfileReply || messagingBlocked || !canTransact} onClick={() => { openAgreementForm(); openWorkspace('plan'); }}><WorkspaceIcon kind="plus" />{roomCopy('Przygotuj zlecenie', 'Prepare project')}</button>}</div> : null}
+      projectAction={isProfileMessage && profileReplyReceived && !conversation?.job_id && !agreement ? <div className="ih-profile-project-step"><div><strong>{roomCopy('Najpierw rozmowa, potem zlecenie', 'Chat first, then prepare the project')}</strong><p>{profileReplyReceived ? roomCopy('Możecie teraz przygotować zakres, cenę i termin w panelu zlecenia.', 'You can now prepare scope, price and deadline in the project panel.') : roomCopy('Panel zlecenia będzie dostępny po odpowiedzi wykonawcy.', 'The project panel becomes available after the freelancer replies.')}</p></div>{isClient && <button type="button" disabled={waitingForProfileReply || messagingBlocked || !canTransact} onClick={() => { openAgreementForm(); openWorkspace('plan'); }}><WorkspaceIcon kind="plus" />{roomCopy('Przygotuj zlecenie', 'Prepare project')}</button>}</div> : null}
       plan={waitingForProfileReply ? <section className="ih-profile-project-wait"><h3>{roomCopy('Zacznijcie od rozmowy', 'Start with a conversation')}</h3><p>{roomCopy('Po odpowiedzi wykonawcy zleceniodawca może przygotować propozycję zakresu, ceny i terminu. Warunki wymagają osobnej akceptacji.', 'After the freelancer replies, the client can propose scope, price and deadline. Terms require a separate acceptance.')}</p><button type="button" className="ih68-secondary" onClick={() => openWorkspace('conversation')}>{roomCopy('Wróć do rozmowy', 'Back to conversation')}</button></section> : <><AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
@@ -21888,14 +21962,15 @@ function Chat() {
                       <h3 id="ih18-legacy-plan-title">Ustalenia w starszej rozmowie</h3>
                       <p>W tej rozmowie nie można zaakceptować formalnych warunków. Aby uzgodnić zakres, cenę i termin, rozpocznij projekt z tym wykonawcą. Dotychczasowe wiadomości pozostaną dostępne.</p>
                       {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}
-                    </section>}<ChatPaymentPanel
+                    </section>}</>}
+      payment={agreement?.status === "accepted" ? <ChatPaymentPanel
                       agreement={agreement}
                       conversation={conversation}
                       userId={user?.id}
                       blocked={messagingBlocked}
                       serviceOrder={conversation?.origin_type === "service_inquiry"}
-                      onStatusChange={setPaymentStatus}
-                    /></>}
+                      onStatusChange={paymentOverview.refresh}
+                    /> : <section className="ih-payment-prerequisite"><h3>{agreementsRequired ? roomCopy('Najpierw ustalcie warunki', 'Agree on terms first') : roomCopy('Rozliczenie wymaga nowego zlecenia', 'Start a new project to arrange payment')}</h3><p>{agreementsRequired ? roomCopy('Płatność będzie dostępna po zaakceptowaniu zakresu, ceny i terminu przez obie strony.', 'Payment becomes available after both parties accept the scope, price and deadline.') : roomCopy('Ta starsza rozmowa nie obsługuje formalnych warunków ani płatności. W ustaleniach znajdziesz możliwość rozpoczęcia nowego projektu.', 'This older conversation does not support formal terms or payments. Open terms to start a new project.')}</p><button type="button" className="ih68-secondary" onClick={() => openWorkspace('plan')}>{roomCopy('Przejdź do ustaleń', 'Open terms')}</button></section>}
       reportDialog={<PrivateReportDialog
                 target={privateWork.reportTarget}
                 onClose={() =>

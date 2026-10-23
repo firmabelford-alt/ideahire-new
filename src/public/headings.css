@@ -1197,3 +1197,419 @@
   .ih-profile-chat-backdrop[data-compact="true"] .ih-profile-chat-form { min-height: 0 !important; flex: 1 1 auto !important; overflow: auto !important; }
   .ih-profile-chat-backdrop[data-compact="true"] .ih-profile-chat-composer textarea { height: 72px !important; max-height: 96px !important; }
 }
+/* Account forms and conversations: one clear task at a time. */
+@layer ideahireHeadings {
+  body .ih-account-editor-page {
+    box-sizing: border-box !important;
+    width: calc(100% - 64px) !important;
+    max-width: 1520px !important;
+    margin: 0 auto !important;
+    padding: 32px 0 64px !important;
+  }
+  body .ih-account-editor-layout:not([hidden]) {
+    grid-template-columns: 192px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 40px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  body .ih-account-editor-layout :is(.ih75-account-main, .account-tab-stage, .account-profile-workspace, .account-form, .account-form-section, .profile-portfolio-manager, .profile-portfolio-editor, .account-jobs-section, .ih75-owned-register, .ih-stripe-profile, .stripe-connect-panel, .discovery-settings-card, .account-template-card) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin-inline: 0 !important;
+  }
+  body .ih-account-editor-layout .account-profile-workspace {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  body .ih-account-editor-layout :is(.ih75-account-main, .account-profile-workspace, .account-form, .account-form-section) { overflow: visible !important; }
+  body .ih-account-editor-layout .ih75-account-main > .ih-page-heading {
+    margin: 0 0 32px !important;
+    border-bottom: 1px solid var(--ih-edit-line) !important;
+    padding: 0 0 24px !important;
+  }
+  body .ih-account-editor-layout .ih75-account-main > .ih-page-heading h1 {
+    max-width: none !important;
+    font-size: clamp(30px, 2.6vw, 40px) !important;
+    line-height: 1.2 !important;
+    letter-spacing: -.035em !important;
+  }
+  body .ih-account-editor-layout .ih75-account-navigation .ih72-section-links > button {
+    min-height: 48px !important;
+    padding: 12px !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px !important;
+  }
+  body .ih-account-editor-layout .ih75-account-navigation .ih72-section-links > button[aria-current="page"] {
+    color: var(--ih-edit-ink) !important;
+    background: var(--ih-edit-wash) !important;
+    border-color: var(--ih-edit-line) !important;
+  }
+  body .ih-account-editor-layout .account-form:not([hidden]) {
+    display: grid !important;
+    gap: 32px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  body .ih-account-editor-layout .account-form-section:not([hidden]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 24px 32px !important;
+    padding: 0 0 32px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--ih-edit-line) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  body .ih-account-editor-layout .account-form-section-identity:not([hidden]) {
+    grid-template-columns: minmax(240px, .8fr) minmax(0, 1.2fr) !important;
+  }
+  body .ih-account-editor-layout .account-form-section-expertise > fieldset { grid-column: auto !important; }
+  body .ih-account-editor-layout .account-form-section-heading h2 {
+    margin: 0 !important;
+    font-size: 20px !important;
+    line-height: 1.4 !important;
+  }
+  body .ih-account-editor-layout .account-form :is(label, fieldset) {
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+  body .ih-account-editor-layout .account-form label {
+    display: grid !important;
+    align-content: start !important;
+    gap: 8px !important;
+    color: var(--ih-edit-ink) !important;
+    font-size: 15px !important;
+  }
+  body .ih-account-editor-layout :is(.account-form, .profile-portfolio-editor) :is(input:not([type="file"]):not([type="checkbox"]):not([type="radio"]), textarea) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  body .ih-account-editor-layout .account-form-section-identity > .ih11-avatar-editor {
+    display: flex !important;
+    align-items: center !important;
+    gap: 18px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+  body .ih-account-editor-layout .ih11-avatar-preview {
+    box-sizing: border-box !important;
+    flex: 0 0 88px !important;
+    width: 88px !important;
+    height: 88px !important;
+    padding: 0 !important;
+    border: 1px solid var(--ih-edit-line) !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+  }
+  body .ih-account-editor-layout .ih11-avatar-preview img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: inherit !important;
+    object-fit: cover !important;
+    transform: none !important;
+  }
+  body .ih-account-editor-layout .ih11-avatar-editor > div:last-child {
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 8px !important;
+  }
+  body .ih-account-editor-layout .ih11-avatar-editor strong { font-size: 14px !important; }
+  body .ih-account-editor-layout .ih11-avatar-editor small { font-size: 13px !important; line-height: 1.6 !important; }
+  body .ih-account-editor-layout .account-form .ih11-avatar-upload {
+    display: inline-flex !important;
+    justify-self: start !important;
+    align-items: center !important;
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+  }
+  body .ih-account-editor-layout .ideahire-country-picker { width: 100% !important; min-width: 0 !important; }
+  body .ih-account-editor-layout .ideahire-country-trigger {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 16px !important;
+    align-items: center !important;
+    gap: 12px !important;
+    box-sizing: border-box !important;
+    min-height: 52px !important;
+    width: 100% !important;
+    padding: 12px 14px !important;
+    color: var(--ih-edit-ink) !important;
+    background: var(--ih-edit-paper) !important;
+    border: 1px solid var(--ih-edit-line) !important;
+    border-radius: 10px !important;
+    text-align: start !important;
+  }
+  body .ih-account-editor-layout .ideahire-country-selected {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    min-width: 0 !important;
+  }
+  body .ih-account-editor-layout :is(.ideahire-country-selected-name, .ideahire-country-option-name, .ideahire-country-placeholder) {
+    color: var(--ih-edit-ink) !important;
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    font-weight: 500 !important;
+    letter-spacing: normal !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    opacity: 1 !important;
+  }
+  body .ih-account-editor-layout :is(.ideahire-country-selected-code, .ideahire-country-option-code) {
+    flex: 0 0 auto !important;
+    color: var(--ih-edit-muted) !important;
+    background: var(--ih-edit-wash) !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    opacity: 1 !important;
+  }
+  body .ih-account-editor-layout .ideahire-country-option { min-height: 48px !important; padding: 10px 14px !important; }
+  body .ih-account-editor-layout .ideahire-country-chevron {
+    display: block !important;
+    width: 8px !important;
+    height: 8px !important;
+    border: 0 !important;
+    border-right: 1.5px solid currentColor !important;
+    border-bottom: 1.5px solid currentColor !important;
+    transform: rotate(45deg) !important;
+    align-self: center !important;
+    justify-self: center !important;
+  }
+  body .ih-account-editor-layout .is-open .ideahire-country-chevron { transform: rotate(225deg) !important; }
+  body .ih-account-editor-layout .profile-portfolio-editor {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 24px !important;
+  }
+  body .ih-account-editor-layout .profile-portfolio-editor-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; min-width: 0 !important; gap: 24px !important; }
+  body .ih-account-editor-layout .profile-portfolio-editor > :is(header, p, .profile-portfolio-editor-heading, .profile-portfolio-image-field, .profile-portfolio-editor-actions) { grid-column: 1 / -1 !important; }
+  body .ih-account-editor-layout .profile-portfolio-editor > label:has(textarea) { grid-column: 1 / -1 !important; }
+  body .ih-account-editor-layout .profile-portfolio-editor label { min-width: 0 !important; font-size: 15px !important; line-height: 1.5 !important; }
+  body .ih-account-editor-layout .ih-sp-head { align-items: center !important; margin-bottom: 24px !important; }
+  body .ih-account-editor-layout .ih-sp-head h2 { font-size: 22px !important; line-height: 1.4 !important; }
+  body .ih-account-editor-layout .ih-sp-tab { min-height: 44px !important; font-size: 14px !important; }
+  body .ih-account-editor-layout .ih-sp-grid { gap: 24px !important; }
+  body .ih-account-editor-layout .ih-sp-card { min-width: 0 !important; padding: 24px !important; }
+  body .ih-account-editor-layout .ih-sp-card h3 { font-size: 16px !important; line-height: 1.5 !important; }
+  body .ih-account-editor-layout .ih5-stripe-brand,
+  body .ih-account-editor-layout .ih5-stripe-brand svg {
+    background: #635bff !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+  body .ih-account-editor-layout .ih5-stripe-brand svg rect { fill: #635bff !important; filter: none !important; }
+  body .ih-account-editor-layout .ih5-stripe-brand svg path { fill: #fff !important; filter: none !important; }
+  body .ih-account-editor-layout .account-form-actions { flex-wrap: wrap !important; }
+  body .ih-account-editor-layout .account-form-actions > .auth-message { flex-basis: 100% !important; order: 3 !important; margin: 0 !important; }
+  body .private-work-share-heading .ih-share-recipient {
+    margin: 8px 0 0 !important;
+    color: var(--p-ink, #172b2d) !important;
+    font: 450 14px/1.6 var(--ih-heading-font) !important;
+    overflow-wrap: anywhere !important;
+  }
+  body .private-work-share-heading .ih-share-recipient strong { font: inherit !important; font-weight: 650 !important; }
+
+  /* Inbox has one wide list; secondary destinations stay in the main navigation. */
+  body .ih72-inbox { width: calc(100% - 64px) !important; max-width: 1320px !important; }
+  body .ih-inbox-single { display: block !important; width: 100% !important; }
+  body .ih-inbox-single .ih79-inbox-list { width: 100% !important; min-width: 0 !important; }
+
+  body .ih-structured-room [hidden] { display: none !important; }
+  body .ih-structured-room:not(.is-focus) { width: calc(100% - 64px) !important; max-width: 1400px !important; }
+  body .ih-structured-room .ih68-room-body {
+    display: flex !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  body .ih-structured-room.has-context .ih68-room-body { display: grid !important; grid-template-columns: minmax(0, 1.25fr) minmax(460px, 1fr) !important; }
+  body .ih-structured-room .ih68-room-page:not([hidden]) {
+    box-sizing: border-box !important;
+    display: block !important;
+    flex: 1 1 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    padding: 28px 36px !important;
+    overflow: auto !important;
+    border-inline-start: 0 !important;
+  }
+  body .ih-structured-room.has-context .ih68-room-page:not([hidden]) { padding: 24px !important; border-inline-start: 1px solid var(--a-line, #d8dfdf) !important; }
+  body .ih-structured-room .ih72-panel-back {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    min-height: 36px !important;
+    margin: 0 0 12px !important;
+    padding: 4px 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--a-muted, #526162) !important;
+    font: 550 13px/1.5 var(--ih-heading-font) !important;
+  }
+  body .ih-structured-room .ih72-room-nav {
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 0 28px !important;
+  }
+  body .ih-structured-room .ih72-room-nav > button {
+    flex: 0 1 auto !important;
+    justify-content: center !important;
+    min-height: 48px !important;
+    padding: 12px 16px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--a-muted, #526162) !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+  body .ih-structured-room .ih72-room-nav > button[aria-current="page"] {
+    color: var(--a-ink, #172b2d) !important;
+    border-bottom-color: currentColor !important;
+    background: transparent !important;
+  }
+  body .ih-room-payment-status {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) 16px !important;
+    align-items: center !important;
+    flex: none !important;
+    gap: 8px 20px !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 10px 36px !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--a-line, #d8dfdf) !important;
+    border-radius: 0 !important;
+    background: var(--a-soft, #f4f6f6) !important;
+    color: var(--a-ink, #172b2d) !important;
+    text-align: start !important;
+    box-shadow: none !important;
+    font: 500 13px/1.5 var(--ih-heading-font) !important;
+    cursor: pointer !important;
+  }
+  body .ih-room-payment-status > strong { justify-self: end !important; max-width: 58ch !important; font: 650 13px/1.5 var(--ih-heading-font) !important; text-align: end !important; overflow-wrap: anywhere !important; }
+  body .ih-room-payment-status > svg { width: 16px !important; height: 16px !important; }
+  body .ih-room-payment-status:focus-visible { outline: 2px solid var(--a-ink, #172b2d) !important; outline-offset: -3px !important; }
+  body .ih-structured-room .ih68-composer-area { box-sizing: border-box !important; max-width: 1072px !important; padding: 16px 36px 12px !important; }
+  body .ih-structured-room .ih-compose-recipient {
+    margin: 0 0 8px !important;
+    color: var(--a-muted, #526162) !important;
+    font: 450 13px/1.5 var(--ih-heading-font) !important;
+    overflow-wrap: anywhere !important;
+  }
+  body .ih-structured-room .ih-compose-recipient strong { color: var(--a-ink, #172b2d) !important; font-weight: 650 !important; }
+  body .ih-structured-room .ih68-composer { display: flex !important; align-items: flex-end !important; gap: 12px !important; }
+  body .ih-structured-room .ih68-composer textarea { flex: 1 1 0 !important; min-width: 0 !important; font-size: 16px !important; line-height: 1.6 !important; }
+  body .ih-structured-room :is(.ih68-attach, .ih68-send) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    flex: 0 0 auto !important;
+    box-sizing: border-box !important;
+    width: auto !important;
+    min-width: 44px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    margin: 0 !important;
+    padding: 10px 14px !important;
+    font: 600 14px/1.5 var(--ih-heading-font) !important;
+  }
+  body .ih-structured-room .ih-compose-action-label { display: inline !important; font: inherit !important; white-space: nowrap !important; }
+  body .ih-structured-room :is(.ih-payment-prerequisite, .ih-profile-project-wait) { padding: 24px 0 !important; max-width: 68ch !important; }
+  body .ih-structured-room .ih-payment-prerequisite h3 { margin: 0 0 12px !important; font-size: 22px !important; line-height: 1.4 !important; }
+  body .ih-structured-room .ih-payment-prerequisite p { font-size: 15px !important; line-height: 1.7 !important; margin: 0 0 24px !important; }
+
+  @media (min-width: 851px) {
+    body .ih-inbox-single .ih72-conversation-row { min-height: 112px !important; padding: 20px 16px !important; }
+    body .ih-inbox-single .ih72-conversation-copy {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) auto !important;
+      grid-template-areas: "person time" "project project" "preview preview" !important;
+      gap: 3px 24px !important;
+    }
+    body .ih-inbox-single .ih72-conversation-person { display: contents !important; }
+    body .ih-inbox-single .ih72-conversation-person > strong { grid-area: person !important; font-size: 16px !important; line-height: 1.5 !important; }
+    body .ih-inbox-single .ih72-conversation-person > time { grid-area: time !important; font-size: 12px !important; line-height: 1.5 !important; }
+    body .ih-inbox-single .ih72-conversation-project { grid-area: project !important; font-size: 14px !important; line-height: 1.5 !important; font-weight: 500 !important; }
+    body .ih-inbox-single .ih72-conversation-copy > p { grid-area: preview !important; font-size: 14px !important; line-height: 1.6 !important; }
+    body .ih-structured-room:not(.has-context) .ih68-room-page :is(.agreement-form-grid, .agreement-details) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 20px 32px !important; }
+    body .ih-structured-room:not(.has-context) .ih68-room-page .ih72-panel-heading { margin-bottom: 28px !important; }
+    body .ih-structured-room .ih68-room-person h1 { font-size: 21px !important; line-height: 1.35 !important; }
+    body .ih-structured-room .ih68-room-header { min-height: 80px !important; padding: 16px 28px !important; }
+    body .ih-structured-room .ih68-thread { padding: 24px 36px !important; }
+    body .ih-structured-room .ih68-thread-inner { width: 100% !important; max-width: 1000px !important; margin-inline: auto !important; }
+    body .ih-structured-room .ih68-message { max-width: min(76%, 720px) !important; }
+    body .ih-structured-room .ih68-message-content { font-size: 15px !important; line-height: 1.75 !important; }
+    body .ih-structured-room .ih-profile-project-step { padding: 20px !important; margin-block: 24px !important; gap: 20px !important; }
+    body .ih-structured-room .ih-profile-project-step p { font-size: 13px !important; }
+  }
+  @media (max-width: 1100px) {
+    body .ih-account-editor-layout:not([hidden]) { grid-template-columns: 176px minmax(0, 1fr) !important; gap: 28px !important; }
+    body .ih-account-editor-layout .account-form-section-identity:not([hidden]) { grid-template-columns: minmax(0, 1fr) !important; }
+  }
+  @media (max-width: 850px) {
+    body .ih-account-editor-page { width: calc(100% - 32px) !important; padding: 20px 0 40px !important; }
+    body .ih-account-editor-layout:not([hidden]) { grid-template-columns: minmax(0, 1fr) !important; gap: 24px !important; }
+    body .ih-account-editor-layout .ih75-account-navigation { position: relative !important; top: auto !important; z-index: 85 !important; }
+    body .ih-account-editor-layout .account-form-section:not([hidden]),
+    body .ih-account-editor-layout :is(.profile-portfolio-editor, .profile-portfolio-editor-grid) { grid-template-columns: minmax(0, 1fr) !important; gap: 20px !important; }
+    body .ih-account-editor-layout .ih75-account-main > .ih-page-heading { margin-bottom: 24px !important; padding-bottom: 20px !important; }
+    body .ih-account-editor-layout .ih75-account-main > .ih-page-heading h1 { font-size: 30px !important; }
+    body .ih-account-editor-layout .profile-portfolio-editor { padding: 20px !important; }
+    body .ih-account-editor-layout .ih-sp-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    body .ih-account-editor-layout .ih-sp-card { padding: 20px !important; }
+    body .ih72-inbox { width: calc(100% - 32px) !important; }
+    body .ih-structured-room:not(.is-focus) { width: 100% !important; max-width: none !important; }
+    body .ih-structured-room .ih72-room-nav { gap: 0 !important; padding: 0 10px !important; }
+    body .ih-structured-room .ih72-room-nav > button { flex: 1 1 0 !important; min-width: 0 !important; padding: 12px 5px !important; gap: 5px !important; font-size: 13px !important; }
+    body .ih-structured-room .ih68-room-page:not([hidden]) { padding: 20px 16px !important; }
+    body .ih-room-payment-status { padding: 8px 16px !important; gap: 6px 12px !important; font-size: 12px !important; }
+    body .ih-room-payment-status > strong { font-size: 12px !important; line-height: 1.5 !important; }
+    body .ih-structured-room .ih68-composer-area { padding: 10px 12px max(10px, env(safe-area-inset-bottom)) !important; }
+    body .ih-structured-room .ih-compose-recipient { display: none !important; }
+    body .ih-structured-room .ih-compose-action-label { display: none !important; }
+    body .ih-structured-room .ih68-composer { gap: 6px !important; }
+    body .ih-structured-room :is(.ih68-attach, .ih68-send) { width: 44px !important; height: 44px !important; min-height: 44px !important; padding: 10px !important; }
+    body .ih-structured-room .ih68-compose-hint { display: none !important; }
+    body .ih-structured-room.is-keyboard .ih-room-payment-status { display: none !important; }
+    body .ih-structured-room.is-keyboard .ih72-room-nav > button { min-height: 40px !important; padding-block: 8px !important; }
+    body .ih-structured-room.is-keyboard .ih68-composer-area { padding: 6px 10px max(6px, env(safe-area-inset-bottom)) !important; }
+  }
+  @media (min-width: 761px) and (max-width: 850px) {
+    body .ih-account-editor-layout .ih75-account-navigation :is(.ih75-account-return, .ih74-section-nav-title, .ih72-section-links) { display: none !important; }
+    body .ih-account-editor-layout .ih75-account-navigation .ih72-section-select { display: block !important; }
+  }
+  @media (max-width: 480px) {
+    body .ih-account-editor-layout .profile-portfolio-edit-list { grid-template-columns: minmax(0, 1fr) !important; }
+    body .ih-account-editor-layout .ih11-avatar-preview { flex-basis: 72px !important; width: 72px !important; height: 72px !important; }
+    body .ih-structured-room .ih72-room-nav > button > svg { display: none !important; }
+  }
+  @media (pointer: coarse) { body .ih-structured-room .ih68-compose-hint { display: none !important; } }
+  body .ih-account-editor-layout[hidden], body .ih-account-editor-layout [hidden] { display: none !important; }
+}

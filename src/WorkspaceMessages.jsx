@@ -31,7 +31,7 @@ export function WorkspaceInbox({
   }
   return <main className="ih68-page ih72-inbox" id="ih68-content">
     <SubpageHeading title={t('Wiadomości', 'Messages')} actions={<Link to="/freelancers" className="ih72-new-conversation"><WorkspaceIcon kind="plus" /><span>{t('Nowa rozmowa', 'New conversation')}</span></Link>} />
-    <div className="ih79-inbox-layout"><aside className="ih79-inbox-context"><h2>{t('Skrzynka', 'Inbox')}</h2><p>{t('Rozmowy dotyczące zleceń i współprac.', 'Conversations about your jobs and projects.')}</p><Link to="/work" className="ih68-text-link">{t('Panel pracy', 'Workspace')}<WorkspaceIcon kind="diagonal" /></Link></aside><div className="ih79-inbox-list">
+    <div className="ih79-inbox-layout ih-inbox-single"><div className="ih79-inbox-list">
     <div className="ih72-list-toolbar">
       <div className="ih72-filters" role="group" aria-label={t('Filtr rozmów', 'Conversation filter')}>
         <button type="button" aria-pressed={inboxFilter === 'all'} onClick={() => update('unread', '')}>{t('Wszystkie', 'All')}{!loading && <span>{conversations.length}</span>}</button>
@@ -127,7 +127,8 @@ export function WorkspaceComposer({
   onMaterials,
   errorMessage,
   blockedByMe,
-  profileId
+  profileId,
+  recipientName
 }) {
   const t = useWorkspaceCopy();
   useLayoutEffect(() => {
@@ -155,10 +156,11 @@ export function WorkspaceComposer({
   }, [composerRef, blocked]);
   return <div className="ih68-composer-area">
     {errorMessage && <p className="ih68-feedback" role="alert">{errorMessage}</p>}
+    {!blocked && <p className="ih-compose-recipient">{t('Wiadomość do', 'Message to')} <strong>{recipientName}</strong></p>}
     {blocked ? <p className="ih68-block-note"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości w tej rozmowie jest wyłączone.', 'Sending messages in this conversation is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> :
       <form className="ih68-composer ih72-composer" onSubmit={onSubmit} aria-busy={sending}>
         <button type="button" className="ih68-attach" onClick={onMaterials} disabled={sending}
-          aria-label={t('Dodaj plik lub link', 'Add a file or link')} title={t('Dodaj plik lub link', 'Add a file or link')}><WorkspaceIcon kind="attachment" /></button>
+          aria-label={t('Dodaj plik lub link do tej rozmowy', 'Add a file or link to this conversation')} title={t('Dodaj plik lub link', 'Add a file or link')}><WorkspaceIcon kind="attachment" /><span className="ih-compose-action-label">{t('Plik lub link', 'File or link')}</span></button>
         <label className="ih68-sr-only" htmlFor="ih68-message-draft">{t('Treść wiadomości', 'Message text')}</label>
         <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000}
           placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
@@ -171,7 +173,7 @@ export function WorkspaceComposer({
           }} />
         <button type="submit" className="ih68-send" disabled={sending || !draft.trim()}
           aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}
-          title={sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}><WorkspaceIcon kind="send" /></button>
+          title={sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}><span className="ih-compose-action-label">{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><WorkspaceIcon kind="send" /></button>
       </form>}
     {!blocked && <p className="ih68-compose-hint">{t('Enter wysyła · Shift + Enter dodaje linię', 'Enter to send · Shift + Enter for a new line')}</p>}
   </div>;
@@ -186,7 +188,6 @@ export function WorkspaceConversation({
   profileId,
   blocked,
   jobTitle,
-  budget,
   category,
   materialCount,
   accepted,
@@ -208,6 +209,8 @@ export function WorkspaceConversation({
   composer,
   materials,
   plan,
+  payment,
+  paymentOverview,
   disputePanel,
   reportDialog,
   projectAction
@@ -215,9 +218,9 @@ export function WorkspaceConversation({
   const t = useWorkspaceCopy();
   const frameRef = useRef(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width: 1100px)').matches ?? true);
+  const [compact, setCompact] = useState(() => window.matchMedia?.('(max-width: 1399px)').matches ?? true);
   useLayoutEffect(() => {
-    const media = window.matchMedia?.('(max-width: 1100px)');
+    const media = window.matchMedia?.('(max-width: 1399px)');
     if (!media) return;
     const update = () => setCompact(media.matches);
     update();
@@ -319,8 +322,8 @@ export function WorkspaceConversation({
     };
   }, [focusMode, onFocusMode]);
   const closeMenu = () => setOptionsOpen(false);
-  const showPlan = view === 'plan' || (planPinned && view === 'conversation');
-  const showContext = view === 'files' || showPlan;
+  const showPlan = view === 'plan' || (planPinned && !compact && view === 'conversation');
+  const showContext = planPinned && !compact && view === 'conversation';
   const closeContext = () => {
     if (planPinned) onClosePlan();
     if (view !== 'conversation') onView('conversation');
@@ -330,7 +333,7 @@ export function WorkspaceConversation({
     <main ref={frameRef} id="ih68-content" data-view={view}
       role={focusMode ? 'dialog' : undefined} aria-modal={focusMode ? true : undefined}
       aria-label={t('Rozmowa IdeaHire', 'IdeaHire conversation')}
-      className={'ih68-room ih72-room' + (focusMode ? ' is-focus' : '') + (showContext && !compact ? ' has-context' : '')}>
+      className={'ih68-room ih72-room ih-structured-room' + (focusMode ? ' is-focus' : '') + (showContext ? ' has-context' : '')}>
       {loading ? <WorkspaceLoading /> : !hasConversation ?
         <section className="ih68-room-error"><h1>{t('Nie można otworzyć rozmowy', 'Unable to open this conversation')}</h1><p role="alert">{errorMessage}</p><button type="button" className="ih68-secondary" onClick={onBack}><WorkspaceIcon kind="back" />{backLabel}</button></section> : <>
         <header className="ih68-room-header">
@@ -345,23 +348,28 @@ export function WorkspaceConversation({
         <nav className="ih72-room-nav" aria-label={t('Rozmowa i współpraca', 'Conversation and project')}>
           <button type="button" aria-current={view === 'conversation' ? 'page' : undefined} aria-controls="ih69-conversation-panel" onClick={() => onView('conversation')}><WorkspaceIcon kind="message" /><span>{t('Rozmowa', 'Chat')}</span></button>
           <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Pliki', 'Files')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
-          <button type="button" aria-current={showPlan ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
-          <span className="ih72-room-budget"><small>{accepted ? t('Uzgodniona cena', 'Agreed price') : t('Budżet', 'Budget')}</small><strong>{budget}</strong></span>
+          <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
+          <button type="button" aria-current={view === 'payment' ? 'page' : undefined} aria-controls="ih68-room-payment" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność', 'Payment')}</span></button>
         </nav>
+        <button type="button" className={'ih-room-payment-status is-' + (paymentOverview?.tone || 'neutral')} onClick={() => onView('payment')} aria-controls="ih68-room-payment">
+          <span>{t('Status płatności', 'Payment status')}</span><strong role="status" aria-live="polite" aria-atomic="true">{paymentOverview?.label || t('Sprawdzanie…', 'Checking…')}</strong><WorkspaceIcon kind="next" />
+        </button>
         {disputePanel}
-        {projectAction}
         <div className="ih68-room-body">
-          <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={compact && view !== 'conversation'}>{thread}{composer}</section>
+          <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={view !== 'conversation'}>{thread}{composer}</section>
           <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu', 'Project materials')}>
-            {view === 'files' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Pliki i materiały', 'Files & materials')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij materiały', 'Close materials')}><WorkspaceIcon kind="close" /></button></header>{materials}</>}
+            {view === 'files' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Pliki i linki', 'Files & links')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij materiały', 'Close materials')}><WorkspaceIcon kind="close" /></button></header>{materials}</>}
           </section>
-          <section hidden={!showPlan} className="ih68-room-page ih68-terms" id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia i płatność', 'Terms and payment')}>
-            {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia i płatność', 'Terms & payment')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij ustalenia', 'Close terms')}><WorkspaceIcon kind="close" /></button></header>
-              <div className="ih72-project-facts"><span>{accepted ? t('Uzgodniona cena', 'Agreed price') : t('Proponowany budżet', 'Proposed budget')}</span><strong>{budget}</strong>{accepted && <small><WorkspaceIcon kind="check" />{t('Warunki zaakceptowane', 'Terms accepted')}</small>}</div>
+          <section hidden={!showPlan} className="ih68-room-page ih68-terms" id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia', 'Terms')}>
+            {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia', 'Terms')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij ustalenia', 'Close terms')}><WorkspaceIcon kind="close" /></button></header>
               <details className="ih72-project-description"><summary>{t('Zlecenie i jego opis', 'Project and description')}<WorkspaceIcon kind="down" /></summary><div><h3>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h3>{category && <p>{category}</p>}{projectDetails}</div></details>
+              {projectAction}
               {plan}
-              {!planPinned && <button type="button" className="ih68-pin-option ih68-text-link" onClick={onPinPlan}><WorkspaceIcon kind="pin" />{t('Przypnij przy rozmowie', 'Pin beside conversation')}</button>}
+              {!compact && !planPinned && <button type="button" className="ih68-pin-option ih68-text-link" onClick={onPinPlan}><WorkspaceIcon kind="pin" />{t('Przypnij przy rozmowie', 'Pin beside conversation')}</button>}
             </>}
+          </section>
+          <section hidden={view !== 'payment'} className="ih68-room-page ih-room-payment-page" id="ih68-room-payment" tabIndex={-1} aria-label={t('Płatność', 'Payment')}>
+            {view === 'payment' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Płatność', 'Payment')}</h2></div><button type="button" className="ih68-icon-button ih72-panel-close" onClick={closeContext} aria-label={t('Zamknij płatność', 'Close payment')}><WorkspaceIcon kind="close" /></button></header>{payment}</>}
           </section>
         </div>
         <WorkspaceSheet open={optionsOpen} onClose={closeMenu} title={t('Opcje rozmowy', 'Conversation options')}>

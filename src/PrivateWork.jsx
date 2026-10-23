@@ -795,6 +795,7 @@ export function PrivateSharePanel({
   openRequest = false,
   onOpenRequest,
   conversationId,
+  recipientName,
   userId,
   disabled,
   agreementAccepted,
@@ -1077,8 +1078,8 @@ export function PrivateSharePanel({
         }}>
           <div className="private-work-share-heading">
             <div>
-              <span className="section-label">Prywatna przestrzeń pracy</span>
               <h2 id="private-work-share-title">Dodaj materiały</h2>
+              {recipientName && <p className="ih-share-recipient">Rozmowa z <strong>{recipientName}</strong></p>}
             </div>
             <button type="button" onClick={() => setOpen(false)} disabled={busy} aria-label="Zamknij okno dodawania materiałów">×</button>
           </div>
