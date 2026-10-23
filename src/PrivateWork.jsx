@@ -1198,7 +1198,7 @@ export function PrivateSharePanel({
                       <MarketSelect label="Rodzaj linku" value={link.materialKind || "link"} disabled={busy || outcomeUnknown} options={[{value:"link",label:"Link do materiału"},{value:"preview",label:"Podgląd / wersja testowa"},{value:"repository",label:"Repozytorium kodu"}]} onChange={(value) => setLinks((current) => current.map((item, itemIndex) => itemIndex === index ? {...item,materialKind:value} : item))} />
                     </div>
                   </div>)}</div>
-                  <button type="button" className="ih-material-add-link" onClick={addLink} disabled={occupiedSlots >= MAX_ITEMS}><Plus size={18} aria-hidden="true" /><Link2 size={18} aria-hidden="true" />{links.length ? "Dodaj następny link" : "Dodaj link zamiast pliku"}</button>
+                  <button type="button" className="ih-material-add-link" onClick={addLink} disabled={occupiedSlots >= MAX_ITEMS}><Plus size={18} aria-hidden="true" /><Link2 size={18} aria-hidden="true" />{links.length ? "Dodaj następny link" : "Dodaj link"}</button>
                 </section>
 
                 <details className="ih-material-extra" open={mode === "delivery" || undefined}>
