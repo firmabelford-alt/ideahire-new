@@ -84,6 +84,8 @@ export function WorkspaceThread({
   return <div ref={optionsRoot} className="ih68-thread-wrap"><div ref={viewportRef} className="ih68-thread" role="log" aria-label={t('Historia rozmowy', 'Conversation history')} aria-live="polite" aria-relevant="additions text" onScroll={onScroll} tabIndex={0}>
     {!messages.length ? <div className="ih68-thread-empty"><WorkspaceIcon kind="message" /><h2>{t('Napisz pierwszą wiadomość.', 'Write the first message.')}</h2><p>{t('Zapytaj o termin lub opisz, co jest do zrobienia.', 'Ask about availability or describe the work.')}</p></div> : <div className="ih68-thread-inner">{messages.map((message, index) => {
           const own = message.sender_id === user?.id;
+          const admin = message.sender_role === 'admin';
+          const authorName = admin ? t('Administrator IdeaHire', 'IdeaHire administrator') : otherName;
           const previous = messages[index - 1];
           const day = !previous || new Date(previous.created_at).toDateString() !== new Date(message.created_at).toDateString();
           const followup = !day && previous.sender_id === message.sender_id && new Date(message.created_at) - new Date(previous.created_at) < 300000;
@@ -92,8 +94,8 @@ export function WorkspaceThread({
                   month: 'long',
                   year: 'numeric'
                 })}</time></div>}
-        <article className={'ih68-message' + (own ? ' is-own' : ' is-received') + (followup ? ' is-followup' : '')} aria-label={own ? t('Twoja wiadomość', 'Your message') : otherName}>
-          {!own && !followup && <strong className="ih69-message-author">{otherName}</strong>}
+        <article className={'ih68-message' + (own ? ' is-own' : ' is-received') + (followup ? ' is-followup' : '')} aria-label={admin ? authorName : own ? t('Twoja wiadomość', 'Your message') : otherName}>
+          {!own && !followup && <strong className="ih69-message-author">{authorName}</strong>}
           <div className="ih68-message-content">{renderContent(message)}</div>
           <footer className="ih69-message-meta"><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleTimeString(en ? 'en-GB' : 'pl-PL', {
                     hour: '2-digit',

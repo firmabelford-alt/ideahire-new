@@ -111,6 +111,9 @@ export function DisputeSettlementStatus({ client, decision, dispute, appeals = [
   else if (decision.payment_action_status === "completed") status = "Decyzja jest oznaczona jako rozliczona. Sprawdzamy zgodność ze statusem płatności.";
   else if (decision.payment_action_status === "not_connected") status = "Administrator musi uruchomić lub sprawdzić rozliczenie tej decyzji. Sam zapis decyzji nie potwierdza zwrotu.";
   else if (appealed || !["decision_issued", "closed"].includes(dispute.status)) status = "Rozliczenie wstrzymane do rozpatrzenia sprawy lub odwołania.";
+  else if (decision.is_final) status = ["refund_pending", "release_pending"].includes(payment?.payment_status)
+    ? "Decyzja ostateczna po odwołaniu. Rozliczenie jest w toku; czekamy na potwierdzenie Stripe."
+    : "Decyzja ostateczna po odwołaniu. Rozliczenie oczekuje na wykonanie w Stripe, bez kolejnego terminu 7 dni.";
   else if (Number.isFinite(deadline) && now <= deadline) status = (isRefund ? "Zwrot przyznany" : "Wynagrodzenie przyznane")
     + " — trwa 7-dniowy termin odwołania do " + settlementDate(dispute.appeal_deadline_at)
     + " (czas polski). Operacja w Stripe jeszcze nie została zakończona.";
@@ -143,6 +146,7 @@ export function DisputeSettlementStatus({ client, decision, dispute, appeals = [
 
 export default function DisputePaymentPanel({ client, decision, userId, conversationId, onSettled }) {
   const [preview, setPreview] = useState(null);
+  const [protection, setProtection] = useState(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [executing, setExecuting] = useState(false);
@@ -184,10 +188,11 @@ export default function DisputePaymentPanel({ client, decision, userId, conversa
       const data = await invoke("preview");
       if (generation !== request.current || currentScope.current !== scope) return;
       setPreview(data.preview);
+      setProtection(data.platform_protection || null);
       setMessage("");
       notify(data.preview?.action);
     } catch (error) {
-      if (generation === request.current && currentScope.current === scope) { setPreview(null); setMessage(error.message); }
+      if (generation === request.current && currentScope.current === scope) { setPreview(null); setProtection(null); setMessage(error.message); }
     } finally {
       if (generation === request.current && currentScope.current === scope) setLoading(false);
     }
@@ -195,7 +200,7 @@ export default function DisputePaymentPanel({ client, decision, userId, conversa
 
   useEffect(() => {
     currentScope.current = scope;
-    setPreview(null); setConfirmed(false); setMessage(""); setExecuting(false); inFlight.current = false;
+    setPreview(null); setProtection(null); setConfirmed(false); setMessage(""); setExecuting(false); inFlight.current = false;
     refresh();
     const visibleRefresh = () => { if (document.visibilityState !== "hidden" && !inFlight.current) refresh(); };
     const timer = window.setInterval(visibleRefresh, 30000);
@@ -224,6 +229,13 @@ export default function DisputePaymentPanel({ client, decision, userId, conversa
   if (!FINANCIAL.has(decision?.outcome)) return null;
   return <div className="dispute-financial-action" style={{ marginTop: 20, borderTop: "1px solid currentColor", paddingTop: 16 }}>
     <h3>Rozliczenie decyzji w Stripe</h3>
+    {protection && <p role={protection.protected === true ? "status" : "alert"}>
+      {protection.protected === true
+        ? "Automatyczne wypłaty z konta platformy na rachunek IdeaHire są wyłączone. Ręczna wypłata wymaga sprawdzenia wolnej nadwyżki po zabezpieczeniu nierozliczonych zleceń i zwrotów."
+        : protection.protected === false
+        ? "Uwaga: automatyczne wypłaty platformy są włączone. Sprawdź harmonogram Stripe i wstrzymaj wypłaty środków potrzebnych na zlecenia i zwroty."
+        : "Nie potwierdzono ochrony salda platformy. Sprawdź harmonogram wypłat w Stripe przed wypłatą prowizji."}
+    </p>}
     <p>Pełny zwrot obejmuje prowizję IdeaHire. Przy częściowym zwrocie prowizja jest zwracana proporcjonalnie. Operacja może rozpocząć się po terminie odwołania, jeśli decyzja pozostaje aktualna.</p>
     {loading && <p role="status">Sprawdzamy plan rozliczenia…</p>}
     {preview && <>

@@ -19366,9 +19366,9 @@ function ChatDisputePanel({
             </ul>
 
             <p className="dispute-context-notice-safety">
-              Dostęp ma wyłącznie administrator przypisany do sprawy, tylko do
-              odczytu. Każde otwarcie pełnego kontekstu jest zapisywane w
-              rejestrze działań.
+              Dostęp ma wyłącznie administrator przypisany do sprawy. Materiały
+              i ustalenia pozostają do odczytu. Administrator może dopisać na
+              czacie oznaczoną wiadomość. Odczyt i wysłanie są rejestrowane.
             </p>
 
             <label className="dispute-context-acknowledgement">
@@ -20923,7 +20923,7 @@ function Chat() {
     } = await supabase
       .from("messages")
       .select(
-        "id, conversation_id, sender_id, content, created_at, read_at, moderation_status, hidden_at"
+        "id, conversation_id, sender_id, content, created_at, read_at, moderation_status, hidden_at, sender_role"
       )
       .eq(
         "conversation_id",
@@ -21642,7 +21642,7 @@ function Chat() {
           content,
         })
         .select(
-          "id, conversation_id, sender_id, content, created_at, read_at, moderation_status, hidden_at"
+          "id, conversation_id, sender_id, content, created_at, read_at, moderation_status, hidden_at, sender_role"
         )
         .single();
 
@@ -22211,12 +22211,24 @@ function DisputeDetails() {
   const [fileCaption, setFileCaption] = useState("");
   const [showMessagePicker, setShowMessagePicker] = useState(false);
   const [appealBody, setAppealBody] = useState("");
+  const [appealReplies, setAppealReplies] = useState({});
+  const [adminChatDrafts, setAdminChatDrafts] = useState({});
+  const adminChatRequest = useRef(null);
+  const adminChatInFlight = useRef(false);
+  const [caseNow, setCaseNow] = useState(Date.now);
   const [adminNote, setAdminNote] = useState("");
   const [adminNotePublic, setAdminNotePublic] = useState(true);
   const [decisionForm, setDecisionForm] = useState(
     createEmptyDisputeDecisionForm
   );
   const [decisionMessage, setDecisionMessage] = useState("");
+
+  useEffect(() => {
+    const update = () => { if (document.visibilityState !== "hidden") setCaseNow(Date.now()); };
+    const timer = window.setInterval(update, 30000);
+    window.addEventListener("focus", update);
+    return () => { window.clearInterval(timer); window.removeEventListener("focus", update); };
+  }, []);
 
   const isParticipant = Boolean(
     dispute &&
@@ -22327,7 +22339,7 @@ function DisputeDetails() {
       if (participant && !isStaff) {
         const { data, error } = await supabase
           .from("messages")
-          .select("id, sender_id, content, created_at")
+          .select("id, sender_id, content, created_at, sender_role")
           .eq("conversation_id", disputeData.conversation_id)
           .order("created_at", { ascending: false })
           .limit(100);
@@ -22363,7 +22375,7 @@ function DisputeDetails() {
           while (true) {
             const { data: messageRows, error: messageError } = await supabase
               .from("messages")
-              .select("id, conversation_id, sender_id, content, created_at, read_at")
+              .select("id, conversation_id, sender_id, content, created_at, read_at, sender_role")
               .eq("conversation_id", disputeData.conversation_id)
               .order("created_at", { ascending: true })
               .range(from, from + pageSize - 1);
@@ -22464,7 +22476,12 @@ function DisputeDetails() {
       )
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "dispute_decisions", filter: `dispute_id=eq.${id}` },
+        { event: "*", schema: "public", table: "dispute_decisions", filter: `dispute_id=eq.${id}` },
+        refresh
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "dispute_appeals", filter: `dispute_id=eq.${id}` },
         refresh
       )
       .subscribe();
@@ -22739,6 +22756,49 @@ function DisputeDetails() {
     );
   }
 
+  async function handleAppealReply(event, appealId) {
+    event.preventDefault();
+    const body = String(appealReplies[appealId] || "").trim();
+    if (body.length < 3 || busy) return;
+    const completed = await runAction("appeal-reply-" + appealId, async () => {
+      const { error } = await supabase.rpc("respond_to_dispute_appeal", {
+        p_appeal_id: appealId, p_body: body,
+      });
+      if (error) throw error;
+    }, "Odpowiedź na odwołanie została zapisana i udostępniona obu stronom.");
+    if (completed) setAppealReplies(current => ({ ...current, [appealId]: "" }));
+  }
+
+  async function handleAdminChatMessage(event) {
+    event.preventDefault();
+    const caseId = id;
+    const content = String(adminChatDrafts[caseId] || "").trim();
+    if (!content || busy || adminChatInFlight.current) return;
+    if (containsCredentialLikeText(content)) {
+      setPageMessage("Nie wysyłaj haseł, kodów uwierzytelnienia ani kluczy API na czacie.");
+      return;
+    }
+    const scope = [user.id, caseId, content].join(":");
+    if (adminChatRequest.current?.scope !== scope) {
+      adminChatRequest.current = { scope, id: window.crypto.randomUUID() };
+    }
+    const messageId = adminChatRequest.current.id;
+    adminChatInFlight.current = true;
+    try {
+      const completed = await runAction("admin-chat", async () => {
+        const { data, error } = await supabase.rpc("admin_send_dispute_chat_message", {
+          p_dispute_id: caseId, p_content: content, p_message_id: messageId,
+        });
+        if (error) throw error;
+        if (data !== messageId) throw new Error("Nie potwierdzono wysłania tej wiadomości. Ponów sprawdzenie.");
+      }, "Wiadomość administratora została wysłana na czat zlecenia.");
+      if (completed) {
+        setAdminChatDrafts(current => ({ ...current, [caseId]: current[caseId]?.trim() === content ? "" : current[caseId] }));
+        if (adminChatRequest.current?.id === messageId) adminChatRequest.current = null;
+      }
+    } finally { adminChatInFlight.current = false; }
+  }
+
   async function handleAdminNote(event) {
     event.preventDefault();
     const body = adminNote.trim();
@@ -22782,6 +22842,11 @@ function DisputeDetails() {
       setDecisionMessage("Uzasadnienie decyzji musi mieć co najmniej 20 znaków.");
       return;
     }
+    if (currentAppeals.length && (!appealsAnswered || appealDeadlineOpen)) {
+      setDecisionMessage("Odpowiedz na każde odwołanie i zachowaj pierwotny termin odwołań obu stron przed decyzją ostateczną.");
+      return;
+    }
+    if (currentAppeals.length && !window.confirm("Wydajesz ostateczną decyzję po rozpatrzeniu odwołań. Nie będzie kolejnego wewnętrznego terminu 7 dni. Rozliczenie finansowe trafi do wykonania w Stripe. Czy potwierdzasz analizę odpowiedzi i wybrany wynik?")) return;
 
     let amount = null;
 
@@ -22890,6 +22955,8 @@ function DisputeDetails() {
       setDecisionMessage(
         applyRestriction
           ? "Decyzja została zapisana, konto zawieszone, a użytkownik otrzymał zawiadomienie."
+          : currentAppeals.length
+          ? "Decyzja została zapisana jako ostateczna w procedurze IdeaHire i przekazana obu stronom."
           : "Decyzja została zapisana i przekazana obu stronom."
       );
       await loadCase(false);
@@ -22964,13 +23031,19 @@ function DisputeDetails() {
     "Wykonawca"
   );
   const currentDecision = decisions.find((item) => item.is_current);
+  const currentAppeals = appeals.filter(item => item.decision_id === currentDecision?.id && !item.resolved_at);
+  const appealsAnswered = currentAppeals.every(item => statements.some(statement => statement.appeal_id === item.id
+    && ["owner", "admin"].includes(statement.author_role) && statement.visibility === "parties"));
+  const appealDeadlineOpen = Boolean(dispute.appeal_deadline_at && new Date(dispute.appeal_deadline_at).getTime() >= caseNow);
+  const assignedAdmin = isStaff && ["owner", "admin"].includes(staffRole) && dispute.assigned_admin_id === user.id;
   const alreadyAppealed = appeals.some((item) => item.appealed_by === user.id);
   const appealIsOpen = Boolean(
     !isStaff &&
       isParticipant &&
-      dispute.status === "decision_issued" &&
+      ["decision_issued", "appealed", "under_review"].includes(dispute.status) &&
+      currentDecision && !currentDecision.is_final &&
       dispute.appeal_deadline_at &&
-      new Date(dispute.appeal_deadline_at).getTime() >= Date.now() &&
+      appealDeadlineOpen &&
       !alreadyAppealed
   );
   const canCancel = Boolean(
@@ -23009,6 +23082,10 @@ function DisputeDetails() {
             <p>Sprawa otwarta {formatDisputeDate(dispute.opened_at)}</p>
           </div>
           <DisputeStatusPill status={dispute.status} />
+          {assignedAdmin && <a className="dispute-secondary-button" href="#admin-dispute-chat" onClick={() => {
+            const chat = document.getElementById("admin-dispute-chat");
+            if (chat) chat.open = true;
+          }}>Otwórz czat zlecenia jako administrator</a>}
         </header>
 
         {pageMessage && (
@@ -23026,8 +23103,9 @@ function DisputeDetails() {
             </strong>
             <p>
               Pełną rozmowę, formularz współpracy i dowody może wyświetlić
-              wyłącznie administrator przypisany do tego sporu. Dostęp jest
-              tylko do odczytu, a każde otwarcie zostaje zapisane.
+              wyłącznie administrator przypisany do tego sporu. Każde otwarcie
+              jest rejestrowane. Administrator może dopisać na czacie wiadomość
+              oznaczoną jako administracyjna; nie zmienia wcześniejszych wiadomości ani ustaleń.
             </p>
             {dispute.context_access_acknowledged_at && (
               <small>
@@ -23044,7 +23122,7 @@ function DisputeDetails() {
           <div className="dispute-detail-main">
             {currentDecision && (
               <section className="dispute-panel dispute-decision-panel">
-                <span className="dispute-eyebrow">Aktualna decyzja</span>
+                <span className="dispute-eyebrow">{currentDecision.is_final ? "Decyzja ostateczna po odwołaniu" : "Aktualna decyzja"}</span>
                 <h2>{getOptionLabel(ADMIN_DECISION_OPTIONS, currentDecision.outcome)}</h2>
                 {currentDecision.amount != null && (
                   <strong className="dispute-decision-amount">
@@ -23069,13 +23147,45 @@ function DisputeDetails() {
                   <DisputePaymentPanel client={supabase} decision={currentDecision} userId={user.id}
                     conversationId={dispute.conversation_id} onSettled={() => loadCase(false)} />
                 )}
-                {dispute.appeal_deadline_at && dispute.status === "decision_issued" && (
+                {currentDecision.is_final && <p>Decyzja jest ostateczna w wewnętrznej procedurze IdeaHire. Nie ogranicza praw ustawowych, możliwości dochodzenia roszczeń ani dostępu do sądu.</p>}
+                {dispute.appeal_deadline_at && dispute.status === "decision_issued" && !currentDecision.is_final && (
                   <p className="dispute-deadline-note">
                     Termin odwołania: {formatDisputeDate(dispute.appeal_deadline_at)}
                   </p>
                 )}
               </section>
             )}
+
+            {appeals.length > 0 && <section className="dispute-panel">
+              <div className="dispute-panel-heading"><h2>Odwołania i odpowiedzi</h2><span className="dispute-count-badge">{appeals.length}</span></div>
+              <p>Odwołanie wstrzymuje rozliczenie. Administrator odpowiada na zgłoszone argumenty, a następnie wydaje decyzję ostateczną po zakończeniu pierwotnego terminu odwołań.</p>
+              {appeals.map(appeal => {
+                const open = currentAppeals.some(item => item.id === appeal.id)
+                  && ["appealed", "under_review"].includes(dispute.status) && !currentDecision?.is_final;
+                const replies = statements.filter(item => item.appeal_id === appeal.id && item.visibility === "parties");
+                const canReply = open && (assignedAdmin || isParticipant && !isStaff);
+                return <article className="dispute-panel" key={appeal.id}>
+                  <span className="dispute-eyebrow">{open ? "Odwołanie w analizie" : "Odwołanie rozpatrzone we wcześniejszej decyzji"}</span>
+                  <h3>{getDisputeProfileName(profiles[appeal.appealed_by], "Strona sporu")}</h3>
+                  <small>{formatDisputeDate(appeal.created_at)}</small>
+                  <p>{appeal.reason}</p>
+                  {replies.map(reply => <div className="dispute-timeline-item" key={reply.id}>
+                    <strong>{["admin", "owner"].includes(reply.author_role) ? "Administrator IdeaHire" : getDisputeProfileName(profiles[reply.author_user_id], "Strona sporu")}</strong>
+                    <small> · {formatDisputeDate(reply.created_at)}</small><p>{reply.body}</p>
+                  </div>)}
+                  {canReply && <form className="dispute-inline-form" onSubmit={event => handleAppealReply(event, appeal.id)}>
+                    <label className="dispute-field"><span>Odpowiedź na odwołanie — widoczna dla obu stron</span>
+                      <textarea value={appealReplies[appeal.id] || ""} onChange={event => setAppealReplies(current => ({ ...current, [appeal.id]: event.target.value }))}
+                        minLength={3} maxLength={10000} rows={4} disabled={Boolean(busy)} required />
+                    </label>
+                    <button className="dispute-secondary-button" type="submit" disabled={Boolean(busy) || String(appealReplies[appeal.id] || "").trim().length < 3}>
+                      {busy === "appeal-reply-" + appeal.id ? "Zapisywanie…" : "Dodaj odpowiedź na odwołanie"}
+                    </button>
+                  </form>}
+                  {appeal.final_decision_id && <p>Odwołanie zostało rozstrzygnięte decyzją ostateczną w procedurze IdeaHire.</p>}
+                </article>;
+              })}
+            </section>}
 
             <section className="dispute-panel">
               <div className="dispute-panel-heading">
@@ -23152,10 +23262,10 @@ function DisputeDetails() {
                     <span className="dispute-eyebrow">Pełny kontekst sprawy</span>
                     <h2>Rozmowa i ustalenia współpracy</h2>
                     <p>
-                      Materiały są dostępne wyłącznie do analizy sporu. Nie możesz edytować formularza ani pisać na czacie użytkowników.
+                      Materiały służą analizie tej sprawy. Przypisany administrator może wysłać na czat oznaczoną wiadomość administracyjną. Ustalenia i wcześniejsze wiadomości pozostają do odczytu.
                     </p>
                   </div>
-                  <span className="admin-readonly-badge">Tylko odczyt</span>
+                  <span className="admin-readonly-badge">{assignedAdmin ? "Obsługa przypisanej sprawy" : "Wymaga przypisania"}</span>
                 </div>
 
                 {dispute.assigned_admin_id !== user.id ? (
@@ -23247,7 +23357,7 @@ function DisputeDetails() {
                         </div>
                       </details>
 
-                      <details className="admin-context-section" open>
+                      <details className="admin-context-section" id="admin-dispute-chat" open>
                         <summary>
                           <span>
                             <small>Pełny zapis rozmowy</small>
@@ -23267,7 +23377,8 @@ function DisputeDetails() {
                             <div className="admin-full-chat" aria-label="Pełna rozmowa użytkowników">
                               {adminChatMessages.map((message) => {
                                 const isClientMessage = message.sender_id === dispute.client_id;
-                                const authorName = isClientMessage ? clientName : contractorName;
+                                const isAdminMessage = message.sender_role === "admin";
+                                const authorName = isAdminMessage ? "Administrator IdeaHire" : isClientMessage ? clientName : contractorName;
 
                                 return (
                                   <article
@@ -23278,7 +23389,7 @@ function DisputeDetails() {
                                   >
                                     <div className="admin-chat-message-meta">
                                       <strong>{authorName}</strong>
-                                      <span>{isClientMessage ? "Zleceniodawca" : "Wykonawca"}</span>
+                                      <span>{isAdminMessage ? "Administracja" : isClientMessage ? "Zleceniodawca" : "Wykonawca"}</span>
                                       <time>{formatDisputeDate(message.created_at)}</time>
                                     </div>
                                     <p>{message.content}</p>
@@ -23287,6 +23398,16 @@ function DisputeDetails() {
                               })}
                             </div>
                           )}
+                          {assignedAdmin && !["closed", "cancelled"].includes(dispute.status) && <form className="dispute-inline-form" onSubmit={handleAdminChatMessage}>
+                            <label className="dispute-field"><span>Napisz na czacie jako Administrator IdeaHire</span>
+                              <textarea value={adminChatDrafts[id] || ""} onChange={event => setAdminChatDrafts(current => ({ ...current, [id]: event.target.value }))}
+                                placeholder="Wiadomość trafi bezpośrednio do rozmowy zleceniodawcy i wykonawcy…" rows={4} maxLength={10000} disabled={Boolean(busy)} required />
+                            </label>
+                            <p>Obie strony zobaczą tę wiadomość na czacie z oznaczeniem administratora. Wysłanie jest rejestrowane.</p>
+                            <button className="dispute-primary-button" type="submit" disabled={Boolean(busy) || !String(adminChatDrafts[id] || "").trim()}>
+                              {busy === "admin-chat" ? "Wysyłanie…" : "Wyślij na czat zlecenia"}
+                            </button>
+                          </form>}
                         </div>
                       </details>
                     </div>
@@ -23512,8 +23633,9 @@ function DisputeDetails() {
                   </button>
                 </form>
 
-                <form className="admin-dispute-form is-decision" onSubmit={handleDecision}>
-                  <h3>Wydaj decyzję</h3>
+                {assignedAdmin && !currentDecision?.is_final && <form className="admin-dispute-form is-decision" onSubmit={handleDecision}>
+                  <h3>{currentAppeals.length ? "Wydaj decyzję ostateczną po odwołaniu" : "Wydaj decyzję"}</h3>
+                  {currentAppeals.length > 0 && <p>Rozstrzygnij wszystkie odwołania w jednej decyzji. {appealDeadlineOpen ? "Pierwotny termin odwołań nadal trwa do " + formatDisputeDate(dispute.appeal_deadline_at) + "." : "Pierwotny termin odwołań upłynął."} {!appealsAnswered && "Dodaj jawną odpowiedź administratora na każde odwołanie w sekcji powyżej."} Decyzja ostateczna nie rozpoczyna kolejnych 7 dni.</p>}
                   <label>
                     Wynik sprawy
                     <select
@@ -23790,8 +23912,9 @@ function DisputeDetails() {
                   <p className="dispute-admin-warning">
                     Decyzja zostanie zapisana w historii i przekazana obu stronom.
                     Zawieszenie jest osobnym środkiem i zostanie dodane tylko po
-                    zaznaczeniu odpowiedniej opcji. Operacje finansowe pozostają
-                    wyłączone do czasu podłączenia operatora płatności.
+                    zaznaczeniu odpowiedniej opcji. Rozliczenie finansowe następuje
+                    przez Stripe po zakończeniu procedury odwoławczej. Zapis decyzji
+                    nie oznacza jeszcze wykonania zwrotu ani transferu.
                   </p>
                   {decisionMessage && (
                     <p
@@ -23811,15 +23934,15 @@ function DisputeDetails() {
                   <button
                     type="submit"
                     className="dispute-danger-button"
-                    disabled={Boolean(busy)}
+                    disabled={Boolean(busy) || currentAppeals.length > 0 && (!appealsAnswered || appealDeadlineOpen)}
                   >
                     {busy === "decision"
                       ? "Zapisywanie decyzji..."
                       : decisionForm.applyRestriction
                         ? "Wydaj decyzję i zawieś konto"
-                        : "Wydaj decyzję"}
+                        : currentAppeals.length ? "Wydaj decyzję ostateczną" : "Wydaj decyzję"}
                   </button>
-                </form>
+                </form>}
 
                 <div className="dispute-moderation-management">
                   <div>
