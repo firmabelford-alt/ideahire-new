@@ -1224,7 +1224,7 @@ export function PrivateSharePanel({
                 </details>
 
                 <section className="ihm-upload-section ihm-upload-caption">
-                  <label className="ihm-upload-field" htmlFor="ihm-upload-caption"><span>{mode === "delivery" ? "Opis gotowej pracy" : "Wiadomość do materiałów"}{mode !== "delivery" && <small>opcjonalnie</small>}</span><textarea id="ihm-upload-caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz zawartość materiałów i sposób sprawdzenia rezultatu…" : "Napisz, co wysyłasz i na co zwrócić uwagę…"} /><small>{mode === "delivery" ? "Minimum 20 znaków. Klient otrzyma te materiały do odbioru pracy." : "Materiały pojawią się w rozmowie i zakładce Pliki. Gotową pracę przekażesz osobno w trybie „Gotowa praca”."}</small></label>
+                  <label className="ihm-upload-field" htmlFor="ihm-upload-caption"><span>{mode === "delivery" ? "Opis gotowej pracy" : "Wiadomość do materiałów"}{mode !== "delivery" && <small>opcjonalnie</small>}</span><textarea id="ihm-upload-caption" value={caption} onChange={(event) => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz zawartość materiałów i sposób sprawdzenia rezultatu…" : "Napisz, co wysyłasz i na co zwrócić uwagę…"} /><small>{mode === "delivery" ? "Minimum 20 znaków. Klient otrzyma te materiały do odbioru pracy." : "Materiały pojawią się w rozmowie i zakładce Materiały. Gotową pracę przekażesz osobno w trybie „Gotowa praca”."}</small></label>
                 </section>
 
                 {mode === "delivery" && <div className="ihm-upload-confirmations">
