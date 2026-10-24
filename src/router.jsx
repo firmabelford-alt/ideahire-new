@@ -19576,18 +19576,9 @@ function AgreementPanel({
   const [confirmed, setConfirmed] =
     useState(false);
 
-  const [expanded, setExpanded] =
-    useState(true);
-
   useEffect(() => {
     setConfirmed(false);
   }, [mode, agreement?.id]);
-
-  useEffect(() => {
-    if (mode === "form") {
-      setExpanded(true);
-    }
-  }, [mode]);
 
   if (!required) return null;
 
@@ -19642,28 +19633,9 @@ function AgreementPanel({
 
   return (
     <section className="agreement-workspace">
-      <button
-        type="button"
-        className="agreement-workspace-toggle"
-        onClick={() =>
-          setExpanded((current) => !current)
-        }
-        aria-expanded={expanded}
-      >
-        <span>
-          <strong>Warunki współpracy</strong>
-          <small>
-            Zakres, cena i termin
-          </small>
-        </span>
-        <span className="ih12-collapse-icon" aria-hidden="true"><MarketIcon kind={expanded ? "close" : "plus"} /></span>
-      </button>
-
-      {expanded && (
       <section className="agreement-gate">
       <div className="agreement-gate-heading">
-        <strong className="ih-agreement-intro">Ustalcie zakres, cenę i termin.</strong>
-        <p>
+        <p className="ih-agreement-process-note">
           Obie strony akceptują tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.
         </p>
 
@@ -19697,7 +19669,7 @@ function AgreementPanel({
                   ? `Nowa wersja ${agreement.version + 1}`
                   : "Pierwsza propozycja"}
               </span>
-              <h3>Warunki realizacji zlecenia</h3>
+              <h3>{agreement ? "Zmieniona propozycja" : "Twoja propozycja warunków"}</h3>
             </div>
 
             <p>
@@ -20021,7 +19993,6 @@ function AgreementPanel({
         </div>
       )}
       </section>
-      )}
     </section>
   );
 }
@@ -21776,11 +21747,37 @@ function Chat() {
         : conversation.client_id
       : null);
 
+  const firstProposalByMe = (conversation?.first_proposer_role === 'contractor'
+    ? conversation?.contractor_id : conversation?.client_id) === user?.id;
+  const replyInConversation = () => {
+    openWorkspace('conversation');
+    requestAnimationFrame(() => composerRef.current?.focus());
+  };
+  const conversationNextStep = !messagingBlocked && agreementsRequired && !agreementLoading && !agreementAccepted ? (
+    waitingForProfileReply ? {
+      title: isClient ? roomCopy('Czekasz na odpowiedź wykonawcy', 'Waiting for the freelancer’s reply') : roomCopy('Klient czeka na Twoją odpowiedź', 'The client is waiting for your reply'),
+      description: roomCopy('Po odpowiedzi wykonawcy zleceniodawca może przygotować propozycję warunków.', 'After the freelancer replies, the client can prepare proposed terms.'),
+      actionLabel: isClient ? roomCopy('Zobacz ustalenia', 'View terms') : roomCopy('Odpowiedz', 'Reply'),
+      onAction: isClient ? () => openWorkspace('plan') : replyInConversation,
+    } : !agreement ? {
+      title: firstProposalByMe ? roomCopy('Możesz przygotować propozycję warunków', 'You can prepare proposed terms') : conversation?.first_proposer_role === 'contractor' ? roomCopy('Czekasz na ofertę wykonawcy', 'Waiting for the freelancer’s offer') : roomCopy('Czekasz na propozycję zleceniodawcy', 'Waiting for the client’s proposal'),
+      description: roomCopy('Zakres, cena, termin i poprawki będą zapisane w jednym formularzu.', 'Scope, price, deadline and revisions will be recorded in one form.'),
+      actionLabel: firstProposalByMe && canTransact ? roomCopy('Przygotuj warunki', 'Prepare terms') : roomCopy('Zobacz ustalenia', 'View terms'),
+      onAction: () => { if (firstProposalByMe && canTransact) openAgreementForm(); openWorkspace('plan'); },
+    } : {
+      title: currentUserAccepted ? roomCopy('Twoja akceptacja jest zapisana', 'Your acceptance has been recorded') : roomCopy('Propozycja warunków czeka na Ciebie', 'Proposed terms are ready to review'),
+      description: currentUserAccepted ? roomCopy('Płatność będzie dostępna po akceptacji tej samej wersji przez drugą stronę.', 'Payment becomes available after the other party accepts the same version.') : roomCopy('Sprawdź zakres, cenę i termin. Możesz zaakceptować propozycję lub zaproponować zmiany.', 'Check the scope, price and deadline. You can accept the proposal or suggest changes.'),
+      actionLabel: roomCopy('Sprawdź warunki', 'Review terms'),
+      onAction: () => openWorkspace('plan'),
+    }
+  ) : null;
+
     const roomReturn = typeof roomLocation.state?.workspaceReturn === 'string' && /^\/(messages|work)(\?|$)/.test(roomLocation.state.workspaceReturn) ? roomLocation.state.workspaceReturn : '/messages';
   return <div className="account-page ih68-chat-root"><AccountNavbar/>
     <WorkspaceConversation loading={loading} errorMessage={errorMessage} hasConversation={Boolean(conversation)}
       otherName={otherName} avatarUrl={otherProfile?.avatar_url} profileId={otherProfileId} blocked={messagingBlocked}
       jobTitle={jobTitle} category={getJobCategoryLabel(jobDetails?.category)}
+      nextStep={conversationNextStep} projectPlan={<ChatProjectPlan job={jobDetails} agreement={agreement} />}
       materialCount={privateWork.items.filter(item=>item.moderation_status==='active').length} accepted={agreement?.status==='accepted'} paymentOverview={paymentOverview}
       view={workspaceTab} onView={openWorkspace} focusMode={focusMode} onFocusMode={setFocusMode}
       backLabel={roomReturn.startsWith('/work')?roomCopy('Praca','Work'):roomCopy('Wiadomości','Messages')}
@@ -21845,7 +21842,16 @@ function Chat() {
                       }
                     /><p className="ih69-material-privacy"><WorkspaceIcon kind="lock" />{roomCopy("Materiały są widoczne wyłącznie dla stron tej współpracy.","Materials are visible only to the people in this project.")}</p></>}
       projectAction={isProfileMessage && profileReplyReceived && !conversation?.job_id && !agreement ? <div className="ih-profile-project-step"><div><strong>{roomCopy('Najpierw rozmowa, potem zlecenie', 'Chat first, then prepare the project')}</strong><p>{profileReplyReceived ? roomCopy('Możecie teraz przygotować zakres, cenę i termin w panelu zlecenia.', 'You can now prepare scope, price and deadline in the project panel.') : roomCopy('Panel zlecenia będzie dostępny po odpowiedzi wykonawcy.', 'The project panel becomes available after the freelancer replies.')}</p></div>{isClient && <button type="button" disabled={waitingForProfileReply || messagingBlocked || !canTransact} onClick={() => { openAgreementForm(); openWorkspace('plan'); }}><WorkspaceIcon kind="plus" />{roomCopy('Przygotuj zlecenie', 'Prepare project')}</button>}</div> : null}
-      plan={waitingForProfileReply ? <section className="ih-profile-project-wait"><h3>{roomCopy('Zacznijcie od rozmowy', 'Start with a conversation')}</h3><p>{roomCopy('Po odpowiedzi wykonawcy zleceniodawca może przygotować propozycję zakresu, ceny i terminu. Warunki wymagają osobnej akceptacji.', 'After the freelancer replies, the client can propose scope, price and deadline. Terms require a separate acceptance.')}</p><button type="button" className="ih68-secondary" onClick={() => openWorkspace('conversation')}>{roomCopy('Wróć do rozmowy', 'Back to conversation')}</button></section> : <><AgreementPanel
+      plan={waitingForProfileReply ? <section className="ih-profile-project-wait">
+        <h3>{isClient ? roomCopy('Formularz będzie dostępny po odpowiedzi wykonawcy', 'The form becomes available after the freelancer replies') : roomCopy('Najpierw odpowiedz klientowi', 'Reply to the client first')}</h3>
+        <p>{isClient ? roomCopy('To na razie prywatne zapytanie. Wykonawca jeszcze nie odpowiedział. Nie ma zaakceptowanych warunków ani płatności.', 'This is currently a private inquiry. The freelancer has not replied yet. No terms have been accepted and no payment has been made.') : roomCopy('Po Twojej odpowiedzi zleceniodawca będzie mógł przygotować propozycję. Wysłanie wiadomości nie oznacza akceptacji warunków.', 'After your reply, the client can prepare proposed terms. Sending a message does not mean accepting the terms.')}</p>
+        <ol className="ih-chat-start-steps">
+          <li><strong>{roomCopy('Rozmowa', 'Conversation')}</strong><span>{roomCopy('Ustalcie, czego dotyczy usługa i czy wykonawca jest dostępny.', 'Discuss the service and the freelancer’s availability.')}</span></li>
+          <li><strong>{roomCopy('Propozycja i akceptacja', 'Proposal and acceptance')}</strong><span>{roomCopy('Zleceniodawca wpisuje zakres, cenę, termin i poprawki. Obie strony akceptują tę samą wersję.', 'The client enters scope, price, deadline and revisions. Both parties accept the same version.')}</span></li>
+          <li><strong>{roomCopy('Płatność i realizacja', 'Payment and delivery')}</strong><span>{roomCopy('Po akceptacji zleceniodawca może zapłacić. Rozpocznijcie realizację po potwierdzeniu płatności.', 'Once terms are accepted, the client can pay. Start delivery after payment is confirmed.')}</span></li>
+        </ol>
+        <button type="button" className="ih68-secondary" onClick={replyInConversation}>{isClient ? roomCopy('Przejdź do rozmowy', 'Open conversation') : roomCopy('Odpowiedz klientowi', 'Reply to the client')}<WorkspaceIcon kind="next" /></button>
+      </section> : <><AgreementPanel
                       required={agreementsRequired}
                       agreement={agreement}
                       loading={agreementLoading}
@@ -21870,7 +21876,7 @@ function Chat() {
                       }}
                       onSubmit={handleAgreementSubmit}
                       onAccept={handleAgreementAccept}
-                    /><details className="ih69-project-plan-disclosure" open={!agreementsRequired}><summary><WorkspaceIcon kind="jobs" /><span>{roomCopy("Plan zlecenia","Project plan")}</span><WorkspaceIcon kind="down" /></summary><ChatProjectPlan job={jobDetails} agreement={agreement} /></details>{!agreementsRequired && <section className="ih18-legacy-plan ih69-legacy-note" aria-labelledby="ih18-legacy-plan-title">
+                    />{!agreementsRequired && <section className="ih18-legacy-plan ih69-legacy-note" aria-labelledby="ih18-legacy-plan-title">
                       <h3 id="ih18-legacy-plan-title">Ustalenia w starszej rozmowie</h3>
                       <p>W tej rozmowie nie można zaakceptować formalnych warunków. Aby uzgodnić zakres, cenę i termin, rozpocznij projekt z tym wykonawcą. Dotychczasowe wiadomości pozostaną dostępne.</p>
                       {isClient && otherProfile ? <ProfileContactAction profile={otherProfile} user={user} supabase={supabase} navigate={navigate} disabled={messagingBlocked} canContact={canTransact && !messagingBlocked} /> : <p>Zleceniodawca może rozpocząć projekt z profilu wykonawcy przyciskiem „Zleć pracę”.</p>}

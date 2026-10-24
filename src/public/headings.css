@@ -1761,95 +1761,7 @@
       max-height: none !important;
       overflow: visible !important;
     }
-    body .ih-message-workspace:not(.is-focus) {
-      position: relative !important;
-      display: flex !important;
-      flex-direction: column !important;
-      box-sizing: border-box !important;
-      width: calc(100% - 48px) !important;
-      max-width: 1680px !important;
-      height: auto !important;
-      min-height: calc(100dvh - 120px) !important;
-      max-height: none !important;
-      margin: 16px auto 32px !important;
-      padding: 0 !important;
-      border: 0 !important;
-      border-radius: 0 !important;
-      overflow: visible !important;
-    }
-    body .ih-message-workspace .ih68-room-header { min-height: 64px !important; padding: 12px 32px !important; }
-    body .ih-message-workspace .ih72-room-nav { gap: 4px !important; padding: 0 32px !important; }
-    body .ih-message-workspace .ih72-room-nav > button:not(.ih-message-payment-control) { flex: 0 0 auto !important; min-height: 48px !important; padding: 12px 16px !important; }
-    body .ih-message-workspace:not(.is-focus) .ih68-room-body,
-    body .ih-message-workspace:not(.is-focus) .ih68-correspondence:not([hidden]) {
-      display: block !important;
-      flex: 1 0 auto !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      overflow: visible !important;
-    }
-    body .ih-message-workspace:not(.is-focus) .ih68-thread-wrap {
-      display: block !important;
-      height: auto !important;
-      min-height: 280px !important;
-      max-height: none !important;
-      overflow: visible !important;
-    }
-    body .ih-message-workspace:not(.is-focus) .ih68-thread {
-      display: block !important;
-      height: auto !important;
-      min-height: 280px !important;
-      max-height: none !important;
-      padding: 32px !important;
-      overflow: visible !important;
-    }
-    body .ih-message-workspace .ih68-thread-inner { width: 100% !important; max-width: none !important; margin: 0 !important; }
-    body .ih-message-workspace .ih68-message { max-width: min(88%, 1120px) !important; }
-    body .ih-message-workspace :is(.ih68-message, .ih68-message-content, .message-text, .ih5-message-text) { height: auto !important; max-height: none !important; overflow: visible !important; scroll-margin-top: 100px !important; }
-    body .ih-message-workspace .ih68-message-content { font-size: 16px !important; line-height: 1.8 !important; }
-    body .ih-message-workspace:not(.is-focus) .ih68-composer-area { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 24px 32px 16px !important; border-top: 1px solid var(--a-line, #d8dfdf) !important; }
-    body .ih-message-workspace:not(.is-focus) .ih68-composer {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) auto !important;
-      align-items: end !important;
-      gap: 12px !important;
-      width: 100% !important;
-      min-height: 0 !important;
-      padding: 16px !important;
-      border: 1px solid var(--a-line, #d8dfdf) !important;
-      border-radius: 12px !important;
-      background: var(--a-paper, #fff) !important;
-    }
-    body .ih-message-workspace:not(.is-focus) .ih68-composer textarea {
-      grid-column: 1 / -1 !important;
-      grid-row: 1 !important;
-      width: 100% !important;
-      min-height: 112px !important;
-      max-height: none !important;
-      padding: 4px 2px !important;
-      overflow-y: hidden !important;
-      font: 450 16px/1.75 var(--ih-heading-font) !important;
-    }
-    body .ih-message-workspace:not(.is-focus) .ih68-attach { grid-row: 2 !important; grid-column: 1 !important; justify-self: start !important; }
-    body .ih-message-workspace:not(.is-focus) .ih68-send { grid-row: 2 !important; grid-column: 2 !important; justify-self: end !important; }
-    body .ih-message-workspace:not(.is-focus) .ih68-room-page:not([hidden]) {
-      display: block !important;
-      width: 100% !important;
-      max-width: none !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      padding: 32px !important;
-      overflow: visible !important;
-      scroll-margin-top: 100px !important;
-    }
-    body .ih-message-workspace .agreement-gate { width: 100% !important; max-width: none !important; max-height: none !important; overflow: visible !important; }
-    body .ih-message-workspace .agreement-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 24px 32px !important; }
-    body .ih-message-workspace .ih69-fact-list { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-    body .ih-message-workspace:not(.is-focus) .ih68-latest { position: fixed !important; inset: auto 32px 24px auto !important; transform: none !important; }
-    body .ih-message-workspace.is-focus .ih68-composer textarea { max-height: 240px !important; }
+    /* The conversation frame and composer are owned by WorkspaceMessages.css. */
     body .ih75-editor-workspace {
       display: grid !important;
       grid-template-columns: minmax(0, 1fr) !important;
@@ -1865,12 +1777,6 @@
     body .ih75-editor-workspace .ih75-editor-content { width: 100% !important; max-width: none !important; margin: 0 !important; }
     body .ih75-editor-workspace .ih5-job-create-step-heading { margin: 0 0 28px !important; padding: 0 !important; }
     body .ih75-editor-workspace .ih5-job-create-step-heading h2 { font-size: 26px !important; line-height: 1.4 !important; }
-  }
-  @media (min-width: 851px) and (max-width: 1100px) {
-    body .ih-message-workspace .ih72-room-nav > .ih-message-payment-control { gap: 6px !important; padding-inline-start: 10px !important; }
-    body .ih-message-workspace .ih-message-payment-control > span { display: none !important; }
-    body .ih-message-workspace .ih-message-payment-control > strong { max-width: 28ch !important; }
-    body .ih-message-workspace .ih72-room-nav > button:not(.ih-message-payment-control) { padding-inline: 10px !important; font-size: 13px !important; }
   }
   @media (max-width: 850px) {
     body .ih73-page-heading.ih-page-heading.ih-heading-unified { padding-block: 12px 24px !important; gap: 16px !important; }

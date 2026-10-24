@@ -1459,34 +1459,200 @@ body.ih68-workspace #root .ih72-room.is-keyboard .ih68-thread-empty > svg {
 }
 
 @layer ideahireHeadings {
+/* Desktop conversation: one wide surface, one content column, one compact composer. */
+body .ih-chat-workspace .ih-chat-next-step { display: none !important; }
+body .ih-chat-workspace .ih72-panel-heading > div { min-width: 0 !important; }
+body .ih-chat-workspace .ih72-panel-heading p {
+  max-width: 76ch !important; margin: 8px 0 0 !important;
+  color: var(--a-muted) !important; font: 400 15px/1.65 Inter,system-ui,sans-serif !important;
+}
+body .ih-chat-workspace .ih-chat-source { margin-top: 28px !important; border-top: 1px solid var(--a-line) !important; }
+body .ih-chat-workspace .ih-chat-source > summary {
+  display: flex !important; align-items: center !important; justify-content: space-between !important;
+  gap: 16px !important; min-height: 52px !important; padding: 14px 0 !important;
+  color: var(--a-ink) !important; font: 600 14px/1.6 Inter,system-ui,sans-serif !important;
+}
+body .ih-chat-workspace .ih-chat-source > div { padding: 12px 0 0 !important; }
+body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) {
+  display: block !important; width: 100% !important; min-width: 0 !important;
+  margin: 0 !important; padding: 24px !important;
+  border: 1px solid var(--a-line) !important; border-radius: 12px !important;
+  background: var(--a-soft) !important; color: var(--a-ink) !important;
+}
+body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) h3 {
+  margin: 0 !important; font: 650 20px/1.45 Inter,system-ui,sans-serif !important;
+  letter-spacing: -.02em !important; overflow-wrap: anywhere !important;
+}
+body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) > p {
+  max-width: 76ch !important; margin: 10px 0 0 !important;
+  color: var(--a-muted) !important; font: 400 15px/1.75 Inter,system-ui,sans-serif !important;
+}
+body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) > button {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  gap: 8px !important; width: auto !important; min-height: 44px !important;
+  margin: 20px 0 0 !important; padding: 10px 16px !important;
+  border: 1px solid var(--a-line) !important; border-radius: 8px !important;
+  background: var(--a-paper) !important; color: var(--a-ink) !important;
+  font: 600 14px/1.5 Inter,system-ui,sans-serif !important; cursor: pointer !important;
+}
+body .ih-chat-workspace .ih-chat-start-steps {
+  display: block !important; margin: 20px 0 0 !important; padding: 0 0 0 22px !important;
+  list-style: decimal !important;
+}
+body .ih-chat-workspace .ih-chat-start-steps > li {
+  display: list-item !important; margin: 0 !important; padding: 12px 0 12px 8px !important;
+  color: var(--a-muted) !important; font: 400 14px/1.7 Inter,system-ui,sans-serif !important;
+}
+body .ih-chat-workspace .ih-chat-start-steps > li + li { border-top: 1px solid var(--a-line) !important; }
+body .ih-chat-workspace .ih-chat-start-steps strong { display: block !important; margin: 0 0 3px !important; color: var(--a-ink) !important; font-weight: 600 !important; }
+body .ih-chat-workspace .ih-chat-start-steps li > span { display: block !important; }
+body .ih-chat-workspace .agreement-workspace { margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+body .ih-chat-workspace .agreement-gate { width: 100% !important; max-width: none !important; max-height: none !important; padding: 0 !important; overflow: visible !important; border: 0 !important; background: transparent !important; }
+body .ih-chat-workspace .agreement-gate-heading > .ih-agreement-process-note { margin: 0 !important; font-size: 14px !important; line-height: 1.7 !important; }
+body .ih-chat-workspace .ih-compose-recipient { margin: 0 0 4px !important; color: var(--a-muted) !important; font: 400 11px/16px Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
+body .ih-chat-workspace .ih-compose-recipient strong { color: var(--a-ink) !important; font-weight: 600 !important; }
+body .ih-chat-workspace .ih-compose-count { margin: 5px 0 0 !important; color: var(--a-muted) !important; text-align: end !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
+
+@media (min-width: 851px) {
+  body .ih-message-workspace.ih-chat-workspace:not(.is-focus) {
+    position: relative !important; display: flex !important; flex-direction: column !important;
+    box-sizing: border-box !important; width: calc(100% - 48px) !important; max-width: 1600px !important;
+    height: auto !important; min-height: calc(100dvh - 128px) !important; max-height: none !important;
+    margin: 20px auto 28px !important; padding: 0 !important; overflow: visible !important;
+    border: 1px solid var(--a-line) !important; border-radius: 14px !important; background: var(--a-paper) !important;
+  }
+  body .ih-message-workspace.ih-chat-workspace .ih68-room-header {
+    display: flex !important; align-items: center !important; gap: 12px !important;
+    min-height: 72px !important; height: auto !important; margin: 0 !important; padding: 12px 24px !important;
+    border-bottom: 1px solid var(--a-line) !important; background: transparent !important;
+  }
+  body .ih-chat-workspace .ih68-room-person { flex: 1 1 0 !important; min-width: 0 !important; }
+  body .ih-chat-workspace .ih68-room-person h1 { margin: 0 !important; font: 650 19px/1.4 Inter,system-ui,sans-serif !important; letter-spacing: -.02em !important; }
+  body .ih-chat-workspace .ih72-room-context { margin: 3px 0 0 !important; color: var(--a-muted) !important; font: 400 13px/1.5 Inter,system-ui,sans-serif !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih72-room-nav {
+    display: flex !important; align-items: center !important; flex-wrap: wrap !important;
+    gap: 4px !important; min-height: 52px !important; margin: 0 !important; padding: 4px 24px 0 !important;
+    border-bottom: 1px solid var(--a-line) !important; background: transparent !important;
+  }
+  body .ih-message-workspace.ih-chat-workspace .ih72-room-nav > button:not(.ih-message-payment-control) {
+    display: inline-flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: center !important;
+    gap: 8px !important; width: auto !important; max-width: none !important; min-height: 48px !important;
+    margin: 0 !important; padding: 12px 14px !important;
+    border: 0 !important; border-bottom: 2px solid transparent !important; border-radius: 0 !important;
+    background: transparent !important; color: var(--a-muted) !important; font: 500 14px/1.5 Inter,system-ui,sans-serif !important;
+  }
+  body .ih-message-workspace.ih-chat-workspace .ih72-room-nav > button[aria-current="page"] { border-bottom-color: var(--a-accent) !important; color: var(--a-ink) !important; font-weight: 650 !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih72-room-nav > .ih-message-payment-control {
+    flex: 0 1 auto !important; gap: 8px !important; width: auto !important; min-height: 40px !important;
+    margin: 0 0 4px auto !important; padding: 8px 12px !important;
+    border: 1px solid var(--a-line) !important; border-radius: 8px !important;
+    background: var(--a-soft) !important; color: var(--a-ink) !important;
+  }
+  body .ih-chat-workspace .ih-message-payment-control > span { font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
+  body .ih-chat-workspace .ih-message-payment-control > strong { max-width: 28ch !important; text-align: end !important; font: 600 13px/1.5 Inter,system-ui,sans-serif !important; }
+  body .ih-chat-workspace .ih-chat-next-step {
+    display: flex !important; flex: none !important; align-items: center !important; justify-content: space-between !important;
+    gap: 16px !important; margin: 0 !important; padding: 12px 24px !important;
+    border-bottom: 1px solid var(--a-line) !important; background: var(--a-soft) !important;
+  }
+  body .ih-chat-workspace .ih-chat-next-step > div { min-width: 0 !important; }
+  body .ih-chat-workspace .ih-chat-next-step strong { display: block !important; color: var(--a-ink) !important; font: 600 13px/1.5 Inter,system-ui,sans-serif !important; }
+  body .ih-chat-workspace .ih-chat-next-step p { margin: 3px 0 0 !important; color: var(--a-muted) !important; font: 400 12px/1.6 Inter,system-ui,sans-serif !important; }
+  body .ih-chat-workspace .ih-chat-next-step > button {
+    display: inline-flex !important; flex: none !important; align-items: center !important; justify-content: center !important;
+    gap: 8px !important; width: auto !important; min-height: 36px !important; padding: 8px 12px !important;
+    border: 1px solid var(--a-line) !important; border-radius: 7px !important; background: var(--a-paper) !important;
+    color: var(--a-ink) !important; font: 600 12px/1.5 Inter,system-ui,sans-serif !important; cursor: pointer !important;
+  }
+  body .ih-chat-workspace:not(.is-focus) .ih68-room-body,
+  body .ih-chat-workspace:not(.is-focus) .ih68-correspondence:not([hidden]) {
+    display: flex !important; flex-direction: column !important; flex: 1 0 auto !important;
+    width: 100% !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important;
+  }
+  body .ih-chat-workspace:not(.is-focus) .ih68-thread-wrap { display: flex !important; flex-direction: column !important; flex: 1 0 auto !important; height: auto !important; min-height: 240px !important; max-height: none !important; overflow: visible !important; }
+  body .ih-chat-workspace:not(.is-focus) .ih68-thread { flex: 1 0 auto !important; height: auto !important; min-height: 240px !important; max-height: none !important; padding: 24px !important; overflow: visible !important; }
+  body .ih-chat-workspace .ih68-thread-inner { width: 100% !important; max-width: none !important; min-height: 0 !important; margin: 0 !important; padding-bottom: 0 !important; }
+  body .ih-chat-workspace .ih68-message { max-width: min(88%, 960px) !important; padding: 14px 18px 10px !important; }
+  body .ih-chat-workspace :is(.ih68-message, .ih68-message-content, .message-text, .ih5-message-text) { height: auto !important; max-height: none !important; overflow: visible !important; scroll-margin-top: 100px !important; }
+  body .ih-chat-workspace .ih68-message-content { font: 400 16px/1.75 Inter,system-ui,sans-serif !important; }
+  body .ih-chat-workspace .ih68-day { margin-bottom: 20px !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih68-composer-area { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 8px 24px 10px !important; border-top: 1px solid var(--a-line) !important; border-radius: 0 0 14px 14px !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih68-composer {
+    display: flex !important; align-items: flex-end !important; gap: 8px !important;
+    width: 100% !important; min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 6px !important;
+    border: 1px solid var(--a-line) !important; border-radius: 10px !important;
+    background: var(--a-paper) !important; box-shadow: none !important;
+  }
+  body .ih-chat-workspace .ih68-composer:focus-within { border-color: var(--a-accent) !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih68-composer textarea {
+    flex: 1 1 0 !important; display: block !important; width: 100% !important; min-width: 0 !important;
+    min-height: 40px !important; max-height: 168px !important; padding: 8px 4px !important;
+    border: 0 !important; border-radius: 0 !important; background: transparent !important;
+    color: var(--a-ink) !important; font: 400 16px/24px Inter,system-ui,sans-serif !important; resize: none !important;
+  }
+  body .ih-message-workspace.ih-chat-workspace .ih68-composer :is(.ih68-attach, .ih68-send) {
+    display: inline-flex !important; flex: none !important; align-items: center !important; justify-content: center !important;
+    gap: 8px !important; width: 40px !important; height: 40px !important; min-width: 40px !important;
+    min-height: 40px !important; margin: 0 !important; padding: 8px !important; border: 0 !important; border-radius: 7px !important;
+  }
+  body .ih-chat-workspace .ih68-attach .ih-compose-action-label { display: none !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih68-composer .ih68-send { width: auto !important; min-width: 102px !important; padding-inline: 14px !important; background: var(--a-accent) !important; color: var(--a-on) !important; }
+  body .ih-chat-workspace .ih68-send .ih-compose-action-label { display: inline !important; font: 600 13px/1.5 Inter,system-ui,sans-serif !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih68-composer .ih68-send:disabled { background: var(--a-soft) !important; color: var(--a-muted) !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih68-room-page:not([hidden]) {
+    display: block !important; flex: none !important; box-sizing: border-box !important;
+    width: 100% !important; max-width: 1180px !important; height: auto !important; min-height: 0 !important; max-height: none !important;
+    margin: 0 auto !important; padding: 28px 32px 32px !important; overflow: visible !important; scroll-margin-top: 100px !important;
+  }
+  body .ih-chat-workspace.is-focus .ih68-room-page:not([hidden]) { flex: 1 !important; min-height: 0 !important; overflow-y: auto !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih72-panel-heading { display: block !important; margin: 0 0 24px !important; padding: 0 !important; }
+  body .ih-chat-workspace .ih72-panel-heading h2 { margin: 0 !important; font: 700 25px/1.35 Inter,system-ui,sans-serif !important; letter-spacing: -.025em !important; }
+  body .ih-chat-workspace .ih72-panel-back { display: none !important; }
+  body .ih-chat-workspace .agreement-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 22px 28px !important; }
+  body .ih-chat-workspace:not(.is-focus) .ih68-latest { position: fixed !important; inset: auto 40px 24px auto !important; transform: none !important; }
+}
+@media (min-width: 851px) and (max-width: 1100px) {
+  body .ih-message-workspace.ih-chat-workspace .ih72-room-nav { padding-inline: 16px !important; }
+  body .ih-message-workspace.ih-chat-workspace .ih72-room-nav > button:not(.ih-message-payment-control) { gap: 6px !important; padding-inline: 10px !important; font-size: 13px !important; }
+  body .ih-chat-workspace .ih-message-payment-control > span { display: none !important; }
+}
+@media (max-width: 850px) {
+  body .ih-chat-workspace .ih68-composer .ih-compose-action-label { display: none !important; }
+  body .ih-chat-workspace .ih72-panel-heading p { font-size: 13px !important; }
+  body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) { padding: 18px !important; }
+  body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) h3 { font-size: 18px !important; }
+  body .ih-chat-workspace .ih-chat-source { margin-top: 22px !important; }
+}
+
 /* Conversation forms share the first UI layer; legacy rules cannot collapse their tracks. */
 body .ih-message-workspace .ih-agreement-approvals {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 16px !important;
+  gap: 12px !important;
   width: 100% !important;
-  margin: 24px 0 32px !important;
+  margin: 16px 0 24px !important;
   padding: 0 !important;
   list-style: none !important;
 }
 body .ih-message-workspace .ih-agreement-approvals > li {
   display: flex !important;
   align-items: center !important;
-  gap: 14px !important;
+  gap: 10px !important;
   min-width: 0 !important;
   margin: 0 !important;
-  padding: 18px !important;
-  border: 1px solid var(--a-line) !important;
-  border-radius: 12px !important;
-  background: var(--a-paper) !important;
+  padding: 12px 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--a-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
   color: var(--a-ink) !important;
 }
 body .ih-message-workspace .ih-agreement-approval-icon {
   display: grid !important;
   place-items: center !important;
-  flex: 0 0 38px !important;
-  width: 38px !important;
-  height: 38px !important;
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50% !important;
   background: var(--a-soft) !important;
   color: var(--a-muted) !important;
@@ -1544,8 +1710,6 @@ body .ih-message-workspace .agreement-summary .ih9-agreement-keyfacts small { fo
 body .ih-message-workspace .agreement-details { gap: 0 32px !important; }
 body .ih-message-workspace .agreement-detail > span { font-size: 13px !important; }
 body .ih-message-workspace .agreement-detail > :is(strong, p) { font-size: 16px !important; line-height: 1.75 !important; }
-body .ih-message-workspace .ih-compose-help { display: flex !important; align-items: baseline !important; justify-content: space-between !important; gap: 12px !important; margin-top: 10px !important; }
-body .ih-message-workspace .ih-compose-help > :is(p, span) { margin: 0 !important; color: var(--a-muted) !important; font: 400 12px/1.5 Inter,system-ui,sans-serif !important; }
 body .ih-message-workspace .ih-compose-count { flex: none !important; font-variant-numeric: tabular-nums !important; }
 body .ih-message-workspace .ih68-message-content :is(.message-text, .ih5-message-text, .private-work-message-text) {
   display: block !important; height: auto !important; max-height: none !important;
@@ -1691,12 +1855,6 @@ body .ih-material-dialog button:disabled { opacity: .5 !important; cursor: not-a
 body .ih-material-dialog :is(button, summary, input, textarea, [tabindex]):focus-visible { outline: 2px solid var(--a-accent) !important; outline-offset: 3px !important; }
 body .ih-material-header h2:focus { outline: none !important; }
 
-@media (min-width: 851px) {
-  body .ih-message-workspace .ih68-room-page { padding-inline: clamp(24px, 4vw, 64px) !important; }
-  body .ih-message-workspace .ih68-room-page .agreement-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 22px 28px !important; }
-  body .ih-message-workspace .ih68-message { max-width: min(90%, 1120px) !important; padding: 20px 24px !important; }
-  body .ih-message-workspace .ih68-composer textarea { min-height: 112px !important; }
-}
 @media (max-width: 600px) {
   body .ih-message-workspace .agreement-summary > summary { grid-template-columns: 30px minmax(0, 1fr) !important; gap: 10px 12px !important; }
   body .ih-message-workspace .agreement-summary .agreement-summary-action { grid-column: 2 !important; grid-row: 3 !important; text-align: start !important; }
@@ -1704,8 +1862,6 @@ body .ih-material-header h2:focus { outline: none !important; }
   body .ih-message-workspace .ih-agreement-approvals > li { padding: 14px !important; gap: 12px !important; }
   body .ih-message-workspace :is(.agreement-form-actions, .agreement-proposal-actions) { flex-direction: column !important; align-items: stretch !important; }
   body .ih-message-workspace :is(.agreement-primary-button, .agreement-secondary-button) { width: 100% !important; }
-  body .ih-message-workspace .ih-compose-help { gap: 8px !important; }
-  body .ih-message-workspace .ih-compose-help > :is(p, span) { font-size: 10px !important; }
   body .ih-material-backdrop { padding: 0 !important; }
   body .ih-material-dialog { width: 100% !important; height: var(--ih9-share-viewport-height, 100dvh) !important; max-height: var(--ih9-share-viewport-height, 100dvh) !important; border: 0 !important; border-radius: 0 !important; }
   body .ih-material-header { padding: max(18px, env(safe-area-inset-top)) 18px 16px !important; gap: 12px !important; }
