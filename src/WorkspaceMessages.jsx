@@ -124,72 +124,64 @@ export function WorkspaceThread({
 }
 function fitWorkspaceDraft(field) {
   if (!field || !field.getClientRects().length) return;
-  const maximum = parseFloat(getComputedStyle(field).maxHeight);
-  const limit = Number.isFinite(maximum) ? maximum : Infinity;
+  const style = getComputedStyle(field);
+  const minimum = parseFloat(style.minHeight) || 40;
+  const maximum = parseFloat(style.maxHeight) || 136;
   field.style.setProperty('height', 'auto', 'important');
-  const height = field.scrollHeight;
-  field.style.setProperty('height', Math.min(height, limit) + 'px', 'important');
-  field.style.overflowY = height > limit ? 'auto' : 'hidden';
+  const needed = field.value ? field.scrollHeight : minimum;
+  field.style.setProperty('height', Math.min(Math.max(needed, minimum), maximum) + 'px', 'important');
+  field.style.setProperty('overflow-y', needed > maximum ? 'auto' : 'hidden', 'important');
 }
-export function WorkspaceComposer({
-  draft,
-  setDraft,
-  sending,
-  blocked,
-  composerRef,
-  onSubmit,
-  onMaterials,
-  errorMessage,
-  blockedByMe,
-  profileId,
-  recipientName
-}) {
-  const t = useWorkspaceCopy();
-  useLayoutEffect(() => {
-    fitWorkspaceDraft(composerRef.current);
-  }, [draft, composerRef]);
+function SendPanelIcon({ add = false }) {
+  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={add ? 'M12 5v14M5 12h14' : 'M4 12h15m-6-6 6 6-6 6'} /></svg>;
+}
+export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerRef, onSubmit, onMaterials, errorMessage, blockedByMe, profileId, recipientName }) {
+  const t = useWorkspaceCopy(), areaRef = useRef(null);
+  useLayoutEffect(() => { fitWorkspaceDraft(composerRef.current); }, [draft, composerRef, blocked]);
   useEffect(() => {
     const field = composerRef.current;
     if (!field) return;
     let task = 0;
-    const fit = () => {
-      cancelAnimationFrame(task);
-      task = requestAnimationFrame(() => fitWorkspaceDraft(field));
-    };
+    const fit = () => { cancelAnimationFrame(task); task = requestAnimationFrame(() => fitWorkspaceDraft(field)); };
     const observer = window.ResizeObserver ? new ResizeObserver(fit) : null;
-    observer?.observe(field);
     observer?.observe(field.parentElement);
-    window.addEventListener('resize', fit);
-    window.visualViewport?.addEventListener('resize', fit);
-    return () => {
-      cancelAnimationFrame(task);
-      observer?.disconnect();
-      window.removeEventListener('resize', fit);
-      window.visualViewport?.removeEventListener('resize', fit);
-    };
+    window.addEventListener('resize', fit); window.visualViewport?.addEventListener('resize', fit);
+    return () => { cancelAnimationFrame(task); observer?.disconnect(); window.removeEventListener('resize', fit); window.visualViewport?.removeEventListener('resize', fit); };
   }, [composerRef, blocked]);
-  return <div className="ih68-composer-area">
-    {errorMessage && <p className="ih68-feedback" role="alert">{errorMessage}</p>}
-    {!blocked && <p className="ih-compose-recipient">{t('Wiadomość do', 'Message to')} <strong>{recipientName}</strong></p>}
-    {blocked ? <p className="ih68-block-note"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości w tej rozmowie jest wyłączone.', 'Sending messages in this conversation is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> :
-      <form className="ih68-composer ih72-composer" onSubmit={onSubmit} aria-busy={sending}>
-        <button type="button" className="ih68-attach" onClick={onMaterials} disabled={sending}
-          aria-label={t('Dodaj plik lub link do tej rozmowy', 'Add a file or link to this conversation')} title={t('Dodaj plik lub link', 'Add a file or link')}><WorkspaceIcon kind="attachment" /><span className="ih-compose-action-label">{t('Plik lub link', 'File or link')}</span></button>
-        <label className="ih68-sr-only" htmlFor="ih68-message-draft">{t('Treść wiadomości', 'Message text')}</label>
-        <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} aria-describedby="ih-compose-keyboard-help"
-          placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
+  useLayoutEffect(() => {
+    const dock = document.getElementById('ih64-lucyna');
+    if (!dock) return;
+    const before = dock.style.getPropertyValue('--ih84-safe-bottom'), priority = dock.style.getPropertyPriority('--ih84-safe-bottom');
+    let previous;
+    const restore = () => { if (before) dock.style.setProperty('--ih84-safe-bottom', before, priority); else dock.style.removeProperty('--ih84-safe-bottom'); };
+    const reserve = () => {
+      const area = areaRef.current;
+      const height = area?.getClientRects().length && window.matchMedia('(max-width:850px)').matches ? Math.ceil(area.getBoundingClientRect().height) + 8 : null;
+      if (height === previous) return;
+      previous = height;
+      if (height === null) restore(); else dock.style.setProperty('--ih84-safe-bottom', height + 'px');
+      window.dispatchEvent(new Event('resize'));
+    };
+    const observer = window.ResizeObserver ? new ResizeObserver(reserve) : null;
+    if (areaRef.current) observer?.observe(areaRef.current);
+    window.addEventListener('resize', reserve); reserve();
+    return () => { observer?.disconnect(); window.removeEventListener('resize', reserve); restore(); window.dispatchEvent(new Event('resize')); };
+  }, [blocked]);
+  return <div className="ih-send-area" ref={areaRef}>
+    {errorMessage && <p className="ih-send-error" role="alert">{errorMessage}</p>}
+    {blocked ? <p className="ih-send-blocked"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości jest wyłączone.', 'Sending messages is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> : <>
+      <form className="ih-send-form" onSubmit={onSubmit} aria-busy={sending}>
+        <button type="button" className="ih-send-add" onClick={onMaterials} disabled={sending} aria-label={t('Dodaj materiały do rozmowy', 'Add conversation materials')} title={t('Plik, link lub tekst', 'File, link or text')}><SendPanelIcon add /></button>
+        <label htmlFor="ih68-message-draft" className="ih-send-sr">{t('Wiadomość do: ', 'Message to: ') + recipientName}</label>
+        <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} aria-describedby="ih-send-help" placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
           onChange={event => setDraft(event.target.value)} onKeyDown={event => {
             if (event.isComposing || event.nativeEvent?.isComposing) return;
-            if (event.key === 'Enter' && !event.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) {
-              event.preventDefault();
-              event.currentTarget.form?.requestSubmit();
-            }
+            if (event.key === 'Enter' && !event.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
           }} />
-        <button type="submit" className="ih68-send" disabled={sending || !draft.trim()}
-          aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}
-          title={sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}><span className="ih-compose-action-label">{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><WorkspaceIcon kind="send" /></button>
-      </form>}
-    {!blocked && <><p id="ih-compose-keyboard-help" className="ih68-sr-only">{t('Na komputerze Enter wysyła, a Shift + Enter dodaje nową linię.', 'On desktop, Enter sends and Shift + Enter adds a new line.')}</p>{draft.length >= 3200 && <p className="ih-compose-count" aria-label={t('Liczba znaków wiadomości', 'Message character count')}>{draft.length.toLocaleString()} / 4 000</p>}</>}
+        <button type="submit" className="ih-send-submit" disabled={sending || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><SendPanelIcon /></button>
+      </form><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
+      {draft.length >= 3200 && <p className="ih-send-count">{draft.length.toLocaleString()} / 4 000</p>}
+    </>}
   </div>;
 }
 
@@ -369,8 +361,8 @@ export function WorkspaceConversation({
           <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu', 'Project materials')}>
             <header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Materiały', 'Materials')}</h2><p>{t('Pliki, linki i przekazane rezultaty w jednym miejscu.', 'Files, links and delivered work in one place.')}</p></div></header>{materials}
           </section>
-          <section hidden={!showPlan} className="ih68-room-page ih68-terms" id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia', 'Terms')}>
-            {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia projektu', 'Project terms')}</h2><p>{t('Zakres, cena, termin i poprawki. Każda propozycja wymaga akceptacji obu stron.', 'Scope, price, deadline and revisions. Each proposal needs both parties’ acceptance.')}</p></div></header>
+          <section hidden={!showPlan} className="ih68-room-page ih68-terms ih-terms-panel" id="ih68-room-plan" tabIndex={-1} aria-label={t('Ustalenia', 'Terms')}>
+            {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia', 'Project terms')}</h2><p>{t('Zakres usługi, wynagrodzenie i termin w jednym miejscu.', 'The service scope, price and deadline in one place.')}</p></div></header>
               {projectAction}
               {plan}
               <details className="ih72-project-description ih-chat-source"><summary>{t('Pierwotny opis i dodatkowy plan', 'Original brief and additional plan')}<WorkspaceIcon kind="down" /></summary><div><h3>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h3>{category && <p>{category}</p>}{projectDetails}{projectPlan}</div></details>
