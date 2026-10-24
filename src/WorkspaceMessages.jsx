@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSitePreferences } from './Preferences';
+import { supabase } from './supabase';
 import { SubpageHeading } from './Subpages';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { WorkspaceAvatar, WorkspaceConversationRows, WorkspaceIcon, WorkspaceLoading, useWorkspaceCopy } from './Workspace';
@@ -170,7 +171,7 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
   return <div className="ih-send-area" ref={areaRef}>
     {errorMessage && <p className="ih-send-error" role="alert">{errorMessage}</p>}
     {blocked ? <p className="ih-send-blocked"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości jest wyłączone.', 'Sending messages is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> : <>
-      <div className="ih-send-row"><form className="ih-send-form" onSubmit={onSubmit} aria-busy={sending}>
+      <form className="ih-send-form ih-send-row" onSubmit={onSubmit} aria-busy={sending}>
         <button type="button" className="ih-send-add" onClick={onMaterials} disabled={sending || materialsDisabled} aria-label={t('Dodaj materiały do rozmowy', 'Add conversation materials')} title={t('Plik, link lub tekst', 'File, link or text')}><SendPanelIcon add /></button>
         <label htmlFor="ih68-message-draft" className="ih-send-sr">{t('Wiadomość do: ', 'Message to: ') + recipientName}</label>
         <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} aria-describedby="ih-send-help" placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
@@ -178,11 +179,98 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
             if (event.isComposing || event.nativeEvent?.isComposing) return;
             if (event.key === 'Enter' && !event.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
           }} />
+        <button type="button" className="ih-send-photo" onClick={onPhotos} disabled={sending || materialsDisabled} aria-label={t('Wybierz zdjęcia', 'Choose photos')} title={t('Wybierz zdjęcia', 'Choose photos')}><SendPanelIcon photo /></button>
         <button type="submit" className="ih-send-submit" disabled={sending || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><SendPanelIcon /></button>
-      </form><button type="button" className="ih-send-photo" onClick={onPhotos} disabled={sending || materialsDisabled} aria-label={t('Wybierz zdjęcia', 'Choose photos')} title={t('Wybierz zdjęcia', 'Choose photos')}><SendPanelIcon photo /><span>{t('Zdjęcia', 'Photos')}</span></button></div><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
+      </form><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
       {draft.length >= 3200 && <p className="ih-send-count">{draft.length.toLocaleString()} / 4 000</p>}
     </>}
   </div>;
+}
+
+function WorkspacePaymentReader({ payment, overview, onMaterials, onDispute }) {
+  const t = useWorkspaceCopy();
+  const { agreement, conversation, userId, blocked } = payment.props;
+  const code = overview?.status || "";
+  const isClient = conversation?.client_id === userId;
+  const caseStatus = ["refund_pending", "refunded", "partially_refunded", "disputed"].includes(code);
+  const workEnabled = ["funds_secured", "work_submitted", "release_pending", "release_failed", "released"].includes(code);
+  const scope = [userId, conversation?.id, agreement?.id, agreement?.status].join(":");
+  const currentScope = useRef(scope), preparingRef = useRef(false);
+  const [preparing, setPreparing] = useState(false), [notice, setNotice] = useState("");
+  currentScope.current = scope;
+  useEffect(() => {
+    preparingRef.current = false; setPreparing(false); setNotice("");
+    return () => { currentScope.current = null; };
+  }, [scope]);
+  function refreshStatus() {
+    window.dispatchEvent(new CustomEvent("ideahire:payment-updated", { detail: { conversationId: conversation?.id } }));
+  }
+  async function prepareAmounts() {
+    if (!isClient || blocked || agreement?.status !== "accepted" || preparingRef.current
+      || !conversation?.id || agreement?.conversation_id !== conversation.id) return;
+    const requestedScope = scope;
+    preparingRef.current = true; setPreparing(true); setNotice("");
+    try {
+      const { data: rows, error: readError } = await supabase.rpc("get_ideahire_payment_summary", { p_conversation_id: conversation.id });
+      if (readError) throw readError;
+      if (currentScope.current !== requestedScope) return;
+      if (!Array.isArray(rows)) throw new Error(t("Nie potwierdzono stanu płatności.", "Payment state was not confirmed."));
+      if (rows.length) {
+        const row = rows[0];
+        if (rows.length !== 1 || row.agreement_id !== agreement.id || row.client_id !== conversation.client_id || row.contractor_id !== conversation.contractor_id) {
+          throw new Error(t("Podsumowanie nie odpowiada tym ustaleniom.", "The summary does not match these terms."));
+        }
+        refreshStatus(); return;
+      }
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", { body: { agreement_id: agreement.id, action: "refresh_pricing" } });
+      if (error || !data?.ok) {
+        let reason = data?.error || "";
+        try { reason = (await error?.context?.json?.())?.error || reason; } catch { /* Keep the available server message. */ }
+        throw new Error(reason || error?.message || t("Nie udało się przygotować kwot.", "Could not prepare the amounts."));
+      }
+      if (currentScope.current === requestedScope) refreshStatus();
+    } catch (error) {
+      if (currentScope.current === requestedScope) setNotice(String(error?.message || t("Nie udało się przygotować podsumowania.", "Could not prepare the summary.")).slice(0, 500));
+    } finally {
+      if (currentScope.current === requestedScope) { preparingRef.current = false; setPreparing(false); }
+    }
+  }
+  const explanations = {
+    awaiting_payment: t("Wpłata nie została jeszcze potwierdzona. Klient może sprawdzić kwoty poniżej i przejść do płatności w Stripe.", "Payment has not been confirmed. The client can review the amounts below and continue to Stripe."),
+    checkout_open: t("Otwarto płatność w Stripe. Samo otwarcie okna nie potwierdza zapłaty. Czekamy na aktualny status Stripe.", "Stripe checkout has been opened. Opening checkout does not confirm payment. We are waiting for Stripe's current status."),
+    processing: t("Stripe sprawdza wpłatę. Nie ponawiaj teraz płatności; status zostanie zaktualizowany po potwierdzeniu.", "Stripe is checking the payment. Do not pay again now; the status will update after confirmation."),
+    funds_secured: t("Stripe potwierdził wpłatę klienta. Można rozpocząć realizację. Wynagrodzenie nie zostało jeszcze przekazane na saldo wykonawcy.", "Stripe has confirmed the client's payment. Work can begin. Earnings have not yet been transferred to the freelancer's balance."),
+    work_submitted: t("Praca czeka na odbiór. Klient sprawdza materiały i osobno potwierdza odbiór oraz przekazanie wynagrodzenia.", "The work is waiting for review. The client reviews the materials and explicitly confirms acceptance and the earnings transfer."),
+    release_pending: t("Trwa przekazywanie wynagrodzenia na saldo Stripe wykonawcy. To jeszcze nie jest potwierdzenie wypłaty na bank.", "Earnings are being transferred to the freelancer's Stripe balance. This does not confirm a bank payout."),
+    release_failed: t("Nie mamy potwierdzenia przekazania wynagrodzenia. Sprawdź status odbioru pracy i szczegóły rozliczenia przed ponowieniem operacji.", "The earnings transfer has not been confirmed. Check work acceptance and settlement details before retrying."),
+    released: t("Wynagrodzenie przekazano na saldo Stripe wykonawcy. Wypłata z tego salda na rachunek bankowy ma osobny status.", "Earnings have been transferred to the freelancer's Stripe balance. A payout from that balance to a bank account has a separate status."),
+    refund_pending: t("Sprawa jest na etapie rozliczenia zwrotu. Kwotę, termin i potwierdzenie operacji sprawdź w szczegółach sprawy.", "The case is at the refund settlement stage. Check the case details for the amount, timing and transaction confirmation."),
+    partially_refunded: t("W rozliczeniu odnotowano częściowy zwrot. Zakres zwrotu i potwierdzenie Stripe są w szczegółach sprawy.", "A partial refund has been recorded. The refund scope and Stripe confirmation are available in the case details."),
+    refunded: t("Płatność ma status zwróconej. Potwierdzenie i szczegóły zwrotu do metody płatności klienta sprawdź w sprawie.", "The payment is marked as refunded. Check the case for confirmation and details of the refund to the client's payment method."),
+    disputed: t("Rozliczenie jest wstrzymane z powodu sporu. Aktualne decyzje, kwoty i dalsze działania są w szczegółach sprawy.", "Settlement is on hold due to a dispute. Current decisions, amounts and next steps are in the case details."),
+    failed: t("Ostatnia próba płatności nie zakończyła się powodzeniem. Sprawdź aktualny status i kwoty przed kolejną próbą.", "The last payment attempt was unsuccessful. Check the current status and amounts before trying again."),
+    cancelled: t("Ostatnie okno płatności zostało anulowane. Przed kolejną próbą sprawdź aktualne kwoty i status rozliczenia.", "The last checkout was cancelled. Review the current amounts and settlement status before trying again.")
+  };
+  const explanation = explanations[code] || t("Podsumowanie kwot nie jest jeszcze dostępne. Zleceniodawca może je przygotować przed przejściem do Stripe. Jeśli status jest niedostępny, najpierw odśwież dane.", "The amount summary is not available yet. The client can prepare it before continuing to Stripe. If the status is unavailable, refresh the data first.");
+  const steps = [
+    [t("Wpłata klienta", "Client payment"), t("Klient płaci w Stripe kwotę za usługę i opłatę IdeaHire. Realizacja zaczyna się po potwierdzeniu wpłaty.", "The client pays the service amount and IdeaHire fee in Stripe. Work begins after payment is confirmed.")],
+    [t("Praca i odbiór", "Work and acceptance"), t("Wykonawca przekazuje rezultat w materiałach. Klient sprawdza pracę i potwierdza jej odbiór oraz przekazanie wynagrodzenia.", "The freelancer delivers the result in Materials. The client reviews and explicitly confirms acceptance and the earnings transfer.")],
+    [t("Saldo Stripe wykonawcy", "Freelancer's Stripe balance"), t("Po potwierdzeniu przekazania środków wynagrodzenie trafia na saldo Stripe wykonawcy. Opłata IdeaHire jest wykazana osobno.", "Once the transfer is confirmed, earnings reach the freelancer's Stripe balance. The IdeaHire fee is listed separately.")],
+    [t("Wypłata na rachunek bankowy", "Bank payout"), t("To osobny etap obsługiwany przez Stripe. Wykonawca sprawdza status i termin wypłaty w sekcji Wypłaty na swoim koncie.", "This is a separate stage handled by Stripe. The freelancer checks the payout status and date in the Payouts section of their account.")]
+  ];
+  return <section className="ih-payment-reader">
+    <header className="ih-pay-heading"><div><h3>{t("Rozliczenie zlecenia", "Project settlement")}</h3><p>{t("Obsługa płatności:", "Payment processing:")} <span className="ih-pay-stripe">Stripe</span></p></div><span className={"ih-pay-status is-" + (overview?.tone || "neutral")} role="status">{overview?.label || t("Sprawdzanie statusu", "Checking status")}</span></header>
+    <div className="ih-pay-current" aria-live="polite"><strong>{t("Na jakim etapie są pieniądze?", "Where is the payment now?")}</strong><p>{explanation}</p></div>
+    <div className="ih-pay-layout">
+      <div className="ih-pay-amounts ih-pay-original">
+        {payment}
+        {!code && <div className="ih-pay-no-summary"><h4>{t("Kwoty przed zapłatą", "Amounts before payment")}</h4><p>{t("Tutaj zobaczysz cenę usługi, opłatę IdeaHire i łączną kwotę przed przejściem do Stripe.", "The service price, IdeaHire fee and total will appear here before you continue to Stripe.")}</p>{isClient && <><button type="button" className="chat-payment-button" onClick={prepareAmounts} disabled={preparing || blocked}>{preparing ? t("Przygotowywanie kwot…", "Preparing amounts…") : t("Przygotuj podsumowanie kwot", "Prepare amount summary")}</button><p className="ih-pay-note">{t("Ten krok przygotowuje podsumowanie. Płatność zatwierdzasz później w Stripe.", "This step prepares the summary. You confirm payment later in Stripe.")}</p></>}</div>}
+      </div>
+      <section className="ih-pay-flow" aria-labelledby="ih-pay-flow-title"><h4 id="ih-pay-flow-title">{t("Standardowy przebieg rozliczenia", "Standard settlement flow")}</h4>{caseStatus && <p className="ih-pay-note">{t("Poniżej standardowy przebieg. Dla tego zlecenia obowiązuje aktualny status sprawy podany powyżej.", "The standard flow is shown below. This project follows the current case status shown above.")}</p>}<ol>{steps.map(([title, detail]) => <li key={title}><strong>{title}</strong><p>{detail}</p></li>)}</ol><div className="ih-pay-auto-note"><strong>{t("Odbiór automatyczny", "Automatic acceptance")}</strong><p>{t("Dla prac objętych tą funkcją brak reakcji przez 10 dni od przekazania może uruchomić automatyczny odbiór i przekazanie wynagrodzenia. Otwarty spór wstrzymuje ten proces. Zasady i status odbioru znajdziesz przy przekazanej pracy.", "For eligible deliveries, no response within 10 days of submission can trigger automatic acceptance and an earnings transfer. An open dispute pauses this process. See the delivered work for acceptance rules and status.")}</p></div></section>
+    </div>
+    {notice && <p className="ih-pay-feedback" role="alert">{notice}</p>}
+    <footer className="ih-pay-actions"><button type="button" onClick={refreshStatus} disabled={preparing}>{t("Odśwież status", "Refresh status")}</button>{workEnabled && <button type="button" onClick={onMaterials}>{t("Przejdź do materiałów", "Open materials")}</button>}{caseStatus && onDispute && <button type="button" onClick={onDispute}>{t("Szczegóły sprawy", "Case details")}</button>}{!isClient && code === "released" && <Link to="/account#account-payouts">{t("Sprawdź wypłaty na bank", "Check bank payouts")}</Link>}</footer>
+  </section>;
 }
 
 export function WorkspaceConversation({
@@ -346,7 +434,7 @@ export function WorkspaceConversation({
         <nav className="ih72-room-nav" aria-label={t('Rozmowa i współpraca', 'Conversation and project')}>
           <button type="button" aria-current={view === 'conversation' ? 'page' : undefined} aria-controls="ih69-conversation-panel" onClick={() => onView('conversation')}><WorkspaceIcon kind="message" /><span>{t('Rozmowa', 'Chat')}</span></button>
           <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
-          <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Pliki', 'Files')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
+          <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Materiały', 'Materials')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
           <button type="button" aria-current={view === 'payment' ? 'page' : undefined} aria-controls="ih68-room-payment" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność', 'Payment')}</span></button>
         <button type="button" className={'ih-room-payment-status ih-message-payment-control is-' + (paymentOverview?.tone || 'neutral')} onClick={() => onView('payment')} aria-controls="ih68-room-payment">
           <span>{t('Status płatności', 'Payment status')}</span><strong role="status" aria-live="polite" aria-atomic="true">{paymentOverview?.label || t('Sprawdzanie…', 'Checking…')}</strong><WorkspaceIcon kind="next" />
@@ -369,7 +457,7 @@ export function WorkspaceConversation({
             </>}
           </section>
           <section hidden={view !== 'payment'} className="ih68-room-page ih-room-payment-page" id="ih68-room-payment" tabIndex={-1} aria-label={t('Płatność', 'Payment')}>
-            {view === 'payment' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Płatność', 'Payment')}</h2><p>{t('Bieżący status płatności i rozliczenia tego projektu.', 'The current payment and settlement status for this project.')}</p></div></header>{payment}</>}
+            {view === 'payment' && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Płatność', 'Payment')}</h2><p>{t('Bieżący status płatności i rozliczenia tego projektu.', 'The current payment and settlement status for this project.')}</p></div></header>{React.isValidElement(payment) && payment.props.agreement?.status === "accepted" ? <WorkspacePaymentReader payment={payment} overview={paymentOverview} onMaterials={() => onView("files")} onDispute={onDispute} /> : payment}</>}
           </section>
         </div>
         <WorkspaceSheet open={optionsOpen} onClose={closeMenu} title={t('Opcje rozmowy', 'Conversation options')}>
