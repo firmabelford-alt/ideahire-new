@@ -7,7 +7,7 @@ import LucynaSymbol from './LucynaSymbol';
 import { useSitePreferences } from './Preferences';
 import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
-import { SubpageNavigation, SubpageHeading, SubpageCount, SubpageLoading } from './Subpages';
+import { SubpageNavigation, SubpageCount, SubpageLoading } from './Subpages';
 import { MarketSelect, helpCenterHref } from './MarketUI';
 import './Workspace.css';
 import './WorkspaceAccount.css';
@@ -366,7 +366,7 @@ export function WorkspaceWork({ inbox }) {
     navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
   }
   return <main className="ih68-page ih72-work-page" id="ih68-content">
-    <SubpageHeading title={t('Panel pracy', 'Workspace')} actions={<Link to="/calendar" className="ih79-button"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>} />
+    <header className="ih-work-heading"><h1>{t('Panel pracy', 'Workspace')}</h1><Link to="/calendar" className="ih79-button"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link></header>
     <div className="ih79-work-overview" aria-label={t('Podsumowanie współprac', 'Project overview')}>
       <Link to="/messages?unread=1" className={unread ? 'has-unread' : ''}><span>{t('Nieprzeczytane rozmowy', 'Unread conversations')}</span><strong><SubpageCount value={unread} loading={inbox?.loading} /></strong><WorkspaceIcon kind="arrow" /></Link>
       <button type="button" aria-pressed={filter === 'client'} onClick={() => update('role', 'client')}><span>{t('Zlecam', 'Hiring')}</span><strong><SubpageCount value={hiring} loading={inbox?.loading} /></strong></button>

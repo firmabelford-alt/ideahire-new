@@ -369,13 +369,21 @@ Deno.serve(async (request: Request) => {
         throw new Error("Liczba plików nie odpowiada przygotowanej paczce.");
       }
 
-      const { data: objects, error: objectsError } = await service
-        .schema("storage")
-        .from("objects")
-        .select("name,metadata")
-        .eq("bucket_id", PRIVATE_BUCKET)
-        .in("name", paths);
-      if (objectsError || (objects?.length ?? 0) !== paths.length) throw new Error("Nie wszystkie pliki dotarły do prywatnego magazynu.");
+      // Use the Storage API without exposing the storage schema to PostgREST.
+      // Only inspect this actor's server-issued upload directory.
+      const folder = `${conversationId}/${user.id}/${defaultBatchId}`;
+      const prefix = `${folder}/`;
+      if (paths.some((path) => !path.startsWith(prefix)) || manifest.some((file) => !file.path.startsWith(prefix))) {
+        throw new Error("Pliki nie należą do przygotowanej paczki tej rozmowy.");
+      }
+      const { data: listed, error: objectsError } = await service.storage
+        .from(PRIVATE_BUCKET)
+        .list(folder, { limit: MAX_ITEMS + 1, offset: 0, sortBy: { column: "name", order: "asc" } });
+      if (objectsError) throw new Error("Nie udało się potwierdzić plików w prywatnym magazynie. Spróbuj ponownie za chwilę.");
+      const objects = (listed ?? [])
+        .filter((object) => object.id && paths.includes(`${prefix}${object.name}`))
+        .map((object) => ({ ...object, name: `${prefix}${object.name}` }));
+      if (objects.length !== paths.length) throw new Error("Nie odnaleziono wszystkich plików z tej paczki. Dodaj brakujące pliki ponownie.");
 
       for (const entry of uploaded) {
         const path = text(entry.path, 500);

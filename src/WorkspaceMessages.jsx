@@ -132,10 +132,10 @@ function fitWorkspaceDraft(field) {
   field.style.setProperty('height', Math.min(Math.max(needed, minimum), maximum) + 'px', 'important');
   field.style.setProperty('overflow-y', needed > maximum ? 'auto' : 'hidden', 'important');
 }
-function SendPanelIcon({ add = false }) {
-  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={add ? 'M12 5v14M5 12h14' : 'M4 12h15m-6-6 6 6-6 6'} /></svg>;
+function SendPanelIcon({ add = false, photo = false }) {
+  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{photo ? <><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8" cy="8" r="1.5" /><path d="m4 17 5-5 4 4 3-3 5 5" /></> : <path d={add ? 'M12 5v14M5 12h14' : 'M4 12h15m-6-6 6 6-6 6'} />}</svg>;
 }
-export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerRef, onSubmit, onMaterials, errorMessage, blockedByMe, profileId, recipientName }) {
+export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerRef, onSubmit, onMaterials, onPhotos, materialsDisabled = false, errorMessage, blockedByMe, profileId, recipientName }) {
   const t = useWorkspaceCopy(), areaRef = useRef(null);
   useLayoutEffect(() => { fitWorkspaceDraft(composerRef.current); }, [draft, composerRef, blocked]);
   useEffect(() => {
@@ -170,8 +170,8 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
   return <div className="ih-send-area" ref={areaRef}>
     {errorMessage && <p className="ih-send-error" role="alert">{errorMessage}</p>}
     {blocked ? <p className="ih-send-blocked"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości jest wyłączone.', 'Sending messages is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> : <>
-      <form className="ih-send-form" onSubmit={onSubmit} aria-busy={sending}>
-        <button type="button" className="ih-send-add" onClick={onMaterials} disabled={sending} aria-label={t('Dodaj materiały do rozmowy', 'Add conversation materials')} title={t('Plik, link lub tekst', 'File, link or text')}><SendPanelIcon add /></button>
+      <div className="ih-send-row"><form className="ih-send-form" onSubmit={onSubmit} aria-busy={sending}>
+        <button type="button" className="ih-send-add" onClick={onMaterials} disabled={sending || materialsDisabled} aria-label={t('Dodaj materiały do rozmowy', 'Add conversation materials')} title={t('Plik, link lub tekst', 'File, link or text')}><SendPanelIcon add /></button>
         <label htmlFor="ih68-message-draft" className="ih-send-sr">{t('Wiadomość do: ', 'Message to: ') + recipientName}</label>
         <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} aria-describedby="ih-send-help" placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
           onChange={event => setDraft(event.target.value)} onKeyDown={event => {
@@ -179,7 +179,7 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
             if (event.key === 'Enter' && !event.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
           }} />
         <button type="submit" className="ih-send-submit" disabled={sending || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><SendPanelIcon /></button>
-      </form><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
+      </form><button type="button" className="ih-send-photo" onClick={onPhotos} disabled={sending || materialsDisabled} aria-label={t('Wybierz zdjęcia', 'Choose photos')} title={t('Wybierz zdjęcia', 'Choose photos')}><SendPanelIcon photo /><span>{t('Zdjęcia', 'Photos')}</span></button></div><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
       {draft.length >= 3200 && <p className="ih-send-count">{draft.length.toLocaleString()} / 4 000</p>}
     </>}
   </div>;

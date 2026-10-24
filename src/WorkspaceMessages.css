@@ -2082,3 +2082,106 @@ body .ih-material-header h2:focus { outline: none !important; }
     body .ih-transfer-actions > button { flex:1 1 0!important; width:0!important; min-width:0!important; padding:10px 8px!important; font-size:13px!important; }
   }
 }
+
+/* Photo shortcut, readable terms and a smaller focused composer. */
+@layer ideahireHeadings {
+  #ih68-content .ih-send-row { display:flex!important; align-items:flex-end!important; gap:10px!important; width:100%!important; max-width:940px!important; min-width:0!important; margin:0 auto!important; }
+  #ih68-content .ih-send-row > .ih-send-form { flex:1 1 0!important; width:auto!important; min-width:0!important; }
+  #ih68-content .ih-send-photo { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:8px!important; flex:none!important; width:auto!important; height:50px!important; min-height:50px!important; padding:12px 14px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-soft)!important; color:var(--sp-accent)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-send-photo > svg { display:block!important; flex:none!important; width:21px!important; height:21px!important; }
+  #ih68-content .ih-send-error { max-width:940px!important; margin:0 auto 8px!important; }
+  #ih68-content .ih-send-count { max-width:940px!important; margin:4px auto 0!important; }
+  body .ih-transfer-native-photos { display:none!important; }
+
+  #ih68-content.ih72-work-page > .ih-work-heading { display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:18px!important; width:100%!important; min-height:0!important; height:auto!important; margin:48px auto 32px!important; padding:0 20px!important; text-align:center!important; }
+  #ih68-content.ih72-work-page .ih-work-heading h1 { display:block!important; width:100%!important; max-width:none!important; min-height:0!important; margin:0!important; padding:0!important; color:var(--a-ink,#14343a)!important; font:750 clamp(34px,3.4vw,46px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; text-align:center!important; }
+  #ih68-content.ih72-work-page .ih-work-heading > a { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:8px!important; width:auto!important; min-height:42px!important; margin:0!important; padding:10px 16px!important; border:1px solid var(--a-line,#d6e4e4)!important; border-radius:9px!important; background:var(--a-paper,#fff)!important; color:var(--a-ink,#14343a)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content.ih72-work-page .ih-work-heading > a > svg { width:18px!important; height:18px!important; }
+
+  #ih68-content .ih-terms-panel > .ih72-panel-heading h2 { font-size:30px!important; font-weight:750!important; }
+  #ih68-content .ih-terms-panel > .ih72-panel-heading p { font-size:16px!important; line-height:1.75!important; }
+  #ih68-content .ih-terms-intro h3, #ih68-content .ih-terms-wait h3 { font-size:24px!important; font-weight:700!important; }
+  #ih68-content .ih-terms-intro p { font-size:14px!important; line-height:1.7!important; }
+  #ih68-content .ih-terms-state { padding:7px 11px!important; font-size:14px!important; font-weight:600!important; }
+  #ih68-content .ih-terms-facts { gap:0!important; padding:20px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-soft)!important; }
+  #ih68-content .ih-terms-facts > div { padding:0 20px!important; border-left:1px solid var(--sp-line)!important; }
+  #ih68-content .ih-terms-facts > div:first-child { padding-left:0!important; border-left:0!important; }
+  #ih68-content .ih-terms-facts dt { color:var(--sp-ink)!important; font-size:15px!important; font-weight:600!important; }
+  #ih68-content .ih-terms-facts dd { margin-top:8px!important; font-size:24px!important; font-weight:700!important; line-height:1.4!important; }
+  #ih68-content .ih-terms-document { gap:20px!important; }
+  #ih68-content .ih-terms-doc-group { display:block!important; min-width:0!important; margin:0!important; padding:22px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-paper)!important; }
+  #ih68-content .ih-terms-doc-group > h4 { margin:0 0 20px!important; color:var(--sp-ink)!important; font:700 19px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-terms-doc-group > dl { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:22px 28px!important; margin:0!important; padding:0!important; }
+  #ih68-content .ih-terms-doc-group > dl > .is-wide { grid-column:1/-1!important; }
+  #ih68-content .ih-terms-doc-group dt { margin:0 0 7px!important; color:var(--sp-ink)!important; font:600 15px/1.6 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-terms-doc-group dd { margin:0!important; color:var(--sp-ink)!important; font:450 18px/1.75 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+  #ih68-content .ih-terms-chapter h4 { font-size:18px!important; font-weight:700!important; }
+  #ih68-content .ih-terms-field { font-size:16px!important; font-weight:600!important; }
+  #ih68-content .ih-terms-field > :is(input,textarea), #ih68-content .ih-terms-field .ih20-date-field > input:first-child { font-size:16px!important; line-height:1.7!important; }
+  #ih68-content .ih-terms-field small { font-size:13px!important; }
+  #ih68-content .ih-terms-note, #ih68-content .ih-terms-confirm, #ih68-content .ih-terms-wait p { font-size:15px!important; line-height:1.8!important; }
+  #ih68-content .ih-terms-approvals, #ih68-content .ih-terms-message { font-size:14px!important; }
+  #ih68-content .ih-terms-panel .ih-chat-source > summary { font-size:15px!important; font-weight:600!important; }
+
+  body .ih-transfer-dialog { width:min(840px,100%)!important; }
+  body .ih-transfer-header h2 { font-size:26px!important; }
+  body .ih-transfer-header p { font-size:14px!important; }
+  body .ih-transfer-delivery-hint { font-size:13px!important; line-height:1.7!important; }
+  body .ih-transfer-dialog [hidden] { display:none!important; }
+  body .ih-transfer-kind-tabs { display:grid!important; grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:7px!important; width:100%!important; margin:0!important; padding:0!important; }
+  body .ih-transfer-kind-tabs > button { display:flex!important; align-items:center!important; justify-content:center!important; gap:7px!important; min-width:0!important; min-height:46px!important; padding:10px 8px!important; border:1px solid var(--sp-line)!important; border-radius:9px!important; background:var(--sp-paper)!important; color:var(--sp-ink)!important; font:600 15px/1.5 Inter,system-ui,sans-serif!important; }
+  body .ih-transfer-kind-tabs > button[aria-selected="true"] { border-color:var(--sp-accent)!important; background:var(--sp-soft)!important; color:var(--sp-accent)!important; }
+  body .ih-transfer-kind-tabs svg { display:block!important; flex:none!important; width:18px!important; height:18px!important; }
+  body .ih-transfer-kind-tabs small { font:600 12px/1 Inter,system-ui,sans-serif!important; }
+  body .ih-transfer-kind-panel:not([hidden]) { display:grid!important; gap:16px!important; min-width:0!important; margin:0!important; padding:6px 0 0!important; }
+  body .ih-transfer-kind-panel .ih-transfer-section-heading { margin:0!important; }
+  body .ih-transfer-kind-panel .ih-transfer-section-heading > h3 { font:700 18px/1.5 Inter,system-ui,sans-serif!important; }
+  body .ih-transfer-kind-panel .ih-transfer-links { margin:0!important; }
+  body .ih-transfer-kind-panel .ih-transfer-kind-help { margin:0!important; color:var(--sp-muted)!important; font:400 14px/1.75 Inter,system-ui,sans-serif!important; }
+  body .ih-transfer-field { font-size:15px!important; font-weight:600!important; }
+  body .ih-transfer-field > :is(input:not([type="checkbox"]),textarea), body .ih-transfer-field .ih20-date-field > input:first-child { font-size:16px!important; line-height:1.6!important; }
+  body .ih-transfer-field small { font-size:13px!important; font-weight:400!important; }
+  body .ih-transfer-dropzone { min-height:112px!important; }
+  body .ih-transfer-dropzone > span:first-of-type { font-size:16px!important; }
+  body .ih-transfer-dropzone > :is(small,.ih-transfer-limits) { font-size:13px!important; }
+  body .ih-transfer-access { padding:18px!important; background:var(--sp-soft)!important; }
+  body .ih-transfer-item-heading > strong { font-size:15px!important; }
+  body .ih-transfer-optional { grid-column:1/-1!important; margin:0!important; padding:0!important; border:0!important; border-top:1px solid var(--sp-line)!important; }
+  body :is(.ih-transfer-optional,.ih-transfer-caption-toggle) > summary { display:flex!important; align-items:center!important; gap:8px!important; min-height:48px!important; margin:0!important; padding:12px 0!important; color:var(--sp-ink)!important; list-style:none!important; cursor:pointer!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; }
+  body :is(.ih-transfer-optional,.ih-transfer-caption-toggle) > summary > span { color:var(--sp-muted)!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; }
+  body :is(.ih-transfer-optional,.ih-transfer-caption-toggle) > summary > svg { margin-left:auto!important; transition:transform .15s ease; }
+  body :is(.ih-transfer-optional,.ih-transfer-caption-toggle)[open] > summary > svg { transform:rotate(180deg)!important; }
+  body .ih-transfer-optional > .ih-transfer-two-fields { padding-top:8px!important; }
+  body .ih-transfer-optional:not([open]) > .ih-transfer-two-fields { display:none!important; }
+  body .ih-transfer-caption-toggle { margin:0!important; padding:0!important; border:0!important; border-top:1px solid var(--sp-line)!important; }
+  body .ih-transfer-caption-toggle > .ih-transfer-field { padding:6px 0 12px!important; }
+  body .ih-transfer-caption-toggle:not([open]) > .ih-transfer-field { display:none!important; }
+  body .ih-transfer-notice { padding:10px 12px!important; border-left:3px solid var(--sp-accent)!important; background:var(--sp-soft)!important; color:var(--sp-ink)!important; font:500 14px/1.7 Inter,system-ui,sans-serif!important; }
+  body .ih-transfer-summary > strong { font-size:14px!important; }
+  body .ih-transfer-summary > span { font-size:12px!important; }
+  body .ih-transfer-actions > button { font-size:15px!important; }
+  @media (max-width:850px) {
+    #ih68-content .ih-send-row { gap:8px!important; max-width:none!important; }
+    #ih68-content .ih-send-photo { width:44px!important; padding:10px!important; }
+    #ih68-content .ih-send-photo > span { display:none!important; }
+    #ih68-content.ih72-work-page > .ih-work-heading { margin:32px auto 26px!important; gap:16px!important; }
+    #ih68-content.ih72-work-page .ih-work-heading h1 { font-size:34px!important; }
+    #ih68-content .ih-terms-panel > .ih72-panel-heading h2 { font-size:28px!important; }
+    #ih68-content .ih-terms-panel > .ih72-panel-heading p { font-size:15px!important; }
+    #ih68-content .ih-terms-intro h3 { font-size:22px!important; }
+    #ih68-content .ih-terms-facts { gap:18px!important; padding:18px!important; }
+    #ih68-content .ih-terms-facts > div { padding:0!important; border:0!important; }
+    #ih68-content .ih-terms-facts dd { font-size:22px!important; }
+    #ih68-content .ih-terms-doc-group { padding:18px!important; }
+    #ih68-content .ih-terms-doc-group > dl { grid-template-columns:minmax(0,1fr)!important; gap:20px!important; }
+    #ih68-content .ih-terms-doc-group dd { font-size:17px!important; }
+    body .ih-transfer-dialog { width:100%!important; }
+    body .ih-transfer-header h2 { font-size:23px!important; }
+    body .ih-transfer-kind-tabs { gap:5px!important; }
+    body .ih-transfer-kind-tabs > button { gap:5px!important; padding:10px 5px!important; font-size:14px!important; }
+    body .ih-transfer-kind-tabs > button > svg { display:none!important; }
+    body .ih-transfer-access { padding:14px!important; }
+    body .ih-transfer-actions > button { font-size:14px!important; }
+  }
+  @media (prefers-reduced-motion:reduce) { body :is(.ih-transfer-optional,.ih-transfer-caption-toggle) > summary > svg { transition:none!important; } }
+}

@@ -19599,9 +19599,11 @@ function AgreementPanel({
     <header className="ih-terms-intro"><div className={'ih-terms-state' + (accepted ? ' is-accepted' : '')}>{accepted ? "Zaakceptowane przez obie strony" : "Propozycja do uzgodnienia"}</div><h3>{accepted ? "Uzgodnione warunki" : "Sprawdź propozycję"}</h3><p>Wersja {agreement.version}</p></header>
     <dl className="ih-terms-facts"><div><dt>Wynagrodzenie</dt><dd>{formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN")}</dd></div><div><dt>Termin wykonania</dt><dd>{formatChatProjectDate(agreement.deadline)}</dd></div><div><dt>Rundy poprawek</dt><dd>{agreement.revisions}</dd></div></dl>
     {!accepted && <ul className="ih-terms-approvals" aria-label="Akceptacja tej wersji"><li>{currentUserAccepted ? "Ty: zaakceptowano" : "Ty: oczekuje na akceptację"}</li><li>{otherUserAccepted ? "Druga strona: zaakceptowano" : "Druga strona: oczekuje na akceptację"}</li></ul>}
-    <dl className="ih-terms-document">{[
-      ["Nazwa zlecenia", agreement.title], ["Zakres usługi", agreement.scope], ["Co otrzyma klient", agreement.deliverables], ["Format przekazania", agreement.delivery_format], ["Sposób odbioru", agreement.acceptance_method], ["Warunki anulowania", agreement.cancellation_terms], ["Dodatkowe ustalenia", agreement.additional_terms],
-    ].filter(([,value]) => value).map(([label,value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+    <div className="ih-terms-document">{[
+      ["Zakres i rezultat", [["Nazwa zlecenia", agreement.title], ["Zakres usługi", agreement.scope], ["Co otrzyma klient", agreement.deliverables]]],
+      ["Przekazanie i odbiór", [["Format przekazania", agreement.delivery_format], ["Sposób odbioru", agreement.acceptance_method]]],
+      ["Zasady współpracy", [["Warunki anulowania", agreement.cancellation_terms], ["Dodatkowe ustalenia", agreement.additional_terms]]],
+    ].map(([title, fields]) => { const visible = fields.filter(([,value]) => value); return visible.length ? <section className="ih-terms-doc-group" key={title}><h4>{title}</h4><dl>{visible.map(([label,value]) => <div key={label} className={label === "Nazwa zlecenia" || visible.length === 1 ? "is-wide" : undefined}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section> : null; })}</div>
     {accepted ? <p className="ih-terms-note">Ta zaakceptowana wersja jest zapisem ustaleń obu stron i pozostaje dostępna w historii rozmowy.</p> : <>
       {message && <p className="ih-terms-message" role="status">{message}</p>}
       {blocked ? <p className="ih-terms-note">Ustalenia są wstrzymane, ponieważ jeden z użytkowników jest zablokowany.</p> : <div className="ih-terms-actions"><button type="button" onClick={onOpenForm} disabled={saving}>Zaproponuj zmiany</button>{!currentUserAccepted ? <button type="button" className="is-primary" onClick={onAccept} disabled={saving}>{saving ? "Akceptowanie…" : "Akceptuję warunki"}</button> : <p className="ih-terms-note">Twoja akceptacja jest zapisana. Czekamy na drugą stronę.</p>}</div>}
@@ -20278,6 +20280,7 @@ function Chat() {
   const [workspaceTab, setWorkspaceTab] =
     useState("conversation");
   const [openMaterialDialog, setOpenMaterialDialog] = useState(false);
+  const materialPhotoInputRef = useRef(null);
   const [focusMode, setFocusMode] = useState(false);
   const workspaceFocusRef = useRef(null);
   const conversationPageScroll = useRef(null);
@@ -21418,9 +21421,9 @@ function Chat() {
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);scrollToLatestMessage(true);}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
-        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>setOpenMaterialDialog(true)} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
+        onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>setOpenMaterialDialog(true)} onPhotos={()=>{ const input=materialPhotoInputRef.current; if(input && !input.disabled) input.click(); else setOpenMaterialDialog(true); }} materialsDisabled={privateWork.loading} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
       materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Materiały w rozmowie:','Materials in this conversation:')} <strong>{activeMaterialCount}</strong></p></div><PrivateSharePanel
-                      key={id} compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
+                      key={id} compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog} photoInputRef={materialPhotoInputRef}
                       conversationId={id} recipientName={otherName}
                       userId={user?.id}
                       disabled={messagingBlocked || privateWork.loading}
