@@ -4,10 +4,10 @@ export default function LucynaPrivacy({kind}) {
   if (!['privacy','terms'].includes(kind)) return null;
   return <section className="legal-document-content" id="lucyna-informacja" aria-labelledby="lucyna-legal-heading">
     <h2 id="lucyna-legal-heading">Lucyna AI — informacja o funkcji</h2>
-    <p>Wersja funkcji 4, informacja z 13 października 2026 r. Ta część opisuje funkcję Lucyny, jeżeli jest udostępniona w serwisie.</p>
+    <p>Wersja funkcji 4, informacja z 24 października 2026 r. Ta część opisuje funkcję Lucyny, jeżeli jest udostępniona w serwisie.</p>
     {kind==='privacy' ? <>
       <h3>Cel i zakres przetwarzania</h3>
-      <p>Lucyna przygotowuje odpowiedzi, szkice wiadomości i zleceń, wyniki publicznych katalogów oraz wstępne sprawdzenie wybranego rezultatu względem wskazanych kryteriów. Administratorem danych jest podmiot wskazany w głównej polityce prywatności. Podstawą przetwarzania danych niezbędnych do realizacji zamówionej przez Ciebie funkcji konta jest art. 6 ust. 1 lit. b RODO. Ta podstawa nie uprawnia Cię do przekazywania dowolnych danych innych osób.</p>
+      <p>Lucyna przygotowuje odpowiedzi, szkice wiadomości i zleceń, wyniki publicznych katalogów oraz wstępne sprawdzenie wybranego rezultatu względem wskazanych kryteriów. Administratorem danych w zakresie opisanym w głównej Polityce prywatności jest Piotr Kosek. Podstawą przetwarzania danych niezbędnych do realizacji zamówionej przez Ciebie funkcji konta jest art. 6 ust. 1 lit. b RODO. Ta podstawa nie uprawnia Cię do przekazywania dowolnych danych innych osób.</p>
       <p>Do generowania odpowiedzi przekazywane są: treść Twojego pytania, ograniczony kontekst tej samej rozmowy, wyniki odczytów publicznych katalogów i instrukcji IdeaHire, wybrane kryteria oraz tekst lub obraz, który samodzielnie wybierzesz do analizy. Bez Twojego wyboru Lucyna nie pobiera plików ani treści prywatnych wiadomości. Nie ma uprawnień do przyjmowania prac, publikowania ocen lub rozporządzania płatnościami.</p>
       <h3>Odbiorcy danych</h3>
       <p>Supabase obsługuje uwierzytelnianie, zapytania funkcji i zapis historii. Cloudflare Workers AI przetwarza wybraną treść w celu generowania odpowiedzi. Zwracanie odpowiedzi i przechowywanie danych może wiązać się z przetwarzaniem poza EOG, zgodnie z umowami powierzenia, stosowanymi zabezpieczeniami transferu oraz informacjami o odbiorcach w głównej polityce. Konkretny region konta i właściwe zabezpieczenia muszą odpowiadać konfiguracji administratora.</p>
