@@ -19639,7 +19639,7 @@ function AgreementPanel({
           Obie strony akceptują tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.
         </p>
 
-        <ul className="ih-agreement-approvals" aria-label="Akceptacja tej wersji warunków">
+        {agreement && mode !== "form" && <ul className="ih-agreement-approvals" aria-label="Akceptacja tej wersji warunków">
           {[
             ["Twoja akceptacja", currentUserAccepted],
             ["Akceptacja drugiej strony", otherUserAccepted],
@@ -19654,7 +19654,7 @@ function AgreementPanel({
               </div>
             </li>
           ))}
-        </ul>
+        </ul>}
       </div>
 
       {mode === "form" ? (

@@ -1509,6 +1509,7 @@ body .ih-chat-workspace .ih-chat-start-steps li > span { display: block !importa
 body .ih-chat-workspace .agreement-workspace { margin: 0 !important; padding: 0 !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
 body .ih-chat-workspace .agreement-gate { width: 100% !important; max-width: none !important; max-height: none !important; padding: 0 !important; overflow: visible !important; border: 0 !important; background: transparent !important; }
 body .ih-chat-workspace .agreement-gate-heading > .ih-agreement-process-note { margin: 0 !important; font-size: 14px !important; line-height: 1.7 !important; }
+body .ih-chat-workspace .agreement-form-grid > .ih-agreement-section:first-child { margin-top: 0 !important; padding-top: 0 !important; border-top: 0 !important; }
 body .ih-chat-workspace .ih-compose-recipient { margin: 0 0 4px !important; color: var(--a-muted) !important; font: 400 11px/16px Inter,system-ui,sans-serif !important; overflow-wrap: anywhere !important; }
 body .ih-chat-workspace .ih-compose-recipient strong { color: var(--a-ink) !important; font-weight: 600 !important; }
 body .ih-chat-workspace .ih-compose-count { margin: 5px 0 0 !important; color: var(--a-muted) !important; text-align: end !important; font: 400 11px/1.5 Inter,system-ui,sans-serif !important; }
@@ -1518,7 +1519,7 @@ body .ih-chat-workspace .ih-compose-count { margin: 5px 0 0 !important; color: v
     position: relative !important; display: flex !important; flex-direction: column !important;
     box-sizing: border-box !important; width: calc(100% - 48px) !important; max-width: 1600px !important;
     height: auto !important; min-height: calc(100dvh - 176px) !important; max-height: none !important;
-    margin: 20px auto 28px !important; padding: 0 !important; overflow: visible !important;
+    margin: 20px auto 96px !important; padding: 0 !important; overflow: visible !important;
     border: 1px solid var(--a-line) !important; border-radius: 14px !important; background: var(--a-paper) !important;
   }
   body .ih-message-workspace.ih-chat-workspace .ih68-room-header {
