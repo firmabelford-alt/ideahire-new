@@ -20109,7 +20109,7 @@ function ChatPaymentPanel({
       </div>
 
       {loading && !summary ? (
-        <InlineRouteLoader className="chat-compact-route-loader" rows={1} />
+        <p className="ihm-loading" role="status"><span aria-hidden="true" /><span>{paymentLanguage === "en" ? "Checking payment status…" : "Sprawdzanie statusu płatności…"}</span></p>
       ) : summary ? (
         <>
           <div className="chat-payment-breakdown">
