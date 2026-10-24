@@ -21772,13 +21772,14 @@ function Chat() {
     }
   ) : null;
 
-    const roomReturn = typeof roomLocation.state?.workspaceReturn === 'string' && /^\/(messages|work)(\?|$)/.test(roomLocation.state.workspaceReturn) ? roomLocation.state.workspaceReturn : '/messages';
+  const activeMaterialCount = privateWork.items.filter(item => item.moderation_status === 'active').length;
+  const roomReturn = typeof roomLocation.state?.workspaceReturn === 'string' && /^\/(messages|work)(\?|$)/.test(roomLocation.state.workspaceReturn) ? roomLocation.state.workspaceReturn : '/messages';
   return <div className="account-page ih68-chat-root"><AccountNavbar/>
     <WorkspaceConversation loading={loading} errorMessage={errorMessage} hasConversation={Boolean(conversation)}
       otherName={otherName} avatarUrl={otherProfile?.avatar_url} profileId={otherProfileId} blocked={messagingBlocked}
       jobTitle={jobTitle} category={getJobCategoryLabel(jobDetails?.category)}
       nextStep={conversationNextStep} projectPlan={<ChatProjectPlan job={jobDetails} agreement={agreement} />}
-      materialCount={privateWork.items.filter(item=>item.moderation_status==='active').length} accepted={agreement?.status==='accepted'} paymentOverview={paymentOverview}
+      materialCount={activeMaterialCount} accepted={agreement?.status==='accepted'} paymentOverview={paymentOverview}
       view={workspaceTab} onView={openWorkspace} focusMode={focusMode} onFocusMode={setFocusMode}
       backLabel={roomReturn.startsWith('/work')?roomCopy('Praca','Work'):roomCopy('Wiadomości','Messages')}
       onBack={()=>navigate(roomReturn,{state:{workspaceRestoreScrollY:roomLocation.state?.workspaceScrollY}})}
@@ -21806,7 +21807,7 @@ function Chat() {
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);scrollToLatestMessage(true);}}/>}
       composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
         onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>setOpenMaterialDialog(true)} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
-      materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Pliki i linki z Waszej współpracy.','Files and links from your project.')}</p></div><PrivateSharePanel
+      materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Materiały w rozmowie:','Materials in this conversation:')} <strong>{activeMaterialCount}</strong></p></div><PrivateSharePanel
                       key={id} compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog}
                       conversationId={id} recipientName={otherName}
                       userId={user?.id}

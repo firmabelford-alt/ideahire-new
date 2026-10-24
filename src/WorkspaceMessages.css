@@ -1474,7 +1474,7 @@ body .ih-chat-workspace .ih-chat-source > summary {
 }
 body .ih-chat-workspace .ih-chat-source > div { padding: 12px 0 0 !important; }
 body .ih-chat-workspace :is(.ih-profile-project-wait, .ih-payment-prerequisite) {
-  display: block !important; width: 100% !important; min-width: 0 !important;
+  display: block !important; width: 100% !important; min-width: 0 !important; max-width: none !important;
   margin: 0 !important; padding: 24px !important;
   border: 1px solid var(--a-line) !important; border-radius: 12px !important;
   background: var(--a-soft) !important; color: var(--a-ink) !important;
@@ -1517,7 +1517,7 @@ body .ih-chat-workspace .ih-compose-count { margin: 5px 0 0 !important; color: v
   body .ih-message-workspace.ih-chat-workspace:not(.is-focus) {
     position: relative !important; display: flex !important; flex-direction: column !important;
     box-sizing: border-box !important; width: calc(100% - 48px) !important; max-width: 1600px !important;
-    height: auto !important; min-height: calc(100dvh - 128px) !important; max-height: none !important;
+    height: auto !important; min-height: calc(100dvh - 176px) !important; max-height: none !important;
     margin: 20px auto 28px !important; padding: 0 !important; overflow: visible !important;
     border: 1px solid var(--a-line) !important; border-radius: 14px !important; background: var(--a-paper) !important;
   }
