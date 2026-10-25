@@ -172,9 +172,7 @@ export const FormSelect = forwardRef(function FormSelect({
     </div>;
   return <span ref={root} className={`ih7-select ih-control-select ${className}`} style={style} data-open={open}>
     {label && <span id={`${controlId}-label`} className="ih7-select-label">{label}</span>}
-    <select {...props} ref={assignField} id={`${controlId}-native`} className="ih-control-native" value={currentValue} disabled={disabled} required={required} tabIndex={-1} aria-hidden="true"
-      onChange={event => { setLocalValue(event.target.value); setInvalid(false); onChange?.(event); }}
-      onInvalid={event => { event.preventDefault(); setInvalid(true); trigger.current?.focus(); onInvalid?.(event); }}>{children}</select>
+
     <button ref={trigger} id={controlId} type="button" className="ih7-select-trigger ih-control-trigger" role="combobox" disabled={disabled}
       aria-expanded={open} aria-controls={open ? `${controlId}-listbox` : undefined} aria-haspopup="listbox" aria-required={required || undefined}
       aria-invalid={invalid || props['aria-invalid']} aria-label={props['aria-labelledby'] ? undefined : name} aria-labelledby={props['aria-labelledby']}
@@ -182,6 +180,9 @@ export const FormSelect = forwardRef(function FormSelect({
       onKeyDown={keyboard} onClick={() => open ? close() : show()} onBlur={event => { if (!menu.current?.contains(event.relatedTarget)) close(); onBlur?.(event); }}>
       <span>{selected?.label || (english ? 'Choose' : 'Wybierz')}</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
     </button>
+    <select {...props} ref={assignField} id={`${controlId}-native`} className="ih-control-native" value={currentValue} disabled={disabled} required={required} tabIndex={-1} aria-hidden="true"
+      onChange={event => { setLocalValue(event.target.value); setInvalid(false); onChange?.(event); }}
+      onInvalid={event => { event.preventDefault(); setInvalid(true); trigger.current?.focus(); onInvalid?.(event); }}>{children}</select>
     {invalid && <small id={`${controlId}-error`} className="ih-control-error" role="alert">{english ? 'Choose an option.' : 'Wybierz jedną z opcji.'}</small>}
     {open && (inlineMenu ? optionsMenu : createPortal(optionsMenu, menuHost))}
   </span>;
