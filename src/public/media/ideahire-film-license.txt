@@ -143,3 +143,9 @@ INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
+
+2026-10-25 — extended catalog loops
+The jobs, freelancers and services backgrounds use the same licensed source
+clips listed above. The full local source clips are now used, with a slower
+playback pace, no audio and web-optimised H.264 encoding. No additional people,
+endorsements or licensing claims are introduced by this edit.

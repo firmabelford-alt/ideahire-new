@@ -84,6 +84,8 @@ export default function LucynaDock({ supabase, user }) {
   const [launcherPosition, setLauncherPosition] = useState(null), [dragging, setDragging] = useState(null);
   const panel = useRef(null), returnTab = useRef(null), drag = useRef(null);
   const suppressLauncherClick = useRef(false);
+  const placementRef = useRef(null);
+  placementRef.current = { position, launcherPosition };
   const launcher = launcherLayout(bounds, launcherPosition);
   const layout = dockLayout(bounds, position || (launcherPosition ? windowNearLauncher(bounds, launcher) : null));
   useEffect(() => {
@@ -117,6 +119,13 @@ export default function LucynaDock({ supabase, user }) {
     }
     suppressLauncherClick.current = false;
     setBounds(viewportBounds());
+    if (!placementRef.current.position && !placementRef.current.launcherPosition) {
+      const anchor = [...document.querySelectorAll('.ih-top-assistant,.ih-room-assistant')].find(element => element.getClientRects().length);
+      if (anchor) {
+        const rect = anchor.getBoundingClientRect();
+        setPosition(windowNearLauncher(viewportBounds(), { x: rect.left, y: rect.top, width: rect.width, height: rect.height }));
+      }
+    }
     setLoaded(true);
     setOpen(true);
   }
@@ -124,7 +133,10 @@ export default function LucynaDock({ supabase, user }) {
     // A hidden chat must not keep a mobile keyboard over the page.
     if (panel.current?.contains(document.activeElement)) document.activeElement?.blur();
     setOpen(false);
-    requestAnimationFrame(() => returnTab.current?.focus({ preventScroll: true }));
+    requestAnimationFrame(() => {
+      const shortcut = [...document.querySelectorAll('.ih-top-assistant,.ih-room-assistant')].find(element => element.getClientRects().length);
+      (shortcut || returnTab.current)?.focus({ preventScroll: true });
+    });
   }
   function beginDrag(event, kind) {
     if (event.button !== 0 || event.isPrimary === false) return;

@@ -1,3 +1,4 @@
+import { FormSelect } from "./FormControls";
 /* IdeaHire | P40 | 2026-10-15 | Pełny plik: src/MarketUI.jsx | Moduły, mikrokwadraty i widoczność haseł */
 import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -245,9 +246,9 @@ export function MarketIcon({ kind = "search", ...props }) {
 }
 
 const CATALOG_SCENES = [
-  { key: 'jobs', to: '/jobs', pl: 'Zlecenia', en: 'Jobs', video: '/media/ideahire-jobs-background.mp4?v=desk4463352', poster: '/media/ideahire-jobs-poster.jpg?v=desk4463352' },
-  { key: 'people', to: '/freelancers', pl: 'Freelancerzy', en: 'Freelancers', video: '/media/ideahire-freelancers-background.mp4?v=3969421', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421' },
-  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-services-background.mp4?v=7633408', poster: '/media/ideahire-services-poster.jpg?v=7633408' },
+  { key: 'jobs', to: '/jobs', pl: 'Zlecenia', en: 'Jobs', video: '/media/ideahire-jobs-background.mp4?v=desk4463352-long', poster: '/media/ideahire-jobs-poster.jpg?v=desk4463352-long' },
+  { key: 'people', to: '/freelancers', pl: 'Freelancerzy', en: 'Freelancers', video: '/media/ideahire-freelancers-background.mp4?v=3969421-long', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421-long' },
+  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-services-background.mp4?v=7633408-long', poster: '/media/ideahire-services-poster.jpg?v=7633408-long' },
 ];
 
 function CatalogFilm({ scene, en }) {
@@ -255,7 +256,6 @@ function CatalogFilm({ scene, en }) {
   const [motionAllowed, setMotionAllowed] = useState(false);
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -279,20 +279,18 @@ function CatalogFilm({ scene, en }) {
   useEffect(() => {
     const update = () => {
       if (!video.current) return;
-      if (visible && !paused && !document.hidden) video.current.play().catch(() => {});
+      if (visible && motionAllowed && !document.hidden) video.current.play().catch(() => {});
       else video.current.pause();
     };
     update();
     document.addEventListener('visibilitychange', update);
     return () => document.removeEventListener('visibilitychange', update);
-  }, [visible, paused, motionAllowed, ready, failed]);
+  }, [visible, motionAllowed, ready, failed]);
   return <>
     <div className="ih-cinema-film" ref={frame} aria-hidden="true" style={{ backgroundImage: `url("${scene.poster}")` }}>
       {motionAllowed && ready && !failed && <video ref={video} src={scene.video} poster={scene.poster} muted loop playsInline preload="none" tabIndex={-1} onError={() => setFailed(true)} />}
     </div>
-    {motionAllowed && ready && !failed && <button type="button" className="ih-cinema-pause" aria-pressed={paused} onClick={() => setPaused(value => !value)} aria-label={paused ? (en ? 'Play background video' : 'Włącz film w tle') : (en ? 'Pause background video' : 'Zatrzymaj film w tle')}>
-      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">{paused ? <path d="m7 4 9 6-9 6Z" /> : <path d="M5 4h3v12H5zm7 0h3v12h-3z" />}</svg>
-    </button>}
+
   </>;
 }
 
@@ -312,7 +310,7 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
     if (timer.current || leaving || target.to === location.pathname) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { navigate(target.to); return; }
     setLeaving(direction);
-    timer.current = window.setTimeout(() => navigate(target.to, { state: { catalogDirection: direction } }), 170);
+    timer.current = window.setTimeout(() => navigate(target.to, { state: { catalogDirection: direction } }), window.matchMedia('(max-width:850px)').matches ? 340 : 230);
   }
   return <section className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
     data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
@@ -383,111 +381,9 @@ export function helpCenterHref() {
 }
 
 export function MarketSelect({ id, label, value, options, onChange, disabled = false }) {
-  const generatedId = useId();
-  const selectId = id || generatedId;
-  const rootRef = useRef(null);
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-  const optionRefs = useRef([]);
-  const typeahead = useRef({ text: "", time: 0 });
-  const [open, setOpen] = useState(false);
-  const [menuLayout, setMenuLayout] = useState({ side: "down", height: 320 });
-  const selected = Math.max(0, options.findIndex((option) => option.value === value));
-  const [focused, setFocused] = useState(selected);
-  const selectedOption = options[selected];
-  const enabled = options.map((option, index) => !option.disabled ? index : -1).filter((index) => index >= 0);
-  useEffect(() => { if (disabled) setOpen(false); }, [disabled]);
-  useEffect(() => {
-    if (!open) return undefined;
-    const option = optionRefs.current[focused], menu = menuRef.current;
-    option?.focus({ preventScroll: true });
-    if (option && menu) {
-      const item = option.getBoundingClientRect(), list = menu.getBoundingClientRect();
-      if (item.top < list.top + 6) menu.scrollTop += item.top - list.top - 6;
-      else if (item.bottom > list.bottom - 6) menu.scrollTop += item.bottom - list.bottom + 6;
-    }
-  }, [open, focused]);
-  useEffect(() => {
-    if (!open) return undefined;
-    const outside = (event) => { if (!rootRef.current?.contains(event.target)) setOpen(false); };
-    const resized = () => setOpen(false);
-    document.addEventListener("pointerdown", outside);
-    window.addEventListener("resize", resized);
-    window.visualViewport?.addEventListener("resize", resized);
-    return () => {
-      document.removeEventListener("pointerdown", outside);
-      window.removeEventListener("resize", resized);
-      window.visualViewport?.removeEventListener("resize", resized);
-    };
-  }, [open]);
-  function close(restoreFocus = false) {
-    setOpen(false);
-    typeahead.current = { text: "", time: 0 };
-    if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
-  }
-  function show(last = false) {
-    if (disabled || !enabled.length) return;
-    const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) {
-      const viewport = window.visualViewport;
-      const top = viewport?.offsetTop || 0;
-      let bottom = top + (viewport?.height || window.innerHeight);
-      const navigation = document.querySelector('.ih68-top-nav');
-      if (navigation && getComputedStyle(navigation).position === 'fixed') bottom = Math.min(bottom, navigation.getBoundingClientRect().top);
-      const header = document.querySelector('.ih68-header');
-      const above = (rootRef.current?.getBoundingClientRect().top ?? rect.top) - Math.max(top, header?.getBoundingClientRect().bottom || top) - 12;
-      const below = bottom - rect.bottom - 12;
-      const up = below < 220 && above > below;
-      setMenuLayout({ side: up ? "up" : "down", height: Math.max(80, Math.min(320, up ? above : below)) });
-    }
-    setFocused(last ? enabled[enabled.length - 1] : enabled.includes(selected) ? selected : enabled[0]);
-    setOpen(true);
-  }
-  function choose(index) { if (disabled || options[index]?.disabled) return; onChange(options[index].value); close(true); }
-  function keyboard(event) {
-    if (disabled) return;
-    if (event.key === "Escape" && open) { event.preventDefault(); event.stopPropagation(); close(true); return; }
-    if (event.key === "Tab") { close(); return; }
-    if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
-      event.preventDefault();
-      if (!open) { show(event.key === "End"); return; }
-      const current = enabled.indexOf(focused);
-      const index = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1 : (current + (event.key === "ArrowUp" ? -1 : 1) + enabled.length) % enabled.length;
-      setFocused(enabled[index]); return;
-    }
-    if (open && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); choose(focused); return; }
-    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey && event.key !== " ") {
-      event.preventDefault();
-      const now = Date.now();
-      const previous = now - typeahead.current.time < 700 ? typeahead.current.text : "";
-      const typed = `${previous}${event.key}`.toLocaleLowerCase("pl-PL");
-      typeahead.current = { text: typed, time: now };
-      const normalize = (text) => text.toLocaleLowerCase("pl-PL").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ł/g, "l");
-      const next = enabled.find((index) => normalize(options[index].label).startsWith(normalize(typed)));
-      if (next !== undefined) { if (!open) show(); setFocused(next); }
-    }
-  }
-  return (
-    <div className="ih7-select" ref={rootRef} data-open={open} data-side={menuLayout.side} style={{ "--ih7-menu-height": `${menuLayout.height}px` }} onKeyDown={keyboard}
-      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) close(); }}>
-      <span id={`${selectId}-label`} className="ih7-select-label">{label}</span>
-      <button type="button" id={selectId} ref={triggerRef} disabled={disabled} className="ih7-select-trigger" aria-haspopup="listbox"
-        aria-expanded={open} aria-controls={`${selectId}-options`} aria-labelledby={`${selectId}-label ${selectId}-value`}
-        onClick={() => open ? close() : show()}>
-        <span id={`${selectId}-value`}>{selectedOption?.label || "Wybierz"}</span>
-        <svg viewBox="0 0 20 20" aria-hidden="true" fill="none"><path d="m5 7 5 5 5-5" /></svg>
-      </button>
-      <div ref={menuRef} className="ih7-select-menu" role="listbox" id={`${selectId}-options`} aria-labelledby={`${selectId}-label`}
-        aria-hidden={!open} inert={open ? undefined : ""}>
-        {options.map((option, index) => <button type="button" role="option" key={option.value}
-          ref={(element) => { optionRefs.current[index] = element; }} tabIndex={open && focused === index ? 0 : -1}
-          aria-selected={option.value === value} aria-disabled={Boolean(disabled || option.disabled)} disabled={disabled || option.disabled}
-          className="ih7-select-option" onFocus={() => setFocused(index)} onClick={() => choose(index)}>
-          <span>{option.label}</span>{option.value === value && <MarketIcon kind="check" />}
-        </button>)}
-      </div>
-    </div>
-  );
+  return <FormSelect id={id} label={label} value={value} onChange={event => onChange(event.target.value)} disabled={disabled}>
+    {options.map(option => <option key={option.value} value={option.value} disabled={option.disabled}>{option.label}</option>)}
+  </FormSelect>;
 }
 
 export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, kind = 'zleceń', children }) {
@@ -783,12 +679,12 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
         <header><strong id={`${fieldId}-calendar-title`}>{caption}</strong><button type="button" onClick={close} aria-label="Zamknij kalendarz">×</button></header>
         <div className="ih20-calendar-navigation">
           <button type="button" onClick={() => moveMonth(-1)} disabled={!rangeAvailable || month <= lowerMonth} aria-label="Poprzedni miesiąc">‹</button>
-          <select aria-label="Miesiąc" value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
+          <FormSelect aria-label="Miesiąc" value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
             {months.map((label, index) => <option value={index + 1} key={label} disabled={`${year}-${pad(index + 1)}` < lowerMonth || `${year}-${pad(index + 1)}` > upperMonth}>{label}</option>)}
-          </select>
-          <select aria-label="Rok" value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
+          </FormSelect>
+          <FormSelect aria-label="Rok" value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
             {Array.from({ length: Math.max(0, maxYear - minYear + 1) }, (_, index) => <option value={maxYear - index} key={index}>{maxYear - index}</option>)}
-          </select>
+          </FormSelect>
           <button type="button" onClick={() => moveMonth(1)} disabled={!rangeAvailable || month >= upperMonth} aria-label="Następny miesiąc">›</button>
         </div>
         <div className="ih20-calendar-weekdays" aria-hidden="true">{weekdays.map(day => <span key={day}>{day}</span>)}</div>
@@ -802,12 +698,12 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
           </div>)}
         </div>
         {isTime && <div className="ih20-calendar-time"><span>Godzina</span>
-          <select aria-label="Godzina" value={timeKey.slice(0, 2)} onChange={event => setDraft(`${dateKey}T${event.target.value}:${timeKey.slice(3, 5)}`)}>
+          <FormSelect aria-label="Godzina" value={timeKey.slice(0, 2)} onChange={event => setDraft(`${dateKey}T${event.target.value}:${timeKey.slice(3, 5)}`)}>
             {Array.from({ length: 24 }, (_, index) => pad(index)).map(hour => <option key={hour}>{hour}</option>)}
-          </select><span>:</span>
-          <select aria-label="Minuta" value={timeKey.slice(3, 5)} onChange={event => setDraft(`${dateKey}T${timeKey.slice(0, 2)}:${event.target.value}`)}>
+          </FormSelect><span>:</span>
+          <FormSelect aria-label="Minuta" value={timeKey.slice(3, 5)} onChange={event => setDraft(`${dateKey}T${timeKey.slice(0, 2)}:${event.target.value}`)}>
             {Array.from({ length: 60 }, (_, index) => pad(index)).map(minute => <option key={minute}>{minute}</option>)}
-          </select>
+          </FormSelect>
         </div>}
         {(!rangeAvailable || (isTime && !valid(draft))) && <p className="ih21-calendar-hint" role="status">{!rangeAvailable ? "Brak dostępnych dat w tym zakresie." : `Wybierz termin${min ? ` od ${format(min)}` : ""}${max ? ` do ${format(max)}` : ""}.`}</p>}
         <footer>{!required && <button type="button" onClick={() => commit("")}>Wyczyść</button>}<button type="button" onClick={close}>Anuluj</button>{isTime && <button type="button" className="is-primary" disabled={!valid(draft)} onClick={() => commit(draft)}>Wybierz</button>}</footer>

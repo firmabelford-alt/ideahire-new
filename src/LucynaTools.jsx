@@ -1,3 +1,4 @@
+import { FormSelect, AutoTextarea } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Wiadomości, brief i analiza wybranego materiału. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -72,8 +73,8 @@ function MessageTool({onUseDraft,busy,initialDraft=""}) {
   useEffect(()=>{setDetails(initialDraft);},[initialDraft]);
   return <section className="lu-tool-card"><div className="lu-tool-heading"><span>WIADOMOŚCI</span><h2>Dobierz słowa do sytuacji</h2><p>Lucyna przygotuje propozycję na podstawie Twoich faktów. Możesz też po prostu opisać sytuację w rozmowie.</p></div>
     <label>Cel wiadomości<input value={purpose} maxLength={300} placeholder="Np. zapytanie o termin albo prośba o poprawki" onChange={e=>setPurpose(e.target.value)} /></label>
-    <label>Fakty i ustalenia<textarea value={details} maxLength={1200} rows={4} placeholder="Podaj tylko fakty potrzebne do tej wiadomości" onChange={e=>setDetails(e.target.value)} /></label>
-    <label>Ton<select value={tone} onChange={e=>setTone(e.target.value)}><option value="polite">Uprzejmy</option><option value="firm">Stanowczy</option><option value="short">Krótki</option></select></label>
+    <label>Fakty i ustalenia<AutoTextarea value={details} maxLength={1200} rows={4} placeholder="Podaj tylko fakty potrzebne do tej wiadomości" onChange={e=>setDetails(e.target.value)} /></label>
+    <label>Ton<FormSelect value={tone} onChange={e=>setTone(e.target.value)}><option value="polite">Uprzejmy</option><option value="firm">Stanowczy</option><option value="short">Krótki</option></FormSelect></label>
     <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onUseDraft("Pomóż mi napisać "+({polite:"uprzejmą",firm:"stanowczą",short:"krótką"}[tone])+" wiadomość.\n\n"+purpose+"\n\nFakty i ustalenia:\n"+details)}>{busy ? "Przygotowuję…" : "Przygotuj wiadomość z AI"}</button></div>
     <p className="lu-tool-note">Wiadomość wysyłasz samodzielnie w rozmowie. Sprawdź adresata, fakty, terminy i zobowiązania.</p>
   </section>;
@@ -84,7 +85,7 @@ function BriefTool({onUseDraft,busy}) {
   const readiness = briefReadiness(fields);
   return <section className="lu-tool-card"><div className="lu-tool-heading"><span>ZLECENIE</span><h2>Zacznij od jasnych ustaleń</h2><p>Podaj znane informacje. Lucyna ułoży z nich szkic i wskaże, co warto jeszcze uzgodnić.</p></div>
     <div className="lu-brief-progress"><strong>{readiness.percent}% pól uzupełnionych</strong><progress max="100" value={readiness.percent} aria-label="Kompletność pól zlecenia" /><span>To kompletność formularza; jakość ustaleń sprawdzasz samodzielnie.</span></div>
-    <div className="lu-tool-grid">{Object.entries(labels).map(([key,label])=><label key={key}>{label}<textarea rows={2} maxLength={key==="scope" || key==="acceptance" ? 350 : 180} value={fields[key]} onChange={e=>setFields({...fields,[key]:e.target.value})} /></label>)}</div>
+    <div className="lu-tool-grid">{Object.entries(labels).map(([key,label])=><label key={key}>{label}<AutoTextarea rows={2} maxLength={key==="scope" || key==="acceptance" ? 350 : 180} value={fields[key]} onChange={e=>setFields({...fields,[key]:e.target.value})} /></label>)}</div>
     <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !Object.values(fields).some(value=>value.trim())} onClick={()=>onUseDraft("Przygotuj przejrzyste zlecenie na podstawie moich informacji. Zachowaj fakty, brakujące informacje oznacz jako do uzgodnienia.\n\n"+briefTemplate(fields))}>{busy ? "Przygotowuję…" : "Przygotuj zlecenie z AI"}</button><Link to="/find-talent">Otwórz formularz publikacji</Link></div>
   </section>;
 }
@@ -132,7 +133,7 @@ function ReviewTool({supabase,user,busy,onReview,onNotice,deliveryId,conversatio
     <fieldset className="lu-criteria-input"><legend>Kryteria do sprawdzenia (1–6)</legend>{criteria.map((criterion,index)=><div key={index}><label><span className="lu-sr-only">Kryterium {index+1}</span><input value={criterion} minLength={8} maxLength={220} placeholder="Np. tekst zawiera trzy jasno opisane korzyści" onChange={e=>setCriteria(criteria.map((c,i)=>i===index ? e.target.value : c))} /></label>
       {criteria.length>1 && <button type="button" className="lu-text-button" aria-label={"Usuń kryterium "+(index+1)} onClick={()=>setCriteria(criteria.filter((_,i)=>i!==index))}>Usuń</button>}</div>)}
       {criteria.length<6 && <button type="button" className="lu-text-button" onClick={()=>setCriteria([...criteria,""])}>+ Dodaj kryterium</button>}</fieldset>
-    <label>Wybrany tekst lub fragment kodu<textarea rows={6} value={material} maxLength={12000} onChange={e=>{setMaterial(e.target.value);setRedacted(false);}} placeholder="Wklej materiał do sprawdzenia. Nie wklejaj prywatnych danych ani instrukcji logowania." /></label>
+    <label>Wybrany tekst lub fragment kodu<AutoTextarea rows={6} value={material} maxLength={12000} onChange={e=>{setMaterial(e.target.value);setRedacted(false);}} placeholder="Wklej materiał do sprawdzenia. Nie wklejaj prywatnych danych ani instrukcji logowania." /></label>
     <label className="lu-file-picker">Wybierz plik (do 2 MB)<input type="file" disabled={fileBusy || busy} accept=".pdf,.txt,.md,.csv,.json,.html,.css,.js,.jsx,.ts,.tsx,.py,.sql,.jpg,.jpeg,.png,.webp" onChange={chooseFile} /></label>
     {note && <p className="lu-tool-note" role="status">{note}</p>}
     {image && <div className="lu-image-preview"><img src={image} alt="Wybrany obraz przygotowany do analizy" /><button type="button" className="lu-text-button" onClick={()=>{setImage("");setNote("");setRedacted(false);}}>Usuń obraz</button></div>}

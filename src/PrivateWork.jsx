@@ -1,3 +1,4 @@
+import { FormSelect, AutoTextarea } from "./FormControls";
 /* P69 — dedicated materials library; storage and delivery operations preserved. */
 /* IdeaHire | Lucyna AI | P35 | Pełny PrivateWork z ProjectFilesPanel i integracją analizy. */
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
@@ -670,7 +671,7 @@ function WorkspaceFilesLibrary({
   if (loading && !items.length) return <p className="ih68-loading" role="status">{t('Pobieranie materiałów…', 'Loading materials…')}</p>;
   return <section className="ih69-material-library" aria-label={t('Biblioteka materiałów', 'Materials library')}>
     {error && <p className="ih68-feedback" role="alert">{error}</p>}
-    {!!groups.length && <div className="ih69-library-toolbar"><span>{t('Elementy: ', 'Items: ')}<b>{items.length}</b></span><label><span className="ih68-sr-only">{t('Rodzaj materiałów', 'Material type')}</span><select value={filter} onChange={event => setFilter(event.target.value)}>{types.filter(([key]) => key === 'all' || counts[key] > 0 || key === filter).map(([key, label]) => <option key={key} value={key}>{label}{key !== 'all' ? ' (' + counts[key] + ')' : ''}</option>)}</select></label></div>}
+    {!!groups.length && <div className="ih69-library-toolbar"><span>{t('Elementy: ', 'Items: ')}<b>{items.length}</b></span><label><span className="ih68-sr-only">{t('Rodzaj materiałów', 'Material type')}</span><FormSelect value={filter} onChange={event => setFilter(event.target.value)}>{types.filter(([key]) => key === 'all' || counts[key] > 0 || key === filter).map(([key, label]) => <option key={key} value={key}>{label}{key !== 'all' ? ' (' + counts[key] + ')' : ''}</option>)}</FormSelect></label></div>}
     {!visible.length ? <div className="ih69-material-empty"><svg viewBox="0 0 144 112" fill="none" aria-hidden="true" focusable="false"><rect x="50" y="13" width="57" height="75" rx="6" fill="currentColor" fillOpacity=".05" stroke="currentColor" strokeOpacity=".5" strokeWidth="1.5" /><path d="M63 32H93M63 43H86" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity=".45" /><path d="M24 47C24 43 27 40 31 40H57L65 49H116C120 49 123 52 122 56L115 94H30L24 47Z" fill="currentColor" fillOpacity=".08" stroke="currentColor" strokeWidth="1.5" /><path d="M67 65V83M58 74H76" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg><h3>{groups.length ? t('Brak materiałów tego typu', 'No materials of this type') : t('Jeszcze bez materiałów', 'No materials yet')}</h3><p>{groups.length ? t('Wybierz inny rodzaj materiałów.', 'Choose a different material type.') : t('Dodane pliki i linki pojawią się tutaj. Możecie wrócić do nich w dowolnym momencie.', 'Files and links you share will appear here. You can return to them at any time.')}</p>{groups.length > 0 && <button type="button" className="ih68-text-link" onClick={() => setFilter('all')}>{t('Pokaż wszystkie', 'Show all')}</button>}</div> : <div className="ih69-material-batches">{visible.map(group => {
         const own = group.senderId === userId;
         return <article key={group.id} className="ih69-material-batch"><header><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" /><path d="M14 3v6h6M8 13h8M8 17h5" /></svg><strong>{own ? t('Dodane przez Ciebie', 'Shared by you') : t('Dodane przez drugą stronę', 'Shared by the other person')}</strong></span>{group.createdAt && <time dateTime={group.createdAt}>{new Date(group.createdAt).toLocaleString(english ? 'en-GB' : 'pl-PL', {
@@ -1209,7 +1210,7 @@ export function PrivateSharePanel({
                   </div>)}</div><button type="button" className="ih-transfer-add-link" onClick={addLink} disabled={occupiedSlots >= MAX_ITEMS}><Plus size={18} aria-hidden="true" />Dodaj kolejny link</button>
                 </section>
                 <section className="ih-transfer-kind-panel" role="tabpanel" id={`${transferId}-panel-text`} aria-labelledby={`${transferId}-tab-text`} hidden={materialType !== "text"}>
-                  <div className="ih-transfer-section-heading"><h3>Przekaż tekst</h3></div><label className="ih-transfer-field"><span>Treść</span><textarea value={writtenText} onChange={event => setWrittenText(event.target.value)} maxLength={20000} rows={5} placeholder="Wklej gotowy tekst lub instrukcję…" /><small>{writtenText.length.toLocaleString()} / 20 000 znaków</small></label>
+                  <div className="ih-transfer-section-heading"><h3>Przekaż tekst</h3></div><label className="ih-transfer-field"><span>Treść</span><AutoTextarea value={writtenText} onChange={event => setWrittenText(event.target.value)} maxLength={20000} rows={5} placeholder="Wklej gotowy tekst lub instrukcję…" /></label>
                   <label className="ih-transfer-field"><span>Tytuł tekstu <small>opcjonalnie</small></span><input type="text" value={writtenTitle} onChange={event => setWrittenTitle(event.target.value)} maxLength={180} placeholder="Np. Treść strony głównej" /></label>
                 </section>
                 <section className="ih-transfer-kind-panel" role="tabpanel" id={`${transferId}-panel-access`} aria-labelledby={`${transferId}-tab-access`} hidden={materialType !== "access"}>
@@ -1222,11 +1223,11 @@ export function PrivateSharePanel({
                       <label className="ih-transfer-field"><span>Adres usługi</span><input type="url" value={entry.serviceUrl} onChange={event => updateAccess(index,"serviceUrl",event.target.value)} placeholder="https://adres-usługi.pl" autoComplete="off" /></label>
                       <label className="ih-transfer-field"><span>Login lub e-mail</span><input type="text" value={entry.login} onChange={event => updateAccess(index,"login",event.target.value)} maxLength={320} placeholder="Login do usługi" autoComplete="off" /></label>
                       <label className="ih-transfer-field"><span>Link ważny do</span><IdeaHireDateField aria-label={`Termin ważności dostępu ${index + 1}`} type="datetime-local" value={entry.expiresAt} disabled={busy || outcomeUnknown} onChange={event => updateAccess(index,"expiresAt",event.target.value)} /></label>
-                      <label className="ih-transfer-field ih-transfer-field-wide"><span>Instrukcja logowania</span><textarea value={entry.instructions} onChange={event => updateAccess(index,"instructions",event.target.value)} maxLength={2000} rows={3} placeholder="Instrukcja bez hasła, tokenu ani kodu 2FA" /></label>
+                      <label className="ih-transfer-field ih-transfer-field-wide"><span>Instrukcja logowania</span><AutoTextarea value={entry.instructions} onChange={event => updateAccess(index,"instructions",event.target.value)} maxLength={2000} rows={3} placeholder="Instrukcja bez hasła, tokenu ani kodu 2FA" /></label>
                     </div></details>
                   </div>)}<button type="button" className="ih-transfer-add-link" disabled={accessEntries.length >= 5 || occupiedSlots >= MAX_ITEMS} onClick={() => setAccessEntries(current => current.length < 5 ? [...current,{label:"",serviceUrl:"",login:"",secureUrl:"",expiresAt:"",instructions:""}] : current)}><Plus size={18} aria-hidden="true" />Dodaj kolejny dostęp</button>
                 </section>
-                <details className="ih-transfer-caption-toggle" open={mode === "delivery" || undefined}><summary>{mode === "delivery" ? "Opis przekazywanej pracy" : "Dołącz wiadomość"}{mode !== "delivery" && <span>opcjonalnie</span>}<ChevronDown size={17} aria-hidden="true" /></summary><label className="ih-transfer-field" htmlFor="ih-transfer-caption"><span>{mode === "delivery" ? "Co przekazujesz i jak to sprawdzić?" : "Wiadomość"}</span><textarea id="ih-transfer-caption" value={caption} onChange={event => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz rezultat i sposób jego sprawdzenia…" : "Krótka informacja do przesyłki…"} /><small>{mode === "delivery" ? "Minimum 20 znaków. Klient otrzyma te materiały do odbioru pracy." : "Wiadomość pojawi się razem z materiałami w rozmowie."}</small></label></details>
+                <details className="ih-transfer-caption-toggle" open={mode === "delivery" || undefined}><summary>{mode === "delivery" ? "Opis przekazywanej pracy" : "Dołącz wiadomość"}{mode !== "delivery" && <span>opcjonalnie</span>}<ChevronDown size={17} aria-hidden="true" /></summary><label className="ih-transfer-field" htmlFor="ih-transfer-caption"><span>{mode === "delivery" ? "Co przekazujesz i jak to sprawdzić?" : "Wiadomość"}</span><AutoTextarea id="ih-transfer-caption" value={caption} onChange={event => setCaption(event.target.value)} maxLength={4000} rows={3} placeholder={mode === "delivery" ? "Opisz rezultat i sposób jego sprawdzenia…" : "Krótka informacja do przesyłki…"} /><small>{mode === "delivery" ? "Minimum 20 znaków. Klient otrzyma te materiały do odbioru pracy." : "Wiadomość pojawi się razem z materiałami w rozmowie."}</small></label></details>
                 {mode === "delivery" && <div className="ih-transfer-confirmations">
                   <label><input type="checkbox" checked={rightsConfirmed} onChange={(event) => setRightsConfirmed(event.target.checked)} /><span>Mam prawa lub wymagane zgody do przekazywanych materiałów.</span></label>
                   <label><input type="checkbox" checked={safetyConfirmed} onChange={(event) => setSafetyConfirmed(event.target.checked)} /><span>Nie dołączam świadomie złośliwego kodu ani danych, których nie wolno mi ujawniać.</span></label>
@@ -1483,7 +1484,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, pa
       )}
       {isClient && latest.status === "submitted" && ["work_submitted", "release_pending", "release_failed"].includes(paymentStatus) && (
         <div className="private-work-delivery-actions">
-          <textarea value={changes} onChange={(event) => setChanges(event.target.value)} minLength={20} maxLength={4000} rows={3} placeholder="Jeśli potrzebujesz zmian, opisz je konkretnie…" />
+          <AutoTextarea value={changes} onChange={(event) => setChanges(event.target.value)} minLength={20} maxLength={4000} rows={3} placeholder="Jeśli potrzebujesz zmian, opisz je konkretnie…" />
           <div>
             <button type="button" onClick={() => respond("request_changes")} disabled={busy || disabled}>Poproś o poprawki</button>
             <button type="button" className="is-primary" onClick={openReleaseConfirmation} disabled={busy || disabled || releaseLoading}>{releaseLoading ? "Sprawdzanie płatności…" : "Zaakceptuj i zwolnij środki"}</button>
@@ -1563,7 +1564,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, pa
             <span>{reviewRating ? `${reviewRating}/5` : "Wybierz ocenę"}</span>
           </div>
           <label htmlFor={`ideahire-review-${conversation.id}`}>Twoja opinia</label>
-          <textarea
+          <AutoTextarea
             id={`ideahire-review-${conversation.id}`}
             value={reviewText}
             onChange={(event) => setReviewText(event.target.value)}
@@ -1634,8 +1635,8 @@ export function PrivateReportDialog({ target, onClose, onSubmitted }) {
         <span className="section-label">Zgłoszenie treści</span>
         <h2 id="private-report-title">Przekaż materiał do ręcznej analizy</h2>
         <p>Zgłoszenie nie nakłada sankcji automatycznie. Administrator oceni treść, kontekst i proporcjonalność ewentualnego działania.</p>
-        <label>Powód<select value={reason} onChange={(event) => setReason(event.target.value)}>{REPORT_REASONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>Co dokładnie jest niezgodne?<textarea value={explanation} onChange={(event) => setExplanation(event.target.value)} minLength={50} maxLength={5000} rows={5} placeholder="Opisz konkretne elementy i kontekst — minimum 50 znaków…" /></label>
+        <label>Powód<FormSelect value={reason} onChange={(event) => setReason(event.target.value)}>{REPORT_REASONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</FormSelect></label>
+        <label>Co dokładnie jest niezgodne?<AutoTextarea value={explanation} onChange={(event) => setExplanation(event.target.value)} minLength={50} maxLength={5000} rows={5} placeholder="Opisz konkretne elementy i kontekst — minimum 50 znaków…" /></label>
         <label>Przepis lub punkt Regulaminu (opcjonalnie)<input type="text" value={legalReference} onChange={(event) => setLegalReference(event.target.value)} maxLength={1500} /></label>
         <label className="private-work-good-faith"><input type="checkbox" checked={goodFaith} onChange={(event) => setGoodFaith(event.target.checked)} /> Potwierdzam, że zgłaszam treść w dobrej wierze, a podane informacje są zgodne z moją wiedzą.</label>
         {message && <p className="private-work-form-message" role="status">{message}</p>}

@@ -1,3 +1,4 @@
+import { FormSelect, AutoTextarea } from "./FormControls";
 /* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
@@ -434,7 +435,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
       <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług">
       <section className="ih78-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>
         <header className="ih78-results-heading">
-          <p role="status" aria-live="polite" aria-atomic="true">{loading ? (english ? "Finding services…" : "Szukamy usług…") : message ? (english ? "Results unavailable" : "Wyniki niedostępne") : <><strong>{services.length}</strong> {resultNoun}</>}</p>
+          <p className="ih-result-badge" role="status" aria-live="polite" aria-atomic="true"><span>{english ? "Results" : "Wyniki"}</span>{loading ? (english ? "Finding services…" : "Szukamy usług…") : message ? (english ? "Results unavailable" : "Wyniki niedostępne") : <strong>{services.length} {resultNoun}</strong>}</p>
           {hasFilters && <button type="button" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}><MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}</button>}
         </header>
         {message ? (
@@ -651,12 +652,11 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   maxLength={120}
                   required
                 />
-                <small>{form.title.length}/120</small>
               </label>
 
               <label>
                 <span>Kategoria *</span>
-                <select
+                <FormSelect
                   value={form.category}
                   onChange={(event) => updateCategory(event.target.value)}
                   required
@@ -664,12 +664,12 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   {SERVICE_CATEGORIES.map((category) => (
                     <option key={category} value={category}>{category}</option>
                   ))}
-                </select>
+                </FormSelect>
               </label>
 
               <label>
                 <span>Podkategoria *</span>
-                <select
+                <FormSelect
                   value={form.subcategory}
                   onChange={(event) => update("subcategory", event.target.value)}
                   required
@@ -677,12 +677,12 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   {(SERVICE_SUBCATEGORIES[form.category] || []).map((subcategory) => (
                     <option key={subcategory} value={subcategory}>{subcategory}</option>
                   ))}
-                </select>
+                </FormSelect>
               </label>
 
               <label className="is-wide">
                 <span>Krótkie podsumowanie *</span>
-                <textarea
+                <AutoTextarea
                   value={form.summary}
                   onChange={(event) => update("summary", event.target.value)}
                   placeholder="Jednym–dwoma zdaniami opisz rezultat i dla kogo jest ta usługa."
@@ -691,12 +691,11 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   rows={3}
                   required
                 />
-                <small>{form.summary.length}/240</small>
               </label>
 
               <label className="is-wide">
                 <span>Pełny opis *</span>
-                <textarea
+                <AutoTextarea
                   value={form.description}
                   onChange={(event) => update("description", event.target.value)}
                   placeholder="Opisz sposób działania, granice zakresu i rezultat. Bez danych kontaktowych i obietnic, których nie da się zweryfikować."
@@ -705,7 +704,6 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   rows={9}
                   required
                 />
-                <small>{form.description.length}/4000</small>
               </label>
             </div>
           </details>
@@ -722,7 +720,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             <div className="ih5-service-editor-fields">
               <label>
                 <span>Rezultaty pracy * <em>jeden w wierszu</em></span>
-                <textarea
+                <AutoTextarea
                   value={form.deliverables}
                   onChange={(event) => update("deliverables", event.target.value)}
                   placeholder={"Gotowy projekt strony\nPliki źródłowe\nInstrukcja wdrożenia"}
@@ -734,7 +732,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
               <label>
                 <span>Czego potrzebujesz od klienta? <em>jeden punkt w wierszu</em></span>
-                <textarea
+                <AutoTextarea
                   value={form.clientRequirements}
                   onChange={(event) => update("clientRequirements", event.target.value)}
                   placeholder={"Treści i logo\nPrzykłady stron, które się podobają\nDostęp do obecnych materiałów"}
@@ -1019,9 +1017,9 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
         <form onSubmit={handleSubmit}>
           <label>
             <span>Co ma powstać? <small>(wymagane)</small></span>
-            <textarea
+            <AutoTextarea
               id="service-inquiry-brief"
-              aria-describedby="service-inquiry-count"
+
               value={brief}
               onChange={(event) => setBrief(event.target.value)}
               placeholder="Opisz oczekiwany efekt, zakres i odbiorców projektu."
@@ -1030,7 +1028,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
               rows={6}
               required
             />
-            <small id="service-inquiry-count">{brief.length}/2500 · minimum 30 znaków</small>
+
           </label>
 
           <div className="ih5-service-modal-fields">
@@ -1602,8 +1600,8 @@ function ProfileMessageDialog({ profile, supabase, navigate, onClose }) {
       </div>
       <form className="ih-profile-chat-form" onSubmit={submit}>
         <label className="ih-profile-chat-confirm"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} disabled={sending} required /><span>{copy("Piszę w sprawie projektu. Nie wysyłam reklam ani ofert własnych usług.", "I am asking about a project, not sending ads or selling my own services.")}</span></label>
-        <div className="ih-profile-chat-composer"><label className="ih5-sr-only" htmlFor={`${id}-draft`}>{copy("Twoja wiadomość", "Your message")}</label><textarea id={`${id}-draft`} ref={draftRef} rows={3} value={draft} onChange={event => setDraft(event.target.value)} minLength={30} maxLength={2000} required disabled={sending} aria-describedby={`${id}-count`} placeholder={copy("Napisz, w czym potrzebujesz pomocy…", "Tell them what you need help with…")} /><button type="submit" disabled={sending || !confirmed || draft.trim().length < 30} aria-label={copy("Wyślij wiadomość", "Send message")}>{sending ? <span aria-hidden="true">…</span> : <MarketIcon kind="arrow" />}</button></div>
-        <div className="ih-profile-chat-foot"><small id={`${id}-count`}>{draft.trim().length} / 2000 · {copy("minimum 30 znaków", "at least 30 characters")}</small><small>{copy("Warunki i płatność ustalicie w panelu zlecenia.", "Agree on terms and payment in the project panel.")}</small></div>
+        <div className="ih-profile-chat-composer"><label className="ih5-sr-only" htmlFor={`${id}-draft`}>{copy("Twoja wiadomość", "Your message")}</label><AutoTextarea id={`${id}-draft`} ref={draftRef} rows={3} value={draft} onChange={event => setDraft(event.target.value)} minLength={30} maxLength={2000} required disabled={sending} placeholder={copy("Napisz, w czym potrzebujesz pomocy…", "Tell them what you need help with…")} /><button type="submit" disabled={sending || !confirmed || draft.trim().length < 30} aria-label={copy("Wyślij wiadomość", "Send message")}>{sending ? <span aria-hidden="true">…</span> : <MarketIcon kind="arrow" />}</button></div>
+        <div className="ih-profile-chat-foot"><small>{copy("Warunki i płatność ustalicie w panelu zlecenia.", "Agree on terms and payment in the project panel.")}</small></div>
         {error && <p role="alert" className="ih-profile-chat-error">{error}</p>}
       </form>
     </section>
@@ -1677,11 +1675,11 @@ function ProjectInquiryFormDialog({ profile, supabase, navigate, onClose, mode =
         <div className="ih12-contact-fields">
           {isProject && <h3 className="ih12-form-section"><span>01</span> Pomysł i zakres</h3>}
           <label htmlFor={`${id}-subject`}>{isProject ? "Nazwa projektu *" : "Temat wiadomości *"}<input id={`${id}-subject`} type="text" value={title} minLength={3} maxLength={120} onChange={(event) => setTitle(event.target.value)} disabled={sending} placeholder={isProject ? "Np. strona dla mojej marki" : "Np. dostępność do projektu strony"} required /></label>
-          {isProject && <label htmlFor={`${id}-category`}>Kategoria *<select id={`${id}-category`} value={category} onChange={(event) => setCategory(event.target.value)} disabled={sending} required><option value="">Wybierz kategorię</option>{FREELANCER_CATEGORIES.map((value) => <option key={value}>{value}</option>)}</select></label>}
-          <label htmlFor={`${id}-brief`}>{isProject ? "Co ma zostać wykonane? *" : "Twoja wiadomość *"}<textarea id={`${id}-brief`} rows={isProject ? 4 : 5} value={brief} minLength={30} maxLength={2000} onChange={(event) => setBrief(event.target.value)} disabled={sending} placeholder={isProject ? "Cel projektu, zakres prac i najważniejsze wymagania…" : "Napisz, w czym potrzebujesz pomocy i o co chcesz zapytać…"} aria-describedby={`${id}-counter`} required /></label>
-          <small id={`${id}-counter`}>{brief.trim().length} / 2000 znaków · minimum 30</small>
+          {isProject && <label htmlFor={`${id}-category`}>Kategoria *<FormSelect id={`${id}-category`} value={category} onChange={(event) => setCategory(event.target.value)} disabled={sending} required><option value="">Wybierz kategorię</option>{FREELANCER_CATEGORIES.map((value) => <option key={value}>{value}</option>)}</FormSelect></label>}
+          <label htmlFor={`${id}-brief`}>{isProject ? "Co ma zostać wykonane? *" : "Twoja wiadomość *"}<AutoTextarea id={`${id}-brief`} rows={isProject ? 4 : 5} value={brief} minLength={30} maxLength={2000} onChange={(event) => setBrief(event.target.value)} disabled={sending} placeholder={isProject ? "Cel projektu, zakres prac i najważniejsze wymagania…" : "Napisz, w czym potrzebujesz pomocy i o co chcesz zapytać…"} required /></label>
+
           {isProject && <>
-            <label htmlFor={`${id}-deliverables`}>Oczekiwany rezultat *<textarea id={`${id}-deliverables`} rows={2} value={deliverables} minLength={3} maxLength={1000} onChange={(event) => setDeliverables(event.target.value)} disabled={sending} placeholder="Np. działająca strona z 5 podstronami i pliki projektu" required /></label>
+            <label htmlFor={`${id}-deliverables`}>Oczekiwany rezultat *<AutoTextarea id={`${id}-deliverables`} rows={2} value={deliverables} minLength={3} maxLength={1000} onChange={(event) => setDeliverables(event.target.value)} disabled={sending} placeholder="Np. działająca strona z 5 podstronami i pliki projektu" required /></label>
             <h3 className="ih12-form-section"><span>02</span> Budżet i termin</h3>
             <div className="ih12-contact-grid">
               <div><label htmlFor={`${id}-budget`}>Proponowany budżet (PLN)<input id={`${id}-budget`} type="text" inputMode="decimal" value={budget} maxLength={12} onChange={(event) => setBudget(event.target.value)} disabled={sending || budgetOpen} placeholder={budgetOpen ? "Do ustalenia" : "Np. 1500"} required={!budgetOpen} /></label><label className="ih12-inline-check"><input type="checkbox" checked={budgetOpen} onChange={(event) => setBudgetOpen(event.target.checked)} disabled={sending} />Do ustalenia w rozmowie</label></div>
@@ -1690,7 +1688,7 @@ function ProjectInquiryFormDialog({ profile, supabase, navigate, onClose, mode =
             <small>Budżet dotyczy wynagrodzenia wykonawcy. Ostateczną cenę i opłatę IdeaHire zobaczysz przed płatnością.</small>
             <h3 className="ih12-form-section"><span>03</span> Materiały i przekazanie</h3>
             <label htmlFor={`${id}-format`}>Format przekazania (opcjonalnie)<input id={`${id}-format`} type="text" value={deliveryFormat} maxLength={200} onChange={(event) => setDeliveryFormat(event.target.value)} disabled={sending} placeholder="Np. Figma, PDF, pliki źródłowe" /></label>
-            <label htmlFor={`${id}-materials`}>Co dostarczysz wykonawcy? (opcjonalnie)<textarea id={`${id}-materials`} rows={2} value={materials} maxLength={700} onChange={(event) => setMaterials(event.target.value)} disabled={sending} placeholder="Np. logo, teksty, inspiracje. Pliki dodasz w rozmowie." /></label>
+            <label htmlFor={`${id}-materials`}>Co dostarczysz wykonawcy? (opcjonalnie)<AutoTextarea id={`${id}-materials`} rows={2} value={materials} maxLength={700} onChange={(event) => setMaterials(event.target.value)} disabled={sending} placeholder="Np. logo, teksty, inspiracje. Pliki dodasz w rozmowie." /></label>
           </>}
           <label className="ih12-inline-check ih12-contact-confirm"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} disabled={sending} required /><span>Kontakt dotyczy współpracy lub projektu do zlecenia. Nie wysyłam reklamy ani oferty sprzedaży własnych usług.</span></label>
           {error && <p className="ih12-contact-error" role="alert">{error}</p>}

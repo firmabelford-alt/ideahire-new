@@ -1,3 +1,4 @@
+import { FormSelect, AutoTextarea } from "./FormControls";
 /* P70 — one task per screen and project details opened on demand. */
 /* P60 — useful onboarding, email actions and site browsing for limited accounts. */
 /* P59 — fullscreen onboarding, visible registration validation, limited account. */
@@ -39,6 +40,7 @@ import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments"
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
+import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision, termsDecisionContent } from "./ConversationCards";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref, getSafeWebUrl } from "./MarketUI";
@@ -7387,16 +7389,16 @@ function PortfolioReportDialog({ target, onClose, onSubmitted }) {
 
         <label>
           Powód zgłoszenia
-          <select value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} disabled={busy}>
+          <FormSelect value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} disabled={busy}>
             {Object.entries(CONTENT_REPORT_REASON_LABELS).map(([value, label]) => (
               <option value={value} key={value}>{label}</option>
             ))}
-          </select>
+          </FormSelect>
         </label>
 
         <label>
           Dlaczego treść może być nielegalna?
-          <textarea
+          <AutoTextarea
             value={explanation}
             onChange={(event) => setExplanation(event.target.value)}
             minLength={50}
@@ -7408,7 +7410,6 @@ function PortfolioReportDialog({ target, onClose, onSubmitted }) {
             disabled={busy}
             required
           />
-          <small>{explanation.length}/5000 znaków</small>
         </label>
 
         <label>
@@ -7809,7 +7810,7 @@ function AccountStatus() {
                     które nie są potrzebne do rozpoznania sprawy.
                   </p>
                 </div>
-                <textarea
+                <AutoTextarea
                   value={appealStatement}
                   onChange={(event) => setAppealStatement(event.target.value)}
                   minLength={30}
@@ -7820,7 +7821,6 @@ function AccountStatus() {
                   aria-describedby="appeal-guidance"
                 />
                 <div className="moderation-form-footer">
-                  <small>{appealStatement.length}/5000</small>
                   <button
                     type="submit"
                     className="privacy-primary-button"
@@ -9944,7 +9944,7 @@ function Account() {
             <label>
               O mnie
 
-              <textarea
+              <AutoTextarea
                 className="ideahire-multiline-field ideahire-about-field"
                 rows="5"
                 value={about}
@@ -10114,7 +10114,7 @@ function Account() {
             <label>
               W czym się specjalizujesz?
 
-              <textarea
+              <AutoTextarea
                 className="ideahire-multiline-field ideahire-specialization-field"
                 rows="5"
                 value={specialization}
@@ -10455,7 +10455,7 @@ function Account() {
 
                 <label>
                   Krótki opis
-                  <textarea
+                  <AutoTextarea
                     rows="4"
                     value={portfolioDraft.description}
                     onChange={(event) =>
@@ -10468,7 +10468,6 @@ function Account() {
                     placeholder="Opisz swój zakres pracy, rezultat i użyte narzędzia..."
                     disabled={portfolioBusy}
                   />
-                  <small>{portfolioDraft.description.length}/800 znaków</small>
                 </label>
 
                 <div className="profile-portfolio-editor-grid">
@@ -11373,7 +11372,7 @@ function PrivacyCenter() {
 
               <label>
                 Opis wniosku
-                <textarea
+                <AutoTextarea
                   value={form.description}
                   onChange={(event) =>
                     setForm((current) => ({
@@ -11836,7 +11835,7 @@ function PrivacyCenter() {
                             ? "Wskaż punkt raportu, o który pytasz, albo opisz swoje zastrzeżenie. Wysłanie odpowiedzi nie zamyka analizy."
                             : "Uzupełnij informacje albo poproś o wyjaśnienie. Wiadomość zapisze się w historii sprawy."}
                         </p>
-                        <textarea
+                        <AutoTextarea
                           id={`privacy-reply-${request.id}`}
                           value={replyDrafts[request.id] || ""}
                           onChange={(event) => setReplyDrafts((current) => ({
@@ -12468,7 +12467,7 @@ function FindTalent() {
                     placeholder={formEnglish ? "E.g. a website for a restaurant" : "Np. strona internetowa dla restauracji"}
                     maxLength={120}
                   />
-                  <small className="ih86-field-note"><span>{formEnglish ? "Name the result you need." : "Krótko nazwij oczekiwany efekt."}</span><span>{title.length}/120</span></small>
+                  <small className="ih86-field-note"><span>{formEnglish ? "Name the result you need." : "Krótko nazwij oczekiwany efekt."}</span></small>
                 </label>
 
                 <MarketSelect label={formEnglish ? "Category" : "Kategoria"} value={category}
@@ -12499,7 +12498,7 @@ function FindTalent() {
 
                 <label className="is-wide">
                   Opisz swój projekt
-                  <textarea
+                  <AutoTextarea
                     className="ideahire-multiline-field ideahire-description-field"
                     rows="5"
                     value={description}
@@ -12526,7 +12525,7 @@ function FindTalent() {
               <div className="ih5-job-form-grid">
                 <label className="is-wide">
                   Jaki rezultat ma przekazać wykonawca?
-                  <textarea
+                  <AutoTextarea
                     rows="4"
                     value={expectedOutcome}
                     onChange={(event) => setExpectedOutcome(event.target.value)}
@@ -12538,7 +12537,7 @@ function FindTalent() {
 
                 <label className="is-wide">
                   Co zapewniasz wykonawcy? <em>Opcjonalnie</em>
-                  <textarea
+                  <AutoTextarea
                     rows="3"
                     value={clientMaterials}
                     onChange={(event) => setClientMaterials(event.target.value)}
@@ -12833,7 +12832,7 @@ function FindTalent() {
                           <div className="ih5-collaboration-plan-fields">
                             <label>
                               Zleceniodawca dostarczy
-                              <textarea
+                              <AutoTextarea
                                 rows="4"
                                 value={collaborationPlan.clientResponsibilities}
                                 onChange={(event) =>
@@ -12850,7 +12849,7 @@ function FindTalent() {
 
                             <label>
                               Wykonawca dostarczy
-                              <textarea
+                              <AutoTextarea
                                 rows="4"
                                 value={collaborationPlan.contractorResponsibilities}
                                 onChange={(event) =>
@@ -13413,7 +13412,7 @@ function EditJob() {
           <label>
             Tytuł
 
-            <textarea
+            <AutoTextarea
               className="ideahire-multiline-field ideahire-title-field"
               rows="2"
               value={title}
@@ -13430,7 +13429,7 @@ function EditJob() {
           <label>
             Kategoria
 
-            <select
+            <FormSelect
               value={category}
               onChange={(event) =>
                 setCategory(
@@ -13448,13 +13447,13 @@ function EditJob() {
                   </option>
                 )
               )}
-            </select>
+            </FormSelect>
           </label>
 
           <label>
             Opis
 
-            <textarea
+            <AutoTextarea
               className="ideahire-multiline-field ideahire-description-field"
               rows="7"
               value={description}
@@ -17104,9 +17103,7 @@ function Calendar() {
                   autoFocus
                   required
                 />
-                <small>
-                  {draft.title.length}/120
-                </small>
+
               </label>
 
               <div className="calendar-form-row">
@@ -17140,7 +17137,7 @@ function Calendar() {
 
                 <label className="calendar-field">
                   <span>Wyślij przypomnienie</span>
-                  <select
+                  <FormSelect
                     value={
                       draft.reminder_minutes_before
                     }
@@ -17169,13 +17166,13 @@ function Calendar() {
                         </option>
                       )
                     )}
-                  </select>
+                  </FormSelect>
                 </label>
               </div>
 
               <label className="calendar-field is-wide">
                 <span>Notatka opcjonalna</span>
-                <textarea
+                <AutoTextarea
                   value={
                     draft.description
                   }
@@ -19123,7 +19120,7 @@ function ChatDisputePanel({
           <div className="dispute-form-grid">
             <label className="dispute-field">
               <span>Powód sporu</span>
-              <select
+              <FormSelect
                 value={form.reason}
                 onChange={(event) =>
                   updateField("reason", event.target.value)
@@ -19136,12 +19133,12 @@ function ChatDisputePanel({
                     {label}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </label>
 
             <label className="dispute-field">
               <span>Oczekiwane rozwiązanie</span>
-              <select
+              <FormSelect
                 value={form.requestedOutcome}
                 onChange={(event) =>
                   updateField("requestedOutcome", event.target.value)
@@ -19154,7 +19151,7 @@ function ChatDisputePanel({
                     {label}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             </label>
 
             {form.requestedOutcome === "partial_refund" && (
@@ -19179,7 +19176,7 @@ function ChatDisputePanel({
 
             <label className="dispute-field dispute-field-wide">
               <span>Opis sytuacji</span>
-              <textarea
+              <AutoTextarea
                 value={form.description}
                 onChange={(event) =>
                   updateField("description", event.target.value)
@@ -19532,7 +19529,7 @@ function AgreementDetails({ agreement }) {
       </div>
 
       <div className="agreement-detail agreement-detail-wide">
-        <span>Sposób odbioru pracy</span>
+        <span>Kryteria odbioru pracy</span>
         <p>{agreement.acceptance_method}</p>
       </div>
 
@@ -19561,9 +19558,17 @@ function AgreementPanel({
   message,
   priceNegotiable,
   firstProposalAuthor = "zleceniodawcy",
+  messageTone = "info",
   currentUserAccepted,
   otherUserAccepted,
   blocked,
+  canStart,
+  canEdit,
+  proposalByMe,
+  decision,
+  error,
+  onRefresh,
+  onDecision,
   onFieldChange,
   onOpenForm,
   onCancelForm,
@@ -19572,9 +19577,13 @@ function AgreementPanel({
 }) {
   const [confirmed, setConfirmed] =
     useState(false);
+  const [decisionMode, setDecisionMode] = useState("");
+  const [decisionReason, setDecisionReason] = useState("");
 
   useEffect(() => {
     setConfirmed(false);
+    setDecisionMode("");
+    setDecisionReason("");
   }, [mode, agreement?.id]);
 
   if (!required) return null;
@@ -19625,6 +19634,15 @@ function AgreementPanel({
     );
   }
 
+  if (decision?.action === "closed") {
+    return <section className="agreement-gate ih-original-terms ih-negotiation-closed">
+      <span className="agreement-eyebrow">Ustalenia · wersja {agreement?.version}</span>
+      <h2>Negocjacje zakończone</h2><p>{decision.reason}</p>
+      <p>Ta propozycja nie stanowi wspólnie zaakceptowanych warunków. Wiadomości i przesłane materiały pozostają w rozmowie.</p>
+      <details><summary>Zobacz ostatnią propozycję</summary><AgreementDetails agreement={agreement} /></details>
+    </section>;
+  }
+
   return (
     <section className="agreement-gate ih-original-terms">
       <div className="agreement-gate-heading">
@@ -19639,21 +19657,23 @@ function AgreementPanel({
         </p>
 
         <div className="agreement-progress" aria-label="Postęp akceptacji">
-          <span className={currentUserAccepted ? "is-complete" : ""}>
-            <i>{currentUserAccepted ? "✓" : "1"}</i>
+          <span className={!decision && currentUserAccepted ? "is-complete" : ""}>
+            <i>{!decision && currentUserAccepted ? "✓" : "1"}</i>
             Twoja akceptacja
           </span>
 
           <b aria-hidden="true" />
 
-          <span className={otherUserAccepted ? "is-complete" : ""}>
-            <i>{otherUserAccepted ? "✓" : "2"}</i>
+          <span className={!decision && otherUserAccepted ? "is-complete" : ""}>
+            <i>{!decision && otherUserAccepted ? "✓" : "2"}</i>
             Akceptacja drugiej strony
           </span>
         </div>
       </div>
 
-      {mode === "form" ? (
+      {error && <div className="agreement-load-error" role="alert"><p>{error}</p><button type="button" onClick={onRefresh} disabled={saving}>Pobierz ponownie</button></div>}
+      {decision?.action === "changes" && <aside className="agreement-decision-notice"><strong>{proposalByMe ? "Druga strona prosi o zmianę ustaleń" : "Poprosiłeś o zmianę ustaleń"}</strong><p>{decision.reason}</p><p>{proposalByMe ? "Możesz poprawić propozycję i wysłać nową wersję albo zakończyć negocjacje. Jeśli druga strona prześle własną propozycję, zobaczysz ją tutaj do akceptacji." : "Czekasz na poprawioną wersję. Możesz też przygotować własną propozycję."}</p></aside>}
+      {mode === "form" && canEdit && !error ? (
         <form
           className="agreement-form"
           onSubmit={onSubmit}
@@ -19694,7 +19714,7 @@ function AgreementPanel({
 
             <label className="agreement-field agreement-field-wide">
               <span>Zakres pracy *</span>
-              <textarea
+              <AutoTextarea
                 value={form.scope}
                 onChange={(event) =>
                   onFieldChange(
@@ -19710,7 +19730,7 @@ function AgreementPanel({
 
             <label className="agreement-field agreement-field-wide">
               <span>Rezultat końcowy *</span>
-              <textarea
+              <AutoTextarea
                 value={form.deliverables}
                 onChange={(event) =>
                   onFieldChange(
@@ -19787,8 +19807,8 @@ function AgreementPanel({
             </label>
 
             <label className="agreement-field agreement-field-wide">
-              <span>Sposób odbioru pracy *</span>
-              <textarea
+              <span>Kryteria odbioru pracy *</span>
+              <AutoTextarea
                 value={form.acceptanceMethod}
                 onChange={(event) =>
                   onFieldChange(
@@ -19796,7 +19816,7 @@ function AgreementPanel({
                     event.target.value
                   )
                 }
-                placeholder="Po czym obie strony poznają, że zlecenie zostało wykonane prawidłowo?"
+                placeholder="Opisz, jak klient sprawdzi gotową pracę i co musi być spełnione, aby ją zaakceptować."
                 maxLength={2000}
                 required
               />
@@ -19804,7 +19824,7 @@ function AgreementPanel({
 
             <label className="agreement-field agreement-field-wide">
               <span>Warunki anulowania *</span>
-              <textarea
+              <AutoTextarea
                 value={form.cancellationTerms}
                 onChange={(event) =>
                   onFieldChange(
@@ -19820,7 +19840,7 @@ function AgreementPanel({
 
             <label className="agreement-field agreement-field-wide">
               <span>Dodatkowe ustalenia</span>
-              <textarea
+              <AutoTextarea
                 value={form.additionalTerms}
                 onChange={(event) =>
                   onFieldChange(
@@ -19857,7 +19877,7 @@ function AgreementPanel({
           )}
 
           <div className="agreement-form-actions">
-            {agreement && (
+            {(agreement || !canStart) && (
               <button
                 type="button"
                 className="agreement-secondary-button"
@@ -19896,7 +19916,7 @@ function AgreementPanel({
             </div>
 
             <span className="agreement-pending-pill">
-              Oczekuje na wspólną akceptację
+              {decision?.action === "changes" ? "Do zmiany" : proposalByMe ? "Czekasz na odpowiedź" : "Do Twojej decyzji"}
             </span>
           </div>
 
@@ -19905,7 +19925,7 @@ function AgreementPanel({
           />
 
           {message && (
-            <p className="agreement-message is-success">
+            <p className={`agreement-message is-${messageTone}`}>
               {message}
             </p>
           )}
@@ -19914,18 +19934,18 @@ function AgreementPanel({
             <p className="agreement-blocked-note">
               Ustalenia są wstrzymane, ponieważ jeden z użytkowników jest zablokowany.
             </p>
-          ) : (
+          ) : error ? null : (
             <div className="agreement-proposal-actions">
-              <button
+              {canEdit && <button
                 type="button"
                 className="agreement-secondary-button"
                 onClick={onOpenForm}
                 disabled={saving}
               >
-                Zaproponuj zmiany
-              </button>
+                {proposalByMe ? "Popraw i wyślij nową wersję" : "Zaproponuj własne warunki"}
+              </button>}
 
-              {!currentUserAccepted ? (
+              {!currentUserAccepted && (!proposalByMe || otherUserAccepted) && !decision ? (
                 <button
                   type="button"
                   className="agreement-primary-button"
@@ -19936,15 +19956,28 @@ function AgreementPanel({
                     ? "Akceptowanie..."
                     : "Akceptuję warunki"}
                 </button>
-              ) : (
+              ) : proposalByMe && !decision ? (
                 <span className="agreement-waiting-note">
-                  ✓ Zaakceptowałeś tę wersję. Czekamy na drugą stronę.
+                  Propozycja została wysłana. Edycja będzie dostępna, jeśli druga strona poprosi o zmiany.
                 </span>
-              )}
+              ) : currentUserAccepted && !decision ? <span className="agreement-waiting-note">Twoja akceptacja tej wersji jest zapisana.</span> : null}
+              {!proposalByMe && !decision && <button type="button" className="agreement-secondary-button" disabled={saving} onClick={() => setDecisionMode("changes")}>Poproś o zmiany</button>}
+              <button type="button" className="agreement-secondary-button" disabled={saving} onClick={onRefresh}>Odśwież ustalenia</button>
+              <button type="button" className="agreement-text-button" disabled={saving} onClick={() => setDecisionMode("closed")}>Zakończ negocjacje</button>
             </div>
           )}
+          {decisionMode && !blocked && !error && <form className="agreement-response-form" onSubmit={async event => {
+            event.preventDefault();
+            const saved = await onDecision(decisionMode, decisionReason.trim() || "Współpraca nie będzie kontynuowana na podstawie tej propozycji.");
+            if (saved) { setDecisionMode(""); setDecisionReason(""); }
+          }}>
+            <h3>{decisionMode === "changes" ? "Co wymaga zmiany?" : "Zakończenie negocjacji"}</h3>
+            <p>{decisionMode === "changes" ? "Propozycja wróci do autora. Twoja wiadomość pojawi się także w rozmowie." : "Druga strona otrzyma informację o zakończeniu negocjacji. Historia rozmowy zostanie zachowana."}</p>
+            <label><span>{decisionMode === "changes" ? "Opisz wymagane zmiany" : "Powód (opcjonalnie)"}</span><AutoTextarea value={decisionReason} onChange={event => setDecisionReason(event.target.value)} maxLength={1200} minLength={decisionMode === "changes" ? 3 : undefined} required={decisionMode === "changes"} rows={3} disabled={saving} /></label>
+            <div><button type="button" className="agreement-secondary-button" onClick={() => setDecisionMode("")} disabled={saving}>Wróć</button><button type="submit" className="agreement-primary-button" disabled={saving}>{saving ? "Wysyłanie…" : decisionMode === "changes" ? "Wyślij prośbę o zmiany" : "Potwierdź zakończenie"}</button></div>
+          </form>}
         </div>
-      ) : <p className="agreement-waiting-note">Czekasz na propozycję {firstProposalAuthor}. Tutaj pojawią się zakres, cena i termin.</p>}
+      ) : <div className="agreement-waiting-note"><p>{canStart ? "Przygotuj zakres, cenę i termin. Po wysłaniu druga strona będzie mogła przeczytać i zaakceptować propozycję albo poprosić o zmiany." : `Czekasz na propozycję ${firstProposalAuthor}. Tutaj pojawią się zakres, cena i termin.`}</p><div>{canStart && !error && <button type="button" className="agreement-primary-button" disabled={saving || blocked} onClick={onOpenForm}>Przygotuj propozycję</button>}<button type="button" className="agreement-secondary-button" onClick={onRefresh} disabled={saving}>Odśwież ustalenia</button></div></div>}
     </section>
   );
 }
@@ -20548,29 +20581,6 @@ function ChatPaymentPanel({
   );
 }
 
-function ChatProjectPlan({
-  job,
-  agreement
-}) {
-  const en = useSitePreferences().language === 'en';
-  const t = (pl, english) => en ? english : pl;
-  const plan = hasCollaborationPlan(job?.collaboration_plan) ? job.collaboration_plan : null;
-  const milestones = cleanCollaborationList(plan?.milestones, 3, 160);
-  const completionCriteria = cleanCollaborationList(plan?.completion_criteria, 3, 240);
-  const requirements = Array.isArray(plan?.application_requirements) ? plan.application_requirements.map(value => getJobOptionLabel(COLLABORATION_APPLICATION_REQUIREMENTS, value, '')).filter(Boolean) : [];
-  const accepted = agreement?.status === 'accepted';
-  const facts = [[t('Kontakt', 'Contact'), getJobOptionLabel(COLLABORATION_CONTACT_OPTIONS, plan?.contact_frequency)], [t('Informacja zwrotna', 'Feedback'), getJobOptionLabel(COLLABORATION_FEEDBACK_OPTIONS, plan?.feedback_time)], [t('Rundy poprawek', 'Revision rounds'), agreement?.revisions != null ? agreement.revisions : getJobOptionLabel(COLLABORATION_REVISION_OPTIONS, plan?.revision_rounds)], [t('Odbiór pracy', 'Approval'), getJobOptionLabel(COLLABORATION_APPROVAL_OPTIONS, plan?.approval_mode)]];
-  return <section className="ih69-project-plan" aria-label={t('Plan i szczegóły zlecenia', 'Project plan and details')}>
-    <div className="ih69-plan-keyfacts"><div><span>{accepted ? t('Wynagrodzenie', 'Agreed price') : t('Proponowany budżet', 'Proposed budget')}</span><strong>{agreement?.price_amount != null ? formatPaymentMoney(agreement.price_amount, agreement.price_currency || 'PLN') : Number(job?.budget) > 0 ? formatChatProjectBudget(job.budget) : t('Do ustalenia', 'To be agreed')}</strong></div><div><span>{t('Termin realizacji', 'Deadline')}</span><strong>{formatChatProjectDate(agreement?.deadline || job?.project_deadline)}</strong></div></div>
-    <p className="ih69-plan-source">{accepted ? t('Cena, termin i zakres pochodzą z zaakceptowanych warunków.', 'Price, deadline and scope come from the accepted terms.') : agreement ? t('To aktualna propozycja. Warunki wymagają akceptacji obu stron.', 'This is the current proposal. Both parties need to accept the terms.') : t('Plan ze zlecenia lub zapytania. Ostateczne warunki ustalcie wspólnie.', 'The plan from the job or inquiry. Agree on the final terms together.')}</p>
-    <dl className="ih69-scope-list"><div><dt>{t('Zakres pracy', 'Scope')}</dt><dd>{agreement?.scope || job?.description || t('Zakres do wspólnego ustalenia', 'Scope to be agreed together')}</dd></div><div><dt>{t('Co zostanie przekazane', 'Deliverables')}</dt><dd>{agreement?.deliverables || job?.project_details?.deliverables || t('Rezultat do wspólnego ustalenia', 'Deliverables to be agreed together')}</dd></div></dl>
-    <section className="ih69-plan-block"><h3>{t('Szczegóły realizacji', 'Project details')}</h3><dl className="ih69-fact-list"><div><dt>{t('Planowany start', 'Planned start')}</dt><dd>{formatChatProjectDate(job?.planned_start_date)}</dd></div>{job?.project_details?.delivery_format && <div><dt>{t('Format przekazania', 'Delivery format')}</dt><dd>{job.project_details.delivery_format}</dd></div>}{job?.project_details?.materials && <div><dt>{t('Materiały od klienta', 'Client materials')}</dt><dd>{job.project_details.materials}</dd></div>}{job?.project_details?.deadline && <div><dt>{t('Termin z zapytania', 'Inquiry deadline')}</dt><dd>{formatChatProjectDate(job.project_details.deadline)}</dd></div>}{job?.project_details?.deliverables && job.project_details.deliverables !== (agreement?.deliverables || job.project_details.deliverables) && <div><dt>{t('Rezultat z zapytania', 'Inquiry deliverables')}</dt><dd>{job.project_details.deliverables}</dd></div>}</dl></section>
-    {milestones.length > 0 && <section className="ih69-plan-block"><h3>{t('Etapy pracy', 'Milestones')}</h3><ol className="ih69-plan-milestones">{milestones.map((item, index) => <li key={index}><span>{index + 1}</span><p>{item}</p></li>)}</ol></section>}
-    <section className="ih69-plan-block"><h3>{t('Kontakt i poprawki', 'Contact & revisions')}</h3><dl className="ih69-fact-list">{facts.map(([label, value]) => <div key={label}><dt>{label}</dt><dd className={value === 'Do ustalenia' ? 'is-pending' : ''}>{value === 'Do ustalenia' ? t('Do ustalenia', 'To be agreed') : value}</dd></div>)}</dl></section>
-    {(completionCriteria.length > 0 || requirements.length > 0) && <section className="ih69-plan-block"><h3>{t('Warunki zakończenia', 'Completion criteria')}</h3>{completionCriteria.length > 0 && <div className="ih69-plan-checklist"><h4>{t('Kryteria odbioru', 'Acceptance criteria')}</h4><ul>{completionCriteria.map(item => <li key={item}><WorkspaceIcon kind="check" /><span>{item}</span></li>)}</ul></div>}{requirements.length > 0 && <div className="ih69-plan-checklist"><h4>{t('Wymagane informacje', 'Required information')}</h4><ul>{requirements.map(item => <li key={item}><WorkspaceIcon kind="check" /><span>{item}</span></li>)}</ul></div>}</section>}
-    <details className="ih69-legal-note"><summary><WorkspaceIcon kind="lock" /><span>{t('Prawa autorskie', 'Copyright')}</span><WorkspaceIcon kind="down" /></summary><p>{t('Plan porządkuje współpracę. Nie zastępuje wymaganej prawem formy przeniesienia autorskich praw majątkowych ani licencji wyłącznej.', 'The plan records the collaboration. It does not replace the legally required form for a transfer of economic copyright or an exclusive licence.')}</p></details>
-  </section>;
-}
 
 
 function Chat() {
@@ -20598,6 +20608,9 @@ function Chat() {
 
   const chatIdRef = useRef(id);
   chatIdRef.current = id;
+  const chatScope = `${user?.id || ""}:${id}`;
+  const chatScopeRef = useRef(chatScope);
+  chatScopeRef.current = chatScope;
   const [conversationDrafts, setConversationDrafts] = useState({});
   const draft = conversationDrafts[id] || "";
   function setDraft(value) {
@@ -20658,6 +20671,7 @@ function Chat() {
     if (pageFlow && workspaceTab === "conversation") conversationPageScroll.current = window.scrollY;
     setWorkspaceTab(value);
     if (value !== "files") setOpenMaterialDialog(false);
+    if (value === "plan") void refreshAgreementState();
     window.requestAnimationFrame(() => {
       if (value === "conversation") {
         if (pageFlow && !followMessagesRef.current && conversationPageScroll.current !== null) {
@@ -20715,6 +20729,7 @@ function Chat() {
 
   const [agreementMessage, setAgreementMessage] =
     useState("");
+  const [agreementMessageTone, setAgreementMessageTone] = useState("info");
 
   const paymentOverview = useConversationPaymentOverview({
     conversation, conversationId: id, agreement, agreementLoading, userId: user?.id, english: roomEnglish,
@@ -20730,70 +20745,122 @@ function Chat() {
     Boolean(conversation)
   );
 
-  async function loadAgreement(
-    conversationData,
-    fallbackTitle = "",
-    fallbackPrice = "",
-    projectBrief = null
-  ) {
-    if (conversationData?.id !== chatIdRef.current) return null;
-    if (
-      !conversationData?.agreements_required
-    ) {
+  const [agreementError, setAgreementError] = useState("");
+  const agreementRef = useRef(agreement);
+  agreementRef.current = agreement;
+  const agreementRequestRef = useRef(0);
+  const agreementOperationRef = useRef(false);
+  const agreementContextRef = useRef(null);
+  agreementContextRef.current = { conversation, jobTitle, jobBudget, jobDetails };
+
+  useEffect(() => {
+    setAgreement(null);
+    setAgreementSaving(false);
+    setAgreementLoading(true);
+    setAgreementMode("view");
+    setAgreementForm(EMPTY_AGREEMENT_FORM);
+    setAgreementMessage("");
+    setAgreementError("");
+    setMessages([]);
+    agreementOperationRef.current = false;
+    return () => { agreementRequestRef.current += 1; };
+  }, [chatScope]);
+
+  async function loadAgreement(conversationData, fallbackTitle = "", fallbackPrice = "", projectBrief = null, options = {}) {
+    const scope = chatScope;
+    if (scope !== chatScopeRef.current || conversationData?.id !== chatIdRef.current) return null;
+    const request = ++agreementRequestRef.current;
+    if (!conversationData?.agreements_required) {
       setAgreement(null);
       setAgreementLoading(false);
+      setAgreementError("");
       return null;
     }
-
-    setAgreementLoading(true);
-
+    if (!options.quiet) setAgreementLoading(true);
     try {
-      const { data, error } =
-        await supabase
-          .from(
-            "conversation_agreements"
-          )
-          .select("*")
-          .eq(
-            "conversation_id",
-            conversationData.id
-          )
-          .order("version", {
-            ascending: false,
-          })
-          .limit(1)
-          .maybeSingle();
-
-      if (error) {
-        throw error;
-      }
-
-      if (conversationData.id !== chatIdRef.current) return null;
+      const { data, error } = await supabase.from("conversation_agreements").select("*")
+        .eq("conversation_id", conversationData.id).order("version", { ascending: false }).limit(1).maybeSingle();
+      if (error) throw error;
+      if (scope !== chatScopeRef.current || request !== agreementRequestRef.current) return null;
+      const current = agreementRef.current;
+      if (current && data && (Number(data.version) < Number(current.version)
+        || data.id === current.id && current.status === "accepted" && data.status !== "accepted")) return current;
+      const changed = current?.id !== data?.id;
       setAgreement(data || null);
-
+      agreementRef.current = data || null;
+      setAgreementError("");
       if (!data) {
-        const firstProposerId =
-          conversationData.first_proposer_role === "contractor"
-            ? conversationData.contractor_id
-            : conversationData.client_id;
-
-        if (firstProposerId === user?.id) {
-          setAgreementForm(
-            profileBriefToAgreementForm(projectBrief, fallbackTitle, fallbackPrice)
-          );
-          setAgreementMode("form");
-        } else {
-          setAgreementMode("view");
+        const firstId = conversationData.first_proposer_role === "contractor" ? conversationData.contractor_id : conversationData.client_id;
+        if (!options.preserveForm || changed) {
+          if (firstId === user?.id) {
+            setAgreementForm(profileBriefToAgreementForm(projectBrief, fallbackTitle, fallbackPrice));
+            setAgreementMode("form");
+          } else setAgreementMode("view");
         }
-      } else {
+      } else if (!options.preserveForm || changed || data.status === "accepted") {
         setAgreementMode("view");
+        if (changed && current) { setAgreementMessageTone("info"); setAgreementMessage("Pojawiła się nowsza wersja ustaleń. Sprawdź jej treść przed podjęciem decyzji."); }
       }
-
       return data || null;
+    } catch (error) {
+      if (scope === chatScopeRef.current && request === agreementRequestRef.current) {
+        setAgreementError("Nie udało się pobrać aktualnych ustaleń. Odśwież je przed podjęciem decyzji.");
+      }
+      throw error;
     } finally {
-      if (conversationData.id === chatIdRef.current) setAgreementLoading(false);
+      if (scope === chatScopeRef.current && request === agreementRequestRef.current) setAgreementLoading(false);
     }
   }
+
+  async function refreshAgreementState({ preflight = false } = {}) {
+    const context = agreementContextRef.current;
+    const scope = chatScope;
+    if (!context?.conversation || context.conversation.id !== id || scope !== chatScopeRef.current
+      || !preflight && agreementOperationRef.current) return null;
+    try {
+      const [current, result] = await Promise.all([
+        loadAgreement(context.conversation, context.jobTitle, context.jobBudget, context.jobDetails, { quiet: true, preserveForm: true }),
+        supabase.from("messages").select("*").eq("conversation_id", id)
+          .like("content", "%[IdeaHire:terms:v1]%").order("created_at", { ascending: false }).limit(100),
+      ]);
+      if (result.error) throw result.error;
+      if (scope !== chatScopeRef.current) return null;
+      const events = result.data || [];
+      setMessages(previous => {
+        const fetched = new Map(events.map(event => [event.id, event]));
+        let changed = false;
+        const merged = previous.map(message => {
+          const update = fetched.get(message.id);
+          fetched.delete(message.id);
+          if (!update || update.content === message.content && update.moderation_status === message.moderation_status && update.read_at === message.read_at) return message;
+          changed = true;
+          return { ...message, ...update };
+        });
+        if (!changed && !fetched.size) return previous;
+        return [...merged, ...fetched.values()].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      });
+      return { agreement: current, decision: latestTermsDecision(events, current, context.conversation) };
+    } catch (error) {
+      if (scope === chatScopeRef.current) setAgreementError("Nie udało się potwierdzić aktualnego stanu ustaleń. Spróbuj ponownie.");
+      if (preflight) throw error;
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    if (!conversation?.id || conversation.id !== id) return;
+    const update = () => { if (!document.hidden) void refreshAgreementState(); };
+    const interval = window.setInterval(update, 15000);
+    window.addEventListener("focus", update);
+    window.addEventListener("online", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", update);
+      window.removeEventListener("online", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [conversation?.id, chatScope]);
 
   async function markIncomingMessagesAsRead(
     messageRows
@@ -21020,7 +21087,8 @@ function Chat() {
           jobResult.data?.budget ?? "";
 
         const loadedJobBudgetNegotiable =
-          conversationData.origin_type === "profile" || jobResult.data?.budget_negotiable === true;
+          conversationData.origin_type === "profile" || jobResult.data?.budget_negotiable === true
+            || conversationData.origin_type === "service_inquiry" && !(Number(loadedJobBudget) > 0);
 
         setJobTitle(
           loadedJobTitle
@@ -21176,49 +21244,9 @@ function Chat() {
             );
           }
         )
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table:
-              "conversation_agreements",
-            filter:
-              `conversation_id=eq.${id}`,
-          },
-          (payload) => {
-            setAgreement(
-              payload.new
-            );
-            setAgreementMode("view");
-            setAgreementMessage("");
-          }
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "UPDATE",
-            schema: "public",
-            table:
-              "conversation_agreements",
-            filter:
-              `conversation_id=eq.${id}`,
-          },
-          (payload) => {
-            if (
-              payload.new.status ===
-              "superseded"
-            ) {
-              return;
-            }
-
-            setAgreement(
-              payload.new
-            );
-            setAgreementMode("view");
-            setAgreementMessage("");
-          }
-        )
+        .on("postgres_changes", { event: "*", schema: "public", table: "conversation_agreements", filter: `conversation_id=eq.${id}` }, () => {
+          if (mounted && chatScope === chatScopeRef.current) void refreshAgreementState();
+        })
         .subscribe();
 
     return () => {
@@ -21242,6 +21270,7 @@ function Chat() {
   }
 
   function openAgreementForm() {
+    if (!canEditAgreement || agreementError || agreementOperationRef.current) return;
     setAgreementMessage("");
     const nextForm = agreement ? agreementToForm(agreement, jobTitle, jobBudget) : profileBriefToAgreementForm(jobDetails, jobTitle, jobBudget);
 
@@ -21262,11 +21291,12 @@ function Chat() {
     event
   ) {
     event.preventDefault();
+    setAgreementMessageTone("error");
 
     if (
       !user?.id ||
       !id ||
-      agreementSaving ||
+      agreementSaving || agreementOperationRef.current || !canEditAgreement || agreementError || !canTransact ||
       messagingBlocked
     ) {
       return;
@@ -21393,7 +21423,7 @@ function Chat() {
       agreementForm.acceptanceMethod.trim().length < 3
     ) {
       setAgreementMessage(
-        "Opisz sposób odbioru pracy."
+        "Opisz kryteria akceptacji gotowej pracy."
       );
       return;
     }
@@ -21407,10 +21437,20 @@ function Chat() {
       return;
     }
 
+    const operationToken = { scope: chatScope };
+    agreementOperationRef.current = operationToken;
     setAgreementSaving(true);
+    setAgreementMessageTone("info");
     setAgreementMessage("");
 
     try {
+      const fresh = await refreshAgreementState({ preflight: true });
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      if (!fresh || (fresh.agreement?.id || null) !== (agreement?.id || null)) throw new Error("Pojawiła się nowsza propozycja. Przeczytaj ją przed wysłaniem zmian.");
+      if (fresh.agreement?.status === "accepted" || fresh.decision?.action === "closed") throw new Error("Ta propozycja nie może być już zmieniana.");
+      const acceptedByMe = fresh.agreement && (conversation.client_id === user.id ? fresh.agreement.client_accepted_at : fresh.agreement.contractor_accepted_at);
+      if (fresh.agreement && fresh.agreement.created_by !== user.id && acceptedByMe && fresh.decision?.action !== "changes") throw new Error("Twoja akceptacja jest już zapisana. Poczekaj na odpowiedź drugiej strony.");
+      if (fresh.agreement?.created_by === user.id && fresh.decision?.action !== "changes") throw new Error("Propozycja czeka na odpowiedź drugiej strony. Poczekaj na akceptację albo prośbę o zmiany.");
       if (conversation?.origin_type === "profile" && !conversation.job_id) {
         const { data, error: projectError } = await supabase.rpc("ensure_ideahire_profile_project", { p_conversation_id: id, p_price_amount: price });
         if (projectError) throw projectError;
@@ -21448,6 +21488,7 @@ function Chat() {
       if (error) {
         throw error;
       }
+      if (operationToken.scope !== chatScopeRef.current) return false;
 
       const savedAgreement = await loadAgreement(
         conversation,
@@ -21479,61 +21520,95 @@ function Chat() {
         );
       }
 
+      setAgreementMessageTone("success");
       setAgreementMessage(
         "Propozycja została wysłana. Możecie dalej omawiać ją na czacie."
       );
     } catch (error) {
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      setAgreementMessageTone("error");
       setAgreementMessage(
         error?.message ||
           "Nie udało się zapisać warunków współpracy."
       );
     } finally {
-      setAgreementSaving(false);
+      if (agreementOperationRef.current === operationToken) {
+        agreementOperationRef.current = false;
+        setAgreementSaving(false);
+      }
     }
   }
 
   async function handleAgreementAccept() {
-    if (
-      !agreement?.id ||
-      agreementSaving ||
-      messagingBlocked
-    ) {
-      return;
-    }
-
+    if (!agreement?.id || agreementSaving || agreementOperationRef.current || messagingBlocked || agreementError || !canTransact) return;
+    const operationToken = { scope: chatScope };
+    agreementOperationRef.current = operationToken;
     setAgreementSaving(true);
+    setAgreementMessageTone("info");
     setAgreementMessage("");
-
+    const expected = agreement.id;
     try {
-      const { error } =
-        await supabase.rpc(
-          "accept_conversation_agreement_v2",
-          {
-            p_agreement_id:
-              agreement.id,
-          }
-        );
-
-      if (error) {
-        throw error;
-      }
-
-      await loadAgreement(
-        conversation,
-        jobTitle,
-        jobBudget
-      );
-
-      setAgreementMessage(
-        "Warunki zostały zaakceptowane i zablokowane. Zleceniodawca może teraz opłacić zlecenie."
-      );
+      const fresh = await refreshAgreementState({ preflight: true });
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      if (!fresh || fresh.agreement?.id !== expected) throw new Error("Pojawiła się nowsza wersja ustaleń. Sprawdź ją przed akceptacją.");
+      if (fresh.decision) throw new Error("Ta wersja wymaga zmiany lub negocjacje zostały zakończone. Nie można jej zaakceptować.");
+      if (fresh.agreement.status === "accepted") { setAgreementMessage("Obie strony zaakceptowały tę wersję."); return; }
+      const { error } = await supabase.rpc("accept_conversation_agreement_v2", { p_agreement_id: expected });
+      if (error) throw error;
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      const saved = await loadAgreement(conversation, jobTitle, jobBudget);
+      setAgreementMessageTone("success");
+      setAgreementMessage(saved?.status === "accepted"
+        ? "Obie strony zaakceptowały tę samą wersję. Zleceniodawca może teraz opłacić zlecenie."
+        : "Twoja akceptacja została zapisana. Czekamy na akceptację tej samej wersji przez drugą stronę.");
     } catch (error) {
-      setAgreementMessage(
-        error?.message ||
-          "Nie udało się zaakceptować warunków współpracy."
-      );
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      setAgreementMessageTone("error");
+      setAgreementMessage(error?.message || "Nie udało się zaakceptować warunków współpracy.");
     } finally {
-      setAgreementSaving(false);
+      if (agreementOperationRef.current === operationToken) {
+        agreementOperationRef.current = false;
+        setAgreementSaving(false);
+      }
+    }
+  }
+
+  async function handleAgreementDecision(action, reason) {
+    if (!agreement?.id || !["changes", "closed"].includes(action) || agreementSaving || agreementOperationRef.current
+      || messagingBlocked || !canTransact || agreement.status === "accepted") return false;
+    if (action === "changes" && agreement.created_by === user?.id) return false;
+    if (reason.trim().length < 3 || reason.trim().length > 1200) return false;
+    const operationToken = { scope: chatScope };
+    agreementOperationRef.current = operationToken;
+    setAgreementSaving(true);
+    setAgreementMessageTone("info");
+    setAgreementMessage("");
+    try {
+      const fresh = await refreshAgreementState({ preflight: true });
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      if (!fresh || fresh.agreement?.id !== agreement.id || fresh.agreement.status === "accepted") throw new Error("Stan ustaleń zmienił się. Sprawdź aktualną wersję.");
+      if (fresh.decision?.action === "closed") throw new Error("Negocjacje zostały już zakończone.");
+      if (action === "changes" && fresh.decision) throw new Error("Prośba o zmiany została już zapisana. Możesz przygotować nową propozycję.");
+      const { data, error } = await supabase.from("messages").insert({
+        conversation_id: id, sender_id: user.id, content: termsDecisionContent(action, fresh.agreement, reason),
+      }).select("*").single();
+      if (error) throw error;
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      setMessages(current => current.some(message => message.id === data.id) ? current : [...current, data]);
+      setAgreementMode("view");
+      setAgreementMessageTone("success");
+      setAgreementMessage(action === "changes" ? "Prośba o zmianę została wysłana. Autor propozycji może przygotować nową wersję." : "Informacja o zakończeniu negocjacji została wysłana.");
+      return true;
+    } catch (error) {
+      if (operationToken.scope !== chatScopeRef.current) return false;
+      setAgreementMessageTone("error");
+      setAgreementMessage(error?.message || "Nie udało się zapisać odpowiedzi na propozycję.");
+      return false;
+    } finally {
+      if (agreementOperationRef.current === operationToken) {
+        agreementOperationRef.current = false;
+        setAgreementSaving(false);
+      }
     }
   }
 
@@ -21726,6 +21801,13 @@ function Chat() {
         : conversation.client_id
       : null);
 
+  const agreementDecision = latestTermsDecision(messages, agreement, conversation);
+  const proposalByMe = Boolean(agreement && agreement.created_by === user?.id);
+  const firstProposalId = conversation?.first_proposer_role === "contractor" ? conversation?.contractor_id : conversation?.client_id;
+  const canStartAgreement = Boolean(agreementsRequired && firstProposalId === user?.id && !waitingForProfileReply && canTransact);
+  const canEditAgreement = Boolean(!agreementLoading && !agreementError && !messagingBlocked && canTransact
+    && (agreement ? agreement.status !== "accepted" && agreementDecision?.action !== "closed"
+      && (!proposalByMe && !currentUserAccepted || agreementDecision?.action === "changes") : canStartAgreement));
   const firstProposalByMe = (conversation?.first_proposer_role === 'contractor'
     ? conversation?.contractor_id : conversation?.client_id) === user?.id;
   const replyInConversation = () => {
@@ -21733,7 +21815,19 @@ function Chat() {
     requestAnimationFrame(() => composerRef.current?.focus());
   };
   const conversationNextStep = !messagingBlocked && agreementsRequired && !agreementLoading && !agreementAccepted ? (
-    waitingForProfileReply ? {
+    agreementError ? {
+      title: roomCopy('Aktualne ustalenia wymagają odświeżenia', 'Refresh the current terms'),
+      description: roomCopy('Przed podjęciem decyzji pobierz aktualną propozycję.', 'Load the current proposal before making a decision.'),
+      actionLabel: roomCopy('Odśwież ustalenia', 'Refresh terms'), onAction: () => openWorkspace('plan'),
+    } : agreementDecision?.action === 'closed' ? {
+      title: roomCopy('Negocjacje zakończone', 'Negotiations ended'),
+      description: roomCopy('Informacja i ostatnia propozycja pozostają w historii ustaleń.', 'The decision and last proposal remain in the terms history.'),
+      actionLabel: roomCopy('Zobacz ustalenia', 'View terms'), onAction: () => openWorkspace('plan'),
+    } : agreementDecision?.action === 'changes' ? {
+      title: proposalByMe ? roomCopy('Druga strona poprosiła o zmiany', 'The other person requested changes') : roomCopy('Prośba o zmiany została wysłana', 'Your change request was sent'),
+      description: roomCopy('Możecie przygotować nową wersję warunków. Obie strony muszą zaakceptować tę samą wersję.', 'You can prepare a new proposal. Both people must accept the same version.'),
+      actionLabel: roomCopy('Przejdź do ustaleń', 'Open terms'), onAction: () => openWorkspace('plan'),
+    } : waitingForProfileReply ? {
       title: isClient ? roomCopy('Czekasz na odpowiedź wykonawcy', 'Waiting for the freelancer’s reply') : roomCopy('Klient czeka na Twoją odpowiedź', 'The client is waiting for your reply'),
       description: roomCopy('Po odpowiedzi wykonawcy zleceniodawca może przygotować propozycję warunków.', 'After the freelancer replies, the client can prepare proposed terms.'),
       actionLabel: isClient ? roomCopy('Zobacz ustalenia', 'View terms') : roomCopy('Odpowiedz', 'Reply'),
@@ -21757,7 +21851,8 @@ function Chat() {
     <WorkspaceConversation loading={loading} errorMessage={errorMessage} hasConversation={Boolean(conversation)}
       otherName={otherName} avatarUrl={otherProfile?.avatar_url} profileId={otherProfileId} blocked={messagingBlocked}
       jobTitle={jobTitle} category={getJobCategoryLabel(jobDetails?.category)}
-      nextStep={conversationNextStep} projectPlan={<ChatProjectPlan job={jobDetails} agreement={agreement} />}
+      nextStep={conversationNextStep}
+      termsPending={Boolean(agreement && !agreementAccepted && agreementDecision?.action !== 'closed' && (!proposalByMe && !currentUserAccepted || proposalByMe && agreementDecision?.action === 'changes'))}
       materialCount={activeMaterialCount} accepted={agreement?.status==='accepted'} paymentOverview={paymentOverview}
       view={workspaceTab} onView={openWorkspace} focusMode={focusMode} onFocusMode={setFocusMode}
       backLabel={roomReturn.startsWith('/work')?roomCopy('Praca','Work'):roomCopy('Wiadomości','Messages')}
@@ -21773,7 +21868,10 @@ function Chat() {
         {jobDetails?.project_details?.deliverables&&<div className="ih68-brief"><strong>{roomCopy('Oczekiwany rezultat','Expected result')}</strong><p>{jobDetails.project_details.deliverables}</p>{jobDetails.project_details.delivery_format&&<p><b>{roomCopy('Format: ','Format: ')}</b>{jobDetails.project_details.delivery_format}</p>}{jobDetails.project_details.materials&&<p><b>{roomCopy('Materiały od klienta: ','Client materials: ')}</b>{jobDetails.project_details.materials}</p>}<p><b>{roomCopy('Termin: ','Deadline: ')}</b>{formatChatProjectDate(jobDetails.project_details.deadline)}</p></div>}
         {conversation?.origin_type==='service_inquiry'&&<div><p>{isClient?roomCopy('Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności.','The freelancer will prepare an offer. An inquiry does not reserve a date or start a payment.'):roomCopy('Przygotuj ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny.','Prepare an offer with scope, deadline and price. Sending it reserves availability for 24 hours.')}</p><Link to={'/services/'+conversation.origin_id}>{roomCopy('Zobacz usługę','View service')}</Link></div>}</>}
       thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef}
-        renderContent={message=><>{String(message.content||'').trim()&&<MessageText text={message.content}/>} <PrivateMessageMaterials
+        renderContent={message=><>{String(message.content||'').trim() && (readTermsDecision(message, null, conversation)
+          ? <TermsDecisionMessage decision={readTermsDecision(message, null, conversation)} own={message.sender_id === user.id} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
+          : isInquiryMessage(message.content) ? <InquiryMessageCard text={message.content} renderText={text => <MessageText text={text}/>} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
+          : <MessageText text={message.content}/>)} <PrivateMessageMaterials
                                 items={privateWork.itemsByMessage[message.id] || []}
                                 signedUrls={privateWork.signedUrls}
                                 ownMessage={message.sender_id === user.id}
@@ -21839,7 +21937,15 @@ function Chat() {
                       mode={agreementMode}
                       form={agreementForm}
                       message={agreementMessage}
+                      messageTone={agreementMessageTone}
                       priceNegotiable={jobBudgetNegotiable}
+                      canStart={canStartAgreement}
+                      canEdit={canEditAgreement}
+                      proposalByMe={proposalByMe}
+                      decision={agreementDecision}
+                      error={agreementError}
+                      onRefresh={() => refreshAgreementState()}
+                      onDecision={handleAgreementDecision}
                       currentUserAccepted={currentUserAccepted}
                       otherUserAccepted={otherUserAccepted}
                       firstProposalAuthor={
@@ -23148,7 +23254,7 @@ function DisputeDetails() {
                   </div>)}
                   {canReply && <form className="dispute-inline-form" onSubmit={event => handleAppealReply(event, appeal.id)}>
                     <label className="dispute-field"><span>Odpowiedź na odwołanie — widoczna dla obu stron</span>
-                      <textarea value={appealReplies[appeal.id] || ""} onChange={event => setAppealReplies(current => ({ ...current, [appeal.id]: event.target.value }))}
+                      <AutoTextarea value={appealReplies[appeal.id] || ""} onChange={event => setAppealReplies(current => ({ ...current, [appeal.id]: event.target.value }))}
                         minLength={3} maxLength={10000} rows={4} disabled={Boolean(busy)} required />
                     </label>
                     <button className="dispute-secondary-button" type="submit" disabled={Boolean(busy) || String(appealReplies[appeal.id] || "").trim().length < 3}>
@@ -23206,7 +23312,7 @@ function DisputeDetails() {
               {canAddEvidence && (
                 <form className="dispute-inline-form" onSubmit={handleAddStatement}>
                   <label htmlFor="dispute-statement">Dodaj wyjaśnienie</label>
-                  <textarea
+                  <AutoTextarea
                     id="dispute-statement"
                     value={statementBody}
                     onChange={(event) => setStatementBody(event.target.value)}
@@ -23373,7 +23479,7 @@ function DisputeDetails() {
                           )}
                           {assignedAdmin && !["closed", "cancelled"].includes(dispute.status) && <form className="dispute-inline-form" onSubmit={handleAdminChatMessage}>
                             <label className="dispute-field"><span>Napisz na czacie jako Administrator IdeaHire</span>
-                              <textarea value={adminChatDrafts[id] || ""} onChange={event => setAdminChatDrafts(current => ({ ...current, [id]: event.target.value }))}
+                              <AutoTextarea value={adminChatDrafts[id] || ""} onChange={event => setAdminChatDrafts(current => ({ ...current, [id]: event.target.value }))}
                                 placeholder="Wiadomość trafi bezpośrednio do rozmowy zleceniodawcy i wykonawcy…" rows={4} maxLength={10000} disabled={Boolean(busy)} required />
                             </label>
                             <p>Obie strony zobaczą tę wiadomość na czacie z oznaczeniem administratora. Wysłanie jest rejestrowane.</p>
@@ -23536,7 +23642,7 @@ function DisputeDetails() {
                   Wskaż konkretny błąd w ocenie lub nowy istotny dowód. Termin upływa {formatDisputeDate(dispute.appeal_deadline_at)}.
                 </p>
                 <form className="dispute-inline-form" onSubmit={handleAppeal}>
-                  <textarea
+                  <AutoTextarea
                     value={appealBody}
                     onChange={(event) => setAppealBody(event.target.value)}
                     placeholder="Uzasadnij odwołanie..."
@@ -23582,7 +23688,7 @@ function DisputeDetails() {
 
                 <form className="admin-dispute-form" onSubmit={handleAdminNote}>
                   <h3>Wiadomość lub notatka</h3>
-                  <textarea
+                  <AutoTextarea
                     value={adminNote}
                     onChange={(event) => setAdminNote(event.target.value)}
                     placeholder="Napisz prośbę o informacje albo notatkę dla administracji..."
@@ -23611,7 +23717,7 @@ function DisputeDetails() {
                   {currentAppeals.length > 0 && <p>Rozstrzygnij wszystkie odwołania w jednej decyzji. {appealDeadlineOpen ? "Pierwotny termin odwołań nadal trwa do " + formatDisputeDate(dispute.appeal_deadline_at) + "." : "Pierwotny termin odwołań upłynął."} {!appealsAnswered && "Dodaj jawną odpowiedź administratora na każde odwołanie w sekcji powyżej."} Decyzja ostateczna nie rozpoczyna kolejnych 7 dni.</p>}
                   <label>
                     Wynik sprawy
-                    <select
+                    <FormSelect
                       value={decisionForm.outcome}
                       onChange={(event) =>
                         setDecisionForm((current) => ({
@@ -23625,7 +23731,7 @@ function DisputeDetails() {
                       {ADMIN_DECISION_OPTIONS.map(([value, label]) => (
                         <option value={value} key={value}>{label}</option>
                       ))}
-                    </select>
+                    </FormSelect>
                   </label>
                   {decisionForm.outcome === "partial_refund" && (
                     <label>
@@ -23646,7 +23752,7 @@ function DisputeDetails() {
                   )}
                   <label>
                     Pełne uzasadnienie
-                    <textarea
+                    <AutoTextarea
                       value={decisionForm.rationale}
                       onChange={(event) =>
                         setDecisionForm((current) => ({
@@ -23690,7 +23796,7 @@ function DisputeDetails() {
                         <div className="moderation-form-grid">
                           <label>
                             Zawieszana strona sporu
-                            <select
+                            <FormSelect
                               value={decisionForm.moderationTargetUserId}
                               onChange={(event) =>
                                 setDecisionForm((current) => ({
@@ -23713,7 +23819,7 @@ function DisputeDetails() {
                                   "Użytkownik"
                                 )}
                               </option>
-                            </select>
+                            </FormSelect>
                           </label>
 
                           <div className="moderation-duration-control">
@@ -23765,7 +23871,7 @@ function DisputeDetails() {
 
                           <label>
                             Kategoria naruszenia
-                            <select
+                            <FormSelect
                               value={decisionForm.reasonCode}
                               onChange={(event) => {
                                 const reasonCode = event.target.value;
@@ -23795,7 +23901,7 @@ function DisputeDetails() {
                                   <option value={value} key={value}>{label}</option>
                                 )
                               )}
-                            </select>
+                            </FormSelect>
                           </label>
 
                           <label>
@@ -23827,7 +23933,7 @@ function DisputeDetails() {
 
                         <label>
                           Uzasadnienie zawieszenia widoczne dla użytkownika
-                          <textarea
+                          <AutoTextarea
                             value={decisionForm.publicReason}
                             onChange={(event) =>
                               setDecisionForm((current) => ({
@@ -23862,7 +23968,7 @@ function DisputeDetails() {
 
                           <label>
                             Wewnętrzna notatka dowodowa
-                            <textarea
+                            <AutoTextarea
                               value={decisionForm.internalNote}
                               onChange={(event) =>
                                 setDecisionForm((current) => ({
@@ -24200,7 +24306,7 @@ function AdminJobs() {
 
           <label className="admin-filter-field">
             <span>Kategoria</span>
-            <select
+            <FormSelect
               value={category}
               onChange={(event) => setCategory(event.target.value)}
             >
@@ -24208,7 +24314,7 @@ function AdminJobs() {
               {JOB_CATEGORIES.map((item) => (
                 <option value={item} key={item}>{getJobCategoryLabel(item)}</option>
               ))}
-            </select>
+            </FormSelect>
           </label>
         </section>
 
@@ -25806,7 +25912,7 @@ function AdminModeration() {
                   <article key={appeal.id}>
                     <strong>{report?.report_number || "Zgłoszenie treści"}</strong>
                     <p>{appeal.statement}</p>
-                    <textarea
+                    <AutoTextarea
                       value={contentAppealNotes[appeal.id] || ""}
                       onChange={(event) => setContentAppealNotes((current) => ({
                         ...current,
@@ -26025,7 +26131,7 @@ function AdminModeration() {
                     </label>
                     <label>
                       Uzasadnienie zmiany
-                      <textarea
+                      <AutoTextarea
                         value={restrictionEditor.reason}
                         onChange={(event) =>
                           setRestrictionEditor((current) => ({
@@ -26086,7 +26192,7 @@ function AdminModeration() {
                 <div className="moderation-form-grid">
                   <label>
                     Rodzaj decyzji
-                    <select
+                    <FormSelect
                       value={form.decisionType}
                       onChange={(event) => updateModerationForm({
                         decisionType: event.target.value,
@@ -26101,7 +26207,7 @@ function AdminModeration() {
                       {staffRole === "owner" && (
                         <option value="indefinite_suspension">Bezterminowe zawieszenie</option>
                       )}
-                    </select>
+                    </FormSelect>
                   </label>
 
                   {form.decisionType === "temporary_suspension" ? (
@@ -26135,7 +26241,7 @@ function AdminModeration() {
                   ) : (
                     <label>
                       Tryb rozpoczęcia
-                      <select
+                      <FormSelect
                         value={form.noticeMode}
                         onChange={(event) => updateModerationForm({
                           noticeMode: event.target.value,
@@ -26144,13 +26250,13 @@ function AdminModeration() {
                       >
                         <option value="thirty_day_notice">Po 30-dniowym uprzedzeniu</option>
                         <option value="immediate">Natychmiast — tylko udokumentowany wyjątek</option>
-                      </select>
+                      </FormSelect>
                     </label>
                   )}
 
                   <label>
                     Kategoria powodu
-                    <select
+                    <FormSelect
                       value={form.reasonCode}
                       onChange={(event) => {
                         const reasonCode = event.target.value;
@@ -26172,14 +26278,14 @@ function AdminModeration() {
                       {Object.entries(MODERATION_REASON_LABELS).map(([value, label]) => (
                         <option value={value} key={value}>{label}</option>
                       ))}
-                    </select>
+                    </FormSelect>
                   </label>
 
                   {form.decisionType === "indefinite_suspension"
                     && form.noticeMode === "immediate" && (
                     <label>
                       Wyjątek pozwalający na natychmiastową decyzję
-                      <select
+                      <FormSelect
                         value={form.immediateExceptionCode}
                         onChange={(event) => updateModerationForm({
                           immediateExceptionCode: event.target.value,
@@ -26190,7 +26296,7 @@ function AdminModeration() {
                         {MODERATION_EXCEPTION_OPTIONS.map(([value, label]) => (
                           <option value={value} key={value}>{label}</option>
                         ))}
-                      </select>
+                      </FormSelect>
                     </label>
                   )}
                 </div>
@@ -26229,7 +26335,7 @@ function AdminModeration() {
 
                 <label>
                   Jasne uzasadnienie widoczne dla użytkownika
-                  <textarea
+                  <AutoTextarea
                     value={form.publicReason}
                     onChange={(event) => updateModerationForm({ publicReason: event.target.value })}
                     minLength={50}
@@ -26263,7 +26369,7 @@ function AdminModeration() {
 
                 <label>
                   Wewnętrzna notatka dowodowa
-                  <textarea
+                  <AutoTextarea
                     value={form.internalNote}
                     onChange={(event) => updateModerationForm({ internalNote: event.target.value })}
                     minLength={20}
@@ -26333,7 +26439,7 @@ function AdminModeration() {
                     <small>
                       Decyzja: {MODERATION_DECISION_LABELS[moderationCase?.decision_type] || "—"}
                     </small>
-                    <textarea
+                    <AutoTextarea
                       value={appealNotes[appeal.id] || ""}
                       onChange={(event) => updateAppealNote(appeal.id, event.target.value)}
                       minLength={30}
@@ -26993,7 +27099,7 @@ function AdminUserPrivacyAccount() {
                 {requests.length > 1 && (
                   <label>
                     Wybierz wniosek
-                    <select
+                    <FormSelect
                       value={currentRequest?.id || ""}
                       onChange={(event) => chooseRequest(event.target.value)}
                     >
@@ -27002,7 +27108,7 @@ function AdminUserPrivacyAccount() {
                           {formatPrivacyRequestNumber(item.request_number)} — {PRIVACY_REQUEST_STATUSES[item.status] || item.status}
                         </option>
                       ))}
-                    </select>
+                    </FormSelect>
                   </label>
                 )}
               </section>
@@ -27044,7 +27150,7 @@ function AdminUserPrivacyAccount() {
                 </div>
                 <label>
                   Metoda weryfikacji
-                  <select
+                  <FormSelect
                     value={identityMethod}
                     onChange={(event) => setIdentityMethod(event.target.value)}
                     disabled={Boolean(busy)}
@@ -27053,11 +27159,11 @@ function AdminUserPrivacyAccount() {
                     <option value="additional_document">Dodatkowy dokument — bez zapisywania kopii</option>
                     <option value="video_call">Rozmowa weryfikacyjna</option>
                     <option value="manual_comparison">Ręczne porównanie danych</option>
-                  </select>
+                  </FormSelect>
                 </label>
                 <label>
                   Notatka weryfikacyjna
-                  <textarea
+                  <AutoTextarea
                     value={identityNote}
                     onChange={(event) => setIdentityNote(event.target.value)}
                     minLength={20}
@@ -27412,7 +27518,7 @@ function AdminUserPrivacyAccount() {
             <form onSubmit={handlePrepareErasure} noValidate>
               <label>
                 Ocena zakresu i podstawy realizacji wniosku
-                <textarea
+                <AutoTextarea
                   value={legalAssessment}
                   onChange={(event) => setLegalAssessment(event.target.value)}
                   minLength={50}
@@ -27428,7 +27534,7 @@ function AdminUserPrivacyAccount() {
 
               <label>
                 Uzasadnienie pozostawienia historii prawnej i transakcyjnej
-                <textarea
+                <AutoTextarea
                   value={retentionReason}
                   onChange={(event) => setRetentionReason(event.target.value)}
                   minLength={30}
@@ -28463,7 +28569,7 @@ function AdminPrivacyRequests() {
                                 <div className="privacy-audit-overview">
                                   <label>
                                     Poziom ryzyka
-                                    <select
+                                    <FormSelect
                                       value={auditDraft.riskLevel}
                                       onChange={(event) => updateAuditDraft(request.id, {
                                         riskLevel: event.target.value,
@@ -28473,7 +28579,7 @@ function AdminPrivacyRequests() {
                                       {PRIVACY_AUDIT_RISK_LEVELS.map(([value, label]) => (
                                         <option value={value} key={value}>{label}</option>
                                       ))}
-                                    </select>
+                                    </FormSelect>
                                   </label>
 
                                   <div className="privacy-audit-updated">
@@ -28484,7 +28590,7 @@ function AdminPrivacyRequests() {
 
                                 <label>
                                   Zakres analizy
-                                  <textarea
+                                  <AutoTextarea
                                     value={auditDraft.scope}
                                     onChange={(event) => updateAuditDraft(request.id, {
                                       scope: event.target.value,
@@ -28531,7 +28637,7 @@ function AdminPrivacyRequests() {
 
                                         <label>
                                           Wynik kontroli
-                                          <select
+                                          <FormSelect
                                             value={check.status}
                                             onChange={(event) => updateAuditCheckDraft(
                                               request.id,
@@ -28543,12 +28649,12 @@ function AdminPrivacyRequests() {
                                             {PRIVACY_AUDIT_CHECK_STATUSES.map(([value, label]) => (
                                               <option value={value} key={value}>{label}</option>
                                             ))}
-                                          </select>
+                                          </FormSelect>
                                         </label>
 
                                         <label>
                                           Dowód lub notatka wewnętrzna
-                                          <textarea
+                                          <AutoTextarea
                                             value={check.note}
                                             onChange={(event) => updateAuditCheckDraft(
                                               request.id,
@@ -28566,7 +28672,7 @@ function AdminPrivacyRequests() {
 
                                         <label className="privacy-audit-public-note">
                                           Wyjaśnienie dla użytkownika
-                                          <textarea
+                                          <AutoTextarea
                                             value={check.publicNote}
                                             onChange={(event) => updateAuditCheckDraft(
                                               request.id,
@@ -28590,7 +28696,7 @@ function AdminPrivacyRequests() {
 
                                 <label>
                                   Podsumowanie ustaleń
-                                  <textarea
+                                  <AutoTextarea
                                     value={auditDraft.findingsSummary}
                                     onChange={(event) => updateAuditDraft(request.id, {
                                       findingsSummary: event.target.value,
@@ -28604,7 +28710,7 @@ function AdminPrivacyRequests() {
 
                                 <label>
                                   Plan działań naprawczych
-                                  <textarea
+                                  <AutoTextarea
                                     value={auditDraft.remediationSummary}
                                     onChange={(event) => updateAuditDraft(request.id, {
                                       remediationSummary: event.target.value,
@@ -28632,7 +28738,7 @@ function AdminPrivacyRequests() {
 
                                   <label>
                                     Zakres widoczny dla użytkownika
-                                    <textarea
+                                    <AutoTextarea
                                       value={auditDraft.publicScope}
                                       onChange={(event) => updateAuditDraft(request.id, {
                                         publicScope: event.target.value,
@@ -28647,7 +28753,7 @@ function AdminPrivacyRequests() {
 
                                   <label>
                                     Ustalenia widoczne dla użytkownika
-                                    <textarea
+                                    <AutoTextarea
                                       value={auditDraft.publicFindingsSummary}
                                       onChange={(event) => updateAuditDraft(request.id, {
                                         publicFindingsSummary: event.target.value,
@@ -28662,7 +28768,7 @@ function AdminPrivacyRequests() {
 
                                   <label>
                                     Działania i zalecenia widoczne dla użytkownika
-                                    <textarea
+                                    <AutoTextarea
                                       value={auditDraft.publicRemediationSummary}
                                       onChange={(event) => updateAuditDraft(request.id, {
                                         publicRemediationSummary: event.target.value,
@@ -28677,7 +28783,7 @@ function AdminPrivacyRequests() {
 
                                   <label className="privacy-audit-public-summary">
                                     Wniosek końcowy dla użytkownika
-                                    <textarea
+                                    <AutoTextarea
                                       value={auditDraft.publicSummary}
                                       onChange={(event) => updateAuditDraft(request.id, {
                                         publicSummary: event.target.value,
@@ -28744,7 +28850,7 @@ function AdminPrivacyRequests() {
 
                                       <label>
                                         Powód odesłania do poprawy
-                                        <textarea
+                                        <AutoTextarea
                                           value={auditDraft.returnNote}
                                           onChange={(event) => updateAuditDraft(request.id, {
                                             returnNote: event.target.value,
@@ -28827,7 +28933,7 @@ function AdminPrivacyRequests() {
                           </div>
                           <label htmlFor={`admin-privacy-reply-${request.id}`}>
                             Treść wiadomości
-                            <textarea
+                            <AutoTextarea
                               id={`admin-privacy-reply-${request.id}`}
                               value={draft.replyMessage}
                               onChange={(event) => updateDraft(request.id, {
@@ -28865,7 +28971,7 @@ function AdminPrivacyRequests() {
                           )}
                           <label>
                             Nowy status
-                            <select
+                            <FormSelect
                               value={draft.status}
                               onChange={(event) => updateDraft(request.id, { status: event.target.value })}
                               disabled={Boolean(busy)}
@@ -28875,12 +28981,12 @@ function AdminPrivacyRequests() {
                                 .filter(([value]) => !isSecurityReview
                                   || !["completed", "partially_completed"].includes(value))
                                 .map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-                            </select>
+                            </FormSelect>
                           </label>
 
                           <label>
                             Wiadomość dla użytkownika
-                            <textarea
+                            <AutoTextarea
                               value={draft.publicMessage}
                               onChange={(event) => updateDraft(request.id, { publicMessage: event.target.value })}
                               placeholder="Opisz wykonane działanie, potrzebne informacje albo przyczynę decyzji..."
@@ -28891,7 +28997,7 @@ function AdminPrivacyRequests() {
 
                           <label>
                             Notatka wewnętrzna
-                            <textarea
+                            <AutoTextarea
                               value={draft.internalNote}
                               onChange={(event) => updateDraft(request.id, { internalNote: event.target.value })}
                               placeholder="Informacja widoczna wyłącznie dla administracji..."
@@ -28908,7 +29014,7 @@ function AdminPrivacyRequests() {
                             <div className="privacy-extension-form">
                               <label>
                                 Uzasadnienie przedłużenia terminu
-                                <textarea
+                                <AutoTextarea
                                   value={draft.extensionReason}
                                   onChange={(event) => updateDraft(request.id, { extensionReason: event.target.value })}
                                   placeholder="Wyjaśnij złożoność sprawy lub liczbę obsługiwanych wniosków..."

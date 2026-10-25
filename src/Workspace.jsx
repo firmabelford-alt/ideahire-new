@@ -158,6 +158,7 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
         </nav>
         <div className="ih68-header-actions">
           {!limited && <Link className="ih68-notifications" to="/notifications" aria-label={t(hasNotifications ? 'Nowe powiadomienia' : 'Powiadomienia', hasNotifications ? 'New notifications' : 'Notifications')}><WorkspaceIcon kind="bell" />{hasNotifications && <i className="ih68-dot" />}</Link>}
+          {assistantEnabled && <Link className="ih-top-assistant" to="/lucyna" data-no-route-transition="true" aria-label={t('Otwórz Lucynę AI', 'Open Lucyna AI')} onClick={onAssistantOpen}><strong>AI</strong><LucynaSymbol /></Link>}
           <button type="button" className="ih68-menu-trigger" aria-haspopup="dialog" aria-controls="ih70-account-menu" aria-expanded={open} aria-label={t('Pozostałe strony i ustawienia', 'More pages and settings')} onClick={() => setOpen(true)}><span className="ih68-desktop-avatar"><WorkspaceAvatar name={name} url={avatarUrl} small /></span><span className="ih68-phone-menu"><WorkspaceIcon kind="menu" /></span><WorkspaceIcon kind="down" /></button>
         </div>
       </div>
@@ -222,7 +223,7 @@ function RecentRows({
   return <div className="ih68-work-list">{conversations.map(item => {
       const name = item.otherProfile?.name || t('Użytkownik', 'User');
       const message = item.lastMessage;
-      const last = String(message?.content || '').trim();
+      const last = String(message?.content || '').split('\n\n[IdeaHire:terms:v1]')[0].trim();
       return <Link className={'ih68-work-row' + (item.isUnread ? ' is-unread' : '')} key={item.id} to={'/chat/' + item.id} onClick={e => open(e, item.id)}>
       <WorkspaceAvatar name={name} url={item.otherProfile?.avatar_url} />
       <div className="ih68-work-row-copy">
@@ -324,7 +325,7 @@ function WorkspaceProjectCards({ conversations, user, loading = false }) {
     const hiring = item.client_id === user?.id;
     const message = item.lastMessage;
     const preview = message ? (message.sender_id === user?.id ? t('Ty: ', 'You: ') : '') +
-      (String(message.content || '').trim() || t('Przesłano materiały', 'Materials shared')) :
+      (String(message.content || '').split('\n\n[IdeaHire:terms:v1]')[0].trim() || t('Przesłano materiały', 'Materials shared')) :
       t('Otwórz rozmowę i ustal kolejne kroki.', 'Open the conversation and agree on next steps.');
     return <Link key={item.id} className={'ih72-project-card' + (item.isUnread ? ' is-unread' : '')}
       to={'/chat/' + item.id} onClick={event => open(event, item.id)}>
@@ -435,7 +436,7 @@ export function WorkspaceConversationRows({ conversations, user, loading = false
     const name = item.otherProfile?.name || t('Użytkownik', 'User');
     const message = item.lastMessage;
     const preview = message ? (message.sender_id === user?.id ? t('Ty: ', 'You: ') : '') +
-      (String(message.content || '').trim() || t('Przesłano materiały', 'Materials shared')) : t('Rozpocznij rozmowę', 'Start a conversation');
+      (String(message.content || '').split('\n\n[IdeaHire:terms:v1]')[0].trim() || t('Przesłano materiały', 'Materials shared')) : t('Rozpocznij rozmowę', 'Start a conversation');
     return <Link key={item.id} to={'/chat/' + item.id} onClick={event => open(event, item.id)}
       className={'ih72-conversation-row' + (item.isUnread ? ' is-unread' : '')}>
       <WorkspaceAvatar name={name} url={item.otherProfile?.avatar_url} />

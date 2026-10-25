@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSitePreferences } from './Preferences';
 import { supabase } from './supabase';
 import { SubpageHeading } from './Subpages';
+import { isInquiryMessage } from './ConversationCards';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { WorkspaceAvatar, WorkspaceConversationRows, WorkspaceIcon, WorkspaceLoading, useWorkspaceCopy } from './Workspace';
 export function WorkspaceInbox({
@@ -108,7 +109,7 @@ export function WorkspaceThread({
                   month: 'long',
                   year: 'numeric'
                 })}</time></div>}
-        <article className={'ih68-message' + (own ? ' is-own' : ' is-received') + (followup ? ' is-followup' : '')} aria-label={admin ? authorName : own ? t('Twoja wiadomość', 'Your message') : otherName}>
+        <article className={'ih68-message' + (own ? ' is-own' : ' is-received') + (followup ? ' is-followup' : '') + (isInquiryMessage(message.content) ? ' has-inquiry' : '')} aria-label={admin ? authorName : own ? t('Twoja wiadomość', 'Your message') : otherName}>
           {!own && !followup && <strong className="ih69-message-author">{authorName}</strong>}
           <div className="ih68-message-content">{renderContent(message)}</div>
           <footer className="ih69-message-meta"><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleTimeString(en ? 'en-GB' : 'pl-PL', {
@@ -151,16 +152,24 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
   }, [composerRef, blocked]);
   useLayoutEffect(() => {
     const dock = document.getElementById('ih64-lucyna');
-    if (!dock) return;
-    const before = dock.style.getPropertyValue('--ih84-safe-bottom'), priority = dock.style.getPropertyPriority('--ih84-safe-bottom');
+    const preferences = document.querySelector('.site-preferences');
+    if (!dock && !preferences) return;
+    const before = dock?.style.getPropertyValue('--ih84-safe-bottom'), priority = dock?.style.getPropertyPriority('--ih84-safe-bottom');
+    const beforePreferences = preferences?.style.getPropertyValue('--ih-pref-reserve');
     let previous;
-    const restore = () => { if (before) dock.style.setProperty('--ih84-safe-bottom', before, priority); else dock.style.removeProperty('--ih84-safe-bottom'); };
+    const restore = () => {
+      if (before) dock?.style.setProperty('--ih84-safe-bottom', before, priority); else dock?.style.removeProperty('--ih84-safe-bottom');
+      if (beforePreferences) preferences?.style.setProperty('--ih-pref-reserve', beforePreferences); else preferences?.style.removeProperty('--ih-pref-reserve');
+    };
     const reserve = () => {
       const area = areaRef.current;
       const height = area?.getClientRects().length && window.matchMedia('(max-width:850px)').matches ? Math.ceil(area.getBoundingClientRect().height) + 8 : null;
       if (height === previous) return;
       previous = height;
-      if (height === null) restore(); else dock.style.setProperty('--ih84-safe-bottom', height + 'px');
+      if (height === null) restore(); else {
+        dock?.style.setProperty('--ih84-safe-bottom', height + 'px');
+        preferences?.style.setProperty('--ih-pref-reserve', height + 'px');
+      }
       window.dispatchEvent(new Event('resize'));
     };
     const observer = window.ResizeObserver ? new ResizeObserver(reserve) : null;
@@ -182,7 +191,6 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
         <button type="button" className="ih-send-photo" onClick={onPhotos} disabled={sending || materialsDisabled} aria-label={t('Wybierz zdjęcia', 'Choose photos')} title={t('Wybierz zdjęcia', 'Choose photos')}><SendPanelIcon photo /></button>
         <button type="submit" className="ih-send-submit" disabled={sending || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><SendPanelIcon /></button>
       </form><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
-      {draft.length >= 3200 && <p className="ih-send-count">{draft.length.toLocaleString()} / 4 000</p>}
     </>}
   </div>;
 }
@@ -293,6 +301,7 @@ export function WorkspaceConversation({
   category,
   materialCount,
   accepted,
+  termsPending = false,
   view,
   onView,
   focusMode,
@@ -435,13 +444,14 @@ export function WorkspaceConversation({
           <Link className="ih69-person-avatar" to={'/profile/' + profileId} aria-label={t('Profil: ', 'Profile: ') + otherName}><WorkspaceAvatar name={otherName} url={blocked ? null : avatarUrl} small /></Link>
           <div className="ih68-room-person"><Link to={'/profile/' + profileId}><h1>{blocked ? t('Zablokowany użytkownik', 'Blocked user') : otherName}</h1></Link><p className="ih72-room-context">{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</p></div>
           <div className="ih68-room-header-tools">
+            <button type="button" className="ih-room-assistant" aria-label={t('Otwórz Lucynę AI', 'Open Lucyna AI')} onClick={() => window.dispatchEvent(new Event('ideahire:lucyna-open'))}><strong>AI</strong><WorkspaceIcon kind="message" /></button>
             {focusMode && <button type="button" className="ih68-focus-exit ih68-icon-button" aria-label={t('Przywróć widok', 'Restore view')} onClick={() => onFocusMode(false)}><WorkspaceIcon kind="collapse" /></button>}
             <button type="button" id="ih70-room-options" className="ih68-icon-button" aria-haspopup="dialog" aria-expanded={optionsOpen} aria-label={t('Opcje rozmowy', 'Conversation options')} onClick={() => setOptionsOpen(true)}><WorkspaceIcon kind="more" /></button>
           </div>
         </header>
         <nav className="ih72-room-nav" aria-label={t('Rozmowa i współpraca', 'Conversation and project')}>
           <button type="button" aria-current={view === 'conversation' ? 'page' : undefined} aria-controls="ih69-conversation-panel" onClick={() => onView('conversation')}><WorkspaceIcon kind="message" /><span>{t('Rozmowa', 'Chat')}</span></button>
-          <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
+          <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')} title={termsPending ? t('Propozycja wymaga Twojej decyzji', 'The proposal needs your decision') : undefined}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{termsPending && <i className="ih-terms-pending-dot" aria-label={t('Do Twojej decyzji', 'Your decision is needed')} />}{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
           <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Materiały', 'Materials')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
           <button type="button" aria-current={view === 'payment' ? 'page' : undefined} aria-controls="ih68-room-payment" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność', 'Payment')}</span></button>
         <button type="button" className={'ih-room-payment-status ih-message-payment-control is-' + (paymentOverview?.tone || 'neutral')} onClick={() => onView('payment')} aria-controls="ih68-room-payment">
@@ -461,7 +471,7 @@ export function WorkspaceConversation({
             {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia', 'Project terms')}</h2><p>{t('Zakres usługi, wynagrodzenie i termin w jednym miejscu.', 'The service scope, price and deadline in one place.')}</p></div></header>
               {projectAction}
               {plan}
-              <details className="ih72-project-description ih-chat-source"><summary>{t('Pierwotny opis i dodatkowy plan', 'Original brief and additional plan')}<WorkspaceIcon kind="down" /></summary><div><h3>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h3>{category && <p>{category}</p>}{projectDetails}{projectPlan}</div></details>
+              <details className="ih-copyright-card" open><summary><WorkspaceIcon kind="lock" /><span>{t('Prawa autorskie', 'Copyright')}</span><WorkspaceIcon kind="down" /></summary><p>{t('Ustalenia porządkują współpracę. Nie zastępują wymaganej prawem formy przeniesienia autorskich praw majątkowych ani licencji wyłącznej.', 'Project terms record the collaboration. They do not replace the legally required form for a transfer of economic copyright or an exclusive licence.')}</p></details>
             </>}
           </section>
           <section hidden={view !== 'payment'} className="ih68-room-page ih-room-payment-page" id="ih68-room-payment" tabIndex={-1} aria-label={t('Płatność', 'Payment')}>

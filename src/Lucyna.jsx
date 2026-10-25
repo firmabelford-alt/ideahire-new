@@ -1,3 +1,4 @@
+import { FormSelect } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Swobodna rozmowa, rzeczywiste narzędzia i strumień odpowiedzi. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -182,8 +183,8 @@ function SearchBox({ mode, filters, onSearch, loading }) {
     <div className="lu-search-fields">
       <label htmlFor={id + "-query"}>Hasło<input id={id + "-query"} value={query} maxLength={100} placeholder="Np. WordPress, logo, montaż"
         onChange={event => setQuery(event.target.value)} /></label>
-      <label htmlFor={id + "-category"}>Kategoria<select id={id + "-category"} value={category} onChange={event => setCategory(event.target.value)}>
-        <option value="">Wszystkie kategorie</option>{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</select></label>
+      <label htmlFor={id + "-category"}>Kategoria<FormSelect id={id + "-category"} value={category} onChange={event => setCategory(event.target.value)}>
+        <option value="">Wszystkie kategorie</option>{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}</FormSelect></label>
       <button type="submit" className="lu-primary" disabled={loading}>{loading ? "Wyszukiwanie…" : "Przeszukaj katalog"}<Icon name="arrow" /></button>
     </div>
     <p>Wyniki pochodzą z katalogu. To wyszukiwanie działa również bez odpowiedzi AI.</p>
