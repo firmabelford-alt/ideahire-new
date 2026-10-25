@@ -637,13 +637,13 @@
   :root[data-template="classic"][data-theme="dark"] .ih-market-intro { --ih-intro-surface: #272727; }
   /* A local, licensed film changes only the jobs masthead background. */
   .ih-market-intro.ih-jobs-intro { position:relative!important; isolation:isolate!important; overflow:hidden!important; }
-  .ih-jobs-intro .ih-jobs-backdrop { position:absolute!important; inset:0!important; z-index:-1!important; pointer-events:none!important; background:url('/media/ideahire-jobs-poster.jpg') center 48% / cover no-repeat!important; }
+  .ih-jobs-intro .ih-jobs-backdrop { position:absolute!important; inset:0!important; z-index:-1!important; pointer-events:none!important; background:url('/media/ideahire-jobs-poster.jpg?v=desk4463352') center 48% / cover no-repeat!important; }
   .ih-jobs-intro .ih-jobs-backdrop > video { display:block!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center 48%!important; }
-  .ih-jobs-intro .ih-jobs-backdrop::after { content:""!important; position:absolute!important; inset:0!important; background:linear-gradient(100deg,#e9f3efed 5%,#e9f3efcf 60%,#e9f3efb8)!important; }
-  :root[data-theme="dark"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#102e31ed 5%,#102e31d9 60%,#102e31bd)!important; }
+  .ih-jobs-intro .ih-jobs-backdrop::after { content:""!important; position:absolute!important; inset:0!important; background:linear-gradient(100deg,#f0f5f280 5%,#f0f5f29e 55%,#f0f5f24d)!important; }
+  :root[data-theme="dark"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#102e31ad 5%,#102e31b8 55%,#102e3173)!important; }
   :root[data-template="classic"] .ih-jobs-intro .ih-jobs-backdrop { filter:grayscale(1)!important; }
-  :root[data-template="classic"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#f0f0eded 5%,#f0f0edcf 60%,#f0f0edb8)!important; }
-  :root[data-template="classic"][data-theme="dark"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#272727ed 5%,#272727d9 60%,#272727bd)!important; }
+  :root[data-template="classic"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#f0f0ed80 5%,#f0f0ed9e 55%,#f0f0ed4d)!important; }
+  :root[data-template="classic"][data-theme="dark"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#272727ad 5%,#272727b8 55%,#27272773)!important; }
   .ih-jobs-intro .ih-jobs-motion { position:absolute!important; right:14px!important; bottom:12px!important; display:grid!important; place-items:center!important; width:32px!important; height:32px!important; min-height:32px!important; margin:0!important; padding:7px!important; border:1px solid color-mix(in srgb,var(--ih-heading-ink) 18%,transparent)!important; border-radius:50%!important; background:var(--ih-intro-surface)!important; color:var(--ih-heading-ink)!important; cursor:pointer!important; }
   .ih-jobs-intro .ih-jobs-motion svg { display:block!important; width:16px!important; height:16px!important; }
   .ih-jobs-intro .ih-jobs-motion:focus-visible { outline:2px solid var(--ih-heading-accent)!important; outline-offset:3px!important; }

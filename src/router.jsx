@@ -19595,15 +19595,28 @@ function AgreementPanel({
     </form>
   </section>;
   if (!agreement) return <section className="ih-terms-wait"><h3>Czekasz na propozycję {firstProposalAuthor}</h3><p>Tutaj pojawią się zakres usługi, wynagrodzenie i termin. Po otrzymaniu propozycji możesz ją zaakceptować albo zaproponować zmiany.</p></section>;
-  return <article className="ih-terms-record">
-    <header className="ih-terms-intro"><div className={'ih-terms-state' + (accepted ? ' is-accepted' : '')}>{accepted ? "Zaakceptowane przez obie strony" : "Propozycja do uzgodnienia"}</div><h3>{accepted ? "Uzgodnione warunki" : "Sprawdź propozycję"}</h3><p>Wersja {agreement.version}</p></header>
-    <dl className="ih-terms-facts"><div><dt>Wynagrodzenie</dt><dd>{formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN")}</dd></div><div><dt>Termin wykonania</dt><dd>{formatChatProjectDate(agreement.deadline)}</dd></div><div><dt>Rundy poprawek</dt><dd>{agreement.revisions}</dd></div></dl>
-    {!accepted && <ul className="ih-terms-approvals" aria-label="Akceptacja tej wersji"><li>{currentUserAccepted ? "Ty: zaakceptowano" : "Ty: oczekuje na akceptację"}</li><li>{otherUserAccepted ? "Druga strona: zaakceptowano" : "Druga strona: oczekuje na akceptację"}</li></ul>}
-    <div className="ih-terms-document">{[
+  return <article className="ih-terms-record ih-contract-document">
+    <header className="ih-contract-heading">
+      <div><p className="ih-contract-version">Wersja {agreement.version}</p><h3>{accepted ? "To ustaliliście" : "Sprawdź propozycję"}</h3></div>
+      <span className={'ih-contract-status' + (accepted ? ' is-accepted' : '')}><WorkspaceIcon kind={accepted ? "check" : "calendar"} />{accepted ? "Obie strony zaakceptowały" : "Do akceptacji obu stron"}</span>
+    </header>
+    <dl className="ih-contract-facts">
+      <div><dt>Wynagrodzenie wykonawcy</dt><dd>{formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN")}</dd></div>
+      <div><dt>Termin wykonania</dt><dd>{formatChatProjectDate(agreement.deadline)}</dd></div>
+      <div><dt>Rundy poprawek</dt><dd>{agreement.revisions}</dd></div>
+    </dl>
+    {!accepted && <ul className="ih-contract-approvals" aria-label="Akceptacja tej wersji"><li className={currentUserAccepted ? "is-accepted" : ""}><WorkspaceIcon kind={currentUserAccepted ? "check" : "calendar"} /><span>{currentUserAccepted ? "Twoja akceptacja zapisana" : "Czekamy na Twoją akceptację"}</span></li><li className={otherUserAccepted ? "is-accepted" : ""}><WorkspaceIcon kind={otherUserAccepted ? "check" : "calendar"} /><span>{otherUserAccepted ? "Druga strona zaakceptowała" : "Czekamy na drugą stronę"}</span></li></ul>}
+    <div className="ih-contract-sections">{[
       ["Zakres i rezultat", [["Nazwa zlecenia", agreement.title], ["Zakres usługi", agreement.scope], ["Co otrzyma klient", agreement.deliverables]]],
       ["Przekazanie i odbiór", [["Format przekazania", agreement.delivery_format], ["Sposób odbioru", agreement.acceptance_method]]],
       ["Zasady współpracy", [["Warunki anulowania", agreement.cancellation_terms], ["Dodatkowe ustalenia", agreement.additional_terms]]],
-    ].map(([title, fields]) => { const visible = fields.filter(([,value]) => value); return visible.length ? <section className="ih-terms-doc-group" key={title}><h4>{title}</h4><dl>{visible.map(([label,value]) => <div key={label} className={label === "Nazwa zlecenia" || visible.length === 1 ? "is-wide" : undefined}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section> : null; })}</div>
+    ].map(([title, fields], index) => {
+      const visible = fields.filter(([, value]) => value);
+      return visible.length ? <section className="ih-contract-section" key={title}>
+        <header><span aria-hidden="true">0{index + 1}</span><h4>{title}</h4></header>
+        <dl className="ih-contract-fields">{visible.map(([label, value]) => <div key={label} className={'ih-contract-field' + (label === "Nazwa zlecenia" || visible.length === 1 ? ' is-wide' : '')}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
+      </section> : null;
+    })}</div>
     {accepted ? <p className="ih-terms-note">Ta zaakceptowana wersja jest zapisem ustaleń obu stron i pozostaje dostępna w historii rozmowy.</p> : <>
       {message && <p className="ih-terms-message" role="status">{message}</p>}
       {blocked ? <p className="ih-terms-note">Ustalenia są wstrzymane, ponieważ jeden z użytkowników jest zablokowany.</p> : <div className="ih-terms-actions"><button type="button" onClick={onOpenForm} disabled={saving}>Zaproponuj zmiany</button>{!currentUserAccepted ? <button type="button" className="is-primary" onClick={onAccept} disabled={saving}>{saving ? "Akceptowanie…" : "Akceptuję warunki"}</button> : <p className="ih-terms-note">Twoja akceptacja jest zapisana. Czekamy na drugą stronę.</p>}</div>}
@@ -19843,6 +19856,8 @@ function ChatPaymentPanel({
   const [message, setMessage] = useState("");
   const requestGeneration = useRef(0);
   const checkoutInFlight = useRef(false);
+  const refreshInFlight = useRef(false);
+  const [checkedRecord, setCheckedRecord] = useState(null);
   const paymentScope = `${userId || ""}:${conversation?.id || ""}:${agreement?.id || ""}:${agreement?.status || ""}`;
   const currentPaymentScope = useRef(paymentScope);
   currentPaymentScope.current = paymentScope;
@@ -19851,7 +19866,7 @@ function ChatPaymentPanel({
   const isClient = conversation?.client_id === userId;
   const paymentReturn = new URLSearchParams(location.search).get("payment");
 
-  const loadSummary = useCallback(async () => {
+  const loadSummary = useCallback(async ({ readOnly = false } = {}) => {
     const requestId = ++requestGeneration.current;
     const isCurrent = () => requestId === requestGeneration.current
       && currentPaymentScope.current === paymentScope;
@@ -19863,18 +19878,23 @@ function ChatPaymentPanel({
     }
 
     setLoading(true);
+    const readController = readOnly ? new AbortController() : null;
+    const readTimeout = readController ? window.setTimeout(() => readController.abort(), 20000) : null;
 
     try {
-      const { data, error } = await supabase.rpc(
+      const query = supabase.rpc(
         "get_ideahire_payment_summary",
         { p_conversation_id: conversation.id }
       );
+      if (readController) query.abortSignal(readController.signal);
+      const { data, error } = await query;
 
       if (error) throw error;
       if (!isCurrent()) return null;
+      if (!Array.isArray(data) || data.length > 1) throw new Error("Nie potwierdzono aktualnego podsumowania płatności.");
 
       let nextSummary = data?.[0] || null;
-      if (isClient && nextSummary
+      if (!readOnly && isClient && nextSummary
         && nextSummary.agreement_id === agreement.id
         && PAYMENT_CHECKOUT_STATUSES.has(nextSummary.payment_status)
         && nextSummary.pricing_rule_code !== "PLN_5_5_MIN20_MAX229_V3") {
@@ -19899,7 +19919,8 @@ function ChatPaymentPanel({
       if (!isCurrent()) return null;
       if (nextSummary && (nextSummary.agreement_id !== agreement.id
         || nextSummary.client_id !== conversation.client_id
-        || nextSummary.contractor_id !== conversation.contractor_id)) {
+        || nextSummary.contractor_id !== conversation.contractor_id
+        || !Object.prototype.hasOwnProperty.call(PAYMENT_STATUS_COPY, nextSummary.payment_status))) {
         throw new Error("Podsumowanie nie odpowiada aktualnym ustaleniom. Odśwież rozmowę.");
       }
       if (nextSummary) {
@@ -19922,14 +19943,16 @@ function ChatPaymentPanel({
         }
       }
       setSummaryRecord({ scope: paymentScope, data: nextSummary });
-      if (PAYMENT_WORK_ENABLED_STATUSES.has(nextSummary?.payment_status)) setMessage("");
+      setCheckedRecord({ scope: paymentScope, at: new Date() });
+      setMessage("");
       onStatusChange?.(nextSummary?.payment_status || "");
       return nextSummary;
     } catch (error) {
       if (!isCurrent()) return null;
       setSummaryRecord(null);
+      setCheckedRecord(null);
       setMessage(
-        cleanSupabaseError(
+        readController?.signal.aborted ? "Odczyt statusu trwał zbyt długo. Spróbuj odświeżyć ponownie." : cleanSupabaseError(
           error,
           "Nie udało się pobrać statusu płatności."
         )
@@ -19937,6 +19960,7 @@ function ChatPaymentPanel({
       onStatusChange?.("");
       return null;
     } finally {
+      if (readTimeout !== null) window.clearTimeout(readTimeout);
       if (isCurrent()) setLoading(false);
     }
   }, [agreement?.id, agreement?.status, conversation?.id, conversation?.client_id, conversation?.contractor_id,
@@ -19945,6 +19969,7 @@ function ChatPaymentPanel({
   useEffect(() => {
     currentPaymentScope.current = paymentScope;
     checkoutInFlight.current = false;
+    refreshInFlight.current = false;
     setPaying(false);
     setMessage("");
     loadSummary();
@@ -19953,6 +19978,18 @@ function ChatPaymentPanel({
       currentPaymentScope.current = null;
     };
   }, [loadSummary]);
+
+  async function handleRefreshStatus() {
+    if (refreshInFlight.current || loading || paying) return;
+    const requestedScope = paymentScope;
+    refreshInFlight.current = true;
+    try {
+      // Refresh reads this conversation's summary; it never opens Checkout or moves funds.
+      await loadSummary({ readOnly: true });
+    } finally {
+      if (currentPaymentScope.current === requestedScope) refreshInFlight.current = false;
+    }
+  }
 
   useEffect(() => {
     if (!conversation?.id || agreement?.status !== "accepted") return;
@@ -20087,43 +20124,39 @@ function ChatPaymentPanel({
   );
 
   return (
-    <section className={`chat-payment-panel is-${status.tone}`}>
-      <div className="chat-payment-heading">
-        <div>
-          <span className="chat-payment-eyebrow">Bezpieczne rozliczenie</span>
-          <h2>{isClient ? "Opłać zlecenie" : "Płatność za zlecenie"}</h2>
-        </div>
-        <span className={`chat-payment-status is-${status.tone}`}>
-          {summary?.payment_status === "released" && paymentLanguage === "en"
-            ? "Transferred to the freelancer's Stripe balance" : status.label}
-        </span>
-      </div>
+    <section className={`chat-payment-panel ih-settlement-card is-${status.tone}`} aria-busy={loading}>
+      <header className="ih-settlement-amount-heading">
+        <h4>{paymentLanguage === "en" ? "Project amounts" : "Kwoty zlecenia"}</h4>
+        <button type="button" className="ih-settlement-refresh" onClick={handleRefreshStatus} disabled={loading || paying}>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M16 7a6.5 6.5 0 1 0 .1 5M16 3v4h-4" /></svg>
+          <span>{loading ? (paymentLanguage === "en" ? "Refreshing…" : "Odświeżanie…") : (paymentLanguage === "en" ? "Refresh status" : "Odśwież status")}</span>
+        </button>
+      </header>
 
       {loading && !summary ? (
         <InlineRouteLoader className="chat-compact-route-loader" rows={1} />
       ) : summary ? (
         <>
-          <div className="chat-payment-breakdown">
+          <dl className="ih-settlement-ledger">
             <div>
-              <span>Uzgodnione wynagrodzenie wykonawcy</span>
-              <strong>
+              <dt>Wynagrodzenie wykonawcy</dt>
+              <dd>
                 {formatPaymentMoney(summary.work_amount, summary.currency)}
-              </strong>
+              </dd>
             </div>
             <div>
-              <span>Opłata IdeaHire</span>
-              <strong>
+              <dt>Opłata IdeaHire</dt>
+              <dd>
                 {formatPaymentMoney(summary.platform_fee, summary.currency)}
-              </strong>
-              <small>Kwota zgodna z podsumowaniem płatności.</small>
+              </dd>
             </div>
             <div className="is-total">
-              <span>{summary.paid_at ? "Zapłacono łącznie" : isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</span>
-              <strong>
+              <dt>{summary.paid_at ? "Zapłacono łącznie" : isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</dt>
+              <dd>
                 {formatPaymentMoney(summary.total_amount, summary.currency)}
-              </strong>
+              </dd>
             </div>
-          </div>
+          </dl>
           {Number(summary.refunded_amount) > 0 && (
             <p className="chat-payment-message">
               Kwota zwrotu odnotowana w rozliczeniu: <strong>{formatPaymentMoney(summary.refunded_amount, summary.currency)}</strong>.
@@ -20180,6 +20213,11 @@ function ChatPaymentPanel({
           {message}
         </p>
       )}
+      <p className="ih-settlement-checked" role="status" aria-live="polite">
+        {loading ? (paymentLanguage === "en" ? "Reading the current payment status…" : "Pobieramy aktualny status płatności…")
+          : checkedRecord?.scope === paymentScope ? <>{paymentLanguage === "en" ? "Status checked at " : "Status sprawdzony o "}<time dateTime={checkedRecord.at.toISOString()}>{checkedRecord.at.toLocaleTimeString(paymentLanguage === "en" ? "en-GB" : "pl-PL", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</time></>
+          : (paymentLanguage === "en" ? "Current status could not be confirmed. Try refreshing again." : "Nie potwierdzono aktualnego statusu. Spróbuj odświeżyć ponownie.")}
+      </p>
     </section>
   );
 }

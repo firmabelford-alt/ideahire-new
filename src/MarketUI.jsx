@@ -277,7 +277,7 @@ function JobsBackdrop({ en }) {
   }, [visible, paused, motionAllowed]);
   return <>
     <div className="ih-jobs-backdrop" ref={frame} aria-hidden="true">
-      {motionAllowed && <video ref={video} src="/media/ideahire-jobs-background.mp4" poster="/media/ideahire-jobs-poster.jpg" muted loop playsInline preload="none" tabIndex={-1} />}
+      {motionAllowed && <video ref={video} src="/media/ideahire-jobs-background.mp4?v=desk4463352" poster="/media/ideahire-jobs-poster.jpg?v=desk4463352" muted loop playsInline preload="none" tabIndex={-1} />}
     </div>
     {motionAllowed && <button type="button" className="ih-jobs-motion" aria-pressed={paused} onClick={() => setPaused(value => !value)} aria-label={paused ? (en ? 'Play background video' : 'Włącz film w tle') : (en ? 'Pause background video' : 'Zatrzymaj film w tle')}>
       <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">{paused ? <path d="m7 4 9 6-9 6Z" /> : <path d="M5 4h3v12H5zm7 0h3v12h-3z" />}</svg>
