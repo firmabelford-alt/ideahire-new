@@ -1572,7 +1572,7 @@ body .ih-chat-workspace .ih-compose-count { margin: 5px 0 0 !important; color: v
   }
   body .ih-chat-workspace:not(.is-focus) .ih68-thread-wrap { display: flex !important; flex-direction: column !important; flex: 1 0 auto !important; height: auto !important; min-height: 240px !important; max-height: none !important; overflow: visible !important; }
   body .ih-chat-workspace:not(.is-focus) .ih68-thread { flex: 1 0 auto !important; height: auto !important; min-height: 240px !important; max-height: none !important; padding: 24px !important; overflow: visible !important; }
-  body .ih-chat-workspace .ih68-thread-inner { width: 100% !important; max-width: none !important; min-height: 0 !important; margin: 0 !important; padding-bottom: 0 !important; }
+  body .ih-chat-workspace .ih68-thread-inner { width: 100% !important; max-width: 1100px !important; min-height: 0 !important; margin: 0 auto !important; padding-bottom: 0 !important; }
   body .ih-chat-workspace .ih68-message { max-width: min(88%, 960px) !important; padding: 14px 18px 10px !important; }
   body .ih-chat-workspace :is(.ih68-message, .ih68-message-content, .message-text, .ih5-message-text) { height: auto !important; max-height: none !important; overflow: visible !important; scroll-margin-top: 100px !important; }
   body .ih-chat-workspace .ih68-message-content { font: 400 16px/1.75 Inter,system-ui,sans-serif !important; }
@@ -1986,7 +1986,7 @@ body .ih-material-header h2:focus { outline: none !important; }
   body .ih-transfer-dropzone { position:relative!important; display:flex!important; flex-direction:column!important; align-items:flex-start!important; justify-content:center!important; gap:5px!important; min-height:96px!important; padding:16px 50px 16px 16px!important; border:1px dashed var(--sp-line)!important; border-radius:10px!important; background:var(--sp-soft)!important; cursor:pointer!important; }
   body .ih-transfer-dropzone > svg { position:absolute!important; top:18px!important; right:16px!important; width:23px!important; height:23px!important; color:var(--sp-accent)!important; }
   body .ih-transfer-dropzone > span:first-of-type { color:var(--sp-ink)!important; font:400 13px/1.6 Inter,system-ui,sans-serif!important; }
-  body .ih-transfer-dropzone strong { text-decoration:underline!important; text-underline-offset:3px!important; font-weight:600!important; }
+  body .ih-transfer-dropzone strong { text-decoration:none!important; font-weight:650!important; }
   body .ih-transfer-dropzone > :is(small,.ih-transfer-limits) { color:var(--sp-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
   body .ih-transfer-file-input { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; border:0!important; opacity:0!important; clip-path:inset(50%)!important; }
   body .ih-transfer-dropzone:focus-within { outline:2px solid var(--sp-accent)!important; outline-offset:3px!important; }
@@ -2269,7 +2269,7 @@ body .ih-material-header h2:focus { outline: none !important; }
   #ih68-content .ih-pay-current { display:grid!important; gap:7px!important; margin:0!important; padding:17px 18px!important; border-radius:10px!important; background:var(--rd-soft)!important; }
   #ih68-content .ih-pay-current > strong { color:var(--rd-ink)!important; font:650 16px/1.6 Inter,system-ui,sans-serif!important; }
   #ih68-content .ih-pay-current > p { color:var(--rd-ink)!important; font:400 15px/1.8 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-pay-layout { display:grid!important; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important; align-items:start!important; gap:30px!important; min-width:0!important; margin:26px 0 0!important; }
+  #ih68-content .ih-pay-layout { display:grid!important; grid-template-columns:minmax(0,1fr)!important; align-items:start!important; gap:28px!important; min-width:0!important; margin:26px 0 0!important; }
   #ih68-content :is(.ih-pay-amounts,.ih-pay-flow) { display:grid!important; gap:18px!important; min-width:0!important; }
   #ih68-content .ih-pay-breakdown { display:grid!important; gap:14px!important; min-width:0!important; }
   #ih68-content .ih-pay-breakdown > div { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:start!important; gap:10px 14px!important; min-width:0!important; }
@@ -2287,25 +2287,27 @@ body .ih-material-header h2:focus { outline: none !important; }
   #ih68-content .ih-pay-no-summary { display:grid!important; gap:14px!important; padding:20px!important; border:1px solid var(--rd-line)!important; border-radius:10px!important; background:var(--rd-paper)!important; }
   #ih68-content :is(.ih-pay-no-summary,.ih-pay-flow) > h4 { color:var(--rd-ink)!important; font:700 18px/1.5 Inter,system-ui,sans-serif!important; }
   #ih68-content .ih-pay-no-summary > p:not(.ih-pay-note) { color:var(--rd-muted)!important; font:400 15px/1.8 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-pay-flow > ol { display:grid!important; gap:19px!important; list-style:none!important; counter-reset:ih-pay-step; }
-  #ih68-content .ih-pay-flow li { display:grid!important; grid-template-columns:22px minmax(0,1fr)!important; gap:4px 9px!important; min-width:0!important; counter-increment:ih-pay-step; }
-  #ih68-content .ih-pay-flow li::before { content:counter(ih-pay-step)!important; grid-column:1!important; grid-row:1/3!important; padding-top:1px!important; color:var(--rd-accent)!important; font:700 16px/1.6 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-pay-flow li > strong { grid-column:2!important; color:var(--rd-ink)!important; font:650 16px/1.6 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-pay-flow li > p { grid-column:2!important; color:var(--rd-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-pay-flow > ol { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:14px!important; margin:0!important; padding:0!important; list-style:none!important; }
+  #ih68-content .ih-pay-flow li { position:relative!important; display:grid!important; grid-template-columns:34px minmax(0,1fr)!important; align-items:start!important; gap:13px!important; min-width:0!important; margin:0!important; padding:18px!important; border:1px solid var(--rd-line)!important; border-radius:12px!important; background:var(--rd-paper)!important; list-style:none!important; }
+  #ih68-content .ih-pay-flow li::before, #ih68-content .ih-pay-flow li::after { content:none!important; display:none!important; }
+  #ih68-content .ih-pay-step-number { position:static!important; display:grid!important; place-items:center!important; width:34px!important; height:34px!important; margin:0!important; padding:0!important; border-radius:50%!important; background:var(--rd-soft)!important; color:var(--rd-accent)!important; font:700 15px/1 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; }
+  #ih68-content .ih-pay-flow li > div { display:block!important; min-width:0!important; }
+  #ih68-content .ih-pay-flow li strong { display:block!important; color:var(--rd-ink)!important; font:650 16px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-pay-flow li p { margin:7px 0 0!important; color:var(--rd-muted)!important; font:400 14px/1.75 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
   #ih68-content .ih-payment-reader .chat-payment-button { appearance:none!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; width:100%!important; min-height:46px!important; margin:0!important; padding:12px 16px!important; border:1px solid var(--rd-accent)!important; border-radius:9px!important; background:var(--rd-accent)!important; color:var(--rd-on)!important; font:600 15px/1.6 Inter,system-ui,sans-serif!important; text-align:center!important; white-space:normal!important; cursor:pointer!important; box-shadow:none!important; }
   #ih68-content .ih-pay-feedback { margin:20px 0 0!important; padding:14px 16px!important; border:1px solid var(--rd-line)!important; border-radius:9px!important; background:var(--rd-soft)!important; color:var(--rd-ink)!important; font:500 14px/1.8 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
   #ih68-content .ih-pay-actions { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:10px!important; margin:24px 0 0!important; padding:18px 0 0!important; border-top:1px solid var(--rd-line)!important; }
   #ih68-content .ih-pay-actions > :is(button,a) { appearance:none!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; min-height:42px!important; margin:0!important; padding:9px 13px!important; border:1px solid var(--rd-line)!important; border-radius:8px!important; background:var(--rd-paper)!important; color:var(--rd-ink)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; text-decoration:none!important; cursor:pointer!important; box-shadow:none!important; }
 
   #ih68-content .ih-send-area { padding:12px 20px!important; border:0!important; border-radius:0!important; background:var(--sp-paper)!important; box-shadow:none!important; }
-  #ih68-content .ih-send-form.ih-send-row { display:flex!important; align-items:flex-end!important; gap:8px!important; width:100%!important; max-width:980px!important; min-width:0!important; margin:0 auto!important; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }
+  #ih68-content .ih-send-form.ih-send-row { display:flex!important; align-items:flex-end!important; gap:8px!important; width:100%!important; max-width:1100px!important; min-width:0!important; margin:0 auto!important; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }
   #ih68-content .ih-send-form.ih-send-row:focus-within { border-color:transparent!important; box-shadow:none!important; }
   #ih68-content .ih-send-form.ih-send-row > textarea { flex:1 1 0!important; width:0!important; min-width:0!important; min-height:44px!important; max-height:112px!important; margin:0!important; padding:10px 12px!important; border:1px solid var(--sp-line)!important; border-radius:10px!important; background:var(--sp-paper)!important; color:var(--sp-ink)!important; font:400 16px/22px Inter,system-ui,sans-serif!important; box-shadow:none!important; }
   #ih68-content .ih-send-form.ih-send-row > textarea:focus-visible { outline:2px solid var(--sp-accent)!important; outline-offset:1px!important; }
   #ih68-content .ih-send-form.ih-send-row > button { display:inline-flex!important; align-items:center!important; justify-content:center!important; flex:none!important; width:44px!important; height:44px!important; min-height:44px!important; min-width:0!important; margin:0!important; padding:11px!important; border:0!important; border-radius:9px!important; background:var(--sp-soft)!important; color:var(--sp-ink)!important; font:600 14px/22px Inter,system-ui,sans-serif!important; box-shadow:none!important; }
   #ih68-content .ih-send-form.ih-send-row > .ih-send-submit { width:auto!important; min-width:96px!important; padding:10px 14px!important; background:var(--sp-accent)!important; color:var(--sp-on)!important; }
   #ih68-content .ih-send-form.ih-send-row > .ih-send-photo svg { width:21px!important; height:21px!important; }
-  #ih68-content :is(.ih-send-error,.ih-send-count) { max-width:980px!important; }
+  #ih68-content :is(.ih-send-error,.ih-send-count) { max-width:1100px!important; }
 
   @media (max-width:850px) {
     #ih68-content .ih-send-area { padding:8px 10px max(8px,env(safe-area-inset-bottom))!important; }
@@ -2362,6 +2364,61 @@ body .ih-material-header h2:focus { outline: none !important; }
 
 /* The settlement reader presents the existing payment component and its guarded actions. */
 @layer ideahireHeadings {
+  /* Keep status, amounts and the explanation on their own readable rows. */
+  #ih68-content .ih-payment-reader { --pay-state:var(--rd-accent); padding:28px!important; border-radius:16px!important; }
+  #ih68-content .ih-payment-reader[data-payment-status="processing"],
+  #ih68-content .ih-payment-reader[data-payment-status="release_pending"],
+  #ih68-content .ih-payment-reader[data-payment-status="awaiting_payment"],
+  #ih68-content .ih-payment-reader[data-payment-status="checkout_open"],
+  #ih68-content .ih-payment-reader[data-payment-status="refund_pending"] { --pay-state:#98600b; }
+  #ih68-content .ih-payment-reader[data-payment-status="disputed"],
+  #ih68-content .ih-payment-reader[data-payment-status="failed"],
+  #ih68-content .ih-payment-reader[data-payment-status="release_failed"],
+  #ih68-content .ih-payment-reader[data-payment-status="cancelled"] { --pay-state:#b13c35; }
+  #ih68-content .ih-payment-reader[data-payment-status="funds_secured"],
+  #ih68-content .ih-payment-reader[data-payment-status="work_submitted"],
+  #ih68-content .ih-payment-reader[data-payment-status="released"] { --pay-state:#23724d; }
+  :root[data-theme="dark"] #ih68-content .ih-payment-reader { --pay-state:var(--rd-accent); }
+  :root[data-theme="dark"] #ih68-content .ih-payment-reader:is([data-payment-status="processing"],[data-payment-status="release_pending"],[data-payment-status="awaiting_payment"],[data-payment-status="checkout_open"],[data-payment-status="refund_pending"]) { --pay-state:#edbf6a; }
+  :root[data-theme="dark"] #ih68-content .ih-payment-reader:is([data-payment-status="disputed"],[data-payment-status="failed"],[data-payment-status="release_failed"],[data-payment-status="cancelled"]) { --pay-state:#ffa59d; }
+  :root[data-theme="dark"] #ih68-content .ih-payment-reader:is([data-payment-status="funds_secured"],[data-payment-status="work_submitted"],[data-payment-status="released"]) { --pay-state:#8ed9af; }
+  #ih68-content .ih-payment-reader .ih-pay-status { align-self:flex-start!important; border:1px solid color-mix(in srgb,var(--pay-state) 25%,var(--rd-paper))!important; background:color-mix(in srgb,var(--pay-state) 8%,var(--rd-paper))!important; color:var(--pay-state)!important; }
+  #ih68-content .ih-payment-reader .ih-pay-current { grid-template-columns:12px minmax(0,1fr)!important; align-items:start!important; gap:14px!important; padding:20px!important; border:1px solid color-mix(in srgb,var(--pay-state) 24%,var(--rd-paper))!important; border-left:4px solid var(--pay-state)!important; background:color-mix(in srgb,var(--pay-state) 5%,var(--rd-paper))!important; }
+  #ih68-content .ih-pay-state-dot { position:static!important; display:block!important; width:10px!important; height:10px!important; margin:8px 0 0!important; border-radius:50%!important; background:var(--pay-state)!important; }
+  #ih68-content .ih-pay-current > div { min-width:0!important; }
+  #ih68-content .ih-pay-current strong { display:block!important; color:var(--rd-ink)!important; font:700 17px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-pay-current p { max-width:78ch!important; margin:7px 0 0!important; color:var(--rd-ink)!important; font:400 15px/1.8 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-pay-original { padding:22px!important; border:1px solid var(--rd-line)!important; border-radius:12px!important; background:var(--rd-paper)!important; }
+  #ih68-content .ih-pay-original > h4 { color:var(--rd-ink)!important; font:700 18px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-pay-original .chat-payment-breakdown > div > :is(span,strong,small) { position:static!important; inset:auto!important; width:auto!important; min-width:0!important; height:auto!important; max-height:none!important; margin:0!important; padding:0!important; transform:none!important; float:none!important; overflow:visible!important; }
+  #ih68-content .ih-pay-original .chat-payment-breakdown strong { justify-self:end!important; text-align:right!important; font-variant-numeric:tabular-nums lining-nums!important; letter-spacing:-.02em!important; }
+  #ih68-content .ih-pay-original .chat-payment-breakdown > div > span { overflow-wrap:anywhere!important; }
+  #ih68-content .ih-pay-original .chat-payment-breakdown > div > small { justify-self:start!important; }
+  #ih68-content .ih-pay-flow { padding-top:4px!important; }
+  #ih68-content .ih-terms-panel .ih-profile-project-wait { max-width:780px!important; margin:0 auto!important; padding:24px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-paper)!important; }
+  #ih68-content .ih-terms-panel .ih-profile-project-wait > h3 { max-width:28ch!important; font:700 25px/1.35 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-terms-panel .ih-profile-project-wait > p { max-width:64ch!important; font:400 16px/1.75 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-terms-panel .ih-chat-start-steps { margin-top:24px!important; padding-left:26px!important; }
+  #ih68-content .ih-terms-panel .ih-chat-start-steps > li { padding:16px 0 16px 10px!important; font-size:15px!important; }
+  #ih68-content .ih-terms-panel .ih-chat-start-steps > li::marker { color:var(--sp-accent)!important; font-weight:750!important; font-variant-numeric:tabular-nums!important; }
+  #ih68-content .ih-terms-panel .ih-chat-start-steps strong { margin-bottom:5px!important; font-size:17px!important; font-weight:700!important; }
+  body .ih-transfer-dropzone { border-style:solid!important; }
+  body .ih-transfer-dropzone strong { display:inline!important; border:0!important; color:var(--sp-accent)!important; text-decoration:none!important; }
+  body .ih-transfer-dropzone > svg { top:50%!important; transform:translateY(-50%)!important; }
+  :root:not([data-template="classic"]) #ih68-content :is(.ih-send-photo,.ih-send-add) { background:var(--sp-soft)!important; color:var(--sp-accent)!important; }
+  @media (prefers-reduced-motion:no-preference) {
+    #ih68-content .ih-payment-reader:is([data-payment-status="processing"],[data-payment-status="release_pending"]) .ih-pay-state-dot { animation:ih-pay-pulse 1.8s ease-in-out infinite!important; }
+  }
+  @keyframes ih-pay-pulse { 50% { opacity:.45; } }
+  @media (max-width:700px) {
+    #ih68-content .ih-pay-flow > ol { grid-template-columns:minmax(0,1fr)!important; }
+    #ih68-content .ih-payment-reader { padding:18px!important; }
+    #ih68-content .ih-pay-original { padding:16px!important; }
+    #ih68-content .ih-pay-heading h3 { font-size:21px!important; }
+    #ih68-content .ih-pay-current { padding:16px!important; }
+    #ih68-content .ih-terms-panel .ih-profile-project-wait { padding:20px!important; }
+    #ih68-content .ih-terms-panel .ih-profile-project-wait > h3 { font-size:22px!important; }
+  }
   #ih68-content .ih69-material-toolbar > div > p { display:none!important; }
   #ih68-content .ih-pay-original > .chat-payment-panel { display:block!important; width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }
   #ih68-content .ih-pay-original .chat-payment-heading, #ih68-content .ih-pay-original .chat-payment-explainer, #ih68-content .ih-pay-original .chat-payment-empty { display:none!important; }
@@ -2376,6 +2433,6 @@ body .ih-material-header h2:focus { outline: none !important; }
   #ih68-content .ih-pay-original .chat-payment-message { margin:14px 0!important; padding:12px 14px!important; border:1px solid var(--rd-line)!important; border-radius:9px!important; background:var(--rd-soft)!important; color:var(--rd-ink)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
   @media (max-width:500px) {
     #ih68-content .ih-pay-original .chat-payment-breakdown > div { grid-template-columns:minmax(0,1fr)!important; }
-    #ih68-content .ih-pay-original .chat-payment-breakdown strong { white-space:normal!important; }
+    #ih68-content .ih-pay-original .chat-payment-breakdown strong { justify-self:start!important; text-align:left!important; white-space:normal!important; }
   }
 }

@@ -244,6 +244,47 @@ export function MarketIcon({ kind = "search", ...props }) {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
 }
 
+function JobsBackdrop({ en }) {
+  const frame = useRef(null), video = useRef(null);
+  const [motionAllowed, setMotionAllowed] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const connection = navigator.connection;
+    const update = () => setMotionAllowed(!reduced.matches && !connection?.saveData);
+    update();
+    reduced.addEventListener?.('change', update);
+    connection?.addEventListener?.('change', update);
+    const observer = window.IntersectionObserver ? new window.IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.05 }) : null;
+    if (frame.current && observer) observer.observe(frame.current);
+    else setVisible(true);
+    return () => {
+      observer?.disconnect();
+      reduced.removeEventListener?.('change', update);
+      connection?.removeEventListener?.('change', update);
+    };
+  }, []);
+  useEffect(() => {
+    const update = () => {
+      if (!video.current) return;
+      if (visible && !paused && !document.hidden) video.current.play().catch(() => {});
+      else video.current.pause();
+    };
+    update();
+    document.addEventListener('visibilitychange', update);
+    return () => document.removeEventListener('visibilitychange', update);
+  }, [visible, paused, motionAllowed]);
+  return <>
+    <div className="ih-jobs-backdrop" ref={frame} aria-hidden="true">
+      {motionAllowed && <video ref={video} src="/media/ideahire-jobs-background.mp4" poster="/media/ideahire-jobs-poster.jpg" muted loop playsInline preload="none" tabIndex={-1} />}
+    </div>
+    {motionAllowed && <button type="button" className="ih-jobs-motion" aria-pressed={paused} onClick={() => setPaused(value => !value)} aria-label={paused ? (en ? 'Play background video' : 'Włącz film w tle') : (en ? 'Pause background video' : 'Zatrzymaj film w tle')}>
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">{paused ? <path d="m7 4 9 6-9 6Z" /> : <path d="M5 4h3v12H5zm7 0h3v12h-3z" />}</svg>
+    </button>}
+  </>;
+}
+
 export function MarketHeader({ eyebrow, title, description, children }) {
   const en = useSitePreferences().language === 'en';
   const location = useLocation();
@@ -263,7 +304,7 @@ export function MarketHeader({ eyebrow, title, description, children }) {
     title: en ? 'Edit your job' : 'Edytuj zlecenie',
     description: en ? 'Update the details that freelancers need to prepare an offer.' : 'Zaktualizuj szczegóły potrzebne wykonawcom do przygotowania oferty.',
   } : { eyebrow, title, description };
-  return <div className={jobs ? "ih-market-intro" : undefined}>{jobs && <SubpageCatalogTabs active="jobs" />}<SubpageHeading {...heading} actions={children || (jobs ? <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link> : undefined)} variant={jobs ? 'catalog' : 'editor'} /></div>;
+  return <div className={jobs ? "ih-market-intro ih-jobs-intro" : undefined}>{jobs && <JobsBackdrop en={en} />}{jobs && <SubpageCatalogTabs active="jobs" />}<SubpageHeading {...heading} actions={children || (jobs ? <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link> : undefined)} variant={jobs ? 'catalog' : 'editor'} /></div>;
 }
 
 export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
@@ -425,6 +466,7 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
         {fields.map(value => <button type="button" key={value} aria-pressed={category === value} onClick={() => onCategory(value)}><span>{fieldLabel(value)}</span>{category === value && <MarketIcon kind="check" />}</button>)}
       </nav>
       {(search || category !== 'Wszystkie') && <button type="button" className="ih73-clear-filters" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
+      {!people && !services && <div className="ih-jobs-sidebar-note"><MarketIcon kind="check" /><div><strong>{en ? 'Before you reply' : 'Zanim odpowiesz'}</strong><p>{en ? 'Check the scope, budget and deadline. Ask the client about any missing details.' : 'Sprawdź zakres, budżet i termin. O brakujące szczegóły zapytaj zleceniodawcę.'}</p></div></div>}
     </aside>
     <div className="ih75-catalog-main">
       <section className="ih75-catalog-controls" aria-label={label}>

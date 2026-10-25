@@ -635,6 +635,18 @@
   :root[data-theme="dark"] .ih-market-intro { --ih-intro-surface: #173735; }
   :root[data-template="classic"] .ih-market-intro { --ih-intro-surface: #f0f0ed; }
   :root[data-template="classic"][data-theme="dark"] .ih-market-intro { --ih-intro-surface: #272727; }
+  /* A local, licensed film changes only the jobs masthead background. */
+  .ih-market-intro.ih-jobs-intro { position:relative!important; isolation:isolate!important; overflow:hidden!important; }
+  .ih-jobs-intro .ih-jobs-backdrop { position:absolute!important; inset:0!important; z-index:-1!important; pointer-events:none!important; background:url('/media/ideahire-jobs-poster.jpg') center 48% / cover no-repeat!important; }
+  .ih-jobs-intro .ih-jobs-backdrop > video { display:block!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center 48%!important; }
+  .ih-jobs-intro .ih-jobs-backdrop::after { content:""!important; position:absolute!important; inset:0!important; background:linear-gradient(100deg,#e9f3efed 5%,#e9f3efcf 60%,#e9f3efb8)!important; }
+  :root[data-theme="dark"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#102e31ed 5%,#102e31d9 60%,#102e31bd)!important; }
+  :root[data-template="classic"] .ih-jobs-intro .ih-jobs-backdrop { filter:grayscale(1)!important; }
+  :root[data-template="classic"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#f0f0eded 5%,#f0f0edcf 60%,#f0f0edb8)!important; }
+  :root[data-template="classic"][data-theme="dark"] .ih-jobs-intro .ih-jobs-backdrop::after { background:linear-gradient(100deg,#272727ed 5%,#272727d9 60%,#272727bd)!important; }
+  .ih-jobs-intro .ih-jobs-motion { position:absolute!important; right:14px!important; bottom:12px!important; display:grid!important; place-items:center!important; width:32px!important; height:32px!important; min-height:32px!important; margin:0!important; padding:7px!important; border:1px solid color-mix(in srgb,var(--ih-heading-ink) 18%,transparent)!important; border-radius:50%!important; background:var(--ih-intro-surface)!important; color:var(--ih-heading-ink)!important; cursor:pointer!important; }
+  .ih-jobs-intro .ih-jobs-motion svg { display:block!important; width:16px!important; height:16px!important; }
+  .ih-jobs-intro .ih-jobs-motion:focus-visible { outline:2px solid var(--ih-heading-accent)!important; outline-offset:3px!important; }
   .ih-market-intro .ih78-services-navigation { margin: 0 !important; padding: 0 !important; }
   .ih-market-intro .ih73-catalog-tabs {
     width: fit-content !important;
@@ -1073,11 +1085,36 @@
   .ih75-account-layout .profile-skill-entry > input { width: 100% !important; max-width: 100% !important; min-width: 0 !important; min-height: 48px !important; font-size: 16px !important; }
 
   /* Clear results, separate from filters and listing content. */
-  .ih5-jobs-results-copy { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 12px !important; }
+  .ih5-jobs-results-copy { display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 10px !important; }
   .ih5-jobs-results-copy > span { display: block !important; font: 600 14px/1.5 var(--ih-heading-font) !important; }
   .ih5-jobs-results-copy > strong { display: inline-flex !important; align-items: baseline !important; flex-wrap: wrap !important; gap: 8px !important; font: 650 17px/1.4 var(--ih-heading-font) !important; }
-  .ih5-jobs-results-copy .ih-results-number { font: 800 32px/1.2 var(--ih-heading-font) !important; font-variant-numeric: tabular-nums !important; color: var(--ih-heading-ink) !important; }
+  .ih5-jobs-results-copy .ih-results-number { position: static !important; display:inline !important; margin:0 !important; padding:0 !important; transform:none !important; font: 750 24px/1.4 var(--ih-heading-font) !important; font-variant-numeric: tabular-nums !important; color: var(--ih-heading-ink) !important; }
   .ih5-jobs-results-copy .ih-results-noun { font: inherit !important; }
+  /* Search and sort share a single height, independent of legacy label styles. */
+  .ih80-catalog-jobs .ih75-catalog-controls { display:grid!important; grid-template-columns:minmax(0,1fr) 220px!important; align-items:end!important; gap:14px!important; }
+  .ih80-catalog-jobs .ih73-catalog-search { display:flex!important; align-items:center!important; gap:12px!important; width:100%!important; max-width:none!important; height:56px!important; min-height:56px!important; margin:0!important; padding:0 16px!important; border:1px solid var(--p-line,var(--a-line))!important; border-radius:12px!important; box-sizing:border-box!important; background:var(--p-paper,var(--a-paper))!important; }
+  .ih80-catalog-jobs .ih73-catalog-search > svg { flex:none!important; width:20px!important; height:20px!important; margin:0!important; }
+  .ih80-catalog-jobs .ih73-catalog-search > input { flex:1 1 0!important; width:0!important; min-width:0!important; height:auto!important; min-height:0!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; color:var(--p-ink,var(--a-ink))!important; font:400 16px/1.5 var(--ih-heading-font)!important; }
+  .ih80-catalog-jobs .ih76-catalog-refinements { display:block!important; min-width:0!important; margin:0!important; padding:0!important; }
+  .ih80-catalog-jobs .ih87-catalog-select { display:block!important; width:100%!important; min-width:0!important; margin:0!important; }
+  .ih80-catalog-jobs .ih87-catalog-select.ih76-category-select { display:none!important; }
+  .ih80-catalog-jobs .ih7-select { display:grid!important; gap:0!important; }
+  .ih80-catalog-jobs .ih7-select-label { position:absolute!important; width:1px!important; height:1px!important; margin:-1px!important; padding:0!important; overflow:hidden!important; clip-path:inset(50%)!important; white-space:nowrap!important; }
+  .ih80-catalog-jobs .ih7-select-trigger { display:flex!important; align-items:center!important; justify-content:space-between!important; width:100%!important; height:56px!important; min-height:56px!important; margin:0!important; padding:0 16px!important; border-radius:12px!important; box-sizing:border-box!important; font:600 15px/1.5 var(--ih-heading-font)!important; }
+  .ih80-catalog-jobs .ih76-mobile-clear { grid-column:1/-1!important; }
+  .ih80-catalog-jobs .ih5-jobs-results-copy > strong { flex-wrap:nowrap!important; gap:7px!important; }
+  .ih80-catalog-jobs .ih5-jobs-results-copy .ih-results-noun { position:static!important; display:inline!important; margin:0!important; transform:none!important; font:600 16px/1.4 var(--ih-heading-font)!important; }
+  .ih80-catalog-jobs .ih-jobs-sidebar-note { display:flex!important; align-items:flex-start!important; gap:10px!important; margin-top:28px!important; padding:18px 0 0!important; border-top:1px solid var(--p-line,var(--a-line))!important; }
+  .ih-jobs-sidebar-note > svg { flex:none!important; width:18px!important; height:18px!important; margin-top:3px!important; color:var(--p-accent,var(--a-accent))!important; }
+  .ih-jobs-sidebar-note strong { display:block!important; margin:0!important; color:var(--p-ink,var(--a-ink))!important; font:650 14px/1.5 var(--ih-heading-font)!important; }
+  .ih-jobs-sidebar-note p { margin:7px 0 0!important; color:var(--p-muted,var(--a-muted))!important; font:400 13px/1.8 var(--ih-heading-font)!important; }
+  @media (max-width:850px) {
+    .ih80-catalog-jobs .ih75-catalog-controls { grid-template-columns:minmax(0,1fr)!important; }
+    .ih80-catalog-jobs .ih76-catalog-refinements { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; }
+    .ih80-catalog-jobs .ih87-catalog-select.ih76-category-select { display:block!important; width:100%!important; }
+    .ih80-catalog-jobs .ih-jobs-sidebar-note { display:none!important; }
+    .ih80-catalog-jobs .ih7-select-trigger { padding-inline:12px!important; font-size:14px!important; }
+  }
   :is(.ih73-result-count, .ih78-results-heading > p) { display: flex !important; align-items: baseline !important; gap: 8px !important; font: 600 16px/1.5 var(--ih-heading-font) !important; }
   :is(.ih73-result-count, .ih78-results-heading) strong { font: 800 30px/1.2 var(--ih-heading-font) !important; font-variant-numeric: tabular-nums !important; }
   :is(.ih5-jobs-results-header, .ih78-results-heading) { margin-block: 0 20px !important; padding-block: 4px !important; }
