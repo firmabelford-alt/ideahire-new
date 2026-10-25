@@ -10698,15 +10698,22 @@ function Account() {
             </div>
           ) : <>
             <p className="ih75-register-count" role="status" aria-live="polite">{accountEnglish ? "Showing " : "Wyświetlasz "}<strong>{visibleOwnedJobs.length}</strong>{accountEnglish ? " of " : " z "}{myJobs.length}{accountEnglish ? " listings" : " ogłoszeń"}</p>
-            <div className="ih75-register-columns" aria-hidden="true"><span>{accountEnglish ? "Project" : "Zlecenie"}</span><span>Status</span><span>{accountEnglish ? "Budget" : "Budżet"}</span><span>{accountEnglish ? "Manage" : "Zarządzaj"}</span></div>
             <div className="ih75-owned-list">
               {visibleOwnedJobs.map(job => {
                 const expiry = getJobExpiryInfo(job.expires_at);
-                return <article className="ih75-owned-row" key={job.id}>
-                  <div className="ih75-owned-copy"><p>{accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}</p><h2><Link to={`/edit-job/${job.id}`}>{job.title}</Link></h2><JobListingMeta job={job} compact /></div>
-                  <span className={"ih75-owned-status" + (expiry.expired ? " is-expired" : "")}><i aria-hidden="true" />{expiry.expired ? (accountEnglish ? "Expired" : "Wygasłe") : (accountEnglish ? "Active" : "Aktywne")}</span>
-                  <div className="ih75-owned-budget"><span>{accountEnglish ? "Budget" : "Budżet"}</span><strong>{Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL")} <small>zł</small></strong></div>
-                  <div className="ih75-owned-actions"><Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow" /></Link><button type="button" onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button></div>
+                return <article className="ih5-job-card ih73-job-row ih79-job ih-owned-job-card" key={job.id}>
+                  <div className="ih5-job-card-top">
+                    <span className="ih5-eyebrow">{accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}{job.subcategory ? ` · ${job.subcategory}` : ""}</span>
+                    <span className={"ih-owned-job-status" + (expiry.expired ? " is-expired" : "")}>{expiry.expired ? (accountEnglish ? "Expired" : "Wygasłe") : (accountEnglish ? "Active" : "Aktywne")}</span>
+                  </div>
+                  <div className="ih5-job-overview">
+                    <div className="ih5-job-copy"><h2 className="ih5-job-title"><Link to={`/edit-job/${job.id}`}>{job.title}</Link></h2>{job.description && <p className="ih5-job-summary">{job.description}</p>}</div>
+                    <div className="ih5-job-price"><span>{accountEnglish ? "Budget" : "Budżet"}</span><strong>{Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL")} zł</strong><small>{job.budget_negotiable ? (accountEnglish ? "Negotiable" : "Do negocjacji") : (accountEnglish ? "Fixed price" : "Cena ustalona")}</small></div>
+                  </div>
+                  <div className="ih-owned-job-footer">
+                    <span className="ih-owned-job-expiry">{accountEnglish ? translateUiText(expiry.label) : expiry.label}</span>
+                    <div className="ih-owned-job-actions"><Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow" /></Link><button type="button" onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button></div>
+                  </div>
                 </article>;
               })}
               {visibleOwnedJobs.length === 0 && <div className="ih75-owned-empty"><h2>{accountEnglish ? "No matching listings" : "Brak pasujących ogłoszeń"}</h2><p>{accountEnglish ? "Change the phrase or select another status." : "Zmień frazę albo wybierz inny status."}</p><button type="button" className="ih5-button is-quiet" onClick={() => { setOwnedJobSearch(""); setOwnedJobFilter("all"); }}>{accountEnglish ? "Show all listings" : "Pokaż wszystkie ogłoszenia"}</button></div>}

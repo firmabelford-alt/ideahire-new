@@ -108,11 +108,9 @@ export function SubpageNavigation({ standalone = false }) {
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
   if (!page || ['dashboard', 'work', 'inbox', 'conversation'].includes(page.kind)) return null;
-  const catalog = ['jobs', 'people', 'services'].includes(page.kind);
   return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
     aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P79">
     <SubpageHistoryControls parent={page.parent} />
-    {!catalog && <span className="ih73-route-label"><span>IdeaHire</span><i aria-hidden="true">/</i><strong>{page.label}</strong></span>}
     <Link to={['access', 'legal'].includes(page.kind) ? '/' : page.kind === 'admin' ? '/admin' : '/account'} className="ih73-panel-link"><LayoutGrid size={17} strokeWidth={1.65} aria-hidden="true" /><span>{['access', 'legal'].includes(page.kind) ? (en ? 'Home' : 'Strona główna') : (en ? 'Dashboard' : 'Panel')}</span></Link>
   </nav>;
 }
@@ -135,12 +133,13 @@ export function SubpageHeading({ eyebrow, title, titleId, description, actions, 
     'Nowe wiadomości, zgłoszenia do zleceń i decyzje dotyczące współpracy.': 'New messages, applications and project decisions.',
   };
   const text = value => en && typeof value === 'string' ? copy[value] || translateUiText(value) : value;
-  return <header key={location.pathname + location.hash} className={'ih73-page-heading ih75-page-heading ih-page-heading ih-heading-unified is-' + variant + (className ? ' ' + className : '')}>
-    <div className="ih73-heading-copy">
+  const catalog = variant === 'catalog';
+  return <header key={location.pathname + location.hash} data-ih-heading={catalog ? undefined : 'compact'} className={(catalog ? 'ih73-page-heading ih75-page-heading ih-page-heading ih-heading-unified' : 'ih-subpage-heading') + ' is-' + variant + (className ? ' ' + className : '')}>
+    <div className={catalog ? 'ih73-heading-copy' : 'ih-subpage-heading-copy'}>
       <h1 id={titleId}>{text(title)}</h1>
-      {description && <p className="ih73-description">{text(description)}</p>}
+      {description && <p className={catalog ? 'ih73-description' : 'ih-subpage-heading-description'}>{text(description)}</p>}
     </div>
-    {actions && <div className="ih73-heading-actions">{actions}</div>}
+    {actions && <div className={catalog ? 'ih73-heading-actions' : 'ih-subpage-heading-actions'}>{actions}</div>}
     {children}
   </header>;
 }

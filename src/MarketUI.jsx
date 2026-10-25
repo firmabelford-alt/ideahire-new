@@ -671,7 +671,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
           event.stopPropagation();
           if (event.key === "Escape") { event.preventDefault(); close(); }
           if (event.key === "Tab") {
-            const controls = [...panel.current.querySelectorAll('button:not(:disabled):not([tabindex="-1"]), select:not(:disabled)')];
+            const controls = [...panel.current.querySelectorAll('button:not(:disabled):not([tabindex="-1"])')];
             if (event.shiftKey && (document.activeElement === controls[0] || !controls.includes(document.activeElement))) { event.preventDefault(); controls.at(-1)?.focus(); }
             else if (!event.shiftKey && (document.activeElement === controls.at(-1) || !controls.includes(document.activeElement))) { event.preventDefault(); controls[0]?.focus(); }
           }
@@ -679,10 +679,10 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
         <header><strong id={`${fieldId}-calendar-title`}>{caption}</strong><button type="button" onClick={close} aria-label="Zamknij kalendarz">×</button></header>
         <div className="ih20-calendar-navigation">
           <button type="button" onClick={() => moveMonth(-1)} disabled={!rangeAvailable || month <= lowerMonth} aria-label="Poprzedni miesiąc">‹</button>
-          <FormSelect aria-label="Miesiąc" value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
+          <FormSelect className="ih-date-month-select" aria-label="Miesiąc" value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
             {months.map((label, index) => <option value={index + 1} key={label} disabled={`${year}-${pad(index + 1)}` < lowerMonth || `${year}-${pad(index + 1)}` > upperMonth}>{label}</option>)}
           </FormSelect>
-          <FormSelect aria-label="Rok" value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
+          <FormSelect className="ih-date-year-select" aria-label="Rok" value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
             {Array.from({ length: Math.max(0, maxYear - minYear + 1) }, (_, index) => <option value={maxYear - index} key={index}>{maxYear - index}</option>)}
           </FormSelect>
           <button type="button" onClick={() => moveMonth(1)} disabled={!rangeAvailable || month >= upperMonth} aria-label="Następny miesiąc">›</button>
