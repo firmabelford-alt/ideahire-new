@@ -1833,7 +1833,7 @@
 /* A shared film frame for the three catalogues. Navigation remains ordinary links. */
 @layer ideahireHeadings {
   .ih-market-intro.ih-catalog-cinema {
-    --ih-cinema-offset:12px; --ih-film-shade:#f9faf6ad;
+    --ih-cinema-offset:12px; --ih-film-shade:#f9faf699;
     position:relative!important; isolation:isolate!important; display:grid!important;
     grid-template-columns:minmax(0,1fr)!important; grid-template-rows:auto minmax(190px,1fr) auto!important;
     gap:20px!important; width:100%!important; min-width:0!important; min-height:430px!important;
@@ -1850,7 +1850,7 @@
   .ih-catalog-cinema .ih-cinema-film::after { content:""!important; display:block!important; position:absolute!important; inset:0!important; background:linear-gradient(90deg,#ffffff1f 0%,var(--ih-film-shade) 32%,var(--ih-film-shade) 68%,#ffffff14 100%)!important; }
   :root[data-theme="dark"] .ih-catalog-cinema { --ih-film-shade:#102629bd; }
   :root[data-theme="dark"] .ih-catalog-cinema .ih-cinema-film::after { background:linear-gradient(90deg,#10262940 0%,var(--ih-film-shade) 32%,var(--ih-film-shade) 68%,#10262940 100%)!important; }
-  :root[data-template="classic"] .ih-catalog-cinema { --ih-film-shade:#fafaf6b3; }
+  :root[data-template="classic"] .ih-catalog-cinema { --ih-film-shade:#fafaf699; }
   :root[data-template="classic"] .ih-catalog-cinema .ih-cinema-film { filter:grayscale(1)!important; }
   :root[data-template="classic"][data-theme="dark"] .ih-catalog-cinema { --ih-film-shade:#1d1d1dbd; }
   .ih-catalog-cinema .ih-cinema-tabs { display:inline-flex!important; flex-wrap:wrap!important; justify-self:start!important; gap:4px!important; max-width:100%!important; margin:0!important; padding:4px!important; border:1px solid color-mix(in srgb,var(--v-ink) 14%,transparent)!important; border-radius:12px!important; background:color-mix(in srgb,var(--v-surface) 88%,transparent)!important; }
