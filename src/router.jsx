@@ -15025,10 +15025,7 @@ function Jobs() {
         {!loading &&
           !message && (
             <div className="ih5-jobs-results-header">
-              <div className="ih5-jobs-results-copy" role="status" aria-live="polite">
-                <span>Wyniki</span>
-                <strong><span className="ih-results-number">{filteredJobs.length.toLocaleString("pl-PL")}</span><span className="ih-results-noun">{formatPolishJobsCount(filteredJobs.length).replace(/^\d+\s*/, "")}</span></strong>
-              </div>
+              <div className="ih-catalog-result-summary" role="status" aria-live="polite" aria-atomic="true"><span>Wyniki</span><strong>{formatPolishJobsCount(filteredJobs.length)}</strong></div>
 
               {hasFilters && (
                 <button
@@ -19555,74 +19552,403 @@ function AgreementDetails({ agreement }) {
 }
 
 function AgreementPanel({
-  required, agreement, loading, saving, mode, form, message, priceNegotiable,
-  currentUserAccepted, otherUserAccepted, firstProposalAuthor = "zleceniodawcy",
-  blocked, onFieldChange, onOpenForm, onCancelForm, onSubmit, onAccept,
+  required,
+  agreement,
+  loading,
+  saving,
+  mode,
+  form,
+  message,
+  priceNegotiable,
+  firstProposalAuthor = "zleceniodawcy",
+  currentUserAccepted,
+  otherUserAccepted,
+  blocked,
+  onFieldChange,
+  onOpenForm,
+  onCancelForm,
+  onSubmit,
+  onAccept,
 }) {
-  const [confirmed, setConfirmed] = useState(false);
-  useEffect(() => { setConfirmed(false); }, [mode, agreement?.id]);
+  const [confirmed, setConfirmed] =
+    useState(false);
+
+  useEffect(() => {
+    setConfirmed(false);
+  }, [mode, agreement?.id]);
+
   if (!required) return null;
-  if (loading) return <p className="ih-terms-message" role="status">Wczytywanie ustaleń…</p>;
-  const accepted = agreement?.status === "accepted";
-  const update = field => event => onFieldChange(field, event.target.value);
-  const field = (name, title, hint, maximum, requiredField = true) => <label className="ih-terms-field ih-terms-wide" key={name}><span>{title}{requiredField && " *"}</span><textarea value={form[name]} onChange={update(name)} rows={3} maxLength={maximum} required={requiredField} placeholder={hint} /></label>;
-  if (mode === "form" && !accepted) return <section className="ih-terms-editor">
-    <header className="ih-terms-intro"><h3>{agreement ? "Zaproponuj zmianę ustaleń" : "Przygotuj ustalenia"}</h3><p>{agreement ? `Nowa wersja ${agreement.version + 1}` : "Pierwsza propozycja"} · Pola z * są wymagane.</p></header>
-    <form className="ih-terms-form" onSubmit={onSubmit} aria-busy={saving}>
-      <fieldset disabled={saving || blocked} className="ih-terms-inputs"><legend className="ih-send-sr">Treść propozycji</legend>
-        <section className="ih-terms-chapter"><header><span aria-hidden="true">1</span><h4>Usługa i rezultat</h4></header><div className="ih-terms-grid">
-          <label className="ih-terms-field ih-terms-wide"><span>Nazwa zlecenia *</span><input type="text" value={form.title} onChange={update("title")} maxLength={140} required placeholder="Np. Projekt strony internetowej" /></label>
-          {field("scope", "Zakres pracy", "Co obejmuje usługa?", 4000)}
-          {field("deliverables", "Co otrzyma klient", "Wymień gotowe pliki, treści lub funkcje.", 2500)}
-        </div></section>
-        <section className="ih-terms-chapter"><header><span aria-hidden="true">2</span><h4>Cena i termin</h4></header><div className="ih-terms-grid">
-          <label className="ih-terms-field"><span>Wynagrodzenie *</span><div className="ih-terms-price"><input type="text" inputMode="decimal" value={form.priceAmount} onChange={update("priceAmount")} disabled={!priceNegotiable || saving || blocked} readOnly={!priceNegotiable} aria-label={priceNegotiable ? "Negocjowana cena zlecenia" : "Cena ustalona przy publikacji zlecenia"} /><span>PLN</span></div><small>{priceNegotiable ? "Kwotę zatwierdzają obie strony." : "Cena z ogłoszenia nie podlega zmianie."}</small></label>
-          <label className="ih-terms-field"><span>Termin wykonania *</span><IdeaHireDateField aria-label="Termin wykonania zlecenia" min={localProjectDate()} value={form.deadline} onChange={update("deadline")} disabled={saving || blocked} required /></label>
-          <label className="ih-terms-field"><span>Rundy poprawek *</span><input type="number" min="0" max="100" step="1" value={form.revisions} onChange={update("revisions")} required /></label>
-          <label className="ih-terms-field"><span>Format przekazania *</span><input type="text" value={form.deliveryFormat} onChange={update("deliveryFormat")} maxLength={500} required placeholder="Np. PDF i pliki źródłowe" /></label>
-        </div></section>
-        <section className="ih-terms-chapter"><header><span aria-hidden="true">3</span><h4>Odbiór i pozostałe zasady</h4></header><div className="ih-terms-grid">
-          {field("acceptanceMethod", "Sposób odbioru", "Po czym klient sprawdzi, że rezultat jest zgodny z ustaleniami?", 2000)}
-          {field("cancellationTerms", "Warunki anulowania", "Zapisz zasady rezygnacji przed ukończeniem usługi.", 2000)}
-          {field("additionalTerms", "Dodatkowe ustalenia", "Opcjonalne informacje dotyczące współpracy.", 2500, false)}
-        </div></section>
-      </fieldset>
-      <footer className="ih-terms-form-footer"><p className="ih-terms-note">Obie strony akceptują tę samą wersję warunków. Następnie zleceniodawca opłaca zlecenie. Pracę rozpocznijcie po potwierdzeniu płatności w tej rozmowie.</p>
-        <label className="ih-terms-confirm"><input type="checkbox" checked={confirmed} disabled={saving || blocked} onChange={event => setConfirmed(event.target.checked)} /><span>Potwierdzam, że zapoznałem się z warunkami współpracy i akceptuję treść wysyłanej propozycji.</span></label>
-        {message && <p className="ih-terms-message" role="status">{message}</p>}
-        <div className="ih-terms-actions">{agreement && <button type="button" onClick={onCancelForm} disabled={saving}>Anuluj zmiany</button>}<button type="submit" className="is-primary" disabled={saving || !confirmed || blocked}>{saving ? "Zapisywanie…" : agreement ? "Wyślij nową propozycję" : "Wyślij propozycję"}</button></div>
-      </footer>
-    </form>
-  </section>;
-  if (!agreement) return <section className="ih-terms-wait"><h3>Czekasz na propozycję {firstProposalAuthor}</h3><p>Tutaj pojawią się zakres usługi, wynagrodzenie i termin. Po otrzymaniu propozycji możesz ją zaakceptować albo zaproponować zmiany.</p></section>;
-  return <article className="ih-terms-record ih-contract-document">
-    <header className="ih-contract-heading">
-      <div><p className="ih-contract-version">Wersja {agreement.version}</p><h3>{accepted ? "To ustaliliście" : "Sprawdź propozycję"}</h3></div>
-      <span className={'ih-contract-status' + (accepted ? ' is-accepted' : '')}><WorkspaceIcon kind={accepted ? "check" : "calendar"} />{accepted ? "Obie strony zaakceptowały" : "Do akceptacji obu stron"}</span>
-    </header>
-    <dl className="ih-contract-facts">
-      <div><dt>Wynagrodzenie wykonawcy</dt><dd>{formatPaymentMoney(agreement.price_amount, agreement.price_currency || "PLN")}</dd></div>
-      <div><dt>Termin wykonania</dt><dd>{formatChatProjectDate(agreement.deadline)}</dd></div>
-      <div><dt>Rundy poprawek</dt><dd>{agreement.revisions}</dd></div>
-    </dl>
-    {!accepted && <ul className="ih-contract-approvals" aria-label="Akceptacja tej wersji"><li className={currentUserAccepted ? "is-accepted" : ""}><WorkspaceIcon kind={currentUserAccepted ? "check" : "calendar"} /><span>{currentUserAccepted ? "Twoja akceptacja zapisana" : "Czekamy na Twoją akceptację"}</span></li><li className={otherUserAccepted ? "is-accepted" : ""}><WorkspaceIcon kind={otherUserAccepted ? "check" : "calendar"} /><span>{otherUserAccepted ? "Druga strona zaakceptowała" : "Czekamy na drugą stronę"}</span></li></ul>}
-    <div className="ih-contract-sections">{[
-      ["Zakres i rezultat", [["Nazwa zlecenia", agreement.title], ["Zakres usługi", agreement.scope], ["Co otrzyma klient", agreement.deliverables]]],
-      ["Przekazanie i odbiór", [["Format przekazania", agreement.delivery_format], ["Sposób odbioru", agreement.acceptance_method]]],
-      ["Zasady współpracy", [["Warunki anulowania", agreement.cancellation_terms], ["Dodatkowe ustalenia", agreement.additional_terms]]],
-    ].map(([title, fields], index) => {
-      const visible = fields.filter(([, value]) => value);
-      return visible.length ? <section className="ih-contract-section" key={title}>
-        <header><span aria-hidden="true">0{index + 1}</span><h4>{title}</h4></header>
-        <dl className="ih-contract-fields">{visible.map(([label, value]) => <div key={label} className={'ih-contract-field' + (label === "Nazwa zlecenia" || visible.length === 1 ? ' is-wide' : '')}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>
-      </section> : null;
-    })}</div>
-    {accepted ? <p className="ih-terms-note">Ta zaakceptowana wersja jest zapisem ustaleń obu stron i pozostaje dostępna w historii rozmowy.</p> : <>
-      {message && <p className="ih-terms-message" role="status">{message}</p>}
-      {blocked ? <p className="ih-terms-note">Ustalenia są wstrzymane, ponieważ jeden z użytkowników jest zablokowany.</p> : <div className="ih-terms-actions"><button type="button" onClick={onOpenForm} disabled={saving}>Zaproponuj zmiany</button>{!currentUserAccepted ? <button type="button" className="is-primary" onClick={onAccept} disabled={saving}>{saving ? "Akceptowanie…" : "Akceptuję warunki"}</button> : <p className="ih-terms-note">Twoja akceptacja jest zapisana. Czekamy na drugą stronę.</p>}</div>}
-    </>}
-  </article>;
+
+  if (loading) {
+    return (
+      <section className="agreement-gate agreement-loading ih-original-terms">
+        <span className="agreement-lock-icon">
+          ◌
+        </span>
+        <p>Ładowanie warunków współpracy...</p>
+      </section>
+    );
+  }
+
+  if (agreement?.status === "accepted") {
+    return (
+      <details className="agreement-summary ih-original-terms" open>
+        <summary>
+          <span className="agreement-status-icon">
+            ✓
+          </span>
+
+          <span className="agreement-summary-copy">
+            <strong>
+              Warunki współpracy zaakceptowane
+            </strong>
+            <small>
+              Wersja {agreement.version} · Akceptacja obu stron
+            </small>
+          </span>
+
+          <span className="agreement-summary-action">
+            <span className="ih-original-show">Pokaż ustalenia</span><span className="ih-original-hide">Ukryj ustalenia</span><WorkspaceIcon kind="down" />
+          </span>
+        </summary>
+
+        <div className="agreement-summary-body">
+          <AgreementDetails
+            agreement={agreement}
+          />
+
+          <p className="agreement-legal-note">
+            Ta zaakceptowana wersja jest zapisem ustaleń obu stron i pozostaje dostępna w historii rozmowy.
+          </p>
+        </div>
+      </details>
+    );
+  }
+
+  return (
+    <section className="agreement-gate ih-original-terms">
+      <div className="agreement-gate-heading">
+        <span className="agreement-eyebrow">
+          Ustalenia przed rozpoczęciem
+        </span>
+
+        <h2>Warunki współpracy</h2>
+
+        <p>
+          Obie strony akceptują tę samą wersję ustaleń. Następnie zleceniodawca może opłacić zlecenie. Realizacja zaczyna się po potwierdzeniu wpłaty.
+        </p>
+
+        <div className="agreement-progress" aria-label="Postęp akceptacji">
+          <span className={currentUserAccepted ? "is-complete" : ""}>
+            <i>{currentUserAccepted ? "✓" : "1"}</i>
+            Twoja akceptacja
+          </span>
+
+          <b aria-hidden="true" />
+
+          <span className={otherUserAccepted ? "is-complete" : ""}>
+            <i>{otherUserAccepted ? "✓" : "2"}</i>
+            Akceptacja drugiej strony
+          </span>
+        </div>
+      </div>
+
+      {mode === "form" ? (
+        <form
+          className="agreement-form"
+          onSubmit={onSubmit}
+          aria-busy={saving}
+        >
+          <div className="agreement-form-heading">
+            <div>
+              <span className="agreement-version-pill">
+                {agreement
+                  ? `Nowa wersja ${agreement.version + 1}`
+                  : "Pierwsza propozycja"}
+              </span>
+              <h3>Warunki realizacji zlecenia</h3>
+            </div>
+
+            <p>
+              Pola oznaczone gwiazdką są wymagane.
+            </p>
+          </div>
+
+          <fieldset className="agreement-form-grid" disabled={saving || blocked}><legend className="ih-send-sr">Treść propozycji</legend>
+            <label className="agreement-field agreement-field-wide">
+              <span>Nazwa zlecenia *</span>
+              <input
+                type="text"
+                value={form.title}
+                onChange={(event) =>
+                  onFieldChange(
+                    "title",
+                    event.target.value
+                  )
+                }
+                placeholder="Np. Projekt strony internetowej"
+                maxLength={140}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Zakres pracy *</span>
+              <textarea
+                value={form.scope}
+                onChange={(event) =>
+                  onFieldChange(
+                    "scope",
+                    event.target.value
+                  )
+                }
+                placeholder="Opisz dokładnie, co ma zostać wykonane..."
+                maxLength={4000}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Rezultat końcowy *</span>
+              <textarea
+                value={form.deliverables}
+                onChange={(event) =>
+                  onFieldChange(
+                    "deliverables",
+                    event.target.value
+                  )
+                }
+                placeholder="Wymień pliki, materiały lub funkcje, które mają zostać przekazane..."
+                maxLength={2500}
+                required
+              />
+            </label>
+
+            <label className="agreement-field">
+              <span>Cena *</span>
+              <div className="agreement-price-input">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={form.priceAmount}
+                  readOnly={!priceNegotiable}
+                  disabled={!priceNegotiable || saving || blocked}
+                  onChange={(event) =>
+                    onFieldChange(
+                      "priceAmount",
+                      event.target.value
+                    )
+                  }
+                  placeholder="1500"
+                  required
+                />
+                <span className="agreement-currency">PLN</span>
+              </div>
+            </label>
+
+            <label className="agreement-field">
+              <span>Termin wykonania *</span>
+              <IdeaHireDateField aria-label="Termin wykonania zlecenia" min={localProjectDate()} value={form.deadline} onChange={event => onFieldChange("deadline", event.target.value)} disabled={saving || blocked} required />
+            </label>
+
+            <label className="agreement-field">
+              <span>Liczba poprawek *</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={form.revisions}
+                onChange={(event) =>
+                  onFieldChange(
+                    "revisions",
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </label>
+
+            <label className="agreement-field">
+              <span>Format przekazania pracy *</span>
+              <input
+                type="text"
+                value={form.deliveryFormat}
+                onChange={(event) =>
+                  onFieldChange(
+                    "deliveryFormat",
+                    event.target.value
+                  )
+                }
+                placeholder="Np. PDF, PNG i pliki źródłowe"
+                maxLength={500}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Sposób odbioru pracy *</span>
+              <textarea
+                value={form.acceptanceMethod}
+                onChange={(event) =>
+                  onFieldChange(
+                    "acceptanceMethod",
+                    event.target.value
+                  )
+                }
+                placeholder="Po czym obie strony poznają, że zlecenie zostało wykonane prawidłowo?"
+                maxLength={2000}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Warunki anulowania *</span>
+              <textarea
+                value={form.cancellationTerms}
+                onChange={(event) =>
+                  onFieldChange(
+                    "cancellationTerms",
+                    event.target.value
+                  )
+                }
+                placeholder="Opisz zasady rezygnacji przed ukończeniem pracy..."
+                maxLength={2000}
+                required
+              />
+            </label>
+
+            <label className="agreement-field agreement-field-wide">
+              <span>Dodatkowe ustalenia</span>
+              <textarea
+                value={form.additionalTerms}
+                onChange={(event) =>
+                  onFieldChange(
+                    "additionalTerms",
+                    event.target.value
+                  )
+                }
+                placeholder="Opcjonalne informacje, które warto zapisać..."
+                maxLength={2500}
+              />
+            </label>
+          </fieldset>
+
+          <label className="agreement-confirmation">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              disabled={saving || blocked}
+              onChange={(event) =>
+                setConfirmed(
+                  event.target.checked
+                )
+              }
+            />
+            <span>
+              Potwierdzam, że zapoznałem się z warunkami współpracy i akceptuję treść wysyłanej propozycji.
+            </span>
+          </label>
+
+          {message && (
+            <p className="agreement-message">
+              {message}
+            </p>
+          )}
+
+          <div className="agreement-form-actions">
+            {agreement && (
+              <button
+                type="button"
+                className="agreement-secondary-button"
+                onClick={onCancelForm}
+                disabled={saving}
+              >
+                Anuluj zmiany
+              </button>
+            )}
+
+            <button
+              type="submit"
+              className="agreement-primary-button"
+              disabled={
+                saving ||
+                !confirmed ||
+                blocked
+              }
+            >
+              {saving
+                ? "Zapisywanie..."
+                : agreement
+                ? "Wyślij nową propozycję"
+                : "Wyślij propozycję"}
+            </button>
+          </div>
+        </form>
+      ) : agreement ? (
+        <div className="agreement-proposal-card">
+          <div className="agreement-proposal-topline">
+            <div>
+              <span className="agreement-version-pill">
+                Wersja {agreement.version}
+              </span>
+              <h3>Propozycja warunków</h3>
+            </div>
+
+            <span className="agreement-pending-pill">
+              Oczekuje na wspólną akceptację
+            </span>
+          </div>
+
+          <AgreementDetails
+            agreement={agreement}
+          />
+
+          {message && (
+            <p className="agreement-message is-success">
+              {message}
+            </p>
+          )}
+
+          {blocked ? (
+            <p className="agreement-blocked-note">
+              Ustalenia są wstrzymane, ponieważ jeden z użytkowników jest zablokowany.
+            </p>
+          ) : (
+            <div className="agreement-proposal-actions">
+              <button
+                type="button"
+                className="agreement-secondary-button"
+                onClick={onOpenForm}
+                disabled={saving}
+              >
+                Zaproponuj zmiany
+              </button>
+
+              {!currentUserAccepted ? (
+                <button
+                  type="button"
+                  className="agreement-primary-button"
+                  onClick={onAccept}
+                  disabled={saving}
+                >
+                  {saving
+                    ? "Akceptowanie..."
+                    : "Akceptuję warunki"}
+                </button>
+              ) : (
+                <span className="agreement-waiting-note">
+                  ✓ Zaakceptowałeś tę wersję. Czekamy na drugą stronę.
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ) : <p className="agreement-waiting-note">Czekasz na propozycję {firstProposalAuthor}. Tutaj pojawią się zakres, cena i termin.</p>}
+    </section>
+  );
 }
+
 
 const PAYMENT_STATUS_COPY = {
   awaiting_payment: {

@@ -2439,17 +2439,6 @@ body .ih-material-header h2:focus { outline: none !important; }
 
 /* Project documents and settlement use their own layout, independent of the old ledger. */
 @layer ideahireHeadings {
-  :root:not([data-template="classic"]) body.ih68-workspace #ih68-content {
-    --a-accent:#096b67!important;
-    --a-on:#fff!important;
-    --a-tint:#e6f1ee!important;
-  }
-  :root[data-theme="dark"]:not([data-template="classic"]) body.ih68-workspace #ih68-content {
-    --a-accent:#a5d8cc!important;
-    --a-on:#13332e!important;
-    --a-tint:#1c403c!important;
-  }
-  #ih68-content .ih68-message.is-own { background:var(--a-tint)!important; color:var(--a-ink)!important; border-color:var(--a-line)!important; }
   #ih68-content .ih-send-form.ih-send-row { max-width:1000px!important; margin-inline:auto!important; align-items:end!important; }
   #ih68-content .ih68-thread-inner { max-width:1000px!important; margin-inline:auto!important; }
   #ih68-content .ih-send-form.ih-send-row > textarea {
@@ -2459,39 +2448,6 @@ body .ih-material-header h2:focus { outline: none !important; }
   }
   #ih68-content .ih-send-form.ih-send-row > textarea::placeholder { color:var(--sp-muted)!important; -webkit-text-fill-color:var(--sp-muted)!important; opacity:1!important; font-weight:450!important; }
   #ih68-content :is(.ih-terms-panel,.ih-room-payment-page) { max-width:1080px!important; margin-inline:auto!important; }
-
-  #ih68-content .ih-terms-record.ih-contract-document { display:block!important; padding:0!important; margin:0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
-  #ih68-content .ih-contract-document :is(p,h3,h4,dl,dt,dd,ul) { margin:0!important; min-width:0!important; }
-  #ih68-content .ih-contract-heading { display:flex!important; flex-wrap:wrap!important; align-items:center!important; justify-content:space-between!important; gap:18px!important; margin:0 0 24px!important; padding:0!important; border:0!important; }
-  #ih68-content .ih-contract-heading h3 { margin-top:5px!important; color:var(--sp-ink)!important; font:750 clamp(23px,2.5vw,30px)/1.35 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-heading .ih-contract-version { color:var(--sp-muted)!important; font:550 14px/1.6 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-status { display:inline-flex!important; align-items:center!important; gap:8px!important; max-width:100%!important; padding:10px 14px!important; border:1px solid var(--sp-line)!important; border-radius:9px!important; color:var(--sp-ink)!important; background:var(--sp-soft)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-status.is-accepted { color:#246340!important; border-color:#b7d3bf!important; background:#edf5ed!important; }
-  :root[data-theme="dark"] #ih68-content .ih-contract-status.is-accepted { color:#b7e6c4!important; border-color:#426c50!important; background:#203b2b!important; }
-  #ih68-content .ih-contract-status > svg { flex:none!important; width:18px!important; height:18px!important; }
-  #ih68-content .ih-contract-facts { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:12px!important; padding:0!important; margin:0 0 28px!important; }
-  #ih68-content .ih-contract-facts > div { display:flex!important; flex-direction:column!important; justify-content:space-between!important; gap:16px!important; min-width:0!important; min-height:130px!important; padding:20px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-paper)!important; }
-  #ih68-content .ih-contract-facts > div:first-child { background:var(--sp-soft)!important; border-color:color-mix(in srgb,var(--sp-accent) 38%,var(--sp-line))!important; }
-  #ih68-content .ih-contract-facts dt { color:var(--sp-muted)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-facts dd { color:var(--sp-ink)!important; font:700 clamp(20px,2vw,25px)/1.4 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; overflow-wrap:anywhere!important; }
-  #ih68-content .ih-contract-approvals { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; padding:0!important; margin:0 0 26px!important; list-style:none!important; }
-  #ih68-content .ih-contract-approvals > li { display:flex!important; gap:10px!important; align-items:center!important; min-width:0!important; padding:14px 16px!important; border:1px solid var(--sp-line)!important; border-radius:10px!important; color:var(--sp-muted)!important; background:var(--sp-paper)!important; font:550 14px/1.6 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-approvals svg { flex:none!important; width:18px!important; height:18px!important; }
-  #ih68-content .ih-contract-approvals .is-accepted { color:var(--sp-accent)!important; }
-  #ih68-content .ih-contract-sections { display:grid!important; gap:26px!important; }
-  #ih68-content .ih-contract-section { display:block!important; min-width:0!important; padding:0!important; margin:0!important; border:0!important; background:transparent!important; }
-  #ih68-content .ih-contract-section > header { display:flex!important; align-items:center!important; gap:11px!important; margin:0 0 12px!important; padding:0!important; }
-  #ih68-content .ih-contract-section > header > span { display:grid!important; place-items:center!important; flex:none!important; width:32px!important; height:32px!important; border:1px solid var(--sp-line)!important; border-radius:8px!important; color:var(--sp-muted)!important; font:600 12px/1 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; }
-  #ih68-content .ih-contract-section h4 { color:var(--sp-ink)!important; font:700 18px/1.5 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-fields { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:12px!important; padding:0!important; }
-  #ih68-content .ih-contract-field { display:block!important; min-width:0!important; padding:20px 22px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-paper)!important; }
-  #ih68-content .ih-contract-field.is-wide { grid-column:1/-1!important; }
-  #ih68-content .ih-contract-field > dt { display:block!important; padding:0 0 10px!important; color:var(--sp-muted)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; }
-  #ih68-content .ih-contract-field > dd { display:block!important; position:static!important; width:auto!important; padding:0!important; color:var(--sp-ink)!important; font:500 17px/1.8 Inter,system-ui,sans-serif!important; white-space:pre-wrap!important; overflow-wrap:anywhere!important; }
-  #ih68-content .ih-contract-document > .ih-terms-note { margin:22px 0 0!important; padding:16px 18px!important; border:1px solid var(--sp-line)!important; border-radius:10px!important; background:var(--sp-soft)!important; font-size:14px!important; }
-  #ih68-content .ih-contract-document .ih-terms-actions { margin-top:22px!important; }
-  #ih68-content .ih-terms-chapter { padding:22px!important; margin:0 0 14px!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-paper)!important; }
-  #ih68-content .ih-terms-field > :is(input,textarea) { color:var(--sp-ink)!important; -webkit-text-fill-color:var(--sp-ink)!important; background:var(--sp-paper)!important; font-size:16px!important; }
 
   #ih68-content .ih-payment-reader.ih-settlement { display:block!important; width:100%!important; max-width:1040px!important; margin-inline:auto!important; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }
   #ih68-content .ih-settlement :is(dl,dt,dd,h3,h4,p,ol) { margin:0!important; min-width:0!important; }
@@ -2592,4 +2548,93 @@ body .ih-material-header h2:focus { outline: none !important; }
     body .ih-transfer-dialog .ih-upload-copy > small { font-size:13px!important; }
   }
   @media (prefers-reduced-motion:reduce) { #ih68-content .ih-settlement-auto > summary svg { transition:none!important; } }
+}
+
+/* Original agreement presentation (30 August), with current controls and readable sizes. */
+@layer ideahireHeadings {
+  #ih68-content.ih72-room:not(.is-focus) { width:calc(100% - 24px)!important; max-width:1560px!important; margin:12px auto 0!important; border:0!important; box-shadow:none!important; }
+  #ih68-content .ih68-thread { padding-inline:16px!important; }
+  #ih68-content .ih68-thread-inner, #ih68-content .ih-send-form.ih-send-row { width:100%!important; max-width:none!important; margin-inline:0!important; }
+  #ih68-content .ih-send-area { padding-inline:16px!important; }
+  #ih68-content :is(.ih68-room-header,.ih72-panel-heading) { border:0!important; box-shadow:none!important; }
+  #ih68-content :is(.ih68-room-header,.ih72-panel-heading)::after { content:none!important; display:none!important; }
+  #ih68-content .ih-chat-next-step, #ih68-content .ih-terms-panel :is(.ih-profile-project-wait,.ih-profile-inquiry-gate) {
+    border:0!important; background:transparent!important; background-image:none!important; box-shadow:none!important;
+    border-radius:0!important; padding:12px 0!important;
+  }
+  #ih68-content .ih-chat-next-step { margin:0 16px 8px!important; gap:16px!important; }
+  #ih68-content .ih-chat-next-step > div > strong { font-size:15px!important; }
+  #ih68-content .ih-chat-next-step > div > p { font-size:14px!important; }
+  #ih68-content .ih68-thread-wrap, #ih68-content .ih68-thread { border:0!important; box-shadow:none!important; background-image:none!important; }
+  #ih68-content .ih69-message-meta { border:0!important; box-shadow:none!important; background:transparent!important; }
+  #ih68-content :is(.ih68-thread-wrap,.ih68-message,.ih69-message-meta)::before,
+  #ih68-content :is(.ih68-message,.ih69-message-meta)::after { content:none!important; display:none!important; }
+  #ih68-content .ih-original-terms { width:100%!important; max-width:1080px!important; min-width:0!important; margin:0 auto!important; padding:0!important; border:1px solid var(--sp-line)!important; border-radius:12px!important; background:var(--sp-paper)!important; box-shadow:none!important; }
+  #ih68-content .ih-original-terms :is(h2,h3,p) { min-width:0!important; margin:0!important; }
+  #ih68-content .ih-original-terms > summary { display:grid!important; grid-template-columns:34px minmax(0,1fr) auto!important; align-items:center!important; gap:12px!important; min-height:80px!important; padding:18px 22px!important; margin:0!important; list-style:none!important; border:0!important; background:transparent!important; }
+  #ih68-content .ih-original-terms > summary::-webkit-details-marker { display:none!important; }
+  #ih68-content .ih-original-terms .agreement-status-icon { display:grid!important; place-items:center!important; position:static!important; width:32px!important; height:32px!important; border:0!important; border-radius:50%!important; background:var(--sp-soft)!important; color:var(--sp-accent)!important; font:700 17px/1 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-summary-copy { display:block!important; min-width:0!important; }
+  #ih68-content .ih-original-terms .agreement-summary-copy > strong { display:block!important; color:var(--sp-ink)!important; font:650 17px/1.55 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-summary-copy > small { display:block!important; margin-top:4px!important; color:var(--sp-muted)!important; font:450 14px/1.6 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-summary-action { display:flex!important; align-items:center!important; gap:8px!important; color:var(--sp-muted)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-summary-action svg { flex:none!important; width:18px!important; height:18px!important; transition:transform .2s ease!important; }
+  #ih68-content .ih-original-terms[open] .agreement-summary-action svg { transform:rotate(180deg)!important; }
+  #ih68-content .ih-original-terms .ih-original-hide, #ih68-content .ih-original-terms[open] .ih-original-show { display:none!important; }
+  #ih68-content .ih-original-terms[open] .ih-original-hide { display:inline!important; }
+  #ih68-content .ih-original-terms .agreement-summary-body { display:block!important; padding:4px 22px 22px!important; margin:0!important; border:0!important; }
+  #ih68-content details.ih-original-terms:not([open]) > .agreement-summary-body { display:none!important; }
+  #ih68-content .ih-original-terms .agreement-details { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:12px!important; margin:0!important; padding:0!important; }
+  #ih68-content .ih-original-terms .agreement-detail { display:block!important; min-width:0!important; padding:16px 18px!important; border:1px solid var(--sp-line)!important; border-radius:9px!important; background:var(--sp-paper)!important; }
+  #ih68-content .ih-original-terms .agreement-detail-wide { grid-column:1/-1!important; }
+  #ih68-content .ih-original-terms .agreement-detail > span { display:block!important; margin:0 0 7px!important; color:var(--sp-muted)!important; font:550 14px/1.6 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-detail > :is(strong,p) { display:block!important; margin:0!important; padding:0!important; color:var(--sp-ink)!important; font:500 16px/1.8 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; white-space:pre-wrap!important; overflow-wrap:anywhere!important; }
+  #ih68-content .ih-original-terms .agreement-detail > strong { font-weight:650!important; }
+  #ih68-content .ih-original-terms .agreement-legal-note { margin:16px 0 0!important; padding:0!important; color:var(--sp-muted)!important; font:400 14px/1.75 Inter,system-ui,sans-serif!important; }
+  #ih68-content .agreement-gate.ih-original-terms { padding:22px!important; }
+  #ih68-content .ih-original-terms .agreement-gate-heading { display:block!important; padding:0!important; border:0!important; }
+  #ih68-content .ih-original-terms .agreement-eyebrow { display:block!important; margin:0 0 6px!important; padding:0!important; border:0!important; background:transparent!important; color:var(--sp-muted)!important; font:500 14px/1.6 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-gate-heading > h2 { color:var(--sp-ink)!important; font:700 25px/1.4 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-gate-heading > p { margin-top:10px!important; max-width:74ch!important; color:var(--sp-muted)!important; font:400 15px/1.75 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-progress { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin:20px 0!important; padding:0!important; }
+  #ih68-content .ih-original-terms .agreement-progress > b { display:none!important; }
+  #ih68-content .ih-original-terms .agreement-progress > span { display:inline-flex!important; align-items:center!important; gap:8px!important; padding:10px 12px!important; border:1px solid var(--sp-line)!important; border-radius:8px!important; color:var(--sp-muted)!important; background:var(--sp-paper)!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-progress i { display:grid!important; place-items:center!important; position:static!important; width:24px!important; height:24px!important; padding:0!important; border:0!important; border-radius:50%!important; color:var(--sp-ink)!important; background:var(--sp-soft)!important; font:650 12px/1 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-progress > .is-complete { color:var(--sp-accent)!important; }
+  #ih68-content .ih-original-terms :is(.agreement-form,.agreement-proposal-card) { display:block!important; padding:0!important; margin:18px 0 0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
+  #ih68-content .ih-original-terms :is(.agreement-form-heading,.agreement-proposal-topline) { display:flex!important; flex-wrap:wrap!important; justify-content:space-between!important; gap:14px!important; margin:0 0 18px!important; padding:0!important; }
+  #ih68-content .ih-original-terms :is(.agreement-form-heading,.agreement-proposal-topline) h3 { margin-top:6px!important; color:var(--sp-ink)!important; font:650 21px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms :is(.agreement-version-pill,.agreement-pending-pill) { display:inline-block!important; padding:5px 9px!important; border:1px solid var(--sp-line)!important; border-radius:7px!important; color:var(--sp-muted)!important; background:var(--sp-soft)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-form-heading > p { color:var(--sp-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-form-grid { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:18px!important; min-width:0!important; padding:0!important; margin:0!important; border:0!important; }
+  #ih68-content .ih-original-terms .agreement-field { display:grid!important; gap:7px!important; min-width:0!important; padding:0!important; margin:0!important; color:var(--sp-ink)!important; font:550 14px/1.6 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-field-wide { grid-column:1/-1!important; }
+  #ih68-content .ih-original-terms .agreement-field :is(input:not([type="checkbox"]),textarea) { width:100%!important; min-width:0!important; min-height:46px!important; padding:11px 12px!important; margin:0!important; border:1px solid var(--sp-line)!important; border-radius:8px!important; background:var(--sp-paper)!important; color:var(--sp-ink)!important; -webkit-text-fill-color:var(--sp-ink)!important; font:400 16px/1.7 Inter,system-ui,sans-serif!important; box-sizing:border-box!important; }
+  #ih68-content .ih-original-terms .agreement-field textarea { min-height:110px!important; resize:vertical!important; }
+  #ih68-content .ih-original-terms .agreement-price-input { display:flex!important; align-items:center!important; gap:10px!important; }
+  #ih68-content .ih-original-terms .agreement-currency { flex:none!important; color:var(--sp-muted)!important; font-size:14px!important; }
+  #ih68-content .ih-original-terms .agreement-confirmation { display:flex!important; align-items:flex-start!important; gap:10px!important; margin:20px 0!important; color:var(--sp-ink)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms .agreement-confirmation > input { flex:none!important; width:18px!important; height:18px!important; margin-top:3px!important; accent-color:var(--sp-accent)!important; }
+  #ih68-content .ih-original-terms :is(.agreement-primary-button,.agreement-secondary-button) { display:inline-flex!important; justify-content:center!important; align-items:center!important; min-height:46px!important; padding:11px 16px!important; border:1px solid var(--sp-line)!important; border-radius:8px!important; color:var(--sp-ink)!important; background:var(--sp-paper)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; white-space:normal!important; }
+  #ih68-content .ih-original-terms .agreement-primary-button { border-color:var(--sp-accent)!important; color:var(--sp-on)!important; background:var(--sp-accent)!important; }
+  #ih68-content .ih-original-terms button:disabled { opacity:.5!important; cursor:not-allowed!important; }
+  #ih68-content .ih-original-terms :is(.agreement-message,.agreement-waiting-note,.agreement-blocked-note) { display:block!important; margin-top:14px!important; color:var(--sp-muted)!important; font:450 14px/1.75 Inter,system-ui,sans-serif!important; }
+  #ih68-content .ih-original-terms :is(.agreement-form-actions,.agreement-proposal-actions) { margin-top:18px!important; padding-top:0!important; border:0!important; }
+  @media (max-width:850px) {
+    #ih68-content.ih72-room:not(.is-focus) { width:100%!important; max-width:none!important; margin:0!important; border-radius:0!important; }
+    #ih68-content .ih68-thread { padding-inline:12px!important; }
+    #ih68-content .ih-send-area { padding-inline:10px!important; }
+  }
+  @media (max-width:600px) {
+    #ih68-content .ih-original-terms > summary { grid-template-columns:30px minmax(0,1fr)!important; padding:16px!important; gap:10px!important; }
+    #ih68-content .ih-original-terms .agreement-summary-action { grid-column:2!important; grid-row:2!important; }
+    #ih68-content .ih-original-terms .agreement-summary-copy > strong { font-size:16px!important; }
+    #ih68-content .ih-original-terms .agreement-summary-body { padding:0 14px 18px!important; }
+    #ih68-content .ih-original-terms .agreement-details, #ih68-content .ih-original-terms .agreement-form-grid { grid-template-columns:minmax(0,1fr)!important; }
+    #ih68-content .ih-original-terms .agreement-detail { padding:14px!important; }
+    #ih68-content .agreement-gate.ih-original-terms { padding:18px!important; }
+    #ih68-content .ih-original-terms .agreement-form-actions, #ih68-content .ih-original-terms .agreement-proposal-actions { flex-direction:column!important; align-items:stretch!important; }
+    #ih68-content .ih-original-terms :is(.agreement-primary-button,.agreement-secondary-button) { width:100%!important; }
+  }
+  @media (prefers-reduced-motion:reduce) { #ih68-content .ih-original-terms .agreement-summary-action svg { transition:none!important; } }
 }

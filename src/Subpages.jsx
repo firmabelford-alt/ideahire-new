@@ -97,7 +97,7 @@ export function SubpageHistoryControls({ parent = '/account' }) {
     <button type="button" onClick={() => {
       if ((window.history.state?.idx || 0) > 0) navigate(-1);
       else navigate(parent === location.pathname + location.search + location.hash ? '/' : parent);
-    }} aria-label={en ? 'Go back' : 'Wróć'} title={en ? 'Go back' : 'Wróć'}>{en ? 'Back' : 'Wróć'}</button>
+    }} aria-label={en ? 'Go back' : 'Wróć'} title={en ? 'Go back' : 'Wróć'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>{en ? 'Back' : 'Wróć'}</button>
     <button type="button" disabled={!forward} onClick={() => navigate(1)}
       aria-label={en ? 'Go forward' : 'Przejdź dalej'} title={en ? 'Go forward' : 'Przejdź dalej'}>{en ? 'Next' : 'Dalej'}</button>
   </div>;

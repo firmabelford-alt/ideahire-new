@@ -1,7 +1,7 @@
 /* IdeaHire | P40 | 2026-10-15 | Pełny plik: src/MarketUI.jsx | Moduły, mikrokwadraty i widoczność haseł */
 import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { BrandLogo } from "./Brand";
@@ -244,11 +244,19 @@ export function MarketIcon({ kind = "search", ...props }) {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}><path d={paths[kind] || paths.search} /></svg>;
 }
 
-function JobsBackdrop({ en }) {
+const CATALOG_SCENES = [
+  { key: 'jobs', to: '/jobs', pl: 'Zlecenia', en: 'Jobs', video: '/media/ideahire-jobs-background.mp4?v=desk4463352', poster: '/media/ideahire-jobs-poster.jpg?v=desk4463352' },
+  { key: 'people', to: '/freelancers', pl: 'Freelancerzy', en: 'Freelancers', video: '/media/ideahire-freelancers-background.mp4?v=3969421', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421' },
+  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-services-background.mp4?v=7633408', poster: '/media/ideahire-services-poster.jpg?v=7633408' },
+];
+
+function CatalogFilm({ scene, en }) {
   const frame = useRef(null), video = useRef(null);
   const [motionAllowed, setMotionAllowed] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [ready, setReady] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const connection = navigator.connection;
@@ -256,9 +264,12 @@ function JobsBackdrop({ en }) {
     update();
     reduced.addEventListener?.('change', update);
     connection?.addEventListener?.('change', update);
-    const observer = window.IntersectionObserver ? new window.IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.05 }) : null;
+    const observer = window.IntersectionObserver ? new window.IntersectionObserver(([entry]) => {
+      setVisible(entry.isIntersecting);
+      if (entry.isIntersecting) setReady(true);
+    }, { threshold: 0.05 }) : null;
     if (frame.current && observer) observer.observe(frame.current);
-    else setVisible(true);
+    else { setVisible(true); setReady(true); }
     return () => {
       observer?.disconnect();
       reduced.removeEventListener?.('change', update);
@@ -274,15 +285,45 @@ function JobsBackdrop({ en }) {
     update();
     document.addEventListener('visibilitychange', update);
     return () => document.removeEventListener('visibilitychange', update);
-  }, [visible, paused, motionAllowed]);
+  }, [visible, paused, motionAllowed, ready, failed]);
   return <>
-    <div className="ih-jobs-backdrop" ref={frame} aria-hidden="true">
-      {motionAllowed && <video ref={video} src="/media/ideahire-jobs-background.mp4?v=desk4463352" poster="/media/ideahire-jobs-poster.jpg?v=desk4463352" muted loop playsInline preload="none" tabIndex={-1} />}
+    <div className="ih-cinema-film" ref={frame} aria-hidden="true" style={{ backgroundImage: `url("${scene.poster}")` }}>
+      {motionAllowed && ready && !failed && <video ref={video} src={scene.video} poster={scene.poster} muted loop playsInline preload="none" tabIndex={-1} onError={() => setFailed(true)} />}
     </div>
-    {motionAllowed && <button type="button" className="ih-jobs-motion" aria-pressed={paused} onClick={() => setPaused(value => !value)} aria-label={paused ? (en ? 'Play background video' : 'Włącz film w tle') : (en ? 'Pause background video' : 'Zatrzymaj film w tle')}>
+    {motionAllowed && ready && !failed && <button type="button" className="ih-cinema-pause" aria-pressed={paused} onClick={() => setPaused(value => !value)} aria-label={paused ? (en ? 'Play background video' : 'Włącz film w tle') : (en ? 'Pause background video' : 'Zatrzymaj film w tle')}>
       <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">{paused ? <path d="m7 4 9 6-9 6Z" /> : <path d="M5 4h3v12H5zm7 0h3v12h-3z" />}</svg>
     </button>}
   </>;
+}
+
+export function MarketCatalogHero({ active, eyebrow, title, description, actions, className = '' }) {
+  const en = useSitePreferences().language === 'en';
+  const navigate = useNavigate(), location = useLocation();
+  const timer = useRef(null);
+  const [leaving, setLeaving] = useState(0);
+  const index = Math.max(0, CATALOG_SCENES.findIndex(item => item.key === active));
+  const scene = CATALOG_SCENES[index];
+  const previous = CATALOG_SCENES[(index + CATALOG_SCENES.length - 1) % CATALOG_SCENES.length];
+  const next = CATALOG_SCENES[(index + 1) % CATALOG_SCENES.length];
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  function go(target, direction, event) {
+    if (event && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button > 0)) return;
+    event?.preventDefault();
+    if (timer.current || leaving || target.to === location.pathname) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { navigate(target.to); return; }
+    setLeaving(direction);
+    timer.current = window.setTimeout(() => navigate(target.to, { state: { catalogDirection: direction } }), 170);
+  }
+  return <section className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
+    data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
+    <CatalogFilm key={scene.key} scene={scene} en={en} />
+    <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>
+    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
+    <nav className="ih-cinema-arrows" aria-label={en ? 'Switch catalog' : 'Zmień katalog'}>
+      <Link to={previous.to} aria-label={(en ? 'Previous: ' : 'Poprzednia: ') + (en ? previous.en : previous.pl)} aria-disabled={leaving ? true : undefined} onClick={event => go(previous, -1, event)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg><span>{en ? previous.en : previous.pl}</span></Link>
+      <Link to={next.to} aria-label={(en ? 'Next: ' : 'Następna: ') + (en ? next.en : next.pl)} aria-disabled={leaving ? true : undefined} onClick={event => go(next, 1, event)}><span>{en ? next.en : next.pl}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link>
+    </nav>
+  </section>;
 }
 
 export function MarketHeader({ eyebrow, title, description, children }) {
@@ -304,7 +345,8 @@ export function MarketHeader({ eyebrow, title, description, children }) {
     title: en ? 'Edit your job' : 'Edytuj zlecenie',
     description: en ? 'Update the details that freelancers need to prepare an offer.' : 'Zaktualizuj szczegóły potrzebne wykonawcom do przygotowania oferty.',
   } : { eyebrow, title, description };
-  return <div className={jobs ? "ih-market-intro ih-jobs-intro" : undefined}>{jobs && <JobsBackdrop en={en} />}{jobs && <SubpageCatalogTabs active="jobs" />}<SubpageHeading {...heading} actions={children || (jobs ? <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link> : undefined)} variant={jobs ? 'catalog' : 'editor'} /></div>;
+  if (jobs) return <MarketCatalogHero active="jobs" {...heading} actions={children || <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link>} />;
+  return <div><SubpageHeading {...heading} actions={children} variant="editor" /></div>;
 }
 
 export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
@@ -315,10 +357,7 @@ export function MarketCatalogHeader({ eyebrow, title, description, count, noun =
   const english = { jobs: 'job', services: 'service', profiles: 'profile' }[noun] || 'result';
   const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
   return <div className="ih73-catalog-header">
-    <div className="ih-market-intro">
-    {tabs || <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />}
-    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
-    </div>
+    <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} eyebrow={eyebrow} title={title} description={description} actions={actions} />
     <div className="ih73-catalog-context">
       <p className="ih73-result-count" role="status" aria-live="polite" aria-atomic="true">{statusCopy || <><strong>{new Intl.NumberFormat(en ? 'en-GB' : 'pl-PL').format(value)}</strong><span>{en ? english + (value === 1 ? '' : 's') : polish}</span></>}</p>
     </div>
