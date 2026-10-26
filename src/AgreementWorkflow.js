@@ -40,3 +40,24 @@ export function termsDecisionContent(action, agreement, reason) {
   const title = action === 'closed' ? 'Rezygnacja ze współpracy' : 'Prośba o zmianę ustaleń';
   return `${title} — wersja ${agreement.version}.\n${reason.trim()}${TERMS_MARKER}${JSON.stringify({ agreementId: agreement.id, version: Number(agreement.version), action, reason: reason.trim() })}`;
 }
+
+export function agreementPermissions({ conversation, agreement, userId, decision, loading = false, error = '', blocked = false, canTransact = true, waitingForReply = false }) {
+  const participant = Boolean(userId && conversation && [conversation.client_id,conversation.contractor_id].includes(userId));
+  const eligible = participant && conversation.agreements_required && !loading && !error && !blocked && canTransact;
+  const firstId = conversation?.first_proposer_role === 'contractor' ? conversation?.contractor_id:conversation?.client_id;
+  const proposalByMe = Boolean(agreement && agreement.created_by === userId);
+  const acceptedByMe = Boolean(agreement && (userId === conversation?.client_id ? agreement.client_accepted_at:agreement.contractor_accepted_at));
+  const otherAccepted = Boolean(agreement && (userId === conversation?.client_id ? agreement.contractor_accepted_at:agreement.client_accepted_at));
+  const closed = Boolean(conversation?.negotiation_closed_at || decision?.action === 'closed');
+  const proposed = Boolean(eligible && !closed && agreement?.conversation_id === conversation.id && agreement.status === 'proposed');
+  const changes = decision?.action === 'changes';
+  const canStart = Boolean(eligible && !closed && !agreement && firstId === userId && !waitingForReply);
+  return {
+    proposalByMe, canStart,
+    canEdit: Boolean(canStart || proposed && (changes || !proposalByMe && !acceptedByMe)),
+    canAccept: Boolean(proposed && !decision && !acceptedByMe && (!proposalByMe || otherAccepted)),
+    canRequestChanges: Boolean(proposed && !decision && !proposalByMe && !acceptedByMe),
+    canDecline: Boolean(proposed && (changes || !proposalByMe && !acceptedByMe)),
+    waitingForResponse: Boolean(proposed && proposalByMe && !decision),
+  };
+}

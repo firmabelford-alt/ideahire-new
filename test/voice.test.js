@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { VoiceCapture, encodeVoiceWav, prepareVoiceFile, voiceRecordingSupported, VOICE_LIMIT_MS, VOICE_CAPTURE_BYTES } from '../src/VoiceRecording.js';
 import { sendPrivateVoice } from '../src/VoiceTransfer.js';
+import { audioPosition, audioTime, recordingDuration } from '../src/VoicePlayback.js';
 
 function captureFixture(getUserMedia) {
   let now = 0, stopped = 0, timer;
@@ -20,6 +21,19 @@ function captureFixture(getUserMedia) {
   return { capture, stream, events, errors, ready, Recorder, stopped: () => stopped, advance: value => { now = value; timer?.(); }, hasTimer: () => Boolean(timer) };
 }
 const tick = () => new Promise(resolve => queueMicrotask(resolve));
+
+test('voice playback: times remain useful before metadata and for long recordings', () => {
+  assert.equal(audioTime(NaN),'0:00'); assert.equal(audioTime(Infinity),'0:00'); assert.equal(audioTime(-8),'0:00');
+  assert.equal(audioTime(2.7),'0:02'); assert.equal(audioTime(120),'2:00');
+});
+test('voice playback: our WAV duration hint rejects impossible or missing byte counts', () => {
+  assert.equal(recordingDuration(96044),2); assert.equal(recordingDuration(5760044),120);
+  for (const bytes of [null,0,44,-1,'invalid',Infinity,100000000]) assert.equal(recordingDuration(bytes),0);
+});
+test('voice playback: seeking never leaves the loaded recording range', () => {
+  assert.equal(audioPosition(-9,2),0); assert.equal(audioPosition(90,2),2); assert.equal(audioPosition('1.25',2),1.25);
+  assert.equal(audioPosition(1,Infinity),0); assert.equal(audioPosition(NaN,2),0); assert.equal(audioPosition(1,0),0);
+});
 
 test('voice: opening a conversation does not request microphone access', () => {
   let requests = 0;

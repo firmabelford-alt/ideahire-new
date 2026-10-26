@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Mic, Square, Trash2, Send, LoaderCircle, RotateCw } from 'lucide-react';
 import { useSitePreferences } from './Preferences';
 import { VoiceCapture, prepareVoiceFile, voiceRecordingSupported } from './VoiceRecording';
+import VoicePlayer from './VoicePlayer';
+import { recordingDuration } from './VoicePlayback';
 
 const voiceTime = seconds => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
@@ -88,7 +90,7 @@ export function VoiceMessageControls({ voice }) {
       <div className="ih-voice-draft-main">
         {recording ? <><span className="ih-voice-recording-dot" /><strong>{t('Nagrywanie', 'Recording')}</strong><time>{voiceTime(voice.seconds)} / 2:00</time><button type="button" onClick={voice.stop} className="ih-voice-stop"><Square size={16} fill="currentColor" />{t('Zatrzymaj', 'Stop')}</button></>
           : waiting ? <p role="status"><LoaderCircle className="ih-voice-loading" size={19} />{phase === 'requesting' ? t('Oczekiwanie na mikrofon…', 'Waiting for the microphone…') : phase === 'sending' ? t('Wysyłanie nagrania…', 'Sending recording…') : t('Przygotowanie odsłuchu…', 'Preparing playback…')}</p>
-          : <audio key={voice.url} src={voice.url} controls preload="metadata" aria-label={t('Odsłuchaj nagranie przed wysłaniem', 'Listen to the recording before sending')} />}
+          : <VoicePlayer key={voice.url} url={voice.url} durationHint={recordingDuration(voice.file?.size)} label={t('Odsłuchaj nagranie przed wysłaniem', 'Listen to the recording before sending')} />}
         <div className="ih-voice-draft-actions">
           <button type="button" onClick={voice.discard} disabled={phase === 'sending'} aria-label={t('Usuń niewysłane nagranie', 'Discard this recording')} title={t('Usuń nagranie', 'Discard recording')}><Trash2 size={19} /></button>
           {phase === 'review' && <button type="button" className="ih-voice-send" onClick={voice.send} disabled={voice.disabled}><Send size={18} />{t('Wyślij', 'Send')}</button>}
@@ -105,6 +107,10 @@ export function AudioMessageAttachment({ item, url, ownMessage, onReport }) {
   const english = useSitePreferences().language === 'en';
   const t = (pl, en) => english ? en : pl;
   const isVoice = /^Wiadomość głosowa /.test(item.display_name || '');
+  if (isVoice) return <section className="ih-audio-message is-voice" aria-label={t('Wiadomość głosowa', 'Voice message')}>
+    <VoicePlayer url={url} durationHint={recordingDuration(item.byte_size)} downloadName={item.display_name}
+      onReport={!ownMessage && onReport ? () => onReport('shared_item', item.id) : undefined}/>
+  </section>;
   return <section className="ih-audio-message" aria-label={t('Nagranie audio', 'Audio recording')}>
     <header><Mic size={17} /><strong>{isVoice ? t('Wiadomość głosowa', 'Voice message') : item.display_name || t('Nagranie audio', 'Audio recording')}</strong></header>
     {url ? <audio controls preload="none" src={url} aria-label={t('Odtwórz wiadomość głosową', 'Play voice message')} /> : <p>{t('Nagranie jest chwilowo niedostępne. Odśwież rozmowę.', 'The recording is temporarily unavailable. Refresh the conversation.')}</p>}

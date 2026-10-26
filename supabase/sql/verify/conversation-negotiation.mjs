@@ -148,6 +148,28 @@ test('declining a service atomically releases its held slot and notifies the oth
   await assert.rejects(() => db.query("update public.conversation_agreements set client_accepted_at=now() where id=$1", [id]), /została porzucona/);
 });
 
+test('client-first service terms stay locked until a reply; the client can decline a counterproposal and restore capacity', async () => {
+  await db.query("update public.conversations set origin_type='service_inquiry', origin_id=$1, first_proposer_role='client' where id=$2", [inquiry,room]);
+  await db.query('insert into public.freelancer_services(id) values($1)',[service]);
+  await db.query('insert into public.service_inquiries(id,conversation_id,service_id) values($1,$2,$3)',[inquiry,room,service]);
+  const first = await propose();
+  await db.query('insert into public.service_reservations(inquiry_id,agreement_id,service_id) values($1,$2,$3)',[inquiry,first,service]);
+  await assert.rejects(propose,/czeka na odpowiedź/);
+  await as(freelancer);
+  const counter = await propose();
+  assert.equal((await row('conversation_agreements',counter)).version,2);
+  await assert.rejects(propose,/czeka na odpowiedź/);
+  await as(client);
+  const result = await respond(counter,'closed','Nie akceptuję nowych warunków');
+  assert.equal(result.released_slots,1); assert.equal(result.message.sender_id,client);
+  assert.equal(result.agreement.response_action,'closed'); assert.match(result.message.content,/Nie akceptuję nowych warunków/);
+  const available = await db.query("select s.capacity_limit - count(r.id)::int as free from public.freelancer_services s left join public.service_reservations r on r.service_id=s.id and r.status in ('held','active') where s.id=$1 group by s.capacity_limit",[service]);
+  assert.equal(available.rows[0].free,1);
+  await as(freelancer);
+  const repeated = await respond(counter,'closed','Odczyt drugiej strony');
+  assert.equal(repeated.changed,false); assert.equal(repeated.message.id,result.message.id);
+});
+
 test('a failed notification rolls back closure and slot release together', async () => {
   const id = await heldService();
   await db.exec("alter table public.messages add constraint simulate_message_failure check(content not like '%Rezygnacja ze współpracy%')");

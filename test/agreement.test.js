@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { latestTermsDecision, readTermsDecision, termsDecisionContent } from '../src/AgreementWorkflow.js';
+import { agreementPermissions, latestTermsDecision, readTermsDecision, termsDecisionContent } from '../src/AgreementWorkflow.js';
 
 const conversation = { id: 'room-1', client_id: 'client', contractor_id: 'freelancer' };
 const agreement = { id: '11111111-1111-4111-8111-111111111111', conversation_id: conversation.id, version: 2, created_by: 'client' };
@@ -43,4 +43,39 @@ test('old conversations can still show a valid recipient change request', () => 
 
 test('erasing the response author does not reopen a closed collaboration', () => {
   assert.equal(latestTermsDecision([], { ...agreement, response_action: 'closed', response_by: null }, conversation)?.action, 'closed');
+});
+
+const serviceConversation = { ...conversation, agreements_required:true, origin_type:'service_inquiry',first_proposer_role:'client' };
+const pending = { ...agreement,status:'proposed',client_accepted_at:'2026-10-26T12:00:00Z',contractor_accepted_at:null,response_action:null };
+const permissions = (userId,record = pending,decision = null,extra = {}) => agreementPermissions({conversation:serviceConversation,agreement:record,userId,decision,...extra});
+test('the client sends the first service proposal and waits without an edit or decision shortcut', () => {
+  assert.equal(permissions('client',null).canStart,true);
+  assert.equal(permissions('freelancer',null).canStart,false);
+  const author = permissions('client');
+  assert.equal(author.canEdit,false); assert.equal(author.canAccept,false); assert.equal(author.canDecline,false); assert.equal(author.waitingForResponse,true);
+});
+test('the freelancer can accept, ask for changes, counterpropose or decline client terms', () => {
+  const recipient = permissions('freelancer');
+  for (const action of ['canAccept','canEdit','canRequestChanges','canDecline']) assert.equal(recipient[action],true,action);
+});
+test('a request for changes unlocks a new version or a decision to end negotiations', () => {
+  const decision = { action:'changes',senderId:'freelancer' };
+  assert.equal(permissions('client',pending,decision).canEdit,true);
+  assert.equal(permissions('client',pending,decision).canDecline,true);
+  assert.equal(permissions('client',pending,decision).canAccept,false);
+});
+test('the client can accept, counter or decline a freelancer counterproposal; its author waits', () => {
+  const counter = { ...pending,created_by:'freelancer',version:3,client_accepted_at:null,contractor_accepted_at:'2026-10-26T12:10:00Z' };
+  const clientActions = permissions('client',counter);
+  assert.equal(clientActions.canAccept,true); assert.equal(clientActions.canEdit,true); assert.equal(clientActions.canDecline,true);
+  assert.equal(permissions('freelancer',counter).canEdit,false);
+});
+test('accepted, closed, stale, inaccessible or unconfirmed terms never expose negotiation actions', () => {
+  const allDisabled = actions => ['canStart','canEdit','canAccept','canRequestChanges','canDecline'].forEach(action => assert.equal(actions[action],false,action));
+  allDisabled(permissions('client',{...pending,status:'accepted'}));
+  allDisabled(permissions('freelancer',pending,{action:'closed'}));
+  allDisabled(permissions('freelancer',{...pending,status:'superseded'}));
+  allDisabled(permissions('freelancer',{...pending,conversation_id:'other-room'}));
+  allDisabled(permissions('stranger'));
+  for (const extra of [{loading:true},{error:'refresh'},{blocked:true},{canTransact:false}]) allDisabled(permissions('freelancer',pending,null,extra));
 });

@@ -40,6 +40,7 @@ import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments"
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
+import { agreementPermissions } from "./AgreementWorkflow";
 import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision } from "./ConversationCards";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
@@ -19573,6 +19574,12 @@ function AgreementPanel({
   canStart,
   canEdit,
   proposalByMe,
+  canAccept,
+  canRequestChanges,
+  canDecline,
+  currentUserId,
+  isClient,
+  isServiceInquiry,
   decision,
   error,
   onRefresh,
@@ -19645,8 +19652,8 @@ function AgreementPanel({
   if (decision?.action === "closed") {
     return <section className="agreement-gate ih-original-terms ih-negotiation-closed">
       <span className="agreement-eyebrow">Ustalenia · wersja {agreement?.version}</span>
-      <h2>Współpraca została zakończona przed rozpoczęciem</h2><p>{decision.reason}</p>
-      <p>Ta propozycja nie stanowi wspólnie zaakceptowanych warunków. Wiadomości i przesłane materiały pozostają w rozmowie.</p>
+      <h2>{!decision.senderId ? "Negocjacje zostały zakończone" : decision.senderId === currentUserId ? "Zrezygnowałeś ze współpracy" : "Druga strona zrezygnowała ze współpracy"}</h2><p>{decision.reason}</p>
+      <p>Nie uzgodniono wspólnej wersji warunków. Wiadomości i przesłane materiały pozostają w rozmowie.</p>
       <details><summary>Zobacz ostatnią propozycję</summary><AgreementDetails agreement={agreement} /></details>
     </section>;
   }
@@ -19680,7 +19687,7 @@ function AgreementPanel({
       </div>
 
       {error && <div className="agreement-load-error" role="alert"><p>{error}</p><button type="button" onClick={onRefresh} disabled={saving}>Pobierz ponownie</button></div>}
-      {decision?.action === "changes" && <aside className="agreement-decision-notice"><strong>{proposalByMe ? "Druga strona prosi o zmianę ustaleń" : "Poprosiłeś o zmianę ustaleń"}</strong><p>{decision.reason}</p><p>{proposalByMe ? "Popraw propozycję i wyślij nową wersję albo porzuć współpracę. Jeśli druga strona prześle własne warunki, zobaczysz je tutaj do przeczytania i akceptacji." : "Czekasz na poprawioną wersję. Możesz też zaproponować własne warunki albo porzucić współpracę."}</p></aside>}
+      {decision?.action === "changes" && <aside className="agreement-decision-notice"><strong>{proposalByMe ? "Druga strona prosi o zmianę ustaleń" : "Poprosiłeś o zmianę ustaleń"}</strong><p>{decision.reason}</p><p>{proposalByMe ? "Popraw propozycję i wyślij nową wersję albo zrezygnuj ze współpracy. Jeśli druga strona prześle własne warunki, zobaczysz je tutaj do przeczytania i akceptacji." : "Czekasz na poprawioną wersję. Możesz też zaproponować własne warunki albo zrezygnować ze współpracy."}</p></aside>}
       {mode === "form" && canEdit && !error ? (
         <form
           className="agreement-form"
@@ -19874,7 +19881,7 @@ function AgreementPanel({
               }
             />
             <span>
-              Potwierdzam, że zapoznałem się z warunkami współpracy i akceptuję treść wysyłanej propozycji.
+              Akceptuję treść tej propozycji. Może ona zostać przyjęta wyłącznie w całości, bez zmian; zmiana warunków wymaga nowej wersji i jej akceptacji.
             </span>
           </label>
 
@@ -19920,7 +19927,7 @@ function AgreementPanel({
               <span className="agreement-version-pill">
                 Wersja {agreement.version}
               </span>
-              <h3>Propozycja warunków</h3>
+              <h3>{proposalByMe ? "Twoja propozycja warunków" : isClient ? "Propozycja freelancera" : "Propozycja klienta"}</h3>
             </div>
 
             <span className="agreement-pending-pill">
@@ -19928,6 +19935,7 @@ function AgreementPanel({
             </span>
           </div>
 
+          {!proposalByMe && !decision && <p className="agreement-recipient-note">Przeczytaj warunki. Możesz je zaakceptować, zaproponować własne albo zrezygnować ze współpracy.</p>}
           <AgreementDetails
             agreement={agreement}
           />
@@ -19953,7 +19961,7 @@ function AgreementPanel({
                 {proposalByMe ? "Popraw i wyślij nową wersję" : "Zaproponuj własne warunki"}
               </button>}
 
-              {!currentUserAccepted && (!proposalByMe || otherUserAccepted) && !decision ? (
+              {canAccept ? (
                 <button
                   type="button"
                   className="agreement-primary-button"
@@ -19969,18 +19977,18 @@ function AgreementPanel({
                   Propozycja została wysłana. Edycja będzie dostępna, jeśli druga strona poprosi o zmiany.
                 </span>
               ) : currentUserAccepted && !decision ? <span className="agreement-waiting-note">Twoja akceptacja tej wersji jest zapisana.</span> : null}
-              {!proposalByMe && !decision && <button type="button" className="agreement-secondary-button" disabled={saving} onClick={() => setDecisionMode("changes")}>Poproś o zmiany</button>}
+              {canRequestChanges && <button type="button" className="agreement-secondary-button" disabled={saving} onClick={() => setDecisionMode("changes")}>Poproś o zmiany</button>}
               <button type="button" className="agreement-secondary-button" disabled={saving} onClick={onRefresh}>Odśwież ustalenia</button>
-              <button type="button" className="agreement-text-button" disabled={saving} onClick={() => setDecisionMode("closed")}>Porzuć współpracę</button>
+              {canDecline && <button type="button" className="agreement-text-button" disabled={saving} onClick={() => setDecisionMode("closed")}>Zrezygnuj ze współpracy</button>}
             </div>
           )}
-          {decisionMode && !blocked && !error && <form className="agreement-response-form" onSubmit={async event => {
+          {decisionMode && (decisionMode === "closed" ? canDecline : canRequestChanges) && !blocked && !error && <form className="agreement-response-form" onSubmit={async event => {
             event.preventDefault();
-            const saved = await onDecision(decisionMode, decisionReason.trim() || "Współpraca nie będzie kontynuowana na podstawie tej propozycji.");
+            const saved = await onDecision(decisionMode, decisionReason.trim() || "Nie decyduję się na współpracę na zaproponowanych warunkach.");
             if (saved) { setDecisionMode(""); setDecisionReason(""); }
           }}>
-            <h3>{decisionMode === "changes" ? "Co wymaga zmiany?" : "Porzuć współpracę"}</h3>
-            <p>{decisionMode === "changes" ? "Propozycja wróci do autora. Twoja wiadomość pojawi się także w rozmowie." : "Druga strona otrzyma wiadomość o rezygnacji. Zarezerwowane miejsce w usłudze zostanie zwolnione. Historia rozmowy zostanie zachowana."}</p>
+            <h3>{decisionMode === "changes" ? "Co wymaga zmiany?" : "Zrezygnuj ze współpracy"}</h3>
+            <p>{decisionMode === "changes" ? "Propozycja wróci do autora. Twoja wiadomość pojawi się także w rozmowie." : ("Druga strona otrzyma wiadomość o rezygnacji." + (isServiceInquiry ? " Rezerwacja miejsca w usłudze zostanie zwolniona." : "") + " Historia rozmowy zostanie zachowana. Ta decyzja kończy negocjacje przed wspólną akceptacją warunków.")}</p>
             <label><span>{decisionMode === "changes" ? "Opisz wymagane zmiany" : "Powód (opcjonalnie)"}</span><AutoTextarea value={decisionReason} onChange={event => setDecisionReason(event.target.value)} maxLength={1200} minLength={decisionMode === "changes" ? 3 : undefined} required={decisionMode === "changes"} rows={3} disabled={saving} /></label>
             <div><button type="button" className="agreement-secondary-button" onClick={() => setDecisionMode("")} disabled={saving}>Wróć</button><button type="submit" className="agreement-primary-button" disabled={saving}>{saving ? "Wysyłanie…" : decisionMode === "changes" ? "Wyślij prośbę o zmiany" : "Potwierdź rezygnację"}</button></div>
           </form>}
@@ -20680,7 +20688,7 @@ function Chat() {
     window.requestAnimationFrame(() => {
       if (value === "conversation") {
         if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
-        else document.getElementById("ih70-room-options")?.focus({ preventScroll: true });
+        else document.querySelector(".ih-room-menu-toggle")?.focus({ preventScroll: true });
       } else {
         const panel = document.getElementById(`ih68-room-${value}`);
         panel?.focus({ preventScroll: true });
@@ -20705,7 +20713,7 @@ function Chat() {
     element.scrollTop = element.scrollHeight;
   }
   useEffect(() => {
-    if (loading || (workspaceTab !== "conversation" && !window.matchMedia("(min-width:1180px)").matches) || !followMessagesRef.current) return;
+    if (loading || workspaceTab !== "conversation" || !followMessagesRef.current) return;
     const frame = window.requestAnimationFrame(() => scrollToLatestMessage());
     return () => window.cancelAnimationFrame(frame);
   }, [messages, workspaceTab, loading, focusMode]);
@@ -21572,7 +21580,7 @@ function Chat() {
   async function handleAgreementDecision(action, reason) {
     if (!agreement?.id || !["changes", "closed"].includes(action) || agreementSaving || agreementOperationRef.current
       || messagingBlocked || !canTransact || agreement.status === "accepted") return false;
-    if (action === "changes" && agreement.created_by === user?.id) return false;
+    if (action === "changes" ? !negotiation.canRequestChanges : !negotiation.canDecline) return false;
     if (reason.trim().length < 3 || reason.trim().length > 1200) return false;
     const operationToken = { scope: chatScope };
     agreementOperationRef.current = operationToken;
@@ -21584,7 +21592,8 @@ function Chat() {
       if (operationToken.scope !== chatScopeRef.current) return false;
       if (!fresh || fresh.agreement?.id !== agreement.id || fresh.agreement.status === "accepted") throw new Error("Stan ustaleń zmienił się. Sprawdź aktualną wersję.");
       if (fresh.decision?.action === "closed") throw new Error("Negocjacje zostały już zakończone.");
-      if (action === "changes" && fresh.decision) throw new Error("Prośba o zmiany została już zapisana. Możesz przygotować nową propozycję.");
+      const currentPermissions = agreementPermissions({ conversation, agreement:fresh.agreement, userId:user.id, decision:fresh.decision, blocked:messagingBlocked, canTransact });
+      if (action === "changes" ? !currentPermissions.canRequestChanges : !currentPermissions.canDecline) throw new Error("Ta propozycja czeka na odpowiedź drugiej strony albo została już rozstrzygnięta. Odśwież ustalenia.");
       const { data, error } = await supabase.rpc("respond_to_conversation_agreement", {
         p_agreement_id: fresh.agreement.id, p_action: action, p_reason: reason.trim(),
       });
@@ -21599,7 +21608,7 @@ function Chat() {
       if (action === "closed") window.dispatchEvent(new CustomEvent("ideahire:service-capacity-updated", { detail: { serviceId: data.service_id } }));
       setAgreementMode("view");
       setAgreementMessageTone("success");
-      setAgreementMessage(action === "changes" ? "Prośba o zmianę została wysłana. Autor propozycji może przygotować nową wersję." : "Współpraca została porzucona. Druga strona otrzymała wiadomość." + (data.released_slots > 0 ? " Rezerwacja miejsca w usłudze została zwolniona." : ""));
+      setAgreementMessage(action === "changes" ? "Prośba o zmianę została wysłana. Autor propozycji może przygotować nową wersję." : "Negocjacje zakończono. Druga strona otrzymała wiadomość." + (data.released_slots > 0 ? " Rezerwacja miejsca w usłudze została zwolniona." : ""));
       return true;
     } catch (error) {
       if (operationToken.scope !== chatScopeRef.current) return false;
@@ -21817,12 +21826,9 @@ function Chat() {
       : null);
 
   const agreementDecision = latestTermsDecision(messages, agreement, conversation);
-  const proposalByMe = Boolean(agreement && agreement.created_by === user?.id);
-  const firstProposalId = conversation?.first_proposer_role === "contractor" ? conversation?.contractor_id : conversation?.client_id;
-  const canStartAgreement = Boolean(agreementsRequired && firstProposalId === user?.id && !waitingForProfileReply && canTransact);
-  const canEditAgreement = Boolean(!agreementLoading && !agreementError && !messagingBlocked && canTransact
-    && (agreement ? agreement.status !== "accepted" && agreementDecision?.action !== "closed"
-      && (!proposalByMe && !currentUserAccepted || agreementDecision?.action === "changes") : canStartAgreement));
+  const negotiation = agreementPermissions({ conversation, agreement, userId:user?.id, decision:agreementDecision,
+    loading:agreementLoading, error:agreementError, blocked:messagingBlocked, canTransact, waitingForReply:waitingForProfileReply });
+  const { proposalByMe, canStart:canStartAgreement, canEdit:canEditAgreement } = negotiation;
   const firstProposalByMe = (conversation?.first_proposer_role === 'contractor'
     ? conversation?.contractor_id : conversation?.client_id) === user?.id;
   const replyInConversation = () => {
@@ -21835,7 +21841,7 @@ function Chat() {
       description: roomCopy('Przed podjęciem decyzji pobierz aktualną propozycję.', 'Load the current proposal before making a decision.'),
       actionLabel: roomCopy('Odśwież ustalenia', 'Refresh terms'), onAction: () => openWorkspace('plan'),
     } : agreementDecision?.action === 'closed' ? {
-      title: roomCopy('Współpraca została porzucona', 'Collaboration declined'),
+      title: roomCopy('Negocjacje zostały zakończone', 'Negotiations ended'),
       description: roomCopy('Informacja i ostatnia propozycja pozostają w historii ustaleń.', 'The decision and last proposal remain in the terms history.'),
       actionLabel: roomCopy('Zobacz ustalenia', 'View terms'), onAction: () => openWorkspace('plan'),
     } : agreementDecision?.action === 'changes' ? {
@@ -21879,7 +21885,7 @@ function Chat() {
                 openRequest={disputeOpenRequest}
                 launcherHidden
               />}
-      thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef}
+      thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef} followEndRef={followMessagesRef}
         renderContent={message=><>{String(message.content||'').trim() && !(message.content === 'Wiadomość głosowa' && (privateWork.itemsByMessage[message.id] || []).some(item => /^Wiadomość głosowa /.test(item.display_name || ''))) && (readTermsDecision(message, null, conversation)
           ? <TermsDecisionMessage decision={readTermsDecision(message, null, conversation)} own={message.sender_id === user.id} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
           : isInquiryMessage(message.content) ? <InquiryMessageCard text={message.content} renderText={text => <MessageText text={text}/>} onTerms={() => openWorkspace('plan')} english={roomEnglish} firstProposalRole={conversation?.first_proposer_role} />
@@ -21954,6 +21960,8 @@ function Chat() {
                       canStart={canStartAgreement}
                       canEdit={canEditAgreement}
                       proposalByMe={proposalByMe}
+                      canAccept={negotiation.canAccept} canDecline={negotiation.canDecline} canRequestChanges={negotiation.canRequestChanges}
+                      currentUserId={user?.id} isClient={isClient} isServiceInquiry={conversation?.origin_type === "service_inquiry"}
                       decision={agreementDecision}
                       error={agreementError}
                       onRefresh={() => refreshAgreementState()}
