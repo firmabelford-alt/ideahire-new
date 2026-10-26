@@ -71,6 +71,25 @@ test('voice: decoding failures close the audio context', async () => {
   class Context { async decodeAudioData() { throw new Error('decode'); } async close() { closed = true; } }
   await assert.rejects(prepareVoiceFile(new Blob(['bad']), { AudioContext: Context }), /decode/); assert.equal(closed,true);
 });
+test('voice: preview conversion resamples to a private-upload compatible mono WAV', async () => {
+  let closed = false, connected = false;
+  const decoded = { duration:1 };
+  class Context { async decodeAudioData() { return decoded; } async close() { closed = true; } }
+  class Offline {
+    constructor(channels,frames,rate) { assert.deepEqual([channels,frames,rate],[1,24000,24000]); this.destination = {}; }
+    createBufferSource() { const source = { connect: () => { connected = true; }, start: () => assert.equal(source.buffer,decoded) }; return source; }
+    async startRendering() { return { getChannelData: channel => { assert.equal(channel,0); return new Float32Array(24000); } }; }
+  }
+  const file = await prepareVoiceFile(new Blob(['encoded audio']), { AudioContext: Context,OfflineAudioContext: Offline });
+  assert.equal(file.type,'audio/wav'); assert.equal(file.size,48044); assert.match(file.name,/^Wiadomość głosowa .*\.wav$/);
+  assert.ok(closed && connected);
+});
+test('voice: a recording too short for a useful preview is rejected before rendering', async () => {
+  let closed = false;
+  class Context { async decodeAudioData() { return { duration:.01 }; } async close() { closed = true; } }
+  await assert.rejects(prepareVoiceFile(new Blob(['short']), { AudioContext: Context }), /VOICE_INVALID_AUDIO/);
+  assert.equal(closed,true);
+});
 
 const voiceFile = () => new File([encodeVoiceWav(new Float32Array(24000))], 'Wiadomość głosowa test.wav', { type:'audio/wav' });
 function transferFixture(options = {}) {
