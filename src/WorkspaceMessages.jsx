@@ -8,6 +8,8 @@ import { SubpageHeading } from './Subpages';
 import { isInquiryMessage } from './ConversationCards';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { WorkspaceAvatar, WorkspaceConversationRows, WorkspaceIcon, WorkspaceLoading, useWorkspaceCopy } from './Workspace';
+import { useVoiceMessage, VoiceMessageControls } from './VoiceMessages';
+import './ConversationMessenger.css';
 export function WorkspaceInbox({
   user, conversations = [], visibleConversations = [], loading, errorMessage,
   search, setSearch, inboxFilter, setInboxFilter, unreadCount,
@@ -65,19 +67,6 @@ export function WorkspaceThread({
   const t = useWorkspaceCopy();
   const en = useSitePreferences().language === 'en';
   const optionsRoot = useRef(null);
-  const scrollCallback = useRef(onScroll);
-  scrollCallback.current = onScroll;
-  useEffect(() => {
-    const pageScroll = () => {
-      const room = optionsRoot.current?.closest('.ih-message-workspace');
-      if (!room || room.classList.contains('is-focus') || !window.matchMedia('(min-width:851px)').matches) return;
-      if (room.dataset.view === 'conversation' && document.scrollingElement) {
-        scrollCallback.current?.({ currentTarget: document.scrollingElement });
-      }
-    };
-    window.addEventListener('scroll', pageScroll, { passive: true });
-    return () => window.removeEventListener('scroll', pageScroll);
-  }, []);
   useEffect(() => {
     const close = event => {
       optionsRoot.current?.querySelectorAll('.ih68-message-options[open]').forEach(details => {
@@ -137,8 +126,10 @@ function fitWorkspaceDraft(field) {
 function SendPanelIcon({ add = false, photo = false }) {
   return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{photo ? <><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="8" cy="8" r="1.5" /><path d="m4 17 5-5 4 4 3-3 5 5" /></> : <path d={add ? 'M12 5v14M5 12h14' : 'M4 12h15m-6-6 6 6-6 6'} />}</svg>;
 }
-export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerRef, onSubmit, onMaterials, onPhotos, materialsDisabled = false, errorMessage, blockedByMe, profileId, recipientName }) {
+export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerRef, onSubmit, onMaterials, onPhotos, materialsDisabled = false, errorMessage, blockedByMe, profileId, recipientName, conversationId, onSendVoice, onRefresh, active = true }) {
   const t = useWorkspaceCopy(), areaRef = useRef(null);
+  const voice = useVoiceMessage({ scope: conversationId, active, disabled: blocked || sending, onSend: onSendVoice, onRefresh });
+  const unavailable = sending || voice.busy;
   useLayoutEffect(() => { fitWorkspaceDraft(composerRef.current); }, [draft, composerRef, blocked]);
   useEffect(() => {
     const field = composerRef.current;
@@ -180,16 +171,20 @@ export function WorkspaceComposer({ draft, setDraft, sending, blocked, composerR
   return <div className="ih-send-area" ref={areaRef}>
     {errorMessage && <p className="ih-send-error" role="alert">{errorMessage}</p>}
     {blocked ? <p className="ih-send-blocked"><WorkspaceIcon kind="lock" /><span>{blockedByMe ? t('Rozmowa jest zablokowana. Możesz odblokować osobę na jej profilu.', 'This conversation is blocked. You can unblock the person on their profile.') : t('Wysyłanie wiadomości jest wyłączone.', 'Sending messages is disabled.')}{blockedByMe && <Link to={'/profile/' + profileId}>{t('Otwórz profil', 'Open profile')}</Link>}</span></p> : <>
-      <form className="ih-send-form ih-send-row" onSubmit={onSubmit} aria-busy={sending}>
-        <button type="button" className="ih-send-add" onClick={onMaterials} disabled={sending || materialsDisabled} aria-label={t('Dodaj materiały do rozmowy', 'Add conversation materials')} title={t('Plik, link lub tekst', 'File, link or text')}><SendPanelIcon add /></button>
+      <form className="ih-send-form ih-send-row" onSubmit={event => { if (voice.busy) event.preventDefault(); else onSubmit(event); }} aria-busy={sending || voice.phase === 'sending'}>
+        <div className="ih-send-options">
+          <button type="button" className="ih-send-add" onClick={onMaterials} disabled={unavailable || materialsDisabled} aria-label={t('Dodaj materiały do rozmowy', 'Add conversation materials')} title={t('Plik, link lub tekst', 'File, link or text')}><SendPanelIcon add /></button>
+          <button type="button" className="ih-send-photo" onClick={onPhotos} disabled={unavailable || materialsDisabled} aria-label={t('Wybierz zdjęcia', 'Choose photos')} title={t('Wybierz zdjęcia', 'Choose photos')}><SendPanelIcon photo /></button>
+        </div>
         <label htmlFor="ih68-message-draft" className="ih-send-sr">{t('Wiadomość do: ', 'Message to: ') + recipientName}</label>
-        <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} aria-describedby="ih-send-help" placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={sending}
+        <textarea id="ih68-message-draft" ref={composerRef} rows={1} value={draft} maxLength={4000} aria-describedby="ih-send-help" placeholder={t('Napisz wiadomość…', 'Write a message…')} disabled={unavailable}
           onChange={event => setDraft(event.target.value)} onKeyDown={event => {
             if (event.isComposing || event.nativeEvent?.isComposing) return;
             if (event.key === 'Enter' && !event.shiftKey && !window.matchMedia?.('(pointer: coarse)').matches) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); }
           }} />
-        <button type="button" className="ih-send-photo" onClick={onPhotos} disabled={sending || materialsDisabled} aria-label={t('Wybierz zdjęcia', 'Choose photos')} title={t('Wybierz zdjęcia', 'Choose photos')}><SendPanelIcon photo /></button>
-        <button type="submit" className="ih-send-submit" disabled={sending || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><SendPanelIcon /></button>
+
+        <button type="submit" className="ih-send-submit" disabled={unavailable || !draft.trim()} aria-label={sending ? t('Wysyłanie wiadomości', 'Sending message') : t('Wyślij wiadomość', 'Send message')}><span>{sending ? t('Wysyłanie…', 'Sending…') : t('Wyślij', 'Send')}</span><SendPanelIcon /></button>
+        <VoiceMessageControls voice={voice} />
       </form><p id="ih-send-help" className="ih-send-sr">{t('Na komputerze Enter wysyła. Shift + Enter dodaje linię.', 'On desktop, Enter sends. Shift + Enter adds a line.')}</p>
     </>}
   </div>;
@@ -327,6 +322,13 @@ export function WorkspaceConversation({
   const t = useWorkspaceCopy();
   const frameRef = useRef(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [wide, setWide] = useState(() => window.matchMedia('(min-width:1180px)').matches);
+  useEffect(() => {
+    const query = window.matchMedia('(min-width:1180px)');
+    const update = () => setWide(query.matches);
+    query.addEventListener('change', update); update();
+    return () => query.removeEventListener('change', update);
+  }, []);
   useLayoutEffect(() => {
     let task = 0,
       scrollTask = 0;
@@ -335,16 +337,10 @@ export function WorkspaceConversation({
     function measure() {
       task = 0;
       if (!element) return;
-      if (!focusMode && window.matchMedia?.('(min-width:851px)').matches) {
-        element.style.removeProperty('--ih68-room-height');
-        element.style.removeProperty('top');
-        element.classList.remove('is-keyboard');
-        return;
-      }
       const narrow = window.matchMedia?.('(max-width:850px)').matches,
         inset = focusMode ? narrow ? 0 : 16 : 0,
         top = focusMode || narrow ? inset : Math.max(0, element.getBoundingClientRect().top - (viewport?.offsetTop || 0)),
-        bottom = focusMode ? inset : narrow ? 0 : 24,
+        bottom = focusMode ? inset : narrow ? 0 : 12,
         height = Math.max(160, Math.floor((viewport?.height || window.innerHeight) - top - bottom));
       const thread = element.querySelector('.ih68-thread');
       const atEnd = thread && thread.scrollHeight - thread.scrollTop - thread.clientHeight < 100;
@@ -429,13 +425,14 @@ export function WorkspaceConversation({
   }, [focusMode, onFocusMode]);
   const closeMenu = () => setOptionsOpen(false);
   const showPlan = view === 'plan';
+  const showConversation = wide || view === 'conversation';
   const closeContext = () => onView('conversation');
   return <>
     {focusMode && createPortal(<div className="ih68-focus-scrim" aria-hidden="true" />, document.body)}
-    <main ref={frameRef} id="ih68-content" data-view={view}
+    <main ref={frameRef} id="ih68-content" data-view={view} data-split={wide && view !== 'conversation'}
       role={focusMode ? 'dialog' : undefined} aria-modal={focusMode ? true : undefined}
       aria-label={t('Rozmowa IdeaHire', 'IdeaHire conversation')}
-      className={'ih68-room ih72-room ih-structured-room ih-message-workspace ih-chat-workspace ih-conversation-with-context' + (focusMode ? ' is-focus' : '')}>
+      className={'ih68-room ih72-room ih-structured-room ih-message-workspace ih-chat-workspace ih-conversation-with-context ih-messenger' + (focusMode ? ' is-focus' : '')}>
       {loading ? <WorkspaceLoading /> : !hasConversation ?
         <section className="ih68-room-error"><h1>{t('Nie można otworzyć rozmowy', 'Unable to open this conversation')}</h1><p role="alert">{errorMessage}</p><button type="button" className="ih68-secondary" onClick={onBack}><WorkspaceIcon kind="back" />{backLabel}</button></section> : <>
         <header className="ih68-room-header">
@@ -451,14 +448,13 @@ export function WorkspaceConversation({
         <nav className="ih72-room-nav" aria-label={t('Rozmowa i współpraca', 'Conversation and project')}>
           <button type="button" aria-current={view === 'conversation' ? 'page' : undefined} aria-controls="ih69-conversation-panel" onClick={() => onView('conversation')}><WorkspaceIcon kind="message" /><span>{t('Rozmowa', 'Chat')}</span></button>
           <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')} title={termsPending ? t('Propozycja wymaga Twojej decyzji', 'The proposal needs your decision') : undefined}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{termsPending && <i className="ih-terms-pending-dot" aria-label={t('Do Twojej decyzji', 'Your decision is needed')} />}{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
-          <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Materiały', 'Materials')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
+          <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Materiały', 'Materials')}</span>{materialCount > 0 && <small aria-label={String(materialCount)}>{materialCount > 99 ? '99+' : materialCount}</small>}</button>
           <button type="button" aria-current={view === 'payment' ? 'page' : undefined} aria-controls="ih68-room-payment" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność', 'Payment')}</span></button>
         </nav>
         {disputePanel}
         <div className="ih68-room-body">
-          <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={view !== 'conversation'}>
-            {nextStep && <aside className="ih-chat-next-step" aria-label={t('Co dalej', 'Next step')}><div><strong>{nextStep.title}</strong><p>{nextStep.description}</p></div><button type="button" onClick={nextStep.onAction}>{nextStep.actionLabel}<WorkspaceIcon kind="next" /></button></aside>}
-            {thread}{composer}
+          <section className="ih68-correspondence" id="ih69-conversation-panel" aria-label={t('Rozmowa', 'Conversation')} hidden={!showConversation}>
+            {thread}{React.isValidElement(composer) ? React.cloneElement(composer, { active: showConversation }) : composer}
           </section>
           <aside className="ih-conversation-context" hidden={view !== 'conversation'} aria-label={t('Podsumowanie współpracy', 'Project overview')}>
             <div className="ih-conversation-context-project"><WorkspaceIcon kind="work" /><span>{t('Współpraca', 'Project')}</span><h2>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h2>{category && <p>{category}</p>}</div>

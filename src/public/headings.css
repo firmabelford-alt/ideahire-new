@@ -1680,39 +1680,6 @@
   body.ih68-workspace #root .ih72-inbox .ih-inbox-empty > svg { width: 30px !important; height: 30px !important; color: var(--a-muted) !important; }
   body.ih68-workspace #root .ih72-inbox .ih-inbox-empty h2 { margin: 0 !important; font: 650 21px/1.4 var(--ih-heading-font) !important; }
   body.ih68-workspace #root .ih72-inbox .ih-inbox-empty p { max-width: 48ch !important; margin: 0 !important; font: 400 14px/1.6 var(--ih-heading-font) !important; }
-  body #root #ih68-content .ih-conversation-context { display: none !important; }
-  @media (min-width: 851px) {
-    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) { width: calc(100% - 48px) !important; max-width: 1180px !important; height: calc(100dvh - 176px) !important; min-height: 480px !important; max-height: 960px !important; margin: 16px auto 40px !important; overflow: hidden !important; }
-    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) .ih68-room-body { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; width: 100% !important; height: auto !important; min-height: 0 !important; overflow: hidden !important; }
-    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) .ih68-correspondence:not([hidden]) { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; width: 100% !important; height: 100% !important; min-width: 0 !important; min-height: 0 !important; overflow: hidden !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih68-thread-wrap { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; min-height: 0 !important; height: auto !important; overflow: hidden !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih68-thread { flex: 1 1 0 !important; min-height: 0 !important; height: auto !important; padding: 20px !important; overflow-y: auto !important; overscroll-behavior: contain !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih68-thread-inner { width: 100% !important; max-width: 760px !important; margin-inline: auto !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih-send-area { flex: none !important; width: 100% !important; padding: 12px 20px 16px !important; border: 0 !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih-send-form.ih-send-row { width: 100% !important; max-width: 760px !important; margin-inline: auto !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih-chat-next-step { flex: none !important; width: calc(100% - 40px) !important; max-width: 760px !important; margin: 0 auto !important; padding-block: 14px !important; }
-    body #root #ih68-content.ih-conversation-with-context .ih68-room-page:not([hidden]) { flex: 1 1 0 !important; min-height: 0 !important; overflow-y: auto !important; }
-  }
-  @media (min-width: 1101px) {
-    body #root #ih68-content.ih-conversation-with-context:not(.is-focus)[data-view="conversation"] .ih68-room-body { display: grid !important; grid-template-columns: minmax(0,1fr) 244px !important; grid-template-rows: minmax(0,1fr) !important; gap: 16px !important; padding-right: 16px !important; }
-    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) .ih-conversation-context:not([hidden]) { box-sizing: border-box !important; display: flex !important; flex-direction: column !important; align-self: start !important; gap: 20px !important; min-width: 0 !important; min-height: 0 !important; max-height: calc(100% - 32px) !important; margin: 16px 0 !important; padding: 20px 16px !important; overflow-y: auto !important; border: 1px solid var(--a-line) !important; border-radius: 12px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; }
-    body #root #ih68-content .ih-conversation-context-project { display: grid !important; grid-template-columns: 18px minmax(0,1fr) !important; gap: 8px !important; }
-    body #root #ih68-content .ih-conversation-context-project > svg { width: 18px !important; height: 18px !important; color: var(--a-muted) !important; }
-    body #root #ih68-content .ih-conversation-context-project > span { color: var(--a-muted) !important; font: 500 12px/1.5 var(--ih-heading-font) !important; }
-    body #root #ih68-content .ih-conversation-context-project > h2 { grid-column: 1/-1 !important; margin: 4px 0 0 !important; font: 650 16px/1.5 var(--ih-heading-font) !important; overflow-wrap: anywhere !important; }
-    body #root #ih68-content .ih-conversation-context-project > p { grid-column: 1/-1 !important; margin: 0 !important; color: var(--a-muted) !important; font: 400 12px/1.6 var(--ih-heading-font) !important; }
-    body #root #ih68-content .ih-conversation-context-facts { display: grid !important; gap: 16px !important; margin: 0 !important; }
-    body #root #ih68-content .ih-conversation-context-facts > div { display: grid !important; gap: 4px !important; min-width: 0 !important; }
-    body #root #ih68-content .ih-conversation-context-facts dt { color: var(--a-muted) !important; font: 400 12px/1.5 var(--ih-heading-font) !important; }
-    body #root #ih68-content .ih-conversation-context-facts dd { margin: 0 !important; font: 600 13px/1.6 var(--ih-heading-font) !important; overflow-wrap: anywhere !important; }
-    body #root #ih68-content .ih-conversation-context > nav { display: grid !important; gap: 6px !important; }
-    body #root #ih68-content .ih-conversation-context > nav > button { display: flex !important; align-items: center !important; gap: 9px !important; width: 100% !important; min-width: 0 !important; min-height: 40px !important; margin: 0 !important; padding: 8px 10px !important; border: 0 !important; border-radius: 8px !important; background: var(--a-soft) !important; color: var(--a-ink) !important; font: 550 12px/1.5 var(--ih-heading-font) !important; text-align: start !important; cursor: pointer !important; }
-    body #root #ih68-content .ih-conversation-context > nav > button > span { flex: 1 !important; }
-    body #root #ih68-content .ih-conversation-context :is(nav,.ih-conversation-context-person) svg { flex: none !important; width: 16px !important; height: 16px !important; }
-    body #root #ih68-content .ih-conversation-context-person { display: flex !important; align-items: center !important; gap: 10px !important; padding-top: 16px !important; border-top: 1px solid var(--a-line) !important; color: var(--a-ink) !important; text-decoration: none !important; }
-    body #root #ih68-content .ih-conversation-context-person > span:not(.ih68-avatar) { flex: 1 !important; min-width: 0 !important; font: 600 13px/1.5 var(--ih-heading-font) !important; overflow-wrap: anywhere !important; }
-    body #root #ih68-content .ih-conversation-context-person small { display: block !important; color: var(--a-muted) !important; font: 400 12px/1.5 var(--ih-heading-font) !important; }
-  }
   @media (max-width: 600px) {
     body.ih68-workspace #root .ih72-inbox { width: calc(100% - 32px) !important; }
     body.ih68-workspace #root .ih72-inbox .ih72-list-toolbar { align-items: stretch !important; gap: 12px !important; }

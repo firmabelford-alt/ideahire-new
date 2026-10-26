@@ -68,6 +68,7 @@ import {
   containsCredentialLikeText,
   MessageText,
   PrivateMessageMaterials,
+  sendConversationVoice,
   PrivateReportDialog,
   PrivateSharePanel,
   ProjectFilesPanel,
@@ -20667,29 +20668,22 @@ function Chat() {
   const materialPhotoInputRef = useRef(null);
   const [focusMode, setFocusMode] = useState(false);
   const workspaceFocusRef = useRef(null);
-  const conversationPageScroll = useRef(null);
-  useEffect(() => { setWorkspaceTab("conversation"); setOpenMaterialDialog(false); workspaceFocusRef.current = null; conversationPageScroll.current = null; }, [id]);
+  useEffect(() => { setWorkspaceTab("conversation"); setOpenMaterialDialog(false); workspaceFocusRef.current = null; setSending(false); }, [id]);
   useEffect(() => {
     const paymentReturn = new URLSearchParams(roomLocation.search).get("payment");
     if (paymentReturn === "success" || paymentReturn === "cancelled") setWorkspaceTab("payment");
   }, [id, roomLocation.search]);
   function openWorkspace(value) {
-    const pageFlow = window.matchMedia("(min-width:851px)").matches && !focusMode;
-    if (pageFlow && workspaceTab === "conversation") conversationPageScroll.current = window.scrollY;
     setWorkspaceTab(value);
     if (value !== "files") setOpenMaterialDialog(false);
     if (value === "plan") void refreshAgreementState();
     window.requestAnimationFrame(() => {
       if (value === "conversation") {
-        if (pageFlow && !followMessagesRef.current && conversationPageScroll.current !== null) {
-          window.scrollTo({ top: conversationPageScroll.current, behavior: "instant" });
-          messageViewportRef.current?.focus({ preventScroll: true });
-        } else if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
+        if (!window.matchMedia?.("(pointer: coarse)").matches) composerRef.current?.focus({ preventScroll: true });
         else document.getElementById("ih70-room-options")?.focus({ preventScroll: true });
       } else {
         const panel = document.getElementById(`ih68-room-${value}`);
         panel?.focus({ preventScroll: true });
-        if (pageFlow) panel?.scrollIntoView({ block: "start", behavior: "instant" });
       }
     });
   }
@@ -20705,19 +20699,13 @@ function Chat() {
     }
   }, [draft]);
   useEffect(() => { followMessagesRef.current = true; setShowLatest(false); }, [id]);
-  function scrollToLatestMessage(revealComposer = false) {
+  function scrollToLatestMessage() {
     const element = messageViewportRef.current;
     if (!element) return;
-    if (window.matchMedia("(min-width:851px)").matches && !focusMode) {
-      const lastMessage = element.querySelector(".ih68-message:last-child");
-      const target = revealComposer || draft ? composerRef.current?.closest(".ih-send-area") : lastMessage;
-      (target || composerRef.current?.closest(".ih-send-area"))?.scrollIntoView({
-        block: target === lastMessage ? "start" : "end", behavior: "instant",
-      });
-    } else element.scrollTop = element.scrollHeight;
+    element.scrollTop = element.scrollHeight;
   }
   useEffect(() => {
-    if (loading || workspaceTab !== "conversation" || !followMessagesRef.current) return;
+    if (loading || (workspaceTab !== "conversation" && !window.matchMedia("(min-width:1180px)").matches) || !followMessagesRef.current) return;
     const frame = window.requestAnimationFrame(() => scrollToLatestMessage());
     return () => window.cancelAnimationFrame(frame);
   }, [messages, workspaceTab, loading, focusMode]);
@@ -21654,6 +21642,7 @@ function Chat() {
       return;
     }
 
+    const sendScope = chatScope;
     setSending(true);
     setErrorMessage("");
 
@@ -21677,8 +21666,8 @@ function Chat() {
         throw error;
       }
 
+      if (sendScope !== chatScopeRef.current) return;
       setDraft("");
-      if (id !== chatIdRef.current) return;
       /*
        * Dodajemy wiadomość lokalnie od razu.
        * Realtime ma ochronę przed duplikatem po id.
@@ -21695,13 +21684,25 @@ function Chat() {
         );
       }
     } catch (error) {
+      if (sendScope !== chatScopeRef.current) return;
       setErrorMessage(
         error?.message ||
           "Nie udało się wysłać wiadomości."
       );
     } finally {
-      setSending(false);
+      if (sendScope === chatScopeRef.current) setSending(false);
     }
+  }
+
+  async function handleSendVoice(file) {
+    if (!user?.id || !id || messagingBlocked) throw new Error("VOICE_UNAVAILABLE");
+    const room = id, voiceScope = chatScope;
+    await sendConversationVoice(room, file);
+    if (voiceScope !== chatScopeRef.current) return;
+    followMessagesRef.current = true;
+    setShowLatest(false);
+    try { await Promise.all([privateWork.reload(), loadMessages()]); }
+    catch { if (voiceScope === chatScopeRef.current) setErrorMessage(roomCopy("Nagranie zapisano. Odśwież rozmowę, aby je zobaczyć.", "Recording saved. Refresh the conversation to see it.")); }
   }
 
   async function handleHideConversation() {
@@ -21879,7 +21880,7 @@ function Chat() {
                 launcherHidden
               />}
       thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef}
-        renderContent={message=><>{String(message.content||'').trim() && (readTermsDecision(message, null, conversation)
+        renderContent={message=><>{String(message.content||'').trim() && !(message.content === 'Wiadomość głosowa' && (privateWork.itemsByMessage[message.id] || []).some(item => /^Wiadomość głosowa /.test(item.display_name || ''))) && (readTermsDecision(message, null, conversation)
           ? <TermsDecisionMessage decision={readTermsDecision(message, null, conversation)} own={message.sender_id === user.id} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
           : isInquiryMessage(message.content) ? <InquiryMessageCard text={message.content} renderText={text => <MessageText text={text}/>} onTerms={() => openWorkspace('plan')} english={roomEnglish} firstProposalRole={conversation?.first_proposer_role} />
           : <MessageText text={message.content}/>)} <PrivateMessageMaterials
@@ -21893,7 +21894,7 @@ function Chat() {
         onReport={messageId=>privateWork.setReportTarget({type:'message',id:messageId})}
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);scrollToLatestMessage(true);}}/>}
-      composer={<WorkspaceComposer draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
+      composer={<WorkspaceComposer conversationId={`${user?.id}:${id}`} onSendVoice={handleSendVoice} onRefresh={() => Promise.all([privateWork.reload(), loadMessages()])} draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
         onSubmit={event=>{followMessagesRef.current=true;handleSend(event);}} onMaterials={()=>setOpenMaterialDialog(true)} onPhotos={()=>{ const input=materialPhotoInputRef.current; if(input && !input.disabled) input.click(); else setOpenMaterialDialog(true); }} materialsDisabled={privateWork.loading} errorMessage={errorMessage} blockedByMe={blockedByMe} profileId={otherProfileId} recipientName={otherName}/>}
       materials={<><div className="ih69-material-toolbar"><div><p>{roomCopy('Materiały w rozmowie:','Materials in this conversation:')} <strong>{activeMaterialCount}</strong></p></div><PrivateSharePanel
                       key={id} compact openRequest={openMaterialDialog} onOpenRequest={setOpenMaterialDialog} photoInputRef={materialPhotoInputRef}

@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import { Upload, Link2, FileText, ShieldCheck, X, Plus, Paperclip, ChevronDown, File as FileIcon } from "lucide-react";
 import { IdeaHireDateField, MarketSelect, getSafeWebUrl } from "./MarketUI";
 import { supabase } from "./supabase";
+import { AudioMessageAttachment } from "./VoiceMessages";
+import { sendPrivateVoice } from "./VoiceTransfer";
 
 const PRIVATE_WORK_BUCKET = "ideahire-private-work";
 const MAX_ITEMS = 24;
@@ -82,6 +84,24 @@ function formatBytes(value) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+export function sendConversationVoice(conversationId, file) {
+  return sendPrivateVoice({ conversationId, file }, {
+    invoke: invokeSecureWork,
+    upload: async (prepared, voiceFile) => {
+      const { error } = await supabase.storage.from(PRIVATE_WORK_BUCKET).uploadToSignedUrl(prepared.path, prepared.token, voiceFile,
+        { contentType: prepared.mimeType, cacheControl: "3600" });
+      if (error) throw error;
+    },
+    remove: async path => { await supabase.storage.from(PRIVATE_WORK_BUCKET).remove([path]); },
+    findCommitted: async (itemId, conversationId) => {
+      const { data, error } = await supabase.from("ideahire_shared_items").select("id,message_id")
+        .eq("id", itemId).eq("conversation_id", conversationId).maybeSingle();
+      if (error) throw error;
+      return Boolean(data?.message_id);
+    },
+  });
 }
 
 function getFilePresentation(item) {
@@ -493,7 +513,9 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
   const visible = items.filter((item) => item.moderation_status === "active");
   const hidden = items.filter((item) => item.moderation_status === "hidden");
   const images = visible.filter((item) => item.item_type === "image" && signedUrls[item.storage_path]);
-  const files = visible.filter((item) => item.item_type === "file");
+  const isAudio = item => item.item_type === "file" && (item.material_kind === "audio" || String(item.mime_type || "").startsWith("audio/"));
+  const audio = visible.filter(isAudio);
+  const files = visible.filter((item) => item.item_type === "file" && !isAudio(item));
   const links = visible.filter((item) => item.item_type === "link");
   const writtenItems = visible.filter((item) => item.item_type === "text");
   const accessItems = visible.filter((item) => item.item_type === "access");
@@ -518,6 +540,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
 
   return (
     <div className="private-work-materials">
+      {audio.map(item => <AudioMessageAttachment key={item.id} item={item} url={signedUrls[item.storage_path]} ownMessage={ownMessage} onReport={onReport} />)}
       {imageAlbums.length > 0 && (
         <div className="private-work-albums">
           {imageAlbums.map((album) => {
