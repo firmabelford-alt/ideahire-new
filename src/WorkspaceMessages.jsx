@@ -44,7 +44,7 @@ export function WorkspaceInbox({
     <section className="ih72-inbox-content" aria-label={t('Lista rozmów', 'Conversation list')}>
       {loading ? <WorkspaceLoading /> : errorMessage ? <p className="ih68-feedback" role="alert">{errorMessage}</p> : visibleConversations.length ?
         <WorkspaceConversationRows conversations={visibleConversations} user={user} loading={loading} /> :
-        <div className="ih79-empty"><h2>{conversations.length ? t('Brak pasujących rozmów', 'No matching conversations') : t('Brak rozmów', 'No conversations')}</h2><p>{conversations.length ? t('Zmień wyszukiwanie lub pokaż wszystkie rozmowy.', 'Change your search or show all conversations.') : t('Znajdź wykonawcę albo odpowiedz na zlecenie. Wiadomości znajdziesz tutaj.', 'Find a freelancer or reply to a job. Your messages will appear here.')}</p>{conversations.length ? <button type="button" className="ih68-secondary" onClick={reset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/freelancers" className="ih68-primary">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
+        <div className="ih79-empty ih-inbox-empty"><WorkspaceIcon kind="message" /><h2>{conversations.length ? t('Brak pasujących rozmów', 'No matching conversations') : t('Brak rozmów', 'No conversations')}</h2><p>{conversations.length ? t('Zmień wyszukiwanie lub pokaż wszystkie rozmowy.', 'Change your search or show all conversations.') : t('Znajdź wykonawcę albo odpowiedz na zlecenie. Wiadomości znajdziesz tutaj.', 'Find a freelancer or reply to a job. Your messages will appear here.')}</p>{conversations.length ? <button type="button" className="ih68-secondary" onClick={reset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/freelancers" className="ih68-primary">{t('Znajdź wykonawcę', 'Find a freelancer')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
     </section>
     </div></div>
   </main>;
@@ -312,7 +312,6 @@ export function WorkspaceConversation({
   hiding,
   onDispute,
   canDispute,
-  projectDetails,
   projectPlan,
   nextStep,
   thread,
@@ -436,7 +435,7 @@ export function WorkspaceConversation({
     <main ref={frameRef} id="ih68-content" data-view={view}
       role={focusMode ? 'dialog' : undefined} aria-modal={focusMode ? true : undefined}
       aria-label={t('Rozmowa IdeaHire', 'IdeaHire conversation')}
-      className={'ih68-room ih72-room ih-structured-room ih-message-workspace ih-chat-workspace' + (focusMode ? ' is-focus' : '')}>
+      className={'ih68-room ih72-room ih-structured-room ih-message-workspace ih-chat-workspace ih-conversation-with-context' + (focusMode ? ' is-focus' : '')}>
       {loading ? <WorkspaceLoading /> : !hasConversation ?
         <section className="ih68-room-error"><h1>{t('Nie można otworzyć rozmowy', 'Unable to open this conversation')}</h1><p role="alert">{errorMessage}</p><button type="button" className="ih68-secondary" onClick={onBack}><WorkspaceIcon kind="back" />{backLabel}</button></section> : <>
         <header className="ih68-room-header">
@@ -454,9 +453,6 @@ export function WorkspaceConversation({
           <button type="button" aria-current={view === 'plan' ? 'page' : undefined} aria-controls="ih68-room-plan" onClick={() => onView('plan')} title={termsPending ? t('Propozycja wymaga Twojej decyzji', 'The proposal needs your decision') : undefined}><WorkspaceIcon kind="jobs" /><span>{t('Ustalenia', 'Terms')}</span>{termsPending && <i className="ih-terms-pending-dot" aria-label={t('Do Twojej decyzji', 'Your decision is needed')} />}{accepted && <WorkspaceIcon kind="check" className="ih72-terms-check" aria-label={t('Warunki zaakceptowane', 'Terms accepted')} aria-hidden="false" />}</button>
           <button type="button" aria-current={view === 'files' ? 'page' : undefined} aria-controls="ih68-room-files" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Materiały', 'Materials')}</span>{materialCount > 0 && <small>{materialCount}</small>}</button>
           <button type="button" aria-current={view === 'payment' ? 'page' : undefined} aria-controls="ih68-room-payment" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność', 'Payment')}</span></button>
-        <button type="button" className={'ih-room-payment-status ih-message-payment-control is-' + (paymentOverview?.tone || 'neutral')} onClick={() => onView('payment')} aria-controls="ih68-room-payment">
-          <span>{t('Status płatności', 'Payment status')}</span><strong role="status" aria-live="polite" aria-atomic="true">{paymentOverview?.label || t('Sprawdzanie…', 'Checking…')}</strong><WorkspaceIcon kind="next" />
-        </button>
         </nav>
         {disputePanel}
         <div className="ih68-room-body">
@@ -464,6 +460,20 @@ export function WorkspaceConversation({
             {nextStep && <aside className="ih-chat-next-step" aria-label={t('Co dalej', 'Next step')}><div><strong>{nextStep.title}</strong><p>{nextStep.description}</p></div><button type="button" onClick={nextStep.onAction}>{nextStep.actionLabel}<WorkspaceIcon kind="next" /></button></aside>}
             {thread}{composer}
           </section>
+          <aside className="ih-conversation-context" hidden={view !== 'conversation'} aria-label={t('Podsumowanie współpracy', 'Project overview')}>
+            <div className="ih-conversation-context-project"><WorkspaceIcon kind="work" /><span>{t('Współpraca', 'Project')}</span><h2>{jobTitle || t('Zapytanie o współpracę', 'Project inquiry')}</h2>{category && <p>{category}</p>}</div>
+            <dl className="ih-conversation-context-facts">
+              <div><dt>{t('Ustalenia', 'Terms')}</dt><dd>{accepted ? t('Zaakceptowane przez obie strony', 'Accepted by both parties') : nextStep?.title || t('Do uzgodnienia', 'To be agreed')}</dd></div>
+              <div><dt>{t('Płatność', 'Payment')}</dt><dd role="status" aria-live="polite">{paymentOverview?.label || t('Sprawdzanie…', 'Checking…')}</dd></div>
+              <div><dt>{t('Materiały w rozmowie', 'Shared materials')}</dt><dd>{materialCount || 0}</dd></div>
+            </dl>
+            <nav aria-label={t('Skróty do współpracy', 'Project shortcuts')}>
+              <button type="button" onClick={() => onView('plan')}><WorkspaceIcon kind="jobs" /><span>{t('Otwórz ustalenia', 'Open terms')}</span><WorkspaceIcon kind="next" /></button>
+              <button type="button" onClick={() => onView('files')}><WorkspaceIcon kind="files" /><span>{t('Zobacz materiały', 'View materials')}</span><WorkspaceIcon kind="next" /></button>
+              <button type="button" onClick={() => onView('payment')}><WorkspaceIcon kind="lock" /><span>{t('Płatność i rozliczenie', 'Payment details')}</span><WorkspaceIcon kind="next" /></button>
+            </nav>
+            <Link className="ih-conversation-context-person" to={'/profile/' + profileId}><WorkspaceAvatar name={otherName} url={blocked ? null : avatarUrl} small /><span>{otherName}<small>{t('Zobacz profil', 'View profile')}</small></span><WorkspaceIcon kind="next" /></Link>
+          </aside>
           <section hidden={view !== 'files'} className="ih68-room-page ih69-materials-page" id="ih68-room-files" tabIndex={-1} aria-label={t('Materiały projektu', 'Project materials')}>
             <header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Materiały', 'Materials')}</h2><p>{t('Pliki, linki i przekazane rezultaty w jednym miejscu.', 'Files, links and delivered work in one place.')}</p></div></header>{materials}
           </section>

@@ -1,37 +1,19 @@
 import React from 'react';
-
-const TERMS_MARKER = '\n\n[IdeaHire:terms:v1]';
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-export function readTermsDecision(message, agreement, conversation) {
-  if (!message || !conversation || message.moderation_status === 'hidden') return null;
-  if (message.conversation_id !== conversation.id || ![conversation.client_id, conversation.contractor_id].includes(message.sender_id)) return null;
-  const content = String(message.content || '');
-  const index = content.lastIndexOf(TERMS_MARKER);
-  if (index < 0) return null;
-  try {
-    const event = JSON.parse(content.slice(index + TERMS_MARKER.length));
-    if (!UUID.test(event.agreementId) || !Number.isInteger(event.version) || event.version < 1) return null;
-    if (agreement && (event.agreementId !== agreement.id || event.version !== Number(agreement.version))) return null;
-    if (!['changes', 'closed'].includes(event.action)) return null;
-    if (event.action === 'changes' && agreement && message.sender_id === agreement.created_by) return null;
-    return { ...event, reason: String(event.reason || '').slice(0, 1200), senderId: message.sender_id, messageId: message.id, createdAt: message.created_at };
-  } catch { return null; }
-}
-
-export function latestTermsDecision(messages, agreement, conversation) {
-  if (!agreement || !conversation) return null;
-  return messages.map(message => readTermsDecision(message, agreement, conversation)).filter(Boolean)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
-}
-
-export function termsDecisionContent(action, agreement, reason) {
-  const title = action === 'closed' ? 'Zakończenie negocjacji' : 'Prośba o zmianę ustaleń';
-  return `${title} — wersja ${agreement.version}.\n${reason.trim()}${TERMS_MARKER}${JSON.stringify({ agreementId: agreement.id, version: Number(agreement.version), action, reason: reason.trim() })}`;
-}
+import { TERMS_MARKER } from './AgreementWorkflow';
+export { latestTermsDecision, readTermsDecision, termsDecisionContent } from './AgreementWorkflow';
 
 export function isInquiryMessage(text) {
   return /^Zapytanie o (?:usługę|współpracę):\s*\S/i.test(String(text || '').trim());
+}
+
+export function conversationMessagePreview(content, english = false) {
+  let text = String(content || '').split(TERMS_MARKER)[0].trim();
+  if (isInquiryMessage(text)) {
+    const scope = text.match(/(?:^|\n)Cel i zakres:\s*([\s\S]*?)(?=\n\s*\n|$)/i);
+    text = scope?.[1] || (english ? 'New project inquiry' : 'Nowe zapytanie o współpracę');
+  }
+  text = text.replace(/\s+/g, ' ').trim();
+  return text.length > 115 ? text.slice(0, 112).trimEnd() + '…' : text;
 }
 
 function inquiryParts(text) {
@@ -47,12 +29,13 @@ function inquiryParts(text) {
   return { title, fields };
 }
 
-export function InquiryMessageCard({ text, renderText, onTerms, english = false }) {
+export function InquiryMessageCard({ text, renderText, onTerms, english = false, firstProposalRole }) {
   const { title, fields } = inquiryParts(text);
   return <section className="ih-inquiry-card" aria-label={english ? 'Project inquiry' : 'Zapytanie o współpracę'}>
     <div className="ih-inquiry-card-heading"><span>{english ? 'Project inquiry' : 'Zapytanie o współpracę'}</span><h3>{title}</h3></div>
     <div className="ih-inquiry-card-fields">{fields.map((field, index) => <div key={index} className={field.label ? 'has-label' : 'is-note'}>
-      {field.label && <strong>{field.label}</strong>}<div>{renderText(field.text)}</div>
+      {field.label && <strong>{field.label}</strong>}<div>{renderText(firstProposalRole === 'client' && field.text === 'To niewiążące zapytanie. Oczekuję na ofertę wykonawcy z zakresem, terminem i ceną.'
+        ? (english ? 'This is a non-binding inquiry. The client prepares the first proposal. The freelancer can accept it or propose changes.' : 'To niewiążące zapytanie. Zleceniodawca przygotowuje pierwszą propozycję ustaleń. Wykonawca może ją zaakceptować albo zaproponować zmiany.') : field.text)}</div>
     </div>)}</div>
     {onTerms && <button type="button" className="ih-inquiry-card-action" onClick={onTerms}>{english ? 'Open project terms' : 'Przejdź do ustaleń'}<span aria-hidden="true">→</span></button>}
   </section>;
@@ -62,7 +45,7 @@ export function TermsDecisionMessage({ decision, own, onTerms, english = false }
   const closed = decision.action === 'closed';
   return <section className={`ih-terms-decision-card${closed ? ' is-closed' : ''}`}>
     <span>{english ? `Terms · version ${decision.version}` : `Ustalenia · wersja ${decision.version}`}</span>
-    <h3>{closed ? (english ? 'Negotiations ended' : 'Negocjacje zakończone') : own ? (english ? 'You requested changes' : 'Poprosiłeś o zmianę ustaleń') : (english ? 'The other person requested changes' : 'Druga strona poprosiła o zmiany')}</h3>
+    <h3>{closed ? own ? (english ? 'You declined this collaboration' : 'Zrezygnowałeś ze współpracy') : (english ? 'The other person declined this collaboration' : 'Druga strona zrezygnowała ze współpracy') : own ? (english ? 'You requested changes' : 'Poprosiłeś o zmianę ustaleń') : (english ? 'The other person requested changes' : 'Druga strona poprosiła o zmiany')}</h3>
     <p>{decision.reason}</p>
     <button type="button" onClick={onTerms}>{english ? 'View terms' : 'Zobacz ustalenia'}<span aria-hidden="true">→</span></button>
   </section>;

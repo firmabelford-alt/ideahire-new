@@ -40,7 +40,7 @@ import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments"
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
-import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision, termsDecisionContent } from "./ConversationCards";
+import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision } from "./ConversationCards";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref, getSafeWebUrl } from "./MarketUI";
@@ -9926,7 +9926,7 @@ function Account() {
               </div>
             </div>
 
-            <label>
+            <label className="account-profile-name">
               Imię / nazwa
 
               <input
@@ -9941,7 +9941,7 @@ function Account() {
               />
             </label>
 
-            <label>
+            <label className="account-profile-about">
               O mnie
 
               <AutoTextarea
@@ -10111,7 +10111,7 @@ function Account() {
               </small>
             </fieldset>
 
-            <label>
+            <label className="account-profile-specialization">
               W czym się specjalizujesz?
 
               <AutoTextarea
@@ -19644,7 +19644,7 @@ function AgreementPanel({
   if (decision?.action === "closed") {
     return <section className="agreement-gate ih-original-terms ih-negotiation-closed">
       <span className="agreement-eyebrow">Ustalenia · wersja {agreement?.version}</span>
-      <h2>Negocjacje zakończone</h2><p>{decision.reason}</p>
+      <h2>Współpraca została zakończona przed rozpoczęciem</h2><p>{decision.reason}</p>
       <p>Ta propozycja nie stanowi wspólnie zaakceptowanych warunków. Wiadomości i przesłane materiały pozostają w rozmowie.</p>
       <details><summary>Zobacz ostatnią propozycję</summary><AgreementDetails agreement={agreement} /></details>
     </section>;
@@ -19679,7 +19679,7 @@ function AgreementPanel({
       </div>
 
       {error && <div className="agreement-load-error" role="alert"><p>{error}</p><button type="button" onClick={onRefresh} disabled={saving}>Pobierz ponownie</button></div>}
-      {decision?.action === "changes" && <aside className="agreement-decision-notice"><strong>{proposalByMe ? "Druga strona prosi o zmianę ustaleń" : "Poprosiłeś o zmianę ustaleń"}</strong><p>{decision.reason}</p><p>{proposalByMe ? "Możesz poprawić propozycję i wysłać nową wersję albo zakończyć negocjacje. Jeśli druga strona prześle własną propozycję, zobaczysz ją tutaj do akceptacji." : "Czekasz na poprawioną wersję. Możesz też przygotować własną propozycję."}</p></aside>}
+      {decision?.action === "changes" && <aside className="agreement-decision-notice"><strong>{proposalByMe ? "Druga strona prosi o zmianę ustaleń" : "Poprosiłeś o zmianę ustaleń"}</strong><p>{decision.reason}</p><p>{proposalByMe ? "Popraw propozycję i wyślij nową wersję albo porzuć współpracę. Jeśli druga strona prześle własne warunki, zobaczysz je tutaj do przeczytania i akceptacji." : "Czekasz na poprawioną wersję. Możesz też zaproponować własne warunki albo porzucić współpracę."}</p></aside>}
       {mode === "form" && canEdit && !error ? (
         <form
           className="agreement-form"
@@ -19970,7 +19970,7 @@ function AgreementPanel({
               ) : currentUserAccepted && !decision ? <span className="agreement-waiting-note">Twoja akceptacja tej wersji jest zapisana.</span> : null}
               {!proposalByMe && !decision && <button type="button" className="agreement-secondary-button" disabled={saving} onClick={() => setDecisionMode("changes")}>Poproś o zmiany</button>}
               <button type="button" className="agreement-secondary-button" disabled={saving} onClick={onRefresh}>Odśwież ustalenia</button>
-              <button type="button" className="agreement-text-button" disabled={saving} onClick={() => setDecisionMode("closed")}>Zakończ negocjacje</button>
+              <button type="button" className="agreement-text-button" disabled={saving} onClick={() => setDecisionMode("closed")}>Porzuć współpracę</button>
             </div>
           )}
           {decisionMode && !blocked && !error && <form className="agreement-response-form" onSubmit={async event => {
@@ -19978,10 +19978,10 @@ function AgreementPanel({
             const saved = await onDecision(decisionMode, decisionReason.trim() || "Współpraca nie będzie kontynuowana na podstawie tej propozycji.");
             if (saved) { setDecisionMode(""); setDecisionReason(""); }
           }}>
-            <h3>{decisionMode === "changes" ? "Co wymaga zmiany?" : "Zakończenie negocjacji"}</h3>
-            <p>{decisionMode === "changes" ? "Propozycja wróci do autora. Twoja wiadomość pojawi się także w rozmowie." : "Druga strona otrzyma informację o zakończeniu negocjacji. Historia rozmowy zostanie zachowana."}</p>
+            <h3>{decisionMode === "changes" ? "Co wymaga zmiany?" : "Porzuć współpracę"}</h3>
+            <p>{decisionMode === "changes" ? "Propozycja wróci do autora. Twoja wiadomość pojawi się także w rozmowie." : "Druga strona otrzyma wiadomość o rezygnacji. Zarezerwowane miejsce w usłudze zostanie zwolnione. Historia rozmowy zostanie zachowana."}</p>
             <label><span>{decisionMode === "changes" ? "Opisz wymagane zmiany" : "Powód (opcjonalnie)"}</span><AutoTextarea value={decisionReason} onChange={event => setDecisionReason(event.target.value)} maxLength={1200} minLength={decisionMode === "changes" ? 3 : undefined} required={decisionMode === "changes"} rows={3} disabled={saving} /></label>
-            <div><button type="button" className="agreement-secondary-button" onClick={() => setDecisionMode("")} disabled={saving}>Wróć</button><button type="submit" className="agreement-primary-button" disabled={saving}>{saving ? "Wysyłanie…" : decisionMode === "changes" ? "Wyślij prośbę o zmiany" : "Potwierdź zakończenie"}</button></div>
+            <div><button type="button" className="agreement-secondary-button" onClick={() => setDecisionMode("")} disabled={saving}>Wróć</button><button type="submit" className="agreement-primary-button" disabled={saving}>{saving ? "Wysyłanie…" : decisionMode === "changes" ? "Wyślij prośbę o zmiany" : "Potwierdź rezygnację"}</button></div>
           </form>}
         </div>
       ) : <div className="agreement-waiting-note"><p>{canStart ? "Przygotuj zakres, cenę i termin. Po wysłaniu druga strona będzie mogła przeczytać i zaakceptować propozycję albo poprosić o zmiany." : `Czekasz na propozycję ${firstProposalAuthor}. Tutaj pojawią się zakres, cena i termin.`}</p><div>{canStart && !error && <button type="button" className="agreement-primary-button" disabled={saving || blocked} onClick={onOpenForm}>Przygotuj propozycję</button>}<button type="button" className="agreement-secondary-button" onClick={onRefresh} disabled={saving}>Odśwież ustalenia</button></div></div>}
@@ -20791,7 +20791,8 @@ function Chat() {
       if (scope !== chatScopeRef.current || request !== agreementRequestRef.current) return null;
       const current = agreementRef.current;
       if (current && data && (Number(data.version) < Number(current.version)
-        || data.id === current.id && current.status === "accepted" && data.status !== "accepted")) return current;
+        || data.id === current.id && current.status === "accepted" && data.status !== "accepted"
+        || data.id === current.id && current.responded_at && (!data.responded_at || new Date(data.responded_at) < new Date(current.responded_at)))) return current;
       const changed = current?.id !== data?.id;
       setAgreement(data || null);
       agreementRef.current = data || null;
@@ -21596,15 +21597,21 @@ function Chat() {
       if (!fresh || fresh.agreement?.id !== agreement.id || fresh.agreement.status === "accepted") throw new Error("Stan ustaleń zmienił się. Sprawdź aktualną wersję.");
       if (fresh.decision?.action === "closed") throw new Error("Negocjacje zostały już zakończone.");
       if (action === "changes" && fresh.decision) throw new Error("Prośba o zmiany została już zapisana. Możesz przygotować nową propozycję.");
-      const { data, error } = await supabase.from("messages").insert({
-        conversation_id: id, sender_id: user.id, content: termsDecisionContent(action, fresh.agreement, reason),
-      }).select("*").single();
-      if (error) throw error;
+      const { data, error } = await supabase.rpc("respond_to_conversation_agreement", {
+        p_agreement_id: fresh.agreement.id, p_action: action, p_reason: reason.trim(),
+      });
+      if (error) throw new Error(["PGRST202", "42883"].includes(error.code)
+        ? "Nie udało się zapisać decyzji. Nic nie zostało zmienione. Spróbuj ponownie później."
+        : error.message);
       if (operationToken.scope !== chatScopeRef.current) return false;
-      setMessages(current => current.some(message => message.id === data.id) ? current : [...current, data]);
+      if (!data?.agreement || !data?.message) throw new Error("Nie udało się potwierdzić zapisu decyzji. Odśwież ustalenia.");
+      setAgreement(data.agreement);
+      agreementRef.current = data.agreement;
+      setMessages(current => current.some(message => message.id === data.message.id) ? current : [...current, data.message]);
+      if (action === "closed") window.dispatchEvent(new CustomEvent("ideahire:service-capacity-updated", { detail: { serviceId: data.service_id } }));
       setAgreementMode("view");
       setAgreementMessageTone("success");
-      setAgreementMessage(action === "changes" ? "Prośba o zmianę została wysłana. Autor propozycji może przygotować nową wersję." : "Informacja o zakończeniu negocjacji została wysłana.");
+      setAgreementMessage(action === "changes" ? "Prośba o zmianę została wysłana. Autor propozycji może przygotować nową wersję." : "Współpraca została porzucona. Druga strona otrzymała wiadomość." + (data.released_slots > 0 ? " Rezerwacja miejsca w usłudze została zwolniona." : ""));
       return true;
     } catch (error) {
       if (operationToken.scope !== chatScopeRef.current) return false;
@@ -21827,7 +21834,7 @@ function Chat() {
       description: roomCopy('Przed podjęciem decyzji pobierz aktualną propozycję.', 'Load the current proposal before making a decision.'),
       actionLabel: roomCopy('Odśwież ustalenia', 'Refresh terms'), onAction: () => openWorkspace('plan'),
     } : agreementDecision?.action === 'closed' ? {
-      title: roomCopy('Negocjacje zakończone', 'Negotiations ended'),
+      title: roomCopy('Współpraca została porzucona', 'Collaboration declined'),
       description: roomCopy('Informacja i ostatnia propozycja pozostają w historii ustaleń.', 'The decision and last proposal remain in the terms history.'),
       actionLabel: roomCopy('Zobacz ustalenia', 'View terms'), onAction: () => openWorkspace('plan'),
     } : agreementDecision?.action === 'changes' ? {
@@ -21871,13 +21878,10 @@ function Chat() {
                 openRequest={disputeOpenRequest}
                 launcherHidden
               />}
-      projectDetails={<><p>{jobDetails?.description||roomCopy('Rozmowa i materiały dotyczące tego projektu.','Conversation and materials for this project.')}</p>
-        {jobDetails?.project_details?.deliverables&&<div className="ih68-brief"><strong>{roomCopy('Oczekiwany rezultat','Expected result')}</strong><p>{jobDetails.project_details.deliverables}</p>{jobDetails.project_details.delivery_format&&<p><b>{roomCopy('Format: ','Format: ')}</b>{jobDetails.project_details.delivery_format}</p>}{jobDetails.project_details.materials&&<p><b>{roomCopy('Materiały od klienta: ','Client materials: ')}</b>{jobDetails.project_details.materials}</p>}<p><b>{roomCopy('Termin: ','Deadline: ')}</b>{formatChatProjectDate(jobDetails.project_details.deadline)}</p></div>}
-        {conversation?.origin_type==='service_inquiry'&&<div><p>{isClient?roomCopy('Wykonawca przygotuje pierwszą ofertę. Samo zapytanie nie rezerwuje terminu i nie uruchamia płatności.','The freelancer will prepare an offer. An inquiry does not reserve a date or start a payment.'):roomCopy('Przygotuj ofertę z zakresem, terminem i ceną. Jej wysłanie zarezerwuje miejsce na 24 godziny.','Prepare an offer with scope, deadline and price. Sending it reserves availability for 24 hours.')}</p><Link to={'/services/'+conversation.origin_id}>{roomCopy('Zobacz usługę','View service')}</Link></div>}</>}
       thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef}
         renderContent={message=><>{String(message.content||'').trim() && (readTermsDecision(message, null, conversation)
           ? <TermsDecisionMessage decision={readTermsDecision(message, null, conversation)} own={message.sender_id === user.id} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
-          : isInquiryMessage(message.content) ? <InquiryMessageCard text={message.content} renderText={text => <MessageText text={text}/>} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
+          : isInquiryMessage(message.content) ? <InquiryMessageCard text={message.content} renderText={text => <MessageText text={text}/>} onTerms={() => openWorkspace('plan')} english={roomEnglish} firstProposalRole={conversation?.first_proposer_role} />
           : <MessageText text={message.content}/>)} <PrivateMessageMaterials
                                 items={privateWork.itemsByMessage[message.id] || []}
                                 signedUrls={privateWork.signedUrls}

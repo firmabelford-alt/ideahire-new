@@ -9,6 +9,7 @@ import { IdeaHirePromoFilm } from './App';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { SubpageNavigation, SubpageCount, SubpageLoading } from './Subpages';
 import { MarketSelect, helpCenterHref } from './MarketUI';
+import { conversationMessagePreview } from './ConversationCards';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -190,7 +191,6 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
   const icons = { profile: 'profile', expertise: 'settings', portfolio: 'portfolio', jobs: 'jobs', preferences: 'settings', payouts: 'payouts', templates: 'palette' };
   return <aside className="ih72-section-navigation ih75-account-navigation">
     <Link to="/account" className="ih75-account-return">{t('Widok konta', 'Account overview')}</Link>
-    <p className="ih74-section-nav-title">{t('Twoje konto', 'Your account')}</p>
     <nav className="ih72-section-links" aria-label={t('Sekcje konta', 'Account sections')}>
       {sections.map(section => <button type="button" key={section.key}
         aria-current={active === section.key ? 'page' : undefined}
@@ -436,7 +436,7 @@ export function WorkspaceConversationRows({ conversations, user, loading = false
     const name = item.otherProfile?.name || t('Użytkownik', 'User');
     const message = item.lastMessage;
     const preview = message ? (message.sender_id === user?.id ? t('Ty: ', 'You: ') : '') +
-      (String(message.content || '').split('\n\n[IdeaHire:terms:v1]')[0].trim() || t('Przesłano materiały', 'Materials shared')) : t('Rozpocznij rozmowę', 'Start a conversation');
+      (conversationMessagePreview(message.content, en) || t('Przesłano materiały', 'Materials shared')) : t('Rozpocznij rozmowę', 'Start a conversation');
     return <Link key={item.id} to={'/chat/' + item.id} onClick={event => open(event, item.id)}
       className={'ih72-conversation-row' + (item.isUnread ? ' is-unread' : '')}>
       <WorkspaceAvatar name={name} url={item.otherProfile?.avatar_url} />

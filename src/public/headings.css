@@ -1239,14 +1239,14 @@
   body .ih-account-editor-page {
     box-sizing: border-box !important;
     width: calc(100% - 64px) !important;
-    max-width: 1520px !important;
+    max-width: 1320px !important;
     margin: 0 auto !important;
     padding: 32px 0 64px !important;
   }
   body .ih-account-editor-layout:not([hidden]) {
     grid-template-columns: 192px minmax(0, 1fr) !important;
     align-items: start !important;
-    gap: 40px !important;
+    gap: 28px !important;
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
@@ -1301,6 +1301,7 @@
     box-shadow: none !important;
   }
   body .ih-account-editor-layout .account-form-section:not([hidden]) {
+    position: relative !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 24px 32px !important;
     padding: 0 0 32px !important;
@@ -1310,8 +1311,13 @@
     background: transparent !important;
   }
   body .ih-account-editor-layout .account-form-section-identity:not([hidden]) {
-    grid-template-columns: minmax(240px, .8fr) minmax(0, 1.2fr) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    position: relative !important;
   }
+  body .ih-account-editor-layout .account-form-section-heading { grid-column: 1 / -1 !important; }
+  body .ih-account-editor-layout :is(.account-form-section-identity,.account-form-section-expertise) > .account-form-section-heading { position: absolute !important; width: 1px !important; height: 1px !important; margin: -1px !important; padding: 0 !important; border: 0 !important; clip-path: inset(50%) !important; overflow: hidden !important; }
+  body .ih-account-editor-layout .account-profile-about,
+  body .ih-account-editor-layout .account-profile-specialization { grid-column: 1 / -1 !important; }
   body .ih-account-editor-layout .account-form-section-expertise > fieldset { grid-column: auto !important; }
   body .ih-account-editor-layout .account-form-section-heading h2 {
     margin: 0 !important;
@@ -1342,6 +1348,11 @@
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    border: 1px solid var(--ih-edit-line) !important;
+    border-radius: 12px !important;
+    background: var(--ih-edit-wash) !important;
   }
   body .ih-account-editor-layout .ih11-avatar-preview {
     box-sizing: border-box !important;
@@ -1649,6 +1660,66 @@
   }
   @media (pointer: coarse) { body .ih-structured-room .ih68-compose-hint { display: none !important; } }
   body .ih-account-editor-layout[hidden], body .ih-account-editor-layout [hidden] { display: none !important; }
+}
+
+/* The inbox uses compact controls; the conversation has a readable writing
+   column and a separate, factual project summary on larger screens. */
+@layer ideahireHeadings {
+  body.ih68-workspace #root .ih72-inbox { width: calc(100% - 48px) !important; max-width: 1080px !important; margin-inline: auto !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-list-toolbar { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 14px !important; margin: 0 0 20px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-filters { display: inline-flex !important; flex: 0 0 auto !important; align-items: center !important; flex-wrap: wrap !important; gap: 6px !important; width: auto !important; max-width: 100% !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-filters > button { display: inline-flex !important; flex: 0 0 auto !important; align-items: center !important; justify-content: center !important; gap: 7px !important; width: auto !important; min-width: max-content !important; min-height: 40px !important; margin: 0 !important; padding: 8px 12px !important; border: 1px solid transparent !important; border-radius: 9px !important; background: transparent !important; color: var(--a-muted) !important; font: 600 13px/1.5 var(--ih-heading-font) !important; white-space: nowrap !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-filters > button[aria-pressed="true"] { color: var(--a-ink) !important; background: var(--a-soft) !important; border-color: var(--a-line) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-filters > button > span { display: inline-grid !important; place-items: center !important; flex: none !important; width: auto !important; min-width: 20px !important; height: 20px !important; margin: 0 !important; padding: 0 4px !important; border: 0 !important; border-radius: 6px !important; background: var(--a-tint) !important; color: inherit !important; font: 600 11px/1 var(--ih-heading-font) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-search { flex: 0 1 330px !important; width: 100% !important; margin: 0 !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-conversation-list { display: grid !important; gap: 8px !important; border: 0 !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-conversation-row { min-height: 104px !important; gap: 16px !important; padding: 18px !important; border: 0 !important; border-radius: 12px !important; background: var(--a-paper) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-conversation-row:is(:hover,.is-unread) { background: var(--a-soft) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih72-conversation-copy p { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 1 !important; max-width: 68ch !important; margin: 4px 0 0 !important; overflow: hidden !important; white-space: normal !important; overflow-wrap: anywhere !important; color: var(--a-muted) !important; font: 400 13px/1.6 var(--ih-heading-font) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih-inbox-empty { display: grid !important; justify-items: center !important; align-content: center !important; gap: 12px !important; min-height: 260px !important; margin: 0 !important; padding: 32px 20px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; text-align: center !important; }
+  body.ih68-workspace #root .ih72-inbox .ih-inbox-empty > svg { width: 30px !important; height: 30px !important; color: var(--a-muted) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih-inbox-empty h2 { margin: 0 !important; font: 650 21px/1.4 var(--ih-heading-font) !important; }
+  body.ih68-workspace #root .ih72-inbox .ih-inbox-empty p { max-width: 48ch !important; margin: 0 !important; font: 400 14px/1.6 var(--ih-heading-font) !important; }
+  body #root #ih68-content .ih-conversation-context { display: none !important; }
+  @media (min-width: 851px) {
+    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) { width: calc(100% - 48px) !important; max-width: 1180px !important; height: calc(100dvh - 176px) !important; min-height: 480px !important; max-height: 960px !important; margin: 16px auto 40px !important; overflow: hidden !important; }
+    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) .ih68-room-body { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; width: 100% !important; height: auto !important; min-height: 0 !important; overflow: hidden !important; }
+    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) .ih68-correspondence:not([hidden]) { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; width: 100% !important; height: 100% !important; min-width: 0 !important; min-height: 0 !important; overflow: hidden !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih68-thread-wrap { display: flex !important; flex-direction: column !important; flex: 1 1 0 !important; min-height: 0 !important; height: auto !important; overflow: hidden !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih68-thread { flex: 1 1 0 !important; min-height: 0 !important; height: auto !important; padding: 20px !important; overflow-y: auto !important; overscroll-behavior: contain !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih68-thread-inner { width: 100% !important; max-width: 760px !important; margin-inline: auto !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih-send-area { flex: none !important; width: 100% !important; padding: 12px 20px 16px !important; border: 0 !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih-send-form.ih-send-row { width: 100% !important; max-width: 760px !important; margin-inline: auto !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih-chat-next-step { flex: none !important; width: calc(100% - 40px) !important; max-width: 760px !important; margin: 0 auto !important; padding-block: 14px !important; }
+    body #root #ih68-content.ih-conversation-with-context .ih68-room-page:not([hidden]) { flex: 1 1 0 !important; min-height: 0 !important; overflow-y: auto !important; }
+  }
+  @media (min-width: 1101px) {
+    body #root #ih68-content.ih-conversation-with-context:not(.is-focus)[data-view="conversation"] .ih68-room-body { display: grid !important; grid-template-columns: minmax(0,1fr) 244px !important; grid-template-rows: minmax(0,1fr) !important; gap: 16px !important; padding-right: 16px !important; }
+    body #root #ih68-content.ih-conversation-with-context:not(.is-focus) .ih-conversation-context:not([hidden]) { box-sizing: border-box !important; display: flex !important; flex-direction: column !important; align-self: start !important; gap: 20px !important; min-width: 0 !important; min-height: 0 !important; max-height: calc(100% - 32px) !important; margin: 16px 0 !important; padding: 20px 16px !important; overflow-y: auto !important; border: 1px solid var(--a-line) !important; border-radius: 12px !important; background: var(--a-paper) !important; color: var(--a-ink) !important; }
+    body #root #ih68-content .ih-conversation-context-project { display: grid !important; grid-template-columns: 18px minmax(0,1fr) !important; gap: 8px !important; }
+    body #root #ih68-content .ih-conversation-context-project > svg { width: 18px !important; height: 18px !important; color: var(--a-muted) !important; }
+    body #root #ih68-content .ih-conversation-context-project > span { color: var(--a-muted) !important; font: 500 12px/1.5 var(--ih-heading-font) !important; }
+    body #root #ih68-content .ih-conversation-context-project > h2 { grid-column: 1/-1 !important; margin: 4px 0 0 !important; font: 650 16px/1.5 var(--ih-heading-font) !important; overflow-wrap: anywhere !important; }
+    body #root #ih68-content .ih-conversation-context-project > p { grid-column: 1/-1 !important; margin: 0 !important; color: var(--a-muted) !important; font: 400 12px/1.6 var(--ih-heading-font) !important; }
+    body #root #ih68-content .ih-conversation-context-facts { display: grid !important; gap: 16px !important; margin: 0 !important; }
+    body #root #ih68-content .ih-conversation-context-facts > div { display: grid !important; gap: 4px !important; min-width: 0 !important; }
+    body #root #ih68-content .ih-conversation-context-facts dt { color: var(--a-muted) !important; font: 400 12px/1.5 var(--ih-heading-font) !important; }
+    body #root #ih68-content .ih-conversation-context-facts dd { margin: 0 !important; font: 600 13px/1.6 var(--ih-heading-font) !important; overflow-wrap: anywhere !important; }
+    body #root #ih68-content .ih-conversation-context > nav { display: grid !important; gap: 6px !important; }
+    body #root #ih68-content .ih-conversation-context > nav > button { display: flex !important; align-items: center !important; gap: 9px !important; width: 100% !important; min-width: 0 !important; min-height: 40px !important; margin: 0 !important; padding: 8px 10px !important; border: 0 !important; border-radius: 8px !important; background: var(--a-soft) !important; color: var(--a-ink) !important; font: 550 12px/1.5 var(--ih-heading-font) !important; text-align: start !important; cursor: pointer !important; }
+    body #root #ih68-content .ih-conversation-context > nav > button > span { flex: 1 !important; }
+    body #root #ih68-content .ih-conversation-context :is(nav,.ih-conversation-context-person) svg { flex: none !important; width: 16px !important; height: 16px !important; }
+    body #root #ih68-content .ih-conversation-context-person { display: flex !important; align-items: center !important; gap: 10px !important; padding-top: 16px !important; border-top: 1px solid var(--a-line) !important; color: var(--a-ink) !important; text-decoration: none !important; }
+    body #root #ih68-content .ih-conversation-context-person > span:not(.ih68-avatar) { flex: 1 !important; min-width: 0 !important; font: 600 13px/1.5 var(--ih-heading-font) !important; overflow-wrap: anywhere !important; }
+    body #root #ih68-content .ih-conversation-context-person small { display: block !important; color: var(--a-muted) !important; font: 400 12px/1.5 var(--ih-heading-font) !important; }
+  }
+  @media (max-width: 600px) {
+    body.ih68-workspace #root .ih72-inbox { width: calc(100% - 32px) !important; }
+    body.ih68-workspace #root .ih72-inbox .ih72-list-toolbar { align-items: stretch !important; gap: 12px !important; }
+    body.ih68-workspace #root .ih72-inbox .ih72-search { flex: 0 0 100% !important; }
+    body.ih68-workspace #root .ih72-inbox .ih72-conversation-row { gap: 12px !important; padding: 14px 10px !important; }
+    body.ih68-workspace #root .ih72-inbox .ih72-conversation-project { white-space: normal !important; display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; overflow: hidden !important; }
+  }
 }
 /* A conversation is a document on desktop; the phone keeps its chat viewport. */
 @layer ideahireHeadings {
@@ -1987,8 +2058,8 @@
   body.ih68-workspace .site-preferences-panel .site-theme-toggle,body.ih68-workspace .site-preferences-panel .site-language-toggle button { display:grid!important; place-items:center!important; width:40px!important; min-width:40px!important; height:40px!important; padding:8px!important; border:0!important; border-radius:9px!important; background:var(--v-soft)!important; color:var(--v-ink)!important; font:550 13px/1 Inter,system-ui,sans-serif!important; }
   body.ih68-workspace .site-preferences-panel .site-language-toggle { display:flex!important; gap:4px!important; }
   body.ih68-workspace .site-preferences-panel .site-language-toggle button.is-active { background:var(--v-accent)!important; color:var(--v-on)!important; }
-  body.ih79-app .ih75-account-main .account-form { width:100%!important; max-width:920px!important; margin-inline:auto!important; }
-  body.ih79-app .ih75-account-main .account-form-grid { width:100%!important; min-width:0!important; margin-inline:auto!important; }
+  body.ih79-app .ih75-account-main .account-form { width:100%!important; max-width:none!important; margin-inline:0!important; }
+  body.ih79-app .ih75-account-main .account-form-grid { width:100%!important; min-width:0!important; margin-inline:0!important; }
   @media(max-width:850px) {
     body.ih68-workspace:not([data-ih73-page="conversation"]) .site-preferences { bottom:calc(max(12px,env(safe-area-inset-bottom)) + 70px)!important; }
     body.ih68-workspace .site-preferences { right:max(12px,env(safe-area-inset-right))!important; }
@@ -2024,43 +2095,43 @@
     inset: auto !important;
     display: flex !important;
     flex: 0 0 auto !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
     align-content: start !important;
-    justify-content: space-between !important;
-    gap: 14px 24px !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
     aspect-ratio: auto !important;
-    margin: 0 0 24px !important;
-    padding: 0 !important;
+    margin: 0 0 28px !important;
+    padding: 12px 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     overflow: visible !important;
-    text-align: start !important;
+    text-align: center !important;
     transform: none !important;
     animation: none !important;
   }
   body #root [data-ih-heading="compact"] > .ih-subpage-heading-copy {
     position: static !important;
     display: grid !important;
-    flex: 1 1 280px !important;
+    flex: 0 0 auto !important;
     align-content: start !important;
-    justify-items: start !important;
-    gap: 6px !important;
-    width: auto !important;
+    justify-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
     min-width: 0 !important;
     max-width: 760px !important;
     height: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    text-align: start !important;
+    text-align: center !important;
   }
   body #root [data-ih-heading="compact"] h1 {
     display: block !important;
@@ -2070,10 +2141,10 @@
     margin: 0 !important;
     padding: 0 !important;
     color: var(--ih-heading-ink) !important;
-    font: 750 28px/1.25 var(--ih-heading-font) !important;
+    font: 750 32px/1.25 var(--ih-heading-font) !important;
     letter-spacing: -.03em !important;
-    text-align: start !important;
-    text-wrap: pretty !important;
+    text-align: center !important;
+    text-wrap: balance !important;
     overflow-wrap: break-word !important;
     animation: none !important;
     transform: none !important;
@@ -2081,14 +2152,14 @@
   body #root .ih-subpage-heading-description {
     display: block !important;
     width: auto !important;
-    max-width: 62ch !important;
+    max-width: 58ch !important;
     height: auto !important;
     min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     color: var(--ih-heading-muted) !important;
     font: 400 14px/1.6 var(--ih-heading-font) !important;
-    text-align: start !important;
+    text-align: center !important;
     text-wrap: pretty !important;
   }
   body #root .ih-subpage-heading-actions {
@@ -2097,7 +2168,7 @@
     flex: 0 1 auto !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: center !important;
     gap: 8px !important;
     width: auto !important;
     min-width: 0 !important;
@@ -2127,14 +2198,19 @@
   body #root [data-ih-heading="compact"]::before,
   body #root [data-ih-heading="compact"]::after { display: none !important; content: none !important; }
   body #root :is(.admin-page-header,.dispute-detail-header,.erasure-account-header,.auth-header,.legal-document-hero) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
     height: auto !important;
     min-height: 0 !important;
     margin-bottom: 24px !important;
     padding-block: 0 !important;
     gap: 14px !important;
+    text-align: center !important;
   }
-  body #root :is(.admin-page-header,.dispute-detail-header,.erasure-account-header) > div { gap: 6px !important; }
-  body #root :is(.admin-page-header,.dispute-detail-header,.erasure-account-header,.auth-header,.legal-document-hero,.public-profile-info,.ih-work-heading) h1 { margin: 0 !important; padding: 0 !important; font: 750 28px/1.25 var(--ih-heading-font) !important; letter-spacing: -.03em !important; }
+  body #root :is(.admin-page-header,.dispute-detail-header,.erasure-account-header) > div { gap: 8px !important; max-width: 760px !important; text-align: center !important; }
+  body #root :is(.admin-page-header,.dispute-detail-header,.erasure-account-header,.auth-header,.legal-document-hero,.public-profile-info,.ih-work-heading) h1 { margin: 0 !important; padding: 0 !important; font: 750 32px/1.25 var(--ih-heading-font) !important; letter-spacing: -.03em !important; }
   body #root :is(.admin-page-header,.dispute-detail-header,.auth-header) .section-label,
   body #root .legal-document-hero .cookie-policy-eyebrow { display: none !important; }
   body.ih79-app .ih72-section-select .ih7-select-label { display: none !important; }
@@ -2183,7 +2259,7 @@
   body .ih20-calendar-time > .ih-control-select + span { margin: 0 !important; }
 
   @media(max-width:850px) {
-    body #root [data-ih-heading="compact"] { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; margin-bottom: 20px !important; }
+    body #root [data-ih-heading="compact"] { align-items: center !important; gap: 12px !important; margin-bottom: 20px !important; padding-block: 8px !important; }
     body #root [data-ih-heading="compact"] > .ih-subpage-heading-copy { flex: 0 0 auto !important; width: 100% !important; }
     body #root [data-ih-heading="compact"] h1 { font-size: 26px !important; }
     body #root :is(.admin-page-header,.dispute-detail-header,.erasure-account-header,.auth-header,.legal-document-hero,.public-profile-info,.ih-work-heading) h1 { font-size: 26px !important; }

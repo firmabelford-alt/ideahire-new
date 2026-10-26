@@ -287,7 +287,7 @@ function serviceCapacity(row) {
   const occupied = Math.max(0, Number(row?.occupied_slots || 0));
   const available = Math.max(
     0,
-    Number.isFinite(Number(row?.available_slots))
+    row?.available_slots != null && Number.isFinite(Number(row.available_slots))
       ? Number(row.available_slots)
       : limit - occupied
   );
@@ -313,6 +313,24 @@ function serviceCapacity(row) {
     className: "is-open",
     available,
   };
+}
+
+function useServiceCapacityRefresh(load) {
+  useEffect(() => {
+    const refresh = () => { if (!document.hidden) void load({ quiet: true }); };
+    const interval = window.setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    window.addEventListener("online", refresh);
+    window.addEventListener("ideahire:service-capacity-updated", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      window.removeEventListener("online", refresh);
+      window.removeEventListener("ideahire:service-capacity-updated", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [load]);
 }
 
 function ServiceAvatar({ service, size = "normal" }) {
@@ -376,6 +394,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Wszystkie");
+  const loadRequest = useRef(0);
 
   useEffect(() => {
     const requestedCategory = new URLSearchParams(location.search).get("category");
@@ -386,9 +405,9 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
     );
   }, [location.search]);
 
-  const loadServices = useCallback(async () => {
-    setLoading(true);
-    setMessage("");
+  const loadServices = useCallback(async ({ quiet = false } = {}) => {
+    const request = ++loadRequest.current;
+    if (!quiet) { setLoading(true); setMessage(""); }
 
     try {
       const { data, error } = await supabase.rpc("list_freelancer_services", {
@@ -397,20 +416,24 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
       });
 
       if (error) throw error;
+      if (request !== loadRequest.current) return;
       setServices(Array.isArray(data) ? data : []);
+      setMessage("");
     } catch (error) {
+      if (request !== loadRequest.current || quiet) return;
       setMessage(
         error?.message || "Nie udało się pobrać usług. Spróbuj ponownie."
       );
     } finally {
-      setLoading(false);
+      if (request === loadRequest.current) setLoading(false);
     }
   }, [search, selectedCategory, supabase]);
 
   useEffect(() => {
     const timeout = window.setTimeout(loadServices, 220);
-    return () => window.clearTimeout(timeout);
+    return () => { window.clearTimeout(timeout); loadRequest.current += 1; };
   }, [loadServices]);
+  useServiceCapacityRefresh(loadServices);
 
   function chooseCategory(category) {
     setSelectedCategory(category);
@@ -890,11 +913,11 @@ function ServiceOrderProcess() {
   const en = useSitePreferences().language === "en";
   const steps = en ? [
     ["Discuss your project", "Send a brief and check availability. An inquiry does not reserve a place or start payment."],
-    ["Review the offer", "The freelancer proposes scope, price and deadline. An offer reserves a place for 24 hours."],
+    ["Agree on terms", "Prepare the scope, price and deadline. The freelancer can accept or propose changes. A place is reserved for 24 hours."],
     ["Agree and pay", "Review the final terms together. Payment through IdeaHire starts the project."],
   ] : [
     ["Porozmawiaj o projekcie", "Wyślij opis i zapytaj o dostępność. Samo zapytanie nie rezerwuje miejsca i nie uruchamia płatności."],
-    ["Sprawdź ofertę", "Wykonawca proponuje zakres, cenę i termin. Po wysłaniu oferty miejsce czeka 24 godziny."],
+    ["Ustal warunki", "Przygotuj zakres, cenę i termin. Wykonawca zaakceptuje propozycję albo zaproponuje zmiany. Rezerwacja miejsca trwa 24 godziny."],
     ["Potwierdź i opłać", "Sprawdźcie ostateczne warunki. Płatność przez IdeaHire uruchamia realizację."],
   ];
   return <section className="ih5-service-process" data-expanded={open}>
@@ -1056,7 +1079,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
           <div className="ih5-service-inquiry-rules">
             <strong>Co dzieje się po wysłaniu?</strong>
             <p>Otworzysz rozmowę z wykonawcą. Zapytanie jest bezpłatne i nie rezerwuje miejsca.</p>
-            <p>Miejsce zostaje czasowo zarezerwowane po wysłaniu oferty przez wykonawcę.
+            <p>W rozmowie przygotujesz pierwszą propozycję ustaleń. Wykonawca będzie mógł ją przeczytać, zaakceptować albo poprosić o zmiany. Miejsce zostaje czasowo zarezerwowane po wysłaniu propozycji.
               Realizacja rusza po akceptacji warunków przez obie strony i płatności.</p>
           </div>
 
@@ -1093,10 +1116,11 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [inquiryOpen, setInquiryOpen] = useState(false);
+  const loadRequest = useRef(0);
 
-  const loadService = useCallback(async () => {
-    setLoading(true);
-    setMessage("");
+  const loadService = useCallback(async ({ quiet = false } = {}) => {
+    const request = ++loadRequest.current;
+    if (!quiet) { setLoading(true); setMessage(""); }
 
     try {
       const { data, error } = await supabase.rpc("get_freelancer_service", {
@@ -1104,19 +1128,23 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
       });
 
       if (error) throw error;
+      if (request !== loadRequest.current) return;
       const row = Array.isArray(data) ? data[0] : data;
       if (!row) throw new Error("Ta usługa nie jest już dostępna.");
       setService(row);
     } catch (error) {
+      if (request !== loadRequest.current || quiet) return;
       setMessage(error?.message || "Nie udało się otworzyć usługi.");
     } finally {
-      setLoading(false);
+      if (request === loadRequest.current) setLoading(false);
     }
   }, [id, supabase]);
 
   useEffect(() => {
     loadService();
+    return () => { loadRequest.current += 1; };
   }, [loadService]);
+  useServiceCapacityRefresh(loadService);
 
   const capacity = useMemo(() => serviceCapacity(service), [service]);
   const isOwner = service?.freelancer_id === user?.id;
