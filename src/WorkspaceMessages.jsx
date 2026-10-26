@@ -395,7 +395,8 @@ export function WorkspaceConversation({
       priority = document.body.style.getPropertyPriority('overflow');
     if (header) header.inert = true;
     document.body.style.setProperty('overflow', 'hidden', 'important');
-    const raf = requestAnimationFrame(() => frame?.querySelector('.ih68-focus-exit')?.focus({
+    const visibleControl = () => [...(frame?.querySelectorAll('.ih68-focus-exit,.ih-room-menu-toggle,#ih70-room-options') || [])].find(node => node.getClientRects().length && !node.closest('[inert]'));
+    const raf = requestAnimationFrame(() => visibleControl()?.focus({
       preventScroll: true
     }));
     function keyboard(e) {
@@ -425,13 +426,19 @@ export function WorkspaceConversation({
       if (header) header.inert = !!inert;
       if (overflow) document.body.style.setProperty('overflow', overflow, priority);else document.body.style.removeProperty('overflow');
       document.removeEventListener('keydown', keyboard);
-      const returnFocus = before?.isConnected && before !== document.body && before.getClientRects().length ? before : frame?.querySelector('#ih70-room-options');
+      const returnFocus = before?.isConnected && before !== document.body && before.getClientRects().length ? before : visibleControl();
       returnFocus?.focus?.({
         preventScroll: true
       });
     };
   }, [focusMode, onFocusMode]);
-  const closeMenu = () => setOptionsOpen(false);
+  const closeMenu = () => {
+    setOptionsOpen(false);
+    requestAnimationFrame(() => {
+      const toggle = frameRef.current?.querySelector('.ih-room-menu-toggle');
+      if (toggle?.getClientRects().length && !toggle.closest('[inert]')) toggle.focus({preventScroll:true});
+    });
+  };
   const showPlan = view === 'plan';
   const showConversation = view === 'conversation';
   const closeContext = () => onView('conversation');

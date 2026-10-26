@@ -1,47 +1,59 @@
-# IdeaHire — komunikator i wiadomości głosowe
+# IdeaHire — komunikator, pełne panele i ustalenia
 
-Data: 26.10.2026. Repozytorium: `firmabelford-alt/ideahire-new`. Zmiana aplikacji: commit `ed4e1ed302359ee5fafdde6359a31018bdf393b7`, drzewo `3ec89824f01bdcb9f6525f0921ee9acfc87ce1a7`. Cloudflare Pages potwierdził udane wdrożenie produkcyjne.
+Data: 26.10.2026. Repozytorium: `firmabelford-alt/ideahire-new`. Produkcja: https://ideahire-new.pages.dev/.
 
-## Układ
+## Zakres tej wersji
 
-Rozmowa zajmuje dostępną wysokość okna. Historia ma własne przewijanie i kolumnę do 960 px, miękkie dymki oraz zaokrąglone, automatycznie rosnące pole pisania. Narzędzia dodawania materiałów, zdjęć, nagrywania i wysyłania znajdują się w dolnym wierszu pola. Usunięto pasek „Co dalej” nad historią.
+Zachowano zaakceptowane, zaokrąglone i automatycznie rosnące pole pisania. Nad historią nie ma już osobnych rzędów z nazwą rozmówcy i zakładkami. Na komputerze znajduje się wąski pasek boczny z ikonami; można go rozwinąć do menu z nazwą rozmówcy, projektem i stanem współpracy. Historia wykorzystuje wysokość panelu i szerszą kolumnę. Rozwinięcie menu nie tworzy dodatkowej kolumny po prawej.
 
-Od 1180 px otwarcie ustaleń, materiałów lub płatności pokazuje dany panel po prawej stronie rozmowy. Kolumny mają równą wysokość i osobne przewijanie. Na węższych ekranach wybrana zakładka zajmuje całe okno. Cztery przyciski nawigacji mieszczą się w jednym rzędzie; na najwęższych ekranach pomijany jest dodatkowy licznik materiałów. Od 1440 px zwykła rozmowa ma podsumowanie współpracy po prawej.
+Ustalenia, materiały i płatność zastępują historię w całej dostępnej przestrzeni roboczej. Nie otwierają się jako ciasny panel obok czatu. Każdy widok ma własne przewijanie. Formularz wysyłania materiałów również korzysta z całego dostępnego okna. Akceptacja warunków, wysyłanie plików i płatność pozostają osobnymi, świadomymi działaniami użytkownika.
 
-Na telefonie wysokość korzysta z visualViewport, aby dostosować widok do klawiatury. Pole tekstowe ma od 40 do 128 px; w trybie klawiatury górny pasek jest niższy. Tryb powiększenia i obsługa Escape pozostają dostępne.
+Do 850 px boczne menu wysuwa się nad widokiem zamiast zwężać treść. Nad rozmową pozostaje krótki pasek; długie nazwy nie zwiększają jego wysokości. Menu obsługuje Escape, ogranicza fokus do swoich elementów i oddaje go widocznemu przyciskowi po zamknięciu. Wysokość czatu reaguje na visualViewport i klawiaturę. Formularz ustaleń przechodzi do jednej kolumny przy małej szerokości panelu. W trybie powiększenia fokus trafia do widocznego elementu także na telefonie.
 
 ## Głosówki
 
-Nagrywanie wymaga HTTPS, obsługi MediaRecorder i zgody użytkownika na mikrofon. Uruchamia je dopiero przycisk mikrofonu. Limit wynosi dwie minuty. Po zatrzymaniu pojawia się odsłuch, usunięcie szkicu i osobny przycisk wysłania. Niewysłany plik pozostaje w pamięci karty. Zmiana rozmowy, jej zablokowanie lub opuszczenie widoku zatrzymuje mikrofon i odrzuca szkic. Przejście karty w tło zatrzymuje nagrywanie.
+Wiadomość głosowa ma kompaktowy odtwarzacz: odtwarzanie/pauza, czas, przewijanie, zmianę prędkości i menu pobierania lub zgłoszenia. Paski ilustrują postęp; nie przedstawiają pomiaru amplitudy nagrania. Uruchomienie kolejnej głosówki zatrzymuje poprzednią. Odsłuch niewysłanego szkicu używa tego samego odtwarzacza. Pozostałe pliki audio zachowują zwykłe kontrolki. Zawężono starszy selektor audio, aby nie tworzył pustego miejsca pod nowym odtwarzaczem.
 
-Przeglądarkowy format nagrania jest przetwarzany lokalnie do WAV, mono, 24 kHz, PCM 16 bit. Taki plik obsługuje działająca wersja 23 funkcji `ideahire-secure-work` i istniejący prywatny bucket `ideahire-private-work`. Przygotowanie sesji, podpisany upload i przekazanie materiału używają tego samego sprawdzania uczestników rozmowy co dotychczasowe pliki. Ta wersja nie wymaga nowego SQL ani zmiany uprawnień bucketa.
+Nagrywanie wymaga HTTPS, obsługi MediaRecorder i zgody na mikrofon. Uruchamia je dopiero przycisk mikrofonu. Limit wynosi dwie minuty; przed wysłaniem można odsłuchać i usunąć szkic. Wyjście z rozmowy lub zablokowanie użytkownika zwalnia mikrofon i odrzuca niewysłany szkic. Przesłanie korzysta z istniejących prywatnych materiałów i czasowych adresów dostępu. Zmiana nie rozszerza uprawnień do plików i nie wymaga nowego SQL.
 
-Utrata odpowiedzi po wysłaniu nie powoduje ponownego wysłania ani usunięcia potencjalnie zapisanego pliku. Aplikacja sprawdza dokładny identyfikator materiału z sesji. Jeśli wyniku nadal nie można potwierdzić, prosi o odświeżenie rozmowy. Odtwarzanie korzysta z czasowych prywatnych adresów; nagrania podlegają istniejącej moderacji materiałów. W polityce prywatności dodano opis nagrywania, odsłuchu i obsługi wysłanych plików.
+## Ustalenia i zakończenie negocjacji
 
-## Pliki
+1. Klient wysyła pierwszą propozycję dla zapytania o usługę. Autor czekającej propozycji nie może jej nadpisać.
+2. Freelancer może przyjąć tę wersję, poprosić o zmiany, przedstawić własną propozycję albo zrezygnować.
+3. Przy kontrpropozycji autor ponownie czeka. Klient może ją zaakceptować, zaproponować własną wersję albo wybrać „Zrezygnuj ze współpracy”.
+4. Rezygnacja przed wspólną akceptacją zapisuje wiadomość dla drugiej strony i atomowo zwalnia istniejącą rezerwację miejsca w usłudze. Powtórzenie żądania nie tworzy drugiej wiadomości ani kolejnego zwolnienia.
+5. Po akceptacji obu stron zakończenie negocjacji nie jest dostępne. Obowiązują osobne zasady obsługi realizacji, płatności i sporów.
 
-Poniższe pliki należy zachować razem. Publiczny arkusz ma wersję `/headings.css?v=20261026-messenger-8`.
+Blokada edycji i operacja rezygnacji są egzekwowane także przez już wdrożoną bazę. Nowy interfejs sprawdza aktualną wersję przed zapisem. Nie opiera decyzji na tekście dowolnej wiadomości. Ta wersja nie zmienia produkcyjnego schematu bazy.
 
-| Plik | Linie |
-| --- | ---: |
-| `index.html` | 68 |
-| `src/ConversationMessenger.css` | 163 |
-| `src/WorkspaceMessages.jsx` | 504 |
-| `src/router.jsx` | 30078 |
-| `src/public/headings.css` | 2249 |
-| `src/PrivateWork.jsx` | 1670 |
-| `src/VoiceMessages.jsx` | 113 |
-| `src/VoiceRecording.js` | 105 |
-| `src/VoiceTransfer.js` | 31 |
-| `src/TermsOfService.jsx` | 193 |
-| `test/voice.test.js` | 135 |
+Rozróżnienie zakończenia negocjacji od anulowania zawartej umowy uwzględnia art. 68, 68¹, 70 i 72 Kodeksu cywilnego. Formularz wymaga przyjęcia całej wersji bez zmian; zmiana jest nową propozycją. Brak wpłaty sam w sobie nie oznacza braku umowy. Źródło: https://isap.sejm.gov.pl/isap.nsf/download.xsp/WDU19640160093/U/D19640093Lj.pdf (tekst z 16.10.2026). To opis działania aplikacji i zakresu weryfikacji, nie pełny audyt prawny platformy.
 
-## Weryfikacja
+## Pełne pliki i kolejność
 
-- `npm run build`: zaliczony. Pozostają istniejące ostrzeżenia o wielkości pakietu i statycznym/dynamicznym imporcie Lucyny.
-- `npm test`: 28 zaliczonych testów. Nowe testy obejmują cykl mikrofonu, późne rozstrzygnięcie pozwolenia, odmowę dostępu, limit czasu i danych, WAV i resampling oraz sukces, odrzucenie i niepewny wynik przesyłania.
-- PostCSS: oba zmienione arkusze poprawnie parsowane. `git diff --check`: bez błędów.
-- Ręcznie na zalogowanym koncie Janek w Chrome, widok 1355 × 936: dwie istniejące rozmowy, pytanie o usługę, zwykłe własne wiadomości, pusty i sześciowierszowy szkic, automatyczna wysokość pola, widoczność ostatniej wiadomości, ustalenia/materiały/płatność obok czatu, okno przesyłania materiałów, jasny i ciemny motyw, powiększenie i wyjście przez Escape.
-- Pomiar zwykłego okna: 1315 × 852 px. Kolumny w widoku z panelem miały tę samą wysokość 712 px; brak poziomego przepełnienia. Powiększenie: 1323 × 904 px. Po teście szkic wyczyszczono i przywrócono jasny motyw.
-- Podczas kontroli nie wysłano wiadomości ani plików do istniejących rozmówców, nie akceptowano ustaleń i nie uruchamiano płatności.
-- Do sprawdzenia na urządzeniu: rzeczywisty mikrofon i odsłuch/wysłanie głosówki oraz mobilna klawiatura w iOS/Android. W tej sesji nie było fizycznego telefonu ani testowej wymiany nagrań między dwoma kontami.
+Pliki stanowią zestaw względem wcześniejszej wersji repozytorium. Publiczny arkusz jest oznaczony `/headings.css?v=20261026-messenger-9`. Archiwum zawiera pełną treść plików, bez fragmentów i diffów.
+
+| Kolejność | Plik | Linie |
+| ---: | --- | ---: |
+| 1 | `src/AgreementWorkflow.js` | 63 |
+| 2 | `src/ConversationRail.jsx` | 90 |
+| 3 | `src/ConversationMessenger.css` | 168 |
+| 4 | `src/VoicePlayback.js` | 15 |
+| 5 | `src/VoicePlayer.jsx` | 82 |
+| 6 | `src/VoicePlayer.css` | 31 |
+| 7 | `src/VoiceMessages.jsx` | 119 |
+| 8 | `src/WorkspaceMessages.jsx` | 494 |
+| 9 | `src/router.jsx` | 30086 |
+| 10 | `index.html` | 68 |
+| 11 | `test/agreement.test.js` | 81 |
+| 12 | `test/voice.test.js` | 149 |
+| 13 | `supabase/sql/verify/conversation-negotiation.mjs` | 278 |
+
+## Sprawdzenia i ograniczenia
+
+- `npm test`: 36 testów zaliczonych, w tym blokada autora, kontrpropozycja, dopuszczalne decyzje klienta, odmowa niedozwolonych działań i obsługa głosu.
+- Izolowana baza PostgreSQL/PGlite: 15 testów zaliczonych. Obejmują scenariusz klient → blokada edycji → kontrpropozycja freelancera → rezygnacja klienta → wiadomość i zwolnienie miejsca. Testy nie zapisywały danych do produkcji.
+- `npm run build`: zaliczony po końcowych poprawkach. Pozostają wcześniejsze ostrzeżenia o wielkości pakietu i statycznym/dynamicznym imporcie Lucyny.
+- Oba arkusze CSS poprawnie parsowane przez PostCSS. `git diff --check`: bez błędów.
+- Cloudflare Pages potwierdził wdrożenie nowego układu z commitu `b9e1e0f0d51e1fb016a7567c041cafd66cb3ce70`. Użytkownik potwierdził, że widzi nową wersję i akceptuje jej kierunek. Drobne końcowe poprawki fokusu i selektora audio nie zmieniają tego układu.
+- Ręcznej kontroli tej wersji w prywatnej rozmowie nie udało się dokończyć: przeglądarka utraciła sesję, a ponowne logowanie anulowano. Nie wysłano wiadomości ani plików do rzeczywistych rozmówców, nie akceptowano ustaleń i nie uruchamiano płatności.
+- Do ręcznej kontroli pozostają rzeczywiste nagrywanie/odsłuch, przełączanie widoków na zalogowanym koncie oraz zachowanie mobilnej klawiatury w iOS/Android. Przejrzano kod responsywny; nie jest to równoznaczne z testem na fizycznym telefonie.
