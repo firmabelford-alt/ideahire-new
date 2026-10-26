@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSitePreferences } from './Preferences';
 import { supabase } from './supabase';
 import { SubpageHeading } from './Subpages';
-import { isInquiryMessage } from './ConversationCards';
+import { conversationMessagePreview, isInquiryMessage } from './ConversationCards';
 import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { WorkspaceAvatar, WorkspaceConversationRows, WorkspaceIcon, WorkspaceLoading, useWorkspaceCopy } from './Workspace';
 import { useVoiceMessage, VoiceMessageControls } from './VoiceMessages';
@@ -59,7 +59,6 @@ export function WorkspaceThread({
   otherName,
   lastReadOwnMessageId,
   renderContent,
-  onReport,
   viewportRef,
   followEndRef,
   onScroll,
@@ -68,7 +67,6 @@ export function WorkspaceThread({
 }) {
   const t = useWorkspaceCopy();
   const en = useSitePreferences().language === 'en';
-  const optionsRoot = useRef(null);
   useLayoutEffect(() => {
     const node = viewportRef.current;
     if (!node) return;
@@ -82,25 +80,7 @@ export function WorkspaceThread({
     observer?.observe(node); align();
     return () => { observer?.disconnect(); cancelAnimationFrame(frame); };
   }, [viewportRef,followEndRef]);
-  useEffect(() => {
-    const close = event => {
-      optionsRoot.current?.querySelectorAll('.ih68-message-options[open]').forEach(details => {
-        if (event.type === 'keydown' && event.key === 'Escape') {
-          event.preventDefault();
-          event.stopPropagation();
-          details.removeAttribute('open');
-          details.querySelector('summary')?.focus();
-        } else if (event.type === 'pointerdown' && !details.contains(event.target)) details.removeAttribute('open');
-      });
-    };
-    document.addEventListener('pointerdown', close);
-    document.addEventListener('keydown', close, true);
-    return () => {
-      document.removeEventListener('pointerdown', close);
-      document.removeEventListener('keydown', close, true);
-    };
-  }, []);
-  return <div ref={optionsRoot} className="ih68-thread-wrap"><div ref={viewportRef} className="ih68-thread" role="log" aria-label={t('Historia rozmowy', 'Conversation history')} aria-live="polite" aria-relevant="additions text" onScroll={event => { if (event.currentTarget.clientHeight) onScroll?.(event); }} tabIndex={0}>
+  return <div className="ih68-thread-wrap"><div ref={viewportRef} className="ih68-thread" role="log" aria-label={t('Historia rozmowy', 'Conversation history')} aria-live="polite" aria-relevant="additions text" onScroll={event => { if (event.currentTarget.clientHeight) onScroll?.(event); }} tabIndex={0}>
     {!messages.length ? <div className="ih68-thread-empty"><WorkspaceIcon kind="message" /><h2>{t('Napisz pierwszą wiadomość.', 'Write the first message.')}</h2><p>{t('Zapytaj o termin lub opisz, co jest do zrobienia.', 'Ask about availability or describe the work.')}</p></div> : <div className="ih68-thread-inner">{messages.map((message, index) => {
           const own = message.sender_id === user?.id;
           const admin = message.sender_role === 'admin';
@@ -119,14 +99,21 @@ export function WorkspaceThread({
           <footer className="ih69-message-meta"><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleTimeString(en ? 'en-GB' : 'pl-PL', {
                     hour: '2-digit',
                     minute: '2-digit'
-                  })}</time>{message.id === lastReadOwnMessageId && <span className="ih68-read-receipt"><WorkspaceIcon kind="check" />{t('Wyświetlono', 'Seen')}</span>}{!own && message.moderation_status !== 'hidden' && <details className="ih68-message-options"><summary aria-label={t('Opcje wiadomości', 'Message options')}><WorkspaceIcon kind="more" /></summary><button type="button" onClick={e => {
-                    e.currentTarget.closest('details')?.removeAttribute('open');
-                    onReport(message.id);
-                  }}>{t('Zgłoś wiadomość', 'Report message')}</button></details>}</footer>
+                  })}</time>{message.id === lastReadOwnMessageId && <span className="ih68-read-receipt"><WorkspaceIcon kind="check" />{t('Wyświetlono', 'Seen')}</span>}</footer>
         </article>
       </React.Fragment>;
         })}</div>}
   </div>{showLatest && <button type="button" className="ih68-latest" onClick={onLatest}><WorkspaceIcon kind="down" />{t('Najnowsze wiadomości', 'Latest messages')}</button>}</div>;
+}
+
+export function WorkspaceMessageReports({ messages, userId, onReport }) {
+  const t = useWorkspaceCopy(), en = useSitePreferences().language === 'en';
+  const reportable = messages.filter(message => message.sender_id !== userId && message.moderation_status !== 'hidden' && !message.hidden_at);
+  if (!reportable.length) return null;
+  return <details className="ih-message-report-picker"><summary>{t('Zgłoś wiadomość','Report a message')}<WorkspaceIcon kind="down"/></summary>
+    <div><p>{t('Wybierz wiadomość do zgłoszenia.','Choose the message to report.')}</p><ul>{[...reportable].reverse().map(message => <li key={message.id}>
+      <button type="button" onClick={() => onReport(message.id)}><span>{conversationMessagePreview(message.content,en) || t('Przesłany materiał','Shared material')}</span><time dateTime={message.created_at}>{new Date(message.created_at).toLocaleString(en ? 'en-GB':'pl-PL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</time></button>
+    </li>)}</ul></div></details>;
 }
 function fitWorkspaceDraft(field) {
   if (!field || !field.getClientRects().length) return;
@@ -254,7 +241,7 @@ function WorkspacePaymentReader({ payment, overview, onMaterials, onDispute }) {
     }
   }
   const explanations = {
-    awaiting_payment: t("Wpłata nie została jeszcze potwierdzona. Klient może sprawdzić kwoty poniżej i przejść do płatności w Stripe.", "Payment has not been confirmed. The client can review the amounts below and continue to Stripe."),
+    awaiting_payment: t("Klient może sprawdzić kwoty poniżej i opłacić zlecenie w Stripe.", "The client can review the amounts below and pay for the project in Stripe."),
     checkout_open: t("Otwarto płatność w Stripe. Samo otwarcie okna nie potwierdza zapłaty. Czekamy na aktualny status Stripe.", "Stripe checkout has been opened. Opening checkout does not confirm payment. We are waiting for Stripe's current status."),
     processing: t("Stripe sprawdza wpłatę. Nie ponawiaj teraz płatności; status zostanie zaktualizowany po potwierdzeniu.", "Stripe is checking the payment. Do not pay again now; the status will update after confirmation."),
     funds_secured: t("Stripe potwierdził wpłatę klienta. Można rozpocząć realizację. Wynagrodzenie nie zostało jeszcze przekazane na saldo wykonawcy.", "Stripe has confirmed the client's payment. Work can begin. Earnings have not yet been transferred to the freelancer's balance."),
@@ -332,6 +319,7 @@ export function WorkspaceConversation({
   paymentOverview,
   disputePanel,
   reportDialog,
+  messageReports,
   projectAction
 }) {
   const t = useWorkspaceCopy();
@@ -466,7 +454,7 @@ export function WorkspaceConversation({
             {showPlan && <><header className="ih72-panel-heading"><div><button type="button" className="ih72-panel-back" onClick={closeContext}><WorkspaceIcon kind="back" />{t('Wróć do rozmowy', 'Back to conversation')}</button><h2>{t('Ustalenia', 'Project terms')}</h2><p>{t('Zakres usługi, wynagrodzenie i termin w jednym miejscu.', 'The service scope, price and deadline in one place.')}</p></div></header>
               {projectAction}
               {plan}
-              <details className="ih-copyright-card" open><summary><WorkspaceIcon kind="lock" /><span>{t('Prawa autorskie', 'Copyright')}</span><WorkspaceIcon kind="down" /></summary><p>{t('Ustalenia porządkują współpracę. Nie zastępują wymaganej prawem formy przeniesienia autorskich praw majątkowych ani licencji wyłącznej.', 'Project terms record the collaboration. They do not replace the legally required form for a transfer of economic copyright or an exclusive licence.')}</p></details>
+              <details className="ih-copyright-card"><summary><WorkspaceIcon kind="lock" /><span>{t('Prawa autorskie', 'Copyright')}</span><WorkspaceIcon kind="down" /></summary><p>{t('Ustalenia porządkują współpracę. Nie zastępują wymaganej prawem formy przeniesienia autorskich praw majątkowych ani licencji wyłącznej.', 'Project terms record the collaboration. They do not replace the legally required form for a transfer of economic copyright or an exclusive licence.')}</p></details>
             </>}
           </section>
           <section hidden={view !== 'payment'} className="ih68-room-page ih-room-payment-page" id="ih68-room-payment" tabIndex={-1} aria-label={t('Płatność', 'Payment')}>
@@ -476,6 +464,7 @@ export function WorkspaceConversation({
         </ConversationRail>
         <WorkspaceSheet open={optionsOpen} onClose={closeMenu} title={t('Opcje rozmowy', 'Conversation options')}>
           <nav className="ih70-menu-list">
+            {React.isValidElement(messageReports) ? React.cloneElement(messageReports, {onReport: messageId => { closeMenu(); messageReports.props.onReport(messageId); }}) : messageReports}
             <Link to={'/profile/' + profileId} className="ih70-menu-link" onClick={closeMenu}><WorkspaceIcon kind="profile" /><span>{t('Profil i opcje blokowania', 'Profile and blocking options')}</span><WorkspaceIcon kind="next" /></Link>
             <button type="button" className="ih70-menu-link" disabled={!canDispute} onClick={() => { closeMenu(); onDispute(); }}><WorkspaceIcon kind="lock" /><span>{t('Zgłoś problem ze współpracą', 'Report a project issue')}</span></button>
             <button type="button" className="ih70-menu-link" disabled={hiding} onClick={() => { closeMenu(); onHide(); }}><WorkspaceIcon kind="close" /><span>{hiding ? t('Ukrywanie…', 'Hiding…') : t('Ukryj rozmowę z listy', 'Hide conversation from list')}</span></button>

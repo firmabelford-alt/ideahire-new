@@ -39,8 +39,8 @@ import App from "./App";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
-import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer } from "./WorkspaceMessages";
-import { agreementPermissions } from "./AgreementWorkflow";
+import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer, WorkspaceMessageReports } from "./WorkspaceMessages";
+import { agreementPermissions, agreementToForm, EMPTY_AGREEMENT_FORM } from "./AgreementWorkflow";
 import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision } from "./ConversationCards";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
 import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
@@ -19294,19 +19294,6 @@ function ChatDisputePanel({
   );
 }
 
-const EMPTY_AGREEMENT_FORM = {
-  title: "",
-  scope: "",
-  deliverables: "",
-  priceAmount: "",
-  priceCurrency: "PLN",
-  deadline: "",
-  revisions: "1",
-  deliveryFormat: "",
-  acceptanceMethod: "",
-  cancellationTerms: "",
-  additionalTerms: "",
-};
 
 function parseAgreementPrice(value) {
   let normalized = String(value || "")
@@ -19351,49 +19338,6 @@ function parseAgreementPrice(value) {
   return Number(normalized);
 }
 
-function agreementToForm(
-  agreement,
-  fallbackTitle = "",
-  fallbackPrice = ""
-) {
-  if (!agreement) {
-    return {
-      ...EMPTY_AGREEMENT_FORM,
-      title: fallbackTitle || "",
-      priceAmount:
-        fallbackPrice === null ||
-        fallbackPrice === undefined
-          ? ""
-          : String(fallbackPrice),
-      priceCurrency: "PLN",
-    };
-  }
-
-  return {
-    title: agreement.title || "",
-    scope: agreement.scope || "",
-    deliverables:
-      agreement.deliverables || "",
-    priceAmount:
-      agreement.price_amount == null
-        ? ""
-        : String(agreement.price_amount),
-    priceCurrency:
-      agreement.price_currency || "PLN",
-    deadline: agreement.deadline || "",
-    revisions: String(
-      agreement.revisions ?? 0
-    ),
-    deliveryFormat:
-      agreement.delivery_format || "",
-    acceptanceMethod:
-      agreement.acceptance_method || "",
-    cancellationTerms:
-      agreement.cancellation_terms || "",
-    additionalTerms:
-      agreement.additional_terms || "",
-  };
-}
 
 function profileBriefToAgreementForm(job, title = "", price = "") {
   const form = agreementToForm(null, title, price);
@@ -19575,7 +19519,6 @@ function AgreementPanel({
   canEdit,
   proposalByMe,
   canAccept,
-  canRequestChanges,
   canDecline,
   currentUserId,
   isClient,
@@ -19641,9 +19584,6 @@ function AgreementPanel({
             agreement={agreement}
           />
 
-          <p className="agreement-legal-note">
-            Ta zaakceptowana wersja jest zapisem ustaleń obu stron i pozostaje dostępna w historii rozmowy.
-          </p>
         </div>
       </details>
     );
@@ -19661,14 +19601,10 @@ function AgreementPanel({
   return (
     <section className="agreement-gate ih-original-terms">
       <div className="agreement-gate-heading">
-        <span className="agreement-eyebrow">
-          Ustalenia przed rozpoczęciem
-        </span>
-
         <h2>Warunki współpracy</h2>
 
         <p>
-          Obie strony akceptują tę samą wersję ustaleń. Następnie zleceniodawca może opłacić zlecenie. Realizacja zaczyna się po potwierdzeniu wpłaty.
+          Obie strony akceptują tę samą wersję. Płatność i rozpoczęcie pracy to kolejne kroki.
         </p>
 
         <div className="agreement-progress" aria-label="Postęp akceptacji">
@@ -19704,9 +19640,7 @@ function AgreementPanel({
               <h3>Warunki realizacji zlecenia</h3>
             </div>
 
-            <p>
-              Pola oznaczone gwiazdką są wymagane.
-            </p>
+
           </div>
 
           <fieldset className="agreement-form-grid" disabled={saving || blocked}><legend className="ih-send-sr">Treść propozycji</legend>
@@ -19935,7 +19869,7 @@ function AgreementPanel({
             </span>
           </div>
 
-          {!proposalByMe && !decision && <p className="agreement-recipient-note">Przeczytaj warunki. Możesz je zaakceptować, zaproponować własne albo zrezygnować ze współpracy.</p>}
+          {!proposalByMe && !decision && <p className="agreement-recipient-note">Zaakceptuj warunki lub edytuj formularz i wyślij nową wersję. Szczegóły omówcie w rozmowie.</p>}
           <AgreementDetails
             agreement={agreement}
           />
@@ -19958,7 +19892,7 @@ function AgreementPanel({
                 onClick={onOpenForm}
                 disabled={saving}
               >
-                {proposalByMe ? "Popraw i wyślij nową wersję" : "Zaproponuj własne warunki"}
+                Edytuj ustalenia
               </button>}
 
               {canAccept ? (
@@ -19974,26 +19908,25 @@ function AgreementPanel({
                 </button>
               ) : proposalByMe && !decision ? (
                 <span className="agreement-waiting-note">
-                  Propozycja została wysłana. Edycja będzie dostępna, jeśli druga strona poprosi o zmiany.
+                  Propozycja została wysłana. Czekasz na akceptację lub nową wersję drugiej strony.
                 </span>
               ) : currentUserAccepted && !decision ? <span className="agreement-waiting-note">Twoja akceptacja tej wersji jest zapisana.</span> : null}
-              {canRequestChanges && <button type="button" className="agreement-secondary-button" disabled={saving} onClick={() => setDecisionMode("changes")}>Poproś o zmiany</button>}
               <button type="button" className="agreement-secondary-button" disabled={saving} onClick={onRefresh}>Odśwież ustalenia</button>
               {canDecline && <button type="button" className="agreement-text-button" disabled={saving} onClick={() => setDecisionMode("closed")}>Zrezygnuj ze współpracy</button>}
             </div>
           )}
-          {decisionMode && (decisionMode === "closed" ? canDecline : canRequestChanges) && !blocked && !error && <form className="agreement-response-form" onSubmit={async event => {
+          {decisionMode === "closed" && canDecline && !blocked && !error && <form className="agreement-response-form" onSubmit={async event => {
             event.preventDefault();
-            const saved = await onDecision(decisionMode, decisionReason.trim() || "Nie decyduję się na współpracę na zaproponowanych warunkach.");
+            const saved = await onDecision("closed", decisionReason.trim() || "Nie decyduję się na współpracę na zaproponowanych warunkach.");
             if (saved) { setDecisionMode(""); setDecisionReason(""); }
           }}>
-            <h3>{decisionMode === "changes" ? "Co wymaga zmiany?" : "Zrezygnuj ze współpracy"}</h3>
-            <p>{decisionMode === "changes" ? "Propozycja wróci do autora. Twoja wiadomość pojawi się także w rozmowie." : ("Druga strona otrzyma wiadomość o rezygnacji." + (isServiceInquiry ? " Rezerwacja miejsca w usłudze zostanie zwolniona." : "") + " Historia rozmowy zostanie zachowana. Ta decyzja kończy negocjacje przed wspólną akceptacją warunków.")}</p>
-            <label><span>{decisionMode === "changes" ? "Opisz wymagane zmiany" : "Powód (opcjonalnie)"}</span><AutoTextarea value={decisionReason} onChange={event => setDecisionReason(event.target.value)} maxLength={1200} minLength={decisionMode === "changes" ? 3 : undefined} required={decisionMode === "changes"} rows={3} disabled={saving} /></label>
-            <div><button type="button" className="agreement-secondary-button" onClick={() => setDecisionMode("")} disabled={saving}>Wróć</button><button type="submit" className="agreement-primary-button" disabled={saving}>{saving ? "Wysyłanie…" : decisionMode === "changes" ? "Wyślij prośbę o zmiany" : "Potwierdź rezygnację"}</button></div>
+            <h3>Zrezygnuj ze współpracy</h3>
+            <p>{"Druga strona otrzyma wiadomość o rezygnacji." + (isServiceInquiry ? " Rezerwacja miejsca w usłudze zostanie zwolniona." : "") + " Historia rozmowy zostanie zachowana."}</p>
+            <label><span>Powód (opcjonalnie)</span><AutoTextarea value={decisionReason} onChange={event => setDecisionReason(event.target.value)} maxLength={1200} rows={3} disabled={saving} /></label>
+            <div><button type="button" className="agreement-secondary-button" onClick={() => setDecisionMode("")} disabled={saving}>Wróć</button><button type="submit" className="agreement-primary-button" disabled={saving}>{saving ? "Wysyłanie…" : "Potwierdź rezygnację"}</button></div>
           </form>}
         </div>
-      ) : <div className="agreement-waiting-note"><p>{canStart ? "Przygotuj zakres, cenę i termin. Po wysłaniu druga strona będzie mogła przeczytać i zaakceptować propozycję albo poprosić o zmiany." : `Czekasz na propozycję ${firstProposalAuthor}. Tutaj pojawią się zakres, cena i termin.`}</p><div>{canStart && !error && <button type="button" className="agreement-primary-button" disabled={saving || blocked} onClick={onOpenForm}>Przygotuj propozycję</button>}<button type="button" className="agreement-secondary-button" onClick={onRefresh} disabled={saving}>Odśwież ustalenia</button></div></div>}
+      ) : <div className="agreement-waiting-note"><p>{canStart ? "Przygotuj zakres, cenę i termin. Po wysłaniu druga strona może zaakceptować propozycję lub edytować formularz i odesłać nową wersję." : `Czekasz na propozycję ${firstProposalAuthor}. Tutaj pojawią się zakres, cena i termin.`}</p><div>{canStart && !error && <button type="button" className="agreement-primary-button" disabled={saving || blocked} onClick={onOpenForm}>Przygotuj propozycję</button>}<button type="button" className="agreement-secondary-button" onClick={onRefresh} disabled={saving}>Odśwież ustalenia</button></div></div>}
     </section>
   );
 }
@@ -21885,6 +21818,7 @@ function Chat() {
                 openRequest={disputeOpenRequest}
                 launcherHidden
               />}
+      messageReports={<WorkspaceMessageReports messages={messages} userId={user?.id} onReport={messageId => privateWork.setReportTarget({type:'message',id:messageId})}/>}
       thread={<WorkspaceThread messages={messages} user={user} otherName={otherName} lastReadOwnMessageId={lastReadOwnMessageId} viewportRef={messageViewportRef} followEndRef={followMessagesRef}
         renderContent={message=><>{String(message.content||'').trim() && !(message.content === 'Wiadomość głosowa' && (privateWork.itemsByMessage[message.id] || []).some(item => /^Wiadomość głosowa /.test(item.display_name || ''))) && (readTermsDecision(message, null, conversation)
           ? <TermsDecisionMessage decision={readTermsDecision(message, null, conversation)} own={message.sender_id === user.id} onTerms={() => openWorkspace('plan')} english={roomEnglish} />
@@ -21897,7 +21831,6 @@ function Chat() {
                                   privateWork.setReportTarget({ type, id: targetId })
                                 }
                               /></>}
-        onReport={messageId=>privateWork.setReportTarget({type:'message',id:messageId})}
         onScroll={event=>{const element=event.currentTarget;followMessagesRef.current=element.scrollHeight-element.scrollTop-element.clientHeight<100;setShowLatest(!followMessagesRef.current);}}
         showLatest={showLatest} onLatest={()=>{followMessagesRef.current=true;setShowLatest(false);scrollToLatestMessage(true);}}/>}
       composer={<WorkspaceComposer conversationId={`${user?.id}:${id}`} onSendVoice={handleSendVoice} onRefresh={() => Promise.all([privateWork.reload(), loadMessages()])} draft={draft} setDraft={setDraft} sending={sending} blocked={messagingBlocked} composerRef={composerRef}
@@ -21960,7 +21893,7 @@ function Chat() {
                       canStart={canStartAgreement}
                       canEdit={canEditAgreement}
                       proposalByMe={proposalByMe}
-                      canAccept={negotiation.canAccept} canDecline={negotiation.canDecline} canRequestChanges={negotiation.canRequestChanges}
+                      canAccept={negotiation.canAccept} canDecline={negotiation.canDecline}
                       currentUserId={user?.id} isClient={isClient} isServiceInquiry={conversation?.origin_type === "service_inquiry"}
                       decision={agreementDecision}
                       error={agreementError}

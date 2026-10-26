@@ -61,3 +61,62 @@ export function agreementPermissions({ conversation, agreement, userId, decision
     waitingForResponse: Boolean(proposed && proposalByMe && !decision),
   };
 }
+
+// Editing starts from the full current version; sending creates a separate proposal.
+export const EMPTY_AGREEMENT_FORM = {
+  title: "",
+  scope: "",
+  deliverables: "",
+  priceAmount: "",
+  priceCurrency: "PLN",
+  deadline: "",
+  revisions: "1",
+  deliveryFormat: "",
+  acceptanceMethod: "",
+  cancellationTerms: "",
+  additionalTerms: "",
+};
+
+export function agreementToForm(
+  agreement,
+  fallbackTitle = "",
+  fallbackPrice = ""
+) {
+  if (!agreement) {
+    return {
+      ...EMPTY_AGREEMENT_FORM,
+      title: fallbackTitle || "",
+      priceAmount:
+        fallbackPrice === null ||
+        fallbackPrice === undefined
+          ? ""
+          : String(fallbackPrice),
+      priceCurrency: "PLN",
+    };
+  }
+
+  return {
+    title: agreement.title || "",
+    scope: agreement.scope || "",
+    deliverables:
+      agreement.deliverables || "",
+    priceAmount:
+      agreement.price_amount == null
+        ? ""
+        : String(agreement.price_amount),
+    priceCurrency:
+      agreement.price_currency || "PLN",
+    deadline: agreement.deadline || "",
+    revisions: String(
+      agreement.revisions ?? 0
+    ),
+    deliveryFormat:
+      agreement.delivery_format || "",
+    acceptanceMethod:
+      agreement.acceptance_method || "",
+    cancellationTerms:
+      agreement.cancellation_terms || "",
+    additionalTerms:
+      agreement.additional_terms || "",
+  };
+}

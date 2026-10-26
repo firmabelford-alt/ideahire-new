@@ -1,59 +1,41 @@
-# IdeaHire — komunikator, pełne panele i ustalenia
+# IdeaHire — dopracowanie wiadomości, 26.10.2026
 
-Data: 26.10.2026. Repozytorium: `firmabelford-alt/ideahire-new`. Produkcja: https://ideahire-new.pages.dev/.
+Repozytorium: `firmabelford-alt/ideahire-new`. Produkcja: https://ideahire-new.pages.dev/.
+Ta wersja zachowuje zaakceptowany układ komunikatora i zaokrąglone pole pisania.
 
-## Zakres tej wersji
+## Zmiany
 
-Zachowano zaakceptowane, zaokrąglone i automatycznie rosnące pole pisania. Nad historią nie ma już osobnych rzędów z nazwą rozmówcy i zakładkami. Na komputerze znajduje się wąski pasek boczny z ikonami; można go rozwinąć do menu z nazwą rozmówcy, projektem i stanem współpracy. Historia wykorzystuje wysokość panelu i szerszą kolumnę. Rozwinięcie menu nie tworzy dodatkowej kolumny po prawej.
+- Na laptopie formularz ustaleń, materiały i rozliczenie mają wyśrodkowaną szerokość do 960 px. Wybrana sekcja nadal zajmuje własny panel, z jednym przewijaniem strony. Formularz rezygnacji ma do 640 px. Okno przesyłania materiałów i gotowej pracy ma do 960 × 740 px i dopasowuje się do mniejszego okna. Na telefonie zachowuje pełny ekran.
+- „Edytuj ustalenia” otwiera cały aktualny formularz, zachowując zakres, cenę, termin, poprawki, format i pozostałe pola. Wysłanie tworzy nową propozycję do akceptacji. Usunięto osobny przycisk i formularz „Co wymaga zmiany?”. Uwagi strony omawiają w rozmowie. Oczekujący autor nadal nie może nadpisać wysłanej wersji; zaakceptowanych ustaleń nie można edytować tym trybem. Dawne prośby o zmiany pozostają czytelne.
+- Na telefonie menu ma widoczną nazwę „Sekcje” oraz trzy bezpośrednie skróty: Ustalenia, Materiały, Płatność. Dodatkowe opcje są w bocznym menu. Przy otwartej klawiaturze skróty chowają się, by zostawić miejsce na rozmowę.
+- Naprawiono obliczanie szerokości kart ustaleń, zawijanie pól i dolne krawędzie. Karty i pola liczą obramowanie w swojej szerokości. Usunięto wewnętrzny limit wysokości i osobne przewijanie zaakceptowanych ustaleń. Na małej szerokości formularz i rozliczenie przechodzą do jednej kolumny.
+- Usunięto powtarzające się nagłówki na telefonie, instrukcję o gwiazdkach i tekst pod zaakceptowaną wersją, który powtarzał jej status. Informacja o prawach autorskich pozostała w tym samym miejscu, w domyślnie zwiniętej karcie. Dane umowy i potwierdzenia przekazania pracy pozostają dostępne.
+- Zapytanie o usługę ma osobną kartę z oznaczeniem, ikoną i wyróżnioną górną krawędzią. W szablonie turkusowym używa stonowanego ciepłego akcentu; w czarno-białym zachowuje kolory szablonu. Jasny i ciemny motyw korzystają z kolorów aplikacji. Zachowano treść celu, terminu i materiałów.
+- Zwykłe wiadomości mają delikatne obramowanie. Usunięto trzy kropki pod otrzymanymi wiadomościami. Zgłoszenie jest dostępne przez Sekcje → Opcje rozmowy → Zgłoś wiadomość, gdzie wybiera się wiadomość przed otwarciem istniejącego formularza zgłoszenia.
+- Rozliczenie ma krótszy opis statusu i bardziej zwarte karty z odstępami. Usunięto pustą instrukcję ze stopki przesyłania; liczba wybranych materiałów i rozmiar plików pozostają widoczne.
 
-Ustalenia, materiały i płatność zastępują historię w całej dostępnej przestrzeni roboczej. Nie otwierają się jako ciasny panel obok czatu. Każdy widok ma własne przewijanie. Formularz wysyłania materiałów również korzysta z całego dostępnego okna. Akceptacja warunków, wysyłanie plików i płatność pozostają osobnymi, świadomymi działaniami użytkownika.
+## Pełne pliki, kolejność i liczba linii
 
-Do 850 px boczne menu wysuwa się nad widokiem zamiast zwężać treść. Nad rozmową pozostaje krótki pasek; długie nazwy nie zwiększają jego wysokości. Menu obsługuje Escape, ogranicza fokus do swoich elementów i oddaje go widocznemu przyciskowi po zamknięciu. Wysokość czatu reaguje na visualViewport i klawiaturę. Formularz ustaleń przechodzi do jednej kolumny przy małej szerokości panelu. W trybie powiększenia fokus trafia do widocznego elementu także na telefonie.
-
-## Głosówki
-
-Wiadomość głosowa ma kompaktowy odtwarzacz: odtwarzanie/pauza, czas, przewijanie, zmianę prędkości i menu pobierania lub zgłoszenia. Paski ilustrują postęp; nie przedstawiają pomiaru amplitudy nagrania. Uruchomienie kolejnej głosówki zatrzymuje poprzednią. Odsłuch niewysłanego szkicu używa tego samego odtwarzacza. Pozostałe pliki audio zachowują zwykłe kontrolki. Zawężono starszy selektor audio, aby nie tworzył pustego miejsca pod nowym odtwarzaczem.
-
-Nagrywanie wymaga HTTPS, obsługi MediaRecorder i zgody na mikrofon. Uruchamia je dopiero przycisk mikrofonu. Limit wynosi dwie minuty; przed wysłaniem można odsłuchać i usunąć szkic. Wyjście z rozmowy lub zablokowanie użytkownika zwalnia mikrofon i odrzuca niewysłany szkic. Przesłanie korzysta z istniejących prywatnych materiałów i czasowych adresów dostępu. Zmiana nie rozszerza uprawnień do plików i nie wymaga nowego SQL.
-
-## Ustalenia i zakończenie negocjacji
-
-1. Klient wysyła pierwszą propozycję dla zapytania o usługę. Autor czekającej propozycji nie może jej nadpisać.
-2. Freelancer może przyjąć tę wersję, poprosić o zmiany, przedstawić własną propozycję albo zrezygnować.
-3. Przy kontrpropozycji autor ponownie czeka. Klient może ją zaakceptować, zaproponować własną wersję albo wybrać „Zrezygnuj ze współpracy”.
-4. Rezygnacja przed wspólną akceptacją zapisuje wiadomość dla drugiej strony i atomowo zwalnia istniejącą rezerwację miejsca w usłudze. Powtórzenie żądania nie tworzy drugiej wiadomości ani kolejnego zwolnienia.
-5. Po akceptacji obu stron zakończenie negocjacji nie jest dostępne. Obowiązują osobne zasady obsługi realizacji, płatności i sporów.
-
-Blokada edycji i operacja rezygnacji są egzekwowane także przez już wdrożoną bazę. Nowy interfejs sprawdza aktualną wersję przed zapisem. Nie opiera decyzji na tekście dowolnej wiadomości. Ta wersja nie zmienia produkcyjnego schematu bazy.
-
-Rozróżnienie zakończenia negocjacji od anulowania zawartej umowy uwzględnia art. 68, 68¹, 70 i 72 Kodeksu cywilnego. Formularz wymaga przyjęcia całej wersji bez zmian; zmiana jest nową propozycją. Brak wpłaty sam w sobie nie oznacza braku umowy. Źródło: https://isap.sejm.gov.pl/isap.nsf/download.xsp/WDU19640160093/U/D19640093Lj.pdf (tekst z 16.10.2026). To opis działania aplikacji i zakresu weryfikacji, nie pełny audyt prawny platformy.
-
-## Pełne pliki i kolejność
-
-Pliki stanowią zestaw względem wcześniejszej wersji repozytorium. Publiczny arkusz jest oznaczony `/headings.css?v=20261026-messenger-9`. Archiwum zawiera pełną treść plików, bez fragmentów i diffów.
+Archiwum zawiera komplet poniższych plików, nie fragmenty ani diff. Należy zachować ich ścieżki. To zestaw zmian względem wcześniejszego repozytorium, nie samodzielna aplikacja.
 
 | Kolejność | Plik | Linie |
 | ---: | --- | ---: |
-| 1 | `src/AgreementWorkflow.js` | 63 |
-| 2 | `src/ConversationRail.jsx` | 90 |
-| 3 | `src/ConversationMessenger.css` | 168 |
-| 4 | `src/VoicePlayback.js` | 15 |
-| 5 | `src/VoicePlayer.jsx` | 82 |
-| 6 | `src/VoicePlayer.css` | 31 |
-| 7 | `src/VoiceMessages.jsx` | 119 |
-| 8 | `src/WorkspaceMessages.jsx` | 494 |
-| 9 | `src/router.jsx` | 30086 |
-| 10 | `index.html` | 68 |
-| 11 | `test/agreement.test.js` | 81 |
-| 12 | `test/voice.test.js` | 149 |
-| 13 | `supabase/sql/verify/conversation-negotiation.mjs` | 278 |
+| 1 | `src/AgreementWorkflow.js` | 122 |
+| 2 | `src/ConversationCards.jsx` | 53 |
+| 3 | `src/ConversationRail.jsx` | 96 |
+| 4 | `src/ConversationMessenger.css` | 228 |
+| 5 | `src/PrivateWork.jsx` | 1670 |
+| 6 | `src/WorkspaceMessages.jsx` | 483 |
+| 7 | `src/router.jsx` | 30019 |
+| 8 | `test/agreement.test.js` | 106 |
 
-## Sprawdzenia i ograniczenia
+Po podmianie całego zestawu: `npm ci`, `npm test`, `npm run build`. Nie jest potrzebny nowy SQL ani zmiana uprawnień bazy. Pliki są również opublikowane przez istniejące wdrożenie GitHub/Cloudflare.
 
-- `npm test`: 36 testów zaliczonych, w tym blokada autora, kontrpropozycja, dopuszczalne decyzje klienta, odmowa niedozwolonych działań i obsługa głosu.
-- Izolowana baza PostgreSQL/PGlite: 15 testów zaliczonych. Obejmują scenariusz klient → blokada edycji → kontrpropozycja freelancera → rezygnacja klienta → wiadomość i zwolnienie miejsca. Testy nie zapisywały danych do produkcji.
-- `npm run build`: zaliczony po końcowych poprawkach. Pozostają wcześniejsze ostrzeżenia o wielkości pakietu i statycznym/dynamicznym imporcie Lucyny.
-- Oba arkusze CSS poprawnie parsowane przez PostCSS. `git diff --check`: bez błędów.
-- Cloudflare Pages potwierdził wdrożenie nowego układu z commitu `b9e1e0f0d51e1fb016a7567c041cafd66cb3ce70`. Użytkownik potwierdził, że widzi nową wersję i akceptuje jej kierunek. Drobne końcowe poprawki fokusu i selektora audio nie zmieniają tego układu.
-- Ręcznej kontroli tej wersji w prywatnej rozmowie nie udało się dokończyć: przeglądarka utraciła sesję, a ponowne logowanie anulowano. Nie wysłano wiadomości ani plików do rzeczywistych rozmówców, nie akceptowano ustaleń i nie uruchamiano płatności.
-- Do ręcznej kontroli pozostają rzeczywiste nagrywanie/odsłuch, przełączanie widoków na zalogowanym koncie oraz zachowanie mobilnej klawiatury w iOS/Android. Przejrzano kod responsywny; nie jest to równoznaczne z testem na fizycznym telefonie.
+## Weryfikacja
+
+- 38 testów aplikacji zaliczonych. Nowe testy sprawdzają zachowanie każdego pola przy edycji, brak zmiany wysłanego rekordu, zerową liczbę poprawek, jawną cenę zero i niezależne szkice formularza. Dotychczasowe testy blokady autora, kontrpropozycji, rezygnacji i obsługi głosu nadal przechodzą.
+- Build Vite zaliczony. Pozostają wcześniejsze ostrzeżenia o wielkości pakietu i statycznym/dynamicznym imporcie Lucyny.
+- PostCSS poprawnie parsuje arkusze. `git diff --check` bez błędów.
+- Nie wykonano nowej operacji SQL na produkcji. Nie wysłano wiadomości, materiałów ani zgłoszeń do rzeczywistych użytkowników.
+- Przeprowadzono przegląd kodu responsywnego i porównanie z dostarczonymi zdjęciami. Ręczna kontrola prywatnej rozmowy i fizycznego telefonu nadal wymaga zalogowanej sesji testowej; wcześniejsze ponowne logowanie anulowano. Nie oznaczamy tej kontroli jako zaliczonej.
+- Edycja zdjęcia płatności wykonana narzędziem imagegen jest poglądową wizualizacją kierunku. Nie jest zrzutem wdrożonej strony ani dowodem testów przeglądarkowych.

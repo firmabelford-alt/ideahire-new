@@ -1,4 +1,5 @@
 import React from 'react';
+import { BriefcaseBusiness } from 'lucide-react';
 import { TERMS_MARKER } from './AgreementWorkflow';
 export { latestTermsDecision, readTermsDecision, termsDecisionContent } from './AgreementWorkflow';
 
@@ -32,10 +33,10 @@ function inquiryParts(text) {
 export function InquiryMessageCard({ text, renderText, onTerms, english = false, firstProposalRole }) {
   const { title, fields } = inquiryParts(text);
   return <section className="ih-inquiry-card" aria-label={english ? 'Project inquiry' : 'Zapytanie o współpracę'}>
-    <div className="ih-inquiry-card-heading"><span>{english ? 'Project inquiry' : 'Zapytanie o współpracę'}</span><h3>{title}</h3></div>
+    <div className="ih-inquiry-card-heading"><span><BriefcaseBusiness size={15} aria-hidden="true"/>{english ? 'Project inquiry' : /^Zapytanie o usługę:/i.test(text.trim()) ? 'Zapytanie o usługę':'Zapytanie o współpracę'}</span><h3>{title}</h3></div>
     <div className="ih-inquiry-card-fields">{fields.map((field, index) => <div key={index} className={field.label ? 'has-label' : 'is-note'}>
       {field.label && <strong>{field.label}</strong>}<div>{renderText(firstProposalRole === 'client' && field.text === 'To niewiążące zapytanie. Oczekuję na ofertę wykonawcy z zakresem, terminem i ceną.'
-        ? (english ? 'This is a non-binding inquiry. The client prepares the first proposal. The freelancer can accept it or propose changes.' : 'To niewiążące zapytanie. Zleceniodawca przygotowuje pierwszą propozycję ustaleń. Wykonawca może ją zaakceptować albo zaproponować zmiany.') : field.text)}</div>
+        ? (english ? 'Discuss the details in chat, then confirm the final scope, price and deadline in Terms.' : 'Szczegóły omówcie w rozmowie. Zakres, cenę i termin potwierdzicie w ustaleniach.') : field.text)}</div>
     </div>)}</div>
     {onTerms && <button type="button" className="ih-inquiry-card-action" onClick={onTerms}>{english ? 'Open project terms' : 'Przejdź do ustaleń'}<span aria-hidden="true">→</span></button>}
   </section>;

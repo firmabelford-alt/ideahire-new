@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { agreementPermissions, latestTermsDecision, readTermsDecision, termsDecisionContent } from '../src/AgreementWorkflow.js';
+import { agreementToForm, EMPTY_AGREEMENT_FORM, agreementPermissions, latestTermsDecision, readTermsDecision, termsDecisionContent } from '../src/AgreementWorkflow.js';
 
 const conversation = { id: 'room-1', client_id: 'client', contractor_id: 'freelancer' };
 const agreement = { id: '11111111-1111-4111-8111-111111111111', conversation_id: conversation.id, version: 2, created_by: 'client' };
@@ -78,4 +78,29 @@ test('accepted, closed, stale, inaccessible or unconfirmed terms never expose ne
   allDisabled(permissions('freelancer',{...pending,conversation_id:'other-room'}));
   allDisabled(permissions('stranger'));
   for (const extra of [{loading:true},{error:'refresh'},{blocked:true},{canTransact:false}]) allDisabled(permissions('freelancer',pending,null,extra));
+});
+
+
+test('editing preserves every field from the current proposal without changing its record', () => {
+  const record = Object.freeze({
+    ...pending, title:'Strona firmowa', scope:'Zakres\nz drugą linią', deliverables:'Kod i pliki',
+    price_amount:800.5, price_currency:'PLN', deadline:'2026-11-05', revisions:0,
+    delivery_format:'ZIP + PDF', acceptance_method:'Testy i odbiór w panelu',
+    cancellation_terms:'Uzgodnione warunki anulowania', additional_terms:'Materiały dostarcza klient',
+  });
+  const form = agreementToForm(record,'Inny tytuł',9999);
+  assert.deepEqual(form, {title:record.title,scope:record.scope,deliverables:record.deliverables,
+    priceAmount:'800.5',priceCurrency:'PLN',deadline:record.deadline,revisions:'0',
+    deliveryFormat:record.delivery_format,acceptanceMethod:record.acceptance_method,
+    cancellationTerms:record.cancellation_terms,additionalTerms:record.additional_terms});
+  form.scope = 'Poprawiony zakres';
+  assert.equal(record.scope,'Zakres\nz drugą linią');
+  assert.equal(record.status,'proposed');
+  assert.equal(record.client_accepted_at,pending.client_accepted_at);
+});
+test('a new proposal uses clean defaults while preserving an explicit zero price', () => {
+  assert.deepEqual(agreementToForm(null,'Nowe zlecenie',0),{...EMPTY_AGREEMENT_FORM,title:'Nowe zlecenie',priceAmount:'0'});
+  const first = agreementToForm(null), second = agreementToForm(null);
+  first.scope = 'Szkic';
+  assert.equal(second.scope,''); assert.equal(EMPTY_AGREEMENT_FORM.scope,'');
 });
