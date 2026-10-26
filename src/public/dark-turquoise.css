@@ -87,6 +87,26 @@
       color:var(--v-ink)!important;
       border-bottom-color:var(--v-line)!important;
     }
+    & :is(#ih63-home-header,#ih63-account-header,#ih60-browse-header) :is(.btn-ghost,.ih-mobile-nav-toggle,.ih63-account-hamburger,.ih64-menu-toggle,.account-mini,.account-create-job-button,.account-notification-button) {
+      background-color:var(--v-surface)!important;
+      color:var(--v-ink)!important;
+      -webkit-text-fill-color:currentColor!important;
+      border-color:var(--v-line)!important;
+    }
+    & :is(#ih63-home-header,#ih63-account-header,#ih60-browse-header) :is(.btn-ghost,.ih-mobile-nav-toggle,.ih63-account-hamburger,.ih64-menu-toggle,.account-mini,.account-create-job-button,.account-notification-button):hover { background-color:var(--v-soft)!important; }
+    & #ih63-home-header .nav-actions .btn-dark {
+      background-color:var(--v-accent)!important;
+      border-color:var(--v-accent)!important;
+      color:var(--v-on)!important;
+      -webkit-text-fill-color:currentColor!important;
+    }
+    & :is(#ih63-home-header .home-nav-links,#ih18-account-menu,#ih27-home-account-menu,#ih64-limited-menu) {
+      background-color:var(--v-surface)!important;
+      color:var(--v-ink)!important;
+      border-color:var(--v-line)!important;
+    }
+    & :is(#ih63-home-header .home-nav-links,#ih18-account-menu,#ih27-home-account-menu,#ih64-limited-menu) :is(a,button) { background-color:var(--v-surface)!important; color:var(--v-ink)!important; -webkit-text-fill-color:currentColor!important; }
+    & :is(#ih63-home-header .home-nav-links,#ih18-account-menu,#ih27-home-account-menu,#ih64-limited-menu) :is(a,button):hover { background-color:var(--v-soft)!important; }
     & .ih53-projects { --ih66-band:var(--v-accent)!important; --ih66-band-ink:var(--v-on)!important; }
     & #ih57-cinema .ih57-final-actions > a:first-child { background:var(--v-accent)!important; border-color:var(--v-accent)!important; color:var(--v-on)!important; }
     & #ih57-cinema .ih57-messages > p + p { background:var(--v-soft)!important; color:var(--v-ink)!important; }
