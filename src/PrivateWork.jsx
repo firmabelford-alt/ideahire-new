@@ -4,7 +4,7 @@ import { FormSelect, AutoTextarea } from "./FormControls";
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { Upload, Link2, FileText, ShieldCheck, X, Plus, Paperclip, ChevronDown, File as FileIcon } from "lucide-react";
+import { Upload, Link2, FileText, ShieldCheck, X, Plus, Paperclip, ChevronDown, Flag, File as FileIcon } from "lucide-react";
 import { IdeaHireDateField, MarketSelect, getSafeWebUrl } from "./MarketUI";
 import { supabase } from "./supabase";
 import { AudioMessageAttachment } from "./VoiceMessages";
@@ -492,7 +492,7 @@ function PrivateImageViewer({ images, activeId, albumTitle, signedUrls, onClose,
         <figcaption>
           <span>{images.length > 1 && albumTitle ? albumTitle : "Dwuklik lub kółko myszy zmienia powiększenie"}</span>
           {!ownMessage && (
-            <button type="button" onClick={() => {
+            <button type="button" className="ih-material-report" onClick={() => {
               onClose();
               onReport("shared_item", item.id);
             }}>
@@ -583,7 +583,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
                 </span>
                 <span className="private-work-file-action" aria-hidden="true">{presentation.action}</span>
               </a>
-              {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
+              {!ownMessage && <button type="button" className="ih-material-report" onClick={() => onReport("shared_item", item.id)}><Flag size={15} aria-hidden="true"/><span>Zgłoś</span></button>}
             </div>
           );})}
           </div>
@@ -603,7 +603,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
                 <b>{item.display_name}</b>
                 <small>{externalUrl ? new URL(externalUrl).hostname : "Nieprawidłowy link"}</small>
               </a>
-              {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
+              {!ownMessage && <button type="button" className="ih-material-report" onClick={() => onReport("shared_item", item.id)}><Flag size={15} aria-hidden="true"/><span>Zgłoś</span></button>}
             </div>
             );
           })}
@@ -618,7 +618,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
             <article className="private-work-written-item" key={item.id}>
               <div><b>{item.display_name}</b><small>Tekst zapisany w tej wersji przekazania</small></div>
               <p>{item.text_content}</p>
-              {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
+              {!ownMessage && <button type="button" className="ih-material-report" onClick={() => onReport("shared_item", item.id)}><Flag size={15} aria-hidden="true"/><span>Zgłoś</span></button>}
             </article>
           ))}
         </section>
@@ -642,7 +642,7 @@ export function PrivateMessageMaterials({ items = [], signedUrls, ownMessage, on
                 {metadata.instructions && <p><span>Instrukcja</span>{metadata.instructions}</p>}
                 {metadata.expires_at && <small>Link zadeklarowany jako ważny do: {new Date(metadata.expires_at).toLocaleString("pl-PL")}</small>}
                 <a className="private-work-secure-access-button" href={secureUrl || undefined} target="_blank" rel="noopener noreferrer nofollow" aria-disabled={!secureUrl}>Otwórz bezpieczny link do sekretu </a>
-                {!ownMessage && <button type="button" onClick={() => onReport("shared_item", item.id)}>Zgłoś</button>}
+                {!ownMessage && <button type="button" className="ih-material-report" onClick={() => onReport("shared_item", item.id)}><Flag size={15} aria-hidden="true"/><span>Zgłoś</span></button>}
               </article>
             );
           })}
@@ -1607,7 +1607,7 @@ export function WorkDeliveryPanel({ deliveries, events, conversation, userId, pa
           Zleceniodawca może teraz wystawić opinię na Twoim profilu.
         </p>
       )}
-      {userId !== latest.submitted_by && <button type="button" className="private-work-report-link" onClick={() => onReport("work_delivery", latest.id)}>Zgłoś przekazaną pracę</button>}
+      {userId !== latest.submitted_by && <button type="button" className="private-work-report-link ih-material-report" onClick={() => onReport("work_delivery", latest.id)}>Zgłoś przekazaną pracę</button>}
       {message && <p className="private-work-form-message" role="status">{message}</p>}
       {reviewMessage && <p className="private-work-form-message" role="status">{reviewMessage}</p>}
     </section>

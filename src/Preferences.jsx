@@ -30,15 +30,15 @@ export const IDEA_HIRE_VISUAL_SYSTEM=Object.freeze({
     "material": "#19cbd3"
 },
   "turquoiseDark": {
-    "bg": "#0c2226",
-    "paper": "#113238",
-    "surface": "#164047",
-    "ink": "#edfcfd",
-    "muted": "#b5dadd",
-    "line": "#3b7278",
-    "accent": "#56dbe0",
-    "on": "#062e32",
-    "material": "#19cbd3"
+    "bg": "#161c1d",
+    "paper": "#20292a",
+    "surface": "#2c3839",
+    "ink": "#f1eee7",
+    "muted": "#bdc7c1",
+    "line": "#718984",
+    "accent": "#8fb7ad",
+    "on": "#142923",
+    "material": "#6e9b90"
 },
   "mono": {
     "bg": "#ffffff",

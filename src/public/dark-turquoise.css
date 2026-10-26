@@ -1,0 +1,98 @@
+/* Loaded before legacy layers. Only the dark turquoise template is affected.
+   This layer changes colour roles, never type, dimensions or application state. */
+@layer ideahirePalette {
+  :root[data-theme="dark"]:not([data-template="classic"]) {
+    --v-bg:#161c1d!important;
+    --v-surface:#20292a!important;
+    --v-soft:#2c3839!important;
+    --v-ink:#f1eee7!important;
+    --v-muted:#bdc7c1!important;
+    --v-line:#718984!important;
+    --v-accent:#8fb7ad!important;
+    --v-on:#142923!important;
+    --v-pop:var(--v-surface)!important;
+    --ih-heading-ink:var(--v-ink)!important;
+    --ih-heading-muted:var(--v-muted)!important;
+    --ih-heading-accent:var(--v-accent)!important;
+    --ih63-nav-ink:var(--v-ink)!important;
+    --ih63-nav-line:var(--v-line)!important;
+    --ih63-nav-focus:var(--v-accent)!important;
+    --ih63-nav-hover:var(--v-soft)!important;
+    --ih63-brand:var(--v-accent)!important;
+    --ih63-on-brand:var(--v-on)!important;
+    --ih63-card:var(--v-surface)!important;
+    --ih63-card-ink:var(--v-ink)!important;
+    --ih63-card-muted:var(--v-muted)!important;
+    --ih63-page-image:linear-gradient(155deg,#161c1d 0%,#20292a 55%,#161c1d 100%)!important;
+    --ih63-hero-image:linear-gradient(115deg,#2c3839 0%,#20292a 60%,#161c1d 100%)!important;
+    --ih-brand-paper:var(--v-bg)!important;
+    --ih-brand-ink:var(--v-ink)!important;
+    --ih-brand-edge:var(--v-accent)!important;
+    --ih47-sculpt:#6e9b90!important;
+    --ih47-sculpt-light:var(--v-surface)!important;
+    color-scheme:dark;
+
+    & body.ih68-workspace {
+      --a-bg:var(--v-bg)!important;
+      --a-paper:var(--v-surface)!important;
+      --a-soft:var(--v-soft)!important;
+      --a-tint:color-mix(in srgb,var(--v-accent) 10%,var(--v-surface))!important;
+      --a-ink:var(--v-ink)!important;
+      --a-muted:var(--v-muted)!important;
+      --a-line:var(--v-line)!important;
+      --a-accent:var(--v-accent)!important;
+      --a-on:var(--v-on)!important;
+    }
+    & :is(.ih-terms-panel,.ih-send-area,.ih-transfer-backdrop) {
+      --sp-paper:var(--v-surface)!important;
+      --sp-ink:var(--v-ink)!important;
+      --sp-muted:var(--v-muted)!important;
+      --sp-line:var(--v-line)!important;
+      --sp-soft:var(--v-soft)!important;
+      --sp-accent:var(--v-accent)!important;
+      --sp-on:var(--v-on)!important;
+    }
+    & :is(.ih-material-reader,.ih-payment-reader) {
+      --rd-paper:var(--v-surface)!important;
+      --rd-ink:var(--v-ink)!important;
+      --rd-muted:var(--v-muted)!important;
+      --rd-line:var(--v-line)!important;
+      --rd-soft:var(--v-soft)!important;
+      --rd-accent:var(--v-accent)!important;
+      --rd-on:var(--v-on)!important;
+    }
+    & :is(.ih7-communications,.lucyna-root) {
+      --ih7-bg:var(--v-bg)!important;
+      --ih7-surface:var(--v-surface)!important;
+      --ih7-soft:var(--v-soft)!important;
+      --ih7-ink:var(--v-ink)!important;
+      --ih7-muted:var(--v-muted)!important;
+      --ih7-line:var(--v-line)!important;
+      --ih7-accent:var(--v-accent)!important;
+      --ih7-on-accent:var(--v-on)!important;
+    }
+    & .lucyna-root {
+      --lu-surface:var(--v-surface)!important;
+      --lu-soft:var(--v-soft)!important;
+      --lu-ink:var(--v-ink)!important;
+      --lu-muted:var(--v-muted)!important;
+      --lu-line:var(--v-line)!important;
+      --lu-accent:var(--v-accent)!important;
+      --lu-neon:var(--v-accent)!important;
+      --lu-on-accent:var(--v-on)!important;
+      --lu-glow:#30413d!important;
+    }
+    & :is(#ih63-home-header,#ih63-account-header.navbar.account-navbar,.ih60-browse-header,.ih68-header) {
+      background-color:var(--v-surface)!important;
+      color:var(--v-ink)!important;
+      border-bottom-color:var(--v-line)!important;
+    }
+    & .ih53-projects { --ih66-band:var(--v-accent)!important; --ih66-band-ink:var(--v-on)!important; }
+    & #ih57-cinema .ih57-final-actions > a:first-child { background:var(--v-accent)!important; border-color:var(--v-accent)!important; color:var(--v-on)!important; }
+    & #ih57-cinema .ih57-messages > p + p { background:var(--v-soft)!important; color:var(--v-ink)!important; }
+    & #ih57-cinema .ih57-fee-rate > strong { color:var(--v-accent)!important; }
+    & .ih-catalog-cinema { --ih-film-shade:#161c1dd1; }
+    & ::selection { background:var(--v-accent); color:var(--v-on); }
+    & input:-webkit-autofill { -webkit-text-fill-color:var(--v-ink)!important; caret-color:var(--v-ink)!important; box-shadow:0 0 0 1000px var(--v-surface) inset!important; }
+  }
+}

@@ -56,7 +56,7 @@ export default function VoicePlayer({ url, durationHint = 0, downloadName, onRep
   }
   const progress = duration > 0 ? Math.min(100,position/duration*100):0;
   return <div className="ih-voice-player" role="group" aria-label={label || t('Wiadomość głosowa','Voice message')}>
-    <audio ref={audio} src={url || undefined} preload="metadata" onLoadedMetadata={metadata} onDurationChange={metadata}
+    <audio hidden aria-hidden="true" ref={audio} src={url || undefined} preload="metadata" onLoadedMetadata={metadata} onDurationChange={metadata}
       onPlaying={() => { setPlaying(true); setLoading(false); }} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)}
       onTimeUpdate={event => setPosition(event.currentTarget.currentTime)} onError={() => { setPlaying(false); setLoading(false); setError(t('Nagranie jest chwilowo niedostępne. Odśwież rozmowę.','Recording is temporarily unavailable. Refresh the conversation.')); }} />
     <div className="ih-voice-player-row">

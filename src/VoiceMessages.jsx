@@ -114,6 +114,6 @@ export function AudioMessageAttachment({ item, url, ownMessage, onReport }) {
   return <section className="ih-audio-message" aria-label={t('Nagranie audio', 'Audio recording')}>
     <header><Mic size={17} /><strong>{isVoice ? t('Wiadomość głosowa', 'Voice message') : item.display_name || t('Nagranie audio', 'Audio recording')}</strong></header>
     {url ? <audio controls preload="none" src={url} aria-label={t('Odtwórz wiadomość głosową', 'Play voice message')} /> : <p>{t('Nagranie jest chwilowo niedostępne. Odśwież rozmowę.', 'The recording is temporarily unavailable. Refresh the conversation.')}</p>}
-    <footer>{url && <a href={url} download={item.display_name} target="_blank" rel="noopener noreferrer">{t('Pobierz', 'Download')}</a>}{!ownMessage && <button type="button" onClick={() => onReport('shared_item', item.id)}>{t('Zgłoś', 'Report')}</button>}</footer>
+    <footer>{url && <a href={url} download={item.display_name} target="_blank" rel="noopener noreferrer">{t('Pobierz', 'Download')}</a>}{!ownMessage && <button type="button" className="ih-material-report" onClick={() => onReport('shared_item', item.id)}>{t('Zgłoś', 'Report')}</button>}</footer>
   </section>;
 }

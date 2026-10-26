@@ -83,14 +83,9 @@ export default function ConversationRail({ otherName, avatarUrl, profileId, bloc
     <div ref={main} className="ih-room-main"><h1 className="ih-send-sr">{activeLabel+' · '+name}</h1>
       <header className="ih-room-mobilebar"><button type="button" className="ih68-icon-button" onClick={view === 'conversation' ? onBack:() => select('conversation')} aria-label={view === 'conversation' ? t('Wróć: ','Back to: ')+backLabel:t('Wróć do rozmowy','Back to conversation')}><WorkspaceIcon kind="back"/></button>
         {view === 'conversation' && <WorkspaceAvatar name={name} url={blocked ? null:avatarUrl} small/>}
-        <strong>{view === 'conversation' ? name:activeLabel}</strong><button ref={mobileToggle} type="button" className="ih68-icon-button ih-room-menu-toggle" onClick={toggle} aria-expanded={open} aria-controls="ih-conversation-sidebar" aria-label={t('Otwórz sekcje i opcje rozmowy','Open conversation sections and options')}><WorkspaceIcon kind="menu"/><span>{t('Sekcje','Sections')}</span></button>
+        <strong>{view === 'conversation' ? name:activeLabel}</strong><button ref={mobileToggle} type="button" className="ih68-icon-button ih-room-menu-toggle" onClick={toggle} aria-expanded={open} aria-controls="ih-conversation-sidebar" aria-label={t('Otwórz projekt i opcje rozmowy','Open project and conversation options')}><WorkspaceIcon kind="down"/><span>{t('Projekt','Project')}</span></button>
       </header>
-      <nav className="ih-room-mobile-nav" aria-label={t('Skróty współpracy','Project shortcuts')}>
-        {sections.filter(section => section.value !== 'conversation').map(section => <button key={section.value} type="button"
-          aria-current={view === section.value ? 'page':undefined} aria-controls={section.panel}
-          aria-label={section.label+(section.value === 'plan' && termsPending ? t(' — czeka na Twoją decyzję',' — your decision is needed'):'')}
-          onClick={() => select(section.value)}><WorkspaceIcon kind={section.icon}/><span>{section.label}</span>{section.value === 'plan' && termsPending && <i aria-hidden="true"/>}</button>)}
-      </nav>{children}
+{children}
     </div>
   </div>;
 }
