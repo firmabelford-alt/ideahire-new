@@ -23,6 +23,7 @@ test.before(async () => {
   await db.exec(`
     create role anon; create role authenticated;
     create schema auth;
+    alter default privileges in schema public grant execute on functions to anon, authenticated;
     create table auth.users (id uuid primary key);
     create function auth.uid() returns uuid language sql stable as $$
       select nullif(current_setting('test.user_id', true), '')::uuid;
@@ -214,6 +215,14 @@ test('anonymous callers cannot execute the decision RPC', async () => {
   try { await assert.rejects(() => respond(id, 'closed'), /permission denied/); }
   finally { await db.exec('reset role'); }
   assert.equal((await row('conversation_agreements', id)).response_action, null);
+});
+
+test('internal trigger functions revoke explicit Supabase default grants', async () => {
+  const result = await db.query(`select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname in
+      ('ideahire_guard_pending_agreement','ideahire_service_client_first','ideahire_service_inquiry_intro')
+      and (has_function_privilege('anon',p.oid,'execute') or has_function_privilege('authenticated',p.oid,'execute'))`);
+  assert.equal(result.rows.length, 0);
 });
 
 test('removing a decision message does not block erasure or reopen the collaboration', async () => {

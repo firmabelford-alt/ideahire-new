@@ -2,7 +2,7 @@
 
 Data: 25.10.2026. Baza pakietu: GitHub `firmabelford-alt/ideahire-new`, main `f9d1f2016b97bf576d10d553aa578d4cedf3ca26`.
 
-Pakiet zawiera kompletne pliki, bez diffów. Zmiany przygotowano lokalnie. Do zakończenia pozostaje uruchomienie SQL i publikacja plików strony. Aktualny stan produkcyjnej bazy nie został zmieniony ani potwierdzony.
+Pakiet zawiera kompletne pliki, bez diffów. SQL wdrożono i zweryfikowano 26.10.2026 w projekcie `lvdymbaltnzjrcizlspd`; wszystkie pięć kontroli zwróciło `ready = true`. Konto GitHub i organizacja Supabase: `firmabelford-alt`. Publikacja strony odbywa się z gałęzi `main` poniższego repozytorium.
 
 ## Co zmieniono
 
@@ -56,9 +56,9 @@ Poczekaj na udany build i wdrożenie produkcyjne Cloudflare Pages. Następnie od
 
 - Kompilacja produkcyjna Vite: zaliczona.
 - Testy aplikacji: 11 zaliczonych.
-- Testy migracji w odizolowanym PostgreSQL przez PGlite: 13 zaliczonych. Sprawdzono blokadę autora, pierwszą propozycję klienta, kontrpropozycję, akceptację, odrzucenie starej wersji, rezygnację i zwolnienie miejsca, idempotencję, cofnięcie operacji po błędzie wiadomości, dostęp uczestników i odmowę anonimowym użytkownikom.
+- Testy migracji w odizolowanym PostgreSQL przez PGlite: 14 zaliczonych. Sprawdzono blokadę autora, pierwszą propozycję klienta, kontrpropozycję, akceptację, odrzucenie starej wersji, rezygnację i zwolnienie miejsca, idempotencję, cofnięcie operacji po błędzie wiadomości, dostęp uczestników, odmowę anonimowym użytkownikom i odebranie domyślnych uprawnień do funkcji wewnętrznych. Dodatkowy test z definicjami działających funkcji v1/v2 i triggerów usług również przeszedł.
 - Publiczny plik CSS: poprawnie parsuje się przez PostCSS. `git diff --check`: bez błędów.
 - Testy nie wykonywały prawdziwych płatności ani operacji w produkcyjnej bazie.
 - Nie potwierdzono ręcznie nowego wyglądu na zalogowanych kontach klienta i wykonawcy. Obecna sesja przeglądarki nie udostępnia takich kont. Testy automatyczne nie zastępują tej kontroli po wdrożeniu.
 
-W pakiecie są też pliki testów: `test/agreement.test.js` — 46 linii oraz `supabase/sql/verify/conversation-negotiation.mjs` — 247 linii. Nie są wymagane do publikacji strony. Instrukcja uruchomienia testów SQL znajduje się na początku pliku weryfikacyjnego.
+W pakiecie są też pliki testów: `test/agreement.test.js` — 46 linii oraz `supabase/sql/verify/conversation-negotiation.mjs` — 256 linii. Nie są wymagane do publikacji strony. Instrukcja uruchomienia testów SQL znajduje się na początku pliku weryfikacyjnego.

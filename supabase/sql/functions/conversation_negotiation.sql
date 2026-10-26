@@ -263,9 +263,9 @@ begin
 end;
 $$;
 
-revoke all on function public.ideahire_guard_pending_agreement() from public;
-revoke all on function public.ideahire_service_client_first() from public;
-revoke all on function public.ideahire_service_inquiry_intro() from public;
+revoke all on function public.ideahire_guard_pending_agreement() from public, anon, authenticated;
+revoke all on function public.ideahire_service_client_first() from public, anon, authenticated;
+revoke all on function public.ideahire_service_inquiry_intro() from public, anon, authenticated;
 revoke all on function public.respond_to_conversation_agreement(uuid, text, text) from public, anon;
 grant execute on function public.respond_to_conversation_agreement(uuid, text, text) to authenticated;
 -- Bezpośrednia podmiana odpowiedzi lub treści nadal jest niedostępna klientowi.
