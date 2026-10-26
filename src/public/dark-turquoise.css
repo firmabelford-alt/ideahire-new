@@ -107,6 +107,7 @@
     }
     & :is(#ih63-home-header .home-nav-links,#ih18-account-menu,#ih27-home-account-menu,#ih64-limited-menu) :is(a,button) { background-color:var(--v-surface)!important; color:var(--v-ink)!important; -webkit-text-fill-color:currentColor!important; }
     & :is(#ih63-home-header .home-nav-links,#ih18-account-menu,#ih27-home-account-menu,#ih64-limited-menu) :is(a,button):hover { background-color:var(--v-soft)!important; }
+    & #ih63-home-header .ih53-menu-label { color:var(--v-muted)!important; }
     & .ih53-projects { --ih66-band:var(--v-accent)!important; --ih66-band-ink:var(--v-on)!important; }
     & #ih57-cinema .ih57-final-actions > a:first-child { background:var(--v-accent)!important; border-color:var(--v-accent)!important; color:var(--v-on)!important; }
     & #ih57-cinema .ih57-messages > p + p { background:var(--v-soft)!important; color:var(--v-ink)!important; }
