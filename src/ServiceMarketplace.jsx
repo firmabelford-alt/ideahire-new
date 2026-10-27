@@ -1,4 +1,5 @@
 import { FormSelect, AutoTextarea } from "./FormControls";
+import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 /* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
   useCallback,
@@ -1354,44 +1355,20 @@ function MyServices({ supabase, user, Navbar }) {
         <SubpageLoading label={english ? "Loading your services…" : "Przygotowujemy Twoje usługi…"} />
       ) : services.length > 0 ? (
         <div className="ih5-my-services-list">
-          {services.map((service) => (
-            <article key={service.id}>
-              <div className="ih5-my-service-copy">
-                <span>{service.category}</span>
-                <h2>{service.title}</h2>
-                <p>{service.summary}</p>
-              </div>
-              <div className="ih5-my-service-state">
-                <span className={service.status === "active" ? "is-active" : "is-paused"}>
-                  {service.status === "active" ? (english ? "Visible" : "Widoczna") : (english ? "Paused" : "Wstrzymana")}
-                </span>
-                <small>{english ? "Updated: " : "Aktualizacja: "}{formatServiceDate(service.updated_at)}</small>
-              </div>
-              <div className="ih5-my-service-actions">
-                <Link to={`/services/${service.id}`}>{english ? "Preview" : "Podgląd"}</Link>
-                <Link to={`/services/${service.id}/edit`}>{english ? "Edit" : "Edytuj"}</Link>
-                <button
-                  type="button"
-                  disabled={busyId === service.id}
-                  onClick={() => toggleStatus(service)}
-                >
-                  {busyId === service.id
-                    ? (english ? "Saving…" : "Zapisywanie…")
-                    : service.status === "active"
-                    ? (english ? "Pause" : "Wstrzymaj")
-                    : (english ? "Resume" : "Wznów")}
-                </button>
-              </div>
-            </article>
-          ))}
+          {services.map(service => <OwnedListingCard key={service.id}
+            title={service.title} category={english ? translateUiText(service.category) : service.category} description={service.summary}
+            status={service.status === "active" ? (english ? "Visible" : "Widoczna") : (english ? "Paused" : "Wstrzymana")} inactive={service.status !== "active"}
+            note={(english ? "Updated: " : "Aktualizacja: ") + formatServiceDate(service.updated_at)} busy={busyId === service.id}
+            actions={<>
+              <Link to={`/services/${service.id}`}>{english ? "Preview" : "Podgląd"}</Link>
+              <Link to={`/services/${service.id}/edit`}>{english ? "Edit" : "Edytuj"}</Link>
+              <button type="button" disabled={Boolean(busyId)} onClick={() => toggleStatus(service)}>{busyId === service.id ? (english ? "Saving…" : "Zapisywanie…") : service.status === "active" ? (english ? "Pause" : "Wstrzymaj") : (english ? "Resume" : "Wznów")}</button>
+            </>} />)}
         </div>
       ) : (
-        <div className="ih5-service-empty ih-owned-services-empty">
-          <span className="ih-owned-services-mark" aria-hidden="true"><MarketIcon kind="files" /></span>
-          <h2>{english ? "Your first service starts here" : "Miejsce na Twoją pierwszą usługę"}</h2>
-          <p>{english ? "Describe what you offer, set the price and let clients contact you." : "Opisz, co oferujesz, ustal wycenę i daj klientom możliwość kontaktu."}</p>
-          <Link to="/services/new">{english ? "Create a service" : "Utwórz usługę"}<MarketIcon kind="arrow" /></Link>
-        </div>
+        <OwnedListingsEmpty title={english ? "Your first service starts here" : "Miejsce na Twoją pierwszą usługę"}
+          description={english ? "Describe what you offer, set the price and let clients contact you." : "Opisz, co oferujesz, ustal wycenę i daj klientom możliwość kontaktu."}
+          to="/services/new" action={english ? "Create a service" : "Utwórz usługę"} />
       )}
       </section>
     </ServiceShell>

@@ -2339,7 +2339,9 @@ export default function Preferences({
         }
       );
 
-    observer.observe(
+    // Polish is the source language. Only English needs live DOM translation;
+    // the initial pass above still restores previous translations on language changes.
+    if (language === "en") observer.observe(
       document.body,
       {
         subtree: true,

@@ -1,8 +1,8 @@
 /* P64 — a movable, non-modal window for the existing Lucyna assistant. */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
-import Assistant from "./Lucyna";
+import { SubpageLoading } from "./Subpages";
 import LucynaSymbol from "./LucynaSymbol";
 import "./LucynaDock.css";
 
@@ -80,6 +80,8 @@ export default function LucynaDock({ supabase, user }) {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // The assistant code is downloaded when its window is first opened.
+  const Assistant = useMemo(() => React.lazy(() => import("./Lucyna")), [attempt]);
   const [bounds, setBounds] = useState(viewportBounds), [position, setPosition] = useState(null);
   const [launcherPosition, setLauncherPosition] = useState(null), [dragging, setDragging] = useState(null);
   const panel = useRef(null), returnTab = useRef(null), drag = useRef(null);
@@ -192,7 +194,7 @@ export default function LucynaDock({ supabase, user }) {
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
         <button className="ih64-dock-control" type="button" title="Zamknij okno" aria-label="Zamknij okno Lucyny AI" onClick={() => minimise()}><Icon kind="close"/></button>
       </header>
-      <div className="ih64-dock-body"><DockBoundary key={attempt} onRetry={() => setAttempt(value => value + 1)}><Assistant supabase={supabase} user={user} embedded visible={open}/></DockBoundary></div>
+      <div className="ih64-dock-body"><DockBoundary key={attempt} onRetry={() => setAttempt(value => value + 1)}><React.Suspense fallback={<SubpageLoading />}><Assistant supabase={supabase} user={user} embedded visible={open}/></React.Suspense></DockBoundary></div>
     </section>}
     {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI. Przeciągnij, aby przesunąć przycisk, lub użyj klawiszy strzałek. Home przywraca pozycję." aria-haspopup="dialog" aria-expanded="false" aria-controls={loaded ? "ih64-lucyna-window" : undefined} title="Lucyna AI — kliknij, aby otworzyć; przeciągnij, aby przesunąć"
       style={{ "--ih84-launcher-x": launcher.x + "px", "--ih84-launcher-y": launcher.y + "px", "--ih84-launcher-width": launcher.width + "px" }}

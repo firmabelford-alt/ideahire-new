@@ -36,6 +36,8 @@ import {
 } from "react-router-dom";
 
 import App from "./App";
+import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
+import { getJobExpiryInfo, useListingClock } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
@@ -1390,29 +1392,20 @@ function DiscoveryPreferencesProvider({ children }) {
       )
     ).slice(0, 3);
 
-    const [coreResult, profileResult] = await Promise.all([
-      supabase.rpc("save_my_ideahire_discovery_preferences", {
-        p_usage_preference: usagePreference || "both",
-        p_preferred_categories: preferredCategories,
-        p_personalization_enabled: personalizationEnabled !== false,
-        p_onboarding_action: action,
-      }),
-      supabase.rpc("save_my_ideahire_onboarding_profile", {
-        p_role_preference: usagePreference || "both",
-        p_freelancer_categories: safeFreelancerCategories,
-        p_client_categories: safeClientCategories,
-        p_onboarding_goals: onboardingGoals || [],
-        p_specialty_summary: specialtySummary?.trim() || null,
-        p_project_readiness: projectReadiness || null,
-        p_onboarding_action: action,
-      }),
-    ]);
-
-    if (coreResult.error) throw coreResult.error;
-    if (profileResult.error) throw profileResult.error;
-
-    const data = coreResult.data || {};
-    const onboardingProfile = profileResult.data || {};
+    const { data: saved, error } = await supabase.rpc("save_my_ideahire_preferences", {
+      p_role_preference: usagePreference || "both",
+      p_preferred_categories: preferredCategories,
+      p_freelancer_categories: safeFreelancerCategories,
+      p_client_categories: safeClientCategories,
+      p_onboarding_goals: onboardingGoals || [],
+      p_specialty_summary: specialtySummary?.trim() || null,
+      p_project_readiness: projectReadiness || null,
+      p_personalization_enabled: personalizationEnabled !== false,
+      p_onboarding_action: action,
+    });
+    if (error) throw error;
+    const data = saved?.preferences || {};
+    const onboardingProfile = saved?.profile || {};
 
     const nextPreferences = {
       authenticated: true,
@@ -1825,7 +1818,7 @@ function DiscoveryOnboarding({
           <span style={{ width: `${(currentStep / totalSteps) * 100}%` }} />
         </div>
 
-        <div className="ih60-discovery-body">
+        <div className="ih60-discovery-body" ref={contentRef}>
           <aside className="ih60-discovery-rail" aria-label={c("Twoja konfiguracja", "Your setup")}>
             <span>{c("IDEAHIRE / TWÓJ WIDOK", "IDEAHIRE / YOUR VIEW")}</span><h2>{c(<>Ustaw swój<br />punkt startu.</>, <>Choose your<br />starting point.</>)}</h2>
             <ol>{stepLabels.map((label, index) => <li key={label} aria-current={currentStep === index + 1 ? "step" : undefined}><b>{index < stepIndex ? "✓" : String(index + 1).padStart(2, "0")}</b><span>{label}</span></li>)}</ol>
@@ -1834,7 +1827,6 @@ function DiscoveryOnboarding({
         <div
           className="discovery-onboarding-content"
           key={step}
-          ref={contentRef}
         >
           <ol className="ih59-discovery-steps" aria-label="Etapy ustawień">
             {stepLabels.map((label, index) => <li key={label} aria-current={currentStep === index + 1 ? "step" : undefined}><b>{index < stepIndex ? "✓" : String(index + 1).padStart(2, "0")}</b><span>{label}</span></li>)}
@@ -2278,7 +2270,7 @@ function DiscoveryOnboarding({
             role="status"
             aria-live="polite"
           >
-            {message}
+            {!message && saving ? c("Zapisywanie…", "Saving…") : ""}
           </span>
 
           {stepIndex < totalSteps - 1 ? (
@@ -3656,47 +3648,6 @@ const JOB_LISTING_DURATION_OPTIONS = [
     description: "Więcej czasu na znalezienie wykonawcy",
   },
 ];
-
-function getJobExpiryInfo(expiresAt) {
-  const expiryTime = new Date(expiresAt || "").getTime();
-
-  if (!Number.isFinite(expiryTime)) {
-    return {
-      expired: false,
-      label: "Aktywne ogłoszenie",
-    };
-  }
-
-  const remainingMilliseconds = expiryTime - Date.now();
-
-  if (remainingMilliseconds <= 0) {
-    return {
-      expired: true,
-      label: "Ogłoszenie wygasło",
-    };
-  }
-
-  const remainingHours = Math.ceil(
-    remainingMilliseconds / (60 * 60 * 1000)
-  );
-
-  if (remainingHours <= 24) {
-    return {
-      expired: false,
-      label:
-        remainingHours === 1
-          ? "Wygasa za godzinę"
-          : `Wygasa za ${remainingHours} godz.`,
-    };
-  }
-
-  const remainingDays = Math.ceil(remainingHours / 24);
-
-  return {
-    expired: false,
-    label: `Wygasa za ${remainingDays} dni`,
-  };
-}
 
 function JobListingMeta({ job, compact = false }) {
   const expiry = getJobExpiryInfo(job?.expires_at);
@@ -7964,14 +7915,14 @@ const ACCOUNT_WORKSPACE_SECTIONS = [
   },
   {
     key: "jobs",
-    english: {"label": "My listings", "eyebrow": "Your listings", "title": "My listings", "description": "Manage your posts and check jobs available for republication."},
+    english: {"label": "My listings", "eyebrow": "Your listings", "title": "My listings", "description": "Edit your listings, check their visibility and republish expired jobs."},
     number: "04",
     label: "Zlecenia",
     hash: "account-jobs",
     eyebrow: "Twoja aktywność",
     title: "Moje zlecenia",
     description:
-      "Zarządzaj własnymi ogłoszeniami i sprawdzaj zlecenia gotowe do ponownej publikacji.",
+      "Edytuj ogłoszenia, sprawdzaj ich widoczność i przywracaj wygasłe zlecenia.",
   },
   {
     key: "preferences",
@@ -8286,6 +8237,9 @@ function Account() {
   const [accountHubOpen, setAccountHubOpen] = useState(false);
   const [ownedJobSearch, setOwnedJobSearch] = useState("");
   const [ownedJobFilter, setOwnedJobFilter] = useState("all");
+  const [renewingJobId, setRenewingJobId] = useState("");
+  const [ownedJobMessage, setOwnedJobMessage] = useState("");
+  const renewingJobRef = useRef(false);
   const accountContentRef = useRef(null);
 
   const connectReturnHandledRef =
@@ -8377,6 +8331,8 @@ function Account() {
 
   const [myJobs, setMyJobs] =
     useState([]);
+
+  const ownedJobsTime = useListingClock(myJobs);
 
   const [jobsLoading, setJobsLoading] =
     useState(true);
@@ -8693,12 +8649,14 @@ function Account() {
       } = await supabase
         .from("jobs")
         .select(
-          "id, user_id, title, description, category, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+          "id, user_id, title, description, category, subcategory, budget, budget_negotiable, listing_duration_days, expires_at, created_at, visibility, source_type"
         )
         .eq(
           "user_id",
           user.id
         )
+        .eq("visibility", "public")
+        .eq("source_type", "client_posted")
         .order(
           "created_at",
           {
@@ -8707,6 +8665,7 @@ function Account() {
         );
 
       if (error) {
+        setOwnedJobMessage(accountEnglish ? "Your listings could not be loaded. Refresh the page." : "Nie udało się pobrać ogłoszeń. Odśwież widok.");
         console.error(
           "MY JOBS ERROR:",
           error
@@ -9137,6 +9096,26 @@ function Account() {
       );
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleRenewJob(job) {
+    if (renewingJobRef.current || !getJobExpiryInfo(job.expires_at).expired) return;
+    renewingJobRef.current = true;
+    setRenewingJobId(job.id);
+    setOwnedJobMessage("");
+    try {
+      const { data, error } = await supabase.rpc("renew_my_ideahire_job", { p_job_id: job.id });
+      if (error) throw error;
+      if (!data?.job?.id) throw new Error(accountEnglish ? "Publication was not confirmed. Refresh the page." : "Nie potwierdzono publikacji. Odśwież widok.");
+      setMyJobs(current => current.map(item => item.id === job.id ? { ...item, ...data.job } : item));
+      setOwnedJobFilter("active");
+      setOwnedJobMessage(accountEnglish ? "Published again. The listing is visible on the board and your profile." : "Opublikowano ponownie. Ogłoszenie jest widoczne na tablicy i Twoim profilu.");
+    } catch (error) {
+      setOwnedJobMessage(error?.message || (accountEnglish ? "The listing could not be published again." : "Nie udało się ponownie opublikować ogłoszenia."));
+    } finally {
+      renewingJobRef.current = false;
+      setRenewingJobId("");
     }
   }
 
@@ -9813,12 +9792,12 @@ function Account() {
     : selectedAccountSectionCopy;
 
   const ownedJobCounts = myJobs.reduce((counts, job) => {
-    counts[getJobExpiryInfo(job.expires_at).expired ? "expired" : "active"] += 1;
+    counts[getJobExpiryInfo(job.expires_at, ownedJobsTime).expired ? "expired" : "active"] += 1;
     return counts;
   }, { all: myJobs.length, active: 0, expired: 0 });
   const ownedJobQuery = ownedJobSearch.trim().toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
   const visibleOwnedJobs = myJobs.filter(job => {
-    const state = getJobExpiryInfo(job.expires_at).expired ? "expired" : "active";
+    const state = getJobExpiryInfo(job.expires_at, ownedJobsTime).expired ? "expired" : "active";
     const text = [job.title, job.description, getJobCategoryLabel(job.category)].filter(Boolean).join(" ").toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
     return (ownedJobFilter === "all" || state === ownedJobFilter) && (!ownedJobQuery || text.includes(ownedJobQuery));
   });
@@ -10339,15 +10318,15 @@ function Account() {
               <span className="profile-portfolio-count" aria-label={accountEnglish ? `Albums: ${portfolioItems.length} of ${MAX_PORTFOLIO_ITEMS}` : `Albumy: ${portfolioItems.length} z ${MAX_PORTFOLIO_ITEMS}`}><strong>{portfolioItems.length}</strong><span>/ {MAX_PORTFOLIO_ITEMS}</span></span>
             </div>
 
-            <div className="profile-portfolio-legal-note">
-              <strong>Publikuj odpowiedzialnie.</strong>
+            <details className="profile-portfolio-legal-note">
+              <summary>{accountEnglish ? "Publish responsibly" : "Publikuj odpowiedzialnie"}</summary>
               <span>
                 Dodając projekt, potwierdzasz, że masz prawo opublikować jego
                 opis, link i zdjęcia oraz że materiały nie naruszają praw innych
                 osób. Projekt możesz usunąć w każdej chwili. Zobacz także{" "}
                 <Link to="/regulamin">Regulamin IdeaHire</Link>.
               </span>
-            </div>
+            </details>
 
             {portfolioLoading ? (
               <InlineRouteLoader
@@ -10363,6 +10342,7 @@ function Account() {
                         <img
                           src={getPortfolioMedia(item)[0].image_url}
                           alt={`Projekt: ${item.title}`}
+                          loading="lazy" decoding="async"
                         />
                         <span>{getPortfolioMedia(item).length} zdj.</span>
                       </div>
@@ -10692,31 +10672,28 @@ function Account() {
             </div>
             <label className="ih75-register-search"><MarketIcon kind="search" /><span className="ih5-sr-only">{accountEnglish ? "Search your listings" : "Szukaj w swoich ogłoszeniach"}</span><input type="search" value={ownedJobSearch} onChange={event => setOwnedJobSearch(event.target.value)} maxLength={160} placeholder={accountEnglish ? "Search listings" : "Szukaj ogłoszenia"} />{ownedJobSearch && <button type="button" aria-label={accountEnglish ? "Clear search" : "Wyczyść wyszukiwanie"} onClick={() => setOwnedJobSearch("")}><MarketIcon kind="close" /></button>}</label>
           </div>
+          {ownedJobMessage && <p className="ih-owned-feedback" role="status">{ownedJobMessage}</p>}
           {jobsLoading ? <InlineRouteLoader className="embedded-route-loader" rows={3} /> : myJobs.length === 0 ? (
-            <div className="ih75-owned-empty"><WorkspaceIcon kind="jobs" />
-              <h2>{accountEnglish ? "No listings yet" : "Nie masz jeszcze ogłoszeń"}</h2>
-              <p>{accountEnglish ? "Describe the work, set the scope and invite freelancers to reply." : "Opisz pracę, określ zakres i zaproś wykonawców do rozmowy."}</p>
-              <Link className="ih5-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link>
-            </div>
+            <OwnedListingsEmpty title={accountEnglish ? "Your first listing starts here" : "Miejsce na Twoje pierwsze zlecenie"}
+              description={accountEnglish ? "Describe the work, set the scope and invite freelancers to reply." : "Opisz pracę, określ zakres i zaproś wykonawców do rozmowy."}
+              to="/find-talent" action={accountEnglish ? "Post a job" : "Dodaj zlecenie"} />
           ) : <>
             <p className="ih75-register-count" role="status" aria-live="polite">{accountEnglish ? "Showing " : "Wyświetlasz "}<strong>{visibleOwnedJobs.length}</strong>{accountEnglish ? " of " : " z "}{myJobs.length}{accountEnglish ? " listings" : " ogłoszeń"}</p>
             <div className="ih75-owned-list">
               {visibleOwnedJobs.map(job => {
-                const expiry = getJobExpiryInfo(job.expires_at);
-                return <article className="ih5-job-card ih73-job-row ih79-job ih-owned-job-card" key={job.id}>
-                  <div className="ih5-job-card-top">
-                    <span className="ih5-eyebrow">{accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}{job.subcategory ? ` · ${job.subcategory}` : ""}</span>
-                    <span className={"ih-owned-job-status" + (expiry.expired ? " is-expired" : "")}>{expiry.expired ? (accountEnglish ? "Expired" : "Wygasłe") : (accountEnglish ? "Active" : "Aktywne")}</span>
-                  </div>
-                  <div className="ih5-job-overview">
-                    <div className="ih5-job-copy"><h2 className="ih5-job-title"><Link to={`/edit-job/${job.id}`}>{job.title}</Link></h2>{job.description && <p className="ih5-job-summary">{job.description}</p>}</div>
-                    <div className="ih5-job-price"><span>{accountEnglish ? "Budget" : "Budżet"}</span><strong>{Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL")} zł</strong><small>{job.budget_negotiable ? (accountEnglish ? "Negotiable" : "Do negocjacji") : (accountEnglish ? "Fixed price" : "Cena ustalona")}</small></div>
-                  </div>
-                  <div className="ih-owned-job-footer">
-                    <span className="ih-owned-job-expiry">{accountEnglish ? translateUiText(expiry.label) : expiry.label}</span>
-                    <div className="ih-owned-job-actions"><Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow" /></Link><button type="button" onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button></div>
-                  </div>
-                </article>;
+                const expiry = getJobExpiryInfo(job.expires_at, ownedJobsTime);
+                return <OwnedListingCard key={job.id} title={job.title}
+                  category={accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}
+                  description={job.description} status={expiry.expired ? (accountEnglish ? "Expired" : "Wygasłe") : (accountEnglish ? "Active" : "Aktywne")} inactive={expiry.expired}
+                  price={Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL") + " zł"}
+                  detail={job.budget_negotiable ? (accountEnglish ? "Negotiable" : "Do negocjacji") : (accountEnglish ? "Fixed price" : "Cena ustalona")}
+                  note={expiry.expired ? (accountEnglish ? "This listing has expired and is hidden from the board and your public profile. Publish it again to restore it." : "Ogłoszenie wygasło i nie jest widoczne na tablicy ani publicznym profilu. Opublikuj je ponownie, aby je przywrócić.") : (accountEnglish ? translateUiText(expiry.label) : expiry.label)}
+                  busy={renewingJobId === job.id}
+                  actions={<>
+                    {expiry.expired && <button type="button" className="is-primary" disabled={Boolean(renewingJobId)} onClick={() => handleRenewJob(job)}>{renewingJobId === job.id ? (accountEnglish ? "Publishing…" : "Publikowanie…") : (accountEnglish ? "Publish again" : "Opublikuj ponownie")}</button>}
+                    <Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow" /></Link>
+                    <button type="button" disabled={Boolean(renewingJobId)} onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button>
+                  </>} />;
               })}
               {visibleOwnedJobs.length === 0 && <div className="ih75-owned-empty"><h2>{accountEnglish ? "No matching listings" : "Brak pasujących ogłoszeń"}</h2><p>{accountEnglish ? "Change the phrase or select another status." : "Zmień frazę albo wybierz inny status."}</p><button type="button" className="ih5-button is-quiet" onClick={() => { setOwnedJobSearch(""); setOwnedJobFilter("all"); }}>{accountEnglish ? "Show all listings" : "Pokaż wszystkie ogłoszenia"}</button></div>}
             </div>
@@ -10727,7 +10704,7 @@ function Account() {
           className="account-jobs-republication"
           hidden={activeAccountSection !== "jobs"}
         >
-          <JobRepublicationPanel />
+          {activeAccountSection === "jobs" && <JobRepublicationPanel />}
         </div>
         </div>
           </div>
@@ -13547,6 +13524,9 @@ function Profile() {
   const [jobs, setJobs] =
     useState([]);
 
+  const profileJobsTime = useListingClock(jobs);
+  const visibleProfileJobs = jobs.filter(job => !getJobExpiryInfo(job.expires_at, profileJobsTime).expired);
+
   const [reviews, setReviews] =
     useState([]);
 
@@ -13617,7 +13597,7 @@ function Profile() {
           supabase.from("public_profiles").select("country_code").eq("user_id", id).maybeSingle(),
           supabase.from("jobs")
             .select("id, user_id, title, description, category, subcategory, budget, budget_negotiable, listing_duration_days, expires_at, created_at")
-            .eq("user_id", id).gt("expires_at", new Date().toISOString()).order("created_at", { ascending: false }),
+            .eq("user_id", id).eq("visibility", "public").eq("source_type", "client_posted").gt("expires_at", new Date().toISOString()).order("created_at", { ascending: false }),
           fetchPortfolioAlbums(id),
         ]);
         if (cancelled) return;
@@ -14332,7 +14312,7 @@ function Profile() {
             użytkownika
           </h2>
 
-          {jobs.length ===
+          {visibleProfileJobs.length ===
           0 ? (
             <p>
               Ten użytkownik
@@ -14342,7 +14322,7 @@ function Profile() {
             </p>
           ) : (
             <div className="jobs-list">
-              {jobs.map(
+              {visibleProfileJobs.map(
                 (job) => (
                   <article
                     className="job-card"
@@ -14526,6 +14506,8 @@ function Jobs() {
   const [jobs, setJobs] =
     useState([]);
 
+  const jobsTime = useListingClock(jobs);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -14639,6 +14621,8 @@ function Jobs() {
           .select(
             "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
           )
+          .eq("visibility", "public")
+          .eq("source_type", "client_posted")
           .gt(
             "expires_at",
             new Date().toISOString()
@@ -14888,6 +14872,7 @@ function Jobs() {
   const filteredJobs =
     jobs.filter(
       (job) => {
+        if (getJobExpiryInfo(job.expires_at, jobsTime).expired) return false;
         const categoryMatches =
           selectedCategory ===
             "Wszystkie" ||

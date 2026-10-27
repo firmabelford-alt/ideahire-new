@@ -57,6 +57,7 @@ export function SubpageTheme() {
   const page = getSubpage(location, en);
   useIdeaHireActivityCycle();
   useSubpageDisclosureMotion();
+  useSubpageEntrance(location);
   useLayoutEffect(() => {
     if (!page) return;
     document.body.classList.add('ih73-subpage', 'ih75-subpage', 'ih79-app');
@@ -77,6 +78,7 @@ export function SubpageLoading({ label, className = '', screen = false, pending 
   const en = useSitePreferences().language === 'en';
   return <div className={'ih87-loading' + (screen ? ' is-screen' : '') + (className ? ' ' + className : '')}
     data-route-loading={pending ? 'true' : undefined} role="status" aria-busy={pending || undefined}>
+    <span className="ih-loading-preview" aria-hidden="true"><i /><i /><i /></span>
     <span className="ih87-loading-label">{label || (en ? 'Loading your page…' : 'Przygotowujemy widok…')}</span>
   </div>;
 }
@@ -198,10 +200,26 @@ export function SubpageCount({ value, loading = false }) {
   </span>;
 }
 
+function useSubpageEntrance(location) {
+  useLayoutEffect(() => {
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    let animation;
+    const frame = requestAnimationFrame(() => {
+      // Search and role filters change the URL too; they must never replay an entrance.
+      const target = document.querySelector('#ih68-content, main.app-page, main.ih5-main, #root main');
+      if (target?.animate) animation = target.animate([
+        { opacity: .55, transform: 'translateY(10px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], { duration: 240, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    });
+    return () => { cancelAnimationFrame(frame); animation?.cancel(); };
+  }, [location.pathname, location.hash]);
+}
+
 function useSubpageDisclosureMotion() {
   useEffect(() => {
     const active = new Map();
-    const selector = 'details.ih5-service-editor-section,details.ih5-service-process,details.ih81-work-shortcuts,details.ih68-account-note,details.ih75-owned-job-details,details.ih70-display';
+    const selector = 'details.ih5-service-editor-section,details.ih5-service-process,details.ih81-work-shortcuts,details.ih68-account-note,details.ih75-owned-job-details,details.ih70-display,details.profile-portfolio-legal-note';
     const restore = (element, record) => {
       element.style.height = record.height;
       element.style.overflow = record.overflow;
