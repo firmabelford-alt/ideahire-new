@@ -15,6 +15,7 @@ import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
 import './WorkspaceCatalog.css';
+import './WorkspaceFinish.css';
 export function useWorkspaceCopy() {
   const en = useSitePreferences().language === 'en';
   return (pl, english) => en ? english : pl;
@@ -152,7 +153,7 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
   const extras = [['/', t('Strona główna', 'Site home'), 'home'], ['/jobs', t('Przeglądaj zlecenia', 'Browse jobs'), 'jobs'], ['/freelancers', t('Freelancerzy', 'Freelancers'), 'people'], ['/services', t('Usługi', 'Services'), 'services'], ['/calendar', t('Kalendarz', 'Calendar'), 'calendar'], ...(!limited ? [['/notifications', t('Powiadomienia', 'Notifications'), 'bell'], ['/disputes', t('Sprawy i zgłoszenia', 'Disputes & reports'), 'lock']] : []), ['/privacy-center', t('Prywatność i dane', 'Privacy & data'), 'lock']];
   return <>
     <a className="ih68-skip" href="#ih68-content">{t('Przejdź do treści', 'Skip to content')}</a>
-    <header className="navbar account-navbar ih68-header ih72-header" data-workspace-release="P79">
+    <header className="navbar account-navbar ih68-header ih72-header ih-workspace-header" data-workspace-release="P79">
       <div className="ih68-header-inner">
         <Link to="/" className="ih68-brand" aria-label={t('IdeaHire — strona główna', 'IdeaHire — site home')}><BrandSignature /></Link>
         <nav className="ih68-top-nav" aria-label={t('Panel konta', 'Account navigation')}>
@@ -161,7 +162,7 @@ export function WorkspaceNavigation({ name, avatarUrl, onLogout, limited, hasMes
         <div className="ih68-header-actions">
           {!limited && <Link className="ih68-notifications" to="/notifications" aria-label={t(hasNotifications ? 'Nowe powiadomienia' : 'Powiadomienia', hasNotifications ? 'New notifications' : 'Notifications')}><WorkspaceIcon kind="bell" />{hasNotifications && <i className="ih68-dot" />}</Link>}
           {assistantEnabled && <Link className="ih-top-assistant" to="/lucyna" data-no-route-transition="true" aria-label={t('Otwórz Lucynę AI', 'Open Lucyna AI')} onClick={onAssistantOpen}><strong>AI</strong><LucynaSymbol /></Link>}
-          <button type="button" className="ih68-menu-trigger" aria-haspopup="dialog" aria-controls="ih70-account-menu" aria-expanded={open} aria-label={t('Pozostałe strony i ustawienia', 'More pages and settings')} onClick={() => setOpen(true)}><span className="ih68-desktop-avatar"><WorkspaceAvatar name={name} url={avatarUrl} small /></span><span className="ih68-phone-menu"><WorkspaceIcon kind="menu" /></span><WorkspaceIcon kind="down" /></button>
+          <button type="button" className="ih68-menu-trigger" aria-haspopup="dialog" aria-controls="ih70-account-menu" aria-expanded={open} aria-label={t('Pozostałe strony i ustawienia', 'More pages and settings')} onClick={() => setOpen(true)}><WorkspaceIcon kind="menu" /></button>
         </div>
       </div>
     </header>

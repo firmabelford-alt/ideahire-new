@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, BriefcaseBusiness, CalendarDays, ChevronDown, FileText, FolderOpen, Grid2X2, MessageSquare, Plus, Search, X } from 'lucide-react';
 import { conversationMessagePreview } from './ConversationCards';
 import './Studio.css';
+import WorkAmbience from './WorkAmbience';
 
 export default function WorkDesk({ rows, visible, user, filter, search, counts, loading, error, onRole, onSearch, onReset, onOpen, loader, en = false }) {
   const t = (pl, english) => en ? english : pl;
@@ -14,7 +15,8 @@ export default function WorkDesk({ rows, visible, user, filter, search, counts, 
     media.addEventListener?.('change', change);
     return () => media.removeEventListener?.('change', change);
   }, []);
-  return <main className="ih-desk" id="ih68-content" data-interface-release="studio-20261027">
+  return <main className="ih-desk" id="ih68-content" data-interface-release="workspace-20261027">
+    <WorkAmbience />
     <div className="ih-desk-layout">
       <aside className="ih-desk-sidebar">
         <details className="ih-desk-navigation" open={wide}>
@@ -41,7 +43,7 @@ export default function WorkDesk({ rows, visible, user, filter, search, counts, 
           <label className="ih-desk-search"><Search size={18} /><span className="ih-studio-sr">{t('Szukaj projektu lub osoby', 'Search for a project or person')}</span><input type="search" value={search} onChange={e => onSearch(e.target.value)} maxLength={160} placeholder={t('Projekt lub osoba', 'Project or person')} />{search && <button type="button" onClick={() => onSearch('')} aria-label={t('Wyczyść wyszukiwanie', 'Clear search')}><X size={17} /></button>}</label>
         </div>
         {loading ? loader : error ? <p className="ih-studio-notice" role="alert">{error}</p> : visible.length ? <div className="ih-desk-projects">
-          {(search || filter !== 'all') && <p className="ih-desk-results" role="status">{t('Znalezione współprace', 'Matching projects')}: {visible.length}</p>}
+          {(search || filter !== 'all') && <p className="ih-studio-sr" role="status">{t('Znalezione współprace', 'Matching projects')}: {visible.length}</p>}
           {visible.map(item => { const name = item.otherProfile?.name || t('Użytkownik', 'User'); const hiring = item.client_id === user?.id; const message = item.lastMessage; const preview = conversationMessagePreview(message?.content, en); const date = new Date(item.sortDate); return <Link key={item.id} to={'/chat/' + item.id} onClick={event => onOpen(event, item.id)} className={'ih-desk-project' + (item.isUnread ? ' is-unread' : '')}>
             <div className="ih-desk-project-heading"><span className="ih-desk-project-role">{hiring ? t('Zlecam', 'Hiring') : t('Realizuję', 'Providing')}</span>{item.isUnread && <span className="ih-desk-project-new"><i />{t('Nowa wiadomość', 'New message')}</span>}</div>
             <h2>{item.job?.title || t('Zapytanie o współpracę', 'Project inquiry')}</h2>

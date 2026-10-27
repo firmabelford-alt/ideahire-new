@@ -1,0 +1,84 @@
+/* Final workspace framing; brand images are intentionally outside the theme palette. */
+@layer ideahireHeadings {
+  body.ih79-app.ih68-workspace { --a-head:80px!important; }
+  body.ih79-app #root header.ih-workspace-header { display:block!important; height:80px!important; min-height:80px!important; max-height:none!important; padding:0!important; overflow:visible!important; background:var(--v-surface,#fff)!important; border-bottom:1px solid var(--v-line,#cbd9d5)!important; box-shadow:0 3px 18px color-mix(in srgb,var(--v-ink,#183532) 3%,transparent)!important; }
+  body.ih79-app #root header.ih-workspace-header .ih68-header-inner { box-sizing:border-box!important; height:80px!important; min-height:80px!important; max-width:1400px!important; padding:0 36px!important; grid-template-columns:minmax(170px,1fr) auto minmax(170px,1fr)!important; grid-template-rows:80px!important; gap:20px!important; }
+  body.ih79-app #root header.ih-workspace-header .ih68-brand { grid-column:1!important; grid-row:1!important; align-self:center!important; min-height:44px!important; overflow:visible!important; }
+  body.ih79-app #root header.ih-workspace-header .ih68-top-nav { grid-column:2!important; grid-row:1!important; align-self:center!important; height:auto!important; min-height:48px!important; }
+  body.ih79-app #root header.ih-workspace-header .ih68-top-link { display:flex!important; align-items:center!important; justify-content:center!important; flex-direction:row!important; gap:9px!important; min-height:46px!important; padding:11px 17px!important; border-radius:11px!important; font:600 15px/1.5 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root header.ih-workspace-header .ih68-header-actions { display:flex!important; grid-column:3!important; grid-row:1!important; align-items:center!important; align-self:center!important; justify-content:flex-end!important; gap:14px!important; min-height:48px!important; }
+  body.ih79-app #root header.ih-workspace-header :is(.ih68-notifications,.ih68-menu-trigger) { display:inline-flex!important; align-items:center!important; justify-content:center!important; width:44px!important; min-width:44px!important; height:44px!important; min-height:44px!important; padding:0!important; border:0!important; border-radius:10px!important; background:transparent!important; color:var(--v-ink,#183532)!important; }
+  body.ih79-app #root header.ih-workspace-header .ih68-menu-trigger>svg { display:block!important; width:26px!important; height:26px!important; }
+  body.ih79-app #root header.ih-workspace-header .ih-top-assistant { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:9px!important; min-height:44px!important; padding:10px 15px!important; border-radius:12px 12px 4px 12px!important; }
+  body.ih79-app #root .ih73-history-controls>button:first-child { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:10px!important; min-width:102px!important; min-height:44px!important; height:auto!important; padding:10px 16px!important; border:1px solid var(--v-line,#cbd9d5)!important; border-radius:11px!important; background:var(--v-surface,#fff)!important; color:var(--v-ink,#183532)!important; font:650 15px/1.5 Inter,system-ui,sans-serif!important; box-shadow:0 2px 8px color-mix(in srgb,var(--v-ink,#183532) 3%,transparent)!important; transition:border-color .18s,background .18s!important; }
+  body.ih79-app #root .ih73-history-controls>button:first-child>svg { flex:none!important; width:19px!important; height:19px!important; }
+  body.ih79-app #root .ih73-history-controls>button:first-child:focus-visible { outline:2px solid var(--v-accent,#16766e)!important; outline-offset:4px!important; }
+  body.ih79-app #root .ih-studio-stage .stripe-connect-panel .ih5-stripe-brand { display:flex!important; align-items:center!important; justify-content:center!important; flex:none!important; width:96px!important; height:60px!important; min-width:96px!important; margin:0!important; padding:8px!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  body.ih79-app #root .stripe-connect-panel .ih5-stripe-brand>img { display:block!important; width:80px!important; height:auto!important; max-width:100%!important; object-fit:contain!important; border:0!important; border-radius:0!important; filter:none!important; opacity:1!important; }
+  body.ih79-app #root .stripe-connect-panel .ih5-stripe-brand>img.ih-stripe-wordmark-dark { display:none!important; }
+  html[data-theme="dark"] body.ih79-app #root .stripe-connect-panel .ih5-stripe-brand>img.ih-stripe-wordmark-light { display:none!important; }
+  html[data-theme="dark"] body.ih79-app #root .stripe-connect-panel .ih5-stripe-brand>img.ih-stripe-wordmark-dark { display:block!important; }
+  body.ih79-app #root .ih-studio-stage .stripe-connect-panel { gap:22px!important; }
+  body.ih79-app #root .ih-studio-stage .stripe-connect-footer small { font-size:14px!important; }
+
+  body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-list { display:grid!important; gap:24px!important; margin-top:24px!important; }
+  body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-empty { display:grid!important; justify-items:center!important; align-content:center!important; gap:18px!important; min-height:308px!important; margin:0!important; padding:40px 28px!important; border:1px solid var(--studio-line)!important; border-radius:20px!important; background:var(--studio-paper)!important; text-align:center!important; box-shadow:0 5px 24px color-mix(in srgb,var(--studio-ink) 3%,transparent)!important; }
+  body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-empty h2 { max-width:32ch!important; margin:0!important; padding:0!important; color:var(--studio-ink)!important; font:650 24px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; text-align:center!important; }
+  body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-empty p { max-width:46ch!important; margin:0!important; color:var(--studio-muted)!important; font:400 16px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root .ih-studio-stage .ih75-owned-empty>.ih-owned-empty-mark { display:grid!important; place-items:center!important; width:52px!important; height:52px!important; margin:0 0 5px!important; border-radius:50%!important; background:var(--studio-soft)!important; color:var(--studio-accent)!important; }
+  body.ih79-app #root .ih-studio-stage .ih75-owned-empty>.ih-owned-empty-mark>svg { width:24px!important; height:24px!important; }
+  body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-empty button { display:inline-flex!important; align-items:center!important; justify-content:center!important; min-height:46px!important; width:auto!important; max-width:100%!important; margin:8px 0 0!important; padding:11px 18px!important; border:1px solid var(--studio-accent)!important; border-radius:11px!important; background:var(--studio-accent)!important; color:var(--studio-on)!important; font:600 15px/1.5 Inter,system-ui,sans-serif!important; white-space:normal!important; }
+  body.ih79-app #root main.ih-desk { position:relative!important; isolation:isolate!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-layout { position:relative!important; z-index:1!important; }
+  body.ih79-app #root main.ih-desk .ih-work-ambience { position:fixed!important; inset:80px auto 0 50%!important; transform:translateX(calc(-50% + 110px))!important; z-index:-1!important; width:min(1000px,76vw)!important; height:calc(100svh - 80px)!important; overflow:hidden!important; pointer-events:none!important; opacity:1!important; }
+  body.ih79-app #root main.ih-desk .ih-work-ambience>div { position:absolute!important; inset:-10%!important; transform:translateY(var(--work-scroll,0px))!important; }
+  body.ih79-app #root main.ih-desk .ih-work-ambience i { position:absolute!important; display:block!important; width:88%!important; height:78%!important; border-radius:50%!important; background:radial-gradient(ellipse,color-mix(in srgb,var(--studio-accent) 11%,transparent),transparent 68%)!important; animation:ih-work-drift 24s ease-in-out infinite alternate!important; }
+  body.ih79-app #root main.ih-desk .ih-work-ambience i:first-child { top:-15%!important; left:12%!important; }
+  body.ih79-app #root main.ih-desk .ih-work-ambience i:nth-child(2) { right:-10%!important; bottom:-3%!important; background:radial-gradient(ellipse,color-mix(in srgb,var(--studio-ink) 7%,transparent),transparent 67%)!important; animation-delay:-12s!important; }
+  body.ih79-app #root main.ih-desk .ih-work-ambience i:last-child { left:-12%!important; bottom:14%!important; width:70%!important; background:radial-gradient(ellipse,color-mix(in srgb,var(--studio-accent) 7%,transparent),transparent 66%)!important; animation-delay:-6s!important; }
+  body.ih79-app #root main.ih-desk header.ih-desk-heading { display:flex!important; align-items:start!important; justify-content:space-between!important; gap:24px!important; position:relative!important; width:100%!important; min-height:0!important; height:auto!important; max-height:none!important; margin:0 0 24px!important; padding:12px 0 20px!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; overflow:visible!important; transform:none!important; }
+  body.ih79-app #root main.ih-desk header.ih-desk-heading>div { min-width:0!important; }
+  body.ih79-app #root main.ih-desk header.ih-desk-heading h1 { display:block!important; min-height:0!important; max-height:none!important; margin:8px 0 12px!important; padding:0!important; overflow:visible!important; font:700 clamp(32px,3vw,42px)/1.25 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; color:var(--studio-ink)!important; }
+  body.ih79-app #root main.ih-desk header.ih-desk-heading h1+p { margin:0!important; font:400 16px/1.7 Inter,system-ui,sans-serif!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-toolbar { background:var(--studio-bg)!important; padding:14px 0!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-roles>button { font-size:15px!important; min-height:46px!important; gap:9px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-roles>button>span { font-size:14px!important; font-weight:600!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-search { min-height:46px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-search>input { font-size:15px!important; }
+  body.ih79-app #root main.ih-desk :is(.ih-desk-project-role,.ih-desk-project-new) { font-size:13px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-person>strong { font-size:15px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-person>p { font-size:14px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-project time { font-size:13px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-project>footer>span { font-size:14px!important; }
+  body.ih79-app #root main.ih-desk .ih-desk-project { box-shadow:0 5px 24px color-mix(in srgb,var(--studio-ink) 4%,transparent)!important; }
+  @keyframes ih-work-drift { from { opacity:.6; transform:translate3d(-12px,-8px,0) scale(.97); } to { opacity:1; transform:translate3d(14px,12px,0) scale(1.04); } }
+  @media(hover:hover) { body.ih79-app #root .ih73-history-controls>button:first-child:hover { border-color:var(--v-accent,#16766e)!important; background:var(--v-soft,#f0f5f4)!important; } }
+  @media(max-width:1000px) and (min-width:851px) {
+    body.ih79-app #root header.ih-workspace-header .ih68-header-inner { grid-template-columns:160px auto minmax(150px,1fr)!important; padding-inline:24px!important; gap:12px!important; }
+    body.ih79-app #root header.ih-workspace-header .ih68-top-link { padding-inline:11px!important; font-size:14px!important; }
+  }
+  @media(max-width:850px) {
+    body.ih79-app.ih68-workspace { --a-head:68px!important; }
+    body.ih79-app #root header.ih-workspace-header { height:68px!important; min-height:68px!important; }
+    body.ih79-app #root header.ih-workspace-header .ih68-header-inner { grid-template-columns:minmax(0,1fr) auto!important; grid-template-rows:68px!important; gap:12px!important; height:68px!important; min-height:68px!important; padding:0 18px!important; }
+    body.ih79-app #root header.ih-workspace-header .ih68-header-actions { grid-column:2!important; gap:9px!important; }
+    body.ih79-app #root header.ih-workspace-header .ih68-top-nav { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; height:auto!important; min-height:calc(66px + env(safe-area-inset-bottom,0px))!important; }
+    body.ih79-app #root header.ih-workspace-header .ih68-top-link { flex-direction:column!important; min-height:54px!important; padding:6px 3px!important; gap:4px!important; font-size:12px!important; border-radius:9px!important; }
+    body.ih79-app #root header.ih-workspace-header .ih-top-assistant { padding:9px 12px!important; }
+    body.ih79-app #root main.ih-desk .ih-work-ambience { inset:68px auto 0 50%!important; width:100vw!important; height:calc(100svh - 68px)!important; transform:translateX(-50%)!important; }
+    body.ih79-app #root main.ih-desk header.ih-desk-heading { margin-bottom:18px!important; padding-top:0!important; }
+    body.ih79-app #root main.ih-desk header.ih-desk-heading h1 { font-size:32px!important; }
+    body.ih79-app #root main.ih-desk header.ih-desk-heading h1+p { font-size:15px!important; }
+    body.ih79-app #root main.ih-desk .ih-desk-roles { gap:14px!important; }
+    body.ih79-app #root main.ih-desk .ih-desk-roles>button { gap:7px!important; font-size:14px!important; }
+    body.ih79-app #root main.ih-desk .ih-desk-roles>button>span { font-size:13px!important; }
+    body.ih79-app #root main.ih-desk .ih-desk-search>input { font-size:16px!important; }
+    body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-empty { min-height:290px!important; padding:30px 20px!important; gap:16px!important; }
+    body.ih79-app #root .ih-studio-stage .ih75-owned-register .ih75-owned-empty h2 { font-size:22px!important; }
+    body.ih79-app #root .ih-studio-stage .stripe-connect-panel .ih5-stripe-brand { justify-content:flex-start!important; padding-left:0!important; }
+  }
+  @media(prefers-reduced-motion:reduce) {
+    body.ih79-app #root main.ih-desk .ih-work-ambience i { animation:none!important; }
+    body.ih79-app #root main.ih-desk .ih-work-ambience>div { transform:none!important; }
+  }
+}

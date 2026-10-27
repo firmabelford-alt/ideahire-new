@@ -38,6 +38,8 @@ import {
 import App from "./App";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
+import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
+import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
@@ -9850,17 +9852,7 @@ function Account() {
               aria-labelledby="stripe-connect-title"
             >
               <a className="stripe-connect-icon ih5-stripe-brand" href="https://stripe.com" target="_blank" rel="noopener noreferrer" aria-label="Stripe — operator wypłat">
-                <svg width="48" height="48" aria-hidden="true" focusable="false" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clipPath="url(#ih5-stripe-connect-clip)">
-<rect width="512" height="512" fill="#635BFF"/>
-<path fillRule="evenodd" clipRule="evenodd" d="M120 392L392 334.317V120L120 178.357V392Z" fill="white"/>
-</g>
-<defs>
-<clipPath id="ih5-stripe-connect-clip">
-<rect width="512" height="512" rx="64" fill="white"/>
-</clipPath>
-</defs>
-</svg>
+                <img className="ih-stripe-wordmark-light" src="/brand/stripe-wordmark.svg" alt="Stripe" width="80" height="34" /><img className="ih-stripe-wordmark-dark" src="/brand/stripe-wordmark-white.svg" alt="Stripe" width="80" height="34" />
               </a>
 
               <div className="stripe-connect-content">
@@ -10067,7 +10059,7 @@ function Account() {
               description={accountEnglish ? "Describe the work, set the scope and invite freelancers to reply." : "Opisz pracę, określ zakres i zaproś wykonawców do rozmowy."}
               to="/find-talent" action={accountEnglish ? "Post a job" : "Dodaj zlecenie"} />
           ) : <>
-            <p className="ih75-register-count" role="status" aria-live="polite">{accountEnglish ? "Showing " : "Wyświetlasz "}<strong>{visibleOwnedJobs.length}</strong>{accountEnglish ? " of " : " z "}{myJobs.length}{accountEnglish ? " listings" : " ogłoszeń"}</p>
+            <p className="ih-studio-sr" role="status" aria-live="polite">{accountEnglish ? "Showing " : "Wyświetlasz "}<strong>{visibleOwnedJobs.length}</strong>{accountEnglish ? " of " : " z "}{myJobs.length}{accountEnglish ? " listings" : " ogłoszeń"}</p>
             <div className="ih75-owned-list">
               {visibleOwnedJobs.map(job => {
                 const expiry = getJobExpiryInfo(job.expires_at, ownedJobsTime);
@@ -10084,7 +10076,7 @@ function Account() {
                     <button type="button" disabled={Boolean(renewingJobId)} onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button>
                   </>} />;
               })}
-              {visibleOwnedJobs.length === 0 && <div className="ih75-owned-empty"><h2>{accountEnglish ? "No matching listings" : "Brak pasujących ogłoszeń"}</h2><p>{accountEnglish ? "Change the phrase or select another status." : "Zmień frazę albo wybierz inny status."}</p><button type="button" className="ih5-button is-quiet" onClick={() => { setOwnedJobSearch(""); setOwnedJobFilter("all"); }}>{accountEnglish ? "Show all listings" : "Pokaż wszystkie ogłoszenia"}</button></div>}
+              {visibleOwnedJobs.length === 0 && <div className="ih75-owned-empty"><span className="ih-owned-empty-mark" aria-hidden="true"><MarketIcon kind="search" /></span><h2>{accountEnglish ? "No listings in this view" : "Brak ogłoszeń w tym widoku"}</h2><p>{accountEnglish ? "Change the search or select another status." : "Zmień wyszukiwanie lub wybierz inny status."}</p><button type="button" className="ih5-button is-quiet" onClick={() => { setOwnedJobSearch(""); setOwnedJobFilter("all"); }}>{accountEnglish ? "Show all listings" : "Pokaż wszystkie ogłoszenia"}</button></div>}
             </div>
           </>}
         </section>
@@ -10346,102 +10338,23 @@ function getSecurityReviewProgress(status) {
 
 function PrivacyCenter() {
   const { user } = useAuth();
-  const [requests, setRequests] = useState([]);
-  const [eventsByRequest, setEventsByRequest] = useState({});
-  const [reportsByRequest, setReportsByRequest] = useState({});
+  const { requests, eventsByRequest, reportsByRequest, loading, busy, historyError, historyRefreshing, notices, refresh, mutate, clearNotice } = usePrivacyRequests(supabase, user?.id);
   const [replyDrafts, setReplyDrafts] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState("");
-  const [message, setMessage] = useState("");
+  const [formProblem, setFormProblem] = useState(null);
+  const [receipt, setReceipt] = useState(null);
   const [erasureEligibility, setErasureEligibility] = useState(null);
   const [erasureEligibilityLoading, setErasureEligibilityLoading] = useState(false);
   const [erasureEligibilityError, setErasureEligibilityError] = useState("");
   const [erasureEligibilityRefresh, setErasureEligibilityRefresh] = useState(0);
-  const [form, setForm] = useState({
-    requestType: "access",
-    preferredFormat: "electronic",
-    description: "",
-    requestedErasureAction: "",
-  });
-
-  async function loadPrivacyRequests() {
-    if (!user?.id) return;
-
-    const { data, error } = await supabase
-      .from("ideahire_privacy_requests")
-      .select(
-        "id, request_number, request_type, requested_erasure_action, description, preferred_format, status, identity_status, submitted_at, due_at, extended_due_at, extension_reason, decision_summary, updated_at, completed_at, requester_closed_at, withdrawn_at"
-      )
-      .eq("requester_user_id", user.id)
-      .order("submitted_at", { ascending: false });
-
-    if (error) throw error;
-
-    const rows = data || [];
-    setRequests(rows);
-
-    if (rows.length === 0) {
-      setEventsByRequest({});
-      setReportsByRequest({});
-      return;
-    }
-
-    const [eventsResult, reportsResult] = await Promise.all([
-      supabase
-        .from("ideahire_privacy_request_events")
-        .select("id, request_id, actor_role, event_type, message, created_at")
-        .in("request_id", rows.map((item) => item.id))
-        .order("created_at", { ascending: true }),
-      supabase.rpc("get_my_ideahire_privacy_audits"),
-    ]);
-
-    if (eventsResult.error) throw eventsResult.error;
-    if (reportsResult.error) throw reportsResult.error;
-
-    setEventsByRequest(
-      (eventsResult.data || []).reduce((result, event) => {
-        if (!result[event.request_id]) result[event.request_id] = [];
-        result[event.request_id].push(event);
-        return result;
-      }, {})
-    );
-
-    setReportsByRequest(Object.fromEntries(
-      (Array.isArray(reportsResult.data) ? reportsResult.data : [])
-        .map((report) => [report.request_id, report])
-    ));
-  }
+  const [form, setForm] = useState({ requestType: "access", preferredFormat: "electronic", description: "", requestedErasureAction: "" });
+  const ownerRef = useRef(user?.id);
+  ownerRef.current = user?.id;
 
   useEffect(() => {
-    if (!user?.id) return;
-
-    let mounted = true;
-
-    async function prepare() {
-      setLoading(true);
-      setMessage("");
-
-      try {
-        await loadPrivacyRequests();
-      } catch (error) {
-        if (mounted) {
-          setMessage(
-            cleanSupabaseError(
-              error,
-              "Nie udało się pobrać Twoich wniosków dotyczących prywatności."
-            )
-          );
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-
-    prepare();
-
-    return () => {
-      mounted = false;
-    };
+    setReceipt(null);
+    setReplyDrafts({});
+    setFormProblem(null);
+    setForm({ requestType: "access", preferredFormat: "electronic", description: "", requestedErasureAction: "" });
   }, [user?.id]);
 
   useEffect(() => {
@@ -10451,241 +10364,76 @@ function PrivacyCenter() {
       setErasureEligibilityLoading(false);
       return;
     }
-
     let mounted = true;
-
-    async function loadErasureEligibility() {
-      setErasureEligibilityLoading(true);
-      setErasureEligibilityError("");
-
-      const { data, error } = await supabase.rpc(
-        "get_my_ideahire_erasure_eligibility"
-      );
-
-      if (!mounted) return;
-
-      if (error) {
-        console.error("ERASURE ELIGIBILITY ERROR:", error);
-        setErasureEligibility(null);
-        setErasureEligibilityError(
-          "Nie udało się teraz sprawdzić warunków zamknięcia konta."
-        );
-      } else {
+    const controller = new AbortController();
+    setErasureEligibility(null);
+    setErasureEligibilityLoading(true);
+    setErasureEligibilityError("");
+    privacyCall(signal => supabase.rpc("get_my_ideahire_erasure_eligibility").abortSignal(signal), { signal: controller.signal })
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) throw error;
         setErasureEligibility(data || null);
-
-        if (!data?.can_close_account) {
-          setForm((current) => current.requestedErasureAction === "close_account"
-            ? { ...current, requestedErasureAction: "" }
-            : current);
-        }
-      }
-
-      setErasureEligibilityLoading(false);
-    }
-
-    loadErasureEligibility();
-
-    return () => {
-      mounted = false;
-    };
+        if (!data?.can_close_account) setForm(current => current.requestedErasureAction === "close_account" ? { ...current, requestedErasureAction: "" } : current);
+      })
+      .catch(() => { if (mounted) setErasureEligibilityError("Nie udało się teraz sprawdzić warunków zamknięcia konta."); })
+      .finally(() => { if (mounted) setErasureEligibilityLoading(false); });
+    return () => { mounted = false; controller.abort(); };
   }, [user?.id, form.requestType, erasureEligibilityRefresh]);
 
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const refreshPrivacyCenter = () => {
-      loadPrivacyRequests().catch((error) => {
-        setMessage(cleanSupabaseError(
-          error,
-          "Nie udało się odświeżyć historii sprawy."
-        ));
-      });
-    };
-
-    const channel = supabase
-      .channel(`privacy-center-live-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ideahire_privacy_requests",
-          filter: `requester_user_id=eq.${user.id}`,
-        },
-        refreshPrivacyCenter
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "ideahire_privacy_request_events",
-        },
-        refreshPrivacyCenter
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
+  function changeForm(patch) {
+    setForm(current => ({ ...current, ...patch }));
+    setFormProblem(null);
+    clearNotice("form");
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
-
-    if (form.description.trim().length < 20) {
-      setMessage("Opisz wniosek w co najmniej 20 znakach.");
+    if (busy) return;
+    const problem = privacyDraftProblem(form, canSelectAccountClosure);
+    setFormProblem(problem);
+    if (problem) {
+      document.getElementById(problem.field)?.focus();
       return;
     }
-
-    if (
-      form.requestType === "erasure"
-      && !["minimize_data", "close_account"].includes(
-        form.requestedErasureAction
-      )
-    ) {
-      setMessage("Wybierz, czy chcesz usunąć możliwe dane, czy zamknąć całe konto.");
-      return;
-    }
-
-    if (
-      form.requestType === "erasure"
-      && form.requestedErasureAction === "close_account"
-      && erasureEligibility?.can_close_account !== true
-    ) {
-      setMessage("Zamknięcie konta nie jest teraz dostępne. Zakończ wskazane sprawy albo wybierz usunięcie możliwych danych.");
-      return;
-    }
-
-    setBusy("submit");
-    setMessage("");
-
-    try {
-      const { error } = await supabase.rpc(
-        "submit_ideahire_privacy_request",
-        {
-          p_request_type: form.requestType,
-          p_description: form.description.trim(),
-          p_preferred_format: form.preferredFormat,
-          p_requested_erasure_action:
-            form.requestType === "erasure"
-              ? form.requestedErasureAction
-              : null,
-        }
-      );
-
-      if (error) throw error;
-
-      setForm({
-        requestType: "access",
-        preferredFormat: "electronic",
-        description: "",
-        requestedErasureAction: "",
-      });
-      setMessage("Wniosek został bezpiecznie zapisany i przekazany administracji IdeaHire.");
-      await loadPrivacyRequests();
-    } catch (error) {
-      setMessage(
-        cleanSupabaseError(error, "Nie udało się wysłać wniosku.")
-      );
-    } finally {
-      setBusy("");
-    }
+    const owner = user?.id;
+    const submitted = { ...form };
+    const result = await mutate({ key: "submit", rpc: "submit_ideahire_privacy_request", args: {
+      p_request_type: submitted.requestType,
+      p_description: submitted.description.trim(),
+      p_preferred_format: submitted.preferredFormat,
+      p_requested_erasure_action: submitted.requestType === "erasure" ? submitted.requestedErasureAction : null,
+    }, success: "Wniosek został wysłany.", failure: "Nie udało się wysłać wniosku." });
+    if (result.ok && ownerRef.current === owner) setReceipt({ id: result.data, requestType: submitted.requestType, ownerId: owner });
   }
 
   async function handleWithdraw(requestId) {
-    const confirmed = window.confirm(
-      "Czy na pewno chcesz wycofać ten wniosek? Historia jego obsługi pozostanie zapisana."
-    );
-
-    if (!confirmed) return;
-
-    setBusy(requestId);
-    setMessage("");
-
-    try {
-      const { error } = await supabase.rpc(
-        "withdraw_my_ideahire_privacy_request",
-        { p_request_id: requestId }
-      );
-
-      if (error) throw error;
-
-      setMessage("Wniosek został wycofany.");
-      await loadPrivacyRequests();
-    } catch (error) {
-      setMessage(
-        cleanSupabaseError(error, "Nie udało się wycofać wniosku.")
-      );
-    } finally {
-      setBusy("");
-    }
+    if (busy || !window.confirm("Czy na pewno chcesz wycofać ten wniosek? Historia jego obsługi pozostanie zapisana.")) return;
+    await mutate({ key: requestId, scope: requestId, rpc: "withdraw_my_ideahire_privacy_request", args: { p_request_id: requestId },
+      success: "Ten wniosek został wycofany. Historia pozostaje dostępna.", failure: "Nie udało się wycofać wniosku.",
+      updateRequest: request => request.id === requestId ? { ...request, status: "withdrawn", withdrawn_at: new Date().toISOString() } : request });
   }
 
   async function handlePrivacyReply(event, requestId) {
     event.preventDefault();
+    if (busy) return;
     const reply = (replyDrafts[requestId] || "").trim();
-
-    if (reply.length < 3) {
-      setMessage("Wiadomość musi mieć co najmniej 3 znaki.");
-      return;
-    }
-
-    setBusy(`${requestId}:reply`);
-    setMessage("");
-
-    try {
-      const { error } = await supabase.rpc(
-        "reply_to_my_ideahire_privacy_request",
-        {
-          p_request_id: requestId,
-          p_message: reply,
-        }
-      );
-
-      if (error) throw error;
-
-      setReplyDrafts((current) => ({ ...current, [requestId]: "" }));
-      setMessage("Twoja wiadomość została przekazana administratorowi.");
-      await loadPrivacyRequests();
-    } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się wysłać wiadomości."));
-    } finally {
-      setBusy("");
-    }
+    if (reply.length < 3 || reply.length > 5000) return;
+    const owner = user?.id;
+    const result = await mutate({ key: `${requestId}:reply`, scope: requestId, rpc: "reply_to_my_ideahire_privacy_request", args: { p_request_id: requestId, p_message: reply },
+      success: "Wiadomość została wysłana. Zapisaliśmy ją w historii tego wniosku.", failure: "Nie udało się wysłać wiadomości.",
+      updateRequest: request => request.id === requestId && request.status === "awaiting_user" ? { ...request, status: "in_progress" } : request });
+    if (result.ok && ownerRef.current === owner) setReplyDrafts(current => ({ ...current, [requestId]: "" }));
   }
 
   async function handleClosePrivacyReview(requestId, hasApprovedReport) {
-    const confirmed = window.confirm(
-      hasApprovedReport
-        ? "Czy na pewno chcesz zamknąć analizę? Raport i historia pozostaną dostępne. Zamknięcie nie oznacza zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
-        : "Czy na pewno chcesz zakończyć analizę przed opublikowaniem raportu? Administrator zobaczy, że sprawa została zamknięta przez Ciebie. Historia pozostanie zapisana, ale raport nie zostanie dostarczony w ramach tej sprawy. Nie ogranicza to Twoich praw dotyczących danych."
-    );
-
+    const confirmed = !busy && window.confirm(hasApprovedReport
+      ? "Czy na pewno chcesz zamknąć analizę? Raport i historia pozostaną dostępne. Zamknięcie nie oznacza zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
+      : "Czy na pewno chcesz zakończyć analizę przed opublikowaniem raportu? Historia pozostanie zapisana, ale raport nie zostanie dostarczony w ramach tej sprawy. Nie ogranicza to Twoich praw dotyczących danych.");
     if (!confirmed) return;
-
-    setBusy(`${requestId}:close-review`);
-    setMessage("");
-
-    try {
-      const { error } = await supabase.rpc(
-        "close_my_ideahire_privacy_review",
-        { p_request_id: requestId }
-      );
-
-      if (error) throw error;
-
-      setMessage(
-        hasApprovedReport
-          ? "Analiza została przez Ciebie zamknięta. Raport i historia pozostają dostępne."
-          : "Analiza została przez Ciebie zamknięta. Administrator od razu zobaczy jej nowy status, a historia pozostanie zachowana."
-      );
-      await loadPrivacyRequests();
-    } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się zamknąć analizy."));
-    } finally {
-      setBusy("");
-    }
+    await mutate({ key: `${requestId}:close-review`, scope: requestId, rpc: "close_my_ideahire_privacy_review", args: { p_request_id: requestId },
+      success: hasApprovedReport ? "Analiza została zamknięta. Raport i historia pozostają dostępne." : "Analiza została zakończona przed publikacją raportu. Historia pozostaje dostępna.", failure: "Nie udało się zamknąć analizy.",
+      updateRequest: request => request.id === requestId ? { ...request, requester_closed_at: new Date().toISOString() } : request });
   }
 
   const erasureBlockers = Object.entries(
@@ -10708,7 +10456,7 @@ function PrivacyCenter() {
     <div className="page privacy-center-page">
       <AccountNavbar />
 
-      <main className="privacy-center-shell">
+      <main className="privacy-center-shell ih-privacy-desk" data-interface-release="privacy-20261027">
         <SubpageHeading eyebrow="Prywatność i moje dane" title="Centrum prywatności"
           description="Wyślij wniosek dotyczący swoich danych i śledź jego realizację bezpośrednio na koncie IdeaHire."
           variant="privacy" />
@@ -10726,49 +10474,57 @@ function PrivacyCenter() {
         </section>
 
         <div className="privacy-center-grid">
-          <section className="privacy-request-form-card">
-            <span className="privacy-card-number">01</span>
-            <h2>Złóż nowy wniosek</h2>
+          {receipt && receipt.ownerId === user?.id ? <PrivacyReceipt request={receipt}
+            number={requests.find(request => request.id === receipt.id)?.request_number ? formatPrivacyRequestNumber(requests.find(request => request.id === receipt.id).request_number) : null}
+            type={getOptionLabel(PRIVACY_REQUEST_TYPES, receipt.requestType)}
+            onNew={() => {
+              setReceipt(null);
+              setForm({ requestType: "access", preferredFormat: "electronic", description: "", requestedErasureAction: "" });
+              clearNotice("form");
+              requestAnimationFrame(() => document.getElementById("privacy-request-type")?.focus());
+            }} /> : <section className="privacy-request-form-card" aria-labelledby="privacy-form-title">
+            <p className="ih-privacy-eyebrow">Nowa sprawa</p>
+            <h2 id="privacy-form-title">W czym możemy pomóc?</h2>
             <p>
               {form.requestType === "security_review"
                 ? "Poproś o techniczną i organizacyjną analizę ochrony danych powiązanych z Twoim kontem."
-                : "Opisz dokładnie, czego potrzebujesz. Standardowy termin odpowiedzi wynosi jeden miesiąc od otrzymania wniosku."}
+                : "Wybierz temat i opisz swoją sprawę. Odpowiedź otrzymasz tutaj. Standardowy termin wynosi jeden miesiąc od otrzymania wniosku."}
             </p>
 
-            <form className="privacy-request-form" onSubmit={handleSubmit}>
+            <form className="privacy-request-form" onSubmit={handleSubmit} noValidate aria-busy={busy === "submit"}>
               <MarketSelect id="privacy-request-type" label="Rodzaj wniosku" value={form.requestType}
                 options={PRIVACY_REQUEST_TYPES.map(([value, label]) => ({ value, label }))}
-                onChange={value => setForm(current => ({ ...current, requestType: value, requestedErasureAction: "" }))}
+                onChange={value => changeForm({ requestType: value, requestedErasureAction: "" })}
                 disabled={Boolean(busy)} />
+              <details className="ih-privacy-format"><summary>{getOptionLabel(PRIVACY_RESPONSE_FORMATS, form.preferredFormat)} <span>Zmień format</span></summary>
               <MarketSelect id="privacy-response-format" label="Preferowany format odpowiedzi" value={form.preferredFormat}
                 options={PRIVACY_RESPONSE_FORMATS.map(([value, label]) => ({ value, label }))}
-                onChange={value => setForm(current => ({ ...current, preferredFormat: value }))}
+                onChange={value => changeForm({ preferredFormat: value })}
                 disabled={Boolean(busy)} />
+              </details>
 
-              <label>
+              <label htmlFor="privacy-description">
                 Opis wniosku
                 <AutoTextarea
+                  id="privacy-description"
+                  aria-describedby="privacy-description-help"
+                  aria-invalid={formProblem?.field === "privacy-description" || undefined}
                   value={form.description}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      description: event.target.value,
-                    }))
-                  }
+                  onChange={event => changeForm({ description: event.target.value })}
                   placeholder={form.requestType === "security_review"
                     ? "Napisz, które dane, funkcje konta albo zdarzenia związane z bezpieczeństwem mamy objąć analizą..."
                     : "Napisz, jakich danych lub działań dotyczy Twój wniosek..."}
                   minLength={20}
                   maxLength={5000}
-                  rows={6}
+                  rows={4}
                   disabled={Boolean(busy)}
                   required
                 />
-                <small>{form.description.length}/5000 · minimum 20 znaków</small>
+                <span className="ih-privacy-description-help" id="privacy-description-help">Napisz, jakiej pomocy potrzebujesz. Wystarczy co najmniej 20 znaków; maksymalnie 5000.</span>
               </label>
 
               {form.requestType === "erasure" && (
-                <fieldset className="privacy-erasure-choice-fieldset">
+                <fieldset className="privacy-erasure-choice-fieldset" id="privacy-erasure-options" tabIndex={-1}>
                   <legend>Co dokładnie mamy zrobić?</legend>
                   <p className="privacy-erasure-choice-intro">
                     Twój wybór zostanie zapisany we wniosku i administracja nie
@@ -10786,10 +10542,7 @@ function PrivacyCenter() {
                         name="requested-erasure-action"
                         value="minimize_data"
                         checked={form.requestedErasureAction === "minimize_data"}
-                        onChange={(event) => setForm((current) => ({
-                          ...current,
-                          requestedErasureAction: event.target.value,
-                        }))}
+                        onChange={event => changeForm({ requestedErasureAction: event.target.value })}
                         disabled={Boolean(busy)}
                       />
                       <span className="privacy-erasure-choice-mark" aria-hidden="true">01</span>
@@ -10809,10 +10562,7 @@ function PrivacyCenter() {
                         name="requested-erasure-action"
                         value="close_account"
                         checked={form.requestedErasureAction === "close_account"}
-                        onChange={(event) => setForm((current) => ({
-                          ...current,
-                          requestedErasureAction: event.target.value,
-                        }))}
+                        onChange={event => changeForm({ requestedErasureAction: event.target.value })}
                         disabled={Boolean(busy) || !canSelectAccountClosure}
                       />
                       <span className="privacy-erasure-choice-mark" aria-hidden="true">02</span>
@@ -10903,32 +10653,17 @@ function PrivacyCenter() {
                 </div>
               ) : null}
 
-              <button
-                type="submit"
-                className="privacy-primary-button"
-                disabled={
-                  Boolean(busy)
-                  || form.description.trim().length < 20
-                  || (
-                    form.requestType === "erasure"
-                    && !["minimize_data", "close_account"].includes(
-                      form.requestedErasureAction
-                    )
-                  )
-                  || (
-                    form.requestedErasureAction === "close_account"
-                    && !canSelectAccountClosure
-                  )
-                }
-              >
-                {busy === "submit" ? "Wysyłanie..." : "Wyślij bezpieczny wniosek "}
+              <PrivacyFeedback notice={formProblem ? { tone: "error", text: formProblem.text } : notices.form} />
+              <button type="submit" className="privacy-primary-button" disabled={Boolean(busy)}>
+                {busy === "submit" ? "Wysyłanie wniosku…" : "Wyślij wniosek"}
               </button>
             </form>
-          </section>
+          </section>}
 
           <aside className="privacy-rights-card">
-            <span className="privacy-card-number">02</span>
-            <h2>Twoje prawa</h2>
+            <h2>Co dalej?</h2>
+            <ol className="ih-privacy-next-steps"><li><strong>Wysyłasz wniosek</strong><span>Od razu zobaczysz potwierdzenie.</span></li><li><strong>Sprawdzamy Twoją sprawę</strong><span>Status i termin znajdziesz poniżej.</span></li><li><strong>Otrzymujesz odpowiedź</strong><span>Możesz dopytać w tym samym wniosku.</span></li></ol>
+            <details className="ih-privacy-rights"><summary>Jakie masz prawa?</summary>
             <ul>
               <li><strong>Dostęp i kopia</strong><span>Sprawdź, jakie dane przetwarzamy.</span></li>
               <li><strong>Sprostowanie</strong><span>Popraw dane nieprawidłowe lub nieaktualne.</span></li>
@@ -10936,24 +10671,19 @@ function PrivacyCenter() {
               <li><strong>Ograniczenie i sprzeciw</strong><span>Zażądaj ograniczenia albo zgłoś sprzeciw.</span></li>
               <li><strong>Przenoszenie</strong><span>Odbierz właściwe dane w ustrukturyzowanym formacie.</span></li>
             </ul>
-            <a href="/polityka-prywatnosci">Przeczytaj Politykę prywatności </a>
-            <small>
-              Możesz również napisać na ideahireprywatnosc@gmail.com.
-            </small>
+            </details>
+            <a href="/polityka-prywatnosci">Polityka prywatności</a>
+            <p className="ih-privacy-contact">Wolisz e-mail?<a href="mailto:ideahireprywatnosc@gmail.com">ideahireprywatnosc@gmail.com</a></p>
           </aside>
         </div>
 
-        {message && (
-          <p className="privacy-page-message" role="status">{message}</p>
-        )}
-
-        <section className="privacy-history-section">
+        <section className="privacy-history-section" id="privacy-history">
           <div className="privacy-section-heading">
             <div>
               <span className="section-label">Historia</span>
               <h2>Twoje wnioski</h2>
             </div>
-            <span className="privacy-count-badge">{requests.length}</span>
+            <PrivacyHistoryNotice error={historyError} refreshing={historyRefreshing} onRefresh={refresh} />
           </div>
 
           {loading ? (
@@ -10963,8 +10693,8 @@ function PrivacyCenter() {
             />
           ) : requests.length === 0 ? (
             <div className="privacy-empty-state">
-              <strong>Nie masz jeszcze żadnych wniosków</strong>
-              <p>Po wysłaniu pierwszego wniosku jego status pojawi się tutaj.</p>
+              <strong>{historyError ? "Historia jest chwilowo niedostępna" : "Nie masz jeszcze żadnych wniosków"}</strong>
+              <p>{historyError ? "Użyj przycisku „Odśwież statusy”, aby spróbować ponownie." : "Po wysłaniu pierwszego wniosku jego status pojawi się tutaj."}</p>
             </div>
           ) : (
             <div className="privacy-request-list">
@@ -10975,7 +10705,7 @@ function PrivacyCenter() {
                 const reportChecksByKey = Object.fromEntries(
                   (report?.checks || []).map((check) => [check.check_key, check])
                 );
-                const securityReviewProgress = request.request_type !== "security_review"
+                const securityReviewProgress = request.requester_closed_at || request.request_type !== "security_review"
                   ? null
                   : report && request.status === "awaiting_user"
                     ? {
@@ -10985,7 +10715,8 @@ function PrivacyCenter() {
                     : getSecurityReviewProgress(request.status);
 
                 return (
-                  <article className="privacy-request-card" key={request.id}>
+                  <article className="privacy-request-card" key={request.id} id={`privacy-request-${request.id}`}>
+                    <PrivacyFeedback notice={notices[request.id]} />
                     <div className="privacy-request-topline">
                       <div>
                         <span>{formatPrivacyRequestNumber(request.request_number)}</span>
@@ -11040,7 +10771,7 @@ function PrivacyCenter() {
                     )}
 
                     {request.request_type === "security_review"
-                      && isPrivacyRequestOpen(request.status) && (
+                      && (isPrivacyRequestOpen(request.status) && !request.requester_closed_at) && (
                       <div className="privacy-user-acceptance-panel is-prominent">
                         <div>
                           <strong>
@@ -11079,9 +10810,7 @@ function PrivacyCenter() {
                           <strong>Sprawa zamknięta przez Ciebie</strong>
                           <p>
                             Zamknięto {formatDisputeDate(request.requester_closed_at)}.
-                            {request.status === "withdrawn"
-                              ? " Historia sprawy pozostaje dostępna na koncie."
-                              : " Raport i historia pozostają dostępne na koncie."}
+                            {report ? " Raport i historia pozostają dostępne na koncie." : " Historia sprawy pozostaje dostępna na koncie."}
                           </p>
                         </div>
                       </div>
@@ -11197,7 +10926,8 @@ function PrivacyCenter() {
                       </details>
                     )}
 
-                    {isPrivacyRequestOpen(request.status) && (
+                    {(isPrivacyRequestOpen(request.status) && !request.requester_closed_at) && (
+                      <details className="ih-privacy-reply"><summary>Napisz wiadomość w tej sprawie</summary>
                       <form
                         className="privacy-user-reply-form"
                         onSubmit={(event) => handlePrivacyReply(event, request.id)}
@@ -11220,7 +10950,7 @@ function PrivacyCenter() {
                           placeholder="Napisz wiadomość..."
                           minLength={3}
                           maxLength={5000}
-                          rows={4}
+                          rows={3}
                           disabled={Boolean(busy)}
                         />
                         <div>
@@ -11236,9 +10966,10 @@ function PrivacyCenter() {
                           </button>
                         </div>
                       </form>
+                      </details>
                     )}
 
-                    {isPrivacyRequestOpen(request.status)
+                    {(isPrivacyRequestOpen(request.status) && !request.requester_closed_at)
                       && request.request_type !== "security_review" && (
                       <button
                         type="button"
