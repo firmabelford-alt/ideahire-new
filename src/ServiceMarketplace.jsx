@@ -16,7 +16,7 @@ import {
 } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs, SubpageLoading } from "./Subpages";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader, MarketCatalogHero } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -445,22 +445,18 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
     );
   }
 
-  const resultNoun = english ? (services.length === 1 ? "service" : "services") : services.length === 1 ? "usługa" : services.length % 10 >= 2 && services.length % 10 <= 4 && (services.length % 100 < 12 || services.length % 100 > 14) ? "usługi" : "usług";
   const hasFilters = Boolean(search.trim()) || selectedCategory !== "Wszystkie";
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page ih78-services-page">
-      <MarketCatalogHero active="services" className="ih78-services-hero"
+      <MarketCatalogHeader count={services.length} noun="services" status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined}
         eyebrow={english ? "Offers from freelancers" : "Oferty wykonawców"}
         title={english ? "Services" : "Usługi"}
         description={english ? "Compare the scope, price and delivery time. Choose a service for your project." : "Porównaj zakres, cenę i termin. Wybierz usługę do swojego projektu."}
         actions={<><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></>} />
       <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług">
       <section className="ih78-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>
-        <header className="ih78-results-heading">
-          <p className="ih-result-badge" role="status" aria-live="polite" aria-atomic="true"><span>{english ? "Results" : "Wyniki"}</span>{loading ? (english ? "Finding services…" : "Szukamy usług…") : message ? (english ? "Results unavailable" : "Wyniki niedostępne") : <strong>{services.length} {resultNoun}</strong>}</p>
-          {hasFilters && <button type="button" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}><MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}</button>}
-        </header>
+        {hasFilters && <header className="ih78-results-heading"><button type="button" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}><MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}</button></header>}
         {message ? (
           <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
         ) : loading ? (
@@ -1346,11 +1342,12 @@ function MyServices({ supabase, user, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-my-services-page">
-      <SubpageHeading eyebrow={english ? "Freelancer workspace" : "Panel wykonawcy"}
+      <SubpageHeading className="ih-owned-services-heading" eyebrow={english ? "Freelancer workspace" : "Panel wykonawcy"}
         title={english ? "My services" : "Moje usługi"}
         description={english ? "Edit your offers, check availability and manage visibility." : "Edytuj oferty, sprawdzaj dostępność i zarządzaj widocznością."}
         actions={<Link className="ih5-button is-primary" to="/services/new"><MarketIcon kind="plus" />{english ? "Add a service" : "Dodaj usługę"}</Link>} />
 
+      <section className="ih-owned-services-register" aria-label={english ? "Your service offers" : "Twoje oferty usług"}>
       {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 
       {loading ? (
@@ -1359,9 +1356,6 @@ function MyServices({ supabase, user, Navbar }) {
         <div className="ih5-my-services-list">
           {services.map((service) => (
             <article key={service.id}>
-              <span className="ih5-service-category-mark" aria-hidden="true">
-                <MarketIcon kind="files" />
-              </span>
               <div className="ih5-my-service-copy">
                 <span>{service.category}</span>
                 <h2>{service.title}</h2>
@@ -1369,36 +1363,37 @@ function MyServices({ supabase, user, Navbar }) {
               </div>
               <div className="ih5-my-service-state">
                 <span className={service.status === "active" ? "is-active" : "is-paused"}>
-                  {service.status === "active" ? "Widoczna" : "Wstrzymana"}
+                  {service.status === "active" ? (english ? "Visible" : "Widoczna") : (english ? "Paused" : "Wstrzymana")}
                 </span>
-                <small>Aktualizacja: {formatServiceDate(service.updated_at)}</small>
+                <small>{english ? "Updated: " : "Aktualizacja: "}{formatServiceDate(service.updated_at)}</small>
               </div>
               <div className="ih5-my-service-actions">
-                <Link to={`/services/${service.id}`}>Podgląd</Link>
-                <Link to={`/services/${service.id}/edit`}>Edytuj</Link>
+                <Link to={`/services/${service.id}`}>{english ? "Preview" : "Podgląd"}</Link>
+                <Link to={`/services/${service.id}/edit`}>{english ? "Edit" : "Edytuj"}</Link>
                 <button
                   type="button"
                   disabled={busyId === service.id}
                   onClick={() => toggleStatus(service)}
                 >
                   {busyId === service.id
-                    ? "Zapisywanie…"
+                    ? (english ? "Saving…" : "Zapisywanie…")
                     : service.status === "active"
-                    ? "Wstrzymaj"
-                    : "Wznów"}
+                    ? (english ? "Pause" : "Wstrzymaj")
+                    : (english ? "Resume" : "Wznów")}
                 </button>
               </div>
             </article>
           ))}
         </div>
       ) : (
-        <div className="ih5-service-empty">
-          <span aria-hidden="true">+</span>
-          <h2>Jeszcze nie masz własnej usługi</h2>
-          <p>Opisz konkretny rezultat, ustaw dostępność i daj klientom prosty start rozmowy.</p>
-          <Link to="/services/new">Utwórz pierwszą usługę</Link>
+        <div className="ih5-service-empty ih-owned-services-empty">
+          <span className="ih-owned-services-mark" aria-hidden="true"><MarketIcon kind="files" /></span>
+          <h2>{english ? "Your first service starts here" : "Miejsce na Twoją pierwszą usługę"}</h2>
+          <p>{english ? "Describe what you offer, set the price and let clients contact you." : "Opisz, co oferujesz, ustal wycenę i daj klientom możliwość kontaktu."}</p>
+          <Link to="/services/new">{english ? "Create a service" : "Utwórz usługę"}<MarketIcon kind="arrow" /></Link>
         </div>
       )}
+      </section>
     </ServiceShell>
   );
 }

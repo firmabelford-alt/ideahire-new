@@ -14996,18 +14996,12 @@ function Jobs() {
     });
   }
 
-  const hasFilters =
-    selectedSubcategory !== "" ||
-    search.trim() !== "" ||
-    selectedCategory !==
-      "Wszystkie";
-
   return (
     <div className="page ih-market-v5 ih5-jobs-page ih10-jobs-page ih25-jobs-page ih75-jobs-page">
       <AccountNavbar />
 
       <main className="ih-market-shell">
-        <MarketHeader eyebrow="Dla wykonawców" title="Znajdź zlecenie" description="Dobry projekt zaczyna się od jasnych ustaleń. Znajdź coś dla siebie." />
+        <MarketHeader eyebrow="Dla wykonawców" title="Znajdź zlecenie" description="Dobry projekt zaczyna się od jasnych ustaleń. Znajdź coś dla siebie." count={filteredJobs.length} status={loading ? "Szukamy zleceń…" : message ? "Wyniki niedostępne" : undefined} />
 
         {isLimited && (
           <section className="ih5-jobs-age-notice">
@@ -15029,26 +15023,6 @@ function Jobs() {
 
         <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder}>
         {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
-
-        {!loading &&
-          !message && (
-            <div className="ih5-jobs-results-header">
-              <div className="ih-catalog-result-summary" role="status" aria-live="polite" aria-atomic="true"><span>Wyniki</span><strong>{formatPolishJobsCount(filteredJobs.length)}</strong></div>
-
-              {hasFilters && (
-                <button
-                  type="button"
-                  className="ih5-jobs-clear-filters"
-                  onClick={
-                    clearFilters
-                  }
-                >
-                  Wyczyść filtry
-                </button>
-              )}
-            </div>
-          )}
-
 
         {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
 

@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { BrandLogo } from "./Brand";
+import './InterfaceRefinements.css';
 
 // Validate stored/user-supplied links again at the point of navigation.
 export function getSafeWebUrl(value, { allowRelative = false } = {}) {
@@ -324,7 +325,7 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
   </section>;
 }
 
-export function MarketHeader({ eyebrow, title, description, children }) {
+export function MarketHeader({ eyebrow, title, description, children, count, status }) {
   const en = useSitePreferences().language === 'en';
   const location = useLocation();
   const jobs = location.pathname === '/jobs';
@@ -343,7 +344,7 @@ export function MarketHeader({ eyebrow, title, description, children }) {
     title: en ? 'Edit your job' : 'Edytuj zlecenie',
     description: en ? 'Update the details that freelancers need to prepare an offer.' : 'Zaktualizuj szczegóły potrzebne wykonawcom do przygotowania oferty.',
   } : { eyebrow, title, description };
-  if (jobs) return <MarketCatalogHero active="jobs" {...heading} actions={children || <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link>} />;
+  if (jobs) return <MarketCatalogHeader {...heading} count={count} noun="jobs" status={status} actions={children || <Link className="ih79-button is-primary" to="/find-talent"><MarketIcon kind="plus" />{en ? 'Post a job' : 'Dodaj zlecenie'}</Link>} />;
   return <div><SubpageHeading {...heading} actions={children} variant="editor" /></div>;
 }
 
@@ -353,7 +354,7 @@ export function MarketCatalogHeader({ eyebrow, title, description, count, noun =
   const words = { jobs: ['zlecenie', 'zlecenia', 'zleceń'], services: ['usługa', 'usługi', 'usług'], profiles: ['profil', 'profile', 'profili'] }[noun] || ['wynik', 'wyniki', 'wyników'];
   const polish = value === 1 ? words[0] : value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 12 || value % 100 > 14) ? words[1] : words[2];
   const english = { jobs: 'job', services: 'service', profiles: 'profile' }[noun] || 'result';
-  const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
+  const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Szukamy zleceń…': 'Loading jobs…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
   return <div className="ih73-catalog-header">
     <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} eyebrow={eyebrow} title={title} description={description} actions={actions} />
     <div className="ih73-catalog-context">
@@ -394,7 +395,7 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
   const label = people ? (en ? 'Search freelancers' : 'Szukaj freelancerów') : services ? (en ? 'Search services' : 'Szukaj usług') : (en ? 'Search jobs' : 'Szukaj zleceń');
   const fields = ['Wszystkie', ...categories.filter(value => value !== 'Wszystkie')];
   const fieldLabel = value => value === 'Wszystkie' ? (en ? 'All fields' : 'Wszystkie dziedziny') : en ? translateUiText(categoryLabel(value)) : categoryLabel(value);
-  return <div className={"ih75-catalog ih80-catalog-" + (people ? "people" : services ? "services" : "jobs")}>
+  return <div className={"ih75-catalog ih-catalog-unified ih80-catalog-" + (people ? "people" : services ? "services" : "jobs")}>
     <aside className="ih75-catalog-sidebar" aria-label={en ? 'Filter by field' : 'Filtruj według dziedziny'}>
       <h2>{en ? 'Fields' : 'Dziedziny'}</h2>
       <nav id={id + '-fields'} className="ih75-category-list" aria-label={en ? 'Fields' : 'Dziedziny'}>

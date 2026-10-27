@@ -1,0 +1,92 @@
+/* Account preferences, owned services and shared catalogue controls. */
+@layer ideahireHeadings {
+  body.ih79-app #root [data-account-section="preferences"] {
+    min-width:0!important;
+    & .ih75-account-main { width:100%!important; min-width:0!important; max-width:960px!important; }
+    & .account-tab-stage { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:20px!important; min-width:0!important; overflow:visible!important; }
+    & #account-preferences { width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:transparent!important; }
+    & .ih74-preferences-card { box-sizing:border-box!important; display:grid!important; gap:20px!important; width:100%!important; min-width:0!important; margin:0!important; padding:24px!important; border:1px solid var(--a-line)!important; border-radius:18px!important; background:var(--a-paper)!important; }
+    & .discovery-settings-heading { display:flex!important; flex-wrap:wrap!important; align-items:flex-start!important; gap:12px 20px!important; margin:0!important; }
+    & .discovery-settings-heading > div { flex:1 1 260px!important; min-width:0!important; }
+    & .discovery-settings-heading h2 { margin:0!important; font:650 21px/1.4 Inter,system-ui,sans-serif!important; overflow-wrap:break-word!important; }
+    & .discovery-settings-heading p { max-width:58ch!important; margin:8px 0 0!important; font:400 14px/1.65 Inter,system-ui,sans-serif!important; }
+    & .ih74-edit-preferences { display:inline-flex!important; flex:none!important; flex-direction:row!important; align-items:center!important; justify-content:center!important; gap:8px!important; width:auto!important; min-height:44px!important; margin:0!important; padding:6px 0!important; border:0!important; border-radius:0!important; background:transparent!important; color:var(--a-accent)!important; box-shadow:none!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+    & .ih74-edit-preferences > svg { flex:none!important; width:19px!important; height:19px!important; }
+    & .ih74-edit-preferences:hover { text-decoration:underline!important; text-underline-offset:4px!important; }
+    & .ih74-edit-preferences:focus-visible { outline:2px solid var(--a-accent)!important; outline-offset:4px!important; }
+    & :is(.discovery-settings-summary,.discovery-settings-readiness) { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:18px!important; min-width:0!important; margin:0!important; padding:18px!important; border:0!important; border-radius:12px!important; background:var(--a-soft)!important; }
+    & .discovery-settings-summary > div { min-width:0!important; padding:0!important; border:0!important; background:transparent!important; }
+    & :is(.discovery-settings-summary,.discovery-settings-readiness) dt { margin:0 0 6px!important; color:var(--a-muted)!important; font:450 13px/1.5 Inter,system-ui,sans-serif!important; }
+    & :is(.discovery-settings-summary,.discovery-settings-readiness) dd { min-width:0!important; margin:0!important; color:var(--a-ink)!important; font:650 16px/1.5 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+    & .discovery-settings-group { min-width:0!important; margin:0!important; padding:0!important; border:0!important; }
+    & .discovery-settings-group h3 { margin:0 0 10px!important; font:650 15px/1.5 Inter,system-ui,sans-serif!important; }
+    & .discovery-settings-tags { display:flex!important; flex-wrap:wrap!important; gap:8px!important; min-width:0!important; }
+    & .discovery-settings-tags > span { max-width:100%!important; overflow-wrap:anywhere!important; }
+    & .discovery-settings-note { margin:0!important; font:400 13px/1.65 Inter,system-ui,sans-serif!important; }
+    & .discovery-settings-actions { display:flex!important; flex-wrap:wrap!important; gap:12px!important; margin:0!important; }
+    & .discovery-settings-actions > a { box-sizing:border-box!important; max-width:100%!important; min-height:44px!important; white-space:normal!important; }
+    & .privacy-entry-card:not([hidden]) { box-sizing:border-box!important; display:grid!important; grid-template-columns:minmax(0,1fr)!important; align-items:start!important; gap:18px!important; width:100%!important; min-width:0!important; max-width:100%!important; margin:0!important; padding:24px!important; border:1px solid var(--a-line)!important; border-radius:18px!important; background:var(--a-paper)!important; }
+    & .privacy-entry-icon { display:none!important; }
+    & .privacy-entry-copy { width:100%!important; min-width:0!important; max-width:100%!important; }
+    & .privacy-entry-copy h2 { margin:8px 0 10px!important; font:650 21px/1.4 Inter,system-ui,sans-serif!important; }
+    & .privacy-entry-copy p { max-width:62ch!important; margin:0!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; white-space:normal!important; overflow-wrap:break-word!important; word-break:normal!important; }
+    & .privacy-entry-link { box-sizing:border-box!important; display:inline-flex!important; align-items:center!important; justify-self:start!important; justify-content:center!important; gap:8px!important; width:auto!important; min-width:0!important; max-width:100%!important; min-height:44px!important; padding:10px 14px!important; border:1px solid var(--a-line)!important; border-radius:11px!important; background:var(--a-soft)!important; color:var(--a-ink)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; white-space:normal!important; overflow-wrap:break-word!important; text-align:start!important; }
+  }
+
+  body.ih79-app #root .ih5-my-services-page {
+    & .ih-owned-services-heading { max-width:960px!important; margin-inline:auto!important; }
+    & .ih-owned-services-register { box-sizing:border-box!important; display:grid!important; gap:20px!important; width:100%!important; min-width:0!important; max-width:960px!important; margin:0 auto!important; padding:0!important; }
+    & .ih-owned-services-empty { box-sizing:border-box!important; display:grid!important; justify-items:center!important; align-content:center!important; gap:14px!important; width:100%!important; min-width:0!important; min-height:300px!important; margin:0!important; padding:36px 28px!important; border:1px solid var(--v-line)!important; border-radius:20px!important; background:var(--v-surface)!important; text-align:center!important; }
+    & .ih-owned-services-mark { display:grid!important; place-items:center!important; width:48px!important; height:48px!important; margin:0 0 4px!important; border:0!important; border-radius:14px!important; background:var(--v-soft)!important; color:var(--v-accent)!important; }
+    & .ih-owned-services-mark > svg { width:24px!important; height:24px!important; }
+    & .ih-owned-services-empty h2 { max-width:30ch!important; margin:0!important; color:var(--v-ink)!important; font:650 24px/1.35 Inter,system-ui,sans-serif!important; overflow-wrap:break-word!important; }
+    & .ih-owned-services-empty p { max-width:52ch!important; margin:0!important; color:var(--v-muted)!important; font:400 15px/1.7 Inter,system-ui,sans-serif!important; }
+    & .ih-owned-services-empty > a { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:10px!important; min-height:44px!important; max-width:100%!important; margin:6px 0 0!important; padding:11px 16px!important; border:1px solid var(--v-accent)!important; border-radius:11px!important; background:var(--v-accent)!important; color:var(--v-on)!important; -webkit-text-fill-color:currentColor!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+    & .ih-owned-services-empty > a > svg { flex:none!important; width:18px!important; height:18px!important; }
+    & .ih5-my-services-list > article { box-sizing:border-box!important; display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; grid-template-areas:"copy state" "actions actions"!important; gap:20px 24px!important; min-width:0!important; padding:24px!important; }
+    & .ih5-my-service-copy { grid-area:copy!important; min-width:0!important; }
+    & .ih5-my-service-state { grid-area:state!important; min-width:0!important; max-width:200px!important; }
+    & .ih5-my-service-actions { grid-area:actions!important; display:flex!important; flex-wrap:wrap!important; gap:10px!important; min-width:0!important; }
+    & .ih5-my-service-actions :is(a,button) { display:inline-flex!important; align-items:center!important; justify-content:center!important; min-height:44px!important; max-width:100%!important; padding:10px 14px!important; text-decoration:none!important; }
+    & :is(a,button):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:3px!important; }
+  }
+
+  body.ih79-app #root .ih75-catalog.ih-catalog-unified {
+    & .ih75-catalog-controls { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:end!important; gap:14px!important; width:100%!important; min-width:0!important; margin:0 0 24px!important; }
+    & .ih73-catalog-search { box-sizing:border-box!important; flex:1 1 0!important; width:100%!important; min-width:0!important; max-width:none!important; height:50px!important; min-height:50px!important; margin:0!important; padding:0 14px!important; }
+    & .ih73-catalog-search > input { flex:1 1 0!important; width:0!important; min-width:0!important; height:auto!important; min-height:0!important; margin:0!important; padding:0!important; font:400 16px/1.5 Inter,system-ui,sans-serif!important; }
+    & .ih76-catalog-refinements { display:flex!important; align-items:end!important; gap:12px!important; min-width:0!important; margin:0!important; padding:0!important; }
+    & .ih87-catalog-select { width:220px!important; min-width:0!important; }
+    & .ih7-select-trigger { box-sizing:border-box!important; display:flex!important; align-items:center!important; width:100%!important; min-width:0!important; height:50px!important; min-height:50px!important; padding:10px 14px!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; }
+    & .ih7-select-trigger > span { flex:1 1 0!important; min-width:0!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; }
+  }
+  @media(min-width:851px) {
+    body.ih79-app #root .ih-catalog-unified .ih76-category-select { display:none!important; }
+    body.ih79-app #root .ih-catalog-unified:is(.ih80-catalog-people,.ih80-catalog-services) .ih75-catalog-controls { grid-template-columns:minmax(0,1fr)!important; }
+    body.ih79-app #root .ih-catalog-unified:is(.ih80-catalog-people,.ih80-catalog-services) .ih76-catalog-refinements { display:none!important; }
+  }
+  @media(max-width:850px) {
+    body.ih79-app #root [data-account-section="preferences"] {
+      & .ih74-preferences-card, & .privacy-entry-card:not([hidden]) { padding:20px!important; }
+      & :is(.discovery-settings-summary,.discovery-settings-readiness) { grid-template-columns:minmax(0,1fr)!important; }
+      & .discovery-settings-actions { display:grid!important; grid-template-columns:minmax(0,1fr)!important; }
+    }
+    body.ih79-app #root .ih5-my-services-page {
+      & .ih-owned-services-empty { min-height:280px!important; padding:28px 20px!important; }
+      & .ih-owned-services-empty h2 { font-size:22px!important; }
+      & .ih5-my-services-list > article { grid-template-columns:minmax(0,1fr)!important; grid-template-areas:"copy" "state" "actions"!important; gap:18px!important; padding:20px!important; }
+      & .ih5-my-service-state { display:flex!important; flex-direction:row!important; flex-wrap:wrap!important; justify-content:space-between!important; gap:8px 14px!important; width:100%!important; max-width:none!important; }
+    }
+    body.ih79-app #root .ih75-catalog.ih-catalog-unified {
+      & .ih75-catalog-controls { grid-template-columns:minmax(0,1fr)!important; gap:12px!important; margin-bottom:22px!important; }
+      & .ih76-catalog-refinements { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:12px!important; width:100%!important; }
+      & .ih87-catalog-select { display:block!important; width:100%!important; }
+      & .ih76-mobile-clear { grid-column:1/-1!important; }
+    }
+  }
+
+  /* The card keeps its own outline; only the redundant rule above the list goes. */
+  body.ih68-workspace #root .ih72-activity .ih72-conversation-list { border-top:0!important; }
+  body #root #ih63-home-header #ih-home-navigation > :is(a[href="#how-it-works"],a[href="#categories"],a[href="#for-users"]),
+  body #root #ih63-home-header #ih-home-navigation > :is(a[href="#how-it-works"],a[href="#categories"],a[href="#for-users"]) .ih-nav-label { font-weight:750!important; }
+}
