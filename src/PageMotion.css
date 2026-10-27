@@ -1,0 +1,10 @@
+@layer ideahireHeadings {
+  html body .ih-scene-loader { display:flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:14px!important; box-sizing:border-box!important; width:100%!important; min-width:0!important; min-height:170px!important; margin:0!important; padding:24px!important; border:0!important; background:transparent!important; color:var(--v-accent,#16766e)!important; font:450 12px/1.6 Inter,system-ui,sans-serif!important; }
+  html body .ih-scene-loader.is-screen { min-height:100dvh!important; background:var(--v-bg,#fff)!important; }
+  html body .ih-scene-loader-mark { display:block!important; width:44px!important; height:44px!important; }
+  html body .ih-scene-loader-mark>svg { display:block!important; width:44px!important; height:44px!important; }
+  html body .ih-scene-loader .ih-brand-dot { transform-origin:center; animation:ih-scene-dot 1.25s ease-in-out infinite; }
+  html body .ih-scene-loader>span:last-child { color:var(--v-muted,#536b67)!important; }
+  @keyframes ih-scene-dot { 0%,100% { opacity:.45; transform:translateY(-3px); } 50% { opacity:1; transform:translateY(0); } }
+  @media(prefers-reduced-motion:reduce) { html body .ih-scene-loader .ih-brand-dot { animation:none!important; } }
+}

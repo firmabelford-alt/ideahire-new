@@ -37,6 +37,7 @@ import {
 
 import App from "./App";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
+import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
@@ -2366,51 +2367,21 @@ function DiscoveryPreferencesCard() {
   const t = (pl, en) => english ? en : pl;
   const label = value => english ? translateUiText(value) : value;
 
-  if (loading) {
-    return <section className="account-card discovery-settings-card ih74-preferences-card">
-      <h2>{t("Dopasowanie", "Recommendations")}</h2>
-      <InlineRouteLoader className="embedded-route-loader" rows={2} />
-    </section>;
-  }
-
+  if (loading) return <section className="ih-studio-panel"><InlineRouteLoader /></section>;
+  const groups = [
+    ...(preferences?.usagePreference !== "hire_talent" ? [{ title:t("Realizuję", "My fields"), values:(preferences?.freelancerCategories || []).map(getJobCategoryLabel) }] : []),
+    ...(preferences?.usagePreference !== "find_work" ? [{ title:t("Szukam pomocy", "I need help with"), values:(preferences?.clientCategories || []).map(getJobCategoryLabel) }] : []),
+    ...((preferences?.onboardingGoals || []).length ? [{ title:t("Moje cele", "My goals"), values:preferences.onboardingGoals.map(getDiscoveryGoalLabel) }] : []),
+  ];
   return <>
-    <section className="account-card discovery-settings-card ih74-preferences-card">
-      <header className="discovery-settings-heading">
-        <div><h2>{t("Twój sposób korzystania", "How you use IdeaHire")}</h2>
-          <p>{t("Ustaw, jakie projekty i usługi chcesz widzieć.", "Choose the projects and services you want to see.")}</p>
-        </div>
-        {!errorMessage && <button type="button" className="ih74-edit-preferences" onClick={() => setEditing(true)}><WorkspaceIcon kind="settings" />{t("Zmień", "Edit")}</button>}
-      </header>
-      {errorMessage ? <p className="auth-error">{errorMessage}</p> : <>
-        <dl className="discovery-settings-summary">
-          <div><dt>{t("Najczęściej", "Main use")}</dt><dd>{label(getDiscoveryUsageLabel(preferences?.usagePreference || "both"))}</dd></div>
-          <div><dt>{t("Kolejność wyników", "Result order")}</dt><dd>{preferences?.personalizationEnabled !== false ? t("Dopasowane dla Ciebie", "Matched to you") : t("Najnowsze", "Newest first")}</dd></div>
-        </dl>
-        {preferences?.usagePreference !== "hire_talent" && <div className="discovery-settings-group">
-          <h3>{t("Realizuję", "My fields")}</h3><div className="discovery-settings-tags">
-            {(preferences?.freelancerCategories || []).map(category => <span key={category}>{label(getJobCategoryLabel(category))}</span>)}
-            {!(preferences?.freelancerCategories || []).length && <p>{t("Nie wybrano dziedzin.", "No fields selected.")}</p>}
-          </div>
-        </div>}
-        {preferences?.usagePreference !== "find_work" && <div className="discovery-settings-group">
-          <h3>{t("Szukam pomocy", "I need help with")}</h3><div className="discovery-settings-tags">
-            {(preferences?.clientCategories || []).map(category => <span key={category}>{label(getJobCategoryLabel(category))}</span>)}
-            {!(preferences?.clientCategories || []).length && <p>{t("Nie wybrano dziedzin.", "No fields selected.")}</p>}
-          </div>
-        </div>}
-        {(preferences?.onboardingGoals || []).length > 0 && <div className="discovery-settings-group">
-          <h3>{t("Moje cele", "My goals")}</h3><div className="discovery-settings-tags is-secondary">
-            {preferences.onboardingGoals.map(goal => <span key={goal}>{label(getDiscoveryGoalLabel(goal))}</span>)}
-          </div>
-        </div>}
-        {preferences?.usagePreference !== "find_work" && preferences?.projectReadiness && <dl className="discovery-settings-readiness">
-          <dt>{t("Etap projektu", "Project stage")}</dt><dd><WorkspaceIcon kind="check" />{label(getDiscoveryReadinessLabel(preferences.projectReadiness))}</dd>
-        </dl>}
-        <p className="discovery-settings-note">{t("Te ustawienia pomagają dopasować wyniki. Nadal możesz zlecać pracę i realizować projekty.", "These settings personalise your results. You can still hire people and work on projects.")}</p>
-        <nav className="discovery-settings-actions" aria-label={t("Przeglądaj według preferencji", "Browse with your preferences")}>
-          <Link className="btn btn-dark" to="/services">{t("Przeglądaj usługi", "Browse services")}<WorkspaceIcon kind="arrow" /></Link>
-          <Link className="btn btn-outline" to="/jobs">{t("Znajdź zlecenie", "Find a job")}<WorkspaceIcon kind="arrow" /></Link>
-        </nav>
+    <section className="ih-studio-panel" aria-labelledby="studio-preferences-title">
+      <header className="ih-studio-panel-heading"><div><h2 id="studio-preferences-title">{t("Treści dopasowane do Ciebie", "Content matched to you")}</h2><p>{t("Wybierz, co chcesz odkrywać w IdeaHire.", "Choose what you want to discover on IdeaHire.")}</p></div>{!errorMessage && <button type="button" className="ih-studio-text-button" onClick={() => setEditing(true)}><WorkspaceIcon kind="settings" />{t("Zmień", "Edit")}</button>}</header>
+      {errorMessage ? <p className="ih-studio-notice" role="alert">{errorMessage}</p> : <>
+        <dl className="ih-studio-summary"><div><dt>{t("Korzystam jako", "I use IdeaHire as")}</dt><dd>{label(getDiscoveryUsageLabel(preferences?.usagePreference || "both"))}</dd></div><div><dt>{t("Kolejność wyników", "Result order")}</dt><dd>{preferences?.personalizationEnabled !== false ? t("Dopasowane dla Ciebie", "Matched to you") : t("Najnowsze", "Newest first")}</dd></div></dl>
+        <div className="ih-studio-preference-groups">{groups.map(group => <div key={group.title}><h3>{group.title}</h3><div>{group.values.length ? group.values.map(value => <span key={value}>{label(value)}</span>) : <p>{t("Nie wybrano dziedzin.", "No fields selected.")}</p>}</div></div>)}</div>
+        {preferences?.usagePreference !== "find_work" && preferences?.projectReadiness && <div className="ih-studio-preference-stage"><span>{t("Etap projektu", "Project stage")}</span><strong>{label(getDiscoveryReadinessLabel(preferences.projectReadiness))}</strong></div>}
+        <p className="ih-studio-muted">{t("Dopasowanie porządkuje wyniki. Nadal możesz zlecać i realizować projekty.", "Matching organises your results. You can still hire and work on projects.")}</p>
+        <nav className="ih-studio-preference-links" aria-label={t("Odkrywaj według preferencji", "Explore with your preferences")}><Link to="/services">{t("Przeglądaj usługi", "Browse services")}<WorkspaceIcon kind="arrow" /></Link><Link to="/jobs">{t("Znajdź zlecenie", "Find a job")}<WorkspaceIcon kind="arrow" /></Link></nav>
       </>}
     </section>
     {editing && <DiscoveryOnboarding initialPreferences={preferences} canClose onClose={() => setEditing(false)} />}
@@ -7848,35 +7819,15 @@ function LimitedAccount() {
 /* ACCOUNT */
 
 function AccountTemplatesCard() {
-  const { template, setTemplate, language } = useSitePreferences();
-  const english = language === "en";
-  const identity = IDEA_HIRE_THEME_IDENTITY[english ? "en" : "pl"];
-  const options = [
-    { value: "current", title: identity.title, description: english ? "The IdeaHire turquoise palette." : "Turkusowa paleta IdeaHire." },
-    { value: "classic", title: english ? "Black and white" : "Czerń i biel", description: english ? "A quiet, monochrome palette." : "Spokojna, monochromatyczna paleta." },
-  ];
-  return <section className="account-card account-template-card" aria-labelledby="account-template-title" data-no-translate="true">
-    <div className="account-template-heading"><div><h2 id="account-template-title">{english ? "Colour palette" : "Paleta kolorów"}</h2></div><p>{english ? "Both palettes work in light and dark mode." : "Obie palety działają w trybie jasnym i ciemnym."}</p></div>
-    <div className="account-template-options" role="radiogroup" aria-label={english ? "Colour palette" : "Paleta kolorów"}>
-      {options.map((option, index) => {
-        const selected = template === option.value;
-        return <button key={option.value} type="button" role="radio" aria-checked={selected} tabIndex={selected ? 0 : -1}
-          className={`account-template-option is-${option.value}${selected ? " is-selected" : ""}`}
-          onClick={() => setTemplate(option.value)} onKeyDown={event => {
-            if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
-            event.preventDefault();
-            const next = event.key === "Home" ? 0 : event.key === "End" ? options.length - 1 : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + options.length) % options.length;
-            setTemplate(options[next].value);
-            event.currentTarget.parentElement.children[next]?.focus();
-          }}>
-          <span className="ih76-palette-preview" aria-hidden="true"><i /><span><i /><i /><i /></span><b /></span>
-          <span className="account-template-option-copy"><strong>{option.title}</strong><span>{option.description}</span><small>{selected ? (english ? "Selected" : "Wybrana paleta") : (english ? "Choose palette" : "Wybierz paletę")}</small></span>
-          <span className="ih76-palette-check" aria-hidden="true">{selected && <MarketIcon kind="check" />}</span>
-        </button>;
-      })}
-    </div>
-    <p className="account-template-note">{english ? "Your choice is saved automatically on this device." : "Twój wybór zapisuje się automatycznie na tym urządzeniu."}</p>
-  </section>;
+  const { template, setTemplate, theme, setTheme, language } = useSitePreferences();
+  const en = language === "en", t = (pl, english) => en ? english : pl;
+  const options = [{ value:"current", title:IDEA_HIRE_THEME_IDENTITY[en ? "en" : "pl"].title, description:t("Charakterystyczne kolory IdeaHire.", "IdeaHire’s signature colours.") }, { value:"classic", title:t("Czerń i biel", "Black and white"), description:t("Spokojna, monochromatyczna paleta.", "A quiet, monochrome palette.") }];
+  return <div className="ih-studio-stack" data-no-translate="true">
+    <section className="ih-studio-panel"><header className="ih-studio-panel-heading"><div><h2>{t("Wybierz paletę", "Choose a palette")}</h2><p>{t("Ten sam interfejs, w Twoich kolorach.", "The same interface in your colours.")}</p></div></header>
+      <div className="ih-studio-palettes" role="radiogroup" aria-label={t("Paleta kolorów", "Colour palette")}>{options.map((option,index) => <button type="button" key={option.value} role="radio" aria-checked={template === option.value} tabIndex={template === option.value ? 0 : -1} className={"ih-studio-palette is-" + option.value} onClick={() => setTemplate(option.value)} onKeyDown={event => { if (!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(event.key)) return; event.preventDefault(); const next = event.key === "Home" ? 0 : event.key === "End" ? options.length-1 : (index + (event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1) + options.length) % options.length; setTemplate(options[next].value); event.currentTarget.parentElement.children[next]?.focus(); }}><span className="ih-studio-palette-sample" aria-hidden="true"><i/><i/><i/><i/></span><span><strong>{option.title}</strong><small>{option.description}</small></span><span className="ih-studio-radio-mark" aria-hidden="true">{template === option.value && <WorkspaceIcon kind="check" />}</span></button>)}</div>
+    </section>
+    <section className="ih-studio-panel"><header className="ih-studio-panel-heading"><div><h2>{t("Jasno czy ciemno?", "Light or dark?")}</h2><p>{t("Wybierz wygodne tło do pracy.", "Choose a comfortable background for your work.")}</p></div></header><div className="ih-studio-mode" role="group" aria-label={t("Tryb wyświetlania", "Display mode")}>{[["light",t("Jasny", "Light")],["dark",t("Ciemny", "Dark")]].map(([value,label]) => <button type="button" key={value} aria-pressed={theme === value} onClick={() => setTheme(value)}><span aria-hidden="true" className={"is-"+value}/>{label}{theme === value && <WorkspaceIcon kind="check" />}</button>)}</div><p className="ih-studio-muted">{t("Wybór zapisuje się automatycznie na tym urządzeniu.", "Your choice is saved automatically on this device.")}</p></section>
+  </div>;
 }
 
 const ACCOUNT_WORKSPACE_SECTIONS = [
@@ -9815,8 +9766,8 @@ function Account() {
       { replace: false }
     );
     window.requestAnimationFrame(() => {
-      accountContentRef.current?.focus({ preventScroll: true });
-      accountContentRef.current?.scrollIntoView({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      document.getElementById("account-section-title")?.focus({ preventScroll: true });
+      accountContentRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
     });
   }
 
@@ -9835,8 +9786,9 @@ function Account() {
       <AccountNavbar />
 
       <main
-        className={`app-page account-workspace-page ih6-account-workspace${activeAccountSection && !accountHubOpen ? " ih-account-editor-page" : ""}`}
+        className={activeAccountSection && !accountHubOpen ? "ih-studio-page" : "app-page account-workspace-page ih6-account-workspace"}
         id="ih68-content"
+        data-interface-release="studio-20261027"
         data-account-section={activeAccountSection || "home"}
       >
         {!activeAccountSection || accountHubOpen ? (
@@ -9848,15 +9800,15 @@ function Account() {
           null
         )}
 
-        <div className="ih6-account-layout ih25-account-panel ih75-account-layout ih-account-editor-layout" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
-          <WorkspaceSectionNav sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} />
-          <div className="ih6-account-content ih75-account-main">
-        <SubpageHeading titleId="account-section-title"
-          title={activeAccountSectionCopy.title} description={activeAccountSectionCopy.description} variant="account"
-          actions={activeAccountSection === "jobs" ? <Link to="/find-talent" className="ih5-button is-primary"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link> : undefined} />
+        <div className="ih-studio-shell" id="profile-studio" ref={accountContentRef} tabIndex={-1} hidden={!activeAccountSection || accountHubOpen} inert={!activeAccountSection || accountHubOpen ? "" : undefined}>
+          <StudioNavigation sections={ACCOUNT_WORKSPACE_SECTIONS} active={activeAccountSection} onSelect={openAccountSection} name={displayName} avatarUrl={avatarUrl} en={accountEnglish} />
+          <div className="ih-studio-main">
+        <StudioHeading en={accountEnglish}
+          title={activeAccountSectionCopy.title} description={activeAccountSectionCopy.description}
+          actions={activeAccountSection === "jobs" ? <Link to="/find-talent" className="ih-studio-button is-primary"><MarketIcon kind="plus" />{accountEnglish ? "Post a job" : "Dodaj zlecenie"}</Link> : undefined} />
 
         <div
-          className="account-tab-stage"
+          className="ih-studio-stage"
           id="account-tab-panel"
           role="region"
           aria-labelledby="account-section-title"
@@ -9865,338 +9817,27 @@ function Account() {
         >
 
         <section
-          className="account-card account-profile-workspace"
+          className="ih-studio-profile-content"
           hidden={
             activeAccountSection === "jobs" ||
             activeAccountSection === "preferences" ||
             activeAccountSection === "templates"
           }
         >
-          <form
-            className="auth-form account-form ih11-profile-form"
-            onSubmit={handleSave}
-            hidden={
-              activeAccountSection !== "profile" &&
-              activeAccountSection !== "expertise"
-            }
-          >
-            <section
-              className="account-form-section account-form-section-identity"
-              id="account-profile-data"
-              aria-labelledby="account-profile-data-title"
-              hidden={activeAccountSection !== "profile"}
-            >
-              <header className="account-form-section-heading">
-                <div>
-                  <h2 id="account-profile-data-title">Twój profil</h2>
-                </div>
-              </header>
-
-            <div className="ih11-avatar-editor">
-              <div className="ih11-avatar-preview" aria-hidden="true">
-                {avatarUrl ? <img src={avatarUrl} alt="" /> : <span>{Array.from(name || "I")[0]}</span>}
-              </div>
-              <div>
-                <strong>Zdjęcie profilowe</strong>
-                <label className={`ih11-avatar-upload${uploading || saving ? " is-disabled" : ""}`}>
-                  <span>{uploading ? "Przesyłanie…" : "Wybierz zdjęcie"}</span>
-                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarChange}
-                    disabled={uploading || saving} aria-label="Wybierz zdjęcie profilowe" />
-                </label>
-                <small>JPG, PNG lub WEBP. Przytniemy zdjęcie do 400 × 400 px.</small>
-              </div>
-            </div>
-
-            <label className="account-profile-name">
-              Imię / nazwa
-
-              <input
-                type="text"
-                value={name}
-                onChange={(event) =>
-                  setName(
-                    event.target.value
-                  )
-                }
-                required
-              />
-            </label>
-
-            <label className="account-profile-about">
-              O mnie
-
-              <AutoTextarea
-                className="ideahire-multiline-field ideahire-about-field"
-                rows="5"
-                value={about}
-                onChange={(event) =>
-                  setAbout(
-                    event.target.value
-                  )
-                }
-                maxLength={1000}
-                placeholder="Napisz kilka słów o sobie..."
-              />
-
-              <small>
-                Opis będzie widoczny
-                na Twoim profilu.
-              </small>
-            </label>
-
-            </section>
-
-            <section
-              className="account-form-section account-form-section-expertise"
-              id="account-expertise"
-              aria-labelledby="account-expertise-title"
-              hidden={activeAccountSection !== "expertise"}
-            >
-              <header className="account-form-section-heading">
-                <div>
-                  <h2 id="account-expertise-title">Twoja specjalizacja</h2>
-                </div>
-              </header>
-
-            <fieldset className="profile-specialties-field">
-              <legend>
-                Kategorie specjalizacji
-              </legend>
-
-              <p className="profile-field-hint">
-                Wybierz maksymalnie 3 obszary, w których najlepiej się odnajdujesz.
-              </p>
-
-              <div className="profile-category-options">
-                {JOB_CATEGORIES.map(
-                  (category) => {
-                    const selected =
-                      specialtyCategories.includes(
-                        category
-                      );
-
-                    return (
-                      <button
-                        key={category}
-                        type="button"
-                        className={`profile-category-option ${
-                          selected
-                            ? "is-selected"
-                            : ""
-                        }`}
-                        onClick={() =>
-                          toggleSpecialtyCategory(
-                            category
-                          )
-                        }
-                        disabled={
-                          saving ||
-                          uploading ||
-                          profileDetailsLoading
-                        }
-                        aria-pressed={selected}
-                      >
-                        <span aria-hidden="true">
-                          {selected
-                            ? "✓"
-                            : "+"}
-                        </span>
-
-                        {getJobCategoryLabel(category)}
-                      </button>
-                    );
-                  }
-                )}
-              </div>
-
-              <small>
-                Wybrano: {specialtyCategories.length}/3
-              </small>
-            </fieldset>
-
-            <fieldset className="profile-skills-field">
-              <legend>
-                Umiejętności
-              </legend>
-
-              <p className="profile-field-hint">
-                Dodaj konkretne narzędzia i umiejętności. Każda pozycja pojawi się na profilu jako osobny kafelek.
-              </p>
-
-              <div className="profile-skill-entry">
-                <input
-                  type="text"
-                  value={skillDraft}
-                  onChange={(event) =>
-                    setSkillDraft(
-                      event.target.value
-                    )
-                  }
-                  onKeyDown={
-                    handleSkillKeyDown
-                  }
-                  maxLength={40}
-                  placeholder="Np. Adobe Illustrator"
-                  disabled={
-                    saving ||
-                    uploading ||
-                    profileDetailsLoading
-                  }
-                />
-
-                <button
-                  type="button"
-                  className="profile-add-skill"
-                  onClick={addSkill}
-                  disabled={
-                    !skillDraft.trim() ||
-                    skills.length >= 12 ||
-                    saving ||
-                    uploading ||
-                    profileDetailsLoading
-                  }
-                >
-                  Dodaj
-                </button>
-              </div>
-
-              {skills.length > 0 && (
-                <div className="profile-edit-skill-chips">
-                  {skills.map(
-                    (skill) => (
-                      <span
-                        className="profile-edit-skill-chip"
-                        key={skill}
-                      >
-                        {skill}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeSkill(
-                              skill
-                            )
-                          }
-                          aria-label={`Usuń umiejętność: ${skill}`}
-                        >
-                          ×
-                        </button>
-                      </span>
-                    )
-                  )}
-                </div>
-              )}
-
-              <small>
-                Dodano: {skills.length}/12. Naciśnij Enter lub przecinek, aby szybko dodać pozycję.
-              </small>
-            </fieldset>
-
-            <label className="account-profile-specialization">
-              W czym się specjalizujesz?
-
-              <AutoTextarea
-                className="ideahire-multiline-field ideahire-specialization-field"
-                rows="5"
-                value={specialization}
-                onChange={(event) =>
-                  setSpecialization(
-                    event.target.value
-                  )
-                }
-                maxLength={1200}
-                placeholder="Np. tworzę nowoczesne strony internetowe, projektuję identyfikację wizualną i dbam o czytelne doświadczenie użytkownika..."
-                disabled={
-                  saving ||
-                  uploading ||
-                  profileDetailsLoading
-                }
-              />
-
-              <small>
-                Opisz konkretnie swoje najmocniejsze umiejętności, doświadczenie i rodzaj projektów, które realizujesz.
-              </small>
-            </label>
-
-            </section>
-
-            <section
-              className="account-form-section account-form-section-contact"
-              id="account-contact"
-              aria-labelledby="account-contact-title"
-              hidden={activeAccountSection !== "profile"}
-            >
-              <header className="account-form-section-heading">
-                <div>
-                  <h2 id="account-contact-title">Dane kontaktowe</h2>
-                  <small>Adres logowania jest chroniony, a kraj widoczny na profilu.</small>
-                </div>
-              </header>
-
-            <label>
-              E-mail
-
-              <input
-                type="email"
-                value={
-                  user.email || ""
-                }
-                disabled
-              />
-            </label>
-
-            <label>
-              Skąd jesteś?
-
-              <CountryPicker
-                value={countryCode}
-                onChange={(country) =>
-                  setCountryCode(
-                    country?.code || ""
-                  )
-                }
-                disabled={
-                  saving ||
-                  uploading ||
-                  countryLoading
-                }
-              />
-
-              <small>
-                Wybierz kraj, który będzie
-                widoczny na Twoim profilu.
-              </small>
-            </label>
-
-            </section>
-
-            <div className="account-form-actions">
-              <div className="account-form-save-copy">
-                <strong>Gotowe?</strong>
-                <span>Zapisz wszystkie zmiany wprowadzone w profilu.</span>
-              </div>
-
-              {message && (
-                <p className="auth-message">
-                  {message}
-                </p>
-              )}
-
-              <button
-                className="btn btn-dark btn-large"
-                type="submit"
-                disabled={
-                  saving ||
-                  uploading ||
-                  profileDetailsLoading
-                }
-              >
-                {saving
-                  ? "Zapisywanie..."
-                  : "Zapisz zmiany "}
-              </button>
-            </div>
-          </form>
+          {activeAccountSection === "profile" && <ProfileDetailsEditor
+            name={name} onName={setName} avatarUrl={avatarUrl} onAvatar={handleAvatarChange}
+            about={about} onAbout={setAbout} email={user.email || ""}
+            countryLabel={getCountryByCode(countryCode)?.name}
+            countryField={<CountryPicker value={countryCode} onChange={country => setCountryCode(country?.code || "")} disabled={saving || uploading || countryLoading || profileDetailsLoading} />}
+            onSubmit={handleSave} saving={saving} uploading={uploading} loading={profileDetailsLoading || countryLoading}
+            message={message} en={accountEnglish} />}
+          {activeAccountSection === "expertise" && <ExpertiseEditor
+            categories={JOB_CATEGORIES} selected={specialtyCategories} onCategory={toggleSpecialtyCategory}
+            categoryLabel={category => accountEnglish ? translateUiText(getJobCategoryLabel(category)) : getJobCategoryLabel(category)}
+            skills={skills} draft={skillDraft} onDraft={setSkillDraft} onKeyDown={handleSkillKeyDown} onAdd={addSkill} onRemove={removeSkill}
+            specialization={specialization} onSpecialization={setSpecialization} onSubmit={handleSave}
+            saving={saving} uploading={uploading} loading={profileDetailsLoading || countryLoading} message={message}
+            name={name} avatarUrl={avatarUrl} en={accountEnglish} />}
 
           {isAdult && activeAccountSection === "payouts" && (
             <StripeAccountPayouts
@@ -10299,266 +9940,14 @@ function Account() {
 
 
 
-          <section
-            className="profile-portfolio-manager"
-            id="account-portfolio"
-            aria-labelledby="portfolio-manager-title"
-            hidden={activeAccountSection !== "portfolio"}
-          >
-            <div className="profile-portfolio-heading">
-              <div>
-                <h2 id="portfolio-manager-title">{accountEnglish ? "Your albums" : "Twoje albumy"}</h2>
-                <p>
-                  Pokaż maksymalnie {MAX_PORTFOLIO_ITEMS} projektów. Każdy projekt
-                  jest osobnym albumem z maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
-                  zdjęciami oraz opcjonalnym linkiem HTTPS.
-                </p>
-              </div>
+          {activeAccountSection === "portfolio" && <PortfolioStudio
+            items={portfolioItems} loading={portfolioLoading} busy={portfolioBusy} editingId={portfolioEditingId}
+            draft={portfolioDraft} onDraft={setPortfolioDraft} files={portfolioFiles} removedIds={portfolioRemovedMediaIds}
+            maxItems={MAX_PORTFOLIO_ITEMS} maxImages={MAX_PORTFOLIO_ALBUM_IMAGES} mediaFor={getPortfolioMedia}
+            onEdit={startPortfolioEdit} onDelete={handlePortfolioDelete} onReset={() => { resetPortfolioEditor(); setPortfolioMessage(""); }}
+            onSubmit={handlePortfolioSubmit} onFiles={handlePortfolioFileChange} onRemoveFile={removePendingPortfolioFile}
+            onToggleMedia={toggleExistingPortfolioMedia} fileInputRef={portfolioFileInputRef} message={portfolioMessage} en={accountEnglish} />}
 
-              <span className="profile-portfolio-count" aria-label={accountEnglish ? `Albums: ${portfolioItems.length} of ${MAX_PORTFOLIO_ITEMS}` : `Albumy: ${portfolioItems.length} z ${MAX_PORTFOLIO_ITEMS}`}><strong>{portfolioItems.length}</strong><span>/ {MAX_PORTFOLIO_ITEMS}</span></span>
-            </div>
-
-            <details className="profile-portfolio-legal-note">
-              <summary>{accountEnglish ? "Publish responsibly" : "Publikuj odpowiedzialnie"}</summary>
-              <span>
-                Dodając projekt, potwierdzasz, że masz prawo opublikować jego
-                opis, link i zdjęcia oraz że materiały nie naruszają praw innych
-                osób. Projekt możesz usunąć w każdej chwili. Zobacz także{" "}
-                <Link to="/regulamin">Regulamin IdeaHire</Link>.
-              </span>
-            </details>
-
-            {portfolioLoading ? (
-              <InlineRouteLoader
-                className="embedded-route-loader"
-                rows={3}
-              />
-            ) : portfolioItems.length > 0 ? (
-              <div className="profile-portfolio-edit-list">
-                {portfolioItems.map((item) => (
-                  <article className="profile-portfolio-edit-card" key={item.id}>
-                    {getPortfolioMedia(item)[0]?.image_url ? (
-                      <div className="profile-portfolio-edit-cover">
-                        <img
-                          src={getPortfolioMedia(item)[0].image_url}
-                          alt={`Projekt: ${item.title}`}
-                          loading="lazy" decoding="async"
-                        />
-                        <span>{getPortfolioMedia(item).length} zdj.</span>
-                      </div>
-                    ) : (
-                      <div className="profile-portfolio-image-placeholder" aria-hidden="true">
-                        
-                      </div>
-                    )}
-
-                    <div className="profile-portfolio-edit-copy">
-                      <strong>{item.title}</strong>
-                      <span>
-                        {getPortfolioMedia(item).length > 0
-                          ? `Album · ${getPortfolioMedia(item).length} ${getPortfolioMedia(item).length === 1 ? "zdjęcie" : "zdjęć"}`
-                          : "Projekt z linkiem"}
-                      </span>
-                    </div>
-
-                    <div className="profile-portfolio-item-actions">
-                      <button
-                        type="button"
-                        onClick={() => startPortfolioEdit(item)}
-                        disabled={portfolioBusy}
-                      >
-                        Edytuj
-                      </button>
-                      <button
-                        type="button"
-                        className="is-danger"
-                        onClick={() => handlePortfolioDelete(item)}
-                        disabled={portfolioBusy}
-                      >
-                        Usuń
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className="profile-portfolio-empty">
-                Portfolio jest jeszcze puste. Dodaj pierwszą realizację poniżej.
-              </p>
-            )}
-
-            {(portfolioEditingId || portfolioItems.length < MAX_PORTFOLIO_ITEMS) && (
-              <form
-                className="profile-portfolio-editor"
-                onSubmit={handlePortfolioSubmit}
-              >
-                <div className="profile-portfolio-editor-heading">
-                  <div>
-                    <span className="section-label">
-                      {portfolioEditingId ? "Edycja projektu" : "Nowy projekt"}
-                    </span>
-                    <h3>
-                      {portfolioEditingId
-                        ? "Zaktualizuj realizację"
-                        : "Dodaj realizację do portfolio"}
-                    </h3>
-                  </div>
-
-                  {portfolioEditingId && (
-                    <button
-                      type="button"
-                      className="profile-portfolio-cancel"
-                      onClick={resetPortfolioEditor}
-                      disabled={portfolioBusy}
-                    >
-                      Anuluj edycję
-                    </button>
-                  )}
-                </div>
-
-                <label>
-                  Tytuł projektu
-                  <input
-                    type="text"
-                    value={portfolioDraft.title}
-                    onChange={(event) =>
-                      setPortfolioDraft((current) => ({
-                        ...current,
-                        title: event.target.value,
-                      }))
-                    }
-                    minLength={3}
-                    maxLength={120}
-                    placeholder="Np. Identyfikacja wizualna kawiarni"
-                    required
-                    disabled={portfolioBusy}
-                  />
-                </label>
-
-                <label>
-                  Krótki opis
-                  <AutoTextarea
-                    rows="4"
-                    value={portfolioDraft.description}
-                    onChange={(event) =>
-                      setPortfolioDraft((current) => ({
-                        ...current,
-                        description: event.target.value,
-                      }))
-                    }
-                    maxLength={800}
-                    placeholder="Opisz swój zakres pracy, rezultat i użyte narzędzia..."
-                    disabled={portfolioBusy}
-                  />
-                </label>
-
-                <div className="profile-portfolio-editor-grid">
-                  <label>
-                    Link do projektu <span className="profile-portfolio-optional">(opcjonalnie)</span>
-                    <input
-                      type="url"
-                      inputMode="url"
-                      value={portfolioDraft.projectUrl}
-                      onChange={(event) =>
-                        setPortfolioDraft((current) => ({
-                          ...current,
-                          projectUrl: event.target.value,
-                        }))
-                      }
-                      maxLength={2048}
-                      placeholder="https://twoje-portfolio.pl/projekt"
-                      disabled={portfolioBusy}
-                    />
-                    <small>Wyłącznie bezpieczny adres HTTPS.</small>
-                  </label>
-
-                  <label>
-                    Zdjęcia do albumu
-                    <input
-                      ref={portfolioFileInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      multiple
-                      onChange={handlePortfolioFileChange}
-                      disabled={portfolioBusy}
-                    />
-                    <small>
-                      Wybierz kilka zdjęć naraz. Maksymalnie {MAX_PORTFOLIO_ALBUM_IMAGES}
-                      zdjęć w albumie i 12 MB na plik.
-                    </small>
-                  </label>
-                </div>
-
-                {portfolioEditingId && getPortfolioMedia(
-                  portfolioItems.find((item) => item.id === portfolioEditingId)
-                ).length > 0 && (
-                  <div className="profile-portfolio-media-editor">
-                    <strong>Zdjęcia zapisane w albumie</strong>
-                    <div>
-                      {getPortfolioMedia(
-                        portfolioItems.find((item) => item.id === portfolioEditingId)
-                      ).map((mediaItem, index) => {
-                        const removed = portfolioRemovedMediaIds.includes(mediaItem.id);
-                        return (
-                          <button
-                            type="button"
-                            className={removed ? "is-removed" : ""}
-                            onClick={() => toggleExistingPortfolioMedia(mediaItem.id)}
-                            disabled={portfolioBusy}
-                            aria-label={removed ? `Przywróć zdjęcie ${index + 1}` : `Usuń zdjęcie ${index + 1}`}
-                            key={mediaItem.id}
-                          >
-                            <img src={mediaItem.image_url} alt="" />
-                            <span>{removed ? "Przywróć" : "Usuń"}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <small>Zmiany zostaną wykonane dopiero po zapisaniu albumu.</small>
-                  </div>
-                )}
-
-                {portfolioFiles.length > 0 && (
-                  <div className="profile-portfolio-new-files">
-                    <strong>Nowe zdjęcia ({portfolioFiles.length})</strong>
-                    <div>
-                      {portfolioFiles.map((file, index) => (
-                        <span key={`${file.name}-${file.lastModified}-${index}`}>
-                          <span>{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removePendingPortfolioFile(index)}
-                            disabled={portfolioBusy}
-                            aria-label={`Usuń plik ${file.name}`}
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {portfolioMessage && (
-                  <p className="profile-portfolio-message" role="status">
-                    {portfolioMessage}
-                  </p>
-                )}
-
-                <button
-                  className="btn btn-dark profile-portfolio-save"
-                  type="submit"
-                  disabled={portfolioBusy}
-                >
-                  {portfolioBusy
-                    ? "Zapisywanie albumu..."
-                    : portfolioEditingId
-                    ? "Zapisz album "
-                    : "Dodaj album do portfolio "}
-                </button>
-              </form>
-            )}
-          </section>
         </section>
 
         <div
@@ -29387,7 +28776,7 @@ function getRouteScrollTarget(pathname, hash) {
   // Account hashes select tabs. Scroll to their heading rather than the
   // matching form section further down the page, which hides the title.
   if (pathname === "/account" && getAccountWorkspaceSection(hash)) {
-    return document.querySelector(".ih75-account-layout:not([hidden])");
+    return document.querySelector("#profile-studio:not([hidden])");
   }
   return document.getElementById(decodeURIComponent(hash.slice(1)));
 }

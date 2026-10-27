@@ -69,7 +69,7 @@ export function startBrandOpening() {
     window.dispatchEvent(new Event("ih:brand-ready"));
   }
   function onAnimationEnd(event) {
-    if (opening && event.target.classList.contains("ih-boot-bottom") && event.animationName === "ih61-open-bottom") finish();
+    if (opening && event.target === boot && event.animationName === "ih-studio-boot-out") finish();
   }
   function reveal() {
     if (cancelled || completed || opening) return;
@@ -80,25 +80,18 @@ export function startBrandOpening() {
     html.setAttribute("data-ih-boot", "opening");
     window.dispatchEvent(new Event("ih:brand-opening"));
     // animationend can be omitted by a background tab or browser preference.
-    finishTimer = timer(finish, motion?.matches ? 140 : 1150);
+    finishTimer = timer(finish, motion?.matches ? 0 : 240);
   }
   function prepare() {
     if (prepared || cancelled || completed) return;
     prepared = true;
-    // The logo is outlined. Waiting briefly here concerns the page text only.
-    fontTimer = timer(stage, 600);
-    if (document.fonts?.ready) Promise.resolve(document.fonts.ready).then(stage, stage);
-    else stage();
+    // Readiness reveals the page immediately; the logo never adds a minimum wait.
+    stage();
   }
   function stage() {
     if (cancelled || completed || staged) return;
     staged = true;
-    window.clearTimeout(fontTimer);
-    // Let the mark complete its 560 ms entrance on a warm cache too.
-    const elapsed = performance.now() - (window.__ihBootStarted ?? 0);
-    const remaining = motion?.matches ? 0 : Math.max(0, 560 - elapsed);
-    if (remaining) timer(reveal, remaining);
-    else reveal();
+    reveal();
   }
   function containKeyboard(event) {
     if (event.key !== "Tab" || completed || cancelled) return;
@@ -115,9 +108,8 @@ export function startBrandOpening() {
   function inspect() {
     frame = 0;
     if (cancelled || completed || prepared) return;
-    const busy = root.querySelector("[data-route-loading='true']");
     const content = root.querySelector("main, .app, .page, form, [role='alert']");
-    if (busy || !content) { stable = 0; return; }
+    if (!content) { stable = 0; return; }
     if (++stable >= 2) prepare();
     else frame = window.requestAnimationFrame(inspect);
   }

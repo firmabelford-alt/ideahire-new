@@ -10,6 +10,7 @@ import { WorkspaceSheet, WorkspaceDisplaySettings } from './WorkspaceFlow';
 import { SubpageNavigation, SubpageCount, SubpageLoading, SubpageHeading } from './Subpages';
 import { MarketSelect, helpCenterHref } from './MarketUI';
 import { conversationMessagePreview } from './ConversationCards';
+import WorkDesk from './WorkDesk';
 import './Workspace.css';
 import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
@@ -209,7 +210,7 @@ export function WorkspaceSectionNav({ sections, active, onSelect }) {
 }
 export function WorkspaceLoading() {
   const t = useWorkspaceCopy();
-  return <SubpageLoading label={t('Przygotowujemy widok…', 'Loading your page…')} />;
+  return <SubpageLoading label={t('Pobieramy Twoje dane…', 'Loading your data…')} />;
 }
 function RecentRows({
   conversations,
@@ -345,13 +346,8 @@ export function WorkspaceWork({ inbox }) {
   const params = new URLSearchParams(location.search);
   const filter = ['client', 'contractor'].includes(params.get('role')) ? params.get('role') : 'all';
   const search = params.get('q') || '';
-  const [wide, setWide] = useState(() => window.matchMedia('(min-width:851px)').matches);
-  useEffect(() => {
-    const media = window.matchMedia('(min-width:851px)');
-    const change = () => setWide(media.matches);
-    media.addEventListener?.('change', change);
-    return () => media.removeEventListener?.('change', change);
-  }, []);
+  const en = useSitePreferences().language === 'en';
+  const openProject = useWorkspaceListNavigation(inbox?.loading);
 
   const rows = inbox?.conversations || [];
   const unread = rows.filter(item => item.isUnread).length;
@@ -366,37 +362,11 @@ export function WorkspaceWork({ inbox }) {
     if (value && value !== 'all') next.set(key, value); else next.delete(key);
     navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
   }
-  return <main className="ih68-page ih72-work-page" id="ih68-content">
-    <SubpageHeading title={t('Panel pracy', 'Workspace')}
-      description={t('Twoje współprace, rozmowy i kolejne kroki w jednym miejscu.', 'Your projects, conversations and next steps in one place.')}
-      actions={<Link to="/calendar" className="ih79-button"><WorkspaceIcon kind="calendar" />{t('Kalendarz', 'Calendar')}</Link>} />
-    <div className="ih79-work-overview" aria-label={t('Podsumowanie współprac', 'Project overview')}>
-      <Link to="/messages?unread=1" className={unread ? 'has-unread' : ''}><span>{t('Nieprzeczytane rozmowy', 'Unread conversations')}</span><strong><SubpageCount value={unread} loading={inbox?.loading} /></strong><WorkspaceIcon kind="arrow" /></Link>
-      <button type="button" aria-pressed={filter === 'client'} onClick={() => update('role', 'client')}><span>{t('Zlecam', 'Hiring')}</span><strong><SubpageCount value={hiring} loading={inbox?.loading} /></strong></button>
-      <button type="button" aria-pressed={filter === 'contractor'} onClick={() => update('role', 'contractor')}><span>{t('Realizuję', 'Providing')}</span><strong><SubpageCount value={providing} loading={inbox?.loading} /></strong></button>
-    </div>
-    <div className="ih79-work-layout">
-      <section className="ih72-projects" aria-labelledby="ih72-projects-title">
-        <div className="ih79-section-title"><h2 id="ih72-projects-title">{t('Współprace', 'Projects')}<span className="ih79-count"><SubpageCount value={visible.length} loading={inbox?.loading} /></span></h2></div>
-        <div className="ih72-list-toolbar">
-          <div className="ih72-filters" role="group" aria-label={t('Twoja rola', 'Your role')}>
-            {[['all', t('Wszystkie', 'All')], ['client', t('Zlecam', 'Hiring')], ['contractor', t('Realizuję', 'Providing')]].map(([value, label]) =>
-              <button type="button" key={value} aria-pressed={filter === value} onClick={() => update('role', value)}>{label}</button>)}
-          </div>
-          <label className="ih72-search"><span className="ih68-sr-only">{t('Szukaj projektu lub osoby', 'Search projects or people')}</span><WorkspaceIcon kind="search" /><input type="search" maxLength={160} value={search} onChange={event => update('q', event.target.value)} placeholder={t('Projekt lub osoba', 'Project or person')} />{search && <button type="button" onClick={() => update('q', '')} aria-label={t('Wyczyść wyszukiwanie', 'Clear search')}><WorkspaceIcon kind="close" /></button>}</label>
-        </div>
-        {inbox?.loading ? <WorkspaceLoading /> : inbox?.errorMessage ? <p className="ih68-feedback" role="alert">{inbox.errorMessage}</p> : visible.length ?
-          <WorkspaceProjectCards conversations={visible} user={inbox?.user} loading={inbox?.loading} /> :
-          <div className="ih79-empty"><h3>{rows.length ? t('Brak pasujących współprac', 'No matching projects') : t('Nie masz jeszcze współprac', 'No projects yet')}</h3><p>{rows.length ? t('Zmień frazę lub wybraną rolę.', 'Change the phrase or selected role.') : t('Odpowiedz na zlecenie albo napisz do wykonawcy. Rozmowę i ustalenia znajdziesz tutaj.', 'Reply to a job or contact a freelancer. Your conversations and terms will appear here.')}</p>{rows.length ? <button type="button" className="ih79-button" onClick={() => navigate('/work', { replace: true })}>{t('Wyczyść filtry', 'Clear filters')}</button> : <Link to="/jobs" className="ih79-button is-primary">{t('Znajdź zlecenie', 'Find a job')}<WorkspaceIcon kind="arrow" /></Link>}</div>}
-      </section>
-      <aside className="ih79-work-tools" aria-label={t('Zlecenia i usługi', 'Jobs and services')}>
-        <details className="ih81-work-shortcuts" open={wide}>
-          <summary><span>{t('Narzędzia pracy', 'Work tools')}</span><WorkspaceIcon kind="plus" /></summary>
-          <div className="ih81-work-shortcuts-body"><WorkspaceWorkActions /></div>
-        </details>
-      </aside>
-    </div>
-  </main>;
+  return <WorkDesk rows={rows} visible={visible} user={inbox?.user} filter={filter} search={search}
+    counts={{ unread, hiring, providing }} loading={inbox?.loading} error={inbox?.errorMessage}
+    onRole={value => update('role', value)} onSearch={value => update('q', value)}
+    onReset={() => navigate('/work', { replace: true })} onOpen={openProject}
+    loader={<WorkspaceLoading />} en={en} />;
 }
 export function WorkspaceLimitedHome({
   fullAccessLabel,

@@ -2,8 +2,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 import { LayoutGrid, CalendarDays, Bell, Check } from 'lucide-react';
+import { BrandMark } from './Brand';
 import { useSitePreferences, translateUiText } from './Preferences';
 import './Subpages.css';
+import './PageMotion.css';
 
 let newestEntry = 0;
 
@@ -76,10 +78,10 @@ export function SubpageTheme() {
 
 export function SubpageLoading({ label, className = '', screen = false, pending = true }) {
   const en = useSitePreferences().language === 'en';
-  return <div className={'ih87-loading' + (screen ? ' is-screen' : '') + (className ? ' ' + className : '')}
+  return <div className={'ih-scene-loader' + (screen ? ' is-screen' : '') + (className ? ' ' + className : '')}
     data-route-loading={pending ? 'true' : undefined} role="status" aria-busy={pending || undefined}>
-    <span className="ih-loading-preview" aria-hidden="true"><i /><i /><i /></span>
-    <span className="ih87-loading-label">{label || (en ? 'Loading your page…' : 'Przygotowujemy widok…')}</span>
+    <span className="ih-scene-loader-mark" aria-hidden="true"><BrandMark /></span>
+    <span>{label || (en ? 'Just a moment…' : 'Chwila…')}</span>
   </div>;
 }
 
@@ -109,7 +111,7 @@ export function SubpageNavigation({ standalone = false }) {
   const location = useLocation();
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
-  if (!page || ['dashboard', 'work', 'inbox', 'conversation'].includes(page.kind)) return null;
+  if (!page || ['dashboard', 'account', 'work', 'inbox', 'conversation'].includes(page.kind)) return null;
   return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
     aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P79">
     <SubpageHistoryControls parent={page.parent} />
@@ -202,6 +204,8 @@ export function SubpageCount({ value, loading = false }) {
 
 function useSubpageEntrance(location) {
   useLayoutEffect(() => {
+    // The studio and desk animate their content, keeping sticky tools still.
+    if (location.pathname === '/work' || location.pathname === '/account') return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     let animation;
     const frame = requestAnimationFrame(() => {
@@ -219,7 +223,7 @@ function useSubpageEntrance(location) {
 function useSubpageDisclosureMotion() {
   useEffect(() => {
     const active = new Map();
-    const selector = 'details.ih5-service-editor-section,details.ih5-service-process,details.ih81-work-shortcuts,details.ih68-account-note,details.ih75-owned-job-details,details.ih70-display,details.profile-portfolio-legal-note';
+    const selector = 'details.ih5-service-editor-section,details.ih5-service-process,details.ih81-work-shortcuts,details.ih68-account-note,details.ih75-owned-job-details,details.ih70-display,details.profile-portfolio-legal-note,details.ih-desk-navigation,details.ih-studio-publishing';
     const restore = (element, record) => {
       element.style.height = record.height;
       element.style.overflow = record.overflow;
@@ -229,7 +233,7 @@ function useSubpageDisclosureMotion() {
       const summary = event.target.closest?.('summary');
       const element = summary?.parentElement;
       if (!element?.matches(selector) || event.defaultPrevented || event.target.closest?.('a,button,input,select,textarea') || !element.animate || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-      if (element.classList.contains('ih81-work-shortcuts') && window.matchMedia('(min-width:851px)').matches) return;
+      if ((element.classList.contains('ih81-work-shortcuts') || element.classList.contains('ih-desk-navigation')) && window.matchMedia('(min-width:851px)').matches) return;
       event.preventDefault();
       const previous = active.get(element);
       const from = element.getBoundingClientRect().height;
