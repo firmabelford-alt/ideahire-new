@@ -227,39 +227,73 @@ export default function DisputePaymentPanel({ client, decision, userId, conversa
   }
 
   if (!FINANCIAL.has(decision?.outcome)) return null;
-  return <div className="dispute-financial-action" style={{ marginTop: 20, borderTop: "1px solid currentColor", paddingTop: 16 }}>
-    <h3>Rozliczenie decyzji w Stripe</h3>
-    {protection && <p role={protection.protected === true ? "status" : "alert"}>
-      {protection.protected === true
-        ? "Automatyczne wypłaty z konta platformy na rachunek IdeaHire są wyłączone. Ręczna wypłata wymaga sprawdzenia wolnej nadwyżki po zabezpieczeniu nierozliczonych zleceń i zwrotów."
-        : protection.protected === false
+  const action = preview?.action;
+  const canExecute = preview?.eligible && action?.state !== "completed";
+  return <section className="dispute-financial-action ih-settlement-sheet" aria-label="Rozliczenie płatności">
+    <header className="ih-settlement-heading">
+      <h3>Rozliczenie w Stripe</h3>
+      {preview?.livemode === false && <span className="ih-settlement-test-mode">Tryb testowy</span>}
+    </header>
+
+    {loading && !preview && <p role="status">Pobieramy status i kwoty…</p>}
+    {preview && <>
+      <div className="ih-settlement-state" role="status">
+        <span>Status rozliczenia</span>
+        <strong>{STATE[action?.state] || preview.blocked_reason || "Plan gotowy do wykonania."}</strong>
+        {STATE[action?.state] && !preview.eligible && preview.blocked_reason && <p>{preview.blocked_reason}</p>}
+      </div>
+
+      <dl className="ih-settlement-amounts">
+        <div><dt>Zwrot klientowi — łącznie z prowizją</dt><dd>{money(preview.refund_total)}</dd></div>
+        <div><dt>Wynagrodzenie wykonawcy po rozliczeniu</dt><dd>{money(preview.contractor_target)}</dd></div>
+      </dl>
+
+      <details className="ih-settlement-details">
+        <summary>Rozbicie kwoty zwrotu</summary>
+        <dl className="ih-settlement-breakdown">
+          <div><dt>Zwrot za pracę</dt><dd>{money(preview.refund_work)}</dd></div>
+          <div><dt>Zwrot prowizji IdeaHire</dt><dd>{money(preview.refund_fee)}</dd></div>
+        </dl>
+      </details>
+      {action?.last_error && <p className="ih-settlement-warning" role="alert">{action.last_error}</p>}
+    </>}
+
+    {protection && protection.protected !== true && <p className="ih-settlement-warning" role="alert">
+      {protection.protected === false
         ? "Uwaga: automatyczne wypłaty platformy są włączone. Sprawdź harmonogram Stripe i wstrzymaj wypłaty środków potrzebnych na zlecenia i zwroty."
         : "Nie potwierdzono ochrony salda platformy. Sprawdź harmonogram wypłat w Stripe przed wypłatą prowizji."}
     </p>}
-    <p>Pełny zwrot obejmuje prowizję IdeaHire. Przy częściowym zwrocie prowizja jest zwracana proporcjonalnie. Operacja może rozpocząć się po terminie odwołania, jeśli decyzja pozostaje aktualna.</p>
-    {loading && <p role="status">Sprawdzamy plan rozliczenia…</p>}
-    {preview && <>
-      {preview.livemode === false && <strong>Sandbox — kwoty testowe</strong>}
-      <dl>
-        <dt>Zwrot wynagrodzenia klientowi</dt><dd>{money(preview.refund_work)}</dd>
-        <dt>Zwrot prowizji klientowi</dt><dd>{money(preview.refund_fee)}</dd>
-        <dt>Łączny zwrot klientowi</dt><dd><strong>{money(preview.refund_total)}</strong></dd>
-        <dt>Wynagrodzenie wykonawcy po rozliczeniu</dt><dd><strong>{money(preview.contractor_target)}</strong></dd>
-      </dl>
-      <p role="status">{STATE[preview.action?.state] || preview.blocked_reason || "Plan gotowy do wykonania."}</p>
-      {preview.action?.last_error && <p role="alert">{preview.action.last_error}</p>}
-      {STATE[preview.action?.state] && !preview.eligible && preview.blocked_reason && <p>{preview.blocked_reason}</p>}
-      {preview.eligible && preview.action?.state !== "completed" && <>
-        <label><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} disabled={executing} /> Sprawdziłem decyzję oraz powyższe kwoty i zlecam wykonanie lub sprawdzenie tej samej operacji w Stripe.</label>
+    {message && <p className="ih-settlement-warning" role="alert">{message}</p>}
+
+    <div className="ih-settlement-controls">
+      {canExecute && <>
+        <label className="ih-settlement-confirmation"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} disabled={executing} />
+          <span>Sprawdziłem decyzję i kwoty. Zlecam wykonanie lub sprawdzenie tej samej operacji w Stripe.</span>
+        </label>
         <button type="button" className="dispute-primary-button" onClick={execute} disabled={!confirmed || loading || executing}>
-          {executing ? "Sprawdzanie rozliczenia…" : preview.action?.state === "needs_review" ? "Ponów sprawdzenie tej samej operacji" : "Wykonaj / sprawdź rozliczenie"}
+          {executing ? "Sprawdzanie rozliczenia…" : action?.state === "needs_review" ? "Sprawdź ponownie tę samą operację" : "Wykonaj rozliczenie w Stripe"}
         </button>
       </>}
-      {preview.action?.refund_id && <small>Zwrot: {preview.action.refund_id}</small>}
-      {(preview.action?.original_transfer || preview.action?.transfer_id) && <p><small>Transfer: {preview.action.original_transfer || preview.action.transfer_id}</small></p>}
-    </>}
-    {message && <p role="alert">{message}</p>}
-    <button type="button" className="dispute-secondary-button" onClick={refresh} disabled={loading || executing}>Odśwież plan i status</button>
-    <p><small>Zwrot wraca do metody płatności klienta. Przekazanie wynagrodzenia na saldo Stripe wykonawcy jest odrębnym etapem od wypłaty na jego rachunek bankowy.</small></p>
-  </div>;
+      <button type="button" className="dispute-secondary-button" onClick={refresh} disabled={loading || executing}>
+        {loading ? "Odświeżanie…" : "Odśwież status"}
+      </button>
+    </div>
+
+    <details className="ih-settlement-details">
+      <summary>Zasady zwrotu i wypłat</summary>
+      <div className="ih-settlement-copy">
+        <p>Pełny zwrot obejmuje prowizję IdeaHire. Przy częściowym zwrocie prowizja jest zwracana proporcjonalnie.</p>
+        <p>Operacja może rozpocząć się po terminie odwołania, jeśli decyzja pozostaje aktualna.</p>
+        <p>Zwrot wraca do metody płatności klienta. Przekazanie wynagrodzenia na saldo Stripe wykonawcy jest odrębnym etapem od wypłaty na jego rachunek bankowy.</p>
+        {protection?.protected === true && <p>Automatyczne wypłaty z konta platformy na rachunek IdeaHire są wyłączone. Ręczna wypłata wymaga sprawdzenia wolnej nadwyżki po zabezpieczeniu nierozliczonych zleceń i zwrotów.</p>}
+      </div>
+    </details>
+    {(action?.refund_id || action?.original_transfer || action?.transfer_id) && <details className="ih-settlement-details">
+      <summary>Identyfikatory operacji</summary>
+      <dl className="ih-settlement-identifiers">
+        {action.refund_id && <div><dt>Zwrot</dt><dd><code>{action.refund_id}</code></dd></div>}
+        {(action.original_transfer || action.transfer_id) && <div><dt>Transfer</dt><dd><code>{action.original_transfer || action.transfer_id}</code></dd></div>}
+      </dl>
+    </details>}
+  </section>;
 }

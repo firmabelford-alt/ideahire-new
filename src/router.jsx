@@ -22167,6 +22167,7 @@ function DisputeDetails() {
                 <h2>{getOptionLabel(ADMIN_DECISION_OPTIONS, currentDecision.outcome)}</h2>
                 {currentDecision.amount != null && (
                   <strong className="dispute-decision-amount">
+                    {isStaff && <span className="ih-admin-decision-amount-label">Kwota decyzji za pracę</span>}
                     {formatDisputeMoney(
                       currentDecision.amount,
                       dispute.price_currency_snapshot
@@ -22184,13 +22185,14 @@ function DisputeDetails() {
                     <span>Operacja płatnicza: nie jest wymagana</span>
                   )}
                 </div>
-                <DisputeSettlementStatus client={supabase} decision={currentDecision} dispute={dispute}
-                  appeals={appeals} userId={user.id} />
-                {isStaff && ["owner", "admin"].includes(staffRole) && (
+                {isStaff && ["owner", "admin"].includes(staffRole) ? (
                   <DisputePaymentPanel client={supabase} decision={currentDecision} userId={user.id}
                     conversationId={dispute.conversation_id} onSettled={() => loadCase(false)} />
+                ) : (
+                  <DisputeSettlementStatus client={supabase} decision={currentDecision} dispute={dispute}
+                    appeals={appeals} userId={user.id} />
                 )}
-                {currentDecision.is_final && <p>Decyzja jest ostateczna w wewnętrznej procedurze IdeaHire. Nie ogranicza praw ustawowych, możliwości dochodzenia roszczeń ani dostępu do sądu.</p>}
+                {currentDecision.is_final && <AdminDisclosure disabled={!isStaff} summary="Co oznacza decyzja ostateczna"><p>Decyzja jest ostateczna w wewnętrznej procedurze IdeaHire. Nie ogranicza praw ustawowych, możliwości dochodzenia roszczeń ani dostępu do sądu.</p></AdminDisclosure>}
                 {dispute.appeal_deadline_at && dispute.status === "decision_issued" && !currentDecision.is_final && (
                   <p className="dispute-deadline-note">
                     Termin odwołania: {formatDisputeDate(dispute.appeal_deadline_at)}
