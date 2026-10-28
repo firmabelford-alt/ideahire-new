@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ClipboardList, FileText, LockKeyhole, MessageSquare, ShieldCheck, Users } from 'lucide-react';
-import { AdminTabs } from './AdminDesk';
-import LucynaSymbol from './LucynaSymbol';
+import { AdminPageHeading, AdminTabs } from './AdminDesk';
 
 export const ADMIN_GUIDES = [
   { id:'privacy', icon:ClipboardList, title:'Obsłuż wniosek RODO', to:'/admin/privacy', action:'Otwórz wnioski', steps:['Wybierz wniosek i sprawdź termin odpowiedzi oraz jego status.','Przejmij sprawę, aby było jasne, kto ją prowadzi.','Sprawdź zakres żądania i status potwierdzenia tożsamości.','Zapisz odpowiedź dla użytkownika. Notatki wewnętrzne trzymaj w osobnym polu.','Zmień status po wykonaniu czynności i sprawdź historię zapisu.'] },
@@ -18,7 +17,7 @@ export default function AdminLucynaDesk({ enabled, children }) {
   const guide=ADMIN_GUIDES.find(item=>item.id===selected)||ADMIN_GUIDES[0];
   const completed=guide.steps.filter((_,i)=>checked[`${guide.id}:${i}`]).length;
   return <main className="admin-shell ih-admin-lucyna-desk" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261028">
-    <header className="admin-page-header"><div><span className="section-label">Wsparcie zespołu</span><h1>Lucyna i instrukcje</h1><p>Procedury pod ręką i pomoc w przygotowaniu czytelnych szkiców.</p></div><span className="ih-admin-assistant-mark"><LucynaSymbol /></span></header>
+    <AdminPageHeading title="Lucyna i instrukcje" description="Procedury pod ręką i pomoc w przygotowaniu czytelnych szkiców. Instrukcje zespołu działają także bez połączenia z modelem AI."/>
     <AdminTabs items={[["guide","Instrukcje zespołu"],["chat","Rozmowa z Lucyną"]]} value={tab} onChange={setTab} />
     <section className="ih-admin-guide-layout" hidden={tab!=='guide'}>
       <nav className="ih-admin-guide-menu" aria-label="Wybierz instrukcję">{ADMIN_GUIDES.map(({id,title,icon:Icon})=><button type="button" key={id} aria-pressed={selected===id} onClick={()=>setSelected(id)}><Icon size={19} aria-hidden="true"/><span>{title}</span><ArrowRight size={17} aria-hidden="true"/></button>)}</nav>

@@ -1,5 +1,95 @@
 /* Phone workspace: one section at a time, quieter surfaces and full access to every tool. */
 @layer ideahireHeadings {
+  body.ih79-app.ih-admin-mode #root main :where(p,li,dt,dd,label,small,time,blockquote,section,article,div) { text-align:start!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-heading {
+    display:grid!important; gap:4px!important; width:100%!important; min-width:0!important;
+    height:auto!important; min-height:0!important; margin:0 0 22px!important; padding:0!important;
+    border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line {
+    display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important;
+    gap:8px 16px!important; min-width:0!important; margin:0!important; padding:0!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 {
+    width:auto!important; min-width:0!important; max-width:100%!important; margin:0!important;
+    font:700 30px/1.3 Inter,system-ui,sans-serif!important; text-align:start!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-heading-meta {
+    display:inline-flex!important; align-items:center!important; min-height:26px!important; max-width:100%!important;
+    padding:0!important; border:0!important; background:none!important; color:var(--ad-muted)!important;
+    font:500 13px/1.5 Inter,system-ui,sans-serif!important; white-space:normal!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help { margin:0!important; padding:0!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help>summary {
+    display:inline-flex!important; align-items:center!important; gap:6px!important; min-height:34px!important;
+    width:auto!important; height:auto!important; margin:0!important; padding:2px 0!important;
+    border:0!important; background:none!important; color:var(--ad-muted)!important;
+    font:400 14px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; list-style:none!important; cursor:pointer!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help>summary::-webkit-details-marker { display:none!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help>summary>svg { flex:none!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help[open]>summary>svg { transform:rotate(180deg)!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help>p {
+    max-width:80ch!important; margin:4px 0 8px!important; padding:12px 14px!important; border-left:2px solid var(--ad-line)!important;
+    border-radius:0!important; background:var(--ad-soft)!important; color:var(--ad-muted)!important;
+    font:400 14px/1.6 Inter,system-ui,sans-serif!important; text-align:start!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-page-help:not([open])>p { display:none!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity { gap:10px!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-toolbar {
+    min-height:38px!important; gap:10px!important; margin:0!important; padding:0!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-toolbar>strong {
+    display:inline-flex!important; align-items:center!important; gap:7px!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity-toolbar>strong>span {
+    min-width:24px!important; padding:2px 6px!important; border-radius:6px!important; background:var(--ad-soft)!important;
+    color:var(--ad-muted)!important; font-weight:500!important; text-align:center!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-code-toggle {
+    display:inline-flex!important; align-items:center!important; gap:6px!important; min-height:38px!important;
+    width:auto!important; height:auto!important; margin:0!important; padding:6px 9px!important;
+    border:1px solid transparent!important; border-radius:8px!important; background:none!important;
+    color:var(--ad-muted)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-code-toggle[aria-pressed=true] {
+    border-color:var(--ad-line)!important; background:var(--ad-soft)!important; color:var(--ad-ink)!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-list {
+    display:block!important; margin:0!important; padding:0 16px!important; border:1px solid var(--ad-line)!important;
+    border-radius:12px!important; background:var(--ad-paper)!important; list-style:none!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-list>li {
+    display:block!important; min-height:0!important; height:auto!important; margin:0!important; padding:12px 0!important;
+    border:0!important; border-bottom:1px solid var(--ad-line)!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-list>li:last-child { border-bottom:0!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-list>li>.ih-admin-event-heading {
+    display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important;
+    min-height:24px!important; min-width:0!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-event-heading>strong {
+    flex:1!important; min-width:0!important; font:600 15px/1.5 Inter,system-ui,sans-serif!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-event-heading>a {
+    display:grid!important; place-items:center!important; flex:none!important; width:40px!important; height:40px!important;
+    margin:-5px -6px -5px 0!important; border-radius:8px!important; color:var(--ad-accent)!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-meta {
+    display:flex!important; justify-content:space-between!important; align-items:baseline!important; flex-wrap:wrap!important;
+    gap:4px 12px!important; margin-top:5px!important; font-size:13px!important; line-height:1.5!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-meta time { font-size:13px!important; line-height:1.5!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-activity-list>li>code { display:block!important; margin-top:7px!important; }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-log-pages {
+    display:flex!important; align-items:center!important; justify-content:space-between!important; gap:8px!important; margin-top:4px!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-log-pages>button {
+    display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:6px!important;
+    min-height:44px!important; padding:8px 10px!important; border:1px solid var(--ad-line)!important; border-radius:9px!important;
+    background:var(--ad-paper)!important; color:var(--ad-ink)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important;
+  }
+  body.ih79-app.ih-admin-mode #root main .ih-admin-log-pages>span { color:var(--ad-muted)!important; font:400 13px/1.5 Inter,system-ui,sans-serif!important; white-space:nowrap!important; }
   body.ih79-app.ih-admin-mode #root main :is(.ih-admin-tab-switcher,.ih-admin-mobile-progress) {
     display:none!important;
   }
@@ -72,27 +162,20 @@
     body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-picker {
       gap:7px!important; margin:0 0 4px!important; font-size:14px!important;
     }
-    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-picker>select {
-      border-color:var(--ad-line)!important; border-radius:12px!important; box-shadow:var(--ad-phone-shadow)!important;
-    }
     body.ih79-app.ih-admin-mode #root main .ih-admin-tabs { display:none!important; }
     body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher {
-      display:grid!important; grid-template-columns:auto minmax(0,1fr)!important; align-items:center!important;
-      gap:12px!important; margin:0 0 18px!important; padding:2px 12px!important; min-height:50px!important;
-      border:1px solid var(--ad-line)!important; border-radius:12px!important;
-      background:var(--ad-paper)!important; box-shadow:var(--ad-phone-shadow)!important;
-    }
-    body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher>span {
-      color:var(--ad-muted)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important;
-    }
-    body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher>select {
-      appearance:auto!important; min-height:46px!important; width:100%!important; padding:10px 0 10px 4px!important;
-      border:0!important; border-radius:0!important; background:transparent!important;
-      color:var(--ad-ink)!important; font:600 16px/1.5 Inter,system-ui,sans-serif!important;
+      display:block!important; width:100%!important; min-width:0!important; margin:0 0 16px!important; padding:0!important;
+      border:0!important; border-radius:0!important; background:var(--ad-paper)!important; box-shadow:none!important;
     }
     body.ih79-app.ih-admin-mode #root main .ih-admin-case-tools>.ih-admin-tab-switcher {
-      position:sticky!important; top:calc(var(--ad-head) + 8px)!important; z-index:20!important;
+      position:sticky!important; top:calc(var(--ad-head) + 6px)!important; z-index:20!important; border-radius:12px!important;
     }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 { font-size:25px!important; line-height:1.3!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-page-heading { margin-bottom:18px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-event-heading>a { width:44px!important; height:44px!important; margin-block:-7px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-code-toggle { min-height:44px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-list { padding-inline:14px!important; border-color:var(--ad-phone-line)!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-activity .ih-admin-activity-list>li { border-bottom-color:var(--ad-phone-line)!important; }
     body.ih79-app.ih-admin-mode #root main .ih-admin-metrics {
       grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:0!important; margin-bottom:20px!important;
       border-color:var(--ad-phone-line)!important; border-radius:14px!important; box-shadow:var(--ad-phone-shadow)!important;

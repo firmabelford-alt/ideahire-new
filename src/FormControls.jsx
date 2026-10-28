@@ -155,7 +155,7 @@ export const FormSelect = forwardRef(function FormSelect({
   }, [open]);
 
   const dialogHost = root.current?.closest('dialog[open]');
-  const menuHost = dialogHost || document.body;
+  const menuHost = dialogHost || (typeof document !== 'undefined' ? document.body : null);
   const topLayerAvailable = typeof HTMLElement !== 'undefined' && typeof HTMLElement.prototype.showPopover === 'function';
   const inlineMenu = Boolean(dialogHost && !topLayerAvailable);
   const name = label || props['aria-label'] || externalLabel || (english ? 'Choose an option' : 'Wybierz opcję');

@@ -41,3 +41,13 @@ Etapy usuwania danych mają na telefonie zwinięte podsumowanie z liczbą zreali
 Karty mają subtelne cienie, spokojniejsze separatory i jednolite odstępy. Pola zachowują czytelny kolor obramowania, rozmiar tekstu 16 px i widoczny fokus. Formularze, historia, instrukcje Lucyny oraz menu administracji otrzymały układ dopasowany do telefonu. Krótkie przejścia kolorów i obrót strzałki są wyłączone przy ustawieniu ograniczenia ruchu.
 
 Kompilacja produkcyjna i 91 testów automatycznych przechodzą. Ten etap zmienia wyłącznie wspólne komponenty i style administracji, bez zmian w wywołaniach serwera, uprawnieniach i operacjach na kontach. Nie przeprowadzono jeszcze wizualnego odbioru zalogowanych ekranów w przeglądarce.
+
+## Korekta po kolejnych zdjęciach
+
+Nagłówki administracji mają wspólny, zwarty układ. Pełne objaśnienia widoku pozostają pod rozwinięciem, a informacja o uprawnieniach jest widoczna obok tytułu. Opis rejestru dotyczy rejestru, zamiast powtarzać opis kolejki sporów. Tekst w obszarze pracy jest jawnie wyrównany do początku wiersza i nie dziedziczy centrowania starych podstron.
+
+Wybór sekcji i wpisu korzysta z istniejącej listy IdeaHire, zamiast wywoływać systemowe okno wyboru telefonu. Zachowane są opcje, liczniki, obsługa klawiatury i zamontowane formularze.
+
+Rejestr ma strony po dziesięć wpisów; wyszukiwanie obejmuje wszystkie wczytane wpisy. Link do sprawy ma postać dostępnego przycisku w wierszu działania. Wykonawca i pełna data są widoczne poniżej. Przełącznik kodów technicznych pozostał dostępny w krótkim przycisku, bez osobnego dużego pola wyboru.
+
+93 testy i kompilacja produkcyjna przechodzą. Porównanie kodu nie wykazało zmian w 314 operacjach na danych w pliku routera ani we wspólnym wywołaniu administracyjnym. Próba podglądu po bezpiecznym logowaniu zatrzymała się na braku potwierdzonego dostępu administracyjnego sesji. Nie nadawano żadnych uprawnień.

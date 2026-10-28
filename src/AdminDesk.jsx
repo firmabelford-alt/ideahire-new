@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronRight, ClipboardList, FileText, History, LayoutDashboard, LockKeyhole, LogOut, Menu, MessageSquare, Search, ShieldCheck, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Check, ChevronDown, ChevronRight, ClipboardList, Code2, FileText, History, LayoutDashboard, LockKeyhole, LogOut, Menu, MessageSquare, Search, ShieldCheck, Users, X } from 'lucide-react';
 import { BrandSignature } from './Brand';
 import { FormSelect } from './FormControls';
 import { adminActionLabel, adminQueueSearch, adminQueuePage } from './AdminDomain';
@@ -40,11 +40,18 @@ export function AdminNavigation({ name, role, onLogout, assistantEnabled = true 
 
 export function AdminTabs({ items, value, onChange, label='Obszary pracy' }) {
   return <>
-    <label className="ih-admin-tab-switcher"><span>Sekcja</span><select aria-label={label} value={value} onChange={event=>onChange(event.target.value)}>{items.map(([id,title,count])=><option key={id} value={id}>{title}{count != null ? ` (${count})` : ''}</option>)}</select></label>
+    <div className="ih-admin-tab-switcher"><FormSelect aria-label={label} value={value} onChange={event=>onChange(event.target.value)}>{items.map(([id,title,count])=><option key={id} value={id}>{title}{count != null ? ` (${count})` : ''}</option>)}</FormSelect></div>
     <nav className="ih-admin-tabs" aria-label={label}>{items.map(([id,title,count]) => <button type="button" key={id} aria-pressed={value === id} onClick={()=>onChange(id)}>{title}{count != null && <span>{count}</span>}</button>)}</nav>
   </>;
 }
 export function AdminPane({ active, children }) { return <div className="ih-admin-pane" hidden={!active}>{children}</div>; }
+
+export function AdminPageHeading({ title, description, meta }) {
+  return <header className="ih-admin-page-heading">
+    <div className="ih-admin-heading-line"><h1>{title}</h1>{meta&&<span className="ih-admin-heading-meta">{meta}</span>}</div>
+    {description&&<details className="ih-admin-page-help"><summary>Informacje o widoku<ChevronDown size={16} aria-hidden="true"/></summary><p>{description}</p></details>}
+  </header>;
+}
 
 export function AdminFilterBar({ search, onSearch, placeholder='Szukaj sprawy lub użytkownika', filter, onFilter, options, label='Widok' }) {
   return <div className={"ih-admin-filterbar" + (options ? "" : " is-search-only")}><label className="ih-admin-search"><Search size={19} aria-hidden="true" /><span className="ih-admin-sr">{placeholder}</span><input type="search" value={search} onChange={event=>onSearch(event.target.value)} placeholder={placeholder} maxLength={200} />{search && <button type="button" onClick={()=>onSearch('')} aria-label="Wyczyść wyszukiwanie"><X size={18} /></button>}</label>{options && <FormSelect label={label} value={filter} onChange={event=>onFilter(event.target.value)}>{options.map(([id,title])=><option value={id} key={id}>{title}</option>)}</FormSelect>}</div>;
@@ -68,7 +75,7 @@ export function AdminQueue({ items, selectedId, onSelect, children, label='Kolej
   useEffect(()=>setPage(Math.max(0,Math.floor(selectedIndex/6))),[selectedId,selectedIndex]);
   const result=adminQueuePage(items,page);
   return <div className="ih-admin-queue-layout">
-    <label className="ih-admin-mobile-picker"><span>{label} <span>({items.length})</span></span><select value={selectedId || ''} onChange={event=>onSelect(event.target.value)}>{items.map(item=><option key={item.id} value={item.id}>{[item.number,item.title].filter(Boolean).join(' · ')}</option>)}</select></label>
+    <div className="ih-admin-mobile-picker"><FormSelect label={`${label} (${items.length})`} value={selectedId || ''} onChange={event=>onSelect(event.target.value)}>{items.map(item=><option key={item.id} value={item.id}>{[item.number,item.title].filter(Boolean).join(' · ')}</option>)}</FormSelect></div>
     <aside className="ih-admin-queue-list" aria-label={label}>
       <div className="ih-admin-queue-caption"><strong>{label}</strong><span>{items.length}</span></div>
       <div className="ih-admin-queue-rows">{result.rows.map(item=><button type="button" key={item.id} onClick={()=>onSelect(item.id)} aria-current={selectedId===item.id ? 'true' : undefined}><span className="ih-admin-queue-number">{item.number}</span><strong>{item.title}</strong><span>{item.subtitle}</span><span className={'ih-admin-queue-meta'+(item.urgent ? ' is-urgent' : '')}>{item.meta}</span></button>)}</div>
@@ -83,9 +90,20 @@ export function AdminCaseRow({ to, title, number, status, assignment, budget, op
 }
 
 export function AdminActivityLog({ rows, actorName, formatDate }) {
-  const [search,setSearch]=useState(''),[showCodes,setShowCodes]=useState(false);
+  const [search,setSearch]=useState(''),[showCodes,setShowCodes]=useState(false),[page,setPage]=useState(0);
   const visible=rows.filter(row=>adminQueueSearch({title:adminActionLabel(row.action),subtitle:actorName(row),number:row.action,search:formatDate(row.created_at)},search));
-  return <section className="ih-admin-activity"><AdminFilterBar search={search} onSearch={setSearch} placeholder="Szukaj działania lub administratora"/><div className="ih-admin-activity-toolbar"><strong>Liczba wpisów: {visible.length}</strong><label><input type="checkbox" checked={showCodes} onChange={event=>setShowCodes(event.target.checked)}/><span>Kody techniczne</span></label></div>{visible.length===0?<p className="ih-admin-activity-empty">{rows.length?'Brak wpisów pasujących do wyszukiwania.':'Brak zapisanych działań.'}</p>:<ol className="ih-admin-activity-list">{visible.map(row=><li key={row.id}><div><strong>{adminActionLabel(row.action)}</strong>{showCodes&&<code>{row.action}</code>}</div><div className="ih-admin-activity-meta"><span>{actorName(row)}</span><time dateTime={row.created_at}>{formatDate(row.created_at)}</time></div>{row.dispute_id&&<Link to={'/disputes/'+row.dispute_id}>Otwórz sprawę<ArrowRight size={16} aria-hidden="true"/></Link>}</li>)}</ol>}</section>;
+  const result=adminQueuePage(visible,page,10);
+  return <section className="ih-admin-activity">
+    <AdminFilterBar search={search} onSearch={value=>{setSearch(value);setPage(0);}} placeholder="Szukaj w rejestrze"/>
+    <div className="ih-admin-activity-toolbar"><strong>Wpisy <span>{visible.length}</span></strong><button type="button" className="ih-admin-code-toggle" aria-label={showCodes?'Ukryj kody techniczne':'Pokaż kody techniczne'} aria-pressed={showCodes} onClick={()=>setShowCodes(old=>!old)}><Code2 size={17} aria-hidden="true"/>Kody</button></div>
+    {visible.length===0?<p className="ih-admin-activity-empty">{rows.length?'Brak wpisów pasujących do wyszukiwania.':'Brak zapisanych działań.'}</p>:<>
+      <ol className="ih-admin-activity-list">{result.rows.map(row=><li key={row.id}>
+        <div className="ih-admin-event-heading"><strong>{adminActionLabel(row.action)}</strong>{row.dispute_id&&<Link to={'/disputes/'+row.dispute_id} aria-label="Otwórz powiązaną sprawę" title="Otwórz powiązaną sprawę"><ArrowUpRight size={19} aria-hidden="true"/></Link>}</div>
+        <div className="ih-admin-activity-meta"><span>{actorName(row)}</span><time dateTime={row.created_at}>{formatDate(row.created_at)}</time></div>{showCodes&&<code>{row.action}</code>}
+      </li>)}</ol>
+      {result.last>0&&<nav className="ih-admin-log-pages" aria-label="Strony rejestru"><button type="button" disabled={result.current===0} onClick={()=>setPage(result.current-1)}><ArrowLeft size={17} aria-hidden="true"/>Poprzednie</button><span>{result.start+1}–{Math.min(visible.length,result.start+result.rows.length)} z {visible.length}</span><button type="button" disabled={result.current===result.last} onClick={()=>setPage(result.current+1)}>Następne<ArrowRight size={17} aria-hidden="true"/></button></nav>}
+    </>}
+  </section>;
 }
 
 function flatten(children) { return React.Children.toArray(children).flatMap(child => child?.type === React.Fragment ? flatten(child.props.children) : [child]).filter(child=>typeof child !== 'string' || child.trim()); }

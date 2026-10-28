@@ -10,7 +10,7 @@ import { adminPrivacyFilter, orderAdminRequests, adminQueueSearch, adminActionLa
 const compiled = new URL(`.admin-test-${process.pid}.mjs`,import.meta.url);
 const bundle = await build({stdin:{contents:"export * from '../src/AdminDesk.jsx'; export * from '../src/LucynaDock.jsx'; export {default as AdminLucynaDesk, ADMIN_GUIDES} from '../src/AdminLucyna.jsx'; export {getSubpage} from '../src/Subpages.jsx';",resolveDir:fileURLToPath(new URL('.',import.meta.url))},bundle:true,platform:'node',format:'esm',packages:'external',loader:{'.css':'empty'},write:false,logLevel:'silent'});
 await writeFile(compiled,bundle.outputFiles[0].text);
-const {AdminNavigation,AdminTabs,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
+const {AdminNavigation,AdminPageHeading,AdminTabs,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
 const render=(Component,props={},path='/admin')=>{
  const old=console.error; console.error=(...args)=>{if(!String(args[0]).includes('useLayoutEffect does nothing on the server'))old(...args);};
  try{return renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:[path]},React.createElement(Component,props)));}finally{console.error=old;}
@@ -62,10 +62,19 @@ test('case tools keep forms mounted across tabs and lead with status instead of 
 test('phone section selection offers every tool and preserves the desktop selection and counts',()=>{
  const html=render(AdminTabs,{items:[['status','Status',0],['reply','Wiadomość',3],['history','Historia']],value:'reply',onChange(){},label:'Narzędzia sprawy'});
  assert.equal((html.match(/<option /g)||[]).length,3);
- assert.match(html,/<select[^>]*aria-label="Narzędzia sprawy"/);
+ assert.match(html,/<button[^>]*role="combobox"[^>]*aria-label="Narzędzia sprawy"/);
+ assert.match(html,/<select[^>]*tabindex="-1"[^>]*aria-hidden="true"/);
  assert.match(html,/<option value="reply" selected="">Wiadomość \(3\)<\/option>/);
  assert.match(html,/<option value="status">Status \(0\)<\/option>/);
  assert.match(html,/<button[^>]*aria-pressed="true"[^>]*>Wiadomość/);
+});
+test('compact headings retain permission context and the complete explanation in a closed disclosure',()=>{
+ const html=render(AdminPageHeading,{title:'Moderacja',meta:'Ograniczenia do 30 dni',description:'Każda decyzja wymaga faktów i uzasadnienia.'});
+ assert.match(html,/<h1>Moderacja<\/h1>/);
+ assert.match(html,/Ograniczenia do 30 dni/);
+ assert.match(html,/<details class="ih-admin-page-help"><summary>/);
+ assert.match(html,/<p>Każda decyzja wymaga faktów i uzasadnienia.<\/p>/);
+ assert.doesNotMatch(html,/admin-page-header|<details[^>]* open/);
 });
 test('public dispute participants retain the original content without staff work tabs',()=>{
  const html=render(AdminCaseTools,{disabled:true,children:React.createElement('section',null,'Original content')});
@@ -134,6 +143,18 @@ test('activity rows show the operation, actor and date without a technical discl
  assert.match(html,/Administrator Sample/);
  assert.match(html,/href="\/disputes\/case-1"/);
  assert.doesNotMatch(html,/<details|<code/);
+ assert.match(html,/aria-label="Otwórz powiązaną sprawę"/);
+ assert.match(html,/aria-label="Pokaż kody techniczne" aria-pressed="false"/);
+});
+test('the activity register shows ten records per page while all loaded records remain searchable and pageable',()=>{
+ const rows=Array.from({length:25},(_,i)=>({id:'event-'+i,action:'review_started',created_at:'2026-10-28T10:00:00Z'}));
+ const html=render(AdminActivityLog,{rows,actorName:row=>'Actor '+row.id,formatDate:()=> '28.10.2026, 11:00'});
+ assert.equal((html.match(/<li>/g)||[]).length,10);
+ assert.match(html,/1–10 z 25/);
+ assert.match(html,/Strony rejestru/);
+ assert.match(html,/Actor event-9/);
+ assert.doesNotMatch(html,/Actor event-10/);
+ assert.deepEqual([0,1,2].flatMap(page=>adminQueuePage(rows,page,10).rows.map(row=>row.id)),rows.map(row=>row.id));
 });
 test('compact admin case rows preserve the target, status and financial context',()=>{
  const html=render(AdminCaseRow,{to:'/disputes/case-1',title:'Project title',number:'IH-000001',status:React.createElement('span',null,'Decision issued'),assignment:'Assigned',budget:'500 PLN',opened:'28.10.2026'});

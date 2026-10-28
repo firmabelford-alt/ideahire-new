@@ -40,7 +40,7 @@ import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
-import { AdminNavigation, AdminTabs, AdminPane, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
+import { AdminNavigation, AdminPageHeading, AdminTabs, AdminPane, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
 import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./AdminDomain";
 import AdminLucynaDesk from "./AdminLucyna";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
@@ -23230,16 +23230,7 @@ function AdminJobs() {
       <AdminNavbar />
 
       <main className="admin-shell admin-readonly-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027">
-        <header className="admin-page-header">
-          <div>
-            <span className="section-label">Tryb tylko do odczytu</span>
-            <h1>Zlecenia użytkowników</h1>
-            <p>
-              Administracja może sprawdzać treść i cenę zleceń, ale nie może ich tworzyć, edytować ani usuwać.
-            </p>
-          </div>
-          <span className="admin-readonly-badge">Tylko podgląd</span>
-        </header>
+        <AdminPageHeading title="Ogłoszenia" meta="Tylko podgląd" description="Administracja może sprawdzać treść i cenę zleceń, ale nie może ich tworzyć, edytować ani usuwać."/>
 
         <section className="admin-catalog-toolbar" aria-label="Wyszukiwanie zleceń">
           <label className="admin-search-field">
@@ -23481,16 +23472,7 @@ function AdminEvidenceMessages() {
       <AdminNavbar />
 
       <main className="admin-shell admin-readonly-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027">
-        <header className="admin-page-header">
-          <div>
-            <span className="section-label">Prywatność i dowody</span>
-            <h1>Wiadomości w sporach</h1>
-            <p>
-              Widoczne są wyłącznie wiadomości, które uczestnik świadomie dołączył jako dowód. Administracja nie otrzymuje dostępu do całych rozmów.
-            </p>
-          </div>
-          <span className="admin-readonly-badge">Tylko podgląd</span>
-        </header>
+        <AdminPageHeading title="Wiadomości dowodowe" meta="Tylko podgląd" description="Widoczne są wyłącznie wiadomości, które uczestnik świadomie dołączył jako dowód. Administracja nie otrzymuje dostępu do całych rozmów."/>
 
         <section className="admin-catalog-toolbar is-single" aria-label="Wyszukiwanie wiadomości">
           <label className="admin-search-field">
@@ -24612,19 +24594,8 @@ function AdminModeration() {
       <AdminNavbar />{adminDialog.element}
 
       <main className="admin-shell moderation-admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadModeration(false).catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
-        <header className="admin-page-header">
-          <div>
-            <span className="section-label">Moderacja i bezpieczeństwo</span>
-            <h1>Ograniczenia kont i odwołania</h1>
-            <p>
-              Każda decyzja wymaga faktów, podstawy regulaminowej, określonego
-              czasu oraz ręcznej oceny proporcjonalności.
-            </p>
-          </div>
-          <span className="admin-role-badge">
-            {staffRole === "owner" ? "Właściciel · pełne uprawnienia" : "Administrator — do 30 dni"}
-          </span>
-        </header><AdminTabs value={adminTab} onChange={setAdminTab} items={[["reports","Zgłoszenia",openContentReports.length],["decision","Konto i decyzja"],["appeals","Odwołania",appeals.filter(item=>item.status==="submitted").length+contentReportAppeals.filter(item=>item.status==="submitted").length],["history","Historia"]]} />
+        <AdminPageHeading title="Moderacja" meta={staffRole === "owner" ? "Pełne uprawnienia" : "Ograniczenia do 30 dni"} description="Każda decyzja wymaga faktów, podstawy regulaminowej, określonego czasu oraz ręcznej oceny proporcjonalności."/>
+        <AdminTabs value={adminTab} onChange={setAdminTab} items={[["reports","Zgłoszenia",openContentReports.length],["decision","Konto i decyzja"],["appeals","Odwołania",appeals.filter(item=>item.status==="submitted").length+contentReportAppeals.filter(item=>item.status==="submitted").length],["history","Historia"]]} />
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
@@ -27245,19 +27216,7 @@ function AdminPrivacyRequests() {
       <AdminNavbar />{adminDialog.element}
 
       <main className="admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadAdminPrivacyRequests().catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
-        <header className="admin-page-header">
-          <div>
-            <span className="section-label">Ochrona danych</span>
-            <h1>{erasureOnly ? "Usuwanie danych i kont" : "Wnioski RODO"}</h1>
-            <p>
-              Kontrolowana kolejka wniosków dotyczących praw użytkownika
-              oraz technicznej i organizacyjnej analizy ochrony danych.
-            </p>
-          </div>
-          <span className="admin-role-badge">
-            {staffRole === "owner" ? "Właściciel techniczny" : "Administrator"}
-          </span>
-        </header>
+        <AdminPageHeading title={erasureOnly ? "Usuwanie danych" : "Wnioski RODO"} meta={staffRole === "owner" ? "Właściciel" : "Administrator"} description="Kontrolowana kolejka wniosków dotyczących praw użytkownika oraz technicznej i organizacyjnej analizy ochrony danych."/>
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
@@ -28200,18 +28159,11 @@ function AdminPanel() {
       <AdminNavbar />{adminDialog.element}
 
       <main className="admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadAdminData().catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
-        <header className="admin-page-header">
-          <div>
-            <span className="section-label">IdeaHire · administracja</span>
-            <h1>{({queue:"Sprawy i spory",access:"Dostęp zespołu",activity:"Rejestr działań",security:"Zabezpieczenia"})[adminView] || "Sprawy i spory"}</h1>
-            <p>
-              Kolejka sporów, udokumentowane decyzje i kontrola dostępu administratorów.
-            </p>
-          </div>
-          <span className="admin-role-badge">
-            {staffRole === "owner" ? "Właściciel" : "Administrator"}
-          </span>
-        </header>
+        <AdminPageHeading
+          title={({queue:"Sprawy i spory",access:"Dostęp zespołu",activity:"Rejestr działań",security:"Zabezpieczenia"})[adminView] || "Sprawy i spory"}
+          meta={staffRole === "owner" ? "Właściciel" : "Administrator"}
+          description={({queue:"Sprawdź status sporu, opiekuna i ustalenia. Otwórz sprawę, aby przejrzeć dowody, zapisać decyzję lub obsłużyć odwołanie.",access:"Nadawaj i odbieraj uprawnienia administratorów. Każda zmiana wymaga potwierdzenia i jest zapisywana w rejestrze działań.",activity:"Sprawdź, kto i kiedy wykonał działanie. Wyszukuj w całym rejestrze, otwieraj powiązane sprawy i w razie potrzeby włącz kody techniczne."})[adminView] || "Narzędzia administracji IdeaHire."}
+        />
 
         {message && <p className="dispute-page-message" role="status">{message}</p>}
 
