@@ -1,0 +1,39 @@
+@layer ideahireHeadings {
+  html:root body dialog.ih20-calendar {
+    position:fixed!important; inset:0!important; box-sizing:border-box!important;
+    width:min(380px,calc(100vw - 24px))!important; max-width:calc(100vw - 24px)!important;
+    height:auto!important; min-height:0!important; max-height:calc(100dvh - 32px)!important;
+    margin:auto!important; padding:16px!important; overflow-y:auto!important; overflow-x:hidden!important;
+    overscroll-behavior:contain!important; touch-action:pan-y!important;
+    border:1px solid var(--v-line,#c9d8d6)!important; border-radius:16px!important;
+    background:var(--v-surface,#fff)!important; color:var(--v-ink,#172e30)!important;
+    font:500 15px/1.5 Inter,system-ui,sans-serif!important;
+  }
+  html:root body dialog.ih20-calendar:not([open]) { display:none!important; }
+  html:root body dialog.ih20-calendar[open] { display:block!important; }
+  html:root body dialog.ih20-calendar::backdrop { background:#0006!important; }
+  html:root body dialog.ih20-calendar header { gap:12px!important; margin-bottom:14px!important; }
+  html:root body dialog.ih20-calendar header strong { font:650 18px/1.4 Inter,system-ui,sans-serif!important; }
+  html:root body dialog.ih20-calendar header>button { width:44px!important; height:44px!important; flex:none!important; }
+  html:root body dialog.ih20-calendar .ih20-calendar-navigation {
+    grid-template-columns:36px minmax(0,1fr) 84px 36px!important; gap:6px!important; align-items:center!important;
+  }
+  html:root body dialog.ih20-calendar .ih-control-trigger { min-height:46px!important; padding:9px 8px!important; gap:4px!important; font-size:14px!important; }
+  html:root body dialog.ih20-calendar .ih-control-trigger>svg { width:14px!important; height:14px!important; flex-basis:14px!important; }
+  html:root body dialog.ih20-calendar .ih-control-options[data-inline=true]>.ih-control-option { padding-inline:6px!important; gap:6px!important; font-size:14px!important; }
+  html:root body dialog.ih20-calendar .ih-control-options[data-inline=true] .ih-control-option>svg { width:14px!important; height:14px!important; flex-basis:14px!important; }
+  html:root body dialog.ih20-calendar .ih20-calendar-weekdays { font-size:12px!important; margin:0 0 5px!important; }
+  html:root body dialog.ih20-calendar .ih21-calendar-row { gap:2px!important; }
+  html:root body dialog.ih20-calendar .ih20-calendar-days button {
+    width:100%!important; height:44px!important; min-height:44px!important; margin:0!important;
+    font:500 15px/1.5 Inter,system-ui,sans-serif!important;
+  }
+  html:root body dialog.ih20-calendar footer { margin-top:12px!important; }
+  @media(max-width:350px) {
+    html:root body dialog.ih20-calendar .ih20-calendar-navigation { grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important; }
+    html:root body dialog.ih20-calendar .ih-date-month-select { grid-column:1!important; grid-row:1!important; }
+    html:root body dialog.ih20-calendar .ih-date-year-select { grid-column:2!important; grid-row:1!important; }
+    html:root body dialog.ih20-calendar .ih20-calendar-navigation>button:first-child { grid-column:1!important; grid-row:2!important; }
+    html:root body dialog.ih20-calendar .ih20-calendar-navigation>button:last-child { grid-column:2!important; grid-row:2!important; }
+  }
+}

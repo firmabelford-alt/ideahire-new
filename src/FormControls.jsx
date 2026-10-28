@@ -21,7 +21,7 @@ function readOptions(children, inheritedDisabled = false, group = '') {
    same themed surface everywhere, including forms and portalled dialogs. */
 export const FormSelect = forwardRef(function FormSelect({
   id, label, children, value, defaultValue, onChange, onBlur, onInvalid,
-  disabled = false, required = false, className = '', style, ...props
+  disabled = false, required = false, className = '', style, menuMinWidth = 0, ...props
 }, forwardedRef) {
   const generatedId = useId();
   const controlId = id || `ih-select-${generatedId}`;
@@ -64,13 +64,13 @@ export const FormSelect = forwardRef(function FormSelect({
     const upward = below < Math.min(desired, 180) && above > below;
     const available = Math.max(44, upward ? above : below);
     const listHeight = Math.min(desired, available);
-    const listWidth = Math.max(1, Math.min(rect.width, width - margin * 2));
+    const listWidth = Math.max(1, Math.min(Math.max(rect.width,Number(menuMinWidth)||0), width - margin * 2));
     setPosition({
       left: Math.max(x + margin, Math.min(rect.left + (rect.width - listWidth) / 2, x + width - margin - listWidth)),
       top: upward ? Math.max(y + margin, rect.top - gap - listHeight) : rect.bottom + gap,
       width: listWidth, height: listHeight,
     });
-  }, [options.length]);
+  }, [options.length,menuMinWidth]);
 
   function show(last = false) {
     if (disabled || trigger.current?.matches(':disabled') || !enabled.length) return;
@@ -120,26 +120,27 @@ export const FormSelect = forwardRef(function FormSelect({
     form?.addEventListener('reset', reset);
     return () => form?.removeEventListener('reset', reset);
   }, [defaultValue, options[0]?.value]);
-  useLayoutEffect(() => {
-    if (!open) return;
-    const active = document.getElementById(`${controlId}-option-${focused}`);
-    if (active && menu.current) {
-      const item = active.getBoundingClientRect(), list = menu.current.getBoundingClientRect();
-      if (item.top < list.top + 6) menu.current.scrollTop += item.top - list.top - 6;
-      else if (item.bottom > list.bottom - 6) menu.current.scrollTop += item.bottom - list.bottom + 6;
-    }
-  }, [open, focused, controlId]);
   useEffect(() => {
     if (!open) return;
     const outside = event => { if (!root.current?.contains(event.target) && !menu.current?.contains(event.target)) close(); };
+    // Touching a non-focusable option may blur the trigger to the body or
+    // modal before its click. Only an actual focus move to another control
+    // dismisses the list; pointerdown handles taps outside it.
+    const focusOutside = event => {
+      const modal = root.current?.closest('dialog[open], [role="dialog"][aria-modal="true"]');
+      if (event.target === document.body || event.target === modal) return;
+      outside(event);
+    };
     const scroll = event => { if (!menu.current?.contains(event.target)) locate(); };
     document.addEventListener('pointerdown', outside);
+    document.addEventListener('focusin', focusOutside);
     window.addEventListener('scroll', scroll, true);
     window.addEventListener('resize', locate);
     window.visualViewport?.addEventListener('resize', locate);
     window.visualViewport?.addEventListener('scroll', locate);
     return () => {
       document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('focusin', focusOutside);
       window.removeEventListener('scroll', scroll, true);
       window.removeEventListener('resize', locate);
       window.visualViewport?.removeEventListener('resize', locate);
@@ -154,7 +155,17 @@ export const FormSelect = forwardRef(function FormSelect({
     return () => { try { if (popup.matches(':popover-open')) popup.hidePopover(); } catch { /* Removed popup. */ } };
   }, [open]);
 
-  const dialogHost = root.current?.closest('dialog[open]');
+  // Measure after showPopover(): a closed popover has no usable layout box.
+  useLayoutEffect(() => {
+    if (!open || !menu.current) return;
+    const active = document.getElementById(`${controlId}-option-${focused}`);
+    if (!active) return;
+    const item = active.getBoundingClientRect(), list = menu.current.getBoundingClientRect();
+    if (item.top < list.top + 6) menu.current.scrollTop += item.top - list.top - 6;
+    else if (item.bottom > list.bottom - 6) menu.current.scrollTop += item.bottom - list.bottom + 6;
+  }, [open, focused, controlId]);
+
+  const dialogHost = root.current?.closest('dialog[open], [role="dialog"][aria-modal="true"]');
   const menuHost = dialogHost || (typeof document !== 'undefined' ? document.body : null);
   const topLayerAvailable = typeof HTMLElement !== 'undefined' && typeof HTMLElement.prototype.showPopover === 'function';
   const inlineMenu = Boolean(dialogHost && !topLayerAvailable);
@@ -177,7 +188,7 @@ export const FormSelect = forwardRef(function FormSelect({
       aria-expanded={open} aria-controls={open ? `${controlId}-listbox` : undefined} aria-haspopup="listbox" aria-required={required || undefined}
       aria-invalid={invalid || props['aria-invalid']} aria-label={props['aria-labelledby'] ? undefined : name} aria-labelledby={props['aria-labelledby']}
       aria-describedby={description} aria-activedescendant={open ? `${controlId}-option-${focused}` : undefined}
-      onKeyDown={keyboard} onClick={() => open ? close() : show()} onBlur={event => { if (!menu.current?.contains(event.relatedTarget)) close(); onBlur?.(event); }}>
+      onKeyDown={keyboard} onClick={() => open ? close() : show()} onBlur={onBlur}>
       <span>{selected?.label || (english ? 'Choose' : 'Wybierz')}</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
     </button>
     <select {...props} ref={assignField} id={`${controlId}-native`} className="ih-control-native" value={currentValue} disabled={disabled} required={required} tabIndex={-1} aria-hidden="true"

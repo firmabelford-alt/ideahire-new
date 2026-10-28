@@ -7,6 +7,7 @@ import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { BrandLogo } from "./Brand";
 import './InterfaceRefinements.css';
+import './DatePicker.css';
 
 // Validate stored/user-supplied links again at the point of navigation.
 export function getSafeWebUrl(value, { allowRelative = false } = {}) {
@@ -519,10 +520,10 @@ export function CommissionStory() {
 export function IdeaHireDateField({ type = "date", value = "", onChange, min, max, id, name, required, disabled, autoComplete, ...props }) {
   const generated = useId();
   const fieldId = id || generated;
-  const root = useRef(null);
   const panel = useRef(null);
   const trigger = useRef(null);
   const focusPending = useRef(false);
+  const backdropPressed = useRef(false);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [focusedDay, setFocusedDay] = useState("");
@@ -573,6 +574,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     return candidate;
   }
   function close() {
+    panel.current?.close?.();
     setOpen(false);
     if (trigger.current?.isConnected) trigger.current.focus({ preventScroll: true });
   }
@@ -629,6 +631,11 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     setMonth(next.slice(0, 7));
     focusPending.current = true;
   }
+  useLayoutEffect(() => {
+    if (!open || !panel.current || panel.current.open) return;
+    if (typeof panel.current.showModal === "function") panel.current.showModal();
+    else panel.current.setAttribute("open", "");
+  }, [open]);
   useEffect(() => {
     if (!open || !focusPending.current) return;
     focusPending.current = false;
@@ -642,12 +649,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     const previousOverflow = document.body.style.getPropertyValue("overflow");
     const previousPriority = document.body.style.getPropertyPriority("overflow");
     document.body.style.setProperty("overflow", "hidden", "important");
-    function outside(event) {
-      if (!panel.current?.contains(event.target) && !root.current?.contains(event.target)) close();
-    }
-    document.addEventListener("pointerdown", outside);
     return () => {
-      document.removeEventListener("pointerdown", outside);
       if (previousOverflow) document.body.style.setProperty("overflow", previousOverflow, previousPriority);
       else document.body.style.removeProperty("overflow");
     };
@@ -658,7 +660,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     const key = `${month}-${pad(day)}`;
     return { day, key, unavailable: !rangeAvailable || key < lowerDate || key > upperDate };
   });
-  return <span className="ih20-date-field" ref={root}>
+  return <span className="ih20-date-field">
     <input {...props} ref={trigger} id={fieldId} type="text" value={format(value)} readOnly disabled={disabled} autoComplete={autoComplete}
       placeholder={props.placeholder || (isTime ? "Wybierz datę i godzinę" : "Wybierz datę")}
       aria-haspopup="dialog" aria-expanded={open} aria-required={required || undefined} aria-controls={open ? `${fieldId}-calendar` : undefined}
@@ -666,24 +668,30 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     <input className="ih20-date-validator" type={type} name={name} value={value} min={min} max={max} required={required} disabled={disabled}
       tabIndex={-1} aria-hidden="true" onChange={onChange} onInvalid={event => { event.preventDefault(); show(); }} />
     <span className="ih20-date-icon" aria-hidden="true"><MarketIcon kind="calendar" /></span>
-    {open && createPortal(<div className="ih20-calendar-backdrop" onClick={event => { if (event.target === event.currentTarget) close(); }}>
-      <section ref={panel} id={`${fieldId}-calendar`} className="ih20-calendar" role="dialog" aria-modal="true" aria-labelledby={`${fieldId}-calendar-title`}
-        onKeyDown={event => {
+    {open && createPortal(<dialog ref={panel} id={`${fieldId}-calendar`} className="ih20-calendar" aria-modal="true" aria-labelledby={`${fieldId}-calendar-title`}
+        onCancel={event=>{event.preventDefault();close();}} onClose={()=>setOpen(false)}
+        onPointerDown={event=>{
+          const rect=event.currentTarget.getBoundingClientRect();
+          backdropPressed.current=event.target===event.currentTarget && (event.clientX<rect.left || event.clientX>rect.right || event.clientY<rect.top || event.clientY>rect.bottom);
+        }}
+        onPointerCancel={()=>{backdropPressed.current=false;}}
+        onClick={event=>{
+          // Portals still bubble through the React label/form tree.
           event.stopPropagation();
-          if (event.key === "Escape") { event.preventDefault(); close(); }
-          if (event.key === "Tab") {
-            const controls = [...panel.current.querySelectorAll('button:not(:disabled):not([tabindex="-1"])')];
-            if (event.shiftKey && (document.activeElement === controls[0] || !controls.includes(document.activeElement))) { event.preventDefault(); controls.at(-1)?.focus(); }
-            else if (!event.shiftKey && (document.activeElement === controls.at(-1) || !controls.includes(document.activeElement))) { event.preventDefault(); controls[0]?.focus(); }
-          }
+          const pressed=backdropPressed.current;
+          backdropPressed.current=false;
+          if(!pressed) return;
+          if(event.target!==event.currentTarget) return;
+          const rect=event.currentTarget.getBoundingClientRect();
+          if(event.clientX<rect.left || event.clientX>rect.right || event.clientY<rect.top || event.clientY>rect.bottom) close();
         }}>
         <header><strong id={`${fieldId}-calendar-title`}>{caption}</strong><button type="button" onClick={close} aria-label="Zamknij kalendarz">×</button></header>
         <div className="ih20-calendar-navigation">
           <button type="button" onClick={() => moveMonth(-1)} disabled={!rangeAvailable || month <= lowerMonth} aria-label="Poprzedni miesiąc">‹</button>
-          <FormSelect className="ih-date-month-select" aria-label="Miesiąc" value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
+          <FormSelect className="ih-date-month-select" aria-label="Miesiąc" menuMinWidth={180} value={monthNumber} onChange={event => changeMonth(`${year}-${pad(event.target.value)}`)}>
             {months.map((label, index) => <option value={index + 1} key={label} disabled={`${year}-${pad(index + 1)}` < lowerMonth || `${year}-${pad(index + 1)}` > upperMonth}>{label}</option>)}
           </FormSelect>
-          <FormSelect className="ih-date-year-select" aria-label="Rok" value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
+          <FormSelect className="ih-date-year-select" aria-label="Rok" menuMinWidth={128} value={year} onChange={event => changeMonth(`${event.target.value}-${pad(monthNumber)}`)}>
             {Array.from({ length: Math.max(0, maxYear - minYear + 1) }, (_, index) => <option value={maxYear - index} key={index}>{maxYear - index}</option>)}
           </FormSelect>
           <button type="button" onClick={() => moveMonth(1)} disabled={!rangeAvailable || month >= upperMonth} aria-label="Następny miesiąc">›</button>
@@ -708,8 +716,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
         </div>}
         {(!rangeAvailable || (isTime && !valid(draft))) && <p className="ih21-calendar-hint" role="status">{!rangeAvailable ? "Brak dostępnych dat w tym zakresie." : `Wybierz termin${min ? ` od ${format(min)}` : ""}${max ? ` do ${format(max)}` : ""}.`}</p>}
         <footer>{!required && <button type="button" onClick={() => commit("")}>Wyczyść</button>}<button type="button" onClick={close}>Anuluj</button>{isTime && <button type="button" className="is-primary" disabled={!valid(draft)} onClick={() => commit(draft)}>Wybierz</button>}</footer>
-      </section>
-    </div>, document.body)}
+    </dialog>, document.body)}
   </span>;
 }
 
