@@ -347,6 +347,9 @@ export function WorkspaceWork({ inbox }) {
   const params = new URLSearchParams(location.search);
   const filter = ['client', 'contractor'].includes(params.get('role')) ? params.get('role') : 'all';
   const search = params.get('q') || '';
+  const unreadOnly = params.get('unread') === '1';
+  const sort = ['oldest', 'name'].includes(params.get('sort')) ? params.get('sort') : 'recent';
+  const requestedPage = /^[1-9]\d{0,5}$/.test(params.get('page') || '') ? Number(params.get('page')) : 1;
   const en = useSitePreferences().language === 'en';
   const openProject = useWorkspaceListNavigation(inbox?.loading);
 
@@ -356,16 +359,28 @@ export function WorkspaceWork({ inbox }) {
   const providing = rows.filter(item => item.contractor_id === inbox?.user?.id).length;
   const visible = useMemo(() => rows.filter(item =>
     (filter === 'all' || (filter === 'client' ? item.client_id : item.contractor_id) === inbox?.user?.id) &&
-    (!search.trim() || [item.job?.title, item.otherProfile?.name, item.lastMessage?.content].filter(Boolean).join(' ').toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))),
-    [rows, filter, search, inbox?.user?.id]);
+    (!unreadOnly || item.isUnread) &&
+    (!search.trim() || [item.job?.title, item.otherProfile?.name, item.lastMessage?.content].filter(Boolean).join(' ').toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())))
+    .sort((a, b) => {
+      const date = item => new Date(item.sortDate || item.created_at || 0).getTime() || 0;
+      const recent = date(b) - date(a);
+      if (sort === 'name') return (a.job?.title || t('Zapytanie o współpracę', 'Project inquiry')).localeCompare(b.job?.title || t('Zapytanie o współpracę', 'Project inquiry'), en ? 'en' : 'pl', { sensitivity: 'base', numeric: true }) || recent;
+      return sort === 'oldest' ? -recent : recent;
+    }), [rows, filter, search, unreadOnly, sort, en, inbox?.user?.id]);
+  const pageSize = 6;
+  const pageCount = Math.max(1, Math.ceil(visible.length / pageSize));
+  const page = Math.min(requestedPage, pageCount);
   function update(key, value) {
     const next = new URLSearchParams(location.search);
-    if (value && value !== 'all') next.set(key, value); else next.delete(key);
+    if (key !== 'page') next.delete('page');
+    if (value && value !== 'all' && !(key === 'sort' && value === 'recent') && !(key === 'page' && value === 1)) next.set(key, value); else next.delete(key);
     navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
   }
-  return <WorkDesk rows={rows} visible={visible} user={inbox?.user} filter={filter} search={search}
+  return <WorkDesk rows={rows} visible={visible.slice((page - 1) * pageSize, page * pageSize)} user={inbox?.user} filter={filter} search={search}
+    unreadOnly={unreadOnly} sort={sort} total={visible.length} page={page} pageCount={pageCount} pageSize={pageSize}
     counts={{ unread, hiring, providing }} loading={inbox?.loading} error={inbox?.errorMessage}
     onRole={value => update('role', value)} onSearch={value => update('q', value)}
+    onUnread={() => update('unread', unreadOnly ? '' : '1')} onSort={value => update('sort', value)} onPage={value => update('page', value)}
     onReset={() => navigate('/work', { replace: true })} onOpen={openProject}
     loader={<WorkspaceLoading />} en={en} />;
 }
