@@ -141,6 +141,7 @@ Deno.serve(async (request) => {
       caseId?: unknown;
       authorizeAndExecute?: unknown;
       ownerConfirmation?: unknown;
+      executionConfirmation?: unknown;
       expectedActionType?: unknown;
     };
 
@@ -170,6 +171,8 @@ Deno.serve(async (request) => {
         ? requestBody.ownerConfirmation.trim()
         : "";
     const expectedActionType = requestBody.expectedActionType;
+    const executionConfirmation = typeof requestBody.executionConfirmation === "string"
+      ? requestBody.executionConfirmation.trim() : ownerConfirmation;
 
     if (!UUID_PATTERN.test(caseId)) {
       return jsonResponse(
@@ -261,6 +264,10 @@ Deno.serve(async (request) => {
         200,
         origin,
       );
+    }
+
+    if (executionConfirmation !== "ZATWIERDZAM USUNIECIE") {
+      return jsonResponse({ok:false,error:"Wpisz dokładnie: ZATWIERDZAM USUNIECIE",code:"CONFIRMATION_REQUIRED",stage:"confirmation"},409,origin);
     }
 
     if (existingCase?.status === "awaiting_owner") {

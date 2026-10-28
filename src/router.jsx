@@ -40,10 +40,10 @@ import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
-import { AdminNavigation, AdminPageHeading, AdminTabs, AdminPane, AdminHistory, AdminModal, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
+import { AdminNavigation, AdminPageHeading, AdminTabs, AdminPane, AdminHistory, AdminModal, AdminDisclosure, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
 import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./AdminDomain";
 import { ErasureScope } from "./AdminErasure";
-import { executeErasure, erasureFailureMessage, erasureOutcomeKnown, ERASURE_RETAINED_LABELS } from "./ErasureWorkflow";
+import { executeErasure, erasureFailureMessage, erasureOutcomeKnown, ERASURE_RETAINED_LABELS, ERASURE_CONFIRMATION } from "./ErasureWorkflow";
 import AdminLucynaDesk from "./AdminLucyna";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
@@ -22133,7 +22133,7 @@ function DisputeDetails() {
           <p className="dispute-page-message" role="status">{pageMessage}</p>
         )}
 
-        <section
+        <AdminDisclosure disabled={!isStaff} summary="Zasady dostępu do rozmowy"><section
           className="dispute-transparency-banner"
           aria-labelledby="dispute-transparency-title"
         >
@@ -22157,7 +22157,7 @@ function DisputeDetails() {
               </small>
             )}
           </div>
-        </section>
+        </section></AdminDisclosure>
 
         <div className="dispute-detail-grid">
           <div className="dispute-detail-main"><AdminCaseTools disabled={!isStaff}>
@@ -22173,8 +22173,10 @@ function DisputeDetails() {
                     )}
                   </strong>
                 )}
+                <AdminDisclosure disabled={!isStaff} summary="Uzasadnienie i zasady rozliczenia">
                 {["full_refund", "partial_refund"].includes(currentDecision.outcome) && <p>Kwota decyzji dotyczy wynagrodzenia. Zwrot klientowi obejmuje również całą prowizję IdeaHire przy pełnym zwrocie lub jej proporcjonalną część przy zwrocie częściowym.</p>}
                 <p>{currentDecision.rationale}</p>
+                </AdminDisclosure>
                 <div className="dispute-decision-meta">
                   <span>Wersja {currentDecision.version}</span>
                   <span>Wydano: {formatDisputeDate(currentDecision.issued_at)}</span>
@@ -22237,8 +22239,8 @@ function DisputeDetails() {
                 <span className="dispute-count-badge">{statements.length}</span>
               </div>
 
-              <div className="dispute-timeline">
-                {statements.map((item) => {
+              <AdminHistory disabled={!isStaff} resetKey={id} label="Strony korespondencji"><div className="dispute-timeline">
+                {(isStaff?[...statements].reverse():statements).map((item) => {
                   const authorName = item.author_role === "system"
                     ? "System IdeaHire"
                     : ["admin", "owner"].includes(item.author_role)
@@ -22269,7 +22271,7 @@ function DisputeDetails() {
                     </article>
                   );
                 })}
-              </div>
+              </div></AdminHistory>
 
               {canAddEvidence && (
                 <form className="dispute-inline-form" onSubmit={handleAddStatement}>
@@ -25481,6 +25483,8 @@ function AdminUserPrivacyAccount() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
+  const [messageKind,setMessageKind] = useState("info");
+  function showMessage(value,kind="info") { setMessage(value);setMessageKind(kind); }
   const [dialogAction, setDialogAction] = useState("");
   const [dialogMessage, setDialogMessage] = useState("");
   const [inventoryError, setInventoryError] = useState("");
@@ -25581,7 +25585,7 @@ function AdminUserPrivacyAccount() {
         setInventoryError("");
       }
     } catch (error) {
-      (showLoading ? setMessage : setRefreshWarning)(cleanSupabaseError(
+      (showLoading ? showMessage : setRefreshWarning)(cleanSupabaseError(
         error,
         "Nie udało się otworzyć administracyjnego widoku konta."
       ));
@@ -25645,6 +25649,8 @@ function AdminUserPrivacyAccount() {
     setErasureTab(currentRequest.identity_status!=='verified' ? 'request' : currentCase ? 'operation' : 'scope');
   },[loading,currentRequest?.id,currentRequest?.identity_status,currentCase?.id]);
 
+  useEffect(()=>{ if(!loading && currentRequest && !currentCase)setErasureTab("request"); },[loading,currentRequest?.id,currentCase?.id]);
+
   const currentCaseEvents = currentCase
     ? caseEvents.filter((item) => item.case_id === currentCase.id)
     : [];
@@ -25661,7 +25667,7 @@ function AdminUserPrivacyAccount() {
     .filter(([, value]) => value === true || Number(value) > 0);
 
   function openErasureDialog(action) {
-    setMessage("");
+    showMessage("");
     setDialogMessage("");
     document.querySelector(".erasure-actions-menu")?.removeAttribute("open");
     setDialogAction(action);
@@ -25678,12 +25684,12 @@ function AdminUserPrivacyAccount() {
     if (!currentRequest) return;
 
     if (identityNote.trim().length < 20) {
-      setMessage("Notatka weryfikacyjna musi mieć co najmniej 20 znaków.");
+      showMessage("Notatka weryfikacyjna musi mieć co najmniej 20 znaków.");
       return;
     }
 
     if (adminBusy.current) return; adminBusy.current = true; setBusy("identity");
-    setMessage("");
+    showMessage("");
 
     try {
       const { error } = await adminRpc(supabase,
@@ -25699,10 +25705,10 @@ function AdminUserPrivacyAccount() {
 
       setIdentityNote("");
       setErasureTab("scope");
-      setMessage("Tożsamość użytkownika została potwierdzona i zapisana w historii sprawy.");
+      showMessage("Tożsamość użytkownika została potwierdzona i zapisana w historii sprawy.");
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
-      setMessage(cleanSupabaseError(error, "Nie udało się potwierdzić tożsamości."));
+      showMessage(cleanSupabaseError(error, "Nie udało się potwierdzić tożsamości."));
     } finally {
       adminBusy.current = false; setBusy("");
     }
@@ -25745,7 +25751,7 @@ function AdminUserPrivacyAccount() {
     }
 
     if (adminBusy.current) return; adminBusy.current = true; setBusy("prepare");
-    setMessage("");
+    showMessage("");
     setDialogMessage("");
 
     try {
@@ -25769,7 +25775,7 @@ function AdminUserPrivacyAccount() {
       setErasureTab("operation");
       setLegalAssessment("");
       setRetentionReason("");
-      setMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez właściciela.");
+      showMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez właściciela.");
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       console.error("ADMIN PREPARE ERASURE ERROR:", error);
@@ -25785,7 +25791,7 @@ function AdminUserPrivacyAccount() {
         setDialogMessage("");
         setLegalAssessment("");
         setRetentionReason("");
-        setMessage(
+        showMessage(
           "Operacja została zapisana i oczekuje na zatwierdzenie właściciela. Widok został odświeżony."
         );
         void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
@@ -25822,17 +25828,17 @@ function AdminUserPrivacyAccount() {
       currentCase.action_type === "close_account"
       && inventory?.execution_blocked
     ) {
-      setMessage("Konta nie można teraz zamknąć. Najpierw zakończ wszystkie przeszkody pokazane w panelu.");
+      showMessage("Konta nie można teraz zamknąć. Najpierw zakończ wszystkie przeszkody pokazane w panelu.");
       return;
     }
 
     if (ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE") {
-      setMessage("Wpisz dokładnie: ZATWIERDZAM USUNIECIE");
+      showMessage("Wpisz dokładnie: ZATWIERDZAM USUNIECIE");
       return;
     }
 
     if (adminBusy.current) return; adminBusy.current = true; setBusy("authorize");
-    setMessage("");
+    showMessage("");
 
     try {
       const actionType = currentCase.action_type;
@@ -25844,14 +25850,15 @@ function AdminUserPrivacyAccount() {
         });
 
       setOwnerConfirmation("");
-      setMessage(
+      showMessage(
         actionType === "close_account"
           ? "Właściciel zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono."
           : "Właściciel zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono."
-      );
+      , "success");
+      setErasureTab("operation");
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
-      setMessage(erasureFailureMessage(error));
+      showMessage(erasureFailureMessage(error));
       setExecutionUnconfirmed(Boolean(error.uncertain));
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } finally {
@@ -25866,29 +25873,31 @@ function AdminUserPrivacyAccount() {
       || "wykonanie operacji";
 
     if (executionUnconfirmed || !inventory || inventoryError) {
-      setMessage("Najpierw odśwież status i zakres danych."); return;
+      showMessage("Najpierw odśwież status i zakres danych."); return;
     }
-    if (!await adminDialog.confirm(
+    const confirmation = await adminDialog.confirm(
       currentCase.action_type === "minimize_data"
         ? "Wyczyścimy wskazane poniżej dane. Adres e-mail, hasło i możliwość logowania pozostaną. Tej operacji nie można cofnąć."
         : "Usuniemy wskazane dane i wyłączymy logowanie. Tej operacji nie można cofnąć.",
-      { title:operationName, confirmLabel:currentCase.action_type === "minimize_data" ? "Usuń dane" : "Usuń i zamknij", details:<ErasureScope inventory={inventory} action={currentCase.action_type} compact /> }
-    )) return;
+      { title:operationName, requiredPhrase:ERASURE_CONFIRMATION, confirmLabel:currentCase.action_type === "minimize_data" ? "Wyczyść dane, zachowaj konto" : "Usuń dane i zamknij konto", details:<details className="ih-admin-confirmation-scope"><summary>Sprawdź zakres przed potwierdzeniem</summary><ErasureScope inventory={inventory} action={currentCase.action_type} compact /></details> }
+    );
+    if (confirmation !== ERASURE_CONFIRMATION) return;
 
     if (adminBusy.current) return; adminBusy.current = true; setBusy("execute");
-    setMessage("");
+    showMessage("");
 
     try {
-      await executeErasure(supabase, { caseId:currentCase.id, expectedActionType:currentCase.action_type });
+      await executeErasure(supabase, { caseId:currentCase.id, expectedActionType:currentCase.action_type, executionConfirmation:confirmation });
 
-      setMessage(
+      showMessage(
         currentCase.action_type === "close_account"
           ? "Konto zostało zamknięte, a status sprawy zaktualizowany."
           : "Pełny możliwy zakres danych został usunięty lub zanonimizowany. Konto logowania pozostało aktywne."
-      );
+      , "success");
+      setErasureTab("operation");
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
-      setMessage(erasureFailureMessage(error));
+      showMessage(erasureFailureMessage(error));
       setExecutionUnconfirmed(Boolean(error.uncertain));
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } finally {
@@ -25897,7 +25906,7 @@ function AdminUserPrivacyAccount() {
   }
 
   function chooseRequest(requestId) {
-    setMessage(""); setErasureTab("request");
+    showMessage(""); setErasureTab("request");
     navigate(`/admin/privacy/users/${userId}?request=${requestId}`, {
       replace: true,
     });
@@ -25971,8 +25980,7 @@ function AdminUserPrivacyAccount() {
                   <details className="ih-admin-account-id"><summary>Identyfikator użytkownika</summary><code>{userId}</code></details>
                   {completedDataMinimization && (
                     <p className="erasure-account-auth-state">
-                      Login pozostaje aktywny. Użytkownik może ponownie
-                      uzupełnić dane wymagane do dalszego korzystania z usługi.
+                      Logowanie pozostaje aktywne. Użytkownik może ponownie uzupełnić profil.
                     </p>
                   )}
                 </div>
@@ -25983,7 +25991,7 @@ function AdminUserPrivacyAccount() {
                   {ERASURE_LIFECYCLE_LABELS[lifecycleStatus] || lifecycleStatus}
                 </span>
 
-                <details className="erasure-actions-menu">
+                {!currentCase && <details className="erasure-actions-menu">
                   <summary>Działania na koncie</summary>
                   <div>
                     <Link
@@ -26016,12 +26024,12 @@ function AdminUserPrivacyAccount() {
                       <small>Usunięcie danych oraz wyłączenie logowania</small>
                     </button>
                   </div>
-                </details>
-                {actionDisabled && currentCase && <p className="ih-erasure-action-hint">Ten wniosek ma już przygotowaną operację. <button type="button" onClick={()=>setErasureTab("operation")}>Pokaż jej status i wynik</button></p>}
+                </details>}
+                {currentCase && <><button type="button" className="ih-admin-account-action" onClick={()=>setErasureTab("operation")}>{currentCase.status==="completed"?"Wynik operacji":"Przejdź do operacji"}</button><Link className="ih-admin-account-action" to={`/admin/moderation?user=${userId}`}>Moderacja konta</Link></>}
               </div>
             </header>
 
-            {message && (
+            {message && !(messageKind === "success" && currentCase?.status === "completed") && (
               <p className="privacy-page-message" role="status">{message}</p>
             )}
 
@@ -26034,26 +26042,7 @@ function AdminUserPrivacyAccount() {
                 </p>
               </section>
             ) : (
-              <><section className="erasure-request-selector">
-                <div>
-                  <span className="section-label">Podstawa operacji</span>
-                  <h2>{formatPrivacyRequestNumber(currentRequest?.request_number)}</h2>
-                  <div className={`privacy-erasure-requested-action is-${
-                    requestedErasureAction || "legacy"
-                  }`}>
-                    <span>Użytkownik wybrał</span>
-                    <strong>
-                      {requestedErasureAction
-                        ? ERASURE_ACTION_LABELS[requestedErasureAction]
-                        : "Zakres wymaga potwierdzenia"}
-                    </strong>
-                    <p>
-                      {requestedErasureAction
-                        ? "Przygotowana operacja musi być dokładnie zgodna z tym wyborem."
-                        : "W starszym wniosku nie zapisano wyboru. Sprawdź jego treść i historię przed operacją."}
-                    </p>
-                  </div>
-                </div>
+              <><section className="erasure-request-selector"><div className="ih-erasure-request-caption"><strong>{formatPrivacyRequestNumber(currentRequest?.request_number)}</strong><span>{PRIVACY_REQUEST_STATUSES[currentRequest?.status] || currentRequest?.status}</span></div>
                 {requests.length > 1 && (
                   <label>
                     Wybierz wniosek
@@ -26069,7 +26058,7 @@ function AdminUserPrivacyAccount() {
                     </FormSelect>
                   </label>
                 )}
-              </section><AdminErasureSteps request={currentRequest} currentCase={currentCase} /><AdminTabs value={erasureTab} onChange={setErasureTab} items={[["request","Sprawdź wniosek i osobę"],["scope","Co usuniemy i zachowamy"],["operation",currentCase?.status === "completed" ? "Raport wykonania" : "Zatwierdź i usuń dane"],["history","Historia operacji",currentCaseEvents.length]]} /></>
+              </section><AdminTabs value={erasureTab} onChange={setErasureTab} items={[["request","Wniosek"],["scope","Zakres danych"],["operation",currentCase?.status === "completed" ? "Wynik" : "Wykonanie"],["history","Historia",currentCaseEvents.length]]} /><AdminPane active={erasureTab==="request"}><section className="ih-erasure-request-details"><h2>Żądanie użytkownika</h2><blockquote>{currentRequest?.description}</blockquote><div className="privacy-erasure-requested-action"><span>{requestedErasureAction?"Użytkownik wybrał":"Zakres przygotowanej operacji"}</span><strong>{ERASURE_ACTION_LABELS[requestedErasureAction || currentCase?.action_type] || "Zakres wymaga ustalenia"}</strong></div><strong>{currentRequest?.identity_status === "verified" ? "Tożsamość potwierdzona" : "Tożsamość wymaga potwierdzenia"}</strong><Link to={`/admin/privacy?request=${currentRequest?.id}`}>Korespondencja i status wniosku</Link></section><AdminErasureSteps request={currentRequest} currentCase={currentCase} /></AdminPane></>
             )}
 
             {currentRequest && !canManage && (
@@ -26082,7 +26071,7 @@ function AdminUserPrivacyAccount() {
               </section>
             )}
 
-            {isLegacyErasureRequest && canManage && erasureTab === "request" && (
+            {isLegacyErasureRequest && !currentCase && canManage && erasureTab === "request" && (
               <section className="erasure-account-notice is-warning">
                 <strong>Starszy wniosek bez technicznie zapisanego zakresu</strong>
                 <p>
@@ -26158,7 +26147,7 @@ function AdminUserPrivacyAccount() {
                 </button>
               </section>
             ) : inventory ? (
-              <AdminPane active={erasureTab==="scope"}>{completedDataMinimization || completedAccountClosure ? <div className="erasure-account-notice"><strong>Operacja została wykonana</strong><p>Raport zawiera rzeczywiste liczby usuniętych i pozostawionych danych. Poniżej widzisz aktualny stan konta.</p><button type="button" className="privacy-secondary-button" onClick={()=>setErasureTab("operation")}>Zobacz raport wykonania</button></div> : null}<ErasureScope inventory={inventory} action={currentCase?.action_type || requestedErasureAction || "minimize_data"}/></AdminPane>
+              <AdminPane active={erasureTab==="scope"}>{completedDataMinimization || completedAccountClosure ? <div className="erasure-account-notice"><strong>Operacja została wykonana</strong><p>Raport zawiera rzeczywiste liczby usuniętych i pozostawionych danych. Nowe dane uzupełnione przez użytkownika po operacji nie należą do tego raportu.</p><button type="button" className="privacy-secondary-button" onClick={()=>setErasureTab("operation")}>Zobacz raport wykonania</button></div> : <ErasureScope inventory={inventory} action={currentCase?.action_type || requestedErasureAction || "minimize_data"}/>}</AdminPane>
             ) : currentRequest ? (
               <section className="erasure-account-notice">
                 <strong>Pobieramy aktualny zakres danych</strong>
@@ -26222,13 +26211,16 @@ function AdminUserPrivacyAccount() {
                         </p>
                       </div>
                       {inventory && <details className="ih-erasure-review"><summary>Sprawdź dokładny zakres przed zatwierdzeniem</summary><ErasureScope inventory={inventory} action={currentCase.action_type} compact /></details>}
-                      <label>
-                        Fraza potwierdzająca
+                      <label className="ih-admin-confirmation-field">
+                        <span>Wpisz dokładnie: <code>{ERASURE_CONFIRMATION}</code></span>
                         <input
                           value={ownerConfirmation}
                           onChange={(event) => setOwnerConfirmation(event.target.value)}
-                          placeholder="ZATWIERDZAM USUNIECIE"
+                          placeholder={ERASURE_CONFIRMATION}
                           autoComplete="off"
+                          autoCapitalize="characters"
+                          spellCheck={false}
+                          maxLength={80}
                           disabled={Boolean(busy)}
                         />
                       </label>
@@ -26288,30 +26280,30 @@ function AdminUserPrivacyAccount() {
                 )}
 
                 {currentCase.status === "completed" && (
-                  <div className="erasure-completed-banner" role="status">
+                  <div className="erasure-completed-banner">
                     <span aria-hidden="true">✓</span>
                     <div className="erasure-completed-content">
-                      <strong>Operacja została zakończona</strong>
+                      <strong role="status">Operacja została zakończona</strong>
                       <p>
                         {currentCase.action_type === "minimize_data"
-                          ? "Usunięto lub zanonimizowano pełny możliwy zakres danych. Konto logowania pozostaje aktywne."
+                          ? "Dane wskazane w raporcie zostały wyczyszczone. Konto i logowanie pozostają aktywne."
                           : "Usunięto lub zanonimizowano możliwe dane i zamknięto konto logowania."}
                       </p>
 
                       {executionRows.length > 0 && (
-                        <details className="erasure-execution-report"><summary>Co usunięto lub wyczyszczono ({executionRows.length})</summary>
+                        <details className="erasure-execution-report" open><summary>Wykonane czynności ({executionRows.length})</summary>
                           <div>
                             <span className="section-label">Raport wykonania</span>
                             <h3>Co zostało usunięte lub zanonimizowane</h3>
                           </div>
-                          <dl>
+                          <AdminHistory resetKey={currentCase.id} label="Strony raportu" previousLabel="Poprzednie" nextLabel="Następne"><dl>
                             {executionRows.map((item) => (
                               <div key={item.key}>
                                 <dt>{item.label}</dt>
                                 <dd>{item.value}</dd>
                               </div>
                             ))}
-                          </dl>
+                          </dl></AdminHistory>
                         </details>
                       )}
 
@@ -26332,8 +26324,9 @@ function AdminUserPrivacyAccount() {
                           </ul>
                         ) : (
                           <p>
-                            Zachowano konto i identyfikator logowania, dokumentację
-                            realizacji wniosku oraz niezbędną historię audytową.
+                            {currentCase.action_type === "minimize_data"
+                              ? "Zachowano konto logowania, dokumentację realizacji wniosku oraz niezbędną historię audytową."
+                              : "Zachowano dokumentację realizacji wniosku oraz niezbędną historię audytową. Logowanie zostało wyłączone."}
                           </p>
                         )}
 
@@ -26371,7 +26364,7 @@ function AdminUserPrivacyAccount() {
                   </ol></AdminHistory>
                 ) : <p>Nie zapisano jeszcze zdarzeń tej operacji.</p>}
               </section></AdminPane>}
-            {currentRequest && <AdminPane active={erasureTab==="request"}><section className="ih-erasure-request-details"><h2>Treść wniosku</h2><p>{currentRequest.description}</p><strong>{currentRequest.identity_status === "verified" ? "Tożsamość potwierdzona" : "Tożsamość wymaga potwierdzenia"}</strong><Link to={`/admin/privacy?request=${currentRequest.id}`}>Otwórz korespondencję i status wniosku</Link></section></AdminPane>}
+
           </>
         )}
       </main>
@@ -28159,7 +28152,7 @@ function AdminPanel() {
             {visibleDisputes.length === 0 ? (
               <p className="dispute-empty-copy">Brak spraw spełniających wybrany filtr.</p>
             ) : (
-              <div className="dispute-list is-admin">
+              <AdminHistory resetKey={`${filter}:${queueSearch}`} label="Strony spraw" previousLabel="Poprzednie" nextLabel="Następne"><div className="dispute-list is-admin">
                 {visibleDisputes.map((item) => (
                   <DisputeListCard
                     key={item.id}
@@ -28168,7 +28161,7 @@ function AdminPanel() {
                     adminView
                   />
                 ))}
-              </div>
+              </div></AdminHistory>
             )}
           </section></AdminPane>
 

@@ -12,7 +12,7 @@
   }
   body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 {
     width:auto!important; min-width:0!important; max-width:100%!important; margin:0!important;
-    font:700 30px/1.3 Inter,system-ui,sans-serif!important; text-align:start!important;
+    font:650 28px/1.3 Inter,system-ui,sans-serif!important; text-align:start!important;
   }
   body.ih79-app.ih-admin-mode #root main .ih-admin-heading-meta {
     display:inline-flex!important; align-items:center!important; min-height:26px!important; max-width:100%!important;
@@ -170,7 +170,7 @@
     body.ih79-app.ih-admin-mode #root main .ih-admin-case-tools>.ih-admin-tab-switcher {
       position:sticky!important; top:calc(var(--ad-head) + 6px)!important; z-index:20!important; border-radius:12px!important;
     }
-    body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 { font-size:25px!important; line-height:1.3!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 { font-size:23px!important; line-height:1.35!important; }
     body.ih79-app.ih-admin-mode #root main .ih-admin-page-heading { margin-bottom:18px!important; }
     body.ih79-app.ih-admin-mode #root main .ih-admin-event-heading>a { width:44px!important; height:44px!important; margin-block:-7px!important; }
     body.ih79-app.ih-admin-mode #root main .ih-admin-code-toggle { min-height:44px!important; }
@@ -285,4 +285,8 @@
       body.ih79-app.ih-admin-mode #root :is(.ih-admin-mobile-progress>summary>svg,.ih-admin-nav-links>a,.ih-admin-case-row,.ih-admin-metrics>button,.ih-admin-menu-button) { transition:none!important; }
     }
   }
+}
+
+@layer ideahireHeadings {
+  body.ih79-app.ih-admin-mode #root main .ih-admin-heading-hint { margin:4px 0!important; color:var(--ad-muted)!important; font:400 14px/1.6 Inter,system-ui,sans-serif!important; max-width:65ch!important; }
 }

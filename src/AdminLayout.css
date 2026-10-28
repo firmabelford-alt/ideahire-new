@@ -1,0 +1,87 @@
+/* Administration: a clear reading order, visible sections and one work surface. */
+@layer ideahireHeadings {
+  html body.ih79-app.ih-admin-mode #root main:is(.admin-shell,.disputes-shell) { background:var(--ad-paper)!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-page-heading { gap:4px!important; margin-bottom:18px!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 { font:650 27px/1.3 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-heading-meta { font:550 12px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher { display:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-tabs {
+    position:static!important; display:flex!important; flex-wrap:nowrap!important; align-items:stretch!important;
+    gap:20px!important; width:100%!important; min-width:0!important; margin:0 0 18px!important; padding:0!important;
+    overflow-x:auto!important; overflow-y:hidden!important; border:0!important; border-bottom:1px solid var(--ad-line)!important;
+    border-radius:0!important; background:none!important; scrollbar-width:thin!important; scroll-padding-inline:4px!important;
+  }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-tabs>button {
+    flex:0 0 auto!important; gap:6px!important; min-height:46px!important; margin:0!important; padding:10px 0!important;
+    border:0!important; border-bottom:2px solid transparent!important; border-radius:0!important;
+    background:none!important; color:var(--ad-muted)!important; font:600 14px/1.45 Inter,system-ui,sans-serif!important;
+    white-space:nowrap!important; text-align:start!important;
+  }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-tabs>button[aria-pressed=true] { border-bottom-color:var(--ad-accent)!important; color:var(--ad-ink)!important; font-weight:700!important; }
+  html body.ih79-app.ih-admin-mode #root main :is(.dispute-panel,.privacy-admin-card,.moderation-workbench,.moderation-search-card,.moderation-content-reports,.moderation-appeals-admin,.moderation-case-register,.erasure-case-card,.erasure-identity-card,.erasure-blockers-card) {
+    height:auto!important; min-height:0!important; max-height:none!important; margin:0!important; padding:18px 0!important;
+    border:0!important; border-bottom:1px solid var(--ad-line)!important; border-radius:0!important;
+    background:transparent!important; box-shadow:none!important; gap:16px!important;
+  }
+  html body.ih79-app.ih-admin-mode #root main :is(.dispute-panel,.privacy-admin-card,.erasure-case-card) h2 { font:650 19px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; }
+  html body.ih79-app.ih-admin-mode #root main :is(.dispute-panel,.privacy-admin-card,.erasure-case-card) h3 { font:650 16px/1.45 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main :is(.dispute-panel,.privacy-admin-card,.erasure-case-card)>.section-label,
+  html body.ih79-app.ih-admin-mode #root main .dispute-panel-heading .dispute-eyebrow { display:none!important; }
+  html body.ih79-app.ih-admin-mode #root main :is(.privacy-request-description,.privacy-admin-latest-reply>p,.ih-erasure-request-details>blockquote,.dispute-timeline-content>p) {
+    color:var(--ad-ink)!important; font:550 16px/1.65 Inter,system-ui,sans-serif!important; white-space:pre-wrap!important; overflow-wrap:anywhere!important;
+  }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-request-details { padding:16px 0!important; border:0!important; border-bottom:1px solid var(--ad-line)!important; border-radius:0!important; background:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-request-details>blockquote { margin:0!important; padding:12px 14px!important; border-left:3px solid var(--ad-accent)!important; background:var(--ad-soft)!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-scope-list { margin:0!important; padding:0!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-scope-list>div { padding:13px 0!important; border:0!important; border-bottom:1px solid var(--ad-line)!important; border-radius:0!important; background:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-scope-list dt strong { color:var(--ad-ink)!important; font:700 15px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-scope-list dt p { color:var(--ad-ink)!important; font:500 15px/1.6 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-scope-list dd { font:700 16px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-guide-detail label { min-height:44px!important; color:var(--ad-ink)!important; font:500 15px/1.6 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-header { align-items:start!important; gap:16px!important; padding:0 0 16px!important; margin-bottom:16px!important; border-bottom:1px solid var(--ad-line)!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-person { grid-template-columns:44px minmax(0,1fr)!important; align-items:start!important; gap:12px!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-avatar { width:44px!important; height:44px!important; margin:0!important; border-radius:10px!important; font-size:19px!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-person .section-label { display:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-person h1 { margin:0!important; font:650 25px/1.35 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-auth-state { margin:6px 0 0!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; font:500 14px/1.55 Inter,system-ui,sans-serif!important; color:var(--ad-muted)!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-account-header-actions { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:8px 14px!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-account-action { display:inline-flex!important; align-items:center!important; min-height:40px!important; padding:6px 0!important; border:0!important; background:none!important; color:var(--ad-accent)!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:underline!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-request-selector { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:12px 20px!important; padding:12px 0!important; margin:0 0 12px!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-request-selector>label { flex:1 1 220px!important; max-width:440px!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-request-caption { display:grid!important; gap:3px!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-request-caption strong { font:700 14px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-erasure-request-caption span { color:var(--ad-muted)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main :is(.erasure-completed-banner,.erasure-completed-content) { display:block!important; min-height:0!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-completed-banner>span { display:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-completed-content>strong { display:block!important; margin-bottom:6px!important; font:700 18px/1.45 Inter,system-ui,sans-serif!important; color:var(--ad-ink)!important; }
+  html body.ih79-app.ih-admin-mode #root main :is(.erasure-execution-report,.erasure-retention-report) { margin:16px 0 0!important; padding:0!important; border:0!important; border-top:1px solid var(--ad-line)!important; border-radius:0!important; background:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-execution-report dt { font:600 15px/1.5 Inter,system-ui,sans-serif!important; color:var(--ad-ink)!important; }
+  html body.ih79-app.ih-admin-mode #root main .erasure-execution-report dd { font:700 16px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-disclosure { margin:0!important; padding:0!important; border:0!important; border-top:1px solid var(--ad-line)!important; background:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-disclosure>summary { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:10px!important; min-height:44px!important; padding:10px 0!important; cursor:pointer!important; list-style:none!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-disclosure>summary::-webkit-details-marker { display:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-disclosure:not([open])>:not(summary) { display:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-case-summary .dispute-decision-meta { gap:6px 14px!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-case-summary :is(.dispute-settlement-status,.ih-dispute-settlement) { padding:12px 0!important; border:0!important; border-top:1px solid var(--ad-line)!important; border-radius:0!important; box-shadow:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-case-summary .dispute-summary-card { padding:14px 0!important; border:0!important; border-top:1px solid var(--ad-line)!important; border-radius:0!important; background:none!important; box-shadow:none!important; }
+  html body.ih79-app.ih-admin-mode #root main .ih-admin-case-summary .dispute-summary-card p { margin:6px 0!important; color:var(--ad-ink)!important; font:500 15px/1.6 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-question { border-radius:14px!important; padding:22px!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-question form { gap:16px!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-question .ih-admin-confirmation-field { display:grid!important; gap:10px!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-confirmation-field span { color:var(--ad-ink)!important; font:600 15px/1.55 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-confirmation-field code { display:block!important; padding-top:4px!important; font:700 14px/1.5 ui-monospace,monospace!important; overflow-wrap:anywhere!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-confirmation-field input { box-sizing:border-box!important; width:100%!important; min-height:48px!important; padding:11px 12px!important; border:1px solid var(--ad-line)!important; border-radius:9px!important; background:var(--ad-paper)!important; color:var(--ad-ink)!important; font:500 16px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-confirmation-scope>summary { min-height:40px!important; cursor:pointer!important; color:var(--ad-muted)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app.ih-admin-mode #root .ih-admin-dialog-actions { border-top:1px solid var(--ad-line)!important; padding-top:12px!important; }
+  @media(max-width:700px) {
+    html body.ih79-app.ih-admin-mode #root main:is(.admin-shell,.disputes-shell) { padding:20px 16px 88px!important; }
+    html body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line { align-items:baseline!important; }
+    html body.ih79-app.ih-admin-mode #root main .ih-admin-heading-line h1 { font-size:23px!important; }
+    html body.ih79-app.ih-admin-mode #root main .erasure-account-person h1 { font-size:23px!important; }
+    html body.ih79-app.ih-admin-mode #root main .ih-admin-tabs { gap:18px!important; }
+    html body.ih79-app.ih-admin-mode #root main .ih-admin-tabs>button { font-size:13px!important; }
+    html body.ih79-app.ih-admin-mode #root main .ih-admin-metrics>:is(button,div) { min-height:60px!important; padding:10px 12px!important; }
+    html body.ih79-app.ih-admin-mode #root main .dispute-decision-amount { margin:4px 0 10px!important; font:700 25px/1.3 Inter,system-ui,sans-serif!important; }
+    html body.ih79-app.ih-admin-mode #root .ih-admin-question { padding:18px!important; }
+  }
+}

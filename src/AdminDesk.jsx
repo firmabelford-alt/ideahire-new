@@ -9,6 +9,7 @@ import LucynaSymbol from './LucynaSymbol';
 import { requestLucynaDock } from './LucynaDock';
 import './AdminDesk.css';
 import './AdminMobile.css';
+import './AdminLayout.css';
 
 const navigation = [
   ['/admin','Sprawy i spory',LayoutDashboard], ['/admin/privacy','Wnioski RODO',ClipboardList],
@@ -39,24 +40,35 @@ export function AdminNavigation({ name, role, onLogout, assistantEnabled = true 
 }
 
 export function AdminTabs({ items, value, onChange, label='Obszary pracy' }) {
+  const tabs=useRef(null);
+  useLayoutEffect(()=>{
+    const list=tabs.current,active=list?.querySelector('[aria-pressed="true"]');
+    if(!list?.clientWidth||!active)return;
+    const item=active.getBoundingClientRect(),viewport=list.getBoundingClientRect();
+    if(item.left<viewport.left)list.scrollLeft+=item.left-viewport.left;
+    else if(item.right>viewport.right)list.scrollLeft+=item.right-viewport.right;
+  },[value]);
   return <>
     <div className="ih-admin-tab-switcher"><FormSelect aria-label={label} value={value} onChange={event=>onChange(event.target.value)}>{items.map(([id,title,count])=><option key={id} value={id}>{title}{count != null ? ` (${count})` : ''}</option>)}</FormSelect></div>
-    <nav className="ih-admin-tabs" aria-label={label}>{items.map(([id,title,count]) => <button type="button" key={id} aria-pressed={value === id} onClick={()=>onChange(id)}>{title}{count != null && <span>{count}</span>}</button>)}</nav>
+    <nav ref={tabs} className="ih-admin-tabs" aria-label={label}>{items.map(([id,title,count]) => <button type="button" key={id} aria-pressed={value === id} onClick={()=>onChange(id)}>{title}{count != null && <span>{count}</span>}</button>)}</nav>
   </>;
 }
 export function AdminPane({ active, children }) { return <div className="ih-admin-pane" hidden={!active}>{children}</div>; }
 
-export function AdminHistory({ children,resetKey,pageSize=6 }) {
+export function AdminHistory({ children,resetKey,pageSize=6,label='Strony historii',previousLabel='Nowsze',nextLabel='Starsze',disabled=false }) {
   const [page,setPage]=useState(0);
   useEffect(()=>setPage(0),[resetKey]);
   const list=React.Children.only(children), entries=React.Children.toArray(list.props.children);
   const result=adminQueuePage(entries,page,pageSize);
-  return <div className="ih-admin-bounded-history">{React.cloneElement(list,{},result.rows)}{result.last>0&&<nav className="ih-admin-log-pages" aria-label="Strony historii"><button type="button" disabled={result.current===0} onClick={()=>setPage(result.current-1)}><ArrowLeft size={17} aria-hidden="true"/>Nowsze</button><span>{result.start+1}–{Math.min(entries.length,result.start+result.rows.length)} z {entries.length}</span><button type="button" disabled={result.current===result.last} onClick={()=>setPage(result.current+1)}>Starsze<ArrowRight size={17} aria-hidden="true"/></button></nav>}</div>;
+  if(disabled) return children;
+  return <div className="ih-admin-bounded-history">{React.cloneElement(list,{},result.rows)}{result.last>0&&<nav className="ih-admin-log-pages" aria-label={label}><button type="button" disabled={result.current===0} onClick={()=>setPage(result.current-1)}><ArrowLeft size={17} aria-hidden="true"/>{previousLabel}</button><span role="status" aria-live="polite">{result.start+1}–{Math.min(entries.length,result.start+result.rows.length)} z {entries.length}</span><button type="button" disabled={result.current===result.last} onClick={()=>setPage(result.current+1)}>{nextLabel}<ArrowRight size={17} aria-hidden="true"/></button></nav>}</div>;
 }
 
 export function AdminPageHeading({ title, description, meta }) {
+  const hint=({ 'Sprawy i spory':'Wybierz sprawę, sprawdź dowody i zapisz decyzję.', 'Rejestr działań':'Kto, kiedy i jaką czynność wykonał w panelu.', 'Moderacja':'Zgłoszenia, ograniczenia kont i odwołania.', 'Wnioski RODO':'Przejmij wniosek, odpowiedz użytkownikowi i kontroluj termin.', 'Usuwanie danych':'Sprawdź tożsamość, zakres czyszczenia i wynik operacji.', 'Dostęp zespołu':'Nadawaj i odbieraj dostęp do administracji.' })[title];
   return <header className="ih-admin-page-heading">
     <div className="ih-admin-heading-line"><h1>{title}</h1>{meta&&<span className="ih-admin-heading-meta">{meta}</span>}</div>
+    {hint&&<p className="ih-admin-heading-hint">{hint}</p>}
     {description&&<details className="ih-admin-page-help"><summary>Informacje o widoku<ChevronDown size={16} aria-hidden="true"/></summary><p>{description}</p></details>}
   </header>;
 }
@@ -140,6 +152,10 @@ export function AdminCaseTools({ children, disabled=false }) {
 
 export function AdminAuditAction({ action }) { return <><strong>{adminActionLabel(action)}</strong><details className="ih-admin-audit-technical"><summary>Kod zdarzenia</summary><code className="ih-admin-audit-code">{action}</code></details></>; }
 
+export function AdminDisclosure({ children, summary, disabled=false }) {
+  return disabled?<>{children}</>:<details className="ih-admin-disclosure"><summary>{summary}<ChevronDown size={17} aria-hidden="true"/></summary>{children}</details>;
+}
+
 export function AdminErasureSteps({ request, currentCase }) {
   const steps=[['Wniosek',Boolean(request)],['Tożsamość',request?.identity_status === 'verified'],['Przygotowanie',Boolean(currentCase)],['Zatwierdzenie',Boolean(currentCase?.approved_at || currentCase?.owner_approved_at || ['authorized','processing','completed','partially_completed'].includes(currentCase?.status))],['Wykonanie',currentCase?.status === 'completed']];
   const list = className => <ol className={'ih-admin-erasure-steps '+className} aria-label="Etapy usuwania danych">{steps.map(([label,done],index)=><li key={label} className={done?'is-done':''}><span aria-hidden="true">{done?<Check size={15}/>:index+1}</span><strong>{label}</strong><span className="ih-admin-sr">{done?'Zrealizowano':'Do weryfikacji'}</span></li>)}</ol>;
@@ -166,8 +182,10 @@ export function useAdminDialog() {
 }
 function AdminQuestion({ question,onFinish }) {
   const ref=useRef(null), [text,setText]=useState('');
+  const needsPhrase=Boolean(question.requiredPhrase);
+  const valid=needsPhrase ? text.trim()===question.requiredPhrase : question.type!=='text'||Boolean(text.trim());
   useEffect(()=>{ref.current?.showModal();},[]);
-  return <dialog className="ih-admin-question" ref={ref} onCancel={event=>{event.preventDefault();onFinish(null);}} aria-labelledby="ih-admin-question-title"><form method="dialog" onSubmit={event=>{event.preventDefault();onFinish(question.type==='text'?text:true);}}><h2 id="ih-admin-question-title">{question.title||(question.type==='text'?'Uzasadnienie działania':'Potwierdź działanie')}</h2><p>{question.message}</p>{question.details}{question.type==='text'&&<label><span>Treść uzasadnienia</span><textarea autoFocus value={text} onChange={event=>setText(event.target.value)} rows={5} maxLength={5000}/></label>}<div className="ih-admin-dialog-actions"><button type="button" autoFocus={question.type!=='text'} onClick={()=>onFinish(null)}>Anuluj</button><button type="submit" className="is-primary" disabled={question.type==='text'&&!text.trim()}>{question.confirmLabel||'Potwierdź'}</button></div></form></dialog>;
+  return <dialog className="ih-admin-question" ref={ref} onCancel={event=>{event.preventDefault();onFinish(null);}} aria-labelledby="ih-admin-question-title"><form method="dialog" onSubmit={event=>{event.preventDefault();if(valid)onFinish(needsPhrase?text.trim():question.type==='text'?text:true);}}><h2 id="ih-admin-question-title">{question.title||(question.type==='text'?'Uzasadnienie działania':'Potwierdź działanie')}</h2><p>{question.message}</p>{needsPhrase&&<label className="ih-admin-confirmation-field"><span>Wpisz dokładnie: <code>{question.requiredPhrase}</code></span><input autoFocus value={text} onChange={event=>setText(event.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={80}/></label>}{question.details}{question.type==='text'&&<label><span>Treść uzasadnienia</span><textarea autoFocus value={text} onChange={event=>setText(event.target.value)} rows={5} maxLength={5000}/></label>}<div className="ih-admin-dialog-actions"><button type="button" autoFocus={question.type!=='text'&&!needsPhrase} onClick={()=>onFinish(null)}>Anuluj</button><button type="submit" className="is-primary" disabled={!valid}>{question.confirmLabel||'Potwierdź'}</button></div></form></dialog>;
 }
 
 export function adminRead(query) { return privacyCall(signal=>query.abortSignal(signal)); }
