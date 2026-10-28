@@ -9,7 +9,7 @@ export const ERASURE_SCOPE = [
   ['portfolio_items','Projekty portfolio','Tytuły, opisy i linki projektów bez zgłoszeń moderacyjnych.'],
   ['portfolio_images','Zdjęcia projektów','Wpisy zdjęć, podpisy i kolejność w albumach bez zgłoszeń.'],
   ['age_profile_rows','Dane wieku','Data urodzenia i zapis potwierdzenia informacji o wieku.'],
-  ['auth_optional_metadata','Opcjonalne dane konta','Zapisana nazwa i inne opcjonalne dane. Adres e-mail i dane logowania pozostają.'],
+  ['auth_optional_metadata','Opcjonalne dane konta','Zapisana nazwa, prywatne imię i nazwisko, sposób korzystania, nazwa firmy i inne opcjonalne dane. Adres e-mail i dane logowania pozostają.'],
   ['user_preference_rows','Ustawienia rozmów','Osobiste ustawienia widoku rozmów.'],
   ['block_rows','Własne blokady','Blokady ustawione przez tego użytkownika. Blokady innych osób pozostają.'],
   ['dispute_notifications','Powiadomienia o sporach','Kopie powiadomień użytkownika. Same spory pozostają.'],
@@ -28,7 +28,7 @@ export const ERASURE_SCOPE = [
 export const ERASURE_RETAINED_LABELS = {
   services_total:'Oferty powiązane z zapytaniami lub rezerwacjami',service_inquiries_total:'Zapytania o usługi',
   reported_portfolio_items:'Portfolio objęte zgłoszeniem',other_users_blocks:'Blokady nałożone przez inne osoby',
-  auth_login_account:'Konto logowania',legal_acceptances:'Potwierdzenia dokumentów prawnych',privacy_requests_open:'Otwarte wnioski RODO',
+  auth_login_account:'Konto logowania',legal_acceptances:'Potwierdzenia dokumentów prawnych',registration_consent_events:'Minimalna historia zgód — bez wartości usuniętych danych',privacy_requests_open:'Otwarte wnioski RODO',
   payments_total:'Płatności',disputes_total:'Spory',agreements_total:'Umowy i ustalenia',
   conversations_total:'Rozmowy przed operacją',messages_total:'Wiadomości przed operacją',job_applications_total:'Zgłoszenia przed operacją',jobs_total:'Zlecenia przed operacją',
 };

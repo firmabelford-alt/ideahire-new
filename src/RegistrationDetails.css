@@ -42,6 +42,14 @@ html:root body #root .ih-private-details-actions button:first-child { background
 html:root body #root .ih-private-details-actions button:disabled { opacity: .55; cursor: default; }
 html:root body #root .ih-private-details-feedback { margin: 0; padding: 14px 0; color: var(--v-ink, #172c2d); font-size: 14px; line-height: 1.7; }
 html:root body #root .ih-private-details-feedback.is-error { color: var(--v-danger, #a52727); }
+html:root body #root .ih-registration-consent-history { min-width: 0; padding-top: 20px; border-top: 1px solid var(--v-line, #dce3e1); color: var(--v-ink, #172c2d); }
+html:root body #root .ih-registration-consent-history summary { min-height: 44px; padding: 10px 0; font-size: 14px; font-weight: 600; cursor: pointer; }
+html:root body #root .ih-registration-consent-history ol { display: grid; gap: 20px; margin: 20px 0; padding: 0; list-style: none; }
+html:root body #root .ih-registration-consent-history li { display: grid; gap: 8px; padding-bottom: 18px; border-bottom: 1px solid var(--v-line, #dce3e1); overflow-wrap: anywhere; }
+html:root body #root .ih-registration-consent-history strong { font-size: 14px; line-height: 1.6; }
+html:root body #root .ih-registration-consent-history :is(p, small, time) { margin: 0; color: var(--v-muted, #536363); font-size: 12px; line-height: 1.7; }
+html:root body #root .ih-registration-consent-history p { margin-block: 14px; }
+html:root body #root .ih-registration-consent-history button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--v-line, #dce3e1); border-radius: 8px; background: var(--v-surface, #fff); color: var(--v-ink, #172c2d); font: inherit; cursor: pointer; }
 @media (max-width: 600px) {
   html:root body #root .ih-registration-details { gap: 24px; padding-block: 26px; }
   html:root body #root .ih-private-details-actions { flex-direction: column; align-items: stretch; }

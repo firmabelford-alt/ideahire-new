@@ -1,3 +1,12 @@
+export const NEW_PASSWORD_MIN_LENGTH = 12;
+
+export function getNewPasswordValidationMessage(value, english = false) {
+  if (typeof value !== "string" || Array.from(value).length < NEW_PASSWORD_MIN_LENGTH) {
+    return english ? "Use a password with at least 12 characters." : "Hasło musi mieć co najmniej 12 znaków.";
+  }
+  return "";
+}
+
 export function normalizeEmail(value) {
   return String(value || "")
     .trim()

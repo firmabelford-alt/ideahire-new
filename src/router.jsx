@@ -73,6 +73,8 @@ import {
 import {
   getLoginErrorMessage,
   getPasswordRecoveryRedirectUrl,
+  getNewPasswordValidationMessage,
+  NEW_PASSWORD_MIN_LENGTH,
   normalizeEmail,
 } from "./auth";
 import {
@@ -5775,6 +5777,7 @@ function Login() {
 /* RESET PASSWORD */
 
 function ResetPassword() {
+  const passwordEnglish = useSitePreferences().language === "en";
   const navigate =
     useNavigate();
 
@@ -6013,11 +6016,9 @@ function ResetPassword() {
       return;
     }
 
-    if (password.length < 6) {
-      setMessage(
-        "Hasło musi mieć co najmniej 6 znaków."
-      );
-
+    const passwordProblem = getNewPasswordValidationMessage(password, passwordEnglish);
+    if (passwordProblem) {
+      setMessage(passwordProblem);
       return;
     }
 
@@ -6165,9 +6166,11 @@ function ResetPassword() {
                   }
                   placeholder="Wpisz nowe hasło"
                   autoComplete="new-password"
-                  minLength={6}
+                  aria-describedby="reset-password-requirements"
+                  minLength={NEW_PASSWORD_MIN_LENGTH}
                   required
                 />
+                <small id="reset-password-requirements">{passwordEnglish ? "At least 12 characters. You can use a long phrase and spaces." : "Co najmniej 12 znaków. Możesz użyć długiej frazy i spacji."}</small>
               </label>
 
               <label>
@@ -6183,7 +6186,8 @@ function ResetPassword() {
                   }
                   placeholder="Wpisz hasło ponownie"
                   autoComplete="new-password"
-                  minLength={6}
+                  aria-describedby="reset-password-requirements"
+                  minLength={NEW_PASSWORD_MIN_LENGTH}
                   required
                 />
               </label>
@@ -6227,6 +6231,7 @@ function ResetPassword() {
 /* REGISTER */
 
 function Register() {
+  const registrationEnglish = useSitePreferences().language === "en";
   const {
     isLoggedIn,
     loading: authLoading,
@@ -6359,6 +6364,9 @@ function Register() {
 
     const detailsProblem = registrationDetailsProblem(registrationDetails);
     if (detailsProblem) { setMessage(detailsProblem); return; }
+
+    const passwordProblem = getNewPasswordValidationMessage(password, registrationEnglish);
+    if (passwordProblem) { setMessage(passwordProblem); return; }
 
     const birthDateValidation =
       getBirthDateValidation(birthDate);
@@ -6633,9 +6641,11 @@ function Register() {
               }
               placeholder="Utwórz hasło"
               autoComplete="new-password"
-              minLength={6}
+              aria-describedby="registration-password-requirements"
+              minLength={NEW_PASSWORD_MIN_LENGTH}
               required
             />
+            <small id="registration-password-requirements">{registrationEnglish ? "At least 12 characters. You can use a long phrase and spaces." : "Co najmniej 12 znaków. Możesz użyć długiej frazy i spacji."}</small>
           </label>
 
           <label className="age-access-confirmation">

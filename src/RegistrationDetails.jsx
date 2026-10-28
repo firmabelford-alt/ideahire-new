@@ -141,6 +141,9 @@ export function RegistrationDetailsPrivacy({ cookies = false }) {
         <p>{en
           ? "These details are not published in your profile or automatically shared with another party. You can change or delete them in account settings. They are kept until you delete them, withdraw consent or the account data is erased. Withdrawal does not affect processing lawfully carried out before withdrawal. Any separately agreed contract or accounting document has its own purpose and retention rules. The recipients, safeguards and your rights are described in the other sections of this policy. These details are a user declaration, not identity verification or a tax classification. Notice version: 2026-10-28-v1."
           : "Dane te nie są publikowane na profilu ani automatycznie przekazywane drugiej stronie. Możesz je zmienić lub usunąć w ustawieniach konta. Pozostają zapisane do ich usunięcia, wycofania zgody albo wyczyszczenia danych konta. Wycofanie zgody nie wpływa na zgodność wcześniejszego przetwarzania z prawem. Odrębnie uzgodniona umowa lub dokument rozliczeniowy ma własny cel i zasady przechowywania. Odbiorców, zabezpieczenia i Twoje prawa opisują pozostałe części tej Polityki. Podane dane stanowią oświadczenie użytkownika, a nie weryfikację tożsamości ani kwalifikację podatkową. Wersja informacji: 2026-10-28-v1."}</p>
+        <p>{en
+          ? "From 28 October 2026, a separate accountability record stores the account identifier, event type and server time, notice version and digest, and the names of the data fields concerned. It does not store the values entered in these fields. It records consent, changes to details with active consent and withdrawal or removal of the details. This minimal evidence serves accountability obligations under Article 6(1)(c), in conjunction with Articles 5(2) and 7(1) GDPR. Its retention is assessed separately from the optional details, under this policy's retention rules and your rights. Earlier consent is not assigned a fictional past grant time."
+          : "Od 28 października 2026 r. odrębny rejestr rozliczalności zapisuje identyfikator konta, typ i czas zdarzenia według serwera, wersję i skrót informacji oraz nazwy pól, których dotyczy zdarzenie. Nie zapisuje wartości wpisanych w te pola. Odnotowuje zgodę, zmianę danych przy aktywnej zgodzie oraz wycofanie zgody lub usunięcie danych. Minimalny dowód służy obowiązkom rozliczalności z art. 6 ust. 1 lit. c w związku z art. 5 ust. 2 i art. 7 ust. 1 RODO. Jego przechowywanie oceniamy odrębnie od opcjonalnych danych, według opisanych w Polityce zasad retencji i praw osób. Wcześniejszym zgodom nie przypisujemy fikcyjnej daty udzielenia."}</p>
       </>}
   </section>;
 }
@@ -150,6 +153,7 @@ export function AccountPrivateDetails({ user, client }) {
   const [details, setDetails] = useState(() => detailsFromMetadata(user?.user_metadata?.[REGISTRATION_DETAILS_KEY]));
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [historyRevision, setHistoryRevision] = useState(0);
   const busy = useRef(false);
   const fingerprint = JSON.stringify(user?.user_metadata?.[REGISTRATION_DETAILS_KEY] ?? null);
   useEffect(() => {
@@ -171,6 +175,7 @@ export function AccountPrivateDetails({ user, client }) {
       if (error) throw error;
       if (data?.user?.id !== user.id) throw new Error(en ? "The save was not confirmed." : "Nie potwierdzono zapisu danych.");
       setDetails(detailsFromMetadata(data.user.user_metadata?.[REGISTRATION_DETAILS_KEY]));
+      setHistoryRevision(value => value + 1);
       clearPendingRegistrationDetails();
       setFeedback({ error: false, message: remove
         ? (en ? "Optional details deleted. Consent withdrawn." : "Opcjonalne dane usunięte. Zgoda została wycofana.")
@@ -189,5 +194,56 @@ export function AccountPrivateDetails({ user, client }) {
       </button>
     </div>
     {feedback && <p className={`ih-private-details-feedback${feedback.error ? " is-error" : ""}`} role={feedback.error ? "alert" : "status"}>{feedback.message}</p>}
+    <RegistrationConsentHistory userId={user?.id} client={client} revision={`${historyRevision}:${fingerprint}`} />
   </form>;
+}
+
+function RegistrationConsentHistory({ userId, client, revision }) {
+  const en = useSitePreferences().language === "en";
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    if (!open || !userId) return;
+    let active = true;
+    setLoading(true);
+    setFailed(false);
+    async function load() {
+      try {
+        const { data, error } = await client.from("ideahire_registration_consent_events")
+          .select("id,event_type,notice_version,recorded_at")
+          .eq("user_id", userId).order("recorded_at", { ascending: false })
+          .order("id", { ascending: false }).limit(20);
+        if (error) throw error;
+        if (active) setRows(Array.isArray(data) ? data : []);
+      } catch { if (active) setFailed(true); }
+      finally { if (active) setLoading(false); }
+    }
+    load();
+    return () => { active = false; };
+  }, [open, userId, client, revision, retry]);
+  const labels = en
+    ? { granted: "Consent recorded", details_updated: "Details updated with active consent", withdrawn: "Consent withdrawn or details removed", observed: "Existing consent observed at deployment" }
+    : { granted: "Zapisano zgodę", details_updated: "Zmieniono dane przy aktywnej zgodzie", withdrawn: "Wycofano zgodę lub usunięto dane", observed: "Odnotowano zgodę zastaną przy wdrożeniu" };
+  function dateLabel(value) {
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat(en ? "en-GB" : "pl-PL",
+      { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Warsaw" }).format(date) : "—";
+  }
+  return <details className="ih-registration-consent-history" onToggle={event => setOpen(event.currentTarget.open)}>
+    <summary>{en ? "Consent history" : "Historia zgód"}</summary>
+    {open && <div aria-busy={loading}>
+      {loading ? <p role="status">{en ? "Loading history…" : "Wczytywanie historii…"}</p>
+        : failed ? <div><p role="alert">{en ? "History is temporarily unavailable." : "Historia jest chwilowo niedostępna."}</p>
+          <button type="button" onClick={() => setRetry(value => value + 1)}>{en ? "Try again" : "Spróbuj ponownie"}</button></div>
+        : rows.length ? <ol>{rows.map(row => <li key={row.id}>
+          <strong>{labels[row.event_type] || (en ? "Consent event" : "Zdarzenie dotyczące zgody")}</strong>
+          <time dateTime={row.recorded_at}>{dateLabel(row.recorded_at)}</time>
+          <small>{en ? "Notice version: " : "Wersja informacji: "}{row.notice_version}</small>
+        </li>)}</ol> : <p>{en ? "No events recorded yet." : "Nie zapisano jeszcze zdarzeń."}</p>}
+      <p>{en ? "The latest 20 events recorded since this feature was introduced. Times use the Warsaw time zone." : "Ostatnie 20 zdarzeń zapisanych od wdrożenia tej funkcji. Czas według strefy Warszawy."}</p>
+    </div>}
+  </details>;
 }
