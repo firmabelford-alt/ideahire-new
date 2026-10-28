@@ -197,7 +197,7 @@ export default function LucynaDock({ supabase, user, administration = false }) {
       </header>
       <div className="ih64-dock-body"><DockBoundary administration={administration} key={attempt} onRetry={() => setAttempt(value => value + 1)}><React.Suspense fallback={<SubpageLoading />}><Assistant supabase={supabase} user={user} embedded visible={open} administration={administration}/></React.Suspense></DockBoundary></div>
     </section>}
-    {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI. Przeciągnij, aby przesunąć przycisk, lub użyj klawiszy strzałek. Home przywraca pozycję." aria-haspopup="dialog" aria-expanded="false" aria-controls={loaded ? "ih64-lucyna-window" : undefined} title="Lucyna AI — kliknij, aby otworzyć; przeciągnij, aby przesunąć"
+    {!open && !administration && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI. Przeciągnij, aby przesunąć przycisk, lub użyj klawiszy strzałek. Home przywraca pozycję." aria-haspopup="dialog" aria-expanded="false" aria-controls={loaded ? "ih64-lucyna-window" : undefined} title="Lucyna AI — kliknij, aby otworzyć; przeciągnij, aby przesunąć"
       style={{ "--ih84-launcher-x": launcher.x + "px", "--ih84-launcher-y": launcher.y + "px", "--ih84-launcher-width": launcher.width + "px" }}
       onPointerDown={event => beginDrag(event, "launcher")} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={cancelDrag} onKeyDown={event => moveWithKeyboard(event, "launcher")} onClick={show}><strong>AI</strong><LucynaSymbol/></button>}
   </div>, document.body);

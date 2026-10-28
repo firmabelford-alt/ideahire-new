@@ -3,7 +3,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, ChevronRight, ClipboardList, FileText, History, LayoutDashboard, LockKeyhole, LogOut, Menu, MessageSquare, Search, ShieldCheck, Users, X } from 'lucide-react';
 import { BrandSignature } from './Brand';
 import { FormSelect } from './FormControls';
-import { adminActionLabel, adminQueueSearch } from './AdminDomain';
+import { adminActionLabel, adminQueueSearch, adminQueuePage } from './AdminDomain';
 import { privacyCall } from './PrivacyRequests';
 import LucynaSymbol from './LucynaSymbol';
 import { requestLucynaDock } from './LucynaDock';
@@ -43,7 +43,7 @@ export function AdminTabs({ items, value, onChange, label='Obszary pracy' }) {
 export function AdminPane({ active, children }) { return <div className="ih-admin-pane" hidden={!active}>{children}</div>; }
 
 export function AdminFilterBar({ search, onSearch, placeholder='Szukaj sprawy lub użytkownika', filter, onFilter, options, label='Widok' }) {
-  return <div className="ih-admin-filterbar"><label className="ih-admin-search"><Search size={19} aria-hidden="true" /><span className="ih-admin-sr">{placeholder}</span><input type="search" value={search} onChange={event=>onSearch(event.target.value)} placeholder={placeholder} maxLength={200} />{search && <button type="button" onClick={()=>onSearch('')} aria-label="Wyczyść wyszukiwanie"><X size={18} /></button>}</label>{options && <FormSelect label={label} value={filter} onChange={event=>onFilter(event.target.value)}>{options.map(([id,title])=><option value={id} key={id}>{title}</option>)}</FormSelect>}</div>;
+  return <div className={"ih-admin-filterbar" + (options ? "" : " is-search-only")}><label className="ih-admin-search"><Search size={19} aria-hidden="true" /><span className="ih-admin-sr">{placeholder}</span><input type="search" value={search} onChange={event=>onSearch(event.target.value)} placeholder={placeholder} maxLength={200} />{search && <button type="button" onClick={()=>onSearch('')} aria-label="Wyczyść wyszukiwanie"><X size={18} /></button>}</label>{options && <FormSelect label={label} value={filter} onChange={event=>onFilter(event.target.value)}>{options.map(([id,title])=><option value={id} key={id}>{title}</option>)}</FormSelect>}</div>;
 }
 
 export function AdminMetrics({ items }) {
@@ -59,9 +59,29 @@ export function useAdminSelection(items, key='request') {
 }
 
 export function AdminQueue({ items, selectedId, onSelect, children, label='Kolejka spraw' }) {
-  const detail = useRef(null);
-  const select = id => { onSelect(id); if(window.matchMedia('(max-width:1100px)').matches) requestAnimationFrame(()=>detail.current?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth'})); };
-  return <div className="ih-admin-queue-layout"><aside className="ih-admin-queue-list" aria-label={label}><div className="ih-admin-queue-caption"><strong>{label}</strong><span>{items.length}</span></div>{items.map(item=><button type="button" key={item.id} onClick={()=>select(item.id)} aria-current={selectedId===item.id ? 'true' : undefined}><span className="ih-admin-queue-number">{item.number}</span><strong>{item.title}</strong><span>{item.subtitle}</span><span className={'ih-admin-queue-meta'+(item.urgent ? ' is-urgent' : '')}>{item.meta}</span></button>)}</aside><div className="ih-admin-record" ref={detail} tabIndex={-1}>{children}</div></div>;
+  const [page,setPage] = useState(() => Math.max(0,Math.floor(items.findIndex(item=>item.id===selectedId)/6)));
+  const selectedIndex=items.findIndex(item=>item.id===selectedId);
+  useEffect(()=>setPage(Math.max(0,Math.floor(selectedIndex/6))),[selectedId]);
+  const result=adminQueuePage(items,page);
+  return <div className="ih-admin-queue-layout">
+    <label className="ih-admin-mobile-picker"><span>{label} <span>({items.length})</span></span><select value={selectedId || ''} onChange={event=>onSelect(event.target.value)}>{items.map(item=><option key={item.id} value={item.id}>{[item.number,item.title].filter(Boolean).join(' · ')}</option>)}</select></label>
+    <aside className="ih-admin-queue-list" aria-label={label}>
+      <div className="ih-admin-queue-caption"><strong>{label}</strong><span>{items.length}</span></div>
+      <div className="ih-admin-queue-rows">{result.rows.map(item=><button type="button" key={item.id} onClick={()=>onSelect(item.id)} aria-current={selectedId===item.id ? 'true' : undefined}><span className="ih-admin-queue-number">{item.number}</span><strong>{item.title}</strong><span>{item.subtitle}</span><span className={'ih-admin-queue-meta'+(item.urgent ? ' is-urgent' : '')}>{item.meta}</span></button>)}</div>
+      {result.last>0&&<nav className="ih-admin-queue-pages" aria-label="Strony listy"><button type="button" disabled={result.current===0} onClick={()=>setPage(result.current-1)} aria-label="Poprzednie wpisy"><ArrowLeft size={17} aria-hidden="true"/></button><span>{result.start+1}–{Math.min(items.length,result.start+result.rows.length)} z {items.length}</span><button type="button" disabled={result.current===result.last} onClick={()=>setPage(result.current+1)} aria-label="Następne wpisy"><ArrowRight size={17} aria-hidden="true"/></button></nav>}
+    </aside>
+    <div className="ih-admin-record" tabIndex={-1}>{children}</div>
+  </div>;
+}
+
+export function AdminCaseRow({ to, title, number, status, assignment, budget, opened }) {
+  return <Link className="ih-admin-case-row" to={to}><div className="ih-admin-case-row-heading"><span>{number}</span>{status}</div><h3>{title || 'Sprawa dotycząca współpracy'}</h3><div className="ih-admin-case-row-meta"><span>{assignment}</span><strong>{budget}</strong><span>{opened}</span></div><span className="ih-admin-case-row-open">Otwórz sprawę<ArrowRight size={17} aria-hidden="true"/></span></Link>;
+}
+
+export function AdminActivityLog({ rows, actorName, formatDate }) {
+  const [search,setSearch]=useState(''),[showCodes,setShowCodes]=useState(false);
+  const visible=rows.filter(row=>adminQueueSearch({title:adminActionLabel(row.action),subtitle:actorName(row),number:row.action,search:formatDate(row.created_at)},search));
+  return <section className="ih-admin-activity"><AdminFilterBar search={search} onSearch={setSearch} placeholder="Szukaj działania lub administratora"/><div className="ih-admin-activity-toolbar"><strong>Liczba wpisów: {visible.length}</strong><label><input type="checkbox" checked={showCodes} onChange={event=>setShowCodes(event.target.checked)}/><span>Kody techniczne</span></label></div>{visible.length===0?<p className="ih-admin-activity-empty">{rows.length?'Brak wpisów pasujących do wyszukiwania.':'Brak zapisanych działań.'}</p>:<ol className="ih-admin-activity-list">{visible.map(row=><li key={row.id}><div><strong>{adminActionLabel(row.action)}</strong>{showCodes&&<code>{row.action}</code>}</div><div className="ih-admin-activity-meta"><span>{actorName(row)}</span><time dateTime={row.created_at}>{formatDate(row.created_at)}</time></div>{row.dispute_id&&<Link to={'/disputes/'+row.dispute_id}>Otwórz sprawę<ArrowRight size={16} aria-hidden="true"/></Link>}</li>)}</ol>}</section>;
 }
 
 function flatten(children) { return React.Children.toArray(children).flatMap(child => child?.type === React.Fragment ? flatten(child.props.children) : [child]).filter(child=>typeof child !== 'string' || child.trim()); }

@@ -15,6 +15,8 @@ export function orderAdminRequests(rows, now = Date.now()) {
 }
 
 export const ADMIN_ACTION_LABELS = {
+  dispute_taken_for_review:'Rozpoczęto analizę sporu', decision_issued:'Wydano decyzję w sprawie', appeal_submitted:'Otrzymano odwołanie', appeal_final_decision_issued:'Wydano decyzję po odwołaniu',
+  private_report_evidence_opened:'Otwarto dowód ze zgłoszenia', private_content_removed_without_account_restriction:'Usunięto zgłoszoną treść', content_removed:'Usunięto treść', review_started:'Rozpoczęto analizę zgłoszenia',
   dispute_opened:'Otwarto spór', dispute_taken:'Przypisano spór', dispute_assigned:'Przypisano opiekuna',
   dispute_message_added:'Dodano komunikat do sprawy', dispute_decision_issued:'Wydano decyzję', dispute_appeal_response_added:'Odpowiedziano na odwołanie',
   admin_granted:'Nadano uprawnienia administratora', admin_revoked:'Odebrano uprawnienia administratora',
@@ -45,4 +47,11 @@ export function adminPrivacyFilter(row, filter, userId, now = Date.now()) {
   if (filter === 'unassigned') return open && !row.assigned_admin_id;
   if (filter === 'overdue') return open && Date.parse(row.extended_due_at || row.due_at) < now;
   return open;
+}
+
+export function adminQueuePage(items, page = 0, size = 6) {
+  const pageSize = Math.max(1, Math.floor(Number(size)) || 6);
+  const last = Math.max(0, Math.ceil(items.length / pageSize) - 1);
+  const current = Math.min(last, Math.max(0, Math.floor(Number(page)) || 0));
+  return { current, last, start:current * pageSize, rows:items.slice(current * pageSize,(current + 1) * pageSize) };
 }

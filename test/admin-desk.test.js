@@ -6,11 +6,11 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { build } from 'esbuild';
-import { adminPrivacyFilter, orderAdminRequests, adminQueueSearch, adminActionLabel } from '../src/AdminDomain.js';
+import { adminPrivacyFilter, orderAdminRequests, adminQueueSearch, adminActionLabel, adminQueuePage } from '../src/AdminDomain.js';
 const compiled = new URL(`.admin-test-${process.pid}.mjs`,import.meta.url);
 const bundle = await build({stdin:{contents:"export * from '../src/AdminDesk.jsx'; export * from '../src/LucynaDock.jsx'; export {default as AdminLucynaDesk, ADMIN_GUIDES} from '../src/AdminLucyna.jsx'; export {getSubpage} from '../src/Subpages.jsx';",resolveDir:fileURLToPath(new URL('.',import.meta.url))},bundle:true,platform:'node',format:'esm',packages:'external',loader:{'.css':'empty'},write:false,logLevel:'silent'});
 await writeFile(compiled,bundle.outputFiles[0].text);
-const {AdminNavigation,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
+const {AdminNavigation,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
 const render=(Component,props={},path='/admin')=>{
  const old=console.error; console.error=(...args)=>{if(!String(args[0]).includes('useLayoutEffect does nothing on the server'))old(...args);};
  try{return renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:[path]},React.createElement(Component,props)));}finally{console.error=old;}
@@ -97,4 +97,36 @@ test('login and password recovery are classified as access pages for navigation 
  for(const pathname of ['/login','/register','/reset-password'])assert.equal(getSubpage({pathname,hash:''}).kind,'access');
  assert.equal(adminActionLabel('dispute_appeal_response_added'),'Odpowiedziano na odwołanie');
  assert.equal(adminActionLabel('new_server_event'),'Zapisano działanie administracyjne');
+});
+
+
+test('large queues have bounded pages without losing records at the last page',()=>{
+ const items=Array.from({length:17},(_,i)=>({id:String(i)}));
+ const pages=[0,1,2].flatMap(page=>adminQueuePage(items,page).rows.map(row=>row.id));
+ assert.deepEqual(pages,items.map(row=>row.id));
+ assert.equal(adminQueuePage(items,-3).current,0);
+ assert.equal(adminQueuePage(items,999).current,2);
+ assert.equal(adminQueuePage([],999).rows.length,0);
+});
+test('a selected record beyond the first page is offered in the desktop list and the mobile picker',()=>{
+ const items=Array.from({length:17},(_,i)=>({id:String(i),number:'IH-'+i,title:'Case '+i,subtitle:'Sample',meta:'Open'}));
+ const html=render(AdminQueue,{items,selectedId:'14',onSelect(){},children:React.createElement('article',null,'Selected record details')});
+ assert.equal((html.match(/<option /g)||[]).length,17);
+ assert.match(html,/<option value="14" selected=""/);
+ assert.match(html,/<button[^>]*aria-current="true"[^>]*>.*?Case 14/);
+ assert.match(html,/13–17 z 17/);
+ assert.match(html,/Selected record details/);
+});
+test('activity rows show the operation, actor and date without a technical disclosure on every row',()=>{
+ const html=render(AdminActivityLog,{rows:[{id:'event',action:'dispute_appeal_response_added',actor_user_id:'actor',created_at:'2026-10-28T10:00:00Z',dispute_id:'case-1'}],actorName:()=> 'Administrator Sample',formatDate:()=> '28.10.2026, 11:00'});
+ assert.match(html,/Odpowiedziano na odwołanie/);
+ assert.match(html,/Administrator Sample/);
+ assert.match(html,/href="\/disputes\/case-1"/);
+ assert.doesNotMatch(html,/<details|<code/);
+});
+test('compact admin case rows preserve the target, status and financial context',()=>{
+ const html=render(AdminCaseRow,{to:'/disputes/case-1',title:'Project title',number:'IH-000001',status:React.createElement('span',null,'Decision issued'),assignment:'Assigned',budget:'500 PLN',opened:'28.10.2026'});
+ for(const text of ['Project title','IH-000001','Decision issued','Assigned','500 PLN','28.10.2026'])assert.match(html,new RegExp(text));
+ assert.match(html,/href="\/disputes\/case-1"/);
+ assert.doesNotMatch(html,/<h2/);
 });

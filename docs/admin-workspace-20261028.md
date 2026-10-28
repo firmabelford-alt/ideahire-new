@@ -20,3 +20,14 @@ Na laptopie nawigacja jest po lewej stronie. Na telefonie otwiera się jako menu
 Nie uruchamiano banów, usuwania danych, zmian ról ani płatności na rzeczywistych kontach. Wydanie nie wymaga nowej migracji. Integracja CAPTCHA i nieukończona nowa ścieżka moderacji ogłoszeń są odłożone i nie są częścią tego wydania.
 
 Weryfikacja obejmuje kompilację produkcyjną, testy automatyczne interfejsu i logiki kolejek oraz porównanie nazw i liczby istniejących wywołań serwera w siedmiu obszarach administracji. Osobny odbiór zalogowanych widoków i aktywnego połączenia AI wymaga konta z właściwymi uprawnieniami; sam poprawny build ich nie potwierdza.
+
+## Korekta układu po przeglądzie widoków mobilnych
+
+- Nagłówek wniosku ma naturalną wysokość i nie dziedziczy pionowego rozciągnięcia starego układu.
+- Pole wyszukiwania ma jedną ramkę; ogólne style pól nie przesłaniają stylu wyszukiwarki.
+- Na telefonie i w węższym oknie listę zastępuje wybór wpisu nad jego szczegółami. Na szerokim ekranie lista ma strony po sześć pozycji, bez wewnętrznego obcinania kolejnych wpisów.
+- Przycisk przygotowania operacji ma szerokość dopasowaną do tekstu. Identyfikator użytkownika jest dostępny w rozwijanych szczegółach.
+- Sprawy mają krótsze wiersze zachowujące status, przypisanie, kwotę i datę. Rejestr działań ma wyszukiwanie, wykonawcę, datę i odsyłacz do powiązanej sprawy. Kody techniczne są opcjonalne.
+- Lucyna pozostaje dostępna w nagłówku; zamknięte okno nie dodaje pływającego przycisku nad treścią administracji.
+
+Kompilacja produkcyjna i 90 testów automatycznych przechodzą. Porównanie istniejących operacji serwerowych w siedmiu obszarach nie wykazało usunięcia ani zmiany wywołań.

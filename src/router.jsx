@@ -40,7 +40,7 @@ import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
-import { AdminNavigation, AdminTabs, AdminPane, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminAuditAction, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
+import { AdminNavigation, AdminTabs, AdminPane, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
 import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./AdminDomain";
 import AdminLucynaDesk from "./AdminLucyna";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
@@ -10652,7 +10652,7 @@ function PrivacyCenter() {
                         <strong>
                           {request.requested_erasure_action
                             ? ERASURE_ACTION_LABELS[request.requested_erasure_action]
-                            : "Starszy wniosek — wybór nie został zapisany"}
+                            : "Zakres wymaga potwierdzenia"}
                         </strong>
                         <p>
                           {request.requested_erasure_action
@@ -21010,6 +21010,8 @@ function DisputeListCard({ dispute, userId, adminView = false }) {
       ? "Zleceniodawca"
       : "Wykonawca";
 
+  if (adminView) return <AdminCaseRow to={`/disputes/${dispute.id}`} title={dispute.job_title_snapshot} number={formatDisputeNumber(dispute.case_number)} status={<DisputeStatusPill status={dispute.status}/>} assignment={dispute.assigned_admin_id?"Przypisana do administratora":"Bez opiekuna"} budget={formatDisputeMoney(dispute.price_amount_snapshot,dispute.price_currency_snapshot)} opened={formatDisputeDate(dispute.opened_at)} />;
+
   return (
     <Link
       className="dispute-list-card"
@@ -23246,7 +23248,7 @@ function AdminJobs() {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Nazwa, opis, kategoria lub użytkownik..."
+              placeholder="Szukaj ogłoszenia"
             />
           </label>
 
@@ -23497,7 +23499,7 @@ function AdminEvidenceMessages() {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Treść, użytkownik, zlecenie lub numer sprawy..."
+              placeholder="Szukaj wiadomości"
             />
           </label>
         </section>
@@ -25973,7 +25975,7 @@ function AdminUserPrivacyAccount() {
                 <div>
                   <span className="section-label">Administracyjny widok konta</span>
                   <h1>{accountName}</h1>
-                  <p>ID użytkownika: <code>{userId}</code></p>
+                  <details className="ih-admin-account-id"><summary>Identyfikator użytkownika</summary><code>{userId}</code></details>
                   {completedDataMinimization && (
                     <p className="erasure-account-auth-state">
                       Login pozostaje aktywny. Użytkownik może ponownie
@@ -26049,12 +26051,12 @@ function AdminUserPrivacyAccount() {
                     <strong>
                       {requestedErasureAction
                         ? ERASURE_ACTION_LABELS[requestedErasureAction]
-                        : "Starszy wniosek — brak zapisanego wyboru"}
+                        : "Zakres wymaga potwierdzenia"}
                     </strong>
                     <p>
                       {requestedErasureAction
                         ? "Przygotowana operacja musi być dokładnie zgodna z tym wyborem."
-                        : "Potwierdź zakres na podstawie treści i historii wniosku. Dotyczy to wyłącznie starszych spraw."}
+                        : "W starszym wniosku nie zapisano wyboru. Sprawdź jego treść i historię przed operacją."}
                     </p>
                   </div>
                 </div>
@@ -27331,7 +27333,7 @@ function AdminPrivacyRequests() {
 
                 return (
                   <article className={`privacy-admin-card${isOverdue ? " is-overdue" : ""}`} key={request.id}>
-                    <div className="privacy-request-topline">
+                    <div className="ih-admin-case-header">
                       <div>
                         <span>{formatPrivacyRequestNumber(request.request_number)}</span>
                         <h3>{getOptionLabel(PRIVACY_REQUEST_TYPES, request.request_type)}</h3>
@@ -27363,19 +27365,19 @@ function AdminPrivacyRequests() {
                           <strong>
                             {request.requested_erasure_action
                               ? ERASURE_ACTION_LABELS[request.requested_erasure_action]
-                              : "Starszy wniosek — wybór nie został zapisany"}
+                              : "Zakres wymaga potwierdzenia"}
                           </strong>
                           <p>
                             {request.requested_erasure_action
                               ? ERASURE_ACTION_DESCRIPTIONS[request.requested_erasure_action]
-                              : "Przed operacją ustal zakres z treści i historii wniosku."}
+                              : "W starszym wniosku nie zapisano wyboru. Sprawdź jego treść i historię przed operacją."}
                           </p>
                         </div>
                         <Link
                           className="privacy-admin-account-link"
                           to={`/admin/privacy/users/${request.requester_user_id}?request=${request.id}`}
                         >
-                          Otwórz konto i kontrolę usunięcia danych 
+                          Obsłuż usunięcie danych
                         </Link>
                       </>
                     )}
@@ -28225,7 +28227,7 @@ function AdminPanel() {
               <span className="dispute-count-badge">{visibleDisputes.length}</span>
             </div>
 
-            <AdminFilterBar search={queueSearch} onSearch={setQueueSearch} placeholder="Numer sprawy lub projekt" filter={filter} onFilter={setFilter} options={[["active","Aktywne"],["unassigned","Bez opiekuna"],["mine","Moje"],["awaiting","Czekają na odpowiedź"],["appealed","Odwołania"],["closed","Zakończone"],["all","Wszystkie"]]} />
+            <AdminFilterBar search={queueSearch} onSearch={setQueueSearch} placeholder="Numer lub tytuł sprawy" filter={filter} onFilter={setFilter} options={[["active","Aktywne"],["unassigned","Bez opiekuna"],["mine","Moje"],["awaiting","Czekają na odpowiedź"],["appealed","Odwołania"],["closed","Zakończone"],["all","Wszystkie"]]} />
 
             {visibleDisputes.length === 0 ? (
               <p className="dispute-empty-copy">Brak spraw spełniających wybrany filtr.</p>
@@ -28306,28 +28308,7 @@ function AdminPanel() {
               </section></AdminPane>
             )}
 
-            <AdminPane active={adminView==="activity"}><section className="dispute-panel admin-audit-panel">
-              <span className="dispute-eyebrow">Rejestr działań</span>
-              <h2>Ostatnia aktywność</h2>
-              <div className="admin-audit-list">
-                {auditLog.length === 0 ? (
-                  <p>Brak zapisanych działań.</p>
-                ) : (
-                  auditLog.map((item) => (
-                    <article key={item.id}>
-                      <AdminAuditAction action={item.action} />
-                      <span>
-                        {getDisputeProfileName(
-                          profiles[item.actor_user_id],
-                          item.actor_role === "owner" ? "Właściciel" : "Administrator"
-                        )}
-                      </span>
-                      <time>{formatDisputeDate(item.created_at)}</time>
-                    </article>
-                  ))
-                )}
-              </div>
-            </section></AdminPane>
+            <AdminPane active={adminView==="activity"}><AdminActivityLog rows={auditLog} actorName={item=>getDisputeProfileName(profiles[item.actor_user_id],item.actor_role==="owner"?"Właściciel":"Administrator")} formatDate={formatDisputeDate}/></AdminPane>
           </aside></div>
       </main>
     </div>
