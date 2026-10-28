@@ -706,3 +706,4 @@ html:root body #root#root#root#root#root#root#root#root .lucyna-root .lu-compose
   }
   body.ih79-app #root .lucyna-root[data-embedded="false"][data-keyboard="true"] .lu-composer-meta { display:none!important; }
 }
+.lucyna-root .lu-admin-scope { margin:0; padding:10px 18px; border-bottom:1px solid var(--lu-line); background:var(--lu-surface); color:var(--lu-muted); font-size:12px; line-height:1.65; overflow-wrap:anywhere; }

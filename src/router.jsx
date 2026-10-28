@@ -40,6 +40,9 @@ import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
+import { AdminNavigation, AdminTabs, AdminPane, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminAuditAction, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
+import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./AdminDomain";
+import AdminLucynaDesk from "./AdminLucyna";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
@@ -5295,106 +5298,14 @@ function AccountNavbar() {
 
 function AdminNavbar() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
-
-  const displayName =
-    user?.user_metadata?.name ||
-    user?.email?.split("@")[0] ||
-    "Administracja";
-
+  const [logoutError,setLogoutError] = useState("");
   async function handleAdminLogout() {
-    try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) throw error;
-
-      navigate("/login", { replace: true });
-    } catch (error) {
-      alert(
-        `Nie udało się wylogować: ${
-          error?.message || "Nieznany błąd"
-        }`
-      );
-    }
+    try { const { error } = await supabase.auth.signOut(); if(error) throw error; navigate("/login",{replace:true}); }
+    catch(error) { setLogoutError(cleanSupabaseError(error,"Nie udało się wylogować.")); }
   }
-
-  return (
-    <>
-    <header
-      className="navbar admin-navbar"
-      data-ui-release="ideahire-v5-5-20260919"
-    >
-      <Link className="admin-navbar-brand" to="/admin">
-        <span className="logo">
-          <BrandSignature />
-        </span>
-        <span className="admin-navbar-label">Administracja</span>
-      </Link>
-
-      <nav className="admin-nav-links" aria-label="Nawigacja administracji">
-        <NavLink
-          to="/admin"
-          end
-          className={({ isActive }) =>
-            isActive || location.pathname.startsWith("/disputes/")
-              ? "is-active"
-              : ""
-          }
-        >
-          Spory
-        </NavLink>
-
-        <NavLink
-          to="/admin/jobs"
-          className={({ isActive }) => (isActive ? "is-active" : "")}
-        >
-          Zlecenia
-        </NavLink>
-
-        <NavLink
-          to="/admin/messages"
-          className={({ isActive }) => (isActive ? "is-active" : "")}
-        >
-          Wiadomości dowodowe
-        </NavLink>
-
-        <NavLink
-          to="/admin/privacy"
-          className={({ isActive }) => (isActive ? "is-active" : "")}
-        >
-          Wnioski RODO
-        </NavLink>
-
-        <NavLink
-          to="/admin/moderation"
-          className={({ isActive }) => (isActive ? "is-active" : "")}
-        >
-          Moderacja
-        </NavLink>
-      </nav>
-
-      <div className="admin-navbar-actions">
-        <div className="admin-navbar-identity">
-          <strong>{displayName}</strong>
-          <span>
-            {staffRole === "owner" ? "Właściciel" : "Administrator"}
-          </span>
-        </div>
-
-        <button
-          type="button"
-          className="admin-logout-button"
-          onClick={handleAdminLogout}
-        >
-          Wyloguj się
-        </button>
-      </div>
-    </header>
-    <SubpageNavigation />
-    </>
-  );
+  return <><AdminNavigation name={user?.user_metadata?.name || user?.email?.split("@")[0] || "Administracja"} role={staffRole} onLogout={handleAdminLogout} assistantEnabled={LUCYNA_VISIBLE} />{logoutError && <p className="ih-admin-logout-error" role="alert">{logoutError}</p>}</>;
 }
 
 /* LOGIN */
@@ -22230,9 +22141,9 @@ function DisputeDetails() {
         </section>
 
         <div className="dispute-detail-grid">
-          <div className="dispute-detail-main">
+          <div className="dispute-detail-main"><AdminCaseTools disabled={!isStaff}>
             {currentDecision && (
-              <section className="dispute-panel dispute-decision-panel">
+              <section className="dispute-panel dispute-decision-panel ih-admin-case-summary">
                 <span className="dispute-eyebrow">{currentDecision.is_final ? "Decyzja ostateczna po odwołaniu" : "Aktualna decyzja"}</span>
                 <h2>{getOptionLabel(ADMIN_DECISION_OPTIONS, currentDecision.outcome)}</h2>
                 {currentDecision.amount != null && (
@@ -22267,7 +22178,7 @@ function DisputeDetails() {
               </section>
             )}
 
-            {appeals.length > 0 && <section className="dispute-panel">
+            {appeals.length > 0 && <section className="dispute-panel ih-admin-dispute-appeals">
               <div className="dispute-panel-heading"><h2>Odwołania i odpowiedzi</h2><span className="dispute-count-badge">{appeals.length}</span></div>
               <p>Odwołanie wstrzymuje rozliczenie. Administrator odpowiada na zgłoszone argumenty, a następnie wydaje decyzję ostateczną po zakończeniu pierwotnego terminu odwołań.</p>
               {appeals.map(appeal => {
@@ -22298,7 +22209,7 @@ function DisputeDetails() {
               })}
             </section>}
 
-            <section className="dispute-panel">
+            <section className="dispute-panel ih-admin-correspondence">
               <div className="dispute-panel-heading">
                 <div>
                   <span className="dispute-eyebrow">Historia sprawy</span>
@@ -22527,7 +22438,7 @@ function DisputeDetails() {
               </section>
             )}
 
-            <section className="dispute-panel">
+            <section className="dispute-panel ih-admin-evidence">
               <div className="dispute-panel-heading">
                 <div>
                   <span className="dispute-eyebrow">Materiały</span>
@@ -23093,7 +23004,7 @@ function DisputeDetails() {
                   )}
               </section>
             )}
-          </div>
+          </AdminCaseTools></div>
 
           <aside className="dispute-detail-sidebar">
             <section className="dispute-panel dispute-summary-card">
@@ -23223,11 +23134,11 @@ function AdminJobs() {
   async function loadAdminJobs() {
     if (!user?.id) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await adminRead(supabase
       .from("jobs")
       .select("id, user_id, title, description, category, budget, created_at")
       .order("created_at", { ascending: false })
-      .limit(300);
+      .limit(300));
 
     if (error) throw error;
 
@@ -23236,10 +23147,10 @@ function AdminJobs() {
     let profileMap = {};
 
     if (ownerIds.length > 0) {
-      const { data: profileRows, error: profileError } = await supabase
+      const { data: profileRows, error: profileError } = await adminRead(supabase
         .from("profiles")
         .select("id, name, avatar_url")
-        .in("id", ownerIds);
+        .in("id", ownerIds));
 
       if (profileError) {
         console.error("ADMIN JOB PROFILES ERROR:", profileError);
@@ -23309,11 +23220,14 @@ function AdminJobs() {
       );
   });
 
+  const [selectedRecordId,selectRecord] = useAdminSelection(visibleJobs,"job");
+  const recordItems = visibleJobs.map(job=>({id:job.id,number:getJobCategoryLabel(job.category),title:job.title,subtitle:getDisputeProfileName(profiles[job.user_id],"Użytkownik"),meta:formatDisputeMoney(job.budget,"PLN")}));
+
   return (
     <div className="account-page admin-page">
       <AdminNavbar />
 
-      <main className="admin-shell admin-readonly-shell">
+      <main className="admin-shell admin-readonly-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027">
         <header className="admin-page-header">
           <div>
             <span className="section-label">Tryb tylko do odczytu</span>
@@ -23363,8 +23277,8 @@ function AdminJobs() {
             <p>Zmień wyszukiwanie albo wybierz inną kategorię.</p>
           </div>
         ) : (
-          <div className="admin-jobs-grid">
-            {visibleJobs.map((job) => {
+          <AdminQueue items={recordItems} selectedId={selectedRecordId} onSelect={selectRecord} label="Ogłoszenia">
+            {visibleJobs.filter(item=>item.id===selectedRecordId).map((job) => {
               const owner = profiles[job.user_id];
               const ownerName = getDisputeProfileName(owner, "Użytkownik");
 
@@ -23403,16 +23317,16 @@ function AdminJobs() {
                     </div>
                   </div>
 
-                  <a
+                  <Link
                     className="privacy-admin-account-link"
-                    href={`/admin/moderation/job/${encodeURIComponent(job.id)}`}
+                    to={`/admin/moderation/job/${encodeURIComponent(job.id)}`}
                   >
-                    Przejdź do moderacji konta 
-                  </a>
+                    Przejdź do moderacji konta
+                  </Link>
                 </article>
               );
             })}
-          </div>
+          </AdminQueue>
         )}
       </main>
     </div>
@@ -23431,13 +23345,13 @@ function AdminEvidenceMessages() {
   async function loadEvidenceMessages() {
     if (!user?.id) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await adminRead(supabase
       .from("dispute_message_evidence")
       .select(
         "id, dispute_id, message_id, message_sender_id, message_content_snapshot, message_created_at_snapshot, submitted_by, created_at"
       )
       .order("created_at", { ascending: false })
-      .limit(300);
+      .limit(300));
 
     if (error) throw error;
 
@@ -23446,10 +23360,10 @@ function AdminEvidenceMessages() {
     let disputeMap = {};
 
     if (disputeIds.length > 0) {
-      const { data: disputeRows, error: disputeError } = await supabase
+      const { data: disputeRows, error: disputeError } = await adminRead(supabase
         .from("disputes")
         .select("id, case_number, job_title_snapshot, status, client_id, contractor_id")
-        .in("id", disputeIds);
+        .in("id", disputeIds));
 
       if (disputeError) throw disputeError;
 
@@ -23469,10 +23383,10 @@ function AdminEvidenceMessages() {
     let profileMap = {};
 
     if (uniqueProfileIds.length > 0) {
-      const { data: profileRows, error: profileError } = await supabase
+      const { data: profileRows, error: profileError } = await adminRead(supabase
         .from("profiles")
         .select("id, name, avatar_url")
-        .in("id", uniqueProfileIds);
+        .in("id", uniqueProfileIds));
 
       if (profileError) {
         console.error("ADMIN EVIDENCE PROFILES ERROR:", profileError);
@@ -23557,11 +23471,14 @@ function AdminEvidenceMessages() {
     );
   });
 
+  const [selectedRecordId,selectRecord] = useAdminSelection(visibleItems,"evidence");
+  const recordItems = visibleItems.map(item=>({id:item.id,number:disputesById[item.dispute_id]?formatDisputeNumber(disputesById[item.dispute_id].case_number):"Sprawa",title:disputesById[item.dispute_id]?.job_title_snapshot||"Wiadomość dowodowa",subtitle:getDisputeProfileName(profiles[item.message_sender_id],"Użytkownik"),meta:formatDisputeDate(item.message_created_at_snapshot)}));
+
   return (
     <div className="account-page admin-page">
       <AdminNavbar />
 
-      <main className="admin-shell admin-readonly-shell">
+      <main className="admin-shell admin-readonly-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027">
         <header className="admin-page-header">
           <div>
             <span className="section-label">Prywatność i dowody</span>
@@ -23605,8 +23522,8 @@ function AdminEvidenceMessages() {
             <p>Użytkownicy nie dołączyli jeszcze wiadomości do spraw albo nic nie pasuje do wyszukiwania.</p>
           </div>
         ) : (
-          <div className="admin-evidence-message-list">
-            {visibleItems.map((item) => {
+          <AdminQueue items={recordItems} selectedId={selectedRecordId} onSelect={selectRecord} label="Dowody wiadomości">
+            {visibleItems.filter(item=>item.id===selectedRecordId).map((item) => {
               const dispute = disputesById[item.dispute_id];
               const senderName = getDisputeProfileName(
                 profiles[item.message_sender_id],
@@ -23648,7 +23565,7 @@ function AdminEvidenceMessages() {
                 </article>
               );
             })}
-          </div>
+          </AdminQueue>
         )}
       </main>
     </div>
@@ -23656,13 +23573,20 @@ function AdminEvidenceMessages() {
 }
 
 function AdminModeration() {
+  const adminDialog = useAdminDialog();
+  const adminBusy = useRef(false);
+  const [refreshWarning,setRefreshWarning] = useState("");
+
+
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
   const location = useLocation();
   const { moderationJobId } = useParams();
   const moderationParams = new URLSearchParams(location.search);
+  const [adminTab,setAdminTab] = useState(() => location.pathname.includes("/job/") || moderationParams.get("user") ? "decision" : "reports");
   const requestedUserId = moderationParams.get("user");
   const requestedJobId = moderationJobId || moderationParams.get("job");
+  useEffect(() => { if (moderationJobId || new URLSearchParams(location.search).get("user")) setAdminTab("decision"); }, [location.pathname, location.search, moderationJobId]);
   const routedModerationSubject =
     location.state?.moderationSubject?.id === requestedUserId
       ? location.state.moderationSubject
@@ -23709,7 +23633,7 @@ function AdminModeration() {
   const [form, setForm] = useState({
     decisionType: "temporary_suspension",
     durationDays: "7",
-    reasonCode: "fraud_or_scam",
+    reasonCode: "other_terms_breach",
     publicReason: "",
     termsReference: "",
     legalBasis: "",
@@ -23724,7 +23648,7 @@ function AdminModeration() {
     if (showLoading) setLoading(true);
 
     try {
-      const { error: refreshError } = await supabase.rpc(
+      const { error: refreshError } = await adminRpc(supabase,
         "get_my_ideahire_moderation_status"
       );
       if (refreshError) throw refreshError;
@@ -23736,31 +23660,31 @@ function AdminModeration() {
         contentReportsResult,
         contentReportAppealsResult,
       ] = await Promise.all([
-        supabase
+        adminRead(supabase
           .from("ideahire_moderation_cases")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(300),
-        supabase
+          .limit(300)),
+        adminRead(supabase
           .from("ideahire_moderation_notices")
           .select("*")
           .order("created_at", { ascending: false })
-          .limit(300),
-        supabase
+          .limit(300)),
+        adminRead(supabase
           .from("ideahire_moderation_appeals")
           .select("*")
           .order("submitted_at", { ascending: false })
-          .limit(300),
-        supabase
+          .limit(300)),
+        adminRead(supabase
           .from("ideahire_content_reports")
           .select("*")
           .order("submitted_at", { ascending: true })
-          .limit(300),
-        supabase
+          .limit(300)),
+        adminRead(supabase
           .from("ideahire_content_report_appeals")
           .select("*")
           .order("submitted_at", { ascending: true })
-          .limit(300),
+          .limit(300)),
       ]);
 
       if (casesResult.error) throw casesResult.error;
@@ -23782,10 +23706,10 @@ function AdminModeration() {
 
       let profileMap = {};
       if (profileIds.length > 0) {
-        const { data: profileRows, error: profileError } = await supabase
+        const { data: profileRows, error: profileError } = await adminRead(supabase
           .from("profiles")
           .select("id, name, avatar_url, created_at")
-          .in("id", profileIds);
+          .in("id", profileIds));
 
         if (profileError) throw profileError;
         profileMap = Object.fromEntries(
@@ -23802,7 +23726,7 @@ function AdminModeration() {
       setContentReportAppeals(contentReportAppealRows);
       setProfiles((current) => ({ ...current, ...profileMap }));
     } catch (error) {
-      setMessage(cleanSupabaseError(
+      (showLoading ? setMessage : setRefreshWarning)(cleanSupabaseError(
         error,
         "Nie udało się pobrać spraw moderacyjnych."
       ));
@@ -23859,7 +23783,7 @@ function AdminModeration() {
       setSelectedSubjectError("");
 
       try {
-        const { data, error } = await supabase.rpc(
+        const { data, error } = await adminRpc(supabase,
           "admin_open_ideahire_job_moderation",
           {
             p_job_id: moderationJobId,
@@ -23946,7 +23870,7 @@ function AdminModeration() {
 
     async function loadRequestedModerationSubject() {
       try {
-        const { data, error } = await supabase.rpc(
+        const { data, error } = await adminRpc(supabase,
           "admin_get_ideahire_moderation_subject",
           {
             p_user_id: requestedUserId,
@@ -24008,12 +23932,12 @@ function AdminModeration() {
       return;
     }
 
-    supabase
+    adminRead(supabase
       .from("jobs")
       .select("id, user_id, title, description, category, budget, created_at")
       .eq("id", requestedJobId)
       .eq("user_id", requestedUserId)
-      .maybeSingle()
+      .maybeSingle())
       .then(({ data, error }) => {
         if (error) {
           setMessage(cleanSupabaseError(
@@ -24023,7 +23947,7 @@ function AdminModeration() {
           return;
         }
         setSourceJob(data || null);
-      });
+      }).catch(error => setMessage(cleanSupabaseError(error, "Nie udało się pobrać źródłowego ogłoszenia.")));
   }, [moderationJobId, requestedJobId, requestedUserId]);
 
   async function handleUserSearch(event) {
@@ -24049,7 +23973,7 @@ function AdminModeration() {
         ? request.eq("id", query)
         : request.ilike("name", `%${query}%`);
 
-      const { data, error } = await request;
+      const { data, error } = await adminRead(request);
       if (error) throw error;
 
       const rows = data || [];
@@ -24081,12 +24005,12 @@ function AdminModeration() {
 
   async function handleOpenContentReport(report) {
     if (busy) return;
-    setBusy(`report:${report.id}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`report:${report.id}`);
     setMessage("");
 
     try {
       if (report.status === "submitted") {
-        const { error } = await supabase.rpc(
+        const { error } = await adminRpc(supabase,
           "admin_review_ideahire_content_report",
           {
             p_report_id: report.id,
@@ -24100,7 +24024,7 @@ function AdminModeration() {
 
       if (isPrivateContentReport(report)) {
         const { error: accessError } =
-          await supabase.rpc(
+          await adminRpc(supabase,
             "admin_record_ideahire_private_report_access",
             { p_report_id: report.id }
           );
@@ -24118,6 +24042,7 @@ function AdminModeration() {
         other_illegal_content: "illegal_content",
       };
 
+      setAdminTab("decision");
       setActiveContentReport({ ...report, status: "in_review" });
       setSelectedUserId(report.reported_user_id || "");
       setForm((current) => ({
@@ -24126,23 +24051,23 @@ function AdminModeration() {
         termsReference: "Regulamin IdeaHire § 21 — nielegalne treści i moderacja",
         internalNote: `Zgłoszenie ${report.report_number}: ${report.explanation}`.slice(0, 5000),
       }));
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się rozpocząć analizy zgłoszenia."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   async function handleOpenPrivateReportEvidence(report) {
     if (busy || !isPrivateContentReport(report)) return;
 
-    setBusy(`report-evidence:${report.id}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`report-evidence:${report.id}`);
     setMessage("");
 
     try {
       if (report.status === "submitted") {
-        const { error: reviewError } = await supabase.rpc(
+        const { error: reviewError } = await adminRpc(supabase,
           "admin_review_ideahire_content_report",
           {
             p_report_id: report.id,
@@ -24155,7 +24080,7 @@ function AdminModeration() {
       }
 
       const { data: accessData, error: accessError } =
-        await supabase.rpc(
+        await adminRpc(supabase,
           "admin_record_ideahire_private_report_access",
           { p_report_id: report.id }
         );
@@ -24211,7 +24136,7 @@ function AdminModeration() {
         "Prywatny dowód otwarto na 5 minut. Dostęp został zapisany w audycie."
       );
 
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(
         cleanSupabaseError(
@@ -24220,14 +24145,14 @@ function AdminModeration() {
         )
       );
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   async function handleRemovePrivateContent(report) {
     if (busy || !isPrivateContentReport(report)) return;
 
-    const decisionSummary = window.prompt(
+    const decisionSummary = await adminDialog.prompt(
       "Podaj uzasadnienie usunięcia treści dla użytkownika (minimum 50 znaków). Konto nie zostanie zawieszone:"
     );
     if (!decisionSummary) return;
@@ -24238,18 +24163,18 @@ function AdminModeration() {
       return;
     }
 
-    const legalAssessment = window.prompt(
+    const legalAssessment = await adminDialog.prompt(
       "Opcjonalnie wpisz podstawę prawną lub ocenę zgodności."
     );
-    if (!window.confirm(
+    if (!await adminDialog.confirm(
       "Treść zostanie ukryta po ręcznej analizie, ale konto nie zostanie zawieszone. Potwierdzasz proporcjonalność tej decyzji?"
     )) return;
 
-    setBusy(`report-remove:${report.id}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`report-remove:${report.id}`);
     setMessage("");
     try {
       if (report.status === "submitted") {
-        const { error: reviewError } = await supabase.rpc(
+        const { error: reviewError } = await adminRpc(supabase,
           "admin_review_ideahire_content_report",
           {
             p_report_id: report.id,
@@ -24261,7 +24186,7 @@ function AdminModeration() {
         if (reviewError) throw reviewError;
       }
 
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_remove_ideahire_reported_private_content",
         {
           p_report_id: report.id,
@@ -24277,7 +24202,7 @@ function AdminModeration() {
       setMessage(
         "Treść ukryto bez zawieszania konta. Decyzja, uzasadnienie i prawo do odwołania zostały zachowane."
       );
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(
         cleanSupabaseError(
@@ -24286,13 +24211,13 @@ function AdminModeration() {
         )
       );
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   async function handleResolveContentReportNoAction(report) {
     if (busy) return;
-    const decisionSummary = window.prompt(
+    const decisionSummary = await adminDialog.prompt(
       "Podaj jasne uzasadnienie decyzji dla zgłaszającego (minimum 50 znaków):"
     );
     if (!decisionSummary) return;
@@ -24301,14 +24226,14 @@ function AdminModeration() {
       return;
     }
 
-    const legalAssessment = window.prompt(
+    const legalAssessment = await adminDialog.prompt(
       "Opcjonalnie wpisz podstawę prawną lub wynik oceny prawnej. Możesz pozostawić puste."
     );
 
-    setBusy(`report-resolve:${report.id}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`report-resolve:${report.id}`);
     setMessage("");
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_review_ideahire_content_report",
         {
           p_report_id: report.id,
@@ -24320,11 +24245,11 @@ function AdminModeration() {
       if (error) throw error;
       setActiveContentReport(null);
       setMessage("Zgłoszenie zakończono. Zgłaszający zobaczy uzasadnienie i możliwość ponownej analizy.");
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zakończyć zgłoszenia."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -24336,10 +24261,10 @@ function AdminModeration() {
       return;
     }
 
-    setBusy(`content-appeal:${appeal.id}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`content-appeal:${appeal.id}`);
     setMessage("");
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_resolve_ideahire_content_report_appeal",
         {
           p_appeal_id: appeal.id,
@@ -24354,11 +24279,11 @@ function AdminModeration() {
           ? "Odwołanie uwzględniono, a zgłoszenie wróciło do ponownej analizy."
           : "Odwołanie oddalono wraz z uzasadnieniem."
       );
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się rozpoznać odwołania do zgłoszenia."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -24408,11 +24333,11 @@ function AdminModeration() {
       return;
     }
 
-    if (!window.confirm(
+    if (!await adminDialog.confirm(
       "Czy potwierdzasz, że przeanalizowano fakty, proporcjonalność decyzji i możliwość zastosowania łagodniejszego środka?"
     )) return;
 
-    setBusy("impose");
+    if (adminBusy.current) return; adminBusy.current = true; setBusy("impose");
     setMessage("");
 
     try {
@@ -24451,7 +24376,7 @@ function AdminModeration() {
         rpcPayload.p_report_id = activeContentReport.id;
       }
 
-      const { error } = await supabase.rpc(rpcName, rpcPayload);
+      const { error } = await adminRpc(supabase, rpcName, rpcPayload);
 
       if (error) throw error;
 
@@ -24469,16 +24394,16 @@ function AdminModeration() {
       });
       setActiveContentReport(null);
       setMessage("Decyzja została zapisana, a użytkownik otrzymał zawiadomienie i dostęp do odwołania.");
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się nałożyć ograniczenia."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   async function handleLiftRestriction(caseId) {
-    const reason = window.prompt(
+    const reason = await adminDialog.prompt(
       "Podaj uzasadnienie zdjęcia ograniczenia — minimum 30 znaków:"
     );
 
@@ -24488,22 +24413,22 @@ function AdminModeration() {
       return;
     }
 
-    setBusy(`lift:${caseId}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`lift:${caseId}`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_lift_ideahire_account_restriction",
         { p_case_id: caseId, p_reason: reason.trim() }
       );
 
       if (error) throw error;
       setMessage("Ograniczenie zostało zdjęte i użytkownik zobaczy uzasadnienie.");
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zdjąć ograniczenia."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -24554,11 +24479,11 @@ function AdminModeration() {
       return;
     }
 
-    setBusy("update:" + restrictionEditor.caseId);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy("update:" + restrictionEditor.caseId);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_update_ideahire_temporary_restriction",
         {
           p_case_id: restrictionEditor.caseId,
@@ -24577,14 +24502,14 @@ function AdminModeration() {
       setMessage(
         "Czas zawieszenia został zmieniony, zapisany w historii i przekazany użytkownikowi."
       );
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(
         error,
         "Nie udało się zmienić czasu zawieszenia."
       ));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -24600,11 +24525,11 @@ function AdminModeration() {
       return;
     }
 
-    setBusy(`appeal:${appeal.id}`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`appeal:${appeal.id}`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_resolve_ideahire_moderation_appeal",
         {
           p_appeal_id: appeal.id,
@@ -24620,11 +24545,11 @@ function AdminModeration() {
           ? "Odwołanie uwzględniono, a ograniczenie zdjęto."
           : "Odwołanie rozpoznano i utrzymano decyzję."
       );
-      await loadModeration(false);
+      void loadModeration(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się rozpoznać odwołania."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -24682,9 +24607,9 @@ function AdminModeration() {
 
   return (
     <div className="account-page admin-page admin-moderation-page">
-      <AdminNavbar />
+      <AdminNavbar />{adminDialog.element}
 
-      <main className="admin-shell moderation-admin-shell">
+      <main className="admin-shell moderation-admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadModeration(false).catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
         <header className="admin-page-header">
           <div>
             <span className="section-label">Moderacja i bezpieczeństwo</span>
@@ -24695,9 +24620,9 @@ function AdminModeration() {
             </p>
           </div>
           <span className="admin-role-badge">
-            {staffRole === "owner" ? "Owner — pełna kontrola" : "Administrator — do 30 dni"}
+            {staffRole === "owner" ? "Właściciel · pełne uprawnienia" : "Administrator — do 30 dni"}
           </span>
-        </header>
+        </header><AdminTabs value={adminTab} onChange={setAdminTab} items={[["reports","Zgłoszenia",openContentReports.length],["decision","Konto i decyzja"],["appeals","Odwołania",appeals.filter(item=>item.status==="submitted").length+contentReportAppeals.filter(item=>item.status==="submitted").length],["history","Historia"]]} />
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
@@ -24719,8 +24644,7 @@ function AdminModeration() {
             </Link>
           </div>
         )}
-
-        <section className="moderation-content-reports">
+        <AdminPane active={adminTab==="reports"}><section className="moderation-content-reports">
           <div className="moderation-content-reports-heading">
             <div>
               <span className="section-label">Zgłoszenia treści i materiałów</span>
@@ -24929,10 +24853,10 @@ function AdminModeration() {
               ))}
             </div>
           )}
-        </section>
+        </section></AdminPane>
 
         {openContentReportAppeals.length > 0 && (
-          <section className="moderation-content-report-appeals">
+          <AdminPane active={adminTab==="appeals"}><section className="moderation-content-report-appeals">
             <div>
               <span className="section-label">Ponowna analiza zgłoszeń</span>
               <h2>Odwołania zgłaszających</h2>
@@ -24977,10 +24901,10 @@ function AdminModeration() {
                 );
               })}
             </div>
-          </section>
+          </section></AdminPane>
         )}
 
-        <section className="moderation-search-card">
+        <AdminPane active={adminTab==="decision"}><section className="moderation-search-card">
           <div>
             <span className="section-label">Wybór konta</span>
             <h2>Znajdź użytkownika</h2>
@@ -25016,10 +24940,10 @@ function AdminModeration() {
               ))}
             </div>
           )}
-        </section>
+        </section></AdminPane>
 
         {selectedUserId && (
-          <section
+          <AdminPane active={adminTab==="decision"}><section
             className="moderation-workbench"
             ref={moderationWorkbenchRef}
           >
@@ -25100,7 +25024,7 @@ function AdminModeration() {
             )}
 
             {sourceJob && (
-              <article className="moderation-source-job">
+              <><article className="moderation-source-job">
                 <div>
                   <span className="section-label">Materiał źródłowy do ręcznej oceny</span>
                   <h3>{sourceJob.title}</h3>
@@ -25109,7 +25033,7 @@ function AdminModeration() {
                 <small>
                   ID: {sourceJob.id} · {sourceJob.category || "Bez kategorii"} · {formatDisputeMoney(sourceJob.budget, "PLN")}
                 </small>
-              </article>
+              </article></>
             )}
 
             {selectedOpenCase ? (
@@ -25413,7 +25337,7 @@ function AdminModeration() {
 
                 {form.decisionType === "indefinite_suspension" && (
                   <label className="moderation-owner-confirmation">
-                    Potwierdzenie ownera
+                    Potwierdzenie właściciela
                     <input
                       value={form.ownerConfirmation}
                       onChange={(event) => updateModerationForm({ ownerConfirmation: event.target.value })}
@@ -25441,10 +25365,10 @@ function AdminModeration() {
                 </button>
               </form>
             )}
-          </section>
+          </section></AdminPane>
         )}
 
-        <section className="moderation-appeals-admin">
+        <AdminPane active={adminTab==="appeals"}><section className="moderation-appeals-admin">
           <div>
             <span className="section-label">Ponowna analiza</span>
             <h2>Odwołania oczekujące</h2>
@@ -25502,9 +25426,9 @@ function AdminModeration() {
               })}
             </div>
           )}
-        </section>
+        </section></AdminPane>
 
-        <section className="moderation-case-register">
+        <AdminPane active={adminTab==="history"}><section className="moderation-case-register">
           <div>
             <span className="section-label">Rejestr decyzji</span>
             <h2>Historia ograniczeń</h2>
@@ -25537,13 +25461,19 @@ function AdminModeration() {
               })}
             </div>
           )}
-        </section>
+        </section></AdminPane>
       </main>
     </div>
   );
 }
 
 function AdminUserPrivacyAccount() {
+  const adminDialog = useAdminDialog();
+  const adminBusy = useRef(false);
+  const [refreshWarning,setRefreshWarning] = useState("");
+
+  const [erasureTab,setErasureTab] = useState("request");
+
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
   const { userId } = useParams();
@@ -25577,33 +25507,33 @@ function AdminUserPrivacyAccount() {
     try {
       const [profileResult, lifecycleResult, requestsResult, casesResult] =
         await Promise.all([
-          supabase
+          adminRead(supabase
             .from("profiles")
             .select(
               "id, name, avatar_url, about, specialty_categories, specialization, skills, created_at"
             )
             .eq("id", userId)
-            .maybeSingle(),
-          supabase
+            .maybeSingle()),
+          adminRead(supabase
             .from("ideahire_account_lifecycle")
             .select(
               "user_id, status, erasure_case_id, data_minimized_at, closed_at, created_at, updated_at"
             )
             .eq("user_id", userId)
-            .maybeSingle(),
-          supabase
+            .maybeSingle()),
+          adminRead(supabase
             .from("ideahire_privacy_requests")
             .select(
               "id, request_number, requester_user_id, request_type, requested_erasure_action, description, status, identity_status, assigned_admin_id, submitted_at, due_at, extended_due_at, decision_summary, completed_at"
             )
             .eq("requester_user_id", userId)
             .eq("request_type", "erasure")
-            .order("submitted_at", { ascending: false }),
-          supabase
+            .order("submitted_at", { ascending: false })),
+          adminRead(supabase
             .from("ideahire_erasure_cases")
             .select("*")
             .eq("target_user_id", userId)
-            .order("created_at", { ascending: false }),
+            .order("created_at", { ascending: false })),
         ]);
 
       if (profileResult.error) throw profileResult.error;
@@ -25623,13 +25553,13 @@ function AdminUserPrivacyAccount() {
       setCases(caseRows);
 
       if (caseRows.length > 0) {
-        const eventResult = await supabase
+        const eventResult = await adminRead(supabase
           .from("ideahire_erasure_case_events")
           .select(
             "id, case_id, actor_role, event_type, visibility, message, details, created_at"
           )
           .in("case_id", caseRows.map((item) => item.id))
-          .order("created_at", { ascending: true });
+          .order("created_at", { ascending: true }));
 
         if (eventResult.error) throw eventResult.error;
         setCaseEvents(eventResult.data || []);
@@ -25638,7 +25568,7 @@ function AdminUserPrivacyAccount() {
       }
 
       if (selectedRequest) {
-        const inventoryResult = await supabase.rpc(
+        const inventoryResult = await adminRpc(supabase,
           "admin_get_ideahire_erasure_inventory",
           { p_request_id: selectedRequest.id }
         );
@@ -25658,7 +25588,7 @@ function AdminUserPrivacyAccount() {
         setInventoryError("");
       }
     } catch (error) {
-      setMessage(cleanSupabaseError(
+      (showLoading ? setMessage : setRefreshWarning)(cleanSupabaseError(
         error,
         "Nie udało się otworzyć administracyjnego widoku konta."
       ));
@@ -25751,11 +25681,11 @@ function AdminUserPrivacyAccount() {
       return;
     }
 
-    setBusy("identity");
+    if (adminBusy.current) return; adminBusy.current = true; setBusy("identity");
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_verify_ideahire_erasure_identity",
         {
           p_request_id: currentRequest.id,
@@ -25768,11 +25698,11 @@ function AdminUserPrivacyAccount() {
 
       setIdentityNote("");
       setMessage("Tożsamość użytkownika została potwierdzona i zapisana w historii sprawy.");
-      await loadAccountData(false);
+      void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się potwierdzić tożsamości."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -25812,12 +25742,12 @@ function AdminUserPrivacyAccount() {
       return;
     }
 
-    setBusy("prepare");
+    if (adminBusy.current) return; adminBusy.current = true; setBusy("prepare");
     setMessage("");
     setDialogMessage("");
 
     try {
-      const { data: preparedCaseId, error } = await supabase.rpc(
+      const { data: preparedCaseId, error } = await adminRpc(supabase,
         "admin_prepare_ideahire_erasure_case",
         {
           p_request_id: currentRequest.id,
@@ -25837,15 +25767,15 @@ function AdminUserPrivacyAccount() {
       setLegalAssessment("");
       setRetentionReason("");
       setMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez ownera.");
-      await loadAccountData(false);
+      void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       console.error("ADMIN PREPARE ERASURE ERROR:", error);
 
-      const { data: existingCase, error: existingCaseError } = await supabase
+      const { data: existingCase, error: existingCaseError } = await adminRead(supabase
         .from("ideahire_erasure_cases")
         .select("id, status")
         .eq("privacy_request_id", currentRequest.id)
-        .maybeSingle();
+        .maybeSingle());
 
       if (!existingCaseError && existingCase?.id) {
         setDialogAction("");
@@ -25855,7 +25785,7 @@ function AdminUserPrivacyAccount() {
         setMessage(
           "Operacja została zapisana i oczekuje na zatwierdzenie ownera. Widok został odświeżony."
         );
-        await loadAccountData(false);
+        void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
         return;
       }
 
@@ -25878,7 +25808,7 @@ function AdminUserPrivacyAccount() {
         );
       }
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -25898,7 +25828,7 @@ function AdminUserPrivacyAccount() {
       return;
     }
 
-    setBusy("authorize");
+    if (adminBusy.current) return; adminBusy.current = true; setBusy("authorize");
     setMessage("");
 
     try {
@@ -25921,15 +25851,15 @@ function AdminUserPrivacyAccount() {
           ? "Owner zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono."
           : "Owner zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono."
       );
-      await loadAccountData(false);
+      void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(
         error,
         "Nie udało się dokończyć operacji. Jeśli zatwierdzenie zostało zapisane, pojawi się bezpieczny przycisk ponowienia."
       ));
-      await loadAccountData(false);
+      void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -25939,11 +25869,11 @@ function AdminUserPrivacyAccount() {
     const operationName = ERASURE_ACTION_LABELS[currentCase.action_type]
       || "wykonanie operacji";
 
-    if (!window.confirm(
+    if (!await adminDialog.confirm(
       `Czy na pewno uruchomić: ${operationName}? Operacja zostanie zapisana w historii i nie można jej cofnąć.`
     )) return;
 
-    setBusy("execute");
+    if (adminBusy.current) return; adminBusy.current = true; setBusy("execute");
     setMessage("");
 
     try {
@@ -25960,15 +25890,15 @@ function AdminUserPrivacyAccount() {
           ? "Konto zostało zamknięte, a status sprawy zaktualizowany."
           : "Pełny możliwy zakres danych został usunięty lub zanonimizowany. Konto logowania pozostało aktywne."
       );
-      await loadAccountData(false);
+      void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(
         error,
         "Nie udało się dokończyć operacji. Możesz bezpiecznie użyć przycisku ponownie."
       ));
-      await loadAccountData(false);
+      void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -26017,9 +25947,9 @@ function AdminUserPrivacyAccount() {
 
   return (
     <div className="account-page admin-page admin-erasure-account-page">
-      <AdminNavbar />
+      <AdminNavbar />{adminDialog.element}
 
-      <main className="admin-shell erasure-account-shell">
+      <main className="admin-shell erasure-account-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadAccountData(false).catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
         <Link className="privacy-back-link" to="/admin/privacy">
            Wróć do wniosków RODO
         </Link>
@@ -26059,7 +25989,7 @@ function AdminUserPrivacyAccount() {
                 </span>
 
                 <details className="erasure-actions-menu">
-                  <summary aria-label="Otwórz działania dotyczące konta">•••</summary>
+                  <summary>Przygotuj operację</summary>
                   <div>
                     <Link
                       to={`/admin/moderation?user=${userId}`}
@@ -26108,7 +26038,7 @@ function AdminUserPrivacyAccount() {
                 </p>
               </section>
             ) : (
-              <section className="erasure-request-selector">
+              <><section className="erasure-request-selector">
                 <div>
                   <span className="section-label">Podstawa operacji</span>
                   <h2>{formatPrivacyRequestNumber(currentRequest?.request_number)}</h2>
@@ -26143,7 +26073,7 @@ function AdminUserPrivacyAccount() {
                     </FormSelect>
                   </label>
                 )}
-              </section>
+              </section><AdminErasureSteps request={currentRequest} currentCase={currentCase} /><AdminTabs value={erasureTab} onChange={setErasureTab} items={[["request","Wniosek i tożsamość"],["scope","Zakres danych"],["operation","Operacja i wynik"]]} /></>
             )}
 
             {currentRequest && !canManage && (
@@ -26171,7 +26101,7 @@ function AdminUserPrivacyAccount() {
               && canManage
               && isPrivacyRequestOpen(currentRequest.status)
               && currentRequest.identity_status !== "verified" && (
-              <form className="erasure-identity-card" onSubmit={handleVerifyIdentity}>
+              <AdminPane active={erasureTab==="request"}><form className="erasure-identity-card" onSubmit={handleVerifyIdentity}>
                 <div>
                   <span className="section-label">Krok 1</span>
                   <h2>Potwierdź tożsamość wnioskodawcy</h2>
@@ -26212,7 +26142,7 @@ function AdminUserPrivacyAccount() {
                 >
                   {busy === "identity" ? "Zapisywanie..." : "Potwierdź tożsamość"}
                 </button>
-              </form>
+              </form></AdminPane>
             )}
 
             {inventoryError ? (
@@ -26232,7 +26162,7 @@ function AdminUserPrivacyAccount() {
                 </button>
               </section>
             ) : inventory ? (
-              <section className="erasure-account-grid">
+              <AdminPane active={erasureTab==="scope"}><section className="erasure-account-grid">
                 <article className="erasure-inventory-card">
                   <div className="erasure-card-heading">
                     <div>
@@ -26274,7 +26204,7 @@ function AdminUserPrivacyAccount() {
                     podać podstawę i okres retencji do późniejszej kontroli prawnej.
                   </p>
                 </article>
-              </section>
+              </section></AdminPane>
             ) : currentRequest ? (
               <section className="erasure-account-notice">
                 <strong>Pobieramy aktualny zakres danych</strong>
@@ -26283,7 +26213,7 @@ function AdminUserPrivacyAccount() {
             ) : null}
 
             {activeBlockers.length > 0 && (
-              <section className="erasure-blockers-card" role="alert">
+              <AdminPane active={erasureTab==="operation"}><section className="erasure-blockers-card" role="alert">
                 <div>
                   <span aria-hidden="true">!</span>
                   <div>
@@ -26300,11 +26230,11 @@ function AdminUserPrivacyAccount() {
                 >
                   Sprawdź ponownie po rozwiązaniu spraw
                 </button>
-              </section>
+              </section></AdminPane>
             )}
 
             {currentCase && (
-              <section className="erasure-case-card">
+              <AdminPane active={erasureTab==="operation"}><section className="erasure-case-card">
                 <div className="erasure-card-heading">
                   <div>
                     <span className="section-label">Kontrola operacji</span>
@@ -26481,7 +26411,7 @@ function AdminUserPrivacyAccount() {
                     ))}
                   </ol>
                 )}
-              </section>
+              </section></AdminPane>
             )}
           </>
         )}
@@ -26604,7 +26534,7 @@ function AdminUserPrivacyAccount() {
                     ? "Przekazywanie..."
                     : dialogAction === "close_account" && inventory?.execution_blocked
                       ? "Sprawdź, co blokuje przekazanie"
-                      : "Przekaż ownerowi do zatwierdzenia"}
+                      : "Przekaż właścicielowi do zatwierdzenia"}
                 </button>
               </div>
             </form>
@@ -26616,6 +26546,14 @@ function AdminUserPrivacyAccount() {
 }
 
 function AdminPrivacyRequests() {
+  const adminDialog = useAdminDialog();
+  const adminBusy = useRef(false);
+  const [refreshWarning,setRefreshWarning] = useState("");
+
+  const adminLocation = useLocation();
+  const erasureOnly = new URLSearchParams(adminLocation.search).get("type") === "erasure";
+  const [queueSearch,setQueueSearch] = useState("");
+
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
   const [requests, setRequests] = useState([]);
@@ -26634,11 +26572,11 @@ function AdminPrivacyRequests() {
   async function loadAdminPrivacyRequests() {
     if (!user?.id) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await adminRead(supabase
       .from("ideahire_privacy_requests")
       .select("*")
       .order("submitted_at", { ascending: false })
-      .limit(300);
+      .limit(300));
 
     if (error) throw error;
 
@@ -26653,10 +26591,10 @@ function AdminPrivacyRequests() {
     )];
 
     if (profileIds.length > 0) {
-      const { data: profileRows, error: profileError } = await supabase
+      const { data: profileRows, error: profileError } = await adminRead(supabase
         .from("profiles")
         .select("id, name, avatar_url")
-        .in("id", profileIds);
+        .in("id", profileIds));
 
       if (!profileError) {
         setProfiles(Object.fromEntries(
@@ -26668,11 +26606,11 @@ function AdminPrivacyRequests() {
     }
 
     if (rows.length > 0) {
-      const { data: eventRows, error: eventError } = await supabase
+      const { data: eventRows, error: eventError } = await adminRead(supabase
         .from("ideahire_privacy_request_events")
         .select("id, request_id, actor_role, event_type, visibility, message, created_at")
         .in("request_id", rows.map((item) => item.id))
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true }));
 
       if (eventError) throw eventError;
 
@@ -26698,10 +26636,10 @@ function AdminPrivacyRequests() {
       return;
     }
 
-    const { data: auditRows, error: auditError } = await supabase
+    const { data: auditRows, error: auditError } = await adminRead(supabase
       .from("ideahire_privacy_audits")
       .select("id, request_id, status, risk_level, scope, findings_summary, remediation_summary, public_scope, public_findings_summary, public_remediation_summary, public_summary, last_updated_by, submitted_for_approval_by, approved_by, created_at, updated_at, submitted_for_approval_at, approved_at")
-      .in("request_id", securityReviewIds);
+      .in("request_id", securityReviewIds));
 
     if (auditError) throw auditError;
 
@@ -26719,16 +26657,16 @@ function AdminPrivacyRequests() {
     }
 
     const [checksResult, auditEventsResult] = await Promise.all([
-      supabase
+      adminRead(supabase
         .from("ideahire_privacy_audit_checks")
         .select("id, audit_id, check_key, status, evidence_note, public_note, checked_by, checked_at, created_at, updated_at")
         .in("audit_id", auditIds)
-        .order("created_at", { ascending: true }),
-      supabase
+        .order("created_at", { ascending: true })),
+      adminRead(supabase
         .from("ideahire_privacy_audit_events")
         .select("id, audit_id, actor_role, event_type, note, details, created_at")
         .in("audit_id", auditIds)
-        .order("created_at", { ascending: true }),
+        .order("created_at", { ascending: true })),
     ]);
 
     if (checksResult.error) throw checksResult.error;
@@ -26804,7 +26742,6 @@ function AdminPrivacyRequests() {
         },
         (payload) => {
           if (payload.new?.requester_closed_at) {
-            setFilter("requester_closed");
             setMessage(
               `Użytkownik zamknął ${formatPrivacyRequestNumber(
                 payload.new.request_number
@@ -26990,11 +26927,11 @@ function AdminPrivacyRequests() {
       return;
     }
 
-    setBusy(`${requestId}:audit-save`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:audit-save`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_save_ideahire_privacy_audit_report",
         {
           p_request_id: requestId,
@@ -27014,11 +26951,11 @@ function AdminPrivacyRequests() {
 
       setMessage("Robocza analiza i checklista zostały zapisane.");
       clearAuditDraft(requestId);
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zapisać analizy."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -27082,11 +27019,11 @@ function AdminPrivacyRequests() {
       return;
     }
 
-    setBusy(`${requestId}:audit-submit`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:audit-submit`);
     setMessage("");
 
     try {
-      const saveResult = await supabase.rpc(
+      const saveResult = await adminRpc(supabase,
         "admin_save_ideahire_privacy_audit_report",
         {
           p_request_id: requestId,
@@ -27104,7 +27041,7 @@ function AdminPrivacyRequests() {
 
       if (saveResult.error) throw saveResult.error;
 
-      const submitResult = await supabase.rpc(
+      const submitResult = await adminRpc(supabase,
         "admin_submit_ideahire_privacy_audit",
         {
           p_request_id: requestId,
@@ -27116,24 +27053,24 @@ function AdminPrivacyRequests() {
 
       setMessage("Analiza została przekazana właścicielowi technicznemu do zatwierdzenia.");
       clearAuditDraft(requestId);
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się przekazać analizy do zatwierdzenia."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   async function handleApproveAudit(requestId) {
-    if (!window.confirm(
+    if (!await adminDialog.confirm(
       "Czy zatwierdzić i opublikować pełny raport użytkownikowi? Sprawa pozostanie otwarta do jego odpowiedzi lub potwierdzenia odbioru."
     )) return;
 
-    setBusy(`${requestId}:audit-approve`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:audit-approve`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "owner_approve_ideahire_privacy_audit",
         { p_request_id: requestId }
       );
@@ -27142,11 +27079,11 @@ function AdminPrivacyRequests() {
 
       setMessage("Raport został zatwierdzony i czeka na odpowiedź lub potwierdzenie użytkownika.");
       clearAuditDraft(requestId);
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zatwierdzić analizy."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -27158,11 +27095,11 @@ function AdminPrivacyRequests() {
       return;
     }
 
-    setBusy(`${requestId}:audit-return`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:audit-return`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "owner_return_ideahire_privacy_audit",
         {
           p_request_id: requestId,
@@ -27174,31 +27111,31 @@ function AdminPrivacyRequests() {
 
       setMessage("Analiza została odesłana administratorowi do poprawy.");
       clearAuditDraft(requestId);
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się odesłać analizy do poprawy."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   async function handleTake(requestId) {
-    setBusy(`${requestId}:take`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:take`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_take_ideahire_privacy_request",
         { p_request_id: requestId }
       );
 
       if (error) throw error;
       setMessage("Wniosek został przypisany do Ciebie.");
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się przejąć wniosku."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -27206,11 +27143,11 @@ function AdminPrivacyRequests() {
     event.preventDefault();
     const draft = getDraft(requestId);
 
-    setBusy(`${requestId}:update`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:update`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_update_ideahire_privacy_request",
         {
           p_request_id: requestId,
@@ -27223,11 +27160,11 @@ function AdminPrivacyRequests() {
       if (error) throw error;
       setMessage("Status wniosku został zapisany.");
       setDrafts((current) => ({ ...current, [requestId]: undefined }));
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zaktualizować wniosku."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -27240,11 +27177,11 @@ function AdminPrivacyRequests() {
       return;
     }
 
-    setBusy(`${requestId}:admin-reply`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:admin-reply`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_reply_to_ideahire_privacy_request",
         {
           p_request_id: requestId,
@@ -27256,11 +27193,11 @@ function AdminPrivacyRequests() {
 
       updateDraft(requestId, { replyMessage: "" });
       setMessage("Wiadomość została wysłana do użytkownika.");
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się wysłać wiadomości."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
@@ -27272,11 +27209,11 @@ function AdminPrivacyRequests() {
       return;
     }
 
-    setBusy(`${requestId}:extend`);
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(`${requestId}:extend`);
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc(
+      const { error } = await adminRpc(supabase,
         "admin_extend_ideahire_privacy_request",
         {
           p_request_id: requestId,
@@ -27286,38 +27223,30 @@ function AdminPrivacyRequests() {
 
       if (error) throw error;
       setMessage("Termin został przedłużony i użytkownik zobaczy uzasadnienie.");
-      await loadAdminPrivacyRequests();
+      void loadAdminPrivacyRequests().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się przedłużyć terminu."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
-  const activeRequests = requests.filter((item) => isPrivacyRequestOpen(item.status));
-  const overdueRequests = activeRequests.filter((item) =>
-    new Date(item.extended_due_at || item.due_at).getTime() < Date.now()
-  );
-  const unassignedRequests = activeRequests.filter((item) => !item.assigned_admin_id);
-
-  const visibleRequests = requests.filter((item) => {
-    if (filter === "all") return true;
-    if (filter === "mine") return item.assigned_admin_id === user.id;
-    if (filter === "unassigned") return isPrivacyRequestOpen(item.status) && !item.assigned_admin_id;
-    if (filter === "requester_closed") return Boolean(item.requester_closed_at);
-    if (filter === "completed") return !isPrivacyRequestOpen(item.status);
-    return isPrivacyRequestOpen(item.status);
-  });
-
+  const scopedRequests = requests.filter(item => !erasureOnly || item.request_type === "erasure");
+  const activeRequests = scopedRequests.filter(item => adminPrivacyFilter(item,"active",user.id));
+  const overdueRequests = scopedRequests.filter(item => adminPrivacyFilter(item,"overdue",user.id));
+  const unassignedRequests = scopedRequests.filter(item => adminPrivacyFilter(item,"unassigned",user.id));
+  const visibleRequests = orderAdminRequests(scopedRequests.filter(item => adminPrivacyFilter(item,filter,user.id) && adminQueueSearch({title:getOptionLabel(PRIVACY_REQUEST_TYPES,item.request_type),subtitle:profiles[item.requester_user_id]?.name,number:formatPrivacyRequestNumber(item.request_number),search:item.description},queueSearch)));
+  const [selectedRequestId,selectRequest] = useAdminSelection(visibleRequests);
+  const queueItems = visibleRequests.map(item => ({id:item.id,number:formatPrivacyRequestNumber(item.request_number),title:getOptionLabel(PRIVACY_REQUEST_TYPES,item.request_type),subtitle:profiles[item.requester_user_id]?.name || "Użytkownik",meta:PRIVACY_REQUEST_STATUSES[item.status]+" · "+formatDisputeDate(item.extended_due_at || item.due_at,false),urgent:isPrivacyRequestOpen(item.status) && new Date(item.extended_due_at || item.due_at).getTime()<Date.now()}));
   return (
     <div className="account-page admin-page admin-privacy-page">
-      <AdminNavbar />
+      <AdminNavbar />{adminDialog.element}
 
-      <main className="admin-shell">
+      <main className="admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadAdminPrivacyRequests().catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
         <header className="admin-page-header">
           <div>
             <span className="section-label">Ochrona danych</span>
-            <h1>Wnioski użytkowników</h1>
+            <h1>{erasureOnly ? "Usuwanie danych i kont" : "Wnioski RODO"}</h1>
             <p>
               Kontrolowana kolejka wniosków dotyczących praw użytkownika
               oraz technicznej i organizacyjnej analizy ochrony danych.
@@ -27330,12 +27259,7 @@ function AdminPrivacyRequests() {
 
         {message && <p className="privacy-page-message" role="status">{message}</p>}
 
-        <section className="admin-stats-grid" aria-label="Statystyki wniosków">
-          <article><strong>{activeRequests.length}</strong><span>Aktywne wnioski</span></article>
-          <article><strong>{unassignedRequests.length}</strong><span>Nieprzypisane</span></article>
-          <article><strong>{overdueRequests.length}</strong><span>Po terminie</span></article>
-          <article><strong>{requests.length}</strong><span>Wszystkie</span></article>
-        </section>
+        <AdminMetrics items={[{label:"Aktywne",value:activeRequests.length,onClick:()=>setFilter("active"),active:filter==="active"},{label:"Bez opiekuna",value:unassignedRequests.length,onClick:()=>setFilter("unassigned"),active:filter==="unassigned"},{label:"Po terminie",value:overdueRequests.length,onClick:()=>setFilter("overdue"),active:filter==="overdue"},{label:"Wszystkie",value:scopedRequests.length,onClick:()=>setFilter("all"),active:filter==="all"}]} />
 
         <section className="privacy-admin-queue">
           <div className="privacy-admin-toolbar">
@@ -27343,25 +27267,7 @@ function AdminPrivacyRequests() {
               <span className="section-label">Kolejka RODO</span>
               <h2>Sprawy do obsługi</h2>
             </div>
-            <div className="disputes-filter-bar is-compact" role="group" aria-label="Filtr wniosków">
-              {[
-                ["active", "Aktywne"],
-                ["unassigned", "Nieprzypisane"],
-                ["mine", "Moje"],
-                ["completed", "Zakończone"],
-                ["requester_closed", "Zamknięte przez użytkownika"],
-                ["all", "Wszystkie"],
-              ].map(([value, label]) => (
-                <button
-                  type="button"
-                  key={value}
-                  className={filter === value ? "is-active" : ""}
-                  onClick={() => setFilter(value)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <AdminFilterBar search={queueSearch} onSearch={setQueueSearch} placeholder="Numer, temat lub użytkownik" filter={filter} onFilter={setFilter} options={[["active","Aktywne"],["unassigned","Bez opiekuna"],["mine","Moje"],["overdue","Po terminie"],["completed","Zakończone"],["requester_closed","Zamknięte przez użytkownika"],["all","Wszystkie"]]} />
           </div>
 
           {loading ? (
@@ -27374,8 +27280,8 @@ function AdminPrivacyRequests() {
               <strong>Brak wniosków w tym widoku</strong>
             </div>
           ) : (
-            <div className="privacy-admin-list">
-              {visibleRequests.map((request) => {
+            <AdminQueue items={queueItems} selectedId={selectedRequestId} onSelect={selectRequest} label="Wnioski">
+              {visibleRequests.filter(item=>item.id===selectedRequestId).map((request) => {
                 const requesterName = getDisputeProfileName(
                   profiles[request.requester_user_id],
                   "Użytkownik"
@@ -27528,8 +27434,8 @@ function AdminPrivacyRequests() {
                       </button>
                     )}
 
-                    <details className="privacy-admin-details">
-                      <summary>Otwórz historię i narzędzia obsługi</summary>
+                    <AdminCaseTools key={request.id}>
+
 
                       {events.length > 0 && (
                         <ol className="privacy-admin-timeline">
@@ -27559,7 +27465,128 @@ function AdminPrivacyRequests() {
                         </ol>
                       )}
 
-                      {isSecurityReview && (
+
+
+                      {isSecurityReview
+                        && audit
+                        && canWork
+                        && isPrivacyRequestOpen(request.status) && (
+                        <form
+                          className="privacy-admin-reply-form"
+                          onSubmit={(event) => handleAdminPrivacyReply(event, request.id)}
+                        >
+                          <div>
+                            <strong>Odpowiedz użytkownikowi</strong>
+                            <p>
+                              Wiadomość będzie widoczna na koncie użytkownika i ustawi
+                              sprawę jako oczekującą na jego odpowiedź lub potwierdzenie.
+                            </p>
+                          </div>
+                          <label htmlFor={`admin-privacy-reply-${request.id}`}>
+                            Treść wiadomości
+                            <AutoTextarea
+                              id={`admin-privacy-reply-${request.id}`}
+                              value={draft.replyMessage}
+                              onChange={(event) => updateDraft(request.id, {
+                                replyMessage: event.target.value,
+                              })}
+                              placeholder="Odpowiedz na pytanie albo wyjaśnij wskazany punkt raportu..."
+                              minLength={3}
+                              maxLength={5000}
+                              rows={4}
+                              disabled={Boolean(busy)}
+                            />
+                          </label>
+                          <button
+                            type="submit"
+                            className="privacy-secondary-button"
+                            disabled={Boolean(busy) || draft.replyMessage.trim().length < 3}
+                          >
+                            {busy === `${request.id}:admin-reply`
+                              ? "Wysyłanie..."
+                              : "Wyślij odpowiedź użytkownikowi"}
+                          </button>
+                        </form>
+                      )}
+
+                      {isPrivacyRequestOpen(request.status)
+                        && canWork
+                        && (!isSecurityReview || (audit && !auditLocked)) && (
+                        <form className="privacy-admin-form" onSubmit={(event) => handleUpdate(event, request.id)}>
+                          {isSecurityReview && (
+                            <div className="privacy-audit-contact-note">
+                              Ten formularz służy do zmiany etapu lub poproszenia
+                              użytkownika o informacje. Zakończenie analizy następuje
+                              wyłącznie przez proces zatwierdzania powyżej.
+                            </div>
+                          )}
+                          <label>
+                            Nowy status
+                            <FormSelect
+                              value={draft.status}
+                              onChange={(event) => updateDraft(request.id, { status: event.target.value })}
+                              disabled={Boolean(busy)}
+                            >
+                              {Object.entries(PRIVACY_REQUEST_STATUSES)
+                                .filter(([value]) => !["submitted", "withdrawn"].includes(value))
+                                .filter(([value]) => !isSecurityReview
+                                  || !["completed", "partially_completed"].includes(value))
+                                .map(([value, label]) => <option value={value} key={value}>{label}</option>)}
+                            </FormSelect>
+                          </label>
+
+                          <label>
+                            Wiadomość dla użytkownika
+                            <AutoTextarea
+                              value={draft.publicMessage}
+                              onChange={(event) => updateDraft(request.id, { publicMessage: event.target.value })}
+                              placeholder="Opisz wykonane działanie, potrzebne informacje albo przyczynę decyzji..."
+                              maxLength={5000}
+                              rows={4}
+                            />
+                          </label>
+
+                          <label>
+                            Notatka wewnętrzna
+                            <AutoTextarea
+                              value={draft.internalNote}
+                              onChange={(event) => updateDraft(request.id, { internalNote: event.target.value })}
+                              placeholder="Informacja widoczna wyłącznie dla administracji..."
+                              maxLength={5000}
+                              rows={3}
+                            />
+                          </label>
+
+                          <button className="privacy-primary-button" type="submit" disabled={Boolean(busy)}>
+                            {busy === `${request.id}:update` ? "Zapisywanie..." : "Zapisz status i wiadomość"}
+                          </button>
+
+                          {!request.extended_due_at && (
+                            <div className="privacy-extension-form">
+                              <label>
+                                Uzasadnienie przedłużenia terminu
+                                <AutoTextarea
+                                  value={draft.extensionReason}
+                                  onChange={(event) => updateDraft(request.id, { extensionReason: event.target.value })}
+                                  placeholder="Wyjaśnij złożoność sprawy lub liczbę obsługiwanych wniosków..."
+                                  maxLength={5000}
+                                  rows={3}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                className="privacy-secondary-button"
+                                onClick={() => handleExtend(request.id)}
+                                disabled={Boolean(busy) || draft.extensionReason.trim().length < 20}
+                              >
+                                {busy === `${request.id}:extend` ? "Przedłużanie..." : "Przedłuż termin maksymalnie o 2 miesiące"}
+                              </button>
+                            </div>
+                          )}
+                        </form>
+                      )}
+
+{isSecurityReview && (
                         <section className="privacy-audit-workspace">
                           <div className="privacy-audit-heading">
                             <div>
@@ -27947,130 +27974,11 @@ function AdminPrivacyRequests() {
                           )}
                         </section>
                       )}
-
-                      {isSecurityReview
-                        && audit
-                        && canWork
-                        && isPrivacyRequestOpen(request.status) && (
-                        <form
-                          className="privacy-admin-reply-form"
-                          onSubmit={(event) => handleAdminPrivacyReply(event, request.id)}
-                        >
-                          <div>
-                            <strong>Odpowiedz użytkownikowi</strong>
-                            <p>
-                              Wiadomość będzie widoczna na koncie użytkownika i ustawi
-                              sprawę jako oczekującą na jego odpowiedź lub potwierdzenie.
-                            </p>
-                          </div>
-                          <label htmlFor={`admin-privacy-reply-${request.id}`}>
-                            Treść wiadomości
-                            <AutoTextarea
-                              id={`admin-privacy-reply-${request.id}`}
-                              value={draft.replyMessage}
-                              onChange={(event) => updateDraft(request.id, {
-                                replyMessage: event.target.value,
-                              })}
-                              placeholder="Odpowiedz na pytanie albo wyjaśnij wskazany punkt raportu..."
-                              minLength={3}
-                              maxLength={5000}
-                              rows={4}
-                              disabled={Boolean(busy)}
-                            />
-                          </label>
-                          <button
-                            type="submit"
-                            className="privacy-secondary-button"
-                            disabled={Boolean(busy) || draft.replyMessage.trim().length < 3}
-                          >
-                            {busy === `${request.id}:admin-reply`
-                              ? "Wysyłanie..."
-                              : "Wyślij odpowiedź użytkownikowi"}
-                          </button>
-                        </form>
-                      )}
-
-                      {isPrivacyRequestOpen(request.status)
-                        && canWork
-                        && (!isSecurityReview || (audit && !auditLocked)) && (
-                        <form className="privacy-admin-form" onSubmit={(event) => handleUpdate(event, request.id)}>
-                          {isSecurityReview && (
-                            <div className="privacy-audit-contact-note">
-                              Ten formularz służy do zmiany etapu lub poproszenia
-                              użytkownika o informacje. Zakończenie analizy następuje
-                              wyłącznie przez proces zatwierdzania powyżej.
-                            </div>
-                          )}
-                          <label>
-                            Nowy status
-                            <FormSelect
-                              value={draft.status}
-                              onChange={(event) => updateDraft(request.id, { status: event.target.value })}
-                              disabled={Boolean(busy)}
-                            >
-                              {Object.entries(PRIVACY_REQUEST_STATUSES)
-                                .filter(([value]) => !["submitted", "withdrawn"].includes(value))
-                                .filter(([value]) => !isSecurityReview
-                                  || !["completed", "partially_completed"].includes(value))
-                                .map(([value, label]) => <option value={value} key={value}>{label}</option>)}
-                            </FormSelect>
-                          </label>
-
-                          <label>
-                            Wiadomość dla użytkownika
-                            <AutoTextarea
-                              value={draft.publicMessage}
-                              onChange={(event) => updateDraft(request.id, { publicMessage: event.target.value })}
-                              placeholder="Opisz wykonane działanie, potrzebne informacje albo przyczynę decyzji..."
-                              maxLength={5000}
-                              rows={4}
-                            />
-                          </label>
-
-                          <label>
-                            Notatka wewnętrzna
-                            <AutoTextarea
-                              value={draft.internalNote}
-                              onChange={(event) => updateDraft(request.id, { internalNote: event.target.value })}
-                              placeholder="Informacja widoczna wyłącznie dla administracji..."
-                              maxLength={5000}
-                              rows={3}
-                            />
-                          </label>
-
-                          <button className="privacy-primary-button" type="submit" disabled={Boolean(busy)}>
-                            {busy === `${request.id}:update` ? "Zapisywanie..." : "Zapisz status i wiadomość"}
-                          </button>
-
-                          {!request.extended_due_at && (
-                            <div className="privacy-extension-form">
-                              <label>
-                                Uzasadnienie przedłużenia terminu
-                                <AutoTextarea
-                                  value={draft.extensionReason}
-                                  onChange={(event) => updateDraft(request.id, { extensionReason: event.target.value })}
-                                  placeholder="Wyjaśnij złożoność sprawy lub liczbę obsługiwanych wniosków..."
-                                  maxLength={5000}
-                                  rows={3}
-                                />
-                              </label>
-                              <button
-                                type="button"
-                                className="privacy-secondary-button"
-                                onClick={() => handleExtend(request.id)}
-                                disabled={Boolean(busy) || draft.extensionReason.trim().length < 20}
-                              >
-                                {busy === `${request.id}:extend` ? "Przedłużanie..." : "Przedłuż termin maksymalnie o 2 miesiące"}
-                              </button>
-                            </div>
-                          )}
-                        </form>
-                      )}
-                    </details>
+</AdminCaseTools>
                   </article>
                 );
               })}
-            </div>
+            </AdminQueue>
           )}
         </section>
       </main>
@@ -28079,8 +27987,17 @@ function AdminPrivacyRequests() {
 }
 
 function AdminPanel() {
+  const adminDialog = useAdminDialog();
+  const adminBusy = useRef(false);
+  const [refreshWarning,setRefreshWarning] = useState("");
+
+  const adminLocation = useLocation();
+  const requestedAdminView = new URLSearchParams(adminLocation.search).get("view") || "queue";
+  const [queueSearch,setQueueSearch] = useState("");
+
   const { user } = useAuth();
   const { staffRole, staffLoading, isStaff, isOwner } = useStaffRole(user?.id);
+  const adminView = ["queue", "activity"].includes(requestedAdminView) || (isOwner && ["access"].includes(requestedAdminView)) ? requestedAdminView : "queue";
   const [disputes, setDisputes] = useState([]);
   const [staff, setStaff] = useState([]);
   const [profiles, setProfiles] = useState({});
@@ -28095,20 +28012,20 @@ function AdminPanel() {
     if (!user?.id || !isStaff) return;
 
     const [disputeResult, staffResult, auditResult] = await Promise.all([
-      supabase
+      adminRead(supabase
         .from("disputes")
         .select("*")
         .order("opened_at", { ascending: false })
-        .limit(300),
-      supabase
+        .limit(300)),
+      adminRead(supabase
         .from("ideahire_staff")
         .select("user_id, role, is_active, granted_at, revoked_at")
-        .order("granted_at", { ascending: true }),
-      supabase
+        .order("granted_at", { ascending: true })),
+      adminRead(supabase
         .from("ideahire_admin_audit_log")
         .select("id, actor_user_id, actor_role, action, dispute_id, target_user_id, created_at")
         .order("created_at", { ascending: false })
-        .limit(30),
+        .limit(30)),
     ]);
 
     if (disputeResult.error) throw disputeResult.error;
@@ -28126,10 +28043,10 @@ function AdminPanel() {
     let profileMap = {};
 
     if (uniqueIds.length > 0) {
-      const { data, error } = await supabase
+      const { data, error } = await adminRead(supabase
         .from("profiles")
         .select("id, name, avatar_url")
-        .in("id", uniqueIds);
+        .in("id", uniqueIds));
 
       if (!error) {
         profileMap = Object.fromEntries(
@@ -28194,11 +28111,12 @@ function AdminPanel() {
       return;
     }
 
-    setBusy(enabled ? "grant" : "revoke");
+    if (!(await adminDialog.confirm((enabled ? "Nadać uprawnienia administratora kontu " : "Odebrać uprawnienia administratora kontu ") + email + "? Ta zmiana wpłynie na dostęp do spraw i danych użytkowników."))) return;
+    if (adminBusy.current) return; adminBusy.current = true; setBusy(enabled ? "grant" : "revoke");
     setMessage("");
 
     try {
-      const { error } = await supabase.rpc("owner_set_admin_by_email", {
+      const { error } = await adminRpc(supabase, "owner_set_admin_by_email", {
         p_email: email,
         p_enabled: enabled,
       });
@@ -28211,19 +28129,19 @@ function AdminPanel() {
           : "Rola administratora została odebrana."
       );
       setAdminEmail("");
-      await loadAdminData();
+      void loadAdminData().catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       setMessage(cleanSupabaseError(error, "Nie udało się zmienić roli administratora."));
     } finally {
-      setBusy("");
+      adminBusy.current = false; setBusy("");
     }
   }
 
   if (staffLoading || loading) {
     return (
       <div className="account-page admin-page">
-        <AdminNavbar />
-        <main className="admin-shell">
+        <AdminNavbar />{adminDialog.element}
+        <main className="admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027">
           <InlineRouteLoader
             className="admin-route-loader"
             rows={5}
@@ -28237,7 +28155,7 @@ function AdminPanel() {
     return (
       <div className="account-page admin-page">
         <AccountNavbar />
-        <main className="admin-shell">
+        <main className="admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027">
           <div className="dispute-state-card is-error">
             <h1>Brak uprawnień</h1>
             <p>Ten panel jest dostępny wyłącznie dla aktywnego właściciela i administratorów IdeaHire.</p>
@@ -28263,6 +28181,9 @@ function AdminPanel() {
     (item) => item.status === "appealed"
   ).length;
   const visibleDisputes = disputes.filter((item) => {
+    if (!adminQueueSearch({title:item.job_title_snapshot,number:formatDisputeNumber(item.case_number)},queueSearch)) return false;
+    if(filter === "awaiting") return item.status === "awaiting_response";
+    if(filter === "appealed") return item.status === "appealed";
     if (filter === "all") return true;
     if (filter === "mine") return item.assigned_admin_id === user.id;
     if (filter === "unassigned") {
@@ -28274,13 +28195,13 @@ function AdminPanel() {
 
   return (
     <div className="account-page admin-page">
-      <AdminNavbar />
+      <AdminNavbar />{adminDialog.element}
 
-      <main className="admin-shell">
+      <main className="admin-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadAdminData().catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
         <header className="admin-page-header">
           <div>
             <span className="section-label">IdeaHire · administracja</span>
-            <h1>Panel administratora</h1>
+            <h1>{({queue:"Sprawy i spory",access:"Dostęp zespołu",activity:"Rejestr działań",security:"Zabezpieczenia"})[adminView] || "Sprawy i spory"}</h1>
             <p>
               Kolejka sporów, udokumentowane decyzje i kontrola dostępu administratorów.
             </p>
@@ -28292,15 +28213,10 @@ function AdminPanel() {
 
         {message && <p className="dispute-page-message" role="status">{message}</p>}
 
-        <section className="admin-stats-grid" aria-label="Statystyki spraw">
-          <article><strong>{activeDisputes.length}</strong><span>Aktywne sprawy</span></article>
-          <article><strong>{unassignedCount}</strong><span>Nieprzypisane</span></article>
-          <article><strong>{awaitingCount}</strong><span>Czekają na odpowiedź</span></article>
-          <article><strong>{appealedCount}</strong><span>Odwołania</span></article>
-        </section>
+        <AdminPane active={adminView==="queue"}><AdminMetrics items={[{label:"Aktywne sprawy",value:activeDisputes.length,onClick:()=>setFilter("active"),active:filter==="active"},{label:"Bez opiekuna",value:unassignedCount,onClick:()=>setFilter("unassigned"),active:filter==="unassigned"},{label:"Czekają na odpowiedź",value:awaitingCount,onClick:()=>setFilter("awaiting"),active:filter==="awaiting"},{label:"Odwołania",value:appealedCount,onClick:()=>setFilter("appealed"),active:filter==="appealed"}]} /></AdminPane>
 
         <div className="admin-content-grid">
-          <section className="dispute-panel admin-queue-panel">
+          <AdminPane active={adminView==="queue"}><section className="dispute-panel admin-queue-panel">
             <div className="dispute-panel-heading">
               <div>
                 <span className="dispute-eyebrow">Kolejka</span>
@@ -28309,24 +28225,7 @@ function AdminPanel() {
               <span className="dispute-count-badge">{visibleDisputes.length}</span>
             </div>
 
-            <div className="disputes-filter-bar is-compact" role="group" aria-label="Filtr kolejki">
-              {[
-                ["active", "Aktywne"],
-                ["unassigned", "Nieprzypisane"],
-                ["mine", "Moje"],
-                ["closed", "Zakończone"],
-                ["all", "Wszystkie"],
-              ].map(([value, label]) => (
-                <button
-                  type="button"
-                  key={value}
-                  className={filter === value ? "is-active" : ""}
-                  onClick={() => setFilter(value)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            <AdminFilterBar search={queueSearch} onSearch={setQueueSearch} placeholder="Numer sprawy lub projekt" filter={filter} onFilter={setFilter} options={[["active","Aktywne"],["unassigned","Bez opiekuna"],["mine","Moje"],["awaiting","Czekają na odpowiedź"],["appealed","Odwołania"],["closed","Zakończone"],["all","Wszystkie"]]} />
 
             {visibleDisputes.length === 0 ? (
               <p className="dispute-empty-copy">Brak spraw spełniających wybrany filtr.</p>
@@ -28342,11 +28241,11 @@ function AdminPanel() {
                 ))}
               </div>
             )}
-          </section>
+          </section></AdminPane>
 
           <aside className="admin-side-column">
             {isOwner && (
-              <section className="dispute-panel owner-access-panel">
+              <AdminPane active={adminView==="access"}><section className="dispute-panel owner-access-panel">
                 <span className="dispute-eyebrow">Tylko właściciel</span>
                 <h2>Dostęp administratorów</h2>
                 <p>
@@ -28404,10 +28303,10 @@ function AdminPanel() {
                     </article>
                   ))}
                 </div>
-              </section>
+              </section></AdminPane>
             )}
 
-            <section className="dispute-panel admin-audit-panel">
+            <AdminPane active={adminView==="activity"}><section className="dispute-panel admin-audit-panel">
               <span className="dispute-eyebrow">Rejestr działań</span>
               <h2>Ostatnia aktywność</h2>
               <div className="admin-audit-list">
@@ -28416,7 +28315,7 @@ function AdminPanel() {
                 ) : (
                   auditLog.map((item) => (
                     <article key={item.id}>
-                      <strong>{ADMIN_AUDIT_LABELS[item.action] || item.action}</strong>
+                      <AdminAuditAction action={item.action} />
                       <span>
                         {getDisputeProfileName(
                           profiles[item.actor_user_id],
@@ -28428,9 +28327,8 @@ function AdminPanel() {
                   ))
                 )}
               </div>
-            </section>
-          </aside>
-        </div>
+            </section></AdminPane>
+          </aside></div>
       </main>
     </div>
   );
@@ -28675,10 +28573,18 @@ function LucynaDockHost() {
   const { isAdult, canTransact, loading: ageLoading, errorMessage: ageError } = useAgeAccess();
   const { isRestricted, loading: restrictionLoading, errorMessage: restrictionError } = useAccountRestriction();
   const { pathname } = useLocation();
+  const { isStaff, staffLoading } = useStaffRole(user?.id);
   if (!canShowLucynaDock({ enabled: LUCYNA_VISIBLE, userId: user?.id, authLoading, ageLoading, ageError,
-    isAdult, canTransact, restrictionLoading, restricted: isRestricted, restrictionError, pathname })) return null;
+    isAdult, canTransact, restrictionLoading, restricted: isRestricted, restrictionError, pathname, isStaff, staffLoading })) return null;
   // A new owner receives a fresh window; drafts never survive a switch of account.
-  return <LucynaDock key={user.id} supabase={supabase} user={user} />;
+  return <LucynaDock key={user.id} supabase={supabase} user={user} administration={isStaff} />;
+}
+
+function AdminLucynaRoute() {
+  const { user } = useAuth();
+  return <div className="account-page admin-page"><AdminNavbar /><AdminLucynaDesk enabled={LUCYNA_VISIBLE}>
+    <LucynaBoundary><React.Suspense fallback={<SubpageLoading label="Otwieram Lucynę…" />}><LucynaModule supabase={supabase} user={user} embedded administration /></React.Suspense></LucynaBoundary>
+  </AdminLucynaDesk></div>;
 }
 
 function LucynaRoute() {
@@ -29003,6 +28909,8 @@ function Router() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/admin/lucyna" element={<ProtectedRoute><StaffOnlyRoute><AdminLucynaRoute /></StaffOnlyRoute></ProtectedRoute>} />
 
           <Route
             path="/admin/jobs"

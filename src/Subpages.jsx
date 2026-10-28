@@ -1,13 +1,13 @@
 /* P79 — one navigation system, with layouts built for each kind of work. */
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutGrid, CalendarDays, Bell, Check } from 'lucide-react';
 import { BrandMark } from './Brand';
+import { adminReturnTarget } from './AdminDomain';
 import { useSitePreferences, translateUiText } from './Preferences';
 import './Subpages.css';
 import './PageMotion.css';
 
-let newestEntry = 0;
 
 export function getSubpage(location, en = false) {
   const path = location.pathname.replace(/\/$/, '') || '/';
@@ -85,33 +85,18 @@ export function SubpageLoading({ label, className = '', screen = false, pending 
   </div>;
 }
 
-export function SubpageHistoryControls({ parent = '/account' }) {
-  const location = useLocation();
+export function SubpageHistoryControls() {
   const navigate = useNavigate();
-  const navigationType = useNavigationType();
   const en = useSitePreferences().language === 'en';
-  const [forward, setForward] = useState(false);
-  useLayoutEffect(() => {
-    const index = Number.isInteger(window.history.state?.idx) ? window.history.state.idx : 0;
-    newestEntry = navigationType === 'PUSH' ? index : Math.max(newestEntry, index);
-    const browserForward = window.navigation?.canGoForward;
-    setForward(typeof browserForward === 'boolean' ? browserForward : index < newestEntry);
-  }, [location.key, navigationType]);
-  return <div className="ih73-history-controls">
-    <button type="button" onClick={() => {
-      if ((window.history.state?.idx || 0) > 0) navigate(-1);
-      else navigate(parent === location.pathname + location.search + location.hash ? '/' : parent);
-    }} aria-label={en ? 'Go back' : 'Wróć'} title={en ? 'Go back' : 'Wróć'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>{en ? 'Back' : 'Wróć'}</button>
-    <button type="button" disabled={!forward} onClick={() => navigate(1)}
-      aria-label={en ? 'Go forward' : 'Przejdź dalej'} title={en ? 'Go forward' : 'Przejdź dalej'}>{en ? 'Next' : 'Dalej'}</button>
-  </div>;
+  return <div className="ih73-history-controls"><button type="button" onClick={() => navigate(adminReturnTarget())}
+    aria-label={en ? 'Return to account centre' : 'Wróć do centrum konta'} title={en ? 'Account centre' : 'Centrum konta'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>{en ? 'My account' : 'Wróć do konta'}</button></div>;
 }
 
 export function SubpageNavigation({ standalone = false }) {
   const location = useLocation();
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
-  if (!page || ['dashboard', 'account', 'work', 'inbox', 'conversation'].includes(page.kind)) return null;
+  if (!page || ['dashboard', 'account', 'work', 'inbox', 'conversation', 'access'].includes(page.kind)) return null;
   return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
     aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P79">
     <SubpageHistoryControls parent={page.parent} />

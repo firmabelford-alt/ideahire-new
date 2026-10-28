@@ -210,13 +210,14 @@ function Results({ mode, items, total }) {
   </div>;
 }
 
-export default function Lucyna({ supabase, user, Navbar, embedded = false, visible = true }) {
+export default function Lucyna({ supabase, user, Navbar, embedded = false, visible = true, administration = false }) {
+  const modes = administration ? MODES.filter(item => ["chat","message","help"].includes(item.id)) : MODES;
   const [routeParams] = useSearchParams();
   const params = useMemo(() => embedded ? new URLSearchParams() : routeParams, [embedded, routeParams]);
   const [conversations, setConversations] = useState(() => [newConversation()]);
   const [activeId, setActiveId] = useState(() => null);
   const active = useMemo(() => conversations.find(c => c.id === activeId) || conversations[0], [activeId, conversations]);
-  const mode = MODES.find(m => m.id === active.mode) || MODES[0];
+  const mode = modes.find(m => m.id === active.mode) || modes[0];
   const [draft, setDraft] = useState(""); const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState({ loading: true, enabled: false, remaining: null });
   const [notice, setNotice] = useState(""); const [searching, setSearching] = useState(false);
@@ -584,7 +585,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 aria-label={mobile ? "Otwórz historię rozmów" : sidebarCollapsed ? "Pokaż historię rozmów" : "Ukryj historię rozmów"}
                 aria-expanded={mobile ? historyOpen : !sidebarCollapsed}
                 onClick={() => mobile ? setHistoryOpen(true) : setSidebarCollapsed(value => !value)}><Icon name="history" /></button>
-              <Mark small /><div><h1>Lucyna <span>AI</span></h1><p>{busy ? "Przygotowuję odpowiedź" : mode.id === "chat" ? "Twoja asystentka w IdeaHire" : mode.title}</p></div>
+              <Mark small /><div><h1>Lucyna <span>AI</span></h1><p>{busy ? "Przygotowuję odpowiedź" : mode.id === "chat" ? (administration ? "Wsparcie pracy administratora" : "Twoja asystentka w IdeaHire") : mode.title}</p></div>
             </div>
             <div className="lu-toolbar-actions"><span className="lu-free-badge"><span className="lu-status-dot" />Bezpłatnie</span>
               <button type="button" className={"lu-tools-toggle" + (toolsOpen ? " is-active" : "")}
@@ -594,8 +595,9 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
               {!embedded && <Link to="/account" className="lu-icon-button" aria-label="Wróć do IdeaHire"><Icon name="exit" /></Link>}
             </div>
           </header>
+          {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Opisuj sytuacje bez danych osób i poufnych materiałów. Szkic wymaga Twojej oceny przed użyciem.</p>}
           {toolsOpen && <div id="lucyna-tools" className="lu-mode-bar" aria-label="Zadanie Lucyny AI">
-            {MODES.map(m => <button key={m.id} type="button" disabled={busy} className={active.mode === m.id ? "is-active" : ""}
+            {modes.map(m => <button key={m.id} type="button" disabled={busy} className={active.mode === m.id ? "is-active" : ""}
               aria-pressed={active.mode === m.id} onClick={() => chooseMode(m.id)}><Icon name={m.icon} /><span>{m.short}</span></button>)}
           </div>}
           <div className={"lu-messages" + (!active.messages.length ? " is-empty" : "")} ref={listRef}
@@ -621,7 +623,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 {MODES.filter(m => ["brief", "freelancers", "jobs"].includes(m.id)).map(m => <button key={m.id} type="button"
                   onClick={() => { chooseMode(m.id); setDraft(m.example); }}><Icon name={m.icon} /><strong>{m.title}</strong><span>{m.text}</span><Icon name="arrow" /></button>)}
               </div>
-              <div className="lu-welcome-note"><span /><span>Rozmawiaj swobodnie — Lucyna dobiera potrzebne narzędzia</span></div>
+              <div className="lu-welcome-note"><span /><span>{administration ? "Pomoc w redagowaniu szkiców i porządkowaniu pracy" : "Rozmawiaj swobodnie — Lucyna dobiera potrzebne narzędzia"}</span></div>
             </div>}
             {isSearch && !active.messages.length && <SearchBox mode={active.mode} onSearch={filters => runSearch(filters)} loading={searching} />}
             {active.mode === "help" && !active.messages.length && <div className="lu-faq-links"><span>Przewodnik po IdeaHire</span>{FAQ.slice(0, 4).map(f =>

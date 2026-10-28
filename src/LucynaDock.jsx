@@ -12,7 +12,8 @@ export function requestLucynaDock(event) {
   window.dispatchEvent(new Event("ideahire:lucyna-open"));
 }
 
-export function canShowLucynaDock({ enabled, userId, authLoading, ageLoading, ageError, isAdult, canTransact, restrictionLoading, restricted, restrictionError, pathname = "/" }) {
+export function canShowLucynaDock({ enabled, userId, authLoading, ageLoading, ageError, isAdult, canTransact, restrictionLoading, restricted, restrictionError, pathname = "/", isStaff = false, staffLoading = true }) {
+  if (/^\/admin(?:\/|$)/.test(pathname)) return Boolean(enabled && userId && authLoading === false && isStaff === true && staffLoading === false && !/^\/admin\/lucyna\/?$/.test(pathname));
   return Boolean(enabled && userId && authLoading === false && ageLoading === false && !ageError
     && isAdult === true && canTransact === true && restrictionLoading === false && !restricted && !restrictionError
     && !/^\/(?:lucyna|admin|login|register|auth|reset-password|forgot-password)(?:\/|$)/.test(pathname));
@@ -72,11 +73,11 @@ class DockBoundary extends React.Component {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   render() {
-    return this.state.failed ? <div className="ih64-dock-status" role="alert"><strong>Nie udało się otworzyć Lucyny.</strong><p>Otwórz rozmowę ponownie albo przejdź do pełnego widoku.</p><button type="button" onClick={this.props.onRetry}>Spróbuj ponownie</button><Link to="/lucyna">Otwórz pełny widok</Link></div> : this.props.children;
+    return this.state.failed ? <div className="ih64-dock-status" role="alert"><strong>Nie udało się otworzyć Lucyny.</strong><p>Otwórz rozmowę ponownie albo przejdź do pełnego widoku.</p><button type="button" onClick={this.props.onRetry}>Spróbuj ponownie</button><Link to={this.props.administration ? "/admin/lucyna" : "/lucyna"}>Otwórz pełny widok</Link></div> : this.props.children;
   }
 }
 
-export default function LucynaDock({ supabase, user }) {
+export default function LucynaDock({ supabase, user, administration = false }) {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -194,7 +195,7 @@ export default function LucynaDock({ supabase, user }) {
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
         <button className="ih64-dock-control" type="button" title="Zamknij okno" aria-label="Zamknij okno Lucyny AI" onClick={() => minimise()}><Icon kind="close"/></button>
       </header>
-      <div className="ih64-dock-body"><DockBoundary key={attempt} onRetry={() => setAttempt(value => value + 1)}><React.Suspense fallback={<SubpageLoading />}><Assistant supabase={supabase} user={user} embedded visible={open}/></React.Suspense></DockBoundary></div>
+      <div className="ih64-dock-body"><DockBoundary administration={administration} key={attempt} onRetry={() => setAttempt(value => value + 1)}><React.Suspense fallback={<SubpageLoading />}><Assistant supabase={supabase} user={user} embedded visible={open} administration={administration}/></React.Suspense></DockBoundary></div>
     </section>}
     {!open && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI. Przeciągnij, aby przesunąć przycisk, lub użyj klawiszy strzałek. Home przywraca pozycję." aria-haspopup="dialog" aria-expanded="false" aria-controls={loaded ? "ih64-lucyna-window" : undefined} title="Lucyna AI — kliknij, aby otworzyć; przeciągnij, aby przesunąć"
       style={{ "--ih84-launcher-x": launcher.x + "px", "--ih84-launcher-y": launcher.y + "px", "--ih84-launcher-width": launcher.width + "px" }}
