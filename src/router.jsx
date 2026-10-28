@@ -89,6 +89,7 @@ import {
 import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction, profileInquiryToJob, localProjectDate } from "./ServiceMarketplace";
 import LucynaDock, { canShowLucynaDock, requestLucynaDock } from "./LucynaDock";
 import { useGoogleAuth, GooglePendingNotice, RegistrationDraftProvider, useRegistrationDraft, RegistrationDocumentLink, LoginOpening, announceLoginSuccess } from "./AuthFlow";
+import { AccountPrivateDetails, RegistrationDetailsFields, EMPTY_REGISTRATION_DETAILS, REGISTRATION_DETAILS_KEY, initialRegistrationDetails, registrationDetailsMetadata, registrationDetailsProblem, rememberRegistrationDetails, clearPendingRegistrationDetails } from "./RegistrationDetails";
 
 // P30: odrębny moduł. VITE_LUCYNA_ENABLED=false ukrywa wejścia i wyłącza trasę.
 const LUCYNA_VISIBLE = import.meta.env.VITE_LUCYNA_ENABLED !== "false";
@@ -2570,6 +2571,7 @@ function ProtectedRoute({
 function PublicOnlyRoute({
   children,
 }) {
+  const registrationReturnLocation = useLocation();
   const {
     loading,
     isLoggedIn,
@@ -2608,6 +2610,7 @@ function PublicOnlyRoute({
               ? "/account-status"
             : "/account"
         }
+        state={{ registrationDetailsToken: new URLSearchParams(registrationReturnLocation.search).get("registration_details") }}
         replace
       />
     );
@@ -2728,6 +2731,8 @@ function RestrictedAccountRoute({ children }) {
 function AgeCompletionScreen() {
   const { user } = useAuth();
   const { refreshAgeAccess, errorMessage } = useAgeAccess();
+  const registrationReturnLocation = useLocation();
+  const [registrationDetails, setRegistrationDetails] = useState(() => initialRegistrationDetails(user, registrationReturnLocation.state?.registrationDetailsToken));
   const [birthDate, setBirthDate] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
   const [privacyAcknowledged, setPrivacyAcknowledged] = useState(false);
@@ -2743,6 +2748,9 @@ function AgeCompletionScreen() {
     event.preventDefault();
 
     if (saving) return;
+
+    const detailsProblem = registrationDetailsProblem(registrationDetails);
+    if (detailsProblem) { setMessage(detailsProblem); return; }
 
     if (!validation?.valid) {
       setMessage(
@@ -2772,6 +2780,8 @@ function AgeCompletionScreen() {
     try {
       const acceptedAtClient = new Date().toISOString();
 
+      const privateDetails = registrationDetailsMetadata(registrationDetails, "account_completion");
+
       const { error } = await supabase.rpc(
         "complete_my_ideahire_onboarding",
         {
@@ -2789,6 +2799,7 @@ function AgeCompletionScreen() {
 
       const { error: metadataError } = await supabase.auth.updateUser({
         data: {
+          ...(privateDetails ? { [REGISTRATION_DETAILS_KEY]: privateDetails } : {}),
           name:
             user?.user_metadata?.name ||
             user?.user_metadata?.full_name ||
@@ -2816,8 +2827,10 @@ function AgeCompletionScreen() {
 
       if (metadataError) {
         console.error("ONBOARDING METADATA ERROR:", metadataError);
+        if (privateDetails) throw new Error("Data urodzenia została zapisana, ale zapis opcjonalnych danych nie powiódł się. Spróbuj ponownie lub pozostaw opcjonalne pola puste.");
       }
 
+      clearPendingRegistrationDetails();
       await refreshAgeAccess();
     } catch (error) {
       setMessage(
@@ -2842,6 +2855,7 @@ function AgeCompletionScreen() {
           </p>
 
           <form className="age-access-form" onSubmit={handleCompleteAge}>
+            <RegistrationDetailsFields value={registrationDetails} onChange={setRegistrationDetails} disabled={saving} idPrefix="account-completion" />
             <label>
               Data urodzenia
               <IdeaHireDateField
@@ -6224,6 +6238,9 @@ function Register() {
   const [name, setName] =
     useState(initialDraft?.name || "");
 
+  const [registrationDetails, setRegistrationDetails] =
+    useState(initialDraft?.registrationDetails || { ...EMPTY_REGISTRATION_DETAILS });
+
   const [email, setEmail] =
     useState(initialDraft?.email || "");
 
@@ -6261,11 +6278,11 @@ function Register() {
   const formTitleRef = useRef(null);
   const errorRef = useRef(null);
   const returnPoint = useRef(initialDraft?.returnPosition || null);
-  const registrationSnapshot = { name, email, password, birthDate, usagePreference,
+  const registrationSnapshot = { name, registrationDetails, email, password, birthDate, usagePreference,
     ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, stage: registrationStage };
   useEffect(() => {
     saveDraft(previous => confirmationEmail ? null : { ...previous, ...registrationSnapshot });
-  }, [name, email, password, birthDate, usagePreference, ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, registrationStage, confirmationEmail, saveDraft]);
+  }, [name, registrationDetails, email, password, birthDate, usagePreference, ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, registrationStage, confirmationEmail, saveDraft]);
 
   useLayoutEffect(() => {
     if (registrationStage !== "account") return;
@@ -6310,9 +6327,13 @@ function Register() {
     if (loading || googleLoading) return;
     setMessage("");
     if (!usagePreference) { setMessage("Wybierz, jak chcesz korzystać z IdeaHire."); return; }
+    const detailsProblem = registrationDetailsProblem(registrationDetails);
+    if (detailsProblem) { setMessage(detailsProblem); return; }
     rememberUsagePreference();
+    const detailsToken = rememberRegistrationDetails(registrationDetails);
     const redirectUrl = new URL("/register", window.location.origin);
     redirectUrl.searchParams.set("oauth", "google");
+    if (detailsToken) redirectUrl.searchParams.set("registration_details", detailsToken);
     await startGoogleAuth(redirectUrl.toString());
   }
 
@@ -6335,6 +6356,9 @@ function Register() {
       setMessage("Podaj imię lub nazwę konta.");
       return;
     }
+
+    const detailsProblem = registrationDetailsProblem(registrationDetails);
+    if (detailsProblem) { setMessage(detailsProblem); return; }
 
     const birthDateValidation =
       getBirthDateValidation(birthDate);
@@ -6379,6 +6403,8 @@ function Register() {
             data: {
               name:
                 name.trim(),
+              [REGISTRATION_DETAILS_KEY]:
+                registrationDetailsMetadata(registrationDetails, "email_signup"),
               date_of_birth:
                 birthDate,
               age_notice_acknowledged:
@@ -6421,6 +6447,7 @@ function Register() {
         return;
       }
 
+      clearPendingRegistrationDetails();
       if (!data.session) {
         setPassword("");
         setConfirmationEmail(normalizeEmail(email));
@@ -6513,7 +6540,7 @@ function Register() {
           aria-busy={loading}
         >
           <label>
-            Imię / nazwa
+            Nazwa profilu
 
             <input
               type="text"
@@ -6523,11 +6550,15 @@ function Register() {
                   event.target.value
                 )
               }
-              placeholder="Twoje imię"
-              autoComplete="name"
+              placeholder="Nazwa widoczna na profilu"
+              autoComplete="nickname"
+              maxLength={160}
               required
             />
+            <small>Ta nazwa może być widoczna dla innych użytkowników.</small>
           </label>
+
+          <RegistrationDetailsFields value={registrationDetails} onChange={setRegistrationDetails} disabled={loading || googleLoading} idPrefix="email-registration" />
 
           <label>
             Adres e-mail
@@ -7705,6 +7736,7 @@ function AccountEntry() {
 
 function LimitedAccount() {
   const location = useLocation();
+  const { user } = useAuth();
   const { dateOfBirth } = useAgeAccess();
   const fullAccessDate = getAgeAnniversary(
     dateOfBirth,
@@ -7724,7 +7756,7 @@ function LimitedAccount() {
     <WorkspaceLimitedHome
       fullAccessLabel={fullAccessLabel}
       ageRestricted={Boolean(location.state?.ageRestricted)}
-      settings={<AccountTemplatesCard />}
+      settings={<><AccountTemplatesCard /><AccountPrivateDetails key={user?.id} user={user} client={supabase} /></>}
       helpUrl={helpCenterHref()}
       showAssistant={LUCYNA_VISIBLE}
     />
@@ -9861,6 +9893,7 @@ function Account() {
           hidden={activeAccountSection !== "preferences"}
         >
           <DiscoveryPreferencesCard />
+          {activeAccountSection === "preferences" && <AccountPrivateDetails key={user.id} user={user} client={supabase} />}
         </div>
 
         <div

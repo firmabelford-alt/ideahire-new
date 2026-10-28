@@ -5,6 +5,7 @@ import {useSitePreferences} from "./Preferences";
 import LucynaPrivacy from "./LucynaPrivacy";
 import { Link } from "react-router-dom";
 import { useRegistrationDocumentReturn } from "./AuthFlow";
+import { RegistrationDetailsPrivacy } from "./RegistrationDetails";
 
 /*
  * IdeaHire — komplet dokumentów prawnych w jednym pliku.
@@ -102,6 +103,7 @@ function LegalDocument({ kind, html }) {
   const renderedHtml = html;
 
   const toc=[...renderedHtml.matchAll(/<h[12]\b[^>]*\bid="([^"]+)"[^>]*>([\s\S]*?)<\/h[12]>/gi)].map(m=>({id:m[1],title:m[2].replace(/<[^>]+>/g,"").replace(/&amp;/g,"&")}));
+  if(kind==='privacy'||kind==='cookies')toc.push({id:'dobrowolne-dane-wspolpracy',title:en?'Optional work details':'Dobrowolne dane do współpracy'});
   if(kind==='terms'||kind==='privacy')toc.push({id:'lucyna-informacja',title:en?'Lucyna AI — information':'Lucyna AI — informacja o funkcji'});
   const links=toc.map(item=><a key={item.id} href={'#'+item.id}>{item.title}</a>);
   const bodyHtml=renderedHtml.replace(/<table\b/gi,'<div class="ih53-legal-table" tabindex="0"><table').replace(/<\/table>/gi,'</table></div>');
@@ -161,6 +163,7 @@ function LegalDocument({ kind, html }) {
 
         <div className="ih53-legal-layout"><aside className="ih53-legal-toc"><strong>{en?'Contents':'Spis treści'}</strong><nav aria-label={en?'Document sections':'Punkty dokumentu'}>{links}</nav></aside><div className="ih53-legal-body"><details className="ih53-legal-toc-mobile"><summary>{en?'Jump to a section':'Przejdź do punktu dokumentu'}</summary><nav>{links}</nav></details>
         <article className="legal-document-content" dangerouslySetInnerHTML={{__html:bodyHtml}}/>
+        {(kind === "privacy" || kind === "cookies") && <RegistrationDetailsPrivacy cookies={kind === "cookies"} />}
         <LucynaPrivacy kind={kind} />
         </div></div>
 
