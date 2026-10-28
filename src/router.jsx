@@ -40,8 +40,10 @@ import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
-import { AdminNavigation, AdminPageHeading, AdminTabs, AdminPane, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
+import { AdminNavigation, AdminPageHeading, AdminTabs, AdminPane, AdminHistory, AdminModal, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
 import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./AdminDomain";
+import { ErasureScope } from "./AdminErasure";
+import { executeErasure, erasureFailureMessage, erasureOutcomeKnown, ERASURE_RETAINED_LABELS } from "./ErasureWorkflow";
 import AdminLucynaDesk from "./AdminLucyna";
 import { getJobExpiryInfo, useListingClock } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
@@ -10022,7 +10024,7 @@ function isPrivacyRequestOpen(status) {
 }
 
 const ERASURE_ACTION_LABELS = {
-  minimize_data: "Usuń dane możliwe do usunięcia",
+  minimize_data: "Wyczyść dane, zachowaj konto",
   close_account: "Usuń dane i zamknij konto",
 };
 
@@ -10053,6 +10055,7 @@ const ERASURE_LIFECYCLE_LABELS = {
 };
 
 const ERASURE_INVENTORY_LABELS = {
+  ...ERASURE_RETAINED_LABELS,
   private_profile_rows: "Prywatny profil",
   public_profile_rows: "Profil publiczny",
   avatar_objects: "Zdjęcia profilu i portfolio",
@@ -10082,6 +10085,17 @@ const ERASURE_INVENTORY_LABELS = {
 };
 
 const ERASURE_EXECUTION_RESULT_LABELS = {
+  auth_optional_metadata_removed: "Wyczyszczone opcjonalne dane konta",
+  private_work_objects_removed: "Usunięte niepowiązane pliki",
+  portfolio_items_deleted: "Usunięte projekty portfolio",
+  portfolio_images_deleted: "Usunięte wpisy zdjęć portfolio",
+  discovery_preferences_deleted: "Usunięte preferencje dopasowań",
+  onboarding_profiles_deleted: "Usunięte odpowiedzi na start",
+  lucyna_preferences_deleted: "Usunięte ustawienia Lucyny",
+  lucyna_threads_deleted: "Usunięte rozmowy z Lucyną",
+  profile_discovery_deleted: "Usunięte ustawienia widoczności",
+  services_deleted: "Usunięte niepowiązane oferty usług",
+  services_paused: "Wstrzymane aktywne oferty usług",
   avatar_objects_removed: "Usunięte pliki zdjęć profilu i portfolio",
   profile_rows_anonymized: "Zanonimizowane profile prywatne",
   public_profile_rows_anonymized: "Zanonimizowane profile publiczne",
@@ -10108,6 +10122,9 @@ function buildErasureExecutionRows(executionResult) {
       : {};
 
   const normalizedResult = {
+    ...Object.fromEntries(Object.keys(ERASURE_EXECUTION_RESULT_LABELS).map(key=>[key,dataResult[key] ?? executionResult[key]])),
+    auth_optional_metadata_removed:
+      executionResult.auth_optional_metadata_removed ?? (executionResult.auth_user_metadata_cleared ? 1 : undefined),
     avatar_objects_removed:
       executionResult.avatar_objects_removed,
     profile_rows_anonymized:
@@ -25445,7 +25462,8 @@ function AdminUserPrivacyAccount() {
   const adminBusy = useRef(false);
   const [refreshWarning,setRefreshWarning] = useState("");
 
-  const [erasureTab,setErasureTab] = useState("request");
+  const [erasureTab,setErasureTab] = useState("operation");
+  const [executionUnconfirmed,setExecutionUnconfirmed] = useState(false);
 
   const { user } = useAuth();
   const { staffRole } = useStaffRole(user?.id);
@@ -25520,6 +25538,8 @@ function AdminUserPrivacyAccount() {
         (item) => item.id === requestedRequestId
       ) || requestRows[0] || null;
 
+      const selectedCase=caseRows.find(item=>item.privacy_request_id===selectedRequest?.id);
+      if (erasureOutcomeKnown(selectedCase)) setExecutionUnconfirmed(false);
       setProfile(profileResult.data || null);
       setLifecycle(lifecycleResult.data || null);
       setRequests(requestRows);
@@ -25618,6 +25638,13 @@ function AdminUserPrivacyAccount() {
     ? cases.find((item) => item.privacy_request_id === currentRequest.id) || null
     : cases[0] || null;
 
+  const initialTabRequest = useRef(null);
+  useEffect(()=>{
+    if(loading || !currentRequest || initialTabRequest.current===currentRequest.id) return;
+    initialTabRequest.current=currentRequest.id;
+    setErasureTab(currentRequest.identity_status!=='verified' ? 'request' : currentCase ? 'operation' : 'scope');
+  },[loading,currentRequest?.id,currentRequest?.identity_status,currentCase?.id]);
+
   const currentCaseEvents = currentCase
     ? caseEvents.filter((item) => item.case_id === currentCase.id)
     : [];
@@ -25636,6 +25663,7 @@ function AdminUserPrivacyAccount() {
   function openErasureDialog(action) {
     setMessage("");
     setDialogMessage("");
+    document.querySelector(".erasure-actions-menu")?.removeAttribute("open");
     setDialogAction(action);
   }
 
@@ -25670,6 +25698,7 @@ function AdminUserPrivacyAccount() {
       if (error) throw error;
 
       setIdentityNote("");
+      setErasureTab("scope");
       setMessage("Tożsamość użytkownika została potwierdzona i zapisana w historii sprawy.");
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
@@ -25710,7 +25739,7 @@ function AdminUserPrivacyAccount() {
 
     if (dialogAction === "close_account" && inventory?.execution_blocked) {
       setDialogMessage(
-        "Nie przekazano operacji ownerowi, ponieważ konto ma aktywne sprawy. Rozwiąż pozycje pokazane poniżej i sprawdź warunki ponownie."
+        "Nie przekazano operacji właścicielowi, ponieważ konto ma aktywne sprawy. Rozwiąż pozycje pokazane poniżej i sprawdź warunki ponownie."
       );
       return;
     }
@@ -25737,9 +25766,10 @@ function AdminUserPrivacyAccount() {
 
       setDialogAction("");
       setDialogMessage("");
+      setErasureTab("operation");
       setLegalAssessment("");
       setRetentionReason("");
-      setMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez ownera.");
+      setMessage("Zakres operacji zapisano i przekazano do zatwierdzenia przez właściciela.");
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
       console.error("ADMIN PREPARE ERASURE ERROR:", error);
@@ -25756,7 +25786,7 @@ function AdminUserPrivacyAccount() {
         setLegalAssessment("");
         setRetentionReason("");
         setMessage(
-          "Operacja została zapisana i oczekuje na zatwierdzenie ownera. Widok został odświeżony."
+          "Operacja została zapisana i oczekuje na zatwierdzenie właściciela. Widok został odświeżony."
         );
         void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
         return;
@@ -25765,7 +25795,7 @@ function AdminUserPrivacyAccount() {
       const errorText = String(error?.message || "").toLowerCase();
       if (errorText.includes("przypisana") || errorText.includes("uprawnie")) {
         setDialogMessage(
-          "Nie przekazano operacji. Ten wniosek musi najpierw przejąć zalogowany administrator albo owner."
+          "Nie przekazano operacji. Ten wniosek musi najpierw przejąć zalogowany administrator albo właściciel."
         );
       } else if (errorText.includes("tożsamo")) {
         setDialogMessage(
@@ -25777,7 +25807,7 @@ function AdminUserPrivacyAccount() {
         );
       } else {
         setDialogMessage(
-          "Nie udało się przekazać operacji ownerowi. Niczego nie usunięto. Odśwież widok i spróbuj ponownie."
+          "Nie udało się przekazać operacji właścicielowi. Niczego nie usunięto. Odśwież widok i spróbuj ponownie."
         );
       }
     } finally {
@@ -25786,7 +25816,7 @@ function AdminUserPrivacyAccount() {
   }
 
   async function handleAuthorizeErasure() {
-    if (!currentCase) return;
+    if (!currentCase || executionUnconfirmed || !inventory || inventoryError) return;
 
     if (
       currentCase.action_type === "close_account"
@@ -25806,30 +25836,23 @@ function AdminUserPrivacyAccount() {
 
     try {
       const actionType = currentCase.action_type;
-      const { data, error } = await supabase.functions.invoke(
-        "ideahire-admin-erasure",
-        { body: {
+      await executeErasure(supabase, {
           caseId: currentCase.id,
           authorizeAndExecute: true,
           ownerConfirmation: ownerConfirmation.trim(),
-        } }
-      );
-
-      if (error) throw error;
-      if (!data?.ok) throw new Error(data?.error || "Operacja nie została zakończona.");
+          expectedActionType: actionType,
+        });
 
       setOwnerConfirmation("");
       setMessage(
         actionType === "close_account"
-          ? "Owner zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono."
-          : "Owner zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono."
+          ? "Właściciel zatwierdził operację. Możliwe dane usunięto lub zanonimizowano, konto zamknięto, a sprawę zakończono."
+          : "Właściciel zatwierdził operację. Pełny możliwy zakres danych usunięto lub zanonimizowano, konto pozostało aktywne, a sprawę zakończono."
       );
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
-      setMessage(cleanSupabaseError(
-        error,
-        "Nie udało się dokończyć operacji. Jeśli zatwierdzenie zostało zapisane, pojawi się bezpieczny przycisk ponowienia."
-      ));
+      setMessage(erasureFailureMessage(error));
+      setExecutionUnconfirmed(Boolean(error.uncertain));
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } finally {
       adminBusy.current = false; setBusy("");
@@ -25842,21 +25865,21 @@ function AdminUserPrivacyAccount() {
     const operationName = ERASURE_ACTION_LABELS[currentCase.action_type]
       || "wykonanie operacji";
 
+    if (executionUnconfirmed || !inventory || inventoryError) {
+      setMessage("Najpierw odśwież status i zakres danych."); return;
+    }
     if (!await adminDialog.confirm(
-      `Czy na pewno uruchomić: ${operationName}? Operacja zostanie zapisana w historii i nie można jej cofnąć.`
+      currentCase.action_type === "minimize_data"
+        ? "Wyczyścimy wskazane poniżej dane. Adres e-mail, hasło i możliwość logowania pozostaną. Tej operacji nie można cofnąć."
+        : "Usuniemy wskazane dane i wyłączymy logowanie. Tej operacji nie można cofnąć.",
+      { title:operationName, confirmLabel:currentCase.action_type === "minimize_data" ? "Usuń dane" : "Usuń i zamknij", details:<ErasureScope inventory={inventory} action={currentCase.action_type} compact /> }
     )) return;
 
     if (adminBusy.current) return; adminBusy.current = true; setBusy("execute");
     setMessage("");
 
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "ideahire-admin-erasure",
-        { body: { caseId: currentCase.id } }
-      );
-
-      if (error) throw error;
-      if (!data?.ok) throw new Error(data?.error || "Operacja nie została zakończona.");
+      await executeErasure(supabase, { caseId:currentCase.id, expectedActionType:currentCase.action_type });
 
       setMessage(
         currentCase.action_type === "close_account"
@@ -25865,10 +25888,8 @@ function AdminUserPrivacyAccount() {
       );
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } catch (error) {
-      setMessage(cleanSupabaseError(
-        error,
-        "Nie udało się dokończyć operacji. Możesz bezpiecznie użyć przycisku ponownie."
-      ));
+      setMessage(erasureFailureMessage(error));
+      setExecutionUnconfirmed(Boolean(error.uncertain));
       void loadAccountData(false).catch(() => setRefreshWarning("Zapis został zakończony, ale nie udało się odświeżyć danych. Odśwież widok przed kolejną operacją."));
     } finally {
       adminBusy.current = false; setBusy("");
@@ -25876,6 +25897,7 @@ function AdminUserPrivacyAccount() {
   }
 
   function chooseRequest(requestId) {
+    setMessage(""); setErasureTab("request");
     navigate(`/admin/privacy/users/${userId}?request=${requestId}`, {
       replace: true,
     });
@@ -25891,7 +25913,7 @@ function AdminUserPrivacyAccount() {
     && currentCase?.action_type === "close_account"
   );
   const accountName = completedDataMinimization
-    ? "Konto aktywne — dane możliwe do usunięcia zostały usunięte"
+    ? "Profil wyczyszczony"
     : completedAccountClosure
       ? "Konto zamknięte"
       : profile?.name?.trim() || "Użytkownik IdeaHire";
@@ -25923,8 +25945,8 @@ function AdminUserPrivacyAccount() {
       <AdminNavbar />{adminDialog.element}
 
       <main className="admin-shell erasure-account-shell" id="ih-admin-content" tabIndex={-1} data-admin-release="admin-20261027"><AdminRefreshNotice warning={refreshWarning} onRefresh={() => { setRefreshWarning(""); loadAccountData(false).catch(() => setRefreshWarning("Nie udało się odświeżyć danych. Spróbuj ponownie.")); }} />
-        <Link className="privacy-back-link" to="/admin/privacy">
-           Wróć do wniosków RODO
+        <Link className="privacy-back-link" to="/admin/privacy?type=erasure">
+           Wnioski o usunięcie danych
         </Link>
 
         {loading ? (
@@ -25944,7 +25966,7 @@ function AdminUserPrivacyAccount() {
                   ) : accountName.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <span className="section-label">Administracyjny widok konta</span>
+                  <span className="section-label">Usuwanie danych użytkownika</span>
                   <h1>{accountName}</h1>
                   <details className="ih-admin-account-id"><summary>Identyfikator użytkownika</summary><code>{userId}</code></details>
                   {completedDataMinimization && (
@@ -25962,7 +25984,7 @@ function AdminUserPrivacyAccount() {
                 </span>
 
                 <details className="erasure-actions-menu">
-                  <summary>Przygotuj operację</summary>
+                  <summary>Działania na koncie</summary>
                   <div>
                     <Link
                       to={`/admin/moderation?user=${userId}`}
@@ -25978,8 +26000,8 @@ function AdminUserPrivacyAccount() {
                         || requestedErasureAction === "close_account"
                       }
                     >
-                      <span>Usuń dane możliwe do usunięcia</span>
-                      <small>Konto nie zostanie usunięte z Auth</small>
+                      <span>Wyczyść dane, zachowaj konto</span>
+                      <small>Usunięcie profilu i danych opcjonalnych. Logowanie pozostaje.</small>
                     </button>
                     <button
                       type="button"
@@ -25991,10 +26013,11 @@ function AdminUserPrivacyAccount() {
                       }
                     >
                       <span>Usuń dane i zamknij konto</span>
-                      <small>Minimalizacja danych i wyłączenie logowania</small>
+                      <small>Usunięcie danych oraz wyłączenie logowania</small>
                     </button>
                   </div>
                 </details>
+                {actionDisabled && currentCase && <p className="ih-erasure-action-hint">Ten wniosek ma już przygotowaną operację. <button type="button" onClick={()=>setErasureTab("operation")}>Pokaż jej status i wynik</button></p>}
               </div>
             </header>
 
@@ -26046,7 +26069,7 @@ function AdminUserPrivacyAccount() {
                     </FormSelect>
                   </label>
                 )}
-              </section><AdminErasureSteps request={currentRequest} currentCase={currentCase} /><AdminTabs value={erasureTab} onChange={setErasureTab} items={[["request","Wniosek i tożsamość"],["scope","Zakres danych"],["operation","Operacja i wynik"]]} /></>
+              </section><AdminErasureSteps request={currentRequest} currentCase={currentCase} /><AdminTabs value={erasureTab} onChange={setErasureTab} items={[["request","Sprawdź wniosek i osobę"],["scope","Co usuniemy i zachowamy"],["operation",currentCase?.status === "completed" ? "Raport wykonania" : "Zatwierdź i usuń dane"],["history","Historia operacji",currentCaseEvents.length]]} /></>
             )}
 
             {currentRequest && !canManage && (
@@ -26054,12 +26077,12 @@ function AdminUserPrivacyAccount() {
                 <strong>Brak uprawnienia do wykonania operacji</strong>
                 <p>
                   Najpierw przejmij wniosek w kolejce. Wgląd i wykonanie ma
-                  prowadzący administrator oraz owner.
+                  prowadzący administrator oraz właściciel.
                 </p>
               </section>
             )}
 
-            {isLegacyErasureRequest && canManage && (
+            {isLegacyErasureRequest && canManage && erasureTab === "request" && (
               <section className="erasure-account-notice is-warning">
                 <strong>Starszy wniosek bez technicznie zapisanego zakresu</strong>
                 <p>
@@ -26123,7 +26146,7 @@ function AdminUserPrivacyAccount() {
                 <strong>Nie udało się pobrać zakresu danych</strong>
                 <p>
                   Operacja nie może zostać przygotowana bez aktualnego inwentarza.
-                  Nic nie zostało usunięte ani przekazane ownerowi.
+                  Odśwież zakres i status. Poprzednia próba mogła już wykonać część zmian.
                 </p>
                 <button
                   type="button"
@@ -26135,49 +26158,7 @@ function AdminUserPrivacyAccount() {
                 </button>
               </section>
             ) : inventory ? (
-              <AdminPane active={erasureTab==="scope"}><section className="erasure-account-grid">
-                <article className="erasure-inventory-card">
-                  <div className="erasure-card-heading">
-                    <div>
-                      <span className="section-label">Możliwe do usunięcia</span>
-                      <h2>Dane profilu i ustawienia</h2>
-                    </div>
-                    <span className="erasure-card-mark is-removable">Usuń</span>
-                  </div>
-                  <ul>
-                    {Object.entries(inventory.erasable_now || {}).map(([key, value]) => (
-                      <li key={key}>
-                        <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
-                        <strong>{Number(value) || 0}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-
-                <article className="erasure-inventory-card is-retained">
-                  <div className="erasure-card-heading">
-                    <div>
-                      <span className="section-label">Kontrolowana retencja</span>
-                      <h2>Historia prawna i transakcyjna</h2>
-                    </div>
-                    <span className="erasure-card-mark is-retained">Zachowaj</span>
-                  </div>
-                  <ul>
-                    {Object.entries(
-                      inventory.retained_for_legal_or_transactional_purposes || {}
-                    ).map(([key, value]) => (
-                      <li key={key}>
-                        <span>{ERASURE_INVENTORY_LABELS[key] || key}</span>
-                        <strong>{Number(value) || 0}</strong>
-                      </li>
-                    ))}
-                  </ul>
-                  <p>
-                    Te rekordy nie są automatycznie kasowane. Administrator musi
-                    podać podstawę i okres retencji do późniejszej kontroli prawnej.
-                  </p>
-                </article>
-              </section></AdminPane>
+              <AdminPane active={erasureTab==="scope"}>{completedDataMinimization || completedAccountClosure ? <div className="erasure-account-notice"><strong>Operacja została wykonana</strong><p>Raport zawiera rzeczywiste liczby usuniętych i pozostawionych danych. Poniżej widzisz aktualny stan konta.</p><button type="button" className="privacy-secondary-button" onClick={()=>setErasureTab("operation")}>Zobacz raport wykonania</button></div> : null}<ErasureScope inventory={inventory} action={currentCase?.action_type || requestedErasureAction || "minimize_data"}/></AdminPane>
             ) : currentRequest ? (
               <section className="erasure-account-notice">
                 <strong>Pobieramy aktualny zakres danych</strong>
@@ -26185,7 +26166,7 @@ function AdminUserPrivacyAccount() {
               </section>
             ) : null}
 
-            {activeBlockers.length > 0 && (
+            {activeBlockers.length > 0 && (currentCase?.action_type === "close_account" || requestedErasureAction === "close_account") && (
               <AdminPane active={erasureTab==="operation"}><section className="erasure-blockers-card" role="alert">
                 <div>
                   <span aria-hidden="true">!</span>
@@ -26218,7 +26199,7 @@ function AdminUserPrivacyAccount() {
                   </span>
                 </div>
 
-                <div className="erasure-assessment-grid">
+                <details className="ih-erasure-assessment"><summary>Uzasadnienie zakresu i zachowania historii</summary><div className="erasure-assessment-grid">
                   <article>
                     <strong>Ocena zakresu i podstawy</strong>
                     <p>{currentCase.legal_assessment}</p>
@@ -26227,19 +26208,20 @@ function AdminUserPrivacyAccount() {
                     <strong>Uzasadnienie pozostawienia historii</strong>
                     <p>{currentCase.retention_reason}</p>
                   </article>
-                </div>
+                </div></details>
 
                 {currentCase.status === "awaiting_owner" && (
                   staffRole === "owner" ? (
                     <div className="erasure-owner-approval">
                       <div>
-                        <strong>Ostateczne zatwierdzenie ownera</strong>
+                        <strong>Zatwierdzenie właściciela</strong>
                         <p>
                           Sprawdź zakres, retencję i aktywne zobowiązania. Następnie
                           wpisz dokładną frazę. Zatwierdzenie od razu uruchomi
-                          minimalizację danych i zamknie tę sprawę.
+                          usuwanie danych. Sprawa zakończy się po potwierdzeniu wszystkich etapów.
                         </p>
                       </div>
+                      {inventory && <details className="ih-erasure-review"><summary>Sprawdź dokładny zakres przed zatwierdzeniem</summary><ErasureScope inventory={inventory} action={currentCase.action_type} compact /></details>}
                       <label>
                         Fraza potwierdzająca
                         <input
@@ -26255,7 +26237,7 @@ function AdminUserPrivacyAccount() {
                         className="erasure-danger-button"
                         onClick={handleAuthorizeErasure}
                         disabled={
-                          Boolean(busy)
+                          Boolean(busy) || executionUnconfirmed || !inventory || Boolean(inventoryError)
                           || ownerConfirmation.trim() !== "ZATWIERDZAM USUNIECIE"
                           || (
                             currentCase.action_type === "close_account"
@@ -26265,17 +26247,19 @@ function AdminUserPrivacyAccount() {
                       >
                         {busy === "authorize"
                           ? "Zatwierdzanie i wykonywanie..."
-                          : "Zatwierdź i wykonaj operację"}
+                          : currentCase.action_type === "minimize_data" ? "Zatwierdź i usuń dane" : "Zatwierdź i zamknij konto"}
                       </button>
                     </div>
                   ) : (
                     <div className="erasure-account-notice">
-                      <strong>Operacja oczekuje na ownera</strong>
+                      <strong>Operacja oczekuje na właściciela</strong>
                       <p>Administrator nie może samodzielnie zatwierdzić nieodwracalnej operacji.</p>
                     </div>
                   )
                 )}
 
+                {currentCase.failure_reason && <div className="erasure-account-notice is-danger" role="alert"><strong>Poprzednia próba została przerwana</strong><p>{currentCase.failure_reason}</p></div>}
+                {executionUnconfirmed && <button type="button" className="privacy-secondary-button" onClick={()=>loadAccountData(false)}>Odśwież status przed kontynuacją</button>}
                 {["authorized", "processing"].includes(currentCase.status) && (
                   <div className="erasure-execute-panel">
                     <div>
@@ -26285,21 +26269,20 @@ function AdminUserPrivacyAccount() {
                           : "Operacja gotowa do wykonania"}
                       </strong>
                       <p>
-                        Pliki profilu zostaną usunięte przez Storage API. Przy
-                        zamknięciu konta dostęp Auth zostanie wyłączony po stronie serwera.
+                        {currentCase.action_type === "minimize_data" ? "Wyczyścimy dane wskazane w zakresie operacji. Konto i logowanie pozostaną aktywne." : "Usuniemy dane wskazane w zakresie i wyłączymy logowanie po ponownej kontroli zobowiązań."}
                       </p>
                     </div>
                     <button
                       type="button"
                       className="erasure-danger-button"
                       onClick={handleExecuteErasure}
-                      disabled={Boolean(busy)}
+                      disabled={Boolean(busy) || executionUnconfirmed || !inventory || Boolean(inventoryError)}
                     >
                       {busy === "execute"
                         ? "Wykonywanie..."
                         : currentCase.status === "processing"
-                          ? "Ponów i dokończ operację"
-                          : "Wykonaj zatwierdzoną operację"}
+                          ? "Sprawdź zakres i dokończ"
+                          : "Sprawdź zakres i usuń dane"}
                     </button>
                   </div>
                 )}
@@ -26316,7 +26299,7 @@ function AdminUserPrivacyAccount() {
                       </p>
 
                       {executionRows.length > 0 && (
-                        <section className="erasure-execution-report">
+                        <details className="erasure-execution-report"><summary>Co usunięto lub wyczyszczono ({executionRows.length})</summary>
                           <div>
                             <span className="section-label">Raport wykonania</span>
                             <h3>Co zostało usunięte lub zanonimizowane</h3>
@@ -26329,10 +26312,10 @@ function AdminUserPrivacyAccount() {
                               </div>
                             ))}
                           </dl>
-                        </section>
+                        </details>
                       )}
 
-                      <section className="erasure-retention-report">
+                      <details className="erasure-retention-report"><summary>Co pozostało po operacji</summary>
                         <div>
                           <span className="section-label">Kontrolowana retencja</span>
                           <h3>Dane pozostawione po operacji</h3>
@@ -26359,7 +26342,7 @@ function AdminUserPrivacyAccount() {
                           są publikowane w profilu i podlegają uzasadnieniu oraz
                           okresowi retencji zapisanym w tej sprawie.
                         </small>
-                      </section>
+                      </details>
                     </div>
                   </div>
                 )}
@@ -26371,9 +26354,12 @@ function AdminUserPrivacyAccount() {
                   </div>
                 )}
 
-                {currentCaseEvents.length > 0 && (
-                  <ol className="erasure-case-timeline">
-                    {currentCaseEvents.map((item) => (
+              </section></AdminPane>
+            )}
+            {currentCase && <AdminPane active={erasureTab==="history"}><section className="erasure-case-card"><h2>Historia operacji</h2>
+                {currentCaseEvents.length > 0 ? (
+                  <AdminHistory resetKey={currentCase.id}><ol className="erasure-case-timeline">
+                    {[...currentCaseEvents].reverse().map((item) => (
                       <li key={item.id}>
                         <span aria-hidden="true" />
                         <div>
@@ -26382,27 +26368,16 @@ function AdminUserPrivacyAccount() {
                         </div>
                       </li>
                     ))}
-                  </ol>
-                )}
-              </section></AdminPane>
-            )}
+                  </ol></AdminHistory>
+                ) : <p>Nie zapisano jeszcze zdarzeń tej operacji.</p>}
+              </section></AdminPane>}
+            {currentRequest && <AdminPane active={erasureTab==="request"}><section className="ih-erasure-request-details"><h2>Treść wniosku</h2><p>{currentRequest.description}</p><strong>{currentRequest.identity_status === "verified" ? "Tożsamość potwierdzona" : "Tożsamość wymaga potwierdzenia"}</strong><Link to={`/admin/privacy?request=${currentRequest.id}`}>Otwórz korespondencję i status wniosku</Link></section></AdminPane>}
           </>
         )}
       </main>
 
       {dialogAction && (
-        <div
-          className="erasure-dialog-backdrop"
-          role="presentation"
-          onMouseDown={closeErasureDialog}
-        >
-          <section
-            className="erasure-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="erasure-dialog-title"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
+        <AdminModal className="erasure-dialog" labelledBy="erasure-dialog-title" onClose={closeErasureDialog} closeDisabled={Boolean(busy)}>
             <div className="erasure-dialog-heading">
               <div>
                 <span className="section-label">Operacja kontrolowana</span>
@@ -26436,7 +26411,7 @@ function AdminUserPrivacyAccount() {
               <div className="erasure-dialog-blockers erasure-account-notice is-danger">
                 <strong>Nie można jeszcze przekazać zamknięcia konta</strong>
                 <p>
-                  Owner nie powinien zatwierdzać zamknięcia, dopóki poniższe sprawy
+                  Właściciel nie powinien zatwierdzać zamknięcia, dopóki poniższe sprawy
                   nie zostaną zakończone. Możesz kliknąć przycisk na dole, aby
                   zobaczyć jednoznaczne potwierdzenie blokady.
                 </p>
@@ -26450,6 +26425,7 @@ function AdminUserPrivacyAccount() {
               </p>
             )}
 
+            {inventory && <details className="ih-erasure-review"><summary>Dokładny zakres tej operacji</summary><ErasureScope inventory={inventory} action={dialogAction} compact /></details>}
             <form onSubmit={handlePrepareErasure} noValidate>
               <label>
                 Ocena zakresu i podstawy realizacji wniosku
@@ -26511,8 +26487,7 @@ function AdminUserPrivacyAccount() {
                 </button>
               </div>
             </form>
-          </section>
-        </div>
+        </AdminModal>
       )}
     </div>
   );

@@ -8,9 +8,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { build } from 'esbuild';
 import { adminPrivacyFilter, orderAdminRequests, adminQueueSearch, adminActionLabel, adminQueuePage } from '../src/AdminDomain.js';
 const compiled = new URL(`.admin-test-${process.pid}.mjs`,import.meta.url);
-const bundle = await build({stdin:{contents:"export * from '../src/AdminDesk.jsx'; export * from '../src/LucynaDock.jsx'; export {default as AdminLucynaDesk, ADMIN_GUIDES} from '../src/AdminLucyna.jsx'; export {getSubpage} from '../src/Subpages.jsx';",resolveDir:fileURLToPath(new URL('.',import.meta.url))},bundle:true,platform:'node',format:'esm',packages:'external',loader:{'.css':'empty'},write:false,logLevel:'silent'});
+const bundle = await build({stdin:{contents:"export * from '../src/AdminDesk.jsx'; export * from '../src/AdminErasure.jsx'; export * from '../src/LucynaDock.jsx'; export {default as AdminLucynaDesk, ADMIN_GUIDES} from '../src/AdminLucyna.jsx'; export {getSubpage} from '../src/Subpages.jsx';",resolveDir:fileURLToPath(new URL('.',import.meta.url))},bundle:true,platform:'node',format:'esm',packages:'external',loader:{'.css':'empty'},write:false,logLevel:'silent'});
 await writeFile(compiled,bundle.outputFiles[0].text);
-const {AdminNavigation,AdminPageHeading,AdminTabs,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
+const {AdminNavigation,AdminPageHeading,AdminTabs,AdminHistory,ErasureScope,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
 const render=(Component,props={},path='/admin')=>{
  const old=console.error; console.error=(...args)=>{if(!String(args[0]).includes('useLayoutEffect does nothing on the server'))old(...args);};
  try{return renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:[path]},React.createElement(Component,props)));}finally{console.error=old;}
@@ -161,4 +161,22 @@ test('compact admin case rows preserve the target, status and financial context'
  for(const text of ['Project title','IH-000001','Decision issued','Assigned','500 PLN','28.10.2026'])assert.match(html,new RegExp(text));
  assert.match(html,/href="\/disputes\/case-1"/);
  assert.doesNotMatch(html,/<h2/);
+});
+
+test('case history is bounded to six events with navigation while retaining all entries',()=>{
+ const list=React.createElement('ol',null,Array.from({length:40},(_,i)=>React.createElement('li',{key:i},'Zdarzenie '+i)));
+ const html=render(AdminHistory,{children:list});
+ assert.equal((html.match(/<li/g)||[]).length,6);assert.match(html,/1–6 z 40/);assert.match(html,/Starsze/);assert.doesNotMatch(html,/Zdarzenie 39/);
+});
+test('the deletion review explains optional data, protected records and active login in plain language',()=>{
+ const html=render(ErasureScope,{inventory:{scope_version:'2026-10-28',erasable_now:{portfolio_items:1,lucyna_threads:5,removable_services:1},retained_for_legal_or_transactional_purposes:{payments_total:3,disputes_total:3,services_total:2}}});
+ for(const text of ['Konto i logowanie pozostają aktywne','Projekty portfolio','Zapisane rozmowy z Lucyną','Co zachowamy','Płatności','Spory'])assert.ok(html.includes(text),text);
+ assert.doesNotMatch(html,/Storage API| Auth|removable_services|private_profile_rows/);
+ assert.match(html,/<details><summary>Kategorie bez danych/);
+});
+
+test('partial erasure does not mark the final execution step as completed',()=>{
+ const html=render(AdminErasureSteps,{request:{identity_status:'verified'},currentCase:{status:'partially_completed',approved_at:'2026-10-28T12:00:00Z'}});
+ assert.match(html,/4 z 5/);
+ for(const list of html.match(/<ol\b[\s\S]*?<\/ol>/g))assert.equal((list.match(/class="is-done"/g)||[]).length,4);
 });

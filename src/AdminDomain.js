@@ -27,6 +27,14 @@ export const ADMIN_ACTION_LABELS = {
   privacy_request_taken:'Przejęto wniosek RODO', privacy_request_updated:'Zmieniono status wniosku RODO', privacy_request_extended:'Przedłużono termin odpowiedzi',
   privacy_audit_report_saved:'Zapisano analizę ochrony danych', privacy_audit_submitted:'Przekazano analizę do zatwierdzenia', privacy_audit_approved:'Zatwierdzono raport',
   erasure_case_prepared:'Przygotowano usunięcie danych', erasure_case_authorized:'Zatwierdzono operację usunięcia', erasure_case_executed:'Wykonano operację usunięcia',
+  erasure_execution_started:'Rozpoczęto usuwanie danych', erasure_identity_verified:'Potwierdzono tożsamość wnioskodawcy',
+  erasure_case_completed:'Zakończono usuwanie danych', erasure_case_failed:'Przerwano operację usuwania danych',
+  admin_dispute_chat_message_sent:'Wysłano wiadomość administracji w sprawie', admin_message_added:'Dodano wiadomość administracji',
+  case_context_viewed:'Otwarto kontekst sprawy', chat_message_attached:'Dołączono wiadomość jako dowód',
+  dispute_context_notice_acknowledged:'Potwierdzono zasady dostępu do sprawy', dispute_payment_completed:'Zapisano wynik rozliczenia sporu',
+  dispute_viewed:'Otwarto szczegóły sporu', evidence_registered:'Dodano materiał dowodowy',
+  first_response_added:'Dodano pierwszą odpowiedź w sprawie', statement_added:'Dodano stanowisko strony',
+  moderation_subject_opened:'Otwarto konto w moderacji', owner_bootstrapped:'Skonfigurowano dostęp właściciela',
 };
 export function adminActionLabel(value) { return ADMIN_ACTION_LABELS[value] || 'Zapisano działanie administracyjne'; }
 

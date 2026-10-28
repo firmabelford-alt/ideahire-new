@@ -46,6 +46,14 @@ export function AdminTabs({ items, value, onChange, label='Obszary pracy' }) {
 }
 export function AdminPane({ active, children }) { return <div className="ih-admin-pane" hidden={!active}>{children}</div>; }
 
+export function AdminHistory({ children,resetKey,pageSize=6 }) {
+  const [page,setPage]=useState(0);
+  useEffect(()=>setPage(0),[resetKey]);
+  const list=React.Children.only(children), entries=React.Children.toArray(list.props.children);
+  const result=adminQueuePage(entries,page,pageSize);
+  return <div className="ih-admin-bounded-history">{React.cloneElement(list,{},result.rows)}{result.last>0&&<nav className="ih-admin-log-pages" aria-label="Strony historii"><button type="button" disabled={result.current===0} onClick={()=>setPage(result.current-1)}><ArrowLeft size={17} aria-hidden="true"/>Nowsze</button><span>{result.start+1}–{Math.min(entries.length,result.start+result.rows.length)} z {entries.length}</span><button type="button" disabled={result.current===result.last} onClick={()=>setPage(result.current+1)}>Starsze<ArrowRight size={17} aria-hidden="true"/></button></nav>}</div>;
+}
+
 export function AdminPageHeading({ title, description, meta }) {
   return <header className="ih-admin-page-heading">
     <div className="ih-admin-heading-line"><h1>{title}</h1>{meta&&<span className="ih-admin-heading-meta">{meta}</span>}</div>
@@ -109,7 +117,7 @@ export function AdminActivityLog({ rows, actorName, formatDate }) {
 function flatten(children) { return React.Children.toArray(children).flatMap(child => child?.type === React.Fragment ? flatten(child.props.children) : [child]).filter(child=>typeof child !== 'string' || child.trim()); }
 const slots = [
   ['status','Status i termin',['privacy-admin-form']], ['reply','Wiadomość',['privacy-admin-reply-form']],
-  ['audit','Analiza ochrony danych',['privacy-audit-workspace']], ['history','Historia',['privacy-admin-timeline']],
+  ['audit','Analiza ochrony danych',['privacy-audit-workspace']], ['history','Historia wniosku',['privacy-admin-timeline']],
   ['case','Przebieg sprawy',['ih-admin-case-summary']], ['context','Rozmowa i ustalenia',['admin-case-context-panel']],
   ['evidence','Dowody',['ih-admin-evidence']], ['communication','Korespondencja',['ih-admin-correspondence']],
   ['decision','Decyzja i działania',['admin-workbench']], ['appeals','Odwołania',['ih-admin-dispute-appeals']],
@@ -122,7 +130,7 @@ export function AdminCaseTools({ children, disabled=false }) {
     const names = String(child?.props?.className || '').split(/\s+/);
     const slot = slots.find(([, , classes])=>classes.some(name=>names.includes(name))) || ['other','Informacje',[]];
     if(!groups.has(slot[0])) groups.set(slot[0],{title:slot[1],children:[]});
-    groups.get(slot[0]).children.push(child);
+    groups.get(slot[0]).children.push(slot[0]==='history' ? <AdminHistory key={child.key||'bounded-history'}>{React.cloneElement(child,{},React.Children.toArray(child.props.children).reverse())}</AdminHistory> : child);
   }
   if(!groups.size) return null;
   const ordered = [...groups].sort(([a],[b]) => (slots.findIndex(slot=>slot[0]===a)+1 || 100) - (slots.findIndex(slot=>slot[0]===b)+1 || 100));
@@ -133,7 +141,7 @@ export function AdminCaseTools({ children, disabled=false }) {
 export function AdminAuditAction({ action }) { return <><strong>{adminActionLabel(action)}</strong><details className="ih-admin-audit-technical"><summary>Kod zdarzenia</summary><code className="ih-admin-audit-code">{action}</code></details></>; }
 
 export function AdminErasureSteps({ request, currentCase }) {
-  const steps=[['Wniosek',Boolean(request)],['Tożsamość',request?.identity_status === 'verified'],['Przygotowanie',Boolean(currentCase)],['Zatwierdzenie',Boolean(currentCase?.owner_approved_at || ['authorized','processing','completed','partially_completed'].includes(currentCase?.status))],['Wykonanie',Boolean(currentCase?.executed_at || ['completed','partially_completed'].includes(currentCase?.status))]];
+  const steps=[['Wniosek',Boolean(request)],['Tożsamość',request?.identity_status === 'verified'],['Przygotowanie',Boolean(currentCase)],['Zatwierdzenie',Boolean(currentCase?.approved_at || currentCase?.owner_approved_at || ['authorized','processing','completed','partially_completed'].includes(currentCase?.status))],['Wykonanie',currentCase?.status === 'completed']];
   const list = className => <ol className={'ih-admin-erasure-steps '+className} aria-label="Etapy usuwania danych">{steps.map(([label,done],index)=><li key={label} className={done?'is-done':''}><span aria-hidden="true">{done?<Check size={15}/>:index+1}</span><strong>{label}</strong><span className="ih-admin-sr">{done?'Zrealizowano':'Do weryfikacji'}</span></li>)}</ol>;
   return <>
     {list('ih-admin-desktop-steps')}
@@ -143,17 +151,23 @@ export function AdminErasureSteps({ request, currentCase }) {
 
 export function AdminRefreshNotice({ warning, onRefresh }) { return warning ? <div className="ih-admin-refresh-warning" role="status"><p>{warning}</p><button type="button" onClick={onRefresh}>Odśwież dane</button></div> : null; }
 
+export function AdminModal({children,className,labelledBy,onClose,closeDisabled=false}) {
+  const ref=useRef(null);
+  useEffect(()=>{ref.current?.showModal();},[]);
+  return <dialog ref={ref} className={className} aria-labelledby={labelledBy} onCancel={event=>{event.preventDefault();if(!closeDisabled)onClose();}}>{children}</dialog>;
+}
+
 export function useAdminDialog() {
   const [question,setQuestion] = useState(null), pending=useRef(null), active=useRef(true), sequence=useRef(0);
   const finish = useCallback(value=>{ const resolve=pending.current; pending.current=null; setQuestion(null); resolve?.(value); },[]);
   useEffect(()=>{ active.current=true; return ()=>{ active.current=false; pending.current?.(null); pending.current=null; }; },[]);
-  const ask = (message,type) => !active.current || pending.current ? Promise.resolve(null) : new Promise(resolve=>{pending.current=resolve;setQuestion({message,type,id:++sequence.current});});
-  return { prompt:message=>ask(message,'text'), confirm:message=>ask(message,'confirm'), element:question ? <AdminQuestion key={question.id} question={question} onFinish={finish} /> : null };
+  const ask = (message,type,options={}) => !active.current || pending.current ? Promise.resolve(null) : new Promise(resolve=>{pending.current=resolve;setQuestion({...options,message,type,id:++sequence.current});});
+  return { prompt:message=>ask(message,'text'), confirm:(message,options)=>ask(message,'confirm',options), element:question ? <AdminQuestion key={question.id} question={question} onFinish={finish} /> : null };
 }
 function AdminQuestion({ question,onFinish }) {
   const ref=useRef(null), [text,setText]=useState('');
   useEffect(()=>{ref.current?.showModal();},[]);
-  return <dialog className="ih-admin-question" ref={ref} onCancel={event=>{event.preventDefault();onFinish(null);}} aria-labelledby="ih-admin-question-title"><form method="dialog" onSubmit={event=>{event.preventDefault();onFinish(question.type==='text'?text:true);}}><h2 id="ih-admin-question-title">{question.type==='text'?'Uzasadnienie działania':'Potwierdź działanie'}</h2><p>{question.message}</p>{question.type==='text'&&<label><span>Treść uzasadnienia</span><textarea autoFocus value={text} onChange={event=>setText(event.target.value)} rows={5} maxLength={5000}/></label>}<div className="ih-admin-dialog-actions"><button type="button" onClick={()=>onFinish(null)}>Anuluj</button><button type="submit" className="is-primary" disabled={question.type==='text'&&!text.trim()}>Dalej</button></div></form></dialog>;
+  return <dialog className="ih-admin-question" ref={ref} onCancel={event=>{event.preventDefault();onFinish(null);}} aria-labelledby="ih-admin-question-title"><form method="dialog" onSubmit={event=>{event.preventDefault();onFinish(question.type==='text'?text:true);}}><h2 id="ih-admin-question-title">{question.title||(question.type==='text'?'Uzasadnienie działania':'Potwierdź działanie')}</h2><p>{question.message}</p>{question.details}{question.type==='text'&&<label><span>Treść uzasadnienia</span><textarea autoFocus value={text} onChange={event=>setText(event.target.value)} rows={5} maxLength={5000}/></label>}<div className="ih-admin-dialog-actions"><button type="button" autoFocus={question.type!=='text'} onClick={()=>onFinish(null)}>Anuluj</button><button type="submit" className="is-primary" disabled={question.type==='text'&&!text.trim()}>{question.confirmLabel||'Potwierdź'}</button></div></form></dialog>;
 }
 
 export function adminRead(query) { return privacyCall(signal=>query.abortSignal(signal)); }
