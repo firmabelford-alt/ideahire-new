@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, ChevronRight, ClipboardList, FileText, History, LayoutDashboard, LockKeyhole, LogOut, Menu, MessageSquare, Search, ShieldCheck, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronDown, ChevronRight, ClipboardList, FileText, History, LayoutDashboard, LockKeyhole, LogOut, Menu, MessageSquare, Search, ShieldCheck, Users, X } from 'lucide-react';
 import { BrandSignature } from './Brand';
 import { FormSelect } from './FormControls';
 import { adminActionLabel, adminQueueSearch, adminQueuePage } from './AdminDomain';
@@ -8,6 +8,7 @@ import { privacyCall } from './PrivacyRequests';
 import LucynaSymbol from './LucynaSymbol';
 import { requestLucynaDock } from './LucynaDock';
 import './AdminDesk.css';
+import './AdminMobile.css';
 
 const navigation = [
   ['/admin','Sprawy i spory',LayoutDashboard], ['/admin/privacy','Wnioski RODO',ClipboardList],
@@ -38,7 +39,10 @@ export function AdminNavigation({ name, role, onLogout, assistantEnabled = true 
 }
 
 export function AdminTabs({ items, value, onChange, label='Obszary pracy' }) {
-  return <nav className="ih-admin-tabs" aria-label={label}>{items.map(([id,title,count]) => <button type="button" key={id} aria-pressed={value === id} onClick={()=>onChange(id)}>{title}{count != null && <span>{count}</span>}</button>)}</nav>;
+  return <>
+    <label className="ih-admin-tab-switcher"><span>Sekcja</span><select aria-label={label} value={value} onChange={event=>onChange(event.target.value)}>{items.map(([id,title,count])=><option key={id} value={id}>{title}{count != null ? ` (${count})` : ''}</option>)}</select></label>
+    <nav className="ih-admin-tabs" aria-label={label}>{items.map(([id,title,count]) => <button type="button" key={id} aria-pressed={value === id} onClick={()=>onChange(id)}>{title}{count != null && <span>{count}</span>}</button>)}</nav>
+  </>;
 }
 export function AdminPane({ active, children }) { return <div className="ih-admin-pane" hidden={!active}>{children}</div>; }
 
@@ -61,7 +65,7 @@ export function useAdminSelection(items, key='request') {
 export function AdminQueue({ items, selectedId, onSelect, children, label='Kolejka spraw' }) {
   const [page,setPage] = useState(() => Math.max(0,Math.floor(items.findIndex(item=>item.id===selectedId)/6)));
   const selectedIndex=items.findIndex(item=>item.id===selectedId);
-  useEffect(()=>setPage(Math.max(0,Math.floor(selectedIndex/6))),[selectedId]);
+  useEffect(()=>setPage(Math.max(0,Math.floor(selectedIndex/6))),[selectedId,selectedIndex]);
   const result=adminQueuePage(items,page);
   return <div className="ih-admin-queue-layout">
     <label className="ih-admin-mobile-picker"><span>{label} <span>({items.length})</span></span><select value={selectedId || ''} onChange={event=>onSelect(event.target.value)}>{items.map(item=><option key={item.id} value={item.id}>{[item.number,item.title].filter(Boolean).join(' · ')}</option>)}</select></label>
@@ -112,7 +116,11 @@ export function AdminAuditAction({ action }) { return <><strong>{adminActionLabe
 
 export function AdminErasureSteps({ request, currentCase }) {
   const steps=[['Wniosek',Boolean(request)],['Tożsamość',request?.identity_status === 'verified'],['Przygotowanie',Boolean(currentCase)],['Zatwierdzenie',Boolean(currentCase?.owner_approved_at || ['authorized','processing','completed','partially_completed'].includes(currentCase?.status))],['Wykonanie',Boolean(currentCase?.executed_at || ['completed','partially_completed'].includes(currentCase?.status))]];
-  return <ol className="ih-admin-erasure-steps" aria-label="Etapy usuwania danych">{steps.map(([label,done],index)=><li key={label} className={done?'is-done':''}><span aria-hidden="true">{done?<Check size={15}/>:index+1}</span><strong>{label}</strong><span className="ih-admin-sr">{done?'Zrealizowano':'Do weryfikacji'}</span></li>)}</ol>;
+  const list = className => <ol className={'ih-admin-erasure-steps '+className} aria-label="Etapy usuwania danych">{steps.map(([label,done],index)=><li key={label} className={done?'is-done':''}><span aria-hidden="true">{done?<Check size={15}/>:index+1}</span><strong>{label}</strong><span className="ih-admin-sr">{done?'Zrealizowano':'Do weryfikacji'}</span></li>)}</ol>;
+  return <>
+    {list('ih-admin-desktop-steps')}
+    <details className="ih-admin-mobile-progress"><summary><span>Etapy operacji</span><span className="ih-admin-progress-count"><span className="ih-admin-sr">Zrealizowano </span>{steps.filter(([,done])=>done).length} z {steps.length}</span><ChevronDown size={18} aria-hidden="true"/></summary>{list('ih-admin-mobile-steps')}</details>
+  </>;
 }
 
 export function AdminRefreshNotice({ warning, onRefresh }) { return warning ? <div className="ih-admin-refresh-warning" role="status"><p>{warning}</p><button type="button" onClick={onRefresh}>Odśwież dane</button></div> : null; }

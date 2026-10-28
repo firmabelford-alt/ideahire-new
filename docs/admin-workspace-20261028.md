@@ -31,3 +31,13 @@ Weryfikacja obejmuje kompilację produkcyjną, testy automatyczne interfejsu i l
 - Lucyna pozostaje dostępna w nagłówku; zamknięte okno nie dodaje pływającego przycisku nad treścią administracji.
 
 Kompilacja produkcyjna i 90 testów automatycznych przechodzą. Porównanie istniejących operacji serwerowych w siedmiu obszarach nie wykazało usunięcia ani zmiany wywołań.
+
+## Uproszczony widok telefonu
+
+Do 700 px szerokości wybór sekcji zastępuje wielowierszowe zakładki. Wszystkie sekcje, ich liczniki i wpisane formularze pozostają dostępne; zmiana sekcji nie uruchamia operacji na danych. Na szerszym ekranie nadal wyświetlają się dotychczasowe zakładki.
+
+Etapy usuwania danych mają na telefonie zwinięte podsumowanie z liczbą zrealizowanych etapów. Rozwinięcie pokazuje wszystkie pięć etapów, w tym osobno zatwierdzenie i wykonanie. Nie zmieniono warunków ich zaliczania.
+
+Karty mają subtelne cienie, spokojniejsze separatory i jednolite odstępy. Pola zachowują czytelny kolor obramowania, rozmiar tekstu 16 px i widoczny fokus. Formularze, historia, instrukcje Lucyny oraz menu administracji otrzymały układ dopasowany do telefonu. Krótkie przejścia kolorów i obrót strzałki są wyłączone przy ustawieniu ograniczenia ruchu.
+
+Kompilacja produkcyjna i 91 testów automatycznych przechodzą. Ten etap zmienia wyłącznie wspólne komponenty i style administracji, bez zmian w wywołaniach serwera, uprawnieniach i operacjach na kontach. Nie przeprowadzono jeszcze wizualnego odbioru zalogowanych ekranów w przeglądarce.

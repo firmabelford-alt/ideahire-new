@@ -1,0 +1,205 @@
+/* Phone workspace: one section at a time, quieter surfaces and full access to every tool. */
+@layer ideahireHeadings {
+  body.ih79-app.ih-admin-mode #root main :is(.ih-admin-tab-switcher,.ih-admin-mobile-progress) {
+    display:none!important;
+  }
+
+  @media(max-width:700px) {
+    body.ih79-app.ih-admin-mode {
+      --ad-phone-line:color-mix(in srgb,var(--ad-line) 65%,var(--ad-paper));
+      --ad-phone-shadow:0 3px 16px #00000008;
+      --ad-phone-field:color-mix(in srgb,var(--ad-soft) 30%,var(--ad-paper));
+    }
+    body.ih79-app.ih-admin-mode #root main:is(.admin-shell,.disputes-shell) {
+      padding:24px 16px calc(56px + env(safe-area-inset-bottom))!important;
+      background:color-mix(in srgb,var(--ad-soft) 24%,var(--ad-bg))!important;
+    }
+    body.ih79-app.ih-admin-mode #root .ih-admin-header {
+      gap:8px!important; padding-inline:16px!important;
+      border-bottom-color:var(--ad-phone-line)!important; box-shadow:0 3px 14px #00000006!important;
+    }
+    body.ih79-app.ih-admin-mode #root .ih-admin-brand .ih-brand-signature {
+      width:auto!important; gap:6px!important;
+    }
+    body.ih79-app.ih-admin-mode #root .ih-admin-brand .ih-brand-wordmark { font-size:22px!important; }
+    body.ih79-app.ih-admin-mode #root .ih-admin-brand .ih-brand-mark { width:28px!important; height:28px!important; }
+    body.ih79-app.ih-admin-mode #root .ih-admin-header-actions { gap:3px!important; }
+    body.ih79-app.ih-admin-mode #root .ih-admin-menu-button {
+      width:44px!important; min-width:44px!important; height:44px!important; padding:8px!important;
+      border-color:transparent!important; background:var(--ad-phone-field)!important; border-radius:12px!important;
+    }
+    body.ih79-app.ih-admin-mode #root .ih-admin-menu-button>span { display:none!important; }
+    body.ih79-app.ih-admin-mode #root main h1 { font-size:27px!important; line-height:1.3!important; }
+    body.ih79-app.ih-admin-mode #root main h2 { font-size:20px!important; line-height:1.4!important; }
+    body.ih79-app.ih-admin-mode #root main :is(p,li,dd,dt) { line-height:1.65!important; }
+    body.ih79-app.ih-admin-mode #root main :is(.admin-page-header,.dispute-detail-header) {
+      gap:12px!important; margin-bottom:22px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :is(.admin-page-header,.dispute-detail-header) p {
+      margin-top:8px!important; font-size:14px!important; line-height:1.65!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .admin-page-header>:is(.admin-role-badge,.admin-readonly-badge) {
+      min-height:24px!important; padding:0!important; border:0!important; background:none!important;
+      color:var(--ad-muted)!important; font-weight:500!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :is(.dispute-panel,.privacy-admin-card,.moderation-content-reports,.moderation-content-report-appeals,.moderation-search-card,.moderation-workbench,.moderation-appeals-admin,.moderation-case-register,.erasure-request-selector,.erasure-case-card,.erasure-blockers-card,.erasure-identity-card,.admin-job-card,.admin-evidence-message-card,.ih-admin-case-row) {
+      padding:18px!important; gap:18px!important; border:1px solid var(--ad-phone-line)!important;
+      border-radius:16px!important; background:var(--ad-paper)!important; box-shadow:var(--ad-phone-shadow)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :is(.privacy-admin-queue,.admin-queue-panel) {
+      padding:0!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-pane:not([hidden]) { gap:18px!important; }
+    body.ih79-app.ih-admin-mode #root main :is(.ih-admin-filterbar,.admin-catalog-toolbar) {
+      grid-template-columns:minmax(0,1fr)!important; gap:10px!important; margin-bottom:18px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-filterbar .ih-control-select {
+      grid-template-columns:auto minmax(0,1fr)!important; align-items:center!important; gap:12px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-filterbar .ih7-select-label { font-weight:500!important; color:var(--ad-muted)!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-search {
+      min-height:48px!important; border-color:var(--ad-line)!important; border-radius:12px!important;
+      background:var(--ad-paper)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :where(input:not([type=checkbox]):not([type=radio]),textarea,select):where(:not(.ih-control-native)),
+    body.ih79-app.ih-admin-mode #root main .ih-control-trigger {
+      border-color:var(--ad-line)!important; border-radius:12px!important; background:var(--ad-phone-field)!important;
+      font-size:16px!important; line-height:1.5!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-search>input[type=search] {
+      border:0!important; border-radius:0!important; background:transparent!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-picker {
+      gap:7px!important; margin:0 0 4px!important; font-size:14px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-picker>select {
+      border-color:var(--ad-line)!important; border-radius:12px!important; box-shadow:var(--ad-phone-shadow)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-tabs { display:none!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher {
+      display:grid!important; grid-template-columns:auto minmax(0,1fr)!important; align-items:center!important;
+      gap:12px!important; margin:0 0 18px!important; padding:2px 12px!important; min-height:50px!important;
+      border:1px solid var(--ad-line)!important; border-radius:12px!important;
+      background:var(--ad-paper)!important; box-shadow:var(--ad-phone-shadow)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher>span {
+      color:var(--ad-muted)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-tab-switcher>select {
+      appearance:auto!important; min-height:46px!important; width:100%!important; padding:10px 0 10px 4px!important;
+      border:0!important; border-radius:0!important; background:transparent!important;
+      color:var(--ad-ink)!important; font:600 16px/1.5 Inter,system-ui,sans-serif!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-tools>.ih-admin-tab-switcher {
+      position:sticky!important; top:calc(var(--ad-head) + 8px)!important; z-index:20!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-metrics {
+      grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:0!important; margin-bottom:20px!important;
+      border-color:var(--ad-phone-line)!important; border-radius:14px!important; box-shadow:var(--ad-phone-shadow)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-metrics>:is(button,div) {
+      min-height:62px!important; padding:12px 14px!important; gap:4px!important;
+      border-color:var(--ad-phone-line)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-metrics>:is(button,div):nth-last-child(-n+2) { border-bottom:0!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-metrics strong { font-size:21px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-metrics span { font-size:13px!important; line-height:1.4!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-metrics button[aria-pressed=true] {
+      background:var(--ad-soft)!important; box-shadow:inset 0 2px var(--ad-accent)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-row { gap:9px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-row h3 {
+      font-size:17px!important; line-height:1.5!important; letter-spacing:-.015em!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-row-meta { gap:5px 14px!important; font-size:14px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-row-open {
+      justify-content:space-between!important; width:100%!important; margin-top:2px!important; padding-top:11px!important;
+      border-top:1px solid var(--ad-phone-line)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-header { gap:9px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-case-header h3 { font-size:19px!important; line-height:1.4!important; }
+    body.ih79-app.ih-admin-mode #root main .privacy-admin-owner-row { gap:10px!important; }
+    body.ih79-app.ih-admin-mode #root main .privacy-request-meta {
+      grid-template-columns:minmax(0,1fr)!important; gap:9px!important; padding:14px 0!important;
+      border-color:var(--ad-phone-line)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .privacy-request-meta>div {
+      display:grid!important; grid-template-columns:80px minmax(0,1fr)!important; gap:12px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .privacy-request-meta dd { margin:0!important; font-size:14px!important; }
+    body.ih79-app.ih-admin-mode #root main :is(.privacy-audit-checklist>article,.privacy-audit-public-editor,.privacy-audit-approval-panel,.erasure-inventory-card,.erasure-owner-approval,.erasure-execute-panel) {
+      padding:16px!important; gap:16px!important; border-color:var(--ad-phone-line)!important;
+      border-radius:12px!important; box-shadow:none!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :is(.privacy-erasure-requested-action,.privacy-admin-latest-reply,.admin-privacy-note,.erasure-account-notice) {
+      padding:14px!important; gap:7px!important; border-radius:12px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :is(.privacy-primary-button,.privacy-secondary-button,.dispute-primary-button,.dispute-secondary-button,.privacy-admin-account-link,.erasure-danger-button) {
+      min-height:46px!important; padding:11px 14px!important; border-radius:11px!important; line-height:1.5!important;
+    }
+    body.ih79-app.ih-admin-mode #root main :is(.privacy-admin-form,.privacy-admin-reply-form,.privacy-audit-form,.moderation-decision-form,.moderation-adjustment-form,.admin-dispute-form,.dispute-inline-form) { gap:16px!important; }
+    body.ih79-app.ih-admin-mode #root main .privacy-admin-timeline { padding:0!important; gap:0!important; }
+    body.ih79-app.ih-admin-mode #root main .privacy-admin-timeline>li {
+      padding:14px 0 14px 14px!important; gap:7px!important; border-left-color:var(--ad-phone-line)!important;
+      border-bottom:1px solid var(--ad-phone-line)!important; background:none!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .privacy-admin-timeline>li.is-internal { border-left-color:var(--ad-accent)!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-desktop-steps { display:none!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-progress {
+      display:block!important; margin:18px 0!important; padding:0 14px!important; border:1px solid var(--ad-phone-line)!important;
+      border-radius:12px!important; background:var(--ad-paper)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-progress>summary {
+      display:flex!important; align-items:center!important; gap:12px!important; min-height:48px!important;
+      width:auto!important; height:auto!important; margin:0!important; padding:8px 0!important;
+      letter-spacing:normal!important; list-style:none!important; cursor:pointer!important;
+      color:var(--ad-ink)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-progress>summary::-webkit-details-marker { display:none!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-progress-count {
+      margin-left:auto!important; color:var(--ad-muted)!important; font-weight:500!important; white-space:nowrap!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-progress>summary>svg { flex:none!important; transition:transform .16s ease!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-progress[open]>summary>svg { transform:rotate(180deg)!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-steps {
+      display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:0!important; margin:0!important; padding:0 0 6px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-progress:not([open])>.ih-admin-mobile-steps { display:none!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-mobile-steps>li {
+      min-height:42px!important; padding:8px 0!important; border:0!important; border-top:1px solid var(--ad-phone-line)!important;
+      font-size:14px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-guide-menu {
+      grid-template-columns:minmax(0,1fr)!important; gap:0!important; padding:0 14px!important;
+      border:1px solid var(--ad-phone-line)!important; border-radius:14px!important; background:var(--ad-paper)!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-guide-menu>button {
+      min-height:48px!important; padding:12px 0!important; border:0!important; border-bottom:1px solid var(--ad-phone-line)!important;
+      border-radius:0!important; background:none!important; font-size:14px!important;
+    }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-guide-menu>button:last-child { border-bottom:0!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-guide-menu>button[aria-pressed=true] { color:var(--ad-accent)!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-guide-detail label { font-size:15px!important; line-height:1.65!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-guide-detail ol { gap:16px!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-activity-list>li { border-bottom-color:var(--ad-phone-line)!important; }
+    body.ih79-app.ih-admin-mode #root main .ih-admin-activity-list>li>a { min-height:40px!important; justify-self:start!important; }
+    body.ih79-app.ih-admin-mode #root .ih-admin-mobile-menu[open] {
+      inset:10px 10px 10px auto!important; width:min(340px,calc(100vw - 20px))!important; max-width:calc(100vw - 20px)!important;
+      height:calc(100svh - 20px)!important; max-height:calc(100svh - 20px)!important;
+      padding:20px 16px calc(20px + env(safe-area-inset-bottom))!important; border-radius:18px!important;
+      box-shadow:0 16px 50px #0003!important; overscroll-behavior:contain!important;
+    }
+    body.ih79-app.ih-admin-mode #root .ih-admin-nav-links>a { min-height:46px!important; border-radius:10px!important; }
+    body.ih79-app.ih-admin-mode #root .ih-admin-question { padding:22px 18px!important; border-radius:18px!important; }
+    body.ih79-app.ih-admin-mode #root .ih-admin-dialog-actions { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+    body.ih79-app.ih-admin-mode #root :is(.ih-admin-nav-links>a,.ih-admin-case-row,.ih-admin-metrics>button,.ih-admin-menu-button) {
+      transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease!important;
+    }
+    @media(hover:none) {
+      body.ih79-app.ih-admin-mode #root :is(.ih-admin-nav-links>a,.ih-admin-case-row,.ih-admin-menu-button):active { background:var(--ad-soft)!important; }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      body.ih79-app.ih-admin-mode #root :is(.ih-admin-mobile-progress>summary>svg,.ih-admin-nav-links>a,.ih-admin-case-row,.ih-admin-metrics>button,.ih-admin-menu-button) { transition:none!important; }
+    }
+  }
+}

@@ -10,7 +10,7 @@ import { adminPrivacyFilter, orderAdminRequests, adminQueueSearch, adminActionLa
 const compiled = new URL(`.admin-test-${process.pid}.mjs`,import.meta.url);
 const bundle = await build({stdin:{contents:"export * from '../src/AdminDesk.jsx'; export * from '../src/LucynaDock.jsx'; export {default as AdminLucynaDesk, ADMIN_GUIDES} from '../src/AdminLucyna.jsx'; export {getSubpage} from '../src/Subpages.jsx';",resolveDir:fileURLToPath(new URL('.',import.meta.url))},bundle:true,platform:'node',format:'esm',packages:'external',loader:{'.css':'empty'},write:false,logLevel:'silent'});
 await writeFile(compiled,bundle.outputFiles[0].text);
-const {AdminNavigation,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
+const {AdminNavigation,AdminTabs,AdminQueue,AdminActivityLog,AdminCaseRow,AdminCaseTools,AdminErasureSteps,AdminLucynaDesk,ADMIN_GUIDES,adminRpc,canShowLucynaDock,getSubpage}=await import(compiled.href); await unlink(compiled);
 const render=(Component,props={},path='/admin')=>{
  const old=console.error; console.error=(...args)=>{if(!String(args[0]).includes('useLayoutEffect does nothing on the server'))old(...args);};
  try{return renderToStaticMarkup(React.createElement(MemoryRouter,{initialEntries:[path]},React.createElement(Component,props)));}finally{console.error=old;}
@@ -59,14 +59,25 @@ test('case tools keep forms mounted across tabs and lead with status instead of 
  assert.match(html,/<button[^>]*aria-pressed="true"[^>]*>Status i termin/);
  assert.match(html,/hidden=""[^>]*>.*?Reply/);
 });
+test('phone section selection offers every tool and preserves the desktop selection and counts',()=>{
+ const html=render(AdminTabs,{items:[['status','Status',0],['reply','Wiadomość',3],['history','Historia']],value:'reply',onChange(){},label:'Narzędzia sprawy'});
+ assert.equal((html.match(/<option /g)||[]).length,3);
+ assert.match(html,/<select[^>]*aria-label="Narzędzia sprawy"/);
+ assert.match(html,/<option value="reply" selected="">Wiadomość \(3\)<\/option>/);
+ assert.match(html,/<option value="status">Status \(0\)<\/option>/);
+ assert.match(html,/<button[^>]*aria-pressed="true"[^>]*>Wiadomość/);
+});
 test('public dispute participants retain the original content without staff work tabs',()=>{
  const html=render(AdminCaseTools,{disabled:true,children:React.createElement('section',null,'Original content')});
  assert.match(html,/Original content/);assert.doesNotMatch(html,/ih-admin-tabs|hidden=/);
 });
 test('erasure progress distinguishes owner approval from execution',()=>{
  const html=render(AdminErasureSteps,{request:{identity_status:'verified'},currentCase:{status:'authorized'}});
- assert.equal((html.match(/class="is-done"/g)||[]).length,4);
- assert.match(html,/Wykonanie/);
+ const lists=html.match(/<ol\b[\s\S]*?<\/ol>/g);
+ assert.equal(lists.length,2);
+ for(const list of lists){assert.equal((list.match(/class="is-done"/g)||[]).length,4);assert.match(list,/Wykonanie/);}
+ assert.match(html,/<details class="ih-admin-mobile-progress"><summary>/);
+ assert.match(html,/4 z 5/);
 });
 test('a slow administrator write is never automatically retried and is reported as unconfirmed',async()=>{
  let calls=0,signal;
