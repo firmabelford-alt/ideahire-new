@@ -6,9 +6,9 @@ const historyError = error => /stale/.test(error?.message || "") ? "Rozmowa zmie
   : /capacity/.test(error?.message || "") ? "Osiągnięto limit miejsca na historię. Ta zmiana pozostaje w bieżącej sesji; możesz wyeksportować rozmowę."
   : "Nie udało się zapisać historii na koncie. Zmiany pozostają w tej sesji. Możesz pobrać ich kopię.";
 
-export function useLucynaMemory({ supabase, user, conversations, setConversations }) {
+export function useLucynaMemory({ supabase, user, conversations, setConversations, handoffThread = null }) {
   const [ready, setReady] = useState(false), [acknowledged, setAcknowledged] = useState(false);
-  const [historyEnabled, setHistoryEnabled] = useState(true), [memoryError, setMemoryError] = useState("");
+  const [historyEnabled, setHistoryEnabled] = useState(false), [memoryError, setMemoryError] = useState("");
   const [saving, setSaving] = useState(false);
   const [ackSaving,setAckSaving] = useState(false); const ackInFlight = useRef(false);
   const context = useRef({ uid: null, epoch: 0, loaded: false });
@@ -32,7 +32,7 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
     context.current = { uid, epoch, loaded: false };
     revisions.current = new Map(); hashes.current = new Map(); pending.current = new Map(); removed.current = new Set();
     inFlight.current.clear(); writeAllowed.current = false;
-    setReady(false); setAcknowledged(false); setHistoryEnabled(true); setMemoryError("");
+    setReady(false); setAcknowledged(false); setHistoryEnabled(false); setMemoryError("");
     let alive = true;
     if (!uid) { context.current.loaded=true;setReady(true); return () => { alive = false; }; }
     (async () => {
@@ -45,7 +45,7 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
         if (!alive || context.current.epoch !== epoch) return;
         if (prefs.error || threads.error) throw new Error("load");
         setAcknowledged(prefs.data?.notice_version === LUCYNA_NOTICE_VERSION);
-        setHistoryEnabled(prefs.data?.history_enabled ?? true);
+        setHistoryEnabled(prefs.data?.history_enabled ?? false);
         writeAllowed.current = prefs.data?.notice_version === LUCYNA_NOTICE_VERSION && !!prefs.data?.history_enabled;
         const restored = (threads.data || []).map(row => ({ id: row.id, title: row.title, mode: row.mode,
           messages: Array.isArray(row.messages) ? row.messages : [], sourceDeliveryId: row.source_delivery_id,
@@ -54,12 +54,13 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
           revisions.current.set(restored[i].id, threads.data[i].revision);
           hashes.current.set(restored[i].id, JSON.stringify(packConversation(restored[i])));
         }
-        if (restored.length) setConversations(restored);
+        const merged = handoffThread ? [handoffThread, ...restored.filter(row => row.id !== handoffThread.id)].slice(0, 12) : restored;
+        if (merged.length) setConversations(merged);
       } catch { if (alive && context.current.epoch === epoch) setMemoryError("Historia na koncie jest chwilowo niedostępna. Nie wysłaliśmy treści rozmów do AI."); }
       finally { if (alive && context.current.epoch === epoch) {context.current.loaded=true;setReady(true);} }
     })();
     return () => { alive = false; };
-  }, [supabase, user?.id, setConversations]);
+  }, [supabase, user?.id, setConversations, handoffThread]);
 
   const flush = useCallback(() => {
     if (worker.current) return worker.current;
@@ -140,5 +141,5 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
       revisions.current.clear(); hashes.current.clear(); setMemoryError("");
     } catch (error) { if (context.current.epoch === owner.epoch) ids.forEach(id => removed.current.delete(id)); throw error; }
   }, [request]);
-  return { ready, acknowledged, historyEnabled, memoryError, saving,ackSaving, acknowledge, remove, clear };
+  return { ready, acknowledged, historyEnabled, memoryError, saving,ackSaving, acknowledge, remove, clear, flush };
 }

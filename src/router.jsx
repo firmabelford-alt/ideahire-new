@@ -90,6 +90,7 @@ import {
 } from "./PrivateWork";
 import ServiceMarketplace, { FreelancerDirectory, FreelancerVisibility, ProfileContactAction, profileInquiryToJob, localProjectDate } from "./ServiceMarketplace";
 import LucynaDock, { canShowLucynaDock, requestLucynaDock } from "./LucynaDock";
+import { normalizeLucynaAction } from "./LucynaActions";
 import { useGoogleAuth, GooglePendingNotice, RegistrationDraftProvider, useRegistrationDraft, RegistrationDocumentLink, LoginOpening, announceLoginSuccess } from "./AuthFlow";
 import { AccountPrivateDetails, RegistrationDetailsFields, EMPTY_REGISTRATION_DETAILS, REGISTRATION_DETAILS_KEY, initialRegistrationDetails, registrationDetailsMetadata, registrationDetailsProblem, rememberRegistrationDetails, clearPendingRegistrationDetails } from "./RegistrationDetails";
 
@@ -10966,6 +10967,7 @@ function PrivacyCenter() {
 
 function FindTalent() {
   const formEnglish = useSitePreferences().language === "en";
+  const formLocation = useLocation();
   const navigate =
     useNavigate();
 
@@ -10975,27 +10977,29 @@ function FindTalent() {
   const { preferences } =
     useDiscoveryPreferences();
 
+  const lucynaDraft = useRef(formLocation.state?.lucynaJobDraft?.userId === user?.id
+    ? normalizeLucynaAction(formLocation.state.lucynaJobDraft.action)?.draft || null : null).current;
   const [title, setTitle] =
-    useState("");
+    useState(lucynaDraft?.title || "");
 
   const [
     description,
     setDescription,
-  ] = useState("");
+  ] = useState(lucynaDraft?.description || "");
 
   const [category, setCategory] =
     useState(
-      JOB_CATEGORIES[0]
+      lucynaDraft?.category || JOB_CATEGORIES[0]
     );
 
   const [subcategory, setSubcategory] =
-    useState(JOB_SUBCATEGORIES[JOB_CATEGORIES[0]][0]);
+    useState(JOB_SUBCATEGORIES[lucynaDraft?.category || JOB_CATEGORIES[0]][0]);
 
   const [projectStage, setProjectStage] =
     useState("idea");
 
   const [expectedOutcome, setExpectedOutcome] =
-    useState("");
+    useState(lucynaDraft?.expected_outcome || "");
 
   const [clientMaterials, setClientMaterials] =
     useState("");
@@ -11022,7 +11026,7 @@ function FindTalent() {
     useState("");
 
   const [projectDeadline, setProjectDeadline] =
-    useState("");
+    useState(lucynaDraft?.project_deadline || "");
 
   const [plannedStartDate, setPlannedStartDate] =
     useState("");
@@ -11040,10 +11044,10 @@ function FindTalent() {
     useState(1);
 
   const [budget, setBudget] =
-    useState("");
+    useState(lucynaDraft?.budget == null ? "" : String(lucynaDraft.budget));
 
   const [budgetNegotiable, setBudgetNegotiable] =
-    useState(true);
+    useState(lucynaDraft?.budget_negotiable ?? true);
 
   const [listingDurationDays, setListingDurationDays] =
     useState(14);
@@ -11483,6 +11487,7 @@ function FindTalent() {
 
       <main className="ih-market-shell ih5-editor-shell">
         <MarketHeader eyebrow="Dla zlecających" title="Dodaj zlecenie" description="Cztery krótkie kroki. Opisz projekt, ustal zakres i pokaż wykonawcom jasne warunki." />
+        {lucynaDraft && <p className="ih68-feedback" role="status">{formEnglish ? "Lucyna’s draft has been loaded. Review it, complete the remaining fields and confirm publication in the last step." : "Wczytano szkic od Lucyny. Sprawdź treść, uzupełnij pozostałe pola i zatwierdź publikację w ostatnim kroku."}</p>}
 
         <div className="ih75-editor-workspace">
         <aside className="ih75-editor-guide" aria-label={formEnglish ? "Project steps" : "Etapy projektu"}>

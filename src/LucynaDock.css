@@ -1,4 +1,4 @@
-/* P64 — a quiet assistant window. All dimensions are bounded by the visible viewport. */
+/* Lucyna's optional desktop window; main navigation opens the full workspace. */
 #ih64-lucyna { --ih84-safe-bottom: env(safe-area-inset-bottom,0px); position:relative; z-index:900; color:var(--v-ink,#191919); font:400 14px/1.5 Inter,Arial,sans-serif; }
 #ih64-lucyna *, #ih64-lucyna *::before, #ih64-lucyna *::after { box-sizing:border-box; }
 #ih64-lucyna [hidden] { display:none!important; }
@@ -105,3 +105,9 @@
   }
 }
 @keyframes ih81-dock-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@layer ideahireHeadings {
+  html:root body.ih79-app #ih64-lucyna .ih64-dock-heading { min-height:58px!important; padding:5px 8px!important; background:var(--v-surface)!important; border-bottom:1px solid var(--v-line)!important; }
+  html:root body.ih79-app #ih64-lucyna .ih64-dock-handle>svg { color:var(--v-accent)!important; stroke:currentColor!important; }
+  html:root body.ih79-app #ih64-lucyna .ih64-dock-window { border-radius:18px!important; box-shadow:0 16px 64px #10272124!important; }
+  html:root body.ih79-app #ih64-lucyna .ih64-dock-control { border:0!important; border-radius:9px!important; background:none!important; color:var(--v-muted)!important; }
+}

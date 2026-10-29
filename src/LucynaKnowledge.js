@@ -11,14 +11,15 @@ const LUCYNA_GUIDE = [
         "id": "brief-projektu",
         "title": "Czym jest brief?",
         "keys": "brief opis projekt wymagania zakres cel rezultat",
-        "text": "Brief to krótki opis zadania dla wykonawcy. Dobry brief odpowiada na sześć pytań:\n\n1. Jaki jest cel projektu?\n2. Co dokładnie obejmuje zakres?\n3. Jaki rezultat lub pliki mają powstać?\n4. Jaki jest termin?\n5. Jaki jest budżet?\n6. Jak sprawdzisz i zaakceptujesz rezultat?\n\nW Lucynie wybierz „Szkic zlecenia”, żeby uzupełnić te pola. Gotowy szkic sprawdzasz i publikujesz samodzielnie.",
+        "text": "Brief porządkuje cel, zakres, rezultat, termin, budżet i sposób odbioru.\n\nOpisz Lucynie, czego potrzebujesz. Może przygotować szkic zlecenia z przyciskiem „Uzupełnij formularz”. Po kliknięciu sprawdzisz i zmienisz przeniesione pola. Brakujące informacje trzeba uzupełnić, a publikację potwierdzasz w ostatnim kroku formularza.\n\nW narzędziu Szkic zlecenia możesz też ułożyć lokalny szablon bez generowania AI.",
         "href": "/find-talent"
     },
     {
         "id": "zaloz-konto",
         "title": "Jak założyć konto w IdeaHire?",
         "keys": "konto rejestracja zarejestruj założenie logowanie email google",
-        "text": "Rejestracja przez e-mail lub Google, wymagane dane i pierwsze logowanie.\n\n1. Otwórz rejestrację i wybierz, czy chcesz zlecać pracę, oferować usługi czy korzystać z obu możliwości. Ten wybór personalizuje konto; nie określa Twojego statusu podatkowego.\n2. Przy rejestracji przez e-mail podaj imię lub nazwę, adres e-mail, datę urodzenia i hasło. Przeczytaj dokumenty oraz potwierdź wymagane pola w formularzu.\n3. Jeśli formularz poprosi o potwierdzenie adresu, otwórz wiadomość otrzymaną na swoją skrzynkę. Po rejestracji zaloguj się i uzupełnij profil.\n\nNie wpisuj danych innej osoby. Data urodzenia służy do ustalenia uprawnień konta i nie jest pokazywana w publicznym profilu."
+        "text": "Konto możesz utworzyć przez e-mail lub Google.\n\n1. W rejestracji określ, czy chcesz zlecać pracę, oferować usługi czy korzystać z obu możliwości. Ten wybór nie określa statusu podatkowego.\n2. W rejestracji e-mail podaj nazwę profilu, adres e-mail, datę urodzenia i hasło co najmniej 12 znaków. Przeczytaj dokumenty i potwierdź wymagane pola. Dodatkowe prywatne dane są opcjonalne i mają osobną informację o celu ich podania.\n3. Potwierdź adres e-mail, jeżeli formularz o to poprosi, a następnie uzupełnij profil.\n\nData urodzenia określa uprawnienia konta i nie jest publiczna. Nie podawaj cudzych danych.",
+        "href": "/register"
     },
     {
         "id": "wiek-konta",
@@ -47,8 +48,9 @@ const LUCYNA_GUIDE = [
     {
         "id": "centrum-profilu",
         "title": "Jak otworzyć funkcje centrum profilu?",
-        "keys": "konto profil centrum koło kółko dane ustawienia szablon",
-        "text": "Koło centrum profilu i przejście do danych, portfolio, zleceń oraz ustawień.\n\n1. Wejdź w Konto. Początkowy widok pokazuje koło Centrum profilu.\n2. Kliknij koło lub użyj klawiatury, aby rozwinąć połączone sekcje. Wybierz Dane profilu, Specjalizację, Portfolio, Zlecenia, Ustawienia lub Szablony.\n3. Po otwarciu sekcji użyj przycisku Centrum profilu, aby wrócić do wyboru. Przed opuszczeniem edytowanego formularza zapisz zmiany."
+        "keys": "konto profil centrum dane ustawienia szablon menu",
+        "text": "W koncie masz osobne sekcje danych profilu, specjalizacji, portfolio, własnych ogłoszeń i ustawień.\n\n1. Otwórz Konto i wybierz sekcję z menu. Na telefonie menu może być zwijane.\n2. Dane profilu służą do nazwy, opisu i zdjęcia. Specjalizacja i Portfolio pokazują umiejętności oraz realizacje.\n3. Zapisz zmiany w formularzu. Aktywne rozmowy i projekty znajdziesz w zakładce Praca → Współprace.",
+        "href": "/account"
     },
     {
         "id": "edytuj-profil",
@@ -297,7 +299,7 @@ function knowledgeAnswer(message) {
     const source = (id) => [...LUCYNA_GUIDE].reverse().find((item) => item.id === id);
     const response = (item) => ({ text: item.text, sources: [{ id: item.id, title: item.title }], kind: "guide" });
     if (/^(?:kim jestes|co potrafisz|co umiesz|jak mozesz mi pomoc|czym jest lucyna|kim jest lucyna|co to lucyna)(?:\b|$)/.test(text))
-        return { text: "Jestem Lucyna AI, asystentka IdeaHire. Pomagam znaleźć wykonawcę lub zlecenie, przygotować brief i wiadomość, wyjaśnić działanie strony oraz uporządkować kryteria odbioru.\n\nWyniki katalogu pochodzą z IdeaHire. Wyszukuję według Twojej prośby. Ty publikujesz ogłoszenia i podejmujesz decyzje. Rozmowa korzysta z modelu AI w ramach darmowej puli serwisu.", sources: [], kind: "guide" };
+        return { text: "Jestem Lucyna AI, asystentka IdeaHire. Znajdę aktualne oferty w katalogach, przygotuję szkic do formularza zlecenia, obliczę koszt współpracy i pomogę przejść do właściwej funkcji. Mogę też ułożyć wiadomość lub sprawdzić wybrany materiał względem Twoich kryteriów.\n\nWyniki katalogu pochodzą z IdeaHire. Wyszukuję według Twojej prośby. Ty publikujesz ogłoszenia i podejmujesz decyzje. Rozmowa korzysta z modelu AI w ramach darmowej puli serwisu.", sources: [], kind: "guide" };
     if (/(?:czym(?: jest)?|co to(?: jest)?|co jest|jak dziala|opisz|wyjasnij|opowiedz(?: o)?|do czego(?: sluzy)?|na czym(?: polega)?)\s+(?:(?:platforma|strona|serwis)\s+)?(?:ideahire|idea hire)/.test(text))
         return response(LUCYNA_GUIDE[0]);
     if (/(?:czym|co to|jak|wyjasnij).*(?:brief)/.test(text))

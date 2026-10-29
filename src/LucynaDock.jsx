@@ -1,12 +1,22 @@
 /* P64 — a movable, non-modal window for the existing Lucyna assistant. */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SubpageLoading } from "./Subpages";
 import LucynaSymbol from "./LucynaSymbol";
 import "./LucynaDock.css";
 
 export function requestLucynaDock(event) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  // Main navigation opens the assistant's own page. The floating launcher still
+  // offers a compact desktop window for quick help without leaving a project.
+  if (event.currentTarget?.getAttribute('data-lucyna-dock') !== 'true') {
+    const panel = document.getElementById('ih64-lucyna-window');
+    if (panel && !panel.hidden && !event.currentTarget?.getAttribute('href')?.startsWith('/admin')) {
+      event.preventDefault(); window.dispatchEvent(new Event('ideahire:lucyna-expand'));
+    }
+    return;
+  }
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || !document.getElementById("ih64-lucyna")) return;
   event.preventDefault();
   window.dispatchEvent(new Event("ideahire:lucyna-open"));
@@ -34,11 +44,11 @@ function viewportBounds() {
 
 export function dockLayout(bounds, position) {
   const margin = Math.min(12, bounds.width / 10);
-  const width = Math.min(408, Math.max(1, bounds.width - margin * 2));
+  const width = Math.min(480, Math.max(1, bounds.width - margin * 2));
   const reservedBottom = Math.max(margin, (bounds.bottomInset || 0) + margin);
   const availableHeight = Math.max(1, bounds.height - margin - reservedBottom);
-  const height = Math.min(bounds.width <= 640 ? 520 : 560,
-    bounds.height < 520 ? availableHeight : Math.round(bounds.height * (bounds.width <= 640 ? .66 : .72)), availableHeight);
+  const height = Math.min(bounds.width <= 640 ? 520 : 640,
+    bounds.height < 520 ? availableHeight : Math.round(bounds.height * (bounds.width <= 640 ? .66 : .8)), availableHeight);
   const bottom = Math.min(reservedBottom + 56, bounds.height - height - margin);
   const x = position?.x ?? bounds.x + bounds.width - width - margin;
   const y = position?.y ?? bounds.y + bounds.height - height - bottom;
@@ -65,7 +75,7 @@ function windowNearLauncher(bounds, launcher) {
 }
 
 function Icon({ kind }) {
-  const paths = { close: "M6 6l12 12M18 6 6 18", minimise: "M5 12h14", return: "m14 7-5 5 5 5", move: "M8 7h.01M12 7h.01M16 7h.01M8 12h.01M12 12h.01M16 12h.01M8 17h.01M12 17h.01M16 17h.01" };
+  const paths = { close: "M6 6l12 12M18 6 6 18", maximise: "M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5", minimise: "M5 12h14", return: "m14 7-5 5 5 5", move: "M8 7h.01M12 7h.01M16 7h.01M8 12h.01M12 12h.01M16 12h.01M8 17h.01M12 17h.01M16 17h.01" };
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={paths[kind]}/></svg>;
 }
 
@@ -79,6 +89,7 @@ class DockBoundary extends React.Component {
 
 export default function LucynaDock({ supabase, user, administration = false }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false), [loaded, setLoaded] = useState(false);
   const [attempt, setAttempt] = useState(0);
   // The assistant code is downloaded when its window is first opened.
@@ -121,6 +132,11 @@ export default function LucynaDock({ supabase, user, administration = false }) {
       return;
     }
     suppressLauncherClick.current = false;
+    if (window.matchMedia('(max-width:850px)').matches && !administration) {
+      if (panel.current?.querySelector('.lucyna-root')) { window.dispatchEvent(new Event('ideahire:lucyna-expand')); return; }
+      navigate('/lucyna', { state: { lucynaReturn: pathname } });
+      return;
+    }
     setBounds(viewportBounds());
     if (!placementRef.current.position && !placementRef.current.launcherPosition) {
       const anchor = [...document.querySelectorAll('.ih-top-assistant,.ih-room-assistant')].find(element => element.getClientRects().length);
@@ -192,6 +208,7 @@ export default function LucynaDock({ supabase, user, administration = false }) {
           onPointerDown={event => beginDrag(event, "window")} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={cancelDrag} onKeyDown={event => moveWithKeyboard(event, "window")} onDoubleClick={() => setPosition(null)}>
           <LucynaSymbol/><span><strong id="ih64-lucyna-title">Lucyna <span>AI</span></strong><small>Asystent AI IdeaHire</small></span>
         </button>
+        {!administration && <button className="ih64-dock-control" type="button" title="Otwórz cały ekran" aria-label="Otwórz Lucynę na całym ekranie z obecną rozmową" onClick={() => panel.current?.querySelector('.lucyna-root') ? window.dispatchEvent(new Event('ideahire:lucyna-expand')) : navigate('/lucyna', { state: { lucynaReturn: pathname } })}><Icon kind="maximise" /></button>}
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
         <button className="ih64-dock-control" type="button" title="Zamknij okno" aria-label="Zamknij okno Lucyny AI" onClick={() => minimise()}><Icon kind="close"/></button>
       </header>
