@@ -72,6 +72,38 @@ const BLOCKED = new Set(["migration","version","user_limit", "global_limit", "di
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const makeId = () => crypto.randomUUID();
 const newConversation = () => ({ id: makeId(), title: "Nowa rozmowa", mode: "chat", messages: [] });
+const QUOTA_CODES = new Set(["user_limit", "global_limit", "provider_quota"]);
+
+export function lucynaAvailabilityCode(data) {
+  if (typeof data.code === 'string' && data.code) return data.code;
+  if (typeof data.eligible !== 'boolean' || typeof data.enabled !== 'boolean'
+    || typeof data.global_available !== 'boolean' || !Number.isInteger(data.limit) || data.limit < 1
+    || !Number.isInteger(data.remaining) || data.remaining < 0 || data.remaining > data.limit) return 'unavailable';
+  return !data.eligible ? 'account' : !data.enabled ? 'disabled' : data.remaining === 0 ? 'user_limit'
+    : !data.global_available ? 'global_limit' : '';
+}
+
+export function LucynaAvailabilityNotice({status, notice, onRefresh, onHelp}) {
+  const [now,setNow]=useState(Date.now);
+  const quota=!notice && QUOTA_CODES.has(status.code), reset=Date.parse(status.reset_at || '');
+  useEffect(()=>{if(!quota || !Number.isFinite(reset))return;setNow(Date.now());const timer=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(timer);},[quota,reset]);
+  if(!notice && !status.code)return null;
+  const minutes=Math.max(0,Math.ceil((reset-now)/60000));
+  const wait=minutes>=60 ? `${Math.floor(minutes/60)} godz. ${minutes%60} min` : `${minutes} min`;
+  return <section className={'lu-notice'+(quota?' lu-quota-notice':'')} role="status" aria-label={quota?'Dostępność Lucyny AI':'Informacja Lucyny'}>
+    <Icon name={quota?'spark':'help'}/><div className="lu-notice-copy">
+      {quota ? <><strong>{status.code==='user_limit'?'Twoja dzisiejsza pula jest wykorzystana':'Darmowa pula AI potrzebuje przerwy'}</strong>
+        <p>{status.code==='user_limit' ? Number.isInteger(status.limit) ? `Wykorzystano limit ${status.limit} prób generowania na Twoim koncie.` : 'Wykorzystano osobisty limit prób generowania na Twoim koncie.'
+          : 'To wspólna pula obliczeń serwisu, niezależna od limitu Twojego konta.'}</p>
+        {Number.isFinite(reset) && <p className="lu-quota-reset">{minutes>0?<>Odnowienie za <b>{wait}</b> · </>:'Sprawdzamy odnowienie puli · '}<time dateTime={status.reset_at}>{new Intl.DateTimeFormat('pl-PL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Warsaw'}).format(new Date(reset))}</time> czasu polskiego</p>}
+        <p>Możesz nadal przeglądać katalogi i korzystać z pomocy IdeaHire.</p></>
+        : <p>{notice || ERRORS[status.code] || ERRORS.unavailable}</p>}
+      {!notice && status.diagnosticRequestId && <details className="lu-notice-details"><summary>Szczegóły dla pomocy</summary><small className="lu-diagnostic-id">Identyfikator zgłoszenia: {status.diagnosticRequestId}</small></details>}
+      <div className="lu-notice-actions">{quota && <button type="button" onClick={onHelp}>Pomoc bez użycia AI<Icon name="arrow"/></button>}
+        {!notice && <button type="button" onClick={onRefresh}>Sprawdź dostępność</button>}</div>
+    </div>
+  </section>;
+}
 
 function Icon({ name = "spark", ...props }) {
   const paths = {
@@ -141,7 +173,7 @@ export function SafeText({ text, animate=false }) {
 }
 function MotionAnswer({message}) {
   const reveal=useLucynaReveal(message.text,!!message.reveal);
-  return <div className="lu-live-answer" data-revealing={reveal.revealing} aria-busy={reveal.revealing}>
+  return <div className="lu-live-answer" data-no-translate="true" data-revealing={reveal.revealing} aria-busy={reveal.revealing}>
     <SafeText text={reveal.text} animate={reveal.motionEnabled}/>
     {reveal.revealing && <div className="lu-reveal-controls"><span className="lu-reveal-label">Wyświetlam odpowiedź</span><button type="button" onClick={reveal.revealAll}>Pokaż od razu</button></div>}
   </div>;
@@ -301,8 +333,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       if (!mounted.current || uid !== userIdRef.current) return;
       if (!response.ok) throw Object.assign(new Error(),{code:response.status === 401 ? "auth" : data.code || "setup",detail:data});
       if (data.backend_version !== LUCYNA_BUILD_VERSION) throw Object.assign(new Error(),{code:"version",detail:data});
-      const code = data.code || (!data.eligible ? "account" : !data.enabled ? "disabled" :
-        !data.global_available ? "global_limit" : data.remaining <= 0 ? "user_limit" : "");
+      const code = lucynaAvailabilityCode(data);
       setStatus(old => {
         const keep = !resetProviderError && ["provider_auth","provider_forbidden","provider_model","provider_blocked","free_model"].includes(old.code);
         return {...data,loading:false,code:code || (keep ? old.code : ""),
@@ -383,7 +414,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   useEffect(() => {
     if (embedded) return;
     const viewport = window.visualViewport;
-    let naturalHeight = viewport?.height || window.innerHeight; let previousWidth = window.innerWidth;
+    let naturalHeight = viewport?.height || window.innerHeight; let previousWidth = window.innerWidth, keyboardWasOpen=false;
     const update = () => {
       if (viewport && Math.abs(viewport.scale - 1) > .05) return;
       const height = viewport?.height || window.innerHeight;
@@ -392,8 +423,15 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       previousWidth = window.innerWidth;
       pageRef.current?.style.setProperty("--lu-viewport", height + "px");
       pageRef.current?.style.setProperty("--lu-offset-top", (viewport?.offsetTop || 0) + "px");
-      if (pageRef.current) pageRef.current.dataset.keyboard = String(window.matchMedia("(max-width:900px)").matches
-        && focused && height < naturalHeight - 120);
+      const keyboardOpen=window.matchMedia("(max-width:900px)").matches && focused && height < naturalHeight - 120;
+      if (pageRef.current) pageRef.current.dataset.keyboard = String(keyboardOpen);
+      if(keyboardOpen && !keyboardWasOpen && document.activeElement?.id==='lucyna-start-message') {
+        requestAnimationFrame(()=>{
+          const home=pageRef.current?.querySelector('.lu-home'), form=home?.querySelector('.lu-home-composer');
+          if(home && form)home.scrollTop += form.getBoundingClientRect().top-home.getBoundingClientRect().top-70;
+        });
+      }
+      keyboardWasOpen=keyboardOpen;
     };
     update(); viewport?.addEventListener("scroll", update); viewport?.addEventListener("resize", update); window.addEventListener("resize", update);
     document.addEventListener("focusin", update); document.addEventListener("focusout", update);
@@ -692,7 +730,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   }
   return <div className="lucyna-route" data-embedded={embedded}>
     <section className="lucyna-root lucyna-studio lucyna-atelier"
-      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-CATALOG-20261029" data-entrance={entrance.phase} data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
+      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-CLARITY-20261029" data-entrance={entrance.phase} data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
       {!memory.ready && <div className="lu-boot" role="status"><LucynaSymbol/><strong>Lucyna</strong><span>Przygotowuję Twoją przestrzeń…</span><i aria-hidden="true"/></div>}
       <div className="lu-shell">
         {historyOpen && !wide && <button className="lu-drawer-shade" type="button"
@@ -742,6 +780,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
           {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Szkice wymagają Twojej oceny przed użyciem.</p>}
           {home && <section className="lu-home" aria-label="Menu główne Lucyny">
             <div className="lu-home-intro"><div className="lu-quiet-identity" aria-hidden="true"><LucynaSymbol/><span>Lucyna<small>AI w IdeaHire</small></span></div><h2>W czym Ci pomóc?</h2><p>Możemy ułożyć wiadomość, dopracować zlecenie albo przyjrzeć się gotowej pracy.</p>
+              <LucynaAvailabilityNotice status={status} notice={notice} onRefresh={()=>refreshStatus(true)} onHelp={()=>openTask('help')}/>
               <form className="lu-home-composer" onSubmit={send}><label className="lu-sr-only" htmlFor="lucyna-start-message">Zacznij rozmowę z Lucyną</label><input id="lucyna-start-message" type="text" autoComplete="off" value={draft} maxLength={6000} placeholder="Napisz do Lucyny…" onChange={e=>setDraft(e.target.value)}/><button className="lu-send" type="submit" disabled={!memory.ready || busy || entrance.phase==='leaving' || !draft.trim()} aria-label="Rozpocznij rozmowę"><Icon name="send"/></button></form>
               <button type="button" className="lu-text-button lu-home-empty-chat" disabled={!memory.ready || busy} onClick={()=>active.messages.length?startNew():chooseMode('chat')}>Otwórz pustą rozmowę<Icon name="arrow"/></button>
               {!!active.messages.length && <button type="button" className="lu-text-button" onClick={()=>setHome(false)}>Wróć do otwartej rozmowy<Icon name="arrow"/></button>}
@@ -794,11 +833,11 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 </div>}
               </div>
             </article>)}
+            {!notice && QUOTA_CODES.has(status.code) && <LucynaAvailabilityNotice status={status} onRefresh={()=>refreshStatus(true)} onHelp={()=>openTask('help')}/>}
             </div>
             {newBelow && <button type="button" className="lu-jump-bottom" onClick={() => { followingRef.current = true; listRef.current.scrollTop = listRef.current.scrollHeight; setNewBelow(false); }}><Icon name="arrow" />Nowsze wiadomości</button>}
             <div className="lu-composer-area">
-            {(notice || status.code) && <div className="lu-notice" role="status"><Icon name="help" /><p>{notice || ERRORS[status.code]}{status.diagnosticRequestId && <small className="lu-diagnostic-id">Identyfikator zgłoszenia: {status.diagnosticRequestId}</small>}</p>
-              {["migration", "version", "setup", "disabled", "global_limit", "user_limit", "account", "provider_auth", "provider_forbidden", "provider_model", "provider_blocked", "free_model", "free_setup"].includes(status.code) && <button type="button" onClick={() => refreshStatus(true)}>Sprawdź dostępność</button>}</div>}
+            {(notice || !QUOTA_CODES.has(status.code)) && <LucynaAvailabilityNotice status={status} notice={notice} onRefresh={()=>refreshStatus(true)} onHelp={()=>openTask('help')}/>}
               {!active.messages.length && <p className="lu-writing-label">OD CZEGO ZACZYNAMY?</p>}
             <form className={"lu-composer" + (busy ? " is-busy" : "")} onSubmit={send}>
               <label className="lu-sr-only" htmlFor="lucyna-message">Wiadomość do Lucyny AI</label>
@@ -844,7 +883,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
           <details className="lu-workshop-settings"><summary>Odpowiedzi i limity<Icon name="plus" /></summary>
             <div className="lu-composer-settings">
               <label className="lu-response-style"><span className="lu-sr-only">Długość odpowiedzi AI</span><select value={responseStyle} onChange={event => setResponseStyle(event.target.value)} disabled={busy}><option value="concise">Zwięźle</option><option value="detailed">Dokładniej</option></select></label>
-              <details className="lu-usage" onKeyDown={event => { if (event.key === 'Escape') { event.currentTarget.open = false; event.stopPropagation(); event.preventDefault(); } }}><summary><span className={'lu-status-dot' + (status.code ? ' is-limited' : '')} />{status.loading ? 'Łączę z AI…' : status.remaining == null ? 'Dostępność AI' : `${status.remaining} / ${status.limit || 50} AI`}<Icon name="help" width="14" height="14" /></summary><div><strong>Twoja dzienna pula</strong><p>{status.remaining == null ? 'Nie udało się jeszcze potwierdzić dostępności generowania.' : `Pozostało ${status.remaining} z ${status.limit || 50} prób generowania AI.`}</p>{Number.isFinite(Date.parse(status.reset_at || '')) && <p>Odnowienie: {new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }).format(new Date(status.reset_at))} czasu polskiego.</p>}<p>Wspólna pula serwisu: {status.global_available === false ? 'chwilowo wyczerpana' : status.configured ? 'dostępna, z limitem dostawcy' : 'dostępność wymaga potwierdzenia'}.</p><p>Instrukcje IdeaHire, katalogi i lokalne szablony działają bez generowania AI. Nieudane generowanie bez odpowiedzi wraca do osobistej puli; zatrzymana odpowiedź może ją zużyć.</p></div></details>
+              <details className="lu-usage" onKeyDown={event => { if (event.key === 'Escape') { event.currentTarget.open = false; event.stopPropagation(); event.preventDefault(); } }}><summary><span className={'lu-status-dot' + (status.code ? ' is-limited' : '')} />{status.loading ? 'Łączę z AI…' : status.remaining == null ? 'Dostępność AI' : `${status.remaining} / ${status.limit ?? '—'} AI`}<Icon name="help" width="14" height="14" /></summary><div><strong>Twoja dzienna pula</strong><p>{status.remaining == null ? 'Nie udało się jeszcze potwierdzić dostępności generowania.' : `Pozostało ${status.remaining} z ${status.limit ?? '—'} prób generowania AI.`}</p>{Number.isFinite(Date.parse(status.reset_at || '')) && <p>Odnowienie: {new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }).format(new Date(status.reset_at))} czasu polskiego.</p>}<p>Wspólna pula serwisu: {status.global_available === false ? 'chwilowo wyczerpana' : status.configured ? 'dostępna, z limitem dostawcy' : 'dostępność wymaga potwierdzenia'}.</p><p>Instrukcje IdeaHire, katalogi i lokalne szablony działają bez generowania AI. Nieudane generowanie bez odpowiedzi wraca do osobistej puli; zatrzymana odpowiedź może ją zużyć.</p></div></details>
             </div>
           </details>
           <div className="lu-workshop-footer"><button type="button" className="lu-text-button" disabled={!memory.ready || deleting} onClick={startNew}><Icon name="plus" />Nowa rozmowa</button><button type="button" className="lu-text-button" ref={infoTriggerRef} onClick={() => { setToolsOpen(false); setInfoOpen(true); }}><Icon name="shield" />AI i Twoje dane</button></div>

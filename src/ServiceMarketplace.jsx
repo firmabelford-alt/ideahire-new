@@ -721,7 +721,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                   placeholder="Opisz sposób działania, granice zakresu i rezultat. Bez danych kontaktowych i obietnic, których nie da się zweryfikować."
                   minLength={80}
                   maxLength={4000}
-                  rows={9}
+                  rows={5}
                   required
                 />
               </label>

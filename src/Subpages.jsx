@@ -88,8 +88,8 @@ export function SubpageLoading({ label, className = '', screen = false, pending 
 export function SubpageHistoryControls() {
   const navigate = useNavigate();
   const en = useSitePreferences().language === 'en';
-  return <div className="ih73-history-controls"><button type="button" onClick={() => navigate(adminReturnTarget())}
-    aria-label={en ? 'Return to account centre' : 'Wróć do centrum konta'} title={en ? 'Account centre' : 'Centrum konta'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>{en ? 'My account' : 'Wróć do konta'}</button></div>;
+  return <div className="ih73-history-controls"><button className="ih-history-back" type="button" onClick={() => navigate(adminReturnTarget())}
+    aria-label={en ? 'Return to account centre' : 'Wróć do centrum konta'} title={en ? 'Account centre' : 'Centrum konta'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg></button></div>;
 }
 
 export function SubpageNavigation({ standalone = false }) {

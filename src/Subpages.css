@@ -1906,3 +1906,67 @@ body.ih79-app .private-work-share-form :is(input,textarea,select) { max-width: 1
 }
 
 }
+
+/* Service editor: a compact heading, readable fields and a quiet back arrow. */
+@layer ideahireHeadings {
+  body.ih79-app #root .ih73-history-controls>button.ih-history-back:first-child {
+    display:inline-flex!important; align-items:center!important; justify-content:center!important;
+    flex:none!important; width:44px!important; min-width:44px!important; height:44px!important; min-height:44px!important;
+    margin:0!important; padding:10px!important; border:0!important; border-radius:50%!important;
+    background:transparent!important; color:var(--v-ink,#191919)!important; box-shadow:none!important;
+  }
+  body.ih79-app #root .ih73-history-controls>button.ih-history-back:first-child:hover { background:var(--v-soft)!important; }
+  html body.ih79-app #root .page.ih5-service-form-page { min-width:0!important; max-width:100%!important; overflow-x:clip!important; }
+  html body.ih79-app #root .page.ih5-service-form-page>main.ih-market-shell {
+    box-sizing:border-box!important; display:block!important; width:100%!important; max-width:980px!important;
+    min-width:0!important; margin:0 auto!important; padding:32px 36px 120px!important;
+    background:none!important; color:var(--v-ink)!important;
+  }
+  html body.ih79-app #root .ih5-service-form-page header.ih-subpage-heading.is-editor {
+    position:static!important; display:block!important; width:100%!important; min-width:0!important;
+    min-height:0!important; height:auto!important; max-height:none!important; margin:0 0 36px!important; padding:0!important;
+    border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; text-align:start!important;
+  }
+  html body.ih79-app #root .ih5-service-form-page .ih-subpage-heading-copy { display:block!important; width:100%!important; min-width:0!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih-subpage-heading-copy>h1 {
+    display:block!important; width:auto!important; min-width:0!important; max-width:100%!important; margin:0!important; padding:0!important;
+    color:var(--v-ink)!important; -webkit-text-fill-color:currentColor!important;
+    font:650 clamp(28px,3vw,36px)/1.25 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important;
+    white-space:normal!important; overflow-wrap:anywhere!important; text-align:start!important;
+  }
+  html body.ih79-app #root .ih5-service-form-page p.ih-subpage-heading-description {
+    max-width:48ch!important; margin:14px 0 0!important; padding:0!important;
+    color:var(--v-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; text-align:start!important;
+  }
+  html body.ih79-app #root .ih5-service-form-page form.ih5-service-editor { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
+  html body.ih79-app #root .ih5-service-form-page details.ih5-service-editor-section { min-width:0!important; margin:0!important; padding:0!important; border:0!important; border-top:1px solid var(--v-line)!important; border-radius:0!important; }
+  html body.ih79-app #root .ih5-service-form-page summary.ih76-service-step {
+    display:flex!important; align-items:center!important; gap:16px!important; width:100%!important; min-height:92px!important;
+    margin:0!important; padding:24px 0!important; background:none!important; color:var(--v-ink)!important; list-style:none!important;
+  }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-index { flex:none!important; width:30px!important; margin:0!important; padding:0!important; font:550 18px/1.4 Inter,system-ui,sans-serif!important; color:var(--v-muted)!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih76-service-step>span:nth-child(2) { flex:1!important; min-width:0!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih76-service-step strong { font:650 18px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; white-space:normal!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih76-service-step small { margin-top:5px!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; color:var(--v-muted)!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih76-service-step>svg { flex:none!important; width:18px!important; height:18px!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-heading { display:block!important; margin:0!important; padding:0 0 24px 46px!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-heading p { margin:0!important; color:var(--v-muted)!important; font:400 13px/1.8 Inter,system-ui,sans-serif!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-fields { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:28px 26px!important; min-width:0!important; padding:0 0 32px 46px!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-fields>label { display:block!important; min-width:0!important; margin:0!important; font:600 13px/1.6 Inter,system-ui,sans-serif!important; color:var(--v-ink)!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-fields>label.is-wide { grid-column:1/-1!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-fields :is(input:not([type="checkbox"]):not([type="radio"]),textarea) { box-sizing:border-box!important; min-width:0!important; max-width:100%!important; margin-top:10px!important; padding:13px 14px!important; font:400 16px/1.7 Inter,system-ui,sans-serif!important; color:var(--v-ink)!important; background:var(--v-surface)!important; border:1px solid var(--v-line)!important; border-radius:9px!important; white-space:pre-wrap!important; overflow-wrap:anywhere!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-actions { gap:16px!important; margin-top:30px!important; padding:26px 0 0!important; border-top:1px solid var(--v-line)!important; }
+  html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-actions>:is(a,button) { min-height:48px!important; padding:13px 20px!important; border-radius:9px!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
+  @media(max-width:640px) {
+    html body.ih79-app #root .page.ih5-service-form-page>main.ih-market-shell { padding:22px 22px 115px!important; }
+    html body.ih79-app #root .ih5-service-form-page header.ih-subpage-heading.is-editor { margin-bottom:28px!important; }
+    html body.ih79-app #root .ih5-service-form-page .ih-subpage-heading-copy>h1 { font-size:29px!important; }
+    html body.ih79-app #root .ih5-service-form-page p.ih-subpage-heading-description { font-size:13px!important; line-height:1.8!important; }
+    html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-fields { grid-template-columns:minmax(0,1fr)!important; gap:28px!important; padding:0 0 30px!important; }
+    html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-heading { padding:0 0 24px!important; }
+    html body.ih79-app #root .ih5-service-form-page summary.ih76-service-step { gap:12px!important; min-height:88px!important; padding:22px 0!important; }
+    html body.ih79-app #root .ih5-service-form-page .ih76-service-step strong { font-size:17px!important; }
+    html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-actions { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:14px!important; }
+    html body.ih79-app #root .ih5-service-form-page .ih5-service-editor-actions>:is(a,button) { width:100%!important; }
+  }
+}

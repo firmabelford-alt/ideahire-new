@@ -2,6 +2,7 @@ import { FormSelect, AutoTextarea } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Wiadomości, brief i analiza wybranego materiału. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useSitePreferences } from "./Preferences";
 import { useLucynaReveal, LucynaWords } from "./LucynaMotion";
 import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, messageTemplate, normalizeMessageVariants, reviewSummary, suggestedCriteria } from "./LucynaCore";
 
@@ -79,6 +80,7 @@ function ReviewScore({summary}) {
   </div>;
 }
 export function MessageVariants({variants,onNotice,onRefine,busy,animate=false,note=''}) {
+  const english=useSitePreferences().language==='en', t=(pl,en)=>english?en:pl;
   const normalized=normalizeMessageVariants(variants), [selected,setSelected]=useState(0);
   const [edits,setEdits]=useState(()=>normalized?.map(v=>v.body)||[]),[copied,setCopied]=useState(false);
   const [interacted,setInteracted]=useState(false),[edited,setEdited]=useState([false,false]);
@@ -90,17 +92,17 @@ export function MessageVariants({variants,onNotice,onRefine,busy,animate=false,n
   if(!normalized)return null;
   function choose(index){setSelected(index);setCopied(false);setInteracted(true);}
   async function copyVariant(){try{await navigator.clipboard.writeText(edits[selected]);setCopied(true);clearTimeout(timer.current);timer.current=setTimeout(()=>setCopied(false),1800);}catch{onNotice('Nie udało się skopiować. Zaznacz i skopiuj wybraną treść ręcznie.');}}
-  return <section className="lu-letter" aria-label="Propozycje wiadomości">
-    <header className="lu-letter-heading"><div><span>OD LUCYNY</span><h3>Napisałabym tak</h3></div><span className="lu-letter-count" aria-label={'Propozycja '+(selected+1)+' z 2'}>{selected+1}<span> / 2</span></span></header>
+  return <section className="lu-letter" data-no-translate="true" aria-label={t('Propozycje wiadomości','Message drafts')}>
+    <header className="lu-letter-heading"><div><span>{t('OD LUCYNY','FROM LUCYNA')}</span><h3>{t('Tak bym to napisała','Here is my suggestion')}</h3></div><span className="lu-letter-count" aria-label={t('Propozycja ','Draft ')+(selected+1)+t(' z 2',' of 2')}>{selected+1}<span> / 2</span></span></header>
     {helpfulNote&&<p className="lu-letter-note">{helpfulNote}</p>}
-    <div className="lu-letter-choice" role="group" aria-label="Porównaj sformułowania"><button type="button" aria-pressed={selected===0} aria-controls={id+'-editor'} onClick={()=>choose(0)}>Pierwsza propozycja</button><button type="button" aria-pressed={selected===1} aria-controls={id+'-editor'} onClick={()=>choose(1)}>Inne sformułowanie</button></div>
+    <div className="lu-letter-choice" role="group" aria-label={t('Porównaj sformułowania','Compare drafts')}><button type="button" aria-pressed={selected===0} aria-controls={id+'-editor'} onClick={()=>choose(0)}>{t('Pierwsza wersja','First version')}</button><button type="button" aria-pressed={selected===1} aria-controls={id+'-editor'} onClick={()=>choose(1)}>{t('Druga wersja','Second version')}</button></div>
     <div className="lu-letter-content" key={selected} data-revealing={reveal.revealing}>
-      <label className="lu-sr-only" htmlFor={id+'-editor'}>{selected===0?'Pierwsza propozycja':'Drugie sformułowanie'} — edytuj treść</label>
-      {reveal.revealing&&<div className="lu-letter-writing" aria-busy="true"><p><LucynaWords text={reveal.text} animate={reveal.motionEnabled}/></p><button type="button" className="lu-text-button" onClick={()=>{reveal.revealAll();requestAnimationFrame(()=>editor.current?.focus({preventScroll:true}));}}>Pokaż całość i edytuj</button></div>}
+      <label className="lu-sr-only" htmlFor={id+'-editor'}>{selected===0?t('Pierwsza wersja','First version'):t('Druga wersja','Second version')} — {t('edytuj treść','edit text')}</label>
+      {reveal.revealing&&<div className="lu-letter-writing" aria-busy="true"><p><LucynaWords text={reveal.text} animate={reveal.motionEnabled}/></p><button type="button" className="lu-text-button" onClick={()=>{reveal.revealAll();requestAnimationFrame(()=>editor.current?.focus({preventScroll:true}));}}>{t('Pokaż całość i edytuj','Show all and edit')}</button></div>}
       <AutoTextarea ref={editor} hidden={reveal.revealing} id={id+'-editor'} rows={3} value={edits[selected]||''} maxLength={2000} onChange={e=>{const value=e.target.value;setEdited(all=>all.map((v,i)=>i===selected?true:v));setEdits(all=>all.map((v,i)=>i===selected?value:v));setCopied(false);}}/>
     </div>
-    <div className="lu-letter-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?'Skopiowano':'Kopiuj tę wersję'}</button><button type="button" className="lu-text-button" disabled={busy||!edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>Zmieńmy coś</button></div>
-    <div className="lu-letter-footer"><p>Możesz edytować tekst. Wysyłasz go samodzielnie.</p><details><summary>O tej propozycji</summary><p>Treść powstała z pomocą AI. Sprawdź adresata, daty i ustalenia. Edycja w tym polu nie zmienia pierwotnej odpowiedzi w historii.</p></details></div>
+    <div className="lu-letter-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?t('Skopiowano','Copied'):t('Kopiuj wiadomość','Copy message')}</button><button type="button" className="lu-text-button" disabled={busy||!edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>{t('Dopracuj','Refine')}</button></div>
+    <div className="lu-letter-footer"><p>{t('Możesz edytować tekst. Wysyłasz go samodzielnie.','You can edit this text. You send it yourself.')}</p><details><summary>{t('O tej propozycji','About this draft')}</summary><p>{t('Treść powstała z pomocą AI. Sprawdź adresata, daty i ustalenia. Edycja w tym polu nie zmienia pierwotnej odpowiedzi w historii.','Created with AI. Check the recipient, dates and terms. Editing here does not change the original response in your history.')}</p></details></div>
   </section>;
 }
 export function ReviewResult({ review, onDraft, busy, animate=false }) {
