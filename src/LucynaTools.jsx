@@ -2,7 +2,7 @@ import { FormSelect, AutoTextarea } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Wiadomości, brief i analiza wybranego materiału. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { useLucynaReveal } from "./LucynaMotion";
+import { useLucynaReveal, LucynaWords } from "./LucynaMotion";
 import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, messageTemplate, normalizeMessageVariants, reviewSummary, suggestedCriteria } from "./LucynaCore";
 
 const byteLimit = (value, limit = 12000) => {
@@ -78,30 +78,29 @@ function ReviewScore({summary}) {
     <details className="lu-score-method"><summary>Jak obliczamy ten wynik?</summary><p>Spełnione: 1 punkt. Częściowo: 0,5. Niezgodność: 0. Wynik to suma punktów podzielona przez liczbę ocenionych kryteriów. „Do sprawdzenia” jest pomijane. Procent nie jest prawdopodobieństwem poprawności ani oceną całej pracy, autora, zgodności prawnej lub bezpieczeństwa. Odbiór pozostaje Twoją decyzją.</p></details>
   </div>;
 }
-export function MessageVariants({variants,onNotice,onRefine,busy,animate=false}) {
-  const normalized = normalizeMessageVariants(variants), [selected,setSelected] = useState(0);
-  const [edits,setEdits] = useState(() => normalized?.map(v=>v.body) || []), [copied,setCopied] = useState(false);
-  const [interacted,setInteracted]=useState(false);
-  const [edited,setEdited]=useState([false,false]);
-  const id = React.useId(), timer = useRef(null), editor=useRef(null);
-  const reveal=useLucynaReveal(edits[selected] || '',(animate || interacted) && !edited[selected]);
-  useEffect(()=>{setEdits(normalizeMessageVariants(variants)?.map(v=>v.body) || []);setSelected(0);setCopied(false);setEdited([false,false]);setInteracted(false);},[variants]);
+export function MessageVariants({variants,onNotice,onRefine,busy,animate=false,note=''}) {
+  const normalized=normalizeMessageVariants(variants), [selected,setSelected]=useState(0);
+  const [edits,setEdits]=useState(()=>normalized?.map(v=>v.body)||[]),[copied,setCopied]=useState(false);
+  const [interacted,setInteracted]=useState(false),[edited,setEdited]=useState([false,false]);
+  const id=React.useId(),timer=useRef(null),editor=useRef(null);
+  const reveal=useLucynaReveal(edits[selected]||'',(animate||interacted)&&!edited[selected]);
+  const helpfulNote=note&&!/^(?:Przygotowano|Przygotowałam dw|Możesz wybrać|Wybierz jedn)/i.test(note)?note:'';
+  useEffect(()=>{setEdits(normalizeMessageVariants(variants)?.map(v=>v.body)||[]);setSelected(0);setCopied(false);setEdited([false,false]);setInteracted(false);},[variants]);
   useEffect(()=>()=>clearTimeout(timer.current),[]);
-  if (!normalized) return null;
-  async function copyVariant() {
-    try {await navigator.clipboard.writeText(edits[selected]);setCopied(true);clearTimeout(timer.current);timer.current=setTimeout(()=>setCopied(false),1800);}
-    catch {onNotice('Nie udało się skopiować. Zaznacz treść wybranej wersji i skopiuj ją ręcznie.');}
-  }
-  return <section className="lu-variants" aria-label="Dwa warianty wiadomości">
-    <div className="lu-variants-heading"><span>WIADOMOŚĆ DO WYBORU</span><strong>Ten sam sens. Dwie wersje.</strong><p>Wybierz brzmienie, które pasuje do Ciebie. Treść możesz od razu poprawić.</p></div>
-    <div className="lu-variant-options" role="group" aria-label="Wybierz wariant wiadomości">{normalized.map((v,i)=><button type="button" key={i} aria-pressed={selected===i} aria-controls={id+'-editor'} onClick={()=>{setSelected(i);setCopied(false);setInteracted(true);}}><span>{i===0?'A':'B'}</span><strong>{v.title}</strong>{selected===i&&<small>Wybrana</small>}</button>)}</div>
-    <div className="lu-variant-paper" key={selected} data-revealing={reveal.revealing}>
-      <div className="lu-paper-top"><label htmlFor={id+'-editor'}>WARIANT {selected===0?'A':'B'} <span>· {reveal.revealing?'ujawnianie treści':'możesz edytować'}</span></label><span aria-hidden="true">{selected===0?'01':'02'}</span></div>
-      {reveal.revealing && <div className="lu-draft-writing" aria-busy="true"><p>{reveal.text}<span className="lu-writing-caret" aria-hidden="true"/></p><button type="button" className="lu-text-button" onClick={()=>{reveal.revealAll();requestAnimationFrame(()=>editor.current?.focus({preventScroll:true}));}}>Pokaż od razu i edytuj</button></div>}
-      <AutoTextarea ref={editor} hidden={reveal.revealing} id={id+'-editor'} rows={3} value={edits[selected] || ''} maxLength={2000} onChange={e=>{setEdited(all=>all.map((value,i)=>i===selected?true:value));setEdits(all=>all.map((text,i)=>i===selected?e.target.value:text));setCopied(false);}} />
+  if(!normalized)return null;
+  function choose(index){setSelected(index);setCopied(false);setInteracted(true);}
+  async function copyVariant(){try{await navigator.clipboard.writeText(edits[selected]);setCopied(true);clearTimeout(timer.current);timer.current=setTimeout(()=>setCopied(false),1800);}catch{onNotice('Nie udało się skopiować. Zaznacz i skopiuj wybraną treść ręcznie.');}}
+  return <section className="lu-letter" aria-label="Propozycje wiadomości">
+    <header className="lu-letter-heading"><div><span>OD LUCYNY</span><h3>Napisałabym tak</h3></div><span className="lu-letter-count" aria-label={'Propozycja '+(selected+1)+' z 2'}>{selected+1}<span> / 2</span></span></header>
+    {helpfulNote&&<p className="lu-letter-note">{helpfulNote}</p>}
+    <div className="lu-letter-choice" role="group" aria-label="Porównaj sformułowania"><button type="button" aria-pressed={selected===0} aria-controls={id+'-editor'} onClick={()=>choose(0)}>Pierwsza propozycja</button><button type="button" aria-pressed={selected===1} aria-controls={id+'-editor'} onClick={()=>choose(1)}>Inne sformułowanie</button></div>
+    <div className="lu-letter-content" key={selected} data-revealing={reveal.revealing}>
+      <label className="lu-sr-only" htmlFor={id+'-editor'}>{selected===0?'Pierwsza propozycja':'Drugie sformułowanie'} — edytuj treść</label>
+      {reveal.revealing&&<div className="lu-letter-writing" aria-busy="true"><p><LucynaWords text={reveal.text} animate={reveal.motionEnabled}/></p><button type="button" className="lu-text-button" onClick={()=>{reveal.revealAll();requestAnimationFrame(()=>editor.current?.focus({preventScroll:true}));}}>Pokaż całość i edytuj</button></div>}
+      <AutoTextarea ref={editor} hidden={reveal.revealing} id={id+'-editor'} rows={3} value={edits[selected]||''} maxLength={2000} onChange={e=>{const value=e.target.value;setEdited(all=>all.map((v,i)=>i===selected?true:v));setEdits(all=>all.map((v,i)=>i===selected?value:v));setCopied(false);}}/>
     </div>
-    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?'Skopiowano':'Kopiuj tekst'}</button><button type="button" className="lu-secondary" disabled={busy || !edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>Dopracuj</button></div>
-    <p className="lu-tool-note">Propozycje AI. Sprawdź fakty, adresata i zobowiązania. Wysyłasz samodzielnie. Edycja tej kopii nie zmienia pierwotnej odpowiedzi zapisanej w historii.</p>
+    <div className="lu-letter-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?'Skopiowano':'Kopiuj tę wersję'}</button><button type="button" className="lu-text-button" disabled={busy||!edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>Zmieńmy coś</button></div>
+    <div className="lu-letter-footer"><p>Możesz edytować tekst. Wysyłasz go samodzielnie.</p><details><summary>O tej propozycji</summary><p>Treść powstała z pomocą AI. Sprawdź adresata, daty i ustalenia. Edycja w tym polu nie zmienia pierwotnej odpowiedzi w historii.</p></details></div>
   </section>;
 }
 export function ReviewResult({ review, onDraft, busy, animate=false }) {
@@ -110,7 +109,7 @@ export function ReviewResult({ review, onDraft, busy, animate=false }) {
   const labels = {met:"Spełnione",partial:"Częściowo",missing:"Niezgodność",unknown:"Do sprawdzenia"};
   return <section className="lu-review-result" aria-label="Wstępne sprawdzenie materiału">
     <div className="lu-review-heading"><strong>Notatka Lucyny</strong><span>Wstępna analiza AI</span></div>
-    <p className="lu-review-summary" aria-busy={reveal.revealing}>{reveal.text}{reveal.revealing && <span className="lu-writing-caret" aria-hidden="true"/>}</p>
+    <p className="lu-review-summary" aria-busy={reveal.revealing}><LucynaWords text={reveal.text} animate={reveal.motionEnabled}/></p>
     <ol className="lu-criteria-results" data-animate={animate}>{review.criteria.map((row,index)=><li key={index} style={{"--lu-row-index":index}} className={"is-"+row.status}>
       <div><strong>{row.criterion}</strong><span>{labels[row.status] || "Do sprawdzenia"}</span></div>
       <p>{row.reason}</p>{row.quote && <blockquote>{row.quote}</blockquote>}
@@ -122,15 +121,21 @@ export function ReviewResult({ review, onDraft, busy, animate=false }) {
     <p className="lu-tool-note">Powstaną dwie propozycje w jednej próbie AI. Żadna nie zostanie wysłana automatycznie.</p>
   </section>;
 }
-function MessageTool({onUseDraft,onLocalDraft,busy,initialDraft=""}) {
-  const [purpose,setPurpose] = useState(""), [details,setDetails] = useState(initialDraft), [tone,setTone] = useState("polite");
+function MessageTool({onMessageDraft,onLocalDraft,busy,initialDraft=''}) {
+  const [purpose,setPurpose]=useState(''),[details,setDetails]=useState(initialDraft),[recipient,setRecipient]=useState('');
+  const [tone,setTone]=useState('polite'),[intent,setIntent]=useState('auto'),[team,setTeam]=useState(false);
   useEffect(()=>{setDetails(initialDraft);},[initialDraft]);
-  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>WIADOMOŚCI</span><h2>Dobierz słowa do sytuacji</h2><p>Dwie wersje w tym samym tonie, oparte na Twoich faktach. Wybierzesz jedną i dopracujesz ją przed wysłaniem.</p></div>
-    <label>Cel wiadomości<input value={purpose} maxLength={300} placeholder="Np. zapytanie o termin albo prośba o poprawki" onChange={e=>setPurpose(e.target.value)} /></label>
-    <label>Fakty i ustalenia<AutoTextarea value={details} maxLength={1200} rows={4} placeholder="Podaj tylko fakty potrzebne do tej wiadomości" onChange={e=>setDetails(e.target.value)} /></label>
-    <label>Ton<FormSelect value={tone} onChange={e=>setTone(e.target.value)}><option value="polite">Uprzejmy</option><option value="firm">Stanowczy</option><option value="short">Krótki</option></FormSelect></label>
-    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onUseDraft("Pomóż mi napisać "+({polite:"uprzejmą",firm:"stanowczą",short:"krótką"}[tone])+" wiadomość. Przygotuj dwa warianty w tym samym tonie, zachowując te same fakty.\n\nCel: "+purpose+"\n\nFakty i ustalenia:\n"+details)}>{busy ? "Przygotowuję…" : "Przygotuj dwie wersje z AI"}</button><button type="button" className="lu-secondary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onLocalDraft(messageTemplate({purpose,details,tone}))}>Ułóż szablon bez AI</button></div>
-    <p className="lu-tool-note">Oba warianty powstają w jednej próbie AI. Wiadomość wysyłasz samodzielnie. Sprawdź adresata, fakty, terminy i zobowiązania.</p>
+  return <section className="lu-tool-card lu-message-form"><div className="lu-tool-heading"><span>WIADOMOŚĆ</span><h2>Co chcesz przekazać?</h2><p>Opisz sytuację swoimi słowami. Ułożę dwie propozycje i sprawdzę ich sens oraz brzmienie.</p></div>
+    <label>O czym piszesz?<AutoTextarea rows={2} value={purpose} maxLength={300} placeholder="Np. chcę poprosić pana Jana o przesunięcie terminu" onChange={e=>setPurpose(e.target.value)}/></label>
+    <label>Co muszę wiedzieć?<AutoTextarea value={details} maxLength={1200} rows={3} placeholder="Np. obecny termin 10.05.2026, proponowany 13.05.2026. Zmiana nie jest jeszcze uzgodniona." onChange={e=>setDetails(e.target.value)}/></label>
+    <details className="lu-message-options"><summary>Adresat, ton i sposób wypowiedzi</summary><div>
+      <label>Do kogo? <small>opcjonalnie</small><input value={recipient} maxLength={160} placeholder="Np. pan Jan, klient, współpracowniczka" onChange={e=>setRecipient(e.target.value)}/></label>
+      <label>Jak ma brzmieć?<FormSelect value={tone} onChange={e=>setTone(e.target.value)}><option value="polite">Uprzejmie i naturalnie</option><option value="firm">Stanowczo, z szacunkiem</option><option value="short">Krótko i rzeczowo</option></FormSelect></label>
+      <label>Co ma zrobić ta wiadomość?<FormSelect value={intent} onChange={e=>setIntent(e.target.value)}><option value="auto">Dobierz do mojego opisu</option><option value="request">Zaproponować zmianę</option><option value="confirm">Potwierdzić już uzgodnione ustalenia</option><option value="inform">Przekazać informację</option><option value="correction">Poprosić o poprawki</option></FormSelect></label>
+      <label className="lu-check"><input type="checkbox" checked={team} onChange={e=>setTeam(e.target.checked)}/><span>Piszę w imieniu zespołu</span></label>
+    </div></details>
+    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy||!purpose.trim()&&!details.trim()} onClick={()=>onMessageDraft({purpose:purpose.trim(),details:details.trim(),recipient:recipient.trim(),tone,intent,voice:team?'team':'individual'})}>{busy?'Pracuję nad treścią…':'Ułóż i sprawdź wiadomość'}</button><button type="button" className="lu-text-button" disabled={busy||!purpose.trim()&&!details.trim()} onClick={()=>onLocalDraft(messageTemplate({purpose,details,tone}))}>Szkic bez AI</button></div>
+    <p className="lu-tool-note">Dwie propozycje, potem kontrola sensu i języka — w jednej próbie z Twojego limitu AI. Wiadomość wysyłasz samodzielnie.</p>
   </section>;
 }
 function BriefTool({onUseDraft,onLocalDraft,busy}) {

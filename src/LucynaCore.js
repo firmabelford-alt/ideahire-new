@@ -74,9 +74,19 @@ export function correctionDraft(review, tone = "polite") {
 }
 export function messageTemplate({ purpose = "", details = "", tone = "polite" } = {}) {
   const lead = tone === "firm" ? "Dzień dobry. Proszę o ustalenie kolejnych kroków."
-    : tone === "short" ? "Cześć!" : "Dzień dobry, dziękuję za dotychczasowy kontakt.";
+    : tone === "short" ? "Cześć!" : "Dzień dobry,";
   return [lead, purpose.trim(), details.trim(), tone === "short" ? "Daj proszę znać." : "Proszę o potwierdzenie i informację, jaki jest możliwy następny krok."]
     .filter(Boolean).join("\n\n");
+}
+export function buildLucynaMessageRequest(input) {
+  const parts=[String(input.purpose || '').trim(),String(input.details || '').trim()];
+  if(input.recipient?.trim())parts.push('Do: '+input.recipient.trim());
+  if(input.intent && input.intent !== 'auto')parts.push(({request:'Chcę zaproponować zmianę, jeszcze bez zgody odbiorcy.',confirm:'Potwierdzam już uzgodnione ustalenia.',inform:'Chcę przekazać informację.',correction:'Chcę poprosić o konkretne poprawki.'})[input.intent]);
+  if(input.voice==='team')parts.push('Piszę w imieniu zespołu.');
+  return parts.filter(Boolean).join('\n\n');
+}
+export function isLucynaMessageRequest(text) {
+  return /(?:napisz|uloz|przygotuj|sformuluj|przeredaguj|dopracuj|skroc).{0,80}(?:wiadomosc|odpowiedz|mail)/s.test(fold(text));
 }
 export function briefReadiness(fields) {
   const keys = ["goal", "scope", "result", "deadline", "budget", "acceptance"];
@@ -148,17 +158,18 @@ export async function revealAnswer(text, signal, onText, reducedMotion = globalT
 }
 
 export function conversationNotes(messages, limit = 10) {
-  const older = messages.filter(m => ['user','assistant'].includes(m.role) && ['done','catalog','stopped'].includes(m.status) && !m.error).slice(0,-limit)
-    .filter(m => m.role === 'user' && !containsPrivateInput(m.text));
-  if (!older.length) return '';
-  const first = String(older[0].text || '').slice(0,350);
+  const safe=messages.filter(m => ['user','assistant'].includes(m.role) && ['done','catalog','stopped'].includes(m.status) && !m.error);
+  const users=safe.filter(m=>m.role==='user' && !containsPrivateInput(m.text));
+  const older=safe.slice(0,-limit).filter(m=>m.role==='user' && !containsPrivateInput(m.text));
+  if (!users.length) return '';
+  const first = String(users[0].text || '').slice(0,350);
   const recent = older.slice(1).slice(-3).map(m => String(m.text || '').slice(0,160));
   return ['Początek prośby użytkownika: ' + first,...recent.map(t => 'Późniejsze ustalenie użytkownika: ' + t)].join('\n');
 }
 export function conversationContext(messages, limit = 10) {
   return messages.filter(message => ["user", "assistant"].includes(message.role)
     && ["done", "catalog", "stopped"].includes(message.status)
-    && !message.error && (message.text || message.review || message.catalogs?.length))
+    && !message.error && (message.text || message.review || message.variants?.length || message.actions?.length || message.catalogs?.length))
     .map(message => {
       let text = String(message.text || "");
       const variants = normalizeMessageVariants(message.variants);

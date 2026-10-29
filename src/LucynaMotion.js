@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { createElement, Fragment, useEffect, useRef, useState } from 'react';
+
+export function LucynaWords({text,animate=false}) {
+  return String(text || '').split(/(\s+)/).map((part,index)=>/\S/.test(part)
+    ? createElement('span',{key:index,className:animate?'lu-word-in':undefined},part)
+    : createElement(Fragment,{key:index},part));
+}
 
 // Presentation only: reveal an answer already received, never simulate an AI result.
 export function useLucynaReveal(text, enabled = false) {
@@ -20,7 +26,7 @@ export function useLucynaReveal(text, enabled = false) {
     let last=performance.now();
     const tick=now=>{
       const elapsed=Math.min(80,Math.max(0,now-last));last=now;
-      current.cursor=Math.min(target.length,current.cursor+Math.max(90,target.length/3.8)*elapsed/1000);
+      current.cursor=Math.min(target.length,current.cursor+Math.max(45,target.length/9)*elapsed/1000);
       let end=Math.floor(current.cursor);
       if(end<target.length && /[\uD800-\uDBFF]/.test(target[end-1] || ''))end--;
       setShown(target.slice(0,end));
@@ -34,5 +40,5 @@ export function useLucynaReveal(text, enabled = false) {
     cancelAnimationFrame(current.frame);setShown(current.target);
   }
   const visible=!enabled || reduced ? target : target.startsWith(shown) ? shown : '';
-  return {text:visible,revealing:visible!==target,revealAll};
+  return {text:visible,revealing:visible!==target,revealAll,motionEnabled:enabled && !reduced};
 }
