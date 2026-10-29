@@ -45,7 +45,7 @@ import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./Admi
 import { ErasureScope } from "./AdminErasure";
 import { executeErasure, erasureFailureMessage, erasureOutcomeKnown, ERASURE_RETAINED_LABELS, ERASURE_CONFIRMATION } from "./ErasureWorkflow";
 import AdminLucynaDesk from "./AdminLucyna";
-import { getJobExpiryInfo, useListingClock } from "./JobListingState";
+import { getJobExpiryInfo, useListingClock, visibleJobSkills } from "./JobListingState";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
@@ -14240,6 +14240,7 @@ function Jobs() {
                   )
                 : [];
 
+              const displaySkills = visibleJobSkills(job.required_skills);
               return (
                 <article
                   className={`ih5-job-card ih73-job-row ih79-job${isOpen ? " is-open" : ""}`}
@@ -14278,7 +14279,7 @@ function Jobs() {
                     <div><span>Termin</span><strong>{job.project_deadline ? formatDate(job.project_deadline) : "Do ustalenia"}</strong></div>
                     <div><span>Opublikowano</span><strong>{formatDate(job.created_at)}</strong><small className="ih5-job-expiry">{getJobExpiryInfo(job.expires_at).label}</small></div>
                   </div>
-                  {Array.isArray(job.required_skills) && job.required_skills.length > 0 && <div className="ih5-job-skills" aria-label="Wymagane umiejętności">{(isOpen ? job.required_skills : job.required_skills.slice(0, 3)).map((skill) => <span key={skill}>{skill}</span>)}{!isOpen && job.required_skills.length > 3 && <span>+{job.required_skills.length - 3}</span>}</div>}
+                  {displaySkills.length > 0 && <div className="ih5-job-skills" aria-label="Wymagane umiejętności">{(isOpen ? displaySkills : displaySkills.slice(0, 3)).map((skill) => <span key={skill}>{skill}</span>)}{!isOpen && displaySkills.length > 3 && <span>+{displaySkills.length - 3}</span>}</div>}
 
                   {isOpen && (
                     <div className="ih5-job-details ih5-job-collaboration-details" id={`ih-job-plan-${job.id}`} aria-labelledby={`ih-job-plan-title-${job.id}`}>

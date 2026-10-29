@@ -88,6 +88,12 @@ export function buildLucynaMessageRequest(input) {
 export function isLucynaMessageRequest(text) {
   return /(?:napisz|uloz|przygotuj|sformuluj|przeredaguj|dopracuj|skroc).{0,80}(?:wiadomosc|odpowiedz|mail)/s.test(fold(text));
 }
+export function isLucynaReviewRequest(value) {
+  const text=fold(value);
+  if(text.length>220 || /\n|:|```|<[^>]+>|https?:\/\//.test(text) || isLucynaMessageRequest(text)
+    || /\b(?:nie chce|nie prosze|nie oceniaj|nie sprawdzaj|nie analizuj)\b/.test(text))return false;
+  return /\b(?:ocen(?:isz|ic|iasz|ilabys|ilbys|iaj|i)?|sprawdz(?:isz|ic|ilabys|ilbys)?|przejrzyj|przeanalizuj|zerknij)\b.{0,70}\b(?:prac\w*|rezultat\w*|projekt\w*|material\w*)|\b(?:prac\w*|rezultat\w*|projekt\w*|material\w*).{0,60}\b(?:ocen(?:isz|ic|iasz|ilabys|ilbys|iaj|i)?|sprawdz(?:isz|ic|ilabys|ilbys)?|przejrzyj|przeanalizuj)\b/.test(text);
+}
 export function briefReadiness(fields) {
   const keys = ["goal", "scope", "result", "deadline", "budget", "acceptance"];
   const missing = keys.filter(key => !String(fields?.[key] || "").trim());

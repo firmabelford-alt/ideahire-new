@@ -1,5 +1,17 @@
 import { useEffect, useState } from 'react';
 
+// Old listings may contain punctuation-only tags. Keep their stored data intact.
+export function visibleJobSkills(value) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  return value.filter(skill => typeof skill === 'string').map(skill => skill.trim())
+    .filter(skill => {
+      const key = skill.toLocaleLowerCase();
+      if (!/[\p{L}\p{N}]/u.test(skill) || seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+}
+
 export function nextListingExpiryDelay(jobs, now = Date.now()) {
   const future = jobs.map(job => new Date(job.expires_at || '').getTime()).filter(time => Number.isFinite(time) && time > now);
   return future.length ? Math.min(2147483647, Math.max(50, Math.min(...future) - now + 50)) : null;

@@ -1,196 +1,159 @@
-/* Scoped workspace layout. Keep it in the existing priority layer so legacy
-   heading and form rules cannot resize controls or expand project titles. */
+/* Workspace: an open project register, with summaries separate from conversations. */
 @layer ideahireHeadings {
-  body.ih79-app #root main.ih-work-board {
-    --work-paper: var(--v-surface, #fff);
-    --work-soft: var(--v-soft, #f3f7f5);
-    --work-ink: var(--v-ink, #192c27);
-    --work-muted: var(--v-muted, #4c5f58);
-    --work-line: var(--v-line, #d2dfd8);
-    --work-accent: var(--v-accent, #12695d);
-    --work-on: var(--v-on, #fff);
-    display: block !important;
-    width: 100% !important;
-    max-width: 1360px !important;
-    min-width: 0 !important;
-    min-height: calc(100svh - var(--a-head, 76px)) !important;
-    margin: 0 auto !important;
-    padding: 36px 36px 96px !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: none !important;
-    color: var(--work-ink) !important;
-    box-shadow: none !important;
-    font: 400 15px/1.6 Inter, system-ui, sans-serif !important;
+  body.ih79-app #root main.ih-work-hub[data-interface-release] { --wd-paper:var(--v-surface,#fff) !important; --wd-soft:var(--v-soft,#f1f6f4) !important; --wd-ink:var(--v-ink,#182d29) !important; --wd-muted:var(--v-muted,#52665e) !important; --wd-line:var(--v-line,#d2dfda) !important; --wd-accent:var(--v-accent,#116e65) !important; --wd-on:var(--v-on,#fff) !important; display:block !important; width:100% !important; max-width:1480px !important; min-width:0 !important; min-height:calc(100svh - var(--a-head,80px)) !important; margin:0 auto !important; padding:42px 40px 100px !important; border:0 !important; border-radius:0 !important; background:none !important; color:var(--wd-ink) !important; font:400 15px/1.6 Inter,system-ui,sans-serif !important; box-shadow:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] *, body.ih79-app #root main.ih-work-hub[data-interface-release] *::before, body.ih79-app #root main.ih-work-hub[data-interface-release] *::after { box-sizing:border-box !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] :is(a,button,input,select) { font-family:inherit !important; text-shadow:none !important; -webkit-text-fill-color:currentColor !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] a { color:inherit !important; text-decoration:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] button { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:8px !important; width:auto !important; min-width:0 !important; min-height:44px !important; margin:0 !important; padding:8px 12px !important; border:1px solid transparent !important; border-radius:8px !important; background:transparent !important; color:var(--wd-ink) !important; font-size:13px !important; font-weight:600 !important; line-height:1.5 !important; text-transform:none !important; letter-spacing:normal !important; box-shadow:none !important; cursor:pointer !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] button:disabled { opacity:.5 !important; cursor:default !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] :is(a,button,input,select):focus-visible { outline:2px solid var(--wd-accent) !important; outline-offset:4px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] :is(h1,h2,h3,p,dl,dd) { margin:0 !important; text-shadow:none !important; text-transform:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] :is(h1,h2,h3,strong) { color:var(--wd-ink) !important; -webkit-text-fill-color:currentColor !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] svg { flex:none !important; width:18px !important; height:18px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] header.wd-heading { position:static !important; inset:auto !important; display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:24px !important; width:100% !important; height:auto !important; min-height:0 !important; margin:0 0 34px !important; padding:0 !important; border:0 !important; border-radius:0 !important; background:none !important; color:inherit !important; box-shadow:none !important; transform:none !important; backdrop-filter:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-eyebrow { display:block !important; color:var(--wd-accent) !important; font:650 10px/1.6 Inter,system-ui,sans-serif !important; letter-spacing:.15em !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-heading h1 { margin:8px 0 10px !important; font:650 clamp(30px,3.3vw,43px)/1.18 Inter,system-ui,sans-serif !important; letter-spacing:-.055em !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-heading h1+p { max-width:50ch !important; color:var(--wd-muted) !important; font:400 14px/1.75 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-button { display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:9px !important; width:auto !important; min-height:46px !important; padding:11px 17px !important; border:1px solid var(--wd-line) !important; border-radius:9px !important; background:var(--wd-paper) !important; color:var(--wd-ink) !important; font:650 13px/1.5 Inter,system-ui,sans-serif !important; transition:background .2s,border-color .2s !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-button.is-primary { border-color:var(--wd-accent) !important; background:var(--wd-accent) !important; color:var(--wd-on) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts { display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:0 !important; margin:0 0 40px !important; padding:0 !important; border:1px solid var(--wd-line) !important; border-radius:12px !important; background:var(--wd-paper) !important; overflow:hidden !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a { display:flex !important; align-items:center !important; gap:13px !important; min-width:0 !important; min-height:88px !important; padding:18px 21px !important; border:0 !important; border-right:1px solid var(--wd-line) !important; background:none !important; transition:background .25s !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a:last-child { border-right:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a:hover { background:var(--wd-soft) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a>svg:first-child { width:21px !important; height:21px !important; color:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a>svg:last-child { width:16px !important; height:16px !important; margin-left:auto !important; color:var(--wd-muted) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts strong { display:block !important; font:650 13px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts small { display:block !important; margin-top:3px !important; color:var(--wd-muted) !important; font:400 11px/1.65 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-layout { display:grid !important; grid-template-columns:minmax(0,1fr) 252px !important; align-items:start !important; gap:44px !important; min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register { min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-heading { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:10px !important; margin-bottom:22px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-heading h2 { display:flex !important; align-items:center !important; gap:11px !important; padding:0 !important; font:650 21px/1.35 Inter,system-ui,sans-serif !important; letter-spacing:-.035em !important; scroll-margin-top:110px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-heading h2>span { min-width:26px !important; padding:3px 7px !important; border-radius:6px !important; background:var(--wd-soft) !important; color:var(--wd-muted) !important; font:600 11px/1.5 Inter,system-ui,sans-serif !important; text-align:center !important; font-variant-numeric:tabular-nums !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-caption { color:var(--wd-muted) !important; font-size:11px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-toolbar { display:flex !important; align-items:center !important; gap:12px !important; margin-bottom:14px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search { display:flex !important; flex:1 1 0 !important; align-items:center !important; gap:10px !important; min-width:0 !important; min-height:49px !important; margin:0 !important; padding:0 14px !important; border:1px solid var(--wd-line) !important; border-radius:9px !important; background:var(--wd-paper) !important; color:var(--wd-muted) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search:focus-within { border-color:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search input { flex:1 1 0 !important; width:100% !important; min-width:0 !important; height:46px !important; margin:0 !important; padding:0 !important; border:0 !important; border-radius:0 !important; outline:0 !important; background:none !important; color:var(--wd-ink) !important; font:400 14px/1.5 Inter,system-ui,sans-serif !important; box-shadow:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search input::placeholder { color:var(--wd-muted) !important; opacity:.9 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search>button { flex:none !important; width:32px !important; min-height:36px !important; padding:4px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort { position:relative !important; display:flex !important; align-items:center !important; flex:0 0 175px !important; min-width:0 !important; margin:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort select { appearance:none !important; width:100% !important; height:49px !important; min-height:49px !important; margin:0 !important; padding:10px 32px 10px 13px !important; border:1px solid var(--wd-line) !important; border-radius:9px !important; outline:0 !important; background:var(--wd-paper) !important; color:var(--wd-ink) !important; font:500 12px/1.5 Inter,system-ui,sans-serif !important; box-shadow:none !important; cursor:pointer !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort>svg { position:absolute !important; right:12px !important; width:15px !important; height:15px !important; pointer-events:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-filterbar { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:12px !important; margin-bottom:20px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles { display:flex !important; gap:3px !important; min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button { gap:7px !important; padding:8px 10px !important; color:var(--wd-muted) !important; font-weight:500 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button>span { font-size:10px !important; font-variant-numeric:tabular-nums !important; opacity:.85 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button[aria-pressed="true"] { background:var(--wd-soft) !important; color:var(--wd-ink) !important; font-weight:700 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-unread { gap:7px !important; padding-inline:8px !important; color:var(--wd-muted) !important; font-size:11px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-unread>span:last-child { font-size:10px !important; font-variant-numeric:tabular-nums !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-unread[aria-pressed="true"] { border-color:var(--wd-line) !important; color:var(--wd-accent) !important; background:var(--wd-soft) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-unread-dot { width:6px !important; height:6px !important; border-radius:50% !important; background:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-active-filters { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:6px 14px !important; padding:0 0 12px !important; color:var(--wd-muted) !important; font-size:11px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-active-filters>button { min-height:36px !important; padding:4px 0 !important; color:var(--wd-accent) !important; font-size:11px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-results { min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-columns { display:grid !important; grid-template-columns:minmax(0,1fr) 92px 92px 24px !important; gap:18px !important; padding:13px 12px !important; border-top:1px solid var(--wd-line) !important; border-bottom:1px solid var(--wd-line) !important; color:var(--wd-muted) !important; font:500 10px/1.6 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] ul.wd-list { display:block !important; margin:0 !important; padding:0 !important; list-style:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-list>li { margin:0 !important; padding:0 !important; border-bottom:1px solid var(--wd-line) !important; animation:wd-row-in .6s cubic-bezier(.18,.7,.25,1) var(--wd-delay,0ms) backwards !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] a.wd-project { display:grid !important; grid-template-columns:minmax(0,1fr) 92px 92px 24px !important; align-items:center !important; gap:18px !important; min-width:0 !important; min-height:134px !important; margin:0 !important; padding:24px 12px !important; border:0 !important; border-radius:0 !important; background:none !important; color:var(--wd-ink) !important; transition:background .25s !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] a.wd-project:hover { background:color-mix(in srgb,var(--wd-soft) 70%,transparent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project-main { display:flex !important; align-items:flex-start !important; gap:14px !important; min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-avatar { display:grid !important; place-items:center !important; flex:none !important; width:37px !important; height:37px !important; margin-top:1px !important; border:1px solid var(--wd-line) !important; border-radius:12px !important; background:var(--wd-soft) !important; color:var(--wd-accent) !important; font:650 13px/1 Inter,system-ui,sans-serif !important; overflow:hidden !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-avatar>img { width:100% !important; height:100% !important; object-fit:cover !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project-copy { min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-title-line { display:flex !important; align-items:baseline !important; gap:9px !important; min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project h3 { display:-webkit-box !important; margin:0 !important; padding:0 !important; -webkit-box-orient:vertical !important; -webkit-line-clamp:2 !important; overflow:hidden !important; overflow-wrap:anywhere !important; font:600 15px/1.5 Inter,system-ui,sans-serif !important; letter-spacing:-.025em !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project.is-unread h3 { font-weight:750 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-new { flex:none !important; align-self:center !important; width:6px !important; height:6px !important; border-radius:50% !important; background:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-person { display:block !important; max-width:100% !important; margin-top:4px !important; overflow:hidden !important; white-space:nowrap !important; text-overflow:ellipsis !important; color:var(--wd-muted) !important; font:500 11px/1.6 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-preview { display:-webkit-box !important; -webkit-box-orient:vertical !important; -webkit-line-clamp:1 !important; max-width:100% !important; margin-top:7px !important; overflow:hidden !important; overflow-wrap:anywhere !important; color:var(--wd-muted) !important; font:400 12px/1.7 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-role { justify-self:start !important; padding:4px 8px !important; border:1px solid var(--wd-line) !important; border-radius:5px !important; color:var(--wd-muted) !important; font:500 10px/1.6 Inter,system-ui,sans-serif !important; white-space:nowrap !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-role.is-client { background:var(--wd-soft) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project time { color:var(--wd-muted) !important; font:500 11px/1.6 Inter,system-ui,sans-serif !important; font-variant-numeric:tabular-nums !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-open { display:flex !important; align-items:center !important; color:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-open>span { display:none !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-pagination { display:flex !important; align-items:center !important; justify-content:space-between !important; flex-wrap:wrap !important; gap:14px !important; margin-top:24px !important; color:var(--wd-muted) !important; font:400 11px/1.6 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-pagination>div { display:flex !important; align-items:center !important; gap:12px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-pagination button { width:38px !important; min-height:40px !important; padding:7px !important; border-color:var(--wd-line) !important; background:var(--wd-paper) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sidebar { position:sticky !important; top:calc(var(--a-head,80px) + 24px) !important; display:grid !important; gap:25px !important; min-width:0 !important; padding:3px 0 0 26px !important; border-left:1px solid var(--wd-line) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview h2 { max-width:17ch !important; margin:14px 0 25px !important; font:550 23px/1.45 Inter,system-ui,sans-serif !important; letter-spacing:-.045em !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview dl { display:grid !important; grid-template-columns:1fr 1fr !important; gap:20px !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview dt { margin:0 0 7px !important; color:var(--wd-muted) !important; font:450 11px/1.6 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview dd { color:var(--wd-ink) !important; font:550 32px/1.2 Inter,system-ui,sans-serif !important; letter-spacing:-.06em !important; font-variant-numeric:tabular-nums !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next { padding:25px 0 0 !important; border-top:1px solid var(--wd-line) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next>svg { width:21px !important; height:21px !important; color:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next h3 { margin:14px 0 10px !important; font:650 14px/1.6 Inter,system-ui,sans-serif !important; letter-spacing:-.02em !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next p { color:var(--wd-muted) !important; font:400 12px/1.9 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next :is(a,button) { display:inline-flex !important; justify-content:flex-start !important; align-items:center !important; gap:10px !important; min-height:44px !important; margin-top:12px !important; padding:8px 0 !important; border:0 !important; color:var(--wd-accent) !important; font:650 11px/1.6 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-empty { display:flex !important; flex-direction:column !important; align-items:flex-start !important; justify-content:center !important; gap:15px !important; min-height:330px !important; padding:36px 12px !important; border-top:1px solid var(--wd-line) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-empty>svg { width:32px !important; height:32px !important; margin-bottom:8px !important; color:var(--wd-accent) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-empty h3 { font:600 23px/1.45 Inter,system-ui,sans-serif !important; letter-spacing:-.04em !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-empty p { max-width:46ch !important; color:var(--wd-muted) !important; font:400 14px/1.8 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-notice { padding:32px 12px !important; border-top:1px solid var(--wd-line) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-notice p { margin-top:12px !important; color:var(--wd-muted) !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sr { position:absolute !important; width:1px !important; height:1px !important; margin:-1px !important; padding:0 !important; border:0 !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; clip-path:inset(50%) !important; white-space:nowrap !important; }
+  @keyframes wd-row-in { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @media(max-width:1160px) {
+    body.ih79-app #root main.ih-work-hub[data-interface-release] { padding-inline:28px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-layout { grid-template-columns:minmax(0,1fr) 210px !important; gap:28px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sidebar { padding-left:20px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a { padding:16px !important; gap:10px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a>svg:last-child { display:none !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-columns, body.ih79-app #root main.ih-work-hub[data-interface-release] a.wd-project { grid-template-columns:minmax(0,1fr) 78px 75px 20px !important; gap:12px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-caption { display:none !important; }
   }
-  body.ih79-app #root main.ih-work-board :is(a, button, input, select, summary) {
-    box-sizing: border-box !important;
-    font-family: inherit !important;
-    text-shadow: none !important;
-    -webkit-text-fill-color: currentColor !important;
-    touch-action: manipulation !important;
+  @media(max-width:900px) {
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-layout { display:block !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sidebar { position:static !important; grid-template-columns:1fr 1fr !important; gap:28px !important; margin-top:45px !important; padding:25px 0 0 !important; border-left:0 !important; border-top:1px solid var(--wd-line) !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next { padding:0 0 0 28px !important; border-top:0 !important; border-left:1px solid var(--wd-line) !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview h2 { max-width:24ch !important; margin:8px 0 16px !important; font-size:20px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview dl { max-width:300px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts small { display:none !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a { min-height:68px !important; }
   }
-  body.ih79-app #root main.ih-work-board :is(a, button) { text-decoration: none !important; }
-  body.ih79-app #root main.ih-work-board :is(button, select, summary) { cursor: pointer !important; }
-  body.ih79-app #root main.ih-work-board :is(a, button, input, select, summary):focus-visible { outline: 2px solid var(--work-accent) !important; outline-offset: 4px !important; }
-  body.ih79-app #root main.ih-work-board svg { display: block !important; flex: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-layout { display: grid !important; grid-template-columns: 204px minmax(0, 1fr) !important; align-items: start !important; gap: 38px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-main { display: block !important; min-width: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
-
-  /* A quiet navigation rail on laptops, a disclosure on phones. */
-  body.ih79-app #root main.ih-work-board .ih-work-sidebar { position: sticky !important; top: calc(var(--a-head, 76px) + 28px) !important; min-width: 0 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu { display: block !important; margin: 0 !important; padding: 8px !important; border: 1px solid var(--work-line) !important; border-radius: 16px !important; background: var(--work-paper) !important; box-shadow: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu > summary { display: flex !important; align-items: center !important; gap: 10px !important; min-height: 46px !important; margin: 0 0 10px !important; padding: 10px !important; color: var(--work-muted) !important; font: 600 13px/1.5 Inter, system-ui, sans-serif !important; list-style: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu > summary::-webkit-details-marker { display: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu > summary > span { flex: 1 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu > summary > svg:last-child { display: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu:not([open]) > .ih-work-menu-body { display: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu nav { display: grid !important; gap: 6px !important; margin: 0 !important; padding: 0 !important; background: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu nav > a { display: flex !important; align-items: center !important; gap: 10px !important; min-height: 46px !important; margin: 0 !important; padding: 10px !important; border: 1px solid transparent !important; border-radius: 9px !important; background: none !important; color: var(--work-muted) !important; font: 500 13px/1.5 Inter, system-ui, sans-serif !important; transition: background 160ms ease, color 160ms ease !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu nav > a > span:first-of-type { flex: 1 !important; overflow-wrap: anywhere !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu nav > a[aria-current] { background: var(--work-soft) !important; color: var(--work-accent) !important; font-weight: 700 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-menu-count { flex: none !important; font: 600 12px/1.5 Inter, system-ui, sans-serif !important; font-variant-numeric: tabular-nums !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-explore { display: grid !important; gap: 8px !important; margin: 22px 4px 4px !important; padding: 18px 6px 0 !important; border-top: 1px solid var(--work-line) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-explore > span { margin-bottom: 4px !important; color: var(--work-muted) !important; font: 500 11px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-explore > a { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important; min-height: 40px !important; color: var(--work-ink) !important; font: 550 13px/1.5 Inter, system-ui, sans-serif !important; }
-
-  body.ih79-app #root main.ih-work-board header.ih-work-heading { position: static !important; display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 20px 24px !important; width: 100% !important; min-height: 0 !important; height: auto !important; margin: 0 0 30px !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; text-align: start !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-heading > div:first-child { flex: 1 1 290px !important; min-width: 0 !important; }
-  body.ih79-app #root main.ih-work-board p.ih-work-eyebrow { margin: 0 0 8px !important; color: var(--work-accent) !important; font: 650 11px/1.5 Inter, system-ui, sans-serif !important; letter-spacing: .1em !important; text-transform: uppercase !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-heading h1 { display: block !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; color: var(--work-ink) !important; font: 750 clamp(28px, 2.8vw, 36px)/1.2 Inter, system-ui, sans-serif !important; letter-spacing: -.04em !important; text-align: start !important; overflow-wrap: anywhere !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-heading h1 + p { max-width: 48ch !important; margin: 10px 0 0 !important; color: var(--work-muted) !important; font: 400 14px/1.65 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-heading-actions { display: flex !important; align-items: center !important; flex-wrap: wrap !important; gap: 10px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-button { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: none !important; gap: 8px !important; width: auto !important; min-width: 44px !important; min-height: 44px !important; height: auto !important; margin: 0 !important; padding: 10px 16px !important; border: 1px solid var(--work-line) !important; border-radius: 10px !important; background: var(--work-paper) !important; color: var(--work-ink) !important; box-shadow: none !important; font: 600 13px/1.5 Inter, system-ui, sans-serif !important; white-space: normal !important; text-align: center !important; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-button.is-primary { border-color: var(--work-accent) !important; background: var(--work-accent) !important; color: var(--work-on) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-button.is-icon { width: 44px !important; padding: 10px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-mobile-cta { display: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-button:disabled { opacity: .4 !important; cursor: default !important; transform: none !important; }
-
-  /* Search, role and unread filters have separate rows and ample touch targets. */
-  body.ih79-app #root main.ih-work-board .ih-work-controls { display: grid !important; gap: 18px !important; margin: 0 0 26px !important; padding: 18px !important; border: 1px solid var(--work-line) !important; border-radius: 16px !important; background: var(--work-paper) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search { display: flex !important; align-items: center !important; gap: 12px !important; width: 100% !important; min-width: 0 !important; min-height: 48px !important; margin: 0 !important; padding: 0 14px !important; border: 1px solid var(--work-line) !important; border-radius: 10px !important; background: var(--work-paper) !important; color: var(--work-muted) !important; transition: border-color 160ms ease, box-shadow 160ms ease !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search input { display: block !important; flex: 1 !important; width: 0 !important; max-width: 100% !important; min-width: 0 !important; min-height: 46px !important; height: auto !important; margin: 0 !important; padding: 10px 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--work-ink) !important; box-shadow: none !important; font: 400 16px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search input:focus { outline: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search input::placeholder { color: var(--work-muted) !important; opacity: .85 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search input::-webkit-search-cancel-button { display: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search:focus-within { border-color: var(--work-accent) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--work-accent) 15%, transparent) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-search > button { display: grid !important; place-items: center !important; flex: none !important; width: 44px !important; min-height: 44px !important; margin: 0 -10px 0 0 !important; padding: 10px !important; border: 0 !important; border-radius: 8px !important; background: none !important; color: var(--work-muted) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-filter-row { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 14px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-roles { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; flex: 1 1 320px !important; gap: 4px !important; max-width: 450px !important; padding: 4px !important; border: 1px solid var(--work-line) !important; border-radius: 11px !important; background: var(--work-soft) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-roles > button { display: flex !important; align-items: center !important; justify-content: center !important; flex-wrap: wrap !important; gap: 4px 7px !important; width: 100% !important; min-width: 0 !important; min-height: 44px !important; margin: 0 !important; padding: 8px 9px !important; border: 1px solid transparent !important; border-radius: 7px !important; background: none !important; color: var(--work-muted) !important; box-shadow: none !important; font: 600 13px/1.5 Inter, system-ui, sans-serif !important; white-space: normal !important; transition: color 180ms ease, background 180ms ease, box-shadow 180ms ease !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-roles > button[aria-pressed="true"] { border-color: var(--work-line) !important; background: var(--work-paper) !important; color: var(--work-accent) !important; box-shadow: 0 2px 5px #00000006 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-roles > button > span { color: inherit !important; font: 500 11px/1.5 Inter, system-ui, sans-serif !important; font-variant-numeric: tabular-nums !important; opacity: .8 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-unread-filter { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex-wrap: wrap !important; gap: 7px !important; width: auto !important; min-height: 44px !important; margin: 0 !important; padding: 9px 12px !important; border: 1px solid var(--work-line) !important; border-radius: 9px !important; background: var(--work-paper) !important; color: var(--work-muted) !important; box-shadow: none !important; font: 550 12px/1.5 Inter, system-ui, sans-serif !important; transition: background 160ms ease, color 160ms ease, border-color 160ms ease !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-unread-filter[aria-pressed="true"] { border-color: var(--work-accent) !important; background: var(--work-accent) !important; color: var(--work-on) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-unread-filter > span { font-weight: 700 !important; font-variant-numeric: tabular-nums !important; }
-
-  body.ih79-app #root main.ih-work-board .ih-work-results-bar { display: flex !important; align-items: center !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 12px 20px !important; margin: 0 0 18px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-results-bar h2 { display: flex !important; align-items: center !important; gap: 9px !important; margin: 0 !important; padding: 0 !important; color: var(--work-ink) !important; font: 650 15px/1.5 Inter, system-ui, sans-serif !important; letter-spacing: -.015em !important; scroll-margin-top: calc(var(--a-head, 76px) + 22px) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-results-bar h2 > span { min-width: 23px !important; padding: 2px 7px !important; border-radius: 6px !important; background: var(--work-soft) !important; color: var(--work-muted) !important; font: 550 11px/1.5 Inter, system-ui, sans-serif !important; text-align: center !important; font-variant-numeric: tabular-nums !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-sort { position: relative !important; display: flex !important; align-items: center !important; gap: 8px !important; min-width: 0 !important; min-height: 44px !important; margin: 0 0 0 auto !important; padding: 0 10px !important; border: 1px solid var(--work-line) !important; border-radius: 9px !important; background: var(--work-paper) !important; color: var(--work-muted) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-sort select { appearance: none !important; -webkit-appearance: none !important; display: block !important; width: auto !important; min-width: 0 !important; max-width: 100% !important; min-height: 42px !important; height: auto !important; margin: 0 !important; padding: 10px 18px 10px 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; background-image: none !important; color: var(--work-ink) !important; box-shadow: none !important; font: 500 12px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-sort > svg:last-child { position: absolute !important; right: 10px !important; pointer-events: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-sort option { background: var(--work-paper) !important; color: var(--work-ink) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-clear { display: inline-flex !important; align-items: center !important; gap: 5px !important; width: auto !important; min-height: 44px !important; margin: 0 !important; padding: 6px 0 !important; border: 0 !important; background: none !important; color: var(--work-accent) !important; box-shadow: none !important; font: 600 12px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board ul.ih-work-projects { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; align-items: stretch !important; gap: 20px !important; width: 100% !important; margin: 0 !important; padding: 0 !important; list-style: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-project-item { display: block !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important; animation: ih-work-card-enter 280ms cubic-bezier(.2, .65, .3, 1) var(--work-item-delay, 0ms) backwards !important; }
-  body.ih79-app #root main.ih-work-board a.ih-work-card { position: relative !important; display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 16px !important; width: 100% !important; min-width: 0 !important; height: 100% !important; margin: 0 !important; padding: 22px !important; border: 1px solid var(--work-line) !important; border-radius: 15px !important; background: var(--work-paper) !important; color: var(--work-ink) !important; box-shadow: 0 3px 12px #00000003 !important; overflow: hidden !important; transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease !important; }
-  body.ih79-app #root main.ih-work-board a.ih-work-card.is-unread { border-color: color-mix(in srgb, var(--work-accent) 60%, var(--work-line)) !important; box-shadow: inset 3px 0 0 var(--work-accent) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-card-top { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 8px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-role { display: inline-flex !important; align-items: center !important; gap: 6px !important; color: var(--work-muted) !important; font: 500 11px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-new { display: inline-flex !important; align-items: center !important; gap: 5px !important; color: var(--work-accent) !important; font: 650 11px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-new > i { width: 6px !important; height: 6px !important; border-radius: 50% !important; background: currentColor !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-card h3 { display: -webkit-box !important; -webkit-box-orient: vertical !important; -webkit-line-clamp: 2 !important; max-height: 2.9em !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; overflow-wrap: anywhere !important; white-space: normal !important; color: var(--work-ink) !important; font: 650 19px/1.45 Inter, system-ui, sans-serif !important; letter-spacing: -.025em !important; text-align: start !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-person { display: grid !important; grid-template-columns: 34px minmax(0, 1fr) !important; align-items: center !important; gap: 10px !important; min-width: 0 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-avatar { display: grid !important; place-items: center !important; width: 34px !important; height: 34px !important; border: 1px solid var(--work-line) !important; border-radius: 10px !important; background: var(--work-soft) !important; color: var(--work-accent) !important; font: 650 13px/1 Inter, system-ui, sans-serif !important; overflow: hidden !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-avatar > img { display: block !important; width: 100% !important; height: 100% !important; object-fit: cover !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-person strong { display: block !important; max-width: 100% !important; margin: 0 !important; color: var(--work-ink) !important; font: 600 13px/1.5 Inter, system-ui, sans-serif !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-  body.ih79-app #root main.ih-work-board p.ih-work-preview { display: block !important; max-width: 100% !important; margin: 3px 0 0 !important; color: var(--work-muted) !important; font: 400 13px/1.6 Inter, system-ui, sans-serif !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-card-bottom { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 8px 16px !important; margin-top: auto !important; padding-top: 14px !important; border-top: 1px solid var(--work-line) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-card-bottom time { color: var(--work-muted) !important; font: 400 11px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-card-bottom > span { display: inline-flex !important; align-items: center !important; gap: 8px !important; color: var(--work-accent) !important; font: 650 12px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-card-bottom svg { transition: transform 180ms ease !important; }
-
-  body.ih79-app #root main.ih-work-board .ih-work-pagination { display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 14px !important; margin: 28px 0 0 !important; padding: 20px 0 0 !important; border-top: 1px solid var(--work-line) !important; background: none !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-pagination > p { margin: 0 !important; color: var(--work-muted) !important; font: 400 12px/1.5 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-pagination > div { display: flex !important; align-items: center !important; gap: 14px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-pagination > div > span { color: var(--work-muted) !important; font: 400 12px/1.5 Inter, system-ui, sans-serif !important; font-variant-numeric: tabular-nums !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-pagination strong { color: var(--work-ink) !important; font-weight: 650 !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-pagination .ih-work-button { width: 44px !important; padding: 10px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-empty { display: grid !important; justify-items: center !important; align-content: center !important; gap: 16px !important; min-height: 300px !important; margin: 0 !important; padding: 40px 24px !important; border: 1px dashed var(--work-line) !important; border-radius: 16px !important; background: var(--work-paper) !important; text-align: center !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-empty-icon { display: grid !important; place-items: center !important; width: 60px !important; height: 60px !important; margin-bottom: 4px !important; border-radius: 17px !important; background: var(--work-soft) !important; color: var(--work-accent) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-empty h3 { max-width: 100% !important; margin: 0 !important; color: var(--work-ink) !important; font: 650 21px/1.4 Inter, system-ui, sans-serif !important; letter-spacing: -.025em !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-empty p { max-width: 44ch !important; margin: 0 !important; color: var(--work-muted) !important; font: 400 14px/1.7 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-empty-actions { display: flex !important; align-items: center !important; justify-content: center !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 6px !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-notice { display: grid !important; gap: 8px !important; padding: 24px !important; border: 1px solid var(--work-line) !important; border-radius: 14px !important; background: var(--work-paper) !important; color: var(--work-ink) !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-notice p { margin: 0 !important; color: var(--work-muted) !important; font: 400 14px/1.65 Inter, system-ui, sans-serif !important; }
-  body.ih79-app #root main.ih-work-board .ih-work-sr { position: absolute !important; width: 1px !important; height: 1px !important; margin: -1px !important; padding: 0 !important; overflow: hidden !important; clip-path: inset(50%) !important; white-space: nowrap !important; border: 0 !important; }
-
-  @keyframes ih-work-card-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  @media (hover: hover) and (pointer: fine) {
-    body.ih79-app #root main.ih-work-board .ih-work-menu nav > a:hover { background: var(--work-soft) !important; color: var(--work-accent) !important; }
-    body.ih79-app #root main.ih-work-board a.ih-work-card:hover { border-color: var(--work-accent) !important; box-shadow: 0 8px 24px color-mix(in srgb, var(--work-ink) 7%, transparent) !important; transform: translateY(-2px) !important; }
-    body.ih79-app #root main.ih-work-board a.ih-work-card:hover .ih-work-card-bottom svg { transform: translateX(3px) !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-button:not(:disabled):hover { border-color: var(--work-accent) !important; transform: translateY(-1px) !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-unread-filter[aria-pressed="false"]:hover { border-color: var(--work-accent) !important; background: var(--work-soft) !important; }
+  @media(max-width:600px) {
+    body.ih79-app #root main.ih-work-hub[data-interface-release] { padding:26px 20px calc(110px + env(safe-area-inset-bottom,0px)) !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] header.wd-heading { align-items:flex-start !important; gap:16px !important; margin-bottom:27px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-heading>div { flex:1 1 190px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-heading h1 { font-size:31px !important; margin-top:7px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-heading h1+p { max-width:29ch !important; font-size:13px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-heading>.wd-button { min-height:42px !important; padding:10px 12px !important; font-size:12px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts { grid-template-columns:1fr 1fr !important; margin-bottom:32px !important; border-radius:10px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a { gap:10px !important; min-height:65px !important; padding:14px 13px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a:nth-child(even) { border-right:0 !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a:nth-child(-n+2) { border-bottom:1px solid var(--wd-line) !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts strong { font-size:12px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a>svg:first-child { width:18px !important; height:18px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-heading { margin-bottom:18px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-register-heading h2 { font-size:22px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-toolbar { flex-wrap:wrap !important; gap:10px !important; margin-bottom:14px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search { flex-basis:100% !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-search input { font-size:16px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort { flex:0 1 100% !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort select { height:42px !important; min-height:42px !important; padding-block:7px !important; font-size:16px !important; background:transparent !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-filterbar { align-items:flex-start !important; gap:6px !important; margin-bottom:15px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles { justify-content:space-between !important; width:100% !important; gap:4px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button { gap:6px !important; min-height:43px !important; padding-inline:10px !important; font-size:12px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-unread { min-height:40px !important; margin-top:5px !important; padding-inline:6px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-columns { display:none !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] ul.wd-list { border-top:1px solid var(--wd-line) !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] a.wd-project { grid-template-columns:minmax(0,1fr) auto !important; gap:14px 12px !important; min-height:0 !important; padding:24px 1px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project-main { grid-column:1 / -1 !important; gap:12px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-avatar { width:33px !important; height:33px !important; border-radius:10px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project h3 { font-size:17px !important; line-height:1.5 !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-person { margin-top:5px !important; font-size:12px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-preview { -webkit-line-clamp:2 !important; margin-top:8px !important; font-size:13px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-role { grid-column:1 !important; grid-row:2 !important; margin-left:45px !important; font-size:10px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project time { grid-column:2 !important; grid-row:2 !important; font-size:11px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-open { display:none !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-pagination { margin-top:22px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sidebar { grid-template-columns:1fr !important; gap:24px !important; margin-top:35px !important; padding-top:28px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-next { padding:22px 0 0 !important; border-left:0 !important; border-top:1px solid var(--wd-line) !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview h2 { max-width:28ch !important; font-size:20px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview dl { max-width:none !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-overview dd { font-size:30px !important; }
+    body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-empty { min-height:290px !important; padding-inline:1px !important; }
   }
-  @media (min-width: 1050px) {
-    body.ih79-app #root main.ih-work-board ul.ih-work-projects { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-  }
-  @media (max-width: 1100px) and (min-width: 851px) {
-    body.ih79-app #root main.ih-work-board { padding-inline: 28px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-layout { grid-template-columns: 190px minmax(0, 1fr) !important; gap: 28px !important; }
-  }
-  @media (max-width: 850px) {
-    body.ih79-app #root main.ih-work-board { padding: 20px 18px calc(112px + env(safe-area-inset-bottom, 0px)) !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-layout { grid-template-columns: minmax(0, 1fr) !important; gap: 26px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-sidebar { position: static !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu { padding: 0 !important; border-radius: 11px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu > summary { min-height: 46px !important; margin: 0 !important; padding: 12px 14px !important; font-size: 13px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu > summary > svg:last-child { display: block !important; transition: transform 180ms ease !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu[open] > summary > svg:last-child { transform: rotate(180deg) !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu-body { padding: 8px 12px 14px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-mobile-cta { display: flex !important; width: 100% !important; margin-bottom: 14px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu nav { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-menu nav > a { padding: 9px 8px !important; gap: 7px !important; font-size: 12px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-explore { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px 16px !important; margin-top: 16px !important; padding-top: 14px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-explore > span { grid-column: 1 / -1 !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-explore > a { font-size: 12px !important; }
-    body.ih79-app #root main.ih-work-board header.ih-work-heading { gap: 18px !important; margin-bottom: 24px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-heading > div:first-child { flex: 1 1 0 !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-heading .ih-work-eyebrow { display: none !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-heading h1 { font-size: 30px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-heading h1 + p { max-width: 38ch !important; font-size: 14px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-heading-actions { align-self: flex-start !important; width: auto !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-heading-actions .is-primary { display: none !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-controls { gap: 14px !important; padding: 0 !important; margin-bottom: 24px !important; border: 0 !important; border-radius: 0 !important; background: none !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-filter-row { gap: 12px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-roles { flex-basis: 100% !important; max-width: none !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-roles > button { padding-inline: 4px !important; font-size: 12px !important; gap: 4px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-search { padding-inline: 11px !important; gap: 9px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-search input { font-size: 16px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-results-bar { gap: 10px 14px !important; margin-bottom: 16px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-results-bar h2 { font-size: 14px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-sort { margin-left: 0 !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-sort select { font-size: 16px !important; }
-    body.ih79-app #root main.ih-work-board ul.ih-work-projects { gap: 18px !important; }
-    body.ih79-app #root main.ih-work-board a.ih-work-card { padding: 18px !important; gap: 13px !important; border-radius: 13px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-card h3 { font-size: 18px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-card-bottom { padding-top: 12px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-pagination { margin-top: 24px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-empty { min-height: 290px !important; padding: 32px 20px !important; }
-  }
-  @media (max-width: 380px) {
-    body.ih79-app #root main.ih-work-board { padding-inline: 14px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-sort { max-width: 100% !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-pagination { flex-direction: column !important; align-items: stretch !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-pagination > div { justify-content: space-between !important; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    body.ih79-app #root main.ih-work-board * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  }
-  @media (forced-colors: active) {
-    body.ih79-app #root main.ih-work-board :is(.ih-work-roles > button[aria-pressed="true"], .ih-work-unread-filter[aria-pressed="true"], a.ih-work-card.is-unread) { outline: 2px solid Highlight !important; outline-offset: -2px !important; }
-    body.ih79-app #root main.ih-work-board .ih-work-new > i { background: Highlight !important; }
-  }
+  @media(max-width:360px) { body.ih79-app #root main.ih-work-hub[data-interface-release] { padding-inline:15px !important; } body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button { gap:5px !important; padding-inline:7px !important; font-size:11px !important; } body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts>a { padding-inline:10px !important; gap:8px !important; } body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts strong { font-size:11px !important; } }
+  @media(prefers-reduced-motion:reduce) { body.ih79-app #root main.ih-work-hub[data-interface-release] * { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+  @media(forced-colors:active) { body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button[aria-pressed="true"], body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-unread[aria-pressed="true"], body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-project.is-unread { outline:2px solid Highlight !important; outline-offset:-2px !important; } body.ih79-app #root main.ih-work-hub[data-interface-release] :is(.wd-new,.wd-unread-dot) { background:Highlight !important; } }
 }

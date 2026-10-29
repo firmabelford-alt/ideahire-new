@@ -668,3 +668,14 @@
 @keyframes lu-editor-think { from {transform:translateX(-105%);} to {transform:translateX(105%);} }
 @keyframes lu-editor-word { from {opacity:.1;filter:blur(1.1px);} to {opacity:1;filter:blur(0);} }
 @keyframes lu-editor-letter { from {opacity:.25;translate:0 9px;} to {opacity:1;translate:0 0;} }
+@layer ideahireHeadings {
+  html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release][data-entrance="leaving"] .lu-home { pointer-events:none !important; transform-origin:50% 42% !important; animation:lu-depth-leave 480ms cubic-bezier(.4,0,.6,1) both !important; will-change:transform,opacity,filter !important; }
+  html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release][data-entrance="arriving"] .lu-conversation-canvas { transform-origin:50% 60% !important; animation:lu-depth-arrive 850ms cubic-bezier(.18,.72,.2,1) both !important; will-change:transform,opacity,filter !important; }
+  html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release] .lu-review-invitation { display:flex !important; align-items:center !important; justify-content:flex-start !important; gap:14px !important; width:100% !important; min-height:72px !important; margin:24px 0 8px !important; padding:16px 18px !important; border:1px solid var(--lu-line) !important; border-radius:12px !important; background:var(--lu-surface) !important; color:var(--lu-accent) !important; text-align:left !important; transition:background .3s,border-color .3s !important; }
+  html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release] .lu-review-invitation:hover { background:var(--lu-soft) !important; border-color:var(--lu-accent) !important; }
+  html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release] .lu-review-invitation>span { flex:1 !important; color:var(--lu-ink) !important; font:600 14px/1.6 Inter,system-ui,sans-serif !important; }
+  html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release] .lu-review-invitation small { display:block !important; color:var(--lu-muted) !important; font:400 12px/1.7 Inter,system-ui,sans-serif !important; }
+  @keyframes lu-depth-leave { from { opacity:1; transform:scale(1); filter:blur(0); } to { opacity:0; transform:scale(1.075) translateY(-12px); filter:blur(5px); } }
+  @keyframes lu-depth-arrive { from { opacity:0; transform:translateY(24px) scale(.975); filter:blur(4px); } to { opacity:1; transform:translateY(0) scale(1); filter:blur(0); } }
+  @media(prefers-reduced-motion:reduce) { html:root body :is(#root,#ih64-lucyna) .lucyna-root.lucyna-atelier[data-lucyna-release][data-lucyna-release][data-lucyna-release] :is(.lu-home,.lu-conversation-canvas) { animation:none !important; transform:none !important; filter:none !important; opacity:1 !important; } }
+}

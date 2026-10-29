@@ -3,7 +3,7 @@ import { FormSelect } from "./FormControls";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { helpCenterHref } from "./MarketUI";
-import { containsPrivateInput, buildLucynaMessageRequest, isLucynaMessageRequest, conversationContext, conversationNotes, normalizeMessageVariants, downloadLucynaExport, localAnswer, packConversation, LUCYNA_NOTICE_VERSION, LUCYNA_BUILD_VERSION } from "./LucynaCore";
+import { containsPrivateInput, buildLucynaMessageRequest, isLucynaMessageRequest, isLucynaReviewRequest, conversationContext, conversationNotes, normalizeMessageVariants, downloadLucynaExport, localAnswer, packConversation, LUCYNA_NOTICE_VERSION, LUCYNA_BUILD_VERSION } from "./LucynaCore";
 import { LUCYNA_GUIDE, knowledgeAnswer } from "./LucynaKnowledge";
 import { consumeLucynaHandoff, handOffLucyna, normalizeLucynaAction, takeLucynaHandoff } from "./LucynaActions";
 import LucynaActionCards from "./LucynaActionCards";
@@ -12,7 +12,7 @@ import LucynaTools, { ReviewResult, MessageVariants } from "./LucynaTools";
 export { containsPrivateInput } from "./LucynaCore";
 import "./Lucyna.css";
 import LucynaSymbol from "./LucynaSymbol";
-import { useLucynaReveal, LucynaWords } from "./LucynaMotion";
+import { useLucynaReveal, useLucynaEntrance, LucynaWords } from "./LucynaMotion";
 
 const CATEGORIES = ["Programowanie", "Grafika i design", "Marketing", "Copywriting", "Video",
   "Fotografia", "AI i automatyzacje", "Dane, analizy i research", "Biznes i e-commerce", "Architektura, wnętrza i CAD"];
@@ -213,7 +213,7 @@ function Results({ mode, items, total }) {
         <div><span className="lu-result-category">{mode === "freelancers" ? row.specialization || "Profil freelancera" : row.category}</span>
           <h3>{mode === "freelancers" ? row.name || "Freelancer" : row.title}</h3>
           <p>{mode === "freelancers" ? String(row.about || "Poznaj informacje i realizacje na profilu.").slice(0, 160) : row.description}</p>
-          {mode === "jobs" && <strong className="lu-result-budget">{row.budget_negotiable || row.budget == null ? "Budżet do ustalenia" : new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN", maximumFractionDigits: 2 }).format(Number(row.budget))}</strong>}
+          {mode === "jobs" && <strong className="lu-result-budget">{row.budget == null ? "Budżet do ustalenia" : new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN", maximumFractionDigits: 2 }).format(Number(row.budget)) + (row.budget_negotiable ? " · do negocjacji" : "")}</strong>}
           {mode === "services" && <strong className="lu-result-budget">{row.price_mode === "custom" || row.base_price == null ? "Wycena indywidualna" : "od " + new Intl.NumberFormat("pl-PL", {style:"currency",currency:"PLN"}).format(row.base_price)}</strong>}
           <Link data-no-route-transition="true" to={mode === "jobs" ? "/jobs" : mode === "services" ? "/services/" + row.id : "/profile/" + row.id} state={mode === "jobs" ? { lucynaJobId: row.id, lucynaTitle: row.title } : undefined}>
             {mode === "jobs" ? "Zobacz zlecenie" : mode === "services" ? "Zobacz usługę" : "Zobacz profil"}<Icon name="arrow" /></Link>
@@ -236,6 +236,8 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   const active = useMemo(() => conversations.find(c => c.id === activeId) || conversations[0], [activeId, conversations]);
   const mode = modes.find(m => m.id === active.mode) || modes[0];
   const [draft, setDraft] = useState(handoff?.draft || ""); const [busy, setBusy] = useState(false);
+  const entrance=useLucynaEntrance(setHome);
+  useEffect(()=>{entrance.reset();},[active.id,user?.id,entrance.reset]);
   const [responseStyle, setResponseStyle] = useState("concise");
   const [historySearch, setHistorySearch] = useState("");
   const [status, setStatus] = useState({ loading: true, enabled: false, remaining: null });
@@ -504,6 +506,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       if(controller.signal.aborted || !mounted.current)return;
       if(error)throw new Error("catalog");
       const value=Array.isArray(data) ? data[0] : data;
+      if(searchMode==='services' ? !Array.isArray(data) : !Array.isArray(value?.items) || !Number.isSafeInteger(value?.total) || value.total<0)throw new Error('catalog');
       const rows=searchMode==="services" ? Array.isArray(data) ? data : [] : Array.isArray(value?.items) ? value.items : [];
       const snippet=(value,max)=>{const text=String(value || "").slice(0,max);return containsPrivateInput(text) ? "Fragment pominięto. Otwórz pozycję w katalogu." : text;};
       const items=rows.filter(row=>row && UUID.test(row.id || "")).slice(0,limit).map(row=>
@@ -511,6 +514,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
           : {id:row.id,title:snippet(row.title,160),description:snippet(searchMode==="services" ? row.summary || row.description : row.description,180),
             category:snippet(row.category,60),...(searchMode==="services" ? {price_mode:row.price_mode,base_price:row.base_price}
               : {budget:row.budget,budget_negotiable:row.budget_negotiable===true})});
+      if(rows.length && !items.length)throw new Error('catalog');
       const total=searchMode==="services" ? rows.length : Number(value?.total) || items.length;
       const catalog={kind:"catalog",mode:searchMode,filters:{...filters,limit},items,total};
       patchMessage(conversationId,id,{text:"Wyniki dla wybranych filtrów.",status:"catalog",catalogs:[catalog],searchMode});
@@ -534,24 +538,26 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   }
   async function send(event, options = {}) {
     event?.preventDefault();
-    if (requestRef.current || expansionRef.current || deleting || !(options.text || draft).trim()) return;
+    if (requestRef.current || expansionRef.current || deleting || entrance.phase==='leaving' || !(options.text || draft).trim()) return;
     if (!memory.ready) { setNotice("Wczytuję ustawienia historii. Spróbuj za chwilę."); return; }
-    setHome(false);
     const text = (options.text || draft).trim();
     const sendMode = options.review ? "review" : options.mode || (active.mode === "review" ? "chat" : active.mode);
     if (text.length > 6000 || new TextEncoder().encode(text).length > 10000) { setNotice(ERRORS.invalid); return; }
     if (containsPrivateInput(text)) { setNotice(ERRORS.private); return; }
     if (options.review && [options.review.material, ...options.review.criteria].some(containsPrivateInput)) { setNotice(ERRORS.private); return; }
+    if(document.activeElement?.id==='lucyna-start-message')document.activeElement.blur();
+    entrance.enter(home);
     const standaloneFee = /^(?:oblicz|policz|ile\s+(?:wynosi|zapłacę|zaplacę|zaplac|kosztuje)|jaka\s+(?:jest\s+)?(?:opłata|oplata|prowizja))/i.test(text)
       && /\d/.test(text) && !/zwrot|refund|vat|podat|faktur|sp[oó]r/i.test(text);
     const composingMessage=sendMode!=='help' && isLucynaMessageRequest(text);
+    const reviewSetup=!options.review && isLucynaReviewRequest(text) && status.eligible !== false;
     const guide = !options.review && !composingMessage && sendMode !== "message" && (sendMode === 'help' || !active.messages.length || standaloneFee) ? knowledgeAnswer(text) : null;
-    const local = !options.review && !composingMessage && sendMode !== "message" ? guide?.text || localAnswer(text, new Date(), false) : null;
+    const local = reviewSetup ? "Jasne. Dodaj rezultat i wskaż, co mam sprawdzić. Porównam materiał z Twoimi kryteriami, opiszę uwagi i zaproponuję poprawki. Decyzja o odbiorze pozostaje po Twojej stronie." : !options.review && !composingMessage && sendMode !== "message" ? guide?.text || localAnswer(text, new Date(), false) : null;
     if (local) {
       const guideTargets = { 'centrum-profilu': 'profile', 'edytuj-profil': 'profile', portfolio: 'portfolio', 'moje-zlecenia': 'my_jobs', 'znajdz-zlecenie': 'jobs', 'wiadomosci': 'messages', kalendarz: 'calendar', 'widocznosc-freelancera': 'profile' };
       const target = guideTargets[guide?.sources?.[0]?.id];
       setDraft(''); setNotice(''); followingRef.current = true;
-      setConversations(all => all.map(c => c.id === active.id ? { ...c, title: c.messages.length ? c.title : text.slice(0, 52),
+      setConversations(all => all.map(c => c.id === active.id ? { ...c, ...(reviewSetup ? {mode:"chat"} : {}), title: c.messages.length ? c.title : text.slice(0, 52),
         messages: [...c.messages, { id: makeId(), role: 'user', text, status: 'done', createdAt: new Date().toISOString() },
           { id: makeId(), role: 'assistant', text: local, status: 'done', reveal:true, kind: guide ? 'guide' : 'local', sources: guide?.sources || [], ...(target ? { actions: [{ kind: 'navigation', target }] } : {}), createdAt: new Date().toISOString() }] } : c));
       return;
@@ -686,7 +692,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   }
   return <div className="lucyna-route" data-embedded={embedded}>
     <section className="lucyna-root lucyna-studio lucyna-atelier"
-      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-EDITOR-20261029" data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
+      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-CATALOG-20261029" data-entrance={entrance.phase} data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
       {!memory.ready && <div className="lu-boot" role="status"><LucynaSymbol/><strong>Lucyna</strong><span>Przygotowuję Twoją przestrzeń…</span><i aria-hidden="true"/></div>}
       <div className="lu-shell">
         {historyOpen && !wide && <button className="lu-drawer-shade" type="button"
@@ -728,7 +734,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
               <Mark small/><div><h1>Lucyna <span>AI</span></h1><p>IdeaHire</p></div>
             </div>
             <div className="lu-toolbar-actions">
-              <button type="button" className="lu-home-toggle" aria-label="Menu główne Lucyny" title="Start" aria-pressed={home} onClick={()=>{setHome(true);setToolsOpen(false);setInfoOpen(false);setHistoryOpen(false);}}><Icon name="home"/><span>Start</span></button>
+              <button type="button" className="lu-home-toggle" aria-label="Menu główne Lucyny" title="Start" aria-pressed={home} onClick={()=>{entrance.reset();setHome(true);setToolsOpen(false);setInfoOpen(false);setHistoryOpen(false);}}><Icon name="home"/><span>Start</span></button>
               <button type="button" className="lu-icon-button lu-history-toggle" hidden={wide} ref={historyTriggerRef} aria-label="Otwórz historię rozmów" title="Rozmowy" aria-expanded={historyOpen} onClick={() => { setToolsOpen(false); setInfoOpen(false); setHistoryOpen(true); }}><Icon name="history" /></button>
               <button type="button" ref={toolsTriggerRef} className="lu-tools-toggle" aria-label="Pracownia Lucyny — narzędzia" title="Pracownia" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls="lucyna-workshop" onClick={openWorkshop}><Icon name="edit" /><span>Pracownia</span></button>
             </div>
@@ -736,7 +742,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
           {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Szkice wymagają Twojej oceny przed użyciem.</p>}
           {home && <section className="lu-home" aria-label="Menu główne Lucyny">
             <div className="lu-home-intro"><div className="lu-quiet-identity" aria-hidden="true"><LucynaSymbol/><span>Lucyna<small>AI w IdeaHire</small></span></div><h2>W czym Ci pomóc?</h2><p>Możemy ułożyć wiadomość, dopracować zlecenie albo przyjrzeć się gotowej pracy.</p>
-              <form className="lu-home-composer" onSubmit={send}><label className="lu-sr-only" htmlFor="lucyna-start-message">Zacznij rozmowę z Lucyną</label><input id="lucyna-start-message" type="text" autoComplete="off" value={draft} maxLength={6000} placeholder="Napisz do Lucyny…" onChange={e=>setDraft(e.target.value)}/><button className="lu-send" type="submit" disabled={!memory.ready || busy || !draft.trim()} aria-label="Rozpocznij rozmowę"><Icon name="send"/></button></form>
+              <form className="lu-home-composer" onSubmit={send}><label className="lu-sr-only" htmlFor="lucyna-start-message">Zacznij rozmowę z Lucyną</label><input id="lucyna-start-message" type="text" autoComplete="off" value={draft} maxLength={6000} placeholder="Napisz do Lucyny…" onChange={e=>setDraft(e.target.value)}/><button className="lu-send" type="submit" disabled={!memory.ready || busy || entrance.phase==='leaving' || !draft.trim()} aria-label="Rozpocznij rozmowę"><Icon name="send"/></button></form>
               <button type="button" className="lu-text-button lu-home-empty-chat" disabled={!memory.ready || busy} onClick={()=>active.messages.length?startNew():chooseMode('chat')}>Otwórz pustą rozmowę<Icon name="arrow"/></button>
               {!!active.messages.length && <button type="button" className="lu-text-button" onClick={()=>setHome(false)}>Wróć do otwartej rozmowy<Icon name="arrow"/></button>}
             </div>
@@ -754,12 +760,13 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 <h2><span>Porozmawiajmy.</span><em>Potem działajmy.</em></h2>
                 <p className="lu-intro-copy">Twój pomysł, moja pomoc.<br />Znajdźmy kolejny krok w IdeaHire.</p>
               </div>}
-            {active.messages.map(message => <article key={message.id} className={"lu-message is-" + message.role}
+            {active.messages.map((message,messageIndex) => <article key={message.id} className={"lu-message is-" + message.role}
               data-ai-generated={message.provenance?.ai_generated ? "true" : "false"} data-ai-model={message.provenance?.model}
               data-ai-output-sha256={message.provenance?.answer_sha256}>
               <div className="lu-message-avatar">{message.role === "assistant" ? <Mark small /> : <span aria-hidden="true">Ty</span>}</div>
               <div className="lu-message-content"><span className="lu-message-author">{message.role === "assistant" ? message.status?.startsWith("catalog") ? "Katalog IdeaHire" : message.error && !message.text ? "Połączenie z AI" : "Lucyna AI" : "Ty"}</span>
                 {message.text && !message.variants && <MotionAnswer message={message.role==='user' && message.text.startsWith('Pomóż mi napisać ') && message.text.includes('Przygotuj dwa warianty w tym samym tonie, zachowując te same fakty.') ? {...message,text:message.text.replace(/^Pomóż mi napisać [\s\S]*?\n\nCel:\s*/,'').replace(/\n\nFakty i ustalenia:\s*/,'\n\n')} : message}/>}
+                {message.role==='assistant' && message.status==='done' && !message.review && !message.error && isLucynaReviewRequest(active.messages[messageIndex-1]?.text) && <button type="button" className="lu-review-invitation" disabled={busy || !memory.ready || status.eligible===false} onClick={()=>openTask('review')}><Icon name="check"/><span>Dodaj pracę do sprawdzenia<small>Materiał, kryteria i konkretne sugestie</small></span><Icon name="arrow"/></button>}
                 {message.variants && <MessageVariants variants={message.variants} note={message.text} animate={!!message.reveal} busy={busy} onNotice={setNotice} onRefine={refineMessage}/>}
                 {message.review && <ReviewResult review={message.review} animate={!!message.reveal} onDraft={useCorrection} busy={busy} />}
                 {message.actions?.length > 0 && <LucynaActionCards actions={message.actions} userId={user?.id} administration={administration} onNotice={setNotice} />}
