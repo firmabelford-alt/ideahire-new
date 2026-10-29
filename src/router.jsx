@@ -38,14 +38,15 @@ import {
 import App from "./App";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
-import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice } from "./PrivacyDesk";
+import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice, PrivacyGuide } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
 import { AdminNavigation, AdminPageHeading, AdminTabs, AdminPane, AdminHistory, AdminModal, AdminDisclosure, AdminFilterBar, AdminMetrics, AdminQueue, AdminCaseTools, AdminCaseRow, AdminActivityLog, AdminErasureSteps, AdminRefreshNotice, useAdminSelection, useAdminDialog, adminRead, adminRpc } from "./AdminDesk";
 import { adminQueueSearch, orderAdminRequests, adminPrivacyFilter } from "./AdminDomain";
 import { ErasureScope } from "./AdminErasure";
 import { executeErasure, erasureFailureMessage, erasureOutcomeKnown, ERASURE_RETAINED_LABELS, ERASURE_CONFIRMATION } from "./ErasureWorkflow";
 import AdminLucynaDesk from "./AdminLucyna";
-import { getJobExpiryInfo, useListingClock, visibleJobSkills } from "./JobListingState";
+import { getJobExpiryInfo, useListingClock, visibleJobSkills, ownedJobState } from "./JobListingState";
+import StripeAccountPayouts from "./StripeAccountPanel";
 import DisputePaymentPanel, { DisputeSettlementStatus } from "./DisputePayments";
 import { BrandSignature } from "./Brand";
 import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, WorkspaceWork, WorkspaceLimitedHome, WorkspaceIcon } from "./Workspace";
@@ -7886,234 +7887,6 @@ function getAccountWorkspaceSection(hash = "") {
   return null;
 }
 
-/* Stripe: private balance and bank payout view, PL / EN. */
-async function stripeProfileRequest(action, userId) {
-  const session = await supabase.auth.getSession();
-  if (session.error || !session.data?.session?.access_token || session.data.session.user?.id !== userId) {
-    throw Object.assign(new Error("Session expired"), { code: "invalid_session" });
-  }
-  const { data, error } = await supabase.functions.invoke("create-connect-onboarding", {
-    body: { action },
-    headers: { Authorization: `Bearer ${session.data.session.access_token}` },
-  });
-  if (error) {
-    let code = "payouts_unavailable";
-    try { code = (await error.context?.clone?.().json())?.code || code; } catch { /* Safe local copy below. */ }
-    throw Object.assign(new Error("Stripe unavailable"), { code });
-  }
-  if (!data || data.schema_version !== 1 || data.error) {
-    throw Object.assign(new Error("Payout view unavailable"), { code: data?.code || "payouts_setup_required" });
-  }
-  if (action === "payouts" && (typeof data.connected !== "boolean"
-    || data.connected && (!Number.isSafeInteger(data.available_grosz) || !Number.isSafeInteger(data.pending_grosz)
-      || !Array.isArray(data.payouts) || !data.schedule || typeof data.livemode !== "boolean"))) {
-    throw Object.assign(new Error("Invalid payout response"), { code: "payouts_response_mismatch" });
-  }
-  return data;
-}
-
-function StripeAccountPayouts({ userId, onConfigure, onStatusChange, children }) {
-  const { language } = useSitePreferences();
-  const en = language === "en";
-  const c = (pl, english) => en ? english : pl;
-  const [tab, setTab] = useState("connection");
-  const [record, setRecord] = useState(null);
-  const [issue, setIssue] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [opening, setOpening] = useState(false);
-  const [refresh, setRefresh] = useState(0);
-  const generation = useRef(0);
-  const currentUser = useRef(userId);
-  const mounted = useRef(true);
-  currentUser.current = userId;
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
-  useEffect(() => {
-    const requestId = ++generation.current;
-    if (tab !== "payouts") return;
-    setLoading(true);
-    setIssue(null);
-    stripeProfileRequest("payouts", userId).then(data => {
-      if (generation.current !== requestId || !mounted.current || currentUser.current !== userId) return;
-      setRecord({ userId, data });
-      if (["not_started", "in_progress", "restricted", "ready", "disabled"].includes(data.status)) onStatusChange?.(data.status);
-    }).catch(error => {
-      if (generation.current !== requestId || !mounted.current || currentUser.current !== userId) return;
-      setRecord(null);
-      setIssue({ userId, code: error?.code || "payouts_unavailable" });
-    }).finally(() => {
-      if (generation.current === requestId && mounted.current) setLoading(false);
-    });
-    return () => { generation.current += 1; };
-  }, [tab, userId, refresh, onStatusChange]);
-  useEffect(() => {
-    if (tab !== "payouts" || !userId) return;
-    let lastRefresh = 0;
-    function refreshVisiblePayouts() {
-      if (document.visibilityState === "hidden" || Date.now() - lastRefresh < 1000) return;
-      lastRefresh = Date.now();
-      setRefresh(value => value + 1);
-    }
-    const timer = window.setInterval(refreshVisiblePayouts, 30000);
-    window.addEventListener("focus", refreshVisiblePayouts);
-    window.addEventListener("pageshow", refreshVisiblePayouts);
-    window.addEventListener("ideahire:payment-updated", refreshVisiblePayouts);
-    document.addEventListener("visibilitychange", refreshVisiblePayouts);
-    return () => {
-      window.clearInterval(timer);
-      window.removeEventListener("focus", refreshVisiblePayouts);
-      window.removeEventListener("pageshow", refreshVisiblePayouts);
-      window.removeEventListener("ideahire:payment-updated", refreshVisiblePayouts);
-      document.removeEventListener("visibilitychange", refreshVisiblePayouts);
-    };
-  }, [tab, userId]);
-  const data = record?.userId === userId ? record.data : null;
-  const errorCode = issue?.userId === userId ? issue.code : "";
-  const money = (grosz, currency = "PLN") => Number.isSafeInteger(grosz)
-    ? new Intl.NumberFormat(en ? "en-GB" : "pl-PL", { style: "currency", currency: currency.toUpperCase() }).format(grosz / 100) : "—";
-  const date = seconds => Number.isSafeInteger(seconds)
-    ? new Intl.DateTimeFormat(en ? "en-GB" : "pl-PL", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(seconds * 1000)) : "—";
-  const statuses = {
-    pending: c("Oczekuje na wysłanie", "Waiting to be sent"),
-    in_transit: c("Wysłana do banku", "Sent to the bank"),
-    paid: c("Zrealizowana przez Stripe", "Completed by Stripe"),
-    failed: c("Nieudana", "Failed"),
-    canceled: c("Anulowana", "Canceled"),
-  };
-  const payoutDescriptions = {
-    pending: c("Stripe przygotował wypłatę. Środki czekają na wysłanie do banku.", "Stripe has prepared the payout. The funds are waiting to be sent to the bank."),
-    in_transit: c("Stripe wysłał środki do banku. Przewidywana data dotyczy ich dotarcia na rachunek.", "Stripe has sent the funds to the bank. The expected date is when they should reach the account."),
-    paid: c("Stripe oznaczył tę wypłatę jako zrealizowaną.", "Stripe has marked this payout as completed."),
-    failed: c("Wypłata nie powiodła się. Sprawdź przyczynę i dane rachunku w Stripe.", "The payout failed. Check the reason and bank details in Stripe."),
-    canceled: c("Ta wypłata została anulowana.", "This payout was canceled."),
-  };
-  const errors = {
-    invalid_session: c("Sesja wygasła. Zaloguj się ponownie.", "Your session expired. Sign in again."),
-    account_not_eligible: c("Wypłaty są dostępne dla aktywnych, pełnoletnich użytkowników.", "Payouts require an active adult account."),
-    connect_account_review_required: c("Nie można odczytać zapisanego konta Stripe w tym trybie. Skontaktuj się z pomocą IdeaHire.", "The saved Stripe account cannot be read in this mode. Contact IdeaHire support."),
-    connect_account_mismatch: c("Dane konta Stripe wymagają sprawdzenia przez pomoc IdeaHire.", "IdeaHire support needs to check the Stripe account details."),
-    connect_account_closed: c("Konto Stripe jest zamknięte. Skontaktuj się z pomocą IdeaHire.", "The Stripe account is closed. Contact IdeaHire support."),
-    express_dashboard_unavailable: c("Panel Stripe Express nie jest dostępny dla tego konta. Skontaktuj się z pomocą IdeaHire.", "Stripe Express is unavailable for this account. Contact IdeaHire support."),
-    payouts_setup_required: c("Podgląd wypłat wymaga dokończenia konfiguracji przez obsługę IdeaHire.", "IdeaHire needs to finish setting up the payout view."),
-    payouts_response_mismatch: c("Dane wypłat wymagają sprawdzenia. Spróbuj ponownie lub skontaktuj się z pomocą IdeaHire.", "The payout details need to be checked. Try again or contact IdeaHire support."),
-  };
-  const schedule = data?.schedule;
-  const intervals = {
-    daily: c("Automatycznie — codziennie", "Automatic — daily"),
-    weekly: c("Automatycznie — co tydzień", "Automatic — weekly"),
-    monthly: c("Automatycznie — co miesiąc", "Automatic — monthly"),
-    manual: c("Wypłaty ręczne", "Manual payouts"),
-    unknown: c("Harmonogram niedostępny", "Schedule unavailable"),
-  };
-  const weekdays = en
-    ? { monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday", thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday" }
-    : { monday: "poniedziałek", tuesday: "wtorek", wednesday: "środa", thursday: "czwartek", friday: "piątek", saturday: "sobota", sunday: "niedziela" };
-  const scheduleDays = schedule?.interval === "weekly"
-    ? (schedule.weekly_days || []).map(day => weekdays[day]).filter(Boolean).join(", ")
-    : schedule?.interval === "monthly" ? (schedule.monthly_days || []).join(", ") : "";
-  const bankEnabled = data?.payouts_enabled === true && data?.payout_settings_status === "enabled";
-  async function openStripe() {
-    if (opening) return;
-    setOpening(true);
-    setIssue(null);
-    const requestedUser = userId;
-    try {
-      const result = await stripeProfileRequest("dashboard", requestedUser);
-      if (!mounted.current || currentUser.current !== requestedUser) return;
-      if (!result.connected) throw Object.assign(new Error("No account"), { code: "payouts_setup_required" });
-      const url = new URL(result.dashboard_url);
-      if (url.protocol !== "https:" || !["connect.stripe.com", "stripe.com"].includes(url.hostname)
-        || !url.pathname.startsWith("/express/") || url.username || url.password || url.port) {
-        throw Object.assign(new Error("Invalid dashboard URL"), { code: "payouts_response_mismatch" });
-      }
-      window.location.assign(url.href);
-    } catch (error) {
-      if (mounted.current && currentUser.current === requestedUser) setIssue({ userId: requestedUser, code: error?.code || "payouts_unavailable" });
-    } finally {
-      if (mounted.current) setOpening(false);
-    }
-  }
-  const tabs = [
-    { key: "connection", text: c("Połączenie ze Stripe", "Stripe connection") },
-    { key: "payouts", text: c("Saldo i wypłaty", "Balance and payouts") },
-  ];
-  return <div className="ih-stripe-profile">
-    <style>{`
-      .ih-stripe-profile{min-width:0;margin-block:20px;color:inherit}
-      .ih-stripe-profile .ih-sp-tabs,.ih-stripe-profile .ih-sp-panel,.ih-stripe-profile .ih-sp-tabs *,.ih-stripe-profile .ih-sp-panel *{font-family:Inter,system-ui,sans-serif!important}
-      .ih-stripe-profile .ih-sp-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:5px;border:1px solid rgba(127,127,127,.25);border-radius:16px;width:fit-content;max-width:100%;background:rgba(127,127,127,.05)}
-      .ih-stripe-profile .ih-sp-tab,.ih-stripe-profile .ih-sp-button{font:inherit;color:inherit;cursor:pointer;border:1px solid rgba(127,127,127,.3);background:rgba(127,127,127,.06);padding:11px 15px;border-radius:11px;line-height:1.35;white-space:normal;min-height:44px;transition:background .16s ease,border-color .16s ease}
-      .ih-stripe-profile .ih-sp-tab{border-color:transparent;background:transparent;font-weight:600}
-      .ih-stripe-profile .ih-sp-tab[aria-selected=true]{border-color:rgba(127,127,127,.35);background:rgba(127,127,127,.16)}
-      .ih-stripe-profile .ih-sp-tab:hover,.ih-stripe-profile .ih-sp-button:hover{background:rgba(127,127,127,.18)}
-      .ih-stripe-profile button:focus-visible{outline:2px solid currentColor;outline-offset:3px}
-      .ih-stripe-profile button:disabled{cursor:wait;opacity:.65}
-      .ih-stripe-profile .ih-sp-panel{border:1px solid rgba(127,127,127,.25);border-radius:22px;padding:24px;background:rgba(127,127,127,.035);min-width:0}
-      .ih-stripe-profile .ih-sp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-      .ih-stripe-profile .ih-sp-panel h2{font:inherit;font-size:1.3rem;font-weight:700;color:inherit;margin:0 0 7px;line-height:1.3}
-      .ih-stripe-profile .ih-sp-panel h3{font:inherit;font-size:1rem;font-weight:700;color:inherit;margin:0 0 12px}
-      .ih-stripe-profile .ih-sp-panel p{color:inherit;font:inherit;line-height:1.6;margin:8px 0;overflow-wrap:anywhere}
-      .ih-stripe-profile .ih-sp-muted{opacity:.75;font-size:.9rem!important}
-      .ih-stripe-profile .ih-sp-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-      .ih-stripe-profile .ih-sp-notice{padding:12px 14px;margin:16px 0;border:1px solid rgba(127,127,127,.3);border-radius:12px;background:rgba(127,127,127,.07)}
-      .ih-stripe-profile .ih-sp-error{border-left:4px solid currentColor}
-      .ih-stripe-profile .ih-sp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
-      .ih-stripe-profile .ih-sp-card{border:1px solid rgba(127,127,127,.22);border-radius:16px;padding:18px;min-width:0;background:rgba(127,127,127,.045)}
-      .ih-stripe-profile .ih-sp-card strong{display:block;font-size:clamp(1.35rem,3vw,1.9rem);line-height:1.25;margin:7px 0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-      .ih-stripe-profile .ih-sp-setting{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;padding:16px 0;border-top:1px solid rgba(127,127,127,.22)}
-      .ih-stripe-profile .ih-sp-badge{font-size:.8rem;font-weight:600;border:1px solid rgba(127,127,127,.3);border-radius:999px;padding:5px 10px;line-height:1.4;max-width:100%;overflow-wrap:anywhere}
-      .ih-stripe-profile .ih-sp-history{margin-top:20px}
-      .ih-stripe-profile .ih-sp-list{list-style:none;padding:0;margin:0}
-      .ih-stripe-profile .ih-sp-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;padding:15px 0;border-top:1px solid rgba(127,127,127,.22);align-items:start;min-width:0}
-      .ih-stripe-profile .ih-sp-row strong{font-variant-numeric:tabular-nums}
-      .ih-stripe-profile .ih-sp-row small{display:block;line-height:1.5;margin-top:5px;overflow-wrap:anywhere;opacity:.75}
-      @media(max-width:600px){.ih-stripe-profile .ih-sp-tabs{width:100%;box-sizing:border-box;flex-wrap:nowrap}.ih-stripe-profile .ih-sp-tab{flex:1;padding:10px 8px;font-size:.9rem}.ih-stripe-profile .ih-sp-panel{padding:17px;border-radius:18px}.ih-stripe-profile .ih-sp-grid{grid-template-columns:1fr}.ih-stripe-profile .ih-sp-actions{width:100%}.ih-stripe-profile .ih-sp-actions .ih-sp-button{flex:1}.ih-stripe-profile .ih-sp-row{grid-template-columns:1fr}.ih-stripe-profile .ih-sp-row .ih-sp-badge{justify-self:start}}
-      @media(prefers-reduced-motion:reduce){.ih-stripe-profile .ih-sp-tab,.ih-stripe-profile .ih-sp-button{transition:none}}
-    `}</style>
-    <div className="ih-sp-tabs" role="tablist" aria-label={c("Konto Stripe", "Stripe account")} data-no-translate="true">
-      {tabs.map((item, index) => <button key={item.key} type="button" className="ih-sp-tab" role="tab"
-        id={`ih-stripe-tab-${item.key}`} aria-controls={`ih-stripe-panel-${item.key}`}
-        aria-selected={tab === item.key} tabIndex={tab === item.key ? 0 : -1}
-        onClick={() => setTab(item.key)} onKeyDown={event => {
-          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-          event.preventDefault();
-          const target = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-          setTab(tabs[target].key);
-          document.getElementById(`ih-stripe-tab-${tabs[target].key}`)?.focus();
-        }}>{item.text}</button>)}
-    </div>
-    {tab === "connection" ? <div role="tabpanel" id="ih-stripe-panel-connection" aria-labelledby="ih-stripe-tab-connection">{children}</div>
-      : <section className="ih-sp-panel" role="tabpanel" id="ih-stripe-panel-payouts" aria-labelledby="ih-stripe-tab-payouts" aria-busy={loading} data-no-translate="true">
-        <div className="ih-sp-head">
-          <div><h2>{c("Saldo i wypłaty", "Balance and payouts")}</h2><p className="ih-sp-muted">{c("Twoje wynagrodzenie w Stripe i wypłaty na rachunek bankowy.", "Your earnings in Stripe and payouts to your bank account.")}</p></div>
-          <div className="ih-sp-actions">
-            <button type="button" className="ih-sp-button" disabled={loading || opening} onClick={() => setRefresh(value => value + 1)}>{loading ? c("Odświeżanie…", "Refreshing…") : c("Odśwież", "Refresh")}</button>
-            {data?.connected && data.dashboard_available && <button type="button" className="ih-sp-button" disabled={opening} onClick={openStripe}>{opening ? c("Otwieranie…", "Opening…") : c("Zarządzaj w Stripe", "Manage in Stripe")}</button>}
-          </div>
-        </div>
-        <p className="ih-sp-notice">{c("Zwroty zapłat wracają do metody płatności klienta i nie powiększają tego salda wypłat wykonawcy. Kwotę i etap zwrotu sprawdzisz w szczegółach sprawy.", "Payment refunds return to the client's original payment method and do not increase this freelancer payout balance. Check the refund amount and progress in the case details.")} <Link to="/disputes">{c("Moje sprawy", "My cases")}</Link></p>
-        {errorCode && <p className="ih-sp-notice ih-sp-error" role="alert">{errors[errorCode] || c("Nie udało się pobrać danych ze Stripe. Spróbuj odświeżyć podgląd.", "Stripe details could not be loaded. Try refreshing this view.")}</p>}
-        {loading && !data && <p role="status">{c("Pobieramy saldo i historię wypłat ze Stripe…", "Loading your Stripe balance and payout history…")}</p>}
-        {data?.connected === false && <div className="ih-sp-notice"><p>{c("Połącz konto Stripe, aby otrzymywać wynagrodzenie i sprawdzać wypłaty.", "Connect Stripe to receive earnings and view payouts.")}</p><button type="button" className="ih-sp-button" onClick={() => { setTab("connection"); onConfigure?.(); }}>{c("Połącz konto Stripe", "Connect Stripe account")}</button></div>}
-        {data?.connected && <>
-          {data.livemode === false && <p className="ih-sp-notice" role="status">{c("Tryb testowy — kwoty i wypłaty są symulowane. Pieniądze nie trafią do banku.", "Test mode — balances and payouts are simulated. No money will reach a bank.")}</p>}
-          <div className="ih-sp-grid">
-            <div className="ih-sp-card"><span>{c("Dostępne w Stripe", "Available in Stripe")}</span><strong>{money(data.available_grosz)}</strong><p className="ih-sp-muted">{c("Środki rozliczone, dostępne do wypłaty zgodnie z ustawieniami konta.", "Settled funds available for payout according to your account settings.")}</p></div>
-            <div className="ih-sp-card"><span>{c("Oczekujące w Stripe", "Pending in Stripe")}</span><strong>{money(data.pending_grosz)}</strong><p className="ih-sp-muted">{c("Stripe rozlicza te środki. Nie są jeszcze dostępne do wypłaty.", "Stripe is settling these funds. They are not yet available for payout.")}</p></div>
-          </div>
-          <div className="ih-sp-setting"><div><h3>{c("Wypłaty bankowe", "Bank payouts")}</h3><p className="ih-sp-muted">{bankEnabled ? c("Stripe umożliwia wypłaty z tego konta.", "Stripe allows payouts from this account.") : data.payout_settings_status === "unknown" ? c("Nie udało się potwierdzić ustawień wypłat. Sprawdź je w Stripe.", "Payout settings could not be confirmed. Check them in Stripe.") : c("Wypłaty wymagają sprawdzenia lub uzupełnienia danych w Stripe.", "Payouts require a review or additional details in Stripe.")}</p></div><span className="ih-sp-badge">{bankEnabled ? c("Aktywne", "Enabled") : c("Wymagają sprawdzenia", "Review needed")}</span></div>
-          <div className="ih-sp-setting"><div><h3>{c("Harmonogram", "Schedule")}</h3><p>{intervals[schedule?.interval] || intervals.unknown}{scheduleDays ? ` · ${scheduleDays}` : ""}</p><p className="ih-sp-muted">{schedule?.interval === "manual" ? c("Automatyczne wypłaty są wyłączone. Wypłatę zlecisz w panelu Stripe, jeśli ta funkcja jest dostępna.", "Automatic payouts are off. Request a payout in Stripe if this option is available.") : c("Wypłaty obejmują dostępne środki. Termin dotarcia do banku potwierdza Stripe.", "Payouts use available funds. Stripe confirms their expected bank arrival.")}</p>{Number.isSafeInteger(schedule?.minimum_balance_grosz) && schedule.minimum_balance_grosz > 0 && <p className="ih-sp-muted">{c("Minimalne saldo pozostawiane w Stripe:", "Minimum balance kept in Stripe:")} {money(schedule.minimum_balance_grosz)}</p>}</div></div>
-          <div className="ih-sp-history"><h3>{c("Ostatnie wypłaty bankowe", "Recent bank payouts")}</h3>
-            {data.payouts.length === 0 ? <p className="ih-sp-muted">{c("Stripe nie utworzył jeszcze wypłaty bankowej. Przekazanie wynagrodzenia na saldo Stripe zobaczysz powyżej.", "Stripe has not created a bank payout yet. Earnings transferred to your Stripe balance appear above.")}</p> : <ul className="ih-sp-list">{data.payouts.map(payout => <li className="ih-sp-row" key={payout.id}>
-              <div><strong>{money(payout.amount_grosz, payout.currency)}</strong><small>{c("Utworzona:", "Created:")} {date(payout.created)}{["pending", "in_transit"].includes(payout.status) ? <> · {c("Przewidywane dotarcie do banku:", "Expected bank arrival:")} {date(payout.arrival_date)}</> : null}</small><small>{payoutDescriptions[payout.status]}</small><small>{c("Numer wypłaty:", "Payout reference:")} {payout.id}</small></div>
-              <span className="ih-sp-badge">{data.livemode === false ? c("Test · ", "Test · ") : ""}{statuses[payout.status] || c("Sprawdź w Stripe", "Check in Stripe")}</span>
-            </li>)}</ul>}
-          </div>
-          <p className="ih-sp-muted">{c("Przekazanie wynagrodzenia po odbiorze pracy zasila saldo Stripe. Wypłata bankowa jest osobną operacją. Rachunkiem zarządzasz bezpośrednio w Stripe.", "Accepting work transfers earnings to your Stripe balance. A bank payout is a separate operation. Manage your bank account directly in Stripe.")}</p>
-          {data.checked_at && <p className="ih-sp-muted">{c("Ostatnie sprawdzenie:", "Last checked:")} {new Intl.DateTimeFormat(en ? "en-GB" : "pl-PL", { dateStyle: "short", timeStyle: "short" }).format(new Date(data.checked_at))}</p>}
-        </>}
-      </section>}
-  </div>;
-}
 
 
 function AccountWorkspaceLanding(props) {
@@ -8238,8 +8011,11 @@ function Account() {
   const [message, setMessage] =
     useState("");
 
-  const [myJobs, setMyJobs] =
-    useState([]);
+  const [myJobsSnapshot, setMyJobsSnapshot] = useState({userId:null,jobs:[]});
+  const myJobs = myJobsSnapshot.userId === user?.id ? myJobsSnapshot.jobs : [];
+  const setMyJobs = useCallback(update => {
+    setMyJobsSnapshot(current => ({userId:user?.id,jobs:typeof update === 'function' ? update(current.userId === user?.id ? current.jobs : []) : update}));
+  }, [user?.id]);
 
   const ownedJobsTime = useListingClock(myJobs);
 
@@ -8547,49 +8323,32 @@ function Account() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (!user?.id) return;
-
+    if (!user?.id) { setMyJobs([]); return; }
+    let live = true, sequence = 0;
     async function loadMyJobs() {
+      const request = ++sequence;
       setJobsLoading(true);
-
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("jobs")
-        .select(
-          "id, user_id, title, description, category, subcategory, budget, budget_negotiable, listing_duration_days, expires_at, created_at, visibility, source_type"
-        )
-        .eq(
-          "user_id",
-          user.id
-        )
-        .eq("visibility", "public")
-        .eq("source_type", "client_posted")
-        .order(
-          "created_at",
-          {
-            ascending: false,
-          }
-        );
-
-      if (error) {
-        setOwnedJobMessage(accountEnglish ? "Your listings could not be loaded. Refresh the page." : "Nie udało się pobrać ogłoszeń. Odśwież widok.");
-        console.error(
-          "MY JOBS ERROR:",
-          error
-        );
-      } else {
-        setMyJobs(
-          data || []
-        );
-      }
-
-      setJobsLoading(false);
+      try {
+        const [listings, states] = await Promise.all([
+          supabase.from("jobs").select("id,user_id,title,description,category,subcategory,budget,budget_negotiable,listing_duration_days,expires_at,created_at,visibility,source_type,listing_stage,assigned_at").eq("user_id",user.id).eq("source_type","client_posted").order("created_at",{ascending:false}),
+          supabase.rpc("ideahire_my_job_listing_states"),
+        ]);
+        if (!live || request !== sequence) return;
+        if (listings.error) throw listings.error;
+        const stages = new Map((!states.error && Array.isArray(states.data) ? states.data : []).map(item=>[item.job_id,item.workspace_stage]));
+        setMyJobs((listings.data || []).map(job=>({...job,workspace_stage:stages.get(job.id)})));
+        if (states.error) setOwnedJobMessage(accountEnglish ? "The archive status could not be refreshed. Check settlement details in your collaboration." : "Nie udało się odświeżyć stanu archiwum. Rozliczenie sprawdzisz we współpracy.");
+      } catch {
+        if (live && request === sequence) setOwnedJobMessage(accountEnglish ? "Your listings could not be loaded. Refresh the page." : "Nie udało się pobrać ogłoszeń. Odśwież widok.");
+      } finally { if (live && request === sequence) setJobsLoading(false); }
     }
-
-    loadMyJobs();
-  }, [user?.id]);
+    void loadMyJobs();
+    const refresh = () => { if (document.visibilityState !== 'hidden') void loadMyJobs(); };
+    window.addEventListener('focus',refresh);
+    window.addEventListener('ideahire:payment-updated',refresh);
+    const channel = supabase.channel(`owned-listing-state-${user.id}`).on('postgres_changes',{event:'*',schema:'public',table:'jobs',filter:`user_id=eq.${user.id}`},refresh).subscribe();
+    return () => { live=false;sequence++;window.removeEventListener('focus',refresh);window.removeEventListener('ideahire:payment-updated',refresh);supabase.removeChannel(channel); };
+  }, [user?.id, activeAccountSection, accountEnglish]);
 
   useEffect(() => {
     if (!user?.id || !isAdult) {
@@ -9009,7 +8768,7 @@ function Account() {
   }
 
   async function handleRenewJob(job) {
-    if (renewingJobRef.current || !getJobExpiryInfo(job.expires_at).expired) return;
+    if (renewingJobRef.current || ownedJobState(job) !== "expired") return;
     renewingJobRef.current = true;
     setRenewingJobId(job.id);
     setOwnedJobMessage("");
@@ -9700,14 +9459,16 @@ function Account() {
     ? { ...selectedAccountSectionCopy, ...selectedAccountSectionCopy.english }
     : selectedAccountSectionCopy;
 
+  const ownedJobLabels = accountEnglish
+    ? {all:"All listings",active:"Open",expired:"Expired",assigned:"Private collaborations",archived:"Archived",hidden:"Hidden"}
+    : {all:"Wszystkie ogłoszenia",active:"Otwarte",expired:"Wygasłe",assigned:"Prywatne współprace",archived:"Archiwum",hidden:"Ukryte"};
   const ownedJobCounts = myJobs.reduce((counts, job) => {
-    counts[getJobExpiryInfo(job.expires_at, ownedJobsTime).expired ? "expired" : "active"] += 1;
-    return counts;
-  }, { all: myJobs.length, active: 0, expired: 0 });
+    counts[ownedJobState(job,ownedJobsTime)] += 1; return counts;
+  }, {all:myJobs.length,active:0,expired:0,assigned:0,archived:0,hidden:0});
   const ownedJobQuery = ownedJobSearch.trim().toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
   const visibleOwnedJobs = myJobs.filter(job => {
-    const state = getJobExpiryInfo(job.expires_at, ownedJobsTime).expired ? "expired" : "active";
-    const text = [job.title, job.description, getJobCategoryLabel(job.category)].filter(Boolean).join(" ").toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
+    const state = ownedJobState(job,ownedJobsTime);
+    const text = [job.title,job.description,getJobCategoryLabel(job.category)].filter(Boolean).join(" ").toLocaleLowerCase(accountEnglish ? "en-GB" : "pl-PL");
     return (ownedJobFilter === "all" || state === ownedJobFilter) && (!ownedJobQuery || text.includes(ownedJobQuery));
   });
 
@@ -9799,6 +9560,7 @@ function Account() {
 
           {isAdult && activeAccountSection === "payouts" && (
             <StripeAccountPayouts
+              client={supabase}
               userId={user.id}
               onConfigure={() => handleConnectOnboarding()}
               onStatusChange={setConnectStatus}
@@ -9819,9 +9581,7 @@ function Account() {
                     </span>
 
                     <h2 id="stripe-connect-title">
-                      {connectStatusLoading
-                        ? "Sprawdzamy połączenie ze Stripe..."
-                        : currentConnectCopy.title}
+                      Połączenie ze Stripe
                     </h2>
                   </div>
 
@@ -10005,9 +9765,7 @@ function Account() {
 
         <section className="ih75-owned-register" id="account-jobs" hidden={activeAccountSection !== "jobs"} aria-label={accountEnglish ? "Your job listings" : "Twoje ogłoszenia"}>
           <div className="ih75-register-toolbar">
-            <div className="ih75-register-filters" role="group" aria-label={accountEnglish ? "Listing status" : "Status ogłoszenia"}>
-              {[["all", accountEnglish ? "All" : "Wszystkie"], ["active", accountEnglish ? "Active" : "Aktywne"], ["expired", accountEnglish ? "Expired" : "Wygasłe"]].map(([value, label]) => <button type="button" key={value} aria-pressed={ownedJobFilter === value} onClick={() => setOwnedJobFilter(value)}><span className="ih-account-filter-label">{label}</span><span className="ih-account-filter-count">{ownedJobCounts[value]}</span></button>)}
-            </div>
+            <div className="ih-owned-stage-filter"><FormSelect aria-label={accountEnglish ? "Listing status" : "Status ogłoszenia"} value={ownedJobFilter} onChange={event=>setOwnedJobFilter(event.target.value)}>{Object.entries(ownedJobLabels).filter(([key])=>key!=='hidden'||ownedJobCounts.hidden>0).map(([value,label])=><option key={value} value={value}>{label} · {ownedJobCounts[value]}</option>)}</FormSelect></div>
             <label className="ih75-register-search"><MarketIcon kind="search" /><span className="ih5-sr-only">{accountEnglish ? "Search your listings" : "Szukaj w swoich ogłoszeniach"}</span><input type="search" value={ownedJobSearch} onChange={event => setOwnedJobSearch(event.target.value)} maxLength={160} placeholder={accountEnglish ? "Search listings" : "Szukaj ogłoszenia"} />{ownedJobSearch && <button type="button" aria-label={accountEnglish ? "Clear search" : "Wyczyść wyszukiwanie"} onClick={() => setOwnedJobSearch("")}><MarketIcon kind="close" /></button>}</label>
           </div>
           {ownedJobMessage && <p className="ih-owned-feedback" role="status">{ownedJobMessage}</p>}
@@ -10019,19 +9777,26 @@ function Account() {
             <p className="ih-studio-sr" role="status" aria-live="polite">{accountEnglish ? "Showing " : "Wyświetlasz "}<strong>{visibleOwnedJobs.length}</strong>{accountEnglish ? " of " : " z "}{myJobs.length}{accountEnglish ? " listings" : " ogłoszeń"}</p>
             <div className="ih75-owned-list">
               {visibleOwnedJobs.map(job => {
-                const expiry = getJobExpiryInfo(job.expires_at, ownedJobsTime);
+                const expiry = getJobExpiryInfo(job.expires_at,ownedJobsTime);
+                const state = ownedJobState(job,ownedJobsTime);
+                const bound = state === 'assigned' || state === 'archived';
+                const note = bound ? (state === 'archived'
+                  ? (accountEnglish ? "Settlement is complete. The listing stays outside the catalogue; terms and records remain in your private collaboration." : "Rozliczenie zakończone. Ogłoszenie pozostaje poza katalogiem, a ustalenia i dokumentacja w prywatnej współpracy.")
+                  : (accountEnglish ? "A freelancer has been selected. This listing is private; continue with the terms, work and payment in your collaboration." : "Wybrano wykonawcę. Ogłoszenie jest prywatne. Ustalenia, pracę i płatność znajdziesz we współpracy."))
+                  : state === 'hidden' ? (accountEnglish ? "This listing is not public." : "To ogłoszenie nie jest publiczne.")
+                  : expiry.expired ? (accountEnglish ? "This listing has expired. Publish it again to restore it to the catalogue." : "Ogłoszenie wygasło. Opublikuj je ponownie, aby przywrócić je do katalogu.")
+                  : (accountEnglish ? translateUiText(expiry.label) : expiry.label);
                 return <OwnedListingCard key={job.id} title={job.title}
                   category={accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}
-                  description={job.description} status={expiry.expired ? (accountEnglish ? "Expired" : "Wygasłe") : (accountEnglish ? "Active" : "Aktywne")} inactive={expiry.expired}
+                  description={job.description} status={ownedJobLabels[state]} inactive={state !== 'active'}
                   price={Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL") + " zł"}
                   detail={job.budget_negotiable ? (accountEnglish ? "Negotiable" : "Do negocjacji") : (accountEnglish ? "Fixed price" : "Cena ustalona")}
-                  note={expiry.expired ? (accountEnglish ? "This listing has expired and is hidden from the board and your public profile. Publish it again to restore it." : "Ogłoszenie wygasło i nie jest widoczne na tablicy ani publicznym profilu. Opublikuj je ponownie, aby je przywrócić.") : (accountEnglish ? translateUiText(expiry.label) : expiry.label)}
-                  busy={renewingJobId === job.id}
-                  actions={<>
-                    {expiry.expired && <button type="button" className="is-primary" disabled={Boolean(renewingJobId)} onClick={() => handleRenewJob(job)}>{renewingJobId === job.id ? (accountEnglish ? "Publishing…" : "Publikowanie…") : (accountEnglish ? "Publish again" : "Opublikuj ponownie")}</button>}
-                    <Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow" /></Link>
-                    <button type="button" disabled={Boolean(renewingJobId)} onClick={() => handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button>
-                  </>} />;
+                  note={note} busy={renewingJobId === job.id}
+                  actions={bound ? <><Link to={`/work?q=${encodeURIComponent(job.title || '')}`}>{accountEnglish ? "Open collaboration" : "Współpraca"}<MarketIcon kind="arrow"/></Link><Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Original brief" : "Opis zlecenia"}<MarketIcon kind="arrow"/></Link></> : <>
+                    {state === 'expired' && <button type="button" className="is-primary" disabled={Boolean(renewingJobId)} onClick={()=>handleRenewJob(job)}>{renewingJobId === job.id ? (accountEnglish ? "Publishing…" : "Publikowanie…") : (accountEnglish ? "Publish again" : "Opublikuj ponownie")}</button>}
+                    <Link to={`/edit-job/${job.id}`}>{accountEnglish ? "Edit" : "Edytuj"}<MarketIcon kind="arrow"/></Link>
+                    <button type="button" disabled={Boolean(renewingJobId)} onClick={()=>handleDeleteJob(job.id)}>{accountEnglish ? "Delete" : "Usuń"}</button>
+                  </>}/>;
               })}
               {visibleOwnedJobs.length === 0 && <div className="ih75-owned-empty"><span className="ih-owned-empty-mark" aria-hidden="true"><MarketIcon kind="search" /></span><h2>{accountEnglish ? "No listings in this view" : "Brak ogłoszeń w tym widoku"}</h2><p>{accountEnglish ? "Change the search or select another status." : "Zmień wyszukiwanie lub wybierz inny status."}</p><button type="button" className="ih5-button is-quiet" onClick={() => { setOwnedJobSearch(""); setOwnedJobFilter("all"); }}>{accountEnglish ? "Show all listings" : "Pokaż wszystkie ogłoszenia"}</button></div>}
             </div>
@@ -10428,15 +10193,16 @@ function PrivacyCenter() {
     <div className="page privacy-center-page">
       <AccountNavbar />
 
-      <main className="privacy-center-shell ih-privacy-desk" data-interface-release="privacy-20261027">
+      <main className="privacy-center-shell ih-privacy-desk" data-interface-release="privacy-clarity-20261029">
         <SubpageHeading eyebrow="Prywatność i moje dane" title="Centrum prywatności"
           description="Wyślij wniosek dotyczący swoich danych i śledź jego realizację bezpośrednio na koncie IdeaHire."
           variant="privacy" />
 
+        <nav className="ih-privacy-page-nav" aria-label="Centrum prywatności"><a href="#privacy-form-title">Nowy wniosek</a><a href="#privacy-history">Twoje wnioski</a></nav>
         <section className="privacy-trust-panel">
           <div className="privacy-trust-mark" aria-hidden="true">✓</div>
           <div>
-            <strong>Bezpieczna obsługa wniosku</strong>
+            <strong>Wniosek przypisany do Twojego konta</strong>
             <p>
               Wniosek jest przypisany do zalogowanego konta. Możemy poprosić
               o dodatkową weryfikację wyłącznie wtedy, gdy pojawią się
@@ -10446,7 +10212,7 @@ function PrivacyCenter() {
         </section>
 
         <div className="privacy-center-grid">
-          {receipt && receipt.ownerId === user?.id ? <PrivacyReceipt request={receipt}
+          {receipt && receipt.ownerId === user?.id ? <PrivacyReceipt request={requests.find(request => request.id === receipt.id) || receipt}
             number={requests.find(request => request.id === receipt.id)?.request_number ? formatPrivacyRequestNumber(requests.find(request => request.id === receipt.id).request_number) : null}
             type={getOptionLabel(PRIVACY_REQUEST_TYPES, receipt.requestType)}
             onNew={() => {
@@ -10632,21 +10398,7 @@ function PrivacyCenter() {
             </form>
           </section>}
 
-          <aside className="privacy-rights-card">
-            <h2>Co dalej?</h2>
-            <ol className="ih-privacy-next-steps"><li><strong>Wysyłasz wniosek</strong><span>Od razu zobaczysz potwierdzenie.</span></li><li><strong>Sprawdzamy Twoją sprawę</strong><span>Status i termin znajdziesz poniżej.</span></li><li><strong>Otrzymujesz odpowiedź</strong><span>Możesz dopytać w tym samym wniosku.</span></li></ol>
-            <details className="ih-privacy-rights"><summary>Jakie masz prawa?</summary>
-            <ul>
-              <li><strong>Dostęp i kopia</strong><span>Sprawdź, jakie dane przetwarzamy.</span></li>
-              <li><strong>Sprostowanie</strong><span>Popraw dane nieprawidłowe lub nieaktualne.</span></li>
-              <li><strong>Usunięcie</strong><span>Poproś o usunięcie danych, gdy zachodzą podstawy.</span></li>
-              <li><strong>Ograniczenie i sprzeciw</strong><span>Zażądaj ograniczenia albo zgłoś sprzeciw.</span></li>
-              <li><strong>Przenoszenie</strong><span>Odbierz właściwe dane w ustrukturyzowanym formacie.</span></li>
-            </ul>
-            </details>
-            <a href="/polityka-prywatnosci">Polityka prywatności</a>
-            <p className="ih-privacy-contact">Wolisz e-mail?<a href="mailto:ideahireprywatnosc@gmail.com">ideahireprywatnosc@gmail.com</a></p>
-          </aside>
+          <PrivacyGuide />
         </div>
 
         <section className="privacy-history-section" id="privacy-history">
@@ -10672,6 +10424,8 @@ function PrivacyCenter() {
             <div className="privacy-request-list">
               {requests.map((request) => {
                 const deadline = request.extended_due_at || request.due_at;
+                const requestClosed = !isPrivacyRequestOpen(request.status) || Boolean(request.requester_closed_at);
+                const finishedAt = request.withdrawn_at || request.requester_closed_at || request.completed_at;
                 const events = eventsByRequest[request.id] || [];
                 const report = reportsByRequest[request.id] || null;
                 const reportChecksByKey = Object.fromEntries(
@@ -10703,6 +10457,10 @@ function PrivacyCenter() {
                       </span>
                     </div>
 
+                    <p className="privacy-request-overview"><span>Wysłano {formatDisputeDate(request.submitted_at,false)}</span><span>{requestClosed ? "Zakończono" : "Termin odpowiedzi"}: {requestClosed ? finishedAt ? formatDisputeDate(finishedAt,false) : "data niedostępna" : formatDisputeDate(deadline,false)}</span></p>
+                    <details className="privacy-request-details" open={request.status === "awaiting_user"}>
+                      <summary>{request.decision_summary || report ? "Treść wniosku i odpowiedź" : "Treść wniosku i historia"}</summary>
+                      <div className="privacy-request-body">
                     <p className="privacy-request-description">{request.description}</p>
 
                     {request.request_type === "erasure" && (
@@ -10732,7 +10490,7 @@ function PrivacyCenter() {
 
                     <dl className="privacy-request-meta">
                       <div><dt>Wysłano</dt><dd>{formatDisputeDate(request.submitted_at)}</dd></div>
-                      <div><dt>Termin odpowiedzi</dt><dd>{formatDisputeDate(deadline, false)}</dd></div>
+                      <div><dt>{requestClosed ? "Zakończono" : "Termin odpowiedzi"}</dt><dd>{requestClosed ? finishedAt ? formatDisputeDate(finishedAt) : "Data niedostępna" : formatDisputeDate(deadline, false)}</dd></div>
                       <div><dt>Format</dt><dd>{getOptionLabel(PRIVACY_RESPONSE_FORMATS, request.preferred_format)}</dd></div>
                     </dl>
 
@@ -10952,6 +10710,8 @@ function PrivacyCenter() {
                         {busy === request.id ? "Wycofywanie..." : "Wycofaj wniosek"}
                       </button>
                     )}
+                      </div>
+                    </details>
                   </article>
                 );
               })}
@@ -12356,7 +12116,7 @@ function EditJob() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at, visibility, source_type, listing_stage, assigned_at"
           )
           .eq("id", id)
           .eq(
@@ -12479,6 +12239,8 @@ function EditJob() {
       </div>
     );
   }
+
+  if (job.listing_stage === 'assigned' || job.assigned_at) return <div className="page ih-market-v5 ih5-create-page"><AccountNavbar/><main className="ih-market-shell ih5-editor-shell"><MarketHeader eyebrow="Prywatna współpraca" title={job.title} description="To zlecenie ma zaakceptowane ustalenia i pozostaje poza publicznym katalogiem. Zmiany zakresu ustal z wykonawcą w rozmowie."/><p className="ih-owned-private-description">{job.description}</p><Link className="ih5-button is-primary" to={`/work?q=${encodeURIComponent(job.title || '')}`}>Przejdź do współpracy<MarketIcon kind="arrow"/></Link></main></div>;
 
   return (
     <div className="page ih-market-v5 ih5-create-page">
@@ -13802,6 +13564,10 @@ function Jobs() {
 
   useEffect(() => {
     loadJobs();
+    const refresh = () => { if (document.visibilityState !== 'hidden') loadJobs(); };
+    window.addEventListener('focus',refresh);
+    const channel = supabase.channel('public-job-listing-state').on('postgres_changes',{event:'*',schema:'public',table:'jobs'},refresh).subscribe();
+    return ()=>{window.removeEventListener('focus',refresh);supabase.removeChannel(channel);};
   }, [user?.id]);
 
   function formatBudget(

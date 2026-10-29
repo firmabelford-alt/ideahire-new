@@ -4,8 +4,9 @@ import { ArrowRight, ArrowUpRight, CalendarDays, ChevronDown, ChevronLeft, Chevr
 import { conversationMessagePreview } from './ConversationCards';
 import './Studio.css';
 import './WorkDesk.css';
+import { FormSelect } from './FormControls';
 
-export default function WorkDesk({ rows, visible, user, filter, search, unreadOnly, sort, total, page, pageCount, pageSize, counts, loading, error, onRole, onSearch, onUnread, onSort, onPage, onReset, onOpen, loader, en = false }) {
+export default function WorkDesk({ rows = [], visible = [], user, filter = 'all', search = '', unreadOnly = false, sort = 'recent', total = visible.length, page = 1, pageCount = 1, pageSize = 6, counts = { unread:0,hiring:0,providing:0 }, loading = false, error = '', onRole, onSearch, onUnread, onSort, onPage, onReset, onOpen, loader, en = false }) {
   const t = (pl, english) => en ? english : pl;
   const heading = useRef(null), focusPage = useRef(false);
   const filtered = Boolean(search.trim() || filter !== 'all' || unreadOnly || sort !== 'recent');
@@ -36,7 +37,7 @@ export default function WorkDesk({ rows, visible, user, filter, search, unreadOn
         <div className="wd-register-heading"><h2 ref={heading} tabIndex={-1} id="wd-results-title">{t('Współprace', 'Projects')}<span>{count(total)}</span></h2><span className="wd-register-caption">{t('Rozmowy • ustalenia • materiały', 'Conversations • terms • files')}</span></div>
         <div className="wd-controls"><div className="wd-toolbar">
           <label className="wd-search"><Search size={19} aria-hidden="true" /><span className="wd-sr">{t('Szukaj współpracy lub osoby', 'Search for a project or person')}</span><input type="search" value={search} onChange={e => onSearch(e.target.value)} maxLength={160} placeholder={t('Projekt, osoba lub wiadomość', 'Project, person or message')} />{search && <button type="button" onClick={() => onSearch('')} aria-label={t('Wyczyść wyszukiwanie', 'Clear search')}><X size={17} aria-hidden="true" /></button>}</label>
-          <label className="wd-sort"><span className="wd-sr">{t('Kolejność współprac', 'Project order')}</span><select value={sort} onChange={e => onSort(e.target.value)}><option value="recent">{t('Ostatnia aktywność', 'Latest activity')}</option><option value="oldest">{t('Najstarsza aktywność', 'Oldest activity')}</option><option value="name">{t('Nazwa A–Z', 'Name A–Z')}</option></select><ChevronDown size={15} aria-hidden="true" /></label>
+          <div className="wd-sort"><FormSelect aria-label={t('Kolejność współprac', 'Project order')} value={sort} onChange={e => onSort(e.target.value)}><option value="recent">{t('Ostatnia aktywność', 'Latest activity')}</option><option value="oldest">{t('Najstarsza aktywność', 'Oldest activity')}</option><option value="name">{t('Nazwa A–Z', 'Name A–Z')}</option></FormSelect></div>
         </div>
         <div className="wd-filterbar">
           <div className="wd-roles" role="group" aria-label={t('Twoja rola we współpracy', 'Your role in the project')}>
@@ -69,7 +70,7 @@ export default function WorkDesk({ rows, visible, user, filter, search, unreadOn
               <p>{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} {t('z', 'of')} {total}</p>
               {pageCount > 1 && <div><button type="button" disabled={page === 1} onClick={() => changePage(page - 1)} aria-label={t('Poprzednia strona', 'Previous page')}><ChevronLeft size={18} aria-hidden="true" /></button><span>{t('Strona', 'Page')} <strong>{page}</strong> / {pageCount}</span><button type="button" disabled={page === pageCount} onClick={() => changePage(page + 1)} aria-label={t('Następna strona', 'Next page')}><ChevronRight size={18} aria-hidden="true" /></button></div>}
             </nav>
-          </> : <div className="wd-empty"><FolderOpen size={32} aria-hidden="true" /><h3>{rows.length ? unreadOnly && !search.trim() && filter === 'all' ? t('Wszystko przeczytane', 'You’re all caught up') : t('Brak pasujących współprac', 'No matching projects') : t('Tutaj zaczyna się współpraca', 'Your next project starts here')}</h3><p>{rows.length ? t('Zmień filtry, żeby wrócić do swoich rozmów.', 'Change the filters to find your conversations.') : t('Odpowiedz na zlecenie albo znajdź wykonawcę. Pierwsza rozmowa pojawi się na tej liście.', 'Reply to a job or find a freelancer. Your first conversation will appear here.')}</p>{rows.length ? <button type="button" className="wd-button" onClick={onReset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/jobs" className="wd-button">{t('Znajdź zlecenie', 'Find a job')}<ArrowRight size={16} aria-hidden="true" /></Link>}</div>}
+          </> : <div className="wd-empty"><FolderOpen size={32} aria-hidden="true" /><h3>{rows.length ? unreadOnly && !search.trim() && filter === 'all' ? t('Wszystko przeczytane', 'You’re all caught up') : t('Brak pasujących współprac', 'No matching projects') : t('Tu zaczyna się współpraca', 'Your next project starts here')}</h3><p>{rows.length ? t('Zmień filtry, żeby wrócić do swoich rozmów.', 'Change the filters to find your conversations.') : t('Odpowiedz na zlecenie albo znajdź wykonawcę. Pierwsza rozmowa pojawi się na tej liście.', 'Reply to a job or find a freelancer. Your first conversation will appear here.')}</p>{rows.length ? <button type="button" className="wd-button" onClick={onReset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/jobs" className="wd-button">{t('Znajdź zlecenie', 'Find a job')}<ArrowRight size={16} aria-hidden="true" /></Link>}</div>}
         </div>
       </section>
     </div>

@@ -1,5 +1,22 @@
 /* Account preferences, owned services and shared catalogue controls. */
 @layer ideahireHeadings {
+  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame] {
+    position:relative!important; isolation:isolate!important; overflow:hidden!important;
+    contain:paint!important; clip-path:inset(0 round 24px)!important;
+  }
+  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame]>.ih-cinema-film {
+    position:absolute!important; inset:0!important; z-index:0!important; width:100%!important; height:100%!important;
+    min-width:0!important; min-height:0!important; max-width:100%!important; max-height:100%!important;
+    margin:0!important; padding:0!important; overflow:hidden!important; border-radius:inherit!important; pointer-events:none!important;
+  }
+  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame]>.ih-cinema-film>video {
+    position:absolute!important; inset:0!important; display:block!important; width:100%!important; height:100%!important;
+    min-width:0!important; min-height:0!important; max-width:100%!important; max-height:100%!important;
+    margin:0!important; padding:0!important; border:0!important; object-fit:cover!important; object-position:center!important;
+  }
+  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame]>:not(.ih-cinema-film) { position:relative!important; z-index:1!important; }
+}
+@layer ideahireHeadings {
   body.ih79-app #root [data-account-section="preferences"] {
     min-width:0!important;
     & .ih75-account-main { width:100%!important; min-width:0!important; max-width:960px!important; }
@@ -267,4 +284,12 @@
   body.ih79-app #root .ih75-register-filters { display:flex!important; flex-wrap:wrap!important; gap:8px!important; }
   body.ih79-app #root .ih75-register-filters>button { flex:1 1 100px!important; min-width:0!important; min-height:44px!important; white-space:normal!important; }
   body.ih79-app #root .ih75-register-search { box-sizing:border-box!important; width:100%!important; max-width:none!important; min-width:0!important; }
+}
+
+@layer ideahireHeadings {
+  body.ih79-app #root#root .ih75-register-toolbar .ih-owned-stage-filter { flex:0 1 260px !important; min-width:0 !important; max-width:100% !important; }
+  body.ih79-app #root#root .ih-owned-stage-filter .ih-control-trigger { min-height:46px !important; padding:11px 36px 11px 14px !important; font:500 13px/1.6 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root#root .ih-owned-stage-filter .ih-control-native { position:absolute !important; width:1px !important; height:1px !important; min-width:0 !important; min-height:0 !important; padding:0 !important; clip-path:inset(50%) !important; }
+  body.ih79-app #root#root .ih-owned-private-description { margin:24px 0 !important; color:var(--v-muted) !important; font:400 15px/1.9 Inter,system-ui,sans-serif !important; white-space:pre-wrap !important; overflow-wrap:anywhere !important; }
+  @media(max-width:600px) { body.ih79-app #root#root .ih75-register-toolbar .ih-owned-stage-filter { flex-basis:100% !important; width:100% !important; } }
 }

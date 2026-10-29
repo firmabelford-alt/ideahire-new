@@ -314,7 +314,7 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
     setLeaving(direction);
     timer.current = window.setTimeout(() => navigate(target.to, { state: { catalogDirection: direction } }), window.matchMedia('(max-width:850px)').matches ? 340 : 230);
   }
-  return <section className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
+  return <section data-catalog-frame="20261029" className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
     data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
     <CatalogFilm key={scene.key} scene={scene} en={en} />
     <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>

@@ -1,4 +1,5 @@
 import { FormSelect, AutoTextarea } from "./FormControls";
+import "./ServiceWorkspace.css";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 /* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
@@ -380,7 +381,7 @@ function ServiceCard({ service }) {
 
 function ServiceShell({ Navbar, children, className = "" }) {
   return (
-    <div className={`page ih-market-v5 ih5-service-page ${className}`.trim()}>
+    <div data-service-interface="20261029" className={`page ih-market-v5 ih5-service-page ${className}`.trim()}>
       <Navbar />
       <main className="ih-market-shell">{children}</main>
     </div>
@@ -481,6 +482,8 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
   const english = useSitePreferences().language === "en";
   const { id } = useParams();
   const [form, setForm] = useState(EMPTY_SERVICE_FORM);
+  const [editorStep, setEditorStep] = useState(0);
+  const editorRef = useRef(null);
   const [loading, setLoading] = useState(editing);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -531,8 +534,35 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
     setMessage("");
   }
 
+  function moveEditorStep(target) {
+    if (saving) return false;
+    if (target <= editorStep) return showEditorStep(target);
+    for (let index = 0; index < target; index++) {
+      const invalid = [...(editorRef.current?.querySelectorAll(`[data-service-step="${index}"] input, [data-service-step="${index}"] textarea, [data-service-step="${index}"] select`) || [])].find(field => !field.disabled && !field.validity.valid);
+      if (invalid) { focusEditorProblem(invalid,index); return false; }
+    }
+    return showEditorStep(target);
+  }
+  function showEditorStep(target) {
+    setMessage(""); setEditorStep(target);
+    requestAnimationFrame(()=>{const panel=editorRef.current?.querySelector(`[data-service-step="${target}"]`);panel?.focus({preventScroll:true});panel?.scrollIntoView({block:'start',behavior:'auto'});});
+    return true;
+  }
+  function focusEditorProblem(field, index) {
+    setEditorStep(index);
+    const label=field.closest('label')?.querySelector('span')?.textContent?.trim() || field.getAttribute('aria-label') || 'Wymagane pole';
+    setMessage(english ? `Check “${label}”. Complete this field with a valid value.` : `Sprawdź pole „${label}”. Uzupełnij je poprawną wartością.`);
+    requestAnimationFrame(()=>{(field.closest('.ih-control-select')?.querySelector('.ih-control-trigger') || field).focus();});
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+    if (saving) return;
+    if (editorStep < 2) { moveEditorStep(editorStep + 1); return; }
+    for (let index = 0; index < 3; index++) {
+      const invalid = [...(editorRef.current?.querySelectorAll(`[data-service-step="${index}"] input, [data-service-step="${index}"] textarea, [data-service-step="${index}"] select`) || [])].find(field => !field.disabled && !field.validity.valid);
+      if (invalid) { focusEditorProblem(invalid,index); return; }
+    }
     setMessage("");
 
     const basePrice = Number(form.basePrice);
@@ -651,13 +681,13 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
       {loading ? (
         <SubpageLoading label="Przygotowujemy formularz…" />
       ) : (
-        <form className="ih5-service-editor" onSubmit={handleSubmit} onInvalidCapture={event => { const section = event.target.closest("details"); if (section) section.open = true; }}>
-          <details className="ih5-service-editor-section" open>
-            <summary className="ih76-service-step">
+        <form className="ih5-service-editor" ref={editorRef} onSubmit={handleSubmit} noValidate>
+          <nav className="ih-service-editor-steps" aria-label={english ? "Service form steps" : "Etapy formularza usługi"}>{[english?'Offer':'Oferta',english?'Scope':'Zakres',english?'Terms':'Warunki'].map((label,index)=><button type="button" key={label} aria-current={editorStep===index?'step':undefined} disabled={saving} onClick={()=>moveEditorStep(index)}><span aria-hidden="true">{index+1}</span>{label}</button>)}</nav>
+          <section className="ih5-service-editor-section ih-service-step-panel" data-service-step="0" tabIndex={-1} aria-labelledby="service-step-title-0" hidden={editorStep !== 0}>
+            <header className="ih76-service-step">
               <span className="ih5-service-editor-index">01</span>
-              <span><strong>{english ? "Your service" : "Twoja oferta"}</strong><small>{english ? "Name, field and description" : "Nazwa, dziedzina i opis"}</small></span>
-              <MarketIcon kind="chevron" />
-            </summary>
+              <span><strong id="service-step-title-0">{english ? "Your service" : "Twoja oferta"}</strong><small>{english ? "Name, field and description" : "Nazwa, dziedzina i opis"}</small></span>
+            </header>
             <div className="ih5-service-editor-heading">
               <p>Zacznij od efektu, który zleceniodawca łatwo zrozumie.</p>
             </div>
@@ -718,7 +748,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 <AutoTextarea
                   value={form.description}
                   onChange={(event) => update("description", event.target.value)}
-                  placeholder="Opisz sposób działania, granice zakresu i rezultat. Bez danych kontaktowych i obietnic, których nie da się zweryfikować."
+                  placeholder="Opisz rezultat, sposób realizacji i granice zakresu…"
                   minLength={80}
                   maxLength={4000}
                   rows={5}
@@ -726,14 +756,13 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 />
               </label>
             </div>
-          </details>
+          </section>
 
-          <details className="ih5-service-editor-section">
-            <summary className="ih76-service-step">
+          <section className="ih5-service-editor-section ih-service-step-panel" data-service-step="1" tabIndex={-1} aria-labelledby="service-step-title-1" hidden={editorStep !== 1}>
+            <header className="ih76-service-step">
               <span className="ih5-service-editor-index">02</span>
-              <span><strong>{english ? "Deliverables" : "Rezultaty pracy"}</strong><small>{english ? "Scope and client materials" : "Zakres i materiały od klienta"}</small></span>
-              <MarketIcon kind="chevron" />
-            </summary>
+              <span><strong id="service-step-title-1">{english ? "Deliverables" : "Rezultaty pracy"}</strong><small>{english ? "Scope and client materials" : "Zakres i materiały od klienta"}</small></span>
+            </header>
             <div className="ih5-service-editor-heading">
               <p>Krótkie punkty są łatwiejsze do porównania niż ściana tekstu.</p>
             </div>
@@ -771,14 +800,13 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 />
               </label>
             </div>
-          </details>
+          </section>
 
-          <details className="ih5-service-editor-section">
-            <summary className="ih76-service-step">
+          <section className="ih5-service-editor-section ih-service-step-panel" data-service-step="2" tabIndex={-1} aria-labelledby="service-step-title-2" hidden={editorStep !== 2}>
+            <header className="ih76-service-step">
               <span className="ih5-service-editor-index">03</span>
-              <span><strong>{english ? "Delivery terms" : "Warunki realizacji"}</strong><small>{english ? "Price, timing and availability" : "Cena, terminy i dostępność"}</small></span>
-              <MarketIcon kind="chevron" />
-            </summary>
+              <span><strong id="service-step-title-2">{english ? "Delivery terms" : "Warunki realizacji"}</strong><small>{english ? "Price, timing and availability" : "Cena, terminy i dostępność"}</small></span>
+            </header>
             <div className="ih5-service-editor-heading">
               <p>Rozmowa nie blokuje miejsca. Rezerwacja powstaje dopiero po wysłaniu oferty.</p>
             </div>
@@ -884,19 +912,16 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 </b>
               </label>
             </div>
-          </details>
+          </section>
 
           {message && <p className="ih5-service-form-message" role="alert">{message}</p>}
 
           <footer className="ih5-service-editor-actions">
             <Link to={editing ? `/services/${id}` : "/services"}>Anuluj</Link>
-            <button type="submit" disabled={saving}>
-              {saving
-                ? "Zapisywanie…"
-                : editing
-                ? "Zapisz zmiany"
-                : "Opublikuj usługę"}
-            </button>
+            <div className="ih-service-editor-navigation">
+              {editorStep>0 && <button type="button" className="is-quiet" disabled={saving} onClick={()=>moveEditorStep(editorStep-1)}>{english?'Previous':'Wstecz'}</button>}
+              {editorStep<2 ? <button type="button" disabled={saving} onClick={()=>moveEditorStep(editorStep+1)}>{english?'Continue':'Dalej'}<MarketIcon kind="arrow"/></button> : <button type="submit" disabled={saving}>{saving ? (english?'Saving…':'Zapisywanie…') : editing ? (english?'Save changes':'Zapisz zmiany') : (english?'Publish service':'Opublikuj usługę')}</button>}
+            </div>
           </footer>
         </form>
       )}
@@ -1194,7 +1219,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
 
           {(deliverables.length > 0 || requirements.length > 0) && <div className="ih80-service-scope">
             {deliverables.length > 0 && <section className="ih5-service-detail-section">
-              <header className="ih-service-section-title"><span aria-hidden="true">01</span><div><h2>Co otrzymasz</h2><p>Rezultaty opisane przez wykonawcę</p></div></header>
+              <header className="ih-service-section-title"><div><h2>Co otrzymasz</h2><p>Rezultaty opisane przez wykonawcę</p></div></header>
               <ul className="ih5-service-check-list">
                 {deliverables.map((item, index) => (
                   <li key={`${item}-${index}`}><span aria-hidden="true">✓</span>{item}</li>
@@ -1202,12 +1227,12 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               </ul>
             </section>}
             {requirements.length > 0 && <section className="ih5-service-detail-section ih80-scope-inputs">
-              <header className="ih-service-section-title"><span aria-hidden="true">02</span><div><h2>Materiały od Ciebie</h2><p>Przygotuj je przed rozpoczęciem realizacji</p></div></header>
-              <ol className="ih5-service-requirement-list">
+              <header className="ih-service-section-title"><div><h2>Materiały od Ciebie</h2><p>Przygotuj je przed rozpoczęciem realizacji</p></div></header>
+              <ul className="ih5-service-requirement-list">
                 {requirements.map((item, index) => (
-                  <li key={`${item}-${index}`}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{item}</li>
+                  <li key={`${item}-${index}`}><span aria-hidden="true">•</span>{item}</li>
                 ))}
-              </ol>
+              </ul>
             </section>}
           </div>}
 

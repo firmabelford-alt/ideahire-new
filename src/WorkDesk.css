@@ -226,3 +226,9 @@
   @media(max-width:360px) { body.ih79-app #root main.ih-work-hub[data-interface-release] { padding-inline:16px !important; } body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-shortcuts { gap:10px 16px !important; } body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-roles>button { font-size:11px !important; gap:5px !important; } }
   @media(prefers-reduced-motion:reduce) { body.ih79-app #root main.ih-work-hub[data-interface-release][data-interface-release] :is(.wd-heading,.wd-shortcuts,.wd-register) { animation:none !important; } }
 }
+
+@layer ideahireHeadings {
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort .ih-control-select { display:block !important; width:100% !important; min-width:0 !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort .ih-control-trigger { min-height:44px !important; height:auto !important; padding:10px 30px 10px 12px !important; font:500 12px/1.5 Inter,system-ui,sans-serif !important; }
+  body.ih79-app #root main.ih-work-hub[data-interface-release] .wd-sort select.ih-control-native { position:absolute !important; width:1px !important; height:1px !important; min-width:0 !important; min-height:0 !important; margin:0 !important; padding:0 !important; border:0 !important; clip-path:inset(50%) !important; opacity:0 !important; pointer-events:none !important; }
+}

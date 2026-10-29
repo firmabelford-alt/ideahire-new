@@ -76,3 +76,13 @@ export function getJobExpiryInfo(expiresAt, now = Date.now()) {
   };
 }
 
+
+// Settlement status comes from an owner-scoped server read. Missing finance data
+// must never turn a chosen, private collaboration back into an open listing.
+export function ownedJobState(job, now = Date.now()) {
+  if (job?.listing_stage === 'assigned' || job?.assigned_at) {
+    return job.workspace_stage === 'archived' ? 'archived' : 'assigned';
+  }
+  if (job?.visibility === 'private') return 'hidden';
+  return getJobExpiryInfo(job?.expires_at, now).expired ? 'expired' : 'active';
+}
