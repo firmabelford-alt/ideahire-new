@@ -2,7 +2,7 @@ import { FormSelect, AutoTextarea } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Wiadomości, brief i analiza wybranego materiału. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, messageTemplate, reviewSummary, suggestedCriteria } from "./LucynaCore";
+import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, messageTemplate, normalizeMessageVariants, reviewSummary, suggestedCriteria } from "./LucynaCore";
 
 const byteLimit = (value, limit = 12000) => {
   let out = String(value); const encoder = new TextEncoder();
@@ -50,33 +50,78 @@ async function copyText(text,onNotice) {
   try { await navigator.clipboard.writeText(text); onNotice("Skopiowano. Sprawdź treść przed samodzielnym wysłaniem."); }
   catch { onNotice("Możesz zaznaczyć tekst i skopiować go ręcznie."); }
 }
+function ReviewScore({summary}) {
+  const ref = useRef(null), [display,setDisplay] = useState(0), [started,setStarted] = useState(false);
+  useEffect(() => {
+    if (!ref.current || started || summary.score === null) return;
+    if (!('IntersectionObserver' in window)) {setStarted(true);return;}
+    const observer = new IntersectionObserver(entries => {if(entries.some(e=>e.isIntersecting)){setStarted(true);observer.disconnect();}}, {threshold:0.2});
+    observer.observe(ref.current); return () => observer.disconnect();
+  }, [started,summary.score]);
+  useEffect(() => {
+    if (!started || summary.score === null) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame, begin;
+    const finish = () => {cancelAnimationFrame(frame);setDisplay(summary.score);};
+    if (reduced.matches) {finish();return;}
+    const tick = now => {if(begin===undefined)begin=now;const p=Math.min(1,(now-begin)/1100);setDisplay(Math.round(summary.score*(1-Math.pow(1-p,3))));if(p<1)frame=requestAnimationFrame(tick);};
+    frame=requestAnimationFrame(tick); reduced.addEventListener?.('change',finish);
+    return () => {cancelAnimationFrame(frame);reduced.removeEventListener?.('change',finish);};
+  }, [started,summary.score]);
+  return <div className="lu-review-score" ref={ref}>
+    <span className="lu-score-eyebrow">PODSUMOWANIE KRYTERIÓW</span>
+    {summary.score===null ? <strong className="lu-score-empty">Potrzeba więcej danych</strong>
+      : <div className="lu-score-number" role="img" aria-label={summary.score+' procent zgodności ocenionych kryteriów'}><strong aria-hidden="true">{display}<span>%</span></strong><span aria-hidden="true">Zgodność ocenionych<br />kryteriów</span></div>}
+    <div className="lu-score-track" aria-hidden="true"><i style={{transform:'scaleX('+(summary.score===null?0:display/100)+')'}} /></div>
+    <p>Podstawa w materiale: <strong>{summary.assessed} z {summary.total} kryteriów</strong>. {summary.assessed < summary.total ? 'Pozostałe punkty wymagają sprawdzenia i nie wchodzą do procentu.' : 'Każde ocenione kryterium ma równą wagę.'}</p>
+    <details className="lu-score-method"><summary>Jak obliczamy ten wynik?</summary><p>Spełnione: 1 punkt. Częściowo: 0,5. Niezgodność: 0. Wynik to suma punktów podzielona przez liczbę ocenionych kryteriów. „Do sprawdzenia” jest pomijane. Procent nie jest prawdopodobieństwem poprawności ani oceną całej pracy, autora, zgodności prawnej lub bezpieczeństwa. Odbiór pozostaje Twoją decyzją.</p></details>
+  </div>;
+}
+export function MessageVariants({variants,onNotice,onRefine,busy}) {
+  const normalized = normalizeMessageVariants(variants), [selected,setSelected] = useState(0);
+  const [edits,setEdits] = useState(() => normalized?.map(v=>v.body) || []), [copied,setCopied] = useState(false);
+  const id = React.useId(), timer = useRef(null);
+  useEffect(()=>{setEdits(normalizeMessageVariants(variants)?.map(v=>v.body) || []);setSelected(0);setCopied(false);},[variants]);
+  useEffect(()=>()=>clearTimeout(timer.current),[]);
+  if (!normalized) return null;
+  async function copyVariant() {
+    try {await navigator.clipboard.writeText(edits[selected]);setCopied(true);clearTimeout(timer.current);timer.current=setTimeout(()=>setCopied(false),1800);}
+    catch {onNotice('Nie udało się skopiować. Zaznacz treść wybranej wersji i skopiuj ją ręcznie.');}
+  }
+  return <section className="lu-variants" aria-label="Dwa warianty wiadomości">
+    <div className="lu-variants-heading"><span>WIADOMOŚĆ DO WYBORU</span><strong>Ten sam sens. Dwie wersje.</strong><p>Wybierz brzmienie, które pasuje do Ciebie. Treść możesz od razu poprawić.</p></div>
+    <div className="lu-variant-options" role="group" aria-label="Wybierz wariant wiadomości">{normalized.map((v,i)=><button type="button" key={i} aria-pressed={selected===i} aria-controls={id+'-editor'} onClick={()=>{setSelected(i);setCopied(false);}}><span>{i===0?'A':'B'}</span><strong>{v.title}</strong>{selected===i&&<small>Wybrana</small>}</button>)}</div>
+    <div className="lu-variant-paper" key={selected}><label htmlFor={id+'-editor'}>Wariant {selected===0?'A':'B'} · edytuj przed wysłaniem</label><AutoTextarea id={id+'-editor'} rows={7} value={edits[selected] || ''} maxLength={2000} onChange={e=>{setEdits(all=>all.map((text,i)=>i===selected?e.target.value:text));setCopied(false);}} /></div>
+    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?'Skopiowano':'Kopiuj wybraną wersję'}</button><button type="button" className="lu-secondary" disabled={busy || !edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>Dopracuj z Lucyną</button></div>
+    <p className="lu-tool-note">Propozycje AI. Sprawdź fakty, adresata i zobowiązania. Wysyłasz samodzielnie. Edycja tej kopii nie zmienia pierwotnej odpowiedzi zapisanej w historii.</p>
+  </section>;
+}
 export function ReviewResult({ review, onDraft, busy }) {
   const summary = reviewSummary(review);
   const labels = {met:"Spełnione",partial:"Częściowo",missing:"Niezgodność",unknown:"Do sprawdzenia"};
   return <section className="lu-review-result" aria-label="Wstępne sprawdzenie materiału">
-    <div className="lu-review-heading"><strong>Sprawdzenie kryteriów</strong><span>Wstępna analiza AI</span></div>
-    <p>{review.summary}</p>
-    <div className="lu-review-metrics"><span><strong>{summary.assessed} / {summary.total}</strong> kryteriów z podstawą w materiale</span>
-      <span><strong>{summary.score===null ? "—" : summary.score+"%"}</strong> zgodności ocenionych kryteriów</span></div>
-    <p className="lu-tool-note">Wynik dotyczy wybranego fragmentu. Punkty „Do sprawdzenia” są wyłączone z procentu. To nie ocena freelancera ani decyzja o odbiorze.</p>
+    <div className="lu-review-heading"><strong>Notatka Lucyny</strong><span>Wstępna analiza AI</span></div>
+    <p className="lu-review-summary">{review.summary}</p>
     <ol className="lu-criteria-results">{review.criteria.map((row,index)=><li key={index} className={"is-"+row.status}>
       <div><strong>{row.criterion}</strong><span>{labels[row.status] || "Do sprawdzenia"}</span></div>
       <p>{row.reason}</p>{row.quote && <blockquote>{row.quote}</blockquote>}
       <small>{row.basis==="text" ? "Podstawa: dosłowny cytat z wybranego tekstu" : row.basis==="image" ? "Podstawa: obserwacja wybranego obrazu" : "Brak wystarczającego materiału"}</small>
       {row.fix && <p className="lu-fix"><strong>Propozycja poprawki:</strong> {row.fix}</p>}
     </li>)}</ol>
-    <button type="button" className="lu-secondary" disabled={busy} onClick={()=>onDraft(correctionDraft(review))}>Przygotuj wiadomość o poprawkach z AI</button>
+    <ReviewScore summary={summary} />
+    <button type="button" className="lu-secondary" disabled={busy} onClick={()=>onDraft(correctionDraft(review))}>Ułóż dwie wiadomości o poprawkach</button>
+    <p className="lu-tool-note">Powstaną dwie propozycje w jednej próbie AI. Żadna nie zostanie wysłana automatycznie.</p>
   </section>;
 }
 function MessageTool({onUseDraft,onLocalDraft,busy,initialDraft=""}) {
   const [purpose,setPurpose] = useState(""), [details,setDetails] = useState(initialDraft), [tone,setTone] = useState("polite");
   useEffect(()=>{setDetails(initialDraft);},[initialDraft]);
-  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>WIADOMOŚCI</span><h2>Dobierz słowa do sytuacji</h2><p>Lucyna przygotuje propozycję na podstawie Twoich faktów. Możesz też po prostu opisać sytuację w rozmowie.</p></div>
+  return <section className="lu-tool-card"><div className="lu-tool-heading"><span>WIADOMOŚCI</span><h2>Dobierz słowa do sytuacji</h2><p>Dwie wersje w tym samym tonie, oparte na Twoich faktach. Wybierzesz jedną i dopracujesz ją przed wysłaniem.</p></div>
     <label>Cel wiadomości<input value={purpose} maxLength={300} placeholder="Np. zapytanie o termin albo prośba o poprawki" onChange={e=>setPurpose(e.target.value)} /></label>
     <label>Fakty i ustalenia<AutoTextarea value={details} maxLength={1200} rows={4} placeholder="Podaj tylko fakty potrzebne do tej wiadomości" onChange={e=>setDetails(e.target.value)} /></label>
     <label>Ton<FormSelect value={tone} onChange={e=>setTone(e.target.value)}><option value="polite">Uprzejmy</option><option value="firm">Stanowczy</option><option value="short">Krótki</option></FormSelect></label>
-    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onUseDraft("Pomóż mi napisać "+({polite:"uprzejmą",firm:"stanowczą",short:"krótką"}[tone])+" wiadomość.\n\n"+purpose+"\n\nFakty i ustalenia:\n"+details)}>{busy ? "Przygotowuję…" : "Przygotuj wiadomość z AI"}</button><button type="button" className="lu-secondary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onLocalDraft(messageTemplate({purpose,details,tone}))}>Ułóż szablon bez AI</button></div>
-    <p className="lu-tool-note">Wiadomość wysyłasz samodzielnie w rozmowie. Sprawdź adresata, fakty, terminy i zobowiązania.</p>
+    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onUseDraft("Pomóż mi napisać "+({polite:"uprzejmą",firm:"stanowczą",short:"krótką"}[tone])+" wiadomość. Przygotuj dwa warianty w tym samym tonie, zachowując te same fakty.\n\nCel: "+purpose+"\n\nFakty i ustalenia:\n"+details)}>{busy ? "Przygotowuję…" : "Przygotuj dwie wersje z AI"}</button><button type="button" className="lu-secondary" disabled={busy || !purpose.trim() && !details.trim()} onClick={()=>onLocalDraft(messageTemplate({purpose,details,tone}))}>Ułóż szablon bez AI</button></div>
+    <p className="lu-tool-note">Oba warianty powstają w jednej próbie AI. Wiadomość wysyłasz samodzielnie. Sprawdź adresata, fakty, terminy i zobowiązania.</p>
   </section>;
 }
 function BriefTool({onUseDraft,onLocalDraft,busy}) {

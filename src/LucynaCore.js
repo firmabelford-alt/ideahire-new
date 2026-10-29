@@ -2,7 +2,9 @@
 import { knowledgeAnswer } from "./LucynaKnowledge.js";
 
 export const LUCYNA_BUILD_VERSION = "P35-2026-10-14";
-export const LUCYNA_RELEASE = "LUCYNA-STUDIO-2026-10-29";
+export const LUCYNA_RELEASE = "LUCYNA-ATELIER-TOOLS-2026-10-29";
+export const LUCYNA_HISTORY_MESSAGES = 200;
+export const LUCYNA_HISTORY_BYTES = 112000; // Leaves room for PostgreSQL JSONB spacing within 120 kB.
 export const LUCYNA_NOTICE_VERSION = "IH-LUCYNA-2026-10-13-V3";
 export const LUCYNA_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export const PRIVATE_INPUT = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\b\d{11}\b|\b(?:sk-[A-Za-z0-9_-]{12,}|(?:sk|rk)_(?:test|live)_[A-Za-z0-9]{12,}|whsec_[A-Za-z0-9]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b|\b(?:has[łl]o|password|passwd|token|api[_ -]?key|secret|kod\s*(?:2fa|mfa))\s*[:=]/i;
@@ -86,13 +88,24 @@ export function briefTemplate(fields) {
   return Object.entries(labels).map(([key, label]) => label + ": " + (String(fields?.[key] || "").trim() || "Do uzupełnienia")).join("\n\n");
 }
 
+export function normalizeMessageVariants(value) {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const variants = value.map(item => item && typeof item === 'object'
+    && typeof item.title === 'string' && item.title.trim().length > 0 && item.title.length <= 40
+    && typeof item.body === 'string' && item.body.trim().length > 0 && item.body.length <= 1600
+    && !containsPrivateInput(item.title + '\n' + item.body)
+    ? {title:item.title.trim(),body:item.body.trim()} : null);
+  return variants.every(Boolean) && variants[0].body !== variants[1].body ? variants : null;
+}
 export function packConversation(conversation) {
   const messages = conversation.messages.filter(message =>
-    !["loading", "streaming"].includes(message.status) && (message.text || message.error || message.review || message.catalogs?.length)).slice(-40).map(message => {
+    !["loading", "streaming"].includes(message.status) && (message.text || message.error || message.review || message.variants?.length || message.catalogs?.length)).map(message => {
     const value = { id: message.id, role: message.role, text: String(message.text || "").slice(0, 8000),
       status: ["done", "error", "stopped", "catalog", "catalog-error"].includes(message.status) ? message.status : "done" };
     for (const key of ["filters", "searchMode", "sources", "provenance", "review", "error", "partial", "kind", "createdAt", "catalogs", "actions"])
       if (message[key] !== undefined) value[key] = message[key];
+    const variants = normalizeMessageVariants(message.variants);
+    if (variants) value.variants = variants;
     if (!value.catalogs?.length && Array.isArray(message.items)) value.catalogs = [{
       kind:"catalog",mode:message.searchMode,items:message.items,filters:message.filters,total:message.total
     }];
@@ -134,12 +147,22 @@ export async function revealAnswer(text, signal, onText, reducedMotion = globalT
   });
 }
 
+export function conversationNotes(messages, limit = 10) {
+  const older = messages.filter(m => ['user','assistant'].includes(m.role) && ['done','catalog','stopped'].includes(m.status) && !m.error).slice(0,-limit)
+    .filter(m => m.role === 'user' && !containsPrivateInput(m.text));
+  if (!older.length) return '';
+  const first = String(older[0].text || '').slice(0,350);
+  const recent = older.slice(1).slice(-3).map(m => String(m.text || '').slice(0,160));
+  return ['Początek prośby użytkownika: ' + first,...recent.map(t => 'Późniejsze ustalenie użytkownika: ' + t)].join('\n');
+}
 export function conversationContext(messages, limit = 10) {
   return messages.filter(message => ["user", "assistant"].includes(message.role)
     && ["done", "catalog", "stopped"].includes(message.status)
     && !message.error && (message.text || message.review || message.catalogs?.length))
     .map(message => {
       let text = String(message.text || "");
+      const variants = normalizeMessageVariants(message.variants);
+      if (variants) text += '\nDwa zaproponowane, niewysłane warianty wiadomości:\n' + variants.map((v,i)=>(i+1)+'. '+v.title+'\n'+v.body).join('\n\n');
       if (message.review) text += "\nAnaliza wskazanego materiału:\n" + message.review.summary + "\n" +
         (message.review.criteria || []).map(row => row.criterion + ": " + row.status + ". " + row.reason + (row.fix ? " Poprawka: " + row.fix : "")).join("\n");
       const catalogs = message.catalogs || (message.items ? [{mode:message.searchMode,items:message.items,filters:message.filters}] : []);

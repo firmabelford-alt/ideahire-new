@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LUCYNA_NOTICE_VERSION, packConversation } from "./LucynaCore";
+import { LUCYNA_NOTICE_VERSION, LUCYNA_HISTORY_BYTES, LUCYNA_HISTORY_MESSAGES, packConversation } from "./LucynaCore";
 
 const historyError = error => /stale/.test(error?.message || "") ? "Rozmowa zmieniła się w innej karcie. Odśwież stronę przed dalszym zapisem."
   : /thread_limit/.test(error?.message || "") ? "Masz już 12 zapisanych rozmów. Usuń wybraną rozmowę, aby zapisać nową."
@@ -9,6 +9,7 @@ const historyError = error => /stale/.test(error?.message || "") ? "Rozmowa zmie
 export function useLucynaMemory({ supabase, user, conversations, setConversations, handoffThread = null }) {
   const [ready, setReady] = useState(false), [acknowledged, setAcknowledged] = useState(false);
   const [historyEnabled, setHistoryEnabled] = useState(false), [memoryError, setMemoryError] = useState("");
+  const [capacityWarning,setCapacityWarning] = useState("");
   const [saving, setSaving] = useState(false);
   const [ackSaving,setAckSaving] = useState(false); const ackInFlight = useRef(false);
   const context = useRef({ uid: null, epoch: 0, loaded: false });
@@ -32,7 +33,7 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
     context.current = { uid, epoch, loaded: false };
     revisions.current = new Map(); hashes.current = new Map(); pending.current = new Map(); removed.current = new Set();
     inFlight.current.clear(); writeAllowed.current = false;
-    setReady(false); setAcknowledged(false); setHistoryEnabled(false); setMemoryError("");
+    setReady(false); setAcknowledged(false); setHistoryEnabled(false); setMemoryError(""); setCapacityWarning("");
     let alive = true;
     if (!uid) { context.current.loaded=true;setReady(true); return () => { alive = false; }; }
     (async () => {
@@ -98,12 +99,20 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
   useEffect(() => {
     // Stan React z poprzedniego renderu nie może włączyć zapisu po zmianie właściciela.
     if (!context.current.loaded || !ready || !acknowledged || !historyEnabled || context.current.uid !== user?.id) return;
+    let capacityReached = false;
     for (const conversation of conversations) {
       const snapshot = packConversation(conversation), hash = JSON.stringify(snapshot);
+      // Never silently trim or replace the earlier part of a conversation.
+      if (snapshot.messages.length > LUCYNA_HISTORY_MESSAGES || new TextEncoder().encode(JSON.stringify(snapshot.messages)).length > LUCYNA_HISTORY_BYTES) {
+        pending.current.delete(snapshot.id);
+        capacityReached = true;
+        continue;
+      }
       if (!snapshot.messages.length || removed.current.has(snapshot.id) || hashes.current.get(snapshot.id) === hash
         || inFlight.current.get(snapshot.id) === hash) continue;
       pending.current.set(snapshot.id, { snapshot, hash, epoch: context.current.epoch });
     }
+    setCapacityWarning(capacityReached ? 'Osiągnięto limit zapisu jednej z rozmów (200 wiadomości lub 120 kB). Możesz dalej rozmawiać w tej sesji. Pobierz pełną kopię przed opuszczeniem strony; wcześniejszy zapis pozostaje na koncie.' : '');
     if (pending.current.size) flush();
   }, [ready, acknowledged, historyEnabled, conversations, user?.id, flush, saving,ackSaving]);
 
@@ -141,5 +150,5 @@ export function useLucynaMemory({ supabase, user, conversations, setConversation
       revisions.current.clear(); hashes.current.clear(); setMemoryError("");
     } catch (error) { if (context.current.epoch === owner.epoch) ids.forEach(id => removed.current.delete(id)); throw error; }
   }, [request]);
-  return { ready, acknowledged, historyEnabled, memoryError, saving,ackSaving, acknowledge, remove, clear, flush };
+  return { ready, acknowledged, historyEnabled, memoryError:capacityWarning || memoryError, saving,ackSaving, acknowledge, remove, clear, flush };
 }
