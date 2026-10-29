@@ -3,7 +3,7 @@ import { FormSelect } from "./FormControls";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { helpCenterHref } from "./MarketUI";
-import { containsPrivateInput, conversationContext, downloadLucynaExport, localAnswer, packConversation, LUCYNA_NOTICE_VERSION, LUCYNA_BUILD_VERSION, LUCYNA_RELEASE } from "./LucynaCore";
+import { containsPrivateInput, conversationContext, downloadLucynaExport, localAnswer, packConversation, LUCYNA_NOTICE_VERSION, LUCYNA_BUILD_VERSION } from "./LucynaCore";
 import { LUCYNA_GUIDE, knowledgeAnswer } from "./LucynaKnowledge";
 import { consumeLucynaHandoff, handOffLucyna, normalizeLucynaAction, takeLucynaHandoff } from "./LucynaActions";
 import LucynaActionCards from "./LucynaActionCards";
@@ -226,9 +226,8 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   const [historySearch, setHistorySearch] = useState("");
   const [status, setStatus] = useState({ loading: true, enabled: false, remaining: null });
   const [notice, setNotice] = useState(""); const [searching, setSearching] = useState(false);
-  const [mobile, setMobile] = useState(() => embedded || window.matchMedia("(max-width: 900px)").matches);
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [taskMenu, setTaskMenu] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false); const [infoOpen, setInfoOpen] = useState(false);
   const [copied, setCopied] = useState(null); const [newBelow, setNewBelow] = useState(false);
   const [toolDraft,setToolDraft] = useState(""); const [deleting,setDeleting] = useState(false);
@@ -244,6 +243,8 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   const infoTriggerRef = useRef(null); const historyTriggerRef = useRef(null); const sideRef = useRef(null);
   const userIdRef = useRef(user?.id); const ownerRef = useRef(user?.id); const mainRef = useRef(null);
   const expansionRef = useRef(false);
+  const toolsRef = useRef(null), toolsTriggerRef = useRef(null), toolsHeadingRef = useRef(null);
+  const composeFocusRef = useRef(false);
   const patchMessage = useCallback((conversationId, messageId, values) => setConversations(all => all.map(c => c.id === conversationId
     ? { ...c, messages: c.messages.map(m => m.id === messageId ? { ...m, ...values } : m) } : c)), []);
   useEffect(() => {
@@ -323,6 +324,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     initialRoute.current=key;
     const requested = params.get("mode");
     if (!MODES.some(m=>m.id===requested)) return;
+    if (["brief", "message", "review"].includes(requested)) { setTaskMenu(false); setToolsOpen(true); }
     if (params.get("delivery") || params.get("conversation")) {
       const c = {...newConversation(),mode:requested}; routeTarget.current=c.id;
       setConversations(all=>all[0]?.messages.length===0 ? [c,...all.slice(1)] : all.length<12 ? [c,...all] : all);
@@ -330,12 +332,25 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       else setNotice("Usuń wybraną rozmowę, aby utworzyć rozmowę dla tej pracy.");
     } else setConversations(all=>all.map((c,index)=>index===0 ? {...c,mode:requested} : c));
   },[params,memory.ready,user?.id,busy]);
+  useEffect(() => { if (!visible) { setHistoryOpen(false); setInfoOpen(false); setToolsOpen(false); } }, [visible]);
   useEffect(() => {
-    const query = window.matchMedia("(max-width: 900px)");
-    const update = () => { setMobile(embedded || query.matches); if (!embedded && !query.matches) setHistoryOpen(false); };
-    query.addEventListener("change", update); return () => query.removeEventListener("change", update);
-  }, [embedded]);
-  useEffect(() => { if (!visible) { setHistoryOpen(false); setInfoOpen(false); } }, [visible]);
+    const dialog = toolsRef.current;
+    if (!dialog) return;
+    if (toolsOpen && visible) { if (!dialog.open) dialog.showModal(); }
+    else if (dialog.open) dialog.close();
+    return () => { if (dialog.open) dialog.close(); };
+  }, [toolsOpen, visible]);
+  useEffect(() => {
+    if (!toolsOpen) return;
+    const frame = requestAnimationFrame(() => toolsHeadingRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [toolsOpen, taskMenu]);
+  useEffect(() => {
+    if (toolsOpen || !composeFocusRef.current) return;
+    composeFocusRef.current = false;
+    const frame = requestAnimationFrame(() => textareaRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [toolsOpen]);
   useEffect(() => {
     if (embedded) return;
     const bodyOverflow = document.body.style.overflow, htmlOverflow = document.documentElement.style.overflow;
@@ -362,7 +377,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       document.removeEventListener("focusin", update); document.removeEventListener("focusout", update); };
   }, [embedded]);
   useEffect(() => {
-    const panel = !visible ? null : infoOpen ? infoRef.current : mobile && historyOpen ? sideRef.current : null;
+    const panel = !visible ? null : infoOpen ? infoRef.current : historyOpen ? sideRef.current : null;
     if (!panel) return;
     const before = document.activeElement; const first = panel.querySelector("button,a,input,select");
     first?.focus({ preventScroll: true });
@@ -376,8 +391,13 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       }
     };
     document.addEventListener("keydown", keyboard);
-    return () => { document.removeEventListener("keydown", keyboard); if (before?.isConnected && !pageRef.current?.closest("[hidden]")) before.focus({ preventScroll: true }); };
-  }, [infoOpen, mobile, historyOpen, visible]);
+    return () => {
+      document.removeEventListener("keydown", keyboard);
+      if (!before?.isConnected || pageRef.current?.closest("[hidden]")) return;
+      const target = before.closest('dialog:not([open]),[inert]') ? toolsTriggerRef.current : before;
+      target?.focus({ preventScroll: true });
+    };
+  }, [infoOpen, historyOpen, visible]);
   useEffect(() => {
     if (!textareaRef.current) return;
     textareaRef.current.style.height = "auto";
@@ -394,9 +414,20 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   useEffect(() => { followingRef.current = true; setNewBelow(false); if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; }, [active.id]);
   function chooseMode(id) {
     if (busy) return;
+    if (toolsOpen && !["brief", "message", "review"].includes(id)) composeFocusRef.current = true;
     setConversations(all => all.map(c => c.id === active.id ? { ...c, mode: id } : c));
     setToolsOpen(["brief", "message", "review"].includes(id));
+    setTaskMenu(false);
+    setHistoryOpen(false); setInfoOpen(false);
     textareaRef.current?.focus({ preventScroll: true });
+  }
+  function openWorkshop() {
+    setHistoryOpen(false); setInfoOpen(false); setTaskMenu(true); setToolsOpen(true);
+  }
+  function openTask(id) {
+    if (busy) return;
+    chooseMode(id);
+    if (id !== 'chat') { composeFocusRef.current = false; setTaskMenu(false); setToolsOpen(true); }
   }
   function startNew() {
     if (conversations.length>=12) {setNotice("Masz już 12 rozmów. Pobierz kopię i usuń wybraną rozmowę przed utworzeniem nowej.");return;}
@@ -600,17 +631,17 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   function useToolDraft(text) {send(null,{text:text.slice(0,6000),mode:active.mode});}
   function useCorrection(text) {send(null,{text:"Przygotuj uprzejmą wiadomość o poprawkach na podstawie powyższej analizy. Zachowaj ustalenia i konkretne punkty.\n\n"+text,mode:"message"});}
   return <div className="lucyna-route" data-embedded={embedded}>
-    <section className={"lucyna-root lucyna-studio" + (sidebarCollapsed ? " is-sidebar-hidden" : "")}
-      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release={LUCYNA_RELEASE} aria-label="Lucyna AI — asystentka IdeaHire">
+    <section className="lucyna-root lucyna-studio lucyna-atelier"
+      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-ATELIER-20261029" data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
       <div className="lu-shell">
-        {mobile && historyOpen && <button className="lu-drawer-shade" type="button"
+        {historyOpen && <button className="lu-drawer-shade" type="button"
           aria-label="Zamknij historię rozmów" onClick={() => setHistoryOpen(false)} />}
         <aside className={"lu-sidebar" + (historyOpen ? " is-open" : "")} ref={sideRef}
-          aria-label="Historia Lucyny AI" aria-hidden={mobile && !historyOpen || !mobile && sidebarCollapsed ? true : undefined}
-          inert={mobile && !historyOpen || !mobile && sidebarCollapsed ? "" : undefined}>
+          aria-label="Historia Lucyny AI" aria-hidden={!historyOpen || infoOpen ? true : undefined}
+          inert={!historyOpen || infoOpen ? "" : undefined}>
           <div className="lu-sidebar-brand"><Link to="/work" aria-label="Wróć do IdeaHire">IdeaHire<span>Przestrzeń Lucyny</span></Link>
             <button className="lu-icon-button" type="button" aria-label="Zamknij historię"
-              onClick={() => mobile ? setHistoryOpen(false) : setSidebarCollapsed(true)}><Icon name="history" /></button></div>
+              onClick={() => setHistoryOpen(false)}><Icon name="history" /></button></div>
           <button type="button" className="lu-new-button" disabled={!memory.ready || deleting}
             onClick={startNew}><Icon name="plus" />Nowa rozmowa</button>
           <label className="lu-history-search"><span className="lu-sr-only">Szukaj w historii rozmów</span><input type="search" value={historySearch} maxLength={80} placeholder="Szukaj rozmowy…" onChange={event => setHistorySearch(event.target.value)} /></label>
@@ -625,7 +656,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
             </div>)}
           </nav>
           <div className="lu-sidebar-bottom">
-            <button className="lu-sidebar-link" type="button" onClick={() => setInfoOpen(true)}><Icon name="shield" />Historia i prywatność</button>
+            <button className="lu-sidebar-link" type="button" onClick={() => { setHistoryOpen(false); setInfoOpen(true); }}><Icon name="shield" />Historia i prywatność</button>
             <button className="lu-sidebar-link" type="button" onClick={() => downloadLucynaExport(conversations)}><Icon name="download" />Pobierz rozmowy</button>
             <button className="lu-sidebar-link" type="button" disabled={deleting || !memory.ready} onClick={clearHistory}><Icon name="trash" />Usuń historię</button>
             <a className="lu-sidebar-link" href={helpCenterHref()}><Icon name="help" />Centrum pomocy<Icon name="arrow" /></a>
@@ -633,63 +664,28 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
               <span>Twoje konto<small>{!memory.ready ? "Wczytuję ustawienia…" : memory.saving ? "Zapisuję rozmowę…" : memory.acknowledged && memory.historyEnabled ? "Historia zapisywana na koncie" : "Rozmowa w bieżącej sesji"}</small></span><Icon name="arrow" /></Link>
           </div>
         </aside>
-        <main className="lu-main" ref={mainRef} role={embedded ? "region" : undefined} aria-label={embedded ? "Rozmowa z Lucyną AI" : undefined} inert={mobile && historyOpen || infoOpen ? "" : undefined}>
+        <main className="lu-main" ref={mainRef} role={embedded ? "region" : undefined} aria-label={embedded ? "Rozmowa z Lucyną AI" : undefined} inert={historyOpen || infoOpen || toolsOpen ? "" : undefined}>
           <header className="lu-chat-toolbar">
             <div className="lu-toolbar-identity">
-              <button type="button" className="lu-icon-button lu-history-toggle" ref={historyTriggerRef}
-                aria-label={mobile ? "Otwórz historię rozmów" : sidebarCollapsed ? "Pokaż historię rozmów" : "Ukryj historię rozmów"}
-                aria-expanded={mobile ? historyOpen : !sidebarCollapsed}
-                onClick={() => mobile ? setHistoryOpen(true) : setSidebarCollapsed(value => !value)}><Icon name="history" /></button>
-              <Mark small /><div><h1>Lucyna <span>AI</span></h1><p>{busy ? "Pracuję nad odpowiedzią" : mode.id === "chat" ? (administration ? "Wsparcie pracy administratora" : "Pomysł. Konkret. Następny krok.") : mode.title}</p></div>
+              {!embedded && <Link to={typeof location.state?.lucynaReturn === 'string' && /^\/(?!\/)(?!lucyna(?:[/?#]|$))/.test(location.state.lucynaReturn) ? location.state.lucynaReturn : '/work'} className="lu-icon-button lu-back-to-site" aria-label="Wróć do IdeaHire" title="Wróć do IdeaHire"><Icon name="exit" /></Link>}
+              <div><h1>Lucyna <span>AI</span></h1><p>IdeaHire</p></div>
             </div>
             <div className="lu-toolbar-actions">
-              <button type="button" className="lu-icon-button lu-toolbar-new" onClick={startNew} disabled={!memory.ready || deleting} aria-label="Nowa rozmowa" title="Nowa rozmowa"><Icon name="plus" /></button>
-              <button type="button" className={"lu-tools-toggle" + (toolsOpen ? " is-active" : "")}
-                aria-label="Narzędzia Lucyny AI" aria-expanded={toolsOpen} aria-controls="lucyna-tools" onClick={() => setToolsOpen(value => !value)}><Icon name="spark" /><span>Narzędzia</span></button>
-              <button className="lu-icon-button lu-toolbar-info" type="button" ref={infoTriggerRef}
-                aria-label="Jak działa Lucyna AI i prywatność" onClick={() => setInfoOpen(true)}><Icon name="shield" /></button>
-              {!embedded && <Link to={typeof location.state?.lucynaReturn === 'string' && /^\/(?!\/)(?!lucyna(?:[/?#]|$))/.test(location.state.lucynaReturn) ? location.state.lucynaReturn : '/work'} className="lu-icon-button lu-back-to-site" aria-label="Wróć do IdeaHire" title="Wróć do IdeaHire"><Icon name="exit" /></Link>}
+              <button type="button" className="lu-icon-button lu-history-toggle" ref={historyTriggerRef} aria-label="Otwórz historię rozmów" title="Rozmowy" aria-expanded={historyOpen} onClick={() => { setToolsOpen(false); setInfoOpen(false); setHistoryOpen(true); }}><Icon name="history" /></button>
+              <button type="button" ref={toolsTriggerRef} className="lu-tools-toggle" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls="lucyna-workshop" onClick={openWorkshop}><Icon name="edit" /><span>Pracownia</span></button>
             </div>
           </header>
-          {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Opisuj sytuacje bez danych osób i poufnych materiałów. Szkic wymaga Twojej oceny przed użyciem.</p>}
-          {toolsOpen && <div id="lucyna-tools" className="lu-mode-bar" aria-label="Zadanie Lucyny AI">
-            {modes.map(m => <button key={m.id} type="button" disabled={busy} className={active.mode === m.id ? "is-active" : ""}
-              aria-pressed={active.mode === m.id} onClick={() => chooseMode(m.id)}><Icon name={m.icon} /><span>{m.short}</span></button>)}
-          </div>}
-          <div className={"lu-messages" + (!active.messages.length ? " is-empty" : "")} ref={listRef}
-            role="region" aria-label="Treść rozmowy" aria-busy={busy}
-            onScroll={() => { const el = listRef.current; followingRef.current = el.scrollHeight - el.clientHeight - el.scrollTop < 100; if (followingRef.current) setNewBelow(false); }}>
-            {memory.ready && !memory.acknowledged && <section className="lu-first-notice" aria-label="Przed rozmową z Lucyną AI">
-              <div><Icon name="shield" /><strong>Zanim zaczniemy</strong></div>
-              <p>Rozmawiasz z AI. Pytanie i kontekst tej rozmowy przetwarza Cloudflare. Zdecyduj, czy zapisywać historię na koncie.</p>
-              <label className="lu-check"><input type="checkbox" checked={historyChoice} onChange={e => setHistoryChoice(e.target.checked)} />
-                <span>Zapisuj rozmowy na koncie do 30 dni od ostatniego zapisu. Mogę je pobrać i usunąć.</span></label>
-              <div className="lu-tool-actions"><button type="button" className="lu-text-button" onClick={() => setInfoOpen(true)}>Jak chronimy dane?</button>
-                <button type="button" className="lu-primary" disabled={memory.ackSaving}
-                  onClick={() => memory.acknowledge(historyChoice).catch(() => setNotice("Nie udało się zapisać ustawienia. Spróbuj ponownie."))}>Rozumiem, rozpocznij<Icon name="check" /></button></div>
-            </section>}
-            {memory.memoryError && <p className="lu-memory-error" role="status">{memory.memoryError}</p>}
-            {!active.messages.length && !["message", "review", "brief"].includes(active.mode) && <div className="lu-welcome">
-              <div className="lu-welcome-mark"><Mark /><span className="lu-welcome-orbit" /></div>
-              <span className="lu-welcome-eyebrow">LUCYNA · ASYSTENTKA AI IDEAHIRE</span>
-              <h2>Twój pomysł.<br /><span>Zróbmy następny krok.</span></h2>
-              <p>Znajdź właściwe osoby, dopracuj zlecenie i ustal, co dalej.</p>
-              <div className="lu-starter-grid">
-                <button type="button" onClick={() => { chooseMode('chat'); setDraft('Znajdź usługi w IdeaHire dopasowane do mojego projektu.'); textareaRef.current?.focus({ preventScroll: true }); }}><Icon name="work" /><strong>Znajdź usługę</strong><span>Gotowe oferty z katalogu</span><Icon name="arrow" /></button>
-                {MODES.filter(m => ["brief", "freelancers", "jobs"].includes(m.id)).map(m => <button key={m.id} type="button"
-                  onClick={() => { chooseMode(m.id); setDraft(m.example); }}><Icon name={m.icon} /><strong>{m.title}</strong><span>{m.text}</span><Icon name="arrow" /></button>)}
-              </div>
-              <button type="button" className="lu-welcome-help" disabled={!memory.ready || busy} onClick={() => send(null, { text: 'Czym jest IdeaHire?', mode: 'help' })}>Pierwszy raz w IdeaHire? Pokaż mi, od czego zacząć.<Icon name="arrow" /></button>
-              <div className="lu-welcome-note"><span /><span>{administration ? "Pomoc w redagowaniu szkiców i porządkowaniu pracy" : "Rozmawiaj swobodnie — Lucyna dobiera potrzebne narzędzia"}</span></div>
-            </div>}
-            {isSearch && !active.messages.length && <SearchBox mode={active.mode} onSearch={filters => runSearch(filters)} loading={searching} />}
-            {active.mode === "help" && !active.messages.length && <div className="lu-faq-links"><span>Przewodnik po IdeaHire</span>{FAQ.slice(0, 4).map(f =>
-              <button key={f.id} type="button" disabled={!memory.ready || busy} onClick={() => send(null, { text: f.title, mode: "help" })}><Icon name="help" /><span>{f.title}</span><Icon name="arrow" /></button>)}</div>}
-            {(toolsOpen || active.mode === "review") && <LucynaTools key={active.id + ":" + active.mode} mode={active.mode} supabase={supabase} user={user} busy={busy}
-              onUseDraft={useToolDraft} onLocalDraft={useLocalDraft} onNotice={setNotice} initialDraft={toolDraft}
-              deliveryId={active.sourceDeliveryId || (routeTarget.current === active.id ? params.get("delivery") : null)}
-              conversationId={active.sourceConversationId || (routeTarget.current === active.id ? params.get("conversation") : null)}
-              onReview={review => send(null, { text: "Sprawdź wybrany materiał względem kryteriów:\n" + review.criteria.map((c, i) => (i + 1) + ". " + c).join("\n"), mode: "review", review })} />}
+          {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Szkice wymagają Twojej oceny przed użyciem.</p>}
+          <div className="lu-conversation-canvas" data-empty={!active.messages.length}>
+            <div className={"lu-messages" + (!active.messages.length ? " is-empty" : "")} ref={listRef} role="region" aria-label="Treść rozmowy" aria-busy={busy}
+              onScroll={() => { const el = listRef.current; followingRef.current = el.scrollHeight - el.clientHeight - el.scrollTop < 100; if (followingRef.current) setNewBelow(false); }}>
+              {memory.memoryError && <p className="lu-memory-error" role="status">{memory.memoryError}</p>}
+              {!active.messages.length && <div className="lu-welcome">
+                <svg className="lu-signature" viewBox="0 0 84 56" fill="none" aria-hidden="true"><path d="M30 6C17 10 13 33 18 43C23 51 42 47 49 38C37 36 19 38 9 47M45 47H75" pathLength="1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <p className="lu-welcome-eyebrow">LUCYNA · AI W IDEAHIRE</p>
+                <h2><span>Porozmawiajmy.</span><em>Potem działajmy.</em></h2>
+                <p className="lu-intro-copy">Twój pomysł, moja pomoc.<br />Znajdźmy kolejny krok w IdeaHire.</p>
+              </div>}
             {active.messages.map(message => <article key={message.id} className={"lu-message is-" + message.role}
               data-ai-generated={message.provenance?.ai_generated ? "true" : "false"} data-ai-model={message.provenance?.model}
               data-ai-output-sha256={message.provenance?.answer_sha256}>
@@ -722,11 +718,12 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 </div>}
               </div>
             </article>)}
-          </div>
-          {newBelow && <button type="button" className="lu-jump-bottom" onClick={() => { followingRef.current = true; listRef.current.scrollTop = listRef.current.scrollHeight; setNewBelow(false); }}><Icon name="arrow" />Nowsze wiadomości</button>}
-          <div className="lu-composer-area">
+            </div>
+            {newBelow && <button type="button" className="lu-jump-bottom" onClick={() => { followingRef.current = true; listRef.current.scrollTop = listRef.current.scrollHeight; setNewBelow(false); }}><Icon name="arrow" />Nowsze wiadomości</button>}
+            <div className="lu-composer-area">
             {(notice || status.code) && <div className="lu-notice" role="status"><Icon name="help" /><p>{notice || ERRORS[status.code]}{status.diagnosticRequestId && <small className="lu-diagnostic-id">Identyfikator zgłoszenia: {status.diagnosticRequestId}</small>}</p>
               {["migration", "version", "setup", "disabled", "global_limit", "user_limit", "account", "provider_auth", "provider_forbidden", "provider_model", "provider_blocked", "free_model", "free_setup"].includes(status.code) && <button type="button" onClick={() => refreshStatus(true)}>Sprawdź dostępność</button>}</div>}
+              {!active.messages.length && <p className="lu-writing-label">OD CZEGO ZACZYNAMY?</p>}
             <form className={"lu-composer" + (busy ? " is-busy" : "")} onSubmit={send}>
               <label className="lu-sr-only" htmlFor="lucyna-message">Wiadomość do Lucyny AI</label>
               <textarea id="lucyna-message" ref={textareaRef} rows={1} maxLength={6000} value={draft}
@@ -737,14 +734,45 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
               {busy ? <button className="lu-send" type="button" onClick={stop} aria-label="Zatrzymaj odpowiedź"><Icon name="stop" /></button>
                 : <button className="lu-send" type="submit" disabled={!draft.trim() || !memory.ready || deleting} aria-label="Wyślij wiadomość do Lucyny AI"><Icon name="send" /></button>}
             </form>
+              {!active.messages.length && <div className="lu-prompt-links" aria-label="Pomysły na początek rozmowy">
+                <button type="button" onClick={() => { chooseMode('freelancers'); setDraft('Szukam wykonawcy do '); }}>Znajdź wykonawcę<Icon name="arrow" /></button>
+                <button type="button" onClick={() => openTask('brief')}>Ułóż zlecenie<Icon name="arrow" /></button>
+                <button type="button" disabled={!memory.ready || busy} onClick={() => send(null, { text: 'Czym jest IdeaHire?', mode: 'help' })}>Poznaj IdeaHire<Icon name="arrow" /></button>
+              </div>}
+              {memory.ready && !memory.acknowledged && <section className="lu-first-notice" aria-label="Informacja przed użyciem AI">
+                <p>Lucyna to AI. Pytanie i kontekst rozmowy przetwarza Cloudflare. Sam wybierasz, czy zapisywać historię na koncie.</p>
+                <div><button type="button" className="lu-text-button" disabled={memory.ackSaving} onClick={() => memory.acknowledge(false).catch(() => setNotice('Nie udało się zapisać ustawienia. Spróbuj ponownie.'))}>Kontynuuj bez zapisu<Icon name="arrow" /></button><button type="button" className="lu-text-button" onClick={() => { setToolsOpen(false); setHistoryOpen(false); setInfoOpen(true); }}>Ustaw historię</button></div>
+              </section>}
+              <div className="lu-composer-meta"><span>AI może się mylić. Sprawdź odpowiedź.</span><button type="button" onClick={openWorkshop} aria-haspopup="dialog">{active.mode === 'chat' ? 'Opcje' : mode.short}<Icon name="arrow" /></button></div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <dialog className="lu-workshop" id="lucyna-workshop" ref={toolsRef} aria-labelledby="lucyna-workshop-title"
+        onKeyDown={event => { if (event.key === 'Escape') event.stopPropagation(); }}
+        onCancel={event => { event.preventDefault(); setToolsOpen(false); }} onClose={() => setToolsOpen(false)}
+        onPointerDown={event => { if (event.target !== event.currentTarget) return; const r = event.currentTarget.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) setToolsOpen(false); }}>
+        <header className="lu-workshop-heading"><div>{!taskMenu && <button type="button" className="lu-text-button" onClick={() => setTaskMenu(true)}><Icon name="exit" />Wszystkie narzędzia</button>}<h2 id="lucyna-workshop-title" ref={toolsHeadingRef} tabIndex={-1}>{taskMenu ? 'Pracownia' : mode.title}</h2><p>{taskMenu ? 'Wybierz jedną rzecz, którą chcesz zrobić.' : 'Uzupełnij tylko to, co potrzebne do tego zadania.'}</p></div><button type="button" className="lu-icon-button" aria-label="Zamknij pracownię" onClick={() => setToolsOpen(false)}><Icon name="close" /></button></header>
+        <div className="lu-workshop-body">
+          <div hidden={!taskMenu} className="lu-task-menu">{modes.map(item => <button key={item.id} type="button" disabled={busy} onClick={() => openTask(item.id)}><Icon name={item.icon} /><span><strong>{item.title}</strong><small>{item.text}</small></span><Icon name="arrow" /></button>)}{!administration && <button type="button" disabled={busy} onClick={() => { chooseMode('chat'); setDraft('Znajdź usługi w IdeaHire dopasowane do mojego projektu.'); }}><Icon name="work" /><span><strong>Znajdź usługę</strong><small>Gotowe oferty z katalogu IdeaHire.</small></span><Icon name="arrow" /></button>}</div>
+          <div hidden={taskMenu} className="lu-task-body">
+            {isSearch && <SearchBox mode={active.mode} onSearch={filters => { setToolsOpen(false); runSearch(filters); }} loading={searching} />}
+            {active.mode === 'help' && <div className="lu-faq-links"><p>Instrukcje IdeaHire bez zużywania puli AI.</p>{FAQ.map(item => <button key={item.id} type="button" disabled={!memory.ready || busy} onClick={() => { setToolsOpen(false); send(null, { text: item.title, mode: 'help' }); }}><Icon name="help" /><span>{item.title}</span><Icon name="arrow" /></button>)}</div>}
+            <LucynaTools key={active.id + ':' + active.mode} mode={active.mode} supabase={supabase} user={user} busy={busy}
+              onUseDraft={text => { setToolsOpen(false); useToolDraft(text); }} onLocalDraft={text => { setToolsOpen(false); useLocalDraft(text); }} onNotice={text => { setToolsOpen(false); setNotice(text); }} initialDraft={toolDraft}
+              deliveryId={active.sourceDeliveryId || (routeTarget.current === active.id ? params.get('delivery') : null)}
+              conversationId={active.sourceConversationId || (routeTarget.current === active.id ? params.get('conversation') : null)}
+              onReview={review => { setToolsOpen(false); send(null, { text: 'Sprawdź wybrany materiał względem kryteriów:\n' + review.criteria.map((c, i) => (i + 1) + '. ' + c).join('\n'), mode: 'review', review }); }} />
+          </div>
+          <details className="lu-workshop-settings"><summary>Odpowiedzi i limity<Icon name="plus" /></summary>
             <div className="lu-composer-settings">
               <label className="lu-response-style"><span className="lu-sr-only">Długość odpowiedzi AI</span><select value={responseStyle} onChange={event => setResponseStyle(event.target.value)} disabled={busy}><option value="concise">Zwięźle</option><option value="detailed">Dokładniej</option></select></label>
               <details className="lu-usage" onKeyDown={event => { if (event.key === 'Escape') { event.currentTarget.open = false; event.stopPropagation(); event.preventDefault(); } }}><summary><span className={'lu-status-dot' + (status.code ? ' is-limited' : '')} />{status.loading ? 'Łączę z AI…' : status.remaining == null ? 'Dostępność AI' : `${status.remaining} / ${status.limit || 50} AI`}<Icon name="help" width="14" height="14" /></summary><div><strong>Twoja dzienna pula</strong><p>{status.remaining == null ? 'Nie udało się jeszcze potwierdzić dostępności generowania.' : `Pozostało ${status.remaining} z ${status.limit || 50} prób generowania AI.`}</p>{Number.isFinite(Date.parse(status.reset_at || '')) && <p>Odnowienie: {new Intl.DateTimeFormat('pl-PL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' }).format(new Date(status.reset_at))} czasu polskiego.</p>}<p>Wspólna pula serwisu: {status.global_available === false ? 'chwilowo wyczerpana' : status.configured ? 'dostępna, z limitem dostawcy' : 'dostępność wymaga potwierdzenia'}.</p><p>Instrukcje IdeaHire, katalogi i lokalne szablony działają bez generowania AI. Nieudane generowanie bez odpowiedzi wraca do osobistej puli; zatrzymana odpowiedź może ją zużyć.</p></div></details>
             </div>
-            <div className="lu-composer-meta"><span>Lucyna jest AI i może się mylić. Sprawdź ważne ustalenia.</span><span>{draft.length > 4800 ? draft.length + '/6000' : memory.historyEnabled && memory.acknowledged ? 'Historia na koncie' : 'Historia w tej sesji'}</span></div>
-          </div>
-        </main>
-      </div>
+          </details>
+          <div className="lu-workshop-footer"><button type="button" className="lu-text-button" disabled={!memory.ready || deleting} onClick={startNew}><Icon name="plus" />Nowa rozmowa</button><button type="button" className="lu-text-button" ref={infoTriggerRef} onClick={() => { setToolsOpen(false); setInfoOpen(true); }}><Icon name="shield" />AI i Twoje dane</button></div>
+        </div>
+      </dialog>
       {infoOpen && <div className="lu-info-shade" onPointerDown={event => { if (event.target === event.currentTarget) setInfoOpen(false); }}>
         <section className="lu-info-dialog" role="dialog" aria-modal="true" aria-labelledby="lucyna-info-title" ref={infoRef}>
           <button className="lu-icon-button" type="button" aria-label="Zamknij informacje" onClick={() => setInfoOpen(false)}><Icon name="close" /></button>
@@ -755,7 +783,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
             <li>Jeśli włączysz zapis, historia pozostaje na Twoim koncie w Supabase do 30 dni od ostatniego zapisu. Możesz ją pobrać i usunąć.</li>
             <li>Wybrany plik nie jest przechowywany w historii. Odpowiedź może zawierać cytaty z materiału.</li>
             <li>Nie wklejaj haseł, numerów dokumentów, danych wrażliwych ani materiałów poufnych.</li>
-            <li>Osobisty limit generowania i najbliższe odnowienie sprawdzisz pod polem wiadomości. Działa również wspólna darmowa pula serwisu. Błędy bez odpowiedzi są zwracane do osobistej puli. Przerwane generowanie może zużyć limit. Reset o północy UTC; interfejs pokazuje czas polski.</li>
+            <li>Osobisty limit generowania i najbliższe odnowienie sprawdzisz w Pracowni, w sekcji „Odpowiedzi i limity”. Działa również wspólna darmowa pula serwisu. Błędy bez odpowiedzi są zwracane do osobistej puli. Przerwane generowanie może zużyć limit. Reset o północy UTC; interfejs pokazuje czas polski.</li>
             <li>Prognoza pochodzi z MET Norway, dla centrum wskazanego miasta. Nie korzystamy z GPS urządzenia.</li>
             <li>Ty określasz potrzebę i podejmujesz decyzje. Lucyna AI nie wysyła wiadomości, nie akceptuje prac i nie wykonuje płatności.</li></ul>
           <label className="lu-check"><input type="checkbox" disabled={memory.ackSaving} checked={memory.acknowledged ? memory.historyEnabled : historyChoice}
