@@ -111,3 +111,8 @@
   html:root body.ih79-app #ih64-lucyna .ih64-dock-window { border-radius:18px!important; box-shadow:0 16px 64px #10272124!important; }
   html:root body.ih79-app #ih64-lucyna .ih64-dock-control { border:0!important; border-radius:9px!important; background:none!important; color:var(--v-muted)!important; }
 }
+
+/* Shared Lucyna identity stays legible in the site's small AI launcher. */
+@layer ideahireHeadings {
+  html:root body :is(.ih-top-assistant,.ih-room-assistant)>svg.ih65-lucyna-symbol { display:block!important; flex:none!important; width:26px!important; height:26px!important; color:inherit!important; }
+}

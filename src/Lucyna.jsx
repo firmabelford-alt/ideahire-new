@@ -12,6 +12,7 @@ import LucynaTools, { ReviewResult, MessageVariants } from "./LucynaTools";
 export { containsPrivateInput } from "./LucynaCore";
 import "./Lucyna.css";
 import LucynaSymbol from "./LucynaSymbol";
+import { useLucynaReveal } from "./LucynaMotion";
 
 const CATEGORIES = ["Programowanie", "Grafika i design", "Marketing", "Copywriting", "Video",
   "Fotografia", "AI i automatyzacje", "Dane, analizy i research", "Biznes i e-commerce", "Architektura, wnętrza i CAD"];
@@ -82,6 +83,7 @@ function Icon({ name = "spark", ...props }) {
     plus: "M12 5v14M5 12h14", close: "m6 6 12 12M18 6 6 18",
     send: "M12 20V4m-6 6 6-6 6 6", stop: "M6 6h12v12H6Z",
     history: "M3 4h18v16H3ZM8 4v16M12 9h5M12 13h5",
+    home: "m3 11 9-8 9 8M5 10v11h14V10M9 21v-7h6v7",
     copy: "M9 8h12v13H9ZM15 8V3H3v13h6",
     arrow: "M5 12h14m-6-6 6 6-6 6", check: "m5 12 4 4L19 6",
     shield: "m12 3 9 4v5c0 5-9 9-9 9s-9-4-9-9V7ZM8 12l3 3 5-6",
@@ -102,7 +104,7 @@ function ThinkingIndicator({phase = "preparing"}) {
     jobs:"Sprawdzam aktualne zlecenia…",freelancers:"Sprawdzam katalog wykonawców…",services:"Sprawdzam opublikowane usługi…",
     review:"Sprawdzam materiał względem kryteriów…",message:"Układam dwie wersje wiadomości…",
     checking:"Sprawdzam informacje…",responding:"Układam odpowiedź…"};
-  return <div className="lu-thinking" role="status"><span className="lu-thinking-dots" aria-hidden="true"><i /><i /><i /></span>
+  return <div className="lu-thinking" role="status"><span className="lu-thinking-signal" aria-hidden="true"><LucynaSymbol/><i/><i/></span>
     <span>{labels[phase] || labels.preparing}</span>{elapsed>=12 && <small>{elapsed} s</small>}</div>;
 }
 function Inline({ text }) {
@@ -136,6 +138,14 @@ export function SafeText({ text }) {
     return <p key={index}><Inline text={block.text} /></p>;
   })}</div>;
 }
+function MotionAnswer({message}) {
+  const reveal=useLucynaReveal(message.text,!!message.reveal);
+  return <div className="lu-live-answer" data-revealing={reveal.revealing} aria-busy={reveal.revealing}>
+    <SafeText text={reveal.text}/>
+    {reveal.revealing && <div className="lu-reveal-controls"><span aria-hidden="true" className="lu-writing-caret"/><button type="button" onClick={reveal.revealAll}>Pokaż od razu</button></div>}
+  </div>;
+}
+
 export async function readEvents(response, signal, onEvent) {
   if (!response.body) throw Object.assign(new Error("unavailable"), { code: "unavailable" });
   const reader = response.body.getReader(), decoder = new TextDecoder();
@@ -372,6 +382,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     const viewport = window.visualViewport;
     let naturalHeight = viewport?.height || window.innerHeight; let previousWidth = window.innerWidth;
     const update = () => {
+      if (viewport && Math.abs(viewport.scale - 1) > .05) return;
       const height = viewport?.height || window.innerHeight;
       const focused = document.activeElement === textareaRef.current;
       if (!focused || Math.abs(window.innerWidth - previousWidth) > 100) naturalHeight = height;
@@ -422,6 +433,16 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     } else setNewBelow(true);
   }, [active.messages]);
   useEffect(() => { followingRef.current = true; setNewBelow(false); if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; }, [active.id,home]);
+  useEffect(() => {
+    const list=listRef.current;
+    if(!list || !window.ResizeObserver || home)return;
+    const observer=new ResizeObserver(()=>{
+      if(followingRef.current){cancelAnimationFrame(scrollFrame.current);scrollFrame.current=requestAnimationFrame(()=>{list.scrollTop=list.scrollHeight;});}
+      else setNewBelow(true);
+    });
+    [...list.querySelectorAll(':scope > .lu-message')].slice(-2).forEach(node=>observer.observe(node));
+    return()=>observer.disconnect();
+  },[active.id,active.messages.length,home]);
   function chooseMode(id) {
     if (busy) return;
     setHome(false);
@@ -508,7 +529,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     if (containsPrivateInput(text)) { setNotice(ERRORS.private); return; }
     setNotice(''); followingRef.current = true;
     setConversations(all => all.map(c => c.id === active.id ? { ...c, title: c.messages.length ? c.title : mode.title,
-      messages: [...c.messages, { id: makeId(), role: 'assistant', text: String(text).slice(0, 8000), status: 'done', kind: 'local', createdAt: new Date().toISOString() }] } : c));
+      messages: [...c.messages, { id: makeId(), role: 'assistant', text: String(text).slice(0, 8000), status: 'done', kind: 'local', reveal:true, createdAt: new Date().toISOString() }] } : c));
   }
   async function send(event, options = {}) {
     event?.preventDefault();
@@ -530,7 +551,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       setDraft(''); setNotice(''); followingRef.current = true;
       setConversations(all => all.map(c => c.id === active.id ? { ...c, title: c.messages.length ? c.title : text.slice(0, 52),
         messages: [...c.messages, { id: makeId(), role: 'user', text, status: 'done', createdAt: new Date().toISOString() },
-          { id: makeId(), role: 'assistant', text: local, status: 'done', kind: guide ? 'guide' : 'local', sources: guide?.sources || [], ...(target ? { actions: [{ kind: 'navigation', target }] } : {}), createdAt: new Date().toISOString() }] } : c));
+          { id: makeId(), role: 'assistant', text: local, status: 'done', reveal:true, kind: guide ? 'guide' : 'local', sources: guide?.sources || [], ...(target ? { actions: [{ kind: 'navigation', target }] } : {}), createdAt: new Date().toISOString() }] } : c));
       return;
     }
     if (!memory.acknowledged) { setNotice(ERRORS.notice); setInfoOpen(true); return; }
@@ -543,7 +564,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       ...(options.review ? { sourceDeliveryId: options.review.source_delivery_id || null, sourceConversationId: options.review.source_conversation_id || null } : {}),
       messages: [...c.messages, { id: makeId(), role: "user", text, status: "done", createdAt: new Date().toISOString() },
         { id: messageId, role: "assistant", text: "", status: "loading", createdAt: new Date().toISOString(),
-          provenance: { ai_generated: true, verified: false }, kind: options.review ? "review" : "ai", phase:options.review ? "review" : options.messageDraft ? "message" : "preparing" }] } : c));
+          reveal:true, provenance: { ai_generated: true, verified: false }, kind: options.review ? "review" : "ai", phase:options.review ? "review" : options.messageDraft ? "message" : "preparing" }] } : c));
     const timer = window.setTimeout(() => controller.abort(), 90_000);
     try {
       const { data, error } = await supabase.auth.getSession();
@@ -659,7 +680,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   }
   return <div className="lucyna-route" data-embedded={embedded}>
     <section className="lucyna-root lucyna-studio lucyna-atelier"
-      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-ATELIER-TOOLS-20261029" data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
+      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-SIGNAL-20261029" data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
       {!memory.ready && <div className="lu-boot" role="status"><LucynaSymbol/><strong>Lucyna</strong><span>Przygotowuję Twoją przestrzeń…</span><i aria-hidden="true"/></div>}
       <div className="lu-shell">
         {historyOpen && !wide && <button className="lu-drawer-shade" type="button"
@@ -701,18 +722,19 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
               <Mark small/><div><h1>Lucyna <span>AI</span></h1><p>IdeaHire</p></div>
             </div>
             <div className="lu-toolbar-actions">
-              <button type="button" className="lu-home-toggle" aria-pressed={home} onClick={()=>{setHome(true);setToolsOpen(false);setInfoOpen(false);setHistoryOpen(false);}}>Start</button>
+              <button type="button" className="lu-home-toggle" aria-label="Menu główne Lucyny" title="Start" aria-pressed={home} onClick={()=>{setHome(true);setToolsOpen(false);setInfoOpen(false);setHistoryOpen(false);}}><Icon name="home"/><span>Start</span></button>
               <button type="button" className="lu-icon-button lu-history-toggle" hidden={wide} ref={historyTriggerRef} aria-label="Otwórz historię rozmów" title="Rozmowy" aria-expanded={historyOpen} onClick={() => { setToolsOpen(false); setInfoOpen(false); setHistoryOpen(true); }}><Icon name="history" /></button>
-              <button type="button" ref={toolsTriggerRef} className="lu-tools-toggle" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls="lucyna-workshop" onClick={openWorkshop}><Icon name="edit" /><span>Pracownia</span></button>
+              <button type="button" ref={toolsTriggerRef} className="lu-tools-toggle" aria-label="Pracownia Lucyny — narzędzia" title="Pracownia" aria-haspopup="dialog" aria-expanded={toolsOpen} aria-controls="lucyna-workshop" onClick={openWorkshop}><Icon name="edit" /><span>Pracownia</span></button>
             </div>
           </header>
           {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Szkice wymagają Twojej oceny przed użyciem.</p>}
           {home && <section className="lu-home" aria-label="Menu główne Lucyny">
-            <div className="lu-home-intro"><LucynaSymbol className="lu-home-mark"/><p className="lu-welcome-eyebrow">TWÓJ POMYSŁ. WSPÓLNY NASTĘPNY KROK.</p><h2>Co dziś<br/><em>zrobimy?</em></h2><p>Rozmowa, dobre słowa i konkretna pomoc w IdeaHire.<br/>Wybierz kierunek — resztę poukładamy razem.</p>
-              <button type="button" className="lu-primary lu-home-chat" disabled={!memory.ready} onClick={()=>active.messages.length?startNew():chooseMode('chat')}>Porozmawiaj z Lucyną<Icon name="arrow"/></button>
+            <div className="lu-home-intro"><div className="lu-home-signal" aria-hidden="true"><span/><LucynaSymbol className="lu-home-mark"/><i/><i/></div><p className="lu-welcome-eyebrow">TWÓJ POMYSŁ. WSPÓLNY NASTĘPNY KROK.</p><h2>Dobry pomysł.<em>Zróbmy kolejny krok.</em></h2><p>Rozmowa, konkretne narzędzia<br/>i pomoc w Twojej pracy.</p>
+              <form className="lu-home-composer" onSubmit={send}><label className="lu-sr-only" htmlFor="lucyna-start-message">Zacznij rozmowę z Lucyną</label><input id="lucyna-start-message" type="text" autoComplete="off" value={draft} maxLength={6000} placeholder="Napisz do Lucyny…" onChange={e=>setDraft(e.target.value)}/><button className="lu-send" type="submit" disabled={!memory.ready || busy || !draft.trim()} aria-label="Rozpocznij rozmowę"><Icon name="send"/></button></form>
+              <button type="button" className="lu-text-button lu-home-empty-chat" disabled={!memory.ready || busy} onClick={()=>active.messages.length?startNew():chooseMode('chat')}>Otwórz pustą rozmowę<Icon name="arrow"/></button>
               {!!active.messages.length && <button type="button" className="lu-text-button" onClick={()=>setHome(false)}>Wróć do otwartej rozmowy<Icon name="arrow"/></button>}
             </div>
-            <div className="lu-home-directions"><span className="lu-welcome-eyebrow">ALBO ZACZNIJ OD KONKRETU</span>{modes.filter(m=>['message','brief','review','freelancers','help'].includes(m.id)).map((item,index)=><button type="button" key={item.id} disabled={!memory.ready || busy} onClick={()=>openTask(item.id)}><span className="lu-direction-number">0{index+1}</span><span><strong>{item.title}</strong><small>{item.id==='message'?'Dwie wersje. Jeden wybrany przez Ciebie ton.':item.id==='review'?'Kryteria, notatka i wskaźnik zgodności.':item.text}</small></span><Icon name="arrow"/></button>)}
+            <div className="lu-home-directions"><span className="lu-welcome-eyebrow">ALBO ZACZNIJ OD KONKRETU</span>{modes.filter(m=>['message','brief','review','freelancers','help'].includes(m.id)).map((item,index)=><button type="button" key={item.id} disabled={!memory.ready || busy} onClick={()=>openTask(item.id)}><span className="lu-direction-number"><Icon name={item.icon}/></span><span><strong>{item.title}</strong><small>{item.id==='message'?'Dwie wersje. Jeden wybrany przez Ciebie ton.':item.id==='review'?'Kryteria, notatka i wskaźnik zgodności.':item.text}</small></span><Icon name="arrow"/></button>)}
               <p>Rozmawiasz z AI. Ty wybierasz, edytujesz i podejmujesz decyzje. <button type="button" className="lu-text-button" onClick={()=>setInfoOpen(true)}>Historia i prywatność</button></p>
             </div>
           </section>}
@@ -731,9 +753,9 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
               data-ai-output-sha256={message.provenance?.answer_sha256}>
               <div className="lu-message-avatar">{message.role === "assistant" ? <Mark small /> : <span aria-hidden="true">Ty</span>}</div>
               <div className="lu-message-content"><span className="lu-message-author">{message.role === "assistant" ? message.status?.startsWith("catalog") ? "Katalog IdeaHire" : message.error && !message.text ? "Połączenie z AI" : "Lucyna AI" : "Ty"}</span>
-                {message.text && <SafeText text={message.text} />}
-                {message.variants && <MessageVariants variants={message.variants} busy={busy} onNotice={setNotice} onRefine={refineMessage}/>}
-                {message.review && <ReviewResult review={message.review} onDraft={useCorrection} busy={busy} />}
+                {message.text && <MotionAnswer message={message}/>}
+                {message.variants && <MessageVariants variants={message.variants} animate={!!message.reveal} busy={busy} onNotice={setNotice} onRefine={refineMessage}/>}
+                {message.review && <ReviewResult review={message.review} animate={!!message.reveal} onDraft={useCorrection} busy={busy} />}
                 {message.actions?.length > 0 && <LucynaActionCards actions={message.actions} userId={user?.id} administration={administration} onNotice={setNotice} />}
                 {["loading","streaming"].includes(message.status) && (!message.text || ["jobs","freelancers","services","checking","analyzing"].includes(message.phase)) && <ThinkingIndicator phase={message.phase} />}
                 {message.status === "streaming" && <span className="lu-stream-cursor" aria-label="Odpowiedź jest wyświetlana" />}
@@ -753,7 +775,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 {message.status === "stopped" && <span className="lu-message-note">Generowanie zatrzymane.</span>}
                 {message.partial && <span className="lu-message-note">Odpowiedź jest częściowa.</span>}
                 {message.role === "assistant" && !["loading", "streaming"].includes(message.status) && (message.text || message.review) && <div className="lu-message-actions">
-                  <button type="button" onClick={() => copy(message)}><Icon name={copied === message.id ? "check" : "copy"} />{copied === message.id ? "Skopiowano" : "Kopiuj"}</button>
+                  <button type="button" onClick={() => copy(message)}><Icon name={copied === message.id ? "check" : "copy"} />{copied === message.id ? "Skopiowano" : message.variants ? "Kopiuj całą odpowiedź" : "Kopiuj"}</button>
                   {message.provenance?.ai_generated && <span>Wygenerowano z AI</span>}
                   {["guide", "local"].includes(message.kind) && <span>{message.kind === 'guide' ? 'Instrukcja IdeaHire' : 'Narzędzie lokalne'} · bez zużycia puli AI</span>}
                 </div>}

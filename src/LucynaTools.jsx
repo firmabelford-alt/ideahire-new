@@ -2,6 +2,7 @@ import { FormSelect, AutoTextarea } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Wiadomości, brief i analiza wybranego materiału. */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useLucynaReveal } from "./LucynaMotion";
 import { briefReadiness, briefTemplate, correctionDraft, LUCYNA_UUID, messageTemplate, normalizeMessageVariants, reviewSummary, suggestedCriteria } from "./LucynaCore";
 
 const byteLimit = (value, limit = 12000) => {
@@ -77,11 +78,14 @@ function ReviewScore({summary}) {
     <details className="lu-score-method"><summary>Jak obliczamy ten wynik?</summary><p>Spełnione: 1 punkt. Częściowo: 0,5. Niezgodność: 0. Wynik to suma punktów podzielona przez liczbę ocenionych kryteriów. „Do sprawdzenia” jest pomijane. Procent nie jest prawdopodobieństwem poprawności ani oceną całej pracy, autora, zgodności prawnej lub bezpieczeństwa. Odbiór pozostaje Twoją decyzją.</p></details>
   </div>;
 }
-export function MessageVariants({variants,onNotice,onRefine,busy}) {
+export function MessageVariants({variants,onNotice,onRefine,busy,animate=false}) {
   const normalized = normalizeMessageVariants(variants), [selected,setSelected] = useState(0);
   const [edits,setEdits] = useState(() => normalized?.map(v=>v.body) || []), [copied,setCopied] = useState(false);
-  const id = React.useId(), timer = useRef(null);
-  useEffect(()=>{setEdits(normalizeMessageVariants(variants)?.map(v=>v.body) || []);setSelected(0);setCopied(false);},[variants]);
+  const [interacted,setInteracted]=useState(false);
+  const [edited,setEdited]=useState([false,false]);
+  const id = React.useId(), timer = useRef(null), editor=useRef(null);
+  const reveal=useLucynaReveal(edits[selected] || '',(animate || interacted) && !edited[selected]);
+  useEffect(()=>{setEdits(normalizeMessageVariants(variants)?.map(v=>v.body) || []);setSelected(0);setCopied(false);setEdited([false,false]);setInteracted(false);},[variants]);
   useEffect(()=>()=>clearTimeout(timer.current),[]);
   if (!normalized) return null;
   async function copyVariant() {
@@ -90,19 +94,24 @@ export function MessageVariants({variants,onNotice,onRefine,busy}) {
   }
   return <section className="lu-variants" aria-label="Dwa warianty wiadomości">
     <div className="lu-variants-heading"><span>WIADOMOŚĆ DO WYBORU</span><strong>Ten sam sens. Dwie wersje.</strong><p>Wybierz brzmienie, które pasuje do Ciebie. Treść możesz od razu poprawić.</p></div>
-    <div className="lu-variant-options" role="group" aria-label="Wybierz wariant wiadomości">{normalized.map((v,i)=><button type="button" key={i} aria-pressed={selected===i} aria-controls={id+'-editor'} onClick={()=>{setSelected(i);setCopied(false);}}><span>{i===0?'A':'B'}</span><strong>{v.title}</strong>{selected===i&&<small>Wybrana</small>}</button>)}</div>
-    <div className="lu-variant-paper" key={selected}><label htmlFor={id+'-editor'}>Wariant {selected===0?'A':'B'} · edytuj przed wysłaniem</label><AutoTextarea id={id+'-editor'} rows={7} value={edits[selected] || ''} maxLength={2000} onChange={e=>{setEdits(all=>all.map((text,i)=>i===selected?e.target.value:text));setCopied(false);}} /></div>
-    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?'Skopiowano':'Kopiuj wybraną wersję'}</button><button type="button" className="lu-secondary" disabled={busy || !edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>Dopracuj z Lucyną</button></div>
+    <div className="lu-variant-options" role="group" aria-label="Wybierz wariant wiadomości">{normalized.map((v,i)=><button type="button" key={i} aria-pressed={selected===i} aria-controls={id+'-editor'} onClick={()=>{setSelected(i);setCopied(false);setInteracted(true);}}><span>{i===0?'A':'B'}</span><strong>{v.title}</strong>{selected===i&&<small>Wybrana</small>}</button>)}</div>
+    <div className="lu-variant-paper" key={selected} data-revealing={reveal.revealing}>
+      <div className="lu-paper-top"><label htmlFor={id+'-editor'}>WARIANT {selected===0?'A':'B'} <span>· {reveal.revealing?'ujawnianie treści':'możesz edytować'}</span></label><span aria-hidden="true">{selected===0?'01':'02'}</span></div>
+      {reveal.revealing && <div className="lu-draft-writing" aria-busy="true"><p>{reveal.text}<span className="lu-writing-caret" aria-hidden="true"/></p><button type="button" className="lu-text-button" onClick={()=>{reveal.revealAll();requestAnimationFrame(()=>editor.current?.focus({preventScroll:true}));}}>Pokaż od razu i edytuj</button></div>}
+      <AutoTextarea ref={editor} hidden={reveal.revealing} id={id+'-editor'} rows={3} value={edits[selected] || ''} maxLength={2000} onChange={e=>{setEdited(all=>all.map((value,i)=>i===selected?true:value));setEdits(all=>all.map((text,i)=>i===selected?e.target.value:text));setCopied(false);}} />
+    </div>
+    <div className="lu-tool-actions"><button type="button" className="lu-primary" disabled={!edits[selected]?.trim()} onClick={copyVariant}>{copied?'Skopiowano':'Kopiuj tekst'}</button><button type="button" className="lu-secondary" disabled={busy || !edits[selected]?.trim()} onClick={()=>onRefine(edits[selected])}>Dopracuj</button></div>
     <p className="lu-tool-note">Propozycje AI. Sprawdź fakty, adresata i zobowiązania. Wysyłasz samodzielnie. Edycja tej kopii nie zmienia pierwotnej odpowiedzi zapisanej w historii.</p>
   </section>;
 }
-export function ReviewResult({ review, onDraft, busy }) {
+export function ReviewResult({ review, onDraft, busy, animate=false }) {
   const summary = reviewSummary(review);
+  const reveal=useLucynaReveal(review.summary,animate);
   const labels = {met:"Spełnione",partial:"Częściowo",missing:"Niezgodność",unknown:"Do sprawdzenia"};
   return <section className="lu-review-result" aria-label="Wstępne sprawdzenie materiału">
     <div className="lu-review-heading"><strong>Notatka Lucyny</strong><span>Wstępna analiza AI</span></div>
-    <p className="lu-review-summary">{review.summary}</p>
-    <ol className="lu-criteria-results">{review.criteria.map((row,index)=><li key={index} className={"is-"+row.status}>
+    <p className="lu-review-summary" aria-busy={reveal.revealing}>{reveal.text}{reveal.revealing && <span className="lu-writing-caret" aria-hidden="true"/>}</p>
+    <ol className="lu-criteria-results" data-animate={animate}>{review.criteria.map((row,index)=><li key={index} style={{"--lu-row-index":index}} className={"is-"+row.status}>
       <div><strong>{row.criterion}</strong><span>{labels[row.status] || "Do sprawdzenia"}</span></div>
       <p>{row.reason}</p>{row.quote && <blockquote>{row.quote}</blockquote>}
       <small>{row.basis==="text" ? "Podstawa: dosłowny cytat z wybranego tekstu" : row.basis==="image" ? "Podstawa: obserwacja wybranego obrazu" : "Brak wystarczającego materiału"}</small>
