@@ -36,6 +36,42 @@ html body #root #ih59-registration { min-height: 100svh; min-height: 100dvh; wid
 .ih59-role-option:has(input:checked) { background: var(--journey-soft); border-color: var(--journey-accent); box-shadow: inset 0 0 0 1px var(--journey-accent); }
 .ih59-role-option:has(input:checked) .ih59-role-check { background: var(--journey-accent); border-color: var(--journey-accent); color: var(--journey-on); transform: scale(1.08); }
 .ih59-role-option:has(input:focus-visible) { outline: 2px solid var(--journey-accent); outline-offset: 4px; }
+/* The introductory questions keep each answer and its selection in one row. */
+@layer ideahireHeadings {
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-content { width:min(1120px,100%)!important; padding-block:36px!important; animation:ih-registration-enter .52s cubic-bezier(.2,.7,.2,1) both!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-heading h1 { font-size:clamp(29px,4vw,48px)!important; line-height:1.15!important; margin:14px 0!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-options { gap:16px!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-option { display:grid!important; grid-template-columns:28px minmax(0,1fr) 28px!important; grid-template-rows:auto 1fr!important; align-content:start!important; align-items:start!important; gap:10px 14px!important; min-height:180px!important; padding:24px 20px!important; border:1px solid var(--journey-line)!important; border-radius:17px!important; box-shadow:none!important; animation:ih-registration-choice .46s cubic-bezier(.2,.7,.2,1) both!important; animation-delay:calc(var(--choice) * 70ms)!important; transition:background-color .26s ease,border-color .26s ease,box-shadow .26s ease!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-number { grid-column:1!important; grid-row:1/3!important; margin:3px 0 0!important; font-size:12px!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-option strong { grid-column:2!important; grid-row:1!important; font-size:clamp(18px,1.65vw,21px)!important; line-height:1.35!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-description { grid-column:2!important; grid-row:2!important; margin:0!important; font-size:14px!important; line-height:1.65!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-check { position:static!important; grid-column:3!important; grid-row:1/3!important; align-self:center!important; display:grid!important; place-items:center!important; flex:none!important; box-sizing:border-box!important; width:28px!important; height:28px!important; min-width:28px!important; min-height:28px!important; aspect-ratio:1!important; margin:0!important; padding:0!important; border:1px solid var(--journey-line)!important; border-radius:50%!important; transform:none!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-check>svg { display:block!important; width:18px!important; height:18px!important; margin:0!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; opacity:0; transition:opacity .2s ease; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-option:has(input:checked) { border-color:var(--journey-accent)!important; background:var(--journey-accent)!important; box-shadow:0 6px 20px color-mix(in srgb,var(--journey-accent) 12%,transparent)!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-option:has(input:checked) .ih59-role-check { background:var(--journey-on)!important; border-color:var(--journey-on)!important; color:var(--journey-accent)!important; animation:ih-registration-check .28s ease-out!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-option:has(input:checked) .ih59-role-check>svg { opacity:1; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih-registration-start-feedback { min-height:48px; max-width:70ch; margin:20px 0 0; color:var(--journey-muted); font:400 14px/1.65 Inter,system-ui,sans-serif; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih-registration-actions { display:flex; align-items:center; justify-content:flex-end; gap:14px; min-width:0; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih59-primary { white-space:normal!important; text-wrap:balance; min-width:0!important; line-height:1.45!important; }
+  html:root body #root #ih59-registration[data-guided-onboarding] .ih-registration-back { flex:none; min-height:44px; margin:0; padding:8px 12px; border:0; background:none; color:var(--journey-ink); font:600 14px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
+  html:root body #root .ih10-register .ih10-registration-card { animation:ih-registration-enter .6s cubic-bezier(.2,.7,.2,1) both!important; }
+  html:root body #root .ih10-registration-card :is(.age-access-confirmation,.registration-privacy-confirmation) { display:grid!important; grid-template-columns:22px minmax(0,1fr)!important; align-items:start!important; gap:12px!important; min-width:0!important; padding-block:12px!important; }
+  html:root body #root .ih10-registration-card :is(.age-access-confirmation,.registration-privacy-confirmation) input[type=checkbox] { flex:none!important; position:static!important; appearance:auto!important; box-sizing:border-box!important; width:20px!important; height:20px!important; min-width:20px!important; min-height:20px!important; margin:3px 0 0!important; padding:0!important; accent-color:var(--v-accent,var(--ih7-accent)); cursor:pointer; }
+  html:root body #root .ih10-registration-card .registration-privacy-confirmation>div>label { display:block!important; padding-block:2px!important; cursor:pointer; }
+  @media(max-width:760px) {
+    html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-options { grid-template-columns:minmax(0,1fr)!important; gap:12px!important; }
+    html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-option { min-height:0!important; padding:20px 18px!important; }
+    html:root body #root #ih59-registration[data-guided-onboarding] .ih59-role-content { padding:28px 20px!important; }
+    html:root body #root #ih59-registration[data-guided-onboarding] .ih-registration-actions { width:100%; }
+    html:root body #root #ih59-registration[data-guided-onboarding] .ih-registration-actions .ih59-primary { flex:1; }
+  }
+  @keyframes ih-registration-enter { from { opacity:0; translate:0 16px; } to { opacity:1; translate:0 0; } }
+  @keyframes ih-registration-choice { from { opacity:0; translate:0 10px; } to { opacity:1; translate:0 0; } }
+  @keyframes ih-registration-check { from { scale:.72; } 65% { scale:1.08; } to { scale:1; } }
+  @media(prefers-reduced-motion:reduce) {
+    html:root body #root #ih59-registration[data-guided-onboarding] *, html:root body #root .ih10-register .ih10-registration-card { animation:none!important; transition:none!important; }
+  }
+}
 .ih59-role-status { min-height: 2em; margin: 18px 0 0; font-size: 12px; line-height: 1.65; color: var(--journey-muted); }
 .ih59-journey-footer { display: flex; align-items: center; justify-content: space-between; gap: 28px; width: 100%; padding: 22px clamp(20px, 5vw, 80px) max(22px, env(safe-area-inset-bottom)); border-top: 1px solid var(--journey-line); background: var(--journey-bg); }
 .ih59-journey-footer p { max-width: 560px; margin: 0; font-size: 11px; line-height: 1.65; color: var(--journey-muted); }

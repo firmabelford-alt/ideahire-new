@@ -186,3 +186,22 @@ html:root body :is(#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-l
   html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root #ih63-account-header.navbar.account-navbar .account-mini { gap:8px!important; width:90px!important; min-width:90px!important; }
 }
 @media (prefers-reduced-motion:reduce) { html:root body :is(#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu,#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu#ih18-account-menu) { animation:none!important; } }
+
+
+/* A currency is an indivisible suffix, independent of text enlargement. */
+@layer ideahireHeadings {
+  html:root body #root .ih53-calculator label.ih53-amount>span {
+    display:grid!important; grid-template-columns:minmax(0,1fr) max-content!important;
+    align-items:center!important; gap:12px!important; min-width:0!important;
+  }
+  html:root body #root .ih53-calculator label.ih53-amount>span>span {
+    display:block!important; flex:none!important; width:auto!important; min-width:2ch!important;
+    max-width:none!important; margin:0!important; padding:0!important;
+    white-space:nowrap!important; overflow-wrap:normal!important; word-break:normal!important;
+    writing-mode:horizontal-tb!important; line-height:1!important; text-align:center!important;
+  }
+  html:root body #root .ih53-calculator label.ih53-amount input {
+    width:100%!important; min-width:0!important; max-width:100%!important;
+    box-sizing:border-box!important; font-size:18px!important;
+  }
+}

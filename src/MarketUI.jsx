@@ -69,12 +69,14 @@ __IH40__ .ih40-hub-actions .ih14-account-action-group {gap:10px!important;paddin
 __IH40__ .ih40-hub-actions .ih14-account-action-group h2 {font-size:13px!important;}
 __IH40__ .ih40-hub-actions .ih14-account-action-group :is(a,button) {font-size:12px!important;min-height:44px!important;padding:10px!important;line-height:1.5!important;}
 __IH40__ .ih40-hub :is(button,a):focus-visible {outline:3px solid var(--m-accent)!important;outline-offset:3px!important;}
-__IH40__ .ih40-password {display:block!important;position:relative!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important;}
-__IH40__ .ih40-password > input {display:block!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;padding-right:58px!important;font-size:16px!important;}
-__IH40__ .ih40-password > button {position:absolute!important;inset:50% 5px auto auto!important;transform:translateY(-50%)!important;display:grid!important;place-items:center!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important;padding:11px!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;color:var(--ih7-muted,#5b687b)!important;cursor:pointer!important;}
+@layer ideahireHeadings {
+__IH40__ .ih40-password {display:grid!important;grid-template-columns:minmax(0,1fr) 49px!important;align-items:center!important;position:relative!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important;}
+__IH40__ .ih40-password > input {display:block!important;grid-area:1 / 1 / 2 / -1!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important;padding-right:58px!important;font-size:16px!important;}
+__IH40__ .ih40-password > button {position:static!important;grid-area:1 / 2!important;align-self:center!important;justify-self:start!important;inset:auto!important;transform:none!important;display:grid!important;place-items:center!important;box-sizing:border-box!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;max-width:44px!important;max-height:44px!important;margin:0!important;padding:0!important;border:0!important;border-radius:8px!important;background:transparent!important;box-shadow:none!important;color:var(--ih7-muted,#5b687b)!important;cursor:pointer!important;line-height:1!important;}
 __IH40__ .ih40-password > button:hover {color:var(--ih7-ink,#20314a)!important;background:color-mix(in srgb,currentColor 8%,transparent)!important;}
 __IH40__ .ih40-password > button:focus-visible {outline:2px solid var(--ih6-accent,#2859cc)!important;outline-offset:-2px!important;}
-__IH40__ .ih40-password > button svg {display:block!important;width:21px!important;height:21px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;}
+__IH40__ .ih40-password > button svg {display:block!important;width:21px!important;height:21px!important;min-width:21px!important;min-height:21px!important;margin:0!important;fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;}
+}
 __IH40__ .ih40-step {position:relative!important;isolation:isolate!important;display:block!important;min-width:0!important;min-height:280px!important;padding:0!important;overflow:hidden!important;border:1px solid var(--ih-home-line,#cdd6e3)!important;border-radius:22px!important;background:var(--ih-home-surface,#fff)!important;color:var(--ih-home-ink,#182535)!important;box-shadow:0 6px 24px color-mix(in srgb,currentColor 4%,transparent)!important;}
 __IH40__ .ih40-step > button {display:flex!important;position:relative!important;z-index:2!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:0!important;width:100%!important;min-width:0!important;height:100%!important;min-height:280px!important;padding:28px!important;margin:0!important;border:0!important;border-radius:inherit!important;background:transparent!important;color:inherit!important;box-shadow:none!important;transform:none!important;text-align:left!important;cursor:pointer!important;-webkit-text-fill-color:currentColor!important;font-family:inherit!important;}
 __IH40__ .ih40-step > button:focus-visible {outline:3px solid var(--ih-home-accent,currentColor)!important;outline-offset:-5px!important;}
@@ -526,6 +528,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
   const backdropPressed = useRef(false);
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [hasDateSelection, setHasDateSelection] = useState(false);
   const [focusedDay, setFocusedDay] = useState("");
   const [month, setMonth] = useState("");
   const isTime = type === "datetime-local";
@@ -585,6 +588,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     if (min && initial < min) initial = min;
     if (max && initial > max) initial = max;
     setDraft(initial);
+    setHasDateSelection(hasValidFormat(value));
     setMonth(initial.slice(0, 7));
     setFocusedDay(initial.slice(0, 10));
     focusPending.current = true;
@@ -603,6 +607,7 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     const day = Math.min(Number(focusedDay.slice(8, 10)) || 1, lastDay);
     setFocusedDay(clampDate(`${next}-${pad(day)}`));
     setMonth(next);
+    if (next !== dateKey.slice(0, 7)) setHasDateSelection(false);
     focusPending.current = focus;
   }
   function moveMonth(delta, focus = false) {
@@ -700,9 +705,9 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
         <div className="ih20-calendar-days" role="grid" aria-label={`${months[monthNumber - 1]} ${year}`} onKeyDown={dayKeyDown}>
           {Array.from({ length: cells.length / 7 }, (_, row) => <div className="ih21-calendar-row" role="row" key={row}>
             {cells.slice(row * 7, row * 7 + 7).map((cell, column) => cell ? <button type="button" role="gridcell" key={cell.key} data-day={cell.day} data-date={cell.key}
-              disabled={cell.unavailable} tabIndex={focusedDay === cell.key ? 0 : -1} aria-selected={dateKey === cell.key}
+              disabled={cell.unavailable} tabIndex={focusedDay === cell.key ? 0 : -1} aria-selected={hasDateSelection && dateKey === cell.key}
               aria-current={today === cell.key ? "date" : undefined} aria-label={parseDate(cell.key)?.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
-              onFocus={() => setFocusedDay(cell.key)} onClick={() => { if (isTime) setDraft(candidateForDate(cell.key)); else commit(cell.key); }}>{cell.day}</button>
+              onFocus={() => setFocusedDay(cell.key)} onClick={() => { setDraft(candidateForDate(cell.key)); setHasDateSelection(true); }}>{cell.day}</button>
               : <span role="gridcell" aria-hidden="true" key={`blank-${column}`} />)}
           </div>)}
         </div>
@@ -715,7 +720,8 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
           </FormSelect>
         </div>}
         {(!rangeAvailable || (isTime && !valid(draft))) && <p className="ih21-calendar-hint" role="status">{!rangeAvailable ? "Brak dostępnych dat w tym zakresie." : `Wybierz termin${min ? ` od ${format(min)}` : ""}${max ? ` do ${format(max)}` : ""}.`}</p>}
-        <footer>{!required && <button type="button" onClick={() => commit("")}>Wyczyść</button>}<button type="button" onClick={close}>Anuluj</button>{isTime && <button type="button" className="is-primary" disabled={!valid(draft)} onClick={() => commit(draft)}>Wybierz</button>}</footer>
+        <p className="ih-date-selection" role="status">{hasDateSelection ? `Wybrana data: ${format(draft)}` : "Zaznacz dzień, a następnie zatwierdź datę."}</p>
+        <footer>{!required && <button type="button" onClick={() => commit("")}>Wyczyść</button>}<button type="button" onClick={close}>Anuluj</button><button type="button" className="is-primary" disabled={!hasDateSelection || !valid(draft)} onClick={() => commit(draft)}>{isTime ? "Zatwierdź termin" : "Zatwierdź datę"}</button></footer>
     </dialog>, document.body)}
   </span>;
 }

@@ -2,7 +2,7 @@
   html:root body dialog.ih20-calendar {
     position:fixed!important; inset:0!important; box-sizing:border-box!important;
     width:min(380px,calc(100vw - 24px))!important; max-width:calc(100vw - 24px)!important;
-    height:auto!important; min-height:0!important; max-height:calc(100dvh - 32px)!important;
+    height:fit-content!important; block-size:fit-content!important; min-height:0!important; max-height:calc(100dvh - 32px)!important;
     margin:auto!important; padding:16px!important; overflow-y:auto!important; overflow-x:hidden!important;
     overscroll-behavior:contain!important; touch-action:pan-y!important;
     border:1px solid var(--v-line,#c9d8d6)!important; border-radius:16px!important;
@@ -10,7 +10,7 @@
     font:500 15px/1.5 Inter,system-ui,sans-serif!important;
   }
   html:root body dialog.ih20-calendar:not([open]) { display:none!important; }
-  html:root body dialog.ih20-calendar[open] { display:block!important; }
+  html:root body dialog.ih20-calendar[open] { display:block!important; animation:ih-date-open .24s ease-out both; }
   html:root body dialog.ih20-calendar::backdrop { background:#0006!important; }
   html:root body dialog.ih20-calendar header { gap:12px!important; margin-bottom:14px!important; }
   html:root body dialog.ih20-calendar header strong { font:650 18px/1.4 Inter,system-ui,sans-serif!important; }
@@ -29,6 +29,10 @@
     font:500 15px/1.5 Inter,system-ui,sans-serif!important;
   }
   html:root body dialog.ih20-calendar footer { margin-top:12px!important; }
+  html:root body dialog.ih20-calendar .ih-date-selection { margin:14px 0 0!important; color:var(--v-muted,#4c6364)!important; font:400 13px/1.6 Inter,system-ui,sans-serif!important; }
+  html:root body dialog.ih20-calendar footer button { white-space:nowrap!important; }
+  @keyframes ih-date-open { from { opacity:0; translate:0 8px; } to { opacity:1; translate:0 0; } }
+  @media(prefers-reduced-motion:reduce) { html:root body dialog.ih20-calendar[open] { animation:none; } }
   @media(max-width:350px) {
     html:root body dialog.ih20-calendar .ih20-calendar-navigation { grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important; }
     html:root body dialog.ih20-calendar .ih-date-month-select { grid-column:1!important; grid-row:1!important; }

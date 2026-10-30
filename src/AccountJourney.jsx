@@ -7,7 +7,7 @@ import "./AccountJourney.css";
 
 // Animate the outgoing panel before changing the actual step. No delayed focus
 // or second mounted copy of a form; reduced motion changes the step immediately.
-export function useJourneyMotion(panelRef) {
+export function useJourneyMotion(panelRef, { duration = 130, easing = "ease-in" } = {}) {
   const [moving, setMoving] = useState(false);
   const [direction, setDirection] = useState("forward");
   const active = useRef(null);
@@ -34,7 +34,7 @@ export function useJourneyMotion(panelRef) {
         const animation = panel.animate([
           { opacity: 1, transform: "translateX(0)" },
           { opacity: 0, transform: `translateX(${nextDirection === "back" ? 18 : -18}px)` },
-        ], { duration: 130, easing: "ease-in", fill: "forwards" });
+        ], { duration, easing, fill: "forwards" });
         active.current = animation;
         await animation.finished;
       }
@@ -63,19 +63,34 @@ export function RegistrationRoleScreen({ options, value, onChange, onContinue })
   const en = useSitePreferences().language === "en";
   const t = (pl, english) => en ? english : pl;
   const titleRef = useRef(null), panelRef = useRef(null);
-  const { moving, move } = useJourneyMotion(panelRef);
+  const { moving, move } = useJourneyMotion(panelRef, { duration: 320, easing: "ease-in-out" });
+  const [question, setQuestion] = useState(0);
+  const [startChoice, setStartChoice] = useState("");
   const selected = options.find(option => option.value === value);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); titleRef.current?.focus({ preventScroll: true }); }, []);
-  return <main id="ih59-registration" className="ih59-journey" data-moving={moving} data-no-translate="true">
+  const starts = [
+    { value: "ready", title: t("Od razu do konkretów", "Straight to the point"), description: t("Mam plan i wiem, od czego chcę zacząć.", "I have a plan and know where I want to start."), feedback: t("Po utworzeniu konta możesz przejść do projektów, usług i swojego profilu.", "Once your account is ready, you can explore projects, services and your profile.") },
+    { value: "compare", title: t("Pomóż mi wybrać kierunek", "Help me find a direction"), description: t("Chcę porównać możliwości i znaleźć coś dla siebie.", "I want to compare the options and find what suits me."), feedback: t("Zacznij od porównania opisów usług, profili i zleceń. Wybór należy do Ciebie.", "Start by comparing services, profiles and project briefs. The choice is yours.") },
+    { value: "explore", title: t("Najpierw się rozejrzę", "Let me explore first"), description: t("Wolę poznać platformę we własnym tempie.", "I prefer to get to know the platform at my own pace."), feedback: t("Możesz zacząć od przeglądania. Samo utworzenie konta niczego nie publikuje.", "You can start by browsing. Creating an account does not publish anything.") },
+  ];
+  const choices = question === 0 ? options : starts;
+  const answer = question === 0 ? value : startChoice;
+  const heading = question === 0 ? t("Jak chcesz działać?", "How would you like to use IdeaHire?") : t("Co ułatwi Ci start?", "What would help you get started?");
+  const status = question === 0 ? (selected ? t(`Wybrano: ${selected.eyebrow}.`, `Selected: ${EN_ROLES[selected.value]?.[0]}.`) : t("Wybierz jedną odpowiedź.", "Choose one option.")) : starts.find(option => option.value === startChoice)?.feedback;
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); titleRef.current?.focus({ preventScroll: true }); }, [question]);
+  const continueJourney = () => {
+    if (!selected || moving) return;
+    move(question === 0 ? () => setQuestion(1) : onContinue);
+  };
+  return <main id="ih59-registration" className="ih59-journey" data-guided-onboarding="true" data-question={question} data-moving={moving} data-no-translate="true">
     <header className="ih59-journey-header"><Link to="/" className="ih59-wordmark"><BrandSignature /></Link><ol className="ih59-registration-steps" aria-label={t("Etapy rejestracji", "Registration steps")}><li aria-current="step"><b>01</b>{t("Twój kierunek", "Your direction")}</li><li><b>02</b>{t("Twoje konto", "Your account")}</li></ol><Link to="/login" className="ih59-login-link">{t("Zaloguj się", "Sign in")}</Link></header>
-    <div className="ih59-role-content" ref={panelRef}>
-      <div className="ih59-role-heading"><span className="ih59-kicker">{t("Zacznijmy od Ciebie", "Let's start with you")}</span><h1 ref={titleRef} tabIndex={-1}>{t(<>Co sprowadza Cię<br />do IdeaHire?</>, <>What brings you<br />to IdeaHire?</>)}</h1><p>{t("Ułożymy pierwsze podpowiedzi pod Twój wybór. Zmienisz go w ustawieniach konta.", "Your choice shapes the first suggestions. You can change it in your account settings.")}</p></div>
-      <fieldset className="ih59-role-options" disabled={moving}><legend className="ih59-sr-only">{t("Wybierz sposób korzystania z IdeaHire", "Choose how to use IdeaHire")}</legend>
-        {options.map((option, index) => <label className="ih59-role-option" key={option.value} style={{ "--choice": index }}><input type="radio" name="registration-usage" value={option.value} checked={value === option.value} onChange={() => onChange(option.value)} /><span className="ih59-role-number" aria-hidden="true">{option.icon}</span><span className="ih59-role-check" aria-hidden="true">✓</span><span className="ih59-role-eyebrow">{en ? EN_ROLES[option.value]?.[0] : option.eyebrow}</span><strong>{en ? EN_ROLES[option.value]?.[1] : option.title}</strong><span className="ih59-role-description">{en ? EN_ROLES[option.value]?.[2] : option.description}</span></label>)}
+    <div className="ih59-role-content" ref={panelRef} key={question}>
+      <div className="ih59-role-heading"><span className="ih59-kicker">{t(`Poznajmy się · ${question + 1} z 2`, `Let's get acquainted · ${question + 1} of 2`)}</span><h1 ref={titleRef} tabIndex={-1}>{heading}</h1><p>{question === 0 ? t("Zacznijmy od Twojego planu. Dopasujemy pierwsze podpowiedzi.", "Let's start with your plan and tailor the first suggestions.") : t("Jedna krótka wskazówka na początek. To pytanie możesz pominąć.", "One quick pointer to get you started. You can skip this question.")}</p></div>
+      <fieldset className="ih59-role-options" disabled={moving}><legend className="ih59-sr-only">{heading}</legend>
+        {choices.map((option, index) => <label className="ih59-role-option" key={option.value} style={{ "--choice": index }}><input type="radio" name={question === 0 ? "registration-usage" : "registration-start"} value={option.value} checked={answer === option.value} onChange={() => { if (question === 0) { onChange(option.value); setStartChoice(""); } else setStartChoice(option.value); }} /><span className="ih59-role-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span><span className="ih59-role-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg></span><strong>{question === 0 ? (en ? EN_ROLES[option.value]?.[0] : option.eyebrow) : option.title}</strong><span className="ih59-role-description">{question === 0 && en ? EN_ROLES[option.value]?.[2] : option.description}</span></label>)}
       </fieldset>
-      <p className="ih59-role-status" role="status">{selected ? t(`Wybrano: ${selected.eyebrow.toLocaleLowerCase("pl-PL")}. Możesz przejść dalej.`, `Selected: ${EN_ROLES[selected.value]?.[0]}. You can continue.`) : t("Zaznacz jedną odpowiedź, aby przejść do formularza.", "Choose one option to continue to the account form.")}</p>
+      <p className={question === 0 ? "ih59-sr-only" : "ih-registration-start-feedback"} role="status" aria-live="polite">{status || " "}</p>
     </div>
-    <footer className="ih59-journey-footer"><p>{t("Wybór służy dopasowaniu treści. Uprawnienia konta zależą od wieku; nie określa on formy zatrudnienia ani rozliczeń.", "This choice personalises content. Age determines account permissions; the choice does not determine employment or tax status.")}</p><button type="button" className="ih59-primary" disabled={!selected || moving} onClick={() => move(onContinue)}>{moving ? t("Przechodzimy dalej…", "Continuing…") : t("Przejdź do formularza", "Continue to the form")}<span aria-hidden="true">→</span></button></footer>
+    <footer className="ih59-journey-footer"><p>{t("Wybór służy dopasowaniu treści. Uprawnienia konta zależą od wieku; nie określa on formy zatrudnienia ani rozliczeń.", "This choice personalises content. Age determines account permissions; the choice does not determine employment or tax status.")}</p><div className="ih-registration-actions">{question > 0 && <button type="button" className="ih-registration-back" disabled={moving} onClick={() => move(() => setQuestion(0), "back")}>{t("Wstecz", "Back")}</button>}<button type="button" className="ih59-primary" disabled={!selected || moving} onClick={continueJourney}>{moving ? (question === 0 ? t("Przechodzimy dalej…", "Continuing…") : t("Przechodzimy do tworzenia konta…", "Opening your account form…")) : question === 0 ? t("Jeszcze jedno pytanie", "One more question") : t("Przejdźmy do tworzenia konta", "Let's create your account")}</button></div></footer>
   </main>;
 }
 
