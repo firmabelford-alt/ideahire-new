@@ -73,11 +73,13 @@ import {
 } from "./supabase";
 import {
   getLoginErrorMessage,
+  getCaptchaErrorMessage,
   getPasswordRecoveryRedirectUrl,
   getNewPasswordValidationMessage,
   NEW_PASSWORD_MIN_LENGTH,
   normalizeEmail,
 } from "./auth";
+import { useAuthCaptcha } from "./AuthCaptcha";
 import {
   containsCredentialLikeText,
   MessageText,
@@ -5345,6 +5347,8 @@ function Login() {
 
   const [mode, setMode] =
     useState("login");
+  const authPreferences = useSitePreferences();
+  const captcha = useAuthCaptcha(mode === "reset" ? "password_reset" : "login", authPreferences);
 
   const [email, setEmail] =
     useState("");
@@ -5401,6 +5405,7 @@ function Login() {
   ]);
 
   function switchToReset() {
+    captcha.reset();
     cancelGoogleAuth();
     setMode("reset");
     setMessage("");
@@ -5409,6 +5414,7 @@ function Login() {
   }
 
   function switchToLogin() {
+    captcha.reset();
     setMode("login");
     setMessage("");
     setSuccess(false);
@@ -5424,6 +5430,10 @@ function Login() {
 
     setMessage("");
     setSuccess(false);
+
+    const captchaToken = captcha.consume();
+    if (captchaToken === null) { setMessage(captcha.message); captcha.reset(); return; }
+
     setLoading(true);
 
     try {
@@ -5436,12 +5446,13 @@ function Login() {
             email:
               normalizeEmail(email),
             password,
+            ...(captchaToken ? { options: { captchaToken } } : {}),
           }
         );
 
       if (error) {
         setMessage(
-          getLoginErrorMessage(error)
+          getLoginErrorMessage(error, captcha.english)
         );
 
         return;
@@ -5482,9 +5493,10 @@ function Login() {
       );
     } catch (error) {
       setMessage(
-        getLoginErrorMessage(error)
+        getLoginErrorMessage(error, captcha.english)
       );
     } finally {
+      captcha.reset();
       setLoading(false);
     }
   }
@@ -5502,6 +5514,7 @@ function Login() {
     event
   ) {
     event.preventDefault();
+    if (loading) return;
 
     setMessage("");
     setSuccess(false);
@@ -5517,6 +5530,9 @@ function Login() {
       return;
     }
 
+    const captchaToken = captcha.consume();
+    if (captchaToken === null) { setMessage(captcha.message); captcha.reset(); return; }
+
     setLoading(true);
 
     try {
@@ -5528,12 +5544,13 @@ function Login() {
               getPasswordRecoveryRedirectUrl(
                 window.location.origin
               ),
+            ...(captchaToken ? { captchaToken } : {}),
           }
         );
 
       if (error) {
         setMessage(
-          `Nie udało się wysłać wiadomości: ${error.message}`
+          getCaptchaErrorMessage(error, captcha.english) || `Nie udało się wysłać wiadomości: ${error.message}`
         );
 
         return;
@@ -5546,12 +5563,13 @@ function Login() {
       );
     } catch (error) {
       setMessage(
-        `Nie udało się wysłać wiadomości: ${
+        getCaptchaErrorMessage(error, captcha.english) || `Nie udało się wysłać wiadomości: ${
           error?.message ||
           "Nieznany błąd"
         }`
       );
     } finally {
+      captcha.reset();
       setLoading(false);
     }
   }
@@ -5612,6 +5630,8 @@ function Login() {
               />
             </label>
 
+            {captcha.field}
+
             {message && (
               <p
                 className={
@@ -5627,7 +5647,7 @@ function Login() {
             <button
               className="btn btn-dark btn-large"
               type="submit"
-              disabled={loading}
+              disabled={loading || !captcha.ready}
             >
               {loading
                 ? "Wysyłanie..."
@@ -5747,6 +5767,8 @@ function Login() {
             </button>
           </div>
 
+          {captcha.field}
+
           {message && (
             <p className="auth-error">
               {message}
@@ -5756,7 +5778,7 @@ function Login() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading}
+            disabled={loading || !captcha.ready}
           >
             {loading
               ? "Logowanie..."
@@ -6233,7 +6255,9 @@ function ResetPassword() {
 /* REGISTER */
 
 function Register() {
-  const registrationEnglish = useSitePreferences().language === "en";
+  const registrationPreferences = useSitePreferences();
+  const registrationEnglish = registrationPreferences.language === "en";
+  const captcha = useAuthCaptcha("signup", registrationPreferences);
   const {
     isLoggedIn,
     loading: authLoading,
@@ -6393,6 +6417,9 @@ function Register() {
       return;
     }
 
+    const captchaToken = captcha.consume();
+    if (captchaToken === null) { setMessage(captcha.message); captcha.reset(); return; }
+
     registrationRequest.current = true;
     setLoading(true);
 
@@ -6410,6 +6437,7 @@ function Register() {
             normalizeEmail(email),
           password,
           options: {
+            ...(captchaToken ? { captchaToken } : {}),
             data: {
               name:
                 name.trim(),
@@ -6443,7 +6471,7 @@ function Register() {
 
       if (error) {
         setMessage(
-          `Nie udało się utworzyć konta: ${error.message}`
+          getCaptchaErrorMessage(error, captcha.english) || `Nie udało się utworzyć konta: ${error.message}`
         );
 
         return;
@@ -6464,12 +6492,13 @@ function Register() {
       }
     } catch (error) {
       setMessage(
-        `Nie udało się utworzyć konta: ${
+        getCaptchaErrorMessage(error, captcha.english) || `Nie udało się utworzyć konta: ${
           error?.message ||
           "Nieznany błąd"
         }`
       );
     } finally {
+      captcha.reset();
       registrationRequest.current = false;
       setLoading(false);
     }
@@ -6717,6 +6746,8 @@ function Register() {
             </div>
           </div>
 
+          {captcha.field}
+
           {message && (
             <p className="auth-error ih59-registration-error" role="alert" tabIndex={-1} ref={errorRef}>
               {message}
@@ -6726,7 +6757,7 @@ function Register() {
           <button
             className="btn btn-dark btn-large"
             type="submit"
-            disabled={loading}
+            disabled={loading || !captcha.ready}
           >
             {loading
               ? "Tworzenie konta..."

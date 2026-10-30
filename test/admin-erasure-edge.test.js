@@ -37,14 +37,14 @@ test('an owner phrase is required before an awaiting operation can be authorized
  const f=fixture({status:'awaiting_owner'});assert.equal((await f.request()).status,409);assert.equal(f.calls.length,0);
 });
 test('minimization clears optional metadata and data but never closes the login account',async()=>{
- const f=fixture(),r=await f.request();assert.equal(r.status,200);assert.equal(r.data.ok,true);assert.equal(r.data.executionResult.auth_soft_deleted,false);
+ const f=fixture(),r=await f.request({executionConfirmation:'ZATWIERDZAM USUNIECIE'});assert.equal(r.status,200);assert.equal(r.data.ok,true);assert.equal(r.data.executionResult.auth_soft_deleted,false);
  assert.equal(f.calls.some(x=>x.name==='auth.deleteUser'),false);
  assert.deepEqual(f.calls.find(x=>x.name==='auth.metadata').values,{user_metadata:{name:null}});
  assert.equal(f.calls.filter(x=>x.name==='admin_apply_ideahire_erasure_data').length,1);
  assert.equal(f.calls.at(-1).name,'admin_finalize_ideahire_erasure_case');
 });
 test('a relational failure is reported at its real stage and cannot finalize the case as complete',async()=>{
- const f=fixture({failure:{code:'23503',message:'foreign key internal detail'}}),r=await f.request();
+ const f=fixture({failure:{code:'23503',message:'foreign key internal detail'}}),r=await f.request({executionConfirmation:'ZATWIERDZAM USUNIECIE'});
  assert.equal(r.status,409);assert.equal(r.data.code,'23503');assert.equal(r.data.stage,'apply_data');assert.equal(r.data.retryable,false);
  assert.doesNotMatch(r.data.error,/foreign key|internal detail/);
  assert.equal(f.calls.some(x=>x.name==='admin_finalize_ideahire_erasure_case'),false);

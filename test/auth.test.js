@@ -2,11 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  getCaptchaErrorMessage,
   getLoginErrorMessage,
   getPasswordRecoveryRedirectUrl,
   isPasswordRecoveryUrl,
   normalizeEmail,
 } from "../src/auth.js";
+
+test("CAPTCHA errors explain re-verification in both languages without returning provider text", () => {
+  const error = { code: "captcha_verification_failed", message: "captcha provider detail" };
+  assert.match(getCaptchaErrorMessage(error), /Potwierdź ją ponownie/);
+  assert.match(getLoginErrorMessage(error, true), /Please verify again/);
+  assert.doesNotMatch(getLoginErrorMessage(error), /provider detail/);
+  assert.equal(getCaptchaErrorMessage({ code: "invalid_credentials" }), "");
+});
 
 test("normalizes e-mail used by login and recovery", () => {
   assert.equal(

@@ -1,0 +1,42 @@
+#root .auth-form .ih-auth-captcha {
+  display:grid!important;
+  gap:10px!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:8px 0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  text-align:start!important;
+}
+#root .auth-form .ih-auth-captcha-widget {
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:65px;
+  padding:0!important;
+  overflow:hidden;
+}
+#root .auth-form .ih-auth-captcha-widget[data-size="compact"] { min-height:140px; }
+#root .auth-form .ih-auth-captcha-status {
+  margin:0!important;
+  color:var(--v-muted,#526663)!important;
+  font:400 13px/1.6 Inter,system-ui,sans-serif!important;
+  text-align:start!important;
+  overflow-wrap:anywhere;
+}
+#root .auth-form .ih-auth-captcha-retry {
+  justify-self:start!important;
+  width:auto!important;
+  min-height:44px!important;
+  margin:0!important;
+  padding:9px 0!important;
+  border:0!important;
+  background:transparent!important;
+  color:var(--v-accent,#16766e)!important;
+  font:600 14px/1.5 Inter,system-ui,sans-serif!important;
+  text-align:start!important;
+  cursor:pointer;
+}
+#root .auth-form .ih-auth-captcha-retry:focus-visible { outline:2px solid currentColor; outline-offset:4px; }

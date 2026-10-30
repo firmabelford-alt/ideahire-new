@@ -55,10 +55,21 @@ export function isPasswordRecoveryUrl(href) {
   );
 }
 
-export function getLoginErrorMessage(error) {
+export function getCaptchaErrorMessage(error, english = false) {
+  const code = String(error?.code || "").toLowerCase();
+  const message = String(error?.message || "").toLowerCase();
+  if (!code.includes("captcha") && !message.includes("captcha")) return "";
+  return english
+    ? "Security verification failed or expired. Please verify again. If verification is not visible, refresh this page."
+    : "Weryfikacja bezpieczeństwa nie powiodła się lub wygasła. Potwierdź ją ponownie. Jeśli nie widzisz weryfikacji, odśwież stronę.";
+}
+
+export function getLoginErrorMessage(error, english = false) {
   const code = String(error?.code || "").toLowerCase();
   const message = String(error?.message || "");
   const normalizedMessage = message.toLowerCase();
+  const captchaMessage = getCaptchaErrorMessage(error, english);
+  if (captchaMessage) return captchaMessage;
 
   if (
     code === "invalid_credentials" ||
