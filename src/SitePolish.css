@@ -190,6 +190,11 @@ html:root body :is(#ih64-limited-menu#ih64-limited-menu#ih64-limited-menu#ih64-l
 
 /* A currency is an indivisible suffix, independent of text enlargement. */
 @layer ideahireHeadings {
+  html:root body #root #ih63-home-header #ih-home-navigation button.ih63-menu-logout {
+    color:var(--ih63-nav-ink,#191919)!important;
+    -webkit-text-fill-color:currentColor!important;
+    opacity:1!important;
+  }
   html:root body #root .ih53-calculator label.ih53-amount>span {
     display:grid!important; grid-template-columns:minmax(0,1fr) max-content!important;
     align-items:center!important; gap:12px!important; min-width:0!important;
