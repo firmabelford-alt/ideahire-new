@@ -1,82 +1,133 @@
-/* One introduction before account creation, using the selected IdeaHire palette. */
+/* Registration cinema: one scene, fixed questions, an independently scrolling answer area. */
 @layer ideahireHeadings {
   html:root:has(#ih-registration-interview), html:root body:has(#ih-registration-interview) { overflow:hidden!important; scrollbar-gutter:auto!important; }
   html:root body #root #ih-registration-interview {
-    --ri-bg:var(--ih7-bg,#fff); --ri-paper:var(--ih7-surface,#fff); --ri-soft:var(--ih7-soft,#f4f4f4);
-    --ri-ink:var(--ih7-ink,#191919); --ri-muted:var(--ih7-muted,#555); --ri-line:var(--ih7-line,#d5d5d5);
-    --ri-accent:var(--ih7-accent,#191919); --ri-on:var(--ih7-on-accent,#fff);
-    display:grid!important; grid-template-rows:auto auto minmax(0,1fr) auto!important; box-sizing:border-box!important; width:100%!important; min-width:0!important;
-    height:100svh!important; height:var(--ri-viewport-height,100dvh)!important; min-height:0!important; margin:0!important; padding:0!important;
+    --ri-bg:#f6f0eb; --ri-paper:#fffaf5; --ri-soft:#eee2ec; --ri-ink:#2b1b31; --ri-muted:#756575;
+    --ri-line:#d7c4d3; --ri-accent:#653c73; --ri-on:#fff2e5; --ri-lilac:#a58ccf; --ri-peach:#ffc3a6;
+    display:grid!important; grid-template-rows:auto auto minmax(0,1fr) auto!important; position:relative!important;
+    box-sizing:border-box!important; width:100%!important; height:var(--ri-viewport-height,100dvh)!important; min-width:0!important; min-height:0!important;
+    margin:0!important; padding:0 0 var(--ri-cookie-space,0px)!important; overflow:hidden!important; isolation:isolate!important;
     background:var(--ri-bg)!important; color:var(--ri-ink)!important; font-family:Inter,system-ui,sans-serif!important;
-    overflow:hidden!important; isolation:isolate;
+    & *, & *::before, & *::after { box-sizing:border-box!important; }
+    & :is(button,input,a,label,strong,span,small,p,h1,h2,dt,dd) { -webkit-text-fill-color:currentColor!important; }
+    &[data-cover=true] { --ri-bg:#19131f; --ri-paper:#2a2030; --ri-ink:#fff0e0; --ri-muted:#d0bccd; --ri-line:#65506c; --ri-accent:#ffc3a6; --ri-on:#2e1931; --ri-lilac:#c3a7f3; }
+    & .ri-ambient { position:absolute!important; inset:0!important; overflow:hidden!important; z-index:-1!important; pointer-events:none!important; }
+    & .ri-ambient>span { position:absolute!important; display:block!important; border-radius:50%!important; opacity:.4; will-change:transform; }
+    & .ri-ambient>span:nth-child(1) { width:1000px; height:1000px; right:-520px; top:-540px; background:radial-gradient(ellipse,#ba8cd640 0%,#b689d320 35%,transparent 66%); animation:ri-aurora 14s ease-in-out infinite alternate; }
+    & .ri-ambient>span:nth-child(2) { width:900px; height:900px; left:-600px; bottom:-650px; background:radial-gradient(ellipse,#f2a47a65 0%,#f2a47a20 35%,transparent 66%); animation:ri-aurora 17s ease-in-out infinite alternate-reverse; }
+    & .ri-ambient>span:nth-child(3) { width:65%; height:180%; top:-45%; left:5%; border-radius:0!important; opacity:.1; background:linear-gradient(100deg,transparent 35%,#dfb7ec 49%,transparent 56%); transform:rotate(-28deg); animation:ri-light-pass 12s ease-in-out infinite; }
+    &[data-cover=true] .ri-ambient>span:nth-child(1) { opacity:1; }
+    &[data-cover=true] .ri-ambient>span:nth-child(2) { opacity:.8; }
+    & .ri-header { grid-row:1!important; position:relative!important; z-index:2!important; display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; width:min(1240px,100%)!important; margin:0 auto!important; padding:27px 40px 22px!important; background:none!important; border:0!important; }
+    & .ri-header a { color:var(--ri-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+    & .ri-brand { display:inline-flex!important; align-items:center!important; min-width:0!important; }
+    & .ri-brand :is(.ih-brand-signature,.ih-brand-wordmark,.ih-brand-mark) { color:inherit!important; }
+    & .ri-brand .ih-brand-signature { font-size:29px!important; }
+    & .ri-progress-wrap { grid-row:2!important; width:min(1160px,calc(100% - 80px))!important; margin:0 auto!important; padding:0 0 10px!important; }
+    & .ri-progress-wrap[hidden] { display:none!important; }
+    & .ri-progress-caption { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; padding:0 0 11px!important; color:var(--ri-muted)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; }
+    & .ri-progress-caption b { margin-left:14px!important; color:var(--ri-ink)!important; font-variant-numeric:tabular-nums!important; font-weight:650!important; }
+    & .ri-progress { height:3px!important; width:100%!important; padding:0!important; margin:0!important; border:0!important; border-radius:4px!important; background:color-mix(in srgb,var(--ri-muted) 25%,transparent)!important; overflow:hidden!important; }
+    & .ri-progress>span { display:block!important; height:100%!important; border-radius:inherit!important; background:linear-gradient(90deg,var(--ri-lilac),var(--ri-accent))!important; box-shadow:0 0 14px color-mix(in srgb,var(--ri-accent) 40%,transparent)!important; transition:width .65s cubic-bezier(.2,.8,.2,1)!important; }
+    & .ri-stage { grid-row:3!important; position:relative!important; z-index:1!important; width:min(1160px,calc(100% - 80px))!important; height:100%!important; min-height:0!important; min-width:0!important; margin:0 auto!important; }
+    & .ri-cover { position:relative!important; display:grid!important; grid-template-columns:1.04fr 1fr!important; align-items:center!important; height:100%!important; min-height:0!important; gap:0!important; }
+    & .ri-cover-copy { position:relative!important; z-index:2!important; max-height:100%!important; min-height:0!important; overflow-y:auto!important; overflow-x:hidden!important; padding:24px 0 30px!important; scrollbar-width:thin; scrollbar-color:var(--ri-line) transparent; }
+    & .ri-kicker { display:block!important; margin:0 0 20px!important; color:var(--ri-accent)!important; font:600 10px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:.14em!important; text-transform:uppercase!important; }
+    & h1 { color:var(--ri-ink)!important; text-wrap:balance!important; overflow-wrap:normal!important; word-break:normal!important; }
+    & h1:focus { outline:none!important; }
+    & .ri-cover h1 { margin:0 0 24px!important; padding:0 0 .1em!important; color:#fff0df!important; font:750 clamp(52px,6.8vw,94px)/1.02 Inter,system-ui,sans-serif!important; letter-spacing:-.065em!important; }
+    & .ri-cover h1>span { display:block!important; animation:ri-title-arrive .95s cubic-bezier(.16,.8,.18,1) both; }
+    & .ri-cover h1>span:nth-child(2) { animation-delay:.12s; }
+    & .ri-cover h1 em { display:inline-block; color:var(--ri-peach)!important; font:italic 500 1.12em/.9 Georgia,"Times New Roman",serif!important; letter-spacing:-.065em!important; }
+    & .ri-cover-copy>p { max-width:39ch!important; margin:0!important; color:var(--ri-muted)!important; font:400 16px/1.8 Inter,system-ui,sans-serif!important; animation:ri-title-arrive .8s .24s both; }
+    & .ri-cover-note { display:flex!important; align-items:center!important; gap:10px!important; margin-top:30px!important; color:var(--ri-muted)!important; font:450 11px/1.6 Inter,system-ui,sans-serif!important; animation:ri-title-arrive .8s .35s both; }
+    & .ri-cover-note>span { flex:0 0 6px!important; width:6px!important; height:6px!important; border-radius:50%!important; background:var(--ri-peach)!important; box-shadow:0 0 14px #ffb89470; animation:ri-signal 3s ease-in-out infinite; }
+    & .ri-artwork { position:relative!important; z-index:1!important; display:block!important; width:115%!important; height:100%!important; max-height:620px!important; margin-left:-4%!important; pointer-events:none!important; animation:ri-art-arrive 1.2s cubic-bezier(.16,.8,.18,1) both; }
+    & .ri-artwork svg { display:block!important; width:100%!important; height:100%!important; overflow:visible!important; }
+    & .ri-sculpture { transform-origin:300px 300px; animation:ri-sculpture-float 6s ease-in-out infinite alternate; }
+    & .ri-orbit-back { transform-origin:300px 306px; animation:ri-orbit 9s ease-in-out infinite alternate; }
+    & .ri-orbit-front { animation:ri-front-orbit 9s ease-in-out infinite alternate; }
+    & .ri-art-points { transform-origin:300px 300px; animation:ri-orbit 16s ease-in-out infinite alternate-reverse; }
+    & .ri-question-layout { display:grid!important; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)!important; height:100%!important; min-height:0!important; gap:64px!important; padding:38px 0 20px!important; }
+    & .ri-heading { position:relative!important; align-self:start!important; min-width:0!important; margin:0!important; padding:0 0 24px!important; animation:ri-title-arrive .65s cubic-bezier(.16,.8,.18,1) both; }
+    & .ri-heading::after { content:""; display:block; width:56px; height:3px; margin-top:28px; border-radius:4px; background:linear-gradient(90deg,var(--ri-accent),var(--ri-lilac)); }
+    & .ri-heading h1 { margin:0 0 20px!important; padding:0!important; font:720 clamp(30px,3.45vw,47px)/1.12 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; }
+    & .ri-heading>p { max-width:44ch!important; margin:0!important; color:var(--ri-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+    & .ri-answer-viewport { min-height:0!important; height:100%!important; min-width:0!important; padding:0 12px 32px 0!important; overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain!important; scroll-padding-block:12px!important; scrollbar-width:thin!important; scrollbar-color:var(--ri-line) transparent!important; animation:ri-answer-arrive .55s cubic-bezier(.16,.8,.18,1) both; }
+    &[data-direction=back] .ri-answer-viewport { animation-name:ri-answer-return; }
+    & .ri-fields { display:block!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; }
+    & .ri-sr-only, & .ri-choice>input { position:absolute!important; width:1px!important; height:1px!important; margin:-1px!important; padding:0!important; overflow:hidden!important; clip-path:inset(50%)!important; white-space:nowrap!important; border:0!important; }
+    & .ri-choices { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:8px!important; min-width:0!important; }
+    & .ri-choice { position:relative!important; display:flex!important; align-items:center!important; gap:16px!important; min-width:0!important; min-height:94px!important; margin:0!important; padding:19px 20px!important; border:1px solid transparent!important; border-bottom-color:var(--ri-line)!important; border-radius:12px!important; background:color-mix(in srgb,var(--ri-paper) 30%,transparent)!important; color:var(--ri-ink)!important; text-align:left!important; cursor:pointer!important; transition:background .25s,border-color .25s,box-shadow .25s,transform .25s!important; animation:ri-choice-arrive .5s cubic-bezier(.16,.8,.18,1) both; animation-delay:calc(var(--ri-choice-index,0)*35ms); }
+    & .ri-choice:hover { border-color:var(--ri-line)!important; background:color-mix(in srgb,var(--ri-paper) 75%,transparent)!important; transform:translateX(3px); }
+    & .ri-choice-number { flex:0 0 20px!important; align-self:flex-start!important; margin:3px 0 0!important; color:var(--ri-muted)!important; font:550 10px/1.5 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; }
+    & .ri-choice-copy { display:grid!important; flex:1 1 0!important; min-width:0!important; gap:7px!important; }
+    & .ri-choice-copy>strong { display:block!important; color:var(--ri-ink)!important; font:650 18px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; overflow-wrap:anywhere!important; }
+    & .ri-choice-copy>span { display:block!important; margin:0!important; color:var(--ri-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+    & .ri-choice-check { display:grid!important; place-items:center!important; flex:0 0 25px!important; width:25px!important; height:25px!important; min-width:25px!important; min-height:25px!important; margin:0!important; padding:0!important; border:1px solid var(--ri-line)!important; border-radius:50%!important; background:transparent!important; color:var(--ri-on)!important; }
+    & .ri-choice-check svg { display:block!important; width:17px!important; height:17px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; opacity:0; transform:scale(.5); transition:opacity .2s,transform .3s cubic-bezier(.2,1.5,.4,1); }
+    & .ri-choice:has(input:checked) { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; box-shadow:0 9px 30px color-mix(in srgb,var(--ri-accent) 12%,transparent)!important; transform:none; }
+    & .ri-choice:has(input:checked) :is(.ri-choice-copy>strong,.ri-choice-copy>span,.ri-choice-number) { color:var(--ri-on)!important; }
+    & .ri-choice:has(input:checked) .ri-choice-check { border-color:var(--ri-on)!important; background:var(--ri-on)!important; color:var(--ri-accent)!important; }
+    & .ri-choice:has(input:checked) .ri-choice-check svg { opacity:1!important; transform:scale(1)!important; }
+    & .ri-choice:has(input:focus-visible) { outline:2px solid var(--ri-accent)!important; outline-offset:3px!important; }
+    & .ri-choice:has(input:disabled) { pointer-events:none; }
+    & .ri-category-choices { grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; }
+    & .ri-category-choices .ri-choice { align-items:start!important; padding:17px 14px!important; gap:9px!important; border-color:var(--ri-line)!important; min-height:112px!important; }
+    & .ri-category-choices .ri-choice-number { display:none!important; }
+    & .ri-category-choices .ri-choice-copy>strong { font-size:15px!important; }
+    & .ri-category-choices .ri-choice-copy>span { font-size:11px!important; }
+    & .ri-category-choices .ri-choice-check { flex-basis:20px!important; width:20px!important; height:20px!important; min-width:20px!important; min-height:20px!important; margin-top:2px!important; }
+    & .ri-category-choices .ri-choice-check svg { width:14px!important; height:14px!important; }
+    & .ri-category-tabs { display:flex!important; gap:10px!important; flex-wrap:wrap!important; margin:0 0 18px!important; }
+    & .ri-category-tabs button { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:14px!important; min-height:44px!important; padding:9px 15px!important; margin:0!important; border:1px solid var(--ri-line)!important; border-radius:8px!important; background:transparent!important; color:var(--ri-ink)!important; font:550 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+    & .ri-category-tabs button[aria-pressed=true] { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; }
+    & :is(.ri-context,.ri-counter,.ri-feedback,.ri-quiet) { display:block!important; margin:15px 0!important; color:var(--ri-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+    & .ri-context { margin:0 0 14px!important; color:var(--ri-ink)!important; font-weight:600!important; }
+    & .ri-feedback { margin:22px 0 8px!important; padding-left:16px!important; border-left:2px solid var(--ri-accent)!important; color:var(--ri-ink)!important; font-size:14px!important; }
+    & .ri-quiet { margin:0!important; font-size:11px!important; }
+    & .ri-text-field { display:grid!important; gap:10px!important; margin:24px 0 0!important; color:var(--ri-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; }
+    & .ri-text-field input { display:block!important; width:100%!important; min-width:0!important; min-height:50px!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--ri-line)!important; border-radius:10px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; font:400 16px/1.5 Inter,system-ui,sans-serif!important; }
+    & .ri-text-field small { color:var(--ri-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
+    & .ri-readiness { min-width:0!important; margin:28px 0 0!important; padding:0!important; border:0!important; }
+    & .ri-readiness legend { padding:0 0 16px!important; color:var(--ri-ink)!important; font:650 17px/1.5 Inter,system-ui,sans-serif!important; }
+    & .ri-summary { padding:24px!important; border:1px solid var(--ri-line)!important; border-radius:16px!important; background:linear-gradient(130deg,color-mix(in srgb,var(--ri-lilac) 12%,var(--ri-paper)),var(--ri-paper))!important; }
+    & .ri-summary-mark { display:grid!important; place-items:center!important; width:48px!important; height:48px!important; margin:0 0 25px!important; border-radius:50%!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; animation:ri-summary-in .7s cubic-bezier(.2,1.5,.4,1) both; }
+    & .ri-summary-mark svg { width:24px!important; height:24px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
+    & .ri-summary dl { display:grid!important; gap:0!important; margin:0!important; }
+    & .ri-summary dl>div { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:5px!important; padding:15px 0!important; border-bottom:1px solid var(--ri-line)!important; }
+    & .ri-summary dt { margin:0!important; color:var(--ri-muted)!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; }
+    & .ri-summary dd { margin:0!important; color:var(--ri-ink)!important; font:600 14px/1.7 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+    & .ri-summary>p { margin:22px 0 0!important; color:var(--ri-muted)!important; font:400 13px/1.8 Inter,system-ui,sans-serif!important; }
+    & .ri-error { margin:0 0 16px!important; padding:12px 15px!important; border-left:2px solid var(--ri-accent)!important; color:var(--ri-ink)!important; background:var(--ri-soft)!important; font:600 13px/1.6 Inter,system-ui,sans-serif!important; }
+    & .ri-privacy { margin:24px 0 0!important; color:var(--ri-muted)!important; font:400 10px/1.8 Inter,system-ui,sans-serif!important; }
+    & .ri-privacy a { color:inherit!important; text-decoration:underline!important; text-underline-offset:3px!important; }
+    & .ri-footer { grid-row:4!important; position:relative!important; z-index:3!important; width:min(1240px,100%)!important; margin:0 auto!important; padding:17px 40px 20px!important; border:0!important; background:transparent!important; }
+    & .ri-navigation { display:flex!important; align-items:stretch!important; gap:14px!important; }
+    & .ri-next { position:relative!important; display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; min-width:0!important; min-height:52px!important; width:340px!important; max-width:100%!important; margin:0 0 0 auto!important; padding:14px 20px!important; border:1px solid var(--ri-accent)!important; border-radius:9px!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; box-shadow:0 6px 30px color-mix(in srgb,var(--ri-accent) 14%,transparent)!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; text-align:left!important; transition:transform .25s,box-shadow .25s!important; overflow:hidden!important; }
+    & .ri-next::before { content:""; position:absolute; inset:-1px; pointer-events:none; background:linear-gradient(105deg,transparent 30%,#fff6 48%,transparent 65%); transform:translateX(-150%); animation:ri-button-light 6s 1.5s ease-in-out infinite; }
+    & .ri-next>span { position:relative!important; min-width:0!important; white-space:normal!important; }
+    & .ri-next svg { position:relative!important; flex:0 0 21px!important; width:21px!important; height:21px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.7!important; stroke-linecap:round!important; stroke-linejoin:round!important; transition:translate .25s!important; }
+    & .ri-next:hover { transform:translateY(-2px)!important; box-shadow:0 12px 34px color-mix(in srgb,var(--ri-accent) 22%,transparent)!important; }
+    & .ri-next:hover svg { translate:4px 0; }
+    & .ri-back { flex:0 0 auto!important; min-width:76px!important; min-height:48px!important; margin:0!important; padding:10px 0!important; border:0!important; background:none!important; color:var(--ri-ink)!important; font:550 13px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; text-align:left!important; }
+    & .ri-footer-meta { display:flex!important; align-items:center!important; justify-content:space-between!important; flex-wrap:wrap!important; gap:6px 16px!important; margin-top:8px!important; }
+    & .ri-skip { min-height:30px!important; margin:0!important; padding:4px 0!important; border:0!important; background:none!important; color:var(--ri-muted)!important; font:450 11px/1.6 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+    & .ri-document-links { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:16px!important; }
+    & .ri-document-links a { display:inline-flex!important; align-items:center!important; min-height:28px!important; padding:4px 0!important; color:var(--ri-muted)!important; font:400 10px/1.6 Inter,system-ui,sans-serif!important; text-decoration:none!important; text-underline-offset:4px!important; }
+    & .ri-document-links a:hover { text-decoration:underline!important; }
+    & :is(a,button,input):focus-visible { outline:2px solid var(--ri-accent)!important; outline-offset:4px!important; }
+    & button:disabled { opacity:.6!important; cursor:wait!important; }
+    &[data-moving=true] .ri-stage { pointer-events:none!important; }
   }
-  html:root body #root #ih-registration-interview *, html:root body #root #ih-registration-interview *::before, html:root body #root #ih-registration-interview *::after { box-sizing:border-box!important; }
-  html:root body #root #ih-registration-interview :is(button,input,a,label,strong,span,small,p,h1,h2,dt,dd) { -webkit-text-fill-color:currentColor!important; }
-  html:root body #root #ih-registration-interview .ri-header { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; width:min(1200px,100%)!important; margin:auto!important; padding:28px 40px!important; border:0!important; background:none!important; }
-  html:root body #root #ih-registration-interview .ri-header a { color:var(--ri-ink)!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
-  html:root body #root #ih-registration-interview .ri-brand { display:inline-flex!important; align-items:center!important; min-width:0!important; }
-  html:root body #root #ih-registration-interview .ri-brand .ih-brand-signature { font-size:28px!important; }
-  html:root body #root #ih-registration-interview .ri-progress-wrap { width:min(1120px,calc(100% - 80px))!important; margin:12px auto 0!important; padding:0!important; }
-  html:root body #root #ih-registration-interview .ri-progress-caption { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; margin-bottom:12px!important; color:var(--ri-muted)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-progress-caption b { margin-left:14px; color:var(--ri-ink); font-variant-numeric:tabular-nums; font-weight:650; }
-  html:root body #root #ih-registration-interview .ri-progress { display:block!important; width:100%!important; height:5px!important; margin:0!important; padding:0!important; border:0!important; border-radius:6px!important; background:var(--ri-line)!important; overflow:hidden!important; }
-  html:root body #root #ih-registration-interview .ri-progress>span { display:block!important; height:100%!important; border-radius:inherit!important; background:var(--ri-accent)!important; transition:width .45s cubic-bezier(.2,.7,.2,1)!important; }
-  html:root body #root #ih-registration-interview .ri-content { width:min(1120px,calc(100% - 80px))!important; min-width:0!important; min-height:0!important; height:100%!important; margin:0 auto!important; padding:52px 0 40px!important; align-self:stretch!important; overflow-y:auto!important; overscroll-behavior:contain!important; scrollbar-gutter:stable!important; animation:ri-enter .48s cubic-bezier(.2,.7,.2,1) both!important; }
-  html:root body #root #ih-registration-interview[data-direction=back] .ri-content { animation-name:ri-enter-back!important; }
-  html:root body #root #ih-registration-interview .ri-heading { max-width:760px!important; margin:0 0 30px!important; }
-  html:root body #root #ih-registration-interview .ri-kicker { display:block!important; margin:0 0 14px!important; color:var(--ri-accent)!important; font:650 11px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.12em!important; text-transform:uppercase!important; }
-  html:root body #root #ih-registration-interview h1 { margin:0 0 18px!important; padding:0!important; color:var(--ri-ink)!important; font:750 clamp(30px,4.1vw,49px)/1.13 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; overflow-wrap:anywhere!important; }
-  html:root body #root #ih-registration-interview h1:focus { outline:none; }
-  html:root body #root #ih-registration-interview .ri-heading>p { max-width:66ch!important; margin:0!important; color:var(--ri-muted)!important; font:400 15px/1.75 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-fields { display:block!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; }
-  html:root body #root #ih-registration-interview .ri-sr-only, html:root body #root #ih-registration-interview .ri-choice>input { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip-path:inset(50%)!important; white-space:nowrap!important; border:0!important; }
-  html:root body #root #ih-registration-interview .ri-choices { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:14px!important; min-width:0!important; }
-  html:root body #root #ih-registration-interview .ri-choices-three { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
-  html:root body #root #ih-registration-interview :is(.ri-choices-two,.ri-category-choices) { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
-  html:root body #root #ih-registration-interview .ri-choice { position:relative!important; display:flex!important; align-items:center!important; gap:16px!important; min-width:0!important; margin:0!important; padding:23px 20px!important; border:1px solid var(--ri-line)!important; border-radius:17px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; cursor:pointer!important; text-align:left!important; transition:background-color .24s,border-color .24s,box-shadow .24s!important; }
-  html:root body #root #ih-registration-interview .ri-choice-number { flex:0 0 20px!important; align-self:flex-start!important; margin:3px 0 0!important; color:var(--ri-muted)!important; font:600 11px/1.5 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; }
-  html:root body #root #ih-registration-interview .ri-choice-copy { display:grid!important; flex:1 1 0!important; min-width:0!important; gap:9px!important; }
-  html:root body #root #ih-registration-interview .ri-choice-copy>strong { display:block!important; color:var(--ri-ink)!important; font:650 18px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; overflow-wrap:anywhere!important; }
-  html:root body #root #ih-registration-interview .ri-choice-copy>span { display:block!important; margin:0!important; color:var(--ri-muted)!important; font:400 13px/1.75 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
-  html:root body #root #ih-registration-interview .ri-choice-check { display:grid!important; place-items:center!important; flex:0 0 26px!important; width:26px!important; height:26px!important; min-width:26px!important; min-height:26px!important; margin:0!important; padding:0!important; border:1px solid var(--ri-line)!important; border-radius:50%!important; background:transparent!important; color:var(--ri-on)!important; }
-  html:root body #root #ih-registration-interview .ri-choice-check svg { display:block!important; width:17px!important; height:17px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; opacity:0; }
-  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; box-shadow:inset 0 0 0 1px var(--ri-accent)!important; }
-  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) :is(.ri-choice-copy>strong,.ri-choice-copy>span,.ri-choice-number) { color:var(--ri-on)!important; }
-  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) .ri-choice-check { border-color:var(--ri-on)!important; background:var(--ri-on)!important; color:var(--ri-accent)!important; animation:ri-check .25s ease-out!important; }
-  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) .ri-choice-check svg { opacity:1!important; }
-  html:root body #root #ih-registration-interview .ri-choice:has(input:focus-visible) { outline:2px solid var(--ri-accent)!important; outline-offset:4px!important; }
-  html:root body #root #ih-registration-interview .ri-category-tabs { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin:0 0 20px!important; }
-  html:root body #root #ih-registration-interview .ri-category-tabs button { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; min-height:46px!important; margin:0!important; padding:10px 16px!important; border:1px solid var(--ri-line)!important; border-radius:9px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; font:600 13px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
-  html:root body #root #ih-registration-interview .ri-category-tabs button[aria-pressed=true] { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; }
-  html:root body #root #ih-registration-interview :is(.ri-context,.ri-counter,.ri-feedback,.ri-quiet) { display:block!important; margin:16px 0!important; color:var(--ri-muted)!important; font:400 13px/1.7 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-context { margin:0 0 16px!important; font-weight:600!important; color:var(--ri-ink)!important; }
-  html:root body #root #ih-registration-interview .ri-feedback { min-height:44px!important; margin:22px 0 8px!important; color:var(--ri-ink)!important; }
-  html:root body #root #ih-registration-interview .ri-quiet { margin:0!important; font-size:12px!important; }
-  html:root body #root #ih-registration-interview .ri-text-field { display:grid!important; gap:10px!important; margin:26px 0 0!important; color:var(--ri-ink)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-text-field input { display:block!important; width:100%!important; min-width:0!important; min-height:50px!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--ri-line)!important; border-radius:10px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; font:400 16px/1.5 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-text-field small { color:var(--ri-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-readiness { min-width:0!important; margin:32px 0 0!important; padding:0!important; border:0!important; }
-  html:root body #root #ih-registration-interview .ri-readiness legend { padding:0 0 16px!important; color:var(--ri-ink)!important; font:650 18px/1.5 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-summary { max-width:800px!important; padding:28px!important; border:1px solid var(--ri-line)!important; border-radius:18px!important; background:var(--ri-paper)!important; }
-  html:root body #root #ih-registration-interview .ri-summary-mark { display:grid!important; place-items:center!important; width:44px!important; height:44px!important; margin:0 0 24px!important; border-radius:50%!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; animation:ri-check .4s ease-out!important; }
-  html:root body #root #ih-registration-interview .ri-summary-mark svg { width:24px!important; height:24px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
-  html:root body #root #ih-registration-interview .ri-summary dl { display:grid!important; gap:18px!important; margin:0!important; }
-  html:root body #root #ih-registration-interview .ri-summary dl>div { display:grid!important; grid-template-columns:170px minmax(0,1fr)!important; gap:8px 20px!important; }
-  html:root body #root #ih-registration-interview .ri-summary dt { margin:0!important; color:var(--ri-muted)!important; font:400 13px/1.7 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-summary dd { margin:0!important; color:var(--ri-ink)!important; font:600 14px/1.7 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
-  html:root body #root #ih-registration-interview .ri-summary>p { margin:24px 0 0!important; padding:20px 0 0!important; border-top:1px solid var(--ri-line)!important; color:var(--ri-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-error { margin:22px 0 0!important; padding:12px 0!important; color:var(--ri-ink)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-privacy { max-width:85ch!important; margin:28px 0 0!important; color:var(--ri-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
-  html:root body #root #ih-registration-interview .ri-footer { position:relative!important; z-index:3!important; display:grid!important; grid-template-columns:1fr auto!important; align-items:center!important; gap:14px 24px!important; width:100%!important; margin:0!important; padding:20px max(40px,calc((100vw - 1120px)/2)) 30px!important; border-top:1px solid var(--ri-line)!important; background:var(--ri-bg)!important; }
-  html:root body #root #ih-registration-interview .ri-secondary-actions { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:14px!important; }
-  html:root body #root #ih-registration-interview :is(.ri-back,.ri-skip) { min-height:44px!important; margin:0!important; padding:10px 0!important; border:0!important; background:none!important; color:var(--ri-muted)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
-  html:root body #root #ih-registration-interview .ri-back { padding-right:12px!important; color:var(--ri-ink)!important; font-weight:600!important; }
-  html:root body #root #ih-registration-interview .ri-next { min-width:200px!important; max-width:430px!important; min-height:50px!important; margin:0!important; padding:14px 23px!important; border:1px solid var(--ri-accent)!important; border-radius:11px!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; white-space:normal!important; text-wrap:balance!important; cursor:pointer!important; }
-  html:root body #root #ih-registration-interview .ri-document-links { grid-column:1/-1!important; display:flex!important; flex-wrap:wrap!important; gap:12px 22px!important; }
-  html:root body #root #ih-registration-interview .ri-document-links a { color:var(--ri-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; text-decoration:underline!important; text-underline-offset:3px!important; }
-  html:root body #root #ih-registration-interview :is(a,button,input):focus-visible { outline:2px solid var(--ri-accent)!important; outline-offset:4px!important; }
-  html:root body #root #ih-registration-interview button:disabled { opacity:.65!important; cursor:wait!important; }
-  html:root body:has(.cookie-notice) #root #ih-registration-interview { padding-bottom:180px!important; }
+  html:root[data-theme=dark] body #root #ih-registration-interview {
+    --ri-bg:#19151e; --ri-paper:#2a2330; --ri-soft:#3a2d40; --ri-ink:#fff0e4; --ri-muted:#cfbdcf; --ri-line:#66536c; --ri-accent:#ffc3a6; --ri-on:#2d192f; --ri-lilac:#b69be4;
+  }
+  html:root body:has(#ih-registration-interview) #root .cookie-notice { border-color:#d5bbc9!important; background:#fff3e8!important; color:#2b1b31!important; }
+  html:root body:has(#ih-registration-interview) #root .cookie-notice-copy strong { color:#2b1b31!important; }
+  html:root body:has(#ih-registration-interview) #root .cookie-notice-copy p { color:#756575!important; }
+  html:root body:has(#ih-registration-interview) #root .cookie-notice-actions a { border-color:#d5bbc9!important; color:#4b3258!important; }
+  html:root body:has(#ih-registration-interview) #root .cookie-notice-actions button { border-color:#653c73!important; background:#653c73!important; color:#fff2e5!important; }
   html:root body #root .ri-sync-notice { max-width:760px; margin:24px auto; padding:20px; border:1px solid var(--v-line,#ddd); border-radius:12px; background:var(--v-surface,#fff); color:var(--v-ink,#191919); font:400 14px/1.7 Inter,system-ui,sans-serif; }
   html:root body #root .ri-sync-notice button { min-height:44px; margin:12px 12px 0 0; padding:10px 16px; border:1px solid currentColor; border-radius:8px; background:none; color:inherit; font:600 13px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
   html:root body #root .ih10-registration-card .ri-account-storage-note { margin:22px 0!important; color:var(--ih7-muted,#555)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
@@ -88,28 +139,77 @@
   html:root body #root .ri-legal-supplement :is(p,dd) { margin:16px 0!important; color:inherit!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
   html:root body #root .ri-legal-supplement dl { margin:24px 0!important; }
   html:root body #root .ri-legal-supplement dt { margin:20px 0 0!important; color:inherit!important; font:650 14px/1.7 Inter,system-ui,sans-serif!important; }
+
   @media(max-width:760px) {
-    html:root body #root #ih-registration-interview .ri-header { padding:24px 20px!important; }
-    html:root body #root #ih-registration-interview .ri-brand .ih-brand-signature { font-size:24px!important; }
-    html:root body #root #ih-registration-interview :is(.ri-progress-wrap,.ri-content) { width:calc(100% - 40px)!important; }
-    html:root body #root #ih-registration-interview .ri-content { padding:32px 0!important; }
-    html:root body #root #ih-registration-interview .ri-heading { margin-bottom:24px!important; }
-    html:root body #root #ih-registration-interview h1 { font-size:30px!important; }
-    html:root body #root #ih-registration-interview .ri-heading>p { font-size:14px!important; line-height:1.75!important; }
-    html:root body #root #ih-registration-interview :is(.ri-choices-three,.ri-choices-two,.ri-category-choices) { grid-template-columns:minmax(0,1fr)!important; gap:12px!important; }
-    html:root body #root #ih-registration-interview .ri-choice { padding:20px 18px!important; gap:12px!important; }
-    html:root body #root #ih-registration-interview .ri-choice-copy>strong { font-size:17px!important; }
-    html:root body #root #ih-registration-interview .ri-summary { padding:22px!important; }
-    html:root body #root #ih-registration-interview .ri-summary dl>div { grid-template-columns:minmax(0,1fr)!important; gap:3px!important; }
-    html:root body #root #ih-registration-interview .ri-footer { grid-template-columns:minmax(0,1fr)!important; gap:10px!important; padding:14px 20px max(24px,env(safe-area-inset-bottom))!important; }
-    html:root body #root #ih-registration-interview .ri-next { grid-row:1!important; width:100%!important; min-width:0!important; max-width:none!important; }
-    html:root body #root #ih-registration-interview .ri-secondary-actions { justify-content:space-between!important; }
-    html:root body #root #ih-registration-interview .ri-document-links { gap:12px 22px!important; }
-    html:root body:has(.cookie-notice) #root #ih-registration-interview { padding-bottom:300px!important; }
+    html:root body #root #ih-registration-interview {
+      & .ri-header { padding:18px 20px 16px!important; }
+      & .ri-brand .ih-brand-signature { font-size:26px!important; }
+      & .ri-header a { font-size:12px!important; }
+      & :is(.ri-stage,.ri-progress-wrap) { width:calc(100% - 40px)!important; }
+      & .ri-progress-wrap { padding-bottom:6px!important; }
+      & .ri-progress-caption { padding-bottom:9px!important; font-size:10px!important; }
+      & .ri-cover { display:block!important; }
+      & .ri-cover-copy { height:100%!important; max-height:100%!important; padding:clamp(130px,calc((var(--ri-viewport-height,100dvh) - var(--ri-cookie-space,0px)) * .25),220px) 0 15px!important; }
+      & .ri-cover .ri-kicker { margin-bottom:16px!important; max-width:27ch!important; font-size:9px!important; }
+      & .ri-cover h1 { margin-bottom:18px!important; font-size:clamp(37px,11.4vw,47px)!important; line-height:1.03!important; letter-spacing:-.065em!important; }
+      & .ri-cover-copy>p { max-width:31ch!important; font-size:13px!important; line-height:1.8!important; }
+      & .ri-cover-note { margin-top:20px!important; font-size:10px!important; }
+      & .ri-artwork { position:absolute!important; top:-28px!important; right:-12px!important; width:clamp(190px,calc((var(--ri-viewport-height,100dvh) - var(--ri-cookie-space,0px)) * .36),260px)!important; height:auto!important; aspect-ratio:1!important; max-height:none!important; margin:0!important; }
+      & .ri-question-layout { grid-template-columns:minmax(0,1fr)!important; grid-template-rows:auto minmax(0,1fr)!important; gap:18px!important; padding:19px 0 0!important; }
+      & .ri-heading { padding:0!important; }
+      & .ri-heading::after { display:none!important; }
+      & .ri-heading .ri-kicker { margin-bottom:9px!important; font-size:9px!important; }
+      & .ri-heading h1 { margin-bottom:11px!important; font-size:28px!important; line-height:1.14!important; }
+      & .ri-heading>p { max-width:100%!important; font-size:12px!important; line-height:1.7!important; }
+      & .ri-answer-viewport { padding:0 6px 20px 0!important; }
+      & .ri-choice { min-height:88px!important; padding:16px 13px!important; gap:12px!important; }
+      & .ri-choice-copy>strong { font-size:16px!important; }
+      & .ri-choice-copy>span { font-size:12px!important; line-height:1.65!important; }
+      & .ri-choice-number { flex-basis:16px!important; font-size:9px!important; }
+      & .ri-category-choices { gap:8px!important; }
+      & .ri-category-choices .ri-choice { min-height:105px!important; padding:13px 10px!important; gap:8px!important; }
+      & .ri-category-choices .ri-choice-copy>strong { font-size:13px!important; line-height:1.4!important; }
+      & .ri-category-choices .ri-choice-copy>span { font-size:10px!important; line-height:1.6!important; }
+      & .ri-category-choices .ri-choice-check { flex-basis:17px!important; width:17px!important; height:17px!important; min-width:17px!important; min-height:17px!important; }
+      & .ri-summary { padding:20px!important; }
+      & .ri-summary dl>div { padding:12px 0!important; }
+      & .ri-footer { padding:13px 20px max(16px,env(safe-area-inset-bottom))!important; }
+      & .ri-navigation { gap:12px!important; }
+      & .ri-next { flex:1 1 0!important; width:auto!important; min-height:50px!important; padding:12px 16px!important; font-size:13px!important; gap:12px!important; }
+      & .ri-back { min-width:62px!important; min-height:48px!important; font-size:12px!important; }
+      & .ri-footer-meta { padding-right:48px!important; margin-top:7px!important; gap:6px 12px!important; }
+      & .ri-document-links { gap:14px!important; }
+      & .ri-document-links a, & .ri-skip { font-size:10px!important; }
+    }
+    html:root body:has(#ih-registration-interview) #root .cookie-notice { transform:none!important; left:12px!important; right:12px!important; bottom:max(12px,env(safe-area-inset-bottom))!important; width:auto!important; max-width:none!important; }
   }
-  @keyframes ri-enter { from { opacity:0; translate:0 14px; } to { opacity:1; translate:0 0; } }
-  @keyframes ri-enter-back { from { opacity:0; translate:-12px 0; } to { opacity:1; translate:0 0; } }
-  @keyframes ri-check { from { scale:.75; } 65% { scale:1.08; } to { scale:1; } }
+  html:root body #root #ih-registration-interview[data-compact=true] {
+    & .ri-header { padding-top:10px!important; padding-bottom:10px!important; }
+    & .ri-brand .ih-brand-signature { font-size:23px!important; }
+    & .ri-heading .ri-kicker { display:none!important; }
+    & .ri-heading h1 { font-size:23px!important; margin-bottom:0!important; }
+    & .ri-heading>p { display:none!important; }
+    & .ri-question-layout { padding-top:10px!important; gap:10px!important; }
+    & .ri-cover-copy { padding-top:12px!important; }
+    & .ri-cover h1 { font-size:36px!important; }
+    & .ri-cover-copy>p { font-size:12px!important; }
+    & .ri-cover-note { display:none!important; }
+    & .ri-artwork { right:-50px!important; top:-25px!important; width:220px!important; height:220px!important; opacity:.2!important; }
+    & .ri-footer { padding-top:9px!important; padding-bottom:12px!important; }
+  }
+  @keyframes ri-aurora { from { transform:translate3d(0,0,0) scale(1); } to { transform:translate3d(-90px,55px,0) scale(1.1); } }
+  @keyframes ri-light-pass { 0%,100% { transform:translateX(-12%) rotate(-28deg); opacity:.06; } 50% { transform:translateX(22%) rotate(-22deg); opacity:.16; } }
+  @keyframes ri-title-arrive { from { opacity:0; transform:translate3d(0,32px,0) rotate(1.5deg); } to { opacity:1; transform:translate3d(0,0,0) rotate(0); } }
+  @keyframes ri-art-arrive { from { opacity:0; transform:translate3d(55px,25px,0) scale(.84) rotate(10deg); } to { opacity:1; transform:translate3d(0,0,0) scale(1) rotate(0); } }
+  @keyframes ri-sculpture-float { from { transform:translate(0,-9px) rotate(-4deg); } to { transform:translate(0,12px) rotate(4deg); } }
+  @keyframes ri-orbit { from { transform:translate(0,0) rotate(-4deg); } to { transform:translate(0,9px) rotate(5deg); } }
+  @keyframes ri-front-orbit { from { transform:translate(0,0); } to { transform:translate(4px,9px); } }
+  @keyframes ri-signal { 50% { opacity:.45; box-shadow:0 0 20px #ffb89490; } }
+  @keyframes ri-choice-arrive { from { opacity:0; transform:translate3d(20px,8px,0); } to { opacity:1; transform:translate3d(0,0,0); } }
+  @keyframes ri-answer-arrive { from { opacity:0; transform:translate3d(24px,0,0); } to { opacity:1; transform:translate3d(0,0,0); } }
+  @keyframes ri-answer-return { from { opacity:0; transform:translate3d(-24px,0,0); } to { opacity:1; transform:translate3d(0,0,0); } }
+  @keyframes ri-summary-in { from { opacity:0; transform:scale(.65) rotate(-20deg); } to { opacity:1; transform:scale(1) rotate(0); } }
+  @keyframes ri-button-light { 0%,65%,100% { transform:translateX(-150%); } 85% { transform:translateX(150%); } }
   @media(prefers-reduced-motion:reduce) {
     html:root body #root #ih-registration-interview *, html:root body #root #ih-registration-interview *::before, html:root body #root #ih-registration-interview *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
   }

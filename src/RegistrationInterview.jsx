@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { BrandSignature } from "./Brand";
 import { useSitePreferences, translateUiText } from "./Preferences";
@@ -14,12 +14,33 @@ export const EMPTY_INTERVIEW = {
 };
 
 function Choice({ name, value, checked, onChange, title, description, number, multiple = false }) {
-  return <label className="ri-choice">
+  return <label className="ri-choice" style={{ "--ri-choice-index": number ? number - 1 : 0 }}>
     <input type={multiple ? "checkbox" : "radio"} name={name} value={value} checked={checked} onChange={onChange} />
     {number && <span className="ri-choice-number" aria-hidden="true">{String(number).padStart(2, "0")}</span>}
     <span className="ri-choice-copy"><strong>{title}</strong>{description && <span>{description}</span>}</span>
     <span className="ri-choice-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg></span>
   </label>;
+}
+
+function CinemaArtwork() {
+  const id = useId().replace(/:/g, "");
+  const mark = "M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z";
+  return <div className="ri-artwork" aria-hidden="true"><svg viewBox="0 0 600 600" focusable="false">
+    <defs>
+      <linearGradient id={`${id}-ribbon`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#ffd0ae"/><stop offset=".45" stopColor="#c5a9ff"/><stop offset="1" stopColor="#8d6ec9"/></linearGradient>
+      <linearGradient id={`${id}-face`} x1="0" y1="0" x2=".7" y2="1"><stop stopColor="#fff3db"/><stop offset=".6" stopColor="#ffbf9f"/><stop offset="1" stopColor="#e68b84"/></linearGradient>
+      <radialGradient id={`${id}-light`}><stop stopColor="#ba90e8" stopOpacity=".5"/><stop offset="1" stopColor="#ba90e8" stopOpacity="0"/></radialGradient>
+    </defs>
+    <circle cx="300" cy="330" r="270" fill={`url(#${id}-light)`}/>
+    <g className="ri-orbit-back" fill="none"><ellipse cx="300" cy="306" rx="238" ry="100" transform="rotate(-28 300 306)" stroke={`url(#${id}-ribbon)`} strokeWidth="32"/><ellipse cx="300" cy="306" rx="254" ry="116" transform="rotate(-28 300 306)" stroke="#d4bbff" strokeOpacity=".25" strokeWidth="1"/></g>
+    <g className="ri-sculpture">
+      {Array.from({ length: 9 }, (_, index) => <path key={index} d={mark} transform={`translate(${158 + (9 - index) * 4} ${139 + (9 - index) * 4}) scale(4.4)`} fill={index < 5 ? "#4b345e" : "#8b587a"}/>)}
+      <path d={mark} transform="translate(158 139) scale(4.4)" fill={`url(#${id}-face)`}/>
+      <path d="m193 174 61 0m114 0 35 0 26 26v177" fill="none" stroke="#fff5e0" strokeOpacity=".6" strokeWidth="2"/>
+    </g>
+    <path className="ri-orbit-front" d="M88 426C116 484 309 423 465 319" fill="none" stroke={`url(#${id}-ribbon)`} strokeWidth="32" strokeLinecap="round"/>
+    <g className="ri-art-points" fill="#fff1db"><circle cx="126" cy="157" r="5"/><circle cx="491" cy="168" r="3"/><circle cx="476" cy="450" r="5"/></g>
+  </svg></div>;
 }
 
 export default function RegistrationInterview({ value, onChange, onComplete, usageOptions, categories, categoryDetails, categoryLabel, goalOptions, readinessOptions, snapshot }) {
@@ -29,9 +50,10 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
   const fieldLabel = category => localText(categoryLabel(category));
   const state = { ...EMPTY_INTERVIEW, ...value };
   const step = Math.min(5, Math.max(0, Number(state.step) || 0));
+  const [cover, setCover] = useState(() => !value?.started && !value?.action && !(Number(value?.step) > 0));
   const [message, setMessage] = useState("");
-  const titleRef = useRef(null), panelRef = useRef(null), viewportRef = useRef(null);
-  const { moving, direction, move } = useJourneyMotion(panelRef, { duration: 300, easing: "ease-in-out" });
+  const titleRef = useRef(null), panelRef = useRef(null), viewportRef = useRef(null), answersRef = useRef(null), errorRef = useRef(null);
+  const { moving, direction, move } = useJourneyMotion(panelRef, { duration: 440, easing: "cubic-bezier(.22,.7,.15,1)" });
   const labels = t(["Twój kierunek", "Dziedziny", "Cel", "Dobry start", "Twój widok", "Gotowe"], ["Your direction", "Fields", "Goal", "A good start", "Your view", "Ready"]);
   const role = usageOptions.find(option => option.value === state.usagePreference);
   const works = state.usagePreference !== "hire_talent", hires = state.usagePreference !== "find_work";
@@ -53,17 +75,45 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+    answersRef.current?.scrollTo({ top: 0, behavior: "instant" });
     titleRef.current?.focus({ preventScroll: true });
-  }, [step]);
+  }, [step, cover]);
+
+  useEffect(() => {
+    if (!message) return;
+    errorRef.current?.focus({ preventScroll: true });
+    errorRef.current?.scrollIntoView({ block: "nearest", behavior: "instant" });
+  }, [message]);
 
   useEffect(() => {
     const viewport = window.visualViewport;
-    const resize = () => viewportRef.current?.style.setProperty("--ri-viewport-height", `${Math.round(viewport?.height || window.innerHeight)}px`);
+    let notice = null;
+    const resize = () => {
+      const height = Math.round(viewport?.height || window.innerHeight);
+      const noticeSpace = notice ? Math.ceil(notice.getBoundingClientRect().height) + 28 : 0;
+      viewportRef.current?.style.setProperty("--ri-viewport-height", `${height}px`);
+      if (viewportRef.current) viewportRef.current.dataset.compact = String(height - noticeSpace < 580);
+      viewportRef.current?.style.setProperty("--ri-cookie-space", `${noticeSpace}px`);
+    };
+    const noticeResize = new ResizeObserver(resize);
+    const updateNotice = () => {
+      const next = document.querySelector(".cookie-notice");
+      if (next !== notice) { noticeResize.disconnect(); notice = next; if (notice) noticeResize.observe(notice); }
+      resize();
+    };
+    const changes = new MutationObserver(updateNotice);
+    changes.observe(document.getElementById("root"), { childList: true, subtree: true });
+    updateNotice();
     resize();
     viewport?.addEventListener("resize", resize);
     window.addEventListener("resize", resize);
-    return () => { viewport?.removeEventListener("resize", resize); window.removeEventListener("resize", resize); };
+    return () => { viewport?.removeEventListener("resize", resize); window.removeEventListener("resize", resize); changes.disconnect(); noticeResize.disconnect(); };
   }, []);
+
+  function start() {
+    if (moving) return;
+    move(() => { onChange({ ...state, started: true }); setCover(false); });
+  }
 
   function validation() {
     if (step === 0 && !role) return t("Wybierz, jak chcesz korzystać z IdeaHire.", "Choose how you want to use IdeaHire.");
@@ -115,14 +165,24 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
     t("Sprawdź swoje wybory. Za chwilę utworzysz konto; odpowiedzi zapiszą się po zalogowaniu. Możesz je potem zmienić.", "Review your choices. Next you will create your account; your answers will be saved after sign-in. You can change them later."),
   ];
 
-  return <main id="ih-registration-interview" ref={viewportRef} data-no-translate="true" data-step={step} data-moving={moving} data-direction={direction}>
+  return <main id="ih-registration-interview" ref={viewportRef} data-no-translate="true" data-cover={cover} data-step={step} data-moving={moving} data-direction={direction} style={{ "--ri-phase": step }}>
+    <div className="ri-ambient" aria-hidden="true"><span/><span/><span/></div>
     <header className="ri-header"><Link to="/" className="ri-brand" aria-label="IdeaHire"><BrandSignature /></Link><Link to="/login">{t("Zaloguj się", "Sign in")}</Link></header>
-    <div className="ri-progress-wrap">
+    <div className="ri-progress-wrap" hidden={cover}>
       <div className="ri-progress-caption"><span>{t("Poznajmy się", "Let's get acquainted")} <b>{String(step + 1).padStart(2, "0")} / 06</b></span><span>{labels[step]}</span></div>
       <div className="ri-progress" role="progressbar" aria-label={t("Postęp wywiadu", "Interview progress")} aria-valuemin={1} aria-valuemax={6} aria-valuenow={step + 1} aria-valuetext={t(`Krok ${step + 1} z 6: ${labels[step]}`, `Step ${step + 1} of 6: ${labels[step]}`)}><span style={{ width: `${(step + 1) / 6 * 100}%` }} /></div>
     </div>
-    <div className="ri-content" ref={panelRef} key={step}>
+    <div className="ri-stage" ref={panelRef} key={cover ? "cover" : step}>
+      {cover ? <div className="ri-cover">
+        <div className="ri-cover-copy"><span className="ri-kicker">{t("Twój pomysł. Jeszcze więcej możliwości.", "Your idea. More possibilities.")}</span>
+          <h1 ref={titleRef} tabIndex={-1}><span>{t("Z pomysłu.", "From an idea.")}</span><span>{t("W coś", "To something")} <em>{t("więcej.", "more.")}</em></span></h1>
+          <p>{t("Masz coś do zrobienia. Albo talent, który chce działać. Znajdź swój kierunek — resztę ułożysz po drodze.", "Something you want to create. Or a talent ready to work. Find your direction and build from there.")}</p>
+          <div className="ri-cover-note"><span aria-hidden="true"/>{t("Kilka wyborów. Twój własny punkt startu.", "A few choices. Your own starting point.")}</div>
+        </div><CinemaArtwork/>
+      </div> : <div className="ri-question-layout">
       <div className="ri-heading"><span className="ri-kicker">{step === 5 ? t("Pomysł. Ludzie. Pierwszy krok.", "Ideas. People. A first step.") : labels[step]}</span><h1 ref={titleRef} tabIndex={-1}>{titles[step]}</h1><p>{descriptions[step]}</p></div>
+      <div className="ri-answer-viewport" ref={answersRef}>
+      {message && <p className="ri-error" role="alert" ref={errorRef} tabIndex={-1}>{message}</p>}
       <fieldset className="ri-fields" disabled={moving}><legend className="ri-sr-only">{titles[step]}</legend>
         {step === 0 && <div className="ri-choices ri-choices-three">{usageOptions.map((option, index) => <Choice key={option.value} name="interview-role" value={option.value} number={index + 1} checked={state.usagePreference === option.value}
           title={t(option.eyebrow, ["Find projects", "Hire a specialist", "Work and hire"][index])}
@@ -144,10 +204,10 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
         {step === 4 && <div className="ri-choices ri-choices-two"><Choice name="interview-order" value="matched" checked={state.personalizationEnabled === true} title={t("Dopasowane dla Ciebie", "Matched to you")} description={t("Wybrane dziedziny pojawią się wyżej. Pozostałe nadal będą dostępne.", "Your chosen fields appear higher. Everything else remains available.")} onChange={() => update({ personalizationEnabled: true })} /><Choice name="interview-order" value="newest" checked={state.personalizationEnabled === false} title={t("Tylko najnowsze", "Newest first")} description={t("Zaczniesz od najnowszych publikacji, bez dopasowania kolejności do dziedzin.", "Start with the latest posts, without ordering by your chosen fields.")} onChange={() => update({ personalizationEnabled: false })} /></div>}
         {step === 5 && <div className="ri-summary"><span className="ri-summary-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg></span><dl><div><dt>{t("Twój kierunek", "Your direction")}</dt><dd>{localText(role?.eyebrow)}</dd></div>{works && <div><dt>{t("Realizuję", "I deliver")}</dt><dd>{state.freelancerCategories.map(fieldLabel).join(" · ")}</dd></div>}{hires && <div><dt>{t("Szukam pomocy", "I need help")}</dt><dd>{state.clientCategories.map(fieldLabel).join(" · ")}</dd></div>}<div><dt>{t("Na początek", "My first goals")}</dt><dd>{state.onboardingGoals.map(goal => localText(goalOptions.find(option => option.value === goal)?.title)).filter(Boolean).join(" · ")}</dd></div>{hires && <div><dt>{t("Etap projektu", "Project stage")}</dt><dd>{localText(readinessOptions.find(option => option.value === state.projectReadiness)?.title)}</dd></div>}<div><dt>{t("Kolejność wyników", "Result order")}</dt><dd>{state.personalizationEnabled ? t("Dopasowane dla Ciebie", "Matched to you") : t("Tylko najnowsze", "Newest first")}</dd></div></dl><p>{support?.feedback || t("Zacznij od jednego kroku. Profil, usługi i projekty ułożysz we własnym tempie.", "Start with one step. Build your profile, services and projects at your own pace.")}</p></div>}
       </fieldset>
-      {message && <p className="ri-error" role="alert">{message}</p>}
       <p className="ri-privacy">{t("Odpowiedzi są dobrowolne i służą ustawieniu widoku. Uprawnienia konta zależą od wieku. Ten wybór nie określa formy zatrudnienia ani rozliczeń.", "The answers are optional and shape your view. Account permissions depend on age. These choices do not determine employment or tax status.")} <RegistrationDocumentLink to="/polityka-prywatnosci#wywiad-przed-rejestracja" id="ri-interview-info" snapshot={snapshot}>{t("Jak przechowujemy odpowiedzi?", "How do we store the answers?")}</RegistrationDocumentLink></p>
+      </div></div>}
     </div>
-    <footer className="ri-footer"><div className="ri-secondary-actions">{step > 0 && <button type="button" className="ri-back" disabled={moving} onClick={() => { setMessage(""); move(() => onChange({ ...state, step: step - 1 }), "back"); }}>{t("Wstecz", "Back")}</button>}<button type="button" className="ri-skip" disabled={moving} onClick={skip}>{t("Pomiń wywiad", "Skip the interview")}</button></div><button type="button" className="ri-next" disabled={moving} onClick={next}>{moving ? step === 5 ? t("Przechodzimy do tworzenia konta…", "Opening your account form…") : t("Przechodzimy dalej…", "Continuing…") : step === 5 ? t("Przejdźmy do tworzenia konta", "Let's create your account") : t("Dalej", "Continue")}</button><div className="ri-document-links"><RegistrationDocumentLink to="/polityka-prywatnosci" id="ri-privacy" snapshot={snapshot}>{t("Prywatność", "Privacy")}</RegistrationDocumentLink><RegistrationDocumentLink to="/polityka-cookies" id="ri-cookies" snapshot={snapshot}>{t("Cookies i pamięć witryny", "Cookies and site storage")}</RegistrationDocumentLink></div></footer>
+    <footer className="ri-footer"><div className="ri-navigation">{!cover && step > 0 && <button type="button" className="ri-back" disabled={moving} onClick={() => { setMessage(""); move(() => onChange({ ...state, step: step - 1 }), "back"); }}>{t("Wstecz", "Back")}</button>}<button type="button" className="ri-next" disabled={moving} onClick={cover ? start : next}><span>{moving ? cover ? t("Zaczynamy…", "Let's begin…") : step === 5 ? t("Przechodzimy do tworzenia konta…", "Opening your account form…") : t("Przechodzimy dalej…", "Continuing…") : cover ? t("Ułóż swój start", "Shape your start") : step === 5 ? t("Przejdźmy do tworzenia konta", "Let's create your account") : t("Dalej", "Continue")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button></div><div className="ri-footer-meta"><button type="button" className="ri-skip" disabled={moving} onClick={skip}>{t("Pomiń wywiad", "Skip the interview")}</button><div className="ri-document-links"><RegistrationDocumentLink to="/polityka-prywatnosci" id="ri-privacy" snapshot={snapshot}>{t("Prywatność", "Privacy")}</RegistrationDocumentLink><RegistrationDocumentLink to="/polityka-cookies" id="ri-cookies" snapshot={snapshot}>{t("Cookies", "Cookies")}</RegistrationDocumentLink></div></div></footer>
   </main>;
 }
 
