@@ -1,3 +1,22 @@
+/* Native tap paint is replaced by the control's own feedback. Keep text
+   selection, pinch zoom and keyboard focus available. Includes portalled UI. */
+@layer ideahireHeadings {
+  html { -webkit-tap-highlight-color:transparent!important; }
+  body :is(a,button,label,summary,input,select,textarea,[role="button"],[role="radio"],[role="checkbox"],[tabindex]),
+  body :is(a,button,label,summary,[role="button"],[role="radio"],[role="checkbox"]) * {
+    -webkit-tap-highlight-color:transparent!important;
+  }
+  body :is(button,.ri-choice), body :is(button,.ri-choice) :not(input) {
+    -webkit-user-select:none; user-select:none;
+  }
+  body :is(button,a,.ri-choice,summary) { touch-action:manipulation; }
+  @media (hover:none) and (pointer:coarse) {
+    body :is(button:not(:disabled),a[href],summary,.ri-choice:not(:has(input:disabled))):active {
+      opacity:.82!important; transform:none!important;
+    }
+  }
+}
+
 /* Account preferences, owned services and shared catalogue controls. */
 @layer ideahireHeadings {
   body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame] {
