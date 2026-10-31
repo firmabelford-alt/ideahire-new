@@ -1,21 +1,28 @@
 /* Registration cinema: one scene, fixed questions, an independently scrolling answer area. */
 @layer ideahireHeadings {
+  html:root body #root :is(#ih-registration-interview,.page.ih10-register) {
+    --ri-bg:#fbfbf8; --ri-paper:#fff; --ri-soft:#f0f0ea; --ri-ink:#262a25; --ri-muted:#686d66;
+    --ri-line:#dedfd6; --ri-control:#838c7e; --ri-accent:#2f352e; --ri-on:#fff; --ri-detail:#ccb299; --ri-peach:#e7c2a6; --ri-highlight:#9c6949;
+    --ri-selection:#f3e2d4; --ri-selected-ink:#3b3028; --ri-selected-line:#c8a88a;
+  }
+  html:root[data-theme=dark] body #root :is(#ih-registration-interview,.page.ih10-register) {
+    --ri-bg:#171b18; --ri-paper:#222823; --ri-soft:#2d352e; --ri-ink:#f6f3eb; --ri-muted:#bec5b9;
+    --ri-line:#465247; --ri-control:#86927f; --ri-accent:#edc4a7; --ri-on:#212820; --ri-detail:#b7b29e; --ri-peach:#edc4a7; --ri-highlight:#edc4a7;
+    --ri-selection:#edc4a7; --ri-selected-ink:#212820; --ri-selected-line:#edc4a7;
+  }
   html:root:has(#ih-registration-interview), html:root body:has(#ih-registration-interview) { overflow:hidden!important; scrollbar-gutter:auto!important; }
   html:root body #root #ih-registration-interview {
-    --ri-bg:#f6f0eb; --ri-paper:#fffaf5; --ri-soft:#eee2ec; --ri-ink:#2b1b31; --ri-muted:#756575;
-    --ri-line:#d7c4d3; --ri-accent:#653c73; --ri-on:#fff2e5; --ri-lilac:#a58ccf; --ri-peach:#ffc3a6;
     display:grid!important; grid-template-rows:auto auto minmax(0,1fr) auto!important; position:relative!important;
     box-sizing:border-box!important; width:100%!important; height:var(--ri-viewport-height,100dvh)!important; min-width:0!important; min-height:0!important;
     margin:0!important; padding:0 0 var(--ri-cookie-space,0px)!important; overflow:hidden!important; isolation:isolate!important;
     background:var(--ri-bg)!important; color:var(--ri-ink)!important; font-family:Inter,system-ui,sans-serif!important; transition:background-color .6s ease,color .6s ease;
     & *, & *::before, & *::after { box-sizing:border-box!important; }
     & :is(button,input,a,label,strong,span,small,p,h1,h2,dt,dd) { -webkit-text-fill-color:currentColor!important; }
-    &[data-cover=true] { --ri-bg:#19131f; --ri-paper:#2a2030; --ri-ink:#fff0e0; --ri-muted:#d0bccd; --ri-line:#65506c; --ri-accent:#ffc3a6; --ri-on:#2e1931; --ri-lilac:#c3a7f3; }
     & .ri-ambient { position:absolute!important; inset:0!important; overflow:hidden!important; z-index:-1!important; pointer-events:none!important; }
     & .ri-ambient>span { position:absolute!important; display:block!important; border-radius:50%!important; opacity:.4; will-change:transform; }
-    & .ri-ambient>span:nth-child(1) { width:1000px; height:1000px; right:-520px; top:-540px; background:radial-gradient(ellipse,#ba8cd640 0%,#b689d320 35%,transparent 66%); animation:ri-aurora 24s ease-in-out infinite alternate; }
+    & .ri-ambient>span:nth-child(1) { width:1000px; height:1000px; right:-520px; top:-540px; background:radial-gradient(ellipse,#e1d8c940 0%,#d8d4c320 35%,transparent 66%); animation:ri-aurora 24s ease-in-out infinite alternate; }
     & .ri-ambient>span:nth-child(2) { width:900px; height:900px; left:-600px; bottom:-650px; background:radial-gradient(ellipse,#f2a47a65 0%,#f2a47a20 35%,transparent 66%); animation:ri-aurora 28s ease-in-out infinite alternate-reverse; }
-    & .ri-ambient>span:nth-child(3) { width:65%; height:180%; top:-45%; left:5%; border-radius:0!important; opacity:.1; background:linear-gradient(100deg,transparent 35%,#dfb7ec 49%,transparent 56%); transform:rotate(-28deg); animation:ri-light-pass 12s ease-in-out infinite; }
+    & .ri-ambient>span:nth-child(3) { width:65%; height:180%; top:-45%; left:5%; border-radius:0!important; opacity:.1; background:linear-gradient(100deg,transparent 35%,#dfc9ad 49%,transparent 56%); transform:rotate(-28deg); animation:ri-light-pass 12s ease-in-out infinite; }
     &[data-cover=true] .ri-ambient>span:nth-child(1) { opacity:1; }
     &[data-cover=true] .ri-ambient>span:nth-child(2) { opacity:.8; }
     & .ri-header { grid-row:1!important; position:relative!important; z-index:2!important; display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; width:min(1240px,100%)!important; margin:0 auto!important; padding:27px 40px 22px!important; background:none!important; border:0!important; }
@@ -28,16 +35,16 @@
     & .ri-progress-caption { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; padding:0 0 11px!important; color:var(--ri-muted)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; }
     & .ri-progress-caption b { margin-left:14px!important; color:var(--ri-ink)!important; font-variant-numeric:tabular-nums!important; font-weight:650!important; }
     & .ri-progress { height:3px!important; width:100%!important; padding:0!important; margin:0!important; border:0!important; border-radius:4px!important; background:color-mix(in srgb,var(--ri-muted) 25%,transparent)!important; overflow:hidden!important; }
-    & .ri-progress>span { display:block!important; height:100%!important; border-radius:inherit!important; background:linear-gradient(90deg,var(--ri-lilac),var(--ri-accent))!important; box-shadow:0 0 14px color-mix(in srgb,var(--ri-accent) 40%,transparent)!important; transition:width .65s cubic-bezier(.2,.8,.2,1)!important; }
+    & .ri-progress>span { display:block!important; height:100%!important; border-radius:inherit!important; background:linear-gradient(90deg,var(--ri-detail),var(--ri-accent))!important; transition:width .65s cubic-bezier(.2,.8,.2,1)!important; }
     & .ri-stage { grid-row:3!important; position:relative!important; z-index:1!important; width:min(1160px,calc(100% - 80px))!important; height:100%!important; min-height:0!important; min-width:0!important; margin:0 auto!important; }
     & .ri-cover { position:relative!important; display:grid!important; grid-template-columns:1.04fr 1fr!important; align-items:center!important; height:100%!important; min-height:0!important; gap:0!important; }
     & .ri-cover-copy { position:relative!important; z-index:2!important; max-height:100%!important; min-height:0!important; overflow-y:auto!important; overflow-x:hidden!important; padding:24px 0!important; scrollbar-width:thin; scrollbar-color:var(--ri-line) transparent; }
     & .ri-kicker { display:block!important; margin:0 0 20px!important; color:var(--ri-accent)!important; font:600 10px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:.14em!important; text-transform:uppercase!important; }
     & h1 { color:var(--ri-ink)!important; text-wrap:balance!important; overflow-wrap:normal!important; word-break:normal!important; }
     & h1:focus { outline:none!important; }
-    & .ri-cover h1 { margin:0!important; padding:0 0 .1em!important; color:#fff0df!important; font:750 clamp(52px,6.8vw,94px)/1.02 Inter,system-ui,sans-serif!important; letter-spacing:-.065em!important; animation:ri-title-arrive 1s cubic-bezier(.2,0,.2,1) both; }
+    & .ri-cover h1 { margin:0!important; padding:0 0 .1em!important; color:var(--ri-ink)!important; font:750 clamp(52px,6.8vw,94px)/1.02 Inter,system-ui,sans-serif!important; letter-spacing:-.065em!important; animation:ri-title-arrive 1s cubic-bezier(.2,0,.2,1) both; }
     & .ri-cover h1>span { display:block!important; }
-    & .ri-cover h1 em { display:inline-block; color:var(--ri-peach)!important; font:italic 500 1.12em/.9 Georgia,"Times New Roman",serif!important; letter-spacing:-.065em!important; }
+    & .ri-cover h1 em { display:inline-block; color:var(--ri-highlight)!important; font:italic 500 1.12em/.9 Georgia,"Times New Roman",serif!important; letter-spacing:-.065em!important; }
     & .ri-artwork { position:relative!important; z-index:1!important; display:block!important; width:115%!important; height:100%!important; max-height:620px!important; margin-left:-4%!important; pointer-events:none!important; animation:ri-art-arrive 1.4s cubic-bezier(.2,0,.2,1) both; }
     & .ri-artwork svg { display:block!important; width:100%!important; height:100%!important; overflow:visible!important; }
     & .ri-sculpture { transform-origin:300px 300px; animation:ri-sculpture-float 11s ease-in-out infinite alternate; }
@@ -46,7 +53,7 @@
     & .ri-art-points { transform-origin:300px 300px; animation:ri-orbit 16s ease-in-out infinite alternate-reverse; }
     & .ri-question-layout { display:grid!important; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)!important; height:100%!important; min-height:0!important; gap:64px!important; padding:38px 0 20px!important; }
     & .ri-heading { position:relative!important; align-self:start!important; min-width:0!important; margin:0!important; padding:0 0 24px!important; }
-    & .ri-heading::after { content:""; display:block; width:56px; height:3px; margin-top:28px; border-radius:4px; background:linear-gradient(90deg,var(--ri-accent),var(--ri-lilac)); }
+    & .ri-heading::after { content:""; display:block; width:56px; height:3px; margin-top:28px; border-radius:4px; background:linear-gradient(90deg,var(--ri-accent),var(--ri-detail)); }
     & .ri-heading h1 { margin:0 0 20px!important; padding:0!important; font:720 clamp(30px,3.45vw,47px)/1.12 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; }
     & .ri-heading>p { max-width:44ch!important; margin:0!important; color:var(--ri-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
     & .ri-answer-viewport { min-height:0!important; height:100%!important; min-width:0!important; padding:0 12px 36px 0!important; overflow-y:auto!important; overflow-x:hidden!important; overscroll-behavior:contain!important; scroll-padding-block:16px!important; scrollbar-width:thin!important; scrollbar-color:var(--ri-line) transparent!important; }
@@ -59,11 +66,11 @@
     & .ri-choice-copy { display:grid!important; flex:1 1 0!important; min-width:0!important; gap:7px!important; }
     & .ri-choice-copy>strong { display:block!important; color:var(--ri-ink)!important; font:650 18px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.025em!important; overflow-wrap:anywhere!important; }
     & .ri-choice-copy>span { display:block!important; margin:0!important; color:var(--ri-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
-    & .ri-choice-check { display:grid!important; place-items:center!important; flex:0 0 25px!important; width:25px!important; height:25px!important; min-width:25px!important; min-height:25px!important; margin:0!important; padding:0!important; border:1px solid var(--ri-line)!important; border-radius:50%!important; background:transparent!important; color:var(--ri-on)!important; }
+    & .ri-choice-check { display:grid!important; place-items:center!important; flex:0 0 25px!important; width:25px!important; height:25px!important; min-width:25px!important; min-height:25px!important; margin:0!important; padding:0!important; border:1px solid var(--ri-control)!important; border-radius:50%!important; background:transparent!important; color:var(--ri-on)!important; }
     & .ri-choice-check svg { display:block!important; width:17px!important; height:17px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; opacity:0; transition:opacity .25s ease; }
-    & .ri-choice:has(input:checked) { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; box-shadow:0 9px 30px color-mix(in srgb,var(--ri-accent) 12%,transparent)!important; transform:none; }
-    & .ri-choice:has(input:checked) :is(.ri-choice-copy>strong,.ri-choice-copy>span,.ri-choice-number) { color:var(--ri-on)!important; }
-    & .ri-choice:has(input:checked) .ri-choice-check { border-color:var(--ri-on)!important; background:var(--ri-on)!important; color:var(--ri-accent)!important; }
+    & .ri-choice:has(input:checked) { border-color:var(--ri-selected-line)!important; background:var(--ri-selection)!important; box-shadow:0 7px 24px color-mix(in srgb,var(--ri-selected-line) 10%,transparent)!important; transform:none; }
+    & .ri-choice:has(input:checked) :is(.ri-choice-copy>strong,.ri-choice-copy>span,.ri-choice-number) { color:var(--ri-selected-ink)!important; }
+    & .ri-choice:has(input:checked) .ri-choice-check { border-color:var(--ri-selected-ink)!important; background:var(--ri-selected-ink)!important; color:var(--ri-selection)!important; }
     & .ri-choice:has(input:checked) .ri-choice-check svg { opacity:1!important; transform:scale(1)!important; }
     & .ri-choice:has(input:focus-visible) { outline:2px solid var(--ri-accent)!important; outline-offset:3px!important; }
     & .ri-choice:has(input:disabled) { pointer-events:none; }
@@ -85,7 +92,7 @@
     & .ri-text-field small { color:var(--ri-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
     & .ri-readiness { min-width:0!important; margin:28px 0 0!important; padding:0!important; border:0!important; }
     & .ri-readiness legend { padding:0 0 16px!important; color:var(--ri-ink)!important; font:650 17px/1.5 Inter,system-ui,sans-serif!important; }
-    & .ri-summary { padding:24px!important; border:1px solid var(--ri-line)!important; border-radius:16px!important; background:linear-gradient(130deg,color-mix(in srgb,var(--ri-lilac) 12%,var(--ri-paper)),var(--ri-paper))!important; }
+    & .ri-summary { padding:24px!important; border:1px solid var(--ri-line)!important; border-radius:16px!important; background:linear-gradient(130deg,color-mix(in srgb,var(--ri-detail) 12%,var(--ri-paper)),var(--ri-paper))!important; }
     & .ri-summary-mark { display:grid!important; place-items:center!important; width:40px!important; height:40px!important; margin:0 0 16px!important; border-radius:50%!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; }
     & .ri-summary-mark svg { width:24px!important; height:24px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
     & .ri-summary dl { display:grid!important; gap:0!important; margin:0!important; }
@@ -117,14 +124,11 @@
     & button:disabled { opacity:1!important; cursor:wait!important; }
     &[data-moving=true] .ri-stage { pointer-events:none!important; }
   }
-  html:root[data-theme=dark] body #root #ih-registration-interview {
-    --ri-bg:#19151e; --ri-paper:#2a2330; --ri-soft:#3a2d40; --ri-ink:#fff0e4; --ri-muted:#cfbdcf; --ri-line:#66536c; --ri-accent:#ffc3a6; --ri-on:#2d192f; --ri-lilac:#b69be4;
-  }
-  html:root body:has(#ih-registration-interview) #root .cookie-notice { border-color:#d5bbc9!important; background:#fff3e8!important; color:#2b1b31!important; }
-  html:root body:has(#ih-registration-interview) #root .cookie-notice-copy strong { color:#2b1b31!important; }
-  html:root body:has(#ih-registration-interview) #root .cookie-notice-copy p { color:#756575!important; }
-  html:root body:has(#ih-registration-interview) #root .cookie-notice-actions a { border-color:#d5bbc9!important; color:#4b3258!important; }
-  html:root body:has(#ih-registration-interview) #root .cookie-notice-actions button { border-color:#653c73!important; background:#653c73!important; color:#fff2e5!important; }
+  html:root body:has(:is(#ih-registration-interview,.page.ih10-register)) #root .cookie-notice { border-color:#dedfd6!important; background:#fffdf9!important; color:#262a25!important; }
+  html:root body:has(:is(#ih-registration-interview,.page.ih10-register)) #root .cookie-notice-copy strong { color:#262a25!important; }
+  html:root body:has(:is(#ih-registration-interview,.page.ih10-register)) #root .cookie-notice-copy p { color:#686d66!important; }
+  html:root body:has(:is(#ih-registration-interview,.page.ih10-register)) #root .cookie-notice-actions a { border-color:#dedfd6!important; color:#2f352e!important; }
+  html:root body:has(:is(#ih-registration-interview,.page.ih10-register)) #root .cookie-notice-actions button { border-color:#2f352e!important; background:#2f352e!important; color:#fff!important; }
   html:root body #root .ri-sync-notice { max-width:760px; margin:24px auto; padding:20px; border:1px solid var(--v-line,#ddd); border-radius:12px; background:var(--v-surface,#fff); color:var(--v-ink,#191919); font:400 14px/1.7 Inter,system-ui,sans-serif; }
   html:root body #root .ri-sync-notice button { min-height:44px; margin:12px 12px 0 0; padding:10px 16px; border:1px solid currentColor; border-radius:8px; background:none; color:inherit; font:600 13px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
   html:root body #root .ih10-registration-card .ri-account-storage-note { margin:22px 0!important; color:var(--ih7-muted,#555)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
@@ -175,7 +179,7 @@
       & .ri-document-links { gap:14px!important; }
       & .ri-document-links a, & .ri-skip { font-size:10px!important; }
     }
-    html:root body:has(#ih-registration-interview) #root .cookie-notice { transform:none!important; left:12px!important; right:12px!important; bottom:max(12px,env(safe-area-inset-bottom))!important; width:auto!important; max-width:none!important; }
+    html:root body:has(:is(#ih-registration-interview,.page.ih10-register)) #root .cookie-notice { transform:none!important; left:12px!important; right:12px!important; bottom:max(12px,env(safe-area-inset-bottom))!important; width:auto!important; max-width:none!important; }
   }
   html:root body #root #ih-registration-interview[data-compact=true] {
     & .ri-header { padding-top:10px!important; padding-bottom:10px!important; }
@@ -192,26 +196,44 @@
   }
   /* The account form follows the same quiet reading rhythm as the interview. */
   html:root body #root#root .page.ih10-register {
-    padding:32px 24px 64px!important;
+    --ih-heading-ink:var(--ri-ink)!important; --ih-heading-muted:var(--ri-muted)!important; --ih-heading-accent:var(--ri-accent)!important;
+    --ih7-bg:var(--ri-bg)!important; --ih7-surface:var(--ri-paper)!important; --ih7-soft:var(--ri-soft)!important; --ih7-ink:var(--ri-ink)!important; --ih7-muted:var(--ri-muted)!important; --ih7-line:var(--ri-line)!important; --ih7-accent:var(--ri-accent)!important; --ih7-on-accent:var(--ri-on)!important;
+    --v-bg:var(--ri-bg)!important; --v-surface:var(--ri-paper)!important; --v-soft:var(--ri-soft)!important; --v-ink:var(--ri-ink)!important; --v-muted:var(--ri-muted)!important; --v-line:var(--ri-line)!important; --v-accent:var(--ri-accent)!important; --v-on:var(--ri-on)!important;
+    padding:32px 24px 64px!important; background:var(--ri-bg)!important; color:var(--ri-ink)!important;
+    & :is(button,input,a,label,strong,span,small,p,h1,h2,summary) { -webkit-text-fill-color:currentColor!important; }
+    & .ih10-registration-card { color:var(--ri-ink)!important; }
+    & .ih10-registration-card :is(.auth-header h1,.ih-registration-details h2,.auth-form>label:not(.age-access-confirmation),.ih-registration-details>label) { color:var(--ri-ink)!important; }
+    & .ih10-registration-card :is(.auth-header p,.auth-form>label>small,.google-auth-notice,.ih-registration-details header p,.ih-registration-details h2 span,.ih-registration-details-note,.auth-footer) { color:var(--ri-muted)!important; }
+    & .ih10-registration-card .auth-form input:not([type=checkbox]) { border-color:var(--ri-line)!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; }
+    & .ih10-registration-card .auth-form input::placeholder { color:var(--ri-muted)!important; }
+    & .ih10-registration-card .auth-form>button[type=submit] { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; }
     & .ih10-registration-card { width:min(100%,760px)!important; max-width:760px!important; padding:28px 40px 40px!important; border:0!important; background:transparent!important; box-shadow:none!important; animation:ri-form-arrive .5s cubic-bezier(.2,0,.2,1) both!important; }
     & .ih10-registration-card::before { content:none!important; }
     & .ih10-registration-intro { display:none!important; }
-    & .ih10-registration-card>:is(.logo,.auth-header,.ih59-registration-selection,.auth-provider-section,.auth-form,.auth-footer) { width:min(100%,600px)!important; max-width:600px!important; min-width:0!important; margin-left:auto!important; margin-right:auto!important; }
-    & .ih10-registration-card>.logo { display:flex!important; align-items:center!important; justify-content:flex-start!important; margin-top:0!important; margin-bottom:0!important; padding:0!important; text-align:left!important; }
-    & .ih10-registration-card>.logo .ih-brand-signature { font-size:28px!important; }
-    & .ih10-registration-card .auth-header { display:block!important; margin-top:36px!important; margin-bottom:26px!important; padding:0!important; text-align:left!important; }
+    & .ih10-registration-card>:is(.logo,.ri-account-topbar,.auth-header,.ih59-registration-selection,.auth-provider-section,.auth-form,.auth-footer) { width:min(100%,600px)!important; max-width:600px!important; min-width:0!important; margin-left:auto!important; margin-right:auto!important; }
+    & .ih10-registration-card>.logo { display:flex!important; align-items:center!important; justify-content:flex-start!important; padding:0!important; margin-top:0!important; margin-bottom:0!important; color:var(--ri-ink)!important; }
+    & .ih10-registration-card>.logo .ih-brand-signature { font-size:24px!important; color:var(--ri-ink)!important; }
+    & .ih10-registration-card .ri-account-topbar { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; min-height:32px!important; margin-top:0!important; margin-bottom:0!important; }
+    & .ih10-registration-card .ri-account-topbar>.logo { display:inline-flex!important; align-items:center!important; justify-content:flex-start!important; width:auto!important; min-width:0!important; margin:0!important; padding:0!important; color:var(--ri-ink)!important; text-align:left!important; }
+    & .ih10-registration-card .ri-account-topbar .ih-brand-signature { font-size:24px!important; color:var(--ri-ink)!important; }
+    & .ih10-registration-card .ri-account-login { display:inline-flex!important; align-items:center!important; flex:0 0 auto!important; min-height:44px!important; padding:6px 0!important; color:var(--ri-muted)!important; font:550 12px/1.6 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+    & .ih10-registration-card .ri-account-login:hover { color:var(--ri-ink)!important; text-decoration:underline!important; text-underline-offset:4px!important; }
+    & .ih10-registration-card .auth-header { display:block!important; margin-top:26px!important; margin-bottom:22px!important; padding:0!important; text-align:left!important; }
     & .ih10-registration-card .auth-header .section-label { display:none!important; }
-    & .ih10-registration-card .auth-header h1 { width:auto!important; max-width:none!important; min-width:0!important; margin:0!important; padding:0!important; font:720 clamp(30px,4vw,42px)/1.18 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; text-align:left!important; text-transform:none!important; text-wrap:balance!important; }
-    & .ih10-registration-card .auth-header p { max-width:42ch!important; margin:12px 0 0!important; padding:0!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; text-align:left!important; }
-    & .ih10-registration-card .ih59-registration-selection { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:center!important; gap:14px!important; margin-top:0!important; margin-bottom:28px!important; padding:18px 0!important; border:0!important; border-block:1px solid var(--ih7-line)!important; background:none!important; border-radius:0!important; }
+    & .ih10-registration-card .auth-header h1 { width:auto!important; max-width:none!important; min-width:0!important; margin:0!important; padding:0!important; font:720 clamp(30px,4vw,38px)/1.18 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; text-align:left!important; text-transform:none!important; text-wrap:balance!important; }
+    & .ih10-registration-card .auth-header p { max-width:42ch!important; margin:10px 0 0!important; padding:0!important; font:400 13px/1.75 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; text-align:left!important; }
+    & .ih10-registration-card .ih59-registration-selection { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:center!important; gap:14px!important; min-height:72px!important; margin-top:0!important; margin-bottom:22px!important; padding:13px 16px!important; border:1px solid var(--ri-line)!important; background:color-mix(in srgb,var(--ri-soft) 65%,var(--ri-paper))!important; border-radius:12px!important; }
     & .ih10-registration-card .ih59-registration-selection>div { display:grid!important; min-width:0!important; gap:5px!important; }
-    & .ih10-registration-card .ih59-registration-selection small { display:block!important; margin:0!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
-    & .ih10-registration-card .ih59-registration-selection strong { display:block!important; margin:0!important; font:650 14px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; }
+    & .ih10-registration-card .ih59-registration-selection small { display:block!important; margin:0!important; color:var(--ri-muted)!important; font:400 10px/1.6 Inter,system-ui,sans-serif!important; }
+    & .ih10-registration-card .ih59-registration-selection strong { display:block!important; margin:0!important; color:var(--ri-ink)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; }
     & .ih10-registration-card .ih59-registration-selection button { width:auto!important; min-width:0!important; min-height:44px!important; margin:0!important; padding:8px 0!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; font:550 12px/1.7 Inter,system-ui,sans-serif!important; text-decoration:underline!important; text-underline-offset:4px!important; white-space:normal!important; }
     & .ih10-registration-card .auth-provider-section { margin-top:0!important; margin-bottom:0!important; padding:0!important; }
-    & .ih10-registration-card .google-auth-button { display:flex!important; align-items:center!important; justify-content:center!important; gap:12px!important; min-height:52px!important; margin:0!important; padding:13px 16px!important; font:650 14px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; }
+    & .ih10-registration-card .google-auth-button { display:flex!important; align-items:center!important; justify-content:center!important; gap:12px!important; min-height:52px!important; margin:0!important; padding:13px 16px!important; border-color:var(--ri-line)!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; box-shadow:0 3px 14px #25282006!important; font:650 14px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; }
+    & .ih10-registration-card .ri-provider-notice { margin:8px 0 0!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; }
+    & .ih10-registration-card .ri-provider-notice>summary { display:list-item!important; min-height:44px!important; margin:0!important; padding:12px 0!important; list-style-position:inside!important; color:var(--ri-muted)!important; font:400 11px/1.8 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+    & .ih10-registration-card .ri-provider-notice .google-auth-notice { margin:0 0 14px!important; }
     & .ih10-registration-card .google-auth-notice { width:100%!important; max-width:60ch!important; margin:16px 0 0!important; padding:0!important; font:400 12px/1.85 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; text-align:left!important; }
-    & .ih10-registration-card .auth-divider { display:flex!important; align-items:center!important; justify-content:center!important; gap:14px!important; width:100%!important; margin:28px 0!important; padding:0!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; text-align:center!important; text-transform:none!important; }
+    & .ih10-registration-card .auth-divider { display:flex!important; align-items:center!important; justify-content:center!important; gap:14px!important; width:100%!important; margin:18px 0 24px!important; padding:0!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; text-align:center!important; text-transform:none!important; }
     & .ih10-registration-card .auth-divider::before, & .ih10-registration-card .auth-divider::after { content:""!important; flex:1 1 0!important; height:1px!important; margin:0!important; border:0!important; background:var(--ih7-line)!important; }
     & .ih10-registration-card .auth-divider span { flex:0 1 auto!important; width:auto!important; max-width:100%!important; padding:0!important; font:inherit!important; letter-spacing:normal!important; text-transform:none!important; }
     & .ih10-registration-card .auth-form { gap:26px!important; padding:0!important; }
@@ -231,8 +253,8 @@
   @media(max-width:760px) {
     html:root body #root#root .page.ih10-register { padding:12px 0 48px!important;
       & .ih10-registration-card { padding:18px 20px 32px!important; border-radius:0!important; }
-      & .ih10-registration-card>.logo .ih-brand-signature { font-size:26px!important; }
-      & .ih10-registration-card .auth-header { margin-top:32px!important; margin-bottom:24px!important; }
+      & .ih10-registration-card .ri-account-topbar .ih-brand-signature { font-size:23px!important; }
+      & .ih10-registration-card .auth-header { margin-top:24px!important; margin-bottom:20px!important; }
     }
   }
   @keyframes ri-form-arrive { from { opacity:0; } to { opacity:1; } }

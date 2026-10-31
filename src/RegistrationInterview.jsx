@@ -76,19 +76,19 @@ function CinemaArtwork() {
   const mark = "M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z";
   return <div className="ri-artwork" aria-hidden="true"><svg viewBox="0 0 600 600" focusable="false">
     <defs>
-      <linearGradient id={`${id}-ribbon`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#ffd0ae"/><stop offset=".45" stopColor="#c5a9ff"/><stop offset="1" stopColor="#8d6ec9"/></linearGradient>
-      <linearGradient id={`${id}-face`} x1="0" y1="0" x2=".7" y2="1"><stop stopColor="#fff3db"/><stop offset=".6" stopColor="#ffbf9f"/><stop offset="1" stopColor="#e68b84"/></linearGradient>
-      <radialGradient id={`${id}-light`}><stop stopColor="#ba90e8" stopOpacity=".5"/><stop offset="1" stopColor="#ba90e8" stopOpacity="0"/></radialGradient>
+      <linearGradient id={`${id}-ribbon`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#f2e4d5"/><stop offset=".45" stopColor="#d8bea7"/><stop offset="1" stopColor="#9d8875"/></linearGradient>
+      <linearGradient id={`${id}-face`} x1="0" y1="0" x2=".7" y2="1"><stop stopColor="#fff4df"/><stop offset=".6" stopColor="#edc4a7"/><stop offset="1" stopColor="#cc9a7a"/></linearGradient>
+      <radialGradient id={`${id}-light`}><stop stopColor="#d8b89a" stopOpacity=".25"/><stop offset="1" stopColor="#d8b89a" stopOpacity="0"/></radialGradient>
     </defs>
     <circle cx="300" cy="330" r="270" fill={`url(#${id}-light)`}/>
-    <g className="ri-orbit-back" fill="none"><ellipse cx="300" cy="306" rx="238" ry="100" transform="rotate(-28 300 306)" stroke={`url(#${id}-ribbon)`} strokeWidth="32"/><ellipse cx="300" cy="306" rx="254" ry="116" transform="rotate(-28 300 306)" stroke="#d4bbff" strokeOpacity=".25" strokeWidth="1"/></g>
+    <g className="ri-orbit-back" fill="none"><ellipse cx="300" cy="306" rx="238" ry="100" transform="rotate(-28 300 306)" stroke={`url(#${id}-ribbon)`} strokeWidth="32"/><ellipse cx="300" cy="306" rx="254" ry="116" transform="rotate(-28 300 306)" stroke="#b9a48f" strokeOpacity=".25" strokeWidth="1"/></g>
     <g className="ri-sculpture">
-      {Array.from({ length: 9 }, (_, index) => <path key={index} d={mark} transform={`translate(${158 + (9 - index) * 4} ${139 + (9 - index) * 4}) scale(4.4)`} fill={index < 5 ? "#4b345e" : "#8b587a"}/>)}
+      {Array.from({ length: 9 }, (_, index) => <path key={index} d={mark} transform={`translate(${158 + (9 - index) * 4} ${139 + (9 - index) * 4}) scale(4.4)`} fill={index < 5 ? "#8c7867" : "#b39a84"}/>)}
       <path d={mark} transform="translate(158 139) scale(4.4)" fill={`url(#${id}-face)`}/>
       <path d="m193 174 61 0m114 0 35 0 26 26v177" fill="none" stroke="#fff5e0" strokeOpacity=".6" strokeWidth="2"/>
     </g>
     <path className="ri-orbit-front" d="M88 426C116 484 309 423 465 319" fill="none" stroke={`url(#${id}-ribbon)`} strokeWidth="32" strokeLinecap="round"/>
-    <g className="ri-art-points" fill="#fff1db"><circle cx="126" cy="157" r="5"/><circle cx="491" cy="168" r="3"/><circle cx="476" cy="450" r="5"/></g>
+    <g className="ri-art-points" fill="#bd9c81"><circle cx="126" cy="157" r="5"/><circle cx="491" cy="168" r="3"/><circle cx="476" cy="450" r="5"/></g>
   </svg></div>;
 }
 
@@ -256,6 +256,35 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
     </div>
     <footer className="ri-footer"><div className="ri-navigation">{!cover && step > 0 && <button type="button" className="ri-back" disabled={moving} onClick={() => { setMessage(""); move(() => onChange({ ...state, step: step - 1 })); }}>{t("Wstecz", "Back")}</button>}<button type="button" className="ri-next" disabled={moving} onClick={cover ? start : next}><span>{cover ? t("Zaczynamy", "Let's begin") : step === 5 ? t("Przejdź do formularza", "Continue to the form") : t("Dalej", "Continue")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button></div><div className="ri-footer-meta"><button type="button" className="ri-skip" disabled={moving} onClick={skip}>{t("Pomiń wywiad", "Skip the interview")}</button><div className="ri-document-links"><RegistrationDocumentLink to="/polityka-prywatnosci" id="ri-privacy" snapshot={snapshot}>{t("Prywatność", "Privacy")}</RegistrationDocumentLink><RegistrationDocumentLink to="/polityka-cookies" id="ri-cookies" snapshot={snapshot}>{t("Cookies", "Cookies")}</RegistrationDocumentLink></div></div></footer>
   </main>;
+}
+
+export function RegistrationAccountHeader({ titleRef, usageLabel, skipped, disabled, onEdit }) {
+  const en = useSitePreferences().language === "en";
+  const t = (pl, english) => en ? english : pl;
+  return <>
+    <div className="ri-account-topbar" data-no-translate="true">
+      <Link className="logo" to="/" aria-label="IdeaHire"><BrandSignature /></Link>
+      <Link className="ri-account-login" to="/login">{t("Zaloguj się", "Sign in")}</Link>
+    </div>
+    <div className="auth-header" data-no-translate="true">
+      <h1 tabIndex={-1} ref={titleRef}>{t("Utwórz konto", "Create your account")}</h1>
+      <p>{t("Wybierz wygodny sposób rejestracji.", "Choose how you would like to sign up.")}</p>
+    </div>
+    <div className="ih59-registration-selection" data-no-translate="true">
+      <div><small>{skipped ? t("Wywiad jest opcjonalny", "The interview is optional") : t("Twój kierunek", "Your direction")}</small><strong>{skipped ? t("Możesz do niego wrócić", "You can return to it") : en ? translateUiText(usageLabel) : usageLabel}</strong></div>
+      <button type="button" disabled={disabled} onClick={onEdit} aria-label={t("Edytuj wywiad", "Edit the interview")}>{skipped ? t("Uzupełnij", "Answer") : t("Edytuj", "Edit")}</button>
+    </div>
+  </>;
+}
+
+export function RegistrationProviderNotice() {
+  const en = useSitePreferences().language === "en";
+  return <details className="ri-provider-notice" data-no-translate="true">
+    <summary>{en ? "How Google registration works" : "Jak działa rejestracja przez Google"}</summary>
+    <p className="google-auth-notice">{en
+      ? "Google shares your email address, account name and photo with IdeaHire. The name fills your profile; the photo only becomes public after you save your profile. After your first sign-in, you will complete your date of birth and confirm the documents required to activate your IdeaHire account."
+      : "Google przekaże IdeaHire adres e-mail, nazwę i zdjęcie konta. Nazwa uzupełni profil; zdjęcie pojawi się publicznie dopiero po zapisaniu profilu. Po pierwszym logowaniu uzupełnisz datę urodzenia i potwierdzisz dokumenty wymagane do aktywowania konta IdeaHire."}</p>
+  </details>;
 }
 
 export function RegistrationInterviewPrivacy({ cookies = false }) {
