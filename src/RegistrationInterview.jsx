@@ -1,9 +1,8 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { BrandSignature } from "./Brand";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { RegistrationDocumentLink } from "./AuthFlow";
-import { useJourneyMotion } from "./AccountJourney";
 import { normalizeRegistrationInterview } from "./RegistrationInterviewState";
 import "./RegistrationInterview.css";
 
@@ -13,8 +12,58 @@ export const EMPTY_INTERVIEW = {
   support: "", categoryAudience: "freelancer",
 };
 
+// Keep the outgoing scene faded until React has mounted the next one. Only the
+// scene animates, so headings and answers arrive together without a flash.
+function useInterviewMotion(panelRef, scene) {
+  const [moving, setMoving] = useState(false);
+  const active = useRef(null), locked = useRef(false), mounted = useRef(true), entering = useRef(false);
+  const finish = () => {
+    active.current?.cancel();
+    active.current = null;
+    locked.current = false;
+    if (mounted.current) setMoving(false);
+  };
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; entering.current = false; active.current?.cancel(); };
+  }, []);
+  useLayoutEffect(() => {
+    if (!entering.current) return;
+    entering.current = false;
+    const previous = active.current;
+    const panel = panelRef.current;
+    if (!panel?.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+    const animation = panel.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 420, easing: "cubic-bezier(.2,0,.2,1)", fill: "both",
+    });
+    active.current = animation;
+    previous?.cancel();
+    animation.finished.then(() => { if (active.current === animation) finish(); }, () => { if (mounted.current && active.current === animation) finish(); });
+  }, [scene]);
+  async function move(commit) {
+    if (locked.current) return;
+    locked.current = true;
+    setMoving(true);
+    const panel = panelRef.current;
+    if (!panel?.animate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      commit(); finish(); return;
+    }
+    try {
+      const animation = panel.animate([{ opacity: 1 }, { opacity: 0 }], {
+        duration: 200, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards",
+      });
+      active.current = animation;
+      await animation.finished;
+      if (!mounted.current) return;
+      entering.current = true;
+      commit();
+    } catch { if (mounted.current) finish(); }
+  }
+  return { moving, move };
+}
+
 function Choice({ name, value, checked, onChange, title, description, number, multiple = false }) {
-  return <label className="ri-choice" style={{ "--ri-choice-index": number ? number - 1 : 0 }}>
+  return <label className="ri-choice">
     <input type={multiple ? "checkbox" : "radio"} name={name} value={value} checked={checked} onChange={onChange} />
     {number && <span className="ri-choice-number" aria-hidden="true">{String(number).padStart(2, "0")}</span>}
     <span className="ri-choice-copy"><strong>{title}</strong>{description && <span>{description}</span>}</span>
@@ -53,7 +102,7 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
   const [cover, setCover] = useState(() => !value?.started && !value?.action && !(Number(value?.step) > 0));
   const [message, setMessage] = useState("");
   const titleRef = useRef(null), panelRef = useRef(null), viewportRef = useRef(null), answersRef = useRef(null), errorRef = useRef(null);
-  const { moving, direction, move } = useJourneyMotion(panelRef, { duration: 440, easing: "cubic-bezier(.22,.7,.15,1)" });
+  const { moving, move } = useInterviewMotion(panelRef, cover ? "cover" : step);
   const labels = t(["Twój kierunek", "Dziedziny", "Cel", "Dobry start", "Twój widok", "Gotowe"], ["Your direction", "Fields", "Goal", "A good start", "Your view", "Ready"]);
   const role = usageOptions.find(option => option.value === state.usagePreference);
   const works = state.usagePreference !== "hire_talent", hires = state.usagePreference !== "find_work";
@@ -165,7 +214,7 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
     t("Sprawdź swoje wybory. Za chwilę utworzysz konto; odpowiedzi zapiszą się po zalogowaniu. Możesz je potem zmienić.", "Review your choices. Next you will create your account; your answers will be saved after sign-in. You can change them later."),
   ];
 
-  return <main id="ih-registration-interview" ref={viewportRef} data-no-translate="true" data-cover={cover} data-step={step} data-moving={moving} data-direction={direction} style={{ "--ri-phase": step }}>
+  return <main id="ih-registration-interview" ref={viewportRef} data-no-translate="true" data-cover={cover} data-step={step} data-moving={moving} aria-busy={moving}>
     <div className="ri-ambient" aria-hidden="true"><span/><span/><span/></div>
     <header className="ri-header"><Link to="/" className="ri-brand" aria-label="IdeaHire"><BrandSignature /></Link><Link to="/login">{t("Zaloguj się", "Sign in")}</Link></header>
     <div className="ri-progress-wrap" hidden={cover}>
@@ -174,10 +223,8 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
     </div>
     <div className="ri-stage" ref={panelRef} key={cover ? "cover" : step}>
       {cover ? <div className="ri-cover">
-        <div className="ri-cover-copy"><span className="ri-kicker">{t("Twój pomysł. Jeszcze więcej możliwości.", "Your idea. More possibilities.")}</span>
+        <div className="ri-cover-copy">
           <h1 ref={titleRef} tabIndex={-1}><span>{t("Z pomysłu.", "From an idea.")}</span><span>{t("W coś", "To something")} <em>{t("więcej.", "more.")}</em></span></h1>
-          <p>{t("Masz coś do zrobienia. Albo talent, który chce działać. Znajdź swój kierunek — resztę ułożysz po drodze.", "Something you want to create. Or a talent ready to work. Find your direction and build from there.")}</p>
-          <div className="ri-cover-note"><span aria-hidden="true"/>{t("Kilka wyborów. Twój własny punkt startu.", "A few choices. Your own starting point.")}</div>
         </div><CinemaArtwork/>
       </div> : <div className="ri-question-layout">
       <div className="ri-heading"><span className="ri-kicker">{step === 5 ? t("Pomysł. Ludzie. Pierwszy krok.", "Ideas. People. A first step.") : labels[step]}</span><h1 ref={titleRef} tabIndex={-1}>{titles[step]}</h1><p>{descriptions[step]}</p></div>
@@ -200,14 +247,14 @@ export default function RegistrationInterview({ value, onChange, onComplete, usa
           <p className="ri-counter" role="status">{t(`Wybrano ${state.onboardingGoals.length} z 3`, `Selected ${state.onboardingGoals.length} of 3`)}</p>
           {hires && <fieldset className="ri-readiness"><legend>{t("Na jakim etapie jest Twój projekt?", "What stage is your project at?")}</legend><div className="ri-choices ri-choices-two">{readinessOptions.map(option => <Choice key={option.value} name="interview-readiness" value={option.value} checked={state.projectReadiness === option.value} title={localText(option.title)} description={localText(option.description)} onChange={() => update({ projectReadiness: option.value })} />)}</div></fieldset>}
         </>}
-        {step === 3 && <><div className="ri-choices ri-choices-three">{supports.map((option, index) => <Choice key={option.value} name="interview-support" value={option.value} number={index + 1} checked={state.support === option.value} title={localText(option.title)} description={localText(option.description)} onChange={() => update({ support: option.value })} />)}</div><p className="ri-feedback" role="status">{support?.feedback || t("Możesz przejść dalej bez wybierania odpowiedzi.", "You can continue without choosing an answer.")}</p><small className="ri-quiet">{t("Ta odpowiedź służy tylko tej wskazówce. Nie zapisujemy jej w profilu.", "This answer is only used for this tip. We do not save it in your profile.")}</small></>}
+        {step === 3 && <><div className="ri-choices ri-choices-three">{supports.map((option, index) => <Choice key={option.value} name="interview-support" value={option.value} number={index + 1} checked={state.support === option.value} title={localText(option.title)} description={localText(option.description)} onChange={() => update({ support: option.value })} />)}</div><p className="ri-feedback" role="status">{support?.feedback || t("Możesz przejść dalej bez wybierania odpowiedzi.", "You can continue without choosing an answer.")}</p></>}
         {step === 4 && <div className="ri-choices ri-choices-two"><Choice name="interview-order" value="matched" checked={state.personalizationEnabled === true} title={t("Dopasowane dla Ciebie", "Matched to you")} description={t("Wybrane dziedziny pojawią się wyżej. Pozostałe nadal będą dostępne.", "Your chosen fields appear higher. Everything else remains available.")} onChange={() => update({ personalizationEnabled: true })} /><Choice name="interview-order" value="newest" checked={state.personalizationEnabled === false} title={t("Tylko najnowsze", "Newest first")} description={t("Zaczniesz od najnowszych publikacji, bez dopasowania kolejności do dziedzin.", "Start with the latest posts, without ordering by your chosen fields.")} onChange={() => update({ personalizationEnabled: false })} /></div>}
         {step === 5 && <div className="ri-summary"><span className="ri-summary-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg></span><dl><div><dt>{t("Twój kierunek", "Your direction")}</dt><dd>{localText(role?.eyebrow)}</dd></div>{works && <div><dt>{t("Realizuję", "I deliver")}</dt><dd>{state.freelancerCategories.map(fieldLabel).join(" · ")}</dd></div>}{hires && <div><dt>{t("Szukam pomocy", "I need help")}</dt><dd>{state.clientCategories.map(fieldLabel).join(" · ")}</dd></div>}<div><dt>{t("Na początek", "My first goals")}</dt><dd>{state.onboardingGoals.map(goal => localText(goalOptions.find(option => option.value === goal)?.title)).filter(Boolean).join(" · ")}</dd></div>{hires && <div><dt>{t("Etap projektu", "Project stage")}</dt><dd>{localText(readinessOptions.find(option => option.value === state.projectReadiness)?.title)}</dd></div>}<div><dt>{t("Kolejność wyników", "Result order")}</dt><dd>{state.personalizationEnabled ? t("Dopasowane dla Ciebie", "Matched to you") : t("Tylko najnowsze", "Newest first")}</dd></div></dl><p>{support?.feedback || t("Zacznij od jednego kroku. Profil, usługi i projekty ułożysz we własnym tempie.", "Start with one step. Build your profile, services and projects at your own pace.")}</p></div>}
       </fieldset>
-      <p className="ri-privacy">{t("Odpowiedzi są dobrowolne i służą ustawieniu widoku. Uprawnienia konta zależą od wieku. Ten wybór nie określa formy zatrudnienia ani rozliczeń.", "The answers are optional and shape your view. Account permissions depend on age. These choices do not determine employment or tax status.")} <RegistrationDocumentLink to="/polityka-prywatnosci#wywiad-przed-rejestracja" id="ri-interview-info" snapshot={snapshot}>{t("Jak przechowujemy odpowiedzi?", "How do we store the answers?")}</RegistrationDocumentLink></p>
+      <details className="ri-privacy"><summary>{t("Odpowiedzi i prywatność", "Answers and privacy")}</summary><div><p>{t("Odpowiedzi są dobrowolne i służą ustawieniu widoku. Uprawnienia konta zależą od wieku. Ten wybór nie określa formy zatrudnienia ani rozliczeń.", "The answers are optional and shape your view. Account permissions depend on age. These choices do not determine employment or tax status.")}</p>{step === 3 && <p>{t("Pytanie o pierwszy krok służy tylko wskazówce na tym ekranie. Tej odpowiedzi nie zapisujemy w profilu.", "The question about your first step is only used for the tip on this screen. This answer is not saved to your profile.")}</p>}<RegistrationDocumentLink to="/polityka-prywatnosci#wywiad-przed-rejestracja" id="ri-interview-info" snapshot={snapshot}>{t("Jak przechowujemy odpowiedzi?", "How do we store the answers?")}</RegistrationDocumentLink></div></details>
       </div></div>}
     </div>
-    <footer className="ri-footer"><div className="ri-navigation">{!cover && step > 0 && <button type="button" className="ri-back" disabled={moving} onClick={() => { setMessage(""); move(() => onChange({ ...state, step: step - 1 }), "back"); }}>{t("Wstecz", "Back")}</button>}<button type="button" className="ri-next" disabled={moving} onClick={cover ? start : next}><span>{moving ? cover ? t("Zaczynamy…", "Let's begin…") : step === 5 ? t("Przechodzimy do tworzenia konta…", "Opening your account form…") : t("Przechodzimy dalej…", "Continuing…") : cover ? t("Ułóż swój start", "Shape your start") : step === 5 ? t("Przejdźmy do tworzenia konta", "Let's create your account") : t("Dalej", "Continue")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button></div><div className="ri-footer-meta"><button type="button" className="ri-skip" disabled={moving} onClick={skip}>{t("Pomiń wywiad", "Skip the interview")}</button><div className="ri-document-links"><RegistrationDocumentLink to="/polityka-prywatnosci" id="ri-privacy" snapshot={snapshot}>{t("Prywatność", "Privacy")}</RegistrationDocumentLink><RegistrationDocumentLink to="/polityka-cookies" id="ri-cookies" snapshot={snapshot}>{t("Cookies", "Cookies")}</RegistrationDocumentLink></div></div></footer>
+    <footer className="ri-footer"><div className="ri-navigation">{!cover && step > 0 && <button type="button" className="ri-back" disabled={moving} onClick={() => { setMessage(""); move(() => onChange({ ...state, step: step - 1 })); }}>{t("Wstecz", "Back")}</button>}<button type="button" className="ri-next" disabled={moving} onClick={cover ? start : next}><span>{cover ? t("Zaczynamy", "Let's begin") : step === 5 ? t("Przejdź do formularza", "Continue to the form") : t("Dalej", "Continue")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></button></div><div className="ri-footer-meta"><button type="button" className="ri-skip" disabled={moving} onClick={skip}>{t("Pomiń wywiad", "Skip the interview")}</button><div className="ri-document-links"><RegistrationDocumentLink to="/polityka-prywatnosci" id="ri-privacy" snapshot={snapshot}>{t("Prywatność", "Privacy")}</RegistrationDocumentLink><RegistrationDocumentLink to="/polityka-cookies" id="ri-cookies" snapshot={snapshot}>{t("Cookies", "Cookies")}</RegistrationDocumentLink></div></div></footer>
   </main>;
 }
 
