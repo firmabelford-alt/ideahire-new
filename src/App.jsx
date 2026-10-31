@@ -11,6 +11,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import "./SitePolish.css";
 import "./HomeFinishing.css";
+import HomeMarketplace from "./HomeMarketplace";
 import LucynaSymbol from "./LucynaSymbol";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
 import { BrandSignature, BrandLogo } from "./Brand";
@@ -2635,19 +2636,14 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
    <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link></div>
   </article>;
  }
- return <div className="ih53-jobs-finale" ref={host} data-no-translate="true" data-paused={stopped} data-motion-paused={paused||reduced}>
-  
-  <div className="ih53-finale-layout"><div className="ih53-finale-copy"><h1>{copy.title.map((line,i)=><span key={i}>{line}</span>)}</h1><p>{copy.intro}</p><div className="ih53-finale-actions"><Link to="/freelancers">{copy.talent}<span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link><Link to="/jobs">{copy.jobs}<span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link></div></div>
-   <div className="ih53-projects" onPointerEnter={e=>{if(e.pointerType==='mouse')setHover(true);}} onPointerLeave={()=>setHover(false)} onFocusCapture={()=>setFocus(true)} onBlurCapture={e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}>
-    <div className="ih66-project-heading"><span>{view.new?copy.new:copy.published}</span><span className="ih66-project-count">{String(list.length?index+1:0).padStart(2,'0')}<span aria-hidden="true"> / </span>{String(list.length).padStart(2,'0')}</span></div>
-    <div className="ih53-project-window" onPointerDown={e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};}} onPointerCancel={()=>{gesture.current=null;}} onPointerUp={e=>{const first=gesture.current;gesture.current=null;if(!first||view.next)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}>
-     <div className="ih53-project-track" data-sliding={view.shift} onTransitionEnd={e=>{if(e.target===e.currentTarget&&e.propertyName==='transform')commit();}}>{active?renderCard(active):<div className="ih53-project-empty"><p>{copy.empty}</p><Link to="/jobs">{copy.jobs}</Link></div>}{view.next&&renderCard(view.next,true)}</div>
-    </div>
-
-    <div className="ih53-project-status" aria-live="polite">{pending&&<button type="button" onClick={()=>show(pending.job,true)}>{copy.pending}</button>}</div>
-   </div>
-  </div>
- </div>;
+  return <HomeMarketplace hostRef={host} en={en} stopped={stopped} motionPaused={paused||reduced}
+    count={list.length} index={index} sample={!!active&&(active.preview===true||!ih53RealJob(active))} isNew={view.new}
+    pending={pending} onShowPending={()=>show(pending?.job,true)}
+    projectEvents={{onPointerEnter:e=>{if(e.pointerType==='mouse')setHover(true);},onPointerLeave:()=>setHover(false),onFocusCapture:()=>setFocus(true),onBlurCapture:e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}}
+    swipeEvents={{onPointerDown:e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};},onPointerCancel:()=>{gesture.current=null;},onPointerUp:e=>{const first=gesture.current;gesture.current=null;if(!first||view.next||list.length<2)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}}
+    trackEvents={{'data-sliding':view.shift,onTransitionEnd:e=>{if(e.target===e.currentTarget&&e.propertyName==='transform')commit();}}}>
+    {active&&renderCard(active)}{view.next&&renderCard(view.next,true)}
+  </HomeMarketplace>;
 }
 
 function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
