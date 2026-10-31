@@ -1,0 +1,116 @@
+/* One introduction before account creation, using the selected IdeaHire palette. */
+@layer ideahireHeadings {
+  html:root:has(#ih-registration-interview), html:root body:has(#ih-registration-interview) { overflow:hidden!important; scrollbar-gutter:auto!important; }
+  html:root body #root #ih-registration-interview {
+    --ri-bg:var(--ih7-bg,#fff); --ri-paper:var(--ih7-surface,#fff); --ri-soft:var(--ih7-soft,#f4f4f4);
+    --ri-ink:var(--ih7-ink,#191919); --ri-muted:var(--ih7-muted,#555); --ri-line:var(--ih7-line,#d5d5d5);
+    --ri-accent:var(--ih7-accent,#191919); --ri-on:var(--ih7-on-accent,#fff);
+    display:grid!important; grid-template-rows:auto auto minmax(0,1fr) auto!important; box-sizing:border-box!important; width:100%!important; min-width:0!important;
+    height:100svh!important; height:var(--ri-viewport-height,100dvh)!important; min-height:0!important; margin:0!important; padding:0!important;
+    background:var(--ri-bg)!important; color:var(--ri-ink)!important; font-family:Inter,system-ui,sans-serif!important;
+    overflow:hidden!important; isolation:isolate;
+  }
+  html:root body #root #ih-registration-interview *, html:root body #root #ih-registration-interview *::before, html:root body #root #ih-registration-interview *::after { box-sizing:border-box!important; }
+  html:root body #root #ih-registration-interview :is(button,input,a,label,strong,span,small,p,h1,h2,dt,dd) { -webkit-text-fill-color:currentColor!important; }
+  html:root body #root #ih-registration-interview .ri-header { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; width:min(1200px,100%)!important; margin:auto!important; padding:28px 40px!important; border:0!important; background:none!important; }
+  html:root body #root #ih-registration-interview .ri-header a { color:var(--ri-ink)!important; font:550 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+  html:root body #root #ih-registration-interview .ri-brand { display:inline-flex!important; align-items:center!important; min-width:0!important; }
+  html:root body #root #ih-registration-interview .ri-brand .ih-brand-signature { font-size:28px!important; }
+  html:root body #root #ih-registration-interview .ri-progress-wrap { width:min(1120px,calc(100% - 80px))!important; margin:12px auto 0!important; padding:0!important; }
+  html:root body #root #ih-registration-interview .ri-progress-caption { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; margin-bottom:12px!important; color:var(--ri-muted)!important; font:500 12px/1.5 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-progress-caption b { margin-left:14px; color:var(--ri-ink); font-variant-numeric:tabular-nums; font-weight:650; }
+  html:root body #root #ih-registration-interview .ri-progress { display:block!important; width:100%!important; height:5px!important; margin:0!important; padding:0!important; border:0!important; border-radius:6px!important; background:var(--ri-line)!important; overflow:hidden!important; }
+  html:root body #root #ih-registration-interview .ri-progress>span { display:block!important; height:100%!important; border-radius:inherit!important; background:var(--ri-accent)!important; transition:width .45s cubic-bezier(.2,.7,.2,1)!important; }
+  html:root body #root #ih-registration-interview .ri-content { width:min(1120px,calc(100% - 80px))!important; min-width:0!important; min-height:0!important; height:100%!important; margin:0 auto!important; padding:52px 0 40px!important; align-self:stretch!important; overflow-y:auto!important; overscroll-behavior:contain!important; scrollbar-gutter:stable!important; animation:ri-enter .48s cubic-bezier(.2,.7,.2,1) both!important; }
+  html:root body #root #ih-registration-interview[data-direction=back] .ri-content { animation-name:ri-enter-back!important; }
+  html:root body #root #ih-registration-interview .ri-heading { max-width:760px!important; margin:0 0 30px!important; }
+  html:root body #root #ih-registration-interview .ri-kicker { display:block!important; margin:0 0 14px!important; color:var(--ri-accent)!important; font:650 11px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.12em!important; text-transform:uppercase!important; }
+  html:root body #root #ih-registration-interview h1 { margin:0 0 18px!important; padding:0!important; color:var(--ri-ink)!important; font:750 clamp(30px,4.1vw,49px)/1.13 Inter,system-ui,sans-serif!important; letter-spacing:-.04em!important; overflow-wrap:anywhere!important; }
+  html:root body #root #ih-registration-interview h1:focus { outline:none; }
+  html:root body #root #ih-registration-interview .ri-heading>p { max-width:66ch!important; margin:0!important; color:var(--ri-muted)!important; font:400 15px/1.75 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-fields { display:block!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; }
+  html:root body #root #ih-registration-interview .ri-sr-only, html:root body #root #ih-registration-interview .ri-choice>input { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip-path:inset(50%)!important; white-space:nowrap!important; border:0!important; }
+  html:root body #root #ih-registration-interview .ri-choices { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:14px!important; min-width:0!important; }
+  html:root body #root #ih-registration-interview .ri-choices-three { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
+  html:root body #root #ih-registration-interview :is(.ri-choices-two,.ri-category-choices) { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  html:root body #root #ih-registration-interview .ri-choice { position:relative!important; display:flex!important; align-items:center!important; gap:16px!important; min-width:0!important; margin:0!important; padding:23px 20px!important; border:1px solid var(--ri-line)!important; border-radius:17px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; cursor:pointer!important; text-align:left!important; transition:background-color .24s,border-color .24s,box-shadow .24s!important; }
+  html:root body #root #ih-registration-interview .ri-choice-number { flex:0 0 20px!important; align-self:flex-start!important; margin:3px 0 0!important; color:var(--ri-muted)!important; font:600 11px/1.5 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important; }
+  html:root body #root #ih-registration-interview .ri-choice-copy { display:grid!important; flex:1 1 0!important; min-width:0!important; gap:9px!important; }
+  html:root body #root #ih-registration-interview .ri-choice-copy>strong { display:block!important; color:var(--ri-ink)!important; font:650 18px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; overflow-wrap:anywhere!important; }
+  html:root body #root #ih-registration-interview .ri-choice-copy>span { display:block!important; margin:0!important; color:var(--ri-muted)!important; font:400 13px/1.75 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+  html:root body #root #ih-registration-interview .ri-choice-check { display:grid!important; place-items:center!important; flex:0 0 26px!important; width:26px!important; height:26px!important; min-width:26px!important; min-height:26px!important; margin:0!important; padding:0!important; border:1px solid var(--ri-line)!important; border-radius:50%!important; background:transparent!important; color:var(--ri-on)!important; }
+  html:root body #root #ih-registration-interview .ri-choice-check svg { display:block!important; width:17px!important; height:17px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; opacity:0; }
+  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; box-shadow:inset 0 0 0 1px var(--ri-accent)!important; }
+  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) :is(.ri-choice-copy>strong,.ri-choice-copy>span,.ri-choice-number) { color:var(--ri-on)!important; }
+  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) .ri-choice-check { border-color:var(--ri-on)!important; background:var(--ri-on)!important; color:var(--ri-accent)!important; animation:ri-check .25s ease-out!important; }
+  html:root body #root #ih-registration-interview .ri-choice:has(input:checked) .ri-choice-check svg { opacity:1!important; }
+  html:root body #root #ih-registration-interview .ri-choice:has(input:focus-visible) { outline:2px solid var(--ri-accent)!important; outline-offset:4px!important; }
+  html:root body #root #ih-registration-interview .ri-category-tabs { display:flex!important; flex-wrap:wrap!important; gap:10px!important; margin:0 0 20px!important; }
+  html:root body #root #ih-registration-interview .ri-category-tabs button { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; min-height:46px!important; margin:0!important; padding:10px 16px!important; border:1px solid var(--ri-line)!important; border-radius:9px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; font:600 13px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  html:root body #root #ih-registration-interview .ri-category-tabs button[aria-pressed=true] { border-color:var(--ri-accent)!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; }
+  html:root body #root #ih-registration-interview :is(.ri-context,.ri-counter,.ri-feedback,.ri-quiet) { display:block!important; margin:16px 0!important; color:var(--ri-muted)!important; font:400 13px/1.7 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-context { margin:0 0 16px!important; font-weight:600!important; color:var(--ri-ink)!important; }
+  html:root body #root #ih-registration-interview .ri-feedback { min-height:44px!important; margin:22px 0 8px!important; color:var(--ri-ink)!important; }
+  html:root body #root #ih-registration-interview .ri-quiet { margin:0!important; font-size:12px!important; }
+  html:root body #root #ih-registration-interview .ri-text-field { display:grid!important; gap:10px!important; margin:26px 0 0!important; color:var(--ri-ink)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-text-field input { display:block!important; width:100%!important; min-width:0!important; min-height:50px!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--ri-line)!important; border-radius:10px!important; background:var(--ri-paper)!important; color:var(--ri-ink)!important; font:400 16px/1.5 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-text-field small { color:var(--ri-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-readiness { min-width:0!important; margin:32px 0 0!important; padding:0!important; border:0!important; }
+  html:root body #root #ih-registration-interview .ri-readiness legend { padding:0 0 16px!important; color:var(--ri-ink)!important; font:650 18px/1.5 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-summary { max-width:800px!important; padding:28px!important; border:1px solid var(--ri-line)!important; border-radius:18px!important; background:var(--ri-paper)!important; }
+  html:root body #root #ih-registration-interview .ri-summary-mark { display:grid!important; place-items:center!important; width:44px!important; height:44px!important; margin:0 0 24px!important; border-radius:50%!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; animation:ri-check .4s ease-out!important; }
+  html:root body #root #ih-registration-interview .ri-summary-mark svg { width:24px!important; height:24px!important; fill:none!important; stroke:currentColor!important; stroke-width:2.5!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
+  html:root body #root #ih-registration-interview .ri-summary dl { display:grid!important; gap:18px!important; margin:0!important; }
+  html:root body #root #ih-registration-interview .ri-summary dl>div { display:grid!important; grid-template-columns:170px minmax(0,1fr)!important; gap:8px 20px!important; }
+  html:root body #root #ih-registration-interview .ri-summary dt { margin:0!important; color:var(--ri-muted)!important; font:400 13px/1.7 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-summary dd { margin:0!important; color:var(--ri-ink)!important; font:600 14px/1.7 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+  html:root body #root #ih-registration-interview .ri-summary>p { margin:24px 0 0!important; padding:20px 0 0!important; border-top:1px solid var(--ri-line)!important; color:var(--ri-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-error { margin:22px 0 0!important; padding:12px 0!important; color:var(--ri-ink)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-privacy { max-width:85ch!important; margin:28px 0 0!important; color:var(--ri-muted)!important; font:400 11px/1.7 Inter,system-ui,sans-serif!important; }
+  html:root body #root #ih-registration-interview .ri-footer { position:relative!important; z-index:3!important; display:grid!important; grid-template-columns:1fr auto!important; align-items:center!important; gap:14px 24px!important; width:100%!important; margin:0!important; padding:20px max(40px,calc((100vw - 1120px)/2)) 30px!important; border-top:1px solid var(--ri-line)!important; background:var(--ri-bg)!important; }
+  html:root body #root #ih-registration-interview .ri-secondary-actions { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:14px!important; }
+  html:root body #root #ih-registration-interview :is(.ri-back,.ri-skip) { min-height:44px!important; margin:0!important; padding:10px 0!important; border:0!important; background:none!important; color:var(--ri-muted)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  html:root body #root #ih-registration-interview .ri-back { padding-right:12px!important; color:var(--ri-ink)!important; font-weight:600!important; }
+  html:root body #root #ih-registration-interview .ri-next { min-width:200px!important; max-width:430px!important; min-height:50px!important; margin:0!important; padding:14px 23px!important; border:1px solid var(--ri-accent)!important; border-radius:11px!important; background:var(--ri-accent)!important; color:var(--ri-on)!important; font:650 14px/1.5 Inter,system-ui,sans-serif!important; white-space:normal!important; text-wrap:balance!important; cursor:pointer!important; }
+  html:root body #root #ih-registration-interview .ri-document-links { grid-column:1/-1!important; display:flex!important; flex-wrap:wrap!important; gap:12px 22px!important; }
+  html:root body #root #ih-registration-interview .ri-document-links a { color:var(--ri-muted)!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; text-decoration:underline!important; text-underline-offset:3px!important; }
+  html:root body #root #ih-registration-interview :is(a,button,input):focus-visible { outline:2px solid var(--ri-accent)!important; outline-offset:4px!important; }
+  html:root body #root #ih-registration-interview button:disabled { opacity:.65!important; cursor:wait!important; }
+  html:root body:has(.cookie-notice) #root #ih-registration-interview { padding-bottom:180px!important; }
+  html:root body #root .ri-sync-notice { max-width:760px; margin:24px auto; padding:20px; border:1px solid var(--v-line,#ddd); border-radius:12px; background:var(--v-surface,#fff); color:var(--v-ink,#191919); font:400 14px/1.7 Inter,system-ui,sans-serif; }
+  html:root body #root .ri-sync-notice button { min-height:44px; margin:12px 12px 0 0; padding:10px 16px; border:1px solid currentColor; border-radius:8px; background:none; color:inherit; font:600 13px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
+  html:root body #root .ih10-registration-card .ri-account-storage-note { margin:22px 0!important; color:var(--ih7-muted,#555)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  html:root body #root .ih10-registration-card .ri-account-storage-note a { color:inherit!important; text-decoration:underline!important; text-underline-offset:3px!important; }
+  html:root body #root #ih-registration-interview .ri-privacy a { color:inherit!important; text-decoration:underline!important; text-underline-offset:3px!important; }
+  html:root body #root .ri-legal-supplement { width:min(1040px,calc(100% - 40px))!important; margin:36px auto 80px!important; padding:28px!important; border:1px solid var(--v-line,#ddd)!important; border-radius:12px!important; background:var(--v-surface,#fff)!important; color:var(--v-ink,#191919)!important; scroll-margin-top:100px!important; overflow-wrap:anywhere!important; }
+  html:root body #root .ri-legal-supplement>span { color:var(--v-muted,#555)!important; font:500 12px/1.7 Inter,system-ui,sans-serif!important; }
+  html:root body #root .ri-legal-supplement h2 { margin:12px 0 20px!important; color:inherit!important; font:700 25px/1.4 Inter,system-ui,sans-serif!important; }
+  html:root body #root .ri-legal-supplement :is(p,dd) { margin:16px 0!important; color:inherit!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+  html:root body #root .ri-legal-supplement dl { margin:24px 0!important; }
+  html:root body #root .ri-legal-supplement dt { margin:20px 0 0!important; color:inherit!important; font:650 14px/1.7 Inter,system-ui,sans-serif!important; }
+  @media(max-width:760px) {
+    html:root body #root #ih-registration-interview .ri-header { padding:24px 20px!important; }
+    html:root body #root #ih-registration-interview .ri-brand .ih-brand-signature { font-size:24px!important; }
+    html:root body #root #ih-registration-interview :is(.ri-progress-wrap,.ri-content) { width:calc(100% - 40px)!important; }
+    html:root body #root #ih-registration-interview .ri-content { padding:32px 0!important; }
+    html:root body #root #ih-registration-interview .ri-heading { margin-bottom:24px!important; }
+    html:root body #root #ih-registration-interview h1 { font-size:30px!important; }
+    html:root body #root #ih-registration-interview .ri-heading>p { font-size:14px!important; line-height:1.75!important; }
+    html:root body #root #ih-registration-interview :is(.ri-choices-three,.ri-choices-two,.ri-category-choices) { grid-template-columns:minmax(0,1fr)!important; gap:12px!important; }
+    html:root body #root #ih-registration-interview .ri-choice { padding:20px 18px!important; gap:12px!important; }
+    html:root body #root #ih-registration-interview .ri-choice-copy>strong { font-size:17px!important; }
+    html:root body #root #ih-registration-interview .ri-summary { padding:22px!important; }
+    html:root body #root #ih-registration-interview .ri-summary dl>div { grid-template-columns:minmax(0,1fr)!important; gap:3px!important; }
+    html:root body #root #ih-registration-interview .ri-footer { grid-template-columns:minmax(0,1fr)!important; gap:10px!important; padding:14px 20px max(24px,env(safe-area-inset-bottom))!important; }
+    html:root body #root #ih-registration-interview .ri-next { grid-row:1!important; width:100%!important; min-width:0!important; max-width:none!important; }
+    html:root body #root #ih-registration-interview .ri-secondary-actions { justify-content:space-between!important; }
+    html:root body #root #ih-registration-interview .ri-document-links { gap:12px 22px!important; }
+    html:root body:has(.cookie-notice) #root #ih-registration-interview { padding-bottom:300px!important; }
+  }
+  @keyframes ri-enter { from { opacity:0; translate:0 14px; } to { opacity:1; translate:0 0; } }
+  @keyframes ri-enter-back { from { opacity:0; translate:-12px 0; } to { opacity:1; translate:0 0; } }
+  @keyframes ri-check { from { scale:.75; } 65% { scale:1.08; } to { scale:1; } }
+  @media(prefers-reduced-motion:reduce) {
+    html:root body #root #ih-registration-interview *, html:root body #root #ih-registration-interview *::before, html:root body #root #ih-registration-interview *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+  }
+}

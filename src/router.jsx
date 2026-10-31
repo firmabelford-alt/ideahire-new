@@ -54,7 +54,9 @@ import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceCompos
 import { agreementPermissions, agreementToForm, EMPTY_AGREEMENT_FORM } from "./AgreementWorkflow";
 import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision } from "./ConversationCards";
 import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
-import { RegistrationRoleScreen, RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
+import { RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
+import RegistrationInterview, { EMPTY_INTERVIEW, RegistrationInterviewPrivacy } from "./RegistrationInterview";
+import { REGISTRATION_INTERVIEW_KEY, normalizeRegistrationInterview, rememberRegistrationInterview, registrationInterviewForUser, saveRegistrationInterview, clearRegistrationInterview, clearRegistrationInterviewMetadata } from "./RegistrationInterviewState";
 import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref, getSafeWebUrl } from "./MarketUI";
 import { useSitePreferences, translateUiText, IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
@@ -1267,9 +1269,13 @@ function getDiscoveryUsageLabel(value) {
 
 function DiscoveryPreferencesProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
+  const { loading: ageLoading, ageRequired } = useAgeAccess();
+  const registrationLocation = useLocation();
+  const registrationToken = new URLSearchParams(registrationLocation.search).get("registration_interview") || registrationLocation.state?.registrationInterviewToken;
   const [preferences, setPreferences] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [interviewSync, setInterviewSync] = useState({ pending: false, error: "" });
   const requestIdRef = useRef(0);
 
   async function refreshPreferences(requestedUserId = user?.id) {
@@ -1279,6 +1285,7 @@ function DiscoveryPreferencesProvider({ children }) {
     if (!requestedUserId) {
       setPreferences(null);
       setErrorMessage("");
+      setInterviewSync({ pending: false, error: "" });
       setLoading(false);
       return null;
     }
@@ -1295,16 +1302,39 @@ function DiscoveryPreferencesProvider({ children }) {
       if (profileResult.error) throw profileResult.error;
       if (requestId !== requestIdRef.current) return null;
 
-      const data = coreResult.data || {};
-      const onboardingProfile = profileResult.data || {};
+      let data = coreResult.data || {};
+      let onboardingProfile = profileResult.data || {};
+      const registrationAnswer = user?.id === requestedUserId
+        ? registrationInterviewForUser(user, registrationToken, JOB_CATEGORIES)
+        : null;
+      let syncError = "";
+      if (registrationAnswer && (data.needs_onboarding || onboardingProfile.needs_onboarding) && !ageLoading && !ageRequired) {
+        try {
+          const saved = await saveRegistrationInterview(supabase, user, registrationAnswer);
+          if (requestId !== requestIdRef.current) return null;
+          data = saved.preferences;
+          onboardingProfile = saved.profile;
+          clearRegistrationInterview();
+          void clearRegistrationInterviewMetadata(supabase, requestedUserId);
+        } catch {
+          if (requestId !== requestIdRef.current) return null;
+          syncError = "Nie udało się jeszcze zapisać odpowiedzi z wywiadu. Nie musisz odpowiadać ponownie.";
+        }
+      } else if (registrationAnswer && !data.needs_onboarding && !onboardingProfile.needs_onboarding) {
+        clearRegistrationInterview();
+        if (user.user_metadata?.[REGISTRATION_INTERVIEW_KEY]) void clearRegistrationInterviewMetadata(supabase, requestedUserId);
+      }
+      if (requestId !== requestIdRef.current) return null;
+      setInterviewSync({ pending: Boolean(registrationAnswer && (data.needs_onboarding || onboardingProfile.needs_onboarding)), error: syncError });
       const storedCategories = Array.isArray(data?.preferred_categories)
         ? data.preferred_categories.filter((category) =>
             JOB_CATEGORIES.includes(category)
           )
         : [];
-      const pendingRole = window.sessionStorage.getItem(
-        "ideahire_pending_usage_preference"
-      );
+      let pendingRole = null;
+      try {
+        if (!registrationAnswer) pendingRole = window.sessionStorage.getItem("ideahire_pending_usage_preference");
+      } catch { /* Preferences still work when browser storage is unavailable. */ }
       const rolePreference = ["find_work", "hire_talent", "both"].includes(
         pendingRole
       )
@@ -1461,7 +1491,10 @@ function DiscoveryPreferencesProvider({ children }) {
       updatedAt: onboardingProfile?.updated_at || data?.updated_at || null,
     };
 
-    window.sessionStorage.removeItem("ideahire_pending_usage_preference");
+    try { window.sessionStorage.removeItem("ideahire_pending_usage_preference"); } catch { /* The server save already succeeded. */ }
+    clearRegistrationInterview();
+    if (user?.user_metadata?.[REGISTRATION_INTERVIEW_KEY]) void clearRegistrationInterviewMetadata(supabase, user.id);
+    setInterviewSync({ pending: false, error: "" });
     setPreferences(nextPreferences);
     setErrorMessage("");
     return nextPreferences;
@@ -1470,7 +1503,7 @@ function DiscoveryPreferencesProvider({ children }) {
   useEffect(() => {
     if (authLoading) return;
     refreshPreferences(user?.id);
-  }, [authLoading, user?.id]);
+  }, [authLoading, user?.id, ageLoading, ageRequired, registrationToken]);
 
   return (
     <DiscoveryPreferencesContext.Provider
@@ -1478,6 +1511,7 @@ function DiscoveryPreferencesProvider({ children }) {
         preferences,
         loading,
         errorMessage,
+        interviewSync,
         refreshPreferences,
         savePreferences,
       }}
@@ -2325,8 +2359,11 @@ function DiscoveryOnboardingLayer() {
     loading: restrictionLoading,
     errorMessage: restrictionError,
   } = useAccountRestriction();
-  const { preferences, loading, errorMessage } =
+  const { preferences, loading, errorMessage, interviewSync, refreshPreferences } =
     useDiscoveryPreferences();
+  const [syncDeferred, setSyncDeferred] = useState(false);
+  const syncEnglish = useSitePreferences().language === "en";
+  useEffect(() => setSyncDeferred(false), [user?.id]);
 
   const excludedPath = [
     "/login",
@@ -2354,6 +2391,11 @@ function DiscoveryOnboardingLayer() {
     !preferences?.needsOnboarding
   ) {
     return null;
+  }
+
+  if (interviewSync?.pending) {
+    if (!interviewSync.error || syncDeferred) return null;
+    return <section className="ri-sync-notice" role="status"><strong>{syncEnglish ? "Your interview answers are ready" : "Odpowiedzi z wywiadu są gotowe"}</strong><p>{syncEnglish ? "We could not save them yet. You do not need to answer again. You can retry or continue using your account." : interviewSync.error}</p><button type="button" onClick={() => { void refreshPreferences(); }}>{syncEnglish ? "Try saving again" : "Spróbuj zapisać ponownie"}</button><button type="button" onClick={() => setSyncDeferred(true)}>{syncEnglish ? "Continue for now" : "Kontynuuj na razie"}</button></section>;
   }
 
   return (
@@ -2616,7 +2658,7 @@ function PublicOnlyRoute({
               ? "/account-status"
             : "/account"
         }
-        state={{ registrationDetailsToken: new URLSearchParams(registrationReturnLocation.search).get("registration_details") }}
+        state={{ registrationDetailsToken: new URLSearchParams(registrationReturnLocation.search).get("registration_details"), registrationInterviewToken: new URLSearchParams(registrationReturnLocation.search).get("registration_interview") }}
         replace
       />
     );
@@ -6284,6 +6326,9 @@ function Register() {
   const [usagePreference, setUsagePreference] =
     useState(initialDraft?.usagePreference || "");
 
+  const [interview, setInterview] = useState(() => ({ ...EMPTY_INTERVIEW, ...initialDraft?.interview,
+    usagePreference: initialDraft?.interview?.usagePreference || initialDraft?.usagePreference || "" }));
+
   const [ageNoticeAcknowledged, setAgeNoticeAcknowledged] =
     useState(initialDraft?.ageNoticeAcknowledged === true);
 
@@ -6303,20 +6348,20 @@ function Register() {
     setMessage(`Nie udało się kontynuować przez Google: ${error?.message || "Spróbuj ponownie."}`);
   });
   const location = useLocation();
-  const [registrationStage, setRegistrationStage] = useState(initialDraft?.stage === "account" ? "account" : "role");
+  const [registrationStage, setRegistrationStage] = useState(initialDraft?.stage === "account" ? "account" : "interview");
   const [confirmationEmail, setConfirmationEmail] = useState("");
   const registrationRequest = useRef(false);
   const formTitleRef = useRef(null);
   const errorRef = useRef(null);
   const returnPoint = useRef(initialDraft?.returnPosition || null);
-  const registrationSnapshot = { name, registrationDetails, email, password, birthDate, usagePreference,
+  const registrationSnapshot = { name, registrationDetails, email, password, birthDate, usagePreference, interview,
     ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, stage: registrationStage };
   useEffect(() => {
     saveDraft(previous => confirmationEmail ? null : { ...previous, ...registrationSnapshot });
-  }, [name, registrationDetails, email, password, birthDate, usagePreference, ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, registrationStage, confirmationEmail, saveDraft]);
+  }, [name, registrationDetails, email, password, birthDate, usagePreference, interview, ageNoticeAcknowledged, privacyNoticeAcknowledged, termsAccepted, registrationStage, confirmationEmail, saveDraft]);
 
   useLayoutEffect(() => {
-    if (registrationStage !== "account") return;
+    if (registrationStage !== "account" && !returnPoint.current) return;
     const frame = requestAnimationFrame(() => {
       const point = returnPoint.current;
       if (point) {
@@ -6339,9 +6384,10 @@ function Register() {
     }
   }, [message, registrationStage]);
 
-  function rememberUsagePreference() {
-    try { window.sessionStorage.setItem("ideahire_pending_usage_preference", usagePreference); }
-    catch { /* Storage being disabled must not block authentication. */ }
+  function registrationInterviewAnswer() {
+    return normalizeRegistrationInterview(interview, JOB_CATEGORIES) || normalizeRegistrationInterview({
+      ...EMPTY_INTERVIEW, usagePreference: usagePreference || "both", action: "skip", personalizationEnabled: false,
+    }, JOB_CATEGORIES);
   }
 
   useEffect(() => {
@@ -6360,10 +6406,15 @@ function Register() {
     if (!usagePreference) { setMessage("Wybierz, jak chcesz korzystać z IdeaHire."); return; }
     const detailsProblem = registrationDetailsProblem(registrationDetails);
     if (detailsProblem) { setMessage(detailsProblem); return; }
-    rememberUsagePreference();
+    const interviewToken = rememberRegistrationInterview(registrationInterviewAnswer());
+    if (!interviewToken) {
+      setMessage(registrationEnglish ? "To keep your interview answers during Google sign-in, allow this site's session storage or create your account by email." : "Aby zachować odpowiedzi podczas logowania Google, zezwól na pamięć sesji tej witryny albo utwórz konto przez e-mail.");
+      return;
+    }
     const detailsToken = rememberRegistrationDetails(registrationDetails);
     const redirectUrl = new URL("/register", window.location.origin);
     redirectUrl.searchParams.set("oauth", "google");
+    redirectUrl.searchParams.set("registration_interview", interviewToken);
     if (detailsToken) redirectUrl.searchParams.set("registration_details", detailsToken);
     await startGoogleAuth(redirectUrl.toString());
   }
@@ -6426,8 +6477,6 @@ function Register() {
     try {
       const acceptedAtClient = new Date().toISOString();
 
-      rememberUsagePreference();
-
       const {
         data,
         error,
@@ -6465,6 +6514,8 @@ function Register() {
                 usagePreference,
               onboarding_source:
                 "registration",
+              [REGISTRATION_INTERVIEW_KEY]:
+                registrationInterviewAnswer(),
             },
           },
         });
@@ -6513,12 +6564,18 @@ function Register() {
     if (error) throw error;
   }} />;
 
-  if (registrationStage === "role") {
-    return <RegistrationRoleScreen
-      options={DISCOVERY_USAGE_OPTIONS}
-      value={usagePreference}
-      onChange={(value) => { setUsagePreference(value); setMessage(""); }}
-      onContinue={() => { if (usagePreference) setRegistrationStage("account"); }}
+  if (registrationStage === "interview") {
+    return <RegistrationInterview
+      value={interview}
+      onChange={(value) => { setInterview(value); setUsagePreference(value.usagePreference); setMessage(""); }}
+      onComplete={(answer) => { setInterview(previous => ({ ...previous, ...answer, step: answer.action === "skip" ? 0 : 5 })); setUsagePreference(answer.usagePreference); setRegistrationStage("account"); }}
+      usageOptions={DISCOVERY_USAGE_OPTIONS}
+      categories={JOB_CATEGORIES}
+      categoryDetails={DISCOVERY_CATEGORY_DETAILS}
+      categoryLabel={getJobCategoryLabel}
+      goalOptions={DISCOVERY_GOAL_OPTIONS}
+      readinessOptions={DISCOVERY_PROJECT_READINESS_OPTIONS}
+      snapshot={registrationSnapshot}
     />;
   }
 
@@ -6550,8 +6607,8 @@ function Register() {
         </div>
 
         <div className="ih59-registration-selection">
-          <div><small>Krok 2 z 2 · Twój kierunek</small><strong>{getDiscoveryUsageLabel(usagePreference)}</strong></div>
-          <button type="button" disabled={loading} onClick={() => { cancelGoogleAuth(); setRegistrationStage("role"); setMessage(""); }}>Zmień wybór</button>
+          <div><small>{interview.action === "skip" ? "Wywiad pominięty · teraz Twoje konto" : "Wywiad gotowy · teraz Twoje konto"}</small><strong>{getDiscoveryUsageLabel(usagePreference)}</strong></div>
+          <button type="button" disabled={loading} onClick={() => { cancelGoogleAuth(); setRegistrationStage("interview"); setMessage(""); }}>Edytuj wywiad</button>
         </div>
 
         <div className="auth-provider-section">
@@ -6745,6 +6802,8 @@ function Register() {
               </small>
             </div>
           </div>
+
+          <p className="ri-account-storage-note">{registrationEnglish ? "Cookies and site storage: necessary technologies are described in the information shown on your first visit. Creating an account does not mean agreeing to advertising or analytics. " : "Cookies i pamięć witryny: niezbędne technologie opisujemy w informacji przy pierwszej wizycie. Utworzenie konta nie oznacza zgody na reklamy ani analitykę. "}<RegistrationDocumentLink to="/polityka-cookies" id="ri-account-cookies" snapshot={registrationSnapshot}>{registrationEnglish ? "Read the cookie policy" : "Przeczytaj politykę cookies"}</RegistrationDocumentLink></p>
 
           {captcha.field}
 
@@ -28423,12 +28482,12 @@ function Router() {
 
           <Route
             path="/polityka-cookies"
-            element={<CookiePolicy />}
+            element={<><CookiePolicy /><RegistrationInterviewPrivacy cookies /></>}
           />
 
           <Route
             path="/polityka-prywatnosci"
-            element={<PrivacyPolicy />}
+            element={<><PrivacyPolicy /><RegistrationInterviewPrivacy /></>}
           />
 
           <Route
