@@ -678,7 +678,7 @@ export function IdeaHireCinematicHero({jobs=[]}){
   </section>;
 }
 
-/* P40: jeden nagłówek w DOM; przewijanie zabiera cały pas, bezruch odsyła go na górę. */
+/* One header in the DOM, with a gentle entrance and no layout jump. */
 const IH40_HEADER_STYLES = String.raw`
 __IH40__ .ih40-header-slot {display:flow-root!important;position:relative!important;width:100%!important;min-width:0!important;overflow:visible!important;}
 __IH40__ .ih40-header-slot > .ih-home-header {position:relative!important;inset:auto!important;translate:0 0!important;}
@@ -694,11 +694,13 @@ function useIdeaHireScrollHeader(headerRef, slotRef) {
     const properties = ["position","top","right","bottom","left","width","max-width","margin","z-index","opacity","translate","transition","pointer-events","box-shadow"];
     const saved = properties.map(name => [name,header.style.getPropertyValue(name),header.style.getPropertyPriority(name)]);
     const originalInert = header.hasAttribute("inert");
-    let mode = "home", idle = 0, returning = 0, frame = 0, hovering = false, focused = false, disposed = false, insetLeft = 0, insetRight = 0;
+    let mode = "home", idle = 0, returning = 0, frame = 0, entering = 0, hovering = false, focused = false, disposed = false, insetLeft = 0, insetRight = 0;
     const set = (name,value) => header.style.setProperty(name,value,"important");
-    const hold = () => hovering || focused || Boolean(header.querySelector('[aria-expanded="true"]'));
+    const transition = () => reduced.matches ? "none" : "opacity 320ms ease, translate 360ms cubic-bezier(.22,.61,.36,1)";
+    const hold = () => hovering || focused || header.dataset.mobileMenuOpen === "true" || Boolean(header.querySelector('[aria-expanded="true"]'));
     function restore() {
       window.clearTimeout(idle); window.clearTimeout(returning); idle = 0; returning = 0;
+      window.cancelAnimationFrame(entering); entering = 0;
       mode = "home";
       saved.forEach(([name,value,priority]) => value ? header.style.setProperty(name,value,priority) : header.style.removeProperty(name));
       slot.style.removeProperty("height");
@@ -709,19 +711,25 @@ function useIdeaHireScrollHeader(headerRef, slotRef) {
       window.clearTimeout(idle); idle = 0;
       if (mode !== "following" || hold()) return;
       mode = "returning"; header.dataset.scrollHeader = "returning";
-      set("opacity","0"); set("translate",reduced.matches ? "0 0" : "0 -12px"); set("pointer-events","none");
+      set("opacity","0"); set("translate",reduced.matches ? "0 0" : "0 -6px"); set("pointer-events","none");
       header.setAttribute("inert","");
-      returning = window.setTimeout(restore,reduced.matches ? 0 : 230);
+      returning = window.setTimeout(restore,reduced.matches ? 0 : 380);
     }
     function arm() {
       window.clearTimeout(idle);
-      if (mode === "following" && !hold()) idle = window.setTimeout(rest,1200);
+      if (mode === "following" && !hold()) idle = window.setTimeout(rest,2400);
+    }
+    function show() {
+      window.clearTimeout(returning); returning = 0;
+      if (!originalInert) header.removeAttribute("inert");
+      set("transition",transition());
+      set("opacity","1"); set("translate","0 0"); set("pointer-events","auto"); arm();
     }
     function follow() {
       if (disposed) return;
       const box = slot.getBoundingClientRect();
-      const beyond = box.bottom < -12;
-      if (!beyond) { restore(); return; }
+      if (mode === "home" && box.bottom >= -24) return;
+      if (mode !== "home" && box.top >= 0) { restore(); return; }
       if (mode === "home") {
         const headerBox = header.getBoundingClientRect();
         insetLeft = headerBox.left - box.left; insetRight = box.right - headerBox.right;
@@ -729,12 +737,21 @@ function useIdeaHireScrollHeader(headerRef, slotRef) {
         set("position","fixed"); set("top","0px"); set("right","auto"); set("bottom","auto");
         set("left",`${headerBox.left}px`); set("width",`${headerBox.width}px`); set("max-width","none"); set("margin","0");
         set("z-index","500"); set("box-shadow","0 10px 32px rgba(8,16,30,.12)");
-        set("transition",reduced.matches ? "none" : "opacity 210ms ease, translate 230ms cubic-bezier(.2,.75,.3,1)");
+        mode = "following"; header.dataset.scrollHeader = "following";
+        if (reduced.matches || hold()) { show(); return; }
+        set("transition","none"); set("opacity","0"); set("translate","0 -6px"); set("pointer-events","none");
+        header.setAttribute("inert","");
+        entering = window.requestAnimationFrame(() => {
+          entering = 0;
+          if (disposed || mode !== "following") return;
+          header.getBoundingClientRect();
+          show();
+        });
+        return;
       }
-      window.clearTimeout(returning); returning = 0;
-      if (!originalInert) header.removeAttribute("inert");
+      if (entering) return;
       mode = "following"; header.dataset.scrollHeader = "following";
-      set("opacity","1"); set("translate","0 0"); set("pointer-events","auto"); arm();
+      show();
     }
     const scroll = () => { if (!frame) frame = window.requestAnimationFrame(() => {frame = 0; follow();}); };
     const enter = event => {if(event.pointerType === "mouse"){hovering = true;window.clearTimeout(idle);}};
@@ -744,12 +761,14 @@ function useIdeaHireScrollHeader(headerRef, slotRef) {
     const pointer = event => {if(mode === "following" && event.pointerType === "mouse" && !event.buttons) arm();};
     const resize = () => {
       if (mode === "home") return;
-      if (!hold()) {restore();return;}
-      const box = slot.getBoundingClientRect();set("left",`${box.left + insetLeft}px`);set("width",`${Math.max(0,box.width - insetLeft - insetRight)}px`);
+      const box = slot.getBoundingClientRect();
+      if (box.top >= 0) {restore();return;}
+      set("left",`${box.left + insetLeft}px`);set("width",`${Math.max(0,box.width - insetLeft - insetRight)}px`);
+      slot.style.setProperty("height",`${header.getBoundingClientRect().height}px`,"important");
     };
     const hidden = () => {if(document.hidden) restore();};
     const lost = () => {hovering = false;focused = false;arm();};
-    const settings = () => {if(mode === "following") set("transition",reduced.matches ? "none" : "opacity 210ms ease, translate 230ms cubic-bezier(.2,.75,.3,1)");};
+    const settings = () => {if(mode === "following") set("transition",transition());};
     const observer = typeof MutationObserver !== "undefined" ? new MutationObserver(arm) : null;
     observer?.observe(header,{subtree:true,attributes:true,attributeFilter:["aria-expanded","data-mobile-menu-open"]});
     header.dataset.scrollHeader = "home";
@@ -1268,14 +1287,12 @@ __IH53__ [data-ih53-press=true]{animation:ih53-card-press 650ms cubic-bezier(.2,
 __IH53__{overflow-x:clip!important;}
 __IH53__ :is(.ih5-category-showcase,.steps,.split-section){perspective:1300px!important;}
 __IH53__ .home-reveal{opacity:1!important;transform:none!important;filter:none!important;}
-__IH53__ [data-ih53-entrance]{backface-visibility:hidden;transform-origin:50% 70%;}
-__IH53__ [data-ih53-entrance=waiting]{filter:opacity(0)!important;}
-__IH53__ [data-ih53-entrance=entering]{animation:ih53-section-in 1020ms cubic-bezier(.16,.85,.23,1) var(--ih53-stagger,0ms) both!important;}
-__IH53__ [data-ih53-entrance=entering] [data-ih53-part]{animation:ih53-content-in 710ms cubic-bezier(.15,.8,.2,1) calc(var(--ih53-stagger,0ms) + var(--ih53-part-delay,190ms)) both!important;}
-@keyframes ih53-section-in{0%{translate:var(--ih53-entry-x,0px) var(--ih53-entry-y,48px);clip-path:var(--ih53-mask,inset(0 0 100% 0));rotate:1 0 0 8deg;}65%{translate:0 -3px;clip-path:inset(0 0 0 0);rotate:1 0 0 -.7deg;}100%{translate:0 0;clip-path:inset(0 0 0 0);rotate:1 0 0 0deg;}}
-@keyframes ih53-content-in{from{translate:var(--ih53-part-x,40px) 14px;clip-path:inset(0 0 100% 0);}to{translate:0 0;clip-path:inset(0 0 0 0);}}
+__IH53__ [data-ih53-entrance]{filter:none!important;rotate:none!important;clip-path:none!important;animation:none!important;transition:opacity 480ms ease,translate 480ms cubic-bezier(.22,.61,.36,1)!important;}
+__IH53__ [data-ih53-entrance=waiting]{opacity:0!important;translate:0 10px!important;}
+__IH53__ [data-ih53-entrance=entering],__IH53__ [data-ih53-entrance=shown]{opacity:1!important;translate:0 0!important;}
+__IH53__ [data-ih53-entrance=shown]{transition:none!important;}
 @media(max-width:760px){__IH53__ .ih40-step-mark .ih53-mark-scene{width:98px!important;height:80px!important;top:20px!important;}__IH53__ .ih53-mark-scene{width:116px!important;height:116px!important;}}
-@media(prefers-reduced-motion:reduce){__IH53__ [data-ih53-entrance],__IH53__ [data-ih53-part]{filter:none!important;pointer-events:auto!important;translate:none!important;rotate:none!important;clip-path:none!important;animation:none!important;}__IH53__ .ih53-optical-fallback{animation:none!important;}__IH53__ [data-ih53-tilt=true],__IH53__ [data-ih53-press=true]{transform:none!important;transition:none!important;animation:none!important;will-change:auto!important;}}
+@media(prefers-reduced-motion:reduce){__IH53__ [data-ih53-entrance]{opacity:1!important;filter:none!important;pointer-events:auto!important;translate:none!important;rotate:none!important;clip-path:none!important;animation:none!important;transition:none!important;}__IH53__ .ih53-optical-fallback{animation:none!important;}__IH53__ [data-ih53-tilt=true],__IH53__ [data-ih53-press=true]{transform:none!important;transition:none!important;animation:none!important;will-change:auto!important;}}
 body.ih53-active::before,body.ih53-active::after{display:none!important;}
 
 /* P53: biały nagłówek, oddzielone karty i dostępne rozwijanie treści. */
@@ -1696,27 +1713,22 @@ function IH53Backdrop({rootRef}){
 function ih53Entrances(root,reduced){
  const selector='.ih-category-trigger,.ih5-story,.ih53-showcase-tile,.split-section > .split-card,.final-cta,.section-heading,.ih-demo-reviews-heading';
  const nodes=Array.from(root.querySelectorAll(selector)),records=new Map();let observer=null,paused=IH53_MOTION.paused,dead=false;
- const finish=node=>{const record=records.get(node);if(!record)return;clearTimeout(record.timer);record.timer=0;node.dataset.ih53Entrance='shown';if(!dead&&!reduced&&!paused)observer?.observe(node);};
- const reveal=(node,immediate=false,delay=0)=>{
+ const finish=node=>{const record=records.get(node);if(!record)return;clearTimeout(record.timer);record.timer=0;node.dataset.ih53Entrance='shown';observer?.unobserve(node);};
+ const reveal=(node,immediate=false)=>{
   const record=records.get(node);if(!record)return;
   if(immediate){finish(node);return;}if(node.dataset.ih53Entrance==='entering'||node.dataset.ih53Entrance==='shown')return;
-  observer?.unobserve(node);node.style.setProperty('--ih53-stagger',delay+'ms');node.dataset.ih53Entrance='entering';node.dispatchEvent(new CustomEvent('ih53-card-enter',{bubbles:true}));node.querySelector('.ih-category-trigger')?.dispatchEvent(new CustomEvent('ih53-card-enter'));
-  record.timer=setTimeout(()=>finish(node),1320+delay);
+  observer?.unobserve(node);node.dataset.ih53Entrance='entering';node.dispatchEvent(new CustomEvent('ih53-card-enter',{bubbles:true}));node.querySelector('.ih-category-trigger')?.dispatchEvent(new CustomEvent('ih53-card-enter'));
+  record.timer=setTimeout(()=>finish(node),520);
  };
- nodes.forEach((node,index)=>{
-  const siblings=Array.from(node.parentElement?.children||[]),ordinal=Math.max(0,siblings.indexOf(node)),up=node.matches('.final-cta,.section-heading,.ih-demo-reviews-heading');
-  node.style.setProperty('--ih53-entry-x',up?'0px':ordinal%2?'76px':'-76px');node.style.setProperty('--ih53-entry-y',up?'72px':'28px');node.style.setProperty('--ih53-mask',up?'inset(0 0 100% 0)':ordinal%2?'inset(0 0 0 100%)':'inset(0 100% 0 0)');
-  const parts=Array.from(node.querySelectorAll('.ih40-step-number,.ih40-step-title,.ih40-step-copy,:scope > .section-label,:scope > h2:not(.final-cta-title),:scope > p,:scope > .btn,.final-cta-title > span'));
-  parts.forEach((part,i)=>{part.dataset.ih53Part='true';part.style.setProperty('--ih53-part-x',part.matches('.btn')?(ordinal%2?'-56px':'56px'):i%2?'32px':'-32px');part.style.setProperty('--ih53-part-delay',190+Math.min(i,4)*90+'ms');});records.set(node,{timer:0,parts});
- });
+ nodes.forEach(node=>records.set(node,{timer:0}));
  const focus=e=>{const node=e.target.closest?.(selector);if(node)reveal(node,true);};
- const motion=e=>{paused=!!e.detail?.paused;if(paused){observer?.disconnect();nodes.forEach(n=>reveal(n,true));}else if(!reduced)nodes.forEach(n=>observer?.observe(n));};
+ const motion=e=>{paused=!!e.detail?.paused;if(paused){observer?.disconnect();nodes.forEach(n=>reveal(n,true));}};
  if(!reduced&&!paused&&typeof IntersectionObserver!=='undefined')try{
-  observer=new IntersectionObserver(entries=>{if(dead)return;let count=0;for(const entry of entries){const node=entry.target;if(entry.isIntersecting){reveal(node,paused,count++*85);}else if(node.dataset.ih53Entrance!=='entering'){const b=entry.boundingClientRect;if(b.bottom<=0||b.top>=window.innerHeight)node.dataset.ih53Entrance='waiting';}}},{threshold:0,rootMargin:'0px 0px -40px 0px'});
-  nodes.forEach(node=>{const b=node.getBoundingClientRect();if(!b.width||!b.height){finish(node);observer.unobserve(node);return;}node.dataset.ih53Entrance=b.bottom<=0?'shown':'waiting';observer.observe(node);});
+  observer=new IntersectionObserver(entries=>{if(dead)return;for(const entry of entries){if(entry.isIntersecting)reveal(entry.target,paused);}},{threshold:0,rootMargin:'0px 0px -24px 0px'});
+  nodes.forEach(node=>{const b=node.getBoundingClientRect();if(!b.width||!b.height||b.top<window.innerHeight){finish(node);return;}node.dataset.ih53Entrance='waiting';observer.observe(node);});
  }catch{observer?.disconnect();nodes.forEach(n=>finish(n));}else nodes.forEach(n=>finish(n));
  root.addEventListener('focusin',focus);root.addEventListener('pointerdown',focus,true);window.addEventListener('ih53-motion',motion);
- return()=>{dead=true;observer?.disconnect();root.removeEventListener('focusin',focus);root.removeEventListener('pointerdown',focus,true);window.removeEventListener('ih53-motion',motion);for(const[node,{timer,parts}]of records){clearTimeout(timer);delete node.dataset.ih53Entrance;for(const key of['--ih53-stagger','--ih53-entry-x','--ih53-entry-y','--ih53-mask'])node.style.removeProperty(key);parts.forEach(part=>{delete part.dataset.ih53Part;part.style.removeProperty('--ih53-part-x');part.style.removeProperty('--ih53-part-delay');});}};
+ return()=>{dead=true;observer?.disconnect();root.removeEventListener('focusin',focus);root.removeEventListener('pointerdown',focus,true);window.removeEventListener('ih53-motion',motion);for(const[node,{timer}]of records){clearTimeout(timer);delete node.dataset.ih53Entrance;}};
 }
 function useIH53LegacyEnhancements(rootRef){
  const site=useSitePreferences(),reduced=useIH53Reduced(),palette=ih53Palette(site);
