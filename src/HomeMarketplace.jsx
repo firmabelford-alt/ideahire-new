@@ -5,51 +5,56 @@ function Arrow() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 5l7 7-7 7" /></svg>;
 }
 
-function RoundLink({ to, label, className }) {
-  const split = label.indexOf(" ");
-  return <Link to={to} className={`ih87-round-link ${className}`} aria-label={label}><span><span>{label.slice(0, split)} </span><strong>{label.slice(split + 1)}</strong></span><Arrow /></Link>;
+function EntryLink({ to, label, hint, className }) {
+  return <Link to={to} className={`ih88-entry ${className}`} aria-label={label}><span><small>{hint}</small><strong>{label}</strong></span><Arrow /></Link>;
 }
 
-/* Live data, rotation, swipe and router state stay owned by the homepage. */
+/* The homepage owns live data, rotation, swipe and the selected project's state. */
 export default function HomeMarketplace({
   en = false, hostRef, stopped, motionPaused, count = 0, index = 0,
   sample = false, isNew = false, pending, onShowPending,
   projectEvents = {}, swipeEvents = {}, trackEvents = {}, children,
 }) {
   const copy = en ? {
-    eyebrow: "PROJECTS × PEOPLE", title: ["Make", "it happen."],
-    note: "Bring your idea. Or your skills. Find the other side of your next project.",
-    jobs: "Find a project", talent: "Find a professional", recent: "The project board",
+    eyebrow: "IDEAS BECOME COLLABORATIONS", title: ["Good things", "start with people."],
+    intro: "Find someone for your project. Or a project for your skills.",
+    client: "I have a project", maker: "I bring the skills",
+    jobs: "Find a project", talent: "Find a professional", recent: "Projects on IdeaHire",
     preview: "An example of a project", fresh: "New project", all: "All projects",
-    empty: "A place for your next project.", add: "Post a project", pending: "Show new project",
+    empty: "Have a project in mind? Tell people what you need.", add: "Post a project", pending: "Show new project",
   } : {
-    eyebrow: "PROJEKTY × LUDZIE", title: ["Dobra.", "Do dzieła."],
-    note: "Masz pomysł albo fach. Tu znajdziesz drugą stronę.",
-    jobs: "Znajdź zlecenie", talent: "Znajdź wykonawcę", recent: "Na tablicy",
+    eyebrow: "Z POMYSŁU WE WSPÓŁPRACĘ", title: ["Dobrze mieć", "z kim działać."],
+    intro: "Znajdź osobę do projektu. Albo projekt dla siebie.",
+    client: "Mam projekt", maker: "Mam umiejętności",
+    jobs: "Znajdź zlecenie", talent: "Znajdź wykonawcę", recent: "Zlecenia na IdeaHire",
     preview: "Przykładowe zlecenie", fresh: "Nowe zlecenie", all: "Wszystkie zlecenia",
-    empty: "Miejsce na Twój kolejny projekt.", add: "Dodaj zlecenie", pending: "Pokaż nowe zlecenie",
+    empty: "Masz pomysł na projekt? Opisz go i zaproś do współpracy.", add: "Dodaj zlecenie", pending: "Pokaż nowe zlecenie",
   };
   return (
-    <div ref={hostRef} className="ih53-jobs-finale ih87-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
-      <div className="ih87-composition">
-        <header className="ih87-heading">
-          <p className="ih87-eyebrow">{copy.eyebrow}</p>
-          <h1 className="ih87-title">{copy.title.map(line => <span key={line}>{line}</span>)}</h1>
-        </header>
-        <RoundLink className="ih87-jobs" to="/jobs" label={copy.jobs}/>
-        <section className="ih87-live" aria-labelledby="ih87-projects-title" data-empty={count === 0} {...projectEvents}>
-          <div className="ih87-live-heading">
-            <h2 id="ih87-projects-title">{count > 0 && sample ? copy.preview : isNew && count > 0 ? copy.fresh : copy.recent}</h2>
-            {count > 1 && !sample && <span className="ih87-count" aria-label={en ? `Project ${index + 1} of ${count}` : `Zlecenie ${index + 1} z ${count}`}>{String(index + 1).padStart(2,"0")}<span aria-hidden="true"> / </span>{String(count).padStart(2,"0")}</span>}
+    <div ref={hostRef} className="ih53-jobs-finale ih88-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
+      <div className="ih88-layout">
+        <div className="ih88-intro">
+          <header className="ih88-heading">
+            <p className="ih88-eyebrow">{copy.eyebrow}</p>
+            <h1 className="ih88-title" aria-label={copy.title.join(" ")}>{copy.title.map(line => <span key={line}>{line}</span>)}</h1>
+            <p className="ih88-lead">{copy.intro}</p>
+          </header>
+          <div className="ih88-photo">
+            <img src="/media/ideahire-collaboration.webp" width="1536" height="1024" alt="" fetchPriority="high" decoding="async"/>
+            <EntryLink className="ih88-talent" to="/freelancers" label={copy.talent} hint={copy.client}/>
           </div>
-          <div className="ih87-paper">
-            {count > 0 ? <div className="ih87-project-window" {...swipeEvents}><div className="ih53-project-track" {...trackEvents}>{children}</div></div> : <div className="ih87-empty"><p>{copy.empty}</p><Link to="/find-talent">{copy.add}<Arrow /></Link></div>}
+          <EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs} hint={copy.maker}/>
+        </div>
+
+        <section className="ih88-live" aria-labelledby="ih88-projects-title" data-empty={count === 0} {...projectEvents}>
+          <div className="ih88-live-heading">
+            <div><h2 id="ih88-projects-title">{count > 0 && sample ? copy.preview : isNew && count > 0 ? copy.fresh : copy.recent}</h2>
+            {count > 1 && !sample && <span className="ih88-count" aria-label={en ? `Project ${index + 1} of ${count}` : `Zlecenie ${index + 1} z ${count}`}>{String(index + 1).padStart(2,"0")}<span aria-hidden="true"> / </span>{String(count).padStart(2,"0")}</span>}</div>
+            <Link to="/jobs">{copy.all}<Arrow /></Link>
           </div>
-          <div className="ih87-live-footer"><Link to="/jobs">{copy.all}<Arrow /></Link></div>
-          <div className="ih87-project-status" aria-live="polite">{pending && <button type="button" onClick={onShowPending}>{copy.pending}<Arrow /></button>}</div>
+          {count > 0 ? <div className="ih88-project-window" {...swipeEvents}><div className="ih53-project-track" {...trackEvents}>{children}</div></div> : <div className="ih88-empty"><p>{copy.empty}</p><Link to="/find-talent">{copy.add}<Arrow /></Link></div>}
+          <div className="ih88-project-status" aria-live="polite">{pending && <button type="button" onClick={onShowPending}>{copy.pending}<Arrow /></button>}</div>
         </section>
-        <RoundLink className="ih87-talent" to="/freelancers" label={copy.talent}/>
-        <p className="ih87-note">{copy.note}</p>
       </div>
     </div>
   );
