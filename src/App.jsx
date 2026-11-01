@@ -1731,10 +1731,10 @@ function ih53Entrances(root,reduced){
  return()=>{dead=true;observer?.disconnect();root.removeEventListener('focusin',focus);root.removeEventListener('pointerdown',focus,true);window.removeEventListener('ih53-motion',motion);for(const[node,{timer}]of records){clearTimeout(timer);delete node.dataset.ih53Entrance;}};
 }
 function useIH53LegacyEnhancements(rootRef){
- const site=useSitePreferences(),reduced=useIH53Reduced(),palette=ih53Palette(site);
+ const site=useSitePreferences(),reduced=useIH53Reduced(),palette=ih53Palette(site),brandReady=useBrandReady();
  useLayoutEffect(()=>{document.body.classList.add('ih53-active');return()=>document.body.classList.remove('ih53-active');},[]);
  useEffect(()=>{
-  const root=rootRef.current;if(!root)return;
+  const root=rootRef.current;if(!root||!brandReady)return;
   const marks=[],presses=new Map(),stopEntrances=ih53Entrances(root,reduced);let frame=0,pending=null,current=null;
   for(const mark of root.querySelectorAll('.ih-category-mark')){
    const owner=mark.closest('.ih-category-trigger,.ih40-step');if(!owner)continue;
@@ -1748,7 +1748,7 @@ function useIH53LegacyEnhancements(rootRef){
   const press=e=>{if(e.pointerType==='mouse'||reduced||IH53_MOTION.paused)return;const target=e.target.closest?.('.ih-category-trigger,.ih40-step > button');if(!target)return;clearTimeout(presses.get(target));target.dataset.ih53Press='true';presses.set(target,setTimeout(()=>{target.removeAttribute('data-ih53-press');presses.delete(target);},680));};
   root.addEventListener('pointermove',move,{passive:true});root.addEventListener('pointerdown',press,{passive:true});root.addEventListener('pointercancel',clearPresses);root.addEventListener('pointerleave',reset);window.addEventListener('blur',reset);
   return()=>{stopEntrances();cancelAnimationFrame(frame);reset();clearPresses();root.removeEventListener('pointermove',move);root.removeEventListener('pointerdown',press);root.removeEventListener('pointercancel',clearPresses);root.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);marks.forEach(({engine,host,mark})=>{engine.destroy();host.remove();delete mark.dataset.ih53Ready;});};
- },[rootRef,palette,reduced]);
+ },[rootRef,palette,reduced,brandReady]);
 }
 function IH53CommissionStory(){
  const site=useSitePreferences(),en=site.language==='en',[draft,setDraft]=useState('500');
