@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { BrandMark } from "./Brand";
 import "./HomeMarketplace.css";
 
 function Arrow() {
@@ -8,19 +9,6 @@ function Arrow() {
 function ActionLink({ to, label }) {
   const split = label.indexOf(" ");
   return <Link to={to} aria-label={label}><span className="ih84-action-label"><span>{label.slice(0,split)}</span><strong>{label.slice(split+1)}</strong></span><Arrow /></Link>;
-}
-
-function IdeaSculpture() {
-  const mark = "M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z";
-  return <div className="ih84-sculpture" aria-hidden="true"><svg viewBox="0 0 260 220" focusable="false">
-    <path className="ih84-orbit" d="M29 151C-10 83 174 4 227 63S111 230 45 179" />
-    <g className="ih84-solid" transform="translate(46 8) rotate(-10 84 92)">
-      <path className="ih84-layer-back" d={mark} transform="translate(30 26) scale(2.7)" />
-      <path className="ih84-layer-mid" d={mark} transform="translate(20 16) scale(2.7)" />
-      <path className="ih84-layer-front" d={mark} transform="translate(10 6) scale(2.7)" />
-    </g>
-    <path className="ih84-orbit-front" d="M45 179C96 208 229 150 235 101" />
-  </svg></div>;
 }
 
 /* Live data, rotation and swipe remain owned by the homepage. */
@@ -46,8 +34,7 @@ export default function HomeMarketplace({
     <div ref={hostRef} className="ih53-jobs-finale ih83-market ih84-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
       <div className="ih84-hub">
         <div className="ih84-intro">
-          <IdeaSculpture />
-          <p className="ih84-eyebrow">{copy.eyebrow}</p>
+          <div className="ih85-masthead"><p className="ih84-eyebrow">{copy.eyebrow}</p><BrandMark className="ih85-hero-mark"/></div>
           <h1 className="ih84-title">{copy.title.map(line => <span key={line}>{line}</span>)}</h1>
           <p className="ih84-lead">{copy.intro}</p>
           <nav className="ih84-actions" aria-label={en ? "Choose your next step" : "Wybierz, co chcesz zrobić"}>
