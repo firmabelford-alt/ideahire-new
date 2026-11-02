@@ -78,7 +78,11 @@ async function execute(actor:string,decision:string,resumeReview=false):Promise<
  check(UUID.test(a.id)&&UUID.test(a.lease)&&a.livemode===live,"Nieprawidłowa rezerwacja rozliczenia.");
  for(const n of ["refund_work","refund_fee","refund_total","contractor_target","total","work"]){check(Number.isSafeInteger(a[n])&&a[n]>=0,"Nieprawidłowa kwota rozliczenia.");}
  const lease=a.lease;
- async function save(step:string,data:J={}){a=await rpc("ideahire_dispute_checkpoint",{p_id:a.id,p_lease:lease,p_step:step,p_data:data});}
+ async function save(step:string,data:J={}){
+  if(step==="refund")check(["pending","requires_action","succeeded","failed","canceled"].includes(data.status),"Nieznany status zwrotu. Wymagana kontrola tej operacji.");
+  a=await rpc("ideahire_dispute_checkpoint",{p_id:a.id,p_lease:lease,p_step:step,p_data:data});
+  if(step==="refund")check(a.refund_id===data.id&&a.refund_status===data.status,"Status zwrotu zmienił się podczas rozliczenia. Wymagana kontrola tej samej operacji.");
+ }
  const key=(step:string)=>"ideahire-dispute-"+a.id+"-"+step;
  try{
   let charge=await paidCharge(a);await save("charge",{id:charge.id});

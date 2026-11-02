@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION public.ideahire_observe_financial_event(p_event_id te
  SET search_path TO ''
 AS $function$
 DECLARE p public.ideahire_payments%rowtype; a ideahire_finance.actions%rowtype; pid uuid; oid text:=p_object->>'id';
- charge text; intent text; state_name text; old_created bigint; old_state text; amount bigint; reversed bigint; expected bigint;
+ charge text; intent text; state_name text; old_created bigint; old_state text; amount bigint; reversed bigint; expected bigint; adjust_failed boolean;
 BEGIN
  PERFORM ideahire_finance.service_only();
  IF p_type NOT IN ('charge.refunded','refund.created','refund.updated','refund.failed','charge.dispute.created','charge.dispute.updated','charge.dispute.closed','transfer.created','transfer.updated','transfer.reversed') THEN RETURN false; END IF;
@@ -65,22 +65,44 @@ BEGIN
     WHEN state='completed' AND p_object->>'status' NOT IN ('failed','canceled') THEN refund_status
     ELSE p_object->>'status' END WHERE id=a.id;
   IF p_object->>'status' IN ('failed','canceled') THEN
+   -- Accounting idempotency cannot depend on refund_status: a checkpoint may
+   -- record the terminal status before its webhook arrives.
+   adjust_failed:=a.completed_at IS NOT NULL AND NOT EXISTS(
+    SELECT 1 FROM public.ideahire_payment_events e
+    WHERE e.payment_id=p.id AND e.event_type='failed_refund_amount_reconciled'
+     AND e.details->>'refund_id'=oid);
    UPDATE ideahire_finance.actions SET state='needs_review',last_error='Stripe zgłosił nieudany zwrot. Wymagana kontrola tej operacji.' WHERE id=a.id;
    UPDATE public.dispute_decisions SET payment_action_status='failed' WHERE id=a.decision_id;
    -- A completed refund can fail later. Remove its credited amount once;
    -- retain other refunds and do not debit again on duplicate events.
    UPDATE public.ideahire_payments SET status='disputed',
     refunded_amount_grosz=CASE
-     WHEN a.completed_at IS NOT NULL AND coalesce(a.refund_status,'') NOT IN ('failed','canceled')
+     WHEN adjust_failed
       THEN greatest(0,refunded_amount_grosz-a.refund_total)
      ELSE refunded_amount_grosz END,
     refunded_at=CASE
-     WHEN a.completed_at IS NOT NULL AND coalesce(a.refund_status,'') NOT IN ('failed','canceled')
+     WHEN adjust_failed
       AND refunded_amount_grosz<=a.refund_total THEN NULL
      ELSE refunded_at END,
     last_error_code='stripe_refund_failed',
     last_error_message='Stripe zgłosił nieudany zwrot. Sprawdź tę operację przed dalszym rozliczeniem.' WHERE id=p.id;
+   IF adjust_failed THEN
+    INSERT INTO public.ideahire_payment_events(payment_id,event_type,details)
+    VALUES(p.id,'failed_refund_amount_reconciled',jsonb_build_object(
+     'action_id',a.id,'refund_id',oid,'previous_grosz',p.refunded_amount_grosz,
+     'corrected_grosz',greatest(0,p.refunded_amount_grosz-a.refund_total),
+     'reason','Terminal refund failure after a completed settlement'));
+   END IF;
   END IF;
+ ELSIF a.id IS NULL AND p_type LIKE 'refund.%' THEN
+  IF p_object->>'object'<>'refund' OR oid!~'^(re|pyr)_[A-Za-z0-9]+$'
+   OR charge IS DISTINCT FROM p.stripe_charge_id OR intent IS DISTINCT FROM p.stripe_payment_intent_id
+   OR (p_object->>'amount')::bigint IS NULL OR (p_object->>'amount')::bigint<=0
+   OR (p_object->>'amount')::bigint>p.total_amount_grosz THEN RAISE EXCEPTION 'Niezgodny zwrot poza planem rozliczenia.'; END IF;
+  -- A refund issued outside the IdeaHire decision has no verified settlement plan.
+  -- Retain the recorded amounts for reconciliation; never claim final completion.
+  UPDATE public.ideahire_payments SET status='disputed',last_error_code='external_refund_requires_reconciliation',
+   last_error_message='Zwrot zlecono poza rozliczeniem decyzji IdeaHire. Kwoty i status wymagają potwierdzenia przez operatora w Stripe.' WHERE id=p.id;
  ELSIF a.id IS NOT NULL AND p_type='charge.refunded' THEN
   IF p_object->>'object'<>'charge' OR (p_object->>'amount')::bigint IS DISTINCT FROM a.total OR intent IS DISTINCT FROM a.payment_intent THEN RAISE EXCEPTION 'Niezgodne obciążenie zwrotu.'; END IF;
   amount:=(p_object->>'amount_refunded')::bigint;
@@ -111,4 +133,3 @@ END $function$
 
 REVOKE ALL ON FUNCTION public.ideahire_observe_financial_event(text,text,jsonb,boolean,bigint) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.ideahire_observe_financial_event(text,text,jsonb,boolean,bigint) TO service_role;
-
