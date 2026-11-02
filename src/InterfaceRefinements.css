@@ -33,11 +33,11 @@
     min-width:0!important; min-height:0!important; max-width:100%!important; max-height:100%!important;
     margin:0!important; padding:0!important; border:0!important; object-fit:cover!important; object-position:center!important;
   }
-  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame][data-catalog="services"]>.ih-cinema-film>video {
-    filter:brightness(1.14) saturate(.9)!important;
+  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame][data-catalog="jobs"]>.ih-cinema-film>video {
+    filter:brightness(1.12) contrast(1.08) saturate(.9)!important;
   }
-  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame][data-catalog="services"]>.ih-cinema-film::after {
-    opacity:.94!important;
+  body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame][data-catalog="jobs"]>.ih-cinema-film::after {
+    opacity:.86!important;
   }
   body #root .ih-market-intro.ih-catalog-cinema[data-catalog-frame]>:not(.ih-cinema-film) { position:relative!important; z-index:1!important; }
 }

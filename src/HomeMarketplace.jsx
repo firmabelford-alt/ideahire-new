@@ -5,8 +5,8 @@ function Arrow() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 5l7 7-7 7" /></svg>;
 }
 
-function EntryLink({ to, label, hint, className }) {
-  return <Link to={to} className={`ih88-entry ${className}`} aria-label={label}><span><small>{hint}</small><strong>{label}</strong></span><Arrow /></Link>;
+function EntryLink({ to, label, className }) {
+  return <Link to={to} className={`ih88-entry ${className}`}><span>{label}</span><Arrow /></Link>;
 }
 
 /* The homepage owns live data, rotation, swipe and the selected project's state. */
@@ -16,16 +16,14 @@ export default function HomeMarketplace({
   projectEvents = {}, swipeEvents = {}, trackEvents = {}, children,
 }) {
   const copy = en ? {
-    eyebrow: "IDEAS BECOME COLLABORATIONS", title: ["Good things", "start with people."],
-    intro: "Find someone for your project. Or a project for your skills.",
-    client: "I have a project", maker: "I bring the skills",
+    eyebrow: "PEOPLE · SKILLS · PROJECTS", title: ["Time for", "something real."],
+    intro: "Find a professional for your idea. Or a project for your skills.",
     jobs: "Find a project", talent: "Find a professional", recent: "Projects on IdeaHire",
     preview: "An example of a project", fresh: "New project", all: "All projects",
     empty: "Have a project in mind? Tell people what you need.", add: "Post a project", pending: "Show new project",
   } : {
-    eyebrow: "Z POMYSŁU WE WSPÓŁPRACĘ", title: ["Dobrze mieć", "z kim działać."],
-    intro: "Znajdź osobę do projektu. Albo projekt dla siebie.",
-    client: "Mam projekt", maker: "Mam umiejętności",
+    eyebrow: "LUDZIE · UMIEJĘTNOŚCI · PROJEKTY", title: ["Czas na", "coś konkretnego."],
+    intro: "Znajdź wykonawcę do swojego pomysłu. Albo projekt dla swoich umiejętności.",
     jobs: "Znajdź zlecenie", talent: "Znajdź wykonawcę", recent: "Zlecenia na IdeaHire",
     preview: "Przykładowe zlecenie", fresh: "Nowe zlecenie", all: "Wszystkie zlecenia",
     empty: "Masz pomysł na projekt? Opisz go i zaproś do współpracy.", add: "Dodaj zlecenie", pending: "Pokaż nowe zlecenie",
@@ -36,14 +34,16 @@ export default function HomeMarketplace({
         <div className="ih88-intro">
           <header className="ih88-heading">
             <p className="ih88-eyebrow">{copy.eyebrow}</p>
-            <h1 className="ih88-title" aria-label={copy.title.join(" ")}>{copy.title.map(line => <span key={line}>{line}</span>)}</h1>
+            <h1 className="ih88-title" aria-label={copy.title.join(" ")}>
+              <span className="ih88-title-first"><span>{copy.title[0]}</span><span className="ih88-photo" aria-hidden="true"><img src="/media/ideahire-collaboration.webp" width="1536" height="1024" alt="" fetchPriority="high" decoding="async"/></span></span>
+              <span className="ih88-title-last">{copy.title[1]}</span>
+            </h1>
             <p className="ih88-lead">{copy.intro}</p>
           </header>
-          <div className="ih88-photo">
-            <img src="/media/ideahire-collaboration.webp" width="1536" height="1024" alt="" fetchPriority="high" decoding="async"/>
-            <EntryLink className="ih88-talent" to="/freelancers" label={copy.talent} hint={copy.client}/>
-          </div>
-          <EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs} hint={copy.maker}/>
+          <nav className="ih88-actions" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"}>
+            <EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/>
+            <EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/>
+          </nav>
         </div>
 
         <section className="ih88-live" aria-labelledby="ih88-projects-title" data-empty={count === 0} {...projectEvents}>
