@@ -56,10 +56,15 @@ async function paidCharge(a:J):Promise<J>{
  return c;
 }
 async function recipient(a:J){
- const r=await fetch("https://api.stripe.com/v2/core/accounts/"+encodeURIComponent(a.destination)+"?include[]=configuration.recipient",{
+ const query=new URLSearchParams({"include[0]":"configuration.recipient"});
+ const r=await fetch("https://api.stripe.com/v2/core/accounts/"+encodeURIComponent(a.destination)+"?"+query.toString(),{
  headers:{Authorization:"Bearer "+env("STRIPE_SECRET_KEY"),"Stripe-Version":"2026-08-26.preview"},signal:AbortSignal.timeout(12000)});
  const c=await r.json().catch(()=>null),cap=c?.configuration?.recipient?.capabilities?.stripe_balance;
- check(r.ok&&c?.id===a.destination&&c.object==="v2.core.account"&&c.livemode===a.livemode&&!c.closed
+ if(!r.ok){
+  const code=String(c?.error?.code||c?.error?.type||r.status).replace(/[^a-zA-Z0-9_]/g,"").slice(0,80);
+  fail("Nie udało się sprawdzić konta wykonawcy w Stripe ("+code+").",r.status===401||r.status===403);
+ }
+ check(c?.id===a.destination&&c.object==="v2.core.account"&&c.livemode===a.livemode&&!c.closed
   &&cap?.stripe_transfers?.status==="active"&&cap?.payouts?.status==="active","Konto wykonawcy nie jest gotowe do przekazania wynagrodzenia.");
 }
 function transferCheck(t:J,a:J,amount:number,managed:boolean){
@@ -135,9 +140,14 @@ async function execute(actor:string,decision:string,resumeReview=false):Promise<
   }
   if(!a.original_transfer&&a.contractor_target>0){
    if(!a.transfer_id&&a.transfer_started){
-    const list=await stripe("/v1/transfers?destination="+encodeURIComponent(a.destination)+"&transfer_group="+encodeURIComponent("IH_DISPUTE_"+a.id)+"&limit=100");
-    check(!list.has_more,"Lista transferów wymaga ręcznej kontroli.");
-    const matching=list.data.filter((x:J)=>x.metadata?.ideahire_action_id===a.id);
+    const groups=[...new Set([typeof charge.transfer_group==="string"?charge.transfer_group:"","IH_DISPUTE_"+a.id].filter(Boolean))];
+    const found=new Map<string,J>();
+    for(const group of groups){
+     const list=await stripe("/v1/transfers?destination="+encodeURIComponent(a.destination)+"&transfer_group="+encodeURIComponent(group)+"&limit=100");
+     check(list.has_more===false&&Array.isArray(list.data),"Lista transferów wymaga ręcznej kontroli.");
+     for(const t of list.data)if(t.metadata?.ideahire_action_id===a.id)found.set(t.id,t);
+    }
+    const matching=[...found.values()];
     check(matching.length<=1,"Wykryto więcej niż jeden transfer tej operacji.");
     if(matching.length===1){transferCheck(matching[0],a,a.contractor_target,true);await save("transfer",{id:matching[0].id});}
    }
@@ -145,7 +155,7 @@ async function execute(actor:string,decision:string,resumeReview=false):Promise<
     await recipient(a);charge=await paidCharge(a);check(charge.amount_refunded===a.refund_total,"Nie potwierdzono kwoty zwrotu przed transferem.");
     await save("start_transfer");
     const t=await stripe("/v1/transfers",{amount:a.contractor_target,currency:"pln",destination:a.destination,
-     source_transaction:a.charge_id,transfer_group:"IH_DISPUTE_"+a.id,...actionMetadata(a)},key("transfer"));
+     source_transaction:a.charge_id,...actionMetadata(a)},key("transfer-source-group-v2"));
     transferCheck(t,a,a.contractor_target,true);await save("transfer",{id:t.id});
    }
    const t=await stripe("/v1/transfers/"+encodeURIComponent(a.transfer_id));transferCheck(t,a,a.contractor_target,true);

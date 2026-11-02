@@ -19342,6 +19342,11 @@ function ChatPaymentPanel({
   const workEnabled = PAYMENT_WORK_ENABLED_STATUSES.has(
     summary?.payment_status
   );
+  const settledContractorAmount = summary
+    && ["refunded", "partially_refunded"].includes(summary.payment_status)
+    && summary.contractor_amount != null && summary.contractor_amount !== ""
+    && Number.isFinite(Number(summary.contractor_amount))
+      ? Number(summary.contractor_amount) : null;
 
   return (
     <section className={`chat-payment-panel ih-settlement-card is-${status.tone}`} aria-busy={loading}>
@@ -19359,7 +19364,7 @@ function ChatPaymentPanel({
         <>
           <dl className="ih-settlement-ledger">
             <div>
-              <dt>Wynagrodzenie wykonawcy</dt>
+              <dt>{paymentLanguage === "en" ? "Agreed work amount" : "Ustalona kwota za pracę"}</dt>
               <dd>
                 {formatPaymentMoney(summary.work_amount, summary.currency)}
               </dd>
@@ -19370,6 +19375,10 @@ function ChatPaymentPanel({
                 {formatPaymentMoney(summary.platform_fee, summary.currency)}
               </dd>
             </div>
+            {settledContractorAmount !== null && <div>
+              <dt>{paymentLanguage === "en" ? "Freelancer earnings after settlement" : "Dla wykonawcy po rozliczeniu"}</dt>
+              <dd>{formatPaymentMoney(settledContractorAmount, summary.currency)}</dd>
+            </div>}
             <div className="is-total">
               <dt>{summary.paid_at ? "Zapłacono łącznie" : isClient ? "Razem do zapłaty" : "Klient płaci łącznie"}</dt>
               <dd>
