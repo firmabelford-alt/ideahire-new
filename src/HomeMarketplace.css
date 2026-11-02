@@ -1,32 +1,36 @@
-/* A typographic opening, a small human scene and two equal ways into IdeaHire. */
+/* A photo-free, type-led opening. Live project behaviour is owned by the homepage. */
 @layer ideahireHeadings {
-  #root .ih53-home > main { background:var(--v-bg)!important; }
+  /* Keep the page wash continuous all the way through the footer. */
+  #root .ih53-home > main { background:transparent!important; }
   #root .ih53-home .ih43-film[data-stage="jobs"] { height:auto!important; min-height:0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
   #root .ih53-home .ih88-market {
     --ih88-line:color-mix(in srgb,var(--v-ink) 16%,transparent);
-    display:block!important; min-height:0!important; padding:24px clamp(20px,4vw,64px) 32px!important;
+    --ih88-hero-bg:#12383b; --ih88-hero-ink:#f5f2ea; --ih88-hero-accent:#b7dfce; --ih88-hero-muted:#cfddda;
+    display:block!important; min-height:0!important; padding:28px clamp(20px,4vw,64px) 32px!important;
     background:transparent!important; color:var(--v-ink)!important; border:0!important; box-shadow:none!important;
   }
+  html[data-template="classic"] #root .ih88-market { --ih88-hero-bg:#20201e; --ih88-hero-accent:#d5d0c4; --ih88-hero-muted:#d0cec7; }
+  html[data-theme="dark"] #root .ih88-market { --ih88-hero-bg:#233234; --ih88-hero-accent:var(--v-accent); --ih88-hero-muted:var(--v-muted); }
+  html[data-theme="dark"][data-template="classic"] #root .ih88-market { --ih88-hero-bg:#292927; --ih88-hero-accent:#d5d0c4; }
   #root .ih88-layout { width:100%!important; max-width:1240px!important; margin:0 auto!important; }
-  #root .ih88-intro { display:flex!important; flex-direction:column!important; align-items:center!important; gap:28px!important; min-width:0!important; padding:30px 0 40px!important; animation:ih88-hero-enter 640ms cubic-bezier(.22,.61,.36,1) both!important; }
-  #root .ih88-heading { width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; text-align:center!important; }
-  #root .ih88-eyebrow { margin:0 0 24px!important; color:var(--v-muted)!important; font:650 10px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:.13em!important; }
-  #root .ih88-title { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; color:var(--v-ink)!important; font:780 clamp(52px,7.1vw,104px)/1.06 Inter,system-ui,sans-serif!important; letter-spacing:-.065em!important; text-wrap:normal!important; text-align:center!important; }
-  #root .ih88-title > span { color:inherit!important; letter-spacing:inherit!important; }
-  #root .ih88-title-first { display:flex!important; align-items:center!important; justify-content:center!important; gap:clamp(18px,2.4vw,32px)!important; min-width:0!important; font-size:.9em!important; }
-  #root .ih88-title-first > span:first-child { flex:none!important; white-space:nowrap!important; }
-  #root .ih88-title-last { display:block!important; margin-top:10px!important; font:inherit!important; }
+  #root .ih88-intro { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:42px!important; min-width:0!important; padding:clamp(34px,4.5vw,64px)!important; border:0!important; border-radius:26px!important; background:var(--ih88-hero-bg)!important; color:var(--ih88-hero-ink)!important; animation:none!important; }
+  #root .ih88-heading { width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; text-align:left!important; }
+  #root .ih88-eyebrow { margin:0 0 28px!important; color:var(--ih88-hero-muted)!important; -webkit-text-fill-color:currentColor!important; font:500 13px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:0!important; }
+  #root .ih88-title { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; color:var(--ih88-hero-ink)!important; -webkit-text-fill-color:currentColor!important; font:780 clamp(48px,6.4vw,88px)/1.08 Inter,system-ui,sans-serif!important; letter-spacing:-.055em!important; text-wrap:balance!important; text-align:left!important; overflow-wrap:normal!important; }
+  #root .ih88-title > span { display:block!important; font:inherit!important; letter-spacing:inherit!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih88-title .ih88-title-first { color:var(--ih88-hero-ink)!important; font-size:.82em!important; }
+  #root .ih88-title .ih88-title-last { margin-top:10px!important; color:var(--ih88-hero-accent)!important; }
   #root .ih88-title::before,#root .ih88-title::after { content:none!important; display:none!important; }
-  #root .ih88-photo { position:relative!important; display:inline-block!important; isolation:isolate!important; flex:0 0 clamp(180px,23vw,300px)!important; width:clamp(180px,23vw,300px)!important; height:clamp(86px,8.4vw,112px)!important; min-width:0!important; border:1px solid var(--ih88-line)!important; border-radius:999px!important; overflow:hidden!important; background:var(--v-soft)!important; }
-  #root .ih88-photo > img { position:absolute!important; inset:0 auto 0 -38%!important; display:block!important; width:140%!important; height:100%!important; max-width:none!important; object-fit:cover!important; object-position:center 35%!important; }
-  #root .ih88-lead { max-width:68ch!important; margin:22px auto 0!important; padding:0 12px!important; color:var(--v-muted)!important; font:400 16px/1.75 Inter,system-ui,sans-serif!important; text-wrap:balance!important; }
-  #root .ih88-actions { display:flex!important; flex-wrap:wrap!important; align-items:stretch!important; justify-content:center!important; gap:12px!important; width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
-  #root .ih88-entry { box-sizing:border-box!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; flex:0 1 auto!important; gap:20px!important; min-width:220px!important; min-height:56px!important; padding:15px 26px!important; border:1px solid var(--v-ink)!important; border-radius:999px!important; color:var(--v-ink)!important; text-decoration:none!important; box-shadow:none!important; transform:none!important; transition:background-color 200ms ease,color 200ms ease!important; }
-  #root .ih88-entry > span { display:block!important; min-width:0!important; color:inherit!important; font:650 15px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; white-space:normal!important; text-align:center!important; }
+  #root .ih88-hero-bottom { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:end!important; gap:36px!important; min-width:0!important; }
+  #root .ih88-lead { max-width:43ch!important; margin:0!important; padding:0!important; color:var(--ih88-hero-muted)!important; -webkit-text-fill-color:currentColor!important; font:400 15px/1.75 Inter,system-ui,sans-serif!important; text-wrap:pretty!important; }
+  #root .ih88-actions { display:flex!important; flex-wrap:wrap!important; align-items:stretch!important; justify-content:flex-start!important; gap:10px!important; width:auto!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
+  #root .ih88-entry { box-sizing:border-box!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; flex:0 1 auto!important; min-width:180px!important; min-height:56px!important; padding:15px 24px!important; border:1px solid color-mix(in srgb,var(--ih88-hero-ink) 62%,transparent)!important; border-radius:9px!important; text-decoration:none!important; box-shadow:none!important; transform:none!important; transition:background-color 220ms ease,border-color 220ms ease!important; }
+  #root .ih88-entry > span { display:block!important; min-width:0!important; color:inherit!important; -webkit-text-fill-color:currentColor!important; font:650 15px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; white-space:normal!important; text-align:center!important; }
   #root .ih88-market :is(a,button) > svg { display:block!important; flex:0 0 20px!important; width:20px!important; height:20px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.6!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
-  #root .ih88-talent { position:static!important; background:var(--v-ink)!important; color:var(--v-bg)!important; }
-  #root .ih88-jobs { background:transparent!important; color:var(--v-ink)!important; }
+  #root .ih88-talent { position:static!important; background:var(--ih88-hero-ink)!important; color:var(--ih88-hero-bg)!important; }
+  #root .ih88-jobs { background:transparent!important; color:var(--ih88-hero-ink)!important; }
   #root .ih88-market :is(a,button):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:4px!important; }
+  #root .ih88-actions a:focus-visible { outline-color:var(--ih88-hero-accent)!important; }
   #root .ih88-live { display:block!important; min-width:0!important; margin:28px 0 0!important; padding:0!important; border:0!important; background:none!important; }
   #root .ih88-live-heading { display:flex!important; flex-wrap:wrap!important; align-items:center!important; justify-content:space-between!important; gap:8px 18px!important; min-height:40px!important; margin:0 0 10px!important; }
   #root .ih88-live-heading > div { display:flex!important; align-items:center!important; gap:14px!important; min-width:0!important; }
@@ -80,8 +84,8 @@
   #root .ih53-home .ih-demo-reviews { width:calc(100% - clamp(40px,8vw,128px))!important; max-width:1240px!important; margin:0 auto!important; padding:0 0 44px!important; border:0!important; background:none!important; }
 
   @media (hover:hover) {
-    #root .ih88-talent:hover { background:color-mix(in srgb,var(--v-ink) 84%,var(--v-bg))!important; }
-    #root .ih88-jobs:hover { background:var(--v-soft)!important; }
+    #root .ih88-talent:hover { background:var(--ih88-hero-accent)!important; border-color:var(--ih88-hero-accent)!important; }
+    #root .ih88-jobs:hover { background:color-mix(in srgb,var(--ih88-hero-ink) 10%,transparent)!important; border-color:var(--ih88-hero-ink)!important; }
     #root .ih88-live a:hover { text-decoration:underline!important; text-underline-offset:4px!important; }
   }
   @media (min-width:901px) {
@@ -98,29 +102,32 @@
   @media (max-width:1100px) and (min-width:901px) {
     #root .ih88-market .ih53-project-card { grid-template-columns:150px minmax(0,1fr) 160px!important; column-gap:22px!important; }
   }
+  @media (max-width:1100px) {
+    #root .ih88-hero-bottom { grid-template-columns:minmax(0,1fr)!important; gap:24px!important; }
+    #root .ih88-lead { max-width:54ch!important; }
+  }
   @media (max-width:900px) {
     #root .ih53-home .ih88-market { padding:20px 24px 28px!important; }
-    #root .ih88-intro { gap:24px!important; padding:28px 0 32px!important; }
+    #root .ih88-intro { gap:32px!important; padding:36px!important; }
     #root .ih88-lead { max-width:54ch!important; }
     #root .ih88-market .ih66-project-description h3 { font-size:26px!important; }
     #root .ih53-home .ih-demo-reviews { width:calc(100% - 48px)!important; }
   }
   @media (max-width:600px) {
-    #root .ih88-eyebrow { margin-bottom:22px!important; font-size:9px!important; letter-spacing:.1em!important; }
-    #root .ih88-title { font-size:clamp(38px,9.7vw,58px)!important; }
-    #root .ih88-title-first { gap:14px!important; }
-    #root .ih88-photo { flex-basis:140px!important; width:140px!important; height:74px!important; }
-    #root .ih88-title-last { margin-top:12px!important; }
-    #root .ih88-lead { max-width:38ch!important; margin-top:22px!important; padding:0!important; font-size:15px!important; line-height:1.7!important; }
-    #root .ih88-actions { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:10px!important; max-width:420px!important; }
-    #root .ih88-entry { min-width:0!important; min-height:54px!important; padding:12px 14px!important; gap:0!important; }
-    #root .ih88-entry > span { font-size:14px!important; }
-    #root .ih88-entry > svg { display:none!important; }
+    #root .ih88-intro { gap:28px!important; padding:30px 24px!important; border-radius:22px!important; }
+    #root .ih88-eyebrow { margin-bottom:24px!important; font-size:12px!important; }
+    #root .ih88-title { font-size:clamp(36px,9.2vw,54px)!important; line-height:1.13!important; letter-spacing:-.045em!important; }
+    #root .ih88-title .ih88-title-first { font-size:.92em!important; }
+    #root .ih88-title .ih88-title-last { margin-top:14px!important; }
+    #root .ih88-hero-bottom { gap:24px!important; }
+    #root .ih88-lead { max-width:38ch!important; font-size:14px!important; line-height:1.75!important; }
+    #root .ih88-actions { display:grid!important; grid-template-columns:minmax(0,1fr)!important; width:100%!important; gap:10px!important; }
+    #root .ih88-entry { min-width:0!important; min-height:52px!important; padding:13px 16px!important; }
+    #root .ih88-entry > span { font-size:15px!important; }
   }
   @media (max-width:480px) {
     #root .ih53-home .ih88-market { padding:18px 20px 28px!important; }
-    #root .ih88-intro { padding:24px 0 30px!important; }
-    #root .ih88-photo { flex-basis:132px!important; width:132px!important; height:70px!important; }
+
     #root .ih88-live { margin-top:18px!important; }
     #root .ih88-live-heading { column-gap:12px!important; margin-bottom:8px!important; }
     #root .ih88-live-heading h2 { font-size:12px!important; }
@@ -138,22 +145,21 @@
   }
   @media (max-width:360px) {
     #root .ih53-home .ih88-market { padding-inline:18px!important; }
+    #root .ih88-intro { padding-inline:20px!important; }
     #root .ih88-title { font-size:34px!important; }
-    #root .ih88-title-first { gap:10px!important; }
-    #root .ih88-photo { flex-basis:120px!important; width:120px!important; height:64px!important; }
-    #root .ih88-actions { grid-template-columns:minmax(0,1fr)!important; max-width:280px!important; }
     #root .ih88-market .ih53-project-card { height:270px!important; min-height:270px!important; padding-inline:18px!important; }
     #root .ih88-market .ih53-project-card:has(.ih53-project-caption) { height:296px!important; min-height:296px!important; }
     #root .ih88-market .ih66-project-budget strong { font-size:22px!important; }
     #root .ih53-home .ih-demo-reviews { width:calc(100% - 36px)!important; }
   }
-  @keyframes ih88-hero-enter { from { opacity:0; translate:0 18px; } to { opacity:1; translate:0 0; } }
-  #root .ih88-market[data-motion-paused="true"] .ih88-intro { animation:none!important; }
+  /* One shared, visible entrance for complete content groups. */
+  #root .ih53-home [data-ih53-entrance] { animation:none!important; scale:1!important; rotate:none!important; filter:none!important; transition:opacity 820ms ease,translate 820ms cubic-bezier(.22,.61,.36,1)!important; }
+  #root .ih53-home [data-ih53-entrance="waiting"] { opacity:0!important; translate:0 32px!important; }
+  #root .ih53-home [data-ih53-entrance="entering"],#root .ih53-home [data-ih53-entrance="shown"] { opacity:1!important; translate:0 0!important; }
+  #root .ih53-home [data-ih53-entrance="shown"] { transition:none!important; }
+  #root .ih53-home [data-ih53-entrance] :is(h1,h2) { animation:none!important; }
   @media (prefers-reduced-motion:reduce) {
-    #root .ih88-intro,#root .ih88-market :is(a,button),#root .ih88-market .ih53-project-track[data-sliding="true"] { transition:none!important; animation:none!important; }
+    #root .ih53-home [data-ih53-entrance] { opacity:1!important; translate:none!important; transition:none!important; animation:none!important; }
+    #root .ih88-market :is(a,button),#root .ih88-market .ih53-project-track[data-sliding="true"] { transition:none!important; animation:none!important; }
   }
-}
-
-@layer ideahireHeadings {
-  #root .ih53-home [data-ih53-entrance="shown"] { animation:none!important; }
 }
