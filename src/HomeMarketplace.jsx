@@ -29,7 +29,7 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
       <p className="ih-showcase-description">{String(job.description || (en ? 'See what the client needs and how you can help.' : 'Sprawdź, czego potrzebuje zleceniodawca i jak możesz pomóc.')).slice(0, 280)}</p>
       <div className="ih-showcase-author">{author}</div>
       {sample && <small className="ih-showcase-example">{en ? 'Illustrative project' : 'Przykładowe zlecenie'}</small>}
-      <div className="ih-showcase-bottom"><div><small>{service ? (en ? 'Price from' : 'Cena od') : (en ? 'Budget' : 'Budżet')}</small><strong>{price}</strong></div><Link tabIndex={duplicate ? -1 : undefined} className="ih-showcase-open" data-preserve-router-state="true" to={href} state={destination} aria-label={`${en ? 'View details' : 'Zobacz szczegóły'}: ${job.title}`}>{en ? 'Details' : 'Szczegóły'}<Arrow /></Link></div>
+      <div className="ih-showcase-bottom"><div><small>{service ? (job.price_mode === 'custom' ? (en ? 'Price' : 'Cena') : (en ? 'Price from' : 'Cena od')) : (en ? 'Budget' : 'Budżet')}</small><strong>{price}</strong></div><Link tabIndex={duplicate ? -1 : undefined} className="ih-showcase-open" data-preserve-router-state="true" to={href} state={destination} aria-label={`${en ? 'View details' : 'Zobacz szczegóły'}: ${job.title}`}>{en ? 'Details' : 'Szczegóły'}<Arrow /></Link></div>
     </div>
   </article>;
 }
@@ -37,6 +37,7 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
 /* Native scrolling keeps touch, trackpad and keyboard interactions predictable. */
 export default function HomeMarketplace({ en = false, jobs = [], renderProject, paused = false, reduced = false }) {
   const host = useRef(null), rail = useRef(null), activeId = useRef(jobs[0] ? homeFeedKey(jobs[0]) : undefined), known = useRef(new Set()), initialized = useRef(false);
+  const openedAt = useRef(Date.now());
   const [stops, setStops] = useState([0]), [position, setPosition] = useState(0), [manualPause, setManualPause] = useState(false);
   const [hover, setHover] = useState(false), [focus, setFocus] = useState(false), [visible, setVisible] = useState(false);
   const [hidden, setHidden] = useState(() => typeof document !== 'undefined' && document.hidden), [pending, setPending] = useState(null);
@@ -95,7 +96,8 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     node.scrollTo({ left: current.offsetLeft - node.firstElementChild.offsetLeft, behavior: 'instant' });
     activeId.current = current.dataset.projectId;
     const incoming = jobs.filter(job => !known.current.has(homeFeedKey(job)));
-    if (initialized.current && incoming.length) setPending(homeFeedKey(incoming[0]));
+    const fresh = incoming.find(job => new Date(job.created_at).getTime() >= openedAt.current);
+    if (initialized.current && fresh) setPending(homeFeedKey(fresh));
     else if (!initialized.current) initialized.current = true;
     known.current = new Set(jobs.map(homeFeedKey));
     setPending(id => jobs.some(job => homeFeedKey(job) === id) ? id : null);
