@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Camera, Check, ChevronRight, FileText, Image, Layers3, Link2, LockKeyhole, Palette, Plus, Save, Settings2, Trash2, UserRound, Wallet, X } from 'lucide-react';
 import { AutoTextarea } from './FormControls';
 import './Studio.css';
+import { SiteModal } from './SiteDialogs';
 
 const copy = en => (pl, english) => en ? english : pl;
 const icons = { profile: UserRound, expertise: Layers3, portfolio: Image, jobs: FileText, preferences: Settings2, payouts: Wallet, templates: Palette };
@@ -43,12 +44,33 @@ function SaveBar({ busy, loading, message, en, section }) {
   return <footer className="ih-studio-savebar"><div><span>{section}</span><p role="status" aria-live="polite">{message || t('Zapisz, aby zaktualizować profil.', 'Save to update your profile.')}</p></div><button type="submit" className="ih-studio-button is-primary" disabled={busy || loading}><Save size={17} />{busy ? t('Zapisywanie…', 'Saving…') : t('Zapisz zmiany', 'Save changes')}</button></footer>;
 }
 
-function ProfilePreview({ name, avatarUrl, about, country, categories, skills, en }) {
-  const t = copy(en);
-  return <aside className="ih-studio-preview" aria-label={t('Podgląd profilu', 'Profile preview')}><span className="ih-studio-kicker">{t('Tak się przedstawiasz', 'How you appear')}</span><StudioAvatar name={name} url={avatarUrl} /><strong>{name || t('Twoja nazwa', 'Your name')}</strong>{country && <span>{country}</span>}{about && <p>{about}</p>}{categories?.length > 0 && <div className="ih-studio-preview-tags">{categories.map(value => <span key={value}>{value}</span>)}</div>}{skills?.length > 0 && <div className="ih-studio-preview-tags is-skills">{skills.slice(0, 6).map(value => <span key={value}>{value}</span>)}</div>}<div className="ih-studio-preview-note"><UserRound size={16} /><span>{t('Podgląd zmian przed zapisaniem', 'Preview before saving')}</span></div></aside>;
+export function ProfilePreview({ name, avatarUrl, about, country, categories = [], skills = [], specialization, portfolio = [], en }) {
+  const t = copy(en), [open, setOpen] = useState(false);
+  return <>
+    <aside className="ih-studio-preview" aria-label={t('Podgląd profilu', 'Profile preview')}>
+      <button type="button" className="ih-profile-preview-trigger" aria-haspopup="dialog" onClick={() => setOpen(true)}>
+        <span className="ih-studio-kicker">{t('Tak się przedstawiasz', 'How you appear')}</span>
+        <StudioAvatar name={name} url={avatarUrl} /><strong>{name || t('Twoja nazwa', 'Your name')}</strong>
+        {country && <span className="ih-preview-country">{country}</span>}
+        {about && <span className="ih-preview-excerpt">{about}</span>}
+        <span className="ih-studio-preview-note"><UserRound size={17} aria-hidden="true" /><span>{t('Zobacz profil oczami klienta', 'See your profile as a client')}<small>{t('Uwzględnia niezapisane zmiany', 'Includes unsaved changes')}</small></span><ArrowUpRight size={18} aria-hidden="true" /></span>
+      </button>
+    </aside>
+    <SiteModal open={open} onClose={() => setOpen(false)} title={t('Twój profil oczami klienta', 'Your profile as a client')} en={en} className="ih-profile-preview-modal">
+      <p className="ih-preview-draft-note">{t('Podgląd aktualnych zmian. Zapisz je w edytorze, aby były widoczne dla innych.', 'Preview of your current changes. Save them in the editor to make them visible to others.')}</p>
+      <article className="ih-client-profile">
+        <header className="ih-client-profile-identity"><StudioAvatar name={name} url={avatarUrl} /><div><h3>{name || t('Twoja nazwa', 'Your name')}</h3>{country && <p>{country}</p>}</div></header>
+        <section><h3>{t('O mnie', 'About me')}</h3><p>{about || t('Dodaj kilka słów o sobie w edytorze.', 'Introduce yourself in the editor.')}</p></section>
+        {specialization && <section><h3>{t('Doświadczenie i specjalizacja', 'Experience and expertise')}</h3><p>{specialization}</p></section>}
+        {(categories.length > 0 || skills.length > 0) && <section><h3>{t('Dziedziny i umiejętności', 'Fields and skills')}</h3><div className="ih-client-profile-tags">{[...categories, ...skills].map((value, index) => <span key={index}>{value}</span>)}</div></section>}
+        <section><h3>Portfolio <span className="ih-preview-count">{portfolio.length}</span></h3>{portfolio.length ? <div className="ih-client-portfolio">{portfolio.map(item => <div key={item.id}>{item.image_url && <img src={item.image_url} alt="" loading="lazy" />}<strong>{item.title}</strong>{item.description && <p>{item.description}</p>}</div>)}</div> : <p className="ih-preview-empty">{t('Nie dodano jeszcze realizacji.', 'No projects added yet.')}</p>}</section>
+      </article>
+      <footer className="ih-modal-actions"><button type="button" className="is-primary" onClick={() => setOpen(false)}>{t('Wróć do edycji', 'Back to editing')}<ArrowLeft size={17} aria-hidden="true" /></button></footer>
+    </SiteModal>
+  </>;
 }
 
-export function ProfileDetailsEditor({ name, onName, avatarUrl, onAvatar, about, onAbout, email, countryField, countryLabel, onSubmit, uploading, saving, loading, message, en = false }) {
+export function ProfileDetailsEditor({ name, onName, avatarUrl, onAvatar, about, onAbout, email, countryField, countryLabel, preview = {}, onSubmit, uploading, saving, loading, message, en = false }) {
   const t = copy(en), busy = saving || uploading;
   return <form className="ih-studio-form" onSubmit={onSubmit}>
     <fieldset className="ih-studio-form-body" disabled={busy || loading}>
@@ -63,14 +85,14 @@ export function ProfileDetailsEditor({ name, onName, avatarUrl, onAvatar, about,
           </Panel>
           <div className="ih-studio-private"><LockKeyhole size={18} /><div><strong>{t('E-mail do logowania', 'Sign-in email')}</strong><span>{email}</span></div><span>{t('Prywatny', 'Private')}</span></div>
         </div>
-        <ProfilePreview name={name} avatarUrl={avatarUrl} about={about} country={countryLabel} en={en} />
+        <ProfilePreview {...preview} name={name} avatarUrl={avatarUrl} about={about} country={countryLabel} en={en} />
       </div>
     </fieldset>
     <SaveBar busy={busy} loading={loading} message={message} en={en} section={t('Dane profilu', 'Profile details')} />
   </form>;
 }
 
-export function ExpertiseEditor({ categories, selected, onCategory, categoryLabel, skills, draft, onDraft, onKeyDown, onAdd, onRemove, specialization, onSpecialization, onSubmit, saving, uploading, loading, message, name, avatarUrl, en = false }) {
+export function ExpertiseEditor({ categories, selected, onCategory, categoryLabel, skills, draft, onDraft, onKeyDown, onAdd, onRemove, specialization, onSpecialization, onSubmit, saving, uploading, loading, message, name, avatarUrl, preview = {}, en = false }) {
   const t = copy(en), busy = saving || uploading;
   return <form className="ih-studio-form" onSubmit={onSubmit}>
     <fieldset className="ih-studio-form-body" disabled={busy || loading}>
@@ -85,7 +107,7 @@ export function ExpertiseEditor({ categories, selected, onCategory, categoryLabe
         <Panel id="studio-experience-title" title={t('Co wnosisz do projektu?', 'What do you bring to a project?')} description={t('Opisz doświadczenie i efekty swojej pracy.', 'Describe your experience and the results of your work.')}>
           <label className="ih-studio-field"><span className="ih-studio-sr">{t('W czym się specjalizujesz?', 'What do you specialise in?')}</span><AutoTextarea rows={4} value={specialization} onChange={e => onSpecialization(e.target.value)} maxLength={1200} placeholder={t('Pomagam w… Najczęściej realizuję…', 'I help with… My projects usually include…')} /><span className="ih-studio-field-meta"><span>{t('Widoczne na Twoim profilu', 'Visible on your profile')}</span><span>{specialization.length}/1200</span></span></label>
         </Panel>
-      </div><ProfilePreview name={name} avatarUrl={avatarUrl} about={specialization} categories={selected.map(categoryLabel)} skills={skills} en={en} /></div>
+      </div><ProfilePreview {...preview} name={name} avatarUrl={avatarUrl} specialization={specialization} categories={selected.map(categoryLabel)} skills={skills} en={en} /></div>
     </fieldset>
     <SaveBar busy={busy} loading={loading} message={message} en={en} section={t('Umiejętności', 'Skills')} />
   </form>;

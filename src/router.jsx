@@ -1,3 +1,4 @@
+import { confirmAction, notifyAction } from './SiteDialogs';
 import { FormSelect, AutoTextarea } from "./FormControls";
 /* P70 — one task per screen and project details opened on demand. */
 /* P60 — useful onboarding, email actions and site browsing for limited accounts. */
@@ -55,7 +56,7 @@ import { WorkspaceNavigation, WorkspaceDashboard, WorkspaceSectionNav, Workspace
 import { WorkspaceInbox, WorkspaceConversation, WorkspaceThread, WorkspaceComposer, WorkspaceMessageReports } from "./WorkspaceMessages";
 import { agreementPermissions, agreementToForm, EMPTY_AGREEMENT_FORM } from "./AgreementWorkflow";
 import { InquiryMessageCard, TermsDecisionMessage, isInquiryMessage, latestTermsDecision, readTermsDecision } from "./ConversationCards";
-import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading } from "./Subpages";
+import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, SubpageLoading, LucynaLoading } from "./Subpages";
 import { RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import RegistrationInterview, { EMPTY_INTERVIEW, RegistrationInterviewPrivacy } from "./RegistrationInterview";
 import { REGISTRATION_INTERVIEW_KEY, normalizeRegistrationInterview, rememberRegistrationInterview, registrationInterviewForUser, saveRegistrationInterview, clearRegistrationInterview, clearRegistrationInterviewMetadata } from "./RegistrationInterviewState";
@@ -3508,9 +3509,9 @@ const JOB_PROJECT_STAGES = [
 ];
 
 const JOB_WORK_MODES = [
-  { value: "remote", label: "Zdalnie" },
-  { value: "onsite", label: "Stacjonarnie" },
-  { value: "hybrid", label: "Hybrydowo" },
+  { value: "remote", label: "Zdalnie", description: "Cały projekt online, bez spotkań na miejscu." },
+  { value: "onsite", label: "Stacjonarnie", description: "Realizacja w ustalonej lokalizacji, np. sesja zdjęciowa." },
+  { value: "hybrid", label: "Hybrydowo", description: "Część prac online, część na miejscu, np. warsztat i projekt." },
 ];
 
 const JOB_EXPERIENCE_LEVELS = [
@@ -5003,7 +5004,7 @@ function AccountNavbar() {
         await supabase.auth.signOut();
 
       if (error) {
-        alert(
+        await notifyAction(
           `Nie udało się wylogować: ${error.message}`
         );
 
@@ -5014,7 +5015,7 @@ function AccountNavbar() {
         replace: true,
       });
     } catch (error) {
-      alert(
+      await notifyAction(
         `Nie udało się wylogować: ${
           error?.message ||
           "Nieznany błąd"
@@ -8883,7 +8884,7 @@ function Account() {
     jobId
   ) {
     const confirmed =
-      window.confirm(
+      await confirmAction(
         "Czy na pewno chcesz usunąć to zlecenie?"
       );
 
@@ -8903,7 +8904,7 @@ function Account() {
         );
 
     if (error) {
-      alert(
+      await notifyAction(
         `Nie udało się usunąć zlecenia: ${error.message}`
       );
 
@@ -9396,7 +9397,7 @@ function Account() {
   async function handlePortfolioDelete(item) {
     if (!user?.id || portfolioBusy) return;
 
-    const confirmed = window.confirm(
+    const confirmed = await confirmAction(
       `Usunąć projekt „${item.title}” z portfolio?`
     );
 
@@ -9641,6 +9642,7 @@ function Account() {
             name={name} onName={setName} avatarUrl={avatarUrl} onAvatar={handleAvatarChange}
             about={about} onAbout={setAbout} email={user.email || ""}
             countryLabel={getCountryByCode(countryCode)?.name}
+            preview={{ specialization, categories: specialtyCategories.map(category => accountEnglish ? translateUiText(getJobCategoryLabel(category)) : getJobCategoryLabel(category)), skills, portfolio: portfolioItems }}
             countryField={<CountryPicker value={countryCode} onChange={country => setCountryCode(country?.code || "")} disabled={saving || uploading || countryLoading || profileDetailsLoading} />}
             onSubmit={handleSave} saving={saving} uploading={uploading} loading={profileDetailsLoading || countryLoading}
             message={message} en={accountEnglish} />}
@@ -9650,7 +9652,7 @@ function Account() {
             skills={skills} draft={skillDraft} onDraft={setSkillDraft} onKeyDown={handleSkillKeyDown} onAdd={addSkill} onRemove={removeSkill}
             specialization={specialization} onSpecialization={setSpecialization} onSubmit={handleSave}
             saving={saving} uploading={uploading} loading={profileDetailsLoading || countryLoading} message={message}
-            name={name} avatarUrl={avatarUrl} en={accountEnglish} />}
+            name={name} avatarUrl={avatarUrl} preview={{ about, country: getCountryByCode(countryCode)?.name, portfolio: portfolioItems }} en={accountEnglish} />}
 
           {isAdult && activeAccountSection === "payouts" && (
             <StripeAccountPayouts
@@ -10240,7 +10242,7 @@ function PrivacyCenter() {
   }
 
   async function handleWithdraw(requestId) {
-    if (busy || !window.confirm("Czy na pewno chcesz wycofać ten wniosek? Historia jego obsługi pozostanie zapisana.")) return;
+    if (busy || !await confirmAction("Czy na pewno chcesz wycofać ten wniosek? Historia jego obsługi pozostanie zapisana.")) return;
     await mutate({ key: requestId, scope: requestId, rpc: "withdraw_my_ideahire_privacy_request", args: { p_request_id: requestId },
       success: "Ten wniosek został wycofany. Historia pozostaje dostępna.", failure: "Nie udało się wycofać wniosku.",
       updateRequest: request => request.id === requestId ? { ...request, status: "withdrawn", withdrawn_at: new Date().toISOString() } : request });
@@ -10259,7 +10261,7 @@ function PrivacyCenter() {
   }
 
   async function handleClosePrivacyReview(requestId, hasApprovedReport) {
-    const confirmed = !busy && window.confirm(hasApprovedReport
+    const confirmed = !busy && await confirmAction(hasApprovedReport
       ? "Czy na pewno chcesz zamknąć analizę? Raport i historia pozostaną dostępne. Zamknięcie nie oznacza zrzeczenia się praw dotyczących Twoich danych ani potwierdzenia zgodności IdeaHire z prawem."
       : "Czy na pewno chcesz zakończyć analizę przed opublikowaniem raportu? Historia pozostanie zapisana, ale raport nie zostanie dostarczony w ramach tej sprawy. Nie ogranicza to Twoich praw dotyczących danych.");
     if (!confirmed) return;
@@ -11519,7 +11521,7 @@ function FindTalent() {
                 </div>
 
                 <fieldset className="ih5-job-compact-fieldset is-wide">
-                  <legend>Tryb współpracy</legend>
+                  <legend>Tryb współpracy</legend><p className="ih-work-mode-help">Wybierz według sposobu realizacji projektu. Dla pracy na miejscu lub hybrydowej wskaż lokalizację.</p>
                   <div className="ih5-job-choice-grid is-three">
                     {JOB_WORK_MODES.map((option) => (
                       <label
@@ -11532,7 +11534,7 @@ function FindTalent() {
                           checked={workMode === option.value}
                           onChange={() => setWorkMode(option.value)}
                         />
-                        <span>{option.label}</span>
+                        <span>{option.label}<small>{option.description}</small></span>
                       </label>
                     ))}
                   </div>
@@ -13732,7 +13734,7 @@ function Jobs() {
     job
   ) {
     if (!user?.id) {
-      alert(
+      await notifyAction(
         "Musisz być zalogowany."
       );
 
@@ -13750,7 +13752,7 @@ function Jobs() {
       user.id ===
       job.user_id
     ) {
-      alert(
+      await notifyAction(
         "Nie możesz zgłosić się do własnego zlecenia."
       );
 
@@ -15469,7 +15471,7 @@ function Calendar() {
     }
 
     const confirmed =
-      window.confirm(
+      await confirmAction(
         "Usunąć to przypomnienie?"
       );
 
@@ -20538,7 +20540,7 @@ function Chat() {
 
     if (
       containsCredentialLikeText(content) &&
-      !window.confirm(
+      !await confirmAction(
         "Ta wiadomość może zawierać hasło, token, klucz API albo kod dostępu. IdeaHire nie jest menedżerem haseł. Dla bezpieczeństwa usuń sekret i udostępnij go narzędziem z dostępem czasowym. Jeśli wykrycie jest błędne, możesz świadomie kontynuować."
       )
     ) {
@@ -20618,7 +20620,7 @@ function Chat() {
     }
 
     const confirmed =
-      window.confirm(
+      await confirmAction(
         "Ukryć tę rozmowę tylko na Twojej liście? Nie usunie to wiadomości ani materiałów, a nowa wiadomość może ponownie pokazać wątek."
       );
 
@@ -21700,7 +21702,7 @@ function DisputeDetails() {
   }
 
   async function handleCancelDispute() {
-    if (!window.confirm("Czy na pewno chcesz wycofać ten spór?")) return;
+    if (!await confirmAction("Czy na pewno chcesz wycofać ten spór?")) return;
 
     await runAction(
       "cancel",
@@ -21841,7 +21843,7 @@ function DisputeDetails() {
       setDecisionMessage("Odpowiedz na każde odwołanie i zachowaj pierwotny termin odwołań obu stron przed decyzją ostateczną.");
       return;
     }
-    if (currentAppeals.length && !window.confirm("Wydajesz ostateczną decyzję po rozpatrzeniu odwołań. Nie będzie kolejnego wewnętrznego terminu 7 dni. Rozliczenie finansowe trafi do wykonania w Stripe. Czy potwierdzasz analizę odpowiedzi i wybrany wynik?")) return;
+    if (currentAppeals.length && !await confirmAction("Wydajesz ostateczną decyzję po rozpatrzeniu odwołań. Nie będzie kolejnego wewnętrznego terminu 7 dni. Rozliczenie finansowe trafi do wykonania w Stripe. Czy potwierdzasz analizę odpowiedzi i wybrany wynik?")) return;
 
     let amount = null;
 
@@ -21902,7 +21904,7 @@ function DisputeDetails() {
         return;
       }
 
-      if (!window.confirm(
+      if (!await confirmAction(
         "Decyzja w sporze i czasowe zawieszenie konta zostaną zapisane razem. Czy potwierdzasz ręczną analizę dowodów i proporcjonalność zawieszenia?"
       )) return;
     }
@@ -28441,7 +28443,7 @@ function LucynaDockHost() {
 function AdminLucynaRoute() {
   const { user } = useAuth();
   return <div className="account-page admin-page"><AdminNavbar /><AdminLucynaDesk enabled={LUCYNA_VISIBLE}>
-    <LucynaBoundary><React.Suspense fallback={<SubpageLoading label="Otwieram Lucynę…" />}><LucynaModule supabase={supabase} user={user} embedded administration /></React.Suspense></LucynaBoundary>
+    <LucynaBoundary><React.Suspense fallback={<LucynaLoading />}><LucynaModule supabase={supabase} user={user} embedded administration /></React.Suspense></LucynaBoundary>
   </AdminLucynaDesk></div>;
 }
 
@@ -28449,7 +28451,7 @@ function LucynaRoute() {
   const { user } = useAuth();
   if (!LUCYNA_VISIBLE) return <Navigate to="/account" replace />;
   return <LucynaBoundary><React.Suspense fallback={<><AccountNavbar />
-    <p role="status" style={{ textAlign: "center", padding: 40 }}>Otwieram Lucynę AI…</p></>}>
+    <LucynaLoading className="is-page" /></>}>
     <LucynaModule supabase={supabase} user={user} Navbar={AccountNavbar} />
   </React.Suspense></LucynaBoundary>;
 }

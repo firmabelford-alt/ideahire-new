@@ -10,11 +10,9 @@ export function useLucynaEntrance(setHome) {
     if(!fromHome){setHome(false);return;}
     clearTimers();
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){setPhase('');setHome(false);return;}
-    setPhase('leaving');
-    timers.current.push(window.setTimeout(()=>{
-      setHome(false);setPhase('arriving');
-      timers.current.push(window.setTimeout(()=>{setPhase('');timers.current=[];},850));
-    },480));
+    setHome(false);
+    setPhase('arriving');
+    timers.current.push(window.setTimeout(()=>{setPhase('');timers.current=[];},200));
   },[clearTimers,setHome]);
   return {phase,enter,reset};
 }

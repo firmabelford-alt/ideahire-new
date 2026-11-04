@@ -76,6 +76,14 @@ export function SubpageTheme() {
   </>;
 }
 
+export function LucynaLoading({ className = '' }) {
+  const en = useSitePreferences().language === 'en';
+  return <div className={'ih-lucyna-loading ' + className} role="status" aria-busy="true">
+    <BrandMark /><strong>Lucyna AI</strong><span>{en ? 'Loading your workspace…' : 'Wczytuję Twoją przestrzeń…'}</span>
+    <i aria-hidden="true" />
+  </div>;
+}
+
 export function SubpageLoading({ label, className = '', screen = false, pending = true }) {
   const en = useSitePreferences().language === 'en';
   return <div className={'ih-scene-loader' + (screen ? ' is-screen' : '') + (className ? ' ' + className : '')}
@@ -85,22 +93,23 @@ export function SubpageLoading({ label, className = '', screen = false, pending 
   </div>;
 }
 
-export function SubpageHistoryControls() {
-  const navigate = useNavigate();
+export function SubpageHistoryControls({ to, label }) {
   const en = useSitePreferences().language === 'en';
-  return <div className="ih73-history-controls"><button className="ih-history-back" type="button" onClick={() => navigate(adminReturnTarget())}
-    aria-label={en ? 'Return to account centre' : 'Wróć do centrum konta'} title={en ? 'Account centre' : 'Centrum konta'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="20" height="20" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg></button></div>;
+  return <Link className="ih-account-back" to={to || adminReturnTarget()}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="19" height="19" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>
+    <span>{label || (en ? 'Account centre' : 'Centrum konta')}</span>
+  </Link>;
 }
 
 export function SubpageNavigation({ standalone = false }) {
   const location = useLocation();
   const en = useSitePreferences().language === 'en';
   const page = getSubpage(location, en);
-  if (!page || ['dashboard', 'account', 'work', 'inbox', 'conversation', 'access'].includes(page.kind)) return null;
-  return <nav className={'ih73-route-navigation ih75-route-navigation' + (standalone ? ' is-standalone' : '')}
-    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true" data-subpage-release="P79">
-    <SubpageHistoryControls parent={page.parent} />
-    <Link to={['access', 'legal'].includes(page.kind) ? '/' : page.kind === 'admin' ? '/admin' : '/account'} className="ih73-panel-link"><LayoutGrid size={17} strokeWidth={1.65} aria-hidden="true" /><span>{['access', 'legal'].includes(page.kind) ? (en ? 'Home' : 'Strona główna') : (en ? 'Dashboard' : 'Panel')}</span></Link>
+  if (!page || ['account', 'conversation', 'access'].includes(page.kind)) return null;
+  const home = ['dashboard', 'legal'].includes(page.kind);
+  return <nav className={'ih-route-return' + (standalone ? ' is-standalone' : '')}
+    aria-label={en ? 'Page navigation' : 'Nawigacja podstrony'} data-no-translate="true">
+    <SubpageHistoryControls to={home ? '/' : page.kind === 'admin' ? '/admin' : undefined} label={home ? (en ? 'Site home' : 'Strona główna') : undefined} />
   </nav>;
 }
 
@@ -190,7 +199,7 @@ export function SubpageCount({ value, loading = false }) {
 function useSubpageEntrance(location) {
   useLayoutEffect(() => {
     // The studio and desk animate their content, keeping sticky tools still.
-    if (location.pathname === '/work' || location.pathname === '/account') return;
+    if (['/work','/account','/lucyna'].includes(location.pathname)) return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
     let animation;
     const frame = requestAnimationFrame(() => {

@@ -5,6 +5,7 @@ import BrandOpening from "./BrandOpening";
 import Sorts from "./Sorts";
 import Preferences from "./Preferences";
 import "./App.css";
+import "./InterfacePolish.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

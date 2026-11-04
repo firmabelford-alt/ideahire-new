@@ -1,3 +1,4 @@
+import { confirmAction } from './SiteDialogs';
 import React, { useMemo, useState, useEffect } from "react";
 import { supabase } from "./supabase";
 
@@ -224,7 +225,7 @@ export function ApplicationActions({
   async function handleReject() {
     if (!applicationId || accepting || rejecting || disabled) return;
 
-    const confirmed = window.confirm(
+    const confirmed = await confirmAction(
       "Odrzucić to zgłoszenie? Wykonawca otrzyma informację, że jego zgłoszenie nie zostało zaakceptowane."
     );
 

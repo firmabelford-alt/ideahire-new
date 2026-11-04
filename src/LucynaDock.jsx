@@ -2,7 +2,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { SubpageLoading } from "./Subpages";
+import { LucynaLoading } from "./Subpages";
 import LucynaSymbol from "./LucynaSymbol";
 import "./LucynaDock.css";
 
@@ -212,7 +212,7 @@ export default function LucynaDock({ supabase, user, administration = false }) {
         <button className="ih64-dock-control" type="button" title="Zwiń okno" aria-label="Zwiń okno Lucyny" onClick={() => minimise()}><Icon kind="minimise"/></button>
         <button className="ih64-dock-control" type="button" title="Zamknij okno" aria-label="Zamknij okno Lucyny AI" onClick={() => minimise()}><Icon kind="close"/></button>
       </header>
-      <div className="ih64-dock-body"><DockBoundary administration={administration} key={attempt} onRetry={() => setAttempt(value => value + 1)}><React.Suspense fallback={<SubpageLoading />}><Assistant supabase={supabase} user={user} embedded visible={open} administration={administration}/></React.Suspense></DockBoundary></div>
+      <div className="ih64-dock-body"><DockBoundary administration={administration} key={attempt} onRetry={() => setAttempt(value => value + 1)}><React.Suspense fallback={<LucynaLoading />}><Assistant supabase={supabase} user={user} embedded visible={open} administration={administration}/></React.Suspense></DockBoundary></div>
     </section>}
     {!open && !administration && <button ref={returnTab} className="ih64-dock-return" type="button" aria-label="Otwórz Lucynę — asystenta AI. Przeciągnij, aby przesunąć przycisk, lub użyj klawiszy strzałek. Home przywraca pozycję." aria-haspopup="dialog" aria-expanded="false" aria-controls={loaded ? "ih64-lucyna-window" : undefined} title="Lucyna AI — kliknij, aby otworzyć; przeciągnij, aby przesunąć"
       style={{ "--ih84-launcher-x": launcher.x + "px", "--ih84-launcher-y": launcher.y + "px", "--ih84-launcher-width": launcher.width + "px" }}

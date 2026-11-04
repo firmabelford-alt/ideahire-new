@@ -1,3 +1,4 @@
+import { notifyAction } from './SiteDialogs';
 /* P63 — two-step specialisations, responsive navigation and a true turquoise palette. */
 /* P61 — a precise trace background and the shared IdeaHire identity. */
 /* P60 — service catalogue, visible wipe background and browsing access. */
@@ -2972,7 +2973,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      alert(`Nie udało się wylogować: ${error.message}`);
+      await notifyAction(`Nie udało się wylogować: ${error.message}`);
       return;
     }
 

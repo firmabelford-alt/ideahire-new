@@ -1,3 +1,5 @@
+import { LucynaLoading } from './Subpages';
+import { confirmAction } from './SiteDialogs';
 import { FormSelect } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Swobodna rozmowa, rzeczywiste narzędzia i strumień odpowiedzi. */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -509,7 +511,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     followingRef.current = true; textareaRef.current?.focus({ preventScroll: true });
   }
   async function deleteConversation(id) {
-    if (deleting || !window.confirm("Usunąć tę rozmowę z historii Lucyny na koncie i z bieżącej sesji?")) return;
+    if (deleting || !await confirmAction("Usunąć tę rozmowę z historii Lucyny na koncie i z bieżącej sesji?", { title: "Usuń rozmowę Lucyny", confirmLabel: "Usuń rozmowę" })) return;
     if (busy) stop();
     searchRef.current?.abort();setDeleting(true);
     try {
@@ -520,7 +522,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     finally {setDeleting(false);}
   }
   async function clearHistory() {
-    if (deleting || !window.confirm("Usunąć wszystkie rozmowy Lucyny z konta i bieżącej sesji? Tej czynności nie można cofnąć.")) return;
+    if (deleting || !await confirmAction("Usunąć wszystkie rozmowy Lucyny z konta i bieżącej sesji? Tej czynności nie można cofnąć.", { title: "Wyczyść historię Lucyny", confirmLabel: "Usuń historię" })) return;
     stop();searchRef.current?.abort();setDeleting(true);
     try {await memory.clear();setConversations([newConversation()]);setActiveId(null);setToolDraft("");setNotice("Usunięto historię Lucyny.");}
     catch {setNotice("Nie udało się usunąć historii z konta. Spróbuj ponownie.");}
@@ -731,7 +733,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   return <div className="lucyna-route" data-embedded={embedded}>
     <section className="lucyna-root lucyna-studio lucyna-atelier"
       ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-CLARITY-20261029" data-entrance={entrance.phase} data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
-      {!memory.ready && <div className="lu-boot" role="status"><LucynaSymbol/><strong>Lucyna</strong><span>Przygotowuję Twoją przestrzeń…</span><i aria-hidden="true"/></div>}
+      {!memory.ready && <LucynaLoading className="lu-boot" />}
       <div className="lu-shell">
         {historyOpen && !wide && <button className="lu-drawer-shade" type="button"
           aria-label="Zamknij historię rozmów" onClick={() => setHistoryOpen(false)} />}

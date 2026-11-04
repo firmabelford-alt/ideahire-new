@@ -1,3 +1,4 @@
+import SiteDialogs from './SiteDialogs';
 /* P52 — pełny plik src/Preferences.jsx | biała baza i turkusowe karty */
 /* IdeaHire | PACZKA 15 | 2026-10-09 | Pelny plik: src/Preferences.jsx */
 /* IDEA HIRE — STRIPE CONNECT TRANSLATIONS — BUILD 2026-09-05 */
@@ -89,6 +90,15 @@ const originalAttributesByElement = new WeakMap();
 const translatedAttributesByElement = new WeakMap();
 
 const EXACT_TRANSLATIONS = Object.freeze({
+  "Usuń rozmowę Lucyny": "Delete Lucyna conversation",
+  "Wyczyść historię Lucyny": "Clear Lucyna history",
+  "Usuń historię": "Delete history",
+  "Usunąć tę rozmowę z historii Lucyny na koncie i z bieżącej sesji?": "Delete this conversation from your account’s Lucyna history and this session?",
+  "Usunąć wszystkie rozmowy Lucyny z konta i bieżącej sesji? Tej czynności nie można cofnąć.": "Delete all Lucyna conversations from your account and this session? This cannot be undone.",
+  "Wybierz według sposobu realizacji projektu. Dla pracy na miejscu lub hybrydowej wskaż lokalizację.": "Choose how the project will be delivered. Add a location for on-site or hybrid work.",
+  "Cały projekt online, bez spotkań na miejscu.": "The entire project online, without on-site meetings.",
+  "Realizacja w ustalonej lokalizacji, np. sesja zdjęciowa.": "Work at an agreed location, such as a photo shoot.",
+  "Część prac online, część na miejscu, np. warsztat i projekt.": "A mix of online and on-site work, such as a workshop followed by design.",
   "Prezentacja": "Presentation",
   "Ilustracja": "Illustration",
   "IdeaHire — strona główna": "IdeaHire — home",
@@ -2353,30 +2363,7 @@ export default function Preferences({
       }
     );
 
-    const originalAlert =
-      window.alert;
-    const originalConfirm =
-      window.confirm;
-
-    window.alert = (message) =>
-      originalAlert(
-        language === "en"
-          ? translateUiText(message)
-          : message
-      );
-
-    window.confirm = (message) =>
-      originalConfirm(
-        language === "en"
-          ? translateUiText(message)
-          : message
-      );
-
-    return () => {
-      observer.disconnect();
-      window.alert = originalAlert;
-      window.confirm = originalConfirm;
-    };
+    return () => { observer.disconnect(); };
   }, [language]);
 
   return (
@@ -2392,6 +2379,7 @@ export default function Preferences({
     >
     <>
       {children}
+      <SiteDialogs language={language} translate={translateUiText} />
 
       <aside
         className={`site-preferences ${
