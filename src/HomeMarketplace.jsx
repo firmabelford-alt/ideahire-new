@@ -6,7 +6,7 @@ function Arrow() {
 }
 
 function EntryLink({ to, label, className }) {
-  return <Link to={to} className={`ih88-entry ${className}`}><span>{label}</span></Link>;
+  return <Link to={to} className={`ih88-entry ${className}`}><span>{label}</span><Arrow /></Link>;
 }
 
 /* The homepage owns live data, rotation, swipe and the selected project's state. */
@@ -16,20 +16,20 @@ export default function HomeMarketplace({
   projectEvents = {}, swipeEvents = {}, trackEvents = {}, children,
 }) {
   const copy = en ? {
-    eyebrow: "A place for ideas and skills.", title: ["An idea is a start.", "People make it happen."],
+    eyebrow: "Projects, professionals, collaboration.", title: ["A good idea.", "Now make it happen."],
     intro: "Find a professional for your idea. Or a project for your skills.",
     jobs: "Find a project", talent: "Find a professional", recent: "Projects on IdeaHire",
     preview: "An example of a project", fresh: "New project", all: "All projects",
     empty: "Have a project in mind? Tell people what you need.", add: "Post a project", pending: "Show new project",
   } : {
-    eyebrow: "Miejsce dla pomysłów i umiejętności.", title: ["Pomysł to początek.", "Ludzie robią resztę."],
+    eyebrow: "Zlecenia, wykonawcy, współpraca.", title: ["Dobry pomysł.", "Teraz dobra robota."],
     intro: "Znajdź wykonawcę do swojego pomysłu. Albo projekt dla swoich umiejętności.",
     jobs: "Znajdź zlecenie", talent: "Znajdź wykonawcę", recent: "Zlecenia na IdeaHire",
     preview: "Przykładowe zlecenie", fresh: "Nowe zlecenie", all: "Wszystkie zlecenia",
     empty: "Masz pomysł na projekt? Opisz go i zaproś do współpracy.", add: "Dodaj zlecenie", pending: "Pokaż nowe zlecenie",
   };
   return (
-    <div ref={hostRef} className="ih53-jobs-finale ih88-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
+    <div ref={hostRef} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
       <div className="ih88-layout">
         <div className="ih88-intro">
           <header className="ih88-heading">

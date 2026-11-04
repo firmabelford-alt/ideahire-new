@@ -1,36 +1,67 @@
-/* A photo-free, type-led opening. Live project behaviour is owned by the homepage. */
+/* An open marketplace introduction. Live project behaviour remains owned by the homepage. */
 @layer ideahireHeadings {
   /* Keep the page wash continuous all the way through the footer. */
   #root .ih53-home > main { background:transparent!important; }
   #root .ih53-home .ih43-film[data-stage="jobs"] { height:auto!important; min-height:0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
   #root .ih53-home .ih88-market {
     --ih88-line:color-mix(in srgb,var(--v-ink) 16%,transparent);
-    --ih88-hero-bg:#12383b; --ih88-hero-ink:#f5f2ea; --ih88-hero-accent:#b7dfce; --ih88-hero-muted:#cfddda;
     display:block!important; min-height:0!important; padding:28px clamp(20px,4vw,64px) 32px!important;
     background:transparent!important; color:var(--v-ink)!important; border:0!important; box-shadow:none!important;
   }
-  html[data-template="classic"] #root .ih88-market { --ih88-hero-bg:#20201e; --ih88-hero-accent:#d5d0c4; --ih88-hero-muted:#d0cec7; }
-  html[data-theme="dark"] #root .ih88-market { --ih88-hero-bg:#233234; --ih88-hero-accent:var(--v-accent); --ih88-hero-muted:var(--v-muted); }
-  html[data-theme="dark"][data-template="classic"] #root .ih88-market { --ih88-hero-bg:#292927; --ih88-hero-accent:#d5d0c4; }
   #root .ih88-layout { width:100%!important; max-width:1240px!important; margin:0 auto!important; }
-  #root .ih88-intro { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:42px!important; min-width:0!important; padding:clamp(34px,4.5vw,64px)!important; border:0!important; border-radius:26px!important; background:var(--ih88-hero-bg)!important; color:var(--ih88-hero-ink)!important; animation:none!important; }
-  #root .ih88-heading { width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; text-align:left!important; }
-  #root .ih88-eyebrow { margin:0 0 28px!important; color:var(--ih88-hero-muted)!important; -webkit-text-fill-color:currentColor!important; font:500 13px/1.6 Inter,system-ui,sans-serif!important; letter-spacing:0!important; }
-  #root .ih88-title { width:100%!important; max-width:none!important; margin:0!important; padding:0!important; color:var(--ih88-hero-ink)!important; -webkit-text-fill-color:currentColor!important; font:780 clamp(48px,6.4vw,88px)/1.08 Inter,system-ui,sans-serif!important; letter-spacing:-.055em!important; text-wrap:balance!important; text-align:left!important; overflow-wrap:normal!important; }
-  #root .ih88-title > span { display:block!important; font:inherit!important; letter-spacing:inherit!important; -webkit-text-fill-color:currentColor!important; }
-  #root .ih88-title .ih88-title-first { color:var(--ih88-hero-ink)!important; font-size:.82em!important; }
-  #root .ih88-title .ih88-title-last { margin-top:10px!important; color:var(--ih88-hero-accent)!important; }
-  #root .ih88-title::before,#root .ih88-title::after { content:none!important; display:none!important; }
-  #root .ih88-hero-bottom { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; align-items:end!important; gap:36px!important; min-width:0!important; }
-  #root .ih88-lead { max-width:43ch!important; margin:0!important; padding:0!important; color:var(--ih88-hero-muted)!important; -webkit-text-fill-color:currentColor!important; font:400 15px/1.75 Inter,system-ui,sans-serif!important; text-wrap:pretty!important; }
-  #root .ih88-actions { display:flex!important; flex-wrap:wrap!important; align-items:stretch!important; justify-content:flex-start!important; gap:10px!important; width:auto!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
-  #root .ih88-entry { box-sizing:border-box!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; flex:0 1 auto!important; min-width:180px!important; min-height:56px!important; padding:15px 24px!important; border:1px solid color-mix(in srgb,var(--ih88-hero-ink) 62%,transparent)!important; border-radius:9px!important; text-decoration:none!important; box-shadow:none!important; transform:none!important; transition:background-color 220ms ease,border-color 220ms ease!important; }
-  #root .ih88-entry > span { display:block!important; min-width:0!important; color:inherit!important; -webkit-text-fill-color:currentColor!important; font:650 15px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:-.015em!important; white-space:normal!important; text-align:center!important; }
   #root .ih88-market :is(a,button) > svg { display:block!important; flex:0 0 20px!important; width:20px!important; height:20px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.6!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
-  #root .ih88-talent { position:static!important; background:var(--ih88-hero-ink)!important; color:var(--ih88-hero-bg)!important; }
-  #root .ih88-jobs { background:transparent!important; color:var(--ih88-hero-ink)!important; }
   #root .ih88-market :is(a,button):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:4px!important; }
-  #root .ih88-actions a:focus-visible { outline-color:var(--ih88-hero-accent)!important; }
+  /* Open, readable marketplace introduction. The existing intro owns its entrance. */
+  #root .ih53-home .ih91-market .ih88-intro {
+    position:relative!important; isolation:isolate!important; display:flex!important; flex-direction:column!important;
+    align-items:center!important; gap:26px!important; min-width:0!important; margin:0!important;
+    padding:clamp(36px,5vw,68px) 20px clamp(40px,5vw,64px)!important;
+    border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important;
+    color:var(--v-ink)!important; text-align:center!important; animation:none!important;
+  }
+  #root .ih91-market .ih88-intro::before {
+    content:""!important; position:absolute!important; z-index:-1!important; pointer-events:none!important;
+    inset:5% 4% 12% 4%!important; border:0!important; border-radius:0!important;
+    background:radial-gradient(ellipse at 72% 35%,color-mix(in srgb,var(--v-accent) 9%,transparent),transparent 64%)!important;
+  }
+  #root .ih91-market .ih88-heading { display:block!important; width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; text-align:center!important; }
+  #root .ih91-market .ih88-eyebrow { display:flex!important; align-items:center!important; justify-content:center!important; gap:10px!important; margin:0 0 22px!important; padding:0!important; color:var(--v-muted)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih91-market .ih88-eyebrow::before { content:""!important; flex:none!important; width:16px!important; height:4px!important; border:0!important; border-radius:2px!important; background:var(--v-accent)!important; }
+  #root .ih91-market .ih88-title { display:block!important; width:100%!important; max-width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; color:var(--v-ink)!important; font:750 clamp(44px,5.8vw,72px)/1.08 Inter,system-ui,sans-serif!important; letter-spacing:-.052em!important; text-wrap:balance!important; text-align:center!important; overflow-wrap:normal!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih91-market .ih88-title > span { display:block!important; color:inherit!important; font:inherit!important; letter-spacing:inherit!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih91-market .ih88-title .ih88-title-first { font-weight:500!important; }
+  #root .ih91-market .ih88-title .ih88-title-last { margin-top:6px!important; color:var(--v-ink)!important; }
+  #root .ih91-market .ih88-title::before, #root .ih91-market .ih88-title::after { content:none!important; display:none!important; }
+  #root .ih91-market .ih88-hero-bottom { display:flex!important; flex-direction:column!important; align-items:center!important; gap:26px!important; width:100%!important; min-width:0!important; margin:0!important; padding:0!important; }
+  #root .ih91-market .ih88-lead { display:block!important; max-width:50ch!important; margin:0!important; padding:0!important; color:var(--v-muted)!important; font:400 16px/1.75 Inter,system-ui,sans-serif!important; text-align:center!important; text-wrap:pretty!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih91-market .ih88-actions { display:flex!important; flex-wrap:wrap!important; justify-content:center!important; align-items:stretch!important; gap:12px!important; width:auto!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
+  #root .ih91-market .ih88-entry { box-sizing:border-box!important; display:inline-flex!important; justify-content:center!important; align-items:center!important; gap:14px!important; min-width:208px!important; min-height:54px!important; margin:0!important; padding:14px 21px!important; border:1px solid color-mix(in srgb,var(--v-ink) 22%,transparent)!important; border-radius:12px!important; text-decoration:none!important; text-align:center!important; box-shadow:none!important; transform:none!important; transition:background-color 180ms ease,border-color 180ms ease!important; }
+  #root .ih91-market .ih88-entry > span { display:block!important; min-width:0!important; color:inherit!important; font:600 15px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; white-space:normal!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih91-market .ih88-entry > svg { flex:none!important; width:18px!important; height:18px!important; color:inherit!important; transition:translate 180ms ease!important; }
+  #root .ih91-market .ih88-talent { position:static!important; background:var(--v-ink)!important; border-color:var(--v-ink)!important; color:var(--v-bg)!important; }
+  #root .ih91-market .ih88-jobs { background:var(--v-surface)!important; color:var(--v-ink)!important; }
+  @media (hover:hover) {
+    #root .ih91-market .ih88-talent:hover { background:color-mix(in srgb,var(--v-ink) 88%,var(--v-bg))!important; border-color:var(--v-ink)!important; }
+    #root .ih91-market .ih88-jobs:hover { background:var(--v-soft)!important; border-color:color-mix(in srgb,var(--v-ink) 40%,transparent)!important; }
+    #root .ih91-market .ih88-entry:hover > svg { translate:3px 0!important; }
+  }
+  @media (max-width:700px) {
+    #root .ih53-home .ih91-market .ih88-intro { padding:38px 0 38px!important; gap:20px!important; }
+    #root .ih91-market .ih88-eyebrow { margin-bottom:18px!important; gap:8px!important; font-size:13px!important; }
+    #root .ih91-market .ih88-title { font-size:clamp(34px,8.9vw,52px)!important; line-height:1.12!important; letter-spacing:-.045em!important; }
+    #root .ih91-market .ih88-title .ih88-title-last { margin-top:5px!important; }
+    #root .ih91-market .ih88-lead { max-width:37ch!important; font-size:15px!important; line-height:1.7!important; }
+    #root .ih91-market .ih88-hero-bottom { gap:22px!important; }
+    #root .ih91-market .ih88-actions { width:100%!important; }
+  }
+  @media (max-width:480px) {
+    #root .ih91-market .ih88-actions { display:grid!important; grid-template-columns:minmax(0,1fr)!important; gap:10px!important; }
+    #root .ih91-market .ih88-entry { width:100%!important; min-width:0!important; min-height:52px!important; padding:13px 18px!important; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    #root .ih91-market .ih88-entry, #root .ih91-market .ih88-entry > svg { transition:none!important; translate:none!important; }
+  }
+
   #root .ih88-live { display:block!important; min-width:0!important; margin:28px 0 0!important; padding:0!important; border:0!important; background:none!important; }
   #root .ih88-live-heading { display:flex!important; flex-wrap:wrap!important; align-items:center!important; justify-content:space-between!important; gap:8px 18px!important; min-height:40px!important; margin:0 0 10px!important; }
   #root .ih88-live-heading > div { display:flex!important; align-items:center!important; gap:14px!important; min-width:0!important; }
@@ -84,8 +115,6 @@
   #root .ih53-home .ih-demo-reviews { width:calc(100% - clamp(40px,8vw,128px))!important; max-width:1240px!important; margin:0 auto!important; padding:0 0 44px!important; border:0!important; background:none!important; }
 
   @media (hover:hover) {
-    #root .ih88-talent:hover { background:var(--ih88-hero-accent)!important; border-color:var(--ih88-hero-accent)!important; }
-    #root .ih88-jobs:hover { background:color-mix(in srgb,var(--ih88-hero-ink) 10%,transparent)!important; border-color:var(--ih88-hero-ink)!important; }
     #root .ih88-live a:hover { text-decoration:underline!important; text-underline-offset:4px!important; }
   }
   @media (min-width:901px) {
@@ -102,28 +131,10 @@
   @media (max-width:1100px) and (min-width:901px) {
     #root .ih88-market .ih53-project-card { grid-template-columns:150px minmax(0,1fr) 160px!important; column-gap:22px!important; }
   }
-  @media (max-width:1100px) {
-    #root .ih88-hero-bottom { grid-template-columns:minmax(0,1fr)!important; gap:24px!important; }
-    #root .ih88-lead { max-width:54ch!important; }
-  }
   @media (max-width:900px) {
     #root .ih53-home .ih88-market { padding:20px 24px 28px!important; }
-    #root .ih88-intro { gap:32px!important; padding:36px!important; }
-    #root .ih88-lead { max-width:54ch!important; }
     #root .ih88-market .ih66-project-description h3 { font-size:26px!important; }
     #root .ih53-home .ih-demo-reviews { width:calc(100% - 48px)!important; }
-  }
-  @media (max-width:600px) {
-    #root .ih88-intro { gap:28px!important; padding:30px 24px!important; border-radius:22px!important; }
-    #root .ih88-eyebrow { margin-bottom:24px!important; font-size:12px!important; }
-    #root .ih88-title { font-size:clamp(36px,9.2vw,54px)!important; line-height:1.13!important; letter-spacing:-.045em!important; }
-    #root .ih88-title .ih88-title-first { font-size:.92em!important; }
-    #root .ih88-title .ih88-title-last { margin-top:14px!important; }
-    #root .ih88-hero-bottom { gap:24px!important; }
-    #root .ih88-lead { max-width:38ch!important; font-size:14px!important; line-height:1.75!important; }
-    #root .ih88-actions { display:grid!important; grid-template-columns:minmax(0,1fr)!important; width:100%!important; gap:10px!important; }
-    #root .ih88-entry { min-width:0!important; min-height:52px!important; padding:13px 16px!important; }
-    #root .ih88-entry > span { font-size:15px!important; }
   }
   @media (max-width:480px) {
     #root .ih53-home .ih88-market { padding:18px 20px 28px!important; }
@@ -145,8 +156,6 @@
   }
   @media (max-width:360px) {
     #root .ih53-home .ih88-market { padding-inline:18px!important; }
-    #root .ih88-intro { padding-inline:20px!important; }
-    #root .ih88-title { font-size:34px!important; }
     #root .ih88-market .ih53-project-card { height:270px!important; min-height:270px!important; padding-inline:18px!important; }
     #root .ih88-market .ih53-project-card:has(.ih53-project-caption) { height:296px!important; min-height:296px!important; }
     #root .ih88-market .ih66-project-budget strong { font-size:22px!important; }
@@ -163,3 +172,4 @@
     #root .ih88-market :is(a,button),#root .ih88-market .ih53-project-track[data-sliding="true"] { transition:none!important; animation:none!important; }
   }
 }
+
