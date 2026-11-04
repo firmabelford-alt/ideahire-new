@@ -11,7 +11,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import "./SitePolish.css";
 import "./HomeFinishing.css";
-import HomeMarketplace from "./HomeMarketplace";
+import HomeMarketplace, { HomeProjectCard } from "./HomeMarketplace";
 import LucynaSymbol from "./LucynaSymbol";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
 import { BrandSignature, BrandLogo } from "./Brand";
@@ -2653,13 +2653,8 @@ function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}
  function renderCard(job,incoming=false){
   const sample=job.preview===true||!ih53RealJob(job),amount=Number(job.budget),category=getCategoryLabel(job.category),label=en?translateUiText(category):category;
   const price=Number.isFinite(amount)&&amount>0?ih53Money(amount,en):(en?'To be agreed':'Do ustalenia');
-  return <article className={'ih53-project-card'+(incoming?' is-incoming':'')} key={job.id} aria-hidden={incoming||undefined} inert={incoming?'':undefined} data-new={view.new}>
-   <div className="ih53-project-top"><IH53JobAuthor job={job} en={en} inactive={incoming}/></div>
-   <span className="ih59-project-category">{label}</span>
-   <div className="ih66-project-description"><h3 title={job.title}>{String(job.title||'').slice(0,160)}</h3><p>{String(job.description||(en?'Review the scope and requirements in the listing.':'Sprawdź zakres i wymagania w ogłoszeniu.')).slice(0,280)}</p></div>
-   {sample&&<small className="ih53-project-caption">{copy.sample}</small>}
-   <div className="ih53-project-bottom ih66-project-budget"><div><small>{copy.budget}</small><strong>{price}</strong></div><Link className="ih53-project-open" data-preserve-router-state="true" to="/jobs" state={sample?undefined:{lucynaJobId:job.id,lucynaTitle:job.title}} tabIndex={incoming?-1:undefined}>{en?'View project':'Zobacz zlecenie'} <span aria-hidden="true"><MarketIcon kind="arrow"/></span></Link></div>
-  </article>;
+  return <HomeProjectCard key={job.id} job={job} en={en} incoming={incoming} isNew={view.new} sample={sample} category={label} price={price}
+    author={<IH53JobAuthor job={job} en={en} inactive={incoming}/>} client={supabase} />;
  }
   return <HomeMarketplace hostRef={host} en={en} stopped={stopped} motionPaused={paused||reduced}
     count={list.length} index={index} sample={!!active&&(active.preview===true||!ih53RealJob(active))} isNew={view.new}
@@ -2764,7 +2759,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
       const ticket = ++request;
       try {
         const { data, error } = await supabase.from("jobs")
-          .select("id, title, description, category, budget, created_at, user_id")
+          .select("id, title, description, category, budget, created_at, user_id, thumbnail_path")
           .order("created_at", { ascending: false }).limit(8);
         if (error || !Array.isArray(data) || !mounted || ticket !== request) return;
         const ownerIds = [...new Set(data.map(job => job.user_id).filter(Boolean))];

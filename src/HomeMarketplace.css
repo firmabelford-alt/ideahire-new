@@ -173,3 +173,74 @@
   }
 }
 
+/* Refinements of the accepted hero; the desktop title and actions stay in place. */
+@layer ideahireHeadings {
+  #root .ih91-market .ih88-eyebrow { gap:0!important; font-size:13px!important; letter-spacing:.015em!important; }
+  #root .ih91-market .ih88-eyebrow::before { content:none!important; display:none!important; }
+  #root .ih91-market .ih88-eyebrow > span { display:inline-flex!important; align-items:center!important; white-space:nowrap!important; }
+  #root .ih91-market .ih88-eyebrow > span + span::before { content:"·"!important; display:inline-block!important; margin:0 12px!important; color:var(--v-accent)!important; font-weight:700!important; }
+  #root .ih91-market .ih91-all-short { display:none!important; }
+  #root .ih91-market .ih88-project-window { box-sizing:border-box!important; transition:height .36s cubic-bezier(.22,.7,.2,1)!important; }
+  #root .ih91-market .ih53-project-track { align-items:flex-start!important; }
+  #root .ih91-market .ih53-project-card > .ih-listing-thumbnail { align-self:center!important; }
+  @media (min-width:901px) {
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) { grid-template-columns:140px 140px minmax(0,1fr) 180px!important; column-gap:24px!important; }
+    #root .ih91-market .ih53-project-card > .ih-listing-thumbnail { grid-column:2!important; grid-row:1/-1!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih66-project-description { grid-column:3!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih66-project-budget { grid-column:4!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih53-project-caption { grid-column:3!important; }
+  }
+  @media (min-width:901px) and (max-width:1100px) {
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) { grid-template-columns:110px 110px minmax(0,1fr) 140px!important; column-gap:18px!important; }
+  }
+  @media (max-width:900px) {
+    #root .ih91-market .ih53-project-card, #root .ih91-market .ih53-project-card:has(.ih53-project-caption) { height:auto!important; min-height:0!important; padding:20px 20px 0!important; row-gap:18px!important; }
+    #root .ih91-market .ih53-project-card .ih53-project-author strong { font-size:14px!important; }
+    #root .ih91-market .ih53-project-card .ih53-project-author small { font-size:11px!important; }
+    #root .ih91-market .ih53-project-card .ih53-author-avatar { width:36px!important; height:36px!important; flex-basis:36px!important; min-width:36px!important; }
+    #root .ih91-market .ih53-project-card .ih59-project-category { font-size:11px!important; line-height:1.5!important; }
+    #root .ih91-market .ih53-project-card .ih66-project-description h3 { font-size:23px!important; line-height:1.22!important; -webkit-line-clamp:3!important; overflow-wrap:anywhere!important; }
+    #root .ih91-market .ih53-project-card .ih66-project-description p { font-size:14px!important; line-height:1.65!important; -webkit-line-clamp:2!important; }
+    #root .ih91-market .ih53-project-card .ih66-project-budget { min-height:78px!important; padding:15px 0!important; }
+    #root .ih91-market .ih53-project-card .ih66-project-budget small { font-size:12px!important; }
+    #root .ih91-market .ih53-project-card .ih53-project-open { min-height:44px!important; padding:8px 10px!important; border:1px solid var(--ih88-line)!important; border-radius:9px!important; font-size:12px!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) { grid-template-columns:150px minmax(0,1fr)!important; }
+    #root .ih91-market .ih53-project-card > .ih-listing-thumbnail { grid-column:1!important; grid-row:2!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih66-project-description { grid-column:2!important; grid-row:2!important; align-self:center!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih53-project-caption { grid-column:1/-1!important; grid-row:3!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih66-project-budget { grid-column:1/-1!important; grid-row:3!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail):has(.ih53-project-caption) .ih66-project-budget { grid-row:4!important; }
+  }
+  @media (max-width:700px) {
+    #root .ih53-home .ih91-market .ih88-intro { padding:28px 0!important; gap:18px!important; }
+    #root .ih91-market .ih88-eyebrow { margin-bottom:16px!important; font-size:12px!important; letter-spacing:0!important; }
+    #root .ih91-market .ih88-eyebrow > span + span::before { margin:0 9px!important; }
+    #root .ih91-market .ih88-title { font-size:clamp(32px,8.65vw,48px)!important; }
+    #root .ih91-market .ih88-hero-bottom { gap:20px!important; }
+    #root .ih91-market .ih88-live { margin-top:12px!important; }
+    #root .ih91-market .ih88-live-heading { display:grid!important; grid-template-columns:minmax(0,1fr) auto!important; gap:10px!important; margin-bottom:12px!important; }
+    #root .ih91-market .ih88-live-heading > div { gap:8px!important; }
+    #root .ih91-market .ih88-live-heading h2 { font-size:15px!important; line-height:1.45!important; }
+    #root .ih91-market .ih88-count { font-size:11px!important; }
+    #root .ih91-market .ih88-live-heading > a { gap:5px!important; font-size:12px!important; }
+    #root .ih91-market .ih91-all-full { display:none!important; }
+    #root .ih91-market .ih91-all-short { display:inline!important; }
+  }
+  @media (max-width:600px) {
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) { grid-template-columns:minmax(0,1fr) minmax(0,38%)!important; }
+    #root .ih91-market .ih53-project-card > .ih-listing-thumbnail { grid-column:1/-1!important; grid-row:2!important; border-radius:10px!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih66-project-description { grid-column:1/-1!important; grid-row:3!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih53-project-caption { grid-row:4!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail) .ih66-project-budget { grid-row:4!important; }
+    #root .ih91-market .ih53-project-card:has(> .ih-listing-thumbnail):has(.ih53-project-caption) .ih66-project-budget { grid-row:5!important; }
+  }
+  @media (max-width:360px) {
+    #root .ih91-market .ih88-live-heading h2 { font-size:14px!important; }
+    #root .ih91-market .ih53-project-card, #root .ih91-market .ih53-project-card:has(.ih53-project-caption) { padding:17px 16px 0!important; }
+    #root .ih91-market .ih53-project-card .ih66-project-description h3 { font-size:21px!important; }
+    #root .ih91-market .ih53-project-card .ih66-project-budget strong { font-size:24px!important; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    #root .ih91-market .ih88-project-window { transition:none!important; }
+  }
+}

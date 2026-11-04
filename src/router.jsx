@@ -37,6 +37,8 @@ import {
 
 import App from "./App";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
+import { ListingThumbnail, ListingThumbnailPicker, ListingThumbnailPreview } from "./ListingThumbnail";
+import { saveListingThumbnail, removeUnlinkedThumbnail, ThumbnailError, thumbnailErrorMessage } from "./ListingThumbnails";
 import { StudioNavigation, StudioHeading, ProfileDetailsEditor, ExpertiseEditor, PortfolioStudio } from "./ProfileStudio";
 import { usePrivacyRequests, PrivacyFeedback, PrivacyReceipt, PrivacyHistoryNotice, PrivacyGuide } from "./PrivacyDesk";
 import { privacyCall, privacyDraftProblem } from "./PrivacyRequests";
@@ -8420,7 +8422,7 @@ function Account() {
       setJobsLoading(true);
       try {
         const [listings, states] = await Promise.all([
-          supabase.from("jobs").select("id,user_id,title,description,category,subcategory,budget,budget_negotiable,listing_duration_days,expires_at,created_at,visibility,source_type,listing_stage,assigned_at").eq("user_id",user.id).eq("source_type","client_posted").order("created_at",{ascending:false}),
+          supabase.from("jobs").select("id,user_id,title,description,category,subcategory,budget,budget_negotiable,listing_duration_days,expires_at,created_at,visibility,source_type,listing_stage,assigned_at, thumbnail_path").eq("user_id",user.id).eq("source_type","client_posted").order("created_at",{ascending:false}),
           supabase.rpc("ideahire_my_job_listing_states"),
         ]);
         if (!live || request !== sequence) return;
@@ -8886,6 +8888,7 @@ function Account() {
       );
 
     if (!confirmed) return;
+    const thumbnailPath = myJobs.find(job => job.id === jobId)?.thumbnail_path;
 
     const {
       error,
@@ -8907,6 +8910,7 @@ function Account() {
       return;
     }
 
+    if (thumbnailPath) await removeUnlinkedThumbnail(supabase, thumbnailPath, user.id);
     setMyJobs(
       (current) =>
         current.filter(
@@ -9877,6 +9881,7 @@ function Account() {
                   : expiry.expired ? (accountEnglish ? "This listing has expired. Publish it again to restore it to the catalogue." : "Ogłoszenie wygasło. Opublikuj je ponownie, aby przywrócić je do katalogu.")
                   : (accountEnglish ? translateUiText(expiry.label) : expiry.label);
                 return <OwnedListingCard key={job.id} title={job.title}
+                  thumbnail={<ListingThumbnail path={job.thumbnail_path} ownerId={job.user_id} kind="jobs" title={job.title} />}
                   category={accountEnglish ? translateUiText(getJobCategoryLabel(job.category)) : getJobCategoryLabel(job.category)}
                   description={job.description} status={ownedJobLabels[state]} inactive={state !== 'active'}
                   price={Number(job.budget || 0).toLocaleString(accountEnglish ? "en-GB" : "pl-PL") + " zł"}
@@ -10911,6 +10916,9 @@ function FindTalent() {
   const [success, setSuccess] =
     useState(false);
 
+  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailBusy, setThumbnailBusy] = useState(false);
+  const publishLock = useRef(false);
   const stepPanelRef = useRef(null);
   const lastFocusedStep = useRef(formStep);
   useEffect(() => {
@@ -11086,6 +11094,7 @@ function FindTalent() {
   }
 
   function goToNextStep() {
+    if (saving || thumbnailBusy) return;
     if (!validateStep(formStep)) return;
 
     const nextStep = Math.min(formStep + 1, JOB_FORM_STEPS.length);
@@ -11095,6 +11104,7 @@ function FindTalent() {
   }
 
   function goToPreviousStep() {
+    if (saving || thumbnailBusy) return;
     setMessage("");
     setFormStep((current) => Math.max(1, current - 1));
     window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
@@ -11154,7 +11164,7 @@ function FindTalent() {
   ) {
     event.preventDefault();
 
-    if (saving) return;
+    if (saving || thumbnailBusy || publishLock.current) return;
     if (formStep < JOB_FORM_STEPS.length) {
       goToNextStep();
       return;
@@ -11199,9 +11209,12 @@ function FindTalent() {
       return;
     }
 
+    publishLock.current = true;
     setSaving(true);
+    let uploadedThumbnail = null;
 
     try {
+      uploadedThumbnail = await saveListingThumbnail(supabase, user.id, 'jobs', thumbnail);
       /*
        * WAŻNE:
        * NIE DODAJEMY jobs.status.
@@ -11213,6 +11226,7 @@ function FindTalent() {
         await supabase
           .from("jobs")
           .insert({
+            thumbnail_path: uploadedThumbnail,
             user_id:
               user.id,
             title:
@@ -11258,6 +11272,7 @@ function FindTalent() {
           });
 
       if (error) {
+        if (uploadedThumbnail) await removeUnlinkedThumbnail(supabase, uploadedThumbnail, user.id);
         if (
           error.code === "23514"
         ) {
@@ -11281,6 +11296,7 @@ function FindTalent() {
         "Zlecenie zostało opublikowane."
       );
 
+      setThumbnail(null);
       setTitle("");
       setDescription("");
       setCategory(
@@ -11319,13 +11335,15 @@ function FindTalent() {
         navigate("/jobs");
       }, 900);
     } catch (error) {
+      if (uploadedThumbnail) await removeUnlinkedThumbnail(supabase, uploadedThumbnail, user.id);
       setMessage(
-        `Nie udało się opublikować zlecenia: ${
+        error instanceof ThumbnailError ? thumbnailErrorMessage(error, formEnglish) : `Nie udało się opublikować zlecenia: ${
           error?.message ||
           "Nieznany błąd"
         }`
       );
     } finally {
+      publishLock.current = false;
       setSaving(false);
     }
   }
@@ -11342,7 +11360,7 @@ function FindTalent() {
         <div className="ih75-editor-workspace">
         <aside className="ih75-editor-guide" aria-label={formEnglish ? "Project steps" : "Etapy projektu"}>
         <p className="ih75-guide-label">{formEnglish ? "Your project" : "Twój projekt"}</p>
-        <div className="ih73-mobile-step-picker"><span>{formEnglish ? "Step" : "Krok"} {formStep} / {JOB_FORM_STEPS.length}</span><MarketSelect label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={value => { setMessage(""); setFormStep(value); }} options={JOB_FORM_STEPS.map((step, index) => ({ value: index + 1, disabled: index + 1 > maxStepReached, label: formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label }))} /></div>
+        <div className="ih73-mobile-step-picker"><span>{formEnglish ? "Step" : "Krok"} {formStep} / {JOB_FORM_STEPS.length}</span><MarketSelect label={formEnglish ? "Project step" : "Etap dodawania zlecenia"} value={formStep} onChange={value => { if (saving || thumbnailBusy) return; setMessage(""); setFormStep(value); }} options={JOB_FORM_STEPS.map((step, index) => ({ value: index + 1, disabled: index + 1 > maxStepReached, label: formEnglish ? ["Project", "Scope", "Terms", "Publish"][index] : step.label }))} /></div>
         <div className="ih86-form-progress" aria-hidden="true">{JOB_FORM_STEPS.map((step, index) => <i key={step.number} data-reached={index + 1 <= formStep} />)}</div>
         <ol className="ih5-job-create-progress" aria-label="Postęp dodawania zlecenia">
           {JOB_FORM_STEPS.map((item, index) => {
@@ -11357,7 +11375,7 @@ function FindTalent() {
               >
                 <button
                   type="button"
-                  disabled={stepNumber > maxStepReached}
+                  disabled={saving || thumbnailBusy || stepNumber > maxStepReached}
                   onClick={() => {
                     setMessage("");
                     setFormStep(stepNumber);
@@ -11440,6 +11458,7 @@ function FindTalent() {
                   />
                   <small>{description.length}/2000</small>
                 </label>
+                <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={formEnglish} ownerId={user?.id} kind="jobs" />
               </div>
             </section>
           )}
@@ -12019,6 +12038,7 @@ function FindTalent() {
               <div className="ih5-job-create-summary">
                 <article className="is-wide">
                   <span className="ih5-eyebrow">{getJobCategoryLabel(category)} · {subcategory}</span>
+                  {thumbnail && <ListingThumbnailPreview value={thumbnail} ownerId={user?.id} kind="jobs" title={title} />}
                   <h3>{title || "Bez tytułu"}</h3>
                   <p>{description || "Brak opisu."}</p>
                 </article>
@@ -12134,17 +12154,17 @@ function FindTalent() {
 
           <div className="ih5-job-create-navigation">
             {formStep > 1 && (
-              <button className="ih5-button is-quiet" type="button" onClick={goToPreviousStep} disabled={saving}>
+              <button className="ih5-button is-quiet" type="button" onClick={goToPreviousStep} disabled={saving || thumbnailBusy}>
                 Wstecz
               </button>
             )}
 
             {formStep < JOB_FORM_STEPS.length ? (
-              <button className="ih5-button is-primary" type="button" onClick={goToNextStep}>
+              <button className="ih5-button is-primary" type="button" onClick={goToNextStep} disabled={saving || thumbnailBusy}>
                 Dalej
               </button>
             ) : (
-              <button className="ih5-button is-primary" type="submit" disabled={saving}>
+              <button className="ih5-button is-primary" type="submit" disabled={saving || thumbnailBusy}>
                 {saving ? "Publikowanie..." : "Opublikuj zlecenie"}
               </button>
             )}
@@ -12160,6 +12180,10 @@ function FindTalent() {
 /* EDIT JOB */
 
 function EditJob() {
+  const editEnglish = useSitePreferences().language === 'en';
+  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailBusy, setThumbnailBusy] = useState(false);
+  const saveLock = useRef(false);
   const { id } =
     useParams();
 
@@ -12206,7 +12230,7 @@ function EditJob() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at, visibility, source_type, listing_stage, assigned_at"
+            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at, visibility, source_type, listing_stage, assigned_at, thumbnail_path"
           )
           .eq("id", id)
           .eq(
@@ -12226,6 +12250,7 @@ function EditJob() {
       }
 
       setJob(data);
+      setThumbnail(data.thumbnail_path || null);
       setTitle(
         data.title || ""
       );
@@ -12247,6 +12272,7 @@ function EditJob() {
     event
   ) {
     event.preventDefault();
+    if (saving || thumbnailBusy || saveLock.current) return;
 
     if (
       !job ||
@@ -12255,10 +12281,14 @@ function EditJob() {
       return;
     }
 
+    saveLock.current = true;
     setSaving(true);
     setMessage("");
+    let uploadedThumbnail = null;
 
     try {
+      const nextThumbnail = await saveListingThumbnail(supabase, user.id, 'jobs', thumbnail);
+      if (thumbnail && typeof thumbnail !== 'string') uploadedThumbnail = nextThumbnail;
       /*
        * BUDŻET NIE JEST
        * AKTUALIZOWANY.
@@ -12270,6 +12300,7 @@ function EditJob() {
         await supabase
           .from("jobs")
           .update({
+            thumbnail_path: nextThumbnail,
             title:
               title.trim(),
             description:
@@ -12283,9 +12314,10 @@ function EditJob() {
           .eq(
             "user_id",
             user.id
-          );
+          ).select('id,thumbnail_path').single();
 
       if (error) {
+        if (uploadedThumbnail) await removeUnlinkedThumbnail(supabase, uploadedThumbnail, user.id);
         setMessage(
           `Nie udało się zapisać zmian: ${error.message}`
         );
@@ -12293,6 +12325,9 @@ function EditJob() {
         return;
       }
 
+      if (job.thumbnail_path && job.thumbnail_path !== nextThumbnail) {
+        await removeUnlinkedThumbnail(supabase, job.thumbnail_path, user.id);
+      }
       navigate(
         "/account",
         {
@@ -12300,13 +12335,15 @@ function EditJob() {
         }
       );
     } catch (error) {
+      if (uploadedThumbnail) await removeUnlinkedThumbnail(supabase, uploadedThumbnail, user.id);
       setMessage(
-        `Nie udało się zapisać zmian: ${
+        error instanceof ThumbnailError ? thumbnailErrorMessage(error, editEnglish) : `Nie udało się zapisać zmian: ${
           error?.message ||
           "Nieznany błąd"
         }`
       );
     } finally {
+      saveLock.current = false;
       setSaving(false);
     }
   }
@@ -12401,6 +12438,8 @@ function EditJob() {
             />
           </label>
 
+          <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={editEnglish} ownerId={user?.id} kind="jobs" />
+
           <div className="fixed-budget-note">
             <strong>
               Budżet:
@@ -12439,7 +12478,7 @@ function EditJob() {
           <button
             className="ih5-button is-primary btn-large"
             type="submit"
-            disabled={saving}
+            disabled={saving || thumbnailBusy}
           >
             {saving
               ? "Zapisywanie..."
@@ -13567,7 +13606,7 @@ function Jobs() {
         await supabase
           .from("jobs")
           .select(
-            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at"
+            "id, user_id, title, description, category, subcategory, project_stage, expected_outcome, client_materials, category_details, collaboration_plan, work_mode, location, experience_level, required_skills, requires_portfolio, reference_url, project_deadline, planned_start_date, budget, budget_negotiable, listing_duration_days, expires_at, created_at, thumbnail_path"
           )
           .eq("visibility", "public")
           .eq("source_type", "client_posted")
@@ -14124,6 +14163,7 @@ function Jobs() {
                   </div>
 
                   <div className="ih5-job-overview">
+                    <ListingThumbnail path={job.thumbnail_path} ownerId={job.user_id} kind="jobs" title={job.title} className="ih-thumbnail-job-card" />
                     <div className="ih5-job-copy">
                       <h2 className="ih5-job-title" id={`ih-job-title-${job.id}`} title={job.title}>{job.title}</h2>
                       <p className="ih5-job-summary">{job.description || "Brak opisu zlecenia."}</p>
@@ -23073,7 +23113,7 @@ function AdminJobs() {
 
     const { data, error } = await adminRead(supabase
       .from("jobs")
-      .select("id, user_id, title, description, category, budget, created_at")
+      .select("id, user_id, title, description, category, budget, created_at, thumbnail_path")
       .order("created_at", { ascending: false })
       .limit(300));
 
@@ -23219,6 +23259,7 @@ function AdminJobs() {
                     <span className="admin-readonly-badge is-small">Podgląd</span>
                   </div>
 
+                  <ListingThumbnail path={job.thumbnail_path} ownerId={job.user_id} kind="jobs" title={job.title} className="ih-thumbnail-job-detail" />
                   <h2>{job.title}</h2>
                   <p>{job.description}</p>
 

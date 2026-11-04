@@ -1,0 +1,57 @@
+/* One complete image, with stable geometry on cards and in the editor. */
+@layer ideahireHeadings {
+  #root .ih-listing-thumbnail { box-sizing:border-box!important; display:block!important; position:relative!important; width:100%!important; min-width:0!important; aspect-ratio:16/10!important; margin:0!important; padding:0!important; overflow:hidden!important; border:1px solid var(--v-line,color-mix(in srgb,var(--v-ink) 14%,transparent))!important; border-radius:14px!important; background:var(--v-soft,var(--v-bg))!important; }
+  #root .ih-listing-thumbnail > img { box-sizing:border-box!important; display:block!important; width:100%!important; height:100%!important; max-width:100%!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; object-fit:contain!important; object-position:center!important; background:none!important; }
+  #root .ih-thumbnail-editor { box-sizing:border-box!important; display:block!important; min-width:0!important; width:100%!important; margin:6px 0!important; padding:20px!important; border:1px solid var(--v-line,color-mix(in srgb,var(--v-ink) 16%,transparent))!important; border-radius:16px!important; background:var(--v-surface,var(--v-bg))!important; color:var(--v-ink)!important; }
+  #root .ih-thumbnail-editor > legend { display:block!important; max-width:100%!important; padding:0 6px!important; margin-left:-6px!important; color:var(--v-ink)!important; font:650 16px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; }
+  #root .ih-thumbnail-editor > legend > span { display:inline!important; margin-left:8px!important; color:var(--v-muted)!important; font:400 13px/1.5 Inter,system-ui,sans-serif!important; }
+  #root .ih-thumbnail-intro { margin:0 0 16px!important; color:var(--v-muted)!important; font:400 14px/1.6 Inter,system-ui,sans-serif!important; }
+  #root .ih-thumbnail-editor-body { display:grid!important; grid-template-columns:minmax(0,280px) minmax(0,1fr)!important; align-items:center!important; gap:22px!important; min-width:0!important; }
+  #root .ih-thumbnail-preview { display:grid!important; place-items:center!important; min-width:0!important; aspect-ratio:16/10!important; overflow:hidden!important; border-radius:12px!important; background:var(--v-soft,var(--v-bg))!important; }
+  #root .ih-thumbnail-preview > .ih-listing-thumbnail { border:0!important; border-radius:12px!important; }
+  #root .ih-thumbnail-placeholder { display:flex!important; flex-direction:column!important; align-items:center!important; gap:10px!important; padding:20px!important; color:var(--v-muted)!important; text-align:center!important; font:400 13px/1.5 Inter,system-ui,sans-serif!important; }
+  #root .ih-thumbnail-placeholder > svg { width:28px!important; height:28px!important; }
+  #root .ih-thumbnail-controls { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:10px 14px!important; min-width:0!important; }
+  #root .ih-thumbnail-choose { box-sizing:border-box!important; position:relative!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:10px!important; width:auto!important; min-width:0!important; min-height:46px!important; margin:0!important; padding:11px 16px!important; border:1px solid color-mix(in srgb,var(--v-ink) 28%,transparent)!important; border-radius:10px!important; background:var(--v-surface,var(--v-bg))!important; color:var(--v-ink)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  #root .ih-thumbnail-choose input { position:absolute!important; inset:0!important; width:100%!important; height:100%!important; min-height:0!important; margin:0!important; padding:0!important; opacity:0!important; cursor:pointer!important; }
+  #root .ih-thumbnail-choose > svg { flex:none!important; width:20px!important; height:20px!important; }
+  #root .ih-thumbnail-choose:focus-within { outline:2px solid var(--v-accent)!important; outline-offset:3px!important; }
+  #root .ih-thumbnail-choose:has(input:disabled) { opacity:.6!important; cursor:wait!important; }
+  #root .ih-thumbnail-remove { display:inline-flex!important; align-items:center!important; min-height:44px!important; margin:0!important; padding:8px 4px!important; border:0!important; border-radius:4px!important; background:none!important; color:var(--v-muted)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:underline!important; text-underline-offset:3px!important; cursor:pointer!important; }
+  #root .ih-thumbnail-format { flex:0 0 100%!important; margin:0!important; color:var(--v-muted)!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; }
+  #root .ih-thumbnail-feedback { margin:14px 0 0!important; color:var(--v-muted)!important; font:400 13px/1.6 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+  #root .ih-thumbnail-feedback:empty { display:none!important; }
+  #root .ih-thumbnail-feedback[role=alert] { color:var(--v-ink)!important; border-left:3px solid var(--v-accent)!important; padding-left:10px!important; }
+  #root .ih-thumbnail-unavailable { padding:18px!important; color:var(--v-muted)!important; font:400 13px/1.6 Inter,system-ui,sans-serif!important; text-align:center!important; }
+  #root :is(.ih78-service-offer,.ih-owned-card) > .ih-listing-thumbnail { margin-bottom:18px!important; }
+  #root .ih-owned-card > .ih-listing-thumbnail { max-width:320px!important; }
+  #root .ih78-service-offer > .ih-listing-thumbnail { grid-column:1/-1!important; }
+  #root .ih5-service-detail-header > .ih-listing-thumbnail { width:min(100%,680px)!important; margin:22px 0!important; }
+  #root .ih-thumbnail-job-card { grid-column:1/-1!important; margin:0 0 16px!important; max-width:100%!important; }
+  #root .ih-thumbnail-job-detail { max-width:760px!important; margin:20px 0!important; }
+  #root .ih-thumbnail-summary { max-width:320px!important; margin:0 0 20px!important; }
+  #root .ih5-job-create-summary .ih-listing-thumbnail { max-width:320px!important; margin:14px 0!important; }
+  #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) { grid-template-columns:150px minmax(0,1fr) 220px!important; gap:20px!important; }
+  #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) > .ih86-offer-heading { grid-column:1/-1!important; grid-row:1!important; }
+  #root .ih5-service-page .ih78-service-offer > .ih-listing-thumbnail { grid-column:1!important; grid-row:2!important; margin:0!important; }
+  #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) > .ih78-offer-copy { grid-column:2!important; grid-row:2!important; }
+  #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) > .ih80-offer-terms { grid-column:3!important; grid-row:2!important; }
+  #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) > .ih78-offer-footer { grid-column:1/-1!important; grid-row:3!important; }
+  #root .ih79-job .ih5-job-overview:has(> .ih-listing-thumbnail) { grid-template-columns:160px minmax(0,1fr) 160px!important; gap:20px!important; }
+  #root .ih79-job .ih5-job-overview > .ih-listing-thumbnail { grid-column:1!important; margin:0!important; }
+  @media (min-width:821px) and (max-width:1100px) {
+    #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) { grid-template-columns:140px minmax(0,1fr)!important; }
+    #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) > .ih80-offer-terms { grid-column:2!important; grid-row:3!important; }
+    #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) > .ih78-offer-footer { grid-row:4!important; }
+  }
+  @media (max-width:820px) {
+    #root .ih5-service-page .ih78-service-offer:has(> .ih-listing-thumbnail) { display:flex!important; flex-direction:column!important; align-items:stretch!important; }
+    #root .ih79-job .ih5-job-overview:has(> .ih-listing-thumbnail) { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:20px!important; }
+  }
+  @media (max-width:600px) {
+    #root .ih-thumbnail-editor { padding:16px!important; }
+    #root .ih-thumbnail-editor-body { grid-template-columns:minmax(0,1fr)!important; gap:14px!important; }
+    #root .ih-thumbnail-preview { width:100%!important; max-width:100%!important; }
+    #root .ih-thumbnail-controls { gap:6px 14px!important; }
+  }
+}

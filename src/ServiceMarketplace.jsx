@@ -1,5 +1,7 @@
 import { FormSelect, AutoTextarea } from "./FormControls";
 import "./ServiceWorkspace.css";
+import { ListingThumbnail, ListingThumbnailPicker, ListingThumbnailPreview } from "./ListingThumbnail";
+import { saveListingThumbnail, removeUnlinkedThumbnail, withServiceThumbnails, ThumbnailError, thumbnailErrorMessage } from "./ListingThumbnails";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
 /* IdeaHire | PACZKA 26 | 2026-10-10 | Pełny plik: src/ServiceMarketplace.jsx */
 import React, {
@@ -361,6 +363,7 @@ function ServiceCard({ service }) {
       <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
       <span className={'ih86-offer-availability ' + capacity.className}>{en ? translateUiText(capacity.label) : capacity.label}</span>
     </header>
+    <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} />
     <div className="ih78-offer-copy">
       <h2><Link to={serviceUrl}>{service.title}</Link></h2>
       {service.summary && <p>{service.summary}</p>}
@@ -419,7 +422,9 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
       if (error) throw error;
       if (request !== loadRequest.current) return;
-      setServices(Array.isArray(data) ? data : []);
+      const rows = await withServiceThumbnails(supabase, Array.isArray(data) ? data : []);
+      if (request !== loadRequest.current) return;
+      setServices(rows);
       setMessage("");
     } catch (error) {
       if (request !== loadRequest.current || quiet) return;
@@ -482,6 +487,10 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
   const english = useSitePreferences().language === "en";
   const { id } = useParams();
   const [form, setForm] = useState(EMPTY_SERVICE_FORM);
+  const [thumbnail, setThumbnail] = useState(null);
+  const [thumbnailBusy, setThumbnailBusy] = useState(false);
+  const originalThumbnail = useRef(null);
+  const saveLock = useRef(false);
   const [editorStep, setEditorStep] = useState(0);
   const editorRef = useRef(null);
   const [loading, setLoading] = useState(editing);
@@ -510,6 +519,8 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
         );
       } else {
         setForm(serviceFormFromRow(data));
+        originalThumbnail.current = data.thumbnail_path || null;
+        setThumbnail(data.thumbnail_path || null);
       }
       setLoading(false);
     }
@@ -535,7 +546,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
   }
 
   function moveEditorStep(target) {
-    if (saving) return false;
+    if (saving || thumbnailBusy) return false;
     if (target <= editorStep) return showEditorStep(target);
     for (let index = 0; index < target; index++) {
       const invalid = [...(editorRef.current?.querySelectorAll(`[data-service-step="${index}"] input, [data-service-step="${index}"] textarea, [data-service-step="${index}"] select`) || [])].find(field => !field.disabled && !field.validity.valid);
@@ -557,7 +568,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (saving) return;
+    if (saving || thumbnailBusy || saveLock.current) return;
     if (editorStep < 2) { moveEditorStep(editorStep + 1); return; }
     for (let index = 0; index < 3; index++) {
       const invalid = [...(editorRef.current?.querySelectorAll(`[data-service-step="${index}"] input, [data-service-step="${index}"] textarea, [data-service-step="${index}"] select`) || [])].find(field => !field.disabled && !field.validity.valid);
@@ -623,6 +634,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
       return;
     }
 
+    saveLock.current = true;
     setSaving(true);
 
     const payload = {
@@ -645,28 +657,37 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
       updated_at: new Date().toISOString(),
     };
 
+    let uploadedThumbnail = null;
     try {
+      const nextThumbnail = await saveListingThumbnail(supabase, user.id, 'services', thumbnail);
+      if (thumbnail && typeof thumbnail !== 'string') uploadedThumbnail = nextThumbnail;
+      payload.thumbnail_path = nextThumbnail;
       const request = editing
         ? supabase
             .from("freelancer_services")
             .update(payload)
             .eq("id", id)
             .eq("freelancer_id", user.id)
-            .select("id")
+            .select("id,thumbnail_path")
             .single()
         : supabase
             .from("freelancer_services")
             .insert(payload)
-            .select("id")
+            .select("id,thumbnail_path")
             .single();
 
       const { data, error } = await request;
       if (error) throw error;
 
+      if (originalThumbnail.current && originalThumbnail.current !== nextThumbnail) {
+        await removeUnlinkedThumbnail(supabase, originalThumbnail.current, user.id);
+      }
       navigate(`/services/${data.id}`, { replace: true });
     } catch (error) {
-      setMessage(error?.message || "Nie udało się zapisać usługi.");
+      if (uploadedThumbnail) await removeUnlinkedThumbnail(supabase, uploadedThumbnail, user.id);
+      setMessage(error instanceof ThumbnailError ? thumbnailErrorMessage(error, english) : error?.message || "Nie udało się zapisać usługi.");
     } finally {
+      saveLock.current = false;
       setSaving(false);
     }
   }
@@ -682,7 +703,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
         <SubpageLoading label="Przygotowujemy formularz…" />
       ) : (
         <form className="ih5-service-editor" ref={editorRef} onSubmit={handleSubmit} noValidate>
-          <nav className="ih-service-editor-steps" aria-label={english ? "Service form steps" : "Etapy formularza usługi"}>{[english?'Offer':'Oferta',english?'Scope':'Zakres',english?'Terms':'Warunki'].map((label,index)=><button type="button" key={label} aria-current={editorStep===index?'step':undefined} disabled={saving} onClick={()=>moveEditorStep(index)}><span aria-hidden="true">{index+1}</span>{label}</button>)}</nav>
+          <nav className="ih-service-editor-steps" aria-label={english ? "Service form steps" : "Etapy formularza usługi"}>{[english?'Offer':'Oferta',english?'Scope':'Zakres',english?'Terms':'Warunki'].map((label,index)=><button type="button" key={label} aria-current={editorStep===index?'step':undefined} disabled={saving || thumbnailBusy} onClick={()=>moveEditorStep(index)}><span aria-hidden="true">{index+1}</span>{label}</button>)}</nav>
           <section className="ih5-service-editor-section ih-service-step-panel" data-service-step="0" tabIndex={-1} aria-labelledby="service-step-title-0" hidden={editorStep !== 0}>
             <header className="ih76-service-step">
               <span className="ih5-service-editor-index">01</span>
@@ -691,6 +712,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             <div className="ih5-service-editor-heading">
               <p>Zacznij od efektu, który zleceniodawca łatwo zrozumie.</p>
             </div>
+            <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={english} ownerId={user?.id} kind="services" client={supabase} />
             <div className="ih5-service-editor-fields">
               <label className="is-wide">
                 <span>Nazwa usługi *</span>
@@ -810,6 +832,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             <div className="ih5-service-editor-heading">
               <p>Rozmowa nie blokuje miejsca. Rezerwacja powstaje dopiero po wysłaniu oferty.</p>
             </div>
+            {thumbnail && <div className="ih-thumbnail-summary"><ListingThumbnailPreview value={thumbnail} ownerId={user?.id} kind="services" title={form.title} client={supabase} /></div>}
             <div className="ih5-service-editor-fields">
               <fieldset className="ih5-service-choice-field is-wide">
                 <legend>Sposób wyceny *</legend>
@@ -919,8 +942,8 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
           <footer className="ih5-service-editor-actions">
             <Link to={editing ? `/services/${id}` : "/services"}>Anuluj</Link>
             <div className="ih-service-editor-navigation">
-              {editorStep>0 && <button type="button" className="is-quiet" disabled={saving} onClick={()=>moveEditorStep(editorStep-1)}>{english?'Previous':'Wstecz'}</button>}
-              {editorStep<2 ? <button type="button" disabled={saving} onClick={()=>moveEditorStep(editorStep+1)}>{english?'Continue':'Dalej'}<MarketIcon kind="arrow"/></button> : <button type="submit" disabled={saving}>{saving ? (english?'Saving…':'Zapisywanie…') : editing ? (english?'Save changes':'Zapisz zmiany') : (english?'Publish service':'Opublikuj usługę')}</button>}
+              {editorStep>0 && <button type="button" className="is-quiet" disabled={saving || thumbnailBusy} onClick={()=>moveEditorStep(editorStep-1)}>{english?'Previous':'Wstecz'}</button>}
+              {editorStep<2 ? <button type="button" disabled={saving || thumbnailBusy} onClick={()=>moveEditorStep(editorStep+1)}>{english?'Continue':'Dalej'}<MarketIcon kind="arrow"/></button> : <button type="submit" disabled={saving || thumbnailBusy}>{saving ? (english?'Saving…':'Zapisywanie…') : editing ? (english?'Save changes':'Zapisz zmiany') : (english?'Publish service':'Opublikuj usługę')}</button>}
             </div>
           </footer>
         </form>
@@ -1153,7 +1176,9 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
       if (request !== loadRequest.current) return;
       const row = Array.isArray(data) ? data[0] : data;
       if (!row) throw new Error("Ta usługa nie jest już dostępna.");
-      setService(row);
+      const [withThumbnail] = await withServiceThumbnails(supabase, [row]);
+      if (request !== loadRequest.current) return;
+      setService(withThumbnail || row);
     } catch (error) {
       if (request !== loadRequest.current || quiet) return;
       setMessage(error?.message || "Nie udało się otworzyć usługi.");
@@ -1208,6 +1233,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           <span>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</span>
         </div>
         <h1>{service.title}</h1>
+        <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={supabase} />
         <p>{service.summary}</p>
       </header>
 
@@ -1381,6 +1407,7 @@ function MyServices({ supabase, user, Navbar }) {
       ) : services.length > 0 ? (
         <div className="ih5-my-services-list">
           {services.map(service => <OwnedListingCard key={service.id}
+            thumbnail={<ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={supabase} />}
             title={service.title} category={english ? translateUiText(service.category) : service.category} description={service.summary}
             status={service.status === "active" ? (english ? "Visible" : "Widoczna") : (english ? "Paused" : "Wstrzymana")} inactive={service.status !== "active"}
             note={(english ? "Updated: " : "Aktualizacja: ") + formatServiceDate(service.updated_at)} busy={busyId === service.id}
