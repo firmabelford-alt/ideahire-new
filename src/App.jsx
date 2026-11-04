@@ -2625,46 +2625,15 @@ function IH53JobAuthor({job,en,inactive=false}){
  const content=<><span className="ih53-author-avatar" aria-hidden="true">{url&&!failed?<img src={url} alt="" loading="lazy" referrerPolicy="no-referrer" onError={()=>setFailedUrl(url)}/>:name.charAt(0).toLocaleUpperCase(en?'en':'pl')}</span><span><strong>{name}</strong><small>{job.preview?(en?'Sample profile':'Przykładowy profil'):(en?'Project author':'Autor zlecenia')}</small></span></>;
  return job.user_id&&!job.preview&&!inactive?<Link className="ih53-project-author" to={'/profile/'+job.user_id}>{content}</Link>:<div className="ih53-project-author">{content}</div>;
 }
-function IH53JobsFinale({jobs=[],paused,reduced,onReplay,onPause,canReplay=true}){
- const en=useSitePreferences().language==='en',host=useRef(null),real=jobs.filter(ih53RealJob),list=real.length?real:jobs;
- const signature=list.map(j=>j.id).join('|'),known=useRef(new Set(list.map(j=>j.id))),current=useRef(list[0]||null),gesture=useRef(null),sequence=useRef(0);
- const[view,setView]=useState(()=>({job:list[0]||null,next:null,shift:false,sequence:0,new:false})),[pending,setPending]=useState(null),[hover,setHover]=useState(false),[focus,setFocus]=useState(false),[visible,setVisible]=useState(true),[hidden,setHidden]=useState(()=>document.hidden);
- const stopped=paused||reduced||hover||focus||hidden||!visible,active=list.find(j=>j.id===view.job?.id)||view.job,index=Math.max(0,list.findIndex(j=>j.id===active?.id));current.current=active;
- const copy=en?{title:['Find work.','Use your skills.'],intro:'Browse recent briefs or find the right person for your own project.',talent:'Find a professional',jobs:'Browse all projects',replay:'Replay the introduction',pause:'Pause animations',play:'Resume animations',sample:'Illustrative project',published:'Recent projects',new:'New project',view:'View project',budget:'Budget',empty:'No projects to display yet.',terms:'Paid only by the client. The freelancer receives the full agreed amount.',fee:'IdeaHire fee',pending:'Show new project',auto:'Projects change automatically',still:'Project preview'}:{title:['Znajdź zlecenie.','Wykorzystaj swój fach.'],intro:'Sprawdź ostatnie ogłoszenia lub znajdź osobę do własnego projektu.',talent:'Znajdź wykonawcę',jobs:'Wszystkie zlecenia',replay:'Powtórz wprowadzenie',pause:'Zatrzymaj animacje',play:'Wznów animacje',sample:'Przykładowe zlecenie',published:'Ostatnie ogłoszenia',new:'Nowe zlecenie',view:'Zobacz ogłoszenie',budget:'Budżet',empty:'Nie ma jeszcze zleceń do wyświetlenia.',terms:'Płaci wyłącznie zleceniodawca. Wykonawca otrzymuje całą ustaloną kwotę.',fee:'Prowizja IdeaHire',pending:'Pokaż nowe zlecenie',auto:'Ogłoszenia zmieniają się automatycznie',still:'Podgląd ogłoszeń'};
- function commit(){setView(v=>v.next?{job:v.next,next:null,shift:false,sequence:v.sequence,new:v.new}:v);}
- function show(job,isNew=false){
-  if(!job)return;setPending(null);sequence.current++;
-  setView(v=>reduced||paused||v.job?.id===job.id?{job,next:null,shift:false,sequence:sequence.current,new:isNew}:{...v,next:job,shift:false,sequence:sequence.current,new:isNew});
- }
- useLayoutEffect(()=>{if(!view.next)return;const frame=requestAnimationFrame(()=>setView(v=>({...v,shift:true})));return()=>cancelAnimationFrame(frame);},[view.sequence]);
- useEffect(()=>{if(!view.next)return;const timer=setTimeout(commit,600);return()=>clearTimeout(timer);},[view.sequence,!!view.next]);
- useEffect(()=>{if((paused||reduced)&&view.next)commit();},[paused,reduced]);
- useEffect(()=>{
-  const incoming=list.filter(j=>!known.current.has(j.id));known.current=new Set(list.map(j=>j.id));
-  if(incoming.length&&real.length)setPending({job:incoming[0],count:incoming.length});
-  else if(!current.current||!list.some(j=>j.id===current.current.id))show(list[0]);
- },[signature]);
- useEffect(()=>{if(pending&&!stopped&&!view.next)show(pending.job,true);},[pending,stopped,!!view.next]);
- useEffect(()=>{if(stopped||list.length<2||pending||view.next)return;const timer=setTimeout(()=>show(list[(index+1)%list.length]),6500);return()=>clearTimeout(timer);},[view.sequence,signature,stopped,!!pending,!!view.next]);
- useEffect(()=>{
-  const update=()=>setHidden(document.hidden);document.addEventListener('visibilitychange',update);let observer;
-  if(typeof IntersectionObserver!=='undefined')try{observer=new IntersectionObserver(entries=>setVisible(!!entries[0]?.isIntersecting),{threshold:0});observer.observe(host.current);}catch{}
-  return()=>{document.removeEventListener('visibilitychange',update);observer?.disconnect();};
- },[]);
- function renderCard(job,incoming=false){
+function IH53JobsFinale({jobs=[],paused,reduced}){
+ const en=useSitePreferences().language==='en',real=jobs.filter(ih53RealJob),list=real.length?real:jobs;
+ function renderProject(job){
   const sample=job.preview===true||!ih53RealJob(job),amount=Number(job.budget),category=getCategoryLabel(job.category),label=en?translateUiText(category):category;
   const price=Number.isFinite(amount)&&amount>0?ih53Money(amount,en):(en?'To be agreed':'Do ustalenia');
-  return <HomeProjectCard key={job.id} job={job} en={en} incoming={incoming} isNew={view.new} sample={sample} category={label} price={price}
-    author={<IH53JobAuthor job={job} en={en} inactive={incoming}/>} client={supabase} />;
+  return <HomeProjectCard job={job} en={en} sample={sample} category={label} price={price}
+    author={<IH53JobAuthor job={job} en={en}/>} client={supabase} />;
  }
-  return <HomeMarketplace hostRef={host} en={en} stopped={stopped} motionPaused={paused||reduced}
-    count={list.length} index={index} sample={!!active&&(active.preview===true||!ih53RealJob(active))} isNew={view.new}
-    pending={pending} onShowPending={()=>show(pending?.job,true)}
-    projectEvents={{onPointerEnter:e=>{if(e.pointerType==='mouse')setHover(true);},onPointerLeave:()=>setHover(false),onFocusCapture:()=>setFocus(true),onBlurCapture:e=>{if(!e.currentTarget.contains(e.relatedTarget))setFocus(false);}}}
-    swipeEvents={{onPointerDown:e=>{if(e.pointerType==='touch')gesture.current={x:e.clientX,y:e.clientY};},onPointerCancel:()=>{gesture.current=null;},onPointerUp:e=>{const first=gesture.current;gesture.current=null;if(!first||view.next||list.length<2)return;const dx=e.clientX-first.x,dy=e.clientY-first.y;if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.5)show(list[(index+(dx>0?-1:1)+list.length)%list.length]);}}}
-    trackEvents={{'data-sliding':view.shift,onTransitionEnd:e=>{if(e.target===e.currentTarget&&e.propertyName==='transform')commit();}}}>
-    {active&&renderCard(active)}{view.next&&renderCard(view.next,true)}
-  </HomeMarketplace>;
+ return <HomeMarketplace en={en} jobs={list} renderProject={renderProject} paused={paused} reduced={reduced}/>;
 }
 
 function App({ session, loading, categoryGroups = [], limitedAccess = false }) {

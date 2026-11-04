@@ -14189,9 +14189,9 @@ function Jobs() {
                         </span>
                         <div>
                           
-                          <h3 id={`ih-job-plan-title-${job.id}`}>Plan współpracy</h3>
+                          <h3 id={`ih-job-plan-title-${job.id}`}>Szczegóły zlecenia</h3>
                           <p>
-                            Szczegóły zlecenia i wymagania.
+                            Zakres, materiały i zasady współpracy w jednym miejscu.
                           </p>
                         </div>
                       </header>
@@ -14452,7 +14452,7 @@ function Jobs() {
                             )
                           }
                         >
-                          Ukryj plan
+                          Zwiń szczegóły
                         </button>
                       </div>
 
