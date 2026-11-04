@@ -15,17 +15,11 @@
   #root .ih88-market .ih-feed-catalog-links { display:flex!important; flex:none!important; gap:18px!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
   #root .ih88-market .ih-feed-catalog-links > a { display:inline-flex!important; align-items:center!important; gap:8px!important; min-height:44px!important; color:var(--v-accent)!important; font:600 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
   #root .ih88-market .ih-showcase-controls { min-height:48px!important; }
-  #root .ih-home-ending { display:grid!important; grid-template-columns:minmax(0,1fr) 250px!important; align-items:center!important; gap:40px!important; width:calc(100% - clamp(40px,8vw,128px))!important; max-width:1280px!important; box-sizing:border-box!important; margin:70px auto 0!important; padding:64px 0!important; border:0!important; border-top:1px solid var(--v-line)!important; border-bottom:1px solid var(--v-line)!important; background:transparent!important; color:var(--v-ink)!important; }
-  #root .ih-home-ending-copy { min-width:0!important; }
-  #root .ih-home-ending-kicker { margin:0 0 22px!important; color:var(--v-accent)!important; font:550 13px/1.6 Inter,system-ui,sans-serif!important; }
-  #root .ih-home-ending h2 { max-width:15ch!important; margin:0 0 22px!important; color:var(--v-ink)!important; font:650 clamp(40px,5.2vw,70px)/1.08 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; text-wrap:balance!important; }
-  #root .ih-home-ending-copy > p:last-of-type { max-width:56ch!important; margin:0!important; color:var(--v-muted)!important; font:400 15px/1.85 Inter,system-ui,sans-serif!important; }
-  #root .ih-home-ending-actions { display:flex!important; flex-wrap:wrap!important; gap:12px!important; margin:28px 0 0!important; }
-  #root .ih-home-ending-actions > a { display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:18px!important; min-height:52px!important; padding:13px 20px!important; border:1px solid var(--v-line)!important; border-radius:12px!important; background:var(--v-surface)!important; color:var(--v-ink)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
-  #root .ih-home-ending-actions > a.is-primary { background:var(--v-ink)!important; color:var(--v-bg)!important; border-color:var(--v-ink)!important; }
-  #root .ih-home-ending-sign { display:flex!important; flex-direction:column!important; align-items:center!important; gap:22px!important; color:var(--v-accent)!important; }
-  #root .ih-home-ending-sign > svg { display:block!important; width:210px!important; height:210px!important; fill:currentColor!important; transform:rotate(-5deg)!important; }
-  #root .ih-home-ending-sign > span { max-width:23ch!important; color:var(--v-muted)!important; font:500 12px/1.6 Inter,system-ui,sans-serif!important; text-align:center!important; }
+  #root .ih-home-ending { display:block!important; width:calc(100% - clamp(40px,8vw,128px))!important; max-width:1280px!important; box-sizing:border-box!important; margin:0 auto!important; padding:56px 0 76px!important; border:0!important; border-radius:0!important; background:transparent!important; color:var(--v-ink)!important; text-align:left!important; }
+  #root .ih-home-ending-kicker { margin:0 0 22px!important; color:var(--v-muted)!important; font:600 12px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.08em!important; text-transform:uppercase!important; }
+  #root .ih-home-ending h2 { max-width:none!important; margin:0!important; color:var(--v-ink)!important; font:600 clamp(38px,6vw,80px)/1.12 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; }
+  #root .ih-home-ending h2 > span { display:block!important; color:inherit!important; }
+  #root .ih-home-ending-note { max-width:54ch!important; margin:26px 0 0!important; color:var(--v-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
   body #root .notifications-page { width:min(1180px,100%)!important; min-width:0!important; margin-inline:auto!important; }
   body #root .notifications-page .ih79-notifications-layout { display:grid!important; grid-template-columns:210px minmax(0,1fr)!important; align-items:start!important; gap:28px!important; }
   body #root .notifications-page .ih79-notification-filters { display:flex!important; flex-direction:column!important; gap:6px!important; min-width:0!important; overflow:visible!important; padding:6px!important; margin:0!important; border:1px solid var(--v-line)!important; border-radius:14px!important; background:var(--v-surface)!important; }
@@ -56,15 +50,10 @@
     #root .ih88-market .ih-feed-catalog-links { gap:18px!important; }
     #root .ih88-market .ih88-live-heading h2 { max-width:26ch!important; font-size:18px!important; }
     #root .ih88-market .ih-showcase-swipe-hint { max-width:none!important; font-size:10px!important; }
-    #root .ih-home-ending { grid-template-columns:minmax(0,1fr)!important; gap:30px!important; width:calc(100% - 40px)!important; margin-top:42px!important; padding:36px 0 40px!important; }
-    #root .ih-home-ending-kicker { max-width:27ch!important; margin-bottom:18px!important; font-size:12px!important; }
-    #root .ih-home-ending h2 { max-width:12ch!important; font-size:clamp(38px,10vw,52px)!important; }
-    #root .ih-home-ending-copy > p:last-of-type { font-size:14px!important; }
-    #root .ih-home-ending-actions { flex-direction:column!important; margin-top:24px!important; gap:10px!important; }
-    #root .ih-home-ending-actions > a { width:100%!important; box-sizing:border-box!important; justify-content:space-between!important; }
-    #root .ih-home-ending-sign { flex-direction:row!important; align-items:center!important; justify-content:flex-start!important; gap:16px!important; }
-    #root .ih-home-ending-sign > svg { width:72px!important; height:72px!important; flex:none!important; }
-    #root .ih-home-ending-sign > span { max-width:22ch!important; text-align:left!important; }
+    #root .ih-home-ending { width:calc(100% - 40px)!important; padding:38px 0 max(48px,env(safe-area-inset-bottom))!important; }
+    #root .ih-home-ending-kicker { margin-bottom:18px!important; font-size:11px!important; }
+    #root .ih-home-ending h2 { font-size:clamp(30px,8.8vw,46px)!important; line-height:1.15!important; }
+    #root .ih-home-ending-note { max-width:30ch!important; margin-top:20px!important; font-size:13px!important; }
     body #root .notifications-page .ih79-notice { padding:18px!important; gap:12px!important; }
     body #root .notifications-page .ih79-notice > h3 { font-size:18px!important; }
     body #root .notifications-page .ih79-notice > p { font-size:13px!important; }
