@@ -1,0 +1,41 @@
+@layer ideahirePolish {
+  #root .ih-report-page { min-height:100svh!important; color:var(--v-ink)!important; background:var(--v-bg)!important; }
+  #root .ih-report-nav { box-sizing:border-box!important; display:flex!important; align-items:center!important; justify-content:space-between!important; gap:20px!important; width:100%!important; padding:22px clamp(20px,5vw,64px)!important; border-bottom:1px solid var(--v-line)!important; background:var(--v-surface)!important; }
+  #root .ih-report-nav > a:last-child { display:flex!important; align-items:center!important; gap:9px!important; min-height:44px!important; color:var(--v-muted)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
+  #root .ih-report-nav .ih-brand-link { color:var(--v-ink)!important; text-decoration:none!important; }
+  #root .ih-report-main { box-sizing:border-box!important; width:min(100%,800px)!important; padding:42px 24px 60px!important; margin:auto!important; }
+  #root .ih-report-heading > span { color:var(--v-accent)!important; font:550 12px/1.5 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-heading h1 { margin:12px 0 14px!important; color:var(--v-ink)!important; font:650 clamp(30px,5vw,42px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
+  #root .ih-report-heading > p { max-width:60ch!important; margin:0 0 28px!important; color:var(--v-muted)!important; font:400 15px/1.8 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-form, #root .ih-report-access, #root .ih-report-receipt { padding:28px!important; border:1px solid var(--v-line)!important; border-radius:16px!important; background:var(--v-surface)!important; }
+  #root .ih-report-form fieldset { display:flex!important; flex-direction:column!important; gap:24px!important; min-width:0!important; margin:0!important; padding:0!important; border:0!important; }
+  #root .ih-report-form label { display:flex!important; flex-direction:column!important; gap:9px!important; color:var(--v-ink)!important; font:550 13px/1.6 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-form input:not([type=checkbox]), #root .ih-report-form textarea { box-sizing:border-box!important; width:100%!important; min-width:0!important; min-height:48px!important; margin:0!important; padding:12px 14px!important; border:1px solid var(--v-line)!important; border-radius:10px!important; color:var(--v-ink)!important; background:var(--v-bg)!important; font:400 16px/1.6 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-form textarea { resize:vertical!important; }
+  #root .ih-report-form label > small { color:var(--v-muted)!important; font:400 12px/1.7 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-optional { color:var(--v-muted)!important; font-size:11px!important; }
+  #root .ih-report-form .ih-report-faith { display:grid!important; grid-template-columns:20px minmax(0,1fr)!important; align-items:start!important; gap:12px!important; font-weight:400!important; }
+  #root .ih-report-faith input { flex:none!important; width:18px!important; height:18px!important; margin:3px 0 0!important; accent-color:var(--v-accent)!important; }
+  #root .ih-report-submit { box-sizing:border-box!important; display:inline-flex!important; align-items:center!important; justify-content:center!important; gap:18px!important; align-self:flex-start!important; min-height:50px!important; padding:12px 18px!important; border:1px solid var(--v-ink)!important; border-radius:10px!important; background:var(--v-ink)!important; color:var(--v-bg)!important; font:600 14px/1.6 Inter,system-ui,sans-serif!important; text-decoration:none!important; cursor:pointer!important; }
+  #root .ih-report-submit:disabled { opacity:.6!important; cursor:wait!important; }
+  #root .ih-report-access h2, #root .ih-report-contact h2 { margin:0 0 10px!important; font:600 18px/1.4 Inter,system-ui,sans-serif!important; color:var(--v-ink)!important; }
+  #root .ih-report-access p, #root .ih-report-contact p, #root .ih-report-receipt p { margin:0 0 20px!important; color:var(--v-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-contact { display:block!important; margin-top:28px!important; padding-top:24px!important; border-top:1px solid var(--v-line)!important; }
+  #root .ih-report-contact > div { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:12px!important; }
+  #root .ih-report-contact code { max-width:100%!important; color:var(--v-ink)!important; font:500 14px/1.5 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+  #root .ih-report-contact button { min-height:44px!important; padding:9px 13px!important; border:1px solid var(--v-line)!important; border-radius:9px!important; background:var(--v-surface)!important; color:var(--v-ink)!important; font:550 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  #root .ih-report-feedback { margin:0!important; padding:14px!important; color:var(--v-ink)!important; background:var(--v-soft)!important; border-left:3px solid var(--v-accent)!important; font:400 13px/1.7 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-receipt > span { color:var(--v-accent)!important; font:600 13px/1.5 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-receipt h2 { margin:14px 0!important; color:var(--v-ink)!important; font:650 26px/1.3 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
+  #root .ih-report-receipt a { display:inline-flex!important; align-items:center!important; gap:12px!important; min-height:44px!important; color:var(--v-accent)!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-privacy { margin-top:26px!important; }
+  #root .ih-report-privacy a { color:var(--v-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
+  #root .ih-report-page :is(input,textarea,button,a):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:3px!important; }
+  @media(max-width:600px){
+    #root .ih-report-nav { padding:16px 20px!important; gap:12px!important; }
+    #root .ih-report-nav .ih-brand-wordmark { font-size:22px!important; }
+    #root .ih-report-main { padding:30px 20px 40px!important; }
+    #root .ih-report-form, #root .ih-report-access, #root .ih-report-receipt { padding:20px!important; }
+    #root .ih-report-submit { width:100%!important; }
+  }
+}

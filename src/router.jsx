@@ -1,3 +1,4 @@
+import ContentReport from './ContentReport';
 import { confirmAction, notifyAction } from './SiteDialogs';
 import { FormSelect, AutoTextarea } from "./FormControls";
 /* P70 — one task per screen and project details opened on demand. */
@@ -17336,8 +17337,8 @@ function Notifications() {
             {showGroup('decisions') && decisionCount > 0 && <section className="ih79-notice-group" aria-labelledby="ih79-decisions-title">
               <h2 id="ih79-decisions-title">{nt('Decyzje i informacje', 'Decisions and updates')}<span>{decisionCount}</span></h2>
               {acceptedDecisions.map(item => <article className="ih79-notice is-accepted" key={'accepted-' + item.id}>
-                <p className="ih79-notice-state"><WorkspaceIcon kind="check" />{nt('Zgłoszenie zaakceptowane', 'Application accepted')}</p><h3>{item.job?.title || nt('Zlecenie', 'Job')}</h3><p>{nt('Zleceniodawca wybrał Cię do realizacji. Ustal szczegóły w rozmowie.', 'The client selected you. Discuss the details in the conversation.')}</p>
-                {item.conversation?.id ? <Link className="ih79-button is-primary" to={'/chat/' + item.conversation.id}>{nt('Przejdź do rozmowy', 'Open conversation')}<WorkspaceIcon kind="arrow" /></Link> : <p className="ih79-feedback">{nt('Rozmowa jest przygotowywana. Odśwież powiadomienia za chwilę.', 'Your conversation is being prepared. Refresh shortly.')}</p>}
+                <p className="ih79-notice-state"><WorkspaceIcon kind="check" />{nt('Wybrano Cię do realizacji', 'You have been selected')}</p><h3>{item.job?.title || nt('Zlecenie', 'Job')}</h3><p>{nt('Zleceniodawca wybrał Cię do realizacji. Ustal szczegóły w rozmowie.', 'The client selected you. Discuss the details in the conversation.')}</p>
+                {item.conversation?.id ? <Link className="ih79-button is-primary" to={'/chat/' + item.conversation.id}>{nt('Przejdź do rozmowy', 'Open conversation')}<WorkspaceIcon kind="arrow" /></Link> : <p className="ih79-feedback">{nt('Rozmowa nie jest jeszcze dostępna. Odśwież listę za chwilę, aby sprawdzić jej status.', 'The conversation is not available yet. Refresh the list shortly to check its status.')}</p>}
               </article>)}
               {rejectedDecisions.map(item => <article className="ih79-notice is-decision" key={'rejected-' + item.id}>
                 <p className="ih79-notice-state">{nt('Zgłoszenie niezaakceptowane', 'Application not accepted')}</p><h3>{item.job?.title || nt('Zlecenie', 'Job')}</h3><p>{nt('Zleceniodawca nie zdecydował się na współpracę przy tym projekcie.', 'The client did not select you for this project.')}</p><time dateTime={item.created_at}>{formatDate(item.created_at)}</time>
@@ -24640,7 +24641,9 @@ function AdminModeration() {
                     <h3>
                       {report.content_snapshot?.title ||
                         report.content_snapshot?.display_name ||
-                        (report.content_type === "private_message"
+                        (report.content_type === "platform_page"
+                          ? "Zgłoszona strona IdeaHire"
+                          : report.content_type === "private_message"
                           ? "Prywatna wiadomość"
                           : report.content_type === "work_delivery"
                           ? `Przekazanie pracy — wersja ${report.content_snapshot?.version || "—"}`
@@ -28456,6 +28459,11 @@ function LucynaRoute() {
   </React.Suspense></LucynaBoundary>;
 }
 
+function ContentReportRoute() {
+  const { user } = useAuth();
+  return <ContentReport user={user} />;
+}
+
 function ServiceRoute({ mode }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28498,6 +28506,7 @@ function Router() {
         
 
         <Routes>
+          <Route path="/report-content" element={<ContentReportRoute />} />
           <Route
             path="/"
             element={

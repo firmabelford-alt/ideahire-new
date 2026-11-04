@@ -1,3 +1,4 @@
+import { ArrowIcon } from './InterfaceIcons';
 import { notifyAction } from './SiteDialogs';
 /* P63 — two-step specialisations, responsive navigation and a true turquoise palette. */
 /* P61 — a precise trace background and the shared IdeaHire identity. */
@@ -12,6 +13,10 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import "./SitePolish.css";
 import "./HomeFinishing.css";
+import HomeEnding from "./HomeEnding";
+import { mixHomeFeed } from "./HomeFeed";
+import { withServiceThumbnails } from "./ListingThumbnails";
+import "./MobileFlow.css";
 import HomeMarketplace, { HomeProjectCard } from "./HomeMarketplace";
 import LucynaSymbol from "./LucynaSymbol";
 import HomeCategoryBrowser from "./SpecialisationExplorer";
@@ -562,7 +567,7 @@ function ih43Reduced(){
 }
 
 /* Każdy wariant jest alternatywą całego pliku App.jsx. Trasy, płatności i dalsza strona pozostają w części P40. */
-export function IdeaHireCinematicHero({jobs=[]}){
+export function IdeaHireCinematicHero({jobs=[],services=[]}){
   const site=useSitePreferences();
   const brandReady=useBrandReady();
   const english=site.language==="en",classic=site.template==="classic";
@@ -661,7 +666,7 @@ export function IdeaHireCinematicHero({jobs=[]}){
     aria-label={finished&&welcomed?(english?"IdeaHire — projects and professionals":"IdeaHire — zlecenia i wykonawcy"):labels.region} onPointerMove={move} onPointerLeave={leave}>
     <style>{IH43_STYLES}</style>
     {finished&&!welcomed&&<IH53Welcome paused={paused} onPause={togglePause} onDone={()=>setWelcomed(true)}/>}
-    {finished&&welcomed&&<IH53JobsFinale jobs={jobs} paused={paused} reduced={reduced} canReplay={!reduced&&!failed} onReplay={replayIntro} onPause={togglePause}/>}
+    {finished&&welcomed&&<IH53JobsFinale jobs={jobs} services={services} paused={paused} reduced={reduced} canReplay={!reduced&&!failed} onReplay={replayIntro} onPause={togglePause}/>}
     <canvas ref={canvasRef} className="ih43-canvas" aria-hidden="true"/>
     <div className="ih43-accessible">
       <h1>{copy.final.join(" ")}</h1>
@@ -2533,13 +2538,13 @@ function IH53Showcase({
           to: "/find-talent",
           children: [e ? "I have a project" : "Mam projekt", (0, IH57JSX.jsx)("span", {
             "aria-hidden": "true",
-            children: "\u2197"
+            children: (0, IH57JSX.jsx)(ArrowIcon, { direction: "up-right" })
           })]
         }), (0, IH57JSX.jsxs)(Link, {
           to: "/jobs",
           children: [e ? "I am looking for work" : "Szukam zlecenia", (0, IH57JSX.jsx)("span", {
             "aria-hidden": "true",
-            children: "\u2197"
+            children: (0, IH57JSX.jsx)(ArrowIcon, { direction: "up-right" })
           })]
         })]
       })]
@@ -2622,16 +2627,16 @@ function ih53RealJob(job){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89a
 function IH53JobAuthor({job,en,inactive=false}){
  const[failedUrl,setFailedUrl]=useState(null),name=String(job.author?.name||'').trim()||(en?'Client':'Zleceniodawca'),url=job.author?.avatar_url;
  const failed=failedUrl===url;
- const content=<><span className="ih53-author-avatar" aria-hidden="true">{url&&!failed?<img src={url} alt="" loading="lazy" referrerPolicy="no-referrer" onError={()=>setFailedUrl(url)}/>:name.charAt(0).toLocaleUpperCase(en?'en':'pl')}</span><span><strong>{name}</strong><small>{job.preview?(en?'Sample profile':'Przykładowy profil'):(en?'Project author':'Autor zlecenia')}</small></span></>;
+ const content=<><span className="ih53-author-avatar" aria-hidden="true">{url&&!failed?<img src={url} alt="" loading="lazy" referrerPolicy="no-referrer" onError={()=>setFailedUrl(url)}/>:name.charAt(0).toLocaleUpperCase(en?'en':'pl')}</span><span><strong>{name}</strong><small>{job.preview?(en?'Sample profile':'Przykładowy profil'):(job.showcase_kind==='service'?(en?'Freelancer':'Wykonawca'):(en?'Project author':'Autor zlecenia'))}</small></span></>;
  return job.user_id&&!job.preview&&!inactive?<Link className="ih53-project-author" to={'/profile/'+job.user_id}>{content}</Link>:<div className="ih53-project-author">{content}</div>;
 }
-function IH53JobsFinale({jobs=[],paused,reduced}){
- const en=useSitePreferences().language==='en',real=jobs.filter(ih53RealJob),list=real.length?real:jobs;
- function renderProject(job){
-  const sample=job.preview===true||!ih53RealJob(job),amount=Number(job.budget),category=getCategoryLabel(job.category),label=en?translateUiText(category):category;
-  const price=Number.isFinite(amount)&&amount>0?ih53Money(amount,en):(en?'To be agreed':'Do ustalenia');
-  return <HomeProjectCard job={job} en={en} sample={sample} category={label} price={price}
-    author={<IH53JobAuthor job={job} en={en}/>} client={supabase} />;
+function IH53JobsFinale({jobs=[],services=[],paused,reduced}){
+ const en=useSitePreferences().language==='en',real=jobs.filter(ih53RealJob),list=mixHomeFeed(real.length?real:jobs,services);
+ function renderProject(job,{duplicate=false}={}){
+  const isService=job.showcase_kind==='service',sample=job.preview===true||!ih53RealJob(job),amount=Number(isService?job.base_price:job.budget),category=getCategoryLabel(job.category),label=en?translateUiText(category):category;
+  const price=isService&&job.price_mode==='custom'?(en?'On request':'Wycena indywidualna'):Number.isFinite(amount)&&amount>0?ih53Money(amount,en):(en?'To be agreed':'Do ustalenia');
+  return <HomeProjectCard job={job} en={en} duplicate={duplicate} sample={sample} category={label} price={price}
+    author={<IH53JobAuthor job={job} en={en} inactive={duplicate}/>} client={supabase} />;
  }
  return <HomeMarketplace en={en} jobs={list} renderProject={renderProject} paused={paused} reduced={reduced}/>;
 }
@@ -2659,6 +2664,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
   const [hasNotifications, setHasNotifications] = useState(false);
   const [recentJobs, setRecentJobs] = useState(fallbackJobs);
+  const [recentServices, setRecentServices] = useState([]);
   const [activeJobIndex, setActiveJobIndex] = useState(0);
   const navigate = useNavigate();
 
@@ -2749,7 +2755,19 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
       }
     }
 
+    let serviceRequest = 0;
+    async function loadRecentServices() {
+      const ticket = ++serviceRequest;
+      try {
+        const { data, error } = await supabase.rpc('list_freelancer_services', { p_category: null, p_search: null });
+        if (error || !Array.isArray(data) || !mounted || ticket !== serviceRequest) return;
+        const rows = await withServiceThumbnails(supabase, data.slice(0, 8));
+        if (!mounted || ticket !== serviceRequest) return;
+        setRecentServices(rows.map(row => ({ ...row, user_id: row.freelancer_id, description: row.summary, author: { name: row.owner_name, avatar_url: row.owner_avatar_url } })));
+      } catch { /* The project reel remains available if services cannot be read. */ }
+    }
     loadRecentJobs();
+    loadRecentServices();
 
     const channel = supabase
       .channel("home-recent-jobs")
@@ -2764,13 +2782,16 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
           loadRecentJobs();
         }
       )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'freelancer_services' }, loadRecentServices)
       .subscribe();
+    const refreshServices = window.setInterval(loadRecentServices, 60000);
 
     return () => {
       mounted = false;
+      window.clearInterval(refreshServices);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (recentJobs.length <= 1) return undefined;
@@ -3083,7 +3104,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
       </div>
 
       <main>
-        <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} userKey={session?.user?.id || "guest"} />
+        <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} services={recentServices} userKey={session?.user?.id || "guest"} />
 
         <HomeDemoReviews />
 
@@ -3138,23 +3159,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
         </section>
 
-        <section className="final-cta home-reveal">
-          <span className="section-label">IdeaHire</span>
-
-          <h2 className="final-cta-title">
-            <span>{ih53English ? "Your next project" : "Twój następny projekt"}</span>
-            <span>{ih53English ? "starts here." : "zaczyna się tutaj."}</span>
-          </h2>
-
-          <Link
-            className="btn btn-light btn-large"
-            to={session ? "/account" : "/register"}
-          >
-            {session
-              ? "Przejdź do konta "
-              : "Zacznij teraz "}
-          </Link>
-        </section>
+        <HomeEnding en={ih53English} />
       </main>
 
       <footer className="footer home-reveal">
@@ -3172,9 +3177,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
           <Link to="/regulamin">Regulamin</Link>
           <Link to="/polityka-prywatnosci">Polityka prywatności</Link>
           <Link to="/polityka-cookies">Polityka cookies</Link>
-          <a href="mailto:ideahireprywatnosc@gmail.com?subject=Zg%C5%82oszenie%20nielegalnej%20tre%C5%9Bci%20w%20IdeaHire">
-            Zgłoś nielegalną treść
-          </a>
+          <Link to="/report-content">Zgłoś nielegalną treść</Link>
         </div>
 
         <span>© 2026 IdeaHire</span>

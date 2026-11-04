@@ -1,3 +1,4 @@
+import { ArrowIcon } from './InterfaceIcons';
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { translateUiText, useSitePreferences } from "./Preferences";
@@ -344,7 +345,7 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
                     <p className="ih63-field-intro">{en ? EN_INTROS[group.value] : details[group.value]?.summary}</p>
                   </div>
                   {services(all.filter(item => item.group.value === group.value))}
-                  <div className="ih66-panel-actions"><Link className="ih63-field-all" to={categoryUrl(group.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<span aria-hidden="true">↗</span></Link>
+                  <div className="ih66-panel-actions"><Link className="ih63-field-all" to={categoryUrl(group.value)}>{en ? "All projects in this field" : "Wszystkie zlecenia w tej dziedzinie"}<ArrowIcon direction="up-right"/></Link>
                     <button className="ih63-back" type="button" onClick={backToFields}>{en ? "Collapse field" : "Zwiń kategorię"}<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 12 5-5 5 5"/></svg></button></div>
                 </div></div>
               </div>
@@ -356,8 +357,8 @@ export default function SpecialisationExplorer({ groups = [], details = {} }) {
     </div>
 
     <footer className="ih63-explorer-footer">
-      <Link to="/jobs">{en ? "All projects" : "Wszystkie zlecenia"}<span aria-hidden="true">↗</span></Link>
-      <Link to="/freelancers">{en ? "Browse professionals" : "Przeglądaj wykonawców"}<span aria-hidden="true">↗</span></Link>
+      <Link to="/jobs">{en ? "All projects" : "Wszystkie zlecenia"}<ArrowIcon direction="up-right"/></Link>
+      <Link to="/freelancers">{en ? "Browse professionals" : "Przeglądaj wykonawców"}<ArrowIcon direction="up-right"/></Link>
     </footer>
   </section>;
 }

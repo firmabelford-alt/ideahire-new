@@ -1,3 +1,4 @@
+import { ArrowIcon } from './InterfaceIcons';
 import React from 'react';
 import { BriefcaseBusiness } from 'lucide-react';
 import { TERMS_MARKER } from './AgreementWorkflow';
@@ -38,7 +39,7 @@ export function InquiryMessageCard({ text, renderText, onTerms, english = false,
       {field.label && <strong>{field.label}</strong>}<div>{renderText(firstProposalRole === 'client' && field.text === 'To niewiążące zapytanie. Oczekuję na ofertę wykonawcy z zakresem, terminem i ceną.'
         ? (english ? 'Discuss the details in chat, then confirm the final scope, price and deadline in Terms.' : 'Szczegóły omówcie w rozmowie. Zakres, cenę i termin potwierdzicie w ustaleniach.') : field.text)}</div>
     </div>)}</div>
-    {onTerms && <button type="button" className="ih-inquiry-card-action" onClick={onTerms}>{english ? 'Open project terms' : 'Przejdź do ustaleń'}<span aria-hidden="true">→</span></button>}
+    {onTerms && <button type="button" className="ih-inquiry-card-action" onClick={onTerms}>{english ? 'Open project terms' : 'Przejdź do ustaleń'}<ArrowIcon/></button>}
   </section>;
 }
 
@@ -48,6 +49,6 @@ export function TermsDecisionMessage({ decision, own, onTerms, english = false }
     <span>{english ? `Terms · version ${decision.version}` : `Ustalenia · wersja ${decision.version}`}</span>
     <h3>{closed ? own ? (english ? 'You declined this collaboration' : 'Zrezygnowałeś ze współpracy') : (english ? 'The other person declined this collaboration' : 'Druga strona zrezygnowała ze współpracy') : own ? (english ? 'You requested changes' : 'Poprosiłeś o zmianę ustaleń') : (english ? 'The other person requested changes' : 'Druga strona poprosiła o zmiany')}</h3>
     <p>{decision.reason}</p>
-    <button type="button" onClick={onTerms}>{english ? 'View terms' : 'Zobacz ustalenia'}<span aria-hidden="true">→</span></button>
+    <button type="button" onClick={onTerms}>{english ? 'View terms' : 'Zobacz ustalenia'}<ArrowIcon/></button>
   </section>;
 }
