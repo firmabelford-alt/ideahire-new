@@ -298,7 +298,7 @@ function CatalogFilm({ scene, en }) {
   </>;
 }
 
-export function MarketCatalogHero({ active, eyebrow, title, description, actions, className = '' }) {
+export function MarketCatalogHero({ active, eyebrow, title, description, actions, className = '', navigation = true }) {
   const en = useSitePreferences().language === 'en';
   const navigate = useNavigate(), location = useLocation();
   const timer = useRef(null);
@@ -319,12 +319,12 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
   return <section data-catalog-frame="20261029" className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
     data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
     <CatalogFilm key={scene.key} scene={scene} en={en} />
-    <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>
+    {navigation && <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>}
     <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
-    <nav className="ih-cinema-arrows" aria-label={en ? 'Switch catalog' : 'Zmień katalog'}>
+    {navigation && <nav className="ih-cinema-arrows" aria-label={en ? 'Switch catalog' : 'Zmień katalog'}>
       <Link to={previous.to} aria-label={(en ? 'Previous: ' : 'Poprzednia: ') + (en ? previous.en : previous.pl)} aria-disabled={leaving ? true : undefined} onClick={event => go(previous, -1, event)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg><span>{en ? previous.en : previous.pl}</span></Link>
       <Link to={next.to} aria-label={(en ? 'Next: ' : 'Następna: ') + (en ? next.en : next.pl)} aria-disabled={leaving ? true : undefined} onClick={event => go(next, 1, event)}><span>{en ? next.en : next.pl}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link>
-    </nav>
+    </nav>}
   </section>;
 }
 
@@ -351,17 +351,21 @@ export function MarketHeader({ eyebrow, title, description, children, count, sta
   return <div><SubpageHeading {...heading} actions={children} variant="editor" /></div>;
 }
 
-export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
+export function MarketResultCount({ count, noun = 'jobs', status, className = 'ih73-result-count' }) {
   const en = useSitePreferences().language === 'en';
   const value = Math.max(0, Number(count) || 0);
   const words = { jobs: ['zlecenie', 'zlecenia', 'zleceń'], services: ['usługa', 'usługi', 'usług'], profiles: ['profil', 'profile', 'profili'] }[noun] || ['wynik', 'wyniki', 'wyników'];
   const polish = value === 1 ? words[0] : value % 10 >= 2 && value % 10 <= 4 && (value % 100 < 12 || value % 100 > 14) ? words[1] : words[2];
   const english = { jobs: 'job', services: 'service', profiles: 'profile' }[noun] || 'result';
   const statusCopy = en ? ({ 'Szukamy usług…': 'Loading services…', 'Szukamy freelancerów…': 'Loading freelancers…', 'Szukamy zleceń…': 'Loading jobs…', 'Wyniki niedostępne': 'Results unavailable' }[status] || status) : status;
+  return <p className={className} role="status" aria-live="polite" aria-atomic="true">{statusCopy || <><strong>{new Intl.NumberFormat(en ? 'en-GB' : 'pl-PL').format(value)}</strong><span>{en ? english + (value === 1 ? '' : 's') : polish}</span></>}</p>;
+}
+
+export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
   return <div className="ih73-catalog-header">
     <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} eyebrow={eyebrow} title={title} description={description} actions={actions} />
     <div className="ih73-catalog-context">
-      <p className="ih73-result-count" role="status" aria-live="polite" aria-atomic="true">{statusCopy || <><strong>{new Intl.NumberFormat(en ? 'en-GB' : 'pl-PL').format(value)}</strong><span>{en ? english + (value === 1 ? '' : 's') : polish}</span></>}</p>
+      <MarketResultCount count={count} noun={noun} status={status} />
     </div>
     {children}
   </div>;

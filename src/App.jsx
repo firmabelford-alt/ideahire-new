@@ -3173,7 +3173,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
         </section>
       </main>
 
-      <footer className="footer home-reveal">
+      <footer className="footer home-reveal ih-home-footer">
         <div>
           <BrandLogo className="logo logo-clean" />
 
@@ -3191,9 +3191,8 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
           <Link to="/report-content">Zgłoś nielegalną treść</Link>
         </div>
 
-        <span>© 2026 IdeaHire</span>
+        <HomeEnding en={ih53English} />
       </footer>
-      <HomeEnding en={ih53English} />
     </div>
   );
 }

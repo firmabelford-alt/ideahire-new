@@ -15,11 +15,13 @@
   #root .ih88-market .ih-feed-catalog-links { display:flex!important; flex:none!important; gap:18px!important; margin:0!important; padding:0!important; border:0!important; background:none!important; }
   #root .ih88-market .ih-feed-catalog-links > a { display:inline-flex!important; align-items:center!important; gap:8px!important; min-height:44px!important; color:var(--v-accent)!important; font:600 12px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
   #root .ih88-market .ih-showcase-controls { min-height:48px!important; }
-  #root .ih-home-ending { display:block!important; width:calc(100% - clamp(40px,8vw,128px))!important; max-width:1280px!important; box-sizing:border-box!important; margin:0 auto!important; padding:56px 0 76px!important; border:0!important; border-radius:0!important; background:transparent!important; color:var(--v-ink)!important; text-align:left!important; }
-  #root .ih-home-ending-kicker { margin:0 0 22px!important; color:var(--v-muted)!important; font:600 12px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.08em!important; text-transform:uppercase!important; }
-  #root .ih-home-ending h2 { max-width:none!important; margin:0!important; color:var(--v-ink)!important; font:600 clamp(38px,6vw,80px)/1.12 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; }
-  #root .ih-home-ending h2 > span { display:block!important; color:inherit!important; }
-  #root .ih-home-ending-note { max-width:54ch!important; margin:26px 0 0!important; color:var(--v-muted)!important; font:400 14px/1.8 Inter,system-ui,sans-serif!important; }
+  #root .ih53-home > .ih-home-footer { display:grid!important; grid-template-columns:minmax(180px,.7fr) minmax(0,2.3fr)!important; align-items:start!important; gap:20px 32px!important; }
+  #root .ih-home-footer > .footer-links { justify-content:flex-start!important; min-width:0!important; }
+  #root .ih-home-footer > .ih-home-footer-end { grid-column:1/-1!important; display:flex!important; flex-wrap:wrap!important; align-items:baseline!important; justify-content:space-between!important; gap:8px 24px!important; min-width:0!important; padding:16px 0 0!important; border-top:1px solid var(--v-line)!important; color:var(--v-muted)!important; }
+  #root .ih-home-footer-end > :is(p,small) { margin:0!important; color:inherit!important; font:400 12px/1.65 Inter,system-ui,sans-serif!important; }
+  @media (max-width:850px) {
+    #root .ih53-home > .ih-home-footer { grid-template-columns:minmax(0,1fr)!important; gap:18px!important; }
+  }
   body #root .notifications-page { width:min(1180px,100%)!important; min-width:0!important; margin-inline:auto!important; }
   body #root .notifications-page .ih79-notifications-layout { display:grid!important; grid-template-columns:210px minmax(0,1fr)!important; align-items:start!important; gap:28px!important; }
   body #root .notifications-page .ih79-notification-filters { display:flex!important; flex-direction:column!important; gap:6px!important; min-width:0!important; overflow:visible!important; padding:6px!important; margin:0!important; border:1px solid var(--v-line)!important; border-radius:14px!important; background:var(--v-surface)!important; }
@@ -50,10 +52,7 @@
     #root .ih88-market .ih-feed-catalog-links { gap:18px!important; }
     #root .ih88-market .ih88-live-heading h2 { max-width:26ch!important; font-size:18px!important; }
     #root .ih88-market .ih-showcase-swipe-hint { max-width:none!important; font-size:10px!important; }
-    #root .ih-home-ending { width:calc(100% - 40px)!important; padding:38px 0 max(48px,env(safe-area-inset-bottom))!important; }
-    #root .ih-home-ending-kicker { margin-bottom:18px!important; font-size:11px!important; }
-    #root .ih-home-ending h2 { font-size:clamp(30px,8.8vw,46px)!important; line-height:1.15!important; }
-    #root .ih-home-ending-note { max-width:30ch!important; margin-top:20px!important; font-size:13px!important; }
+    #root .ih-home-footer > .ih-home-footer-end { flex-direction:column!important; align-items:flex-start!important; padding-inline-end:48px!important; }
     body #root .notifications-page .ih79-notice { padding:18px!important; gap:12px!important; }
     body #root .notifications-page .ih79-notice > h3 { font-size:18px!important; }
     body #root .notifications-page .ih79-notice > p { font-size:13px!important; }

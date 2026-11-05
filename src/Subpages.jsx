@@ -96,7 +96,7 @@ export function SubpageLoading({ label, className = '', screen = false, pending 
 export function SubpageHistoryControls({ to, label }) {
   const en = useSitePreferences().language === 'en';
   return <Link className="ih-account-back" to={to || adminReturnTarget()}>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="19" height="19" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg>
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" aria-hidden="true" focusable="false"><path d="m12 5-5 5 5 5" /></svg>
     <span>{label || (en ? 'Account centre' : 'Centrum konta')}</span>
   </Link>;
 }

@@ -7,11 +7,19 @@ function ImageIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 5-5 4 4 4-6 5 7"/></svg>;
 }
 
-export function ListingThumbnail({ path, ownerId, kind, title = '', className = '', client = supabase, fallback = null }) {
+export function ListingThumbnail({ path, ownerId, kind, title = '', className = '', client = supabase, fallback = null, expandable = false, en = false }) {
   const url = thumbnailUrl(client, path, ownerId, kind);
   const [failed, setFailed] = useState('');
+  const [fullImage, setFullImage] = useState('');
+  const imageId = useId();
   if (!url || failed === url) return fallback;
-  return <figure className={`ih-listing-thumbnail ${className}`.trim()}><img src={url} alt={title} loading="lazy" decoding="async" onError={() => setFailed(url)} /></figure>;
+  const full = expandable && fullImage === url;
+  return <figure className={`ih-listing-thumbnail ${className}`.trim()} data-full={full || undefined}>
+    <img id={expandable ? imageId : undefined} src={url} alt={title} loading={expandable ? 'eager' : 'lazy'} decoding="async" onError={() => setFailed(url)} />
+    {expandable && <button type="button" className="ih-thumbnail-view" aria-expanded={full} aria-controls={imageId} onClick={() => setFullImage(full ? '' : url)}>
+      {full ? (en ? 'Show crop' : 'Pokaż kadr') : (en ? 'Full image' : 'Całe zdjęcie')}
+    </button>}
+  </figure>;
 }
 
 export function ListingThumbnailPreview({ value, ...props }) {
@@ -54,7 +62,7 @@ export function ListingThumbnailPicker({ value, onChange, onBusyChange, disabled
   const brokenPreview = <span className="ih-thumbnail-unavailable">{en ? 'Preview unavailable. Choose another image.' : 'Podgląd niedostępny. Wybierz inne zdjęcie.'}</span>;
   return <fieldset className="ih-thumbnail-editor is-wide" disabled={disabled || busy} aria-describedby={`${id}-hint`}>
     <legend>{en ? 'Thumbnail' : 'Miniaturka'} <span>{en ? 'Optional' : 'Opcjonalnie'}</span></legend>
-    <p id={`${id}-hint`} className="ih-thumbnail-intro">{en ? 'Visible on the listing card. We show the whole image.' : 'Widoczna na karcie ogłoszenia. Pokażemy całe zdjęcie.'}</p>
+    <p id={`${id}-hint`} className="ih-thumbnail-intro">{en ? 'The image fills the listing frame. Its edges may be cropped.' : 'Zdjęcie wypełni cały kadr ogłoszenia. Brzegi mogą zostać przycięte.'}</p>
     <div className="ih-thumbnail-editor-body">
       <div className="ih-thumbnail-preview">
         {value ? <ListingThumbnailPreview value={value} ownerId={ownerId} kind={kind} client={client} title={en ? 'Your thumbnail preview' : 'Podgląd Twojej miniaturki'} fallback={brokenPreview} />

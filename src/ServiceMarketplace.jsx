@@ -1,5 +1,6 @@
 import { FormSelect, AutoTextarea } from "./FormControls";
 import "./ServiceWorkspace.css";
+import "./ServiceFinder.css";
 import { ListingThumbnail, ListingThumbnailPicker, ListingThumbnailPreview } from "./ListingThumbnail";
 import { saveListingThumbnail, removeUnlinkedThumbnail, withServiceThumbnails, ThumbnailError, thumbnailErrorMessage } from "./ListingThumbnails";
 import { OwnedListingCard, OwnedListingsEmpty } from "./OwnedListings";
@@ -20,7 +21,7 @@ import {
 } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs, SubpageLoading } from "./Subpages";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader, MarketCatalogHero, MarketResultCount } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -348,7 +349,7 @@ function ServiceAvatar({ service, size = "normal" }) {
   );
 }
 
-function ServiceCard({ service }) {
+function ServiceCard({ service, client }) {
   const capacity = serviceCapacity(service);
   const isCustom = service.price_mode === 'custom';
   const en = useSitePreferences().language === 'en';
@@ -363,7 +364,7 @@ function ServiceCard({ service }) {
       <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
       <span className={'ih86-offer-availability ' + capacity.className}>{en ? translateUiText(capacity.label) : capacity.label}</span>
     </header>
-    <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} />
+    <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={client} />
     <div className="ih78-offer-copy">
       <h2><Link to={serviceUrl}>{service.title}</Link></h2>
       {service.summary && <p>{service.summary}</p>}
@@ -400,6 +401,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Wszystkie");
   const loadRequest = useRef(0);
+  const searchId = useId();
 
   useEffect(() => {
     const requestedCategory = new URLSearchParams(location.search).get("category");
@@ -456,21 +458,41 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page ih78-services-page">
-      <MarketCatalogHeader count={services.length} noun="services" status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined}
-        eyebrow={english ? "Offers from freelancers" : "Oferty wykonawców"}
-        title={english ? "Services" : "Usługi"}
-        description={english ? "Compare the scope, price and delivery time. Choose a service for your project." : "Porównaj zakres, cenę i termin. Wybierz usługę do swojego projektu."}
-        actions={<><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new" aria-label={english ? "Add a service" : "Dodaj usługę"}><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></>} />
-      <MarketFilters search={search} onSearch={setSearch} categories={SERVICE_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} kind="usług">
-      <section className="ih78-service-results" aria-label={english ? "Services" : "Usługi"} aria-busy={loading}>
-        {hasFilters && <header className="ih78-results-heading"><button type="button" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}><MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}</button></header>}
+      <div className="ih-service-finder" data-no-translate="true">
+        <SubpageCatalogTabs active="services" />
+        <MarketCatalogHero active="services" navigation={false} className="ih-service-finder-hero"
+          title={english ? "Services" : "Usługi"}
+          description={english ? "Compare the scope, price and delivery time. Find the right service for your project." : "Porównaj zakres, cenę i termin. Znajdź usługę do swojego projektu."}
+          actions={<><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new"><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></>} />
+        <div className="ih-service-finder-tools">
+          <div className="ih-service-finder-search">
+            <label htmlFor={searchId}>{english ? "Search services" : "Szukaj usługi"}</label>
+            <div className="ih-service-search-input"><MarketIcon kind="search" />
+              <input id={searchId} type="search" value={search} maxLength={160} aria-controls="ih-service-results" onChange={event => setSearch(event.target.value)}
+                placeholder={english ? "E.g. logo or website" : "Np. logo lub strona WWW"} />
+            </div>
+          </div>
+          <FormSelect className="ih-service-finder-field" label={english ? "Field" : "Dziedzina"} value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
+            <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
+            {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
+          </FormSelect>
+        </div>
+        <div className="ih-service-finder-summary">
+          <MarketResultCount count={services.length} noun="services" className="ih-service-finder-count"
+            status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
+          {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}>
+            <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
+          </button>}
+        </div>
+      </div>
+      <section className="ih78-service-results ih-services-list" id="ih-service-results" aria-label={english ? "Service results" : "Wyniki wyszukiwania usług"} aria-busy={loading}>
         {message ? (
           <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
         ) : loading ? (
           <SubpageLoading label={english ? "Finding services…" : "Szukamy usług…"} />
         ) : services.length > 0 ? (
           <div className="ih78-service-grid">
-            {services.map(service => <ServiceCard key={service.id} service={service} />)}
+            {services.map(service => <ServiceCard key={service.id} service={service} client={supabase} />)}
           </div>
         ) : (
           <div className="ih78-services-empty">
@@ -478,7 +500,6 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
           </div>
         )}
       </section>
-      </MarketFilters>
     </ServiceShell>
   );
 }
@@ -1156,6 +1177,7 @@ function ServiceInquiryDialog({ service, user, supabase, navigate, onClose }) {
 }
 
 function ServiceDetails({ supabase, user, navigate, Navbar }) {
+  const english = useSitePreferences().language === "en";
   const { id } = useParams();
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1233,7 +1255,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           <span>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</span>
         </div>
         <h1>{service.title}</h1>
-        <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={supabase} />
+        <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={supabase} expandable en={english} />
         <p>{service.summary}</p>
       </header>
 
