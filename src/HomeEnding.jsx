@@ -2,6 +2,13 @@ import { useEffect, useId, useRef, useState } from "react";
 import { BrandMark } from "./Brand";
 import "./HomeEnding.css";
 
+function FinaleLetters({ side, children }) {
+  return <span className={`ih-finale-letters ih-finale-letters-${side}`}>
+    {[3, 2, 1].map(depth => <span key={depth} className="ih-finale-depth" style={{ "--ih-depth": depth }}>{children}</span>)}
+    <span className="ih-finale-face">{children}</span>
+  </span>;
+}
+
 export default function HomeEnding({ en = false }) {
   const titleId = useId();
   const end = useRef(null);
@@ -22,7 +29,7 @@ export default function HomeEnding({ en = false }) {
 
   useEffect(() => {
     if (!motion || run || !end.current) return;
-    // The marker is after the frame and credits, inside the footer's bottom padding.
+    // The marker sits after the credits, so the cut starts at the end of the page.
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;
       observer.disconnect();
@@ -43,14 +50,14 @@ export default function HomeEnding({ en = false }) {
           {run ? (en ? "Replay" : "Powtórz cięcie") : (en ? "Open the finale" : "Otwórz finał")}
         </button>}
       </div>
-      <div className="ih-finale-stage" key={run} data-playing={motion && run > 0 ? "true" : undefined}>
+      <div className="ih-finale-stage" key={run} data-motion={motion ? "true" : undefined} data-playing={motion && run > 0 ? "true" : undefined}>
         <div className="ih-finale-message">
           <h2 id={titleId}><span>{en ? "Let’s make" : "Zróbmy coś"}</span>{" "}<em>{en ? "it happen." : "razem."}</em></h2>
           <BrandMark className="ih-finale-mark" />
         </div>
-        {motion && <div className="ih-finale-shutters" aria-hidden="true">
-          <div className="ih-finale-shutter ih-finale-shutter-left"><div className="ih-finale-face"><span>IdeaHire</span></div></div>
-          <div className="ih-finale-shutter ih-finale-shutter-right"><div className="ih-finale-face"><span>IdeaHire</span></div></div>
+        {motion && <div className="ih-finale-wordmark" aria-hidden="true">
+          <FinaleLetters side="left">Idea</FinaleLetters>
+          <FinaleLetters side="right">Hire</FinaleLetters>
         </div>}
       </div>
       <small className="ih-finale-credit">© 2026 IdeaHire</small>

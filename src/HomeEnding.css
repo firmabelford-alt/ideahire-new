@@ -1,17 +1,17 @@
-/* A final film frame after the footer links. The two faces carry one cut wordmark. */
+/* Keep the film ending on the same surface and baseline as the footer. */
 @layer ideahirePolish {
+  #root .ih53-home > .footer.ih-home-footer {
+    background-image: radial-gradient(ellipse 50% 96% at 50% 100%, color-mix(in srgb, var(--v-accent) 10%, transparent), transparent 100%) !important;
+  }
   #root .ih-home-footer > .ih-home-finale {
-    --ih-finale-paper: color-mix(in srgb, var(--v-soft) 55%, var(--v-surface));
-    --ih-finale-frame: color-mix(in srgb, var(--v-ink) 19%, var(--v-line));
     position: relative;
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
     min-width: 0;
-    margin: 6px 0 0;
-    border-top: 1px solid var(--v-line);
-    padding: 10px 0 0;
+    margin: clamp(8px, 1.8vw, 26px) 0 0;
+    border: 0;
+    padding: 0;
     color: var(--v-ink);
   }
   #root .ih-finale-bar {
@@ -23,9 +23,9 @@
     gap: 0 14px;
   }
   #root .ih-finale-caption {
-    color: var(--v-muted);
+    color: var(--v-muted) !important;
     font: 600 10px/1.5 ui-monospace, monospace;
-    letter-spacing: .14em;
+    letter-spacing: .13em;
   }
   #root .ih-finale-replay {
     display: inline-flex;
@@ -33,46 +33,43 @@
     gap: 6px;
     min-height: 44px;
     margin: 0;
-    padding: 0 8px;
-    border: 0;
+    padding: 0 6px;
+    border: 0 !important;
     border-radius: 5px;
-    background: transparent;
-    color: var(--v-accent);
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--v-accent) !important;
     font: 600 12px/1.4 Inter, system-ui, sans-serif;
     cursor: pointer;
   }
   #root .ih-finale-replay > svg { width: 17px; height: 17px; flex: none; }
-  #root .ih-finale-replay:hover { background: var(--v-soft); }
+  #root .ih-finale-replay:hover { text-decoration: underline; text-underline-offset: 3px; }
   #root .ih-finale-replay:focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: -2px !important; }
 
   #root .ih-finale-stage {
     position: relative;
     isolation: isolate;
     overflow: hidden;
+    overflow: clip;
     display: grid;
-    box-sizing: border-box;
-    min-height: clamp(224px, 27vw, 322px);
-    border: 1px solid var(--ih-finale-frame);
-    border-radius: 14px;
-    background:
-      radial-gradient(ellipse at 86% 52%, color-mix(in srgb, var(--v-accent) 17%, transparent), transparent 63%),
-      var(--ih-finale-paper);
+    min-height: clamp(136px, 17vw, 220px);
+    min-width: 0;
   }
   #root .ih-finale-message {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: clamp(14px, 5vw, 72px);
+    gap: clamp(14px, 5vw, 60px);
     align-items: center;
     min-width: 0;
-    padding: clamp(20px, 5vw, 64px);
+    padding: 10px 0 16px;
   }
   #root .ih-finale-message h2 {
     margin: 0 !important;
     padding: 0 !important;
     max-width: none !important;
     color: var(--v-ink) !important;
-    font: 750 clamp(42px, 6.8vw, 96px)/1.05 Inter, system-ui, sans-serif !important;
-    letter-spacing: -.064em !important;
+    font: 750 clamp(39px, 6.2vw, 87px)/1.07 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.062em !important;
     text-align: start !important;
     text-wrap: balance;
   }
@@ -83,99 +80,97 @@
     letter-spacing: -.052em;
   }
   #root .ih-finale-mark {
-    width: clamp(55px, 12vw, 142px);
+    display: block;
+    width: clamp(48px, 10vw, 116px);
     height: auto;
     color: var(--v-accent);
   }
   #root .ih-finale-credit {
-    margin: 3px 0 0;
+    margin: 4px 0 0;
     color: var(--v-muted);
     font: 400 12px/1.6 Inter, system-ui, sans-serif;
   }
   #root .ih-finale-end { position: absolute; inset: auto auto 0 0; width: 2px; height: 2px; pointer-events: none; }
 
-  #root .ih-finale-shutters {
+  /* Each half is just glyphs. Offset copies behind the face give the turn depth. */
+  #root .ih-finale-wordmark {
+    --ih-depth-step: clamp(1.2px, .36vw, 4px);
     position: absolute;
     inset: 0;
-    z-index: 1;
-    perspective: 880px;
+    display: flex;
+    align-items: center;
+    perspective: 780px;
     pointer-events: none;
-  }
-  #root .ih-finale-shutter {
-    position: absolute;
-    inset-block: 0;
-    width: 50%;
-    transform-style: preserve-3d;
-  }
-  #root .ih-finale-shutter-left { --ih-hinge: -103deg; left: 0; transform-origin: left center; }
-  #root .ih-finale-shutter-right { --ih-hinge: 103deg; right: 0; transform-origin: right center; }
-  #root .ih-finale-face {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    background: linear-gradient(148deg, var(--v-surface), var(--v-soft));
-  }
-  #root .ih-finale-shutter-right .ih-finale-face {
-    background: linear-gradient(32deg, var(--v-soft), var(--v-surface));
-    border-inline-start: 1px solid var(--ih-finale-frame);
-  }
-  #root .ih-finale-face > span {
-    position: absolute;
-    inset: 0 auto 0 0;
-    display: grid;
-    place-items: center;
-    width: 200%;
+    z-index: 1;
     color: var(--v-ink);
-    font: 800 clamp(41px, 12.5vw, 162px)/1 "IdeaHire Wordmark", Inter, system-ui, sans-serif;
-    letter-spacing: -.075em;
+    font: 800 clamp(46px, 11.4vw, 144px)/1.1 "IdeaHire Wordmark", Inter, system-ui, sans-serif;
+    letter-spacing: -.071em;
     white-space: nowrap;
   }
-  #root .ih-finale-shutter-right .ih-finale-face > span { left: -100%; }
-  #root .ih-finale-shutter::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    width: 7px;
-    background: color-mix(in srgb, var(--v-ink) 44%, var(--v-soft));
+  #root .ih-finale-letters {
+    display: grid;
+    flex: none;
+    transform-style: preserve-3d;
   }
-  #root .ih-finale-shutter-left::after { left: 100%; transform: rotateY(90deg); transform-origin: left center; }
-  #root .ih-finale-shutter-right::after { right: 100%; transform: rotateY(-90deg); transform-origin: right center; }
-  #root .ih-finale-stage[data-playing="true"] .ih-finale-shutter {
-    animation: ih-finale-open 890ms cubic-bezier(.53,.02,.14,1) both;
+  #root .ih-finale-letters-left {
+    --ih-hinge: -80deg;
+    --ih-splice-x: -3px;
+    --ih-splice-y: 2px;
+    --ih-slide: -27%;
+    transform-origin: left center;
   }
-  #root .ih-finale-stage[data-playing="true"] .ih-finale-shutter-right { animation-delay: 64ms; }
-  #root .ih-finale-stage[data-playing="true"] .ih-finale-shutter-right .ih-finale-face > span {
-    animation: ih-finale-splice 890ms step-end both;
+  #root .ih-finale-letters-right {
+    --ih-hinge: 80deg;
+    --ih-splice-x: 3px;
+    --ih-splice-y: -7px;
+    --ih-slide: 28%;
+    transform-origin: right center;
   }
+  #root .ih-finale-letters > span {
+    grid-area: 1 / 1;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  #root .ih-finale-depth {
+    color: color-mix(in srgb, var(--v-accent) 64%, var(--v-ink));
+    transform: translateZ(calc(-1 * var(--ih-depth) * var(--ih-depth-step)));
+  }
+  #root .ih-finale-stage[data-motion="true"]:not([data-playing]) .ih-finale-message { opacity: 0; }
+  #root .ih-finale-stage[data-playing="true"] .ih-finale-letters {
+    animation: ih-finale-turn 950ms cubic-bezier(.38,.02,.21,1) both;
+  }
+  #root .ih-finale-stage[data-playing="true"] .ih-finale-letters-right { animation-delay: 38ms; }
   #root .ih-finale-stage[data-playing="true"] .ih-finale-message {
-    animation: ih-finale-title 950ms cubic-bezier(.19,1,.32,1) both;
+    animation: ih-finale-title 1000ms cubic-bezier(.2,.75,.25,1) both;
   }
-  @keyframes ih-finale-open {
-    0%, 11% { transform: rotateY(0); opacity: 1; }
-    83% { opacity: 1; }
-    100% { transform: rotateY(var(--ih-hinge)); opacity: 0; visibility: hidden; }
+  #root .ih-finale-stage[data-playing="true"] .ih-finale-mark {
+    animation: ih-finale-mark-arrive 1000ms cubic-bezier(.2,.75,.25,1) both;
+  }
+  @keyframes ih-finale-turn {
+    0% { transform: translate3d(0, 0, 0) rotateY(0); opacity: 1; animation-timing-function: step-end; }
+    10% { transform: translate3d(var(--ih-splice-x), var(--ih-splice-y), 0) rotateY(0); opacity: 1; }
+    67% { transform: translate3d(var(--ih-slide), 0, 5px) rotateY(var(--ih-hinge)); opacity: 1; }
+    100% { transform: translate3d(var(--ih-slide), 0, -24px) rotateY(var(--ih-hinge)); opacity: 0; }
   }
   @keyframes ih-finale-title {
-    0%, 26% { opacity: 0; transform: translateY(9px); }
+    0%, 42% { opacity: 0; transform: translateY(7px); }
     100% { opacity: 1; transform: translateY(0); }
   }
-  @keyframes ih-finale-splice {
-    0%, 24% { transform: none; }
-    11% { transform: translateY(-7px); }
+  @keyframes ih-finale-mark-arrive {
+    0%, 42% { transform: perspective(440px) rotateY(-48deg); }
+    100% { transform: perspective(440px) rotateY(0); }
   }
   @media (max-width: 680px) {
-    #root .ih-finale-stage { min-height: 194px; border-radius: 12px; }
-    #root .ih-finale-message { gap: 12px; padding: 20px; }
-    #root .ih-finale-message h2 { font-size: clamp(31px, 9vw, 52px) !important; }
+    #root .ih-finale-message { gap: 14px; padding-block: 8px 12px; }
+    #root .ih-finale-message h2 { font-size: clamp(30px, 9vw, 52px) !important; }
     #root .ih-finale-message h2 > span,
     #root .ih-finale-message h2 > em { display: block; }
-    #root .ih-finale-mark { width: clamp(45px, 13vw, 72px); }
-    #root .ih-finale-shutters { perspective: 560px; }
+    #root .ih-finale-mark { width: clamp(44px, 12.5vw, 70px); }
+    #root .ih-finale-wordmark { perspective: 510px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    #root .ih-finale-shutters, #root .ih-finale-replay { display: none; }
-    #root .ih-finale-stage[data-playing="true"] .ih-finale-message { animation: none; }
+    #root .ih-finale-wordmark, #root .ih-finale-replay { display: none !important; }
+    #root .ih-finale-stage .ih-finale-message { opacity: 1 !important; }
+    #root .ih-finale-stage :is(.ih-finale-message, .ih-finale-mark) { animation: none !important; }
   }
 }
