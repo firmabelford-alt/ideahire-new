@@ -17,8 +17,6 @@
   #root .ih88-market .ih-showcase-controls { min-height:48px!important; }
   #root .ih53-home > .ih-home-footer { display:grid!important; grid-template-columns:minmax(180px,.7fr) minmax(0,2.3fr)!important; align-items:start!important; gap:20px 32px!important; max-width:1160px!important; }
   #root .ih-home-footer > .footer-links { justify-content:flex-start!important; min-width:0!important; }
-  #root .ih-home-footer > .ih-home-footer-end { grid-column:1/-1!important; display:flex!important; flex-wrap:wrap!important; align-items:baseline!important; gap:8px 24px!important; min-width:0!important; padding:16px 0 0!important; border-top:1px solid var(--v-line)!important; color:var(--v-muted)!important; }
-  #root .ih-home-footer-end > :is(p,small) { margin:0!important; color:inherit!important; font:400 12px/1.65 Inter,system-ui,sans-serif!important; }
   @media (max-width:850px) {
     #root .ih53-home > .ih-home-footer { grid-template-columns:minmax(0,1fr)!important; gap:18px!important; }
   }
@@ -52,7 +50,6 @@
     #root .ih88-market .ih-feed-catalog-links { gap:18px!important; }
     #root .ih88-market .ih88-live-heading h2 { max-width:26ch!important; font-size:18px!important; }
     #root .ih88-market .ih-showcase-swipe-hint { max-width:none!important; font-size:10px!important; }
-    #root .ih-home-footer > .ih-home-footer-end { flex-direction:column!important; align-items:flex-start!important; padding-inline-end:48px!important; }
     body #root .notifications-page .ih79-notice { padding:18px!important; gap:12px!important; }
     body #root .notifications-page .ih79-notice > h3 { font-size:18px!important; }
     body #root .notifications-page .ih79-notice > p { font-size:13px!important; }

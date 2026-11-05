@@ -402,6 +402,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const [selectedCategory, setSelectedCategory] = useState("Wszystkie");
   const loadRequest = useRef(0);
   const searchId = useId();
+  const offersId = useId();
 
   useEffect(() => {
     const requestedCategory = new URLSearchParams(location.search).get("category");
@@ -462,43 +463,50 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
         <SubpageCatalogTabs active="services" />
         <MarketCatalogHero active="services" navigation={false} className="ih-service-finder-hero"
           title={english ? "Services" : "Usługi"}
-          description={english ? "Compare the scope, price and delivery time. Find the right service for your project." : "Porównaj zakres, cenę i termin. Znajdź usługę do swojego projektu."}
+          description={english ? "See what you can hire for. Compare what’s included, the price and when it’ll be ready." : "Zobacz, co możesz zlecić. Porównaj zakres, cenę i czas realizacji."}
           actions={<><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new"><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></>} />
-        <div className="ih-service-finder-tools">
-          <div className="ih-service-finder-search">
-            <label htmlFor={searchId}>{english ? "Search services" : "Szukaj usługi"}</label>
-            <div className="ih-service-search-input"><MarketIcon kind="search" />
-              <input id={searchId} type="search" value={search} maxLength={160} aria-controls="ih-service-results" onChange={event => setSearch(event.target.value)}
-                placeholder={english ? "E.g. logo or website" : "Np. logo lub strona WWW"} />
-            </div>
-          </div>
-          <FormSelect className="ih-service-finder-field" label={english ? "Field" : "Dziedzina"} value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
-            <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
-            {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
-          </FormSelect>
-        </div>
-        <div className="ih-service-finder-summary">
-          <MarketResultCount count={services.length} noun="services" className="ih-service-finder-count"
-            status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
-          {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}>
-            <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
-          </button>}
-        </div>
       </div>
-      <section className="ih78-service-results ih-services-list" id="ih-service-results" aria-label={english ? "Service results" : "Wyniki wyszukiwania usług"} aria-busy={loading}>
-        {message ? (
-          <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
-        ) : loading ? (
-          <SubpageLoading label={english ? "Finding services…" : "Szukamy usług…"} />
-        ) : services.length > 0 ? (
-          <div className="ih78-service-grid">
-            {services.map(service => <ServiceCard key={service.id} service={service} client={supabase} />)}
+      <section className="ih-service-browse" aria-labelledby={offersId}>
+        <div className="ih-service-finder-controls" data-no-translate="true">
+          <header className="ih-service-finder-summary">
+            <div className="ih-service-finder-title">
+              <h2 id={offersId}>{english ? "Offers" : "Oferty"}</h2>
+              <MarketResultCount count={services.length} noun="services" className="ih-service-finder-count"
+                status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
+            </div>
+            {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}>
+              <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
+            </button>}
+          </header>
+          <div className="ih-service-finder-tools">
+            <div className="ih-service-finder-search">
+              <label htmlFor={searchId}>{english ? "Search services" : "Szukaj usługi"}</label>
+              <div className="ih-service-search-input"><MarketIcon kind="search" />
+                <input id={searchId} type="search" value={search} maxLength={160} aria-controls="ih-service-results" onChange={event => setSearch(event.target.value)}
+                  placeholder={english ? "E.g. logo or website" : "Np. logo lub strona WWW"} />
+              </div>
+            </div>
+            <FormSelect className="ih-service-finder-field" label={english ? "Field" : "Dziedzina"} value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
+              <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
+              {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
+            </FormSelect>
           </div>
-        ) : (
-          <div className="ih78-services-empty">
-            <div><h2>{english ? "No services found" : "Nie znaleźliśmy usług"}</h2><p>{english ? "We haven't found this service yet. Try another phrase or field." : "Nie znaleźliśmy takiej usługi. Spróbuj innej frazy lub dziedziny."}</p><Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link></div>
-          </div>
-        )}
+        </div>
+        <div className="ih78-service-results ih-services-list" id="ih-service-results" aria-busy={loading}>
+          {message ? (
+            <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
+          ) : loading ? (
+            <SubpageLoading label={english ? "Finding services…" : "Szukamy usług…"} />
+          ) : services.length > 0 ? (
+            <div className="ih78-service-grid">
+              {services.map(service => <ServiceCard key={service.id} service={service} client={supabase} />)}
+            </div>
+          ) : (
+            <div className="ih78-services-empty">
+              <div><h3>{english ? "No services found" : "Nie znaleźliśmy usług"}</h3><p>{english ? "We haven't found this service yet. Try another phrase or field." : "Nie znaleźliśmy takiej usługi. Spróbuj innej frazy lub dziedziny."}</p><Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link></div>
+            </div>
+          )}
+        </div>
       </section>
     </ServiceShell>
   );
