@@ -39,7 +39,9 @@ function viewportBounds() {
     && rect.top >= y && rect.top < y + height && rect.bottom >= y + height - 1 ? y + height - rect.top : 0;
   const host = document.getElementById("ih64-lucyna");
   const safeInset = host ? parseFloat(window.getComputedStyle(host).getPropertyValue("--ih84-safe-bottom")) || 0 : 0;
-  return { x, y, width, height, bottomInset: Math.max(navigationInset, safeInset) };
+  // The homepage also places the appearance button in the lower-right corner.
+  const appearanceSpace = document.querySelector(".ih53-home") ? 54 : 0;
+  return { x, y, width, height, appearanceSpace, bottomInset: Math.max(navigationInset, safeInset) };
 }
 
 export function dockLayout(bounds, position) {
@@ -62,8 +64,9 @@ function launcherLayout(bounds, position) {
   const width = Math.min(72, Math.max(1, bounds.width - margin * 2));
   const height = 44;
   const bottom = Math.max(22, (bounds.bottomInset || 0) + 12);
+  const right = bounds.x + bounds.width - width - margin;
   return { width, height,
-    x: Math.max(bounds.x + margin, Math.min(position?.x ?? bounds.x + bounds.width - width - margin, bounds.x + bounds.width - width - margin)),
+    x: Math.max(bounds.x + margin, Math.min(position?.x ?? right - (bounds.appearanceSpace || 0), right)),
     y: Math.max(bounds.y + margin, Math.min(position?.y ?? bounds.y + bounds.height - height - bottom, bounds.y + bounds.height - height - bottom)) };
 }
 

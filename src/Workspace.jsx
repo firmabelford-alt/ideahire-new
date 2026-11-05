@@ -16,6 +16,7 @@ import './WorkspaceAccount.css';
 import './WorkspaceMessages.css';
 import './WorkspaceCatalog.css';
 import './WorkspaceFinish.css';
+import './AccountTurquoise.css';
 export function useWorkspaceCopy() {
   const en = useSitePreferences().language === 'en';
   return (pl, english) => en ? english : pl;

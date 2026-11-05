@@ -1,10 +1,11 @@
 /* One continuous homepage atmosphere, vector controls, and a quiet notification desk. */
 @layer ideahirePolish {
   #root .ih-arrow-icon { display:inline-block!important; flex:0 0 20px!important; width:20px!important; height:20px!important; min-width:20px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.7!important; vertical-align:middle!important; overflow:visible!important; }
-  #root .ih53-home { position:relative!important; isolation:isolate!important; background:var(--v-bg)!important; }
+  #root .ih53-home { --home-wash:var(--v-accent); --home-wash-strong:14%; --home-wash-soft:11%; position:relative!important; isolation:isolate!important; background:var(--v-bg)!important; }
+  html[data-theme="dark"]:not([data-template="classic"]) #root .ih53-home { --home-wash:#aebbc2; --home-wash-strong:7%; --home-wash-soft:5%; }
   #root .ih53-home::before, #root .ih53-home::after { content:""!important; display:block!important; position:fixed!important; inset:0!important; z-index:-1!important; pointer-events:none!important; border:0!important; border-radius:0!important; }
-  #root .ih53-home::before { background:linear-gradient(140deg,color-mix(in srgb,var(--v-accent) 11%,transparent),transparent 48%,color-mix(in srgb,var(--v-accent) 6%,transparent))!important; }
-  #root .ih53-home::after { background:linear-gradient(320deg,color-mix(in srgb,var(--v-accent) 14%,transparent),transparent 60%)!important; animation:ih-home-atmosphere 26s ease-in-out infinite alternate!important; }
+  #root .ih53-home::before { background:linear-gradient(140deg,color-mix(in srgb,var(--home-wash) var(--home-wash-soft),transparent),transparent 48%,color-mix(in srgb,var(--home-wash) 5%,transparent))!important; }
+  #root .ih53-home::after { background:linear-gradient(320deg,color-mix(in srgb,var(--home-wash) var(--home-wash-strong),transparent),transparent 60%)!important; animation:ih-home-atmosphere 26s ease-in-out infinite alternate!important; }
   #root .ih53-home > main, #root .ih53-home .ih88-market, #root .ih53-home .ih-demo-reviews, #root .ih53-home .ih-demo-reviews::before, #root .ih53-home .ih-demo-reviews::after, #root .ih53-home .categories, #root .ih53-home .split-section, #root .ih53-home .ih53-showcase, #root .ih53-home > .footer { background:transparent!important; background-image:none!important; }
   #root .ih53-home .ih88-market { overflow:hidden!important; }
   #root .ih88-market .ih-showcase-rail[data-auto-moving="true"] { scroll-snap-type:none!important; scroll-behavior:auto!important; }
@@ -67,3 +68,13 @@
   }
 }
 @keyframes ih-home-atmosphere { from { opacity:.1; } to { opacity:.9; } }
+@layer ideahirePolish {
+  @media (max-width: 600px) {
+    body #root .cookie-notice {
+      box-sizing: border-box !important;
+      inset-inline: 8px !important;
+      width: auto !important;
+      transform: none !important;
+    }
+  }
+}

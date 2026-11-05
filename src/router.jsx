@@ -61,7 +61,8 @@ import { SubpageTheme, SubpageNavigation, SubpageHeading, SubpageMetrics, Subpag
 import { RegistrationSentScreen, LimitedAccountOverview, LimitedAccountNavigation, useJourneyMotion } from "./AccountJourney";
 import RegistrationInterview, { EMPTY_INTERVIEW, RegistrationInterviewPrivacy } from "./RegistrationInterview";
 import { REGISTRATION_INTERVIEW_KEY, normalizeRegistrationInterview, rememberRegistrationInterview, registrationInterviewForUser, saveRegistrationInterview, clearRegistrationInterview, clearRegistrationInterviewMetadata } from "./RegistrationInterviewState";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref, getSafeWebUrl } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, MarketSelect, IDEA_HIRE_PUBLIC_OFFER, IdeaHireLogo, ProfileHub, PasswordInput, helpCenterHref, getSafeWebUrl, ListingSaveButton, ListingSavedFilter } from "./MarketUI";
+import { selectMarketplaceListings, useListingFavorites } from "./MarketplaceListings";
 import { useSitePreferences, translateUiText, IDEA_HIRE_THEME_IDENTITY } from "./Preferences";
 import CookiePolicy from "./CookiePolicy";
 import PrivacyPolicy from "./PrivacyPolicy";
@@ -13476,6 +13477,9 @@ function JobsSpotlight({ jobs, formatBudget }) {
 function Jobs() {
   const { user } =
     useAuth();
+  const en = useSitePreferences().language === "en";
+  const { ids: savedIds, toggle: toggleSaved } = useListingFavorites("jobs", user?.id);
+  const [savedOnly, setSavedOnly] = useState(false);
 
   const {
     preferences: discoveryPreferences,
@@ -13939,30 +13943,10 @@ function Jobs() {
     discoveryPreferences?.personalizationEnabled !== false &&
     preferredJobCategories.length > 0;
 
-  const displayedJobs =
-    [...filteredJobs].sort((firstJob, secondJob) => {
-      if (sortMode === "matched" && canUseMatchedOrder) {
-        const firstScore = preferredJobCategories.includes(
-          firstJob.category
-        )
-          ? 0
-          : 1;
-        const secondScore = preferredJobCategories.includes(
-          secondJob.category
-        )
-          ? 0
-          : 1;
-
-        if (firstScore !== secondScore) {
-          return firstScore - secondScore;
-        }
-      }
-
-      return (
-        new Date(secondJob.created_at).getTime() -
-        new Date(firstJob.created_at).getTime()
-      );
-    });
+  const displayedJobs = selectMarketplaceListings(filteredJobs, {
+    kind: "jobs", order: sortMode, savedIds, savedOnly,
+    preferred: canUseMatchedOrder ? preferredJobCategories : [],
+  });
 
   function clearFilters() {
     setSearch("");
@@ -13980,7 +13964,7 @@ function Jobs() {
       <AccountNavbar />
 
       <main className="ih-market-shell">
-        <MarketHeader eyebrow="Dla wykonawców" title="Znajdź zlecenie" description="Dobry projekt zaczyna się od jasnych ustaleń. Znajdź coś dla siebie." count={filteredJobs.length} status={loading ? "Szukamy zleceń…" : message ? "Wyniki niedostępne" : undefined} />
+        <MarketHeader eyebrow="Dla wykonawców" title="Znajdź zlecenie" description="Dobry projekt zaczyna się od jasnych ustaleń. Znajdź coś dla siebie." count={displayedJobs.length} status={loading ? "Szukamy zleceń…" : message ? "Wyniki niedostępne" : undefined} />
 
         {isLimited && (
           <section className="ih5-jobs-age-notice">
@@ -14000,7 +13984,8 @@ function Jobs() {
         {/* WYSZUKIWARKA */}
 
 
-        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder}>
+        <MarketFilters search={search} onSearch={setSearch} categories={JOB_CATEGORIES} category={selectedCategory} onCategory={chooseCategory} categoryLabel={getJobCategoryLabel} sort={sortMode} onSort={setSortMode} matchedAvailable={canUseMatchedOrder}
+          favoritesControl={<ListingSavedFilter pressed={savedOnly} onClick={() => setSavedOnly(value => !value)} />}>
         {selectedSubcategory && <div className="ih5-active-filter"><span>{selectedSubcategory}</span><button type="button" onClick={() => chooseCategory(selectedCategory)} aria-label="Usuń filtr specjalizacji"><MarketIcon kind="close" /></button></div>}
 
         {applicationNotice && <p className="ih5-notice is-success ih5-application-notice" role="status" aria-live="polite">{applicationNotice}</p>}
@@ -14025,7 +14010,7 @@ function Jobs() {
 
         {!loading &&
           !message &&
-          jobs.length === 0 && (
+          !savedOnly && jobs.length === 0 && (
             <section className="ih5-empty">
               <span className="ih5-eyebrow">
                 Brak zleceń
@@ -14046,7 +14031,7 @@ function Jobs() {
 
         {!loading &&
           !message &&
-          jobs.length > 0 &&
+          !savedOnly && jobs.length > 0 &&
           filteredJobs.length ===
             0 && (
             <section className="ih5-empty ih5-jobs-empty-search">
@@ -14076,6 +14061,16 @@ function Jobs() {
               </button>
             </section>
           )}
+
+        {!loading && !message && savedOnly && displayedJobs.length === 0 && (
+          <section className="ih5-empty ih5-jobs-empty-search" data-no-translate="true">
+            <h2>{en ? "No favorites to show" : "Brak ulubionych w tym widoku"}</h2>
+            <p>{normalizedSearch || selectedCategory !== "Wszystkie"
+              ? (en ? "Try a different search or view all jobs." : "Zmień wyszukiwanie albo wróć do wszystkich zleceń.")
+              : (en ? "Tap the heart on a job to save it here." : "Dotknij serduszka przy zleceniu, żeby je tutaj zapisać.")}</p>
+            <button type="button" className="ih-listing-saved-filter" onClick={() => setSavedOnly(false)}>{en ? "All jobs" : "Wszystkie zlecenia"}</button>
+          </section>
+        )}
 
         {/* LISTA ZLECEŃ */}
 
@@ -14154,15 +14149,12 @@ function Jobs() {
                       {job.subcategory ? ` · ${job.subcategory}` : ""}
                     </span>
 
-                    <span
-                      className={`ih5-job-active-badge ${
-                        isMatched ? "is-matched" : "is-active"
-                      }`}
-                    >
-                      {isMatched
-                        ? "Pasuje do Twoich kategorii"
-                        : "Otwarte na zgłoszenia"}
-                    </span>
+                    <div className="ih-job-card-controls">
+                      <span className={`ih5-job-active-badge ${isMatched ? "is-matched" : "is-active"}`}>
+                        {isMatched ? "Pasuje do Twoich kategorii" : "Otwarte na zgłoszenia"}
+                      </span>
+                      <ListingSaveButton title={job.title} pressed={savedIds.includes(String(job.id).toLowerCase())} onClick={() => toggleSaved(job.id)} />
+                    </div>
                   </div>
 
                   <div className="ih5-job-overview">

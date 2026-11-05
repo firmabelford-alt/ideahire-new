@@ -194,19 +194,17 @@
   body #root .ih-service-finder-hero .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
 
   body #root .ih-service-console {
-    margin: clamp(16px, 3vw, 32px) 0 14px;
+    margin: clamp(26px, 3.3vw, 42px) 0 clamp(20px, 3vw, 34px);
     scroll-margin-top: calc(var(--a-head, 72px) + 12px);
   }
   body #root .ih-service-discovery {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(126px, 17%);
+    grid-template-columns: minmax(0, 1fr) minmax(124px, 16%) minmax(110px, 15%);
     align-items: stretch;
     min-width: 0;
-    border: 1px solid var(--finder-line);
-    border-radius: 10px;
-    background: var(--v-surface);
+    gap: 10px;
   }
-  body #root .ih-service-search { min-width: 0; width: 100%; margin: 0 !important; padding: 0 !important; }
+  body #root .ih-service-search { box-sizing: border-box; min-width: 0; width: 100%; margin: 0 !important; padding: 0 !important; }
   body #root .ih-service-sr {
     position: absolute !important;
     width: 1px !important;
@@ -224,9 +222,11 @@
     align-items: center !important;
     gap: 9px !important;
     min-width: 0 !important;
-    height: 52px !important;
+    height: 54px !important;
     padding: 0 4px 0 12px !important;
-    border-radius: 9px 0 0 9px;
+    border: 1px solid var(--finder-line);
+    border-radius: 10px;
+    background: var(--v-surface);
     color: var(--v-accent) !important;
   }
   body #root .ih-service-search-input:focus-within { outline: 2px solid var(--v-accent); outline-offset: -2px; }
@@ -275,17 +275,21 @@
     box-sizing: border-box !important;
     width: 100% !important;
     height: 100% !important;
-    min-height: 52px !important;
-    gap: 6px !important;
-    padding: 6px 9px !important;
-    border: 0 !important;
-    border-left: 1px solid var(--finder-line) !important;
-    border-radius: 0 9px 9px 0 !important;
-    background: var(--v-soft) !important;
+    min-height: 54px !important;
+    gap: 8px !important;
+    padding: 7px 13px !important;
+    border: 1px solid var(--finder-line) !important;
+    border-radius: 10px !important;
+    background: var(--v-surface) !important;
     color: var(--v-ink) !important;
     font: 650 13px/1.4 Inter, system-ui, sans-serif !important;
   }
-  body #root .ih-service-discovery[data-filtered] .ih-service-finder-field > .ih-control-trigger { color: var(--v-accent) !important; }
+  body #root .ih-service-discovery[data-filtered] .ih-service-finder-field:not(.ih-service-sort) > .ih-control-trigger,
+  body #root .ih-service-discovery[data-custom-order] .ih-service-sort > .ih-control-trigger {
+    color: var(--v-accent) !important;
+    border-color: var(--v-accent) !important;
+    background: var(--v-soft) !important;
+  }
   body #root .ih-service-finder-field > .ih-control-trigger > span {
     min-width: 0 !important;
     overflow: hidden !important;
@@ -300,9 +304,10 @@
     align-items: center !important;
     gap: 8px 15px !important;
     min-height: 51px;
-    margin: 0 !important;
-    padding: 6px 0 0 !important;
+    margin: 20px 0 0 !important;
+    padding: 14px 0 0 !important;
     border: 0 !important;
+    border-top: 1px solid var(--v-line) !important;
     background: none !important;
   }
   body #root .ih-service-finder-count {
@@ -310,7 +315,7 @@
     align-items: baseline !important;
     flex: none;
     gap: 5px;
-    max-width: 50%;
+    max-width: 62%;
     margin: 0 !important;
     padding: 0 0 0 10px !important;
     border-left: 3px solid var(--v-accent);
@@ -324,16 +329,18 @@
   }
   body #root .ih-service-filter-state {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0 10px;
+    gap: 2px 14px;
     min-width: 0;
     color: var(--v-muted);
     font: 550 12px/1.4 Inter, system-ui, sans-serif;
     overflow-wrap: anywhere;
-    text-align: end;
+    text-align: start;
   }
+  body #root .ih-service-filter-state[data-visible] { margin: 10px 0 0; }
+  body #root .ih-service-filter-state > span:not(.ih-service-sr) { padding: 4px 0; }
   body #root .ih-service-finder-reset {
     display: inline-flex !important;
     align-items: center !important;
@@ -358,7 +365,7 @@
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     align-items: start !important;
-    gap: clamp(14px, 2.4vw, 28px) !important;
+    gap: clamp(22px, 2.7vw, 32px) !important;
   }
   body #root .ih-services-list .ih78-service-offer {
     --offer-pad: clamp(14px, 2vw, 22px);
@@ -375,7 +382,8 @@
     color: var(--v-ink) !important;
   }
   body #root .ih-services-list .ih78-service-offer > * { grid-area: auto !important; min-width: 0 !important; }
-  body #root .ih-services-list .ih78-service-offer > .ih-listing-thumbnail {
+  body #root .ih-services-list .ih-service-offer-media { position: relative; min-width: 0; }
+  body #root .ih-services-list .ih-service-offer-media > .ih-listing-thumbnail {
     width: 100% !important;
     max-width: none !important;
     height: auto !important;
@@ -385,13 +393,22 @@
     border: 0 !important;
     border-radius: 0 !important;
   }
+  body #root .ih-services-list .ih-service-cover-placeholder {
+    display: flex;
+    align-items: center;
+    min-height: 64px;
+    padding: 0 var(--offer-pad);
+    background: var(--v-soft);
+    color: var(--v-accent);
+  }
+  body #root .ih-services-list .ih-service-cover-placeholder > svg { width: 21px; height: 21px; }
   body #root .ih-services-list .ih86-offer-heading {
     position: static !important;
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
     flex-wrap: wrap !important;
-    gap: 4px 9px !important;
+    gap: 8px 12px !important;
     padding: var(--offer-pad) var(--offer-pad) 0 !important;
   }
   body #root .ih-services-list .ih78-offer-field { flex: 1 1 140px !important; min-width: 0 !important; overflow-wrap: anywhere; }
@@ -400,7 +417,7 @@
     background: var(--v-soft) !important;
   }
   body #root .ih-services-list .ih86-offer-availability.is-full { color: var(--v-muted) !important; }
-  body #root .ih-services-list .ih78-offer-copy { padding: 12px var(--offer-pad) 15px !important; overflow-wrap: anywhere; }
+  body #root .ih-services-list .ih78-offer-copy { padding: 14px var(--offer-pad) 19px !important; overflow-wrap: anywhere; }
   body #root .ih-services-list .ih78-offer-copy h2 {
     margin: 0 0 6px !important;
     color: var(--v-ink) !important;
@@ -413,7 +430,7 @@
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) !important;
     align-items: center !important;
     gap: 12px !important;
-    padding: 12px var(--offer-pad) !important;
+    padding: 15px var(--offer-pad) !important;
     border: 0 !important;
     border-radius: 0 !important;
     background: var(--v-soft) !important;
@@ -430,7 +447,7 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
-    padding: 8px var(--offer-pad) !important;
+    padding: 12px var(--offer-pad) !important;
     border: 0 !important;
     background: none !important;
   }
@@ -455,15 +472,19 @@
       min-height: 0 !important;
     }
     body #root .ih-service-finder-hero > .ih-cinema-film {
-      aspect-ratio: 2.2 / 1 !important;
-      max-height: 235px !important;
+      aspect-ratio: 16 / 9 !important;
+      max-height: 280px !important;
     }
-    body #root .ih-service-finder-hero > .ih-page-heading { gap: 9px !important; padding: 14px 15px 12px !important; }
-    body #root .ih-service-finder-hero .ih73-heading-copy { gap: 5px !important; }
-    body #root .ih-service-finder-hero .ih-page-heading h1 { font-size: clamp(34px, 10vw, 48px) !important; }
-    body #root .ih-service-finder-hero .ih73-description { font-size: 14px !important; }
-    body #root .ih-service-finder-hero .ih73-heading-actions { gap: 3px 12px !important; }
-    body #root .ih-service-discovery { grid-template-columns: minmax(0, 1fr) 108px; }
+    body #root .ih-service-finder-hero > .ih-page-heading { gap: 16px !important; padding: 21px clamp(16px, 5vw, 28px) 23px !important; }
+    body #root .ih-service-finder-hero .ih73-heading-copy { gap: 9px !important; }
+    body #root .ih-service-finder-hero .ih-page-heading h1 { font-size: clamp(34px, 9.5vw, 48px) !important; }
+    body #root .ih-service-finder-hero .ih73-description { font-size: 15px !important; }
+    body #root .ih-service-finder-hero .ih73-heading-actions { gap: 7px 13px !important; }
+    body #root .ih-service-discovery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    body #root .ih-service-discovery > .ih-service-search { grid-column: 1 / -1; }
+    body #root .ih-service-finder-field > .ih-control-trigger { min-height: 49px !important; }
+    body #root .ih-service-finder-summary { margin-top: 18px !important; }
+    body #root .ih-service-offer-media > .ih-listing-save[data-overlay] { inset: 10px auto auto 10px; }
   }
   @media (max-width: 600px) {
     body #root .ih-service-finder > .ih73-catalog-tabs { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 3px !important; }

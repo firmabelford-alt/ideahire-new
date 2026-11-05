@@ -1,0 +1,65 @@
+/* The identity uses the same saturated field as the home and Services openings. */
+@layer ideahirePolish {
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-dashboard > .ih72-identity {
+    --p-bg: var(--v-field);
+    --p-ink: var(--v-field-ink);
+    --p-muted: var(--v-field-muted);
+    --p-accent: var(--v-field-ink);
+    --p-on: var(--v-field);
+    --p-line: color-mix(in srgb, var(--v-field-ink) 36%, transparent);
+    --p-tint: color-mix(in srgb, var(--v-field) 72%, white);
+    --a-ink: var(--v-field-ink) !important;
+    --a-muted: var(--v-field-muted) !important;
+    --a-line: var(--p-line) !important;
+    --a-accent: var(--v-field-ink) !important;
+    --a-on: var(--v-field) !important;
+    --a-tint: var(--p-tint) !important;
+    --desk-line: var(--p-line);
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: clamp(28px, 4vw, 52px) clamp(13px, 4vw, 42px) clamp(26px, 4vw, 40px) !important;
+    border: 0 !important;
+    border-radius: clamp(12px, 2vw, 20px) !important;
+    color: var(--v-field-ink) !important;
+    background:
+      linear-gradient(131deg, transparent 21%, #1012140b 21% 21.15%, transparent 21.15% 77%, #10121412 77% 77.15%, transparent 77.15%),
+      linear-gradient(180deg, transparent 45%, color-mix(in srgb, var(--v-action) 38%, transparent)),
+      var(--v-field) !important;
+  }
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-identity h1 {
+    max-width: 100% !important;
+    color: var(--v-field-ink) !important;
+    overflow-wrap: anywhere !important;
+  }
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-identity .ih72-orbit-control {
+    background: var(--v-field-ink) !important;
+    border-color: var(--v-field) !important;
+    color: var(--v-field) !important;
+  }
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-identity :is(a,button):focus-visible {
+    outline-color: var(--v-field-ink) !important;
+  }
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-dashboard .ih72-main-actions > .ih68-primary {
+    background: var(--v-action) !important;
+    border-color: var(--v-action) !important;
+    color: var(--v-action-ink) !important;
+  }
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-dashboard .ih72-main-actions > .ih68-secondary {
+    background: var(--v-surface) !important;
+    border-color: var(--v-control-line) !important;
+    color: var(--v-ink) !important;
+  }
+  html:not([data-template="classic"]) body.ih79-app #root .ih72-dashboard .ih72-main-actions > a > span {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  @media (hover: hover) {
+    html:not([data-template="classic"]) body.ih79-app #root .ih72-dashboard .ih72-main-actions > .ih68-primary:hover {
+      background: var(--v-field) !important;
+    }
+    html:not([data-template="classic"]) body.ih79-app #root .ih72-dashboard .ih72-main-actions > .ih68-secondary:hover {
+      background: var(--v-soft) !important;
+    }
+  }
+}

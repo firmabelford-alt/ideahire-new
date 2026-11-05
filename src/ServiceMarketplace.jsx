@@ -21,7 +21,8 @@ import {
 } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs, SubpageLoading } from "./Subpages";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader, MarketCatalogHero, MarketResultCount } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader, MarketCatalogHero, MarketResultCount, ListingSaveButton, ListingSavedFilter, listingOrderOptions } from "./MarketUI";
+import { selectMarketplaceListings, useListingFavorites } from "./MarketplaceListings";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -349,7 +350,7 @@ function ServiceAvatar({ service, size = "normal" }) {
   );
 }
 
-function ServiceCard({ service, client }) {
+function ServiceCard({ service, client, favorite, onFavorite }) {
   const capacity = serviceCapacity(service);
   const isCustom = service.price_mode === 'custom';
   const en = useSitePreferences().language === 'en';
@@ -360,7 +361,11 @@ function ServiceCard({ service, client }) {
   const ownerName = service.owner_name || service.freelancer_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire');
   const Owner = service.freelancer_id ? Link : 'div';
   return <article className="ih78-service-offer">
-    <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={client} />
+    <div className="ih-service-offer-media">
+      <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={client}
+        fallback={<div className="ih-service-cover-placeholder" aria-hidden="true"><MarketIcon kind="talent" /></div>} />
+      <ListingSaveButton title={service.title} pressed={favorite} onClick={onFavorite} overlay />
+    </div>
     <header className="ih86-offer-heading">
       <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
       <span className={'ih86-offer-availability ' + capacity.className}>{en ? translateUiText(capacity.label) : capacity.label}</span>
@@ -399,6 +404,9 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
+  const [order, setOrder] = useState("latest");
+  const [savedOnly, setSavedOnly] = useState(false);
+  const { ids: savedIds, toggle: toggleSaved } = useListingFavorites("services", user?.id);
   const requestedCategory = new URLSearchParams(location.search).get("category");
   const selectedCategory = SERVICE_CATEGORIES.includes(requestedCategory) ? requestedCategory : "Wszystkie";
   const loadRequest = useRef(0);
@@ -406,6 +414,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const searchId = useId();
   const offersId = useId();
   const categoryId = useId();
+  const orderId = useId();
 
   const loadServices = useCallback(async ({ quiet = false } = {}) => {
     const request = ++loadRequest.current;
@@ -419,7 +428,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
 
       if (error) throw error;
       if (request !== loadRequest.current) return;
-      const rows = await withServiceThumbnails(supabase, Array.isArray(data) ? data : []);
+      const rows = await withServiceThumbnails(supabase, Array.isArray(data) ? data : [], { includeCreatedAt: true });
       if (request !== loadRequest.current) return;
       setServices(rows);
       setMessage("");
@@ -444,6 +453,11 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
     ? (english ? "All fields" : "Wszystkie dziedziny")
     : (english ? translateUiText(selectedCategory) : selectedCategory);
   const hasFilters = Boolean(search.trim()) || !allCategories;
+  const orderOptions = listingOrderOptions(english, "services");
+  const orderLabel = orderOptions.find(option => option.value === order)?.label;
+  const visibleServices = useMemo(() => selectMarketplaceListings(services, {
+    kind: "services", order, savedOnly, savedIds,
+  }), [services, order, savedOnly, savedIds]);
 
   function chooseCategory(category) {
     if (category === selectedCategory) return;
@@ -480,7 +494,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
       <section className="ih-service-browse" aria-labelledby={offersId}>
         <h2 id={offersId} className="ih-service-sr" tabIndex={-1}>{english ? "Service results" : "Wyniki wyszukiwania usług"}</h2>
         <div className="ih-service-console" id="services-filter" data-no-translate="true">
-          <div className="ih-service-discovery" data-filtered={!allCategories || undefined}>
+          <div className="ih-service-discovery" data-filtered={!allCategories || undefined} data-custom-order={order !== "latest" || undefined}>
             <form className="ih-service-search" role="search" aria-label={english ? "Service search" : "Wyszukiwarka usług"}
               onSubmit={event => {
                 event.preventDefault();
@@ -502,28 +516,43 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
               <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
               {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
             </FormSelect>
+            <FormSelect className="ih-service-finder-field ih-service-sort" menuMinWidth={225} triggerLabel={english ? "Sort" : "Sortuj"}
+              aria-label={english ? "Sort services" : "Sortuj usługi"} aria-describedby={orderId}
+              value={order} onChange={event => setOrder(event.target.value)}>
+              {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </FormSelect>
           </div>
           <header className="ih-service-finder-summary">
-            <MarketResultCount count={services.length} noun="services" className="ih-service-finder-count"
+            <MarketResultCount count={visibleServices.length} noun="services" className="ih-service-finder-count"
               status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
-            <div className="ih-service-filter-state">
-              <span id={categoryId}>{categoryLabel}</span>
-              {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={clearFilters}
-                aria-label={english ? "Clear filters" : "Wyczyść filtry"}>
-                <MarketIcon kind="close" />{english ? "Clear" : "Wyczyść"}
-              </button>}
-            </div>
+            <ListingSavedFilter pressed={savedOnly} onClick={() => setSavedOnly(value => !value)} />
           </header>
+          <div className="ih-service-filter-state" data-visible={hasFilters || order !== "latest" || undefined}>
+            <span id={categoryId} className={allCategories ? "ih-service-sr" : undefined}>{categoryLabel}</span>
+            <span id={orderId} className={order === "latest" ? "ih-service-sr" : undefined}>{orderLabel}</span>
+            {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={clearFilters}
+              aria-label={english ? "Clear filters" : "Wyczyść filtry"}>
+              <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
+            </button>}
+          </div>
         </div>
         <div className="ih78-service-results ih-services-list" id="ih-service-results" aria-busy={loading}>
           {message ? (
             <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
           ) : loading ? (
             <SubpageLoading label={english ? "Finding services…" : "Szukamy usług…"} />
-          ) : services.length > 0 ? (
+          ) : visibleServices.length > 0 ? (
             <div className="ih78-service-grid">
-              {services.map(service => <ServiceCard key={service.id} service={service} client={supabase} />)}
+              {visibleServices.map(service => <ServiceCard key={service.id} service={service} client={supabase}
+                favorite={savedIds.includes(String(service.id).toLowerCase())} onFavorite={() => toggleSaved(service.id)} />)}
             </div>
+          ) : savedOnly ? (
+            <div className="ih78-services-empty"><div>
+              <h3>{english ? "No favorites to show" : "Brak ulubionych w tym widoku"}</h3>
+              <p>{hasFilters ? (english ? "Try clearing the filters or view all services." : "Wyczyść filtry albo wróć do wszystkich usług.")
+                : (english ? "Tap the heart on an offer to save it here." : "Dotknij serduszka przy ofercie, żeby ją tutaj zapisać.")}</p>
+              <button type="button" className="ih-listing-saved-filter" onClick={() => setSavedOnly(false)}>{english ? "All services" : "Wszystkie usługi"}</button>
+            </div></div>
           ) : (
             <div className="ih78-services-empty">
               <div><h3>{english ? "No services found" : "Nie znaleźliśmy usług"}</h3><p>{english ? "We haven't found this service yet. Try another phrase or field." : "Nie znaleźliśmy takiej usługi. Spróbuj innej frazy lub dziedziny."}</p><Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link></div>

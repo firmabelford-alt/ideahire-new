@@ -195,16 +195,21 @@ export async function removeUnlinkedThumbnail(client, path, ownerId) {
 }
 
 // Keep the existing service RPCs (capacity, prices and permissions) unchanged.
-// One bounded read enriches their result with optional thumbnails.
-export async function withServiceThumbnails(client, rows) {
+// One bounded read enriches their result with thumbnails and, for sorting, creation dates.
+export async function withServiceThumbnails(client, rows, { includeCreatedAt = false } = {}) {
   if (!Array.isArray(rows) || !rows.length) return Array.isArray(rows) ? rows : [];
   try {
-    const paths = new Map();
+    const details = new Map();
+    const columns = includeCreatedAt ? 'id,thumbnail_path,created_at' : 'id,thumbnail_path';
     for (let offset = 0; offset < rows.length; offset += 100) {
-      const { data, error } = await client.from('freelancer_services').select('id,thumbnail_path').in('id', rows.slice(offset, offset + 100).map(row => row.id));
+      const { data, error } = await client.from('freelancer_services').select(columns).in('id', rows.slice(offset, offset + 100).map(row => row.id));
       if (error || !Array.isArray(data)) return rows;
-      for (const row of data) paths.set(row.id, row.thumbnail_path);
+      for (const row of data) details.set(row.id, row);
     }
-    return rows.map(row => ({ ...row, thumbnail_path: paths.get(row.id) || null }));
+    return rows.map(row => {
+      const detail = details.get(row.id);
+      return { ...row, thumbnail_path: detail?.thumbnail_path || null,
+        ...(includeCreatedAt && { created_at: detail?.created_at ?? row.created_at }) };
+    });
   } catch { return rows; }
 }

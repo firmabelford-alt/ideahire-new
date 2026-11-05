@@ -134,14 +134,14 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     setPending(null);
   }
   return <div ref={host} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
+    <div className="ih88-intro">
+      <header className="ih88-heading">
+        <p className="ih88-eyebrow">{copy.eyebrow.map(word => <span key={word}>{word}</span>)}</p>
+        <h1 className="ih88-title"><span className="ih88-title-first">{copy.title[0]}</span><span className="ih88-title-last">{copy.title[1]}</span></h1>
+      </header>
+      <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>
+    </div>
     <div className="ih88-layout">
-      <div className="ih88-intro">
-        <header className="ih88-heading">
-          <p className="ih88-eyebrow">{copy.eyebrow.map(word => <span key={word}>{word}</span>)}</p>
-          <h1 className="ih88-title"><span className="ih88-title-first">{copy.title[0]}</span><span className="ih88-title-last">{copy.title[1]}</span></h1>
-        </header>
-        <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>
-      </div>
       <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerEnter={event => { if (event.pointerType === 'mouse') setHover(true); }} onPointerLeave={() => setHover(false)} onFocusCapture={() => setFocus(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
         <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}<Arrow /></Link><Link to="/services">{en ? "Services" : "Usługi"}<Arrow /></Link></nav></div>
         {jobs.length ? <>

@@ -1,18 +1,19 @@
 /* Homepage introduction and a native, image-led project reel. */
 @layer ideahirePolish {
-  #root .ih53-home > main { background:transparent!important; }
+  #root .ih53-home > main { min-width:0!important; max-width:100%!important; background:transparent!important; }
   #root .ih53-home .ih43-film[data-stage="jobs"] { height:auto!important; min-height:0!important; border:0!important; background:transparent!important; box-shadow:none!important; }
   #root .ih88-market {
     --showcase-line:color-mix(in srgb,var(--v-ink) 14%,transparent);
-    position:relative!important; display:block!important; min-height:0!important; margin:0!important;
-    padding:24px clamp(20px,4vw,64px) 44px!important; color:var(--v-ink)!important;
+    --showcase-gutter:clamp(20px,4vw,64px);
+    box-sizing:border-box!important; position:relative!important; display:block!important; width:100%!important; max-width:100%!important; min-width:0!important; min-height:0!important; margin:0!important;
+    padding:24px 0 44px!important; color:var(--v-ink)!important;
     background:linear-gradient(180deg,color-mix(in srgb,var(--v-accent) 9%,var(--v-bg)),color-mix(in srgb,var(--v-accent) 3%,var(--v-bg)) 54%,var(--v-bg))!important;
-    border:0!important; box-shadow:none!important; overflow:clip!important;
+    border:0!important; box-shadow:none!important; overflow:hidden!important; overflow:clip!important;
   }
-  #root .ih88-layout { width:100%!important; max-width:1280px!important; min-width:0!important; margin:0 auto!important; }
+  #root .ih88-layout { box-sizing:border-box!important; width:100%!important; max-width:calc(1280px + 2 * var(--showcase-gutter))!important; min-width:0!important; margin:0 auto!important; padding-inline:var(--showcase-gutter)!important; }
   #root .ih88-market :is(a,button) > svg { display:block!important; flex:none!important; width:19px!important; height:19px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.6!important; stroke-linecap:round!important; stroke-linejoin:round!important; }
   #root .ih88-market :is(a,button):focus-visible, #root .ih-showcase-rail:focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:4px!important; }
-  #root .ih88-market .ih88-intro { position:relative!important; display:flex!important; flex-direction:column!important; align-items:center!important; gap:24px!important; min-width:0!important; margin:0!important; padding:48px 0 48px!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; text-align:center!important; animation:none!important; }
+  #root .ih88-market .ih88-intro { box-sizing:border-box!important; position:relative!important; display:flex!important; flex-direction:column!important; align-items:center!important; gap:24px!important; width:100%!important; max-width:100%!important; min-width:0!important; margin:0!important; padding:48px var(--showcase-gutter)!important; border:0!important; border-radius:0!important; background:none!important; box-shadow:none!important; text-align:center!important; animation:none!important; }
   #root .ih88-market .ih88-intro::before, #root .ih88-market .ih88-intro::after { display:none!important; content:none!important; }
   #root .ih88-market .ih88-heading { display:block!important; width:100%!important; min-width:0!important; padding:0!important; margin:0!important; border:0!important; background:none!important; text-align:center!important; }
   #root .ih88-market .ih88-eyebrow { display:flex!important; flex-wrap:wrap!important; align-items:center!important; justify-content:center!important; gap:8px 20px!important; margin:0 0 24px!important; padding:0!important; color:var(--v-muted)!important; font:500 13px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:0!important; }
@@ -94,13 +95,14 @@
     #root .ih88-market .ih-showcase-rail { grid-auto-columns:calc((100% - 20px)/2)!important; }
   }
   @media (max-width:700px) {
-    #root .ih88-market { padding:16px 20px 32px!important; }
-    #root .ih88-market .ih88-intro { padding:32px 0 32px!important; gap:20px!important; }
+    #root .ih53-home { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    #root .ih88-market { --showcase-gutter:20px; padding:16px 0 32px!important; }
+    #root .ih88-market .ih88-intro { padding-block:32px!important; gap:20px!important; }
     #root .ih88-market .ih88-eyebrow { font-size:11px!important; gap:8px 15px!important; margin-bottom:20px!important; }
     #root .ih88-market .ih88-eyebrow span + span::before { left:-9px!important; }
-    #root .ih88-market .ih88-title { font-size:clamp(31px,8vw,48px)!important; line-height:1.16!important; letter-spacing:-.04em!important; }
+    #root .ih88-market .ih88-title { font-size:clamp(30px,8vw,48px)!important; line-height:1.16!important; letter-spacing:-.04em!important; overflow-wrap:anywhere!important; }
     #root .ih88-market .ih88-title .ih88-title-last { margin-top:8px!important; }
-    #root .ih88-market .ih88-lead { max-width:37ch!important; font-size:14px!important; line-height:1.75!important; }
+    #root .ih88-market .ih88-lead { max-width:min(100%,37ch)!important; font-size:14px!important; line-height:1.75!important; overflow-wrap:anywhere!important; }
     #root .ih88-market .ih88-hero-bottom { gap:22px!important; }
     #root .ih88-market .ih88-actions { display:grid!important; grid-template-columns:minmax(0,1fr)!important; width:min(100%,380px)!important; gap:10px!important; }
     #root .ih88-market .ih88-entry { width:100%!important; min-width:0!important; min-height:50px!important; padding:13px 18px!important; }
@@ -143,27 +145,18 @@
     overflow: clip !important;
   }
   html:not([data-template="classic"]) #root .ih88-market .ih88-intro {
-    isolation: isolate;
     padding-block: clamp(58px, 7.5vw, 110px) clamp(50px, 6.8vw, 94px) !important;
     color: var(--v-field-ink) !important;
-  }
-  html:not([data-template="classic"]) #root .ih88-market .ih88-intro::before {
-    content: "" !important;
-    display: block !important;
-    position: absolute;
-    z-index: -1;
-    inset: 0 -100vmax;
-    pointer-events: none;
     background:
       linear-gradient(0deg, color-mix(in srgb, var(--v-action) 40%, transparent), transparent 53%),
       repeating-linear-gradient(90deg, transparent 0 63px, #0a171b0b 63px 64px),
-      var(--v-field);
+      var(--v-field) !important;
   }
   html:not([data-template="classic"]) #root .ih88-market .ih88-intro::after {
     content: "" !important;
     display: block !important;
     position: absolute;
-    inset: auto 0 0;
+    inset: auto var(--showcase-gutter) 0;
     height: 4px;
     background: linear-gradient(90deg, var(--v-field-ink) 0 38px, transparent 38px calc(100% - 38px), var(--v-field-ink) calc(100% - 38px));
     pointer-events: none;

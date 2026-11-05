@@ -8,6 +8,7 @@ import { SubpageHeading, SubpageCatalogTabs } from "./Subpages";
 import { BrandLogo } from "./Brand";
 import './InterfaceRefinements.css';
 import './DatePicker.css';
+import './MarketplaceListings.css';
 
 // Validate stored/user-supplied links again at the point of navigation.
 export function getSafeWebUrl(value, { allowRelative = false } = {}) {
@@ -234,6 +235,7 @@ export function MarketIcon({ kind = "search", ...props }) {
     close: "m6 6 12 12M18 6 6 18",
     plus: "M12 5v14M5 12h14",
     check: "m5 12 4 4L19 6",
+    heart: "M20.8 8.7c0 3.7-3.7 6.4-8.8 10.3-5.1-3.9-8.8-6.6-8.8-10.3a4.7 4.7 0 0 1 8.8-2.4 4.7 4.7 0 0 1 8.8 2.4Z",
     message: "M5 4h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 3V6a2 2 0 0 1 2-2ZM7 9h10M7 13h6",
     chevron: "m7 10 5 5 5-5",
     files: "M8 3h7l5 5v12H8ZM15 3v6h5M4 7v15h12",
@@ -403,7 +405,32 @@ export function MarketSelect({ id, label, value, options, onChange, disabled = f
   </FormSelect>;
 }
 
-export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, kind = 'zleceń', children }) {
+export function listingOrderOptions(en, kind) {
+  const jobs = kind === "jobs";
+  return [
+    { value: "latest", label: en ? "Newest first" : "Od najnowszych" },
+    { value: "oldest", label: en ? "Oldest first" : "Od najstarszych" },
+    { value: "price-low", label: en ? (jobs ? "Lowest budget" : "Lowest price") : (jobs ? "Od najniższego budżetu" : "Od najniższej ceny") },
+    { value: "price-high", label: en ? (jobs ? "Highest budget" : "Highest price") : (jobs ? "Od najwyższego budżetu" : "Od najwyższej ceny") },
+  ];
+}
+
+export function ListingSaveButton({ title, pressed, onClick, overlay = false }) {
+  const en = useSitePreferences().language === "en";
+  return <button type="button" className="ih-listing-save" data-overlay={overlay || undefined}
+    aria-pressed={pressed} aria-label={(en ? "Favorite: " : "Ulubione: ") + title}
+    title={pressed ? (en ? "Remove from favorites" : "Usuń z ulubionych") : (en ? "Save to favorites" : "Dodaj do ulubionych")}
+    onClick={onClick} data-no-translate="true"><MarketIcon kind="heart" /></button>;
+}
+
+export function ListingSavedFilter({ pressed, onClick }) {
+  const en = useSitePreferences().language === "en";
+  return <button type="button" className="ih-listing-saved-filter" aria-pressed={pressed} onClick={onClick} data-no-translate="true">
+    <MarketIcon kind="heart" /><span>{en ? "Favorites" : "Ulubione"}</span>
+  </button>;
+}
+
+export function MarketFilters({ search, onSearch, categories, category, onCategory, categoryLabel = value => value, sort, onSort, matchedAvailable = false, favoritesControl, kind = 'zleceń', children }) {
   const id = useId();
   const en = useSitePreferences().language === 'en';
   const people = kind === 'freelancerów';
@@ -434,12 +461,13 @@ export function MarketFilters({ search, onSearch, categories, category, onCatego
           </div>
           {onSort && <div className="ih87-catalog-select">
             <MarketSelect id={id + '-sort'} label={en ? 'Sort by' : 'Kolejność'} value={sort} onChange={onSort}
-              options={[{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' },
+              options={[...(people || services ? [{ value: 'latest', label: en ? 'Newest first' : 'Najnowsze' }] : listingOrderOptions(en, "jobs")),
                 { value: 'matched', label: en ? 'Matched to me' : 'Dopasowane do mnie', disabled: !matchedAvailable }]} />
           </div>}
         </div>
         {(search || category !== 'Wszystkie') && <button type="button" className="ih76-mobile-clear" onClick={() => { onSearch(''); onCategory('Wszystkie'); }}><MarketIcon kind="close" />{en ? 'Clear filters' : 'Wyczyść filtry'}</button>}
       </section>
+      {favoritesControl && <div className="ih-market-saved-bar">{favoritesControl}</div>}
       <div className="ih75-catalog-results">{children}</div>
     </div>
   </div>;
