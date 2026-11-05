@@ -1,15 +1,11 @@
-/* P63 — shared colours, stationary page wash and one compact navigation system. */
-html:root, html:root[data-template="current"] {
-  --v-bg:#ffffff!important; --v-surface:#ffffff!important; --v-soft:#e5fafa!important; --v-ink:#102e31!important; --v-muted:#3d6366!important; --v-line:#a9d9dc!important; --v-accent:#076f76!important; --v-on:#ffffff!important; --v-pop:#ffffff!important;
-  --ih63-nav-ink:#142f31!important; --ih63-nav-line:#dce5e5!important; --ih63-nav-focus:#087b82!important; --ih63-brand:#19cbd3!important; --ih63-on-brand:#073639!important; --ih63-card:#d5f5f6!important; --ih63-card-ink:#102e31!important; --ih63-card-muted:#3d6366!important; --ih63-nav-hover:#e3f9fa!important;
-  --ih63-page-image:linear-gradient(155deg,#ffffff 0%,#edfafa 30%,#d9f5f6 65%,#ffffff 100%)!important;
-  --ih63-hero-image:linear-gradient(115deg,#d7f6f7 0%,#f5fdfd 58%,#ffffff 100%)!important;
-}
-html:root[data-theme="dark"]:not([data-template="classic"]) {
-  --v-bg:#0c2226!important; --v-surface:#113238!important; --v-soft:#164047!important; --v-ink:#edfcfd!important; --v-muted:#b5dadd!important; --v-line:#3b7278!important; --v-accent:#56dbe0!important; --v-on:#062e32!important; --v-pop:#113238!important;
-  --ih63-brand:#19cbd3!important; --ih63-on-brand:#073639!important; --ih63-card:#164047!important; --ih63-card-ink:#edfcfd!important; --ih63-card-muted:#b5dadd!important;
-  --ih63-page-image:linear-gradient(155deg,#0c2226 0%,#12383e 55%,#0c2226 100%)!important;
-  --ih63-hero-image:linear-gradient(115deg,#164047 0%,#0e292e 60%,#0c2226 100%)!important;
+/* Shared page wash and navigation. Turquoise colours load before the app. */
+@layer ideahirePolish {
+  html:not([data-template="classic"]) body #root :is(.ih-top-assistant, .ih-room-assistant),
+  html:not([data-template="classic"]) body #ih64-lucyna .ih64-dock-return {
+    border-color: var(--v-action) !important;
+    background-color: var(--v-action) !important;
+    color: var(--v-action-ink) !important;
+  }
 }
 html:root[data-template="classic"] {
   --v-bg:#ffffff!important; --v-surface:#ffffff!important; --v-soft:#f2f2f2!important; --v-ink:#191919!important; --v-muted:#555555!important; --v-line:#d5d5d5!important; --v-accent:#191919!important; --v-on:#ffffff!important; --v-pop:#ffffff!important;
@@ -71,16 +67,16 @@ html:root body :is(#ih18-account-menu,#ih27-home-account-menu) { border:1px soli
 html:root body :is(#ih18-account-menu,#ih27-home-account-menu) :is(a,button,strong,span) { color:var(--ih63-nav-ink)!important; -webkit-text-fill-color:currentColor!important; }
 
 /* The turquoise sample shows its own palette, even when classic is selected. */
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview { border-color:#a1dfe3!important; background:#effcfc!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-nav { border-color:#19cbd3!important; background:#19cbd3!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-nav i { background:#0c4247!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero { border-color:#b8e9ec!important; background:#ffffff!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero i { background:#12373b!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero i:nth-child(3) { background:#19cbd3!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero b { background:#19cbd3!important; border-radius:10px!important; transform:none!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-cards i { border-color:#9edce0!important; background:#bdeff2!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current.is-selected { border-color:#087b82!important; }
-html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-option-action i { background:#19cbd3!important; border-color:#087b82!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview { border-color:#b6d0ca!important; background:#ecf8f5!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-nav { border-color:#15d6c1!important; background:#15d6c1!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-nav i { background:#082923!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero { border-color:#b6d0ca!important; background:#ffffff!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero i { background:#112825!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero i:nth-child(3) { background:#15d6c1!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-hero b { background:#15d6c1!important; border-radius:10px!important; transform:none!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-preview-cards i { border-color:#8de3d7!important; background:#cbf6ef!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current.is-selected { border-color:#00746a!important; }
+html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root .account-template-option.is-current .account-template-option-action i { background:#15d6c1!important; border-color:#00746a!important; }
 
 @media (max-width:1260px) {
   html:root body #root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root#root #ih63-home-header .ih53-desktop-account { display:none!important; }

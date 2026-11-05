@@ -1,163 +1,418 @@
-/* The Services masthead and the controls for its results are separate sections. */
+/* Search and categories introduce the catalogue; the pictures belong to its offers. */
 @layer ideahirePolish {
   body #root .ih-service-finder,
-  body #root .ih-service-browse { box-sizing:border-box!important; width:100%!important; min-width:0!important; }
-  body #root .ih-service-finder { margin:0 0 clamp(25px,4vw,54px)!important; }
+  body #root .ih-service-browse {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    --finder-fill: var(--v-action, var(--v-accent));
+    --finder-on: var(--v-action-ink, var(--v-on));
+    --finder-control: var(--v-control-line, color-mix(in srgb, var(--v-ink) 44%, var(--v-line)));
+  }
 
   body #root .ih-service-finder > .ih73-catalog-tabs {
-    box-sizing:border-box!important; display:flex!important; align-items:center!important;
-    justify-content:flex-start!important; gap:clamp(8px,2vw,26px)!important;
-    width:100%!important; min-width:0!important; margin:0 0 16px!important; padding:0!important;
-    border:0!important; border-bottom:1px solid var(--v-line)!important; background:transparent!important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: clamp(10px, 3vw, 34px) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--v-line) !important;
+    background: transparent !important;
   }
   body #root .ih-service-finder > .ih73-catalog-tabs > a {
-    position:relative!important; box-sizing:border-box!important; display:grid!important; place-items:center!important;
-    min-width:0!important; min-height:48px!important; margin:0!important; padding:9px 12px!important;
-    border:0!important; border-radius:0!important; background:none!important; color:var(--v-muted)!important;
-    font:550 15px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:normal!important; text-decoration:none!important;
+    position: relative !important;
+    display: grid !important;
+    place-items: center !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    padding: 6px 9px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--v-muted) !important;
+    font: 600 14px/1.4 Inter, system-ui, sans-serif !important;
+    text-decoration: none !important;
   }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a::after { content:none!important; }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"] { color:var(--v-ink)!important; font-weight:700!important; }
+  body #root .ih-service-finder > .ih73-catalog-tabs > a::after { content: none !important; }
+  body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"] { color: var(--v-ink) !important; font-weight: 750 !important; }
   body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"]::after {
-    content:""!important; position:absolute!important; inset:auto 0 -1px!important;
-    width:100%!important; height:3px!important; border-radius:2px 2px 0 0!important; background:var(--v-accent)!important;
+    content: "" !important;
+    position: absolute !important;
+    inset: auto 0 -1px !important;
+    width: 100% !important;
+    height: 3px !important;
+    border-radius: 2px 2px 0 0 !important;
+    background: var(--v-accent) !important;
   }
 
-  body #root .ih-service-finder > .ih-service-finder-hero {
-    display:grid!important; grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)!important;
-    grid-template-areas:"copy film"!important; grid-template-rows:minmax(0,1fr)!important; align-items:stretch!important; gap:0!important;
-    box-sizing:border-box!important; width:100%!important; max-width:none!important; min-height:clamp(300px,29vw,390px)!important;
-    height:auto!important; margin:0!important; padding:0!important; overflow:hidden!important;
-    border:1px solid var(--v-line)!important; border-radius:20px!important; clip-path:none!important;
-    background:linear-gradient(118deg,var(--v-surface) 10%,var(--v-soft) 100%)!important; animation:none!important;
+  body #root .ih-service-masthead {
+    display: grid;
+    grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+    align-items: center;
+    gap: 18px clamp(24px, 5vw, 74px);
+    padding: clamp(30px, 5vw, 62px) 0 clamp(20px, 3vw, 42px);
+    background: radial-gradient(ellipse 51% 90% at 56% 16%, color-mix(in srgb, var(--finder-fill) 11%, transparent), transparent 100%);
   }
-  body #root .ih-service-finder-hero > .ih-cinema-film {
-    grid-area:film!important; position:relative!important; inset:auto!important; z-index:0!important;
-    width:100%!important; height:auto!important; max-width:none!important; max-height:none!important;
-    min-height:0!important; overflow:hidden!important; border-radius:0!important;
-    background-size:cover!important; background-position:50% 54%!important; background-color:var(--v-soft)!important;
+  body #root .ih-service-intro {
+    position: static !important;
+    display: grid !important;
+    gap: 10px;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: start !important;
   }
-  body #root .ih-service-finder-hero > .ih-cinema-film::after {
-    background:linear-gradient(90deg,color-mix(in srgb,var(--v-soft) 28%,transparent),transparent 38%)!important;
+  body #root .ih-service-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
   }
-  body #root .ih-service-finder-hero .ih-cinema-film > video {
-    object-position:50% 54%!important; filter:none!important;
+  body #root .ih-service-intro h1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--v-ink) !important;
+    font: 780 clamp(42px, 6vw, 76px)/1 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.064em !important;
+    text-align: start !important;
   }
-  body #root .ih-service-finder-hero > .ih-page-heading {
-    grid-area:copy!important; box-sizing:border-box!important; display:flex!important; flex-direction:column!important;
-    justify-content:center!important; align-items:flex-start!important; gap:22px!important;
-    width:100%!important; min-height:0!important; margin:0!important; padding:clamp(26px,4vw,54px)!important;
-    text-align:start!important;
+  body #root .ih-service-intro p {
+    max-width: 36ch;
+    margin: 0 !important;
+    color: var(--v-muted) !important;
+    font: 450 15px/1.57 Inter, system-ui, sans-serif !important;
+    text-align: start !important;
+    text-wrap: pretty;
   }
-  body #root .ih-service-finder-hero .ih73-heading-copy {
-    display:grid!important; flex:0 1 auto!important; justify-items:start!important; gap:10px!important; width:100%!important; min-width:0!important;
+  body #root .ih-service-my-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 1px;
+    color: var(--v-accent) !important;
+    font: 650 13px/1.4 Inter, system-ui, sans-serif !important;
+    text-decoration: none !important;
   }
-  body #root .ih-service-finder-hero .ih-page-heading h1 {
-    color:var(--v-ink)!important; font:750 clamp(45px,6.4vw,84px)/.99 Inter,system-ui,sans-serif!important;
-    letter-spacing:-.062em!important; text-align:start!important;
-  }
-  body #root .ih-service-finder-hero .ih73-description {
-    color:var(--v-muted)!important; max-width:38ch!important; font:450 16px/1.65 Inter,system-ui,sans-serif!important;
-    text-align:start!important;
-  }
-  body #root .ih-service-finder-hero .ih73-heading-actions {
-    display:flex!important; align-self:flex-start!important; justify-content:flex-start!important; flex-wrap:wrap!important; gap:6px 16px!important; margin:0!important;
-  }
-  body #root .ih-service-finder-hero .ih73-heading-actions > a {
-    min-height:44px!important; margin:0!important; padding:9px 14px!important; font:650 14px/1.4 Inter,system-ui,sans-serif!important;
-  }
-  body #root .ih-service-finder-hero .ih73-heading-actions > a:first-child {
-    padding-inline:0!important; color:var(--v-ink)!important; text-decoration:underline!important; text-underline-offset:4px!important;
-  }
+  body #root .ih-service-my-link svg { flex: none; width: 15px; height: 15px; }
 
-  body #root .ih-service-finder-controls { min-width:0!important; margin:0 0 19px!important; }
-  body #root .ih-service-finder-summary,
-  body #root .ih-service-finder-title {
-    display:flex!important; align-items:center!important; flex-wrap:wrap!important; min-width:0!important; gap:6px 14px!important;
-  }
-  body #root .ih-service-finder-summary { justify-content:space-between!important; min-height:44px!important; margin:0 0 12px!important; }
-  body #root .ih-service-finder-title > h2 {
-    margin:0!important; padding:0!important; color:var(--v-ink)!important; text-align:start!important;
-    font:700 clamp(24px,3vw,34px)/1.15 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important;
-  }
-  body #root .ih-service-finder-count {
-    display:inline-flex!important; align-items:baseline!important; gap:5px!important; margin:0!important; padding:5px 11px!important;
-    border:1px solid var(--v-line)!important; border-radius:999px!important; background:var(--v-surface)!important;
-    color:var(--v-muted)!important; font:550 12px/1.5 Inter,system-ui,sans-serif!important;
-  }
-  body #root .ih-service-finder-count > strong {
-    color:var(--v-accent)!important; font:700 15px/1.2 Inter,system-ui,sans-serif!important; font-variant-numeric:tabular-nums!important;
-  }
-  body #root .ih-service-finder-tools {
-    display:grid!important; grid-template-columns:minmax(0,2.4fr) minmax(215px,1fr)!important; align-items:end!important;
-    box-sizing:border-box!important; gap:12px!important; min-width:0!important; padding:14px!important;
-    border:1px solid var(--v-line)!important; border-radius:15px!important; background:var(--v-surface)!important;
-  }
-  body #root .ih-service-finder-search, body #root .ih-service-finder-field.ih-control-select {
-    display:grid!important; gap:6px!important; width:100%!important; min-width:0!important; margin:0!important;
-  }
-  body #root .ih-service-finder-search > label, body #root .ih-service-finder-field > .ih7-select-label {
-    display:block!important; position:static!important; width:auto!important; height:auto!important; margin:0!important; padding:0!important;
-    color:var(--v-muted)!important; font:600 12px/1.5 Inter,system-ui,sans-serif!important;
+  body #root .ih-service-discovery { display: grid; gap: 8px; min-width: 0; }
+  body #root .ih-service-search { min-width: 0; width: 100%; margin: 0 !important; padding: 0 !important; }
+  body #root .ih-service-sr {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   body #root .ih-service-search-input {
-    box-sizing:border-box!important; display:flex!important; align-items:center!important; gap:10px!important; min-width:0!important;
-    height:50px!important; padding:0 14px!important; border:1px solid var(--v-line)!important; border-radius:9px!important;
-    background:var(--v-bg)!important; color:var(--v-muted)!important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    height: 54px !important;
+    padding: 0 5px 0 13px !important;
+    border: 1px solid var(--finder-control) !important;
+    border-radius: 13px !important;
+    background: var(--v-surface) !important;
+    color: var(--v-accent) !important;
   }
   body #root .ih-service-search-input:focus-within {
-    border-color:var(--v-accent)!important; outline:2px solid var(--v-accent)!important; outline-offset:2px!important;
+    border-color: var(--v-accent) !important;
+    outline: 2px solid var(--v-accent) !important;
+    outline-offset: 2px !important;
   }
-  body #root .ih-service-search-input > svg { flex:none!important; width:17px!important; height:17px!important; }
+  body #root .ih-service-search-input > svg { flex: none; width: 20px; height: 20px; }
   body #root .ih-service-search-input > input {
-    box-sizing:border-box!important; display:block!important; appearance:none!important; flex:1 1 0!important; width:0!important; min-width:0!important;
-    height:100%!important; min-height:0!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important;
-    outline:0!important; background:transparent!important; box-shadow:none!important; color:var(--v-ink)!important;
-    font:400 16px/1.4 Inter,system-ui,sans-serif!important;
+    box-sizing: border-box !important;
+    display: block !important;
+    appearance: none !important;
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 6px 0 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--v-ink) !important;
+    font: 500 16px/1.4 Inter, system-ui, sans-serif !important;
   }
-  body #root .ih-service-search-input > input::placeholder { color:var(--v-muted)!important; opacity:.86!important; }
-  body #root .ih-service-search-input > input::-webkit-search-cancel-button { display:none!important; }
-  body #root .ih-service-finder-field > .ih-control-trigger {
-    box-sizing:border-box!important; height:50px!important; min-height:50px!important; padding:8px 14px!important;
-    border-radius:9px!important; background:var(--v-bg)!important; font:550 14px/1.4 Inter,system-ui,sans-serif!important;
-  }
-  body #root .ih-service-finder-field > .ih-control-trigger > span { min-width:0!important; white-space:nowrap!important; overflow:hidden!important; text-overflow:ellipsis!important; }
-  body #root .ih-service-finder-reset {
-    display:inline-flex!important; align-items:center!important; gap:6px!important; min-height:44px!important; margin:0!important; padding:0!important;
-    border:0!important; background:transparent!important; color:var(--v-accent)!important; font:600 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important;
-  }
-  body #root .ih-service-finder-reset > svg { flex:none!important; width:15px!important; height:15px!important; }
-  body #root :is(.ih-service-finder,.ih-service-finder-controls) :is(a,button):focus-visible {
-    outline:2px solid var(--v-accent)!important; outline-offset:2px!important;
-  }
-  body #root .ih-services-list { min-width:0!important; width:100%!important; margin:0!important; }
-  body #root .ih-services-list .ih78-services-empty h3 {
-    margin:0 0 8px!important; color:var(--v-ink)!important; font:700 22px/1.3 Inter,system-ui,sans-serif!important;
+  body #root .ih-service-search-input > input::placeholder { color: var(--v-muted) !important; opacity: 1 !important; }
+  body #root .ih-service-search-input > input::-webkit-search-cancel-button { display: none !important; }
+  body #root .ih-service-search-clear {
+    flex: 0 0 44px;
+    display: grid !important;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: none !important;
+    color: var(--v-muted) !important;
+    cursor: pointer;
   }
 
-  @media (min-width:1051px) {
-    #root .ih5-service-page .ih-services-list .ih78-service-offer:has(> .ih-listing-thumbnail) {
-      grid-template-columns:minmax(180px,22%) minmax(0,1fr) 206px!important;
-    }
+  body #root .ih-service-finder-fields {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: start;
+    gap: 9px;
+    min-width: 0;
   }
-  @media (max-width:720px) {
-    body #root .ih-service-finder > .ih73-catalog-tabs {
-      display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr))!important; gap:4px!important; margin-bottom:13px!important;
+  body #root .ih-service-finder-field.ih-control-select {
+    display: block !important;
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: min(196px, 39vw) !important;
+    margin: 0 !important;
+  }
+  body #root .ih-service-finder-field > .ih-control-trigger {
+    box-sizing: border-box !important;
+    min-height: 44px !important;
+    gap: 4px !important;
+    padding: 6px 8px 6px 10px !important;
+    border: 1px solid var(--finder-control) !important;
+    border-radius: 9px !important;
+    background: var(--v-surface) !important;
+    color: var(--v-ink) !important;
+    font: 650 12px/1.4 Inter, system-ui, sans-serif !important;
+  }
+  body #root .ih-service-finder-field > .ih-control-trigger > span {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+  }
+  body #root .ih-service-finder-field > .ih-control-trigger > svg { width: 15px !important; height: 15px !important; }
+  body #root .ih-service-quick-fields {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    padding: 0 10px 0 2px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none !important;
+  }
+  body #root .ih-service-quick-fields::-webkit-scrollbar { display: none !important; }
+  body #root .ih-service-quick-fields > button {
+    flex: none;
+    min-height: 44px !important;
+    padding: 7px 12px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    background: var(--v-soft) !important;
+    color: var(--v-ink) !important;
+    font: 600 13px/1.3 Inter, system-ui, sans-serif !important;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  body #root .ih-service-quick-fields > button[aria-pressed="true"] {
+    background: var(--finder-fill) !important;
+    color: var(--finder-on) !important;
+  }
+
+  body #root .ih-service-finder-summary,
+  body #root .ih-service-finder-title {
+    display: flex !important;
+    align-items: baseline !important;
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+    gap: 4px 12px !important;
+  }
+  body #root .ih-service-finder-summary {
+    position: static !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 52px !important;
+    margin: 0 0 14px !important;
+    padding: 8px 0 0 !important;
+    border: 0 !important;
+    border-top: 1px solid var(--v-line) !important;
+    background: none !important;
+  }
+  body #root .ih-service-finder-title > h2 {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--v-ink) !important;
+    text-align: start !important;
+    font: 750 clamp(22px, 3vw, 32px)/1.16 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.04em !important;
+  }
+  body #root .ih-service-finder-count {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--v-muted) !important;
+    font: 550 13px/1.45 Inter, system-ui, sans-serif !important;
+  }
+  body #root .ih-service-finder-count > strong { color: var(--v-accent) !important; font-weight: 750; font-variant-numeric: tabular-nums; }
+  body #root .ih-service-publish {
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-height: 44px !important;
+    padding: 7px 12px !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: var(--finder-fill) !important;
+    color: var(--finder-on) !important;
+    font: 700 13px/1.4 Inter, system-ui, sans-serif !important;
+    text-decoration: none !important;
+  }
+  body #root .ih-service-publish svg { flex: none; width: 17px; height: 17px; }
+  body #root .ih-service-finder-reset {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 44px !important;
+    margin: -7px 0 7px !important;
+    padding: 0 3px !important;
+    border: 0 !important;
+    background: none !important;
+    color: var(--v-accent) !important;
+    font: 650 13px/1.5 Inter, system-ui, sans-serif !important;
+    cursor: pointer;
+  }
+  body #root .ih-service-finder-reset > svg { flex: none; width: 15px; height: 15px; }
+  body #root :is(.ih-service-finder, .ih-service-browse) :is(a, button):focus-visible {
+    outline: 2px solid var(--v-accent) !important;
+    outline-offset: 2px !important;
+  }
+  body #root .ih-service-quick-fields > button:focus-visible { outline-offset: -3px !important; }
+  body #root .ih-service-publish:hover { background: color-mix(in srgb, var(--finder-fill) 86%, var(--finder-on)) !important; }
+  body #root :is(.ih-service-my-link, .ih-service-finder-reset):hover { text-decoration: underline !important; text-underline-offset: 3px; }
+
+  body #root .ih-services-list { min-width: 0 !important; width: 100% !important; margin: 0 !important; }
+  body #root .ih-services-list .ih78-service-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: clamp(14px, 2.4vw, 28px) !important;
+  }
+  body #root .ih-services-list .ih78-service-offer {
+    --offer-pad: clamp(14px, 2vw, 22px);
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid var(--v-line) !important;
+    border-radius: 16px !important;
+    background: var(--v-surface) !important;
+    color: var(--v-ink) !important;
+  }
+  body #root .ih-services-list .ih78-service-offer > * { grid-area: auto !important; min-width: 0 !important; }
+  body #root .ih-services-list .ih78-service-offer > .ih-listing-thumbnail {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+  body #root .ih-services-list .ih86-offer-heading {
+    position: static !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 4px 9px !important;
+    padding: var(--offer-pad) var(--offer-pad) 0 !important;
+  }
+  body #root .ih-services-list .ih78-offer-field { flex: 1 1 140px !important; min-width: 0 !important; overflow-wrap: anywhere; }
+  body #root .ih-services-list .ih86-offer-availability {
+    color: var(--v-accent) !important;
+    background: var(--v-soft) !important;
+  }
+  body #root .ih-services-list .ih86-offer-availability.is-full { color: var(--v-muted) !important; }
+  body #root .ih-services-list .ih78-offer-copy { padding: 12px var(--offer-pad) 15px !important; overflow-wrap: anywhere; }
+  body #root .ih-services-list .ih78-offer-copy h2 {
+    margin: 0 0 6px !important;
+    color: var(--v-ink) !important;
+    font: 740 clamp(19px, 3vw, 25px)/1.28 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.03em !important;
+  }
+  body #root .ih-services-list .ih78-offer-copy p { color: var(--v-muted) !important; }
+  body #root .ih-services-list .ih80-offer-terms {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px var(--offer-pad) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--v-soft) !important;
+    color: var(--v-ink) !important;
+    overflow-wrap: anywhere;
+  }
+  body #root .ih-services-list .ih80-offer-terms:has(> dl:empty) { grid-template-columns: minmax(0, 1fr) !important; }
+  body #root .ih-services-list .ih80-offer-terms .ih78-offer-price { gap: 3px 7px !important; }
+  body #root .ih-services-list .ih80-offer-terms .ih78-offer-price > strong { font-size: clamp(16px, 4.4vw, 24px) !important; }
+  body #root .ih-services-list .ih80-offer-facts { gap: 6px !important; }
+  body #root .ih-services-list .ih80-offer-facts dt { font-size: 11px !important; color: var(--v-muted) !important; }
+  body #root .ih-services-list .ih78-offer-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 8px var(--offer-pad) !important;
+    border: 0 !important;
+    background: none !important;
+  }
+  body #root .ih-services-list .ih78-offer-person { min-width: 0 !important; overflow-wrap: anywhere; }
+  body #root .ih-services-list .ih80-offer-open {
+    flex: 0 0 auto !important;
+    gap: 5px !important;
+    width: auto !important;
+    min-height: 44px !important;
+    padding: 4px 0 4px 5px !important;
+    border: 0 !important;
+    background: none !important;
+    color: var(--v-accent) !important;
+  }
+  body #root .ih-services-list .ih80-offer-open:hover { text-decoration: underline !important; }
+
+  @media (max-width: 780px) {
+    body #root .ih-service-masthead {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+      padding: 23px 0 16px;
     }
-    body #root .ih-service-finder > .ih73-catalog-tabs > a { padding-inline:2px!important; font-size:13px!important; }
-    body #root .ih-service-finder > .ih-service-finder-hero {
-      grid-template-columns:minmax(0,1fr)!important; grid-template-areas:"copy" "film"!important; grid-template-rows:auto auto!important;
-      min-height:0!important; border-radius:16px!important;
-    }
-    body #root .ih-service-finder-hero > .ih-page-heading { gap:15px!important; padding:23px 18px 19px!important; }
-    body #root .ih-service-finder-hero .ih-page-heading h1 { font-size:clamp(40px,11vw,56px)!important; }
-    body #root .ih-service-finder-hero .ih73-description { font-size:15px!important; line-height:1.55!important; }
-    body #root .ih-service-finder-hero .ih73-heading-actions { gap:6px 13px!important; }
-    body #root .ih-service-finder-hero .ih73-heading-actions > a { font-size:13px!important; }
-    body #root .ih-service-finder-hero > .ih-cinema-film {
-      aspect-ratio:2 / 1!important; height:auto!important; max-height:235px!important;
-    }
-    body #root .ih-service-finder-hero > .ih-cinema-film::after { background:transparent!important; }
-    body #root .ih-service-finder-tools { grid-template-columns:minmax(0,1fr)!important; gap:11px!important; padding:12px!important; }
+    body #root .ih-service-intro { gap: 7px; }
+    body #root .ih-service-intro h1 { font-size: clamp(41px, 12vw, 60px) !important; }
+  }
+  @media (max-width: 600px) {
+    body #root .ih-service-finder > .ih73-catalog-tabs { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 3px !important; }
+    body #root .ih-service-finder > .ih73-catalog-tabs > a { padding-inline: 2px !important; font-size: 13px !important; }
+    body #root .ih-services-list .ih78-service-grid { grid-template-columns: minmax(0, 1fr) !important; }
   }
 }

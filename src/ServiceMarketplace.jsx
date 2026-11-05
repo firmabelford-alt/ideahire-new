@@ -21,7 +21,7 @@ import {
 } from "react-router-dom";
 import { useSitePreferences, translateUiText } from "./Preferences";
 import { SubpageHeading, SubpageCatalogTabs, SubpageLoading } from "./Subpages";
-import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader, MarketCatalogHero, MarketResultCount } from "./MarketUI";
+import { IdeaHireDateField, MarketFilters, MarketHeader, MarketIcon, IDEA_HIRE_PUBLIC_OFFER, MarketCatalogHeader, MarketResultCount } from "./MarketUI";
 
 const SERVICE_CATEGORIES = [
   "Programowanie",
@@ -34,6 +34,13 @@ const SERVICE_CATEGORIES = [
   "Dane, analizy i research",
   "Biznes i e-commerce",
   "Architektura, wnętrza i CAD",
+];
+
+const SERVICE_QUICK_FIELDS = [
+  ["Programowanie", "Strony i IT", "Web & IT"],
+  ["Grafika i design", "Grafika", "Design"],
+  ["Copywriting", "Teksty", "Writing"],
+  ["Marketing", "Marketing", "Marketing"],
 ];
 
 const SERVICE_CATEGORY_COPY = {
@@ -360,11 +367,11 @@ function ServiceCard({ service, client }) {
   const ownerName = service.owner_name || service.freelancer_name || (en ? 'IdeaHire freelancer' : 'Wykonawca IdeaHire');
   const Owner = service.freelancer_id ? Link : 'div';
   return <article className="ih78-service-offer">
+    <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={client} />
     <header className="ih86-offer-heading">
       <div className="ih78-offer-field"><span>{category}</span>{service.subcategory && <small>{en ? translateUiText(service.subcategory) : service.subcategory}</small>}</div>
       <span className={'ih86-offer-availability ' + capacity.className}>{en ? translateUiText(capacity.label) : capacity.label}</span>
     </header>
-    <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={client} />
     <div className="ih78-offer-copy">
       <h2><Link to={serviceUrl}>{service.title}</Link></h2>
       {service.summary && <p>{service.summary}</p>}
@@ -399,19 +406,12 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Wszystkie");
+  const requestedCategory = new URLSearchParams(location.search).get("category");
+  const selectedCategory = SERVICE_CATEGORIES.includes(requestedCategory) ? requestedCategory : "Wszystkie";
   const loadRequest = useRef(0);
+  const searchInput = useRef(null);
   const searchId = useId();
   const offersId = useId();
-
-  useEffect(() => {
-    const requestedCategory = new URLSearchParams(location.search).get("category");
-    setSelectedCategory(
-      SERVICE_CATEGORIES.includes(requestedCategory)
-        ? requestedCategory
-        : "Wszystkie"
-    );
-  }, [location.search]);
 
   const loadServices = useCallback(async ({ quiet = false } = {}) => {
     const request = ++loadRequest.current;
@@ -446,7 +446,6 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   useServiceCapacityRefresh(loadServices);
 
   function chooseCategory(category) {
-    setSelectedCategory(category);
     navigate(
       category === "Wszystkie"
         ? "/services"
@@ -456,42 +455,69 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   }
 
   const hasFilters = Boolean(search.trim()) || selectedCategory !== "Wszystkie";
+  const clearFilters = () => {
+    setSearch("");
+    if (selectedCategory !== "Wszystkie") chooseCategory("Wszystkie");
+  };
 
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-list-page ih75-services-page ih78-services-page">
       <div className="ih-service-finder" data-no-translate="true">
         <SubpageCatalogTabs active="services" />
-        <MarketCatalogHero active="services" navigation={false} className="ih-service-finder-hero"
-          title={english ? "Services" : "Usługi"}
-          description={english ? "See what you can hire for. Compare what’s included, the price and when it’ll be ready." : "Zobacz, co możesz zlecić. Porównaj zakres, cenę i czas realizacji."}
-          actions={<><Link className="ih79-text-action" to="/services/mine">{english ? "My services" : "Moje usługi"}</Link><Link className="ih78-add-service" to="/services/new"><MarketIcon kind="plus" /><span>{english ? "Add a service" : "Dodaj usługę"}</span></Link></>} />
-      </div>
-      <section className="ih-service-browse" aria-labelledby={offersId}>
-        <div className="ih-service-finder-controls" data-no-translate="true">
-          <header className="ih-service-finder-summary">
-            <div className="ih-service-finder-title">
-              <h2 id={offersId}>{english ? "Offers" : "Oferty"}</h2>
-              <MarketResultCount count={services.length} noun="services" className="ih-service-finder-count"
-                status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
+        <div className="ih-service-masthead">
+          <header className="ih-service-intro">
+            <div className="ih-service-title-row">
+              <h1>{english ? "Services" : "Usługi"}</h1>
+              <Link className="ih-service-my-link" to="/services/mine">
+                {english ? "My services" : "Moje usługi"}<MarketIcon kind="arrow" />
+              </Link>
             </div>
-            {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={() => { setSearch(""); chooseCategory("Wszystkie"); }}>
-              <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
-            </button>}
+            <p>{english ? "Find someone for a specific task. Compare what’s included, the price and delivery time." : "Znajdź kogoś do konkretnego zadania. Porównaj zakres, cenę i termin."}</p>
           </header>
-          <div className="ih-service-finder-tools">
-            <div className="ih-service-finder-search">
-              <label htmlFor={searchId}>{english ? "Search services" : "Szukaj usługi"}</label>
-              <div className="ih-service-search-input"><MarketIcon kind="search" />
-                <input id={searchId} type="search" value={search} maxLength={160} aria-controls="ih-service-results" onChange={event => setSearch(event.target.value)}
-                  placeholder={english ? "E.g. logo or website" : "Np. logo lub strona WWW"} />
+          <div className="ih-service-discovery">
+            <form className="ih-service-search" role="search" aria-label={english ? "Service search" : "Wyszukiwarka usług"}
+              onSubmit={event => {
+                event.preventDefault();
+                if (window.matchMedia("(pointer: coarse)").matches) searchInput.current?.blur();
+              }}>
+              <label className="ih-service-sr" htmlFor={searchId}>{english ? "Search services" : "Szukaj usługi"}</label>
+              <div className="ih-service-search-input">
+                <MarketIcon kind="search" />
+                <input ref={searchInput} id={searchId} type="search" value={search} maxLength={160} enterKeyHint="search"
+                  aria-controls="ih-service-results" onChange={event => setSearch(event.target.value)}
+                  placeholder={english ? "Logo, website, video…" : "Logo, strona WWW, montaż…"} />
+                {search && <button className="ih-service-search-clear" type="button" aria-label={english ? "Clear search" : "Wyczyść wyszukiwanie"}
+                  onClick={() => { searchInput.current?.focus(); setSearch(""); }}><MarketIcon kind="close" /></button>}
+              </div>
+            </form>
+            <div className="ih-service-finder-fields">
+              <FormSelect className="ih-service-finder-field" menuMinWidth={266} aria-label={english ? "Service categories" : "Dziedziny usług"}
+                value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
+                <option value="Wszystkie">{english ? "All fields" : "Wszystkie"}</option>
+                {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
+              </FormSelect>
+              <div className="ih-service-quick-fields" role="group" aria-label={english ? "Quick categories" : "Szybki wybór dziedziny"}>
+                {SERVICE_QUICK_FIELDS.map(([value, pl, en]) => (
+                  <button key={value} type="button" aria-pressed={value === selectedCategory} aria-controls="ih-service-results"
+                    onClick={() => chooseCategory(value === selectedCategory ? "Wszystkie" : value)}>{english ? en : pl}</button>
+                ))}
               </div>
             </div>
-            <FormSelect className="ih-service-finder-field" label={english ? "Field" : "Dziedzina"} value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
-              <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
-              {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
-            </FormSelect>
           </div>
         </div>
+      </div>
+      <section className="ih-service-browse" aria-labelledby={offersId}>
+        <header className="ih-service-finder-summary" data-no-translate="true">
+          <div className="ih-service-finder-title">
+            <h2 id={offersId}>{english ? "Offers" : "Oferty"}</h2>
+            <MarketResultCount count={services.length} noun="services" className="ih-service-finder-count"
+              status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
+          </div>
+          <Link className="ih-service-publish" to="/services/new"><MarketIcon kind="plus" />{english ? "Add a service" : "Dodaj usługę"}</Link>
+        </header>
+        {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={clearFilters}>
+          <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
+        </button>}
         <div className="ih78-service-results ih-services-list" id="ih-service-results" aria-busy={loading}>
           {message ? (
             <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
