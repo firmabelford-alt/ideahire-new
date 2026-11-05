@@ -1,24 +1,24 @@
-/* Search and categories introduce the catalogue; the pictures belong to its offers. */
+/* The original film sits above a single control strip and the live catalogue. */
 @layer ideahirePolish {
-  body #root .ih-service-finder,
-  body #root .ih-service-browse {
+  body.ih79-app #root .ih5-service-list-page > .ih-market-shell { padding-top: clamp(8px, 2vw, 22px) !important; }
+  body #root :is(.ih-service-finder, .ih-service-browse) {
     box-sizing: border-box !important;
     width: 100% !important;
     min-width: 0 !important;
-    --finder-fill: var(--v-action, var(--v-accent));
-    --finder-on: var(--v-action-ink, var(--v-on));
-    --finder-control: var(--v-control-line, color-mix(in srgb, var(--v-ink) 44%, var(--v-line)));
+    --finder-field: var(--v-field, var(--v-soft));
+    --finder-ink: var(--v-field-ink, var(--v-ink));
+    --finder-muted: var(--v-field-muted, var(--v-muted));
+    --finder-line: var(--v-control-line, color-mix(in srgb, var(--v-ink) 44%, var(--v-line)));
   }
-
   body #root .ih-service-finder > .ih73-catalog-tabs {
     box-sizing: border-box !important;
     display: flex !important;
-    align-items: stretch !important;
     justify-content: flex-start !important;
-    gap: clamp(10px, 3vw, 34px) !important;
+    align-items: stretch !important;
+    gap: clamp(6px, 2.5vw, 28px) !important;
     width: 100% !important;
     min-width: 0 !important;
-    margin: 0 !important;
+    margin: 0 0 13px !important;
     padding: 0 !important;
     border: 0 !important;
     border-bottom: 1px solid var(--v-line) !important;
@@ -29,89 +29,189 @@
     display: grid !important;
     place-items: center !important;
     min-width: 0 !important;
-    min-height: 48px !important;
+    min-height: 44px !important;
     margin: 0 !important;
-    padding: 6px 9px !important;
+    padding: 6px 10px !important;
     border: 0 !important;
     border-radius: 0 !important;
-    background: transparent !important;
+    background: none !important;
     color: var(--v-muted) !important;
     font: 600 14px/1.4 Inter, system-ui, sans-serif !important;
     text-decoration: none !important;
   }
   body #root .ih-service-finder > .ih73-catalog-tabs > a::after { content: none !important; }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"] { color: var(--v-ink) !important; font-weight: 750 !important; }
+  body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"] { color: var(--v-ink) !important; }
   body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"]::after {
     content: "" !important;
     position: absolute !important;
     inset: auto 0 -1px !important;
     width: 100% !important;
     height: 3px !important;
-    border-radius: 2px 2px 0 0 !important;
     background: var(--v-accent) !important;
   }
 
-  body #root .ih-service-masthead {
-    display: grid;
-    grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
-    align-items: center;
-    gap: 18px clamp(24px, 5vw, 74px);
-    padding: clamp(30px, 5vw, 62px) 0 clamp(20px, 3vw, 42px);
-    background: radial-gradient(ellipse 51% 90% at 56% 16%, color-mix(in srgb, var(--finder-fill) 11%, transparent), transparent 100%);
-  }
-  body #root .ih-service-intro {
-    position: static !important;
+  body #root .ih-service-finder > .ih-service-finder-hero {
     display: grid !important;
-    gap: 10px;
-    min-width: 0;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) !important;
+    grid-template-areas: "intro film" !important;
+    grid-template-rows: auto !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: clamp(250px, 27vw, 350px) !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: 1px solid var(--v-line) !important;
+    border-radius: 15px !important;
+    background: var(--finder-field) !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+    overflow: hidden !important;
+    animation: none !important;
+  }
+  body #root .ih-service-finder-hero > .ih-cinema-film {
+    grid-area: film !important;
+    position: relative !important;
+    inset: auto !important;
+    z-index: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    background-size: cover !important;
+    background-position: 50% 53% !important;
+    background-color: var(--v-soft) !important;
+    overflow: hidden !important;
+  }
+  body #root .ih-service-finder-hero > .ih-cinema-film::after { background: none !important; }
+  body #root .ih-service-finder-hero .ih-cinema-film > video {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: 50% 53% !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+  body #root .ih-service-finder-hero .ih-cinema-toggle {
+    position: absolute !important;
+    z-index: 2;
+    inset: auto 10px 10px auto;
+    display: grid !important;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0 !important;
+    border: 1px solid #ffffff80 !important;
+    border-radius: 8px;
+    background: #10171aea !important;
+    color: #fff !important;
+    pointer-events: auto !important;
+    cursor: pointer;
+  }
+  body #root .ih-service-finder-hero .ih-cinema-toggle > svg { width: 19px; height: 19px; }
+  body #root .ih-service-finder-hero > .ih-page-heading {
+    grid-area: intro !important;
+    position: static !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: clamp(14px, 2vw, 26px) !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: clamp(24px, 4vw, 52px) !important;
     border: 0 !important;
-    background: transparent !important;
+    background: none !important;
+    color: var(--finder-ink) !important;
     text-align: start !important;
   }
-  body #root .ih-service-title-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 4px 12px;
+  body #root .ih-service-finder-hero .ih73-heading-copy {
+    display: grid !important;
+    flex: 0 1 auto !important;
+    justify-items: start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
-  body #root .ih-service-intro h1 {
+  body #root .ih-service-finder-hero .ih-page-heading h1 {
     margin: 0 !important;
     padding: 0 !important;
-    color: var(--v-ink) !important;
-    font: 780 clamp(42px, 6vw, 76px)/1 Inter, system-ui, sans-serif !important;
-    letter-spacing: -.064em !important;
+    color: var(--finder-ink) !important;
+    font: 780 clamp(39px, 5.9vw, 76px)/1 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.059em !important;
     text-align: start !important;
   }
-  body #root .ih-service-intro p {
-    max-width: 36ch;
+  body #root .ih-service-finder-hero .ih73-description {
     margin: 0 !important;
-    color: var(--v-muted) !important;
-    font: 450 15px/1.57 Inter, system-ui, sans-serif !important;
+    color: var(--finder-muted) !important;
+    font: 500 15px/1.55 Inter, system-ui, sans-serif !important;
     text-align: start !important;
     text-wrap: pretty;
   }
-  body #root .ih-service-my-link {
+  body #root .ih-service-finder-hero .ih73-heading-actions {
+    display: flex !important;
+    align-self: start !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 5px 16px !important;
+    margin: 0 !important;
+  }
+  body #root .ih-service-finder-hero .ih73-heading-actions > a {
+    box-sizing: border-box !important;
     display: inline-flex !important;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    min-height: 44px;
-    padding: 0 1px;
-    color: var(--v-accent) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-height: 44px !important;
+    padding: 7px 12px !important;
+    border-radius: 7px !important;
     font: 650 13px/1.4 Inter, system-ui, sans-serif !important;
     text-decoration: none !important;
   }
-  body #root .ih-service-my-link svg { flex: none; width: 15px; height: 15px; }
+  body #root .ih-service-finder-hero .ih73-heading-actions > .ih-service-my-link {
+    padding-inline: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    color: var(--finder-ink) !important;
+  }
+  body #root .ih-service-finder-hero .ih73-heading-actions > .ih-service-publish {
+    border: 0 !important;
+    background: var(--finder-ink) !important;
+    color: var(--v-field, var(--v-bg)) !important;
+  }
+  body #root .ih-service-finder-hero .ih73-heading-actions > a svg { flex: none; width: 17px; height: 17px; }
+  body #root .ih-service-finder-hero .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
 
-  body #root .ih-service-discovery { display: grid; gap: 8px; min-width: 0; }
+  body #root .ih-service-console {
+    margin: clamp(16px, 3vw, 32px) 0 14px;
+    scroll-margin-top: calc(var(--a-head, 72px) + 12px);
+  }
+  body #root .ih-service-discovery {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(126px, 17%);
+    align-items: stretch;
+    min-width: 0;
+    border: 1px solid var(--finder-line);
+    border-radius: 10px;
+    background: var(--v-surface);
+  }
   body #root .ih-service-search { min-width: 0; width: 100%; margin: 0 !important; padding: 0 !important; }
   body #root .ih-service-sr {
     position: absolute !important;
     width: 1px !important;
     height: 1px !important;
+    min-height: 0 !important;
     padding: 0 !important;
     margin: -1px !important;
     overflow: hidden !important;
@@ -122,21 +222,15 @@
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 9px !important;
     min-width: 0 !important;
-    height: 54px !important;
-    padding: 0 5px 0 13px !important;
-    border: 1px solid var(--finder-control) !important;
-    border-radius: 13px !important;
-    background: var(--v-surface) !important;
+    height: 52px !important;
+    padding: 0 4px 0 12px !important;
+    border-radius: 9px 0 0 9px;
     color: var(--v-accent) !important;
   }
-  body #root .ih-service-search-input:focus-within {
-    border-color: var(--v-accent) !important;
-    outline: 2px solid var(--v-accent) !important;
-    outline-offset: 2px !important;
-  }
-  body #root .ih-service-search-input > svg { flex: none; width: 20px; height: 20px; }
+  body #root .ih-service-search-input:focus-within { outline: 2px solid var(--v-accent); outline-offset: -2px; }
+  body #root .ih-service-search-input > svg { flex: none; width: 19px; height: 19px; }
   body #root .ih-service-search-input > input {
     box-sizing: border-box !important;
     display: block !important;
@@ -147,7 +241,7 @@
     height: 100% !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 0 6px 0 0 !important;
+    padding: 0 4px 0 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     outline: 0 !important;
@@ -166,132 +260,87 @@
     height: 44px;
     padding: 0 !important;
     border: 0 !important;
-    border-radius: 8px !important;
-    background: none !important;
+    border-radius: 7px;
+    background: transparent !important;
     color: var(--v-muted) !important;
     cursor: pointer;
   }
-
-  body #root .ih-service-finder-fields {
-    display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
-    align-items: start;
-    gap: 9px;
-    min-width: 0;
-  }
   body #root .ih-service-finder-field.ih-control-select {
     display: block !important;
-    width: max-content !important;
+    width: 100% !important;
     min-width: 0 !important;
-    max-width: min(196px, 39vw) !important;
     margin: 0 !important;
   }
   body #root .ih-service-finder-field > .ih-control-trigger {
     box-sizing: border-box !important;
-    min-height: 44px !important;
-    gap: 4px !important;
-    padding: 6px 8px 6px 10px !important;
-    border: 1px solid var(--finder-control) !important;
-    border-radius: 9px !important;
-    background: var(--v-surface) !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 52px !important;
+    gap: 6px !important;
+    padding: 6px 9px !important;
+    border: 0 !important;
+    border-left: 1px solid var(--finder-line) !important;
+    border-radius: 0 9px 9px 0 !important;
+    background: var(--v-soft) !important;
     color: var(--v-ink) !important;
-    font: 650 12px/1.4 Inter, system-ui, sans-serif !important;
+    font: 650 13px/1.4 Inter, system-ui, sans-serif !important;
   }
+  body #root .ih-service-discovery[data-filtered] .ih-service-finder-field > .ih-control-trigger { color: var(--v-accent) !important; }
   body #root .ih-service-finder-field > .ih-control-trigger > span {
     min-width: 0 !important;
     overflow: hidden !important;
-    white-space: nowrap !important;
     text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
-  body #root .ih-service-finder-field > .ih-control-trigger > svg { width: 15px !important; height: 15px !important; }
-  body #root .ih-service-quick-fields {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    padding: 0 10px 0 2px;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: none !important;
-  }
-  body #root .ih-service-quick-fields::-webkit-scrollbar { display: none !important; }
-  body #root .ih-service-quick-fields > button {
-    flex: none;
-    min-height: 44px !important;
-    padding: 7px 12px !important;
-    border: 0 !important;
-    border-radius: 8px !important;
-    background: var(--v-soft) !important;
-    color: var(--v-ink) !important;
-    font: 600 13px/1.3 Inter, system-ui, sans-serif !important;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  body #root .ih-service-quick-fields > button[aria-pressed="true"] {
-    background: var(--finder-fill) !important;
-    color: var(--finder-on) !important;
-  }
-
-  body #root .ih-service-finder-summary,
-  body #root .ih-service-finder-title {
-    display: flex !important;
-    align-items: baseline !important;
-    flex-wrap: wrap !important;
-    min-width: 0 !important;
-    gap: 4px 12px !important;
-  }
+  body #root .ih-service-finder-field > .ih-control-trigger > svg { flex: none; width: 17px !important; height: 17px !important; }
   body #root .ih-service-finder-summary {
     position: static !important;
-    align-items: center !important;
+    display: flex !important;
     justify-content: space-between !important;
-    min-height: 52px !important;
-    margin: 0 0 14px !important;
-    padding: 8px 0 0 !important;
-    border: 0 !important;
-    border-top: 1px solid var(--v-line) !important;
-    background: none !important;
-  }
-  body #root .ih-service-finder-title > h2 {
+    align-items: center !important;
+    gap: 8px 15px !important;
+    min-height: 51px;
     margin: 0 !important;
-    padding: 0 !important;
-    color: var(--v-ink) !important;
-    text-align: start !important;
-    font: 750 clamp(22px, 3vw, 32px)/1.16 Inter, system-ui, sans-serif !important;
-    letter-spacing: -.04em !important;
+    padding: 6px 0 0 !important;
+    border: 0 !important;
+    background: none !important;
   }
   body #root .ih-service-finder-count {
     display: inline-flex !important;
     align-items: baseline !important;
-    gap: 4px !important;
+    flex: none;
+    gap: 5px;
+    max-width: 50%;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 0 0 10px !important;
+    border-left: 3px solid var(--v-accent);
     color: var(--v-muted) !important;
-    font: 550 13px/1.45 Inter, system-ui, sans-serif !important;
+    font: 600 13px/1.45 Inter, system-ui, sans-serif !important;
   }
-  body #root .ih-service-finder-count > strong { color: var(--v-accent) !important; font-weight: 750; font-variant-numeric: tabular-nums; }
-  body #root .ih-service-publish {
-    box-sizing: border-box !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    min-height: 44px !important;
-    padding: 7px 12px !important;
-    border: 0 !important;
-    border-radius: 9px !important;
-    background: var(--finder-fill) !important;
-    color: var(--finder-on) !important;
-    font: 700 13px/1.4 Inter, system-ui, sans-serif !important;
-    text-decoration: none !important;
+  body #root .ih-service-finder-count > strong {
+    color: var(--v-ink) !important;
+    font: 760 24px/1 Inter, system-ui, sans-serif !important;
+    font-variant-numeric: tabular-nums;
   }
-  body #root .ih-service-publish svg { flex: none; width: 17px; height: 17px; }
+  body #root .ih-service-filter-state {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0 10px;
+    min-width: 0;
+    color: var(--v-muted);
+    font: 550 12px/1.4 Inter, system-ui, sans-serif;
+    overflow-wrap: anywhere;
+    text-align: end;
+  }
   body #root .ih-service-finder-reset {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
     min-height: 44px !important;
-    margin: -7px 0 7px !important;
-    padding: 0 3px !important;
+    margin: 0 !important;
+    padding: 0 2px !important;
     border: 0 !important;
     background: none !important;
     color: var(--v-accent) !important;
@@ -299,12 +348,9 @@
     cursor: pointer;
   }
   body #root .ih-service-finder-reset > svg { flex: none; width: 15px; height: 15px; }
-  body #root :is(.ih-service-finder, .ih-service-browse) :is(a, button):focus-visible {
-    outline: 2px solid var(--v-accent) !important;
-    outline-offset: 2px !important;
-  }
-  body #root .ih-service-quick-fields > button:focus-visible { outline-offset: -3px !important; }
-  body #root .ih-service-publish:hover { background: color-mix(in srgb, var(--finder-fill) 86%, var(--finder-on)) !important; }
+  body #root :is(.ih-service-finder, .ih-service-browse) :is(a, button):focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: 2px !important; }
+  body #root .ih-service-finder .ih-service-finder-hero .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
+  body #root .ih-service-finder-hero .ih-cinema-toggle:focus-visible { outline-color: #fff !important; }
   body #root :is(.ih-service-my-link, .ih-service-finder-reset):hover { text-decoration: underline !important; text-underline-offset: 3px; }
 
   body #root .ih-services-list { min-width: 0 !important; width: 100% !important; margin: 0 !important; }
@@ -401,14 +447,23 @@
   }
   body #root .ih-services-list .ih80-offer-open:hover { text-decoration: underline !important; }
 
-  @media (max-width: 780px) {
-    body #root .ih-service-masthead {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 14px;
-      padding: 23px 0 16px;
+  @media (max-width: 720px) {
+    body #root .ih-service-finder > .ih-service-finder-hero {
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-areas: "film" "intro" !important;
+      grid-template-rows: auto auto !important;
+      min-height: 0 !important;
     }
-    body #root .ih-service-intro { gap: 7px; }
-    body #root .ih-service-intro h1 { font-size: clamp(41px, 12vw, 60px) !important; }
+    body #root .ih-service-finder-hero > .ih-cinema-film {
+      aspect-ratio: 2.2 / 1 !important;
+      max-height: 235px !important;
+    }
+    body #root .ih-service-finder-hero > .ih-page-heading { gap: 9px !important; padding: 14px 15px 12px !important; }
+    body #root .ih-service-finder-hero .ih73-heading-copy { gap: 5px !important; }
+    body #root .ih-service-finder-hero .ih-page-heading h1 { font-size: clamp(34px, 10vw, 48px) !important; }
+    body #root .ih-service-finder-hero .ih73-description { font-size: 14px !important; }
+    body #root .ih-service-finder-hero .ih73-heading-actions { gap: 3px 12px !important; }
+    body #root .ih-service-discovery { grid-template-columns: minmax(0, 1fr) 108px; }
   }
   @media (max-width: 600px) {
     body #root .ih-service-finder > .ih73-catalog-tabs { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 3px !important; }

@@ -2,17 +2,20 @@
    appearance and loading a new page use the same palette. */
 @layer ideahirePalette {
   :root:not([data-template="classic"]) {
-    --v-bg:#f9fcfb!important;
+    --v-bg:#f6f9fa!important;
     --v-surface:#ffffff!important;
-    --v-soft:#ecf8f5!important;
-    --v-ink:#112825!important;
-    --v-muted:#43605b!important;
-    --v-line:#b6d0ca!important;
-    --v-control-line:#718e87!important;
-    --v-accent:#00746a!important;
+    --v-soft:#edf3f4!important;
+    --v-ink:#101b20!important;
+    --v-muted:#43575d!important;
+    --v-line:#b9c9cc!important;
+    --v-control-line:#71888d!important;
+    --v-accent:#006b72!important;
     --v-on:#ffffff!important;
-    --v-action:#15d6c1!important;
-    --v-action-ink:#082923!important;
+    --v-action:#19cbd3!important;
+    --v-action-ink:#0a171b!important;
+    --v-field:#61e4e7!important;
+    --v-field-ink:#0a171b!important;
+    --v-field-muted:#17454a!important;
     --v-pop:var(--v-surface)!important;
 
     --ih-heading-ink:var(--v-ink)!important;
@@ -27,7 +30,7 @@
     --ih63-card:var(--v-soft)!important;
     --ih63-card-ink:var(--v-ink)!important;
     --ih63-card-muted:var(--v-muted)!important;
-    --ih63-page-image:radial-gradient(ellipse at 80% 18%,var(--v-soft),transparent 67%),var(--v-bg)!important;
+    --ih63-page-image:radial-gradient(ellipse at 100% 0%,color-mix(in srgb,var(--v-field) 9%,transparent),transparent 55%),var(--v-bg)!important;
     --ih63-hero-image:linear-gradient(118deg,var(--v-soft),var(--v-surface) 82%)!important;
     --ih-brand-paper:var(--v-bg)!important;
     --ih-brand-ink:var(--v-ink)!important;
@@ -53,15 +56,16 @@
     & ::selection { background:var(--v-action); color:var(--v-action-ink); }
   }
   :root[data-theme="dark"]:not([data-template="classic"]) {
-    --v-bg:#111917!important;
-    --v-surface:#172321!important;
-    --v-soft:#20312e!important;
-    --v-ink:#f0faf7!important;
-    --v-muted:#aec7c1!important;
-    --v-line:#67867f!important;
+    --v-bg:#101214!important;
+    --v-surface:#191d20!important;
+    --v-soft:#242a2e!important;
+    --v-ink:#f3f8fa!important;
+    --v-muted:#b5c4c8!important;
+    --v-line:#738188!important;
     --v-control-line:var(--v-line)!important;
-    --v-accent:#39e2cc!important;
-    --v-on:#082923!important;
+    --v-accent:#61e4e7!important;
+    --v-field:#2dd9df!important;
+    --v-on:#0a171b!important;
     --ih63-card:var(--v-surface)!important;
     --ih63-hero-image:linear-gradient(118deg,var(--v-soft),var(--v-bg) 86%)!important;
     color-scheme:dark;

@@ -255,12 +255,13 @@ const CATALOG_SCENES = [
   { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-services-background.mp4?v=7633408-long', poster: '/media/ideahire-services-poster.jpg?v=7633408-long' },
 ];
 
-function CatalogFilm({ scene, en }) {
+function CatalogFilm({ scene, en, pauseControl }) {
   const frame = useRef(null), video = useRef(null);
   const [motionAllowed, setMotionAllowed] = useState(false);
   const [visible, setVisible] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [paused, setPaused] = useState(false);
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const connection = navigator.connection;
@@ -283,22 +284,30 @@ function CatalogFilm({ scene, en }) {
   useEffect(() => {
     const update = () => {
       if (!video.current) return;
-      if (visible && motionAllowed && !document.hidden) video.current.play().catch(() => {});
+      if (visible && motionAllowed && !paused && !document.hidden) video.current.play().catch(() => {});
       else video.current.pause();
     };
     update();
     document.addEventListener('visibilitychange', update);
     return () => document.removeEventListener('visibilitychange', update);
-  }, [visible, motionAllowed, ready, failed]);
-  return <>
-    <div className="ih-cinema-film" ref={frame} aria-hidden="true" style={{ backgroundImage: `url("${scene.poster}")` }}>
-      {motionAllowed && ready && !failed && <video ref={video} src={scene.video} poster={scene.poster} muted loop playsInline preload="none" tabIndex={-1} onError={() => setFailed(true)} />}
+  }, [visible, motionAllowed, ready, failed, paused]);
+  return (
+    <div className="ih-cinema-film" ref={frame} aria-hidden={pauseControl ? undefined : true} style={{ backgroundImage: `url("${scene.poster}")` }}>
+      {motionAllowed && ready && !failed && <>
+        <video ref={video} src={scene.video} poster={scene.poster} muted loop playsInline preload="none"
+          aria-hidden="true" tabIndex={-1} onError={() => setFailed(true)} />
+        {pauseControl && <button className="ih-cinema-toggle" type="button" onClick={() => setPaused(value => !value)}
+          aria-label={paused ? (en ? "Play film" : "Odtwórz film") : (en ? "Pause film" : "Wstrzymaj film")}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d={paused ? "M9 6l10 6-10 6z" : "M9 6v12m6-12v12"} />
+          </svg>
+        </button>}
+      </>}
     </div>
-
-  </>;
+  );
 }
 
-export function MarketCatalogHero({ active, eyebrow, title, description, actions, className = '', navigation = true }) {
+export function MarketCatalogHero({ active, eyebrow, title, description, actions, className = '', navigation = true, pauseFilm = false }) {
   const en = useSitePreferences().language === 'en';
   const navigate = useNavigate(), location = useLocation();
   const timer = useRef(null);
@@ -318,7 +327,7 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
   }
   return <section data-catalog-frame="20261029" className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
     data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
-    <CatalogFilm key={scene.key} scene={scene} en={en} />
+    <CatalogFilm key={scene.key} scene={scene} en={en} pauseControl={pauseFilm} />
     {navigation && <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>}
     <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
     {navigation && <nav className="ih-cinema-arrows" aria-label={en ? 'Switch catalog' : 'Zmień katalog'}>

@@ -133,3 +133,65 @@
     #root .ih88-market *, #root .ih88-market *::before, #root .ih88-market *::after { transition:none!important; animation:none!important; scroll-behavior:auto!important; }
   }
 }
+
+/* A full-width turquoise field for the introduction, followed by a neutral reel. */
+@layer ideahirePolish {
+  html:not([data-template="classic"]) #root .ih88-market {
+    padding-top: 0 !important;
+    background: var(--v-bg) !important;
+    overflow: hidden !important;
+    overflow: clip !important;
+  }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro {
+    isolation: isolate;
+    padding-block: clamp(58px, 7.5vw, 110px) clamp(50px, 6.8vw, 94px) !important;
+    color: var(--v-field-ink) !important;
+  }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro::before {
+    content: "" !important;
+    display: block !important;
+    position: absolute;
+    z-index: -1;
+    inset: 0 -100vmax;
+    pointer-events: none;
+    background:
+      linear-gradient(0deg, color-mix(in srgb, var(--v-action) 40%, transparent), transparent 53%),
+      repeating-linear-gradient(90deg, transparent 0 63px, #0a171b0b 63px 64px),
+      var(--v-field);
+  }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro::after {
+    content: "" !important;
+    display: block !important;
+    position: absolute;
+    inset: auto 0 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--v-field-ink) 0 38px, transparent 38px calc(100% - 38px), var(--v-field-ink) calc(100% - 38px));
+    pointer-events: none;
+  }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro :is(.ih88-title, .ih88-title > span) { color: var(--v-field-ink) !important; }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro :is(.ih88-eyebrow, .ih88-lead) { color: var(--v-field-muted) !important; }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-eyebrow span + span::before { color: var(--v-field-ink) !important; }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-talent {
+    background: var(--v-field-ink) !important;
+    border-color: var(--v-field-ink) !important;
+    color: #f3f8fa !important;
+  }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-jobs {
+    background: color-mix(in srgb, #fff 18%, transparent) !important;
+    border-color: color-mix(in srgb, var(--v-field-ink) 55%, transparent) !important;
+    color: var(--v-field-ink) !important;
+  }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-entry:focus-visible { outline-color: var(--v-field-ink) !important; }
+  html:not([data-template="classic"]) #root .ih88-market .ih88-live {
+    border-top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: clamp(32px, 5vw, 65px) !important;
+  }
+  @media (hover: hover) {
+    html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-talent:hover { background: #243135 !important; }
+    html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-jobs:hover { background: color-mix(in srgb, #fff 33%, transparent) !important; }
+  }
+  @media (max-width: 700px) {
+    html:not([data-template="classic"]) #root .ih88-market .ih88-intro { padding-block: 46px 44px !important; }
+  }
+}

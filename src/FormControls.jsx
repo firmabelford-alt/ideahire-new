@@ -21,7 +21,7 @@ function readOptions(children, inheritedDisabled = false, group = '') {
    same themed surface everywhere, including forms and portalled dialogs. */
 export const FormSelect = forwardRef(function FormSelect({
   id, label, children, value, defaultValue, onChange, onBlur, onInvalid,
-  disabled = false, required = false, className = '', style, menuMinWidth = 0, ...props
+  disabled = false, required = false, className = '', style, menuMinWidth = 0, triggerLabel, ...props
 }, forwardedRef) {
   const generatedId = useId();
   const controlId = id || `ih-select-${generatedId}`;
@@ -189,7 +189,7 @@ export const FormSelect = forwardRef(function FormSelect({
       aria-invalid={invalid || props['aria-invalid']} aria-label={props['aria-labelledby'] ? undefined : name} aria-labelledby={props['aria-labelledby']}
       aria-describedby={description} aria-activedescendant={open ? `${controlId}-option-${focused}` : undefined}
       onKeyDown={keyboard} onClick={() => open ? close() : show()} onBlur={onBlur}>
-      <span>{selected?.label || (english ? 'Choose' : 'Wybierz')}</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
+      <span>{triggerLabel ?? (selected?.label || (english ? 'Choose' : 'Wybierz'))}</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true"><path d="m5 7 5 5 5-5" /></svg>
     </button>
     <select {...props} ref={assignField} id={`${controlId}-native`} className="ih-control-native" value={currentValue} disabled={disabled} required={required} tabIndex={-1} aria-hidden="true"
       onChange={event => { setLocalValue(event.target.value); setInvalid(false); onChange?.(event); }}

@@ -10,36 +10,38 @@ export const IDEA_HIRE_THEME_IDENTITY=Object.freeze({
   "pl": {
     "eyebrow": "IdeaHire / Turkus",
     "title": "Turkus",
-    "description": "Wyraźny turkus na jasnym lub grafitowym tle."
+    "description": "Turkusowe tło i wyraźnie oddzielone powierzchnie."
   },
   "en": {
     "eyebrow": "IdeaHire / Turquoise",
     "title": "Turquoise",
-    "description": "Vivid turquoise on a light or charcoal background."
+    "description": "A turquoise canvas with clearly separated surfaces."
   }
 });
 export const IDEA_HIRE_VISUAL_SYSTEM=Object.freeze({
   "turquoise": {
-    "bg": "#f9fcfb",
+    "bg": "#f6f9fa",
     "paper": "#ffffff",
-    "surface": "#ecf8f5",
-    "ink": "#112825",
-    "muted": "#43605b",
-    "line": "#b6d0ca",
-    "accent": "#00746a",
+    "surface": "#edf3f4",
+    "ink": "#101b20",
+    "muted": "#43575d",
+    "line": "#b9c9cc",
+    "accent": "#006b72",
     "on": "#ffffff",
-    "material": "#15d6c1"
+    "material": "#19cbd3",
+    "field": "#61e4e7"
   },
   "turquoiseDark": {
-    "bg": "#111917",
-    "paper": "#172321",
-    "surface": "#20312e",
-    "ink": "#f0faf7",
-    "muted": "#aec7c1",
-    "line": "#67867f",
-    "accent": "#39e2cc",
-    "on": "#082923",
-    "material": "#15d6c1"
+    "bg": "#101214",
+    "paper": "#191d20",
+    "surface": "#242a2e",
+    "ink": "#f3f8fa",
+    "muted": "#b5c4c8",
+    "line": "#738188",
+    "accent": "#61e4e7",
+    "on": "#0a171b",
+    "material": "#19cbd3",
+    "field": "#2dd9df"
   },
   "mono": {
     "bg": "#ffffff",

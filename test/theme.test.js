@@ -37,6 +37,10 @@ test('the shared vivid turquoise has sufficient contrast with its action labels 
   assert.equal(action, visual.turquoise.material);
   assert.equal(action, visual.turquoiseDark.material);
   assert.ok(contrast(action, ink) >= 4.5);
+  for (const palette of [visual.turquoise, visual.turquoiseDark]) {
+    assert.ok(contrast(palette.field, role(common, 'field-ink')) >= 7, 'heading on turquoise');
+    assert.ok(contrast(palette.field, role(common, 'field-muted')) >= 4.5, 'supporting text on turquoise');
+  }
 });
 
 test('control boundaries stay visible in both modes', () => {
@@ -47,7 +51,7 @@ test('control boundaries stay visible in both modes', () => {
 });
 
 test('the first paint and the theme chooser use the same colour roles', () => {
-  const roles = { bg:'bg', paper:'surface', surface:'soft', ink:'ink', muted:'muted', line:'line', accent:'accent', on:'on' };
+  const roles = { bg:'bg', paper:'surface', surface:'soft', ink:'ink', muted:'muted', line:'line', accent:'accent', on:'on', field:'field' };
   ['turquoise', 'turquoiseDark'].forEach((theme, i) => {
     const block = paletteRule(selectors[i]);
     for (const [name, token] of Object.entries(roles)) assert.equal(role(block, token), visual[theme][name], `${theme} ${name}`);
