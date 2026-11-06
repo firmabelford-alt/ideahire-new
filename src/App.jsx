@@ -1267,10 +1267,6 @@ __IH53__ [data-ih53-press=true]{animation:ih53-card-press 650ms cubic-bezier(.2,
 __IH53__{overflow-x:clip!important;}
 __IH53__ :is(.ih5-category-showcase,.steps,.split-section){perspective:1300px!important;}
 __IH53__ .home-reveal{opacity:1!important;transform:none!important;filter:none!important;}
-__IH53__ [data-ih53-entrance]{filter:none!important;rotate:none!important;clip-path:none!important;animation:none!important;transition:opacity 820ms ease,translate 820ms cubic-bezier(.22,.61,.36,1)!important;}
-__IH53__ [data-ih53-entrance=waiting]{opacity:0!important;translate:0 32px!important;transition:none!important;}
-__IH53__ [data-ih53-entrance=entering],__IH53__ [data-ih53-entrance=shown]{opacity:1!important;translate:0 0!important;}
-__IH53__ [data-ih53-entrance=shown]{transition:none!important;}
 @media(max-width:760px){__IH53__ .ih40-step-mark .ih53-mark-scene{width:98px!important;height:80px!important;top:20px!important;}__IH53__ .ih53-mark-scene{width:116px!important;height:116px!important;}}
 @media(prefers-reduced-motion:reduce){__IH53__ [data-ih53-entrance]{opacity:1!important;filter:none!important;pointer-events:auto!important;translate:none!important;rotate:none!important;clip-path:none!important;animation:none!important;transition:none!important;}__IH53__ .ih53-optical-fallback{animation:none!important;}__IH53__ [data-ih53-tilt=true],__IH53__ [data-ih53-press=true]{transform:none!important;transition:none!important;animation:none!important;will-change:auto!important;}}
 body.ih53-active::before,body.ih53-active::after{display:none!important;}
@@ -1690,71 +1686,12 @@ function IH53Backdrop({rootRef}){
  useEffect(()=>{const state={current:ih53Initial('background',palette,reduced)};const engine=ih53StartScene(canvas.current,host.current,rootRef.current,state);return()=>engine.destroy();},[palette,reduced]);
  return <div className="ih53-backdrop" ref={host} aria-hidden="true"><div className="ih53-optical-fallback"/><canvas ref={canvas}/></div>;
 }
-function ih53Entrances(root,reduced){
- // Animate content groups, including the marketplace mounted after the intro.
- const selector='.ih88-intro,.ih88-live,.ih-demo-reviews,.ih63-explorer-heading,.ih63-search-area,.ih66-field,.ih63-explorer-footer,.ih-category-trigger,.ih5-story,.ih53-showcase,.split-section,.final-cta,.section-heading';
- const records=new Map(),pending=new Set();let observer=null,mutation=null,frame=0,paint=0,paused=IH53_MOTION.paused,dead=false;
- const finish=node=>{const record=records.get(node);if(!record)return;clearTimeout(record.timer);record.timer=0;node.dataset.ih53Entrance='shown';observer?.unobserve(node);pending.delete(node);};
- const reveal=(node,immediate=false)=>{
-  const record=records.get(node);if(!record)return;
-  if(immediate){finish(node);return;}
-  if(record.timer||node.dataset.ih53Entrance==='entering'||node.dataset.ih53Entrance==='shown')return;
-  observer?.unobserve(node);
-  const start=()=>{
-   if(dead||!node.isConnected)return;
-   if(paused){finish(node);return;}
-   node.dataset.ih53Entrance='entering';
-   node.dispatchEvent(new CustomEvent('ih53-card-enter',{bubbles:true}));
-   node.querySelector('.ih-category-trigger')?.dispatchEvent(new CustomEvent('ih53-card-enter'));
-   record.timer=setTimeout(()=>finish(node),880);
-  };
-  if(node.matches('.ih88-live')&&node.getBoundingClientRect().top<window.innerHeight)record.timer=setTimeout(start,120);else start();
- };
- const queue=()=>{
-  if(frame||paint)return;
-  // Commit the waiting state before observing, so initial content also moves.
-  frame=requestAnimationFrame(()=>{frame=0;paint=requestAnimationFrame(()=>{
-   paint=0;if(dead)return;
-   for(const node of pending){if(paused||reduced||!observer)finish(node);else observer.observe(node);}
-   pending.clear();
-  });});
- };
- const register=node=>{
-  if(records.has(node)||node.parentElement?.closest(selector))return;
-  records.set(node,{timer:0});
-  const box=node.getBoundingClientRect();
-  if(reduced||paused||!observer||!box.width||!box.height||box.bottom<=0){finish(node);return;}
-  node.dataset.ih53Entrance='waiting';pending.add(node);queue();
- };
- const scan=parent=>{if(parent.nodeType!==1)return;if(parent.matches(selector))register(parent);parent.querySelectorAll(selector).forEach(register);};
- const focus=event=>{const node=event.target.closest?.('[data-ih53-entrance]');if(node&&root.contains(node))reveal(node,true);};
- const motion=event=>{paused=!!event.detail?.paused;if(paused){observer?.disconnect();records.forEach((_,node)=>finish(node));}};
- if(!reduced&&typeof IntersectionObserver!=='undefined')try{
-  observer=new IntersectionObserver(entries=>{if(dead)return;for(const entry of entries){if(entry.isIntersecting)reveal(entry.target,paused);}},{threshold:.08,rootMargin:'0px 0px -48px 0px'});
- }catch{observer=null;}
- scan(root);
- if(typeof MutationObserver!=='undefined'){
-  mutation=new MutationObserver(changes=>{
-   if(dead)return;
-   for(const change of changes)change.addedNodes.forEach(scan);
-   for(const[node,record]of records)if(!node.isConnected){clearTimeout(record.timer);observer?.unobserve(node);pending.delete(node);records.delete(node);}
-  });
-  mutation.observe(root,{childList:true,subtree:true});
- }
- root.addEventListener('focusin',focus);root.addEventListener('pointerdown',focus,true);window.addEventListener('ih53-motion',motion);
- return()=>{
-  dead=true;observer?.disconnect();mutation?.disconnect();cancelAnimationFrame(frame);cancelAnimationFrame(paint);
-  root.removeEventListener('focusin',focus);root.removeEventListener('pointerdown',focus,true);window.removeEventListener('ih53-motion',motion);
-  for(const[node,{timer}]of records){clearTimeout(timer);delete node.dataset.ih53Entrance;}
- };
-}
-
 function useIH53LegacyEnhancements(rootRef){
  const site=useSitePreferences(),reduced=useIH53Reduced(),palette=ih53Palette(site),brandReady=useBrandReady();
  useLayoutEffect(()=>{document.body.classList.add('ih53-active');return()=>document.body.classList.remove('ih53-active');},[]);
  useEffect(()=>{
   const root=rootRef.current;if(!root||!brandReady)return;
-  const marks=[],presses=new Map(),stopEntrances=ih53Entrances(root,reduced);let frame=0,pending=null,current=null;
+  const marks=[],presses=new Map();let frame=0,pending=null,current=null;
   for(const mark of root.querySelectorAll('.ih-category-mark')){
    const owner=mark.closest('.ih-category-trigger,.ih40-step');if(!owner)continue;
    const host=document.createElement('span'),canvas=document.createElement('canvas');host.className='ih53-mark-scene';host.setAttribute('aria-hidden','true');host.appendChild(canvas);mark.appendChild(host);
@@ -1766,7 +1703,7 @@ function useIH53LegacyEnhancements(rootRef){
   const clearPresses=()=>{presses.forEach((timer,target)=>{clearTimeout(timer);target.removeAttribute('data-ih53-press');});presses.clear();};
   const press=e=>{if(e.pointerType==='mouse'||reduced||IH53_MOTION.paused)return;const target=e.target.closest?.('.ih-category-trigger,.ih40-step > button');if(!target)return;clearTimeout(presses.get(target));target.dataset.ih53Press='true';presses.set(target,setTimeout(()=>{target.removeAttribute('data-ih53-press');presses.delete(target);},680));};
   root.addEventListener('pointermove',move,{passive:true});root.addEventListener('pointerdown',press,{passive:true});root.addEventListener('pointercancel',clearPresses);root.addEventListener('pointerleave',reset);window.addEventListener('blur',reset);
-  return()=>{stopEntrances();cancelAnimationFrame(frame);reset();clearPresses();root.removeEventListener('pointermove',move);root.removeEventListener('pointerdown',press);root.removeEventListener('pointercancel',clearPresses);root.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);marks.forEach(({engine,host,mark})=>{engine.destroy();host.remove();delete mark.dataset.ih53Ready;});};
+  return()=>{cancelAnimationFrame(frame);reset();clearPresses();root.removeEventListener('pointermove',move);root.removeEventListener('pointerdown',press);root.removeEventListener('pointercancel',clearPresses);root.removeEventListener('pointerleave',reset);window.removeEventListener('blur',reset);marks.forEach(({engine,host,mark})=>{engine.destroy();host.remove();delete mark.dataset.ih53Ready;});};
  },[rootRef,palette,reduced,brandReady]);
 }
 function IH53CommissionStory(){
@@ -3203,5 +3140,6 @@ export function IdeaHirePromoFilm(props) {
 }
 
 export default App;
+
 
 

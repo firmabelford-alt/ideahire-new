@@ -38,25 +38,25 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
 export default function HomeMarketplace({ en = false, jobs = [], renderProject, paused = false, reduced = false }) {
   const host = useRef(null), rail = useRef(null), activeId = useRef(jobs[0] ? homeFeedKey(jobs[0]) : undefined), known = useRef(new Set()), initialized = useRef(false);
   const openedAt = useRef(Date.now()), interactionTimer = useRef(0), pointerActive = useRef(false);
-  const [stops, setStops] = useState([0]), [position, setPosition] = useState(0), [manualPause, setManualPause] = useState(false);
+  const [stops, setStops] = useState([0]), [position, setPosition] = useState(0);
   const [hover, setHover] = useState(false), [focus, setFocus] = useState(false), [visible, setVisible] = useState(false);
   const [interacting, setInteracting] = useState(false);
   const [hidden, setHidden] = useState(() => typeof document !== 'undefined' && document.hidden), [pending, setPending] = useState(null);
   const signature = jobs.map(homeFeedKey).join('|');
-  const motionPaused = paused || reduced || manualPause;
+  const motionPaused = paused || reduced;
   const stopped = motionPaused || interacting || hover || focus || hidden || !visible;
   const copy = en ? {
     eyebrow: ['Your idea', 'The right people', 'Work together'], title: ['Have something in mind?', 'Let’s get it done.'],
     intro: 'Find someone who knows how to help. Or put your skills to work on your next project.',
     jobs: 'Find a project', talent: 'Find a professional', recent: 'Projects and services. Take a look.', all: 'Browse all',
     empty: 'Have a project in mind? Tell people what you need.', add: 'Post a project', pending: 'See the new listing',
-    hint: 'New projects and services, in one place', mobileHint: 'Scrolls automatically · swipe to explore', pause: 'Pause scrolling', play: 'Resume scrolling',
+    hint: 'New projects and services, in one place',
   } : {
     eyebrow: ['Twój pomysł', 'Właściwi ludzie', 'Wspólna praca'], title: ['Masz coś do zrobienia?', 'Znajdźmy kogoś do pomocy.'],
     intro: 'Poznaj ludzi, którzy znają się na rzeczy. A jeśli to Ty szukasz zlecenia — sprawdź, gdzie przydadzą się Twoje umiejętności.',
     jobs: 'Znajdź zlecenie', talent: 'Znajdź wykonawcę', recent: 'Zlecenia i usługi. Zobacz, co nowego.', all: 'Przeglądaj wszystkie',
     empty: 'Masz pomysł na projekt? Opisz go i zaproś do współpracy.', add: 'Dodaj zlecenie', pending: 'Zobacz nową ofertę',
-    hint: 'Nowe projekty i oferty wykonawców, w jednym miejscu', mobileHint: 'Przewija się automatycznie · możesz też przesunąć', pause: 'Zatrzymaj przewijanie', play: 'Wznów przewijanie',
+    hint: 'Nowe projekty i oferty wykonawców, w jednym miejscu',
   };
   function pauseForInteraction(delay = 2200) {
     window.clearTimeout(interactionTimer.current);
@@ -167,14 +167,13 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
       <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>
     </div>
     <div className="ih88-layout">
-      <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerEnter={event => { if (event.pointerType === 'mouse') setHover(true); }} onPointerLeave={() => setHover(false)} onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible') && !event.target.closest('.ih-showcase-controls')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
+      <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerEnter={event => { if (event.pointerType === 'mouse') setHover(true); }} onPointerLeave={() => setHover(false)} onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
         <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}<Arrow /></Link><Link to="/services">{en ? "Services" : "Usługi"}<Arrow /></Link></nav></div>
         {jobs.length ? <>
           <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={beginPointerInteraction} onWheel={() => pauseForInteraction()} onKeyDown={event => {
             if (event.target !== event.currentTarget) return;
             if (['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) { event.preventDefault(); goTo(event.key === 'Home' ? 0 : event.key === 'End' ? stops.length - 1 : position + (event.key === 'ArrowRight' ? 1 : -1), true); }
           }}>{(jobs.length > 1 ? [0, 1] : [0]).flatMap(copy => jobs.map((job, index) => <div className="ih-showcase-slide" data-project-id={homeFeedKey(job)} data-copy={copy} key={`${copy}-${homeFeedKey(job)}`} role="group" aria-hidden={copy === 1 ? true : undefined} aria-roledescription={en ? 'slide' : 'slajd'} aria-label={copy === 0 ? `${index + 1} ${en ? 'of' : 'z'} ${jobs.length}` : undefined}>{renderProject(job, { duplicate: copy === 1 })}</div>))}</div>
-          {stops.length > 1 && <div className="ih-showcase-controls"><span className="ih-showcase-swipe-hint">{motionPaused ? (en ? 'Swipe to explore projects and services' : 'Przesuń, aby zobaczyć zlecenia i usługi') : copy.mobileHint}</span><div className="ih-showcase-dots" role="group" aria-label={en ? 'Choose listing position' : 'Wybierz pozycję ofert'}>{stops.map((left, index) => <button key={index} type="button" aria-label={en ? `Show position ${index + 1} of ${stops.length}` : `Pokaż pozycję ${index + 1} z ${stops.length}`} aria-current={position === index ? 'true' : undefined} aria-controls="ih-home-project-rail" onClick={() => goTo(index, true)}><span /></button>)}</div><span className="ih-showcase-count">{String(position + 1).padStart(2, '0')}<span> / {String(stops.length).padStart(2, '0')}</span></span>{!reduced && <button className="ih-showcase-pause" type="button" disabled={paused} aria-label={motionPaused ? copy.play : copy.pause} onClick={() => setManualPause(value => !value)}>{motionPaused ? <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 8 6-8 6Z"/></svg> : <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4v12M13 4v12"/></svg>}</button>}</div>}
         </> : <div className="ih88-empty"><p>{copy.empty}</p><Link to="/find-talent">{copy.add}<Arrow /></Link></div>}
         <div className="ih88-project-status" aria-live="polite">{pending && <button type="button" onClick={showPending}>{copy.pending}<Arrow /></button>}</div>
       </section>
