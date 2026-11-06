@@ -1,4 +1,4 @@
-/* Original IdeaHire artwork: two tracks meet in the negative space of the brand mark. */
+/* Footer artwork stays still as the preceding page uncovers it. */
 @layer ideahirePolish {
   #root .ih53-home > .footer.ih-home-footer { background: none !important; }
   #root .ih53-home .final-cta > .btn {
@@ -12,160 +12,102 @@
     margin: clamp(18px, 4vw, 48px) 0 0;
     color: var(--v-ink);
   }
-
   #root .ih-finale-payments {
-    display: flex;
+    display: flex !important;
     justify-content: space-between;
     align-items: center;
-    gap: 10px 24px;
+    gap: 16px;
     min-width: 0;
     margin: 0 !important;
-    padding: clamp(15px, 3vw, 32px) 0 clamp(12px, 2vw, 24px) !important;
+    padding: 18px 0 22px !important;
     border: 0 !important;
     border-top: 1px solid var(--v-line) !important;
     background: none !important;
-    text-align: start !important;
-  }
-  #root .ih-finale-payments > div { min-width: 0; }
-  #root .ih-finale-payments h2 {
-    margin: 0 !important;
-    padding: 0 !important;
-    color: var(--v-ink) !important;
-    font: 720 clamp(17px, 1.7vw, 22px)/1.3 Inter, system-ui, sans-serif !important;
-    letter-spacing: -.024em !important;
-    text-align: start !important;
-    overflow-wrap: anywhere;
   }
   #root .ih-finale-payments a {
     display: inline-flex !important;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     min-height: 44px;
     margin: 0 !important;
     padding: 0 !important;
     color: var(--v-accent) !important;
-    font: 550 13px/1.45 Inter, system-ui, sans-serif !important;
+    font: 550 14px/1.4 Inter, system-ui, sans-serif !important;
     text-decoration: none !important;
   }
   #root .ih-finale-payments a:hover { text-decoration: underline !important; text-underline-offset: 3px; }
-  #root .ih-finale-payments a:focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: 3px !important; }
-  #root .ih-finale-payments a > svg { width: 16px; height: 16px; flex: none; }
-  #root .ih-finale-stripe { display: block; flex: none; width: clamp(68px, 7.2vw, 98px); height: auto; max-width: 36%; }
-
-  #root .ih-finale-story {
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(210px, .65fr);
-    align-items: end;
-    gap: 14px clamp(24px, 6vw, 85px);
-    margin: clamp(18px, 3.3vw, 44px) 0 0;
-    padding: clamp(21px, 4vw, 52px) 0 clamp(20px, 3.5vw, 40px);
-    border-top: 1px solid var(--v-line);
-  }
-  #root .ih-finale-kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: clamp(12px, 2.4vw, 23px);
-    color: var(--v-muted);
-    font: 650 11px/1.4 Inter, system-ui, sans-serif;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-  }
-  #root .ih-finale-kicker::before {
-    content: "";
-    width: 24px;
-    height: 7px;
-    background: var(--v-accent);
-    clip-path: polygon(0 0, 100% 0, 72% 100%, 0 100%);
-  }
-  #root .ih-finale-story h2 {
-    margin: 0 !important;
-    color: var(--v-ink) !important;
-    font: 710 clamp(31px, 4.5vw, 62px)/1.08 Inter, system-ui, sans-serif !important;
-    letter-spacing: -.055em !important;
-    text-align: start !important;
-    text-wrap: balance;
-  }
-  #root .ih-finale-story h2 > em {
-    display: block;
-    color: var(--v-accent);
-    font: inherit;
-  }
-  #root .ih-finale-story > p {
-    max-width: 35ch;
-    margin: 0 0 3px !important;
-    color: var(--v-muted) !important;
-    font: 450 clamp(14px, 1.4vw, 17px)/1.65 Inter, system-ui, sans-serif !important;
-    text-wrap: pretty;
-  }
+  #root .ih-finale-payments a:focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: 4px !important; }
+  #root .ih-finale-payments a > svg { width: 17px; height: 17px; flex: none; }
+  #root .ih-finale-stripe { display: block; flex: none; width: clamp(70px, 7.2vw, 98px); height: auto; max-width: 32%; }
 
   #root .ih-finale-scene {
     --cut-bright: color-mix(in srgb, var(--v-field, var(--v-ink)) 82%, var(--v-surface));
     --cut-mid: color-mix(in srgb, var(--v-action, var(--v-muted)) 81%, var(--v-bg));
     --cut-deep: color-mix(in srgb, var(--cut-mid) 56%, var(--v-bg));
-    --cut-trace: color-mix(in srgb, var(--v-ink) 23%, transparent);
-    --cut-paper: color-mix(in srgb, var(--v-bg) 94%, var(--cut-mid));
+    --cut-trace: color-mix(in srgb, var(--v-ink) 18%, transparent);
     box-sizing: border-box;
     position: relative;
     width: 100%;
     min-width: 0;
-    height: clamp(236px, 29vw, 376px);
-    overflow: hidden;
-    overflow: clip;
+    height: clamp(310px, 35vw, 460px);
+    margin: 0 !important;
+    background: none !important;
     isolation: isolate;
-    background: radial-gradient(ellipse at var(--cut-focus-x, 50%) var(--cut-focus-y, 50%),
-      color-mix(in srgb, var(--cut-mid) 20%, transparent), transparent 72%);
   }
-  #root .ih-finale-scene > svg {
+  #root .ih-finale-layer {
+    box-sizing: border-box;
+    position: relative;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 14px;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    padding: 20px 0 0;
+    background: var(--v-bg);
+    pointer-events: none;
+  }
+  #root .ih-finale-scene[data-reveal="fixed"] .ih-finale-layer {
+    position: fixed !important;
+    z-index: 0;
+    top: var(--finale-top) !important;
+    left: var(--finale-left) !important;
+    width: var(--finale-width) !important;
+    height: var(--finale-height) !important;
+    clip-path: inset(var(--reveal-top, 0px) 0 var(--reveal-bottom, 0px));
+  }
+  #root .ih-finale-scene[data-reveal="fixed"]:not([data-in-view]) .ih-finale-layer { visibility: hidden; }
+  #root .ih-finale-layer > h2 {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--v-ink) !important;
+    font: 620 clamp(21px, 2.5vw, 34px)/1.2 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.035em !important;
+    text-align: center !important;
+    text-wrap: balance;
+  }
+  #root .ih-finale-layer > svg {
     display: block;
     width: 100%;
     height: 100%;
+    min-height: 0;
     overflow: hidden;
-    transform: translateY(var(--cut-rise, 0px));
-  }
-  #root .ih-finale-scene[data-curtained]::before,
-  #root .ih-finale-scene[data-curtained]::after {
-    --seam-y: calc(var(--cut-edge-y) + var(--seam-lip, 0px));
-    --seam-dip: calc(var(--seam-y) + var(--cut-notch));
-    content: "";
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    pointer-events: none;
-    clip-path: polygon(0 0, 100% 0, 100% var(--seam-y),
-      calc(var(--cut-focus-x) + 12%) var(--seam-y),
-      calc(var(--cut-focus-x) + 5%) var(--seam-dip),
-      calc(var(--cut-focus-x) - 5%) var(--seam-dip),
-      calc(var(--cut-focus-x) - 12%) var(--seam-y), 0 var(--seam-y));
-  }
-  #root .ih-finale-scene[data-curtained]::before {
-    --seam-lip: 3px;
-    background: linear-gradient(90deg, var(--cut-paper), var(--cut-mid) 42%, var(--cut-bright) 54%, var(--cut-paper) 100%);
-  }
-  #root .ih-finale-scene[data-curtained]::after {
-    background: linear-gradient(180deg, var(--cut-paper) 65%, color-mix(in srgb, var(--v-bg) 87%, var(--cut-mid)));
   }
   #root .ih-finale-guides { stroke: var(--cut-trace); stroke-width: 1; }
   #root .ih-finale-corners { stroke: var(--cut-trace); stroke-width: 1.5; }
   #root .ih-finale-band.is-edge { fill: var(--cut-bright); opacity: .54; }
-  #root .ih-finale-signal { stroke: var(--v-ink); stroke-width: 1; opacity: .3; }
-
+  #root .ih-finale-signal { stroke: var(--v-ink); stroke-width: 1; opacity: .25; }
   #root .ih-finale-credit {
     display: block;
-    padding: 16px 0 0;
+    margin: 0 !important;
+    padding: 14px 0 0;
     border-top: 1px solid var(--v-line);
     color: var(--v-muted);
     font: 450 12px/1.5 Inter, system-ui, sans-serif;
   }
-
   @media (max-width: 680px) {
-    #root .ih-finale-story { grid-template-columns: minmax(0, 1fr); }
-    #root .ih-finale-scene { height: clamp(218px, 65vw, 296px); }
-    #root .ih-finale-stripe { width: clamp(62px, 18vw, 78px); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    #root .ih-finale-scene > svg { transform: none; }
-    #root .ih-finale-scene[data-curtained]::before,
-    #root .ih-finale-scene[data-curtained]::after { display: none; }
+    #root .ih-finale-scene { height: clamp(300px, 85vw, 390px); }
+    #root .ih-finale-layer { gap: 10px; padding-top: 14px; }
+    #root .ih-finale-stripe { width: 76px; }
   }
 }

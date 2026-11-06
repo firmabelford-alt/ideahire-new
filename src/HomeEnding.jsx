@@ -1,64 +1,49 @@
-import { useEffect, useId, useRef } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { IDEA_HIRE_MARK } from "./Brand";
 import { useSitePreferences } from "./Preferences";
 import "./HomeEnding.css";
 
 const SETTLEMENT_TERMS = "/regulamin#stripe-connect-i-uruchomienie-płatności";
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-
-function ClosingCut({ scene }) {
+function FooterReveal({ scene, en }) {
   const stageRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const stage = stageRef.current;
-    if (!stage || !window.CSS?.supports("clip-path", "polygon(0 0, 100% 0, 100% 100%)")) return;
+    if (!stage || !window.CSS?.supports("clip-path", "inset(0px)")) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const viewport = window.visualViewport;
-    let point = null;
     let frame = 0;
 
-    function renderCut() {
+    function renderReveal() {
       frame = 0;
       if (reducedMotion.matches) {
-        stage.removeAttribute("data-curtained");
+        stage.removeAttribute("data-reveal");
+        stage.removeAttribute("data-in-view");
         return;
       }
       const rect = stage.getBoundingClientRect();
-      if (!rect.height || !rect.width) return;
-      const viewportHeight = viewport?.height || window.innerHeight;
-      const visible = viewportHeight + (viewport?.offsetTop || 0) - rect.top;
-      const progress = clamp(visible / Math.min(rect.height, viewportHeight * 0.78));
-      const inside = point && point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
-      const x = inside ? clamp((point.x - rect.left) / rect.width, 0.17, 0.83) : 0.5;
-      const y = inside ? clamp((point.y - rect.top) / rect.height) : 0.5;
-      // The seam follows the scroll. Pointer movement shapes only its local notch.
-      const edge = (1 - progress) ** 2 * 100;
-      const notch = Math.sin(progress * Math.PI) * (4 + 8 * y);
-      stage.style.setProperty("--cut-edge-y", `${edge.toFixed(2)}%`);
-      stage.style.setProperty("--cut-notch", `${notch.toFixed(2)}%`);
-      stage.style.setProperty("--cut-focus-x", `${(x * 100).toFixed(2)}%`);
-      stage.style.setProperty("--cut-focus-y", `${(y * 100).toFixed(2)}%`);
-      stage.style.setProperty("--cut-rise", `${((1 - progress) * 18).toFixed(2)}px`);
-      stage.toggleAttribute("data-curtained", progress < 1);
+      if (!rect.width || !rect.height) return;
+      const page = document.scrollingElement || document.documentElement;
+      const viewportHeight = window.innerHeight;
+      const remainingScroll = Math.max(0, page.scrollHeight - viewportHeight - page.scrollTop);
+      // The artwork waits at its final screen position. Only the page edge moves.
+      const bottomGap = clamp(viewportHeight - rect.bottom + remainingScroll, 0, Math.max(0, viewportHeight - rect.height));
+      const top = viewportHeight - bottomGap - rect.height;
+      stage.style.setProperty("--finale-top", `${top}px`);
+      stage.style.setProperty("--finale-left", `${rect.left}px`);
+      stage.style.setProperty("--finale-width", `${rect.width}px`);
+      stage.style.setProperty("--finale-height", `${rect.height}px`);
+      stage.style.setProperty("--reveal-top", `${clamp(rect.top - top, 0, rect.height)}px`);
+      stage.style.setProperty("--reveal-bottom", `${clamp(top + rect.height - rect.bottom, 0, rect.height)}px`);
+      stage.setAttribute("data-reveal", "fixed");
+      stage.toggleAttribute("data-in-view", rect.top < viewportHeight && rect.bottom > 0);
     }
-
     function schedule() {
-      if (!frame) frame = window.requestAnimationFrame(renderCut);
+      if (!frame) frame = window.requestAnimationFrame(renderReveal);
     }
-
-    function track(event) {
-      if (event.pointerType === "touch" || reducedMotion.matches) return;
-      point = { x: event.clientX, y: event.clientY };
-      schedule();
-    }
-
-    function resetPointer() {
-      point = null;
-      schedule();
-    }
-
     const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
     observer?.observe(stage);
     observer?.observe(document.body);
@@ -66,9 +51,7 @@ function ClosingCut({ scene }) {
     window.addEventListener("resize", schedule);
     viewport?.addEventListener("resize", schedule);
     reducedMotion.addEventListener("change", schedule);
-    stage.addEventListener("pointermove", track, { passive: true });
-    stage.addEventListener("pointerleave", resetPointer);
-    renderCut();
+    renderReveal();
     return () => {
       window.cancelAnimationFrame(frame);
       observer?.disconnect();
@@ -76,14 +59,14 @@ function ClosingCut({ scene }) {
       window.removeEventListener("resize", schedule);
       viewport?.removeEventListener("resize", schedule);
       reducedMotion.removeEventListener("change", schedule);
-      stage.removeEventListener("pointermove", track);
-      stage.removeEventListener("pointerleave", resetPointer);
     };
   }, []);
 
   return (
-    <div ref={stageRef} className="ih-finale-scene" aria-hidden="true">
-      <svg viewBox="0 0 1100 344" preserveAspectRatio="xMidYMid slice" focusable="false">
+    <div ref={stageRef} className="ih-finale-scene">
+      <div className="ih-finale-layer">
+        <h2>{en ? "Your idea. Working together." : "Twój pomysł. Wspólna praca."}</h2>
+      <svg aria-hidden="true" viewBox="0 0 1100 344" preserveAspectRatio="xMidYMid slice" focusable="false">
         <defs>
           <linearGradient id={scene + "-upper"} x1="0" x2="1">
             <stop offset="0" stopColor="var(--cut-deep)" />
@@ -123,42 +106,27 @@ function ClosingCut({ scene }) {
           <path d="M471 118v-17h18m126 0h18v17M471 237v17h18m126 0h18v-17" />
         </g>
       </svg>
+        <small className="ih-finale-credit">© 2026 IdeaHire</small>
+      </div>
     </div>
   );
 }
 
 export default function HomeEnding({ en = false }) {
   const { theme } = useSitePreferences();
-  const paymentsTitle = useId();
   const scene = "ih-cut-" + useId().replace(/[^a-z0-9_-]/gi, "");
-
   const dark = theme === "dark";
   return (
-    <section className="ih-home-finale"
-      aria-label={en ? "IdeaHire and payments" : "IdeaHire i rozliczenia"} data-no-translate="true">
-      <section className="ih-finale-payments" aria-labelledby={paymentsTitle}>
-          <div>
-            <h2 id={paymentsTitle}>{en ? "Payments and payouts" : "Płatności i wypłaty"}</h2>
-            <Link to={SETTLEMENT_TERMS}>
-              {en ? "Payment terms" : "Zasady płatności"}
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" /></svg>
-            </Link>
-          </div>
-          <img className="ih-finale-stripe" src={dark ? "/brand/stripe-wordmark-white.svg" : "/brand/stripe-wordmark.svg"}
-            width="360" height={dark ? "151" : "150"} loading="lazy" decoding="async" alt="Stripe" />
-      </section>
-      <div className="ih-finale-story">
-        <div>
-          <span className="ih-finale-kicker">{en ? "The first step" : "Pierwszy krok"}</span>
-          <h2>{en ? "You don’t need the whole plan." : "Nie musisz mieć całego planu."}{" "}
-            <em>{en ? "You just need to start." : "Wystarczy zacząć."}</em>
-          </h2>
-        </div>
-        <p>{en ? "Tell us what you want to make. Or show what you can do. That’s how working together begins."
-          : "Opowiedz, co chcesz zrobić. Albo pokaż, co potrafisz. Od tego zaczyna się współpraca."}</p>
+    <section className="ih-home-finale" aria-label={en ? "IdeaHire and payments" : "IdeaHire i rozliczenia"} data-no-translate="true">
+      <div className="ih-finale-payments">
+        <Link to={SETTLEMENT_TERMS}>
+          {en ? "Payment terms" : "Zasady płatności"}
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" /></svg>
+        </Link>
+        <img className="ih-finale-stripe" src={dark ? "/brand/stripe-wordmark-white.svg" : "/brand/stripe-wordmark.svg"}
+          width="360" height={dark ? "151" : "150"} loading="lazy" decoding="async" alt="Stripe" />
       </div>
-      <ClosingCut scene={scene} />
-      <small className="ih-finale-credit">© 2026 IdeaHire</small>
+      <FooterReveal scene={scene} en={en} />
     </section>
   );
 }

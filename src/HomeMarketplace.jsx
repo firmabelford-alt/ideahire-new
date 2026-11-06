@@ -37,13 +37,14 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
 /* Native scrolling keeps touch, trackpad and keyboard interactions predictable. */
 export default function HomeMarketplace({ en = false, jobs = [], renderProject, paused = false, reduced = false }) {
   const host = useRef(null), rail = useRef(null), activeId = useRef(jobs[0] ? homeFeedKey(jobs[0]) : undefined), known = useRef(new Set()), initialized = useRef(false);
-  const openedAt = useRef(Date.now());
+  const openedAt = useRef(Date.now()), interactionTimer = useRef(0), pointerActive = useRef(false);
   const [stops, setStops] = useState([0]), [position, setPosition] = useState(0), [manualPause, setManualPause] = useState(false);
   const [hover, setHover] = useState(false), [focus, setFocus] = useState(false), [visible, setVisible] = useState(false);
+  const [interacting, setInteracting] = useState(false);
   const [hidden, setHidden] = useState(() => typeof document !== 'undefined' && document.hidden), [pending, setPending] = useState(null);
   const signature = jobs.map(homeFeedKey).join('|');
   const motionPaused = paused || reduced || manualPause;
-  const stopped = motionPaused || hover || focus || hidden || !visible;
+  const stopped = motionPaused || interacting || hover || focus || hidden || !visible;
   const copy = en ? {
     eyebrow: ['Your idea', 'The right people', 'Work together'], title: ['Have something in mind?', 'Let’s get it done.'],
     intro: 'Find someone who knows how to help. Or put your skills to work on your next project.',
@@ -57,8 +58,32 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     empty: 'Masz pomysł na projekt? Opisz go i zaproś do współpracy.', add: 'Dodaj zlecenie', pending: 'Zobacz nową ofertę',
     hint: 'Nowe projekty i oferty wykonawców, w jednym miejscu', mobileHint: 'Przewija się automatycznie · możesz też przesunąć', pause: 'Zatrzymaj przewijanie', play: 'Wznów przewijanie',
   };
+  function pauseForInteraction(delay = 2200) {
+    window.clearTimeout(interactionTimer.current);
+    setInteracting(true);
+    interactionTimer.current = window.setTimeout(() => setInteracting(false), delay);
+  }
+  function beginPointerInteraction() {
+    pointerActive.current = true;
+    window.clearTimeout(interactionTimer.current);
+    setInteracting(true);
+  }
+  useEffect(() => {
+    const release = () => {
+      if (!pointerActive.current) return;
+      pointerActive.current = false;
+      pauseForInteraction();
+    };
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', release, true);
+    return () => {
+      window.clearTimeout(interactionTimer.current);
+      window.removeEventListener('pointerup', release, true);
+      window.removeEventListener('pointercancel', release, true);
+    };
+  }, []);
   function goTo(index, manual = false) {
-    if (manual) setManualPause(true);
+    if (manual) pauseForInteraction(4000);
     const next = Math.max(0, Math.min(index, stops.length - 1));
     rail.current?.scrollTo({ left: stops[next], behavior: reduced ? 'instant' : 'smooth' });
   }
@@ -118,7 +143,7 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
       const firstCopy = node.children[jobs.length];
       const cycle = firstCopy ? firstCopy.offsetLeft - node.firstElementChild.offsetLeft : 0;
       if (cycle > 0) {
-        if (previous) offset = (offset + Math.min(now - previous, 64) * .026) % cycle;
+        if (previous) offset = (offset + Math.min(now - previous, 50) * .032) % cycle;
         node.scrollLeft = offset;
       }
       previous = now;
@@ -130,7 +155,7 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
   function showPending() {
     const node = rail.current;
     const card = Array.from(node?.children || []).find(child => child.dataset.projectId === pending);
-    if (card) { setManualPause(true); node.scrollTo({ left: card.offsetLeft - node.firstElementChild.offsetLeft, behavior: reduced ? 'instant' : 'smooth' }); }
+    if (card) { pauseForInteraction(4000); node.scrollTo({ left: card.offsetLeft - node.firstElementChild.offsetLeft, behavior: reduced ? 'instant' : 'smooth' }); }
     setPending(null);
   }
   return <div ref={host} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
@@ -142,10 +167,10 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
       <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>
     </div>
     <div className="ih88-layout">
-      <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerEnter={event => { if (event.pointerType === 'mouse') setHover(true); }} onPointerLeave={() => setHover(false)} onFocusCapture={() => setFocus(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
+      <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerEnter={event => { if (event.pointerType === 'mouse') setHover(true); }} onPointerLeave={() => setHover(false)} onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible') && !event.target.closest('.ih-showcase-controls')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
         <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}<Arrow /></Link><Link to="/services">{en ? "Services" : "Usługi"}<Arrow /></Link></nav></div>
         {jobs.length ? <>
-          <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={() => setManualPause(true)} onWheel={() => setManualPause(true)} onKeyDown={event => {
+          <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={beginPointerInteraction} onWheel={() => pauseForInteraction()} onKeyDown={event => {
             if (event.target !== event.currentTarget) return;
             if (['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) { event.preventDefault(); goTo(event.key === 'Home' ? 0 : event.key === 'End' ? stops.length - 1 : position + (event.key === 'ArrowRight' ? 1 : -1), true); }
           }}>{(jobs.length > 1 ? [0, 1] : [0]).flatMap(copy => jobs.map((job, index) => <div className="ih-showcase-slide" data-project-id={homeFeedKey(job)} data-copy={copy} key={`${copy}-${homeFeedKey(job)}`} role="group" aria-hidden={copy === 1 ? true : undefined} aria-roledescription={en ? 'slide' : 'slajd'} aria-label={copy === 0 ? `${index + 1} ${en ? 'of' : 'z'} ${jobs.length}` : undefined}>{renderProject(job, { duplicate: copy === 1 })}</div>))}</div>
@@ -156,3 +181,4 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     </div>
   </div>;
 }
+

@@ -36,7 +36,7 @@
   #root .ih88-market .ih88-live-heading h2 { margin:0!important; color:var(--v-ink)!important; font:650 20px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; }
   #root .ih88-market .ih88-live-heading p { display:block!important; margin:5px 0 0!important; color:var(--v-muted)!important; font:400 12px/1.5 Inter,system-ui,sans-serif!important; }
   #root .ih88-market .ih88-live-heading > a, #root .ih88-market .ih88-empty > a, #root .ih88-market .ih88-project-status > button { display:inline-flex!important; align-items:center!important; justify-content:flex-start!important; flex:none!important; gap:10px!important; min-height:44px!important; padding:4px 0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-accent)!important; font:600 13px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; cursor:pointer!important; }
-  #root .ih88-market .ih-showcase-rail { position:relative!important; display:grid!important; grid-auto-flow:column!important; grid-auto-columns:calc((100% - 40px)/3)!important; align-items:stretch!important; gap:20px!important; width:100%!important; min-width:0!important; padding:3px 0 15px!important; margin:0!important; border:0!important; background:none!important; overflow-x:auto!important; overflow-y:hidden!important; scroll-snap-type:x mandatory!important; overscroll-behavior-x:contain!important; scrollbar-width:none!important; scroll-padding-inline:0!important; -webkit-overflow-scrolling:touch; }
+  #root .ih88-market .ih-showcase-rail { position:relative!important; display:grid!important; grid-auto-flow:column!important; grid-auto-columns:calc((100% - 40px)/3)!important; align-items:stretch!important; gap:20px!important; width:100%!important; min-width:0!important; padding:3px 0 15px!important; margin:0!important; border:0!important; background:none!important; overflow-x:auto!important; overflow-y:hidden!important; scroll-snap-type:none!important; scroll-behavior:auto!important; overflow-anchor:none!important; overscroll-behavior-x:contain!important; scrollbar-width:none!important; scroll-padding-inline:0!important; -webkit-overflow-scrolling:touch; }
   #root .ih-showcase-rail::-webkit-scrollbar { display:none!important; width:0!important; height:0!important; }
   #root .ih-showcase-rail::-webkit-scrollbar-track { background:transparent!important; }
   #root .ih-showcase-rail::-webkit-scrollbar-thumb { border:0!important; border-radius:10px!important; background:color-mix(in srgb,var(--v-accent) 45%,transparent)!important; }
@@ -172,3 +172,4 @@
     html:not([data-template="classic"]) #root .ih88-market .ih88-intro { padding-block: 46px 44px !important; }
   }
 }
+
