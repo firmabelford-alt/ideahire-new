@@ -90,7 +90,7 @@ export function HomePaths({ en = false }) {
         <div className="ih-path-tabs" role="tablist" aria-label={en ? "Your role in the collaboration" : "Twoja rola we współpracy"} ref={tabsRef} onKeyDown={moveTab}>
           {["hire", "work"].map((value, index) => <button key={value} id={`ih-path-tab-${value}`} type="button" role="tab" aria-selected={role === value} aria-controls={`ih-path-panel-${value}`} tabIndex={role === value ? 0 : -1} onClick={() => setRole(value)}><span aria-hidden="true">0{index + 1}</span>{value === "hire" ? (en ? "I’m hiring" : "Zlecam") : (en ? "I’m creating" : "Wykonuję")}<ArrowIcon direction="up-right" /></button>)}
         </div>
-        {["hire", "work"].map(value => <div className="ih-path-panel" key={value} role="tabpanel" id={`ih-path-panel-${value}`} aria-labelledby={`ih-path-tab-${value}`} hidden={role !== value}>
+        {["hire", "work"].map(value => <div className="ih-path-panel" key={value} role="tabpanel" tabIndex={0} id={`ih-path-panel-${value}`} aria-labelledby={`ih-path-tab-${value}`} hidden={role !== value}>
           {role === value && <>
             <h3>{title[0]}<span>{title[1]}</span></h3>
             <p>{hire
