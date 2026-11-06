@@ -453,6 +453,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
     ? (english ? "All fields" : "Wszystkie dziedziny")
     : (english ? translateUiText(selectedCategory) : selectedCategory);
   const hasFilters = Boolean(search.trim()) || !allCategories;
+  const customOrder = order !== "latest";
   const orderOptions = listingOrderOptions(english, "services");
   const orderLabel = orderOptions.find(option => option.value === order)?.label;
   const visibleServices = useMemo(() => selectMarketplaceListings(services, {
@@ -469,7 +470,7 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
   }
 
   function clearFilters(event) {
-    if (event.detail === 0) document.getElementById(offersId)?.focus({ preventScroll: true });
+    if (event.detail === 0) searchInput.current?.focus({ preventScroll: true });
     setSearch("");
     if (!allCategories) chooseCategory("Wszystkie");
   }
@@ -492,9 +493,8 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
         />
       </div>
       <section className="ih-service-browse" aria-labelledby={offersId}>
-        <h2 id={offersId} className="ih-service-sr" tabIndex={-1}>{english ? "Service results" : "Wyniki wyszukiwania usług"}</h2>
         <div className="ih-service-console" id="services-filter" data-no-translate="true">
-          <div className="ih-service-discovery" data-filtered={!allCategories || undefined} data-custom-order={order !== "latest" || undefined}>
+          <div className="ih-service-discovery" data-filtered={!allCategories || undefined} data-custom-order={customOrder || undefined}>
             <form className="ih-service-search" role="search" aria-label={english ? "Service search" : "Wyszukiwarka usług"}
               onSubmit={event => {
                 event.preventDefault();
@@ -510,32 +510,37 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
                   onClick={() => { searchInput.current?.focus(); setSearch(""); }}><MarketIcon kind="close" /></button>}
               </div>
             </form>
-            <FormSelect className="ih-service-finder-field" menuMinWidth={266} triggerLabel={english ? "Category" : "Dziedzina"}
+            <FormSelect className="ih-service-finder-field" menuMinWidth={266} triggerLabel={allCategories ? (english ? "Category" : "Dziedzina") : categoryLabel}
               aria-label={english ? "Service categories" : "Dziedziny usług"} aria-describedby={categoryId}
               value={selectedCategory} onChange={event => chooseCategory(event.target.value)}>
               <option value="Wszystkie">{english ? "All fields" : "Wszystkie dziedziny"}</option>
               {SERVICE_CATEGORIES.map(value => <option key={value} value={value}>{english ? translateUiText(value) : value}</option>)}
             </FormSelect>
-            <FormSelect className="ih-service-finder-field ih-service-sort" menuMinWidth={225} triggerLabel={english ? "Sort" : "Sortuj"}
+            <FormSelect className="ih-service-finder-field ih-service-sort" menuMinWidth={225} triggerLabel={customOrder ? orderLabel : (english ? "Sort" : "Sortuj")}
               aria-label={english ? "Sort services" : "Sortuj usługi"} aria-describedby={orderId}
               value={order} onChange={event => setOrder(event.target.value)}>
               {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
             </FormSelect>
           </div>
-          <header className="ih-service-finder-summary">
-            <MarketResultCount count={visibleServices.length} noun="services" className="ih-service-finder-count"
-              status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
-            <ListingSavedFilter pressed={savedOnly} onClick={() => setSavedOnly(value => !value)} />
-          </header>
-          <div className="ih-service-filter-state" data-visible={hasFilters || order !== "latest" || undefined}>
-            <span id={categoryId} className={allCategories ? "ih-service-sr" : undefined}>{categoryLabel}</span>
-            <span id={orderId} className={order === "latest" ? "ih-service-sr" : undefined}>{orderLabel}</span>
-            {hasFilters && <button type="button" className="ih-service-finder-reset" onClick={clearFilters}
+          <span id={categoryId} className="ih-service-sr">{categoryLabel}</span>
+          <span id={orderId} className="ih-service-sr">{orderLabel}</span>
+          {hasFilters && <div className="ih-service-filter-state">
+            {!allCategories && <span>{categoryLabel}</span>}
+            {search.trim() && <span>{search.trim()}</span>}
+            <button type="button" className="ih-service-finder-reset" onClick={clearFilters}
               aria-label={english ? "Clear filters" : "Wyczyść filtry"}>
               <MarketIcon kind="close" />{english ? "Clear filters" : "Wyczyść filtry"}
-            </button>}
-          </div>
+            </button>
+          </div>}
         </div>
+        <header className="ih-service-finder-summary">
+          <div className="ih-service-result-heading">
+            <h2 id={offersId}>{english ? "Service offers" : "Oferty usług"}</h2>
+            <MarketResultCount count={visibleServices.length} noun="services" className="ih-service-finder-count"
+              status={loading ? "Szukamy usług…" : message ? "Wyniki niedostępne" : undefined} />
+          </div>
+          <ListingSavedFilter pressed={savedOnly} onClick={() => setSavedOnly(value => !value)} />
+        </header>
         <div className="ih78-service-results ih-services-list" id="ih-service-results" aria-busy={loading}>
           {message ? (
             <div className="ih78-services-error" role="alert"><p>{message}</p><button type="button" onClick={loadServices}>{english ? "Try again" : "Spróbuj ponownie"}<MarketIcon kind="arrow" /></button></div>
@@ -555,7 +560,14 @@ function ServiceList({ supabase, user, navigate, Navbar }) {
             </div></div>
           ) : (
             <div className="ih78-services-empty">
-              <div><h3>{english ? "No services found" : "Nie znaleźliśmy usług"}</h3><p>{english ? "We haven't found this service yet. Try another phrase or field." : "Nie znaleźliśmy takiej usługi. Spróbuj innej frazy lub dziedziny."}</p><Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link></div>
+              <div>
+                <h3>{english ? "No services found" : "Nie znaleźliśmy usług"}</h3>
+                <p>{hasFilters ? (english ? "Try another phrase or browse all fields." : "Spróbuj innej frazy albo wróć do wszystkich dziedzin.")
+                  : (english ? "New offers will appear here when they’re published." : "Tutaj pojawią się nowe oferty, gdy wykonawcy je opublikują.")}</p>
+                {hasFilters ? <button type="button" className="ih-service-finder-reset" onClick={clearFilters}>
+                  {english ? "Show all services" : "Pokaż wszystkie usługi"}<MarketIcon kind="arrow" />
+                </button> : <Link to="/services/new">{english ? "Publish your service" : "Dodaj swoją usługę"}<MarketIcon kind="arrow" /></Link>}
+              </div>
             </div>
           )}
         </div>
@@ -774,7 +786,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
   }
 
   return (
-    <ServiceShell Navbar={Navbar} className="ih5-service-form-page">
+    <ServiceShell Navbar={Navbar} className="ih5-service-form-page ih-listing-authoring">
       <SubpageHeading eyebrow={english ? "For freelancers" : "Dla wykonawców"}
         title={editing ? (english ? "Edit your service" : "Edytuj usługę") : (english ? "Add a service" : "Dodaj usługę")}
         description={english ? "Describe the result, scope, price and availability." : "Opisz rezultat, zakres, cenę i dostępność swojej usługi."}
@@ -793,7 +805,6 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             <div className="ih5-service-editor-heading">
               <p>Zacznij od efektu, który zleceniodawca łatwo zrozumie.</p>
             </div>
-            <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={english} ownerId={user?.id} kind="services" client={supabase} />
             <div className="ih5-service-editor-fields">
               <label className="is-wide">
                 <span>Nazwa usługi *</span>
@@ -859,6 +870,7 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
                 />
               </label>
             </div>
+            <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={english} ownerId={user?.id} kind="services" client={supabase} />
           </section>
 
           <section className="ih5-service-editor-section ih-service-step-panel" data-service-step="1" tabIndex={-1} aria-labelledby="service-step-title-1" hidden={editorStep !== 1}>
@@ -1024,7 +1036,16 @@ function ServiceForm({ supabase, user, navigate, Navbar, editing = false }) {
             <Link to={editing ? `/services/${id}` : "/services"}>Anuluj</Link>
             <div className="ih-service-editor-navigation">
               {editorStep>0 && <button type="button" className="is-quiet" disabled={saving || thumbnailBusy} onClick={()=>moveEditorStep(editorStep-1)}>{english?'Previous':'Wstecz'}</button>}
-              {editorStep<2 ? <button type="button" disabled={saving || thumbnailBusy} onClick={()=>moveEditorStep(editorStep+1)}>{english?'Continue':'Dalej'}<MarketIcon kind="arrow"/></button> : <button type="submit" disabled={saving || thumbnailBusy}>{saving ? (english?'Saving…':'Zapisywanie…') : editing ? (english?'Save changes':'Zapisz zmiany') : (english?'Publish service':'Opublikuj usługę')}</button>}
+              {editorStep < 2 ? (
+                <button key="continue" type="button" disabled={saving || thumbnailBusy} onClick={event => {
+                  event.preventDefault();
+                  moveEditorStep(editorStep + 1);
+                }}>{english ? "Continue" : "Dalej"}<MarketIcon kind="arrow" /></button>
+              ) : (
+                <button key="save" type="submit" disabled={saving || thumbnailBusy}>
+                  {saving ? (english ? "Saving…" : "Zapisywanie…") : editing ? (english ? "Save changes" : "Zapisz zmiany") : (english ? "Publish service" : "Opublikuj usługę")}
+                </button>
+              )}
             </div>
           </footer>
         </form>
@@ -1309,15 +1330,15 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
   return (
     <ServiceShell Navbar={Navbar} className="ih5-service-detail-page">
       <div className="ih5-service-detail-layout">
-      <header className="ih5-service-detail-header">
-        <div className="ih5-service-detail-category">
-          <Link to={`/services?category=${encodeURIComponent(service.category)}`}>{service.category}</Link>
-          <span>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</span>
-        </div>
-        <h1>{service.title}</h1>
-        <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={supabase} expandable en={english} />
-        <p>{service.summary}</p>
-      </header>
+        <header className="ih5-service-detail-header">
+          <div className="ih5-service-detail-category">
+            <Link to={`/services?category=${encodeURIComponent(service.category)}`}>{service.category}</Link>
+            <span>{service.subcategory || SERVICE_CATEGORY_COPY[service.category]}</span>
+          </div>
+          <h1>{service.title}</h1>
+          {service.summary && <p>{service.summary}</p>}
+          <ListingThumbnail path={service.thumbnail_path} ownerId={service.freelancer_id} kind="services" title={service.title} client={supabase} expandable en={english} />
+        </header>
 
         <article className="ih5-service-detail-main">
           <section className="ih5-service-detail-section ih-service-description">
@@ -1330,7 +1351,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               <header className="ih-service-section-title"><div><h2>Co otrzymasz</h2><p>Rezultaty opisane przez wykonawcę</p></div></header>
               <ul className="ih5-service-check-list">
                 {deliverables.map((item, index) => (
-                  <li key={`${item}-${index}`}><span aria-hidden="true">✓</span>{item}</li>
+                  <li key={`${item}-${index}`}><span aria-hidden="true">✓</span><div>{item}</div></li>
                 ))}
               </ul>
             </section>}
@@ -1338,7 +1359,7 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
               <header className="ih-service-section-title"><div><h2>Materiały od Ciebie</h2><p>Przygotuj je przed rozpoczęciem realizacji</p></div></header>
               <ul className="ih5-service-requirement-list">
                 {requirements.map((item, index) => (
-                  <li key={`${item}-${index}`}><span aria-hidden="true">•</span>{item}</li>
+                  <li key={`${item}-${index}`}><span aria-hidden="true">•</span><div>{item}</div></li>
                 ))}
               </ul>
             </section>}
@@ -1404,8 +1425,8 @@ function ServiceDetails({ supabase, user, navigate, Navbar }) {
           )}
 
           <p className="ih5-service-order-legal">
-            Najpierw ustalasz zakres w rozmowie. Realizacja rusza po akceptacji
-            warunków przez obie strony i płatności.
+            {isOwner ? "To podgląd Twojej oferty. Zapisane zmiany zobaczą osoby przeglądające usługi."
+              : "Najpierw ustalasz zakres w rozmowie. Realizacja rusza po akceptacji warunków przez obie strony i płatności."}
           </p>
 
           {skills.length > 0 && (

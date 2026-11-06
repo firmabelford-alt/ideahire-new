@@ -1,11 +1,29 @@
 /* One continuous homepage atmosphere, vector controls, and a quiet notification desk. */
 @layer ideahirePolish {
   #root .ih-arrow-icon { display:inline-block!important; flex:0 0 20px!important; width:20px!important; height:20px!important; min-width:20px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.7!important; vertical-align:middle!important; overflow:visible!important; }
-  #root .ih53-home { --home-wash:var(--v-accent); --home-wash-strong:14%; --home-wash-soft:11%; position:relative!important; isolation:isolate!important; background:var(--v-bg)!important; }
-  html[data-theme="dark"]:not([data-template="classic"]) #root .ih53-home { --home-wash:#aebbc2; --home-wash-strong:7%; --home-wash-soft:5%; }
+  #root .ih53-home {
+    --home-wash: color-mix(in srgb, var(--v-action, var(--v-accent)) 19%, transparent);
+    --home-glow: #568cc01c;
+    position:relative!important;
+    isolation:isolate!important;
+    background:var(--v-bg)!important;
+  }
+  html[data-theme="dark"] #root .ih53-home { --home-wash: color-mix(in srgb, var(--v-action, var(--v-accent)) 16%, transparent); --home-glow: #5286d51a; }
+  html[data-template="classic"] #root .ih53-home { --home-wash: color-mix(in srgb, var(--v-ink) 5%, transparent); --home-glow: transparent; }
   #root .ih53-home::before, #root .ih53-home::after { content:""!important; display:block!important; position:fixed!important; inset:0!important; z-index:-1!important; pointer-events:none!important; border:0!important; border-radius:0!important; }
-  #root .ih53-home::before { background:linear-gradient(140deg,color-mix(in srgb,var(--home-wash) var(--home-wash-soft),transparent),transparent 48%,color-mix(in srgb,var(--home-wash) 5%,transparent))!important; }
-  #root .ih53-home::after { background:linear-gradient(320deg,color-mix(in srgb,var(--home-wash) var(--home-wash-strong),transparent),transparent 60%)!important; animation:ih-home-atmosphere 26s ease-in-out infinite alternate!important; }
+  #root .ih53-home::before {
+    background: radial-gradient(ellipse at 9% 12%, var(--home-wash), transparent 57%),
+      radial-gradient(ellipse at 91% 78%, var(--home-glow), transparent 62%) !important;
+  }
+  #root .ih53-home::after {
+    background-image: radial-gradient(ellipse at 71% 43%, var(--home-wash), transparent 55%) !important;
+    background-color: transparent !important;
+    background-size: 144% 144% !important;
+    background-repeat: no-repeat !important;
+    background-position: 40% 40%;
+    opacity: .46;
+    animation: ih-home-atmosphere 22s ease-in-out infinite alternate !important;
+  }
   #root .ih53-home > main, #root .ih53-home .ih88-market, #root .ih53-home .ih-demo-reviews, #root .ih53-home .ih-demo-reviews::before, #root .ih53-home .ih-demo-reviews::after, #root .ih53-home .categories, #root .ih53-home .split-section, #root .ih53-home .ih53-showcase, #root .ih53-home > .footer { background:transparent!important; background-image:none!important; }
   #root .ih53-home .ih88-market { overflow:hidden!important; }
   #root .ih88-market .ih-showcase-rail[data-auto-moving="true"] { scroll-snap-type:none!important; scroll-behavior:auto!important; }
@@ -67,7 +85,10 @@
     #root .ih53-home::before, #root .ih53-home::after { animation:none!important; }
   }
 }
-@keyframes ih-home-atmosphere { from { opacity:.1; } to { opacity:.9; } }
+@keyframes ih-home-atmosphere {
+  from { background-position: 12% 22%; opacity: .24; }
+  to { background-position: 92% 70%; opacity: .68; }
+}
 @layer ideahirePolish {
   @media (max-width: 600px) {
     body #root .cookie-notice {

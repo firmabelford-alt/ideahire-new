@@ -1,5 +1,5 @@
 
-/* Services: a three-step editor and one open, ordered offer view. */
+/* Services: step navigation and the public offer view. */
 @layer ideahireHeadings {
   body.ih79-app #root#root .page.ih5-service-page[data-service-interface] { min-width:0 !important; max-width:100% !important; color:var(--v-ink) !important; }
   body.ih79-app #root#root .page.ih5-service-page[data-service-interface]:is(.ih5-service-form-page,.ih5-service-detail-page)>main.ih-market-shell { box-sizing:border-box !important; display:block !important; width:100% !important; max-width:1160px !important; min-width:0 !important; margin:0 auto !important; padding:30px 36px 120px !important; background:none !important; }
@@ -103,4 +103,63 @@
   @media(max-width:360px) { body.ih79-app #root#root .page.ih5-service-page[data-service-interface]:is(.ih5-service-form-page,.ih5-service-detail-page)>main.ih-market-shell { padding-inline:16px !important; } body.ih79-app #root#root .page.ih5-service-page[data-service-interface] footer.ih5-service-editor-actions { align-items:stretch !important; } body.ih79-app #root#root .page.ih5-service-page[data-service-interface] .ih-service-editor-navigation { width:100% !important; justify-content:flex-end !important; } }
   body.ih79-app #root#root .page.ih5-service-page[data-service-interface] [hidden][hidden] { display:none !important; }
   @media(prefers-reduced-motion:reduce) { body.ih79-app #root#root .page.ih5-service-page[data-service-interface] *, body.ih79-app #root#root .page.ih5-service-page[data-service-interface] *::before, body.ih79-app #root#root .page.ih5-service-page[data-service-interface] *::after { animation:none !important; transition:none !important; } }
+}
+
+@layer ideahirePolish {
+  #root .ih5-service-detail-page .ih5-service-detail-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(265px, 29%) !important;
+    gap: clamp(24px, 3.5vw, 48px) !important;
+  }
+  #root .ih5-service-detail-page .ih5-service-detail-category { margin-bottom: 12px !important; }
+  #root .ih5-service-detail-page .ih5-service-detail-header > h1 {
+    margin-bottom: 12px !important;
+    font-size: clamp(29px, 4vw, 43px) !important;
+    line-height: 1.13 !important;
+    text-wrap: balance;
+  }
+  #root .ih5-service-detail-page .ih5-service-detail-header > p {
+    max-width: 64ch;
+    font-size: 16px !important;
+    line-height: 1.65 !important;
+    overflow-wrap: anywhere;
+  }
+  #root .ih5-service-detail-page .ih5-service-detail-header > .ih-listing-thumbnail {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 20px 0 0 !important;
+  }
+  #root .ih5-service-detail-page .ih-listing-thumbnail:not([data-full="true"]) { aspect-ratio: 16 / 9 !important; }
+  #root .ih5-service-detail-page .ih5-service-rich-copy {
+    max-width: 68ch;
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+  }
+  #root .ih5-service-detail-page .ih80-service-scope {
+    display: grid !important;
+    gap: 14px !important;
+    margin: 4px 0 26px !important;
+  }
+  #root .ih5-service-detail-page .ih80-service-scope > .ih5-service-detail-section {
+    min-width: 0 !important;
+    padding: clamp(16px, 2.5vw, 25px) !important;
+    border: 1px solid var(--v-line) !important;
+    border-radius: 13px !important;
+    background: var(--v-surface) !important;
+  }
+  #root .ih5-service-detail-page .ih80-service-scope li > div { min-width: 0; overflow-wrap: anywhere; }
+  #root .ih5-service-detail-page .ih5-service-order-card { border-radius: 15px !important; }
+  #root .ih5-service-detail-page .ih5-service-order-card .ih5-service-skill-list { min-width: 0; overflow-wrap: anywhere; }
+  #root .ih5-service-detail-page .ih5-service-order-card .ih5-service-skill-list > span {
+    max-width: 100% !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 790px) {
+    #root .ih5-service-detail-page .ih5-service-detail-layout {
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-areas: "header" "order" "main" !important;
+      gap: 24px !important;
+    }
+    #root .ih5-service-detail-page aside.ih5-service-order-card { position: static !important; }
+  }
 }

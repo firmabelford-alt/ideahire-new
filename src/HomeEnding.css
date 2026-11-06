@@ -52,39 +52,103 @@
   #root .ih-finale-payments a > svg { width: 16px; height: 16px; flex: none; }
   #root .ih-finale-stripe { display: block; flex: none; width: clamp(68px, 7.2vw, 98px); height: auto; max-width: 36%; }
 
+  #root .ih-finale-story {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(210px, .65fr);
+    align-items: end;
+    gap: 14px clamp(24px, 6vw, 85px);
+    margin: clamp(18px, 3.3vw, 44px) 0 0;
+    padding: clamp(21px, 4vw, 52px) 0 clamp(20px, 3.5vw, 40px);
+    border-top: 1px solid var(--v-line);
+  }
+  #root .ih-finale-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: clamp(12px, 2.4vw, 23px);
+    color: var(--v-muted);
+    font: 650 11px/1.4 Inter, system-ui, sans-serif;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+  }
+  #root .ih-finale-kicker::before {
+    content: "";
+    width: 24px;
+    height: 7px;
+    background: var(--v-accent);
+    clip-path: polygon(0 0, 100% 0, 72% 100%, 0 100%);
+  }
+  #root .ih-finale-story h2 {
+    margin: 0 !important;
+    color: var(--v-ink) !important;
+    font: 710 clamp(31px, 4.5vw, 62px)/1.08 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.055em !important;
+    text-align: start !important;
+    text-wrap: balance;
+  }
+  #root .ih-finale-story h2 > em {
+    display: block;
+    color: var(--v-accent);
+    font: inherit;
+  }
+  #root .ih-finale-story > p {
+    max-width: 35ch;
+    margin: 0 0 3px !important;
+    color: var(--v-muted) !important;
+    font: 450 clamp(14px, 1.4vw, 17px)/1.65 Inter, system-ui, sans-serif !important;
+    text-wrap: pretty;
+  }
+
   #root .ih-finale-scene {
-    --cut-bright: var(--v-field, var(--v-ink));
-    --cut-mid: var(--v-action, var(--v-muted));
+    --cut-bright: color-mix(in srgb, var(--v-field, var(--v-ink)) 82%, var(--v-surface));
+    --cut-mid: color-mix(in srgb, var(--v-action, var(--v-muted)) 81%, var(--v-bg));
     --cut-deep: color-mix(in srgb, var(--cut-mid) 56%, var(--v-bg));
     --cut-trace: color-mix(in srgb, var(--v-ink) 23%, transparent);
+    --cut-paper: color-mix(in srgb, var(--v-bg) 94%, var(--cut-mid));
     box-sizing: border-box;
     position: relative;
     width: 100%;
     min-width: 0;
-    height: clamp(218px, 29vw, 376px);
+    height: clamp(236px, 29vw, 376px);
     overflow: hidden;
     overflow: clip;
     isolation: isolate;
-    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--cut-mid) 11%, transparent), transparent 69%);
+    background: radial-gradient(ellipse at var(--cut-focus-x, 50%) var(--cut-focus-y, 50%),
+      color-mix(in srgb, var(--cut-mid) 20%, transparent), transparent 72%);
   }
-  #root .ih-finale-scene > svg { display: block; width: 100%; height: 100%; overflow: hidden; }
+  #root .ih-finale-scene > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transform: translateY(var(--cut-rise, 0px));
+  }
+  #root .ih-finale-scene[data-curtained]::before,
+  #root .ih-finale-scene[data-curtained]::after {
+    --seam-y: calc(var(--cut-edge-y) + var(--seam-lip, 0px));
+    --seam-dip: calc(var(--seam-y) + var(--cut-notch));
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    pointer-events: none;
+    clip-path: polygon(0 0, 100% 0, 100% var(--seam-y),
+      calc(var(--cut-focus-x) + 12%) var(--seam-y),
+      calc(var(--cut-focus-x) + 5%) var(--seam-dip),
+      calc(var(--cut-focus-x) - 5%) var(--seam-dip),
+      calc(var(--cut-focus-x) - 12%) var(--seam-y), 0 var(--seam-y));
+  }
+  #root .ih-finale-scene[data-curtained]::before {
+    --seam-lip: 3px;
+    background: linear-gradient(90deg, var(--cut-paper), var(--cut-mid) 42%, var(--cut-bright) 54%, var(--cut-paper) 100%);
+  }
+  #root .ih-finale-scene[data-curtained]::after {
+    background: linear-gradient(180deg, var(--cut-paper) 65%, color-mix(in srgb, var(--v-bg) 87%, var(--cut-mid)));
+  }
   #root .ih-finale-guides { stroke: var(--cut-trace); stroke-width: 1; }
   #root .ih-finale-corners { stroke: var(--cut-trace); stroke-width: 1.5; }
   #root .ih-finale-band.is-edge { fill: var(--cut-bright); opacity: .54; }
   #root .ih-finale-signal { stroke: var(--v-ink); stroke-width: 1; opacity: .3; }
-  #root .ih-finale-scene[data-arrived] .ih-finale-band.is-over {
-    animation: ih-finale-enter 860ms cubic-bezier(.2,.78,.2,1) both;
-    --cut-start: -87px;
-  }
-  #root .ih-finale-scene[data-arrived] .ih-finale-band.is-under {
-    animation: ih-finale-enter 860ms 95ms cubic-bezier(.2,.78,.2,1) both;
-    --cut-start: 87px;
-  }
-  #root .ih-finale-scene[data-arrived] .ih-finale-band.is-edge { animation: ih-finale-edge 520ms 430ms ease both; }
-  #root .ih-finale-scene[data-arrived] .ih-finale-signal { stroke-dasharray: 1; animation: ih-finale-signal 940ms 170ms ease-out both; }
-  @keyframes ih-finale-enter { from { transform: translateX(var(--cut-start)); opacity: .18; } to { transform: translateX(0); opacity: 1; } }
-  @keyframes ih-finale-edge { from { opacity: 0; } to { opacity: .54; } }
-  @keyframes ih-finale-signal { from { stroke-dashoffset: 1; opacity: 0; } to { stroke-dashoffset: 0; opacity: .3; } }
 
   #root .ih-finale-credit {
     display: block;
@@ -95,10 +159,13 @@
   }
 
   @media (max-width: 680px) {
+    #root .ih-finale-story { grid-template-columns: minmax(0, 1fr); }
     #root .ih-finale-scene { height: clamp(218px, 65vw, 296px); }
     #root .ih-finale-stripe { width: clamp(62px, 18vw, 78px); }
   }
   @media (prefers-reduced-motion: reduce) {
-    #root .ih-finale-scene[data-arrived] :is(.ih-finale-band,.ih-finale-signal) { animation: none !important; }
+    #root .ih-finale-scene > svg { transform: none; }
+    #root .ih-finale-scene[data-curtained]::before,
+    #root .ih-finale-scene[data-curtained]::after { display: none; }
   }
 }

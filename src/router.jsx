@@ -1,6 +1,7 @@
 import ContentReport from './ContentReport';
 import { confirmAction, notifyAction } from './SiteDialogs';
 import { FormSelect, AutoTextarea } from "./FormControls";
+import "./ListingEditors.css";
 /* P70 — one task per screen and project details opened on demand. */
 /* P60 — useful onboarding, email actions and site browsing for limited accounts. */
 /* P59 — fullscreen onboarding, visible registration validation, limited account. */
@@ -11353,7 +11354,7 @@ function FindTalent() {
   }
 
   return (
-    <div className="page ih-market-v5 ih5-create-page">
+    <div className="page ih-market-v5 ih5-create-page ih-listing-authoring ih-job-create-page">
       <AccountNavbar />
 
 
@@ -12164,11 +12165,14 @@ function FindTalent() {
             )}
 
             {formStep < JOB_FORM_STEPS.length ? (
-              <button className="ih5-button is-primary" type="button" onClick={goToNextStep} disabled={saving || thumbnailBusy}>
+              <button key="continue" className="ih5-button is-primary" type="button" onClick={event => {
+                event.preventDefault();
+                goToNextStep();
+              }} disabled={saving || thumbnailBusy}>
                 Dalej
               </button>
             ) : (
-              <button className="ih5-button is-primary" type="submit" disabled={saving || thumbnailBusy}>
+              <button key="publish" className="ih5-button is-primary" type="submit" disabled={saving || thumbnailBusy}>
                 {saving ? "Publikowanie..." : "Opublikuj zlecenie"}
               </button>
             )}
@@ -12374,121 +12378,61 @@ function EditJob() {
   if (job.listing_stage === 'assigned' || job.assigned_at) return <div className="page ih-market-v5 ih5-create-page"><AccountNavbar/><main className="ih-market-shell ih5-editor-shell"><MarketHeader eyebrow="Prywatna współpraca" title={job.title} description="To zlecenie ma zaakceptowane ustalenia i pozostaje poza publicznym katalogiem. Zmiany zakresu ustal z wykonawcą w rozmowie."/><p className="ih-owned-private-description">{job.description}</p><Link className="ih5-button is-primary" to={`/work?q=${encodeURIComponent(job.title || '')}`}>Przejdź do współpracy<MarketIcon kind="arrow"/></Link></main></div>;
 
   return (
-    <div className="page ih-market-v5 ih5-create-page">
+    <div className="page ih-market-v5 ih5-create-page ih-listing-authoring ih-job-edit-page">
       <AccountNavbar />
 
       <main className="ih-market-shell ih5-editor-shell">
-        <MarketHeader eyebrow="Twoje zlecenie" title="Edytuj zlecenie" description="Dopracuj opis i wymagania. Zapisane ustalenia pozostają czytelne dla wykonawców." />
+        <SubpageHeading titleId="ih-job-edit-title" variant="editor"
+          title={editEnglish ? "Edit your job" : "Edytuj zlecenie"}
+          description={editEnglish ? "Update what freelancers see when they open your listing." : "Zaktualizuj informacje, które wykonawcy zobaczą po otwarciu ogłoszenia."} />
 
-        <form
-          className="ih5-editor"
-          onSubmit={handleSave}
-        >
-          <label>
-            Tytuł
+        <div className="ih-job-edit-layout">
+          <form className="ih5-editor ih-job-edit-form" aria-labelledby="ih-job-edit-title" onSubmit={handleSave}>
+            <section className="ih-authoring-panel" aria-labelledby="ih-job-edit-details">
+              <h2 id="ih-job-edit-details">{editEnglish ? "Listing details" : "Treść ogłoszenia"}</h2>
+              <div className="ih-job-edit-fields">
+                <label>
+                  <span>{editEnglish ? "Job title" : "Tytuł zlecenia"}</span>
+                  <AutoTextarea className="ideahire-title-field" rows={1} value={title}
+                    onChange={event => setTitle(event.target.value)} maxLength={120} required />
+                </label>
+                <label>
+                  <span>{editEnglish ? "Category" : "Kategoria"}</span>
+                  <FormSelect value={category} onChange={event => setCategory(event.target.value)}>
+                    {JOB_CATEGORIES.map(item => <option key={item} value={item}>{getJobCategoryLabel(item)}</option>)}
+                  </FormSelect>
+                </label>
+                <label>
+                  <span>{editEnglish ? "Project description" : "Opis projektu"}</span>
+                  <AutoTextarea className="ideahire-description-field" rows={5} value={description}
+                    onChange={event => setDescription(event.target.value)} maxLength={2000} required />
+                  <small>{description.length}/2000</small>
+                </label>
+              </div>
+            </section>
 
-            <AutoTextarea
-              className="ideahire-multiline-field ideahire-title-field"
-              rows="2"
-              value={title}
-              onChange={(event) =>
-                setTitle(
-                  event.target.value
-                )
-              }
-              maxLength={120}
-              required
-            />
-          </label>
+            <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={editEnglish} ownerId={user?.id} kind="jobs" />
 
-          <label>
-            Kategoria
+            {message && <p className="ih5-notice is-error" role="alert">{message}</p>}
 
-            <FormSelect
-              value={category}
-              onChange={(event) =>
-                setCategory(
-                  event.target.value
-                )
-              }
-            >
-              {JOB_CATEGORIES.map(
-                (item) => (
-                  <option
-                    key={item}
-                    value={item}
-                  >
-                    {getJobCategoryLabel(item)}
-                  </option>
-                )
-              )}
-            </FormSelect>
-          </label>
+            <div className="ih-job-edit-actions">
+              <Link to="/account#account-jobs">{editEnglish ? "Cancel" : "Anuluj"}</Link>
+              <button className="ih5-button is-primary" type="submit" disabled={saving || thumbnailBusy}>
+                {saving ? (editEnglish ? "Saving…" : "Zapisywanie…") : (editEnglish ? "Save changes" : "Zapisz zmiany")}
+              </button>
+            </div>
+          </form>
 
-          <label>
-            Opis
-
-            <AutoTextarea
-              className="ideahire-multiline-field ideahire-description-field"
-              rows="7"
-              value={description}
-              onChange={(event) =>
-                setDescription(
-                  event.target.value
-                )
-              }
-              maxLength={2000}
-              required
-            />
-          </label>
-
-          <ListingThumbnailPicker value={thumbnail} onChange={setThumbnail} onBusyChange={setThumbnailBusy} disabled={saving} en={editEnglish} ownerId={user?.id} kind="jobs" />
-
-          <div className="fixed-budget-note">
-            <strong>
-              Budżet:
-            </strong>{" "}
-            {Number(
-              job.budget || 0
-            ).toLocaleString(
-              "pl-PL"
-            )}{" "}
-            zł
-
-            <br />
-
-            <small>
-              {job.budget_negotiable
-                ? "To budżet orientacyjny. Ostateczną cenę ustalicie przed rozpoczęciem współpracy."
-                : "Cena została ustalona przy publikacji i nie może być edytowana."}
-            </small>
-          </div>
-
-          <div className="ih5-job-edit-publication-summary">
-            <span className="ih5-eyebrow">Warunki publikacji</span>
+          <aside className="ih-authoring-panel ih-job-edit-publication" aria-labelledby="ih-job-edit-terms">
+            <h2 id="ih-job-edit-terms">{editEnglish ? "Publication terms" : "Warunki publikacji"}</h2>
+            <dl>
+              <div><dt>{editEnglish ? "Budget" : "Budżet"}</dt>
+                <dd>{Number(job.budget || 0).toLocaleString(editEnglish ? "en-GB" : "pl-PL")} {editEnglish ? "PLN" : "zł"}</dd></div>
+            </dl>
             <JobListingMeta job={job} />
-            <small>
-              Wybrany czas publikacji i charakter budżetu są zapisywane w
-              chwili dodania zlecenia.
-            </small>
-          </div>
-
-          {message && (
-            <p className="ih5-notice is-error">
-              {message}
-            </p>
-          )}
-
-          <button
-            className="ih5-button is-primary btn-large"
-            type="submit"
-            disabled={saving || thumbnailBusy}
-          >
-            {saving
-              ? "Zapisywanie..."
-              : "Zapisz zmiany "}
-          </button>
-        </form>
+            <p>{editEnglish ? "The budget and listing duration were set at publication." : "Budżet i czas publikacji ustalono przy dodawaniu zlecenia."}</p>
+          </aside>
+        </div>
       </main>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Link } from "react-router-dom";
 import { IDEA_HIRE_MARK } from "./Brand";
 import { useSitePreferences } from "./Preferences";
@@ -6,9 +6,83 @@ import "./HomeEnding.css";
 
 const SETTLEMENT_TERMS = "/regulamin#stripe-connect-i-uruchomienie-płatności";
 
-function ClosingCut({ scene, sceneRef, arrived }) {
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+function ClosingCut({ scene }) {
+  const stageRef = useRef(null);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || !window.CSS?.supports("clip-path", "polygon(0 0, 100% 0, 100% 100%)")) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const viewport = window.visualViewport;
+    let point = null;
+    let frame = 0;
+
+    function renderCut() {
+      frame = 0;
+      if (reducedMotion.matches) {
+        stage.removeAttribute("data-curtained");
+        return;
+      }
+      const rect = stage.getBoundingClientRect();
+      if (!rect.height || !rect.width) return;
+      const viewportHeight = viewport?.height || window.innerHeight;
+      const visible = viewportHeight + (viewport?.offsetTop || 0) - rect.top;
+      const progress = clamp(visible / Math.min(rect.height, viewportHeight * 0.78));
+      const inside = point && point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+      const x = inside ? clamp((point.x - rect.left) / rect.width, 0.17, 0.83) : 0.5;
+      const y = inside ? clamp((point.y - rect.top) / rect.height) : 0.5;
+      // The seam follows the scroll. Pointer movement shapes only its local notch.
+      const edge = (1 - progress) ** 2 * 100;
+      const notch = Math.sin(progress * Math.PI) * (4 + 8 * y);
+      stage.style.setProperty("--cut-edge-y", `${edge.toFixed(2)}%`);
+      stage.style.setProperty("--cut-notch", `${notch.toFixed(2)}%`);
+      stage.style.setProperty("--cut-focus-x", `${(x * 100).toFixed(2)}%`);
+      stage.style.setProperty("--cut-focus-y", `${(y * 100).toFixed(2)}%`);
+      stage.style.setProperty("--cut-rise", `${((1 - progress) * 18).toFixed(2)}px`);
+      stage.toggleAttribute("data-curtained", progress < 1);
+    }
+
+    function schedule() {
+      if (!frame) frame = window.requestAnimationFrame(renderCut);
+    }
+
+    function track(event) {
+      if (event.pointerType === "touch" || reducedMotion.matches) return;
+      point = { x: event.clientX, y: event.clientY };
+      schedule();
+    }
+
+    function resetPointer() {
+      point = null;
+      schedule();
+    }
+
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
+    observer?.observe(stage);
+    observer?.observe(document.body);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    viewport?.addEventListener("resize", schedule);
+    reducedMotion.addEventListener("change", schedule);
+    stage.addEventListener("pointermove", track, { passive: true });
+    stage.addEventListener("pointerleave", resetPointer);
+    renderCut();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer?.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      viewport?.removeEventListener("resize", schedule);
+      reducedMotion.removeEventListener("change", schedule);
+      stage.removeEventListener("pointermove", track);
+      stage.removeEventListener("pointerleave", resetPointer);
+    };
+  }, []);
+
   return (
-    <div ref={sceneRef} className="ih-finale-scene" data-arrived={arrived || undefined} aria-hidden="true">
+    <div ref={stageRef} className="ih-finale-scene" aria-hidden="true">
       <svg viewBox="0 0 1100 344" preserveAspectRatio="xMidYMid slice" focusable="false">
         <defs>
           <linearGradient id={scene + "-upper"} x1="0" x2="1">
@@ -57,20 +131,6 @@ export default function HomeEnding({ en = false }) {
   const { theme } = useSitePreferences();
   const paymentsTitle = useId();
   const scene = "ih-cut-" + useId().replace(/[^a-z0-9_-]/gi, "");
-  const ending = useRef(null);
-  const [arrived, setArrived] = useState(false);
-
-  useEffect(() => {
-    if (!ending.current || typeof IntersectionObserver !== "function" ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      setArrived(true);
-      observer.disconnect();
-    }, { threshold: 0.25 });
-    observer.observe(ending.current);
-    return () => observer.disconnect();
-  }, []);
 
   const dark = theme === "dark";
   return (
@@ -87,7 +147,17 @@ export default function HomeEnding({ en = false }) {
           <img className="ih-finale-stripe" src={dark ? "/brand/stripe-wordmark-white.svg" : "/brand/stripe-wordmark.svg"}
             width="360" height={dark ? "151" : "150"} loading="lazy" decoding="async" alt="Stripe" />
       </section>
-      <ClosingCut scene={scene} sceneRef={ending} arrived={arrived} />
+      <div className="ih-finale-story">
+        <div>
+          <span className="ih-finale-kicker">{en ? "The first step" : "Pierwszy krok"}</span>
+          <h2>{en ? "You don’t need the whole plan." : "Nie musisz mieć całego planu."}{" "}
+            <em>{en ? "You just need to start." : "Wystarczy zacząć."}</em>
+          </h2>
+        </div>
+        <p>{en ? "Tell us what you want to make. Or show what you can do. That’s how working together begins."
+          : "Opowiedz, co chcesz zrobić. Albo pokaż, co potrafisz. Od tego zaczyna się współpraca."}</p>
+      </div>
+      <ClosingCut scene={scene} />
       <small className="ih-finale-credit">© 2026 IdeaHire</small>
     </section>
   );

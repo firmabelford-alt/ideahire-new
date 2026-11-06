@@ -1,0 +1,208 @@
+/* Shared layout and field sizing for job and service authoring routes. */
+@layer ideahirePolish {
+  #root .page.ih-listing-authoring > .ih-market-shell {
+    --editor-inset: clamp(16px, 3.3vw, 40px);
+    --editor-panel-inset: clamp(16px, 2.8vw, 30px);
+    --editor-field-line: color-mix(in srgb, var(--v-muted) 50%, var(--v-line));
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 1040px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: clamp(22px, 3vw, 36px) var(--editor-inset) max(108px, env(safe-area-inset-bottom)) !important;
+  }
+  #root .page.ih-job-create-page > .ih-market-shell { max-width: 1130px !important; }
+  #root .page.ih5-service-form-page.ih-listing-authoring > .ih-market-shell { max-width: 952px !important; }
+  #root .ih-listing-authoring .ih-market-shell header.ih-subpage-heading.is-editor {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 0 clamp(24px, 4vw, 40px) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    text-align: start !important;
+    box-shadow: none !important;
+  }
+  #root .ih-listing-authoring .ih-market-shell .ih-subpage-heading-copy > h1 {
+    margin: 0 !important;
+    color: var(--v-ink) !important;
+    font: 730 clamp(30px, 4vw, 43px)/1.13 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.046em !important;
+    text-align: start !important;
+  }
+  #root .ih-listing-authoring .ih-market-shell .ih-subpage-heading-copy { justify-items: start !important; }
+  #root .ih-listing-authoring .ih-market-shell p.ih-subpage-heading-description {
+    justify-self: start !important;
+    width: auto !important;
+    max-width: 56ch !important;
+    margin: 10px 0 0 !important;
+    padding: 0 !important;
+    color: var(--v-muted) !important;
+    font: 440 15px/1.6 Inter, system-ui, sans-serif !important;
+    text-align: start !important;
+  }
+  #root .ih-listing-authoring :is(.ih-authoring-panel, .ih-service-step-panel, .ih5-job-create-step-panel) {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    padding: var(--editor-panel-inset) !important;
+    border: 1px solid var(--v-line) !important;
+    border-radius: 15px !important;
+    background: var(--v-surface) !important;
+  }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: start !important;
+    gap: 22px 18px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #root .ih-listing-authoring .ih-job-edit-fields { grid-template-columns: minmax(0, 1fr) !important; }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid) > .is-wide {
+    grid-column: 1 / -1 !important;
+  }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid)
+    > label:not(.ih5-service-switch) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-content: start !important;
+    gap: 7px !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--v-ink) !important;
+    font: 620 14px/1.5 Inter, system-ui, sans-serif !important;
+  }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid)
+    :is(input:not([type="checkbox"],[type="radio"],[type="file"]), textarea, .ih-control-trigger) {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 49px !important;
+    margin: 0 !important;
+    padding: 11px 13px !important;
+    border: 1px solid var(--editor-field-line) !important;
+    border-radius: 9px !important;
+    background: color-mix(in srgb, var(--v-bg) 52%, var(--v-surface)) !important;
+    color: var(--v-ink) !important;
+    font: 450 16px/1.55 Inter, system-ui, sans-serif !important;
+    box-shadow: none !important;
+  }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid)
+    :is(input, textarea)::placeholder { color: var(--v-muted) !important; opacity: .89 !important; }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid) .ih-control-select {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid)
+    :is(input:not([type="file"]), textarea, .ih-control-trigger):focus-visible {
+    border-color: var(--v-accent) !important;
+    outline: 2px solid var(--v-accent) !important;
+    outline-offset: 2px !important;
+  }
+  #root .ih-listing-authoring :is(.ih5-service-editor-fields, .ih5-job-form-grid, .ih-job-edit-fields)
+    :is(.ih-control-select[data-open="true"] > .ih-control-trigger) { border-color: var(--v-accent) !important; }
+  #root .ih-listing-authoring :is(.ih-job-edit-fields, .ih5-service-editor-fields, .ih5-job-form-grid) textarea {
+    min-height: 108px !important;
+    overflow-wrap: anywhere !important;
+  }
+  #root .ih-listing-authoring .ih-job-edit-fields .ideahire-title-field { min-height: 49px !important; }
+  #root .ih-listing-authoring .ih-job-edit-fields .ideahire-description-field { min-height: 148px !important; }
+  #root .ih-listing-authoring .ih5-service-editor-fields .ih5-service-price-input {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-color: var(--editor-field-line) !important;
+    background: color-mix(in srgb, var(--v-bg) 52%, var(--v-surface)) !important;
+  }
+  #root .ih-listing-authoring .ih5-service-editor-fields .ih5-service-price-input > input {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    outline: none !important;
+  }
+  #root .ih-listing-authoring .ih5-service-price-input:focus-within {
+    outline: 2px solid var(--v-accent) !important;
+    outline-offset: 2px !important;
+  }
+  #root .ih-listing-authoring section.ih-service-step-panel[hidden] { display: none !important; }
+  #root .ih-listing-authoring .ih-service-step-panel { scroll-margin-top: calc(var(--a-head, 72px) + 16px); }
+  #root .ih-listing-authoring .ih-service-step-panel > .ih5-service-editor-heading { padding: 0 !important; }
+  #root .ih-listing-authoring .ih-service-step-panel > .ih-thumbnail-editor {
+    width: 100% !important;
+    margin: 24px 0 0 !important;
+    background: var(--v-bg) !important;
+  }
+  #root .ih-listing-authoring .ih-thumbnail-choose { flex-direction: row !important; }
+
+  #root .ih-job-edit-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(218px, 27%);
+    align-items: start;
+    gap: clamp(16px, 2.8vw, 30px);
+  }
+  #root .ih-job-edit-page form.ih-job-edit-form {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 18px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+  #root .ih-job-edit-page .ih-authoring-panel h2 {
+    margin: 0 0 20px !important;
+    padding: 0 !important;
+    color: var(--v-ink) !important;
+    font: 690 19px/1.35 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.022em !important;
+    text-align: start !important;
+  }
+  #root .ih-job-edit-page aside.ih-job-edit-publication { background: var(--v-soft) !important; }
+  #root .ih-job-edit-page .ih-job-edit-publication dl { margin: 0 0 14px; }
+  #root .ih-job-edit-page .ih-job-edit-publication dt,
+  #root .ih-job-edit-page .ih-job-edit-publication p { margin: 0; color: var(--v-muted); font: 450 13px/1.6 Inter, system-ui, sans-serif; }
+  #root .ih-job-edit-page .ih-job-edit-publication dd {
+    margin: 4px 0 0;
+    color: var(--v-ink);
+    font: 720 24px/1.25 Inter, system-ui, sans-serif;
+    letter-spacing: -.025em;
+    overflow-wrap: anywhere;
+  }
+  #root .ih-job-edit-page .ih-job-edit-publication p { margin-top: 14px; }
+  #root .ih-job-edit-page .ih-job-edit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+  }
+  #root .ih-job-edit-page .ih-job-edit-actions > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 46px;
+    color: var(--v-muted);
+    font: 600 14px/1.4 Inter, system-ui, sans-serif;
+  }
+  #root .ih-job-edit-page .ih-job-edit-actions > button { width: auto !important; min-height: 46px !important; margin: 0 !important; }
+
+  @media (max-width: 770px) {
+    #root .ih-job-edit-layout { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 620px) {
+    #root .ih-listing-authoring :is(.ih5-service-editor-fields, .ih5-job-form-grid) { grid-template-columns: minmax(0, 1fr) !important; gap: 19px !important; }
+    #root .ih-listing-authoring .ih-service-editor-steps { margin-bottom: 18px !important; }
+  }
+}
