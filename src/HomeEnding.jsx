@@ -64,7 +64,7 @@ function FooterReveal({ scene, en }) {
   return (
     <div ref={stageRef} className="ih-finale-scene">
       <div className="ih-finale-layer">
-        <h2>{en ? "From an idea" : "Od pomysłu"}<span>{en ? "to a job well done." : "do dobrej roboty."}</span></h2>
+        <h2>{en ? "From an idea " : "Od pomysłu "}<span>{en ? "to a job well done." : "do dobrej roboty."}</span></h2>
       <svg className="ih-finale-ribbons" aria-hidden="true" viewBox="0 0 1200 460" preserveAspectRatio="none" focusable="false">
         <defs>
           <linearGradient id={scene + "-ribbon"} x1="0" y1="1" x2="1" y2="0">
