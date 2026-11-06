@@ -61,8 +61,8 @@
   body #root .ih72-new-conversation>svg { flex:none !important; width:18px !important; height:18px !important; }
 
   /* Quick links move as a unit, with a small colour change rather than a jump. */
-  body #root .ih72-work-links > :is(a,button) { border-radius:10px !important; transition:background .18s,color .18s,translate .18s !important; }
-  body #root .ih72-work-links > :is(a,button):hover { background:var(--ih-ui-soft) !important; color:var(--ih-ui-accent) !important; translate:0 -2px !important; }
+  body #root .ih72-work-links > :is(a,button) { border-radius:10px !important; transition:color .18s,translate .18s !important; }
+  body #root .ih72-work-links > :is(a,button):hover { background:transparent !important; color:var(--ih-ui-accent) !important; translate:0 -2px !important; }
 
   body #root :is(.ih5-button.is-primary,.ih11-button.is-primary,.ih79-button.is-primary,.ih68-primary,.wd-button.is-primary,.ih-studio-button.is-primary,.ih72-new-conversation,.ih53-home .btn-light) { background:var(--ih-ui-accent) !important; border-color:var(--ih-ui-accent) !important; color:var(--v-on,#fff) !important; -webkit-text-fill-color:currentColor !important; box-shadow:none !important; }
   body #root :is(.ih5-button.is-primary,.ih11-button.is-primary,.ih79-button.is-primary,.ih68-primary,.wd-button.is-primary,.ih-studio-button.is-primary,.ih72-new-conversation,.ih53-home .btn-light) :is(span,strong,svg) { color:inherit !important; -webkit-text-fill-color:currentColor !important; }
@@ -234,5 +234,23 @@
     html, body, body * { scrollbar-color:auto !important; }
     body :is(.calendar-type-picker,.ih5-job-choice-grid,.ih5-collaboration-plan-radio-list) input[type="radio"] { appearance:auto !important; }
     body input[type="range"] { appearance:auto !important; }
+  }
+}
+
+
+/* Hover feedback follows the icon instead of painting a grey panel. */
+@layer ideahirePolish {
+  body #root .ih72-work-links > :is(a,button) > svg,
+  body #root #ih63-specialisations .ih63-field-choice > svg,
+  body #root .ih88-entry > svg { transition:translate 180ms ease !important; }
+  @media (hover:hover) and (pointer:fine) {
+    body #root .ih72-work-links > :is(a,button):hover > svg,
+    body #root #ih63-specialisations .ih63-field-choice:hover > svg,
+    body #root .ih88-entry:hover > svg { translate:3px 0 !important; }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    body #root .ih72-work-links > :is(a,button) > svg,
+    body #root #ih63-specialisations .ih63-field-choice > svg,
+    body #root .ih88-entry > svg { transition:none !important; translate:none !important; }
   }
 }

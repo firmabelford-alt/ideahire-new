@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, FileText, FolderOpen, Grid2X2, MessageSquare, Plus, Search, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BarChart3, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, FileText, FolderOpen, Grid2X2, MessageSquare, Plus, Search, X } from 'lucide-react';
 import { conversationMessagePreview } from './ConversationCards';
 import './Studio.css';
 import './WorkDesk.css';
 import { FormSelect } from './FormControls';
+import WorkStatistics from './WorkStatistics';
 
-export default function WorkDesk({ rows = [], visible = [], user, filter = 'all', search = '', unreadOnly = false, sort = 'recent', total = visible.length, page = 1, pageCount = 1, pageSize = 6, counts = { unread:0,hiring:0,providing:0 }, loading = false, error = '', onRole, onSearch, onUnread, onSort, onPage, onReset, onOpen, loader, en = false }) {
+export default function WorkDesk({ rows = [], visible = [], user, filter = 'all', search = '', unreadOnly = false, sort = 'recent', total = visible.length, page = 1, pageCount = 1, pageSize = 6, counts = { unread:0,hiring:0,providing:0 }, loading = false, error = '', onRole, onSearch, onUnread, onSort, onPage, onReset, onOpen, loader, en = false, view = 'projects', months = 6, onView, onPeriod }) {
   const t = (pl, english) => en ? english : pl;
   const heading = useRef(null), focusPage = useRef(false);
   const filtered = Boolean(search.trim() || filter !== 'all' || unreadOnly || sort !== 'recent');
@@ -29,10 +30,14 @@ export default function WorkDesk({ rows = [], visible = [], user, filter = 'all'
       <div><p className="wd-eyebrow">{t('PANEL PRACY', 'WORKSPACE')}</p><h1>{t('Twoja praca', 'Your workspace')}</h1><p>{t('Rozmowy, ustalenia i materiały w jednym miejscu.', 'Conversations, terms and files in one place.')}</p></div>
       <Link to="/find-talent" className="wd-button is-primary"><Plus size={18} aria-hidden="true" />{t('Zleć pracę', 'Post a job')}</Link>
     </header>
+    <nav className="wd-view-switch" aria-label={t('Widok panelu pracy', 'Workspace view')}>
+      <button type="button" aria-pressed={view === 'projects'} onClick={() => onView('projects')}><FolderOpen size={18} aria-hidden="true" />{t('Współprace', 'Projects')}</button>
+      <button type="button" aria-pressed={view === 'stats'} onClick={() => onView('stats')}><BarChart3 size={18} aria-hidden="true" />{t('Statystyki', 'Statistics')}</button>
+    </nav>
     <nav className="wd-shortcuts" aria-label={t('Narzędzia pracy', 'Workspace tools')}>
       {shortcuts.map(([to, Icon, label, detail]) => <Link key={to} to={to}><Icon size={20} aria-hidden="true" /><span><strong>{label}</strong><small>{detail}</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>)}
     </nav>
-    <div className="wd-layout">
+    {view === 'stats' ? <WorkStatistics user={user} role={filter === 'client' ? 'client' : 'contractor'} months={months} onRole={onRole} onPeriod={onPeriod} en={en} /> : <div className="wd-layout">
       <section className="wd-register" aria-labelledby="wd-results-title">
         <div className="wd-register-heading"><h2 ref={heading} tabIndex={-1} id="wd-results-title">{t('Współprace', 'Projects')}<span>{count(total)}</span></h2><span className="wd-register-caption">{t('Rozmowy • ustalenia • materiały', 'Conversations • terms • files')}</span></div>
         <div className="wd-controls"><div className="wd-toolbar">
@@ -73,6 +78,7 @@ export default function WorkDesk({ rows = [], visible = [], user, filter = 'all'
           </> : <div className="wd-empty"><FolderOpen size={32} aria-hidden="true" /><h3>{rows.length ? unreadOnly && !search.trim() && filter === 'all' ? t('Wszystko przeczytane', 'You’re all caught up') : t('Brak pasujących współprac', 'No matching projects') : t('Tu zaczyna się współpraca', 'Your next project starts here')}</h3><p>{rows.length ? t('Zmień filtry, żeby wrócić do swoich rozmów.', 'Change the filters to find your conversations.') : t('Odpowiedz na zlecenie albo znajdź wykonawcę. Pierwsza rozmowa pojawi się na tej liście.', 'Reply to a job or find a freelancer. Your first conversation will appear here.')}</p>{rows.length ? <button type="button" className="wd-button" onClick={onReset}>{t('Pokaż wszystkie', 'Show all')}</button> : <Link to="/jobs" className="wd-button">{t('Znajdź zlecenie', 'Find a job')}<ArrowRight size={16} aria-hidden="true" /></Link>}</div>}
         </div>
       </section>
-    </div>
+    </div>}
   </main>;
 }
+

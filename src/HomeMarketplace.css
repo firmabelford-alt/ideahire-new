@@ -124,9 +124,15 @@
     overflow: clip !important;
   }
   html:not([data-template="classic"]) #root .ih88-market .ih88-intro {
+    --v-ink: #09252b;
+    --v-muted: #204a50;
+    --v-accent: #09252b;
+    --v-on: #ffffff;
+    --v-surface: #ffffff;
+    --v-control-line: #17464e66;
     padding-block: clamp(58px, 7.5vw, 110px) clamp(50px, 6.8vw, 94px) !important;
     color: var(--v-ink) !important;
-    background: radial-gradient(ellipse 74% 95% at 45% 0%, color-mix(in srgb, var(--v-action) 10%, transparent), transparent 86%) !important;
+    background: linear-gradient(115deg, #65e7e9 0%, #23cdd6 60%, #16bfcf 100%) !important;
   }
   html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-talent {
     background: var(--v-accent) !important;
@@ -134,7 +140,7 @@
     color: var(--v-on) !important;
   }
   html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-jobs {
-    background: color-mix(in srgb, var(--v-surface) 74%, transparent) !important;
+    background: #ffffffb8 !important;
     border-color: var(--v-control-line, var(--v-line)) !important;
     color: var(--v-ink) !important;
   }
@@ -145,7 +151,7 @@
   }
   @media (hover: hover) {
     html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-talent:hover { background: color-mix(in srgb, var(--v-accent) 90%, var(--v-ink)) !important; }
-    html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-jobs:hover { background: var(--v-surface) !important; }
+    html:not([data-template="classic"]) #root .ih88-market .ih88-intro .ih88-jobs:hover { background: #ffffff !important; }
   }
   @media (max-width: 700px) {
     html:not([data-template="classic"]) #root .ih88-market .ih88-intro { padding-block: 46px 44px !important; }

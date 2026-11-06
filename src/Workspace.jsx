@@ -346,6 +346,8 @@ export function WorkspaceWork({ inbox }) {
   const location = useLocation();
   const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
+  const view = params.get('view') === 'stats' ? 'stats' : 'projects';
+  const months = ['0', '3', '6', '12'].includes(params.get('period')) ? Number(params.get('period')) : 6;
   const filter = ['client', 'contractor'].includes(params.get('role')) ? params.get('role') : 'all';
   const search = params.get('q') || '';
   const unreadOnly = params.get('unread') === '1';
@@ -378,6 +380,7 @@ export function WorkspaceWork({ inbox }) {
     navigate({ pathname: '/work', search: next.toString() ? '?' + next : '' }, { replace: true, state: {} });
   }
   return <WorkDesk rows={rows} visible={visible.slice((page - 1) * pageSize, page * pageSize)} user={inbox?.user} filter={filter} search={search}
+    view={view} months={months} onView={value => update('view', value === 'stats' ? 'stats' : '')} onPeriod={value => update('period', value === 6 ? '' : String(value))}
     unreadOnly={unreadOnly} sort={sort} total={visible.length} page={page} pageCount={pageCount} pageSize={pageSize}
     counts={{ unread, hiring, providing }} loading={inbox?.loading} error={inbox?.errorMessage}
     onRole={value => update('role', value)} onSearch={value => update('q', value)}
@@ -454,4 +457,5 @@ function WorkspaceWorkActions() {
     </nav>
   </div>;
 }
+
 
