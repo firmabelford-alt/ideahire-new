@@ -4,6 +4,8 @@ import { ListingThumbnail } from "./ListingThumbnail";
 import { nearestProjectStop, projectScrollStops } from "./HomeProjectScroll";
 import "./HomeMarketplace.css";
 import { homeFeedKey } from "./HomeFeed";
+import { BrandMark } from "./Brand";
+import { useBrandReady } from "./BrandOpening";
 
 function Arrow() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12h15M13 5l7 7-7 7" /></svg>;
@@ -36,6 +38,7 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
 
 /* Native scrolling keeps touch, trackpad and keyboard interactions predictable. */
 export default function HomeMarketplace({ en = false, jobs = [], renderProject, paused = false, reduced = false }) {
+  const brandReady = useBrandReady();
   const host = useRef(null), rail = useRef(null), activeId = useRef(jobs[0] ? homeFeedKey(jobs[0]) : undefined), known = useRef(new Set()), initialized = useRef(false);
   const openedAt = useRef(Date.now()), interactionTimer = useRef(0), pointerActive = useRef(false);
   const [stops, setStops] = useState([0]), [position, setPosition] = useState(0);
@@ -158,10 +161,10 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     if (card) { pauseForInteraction(4000); node.scrollTo({ left: card.offsetLeft - node.firstElementChild.offsetLeft, behavior: reduced ? 'instant' : 'smooth' }); }
     setPending(null);
   }
-  return <div ref={host} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-paused={stopped} data-motion-paused={motionPaused}>
+  return <div ref={host} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-brand-ready={brandReady} data-paused={stopped} data-motion-paused={motionPaused}>
     <div className="ih88-intro">
       <header className="ih88-heading">
-        <p className="ih88-eyebrow">{copy.eyebrow.map(word => <span key={word}>{word}</span>)}</p>
+        <p className="ih88-eyebrow"><BrandMark className="ih88-greeting-mark" />{copy.eyebrow.map(word => <span key={word}>{word}</span>)}</p>
         <h1 className="ih88-title"><span className="ih88-title-first">{copy.title[0]}</span><span className="ih88-title-last">{copy.title[1]}</span></h1>
       </header>
       <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>

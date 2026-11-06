@@ -158,3 +158,22 @@
   }
 }
 
+
+/* The familiar dot greets the visitor after the page is ready, in every theme. */
+@layer ideahirePolish {
+  #root .ih88-market .ih88-eyebrow { align-items:center !important; }
+  #root .ih88-market .ih88-greeting-mark { display:block !important; flex:0 0 36px !important; width:36px !important; height:36px !important; color:var(--v-ink) !important; overflow:visible; }
+  @media (prefers-reduced-motion:no-preference) {
+    #root .ih88-market[data-brand-ready="true"] .ih88-greeting-mark .ih-brand-dot { transform-box:fill-box; transform-origin:center bottom; animation:ih-greeting-dot 1700ms cubic-bezier(.25,.7,.35,1) both !important; }
+  }
+  @keyframes ih-greeting-dot {
+    0% { transform:translateY(0) scale(1); }
+    12% { transform:translateY(2px) scale(1.12,.82); }
+    34% { transform:translateY(-24px) scale(.95,1.05); }
+    52% { transform:translateY(0) scale(1.1,.86); }
+    67% { transform:translateY(-10px) scale(1); }
+    81% { transform:translateY(0) scale(1.05,.92); }
+    91% { transform:translateY(-3px); }
+    100% { transform:translateY(0) scale(1); }
+  }
+}

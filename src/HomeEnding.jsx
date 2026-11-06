@@ -1,6 +1,5 @@
 import { useId, useLayoutEffect, useRef } from "react";
-import { IDEA_HIRE_MARK } from "./Brand";
-import { useSitePreferences } from "./Preferences";
+import { BrandSignature } from "./Brand";
 import "./HomeEnding.css";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -64,8 +63,7 @@ function FooterReveal({ scene, en }) {
   return (
     <div ref={stageRef} className="ih-finale-scene">
       <div className="ih-finale-layer">
-        <h2>{en ? "Your move. " : "Twój ruch. "}<span>{en ? "Clear terms." : "Jasne zasady."}</span></h2>
-        <p className="ih-finale-assurance">{en ? "Scope, price and terms — agreed before the work begins." : "Zakres, cena i ustalenia — zanim ruszy praca."}</p>
+        <h2>{en ? "Your next big project " : "Twój kolejny duży projekt "}<span>{en ? "starts here." : "zaczyna się tutaj."}</span></h2>
       <svg className="ih-finale-ribbons" aria-hidden="true" viewBox="0 0 1200 460" preserveAspectRatio="none" focusable="false">
         <defs>
           <linearGradient id={scene + "-ribbon"} x1="0" y1="1" x2="1" y2="0">
@@ -82,9 +80,7 @@ function FooterReveal({ scene, en }) {
         <path fill={"url(#" + scene + "-ribbon)"} d="M-80 295C170 120 370 444 648 290S1025 160 1280 279V340C1010 205 896 220 664 343S165 205-80 361Z" />
         <path className="ih-finale-trace" d="M-80 284C170 109 370 433 648 279S1025 149 1280 268" />
       </svg>
-        <svg className="ih-finale-mark" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true" focusable="false">
-          <path d={IDEA_HIRE_MARK.dot} /><path d={IDEA_HIRE_MARK.join} />
-        </svg>
+        <BrandSignature className="ih-finale-brand" />
         <small className="ih-finale-credit">© 2026 IdeaHire</small>
       </div>
     </div>
@@ -92,14 +88,12 @@ function FooterReveal({ scene, en }) {
 }
 
 export default function HomeEnding({ en = false }) {
-  const { theme } = useSitePreferences();
   const scene = "ih-cut-" + useId().replace(/[^a-z0-9_-]/gi, "");
-  const dark = theme === "dark";
   return (
     <section className="ih-home-finale" aria-label={en ? "IdeaHire and payments" : "IdeaHire i rozliczenia"} data-no-translate="true">
       <div className="ih-finale-payments">
-        <img className="ih-finale-stripe" src={dark ? "/brand/stripe-wordmark-white.svg" : "/brand/stripe-wordmark.svg"}
-          width="360" height={dark ? "151" : "150"} loading="lazy" decoding="async" alt="Stripe" />
+        <img className="ih-finale-stripe" src="/brand/stripe-wordmark.svg"
+          width="360" height="150" loading="lazy" decoding="async" alt="Stripe" />
       </div>
       <FooterReveal scene={scene} en={en} />
     </section>

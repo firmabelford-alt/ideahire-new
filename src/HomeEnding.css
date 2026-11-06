@@ -26,7 +26,7 @@
     border-top: 1px solid var(--v-line) !important;
     background: none !important;
   }
-  #root .ih-finale-stripe { display: block; flex: none; width: clamp(70px, 7.2vw, 98px); height: auto; max-width: 32%; }
+  #root .ih-finale-stripe { display: block; flex: none; width: clamp(70px, 7.2vw, 98px); height: auto; max-width: 32%; filter: none !important; }
   #root .ih-finale-scene {
     --ribbon-soft: color-mix(in srgb, var(--v-field) 38%, var(--v-bg));
     --finale-gutter: max(24px, calc((var(--finale-viewport-width, 100vw) - 1160px) / 2));
@@ -43,6 +43,12 @@
   #root .ih-finale-layer {
     box-sizing: border-box;
     position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr;
+    align-items: start;
+    column-gap: 28px;
+    padding: 48px var(--finale-gutter) 0;
     width: 100%;
     height: 100%;
     min-width: 0;
@@ -65,15 +71,15 @@
   }
   #root .ih-finale-scene[data-reveal="fixed"]:not([data-in-view]) .ih-finale-layer { visibility: hidden; }
   #root .ih-finale-layer > h2 {
-    position: absolute;
+    position: relative;
     z-index: 1;
-    top: 48px;
-    left: var(--finale-gutter);
-    max-width: 65%;
+    grid-column: 1;
+    grid-row: 1;
+    max-width: 100%;
     margin: 0 !important;
     padding: 0 !important;
     color: var(--v-ink) !important;
-    font: 650 clamp(30px, 4.5vw, 62px)/1.08 Inter, system-ui, sans-serif !important;
+    font: 650 clamp(30px, 4.1vw, 56px)/1.08 Inter, system-ui, sans-serif !important;
     letter-spacing: -.05em !important;
     text-align: left !important;
   }
@@ -91,28 +97,18 @@
     overflow: visible;
   }
   #root .ih-finale-trace { fill: none; stroke: var(--v-accent); stroke-width: 1; opacity: .3; }
-  #root .ih-finale-layer > .ih-finale-mark {
-    position: absolute;
-    top: 28px;
-    right: var(--finale-gutter);
-    width: clamp(130px, 18vw, 230px);
-    height: auto;
-    color: var(--v-ink);
-    stroke: var(--v-bg);
-    stroke-width: 2;
-    stroke-linejoin: round;
-    paint-order: stroke fill;
-  }
-  #root .ih-finale-assurance {
-    position: absolute;
-    top: calc(64px + 2.16 * clamp(30px, 4.5vw, 62px));
-    left: var(--finale-gutter);
+  #root .ih-finale-layer > .ih-finale-brand {
+    position: relative;
     z-index: 1;
-    max-width: min(45ch, 58%);
-    margin: 0 !important;
-    color: var(--v-muted) !important;
-    font: 450 clamp(13px, 1.25vw, 16px)/1.6 Inter, system-ui, sans-serif !important;
+    display: inline-flex !important;
+    grid-column: 2;
+    grid-row: 1;
+    align-items: center !important;
+    gap: 9px !important;
+    color: var(--v-ink) !important;
   }
+  #root .ih-finale-brand > .ih-brand-mark { width: 34px !important; height: 34px !important; flex: none; stroke: none !important; }
+  #root .ih-finale-brand > .ih-brand-wordmark { font-size: 28px !important; line-height: 1 !important; }
   #root .ih-finale-credit {
     position: absolute;
     right: var(--finale-gutter);
@@ -127,9 +123,12 @@
   }
   @media (max-width: 680px) {
     #root .ih-finale-scene { --finale-gutter: 20px; height: clamp(360px, 100vw, 430px); }
-    #root .ih-finale-layer > h2 { top: 30px; max-width: calc(100% - 40px); font-size: clamp(29px, 8vw, 42px) !important; }
-    #root .ih-finale-layer > .ih-finale-mark { top: auto; bottom: 64px; width: clamp(112px, 32vw, 150px); }
-    #root .ih-finale-assurance { top: calc(46px + 2.16 * clamp(29px, 8vw, 42px)); max-width: calc(100% - 40px); }
+    #root .ih-finale-layer { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto 1fr; gap: 16px; padding-top: 30px; }
+    #root .ih-finale-layer > h2 { font-size: clamp(24px, 7.5vw, 36px) !important; }
+    #root .ih-finale-layer > .ih-finale-brand { grid-column: 1; grid-row: 2; justify-self: end; }
+    #root .ih-finale-brand > .ih-brand-mark { width: 28px !important; height: 28px !important; }
+    #root .ih-finale-brand > .ih-brand-wordmark { font-size: 23px !important; }
+    #root .ih-finale-layer > .ih-finale-ribbons { top: 60px; height: calc(100% - 60px); }
     #root .ih-finale-stripe { width: 76px; }
   }
 }

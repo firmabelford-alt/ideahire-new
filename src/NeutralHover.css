@@ -1,0 +1,51 @@
+/* Loaded before legacy layers so neutral hover feedback stays consistent on
+   routes and in portalled menus, without repeating legacy ID selectors. */
+@layer ideahireHover {
+  body :is(
+    .ih72-conversation-row, .wd-project, .wd-shortcuts > a,
+    .ih72-project-card, .ih72-new-conversation,
+    .ih-admin-nav-links > a, .ih-admin-queue-rows > button,
+    .ih68-top-link, .ih68-popover > nav :is(a,button), .ih-rail-button,
+    .home-nav-links :is(a,button), .ih27-home-account-menu > a,
+    #ih18-account-menu :is(a,button), #ih64-limited-menu :is(a,button),
+    .ih-studio-nav-list > button, .ih-desk-navigation nav > a,
+    .ih72-profile-shortcuts > button, .ih72-work-links > :is(a,button),
+    .ih72-main-actions > .ih68-secondary, .ih-profile-preview-trigger,
+    .ih73-history-controls > button,
+    .ih68-icon-button, .ih68-attach, .ih-send-add, .ih-send-photo,
+    .ih-send-voice, .ih-material-report, .ih-material-icon-button,
+    .ih64-dock-control, .ih64-dock-hide, .lu-icon-button,
+    .lu-history-item, .lu-review-invitation,
+    .ih-voice-options > div > :is(a,button),
+    .ih7-select-option, .ih-control-option, .ideahire-country-option,
+    .ideahire-country-trigger, .ih40-hub-tile, .ih40-password > button,
+    .ri-choice, .ih75-category-list button, .ih58-category-option,
+    .ih63-service, .ih63-field-choice, .ih-cinema-tabs > a,
+    .profile-more-menu > summary, .profile-more-dropdown button,
+    .site-theme-toggle, .site-language-toggle button,
+    .btn-ghost, .ih-mobile-nav-toggle, .ih63-account-hamburger,
+    .ih64-menu-toggle, .account-mini, .account-create-job-button,
+    .account-notification-button, .ih88-jobs
+  ):hover:not(:disabled):not([aria-disabled="true"]) {
+    background: transparent !important;
+    background-image: none !important;
+    border-color: var(--v-accent,currentColor) !important;
+  }
+  body .ih40-hub-tile:hover { box-shadow: none !important; }
+
+  /* The unread dot and weight carry the state, not a grey row-sized panel. */
+  body :is(.ih72-conversation-row,.wd-project).is-unread {
+    background: transparent !important;
+    background-image: none !important;
+  }
+
+  /* Portalled choices keep a visible keyboard/selection indicator. */
+  body :is(.ih-control-option.is-focused,.ih-control-option[aria-selected="true"],.ideahire-country-option.is-selected) {
+    background: transparent !important;
+    box-shadow: inset 3px 0 var(--v-accent,currentColor) !important;
+  }
+  body .site-language-toggle button.is-active {
+    background: transparent !important;
+    box-shadow: inset 0 -2px var(--v-accent,currentColor) !important;
+  }
+}
