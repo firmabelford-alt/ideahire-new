@@ -14,6 +14,7 @@ import "./App.css";
 import "./SitePolish.css";
 import "./HomeFinishing.css";
 import HomeEnding from "./HomeEnding";
+import { HomeClarity, HomePaths } from "./HomeCooperation";
 import { mixHomeFeed } from "./HomeFeed";
 import { withServiceThumbnails } from "./ListingThumbnails";
 import "./MobileFlow.css";
@@ -1072,47 +1073,6 @@ function HomeGreeting({ name }) {
     <span>{en?'Welcome,':'Witaj,'}</span><strong>{name}</strong>
   </span>;
 }
-
-// Fictional content for the requested visual test. Keep the demo label visible.
-const HOME_DEMO_REVIEWS = [
-  { initial: "A", name: "Aleksandra", role: "zleceniodawczyni", text: "Mam pomysł i od razu wiem, gdzie szukać osoby, która pomoże mi go zrealizować." },
-  { initial: "M", name: "Michał", role: "freelancer", text: "Przejrzyste kategorie i zlecenia w jednym miejscu. Tak lubię szukać nowych projektów." },
-  { initial: "K", name: "Karolina", role: "zleceniodawczyni", text: "Najbardziej podoba mi się prosty układ. Mogę skupić się na swoim projekcie." },
-  { initial: "P", name: "Piotr", role: "freelancer", text: "Od małego zadania po większy projekt — łatwo znaleźć swój kierunek." },
-];
-
-function HomeDemoReviews() {
-  return (
-    <section className="ih-demo-reviews" aria-labelledby="ih-demo-reviews-title">
-      <div className="ih-demo-reviews-heading">
-        <div>
-          <span className="ih-demo-review-caption">Pomysły spotykają ludzi</span>
-          <h2 id="ih-demo-reviews-title">Opinie przykładowe — test wyglądu</h2>
-        </div>
-      </div>
-      <div className="ih-demo-reviews-viewport" tabIndex={0} aria-label="Przykładowe, fikcyjne opinie do testu wyglądu. Najedź kursorem lub ustaw fokus, aby zatrzymać przewijanie.">
-        <div className="ih-demo-reviews-track" id="ih-demo-reviews-track">
-          {[0, 1].map((copy) => (
-            <div className="ih-demo-reviews-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
-              {HOME_DEMO_REVIEWS.map((review) => (
-                <article className="ih-demo-review" key={review.name}>
-                  <span className="ih-demo-review-tag">Opinia testowa</span>
-                  <blockquote>{review.text}</blockquote>
-                  <div className="ih-demo-review-person">
-                    <span className="ih-demo-review-avatar" aria-hidden="true">{review.initial}</span>
-                    <div><strong>{review.name}</strong><span>{review.role}</span></div>
-                    <span className="ih-demo-review-quote" aria-hidden="true">“</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 
 const IH58_STYLES = String.raw`/* P58: spokojne tło, użyteczny katalog i film bez dolnego panelu. */
 __IH58__ {background:var(--v-bg)!important;box-shadow:none!important;}
@@ -3043,7 +3003,7 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
       <main>
         <IdeaHireCinematicHero job={activeJob} jobs={recentJobs} services={recentServices} userKey={session?.user?.id || "guest"} />
 
-        <HomeDemoReviews />
+        <HomeClarity en={ih53English} />
 
         <section className="categories section ih63-specialisations-section" id="categories">
           <HomeCategoryBrowser groups={categoryGroups.length ? categoryGroups : categories} details={HOME_CATEGORY_COPY} />
@@ -3052,62 +3012,8 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
         <IH53Showcase />
 
-        <section
-          className="split-section section home-reveal"
-          id="for-users"
-        >
-          <div className="split-card">
-            <span className="section-label">
-              Dla zlecających
-            </span>
+        <HomePaths en={ih53English} />
 
-            <h2>{ih53English ? "Hire for a specific task." : "Zleć konkretną pracę."}</h2>
-
-            <p>
-              {ih53English ? "Explore portfolios, choose a professional and agree on the scope." : "Sprawdź portfolio, wybierz wykonawcę i ustal zakres prac."}
-            </p>
-
-            <Link
-              className="btn btn-light"
-              to="/find-talent"
-            >
-              Dodaj zlecenie 
-            </Link>
-          </div>
-
-          <div className="split-card light">
-            <span className="section-label">
-              Dla wykonawców
-            </span>
-
-            <h2>{ih53English ? "Find your next project." : "Znajdź zlecenie dla siebie."}</h2>
-
-            <p>
-              {ih53English ? "Add your work to your profile and explore projects in your field." : "Dodaj swoje prace do profilu i sprawdź projekty w Twojej dziedzinie."}
-            </p>
-
-            <Link
-              className="btn btn-outline"
-              to="/jobs"
-            >
-              Znajdź zlecenia 
-            </Link>
-          </div>
-
-        </section>
-
-        <section className="final-cta home-reveal">
-          <span className="section-label">IdeaHire</span>
-          <h2 className="final-cta-title">
-            <span>{ih53English ? "Your next project" : "Twój następny projekt"}</span>
-            <span>{ih53English ? "starts here." : "zaczyna się tutaj."}</span>
-          </h2>
-          <Link className="btn btn-light btn-large" to={session ? "/account" : "/register"}>
-            {session
-              ? (ih53English ? "Go to your account" : "Przejdź do konta")
-              : (ih53English ? "Get started" : "Zacznij teraz")}
-          </Link>
-        </section>
       </main>
 
       <footer className="footer home-reveal ih-home-footer">
