@@ -1,107 +1,126 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowIcon } from "./InterfaceIcons";
-import { BrandMark } from "./Brand";
+import { supabase } from "./supabase";
 import "./HomeCooperation.css";
 
 export function HomeClarity({ en = false }) {
-  const points = en ? [
-    ["The person.", "See their work before you choose.", "Explore profiles, portfolios and services. Ask about what matters to your project."],
-    ["The agreement.", "Know what you are starting together.", "Agree on the scope, price and deadline before the work begins."],
-    ["The conversation.", "Keep the details with the project.", "Exchange messages, confirm arrangements and share materials in your collaboration."],
-  ] : [
-    ["Człowiek.", "Zobacz prace. Poznaj podejście.", "Sprawdź profil, portfolio i ofertę. Zapytaj o to, co ma znaczenie dla Twojego projektu."],
-    ["Ustalenia.", "Wiedz, na co się umawiacie.", "Zakres, cena i termin — ustalcie je wspólnie, zanim zacznie się praca."],
-    ["Kontakt.", "Wracaj do konkretów, nie do domysłów.", "W jednej współpracy wymieniajcie wiadomości, zapisujcie ustalenia i przekazujcie materiały."],
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [status, setStatus] = useState("loading");
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    setStatus("loading");
+    // The existing public SELECT policy admits only visible reviews.
+    // Select only columns already granted to anonymous visitors.
+    supabase.from("ideahire_job_reviews")
+      .select("id, contractor_id, rating, review_text, created_at")
+      .order("created_at", { ascending: false }).limit(8)
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) { setStatus("error"); return; }
+        setReviews((data || []).filter(row => row.review_text?.trim() && Number.isInteger(Number(row.rating)) && Number(row.rating) >= 1 && Number(row.rating) <= 5));
+        setStatus("ready");
+      }).catch(() => { if (!cancelled) setStatus("error"); });
+    return () => { cancelled = true; };
+  }, [attempt]);
 
-  return <section className="ih-cooperation ih-clarity" aria-labelledby="ih-clarity-title" data-no-translate="true">
-    <div className="ih-clarity-intro">
-      <div>
-        <p className="ih-cooperation-kicker">{en ? "GOOD WORK STARTS WITH A CONVERSATION" : "DOBRA ROBOTA ZACZYNA SIĘ OD ROZMOWY"}</p>
-        <h2 id="ih-clarity-title">{en ? "Work together." : "Współpraca bez"}<span>{en ? "Leave out the guesswork." : "czytania w myślach."}</span></h2>
-      </div>
-      <div className="ih-clarity-summary">
-        <p className="ih-clarity-lead">{en ? "You bring the idea. You choose who joins you. Agree on the details together, so both sides know where to begin." : "Przychodzisz z pomysłem. Wybierasz osobę. Szczegóły ustalacie razem — tak, żeby obie strony wiedziały, od czego zaczynają."}</p>
-        <a className="ih-cooperation-link" href="#categories">{en ? "Find your field" : "Znajdź swoją dziedzinę"}<ArrowIcon /></a>
-      </div>
+  return <section className="ih-cooperation ih-real-reviews" aria-labelledby="ih-reviews-title" data-no-translate="true">
+    <div className="ih-reviews-heading">
+      <h2 id="ih-reviews-title">{en ? "Reviews after working together" : "Opinie po współpracy"}</h2>
+      <span>{en ? "From completed projects" : "Z zakończonych zleceń"}</span>
     </div>
-    <ol className="ih-clarity-list">
-      {points.map(([label, title, description], index) => <li key={label}>
-        <div className="ih-clarity-step"><span className="ih-clarity-index" aria-hidden="true">0{index + 1}</span><p className="ih-clarity-label">{label}</p><span className="ih-clarity-dot" aria-hidden="true" /></div>
-        <h3>{title}</h3><p className="ih-clarity-detail">{description}</p>
-      </li>)}
-    </ol>
+    {status === "loading" && <p className="ih-reviews-notice" role="status">{en ? "Loading reviews…" : "Ładowanie opinii…"}</p>}
+    {status === "error" && <div className="ih-reviews-notice" role="status"><p>{en ? "Reviews are temporarily unavailable." : "Opinie są chwilowo niedostępne."}</p><button type="button" onClick={() => setAttempt(value => value + 1)}>{en ? "Try again" : "Spróbuj ponownie"}</button></div>}
+    {status === "ready" && !reviews.length && <p className="ih-reviews-notice">{en ? "The first reviews will appear after completed projects." : "Pierwsze opinie pojawią się po zakończonych współpracach."}</p>}
+    {status === "ready" && reviews.length > 0 && <div className="ih-reviews-grid">
+      {reviews.map(review => <article className="ih-real-review" key={review.id}>
+        <div className="ih-review-stars" role="img" aria-label={en ? `${review.rating} out of 5 stars` : `${review.rating} z 5 gwiazdek`}>
+          {Array.from({ length: 5 }, (_, index) => <span key={index} data-filled={index < Number(review.rating)} aria-hidden="true">★</span>)}
+        </div>
+        <blockquote>{review.review_text}</blockquote>
+        <div className="ih-review-source"><span>{en ? "Client review" : "Opinia zleceniodawcy"}</span><time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString(en ? "en-GB" : "pl-PL", { day: "numeric", month: "short", year: "numeric" })}</time></div>
+        <Link className="ih-review-profile" to={`/profile/${review.contractor_id}`}>{en ? "View professional" : "Zobacz wykonawcę"}<ArrowIcon direction="up-right" /></Link>
+      </article>)}
+    </div>}
   </section>;
 }
 
-function ConnectionArtwork({ en, role }) {
-  return <div className="ih-connection-art" data-role={role} aria-hidden="true">
-    <div className="ih-connection-orbit" />
-    <span className="ih-art-coordinate ih-art-coordinate-top">{en ? "YOUR NEXT CONNECTION" : "TWOJE NASTĘPNE POŁĄCZENIE"}</span>
-    <div className="ih-connection-brief">
-      <span className="ih-art-eyebrow">{en ? "THE STARTING POINT" : "PUNKT WYJŚCIA"}</span>
-      <strong>{en ? "Your\nidea." : "Twój\npomysł."}</strong>
-      <div className="ih-brief-lines"><i /><i /><i /></div>
-      <div className="ih-brief-tags"><span>{en ? "Scope" : "Zakres"}</span><span>{en ? "Deadline" : "Termin"}</span></div>
-      <span className="ih-art-page">01 / BRIEF</span>
-    </div>
-    <div className="ih-connection-folio">
-      <span className="ih-art-eyebrow">{en ? "THE OTHER SIDE" : "DRUGA STRONA"}</span>
-      <svg className="ih-folio-art" viewBox="0 0 200 150" fill="none" focusable="false">
-        <path d="M8 140V75a52 52 0 0 1 104 0v65H8Z" fill="var(--connection-ink)" />
-        <path d="M56 140V75a52 52 0 0 1 104 0v65H56Z" fill="var(--connection-accent)" />
-        <path d="M104 140V75a52 52 0 0 1 88-37" stroke="var(--connection-ink)" strokeWidth="1.5" />
-        <circle cx="162" cy="25" r="17" fill="var(--connection-ink)" />
-        <path d="M8 140h184M8 12h42" stroke="var(--connection-ink)" strokeWidth="1.5" />
-      </svg>
-      <strong>{en ? "Their craft." : "Czyjś fach."}</strong>
-      <span className="ih-art-page">02 / PORTFOLIO</span>
-    </div>
-    <div className="ih-connection-seal"><BrandMark /></div>
-    <span className="ih-art-coordinate ih-art-coordinate-bottom">{en ? "An illustration of a collaboration" : "Ilustracja współpracy"}</span>
+const DROP_TILES = [
+  [112, 82, -12, "pen"], [224, 65, 8, "code"], [294, 156, 12, "image"],
+  [251, 260, -9, "video"], [140, 286, 8, "chart"], [70, 196, -12, "person"], [180, 174, -4, "cursor"],
+];
+const DROP_COLUMNS = [[0, 0, 1], [1, 0, 2], [0, 1, 1], [2, 0, 1], [1, 1, 3], [2, 1, 2]];
+const TILE_ICONS = {
+  pen: "M-14 12-9-7 8-17 18-7 7 10-14 12Zm5-19L7 10M-14 12-5 3",
+  code: "m-10-12-12 12 12 12m20-24 12 12-12 12M5-18-5 18",
+  image: "M-22-19h44v38h-44Z M-22 10-7-4 5 8l9-8 8 7M7-10h.1",
+  video: "M-20-17h40v34h-40Z M-5-9l15 9-15 9Z",
+  chart: "M-20 18h40M-13 10V-2M0 10v-27M13 10V-9",
+  person: "M-17 18c0-19 34-19 34 0M0-4a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z",
+  cursor: "M-17-22 20 1 2 5l-8 17-11-44Z",
+};
+
+function ConnectionArtwork({ kind }) {
+  const sceneRef = useRef(null);
+  const lastPlay = useRef(0);
+  const [active, setActive] = useState(false);
+  const [cycle, setCycle] = useState(0);
+  useEffect(() => {
+    const node = sceneRef.current;
+    if (!node) return;
+    const play = () => { lastPlay.current = Date.now(); setActive(true); };
+    if (typeof IntersectionObserver !== "function") { play(); return; }
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) { play(); observer.disconnect(); }
+    }, { threshold: .3 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  function replay(event) {
+    if (event.pointerType !== "mouse" || !active || Date.now() - lastPlay.current < 2000) return;
+    lastPlay.current = Date.now();
+    setCycle(value => value + 1);
+  }
+  return <div ref={sceneRef} className="ih-drop-art" data-kind={kind} data-play={active} aria-hidden="true" onPointerEnter={replay}>
+    <svg viewBox="0 0 400 370" focusable="false">
+      <ellipse className="ih-drop-shadow" cx="200" cy="302" rx="135" ry="29" />
+      {kind === "people" ? <g key={cycle}>
+        <path className="ih-drop-guide" d="M112 82 224 65 294 156 251 260 140 286 70 196Z M112 82 180 174 251 260M70 196 180 174 294 156M224 65 180 174 140 286" />
+        {DROP_TILES.map(([x, y, turn, icon], index) => <g key={icon} transform={`translate(${x} ${y})`}>
+          <g className="ih-drop-piece ih-drop-tile" data-tone={index % 3} style={{ "--drop-turn": `${turn}deg`, "--drop-delay": `${index * 90}ms` }}>
+            <rect className="ih-tile-under" x="-39" y="-31" width="78" height="78" rx="20" />
+            <rect className="ih-tile-face" x="-39" y="-39" width="78" height="78" rx="20" />
+            <path className="ih-tile-icon" d={TILE_ICONS[icon]} />
+          </g>
+        </g>)}
+      </g> : <g key={cycle}>
+        <path className="ih-drop-guide" d="m46 269 152-88 156 89-152 88Z M96 240l156 89M146 211l156 89M96 298l152-88M146 327l152-88" />
+        {DROP_COLUMNS.flatMap(([col, row, height], column) => Array.from({ length: height }, (_, level) => <g key={`${col}-${row}-${level}`} transform={`translate(${184 + (col - row) * 43} ${133 + (col + row) * 25 - level * 49})`}>
+          <g className="ih-drop-piece ih-drop-cube" data-tone={(column + level) % 3} style={{ "--drop-turn": "0deg", "--drop-delay": `${(column + level * 2) * 90}ms` }}>
+            <path className="ih-cube-left" d="M-43 0 0 25V74l-43-25Z" />
+            <path className="ih-cube-right" d="M0 25 43 0v49L0 74Z" />
+            <path className="ih-cube-top" d="M0-25 43 0 0 25-43 0Z" />
+          </g>
+        </g>))}
+      </g>}
+    </svg>
   </div>;
 }
 
 export function HomePaths({ en = false }) {
-  const [role, setRole] = useState("hire");
-  const tabsRef = useRef(null);
-  const hire = role === "hire";
-  const title = hire
-    ? (en ? ["You have an idea.", "Someone has the craft."] : ["Ty masz pomysł.", "Ktoś ma ten fach."])
-    : (en ? ["You have the craft.", "Someone needs it."] : ["Ty masz fach.", "Ktoś go potrzebuje."]);
-
-  function moveTab(event) {
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-    event.preventDefault();
-    const tabs = Array.from(tabsRef.current?.querySelectorAll('[role="tab"]') || []);
-    const current = tabs.indexOf(event.target);
-    if (current < 0) return;
-    const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
-    // Instant local content: selection follows the arrow-key focus.
-    setRole(next === 0 ? "hire" : "work");
-    tabs[next]?.focus({ preventScroll: true });
-  }
-
-  return <section className="ih-cooperation ih-paths" id="for-users" aria-labelledby="ih-paths-title" data-no-translate="true">
-    <div className="ih-paths-heading"><h2 className="ih-cooperation-kicker" id="ih-paths-title">{en ? "TWO SIDES. ONE CONNECTION." : "DWIE STRONY. JEDNO POŁĄCZENIE."}</h2><span className="ih-paths-connection" aria-hidden="true"><i /><span /><i /></span></div>
-    <div className="ih-connection-layout">
-      <div className="ih-connection-copy">
-        <div className="ih-path-tabs" role="tablist" aria-label={en ? "Your role in the collaboration" : "Twoja rola we współpracy"} ref={tabsRef} onKeyDown={moveTab}>
-          {["hire", "work"].map((value, index) => <button key={value} id={`ih-path-tab-${value}`} type="button" role="tab" aria-selected={role === value} aria-controls={`ih-path-panel-${value}`} tabIndex={role === value ? 0 : -1} onClick={() => setRole(value)}><span aria-hidden="true">0{index + 1}</span>{value === "hire" ? (en ? "I’m hiring" : "Zlecam") : (en ? "I’m creating" : "Wykonuję")}<ArrowIcon direction="up-right" /></button>)}
-        </div>
-        {["hire", "work"].map(value => <div className="ih-path-panel" key={value} role="tabpanel" tabIndex={0} id={`ih-path-panel-${value}`} aria-labelledby={`ih-path-tab-${value}`} hidden={role !== value}>
-          {role === value && <>
-            <h3>{title[0]}<span>{title[1]}</span></h3>
-            <p>{hire
-              ? (en ? "You don’t need a whole team to take your next step. Find the right person for the task, explore their work and agree on the details." : "Do następnego kroku nie potrzebujesz całego zespołu. Znajdź osobę do konkretnego zadania, sprawdź jej prace i ustalcie szczegóły.")
-              : (en ? "Your skills can become someone’s next step. Explore projects and start a conversation where your work can make a difference." : "To, co potrafisz, może być czyimś następnym krokiem. Sprawdź zlecenia i zacznij rozmowę tam, gdzie Twoja praca może coś zmienić.")}</p>
-            <Link className="ih-connection-cta" to={hire ? "/find-talent" : "/jobs"}>{hire ? (en ? "Find a professional" : "Znajdź wykonawcę") : (en ? "Explore projects" : "Przeglądaj zlecenia")}<ArrowIcon /></Link>
-            <p className="ih-connection-footnote">{en ? "The scope, price and terms are yours to agree on." : "Zakres, cenę i warunki ustalacie między sobą."}</p>
-          </>}
-        </div>)}
-      </div>
-      <ConnectionArtwork en={en} role={role} />
+  return <section className="ih-cooperation ih-paths" id="for-users" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"} data-no-translate="true">
+    <div className="ih-action-squares">
+      <Link className="ih-action-square" to="/find-talent">
+        <span className="ih-square-index" aria-hidden="true">01</span>
+        <ConnectionArtwork kind="people" />
+        <div className="ih-square-action"><h2>{en ? "Hire a professional" : "Zleć pracę"}</h2><span><ArrowIcon direction="up-right" /></span></div>
+      </Link>
+      <Link className="ih-action-square ih-action-square-build" to="/jobs">
+        <span className="ih-square-index" aria-hidden="true">02</span>
+        <ConnectionArtwork kind="build" />
+        <div className="ih-square-action"><h2>{en ? "Find a project" : "Znajdź zlecenie"}</h2><span><ArrowIcon direction="up-right" /></span></div>
+      </Link>
     </div>
   </section>;
 }
