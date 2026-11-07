@@ -2,18 +2,16 @@ import * as THREE from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import wordmark from "./assets/ideaHireRelief.json";
+import { clamp, smooth, reliefDepthAt } from "./ReliefMotion";
 
-const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-const smooth = x => { const t = clamp(x); return t * t * (3 - 2 * t); };
-
-/* The floor has glyph-shaped holes. Caps move through it while side walls
-   change signed depth: a real negative/positive relief, not a 2D projection. */
+/* A stencil cuts the original letter contours into an invisible floor.
+   It preserves counters and overlapping kerning without fragile compound holes. */
 export function createReliefScene(host, canvas) {
   const mobile = window.matchMedia("(max-width:600px)").matches;
   const reduced = window.matchMedia("(prefers-reduced-motion:reduce)");
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "low-power" });
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, stencil: true, antialias: true, powerPreference: "low-power" });
   } catch {
     host.dataset.renderer = "fallback";
     return { dispose() {}, setPaused() {} };
@@ -41,6 +39,14 @@ export function createReliefScene(host, canvas) {
   const invisible = material(new THREE.MeshBasicMaterial({ visible: false }));
   const depthOnly = material(new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true, side: THREE.DoubleSide }));
   const shadow = material(new THREE.ShadowMaterial({ opacity: .2, depthWrite: false }));
+  const cutout = material(new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false, depthTest: false, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.AlwaysStencilFunc, stencilZPass: THREE.ReplaceStencilOp, side: THREE.DoubleSide }));
+  for (const floorMaterial of [depthOnly, shadow]) {
+    floorMaterial.stencilWrite = true; floorMaterial.stencilRef = 1;
+    floorMaterial.stencilFunc = THREE.NotEqualStencilFunc;
+    floorMaterial.stencilFail = THREE.KeepStencilOp;
+    floorMaterial.stencilZFail = THREE.KeepStencilOp;
+    floorMaterial.stencilZPass = THREE.KeepStencilOp;
+  }
   const key = new THREE.DirectionalLight("#fff8ef", 3.25);
   key.position.set(-3.8, 5.4, 6); key.castShadow = true;
   key.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
@@ -52,19 +58,11 @@ export function createReliefScene(host, canvas) {
   const rim = new THREE.SpotLight("#31d7da", 24, 15, Math.PI / 4, 1, 2);
   rim.position.set(3.4, .7, 3); rim.target.position.set(0, 0, .1); scene.add(rim, rim.target);
 
-  const floor = new THREE.Shape(), [cx, cy] = wordmark.center;
-  floor.moveTo(cx - 20, cy - 10); floor.lineTo(cx + 20, cy - 10);
-  floor.lineTo(cx + 20, cy + 10); floor.lineTo(cx - 20, cy + 10); floor.closePath();
-  const islands = [];
+  const [cx, cy] = wordmark.center, silhouettes = [];
   const letters = wordmark.glyphs.map((glyph, index) => {
     const parsed = new SVGLoader().parse('<svg xmlns="http://www.w3.org/2000/svg"><path fill="#000" fill-rule="nonzero" d="' + glyph.path + '"/></svg>');
     const shapes = parsed.paths.flatMap(path => SVGLoader.createShapes(path));
-    for (const shape of shapes) {
-      const hole = new THREE.Path(); hole.curves = shape.curves.slice(); floor.holes.push(hole);
-      for (const counter of shape.holes) {
-        const island = new THREE.Shape(); island.curves = counter.curves.slice(); islands.push(island);
-      }
-    }
+    silhouettes.push(...shapes);
     const capGeometry = geometry(new THREE.ExtrudeGeometry(shapes, { depth: .004, steps: 1, curveSegments: 12, bevelEnabled: true, bevelSegments: 3, bevelSize: .006, bevelThickness: .006 }));
     const bodyGeometry = geometry(new THREE.ExtrudeGeometry(shapes, { depth: 1, steps: 1, curveSegments: 12, bevelEnabled: false }));
     const body = new THREE.Mesh(bodyGeometry, [invisible, wall]), cap = new THREE.Mesh(capGeometry, [face, edge]);
@@ -72,8 +70,11 @@ export function createReliefScene(host, canvas) {
     stage.add(body, cap);
     return { body, cap, x: glyph.center - cx, index, depth: -.075 };
   });
-  const floorGeometry = geometry(new THREE.ShapeGeometry([floor, ...islands], 12));
-  // Write depth without painting a visible rectangle over the page background.
+  const stencil = new THREE.Mesh(geometry(new THREE.ShapeGeometry(silhouettes, 12)), cutout);
+  stencil.renderOrder = -30; stage.add(stencil);
+  const floorGeometry = geometry(new THREE.PlaneGeometry(40, 20));
+  floorGeometry.translate(cx, cy, 0);
+  // Depth and shadow only: no painted panel behind the wordmark.
   const occluder = new THREE.Mesh(floorGeometry, depthOnly); occluder.renderOrder = -20;
   const receiver = new THREE.Mesh(floorGeometry, shadow);
   receiver.receiveShadow = true; receiver.position.z = .0003; stage.add(occluder, receiver);
@@ -102,13 +103,9 @@ export function createReliefScene(host, canvas) {
     const still = reduced.matches, intro = still ? 1 : smooth(elapsed / 1.65);
     const progress = ((Math.max(0, elapsed - 2) % 16) - 5) / 8;
     const wave = progress > 0 && progress < 1 ? Math.sin(Math.PI * progress) ** 4 : 0;
-    const waveX = (-.75 + clamp(progress) * 1.5) * wordmark.width;
     for (const letter of letters) {
-      const delay = (letter.x / wordmark.width + .5) * .38;
-      const rise = still ? 1 : smooth((elapsed - .12 - delay) / 1.12);
-      const baseline = THREE.MathUtils.lerp(-.075, mobile ? .105 : .145, rise);
-      const pressure = still ? 0 : Math.exp(-(((letter.x - waveX) / .95) ** 2)) * wave * .018;
-      const depth = baseline + pressure; letter.depth = depth; letter.cap.position.z = depth;
+      const depth = reliefDepthAt(elapsed, letter.x, wordmark.width, mobile, still);
+      letter.depth = depth; letter.cap.position.z = depth;
       letter.body.scale.z = Math.abs(depth) < .0003 ? .0003 * Math.sign(depth || 1) : depth;
     }
     const x = still ? 0 : pointer.x, y = still ? 0 : pointer.y;
