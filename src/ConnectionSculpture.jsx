@@ -26,11 +26,11 @@ export default function ConnectionSculpture() {
     if (!host || !context) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     let width = 1, height = 1, ratio = 1, frame = 0, last = 0, elapsed = 0;
-    let visible = false, entrance = 0, targetTilt = 0, tilt = 0, lastStamp = -1;
+    let visible = false, entrance = 0, targetTilt = 0, tilt = 0, lastStamp = -1, lastPaint = 0;
     let accent, ink, dark;
     function palette() {
       const style = getComputedStyle(host);
-      accent = colour(context, style.getPropertyValue("--v-accent").trim(), "#14c3ca");
+      accent = colour(context, (style.getPropertyValue("--v-action").trim() || style.getPropertyValue("--v-accent").trim()), "#14c3ca");
       ink = colour(context, style.getPropertyValue("--v-ink").trim(), "#101b20");
       dark = document.documentElement.dataset.theme === "dark";
     }
@@ -86,13 +86,18 @@ export default function ConnectionSculpture() {
         const light = .66 + .34 * Math.cos(face.phase - .9);
         const sheen = Math.pow(Math.max(0, Math.cos(face.v * Math.PI * 1.4 + face.phase * .55)), 12) * (face.strand ? .27 : .42);
         const rgb = material.map(channel => Math.round(clamp(channel * light + (255 - channel) * sheen, 0, 255)));
+        const cx = face.corners.reduce((sum, p) => sum + p.x, 0) / 4;
+        const cy = face.corners.reduce((sum, p) => sum + p.y, 0) / 4;
         context.beginPath();
-        face.corners.forEach((p, index) => index ? context.lineTo(p.x, p.y) : context.moveTo(p.x, p.y));
+        // A subpixel overlap closes Canvas antialias seams between mesh faces.
+        face.corners.forEach((p, index) => {
+          const dx = p.x - cx, dy = p.y - cy, length = Math.hypot(dx, dy) || 1;
+          const x = p.x + dx / length * .8, y = p.y + dy / length * .8;
+          if (index) context.lineTo(x, y); else context.moveTo(x, y);
+        });
         context.closePath();
         context.fillStyle = `rgb(${rgb.join(",")})`;
-        context.strokeStyle = context.fillStyle;
-        context.lineWidth = .45;
-        context.fill(); context.stroke();
+        context.fill();
       }
       context.restore();
       const stamp = Math.floor(elapsed * 2);
@@ -104,7 +109,7 @@ export default function ConnectionSculpture() {
       last = now;
       elapsed += delta; entrance += delta;
       tilt += (targetTilt - tilt) * .05;
-      draw();
+      if (now - lastPaint >= 32) { draw(); lastPaint = now; }
       if (visible && !document.hidden && !reduced.matches) frame = requestAnimationFrame(tick);
     }
     function update() {
