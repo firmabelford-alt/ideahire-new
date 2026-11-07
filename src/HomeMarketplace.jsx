@@ -66,7 +66,8 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     setInteracting(true);
     interactionTimer.current = window.setTimeout(() => setInteracting(false), delay);
   }
-  function beginPointerInteraction() {
+  function beginPointerInteraction(event) {
+    if (event.pointerType === 'mouse') { setFocus(false); return; }
     pointerActive.current = true;
     window.clearTimeout(interactionTimer.current);
     setInteracting(true);
@@ -161,7 +162,7 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     if (card) { pauseForInteraction(4000); node.scrollTo({ left: card.offsetLeft - node.firstElementChild.offsetLeft, behavior: reduced ? 'instant' : 'smooth' }); }
     setPending(null);
   }
-  return <div ref={host} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-brand-ready={brandReady} data-paused={stopped} data-motion-paused={motionPaused}>
+  return <div ref={host} className="ih53-jobs-finale ih88-market ih91-market" data-no-translate="true" data-brand-ready={brandReady} data-paused={stopped} data-motion-paused={motionPaused} data-pause-reason={motionPaused ? 'motion' : interacting ? 'manual' : focus ? 'keyboard' : hidden ? 'hidden' : !visible ? 'outside' : 'none'}>
     <div className="ih88-intro">
       <header className="ih88-heading">
         <p className="ih88-eyebrow"><BrandMark className="ih88-greeting-mark" />{copy.eyebrow.map(word => <span key={word}>{word}</span>)}</p>
@@ -170,10 +171,10 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
       <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>
     </div>
     <div className="ih88-layout">
-      <section className="ih88-live" aria-labelledby="ih88-projects-title" onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
+      <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerMoveCapture={event => { if (focus && event.pointerType === 'mouse') setFocus(false); }} onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
         <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}<Arrow /></Link><Link to="/services">{en ? "Services" : "Usługi"}<Arrow /></Link></nav></div>
         {jobs.length ? <>
-          <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={beginPointerInteraction} onWheel={() => pauseForInteraction()} onKeyDown={event => {
+          <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={beginPointerInteraction} onWheel={event => { if (Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey) pauseForInteraction(); }} onKeyDown={event => {
             if (event.target !== event.currentTarget) return;
             if (['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) { event.preventDefault(); goTo(event.key === 'Home' ? 0 : event.key === 'End' ? stops.length - 1 : position + (event.key === 'ArrowRight' ? 1 : -1), true); }
           }}>{(jobs.length > 1 ? [0, 1] : [0]).flatMap(copy => jobs.map((job, index) => <div className="ih-showcase-slide" data-project-id={homeFeedKey(job)} data-copy={copy} key={`${copy}-${homeFeedKey(job)}`} role="group" aria-hidden={copy === 1 ? true : undefined} aria-roledescription={en ? 'slide' : 'slajd'} aria-label={copy === 0 ? `${index + 1} ${en ? 'of' : 'z'} ${jobs.length}` : undefined}>{renderProject(job, { duplicate: copy === 1 })}</div>))}</div>

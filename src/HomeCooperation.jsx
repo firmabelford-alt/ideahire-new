@@ -98,54 +98,36 @@ function HomeReviewRail({ reviews, en }) {
   </div>;
 }
 
-function ConnectionArtwork({ kind }) {
+function ConnectionArtwork() {
   const sceneRef = useRef(null);
   const [active, setActive] = useState(false);
   useEffect(() => {
     const node = sceneRef.current;
     if (!node) return;
     if (typeof IntersectionObserver !== "function") { setActive(true); return; }
-    const observer = new IntersectionObserver(entries => {
-      setActive(entries.some(entry => entry.isIntersecting));
-    }, { threshold: .15 });
+    const observer = new IntersectionObserver(entries => setActive(entries.some(entry => entry.isIntersecting)), { threshold: .05 });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  return <div ref={sceneRef} className="ih-scene-art" data-kind={kind} data-play={active} aria-hidden="true">
-    <svg viewBox="0 0 400 400" focusable="false">
-      {kind === "assemble" ? <>
-        <path className="ih-poster-guide" d="M24 88H376M24 200H376M24 312H376M88 24V376M200 24V376M312 24V376" />
-        <g transform="translate(24 24) scale(5.5)">
-          <g className="ih-build-piece ih-build-left"><path d="M8 28H22V56H8Z" /></g>
-          <g className="ih-build-piece ih-build-bridge"><path d="M22 28H42V42H22Z" /></g>
-          <g className="ih-build-piece ih-build-right"><path d="M42 8H50L56 14V56H42Z" /></g>
-          <g className="ih-build-piece ih-build-dot"><path d={IDEA_HIRE_MARK.dot} /></g>
-        </g>
-      </> : <>
-        <g className="ih-poster-orbit ih-poster-orbit-outer"><rect x="47" y="47" width="306" height="306" rx="30" /></g>
-        <g className="ih-poster-orbit ih-poster-orbit-inner"><rect x="76" y="76" width="248" height="248" rx="22" /></g>
-        <g className="ih-poster-stamp" transform="translate(88 88) scale(3.5)">
-          <path d={IDEA_HIRE_MARK.join} /><path className="ih-stamp-dot" d={IDEA_HIRE_MARK.dot} />
-        </g>
-      </>}
+  return <div ref={sceneRef} className="ih-connection-art" data-play={active} aria-hidden="true">
+    <svg className="ih-connection-mark" viewBox="0 0 64 64" focusable="false">
+      <path className="ih-connection-dot" d={IDEA_HIRE_MARK.dot} />
+      <path d={IDEA_HIRE_MARK.join} />
     </svg>
+    <span className="ih-connection-word">{Array.from("IdeaHire", (letter, index) => <span key={index} style={{ "--letter": index }}>{letter}</span>)}</span>
   </div>;
 }
 
 export function HomePaths({ en = false }) {
   return <section className="ih-cooperation ih-paths" id="for-users" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"} data-no-translate="true">
-    <div className="ih-action-squares">
-      <Link className="ih-action-square" to="/find-talent">
-        <span className="ih-square-index"><span aria-hidden="true">01</span>{en ? "For clients" : "Dla zlecających"}</span>
-        <ConnectionArtwork kind="assemble" />
-        <div className="ih-square-action"><h2>{en ? "Hire a professional" : "Zleć pracę"}</h2><span><ArrowIcon direction="up-right" /></span></div>
-      </Link>
-      <Link className="ih-action-square ih-action-square-orbit" to="/jobs">
-        <span className="ih-square-index"><span aria-hidden="true">02</span>{en ? "For professionals" : "Dla wykonawców"}</span>
-        <ConnectionArtwork kind="orbit" />
-        <div className="ih-square-action"><h2>{en ? "Find a project" : "Znajdź zlecenie"}</h2><span><ArrowIcon direction="up-right" /></span></div>
-      </Link>
+    <div className="ih-connection-panel">
+      <div className="ih-connection-sheet">
+        <nav className="ih-connection-links" aria-label={en ? "Choose your next step" : "Wybierz kolejny krok"}>
+          <Link to="/find-talent"><span><small>{en ? "FOR CLIENTS" : "DLA ZLECAJĄCYCH"}</small><strong>{en ? "Hire a professional" : "Zleć pracę"}</strong></span><ArrowIcon direction="up-right" /></Link>
+          <Link to="/jobs"><span><small>{en ? "FOR PROFESSIONALS" : "DLA WYKONAWCÓW"}</small><strong>{en ? "Find a project" : "Znajdź zlecenie"}</strong></span><ArrowIcon direction="up-right" /></Link>
+        </nav>
+        <ConnectionArtwork />
+      </div>
     </div>
-
   </section>;
 }

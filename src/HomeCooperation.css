@@ -31,72 +31,51 @@
   #root .ih-reviews-notice > p { margin:0!important; }
   #root .ih-reviews-notice > button { min-height:44px; padding:8px 0; border:0; background:none; color:var(--v-accent); font:550 13px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
   #root .ih-cooperation :is(a,button):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:5px!important; }
-  #root .ih-action-squares { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; max-width:1100px; margin:0 auto; }
-  #root .ih-cooperation .ih-action-square { --scene-ink:var(--v-action-ink,#10272d); --scene-paper:var(--v-action,#13c4ce); --scene-accent:#f2ffff; --cooperation-line:color-mix(in srgb,var(--scene-ink) 24%,transparent); position:relative!important; display:flex!important; flex-direction:column!important; min-width:0!important; aspect-ratio:1; padding:28px!important; overflow:hidden!important; border:0!important; border-radius:16px!important; background:var(--scene-paper)!important; color:var(--scene-ink)!important; text-decoration:none!important; box-shadow:none!important; isolation:isolate; touch-action:manipulation; }
-  #root .ih-cooperation .ih-action-square-orbit { --scene-paper:#10272d; --scene-ink:#e7f8f6; --scene-accent:#61e4e7; }
-  html[data-template="classic"] #root .ih-cooperation .ih-action-square-orbit { --scene-paper:#e9e9e6; --scene-ink:#181b1a; --scene-accent:#181b1a; }
-  #root .ih-square-index { position:absolute; top:25px; left:28px; z-index:2; display:flex; align-items:center; gap:14px; color:var(--scene-ink); font:500 11px/1.5 Inter,system-ui,sans-serif; }
-  #root .ih-square-index > span { padding-right:14px; border-right:1px solid var(--cooperation-line); font-variant-numeric:tabular-nums; }
-  #root .ih-scene-art { position:relative; flex:1; width:100%; min-width:0; min-height:0; margin:30px auto 8px; overflow:hidden; }
-  #root .ih-scene-art > svg { position:absolute!important; inset:0!important; display:block!important; width:100%!important; height:100%!important; max-width:none!important; fill:none!important; stroke:none!important; }
-  #root .ih-poster-guide { fill:none!important; stroke:var(--scene-ink)!important; stroke-width:1!important; stroke-opacity:.12; }
-  #root .ih-build-piece > path { fill:var(--scene-ink)!important; stroke:none!important; }
-  #root .ih-build-dot > path { fill:var(--scene-accent)!important; }
-  #root .ih-poster-orbit { transform-origin:200px 200px; }
-  #root .ih-poster-orbit > rect { fill:none!important; stroke:var(--scene-ink)!important; stroke-width:1.25!important; stroke-opacity:.45; }
-  #root .ih-poster-orbit-inner > rect { fill:var(--scene-accent)!important; fill-opacity:.11; stroke:var(--scene-accent)!important; stroke-opacity:.4; }
-  #root .ih-poster-stamp > path { fill:var(--scene-accent)!important; stroke:none!important; }
-  #root .ih-poster-stamp > .ih-stamp-dot { fill:var(--scene-ink)!important; }
-  #root .ih-square-action { position:relative; z-index:2; display:flex; flex:none; align-items:center; justify-content:space-between; gap:20px; margin-top:12px; padding-top:18px; border-top:1px solid var(--cooperation-line); }
-  #root .ih-square-action > h2 { min-width:0; margin:0!important; padding:0!important; color:var(--scene-ink)!important; -webkit-text-fill-color:currentColor!important; font:600 clamp(22px,2.5vw,32px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
-  #root .ih-square-action > span { display:grid; place-items:center; flex:none; width:44px; height:44px; border:1px solid var(--cooperation-line); border-radius:50%; color:var(--scene-accent); }
-  #root .ih-square-action > span > svg { display:block!important; width:22px!important; height:22px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.7!important; }
+  #root .ih-connection-panel { --connection-ink:var(--v-ink); --connection-paper:var(--v-bg); --connection-frame:var(--v-action,var(--v-accent)); padding:14px; border-radius:20px; background:var(--connection-frame); }
+  #root .ih-connection-sheet { min-width:0; overflow:hidden; border:1px solid color-mix(in srgb,var(--connection-ink) 12%,transparent); border-radius:9px; background:var(--connection-paper); color:var(--connection-ink); }
+  #root .ih-connection-links { display:flex; padding:24px 34px; border-bottom:1px solid var(--cooperation-line); }
+  #root .ih-connection-links > a { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:24px; flex:1; min-width:0; min-height:64px; margin:0!important; padding:0 30px 0 0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--connection-ink)!important; text-decoration:none!important; box-shadow:none!important; }
+  #root .ih-connection-links > a + a { padding:0 0 0 34px!important; border-left:1px solid var(--cooperation-line)!important; }
+  #root .ih-connection-links small { display:block; margin-bottom:8px; color:var(--v-muted); font:500 10px/1.4 Inter,system-ui,sans-serif; letter-spacing:.1em; }
+  #root .ih-connection-links strong { display:block; font:550 clamp(20px,2.4vw,28px)/1.2 Inter,system-ui,sans-serif; letter-spacing:-.035em; }
+  #root .ih-connection-links svg { display:block!important; flex:none; width:28px!important; height:28px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.4!important; }
+  #root .ih-connection-art { display:flex; align-items:center; justify-content:center; gap:12px; min-width:0; padding:64px 36px 54px; overflow:hidden; color:var(--connection-ink); }
+  #root .ih-connection-mark { display:block!important; flex:0 0 15%; width:15%!important; height:auto!important; max-width:none!important; overflow:visible; fill:currentColor!important; stroke:none!important; }
+  #root .ih-connection-mark path { fill:currentColor!important; stroke:none!important; }
+  #root .ih-connection-word { display:flex; flex:none; align-items:baseline; overflow:hidden; padding:12px 0 20px; font:800 clamp(54px,13.5vw,180px)/1 Inter,system-ui,sans-serif!important; letter-spacing:-.075em!important; white-space:nowrap; }
+  #root .ih-connection-word > span { display:block; transform-origin:center bottom; }
   @media(hover:hover) {
-    #root .ih-cooperation .ih-action-square:hover { outline:1px solid var(--scene-ink)!important; outline-offset:4px!important; }
+    #root .ih-connection-links > a:hover strong { text-decoration:underline; text-underline-offset:6px; text-decoration-thickness:1px; }
     #root .ih-real-review .ih-review-profile:hover { text-decoration:underline!important; text-underline-offset:4px; }
   }
   @media(prefers-reduced-motion:no-preference) {
-    #root .ih-build-piece { animation:ihAssembleLeft 6.4s cubic-bezier(.65,0,.25,1) infinite!important; }
-    #root .ih-build-bridge { animation-name:ihAssembleBridge!important; }
-    #root .ih-build-right { animation-name:ihAssembleRight!important; }
-    #root .ih-build-dot { animation-name:ihAssembleDot!important; }
-    #root .ih-poster-orbit-outer { animation:ihOrbitFrame 8s cubic-bezier(.65,0,.25,1) infinite!important; }
-    #root .ih-poster-orbit-inner { animation:ihOrbitFrame 8s cubic-bezier(.65,0,.25,1) infinite reverse!important; }
-    #root .ih-stamp-dot { animation:ihStampDot 8s cubic-bezier(.65,0,.25,1) infinite!important; }
-    #root .ih-scene-art[data-play="false"] :is(.ih-build-piece,.ih-poster-orbit,.ih-stamp-dot) { animation-play-state:paused!important; }
-    #root .ih-square-action > span > svg { transition:transform 160ms ease; }
-    #root .ih-action-square:hover .ih-square-action > span > svg { transform:translate(2px,-2px); }
+    #root .ih-connection-word > span { animation:ihIdentityLetter 8s cubic-bezier(.25,.75,.3,1) infinite!important; animation-delay:calc(var(--letter) * 65ms)!important; }
+    #root .ih-connection-dot { animation:ihIdentityDot 8s cubic-bezier(.25,.75,.3,1) infinite!important; }
+    #root .ih-connection-art[data-play="false"] :is(.ih-connection-word > span,.ih-connection-dot) { animation-play-state:paused!important; }
+    #root .ih-connection-links svg { transition:transform 160ms ease; }
+    #root .ih-connection-links > a:hover svg { transform:translate(3px,-3px); }
   }
-  @keyframes ihAssembleLeft { 0%,8%,100% { transform:translate(-18px,0); } 30%,72% { transform:translate(0,0); } }
-  @keyframes ihAssembleBridge { 0%,10%,100% { transform:translate(0,18px); } 32%,74% { transform:translate(0,0); } }
-  @keyframes ihAssembleRight { 0%,6%,100% { transform:translate(18px,0); } 28%,70% { transform:translate(0,0); } }
-  @keyframes ihAssembleDot { 0%,12%,100% { transform:translate(0,-20px); } 31% { transform:translate(0,2px); } 36%,76% { transform:translate(0,0); } }
-  @keyframes ihOrbitFrame { 0%,12% { transform:rotate(0); } 48%,62% { transform:rotate(90deg); } 100% { transform:rotate(180deg); } }
-  @keyframes ihStampDot { 0%,12%,62%,100% { transform:translateY(0); } 35%,48% { transform:translateY(-7px); } }
-  #root .ih53-home .final-cta.ih-account-entry { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:30px!important; padding:34px 40px!important; text-align:left!important; }
-  #root .ih-account-entry-copy { min-width:0; }
-  #root .ih-account-entry-copy > span { color:var(--v-muted)!important; font:550 10px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.12em; }
-  #root .ih-account-entry-copy > h2 { margin:10px 0!important; padding:0!important; color:var(--v-ink)!important; font:600 clamp(22px,2.4vw,30px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
-  #root .ih-account-entry-copy > p { margin:0!important; color:var(--v-muted)!important; font:400 14px/1.6 Inter,system-ui,sans-serif!important; }
-  #root .ih53-home .final-cta.ih-account-entry > .btn { flex:none!important; width:auto!important; min-width:200px!important; margin:0!important; }
+  @keyframes ihIdentityLetter { 0%,72%,100% { transform:translateY(0); } 78% { transform:translateY(-10%); } 84% { transform:translateY(8%); } 89% { transform:translateY(-2%); } 94% { transform:translateY(0); } }
+  @keyframes ihIdentityDot { 0%,69%,100% { transform:translateY(0); } 76% { transform:translateY(-15px) rotate(-8deg); } 84% { transform:translateY(2px); } 89% { transform:translateY(-1px); } 94% { transform:translateY(0); } }
   @media(prefers-reduced-motion:reduce) { #root .ih-reviews-group[aria-hidden="true"] { display:none; } }
   @media(max-width:980px) {
-    #root .ih-action-squares { gap:18px; }
-    #root .ih-cooperation .ih-action-square { padding:22px!important; border-radius:14px!important; }
-    #root .ih-square-action { padding-top:16px; gap:12px; }
-    #root .ih-square-action > span { width:40px; height:40px; }
+    #root .ih-connection-links { padding:20px 24px; }
+    #root .ih-connection-art { gap:8px; padding:44px 24px 34px; }
   }
   @media(max-width:600px) {
     #root .ih53-home .ih-cooperation { width:calc(100% - 40px)!important; padding-block:32px!important; }
     #root .ih-reviews-heading { margin-bottom:18px; gap:8px; }
     #root .ih-reviews-heading > span { font-size:11px; }
     #root .ih-real-review { flex-basis:clamp(240px,calc(86vw - 34px),360px); min-height:235px; padding:22px; }
-    #root .ih-action-squares { grid-template-columns:minmax(0,1fr); max-width:460px; gap:18px; }
-    #root .ih-cooperation .ih-action-square { padding:20px!important; }
-    #root .ih-square-index { top:18px; left:22px; font-size:10px; }
-    #root .ih53-home .final-cta.ih-account-entry { flex-direction:column!important; align-items:stretch!important; gap:24px!important; padding:28px 24px!important; }
-    #root .ih53-home .final-cta.ih-account-entry > .btn { width:100%!important; min-width:0!important; }
-    #root .ih-square-action > h2 { font-size:clamp(21px,6vw,28px)!important; }
-    #root .ih-square-action > span { width:38px; height:38px; }
+    #root .ih-connection-panel { padding:8px; border-radius:16px; }
+    #root .ih-connection-sheet { border-radius:9px; }
+    #root .ih-connection-links { flex-direction:column; padding:10px 18px; }
+    #root .ih-connection-links > a { padding:14px 0!important; min-height:80px; }
+    #root .ih-connection-links > a + a { padding:14px 0!important; border-left:0!important; border-top:1px solid var(--cooperation-line)!important; }
+    #root .ih-connection-links strong { font-size:23px; }
+    #root .ih-connection-links small { font-size:9px; margin-bottom:5px; }
+    #root .ih-connection-art { gap:5px; min-height:190px; padding:30px 10px; }
+    #root .ih-connection-word { font-size:clamp(35px,11.5vw,69px)!important; }
+    #root .ih-connection-mark { flex-basis:15%; width:15%!important; }
   }
 }
