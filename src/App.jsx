@@ -3014,6 +3014,19 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
         <HomePaths en={ih53English} />
 
+        <section className="final-cta home-reveal">
+          <span className="section-label">IdeaHire</span>
+          <h2 className="final-cta-title">
+            <span>{ih53English ? "Your next project" : "Twój następny projekt"}</span>
+            <span>{ih53English ? "starts here." : "zaczyna się tutaj."}</span>
+          </h2>
+          <Link className="btn btn-light btn-large" to={session ? "/account" : "/register"}>
+            {session
+              ? (ih53English ? "Go to your account" : "Przejdź do konta")
+              : (ih53English ? "Get started" : "Zacznij teraz")}
+          </Link>
+        </section>
+
       </main>
 
       <footer className="footer home-reveal ih-home-footer">
