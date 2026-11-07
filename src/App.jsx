@@ -2387,7 +2387,7 @@ function IH53Showcase({
     [c, u] = (0, IH57React.useState)(() => document.hidden),
     [p, B] = (0, IH57React.useState)(!1),
     Q = typeof navigator < "u" && navigator.connection?.saveData,
-    x = (f || s) && h && !a && !y && !c && !t && !Q;
+    x = h && !a && !y && !c && !t && !Q;
   return (0, IH57React.useEffect)(() => {
     let X = O => L(!!O.detail?.paused),
       g = () => u(document.hidden);
@@ -2433,16 +2433,10 @@ function IH53Showcase({
         className: "ih53-showcase-links",
         children: [(0, IH57JSX.jsxs)(Link, {
           to: "/find-talent",
-          children: [e ? "I have a project" : "Mam projekt", (0, IH57JSX.jsx)("span", {
-            "aria-hidden": "true",
-            children: (0, IH57JSX.jsx)(ArrowIcon, { direction: "up-right" })
-          })]
+          children: e ? "I have a project" : "Mam projekt"
         }), (0, IH57JSX.jsxs)(Link, {
           to: "/jobs",
-          children: [e ? "I am looking for work" : "Szukam zlecenia", (0, IH57JSX.jsx)("span", {
-            "aria-hidden": "true",
-            children: (0, IH57JSX.jsx)(ArrowIcon, { direction: "up-right" })
-          })]
+          children: e ? "I am looking for work" : "Szukam zlecenia"
         })]
       })]
     }), (0, IH57JSX.jsxs)("button", {
@@ -2478,15 +2472,14 @@ function IH53Showcase({
         }), x && (0, IH57JSX.jsx)("video", {
           ref: r,
           src: A.wide,
+          autoPlay: !0,
           muted: !0,
+          loop: !0,
           playsInline: !0,
-          preload: "none",
+          preload: "metadata",
           "aria-hidden": "true",
           tabIndex: -1,
           onPlaying: () => B(!0),
-          onTimeUpdate: X => {
-            X.currentTarget.currentTime > 6.5 && (X.currentTarget.currentTime = 0);
-          },
           onError: () => B(!1)
         })]
       }), (0, IH57JSX.jsxs)("span", {

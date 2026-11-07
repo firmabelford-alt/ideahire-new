@@ -1,6 +1,6 @@
 /* Keep this compact section heading inside its available mobile width. */
 @layer ideahireHeadings {
-  #root .ih88-market .ih-showcase-heading h3, #root .ih88-market .ih-showcase-heading h3 > a { font:600 17px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; }
+  #root .ih88-market .ih-showcase-heading h3, #root .ih88-market .ih-showcase-heading h3 > a { font:600 19px/1.35 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; }
   #root .ih88-market #ih88-projects-title { width:auto!important; min-width:0!important; max-width:100%!important; font:650 clamp(18px,1.5vw,20px)/1.4 Inter,system-ui,sans-serif!important; white-space:normal!important; overflow-wrap:anywhere!important; text-wrap:balance!important; }
 }
 /* Homepage introduction and a native, image-led project reel. */
@@ -47,23 +47,23 @@
   #root .ih-showcase-rail::-webkit-scrollbar-thumb { border:0!important; border-radius:10px!important; background:color-mix(in srgb,var(--v-accent) 45%,transparent)!important; }
   #root .ih88-market .ih-showcase-rail[data-single="true"] { grid-auto-columns:min(100%,480px)!important; justify-content:center!important; }
   #root .ih88-market .ih-showcase-slide { display:flex!important; min-width:0!important; height:auto!important; scroll-snap-align:start!important; scroll-snap-stop:normal!important; }
-  #root .ih88-market .ih-showcase-card { box-sizing:border-box!important; display:flex!important; flex-direction:column!important; width:100%!important; min-width:0!important; height:100%!important; margin:0!important; padding:16px 0 18px!important; border:0!important; border-bottom:1px solid var(--showcase-line)!important; border-radius:0!important; background:none!important; color:var(--v-ink)!important; box-shadow:none!important; overflow:hidden!important; }
-  #root .ih88-market .ih-showcase-top { display:grid!important; grid-template-columns:88px minmax(0,1fr)!important; align-items:start!important; gap:14px!important; min-width:0!important; }
-  #root .ih88-market .ih-showcase-cover { display:block!important; width:88px!important; height:88px!important; min-width:0!important; aspect-ratio:1!important; margin:0!important; padding:0!important; background:color-mix(in srgb,var(--v-accent) 7%,transparent)!important; border:0!important; border-radius:8px!important; color:var(--v-ink)!important; text-decoration:none!important; overflow:hidden!important; }
+  #root .ih88-market .ih-showcase-card { box-sizing:border-box!important; display:flex!important; flex-direction:column!important; width:100%!important; min-width:0!important; height:100%!important; margin:0!important; padding:0 0 18px!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-ink)!important; box-shadow:none!important; overflow:hidden!important; }
+  #root .ih88-market .ih-showcase-top { display:flex!important; flex-direction:column!important; align-items:stretch!important; gap:16px!important; min-width:0!important; }
+  #root .ih88-market .ih-showcase-cover { display:block!important; width:100%!important; height:auto!important; min-width:0!important; aspect-ratio:1.85!important; margin:0!important; padding:0!important; background:color-mix(in srgb,var(--v-accent) 7%,transparent)!important; border:0!important; border-radius:6px!important; color:var(--v-ink)!important; text-decoration:none!important; overflow:hidden!important; }
   #root .ih88-market .ih-showcase-cover > .ih-listing-thumbnail { display:block!important; box-sizing:border-box!important; width:100%!important; height:100%!important; max-width:none!important; margin:0!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; }
   #root .ih88-market .ih-showcase-cover img { display:block!important; width:100%!important; height:100%!important; object-fit:cover!important; object-position:center!important; }
   #root .ih88-market .ih-showcase-no-image { box-sizing:border-box!important; display:grid!important; place-items:center!important; width:100%!important; height:100%!important; padding:0!important; color:var(--v-accent)!important; background:none!important; }
-  #root .ih88-market .ih-showcase-no-image > svg { width:32px!important; height:32px!important; fill:currentColor!important; stroke:none!important; }
+  #root .ih88-market .ih-showcase-no-image > svg { width:48px!important; height:48px!important; fill:currentColor!important; stroke:none!important; }
   #root .ih88-market .ih-showcase-no-image path { fill:currentColor!important; stroke:none!important; }
   #root .ih88-market .ih-showcase-heading { min-width:0!important; }
   #root .ih88-market .ih-showcase-heading .ih-showcase-category-row { display:flex!important; align-items:center!important; gap:7px!important; margin:0 0 9px!important; min-width:0!important; }
   #root .ih88-market .ih-showcase-heading .ih-showcase-kind { flex:none!important; padding:0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-muted)!important; font:500 10px/1.5 Inter,system-ui,sans-serif!important; }
   #root .ih88-market .ih-showcase-category { display:block!important; min-width:0!important; margin:0!important; color:var(--v-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; overflow:hidden!important; text-overflow:ellipsis!important; white-space:nowrap!important; }
-  #root .ih88-market .ih-showcase-heading h3 { display:-webkit-box!important; -webkit-box-orient:vertical!important; -webkit-line-clamp:3!important; min-height:0!important; margin:0!important; overflow:hidden!important; color:var(--v-ink)!important; overflow-wrap:anywhere!important; }
+  #root .ih88-market .ih-showcase-heading h3 { display:-webkit-box!important; -webkit-box-orient:vertical!important; -webkit-line-clamp:2!important; min-height:52px!important; margin:0!important; overflow:hidden!important; color:var(--v-ink)!important; overflow-wrap:anywhere!important; }
   #root .ih88-market .ih-showcase-heading h3 > a { color:inherit!important; text-decoration:none!important; -webkit-text-fill-color:currentColor!important; }
-  #root .ih88-market .ih-showcase-body { display:flex!important; flex:1!important; flex-direction:column!important; min-width:0!important; padding:14px 0 0!important; }
+  #root .ih88-market .ih-showcase-body { display:flex!important; flex:1!important; flex-direction:column!important; min-width:0!important; padding:12px 0 0!important; }
   #root .ih88-market .ih-showcase-description { display:-webkit-box!important; -webkit-box-orient:vertical!important; -webkit-line-clamp:2!important; min-height:38px!important; margin:0 0 14px!important; overflow:hidden!important; color:var(--v-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; overflow-wrap:anywhere!important; }
-  #root .ih88-market .ih-showcase-author { margin:auto 0 10px!important; min-width:0!important; }
+  #root .ih88-market .ih-showcase-author { margin:0 0 12px!important; min-width:0!important; }
   #root .ih88-market .ih53-project-author { display:flex!important; align-items:center!important; gap:7px!important; min-width:0!important; color:var(--v-ink)!important; text-decoration:none!important; }
   #root .ih88-market .ih53-project-author > span:last-child { display:block!important; min-width:0!important; flex:1!important; }
   #root .ih88-market .ih53-author-avatar { display:grid!important; place-items:center!important; flex:0 0 22px!important; width:22px!important; height:22px!important; min-width:22px!important; border:0!important; border-radius:50%!important; background:var(--v-soft)!important; color:var(--v-ink)!important; font:600 10px/1 Inter,system-ui,sans-serif!important; overflow:hidden!important; }
@@ -71,10 +71,10 @@
   #root .ih88-market .ih53-project-author strong { display:block!important; max-width:none!important; overflow:hidden!important; text-overflow:ellipsis!important; white-space:nowrap!important; color:var(--v-ink)!important; font:450 11px/1.5 Inter,system-ui,sans-serif!important; }
   #root .ih88-market .ih53-project-author small { display:none!important; }
   #root .ih88-market .ih-showcase-example { margin:0 0 8px!important; color:var(--v-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
-  #root .ih88-market .ih-showcase-bottom { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; min-width:0!important; margin:0!important; padding:4px 0 0!important; border:0!important; }
+  #root .ih88-market .ih-showcase-bottom { display:flex!important; align-items:center!important; justify-content:space-between!important; gap:12px!important; min-width:0!important; margin:0!important; padding:10px 0 0!important; border:0!important; border-top:1px solid var(--showcase-line)!important; }
   #root .ih88-market .ih-showcase-bottom > div { min-width:0!important; }
   #root .ih88-market .ih-showcase-bottom small { display:block!important; color:var(--v-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; }
-  #root .ih88-market .ih-showcase-bottom strong { display:block!important; color:var(--v-ink)!important; font:600 17px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; overflow-wrap:anywhere!important; }
+  #root .ih88-market .ih-showcase-bottom strong { display:block!important; color:var(--v-ink)!important; font:600 16px/1.4 Inter,system-ui,sans-serif!important; letter-spacing:-.02em!important; overflow-wrap:anywhere!important; }
   #root .ih88-market .ih-showcase-open { display:inline-flex!important; flex:none!important; align-items:center!important; min-height:40px!important; color:var(--v-accent)!important; font:500 11px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; }
   #root .ih88-market .ih88-empty { display:flex!important; flex-wrap:wrap!important; align-items:center!important; justify-content:space-between!important; gap:12px 28px!important; padding:24px!important; border:1px solid var(--showcase-line)!important; border-radius:16px!important; background:var(--v-surface)!important; }
   #root .ih88-market .ih88-empty p { margin:0!important; color:var(--v-muted)!important; font:400 14px/1.7 Inter,system-ui,sans-serif!important; }
@@ -110,10 +110,10 @@
     #root .ih88-market .ih88-live-heading p { display:none!important; }
     #root .ih88-market .ih-showcase-rail { grid-auto-columns:88%!important; gap:14px!important; width:calc(100% + 20px)!important; padding-right:20px!important; box-sizing:border-box!important; }
     #root .ih88-market .ih-showcase-rail[data-single="true"] { width:100%!important; padding-right:0!important; grid-auto-columns:100%!important; }
-    #root .ih88-market .ih-showcase-top { grid-template-columns:72px minmax(0,1fr)!important; gap:12px!important; }
-    #root .ih88-market .ih-showcase-cover { width:72px!important; height:72px!important; }
+    #root .ih88-market .ih-showcase-top { gap:15px!important; }
+    #root .ih88-market .ih-showcase-cover { width:100%!important; height:auto!important; aspect-ratio:1.7!important; }
     #root .ih88-market .ih-showcase-body { padding:14px 0 0!important; }
-    #root .ih88-market .ih-showcase-heading h3 { min-height:0!important; }
+    #root .ih88-market .ih-showcase-heading h3 { min-height:50px!important; }
     #root .ih88-market .ih-showcase-description { margin-bottom:12px!important; font-size:12px!important; min-height:38px!important; }
     #root .ih88-market .ih-showcase-no-image { padding:0!important; }
     #root .ih88-market .ih-showcase-bottom strong { font-size:17px!important; }

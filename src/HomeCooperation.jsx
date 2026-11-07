@@ -32,7 +32,13 @@ export function HomeClarity({ en = false }) {
     {status === "loading" && <p className="ih-reviews-notice" role="status">{en ? "Loading reviews…" : "Ładowanie opinii…"}</p>}
     {status === "error" && <div className="ih-reviews-notice" role="status"><p>{en ? "Reviews are temporarily unavailable." : "Opinie są chwilowo niedostępne."}</p><button type="button" onClick={() => setAttempt(value => value + 1)}>{en ? "Try again" : "Spróbuj ponownie"}</button></div>}
     {status === "ready" && !reviews.length && <p className="ih-reviews-notice">{en ? "The first reviews will appear after completed projects." : "Pierwsze opinie pojawią się po zakończonych współpracach."}</p>}
-    {status === "ready" && reviews.length > 0 && <HomeReviewRail reviews={reviews} en={en} />}
+    {status === "ready" && reviews.length > 0 && <div className="ih-reviews-composition">
+      <div className="ih-review-summary">
+        <strong>{new Intl.NumberFormat(en ? "en-GB" : "pl-PL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(reviews.reduce((total, review) => total + Number(review.rating), 0) / reviews.length)}<small> / 5</small></strong>
+        <span>{en ? `Average of the latest ${reviews.length} reviews` : `Średnia z ostatnich ${reviews.length} opinii`}</span>
+      </div>
+      <HomeReviewRail reviews={reviews} en={en} />
+    </div>}
   </section>;
 }
 
@@ -98,9 +104,10 @@ function HomeReviewRail({ reviews, en }) {
   </div>;
 }
 
+/* The former organic-loop scene is preserved on the design/rumunia branch. */
 function ConnectionArtwork() {
   const sceneRef = useRef(null);
-  const gradient = "ih-flow-" + useId().replace(/[^a-z0-9_-]/gi, "");
+  const clip = "ih-join-" + useId().replace(/[^a-z0-9_-]/gi, "");
   const [active, setActive] = useState(false);
   useEffect(() => {
     const node = sceneRef.current;
@@ -110,20 +117,16 @@ function ConnectionArtwork() {
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  const back = "M290 76C410 34 529 164 460 277S246 408 207 290 184 113 290 76Z";
-  const front = "M155 186C217 70 392 111 416 242S300 417 199 342 89 282 155 186Z";
-  return <div ref={sceneRef} className="ih-flow-art" data-play={active} aria-hidden="true">
-    <svg viewBox="75 42 450 360" focusable="false">
-      <defs><linearGradient id={gradient} x1="100" y1="90" x2="470" y2="350" gradientUnits="userSpaceOnUse"><stop stopColor="var(--v-accent)" /><stop offset=".5" stopColor="var(--v-action,var(--v-accent))" /><stop offset="1" stopColor="var(--v-field,var(--v-accent))" /></linearGradient></defs>
-      <g className="ih-flow-breath">
-        <path className="ih-flow-echo" d={back} transform="translate(20 -16)" />
-        <path className="ih-flow-strand ih-flow-back" d={back} pathLength="1" style={{ stroke: `url(#${gradient})` }} />
-        <path className="ih-flow-strand ih-flow-sheen" d={back} pathLength="1" />
-        <path className="ih-flow-strand ih-flow-cut" d={front} pathLength="1" />
-        <path className="ih-flow-strand ih-flow-front" d={front} pathLength="1" />
-        <circle className="ih-flow-particle ih-flow-particle-one" cx="299" cy="72" r="6" />
-        <circle className="ih-flow-particle ih-flow-particle-two" cx="163" cy="184" r="4" />
+  return <div ref={sceneRef} className="ih-join-art" data-play={active} aria-hidden="true">
+    <svg viewBox="0 0 420 300" focusable="false">
+      <defs><clipPath id={clip}><path transform="translate(107 47) scale(3.2)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" /></clipPath></defs>
+      <path className="ih-join-guide" d="M5 150H112M308 150H415" />
+      <path className="ih-join-outline" transform="translate(107 47) scale(3.2)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" />
+      <g clipPath={`url(#${clip})`}>
+        {Array.from({ length: 23 }, (_, index) => <path key={index} className="ih-join-slat" d={`M50 ${67 + index * 7}H370`} style={{ "--join-shift": `${index % 2 ? 330 : -330}px`, "--join-delay": `${index * 22}ms` }} />)}
       </g>
+      <circle className="ih-join-signal ih-join-signal-left" cx="15" cy="150" r="4" />
+      <circle className="ih-join-signal ih-join-signal-right" cx="405" cy="150" r="4" />
     </svg>
   </div>;
 }

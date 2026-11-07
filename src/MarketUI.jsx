@@ -9,6 +9,7 @@ import { BrandLogo } from "./Brand";
 import './InterfaceRefinements.css';
 import './DatePicker.css';
 import './MarketplaceListings.css';
+import './ServiceFinder.css';
 
 // Validate stored/user-supplied links again at the point of navigation.
 export function getSafeWebUrl(value, { allowRelative = false } = {}) {
@@ -254,7 +255,7 @@ export function MarketIcon({ kind = "search", ...props }) {
 const CATALOG_SCENES = [
   { key: 'jobs', to: '/jobs', pl: 'Zlecenia', en: 'Jobs', video: '/media/ideahire-jobs-background.mp4?v=desk4463352-long', poster: '/media/ideahire-jobs-poster.jpg?v=desk4463352-long' },
   { key: 'people', to: '/freelancers', pl: 'Freelancerzy', en: 'Freelancers', video: '/media/ideahire-freelancers-background.mp4?v=3969421-long', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421-long' },
-  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-services-background.mp4?v=7633408-long', poster: '/media/ideahire-services-poster.jpg?v=7633408-long' },
+  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-freelancers-background.mp4?v=3969421-long', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421-long' },
 ];
 
 function CatalogFilm({ scene, en, pauseControl }) {
@@ -296,7 +297,7 @@ function CatalogFilm({ scene, en, pauseControl }) {
   return (
     <div className="ih-cinema-film" ref={frame} aria-hidden={pauseControl ? undefined : true} style={{ backgroundImage: `url("${scene.poster}")` }}>
       {motionAllowed && ready && !failed && <>
-        <video ref={video} src={scene.video} poster={scene.poster} muted loop playsInline preload="none"
+        <video ref={video} src={scene.video} poster={scene.poster} autoPlay muted loop playsInline preload="metadata"
           aria-hidden="true" tabIndex={-1} onError={() => setFailed(true)} />
         {pauseControl && <button className="ih-cinema-toggle" type="button" onClick={() => setPaused(value => !value)}
           aria-label={paused ? (en ? "Play film" : "Odtwórz film") : (en ? "Pause film" : "Wstrzymaj film")}>
@@ -327,7 +328,7 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
     setLeaving(direction);
     timer.current = window.setTimeout(() => navigate(target.to, { state: { catalogDirection: direction } }), window.matchMedia('(max-width:850px)').matches ? 340 : 230);
   }
-  return <section data-catalog-frame="20261029" className={'ih-market-intro ih-catalog-cinema' + (className ? ' ' + className : '')}
+  return <section data-catalog-frame="20261029" className={'ih-market-intro ih-catalog-cinema ih-catalog-split' + (className ? ' ' + className : '')}
     data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
     <CatalogFilm key={scene.key} scene={scene} en={en} pauseControl={pauseFilm} />
     {navigation && <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>}
@@ -374,7 +375,8 @@ export function MarketResultCount({ count, noun = 'jobs', status, className = 'i
 
 export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
   return <div className="ih73-catalog-header">
-    <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} eyebrow={eyebrow} title={title} description={description} actions={actions} />
+    <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />
+    <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} navigation={false} pauseFilm title={title} description={description} actions={actions} />
     <div className="ih73-catalog-context">
       <MarketResultCount count={count} noun={noun} status={status} />
     </div>
@@ -766,4 +768,5 @@ export function IdeaHireDateField({ type = "date", value = "", onChange, min, ma
     </dialog>, document.body)}
   </span>;
 }
+
 

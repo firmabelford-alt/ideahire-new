@@ -32,7 +32,6 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
     </div>
     </div>
     <div className="ih-showcase-body">
-      <p className="ih-showcase-description">{String(job.description || (en ? 'See what the client needs and how you can help.' : 'Sprawdź, czego potrzebuje zleceniodawca i jak możesz pomóc.')).slice(0, 280)}</p>
       <div className="ih-showcase-author">{author}</div>
       {sample && <small className="ih-showcase-example">{en ? 'Illustrative project' : 'Przykładowe zlecenie'}</small>}
       <div className="ih-showcase-bottom"><div><small>{service ? (job.price_mode === 'custom' ? (en ? 'Price' : 'Cena') : (en ? 'Price from' : 'Cena od')) : (en ? 'Budget' : 'Budżet')}</small><strong>{price}</strong></div><Link tabIndex={duplicate ? -1 : undefined} className="ih-showcase-open" data-preserve-router-state="true" to={href} state={destination} aria-label={`${en ? 'View details' : 'Zobacz szczegóły'}: ${job.title}`}>{en ? 'View' : 'Zobacz'}</Link></div>

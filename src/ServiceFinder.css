@@ -10,7 +10,7 @@
     --finder-muted: var(--v-muted);
     --finder-line: var(--v-control-line, color-mix(in srgb, var(--v-ink) 44%, var(--v-line)));
   }
-  body #root .ih-service-finder > .ih73-catalog-tabs {
+  body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs {
     box-sizing: border-box !important;
     display: flex !important;
     justify-content: flex-start !important;
@@ -24,7 +24,7 @@
     border-bottom: 1px solid var(--v-line) !important;
     background: transparent !important;
   }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a {
+  body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs > a {
     position: relative !important;
     display: grid !important;
     place-items: center !important;
@@ -39,9 +39,9 @@
     font: 600 14px/1.4 Inter, system-ui, sans-serif !important;
     text-decoration: none !important;
   }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a::after { content: none !important; }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"] { color: var(--v-ink) !important; }
-  body #root .ih-service-finder > .ih73-catalog-tabs > a[aria-current="page"]::after {
+  body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs > a::after { content: none !important; }
+  body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs > a[aria-current="page"] { color: var(--v-ink) !important; }
+  body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs > a[aria-current="page"]::after {
     content: "" !important;
     position: absolute !important;
     inset: auto 0 -1px !important;
@@ -50,7 +50,10 @@
     background: var(--v-accent) !important;
   }
 
-  body #root .ih-service-finder > .ih-service-finder-hero {
+  body #root .ih-catalog-split {
+    --finder-field: color-mix(in srgb, var(--v-action, var(--v-accent)) 11%, var(--v-surface));
+    --finder-ink: var(--v-ink);
+    --finder-muted: var(--v-muted);
     display: grid !important;
     grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) !important;
     grid-template-areas: "intro film" !important;
@@ -72,7 +75,7 @@
     overflow: hidden !important;
     animation: none !important;
   }
-  body #root .ih-service-finder-hero > .ih-cinema-film {
+  body #root .ih-catalog-split > .ih-cinema-film {
     grid-area: film !important;
     position: relative !important;
     inset: auto !important;
@@ -88,8 +91,8 @@
     background-color: var(--v-soft) !important;
     overflow: hidden !important;
   }
-  body #root .ih-service-finder-hero > .ih-cinema-film::after { background: none !important; }
-  body #root .ih-service-finder-hero .ih-cinema-film > video {
+  body #root .ih-catalog-split > .ih-cinema-film::after { background: none !important; }
+  body #root .ih-catalog-split .ih-cinema-film > video {
     position: absolute !important;
     inset: 0 !important;
     width: 100% !important;
@@ -99,7 +102,7 @@
     opacity: 1 !important;
     filter: none !important;
   }
-  body #root .ih-service-finder-hero .ih-cinema-toggle {
+  body #root .ih-catalog-split .ih-cinema-toggle {
     position: absolute !important;
     z-index: 2;
     inset: auto 10px 10px auto;
@@ -115,8 +118,8 @@
     pointer-events: auto !important;
     cursor: pointer;
   }
-  body #root .ih-service-finder-hero .ih-cinema-toggle > svg { width: 19px; height: 19px; }
-  body #root .ih-service-finder-hero > .ih-page-heading {
+  body #root .ih-catalog-split .ih-cinema-toggle > svg { width: 19px; height: 19px; }
+  body #root .ih-catalog-split > .ih-page-heading {
     grid-area: intro !important;
     position: static !important;
     box-sizing: border-box !important;
@@ -135,7 +138,7 @@
     color: var(--finder-ink) !important;
     text-align: start !important;
   }
-  body #root .ih-service-finder-hero .ih73-heading-copy {
+  body #root .ih-catalog-split .ih73-heading-copy {
     display: grid !important;
     flex: 0 1 auto !important;
     justify-items: start !important;
@@ -143,22 +146,22 @@
     width: 100% !important;
     min-width: 0 !important;
   }
-  body #root .ih-service-finder-hero .ih-page-heading h1 {
+  body #root .ih-catalog-split .ih-page-heading h1 {
     margin: 0 !important;
     padding: 0 !important;
     color: var(--finder-ink) !important;
-    font: 780 clamp(39px, 5.9vw, 76px)/1 Inter, system-ui, sans-serif !important;
+    font: 780 clamp(36px, 4.8vw, 66px)/1.06 Inter, system-ui, sans-serif !important;
     letter-spacing: -.059em !important;
     text-align: start !important;
   }
-  body #root .ih-service-finder-hero .ih73-description {
+  body #root .ih-catalog-split .ih73-description {
     margin: 0 !important;
     color: var(--finder-muted) !important;
     font: 500 15px/1.55 Inter, system-ui, sans-serif !important;
     text-align: start !important;
     text-wrap: pretty;
   }
-  body #root .ih-service-finder-hero .ih73-heading-actions {
+  body #root .ih-catalog-split .ih73-heading-actions {
     display: flex !important;
     align-self: start !important;
     align-items: center !important;
@@ -167,7 +170,7 @@
     gap: 5px 16px !important;
     margin: 0 !important;
   }
-  body #root .ih-service-finder-hero .ih73-heading-actions > a {
+  body #root .ih-catalog-split .ih73-heading-actions > a {
     box-sizing: border-box !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -179,19 +182,19 @@
     font: 650 13px/1.4 Inter, system-ui, sans-serif !important;
     text-decoration: none !important;
   }
-  body #root .ih-service-finder-hero .ih73-heading-actions > .ih-service-my-link {
+  body #root .ih-catalog-split .ih73-heading-actions > .ih-service-my-link {
     padding-inline: 0 !important;
     border: 0 !important;
     background: none !important;
     color: var(--finder-ink) !important;
   }
-  body #root .ih-service-finder-hero .ih73-heading-actions > .ih-service-publish {
+  body #root .ih-catalog-split .ih73-heading-actions > .ih-service-publish {
     border: 0 !important;
     background: var(--v-accent) !important;
     color: var(--v-on) !important;
   }
-  body #root .ih-service-finder-hero .ih73-heading-actions > a svg { flex: none; width: 17px; height: 17px; }
-  body #root .ih-service-finder-hero .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
+  body #root .ih-catalog-split .ih73-heading-actions > a svg { flex: none; width: 17px; height: 17px; }
+  body #root .ih-catalog-split .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
 
   body #root .ih-service-console {
     box-sizing: border-box;
@@ -380,8 +383,8 @@
   }
   body #root .ih-service-finder-reset > svg { flex: none; width: 15px; height: 15px; }
   body #root :is(.ih-service-finder, .ih-service-browse) :is(a, button):focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: 2px !important; }
-  body #root .ih-service-finder .ih-service-finder-hero .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
-  body #root .ih-service-finder-hero .ih-cinema-toggle:focus-visible { outline-color: #fff !important; }
+  body #root .ih-service-finder .ih-catalog-split .ih73-heading-actions > a:focus-visible { outline-color: var(--finder-ink) !important; }
+  body #root .ih-catalog-split .ih-cinema-toggle:focus-visible { outline-color: #fff !important; }
   body #root :is(.ih-service-my-link, .ih-service-finder-reset):hover { text-decoration: underline !important; text-underline-offset: 3px; }
 
   body #root .ih-services-list { min-width: 0 !important; width: 100% !important; margin: 0 !important; container-type: inline-size; }
@@ -506,28 +509,29 @@
     body #root .ih-services-list .ih78-offer-field { min-height: 0; }
   }
   @media (max-width: 720px) {
-    body #root .ih-service-finder > .ih-service-finder-hero {
+    body #root .ih-catalog-split {
       grid-template-columns: minmax(0, 1fr) !important;
       grid-template-areas: "film" "intro" !important;
       grid-template-rows: auto auto !important;
       min-height: 0 !important;
     }
-    body #root .ih-service-finder-hero > .ih-cinema-film {
+    body #root .ih-catalog-split > .ih-cinema-film {
       aspect-ratio: 16 / 10 !important;
       max-height: 320px !important;
     }
-    body #root .ih-service-finder-hero > .ih-page-heading { gap: 16px !important; padding: 21px clamp(16px, 5vw, 28px) 23px !important; }
-    body #root .ih-service-finder-hero .ih73-heading-copy { gap: 9px !important; }
-    body #root .ih-service-finder-hero .ih-page-heading h1 { font-size: clamp(34px, 9.5vw, 48px) !important; }
-    body #root .ih-service-finder-hero .ih73-description { font-size: 15px !important; }
-    body #root .ih-service-finder-hero .ih73-heading-actions { gap: 7px 13px !important; }
+    body #root .ih-catalog-split > .ih-page-heading { gap: 16px !important; padding: 21px clamp(16px, 5vw, 28px) 23px !important; }
+    body #root .ih-catalog-split .ih73-heading-copy { gap: 9px !important; }
+    body #root .ih-catalog-split .ih-page-heading h1 { font-size: clamp(34px, 9.5vw, 48px) !important; }
+    body #root .ih-catalog-split .ih73-description { font-size: 15px !important; }
+    body #root .ih-catalog-split .ih73-heading-actions { gap: 7px 13px !important; }
     body #root .ih-service-discovery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     body #root .ih-service-discovery > .ih-service-search { grid-column: 1 / -1; }
     body #root .ih-service-finder-field > .ih-control-trigger { min-height: 49px !important; }
     body #root .ih-service-offer-media > .ih-listing-save[data-overlay] { inset: 10px auto auto 10px; }
   }
   @media (max-width: 600px) {
-    body #root .ih-service-finder > .ih73-catalog-tabs { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 3px !important; }
-    body #root .ih-service-finder > .ih73-catalog-tabs > a { padding-inline: 2px !important; font-size: 13px !important; }
+    body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 3px !important; }
+    body #root :is(.ih-service-finder, .ih73-catalog-header) > .ih73-catalog-tabs > a { padding-inline: 2px !important; font-size: 13px !important; }
   }
 }
+
