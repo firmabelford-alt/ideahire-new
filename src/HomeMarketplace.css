@@ -1,3 +1,7 @@
+/* Keep this compact section heading inside its available mobile width. */
+@layer ideahireHeadings {
+  #root .ih88-market #ih88-projects-title { width:auto!important; min-width:0!important; max-width:100%!important; font:650 clamp(18px,1.5vw,20px)/1.4 Inter,system-ui,sans-serif!important; white-space:normal!important; overflow-wrap:anywhere!important; text-wrap:balance!important; }
+}
 /* Homepage introduction and a native, image-led project reel. */
 @layer ideahirePolish {
   #root .ih53-home > main { min-width:0!important; max-width:100%!important; background:transparent!important; }

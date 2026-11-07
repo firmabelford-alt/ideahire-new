@@ -51,13 +51,13 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
   const copy = en ? {
     eyebrow: ['Your idea', 'The right people', 'Work together'], title: ['Have something in mind?', 'Let’s get it done.'],
     intro: 'Find someone who knows how to help. Or put your skills to work on your next project.',
-    jobs: 'Find a project', talent: 'Find a professional', recent: 'Projects and services. Take a look.', all: 'Browse all',
+    jobs: 'Find a project', talent: 'Find a professional', recent: 'Projects and services', all: 'Browse all',
     empty: 'Have a project in mind? Tell people what you need.', add: 'Post a project', pending: 'See the new listing',
     hint: 'New projects and services, in one place',
   } : {
     eyebrow: ['Twój pomysł', 'Właściwi ludzie', 'Wspólna praca'], title: ['Masz coś do zrobienia?', 'Znajdźmy kogoś do pomocy.'],
     intro: 'Poznaj ludzi, którzy znają się na rzeczy. A jeśli to Ty szukasz zlecenia — sprawdź, gdzie przydadzą się Twoje umiejętności.',
-    jobs: 'Znajdź zlecenie', talent: 'Znajdź wykonawcę', recent: 'Zlecenia i usługi. Zobacz, co nowego.', all: 'Przeglądaj wszystkie',
+    jobs: 'Znajdź zlecenie', talent: 'Znajdź wykonawcę', recent: 'Zlecenia i usługi', all: 'Przeglądaj wszystkie',
     empty: 'Masz pomysł na projekt? Opisz go i zaproś do współpracy.', add: 'Dodaj zlecenie', pending: 'Zobacz nową ofertę',
     hint: 'Nowe projekty i oferty wykonawców, w jednym miejscu',
   };
@@ -172,7 +172,7 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
     </div>
     <div className="ih88-layout">
       <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerMoveCapture={event => { if (focus && event.pointerType === 'mouse') setFocus(false); }} onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
-        <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}<Arrow /></Link><Link to="/services">{en ? "Services" : "Usługi"}<Arrow /></Link></nav></div>
+        <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}</Link><Link to="/services">{en ? "Services" : "Usługi"}</Link></nav></div>
         {jobs.length ? <>
           <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={beginPointerInteraction} onWheel={event => { if (Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey) pauseForInteraction(); }} onKeyDown={event => {
             if (event.target !== event.currentTarget) return;

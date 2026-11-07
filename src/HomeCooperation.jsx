@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowIcon } from "./InterfaceIcons";
-import { IDEA_HIRE_MARK } from "./Brand";
 import { supabase } from "./supabase";
 import "./HomeCooperation.css";
 
@@ -100,34 +99,40 @@ function HomeReviewRail({ reviews, en }) {
 
 function ConnectionArtwork() {
   const sceneRef = useRef(null);
+  const gradient = "ih-flow-" + useId().replace(/[^a-z0-9_-]/gi, "");
   const [active, setActive] = useState(false);
   useEffect(() => {
     const node = sceneRef.current;
     if (!node) return;
     if (typeof IntersectionObserver !== "function") { setActive(true); return; }
-    const observer = new IntersectionObserver(entries => setActive(entries.some(entry => entry.isIntersecting)), { threshold: .05 });
+    const observer = new IntersectionObserver(entries => setActive(entries.some(entry => entry.intersectionRatio >= .25)), { threshold: [0, .25] });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  return <div ref={sceneRef} className="ih-connection-art" data-play={active} aria-hidden="true">
-    <svg className="ih-connection-mark" viewBox="0 0 64 64" focusable="false">
-      <path className="ih-connection-dot" d={IDEA_HIRE_MARK.dot} />
-      <path d={IDEA_HIRE_MARK.join} />
+  const back = "M290 76C410 34 529 164 460 277S246 408 207 290 184 113 290 76Z";
+  const front = "M155 186C217 70 392 111 416 242S300 417 199 342 89 282 155 186Z";
+  return <div ref={sceneRef} className="ih-flow-art" data-play={active} aria-hidden="true">
+    <svg viewBox="50 20 500 400" focusable="false">
+      <defs><linearGradient id={gradient} x1="100" y1="90" x2="470" y2="350" gradientUnits="userSpaceOnUse"><stop stopColor="var(--v-accent)" /><stop offset=".5" stopColor="var(--v-action,var(--v-accent))" /><stop offset="1" stopColor="var(--v-field,var(--v-accent))" /></linearGradient></defs>
+      <g className="ih-flow-breath">
+        <path className="ih-flow-echo" d={back} transform="translate(20 -16)" />
+        <path className="ih-flow-strand ih-flow-back" d={back} pathLength="1" style={{ stroke: `url(#${gradient})` }} />
+        <path className="ih-flow-strand ih-flow-sheen" d={back} pathLength="1" />
+        <path className="ih-flow-strand ih-flow-cut" d={front} pathLength="1" />
+        <path className="ih-flow-strand ih-flow-front" d={front} pathLength="1" />
+        <circle className="ih-flow-particle ih-flow-particle-one" cx="299" cy="72" r="6" />
+        <circle className="ih-flow-particle ih-flow-particle-two" cx="163" cy="184" r="4" />
+      </g>
     </svg>
-    <span className="ih-connection-word">{Array.from("IdeaHire", (letter, index) => <span key={index} style={{ "--letter": index }}>{letter}</span>)}</span>
   </div>;
 }
 
 export function HomePaths({ en = false }) {
   return <section className="ih-cooperation ih-paths" id="for-users" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"} data-no-translate="true">
-    <div className="ih-connection-panel">
-      <div className="ih-connection-sheet">
-        <nav className="ih-connection-links" aria-label={en ? "Choose your next step" : "Wybierz kolejny krok"}>
-          <Link to="/find-talent"><span><small>{en ? "FOR CLIENTS" : "DLA ZLECAJĄCYCH"}</small><strong>{en ? "Hire a professional" : "Zleć pracę"}</strong></span><ArrowIcon direction="up-right" /></Link>
-          <Link to="/jobs"><span><small>{en ? "FOR PROFESSIONALS" : "DLA WYKONAWCÓW"}</small><strong>{en ? "Find a project" : "Znajdź zlecenie"}</strong></span><ArrowIcon direction="up-right" /></Link>
-        </nav>
-        <ConnectionArtwork />
-      </div>
+    <div className="ih-flow-scene">
+      <Link className="ih-flow-choice" to="/find-talent"><small>{en ? "FOR CLIENTS" : "DLA ZLECAJĄCYCH"}</small><strong>{en ? "Hire a professional" : "Zleć pracę"}</strong></Link>
+      <ConnectionArtwork />
+      <Link className="ih-flow-choice" to="/jobs"><small>{en ? "FOR PROFESSIONALS" : "DLA WYKONAWCÓW"}</small><strong>{en ? "Find a project" : "Znajdź zlecenie"}</strong></Link>
     </div>
   </section>;
 }
