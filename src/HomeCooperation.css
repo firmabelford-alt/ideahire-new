@@ -38,13 +38,18 @@
   #root .ih-reviews-notice > p { margin:0!important; }
   #root .ih-reviews-notice > button { min-height:44px; padding:8px 0; border:0; background:none; color:var(--v-accent); font:550 13px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
   #root .ih-cooperation :is(a,button):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:5px!important; }
-  #root .ih-flow-scene { display:grid; grid-template-columns:minmax(160px,1fr) minmax(360px,510px) minmax(160px,1fr); align-items:center; gap:18px; max-width:1120px; min-height:330px; margin:0 auto; border:0; border-radius:0; background:none; }
-  #root .ih-flow-choice { display:block!important; min-width:0; width:fit-content; max-width:100%; justify-self:end; text-align:right; margin:0!important; padding:12px 0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-ink)!important; text-decoration:none!important; box-shadow:none!important; }
+  #root .ih-flow-scene { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:center; gap:8px 72px; max-width:1160px; min-height:0; margin:0 auto; border:0; border-radius:0; background:none; }
+  #root .ih-flow-choice { display:block!important; grid-row:2; min-width:0; width:fit-content; max-width:100%; justify-self:end; text-align:left; margin:0!important; padding:12px 0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-ink)!important; text-decoration:none!important; box-shadow:none!important; }
   #root .ih-flow-choice:last-child { justify-self:start; text-align:left; }
   #root .ih-flow-choice > small { display:block; margin-bottom:9px; color:var(--v-muted); font:500 10px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.1em; }
   #root .ih-flow-choice > strong { display:block; font:550 clamp(23px,2.2vw,28px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em; overflow-wrap:anywhere; }
-  #root .ih-sculpture-art { position:relative; width:100%; min-width:0; aspect-ratio:49/31; background:none; border:0; border-radius:0; isolation:isolate; }
+  #root .ih-sculpture-art { position:relative; grid-column:1/-1; grid-row:1; width:100%; min-width:0; aspect-ratio:2.7; min-height:280px; background:none; border:0; border-radius:0; isolation:isolate; touch-action:pan-y; }
   #root .ih-sculpture-art > canvas { display:block!important; width:100%!important; height:100%!important; max-width:none!important; background:none!important; }
+  #root .ih-relief-fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--v-ink); font:800 clamp(64px,13vw,170px)/1 "IdeaHire Wordmark",Inter,Arial,sans-serif; letter-spacing:-.045em; pointer-events:none; }
+  #root .ih-sculpture-art[data-renderer="webgl"] .ih-relief-fallback { opacity:0; }
+  #root .ih-relief-motion { position:absolute; right:0; bottom:0; min-height:36px!important; margin:0!important; padding:8px 0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-muted)!important; font:400 10px/1.5 Inter,system-ui,sans-serif!important; box-shadow:none!important; cursor:pointer; visibility:hidden; }
+  #root .ih-sculpture-art[data-renderer="webgl"] .ih-relief-motion { visibility:visible; }
+  @media(prefers-reduced-motion:reduce) { #root .ih-relief-motion { display:none!important; } }
   #root .ih53-home > main > .final-cta { border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; margin-top:20px!important; }
   @media(hover:hover) {
     #root .ih-flow-choice:hover > strong { text-decoration:underline; text-underline-offset:7px; text-decoration-thickness:1px; }
@@ -52,7 +57,7 @@
   }
   @media(prefers-reduced-motion:reduce) { #root .ih-reviews-group[aria-hidden="true"] { display:none; } }
   @media(max-width:980px) {
-    #root .ih-flow-scene { grid-template-columns:minmax(0,1fr) minmax(280px,400px) minmax(0,1fr); gap:12px; min-height:280px; }
+    #root .ih-flow-scene { gap:8px 48px; }
     #root .ih-flow-choice > strong { font-size:24px!important; }
   }
   @media(max-width:600px) {
@@ -67,8 +72,9 @@
     #root .ih-review-summary > span { max-width:20ch; }
     #root .ih-real-review { flex-basis:clamp(275px,calc(84vw - 34px),340px); min-height:190px; padding:18px 0 0; }
     #root .ih-real-review > blockquote { font-size:21px!important; }
-    #root .ih-flow-scene { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 20px; min-height:0; }
-    #root .ih-sculpture-art { grid-column:1/-1; grid-row:1; justify-self:center; width:min(100%,440px); min-height:235px; }
+    #root .ih-flow-scene { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 20px; min-height:0; }
+    #root .ih-sculpture-art { justify-self:center; width:100%; min-height:195px; aspect-ratio:1.75; }
+    #root .ih-relief-fallback { font-size:clamp(45px,13.3vw,78px); }
     #root .ih-flow-choice { grid-row:2; align-self:start; justify-self:start; text-align:left; }
     #root .ih-flow-choice:last-child { justify-self:end; text-align:right; }
     #root .ih53-home > main > .final-cta { margin-top:10px!important; padding-top:28px!important; }

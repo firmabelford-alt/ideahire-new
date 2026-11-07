@@ -109,7 +109,7 @@ export function HomePaths({ en = false }) {
   return <section className="ih-cooperation ih-paths" id="for-users" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"} data-no-translate="true">
     <div className="ih-flow-scene">
       <Link className="ih-flow-choice" to="/find-talent"><small>{en ? "FOR CLIENTS" : "DLA ZLECAJĄCYCH"}</small><strong>{en ? "Hire a professional" : "Zleć pracę"}</strong></Link>
-      <ConnectionSculpture />
+      <ConnectionSculpture en={en} />
       <Link className="ih-flow-choice" to="/jobs"><small>{en ? "FOR PROFESSIONALS" : "DLA WYKONAWCÓW"}</small><strong>{en ? "Find a project" : "Znajdź zlecenie"}</strong></Link>
     </div>
   </section>;
