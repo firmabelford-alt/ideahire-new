@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "./supabase";
 import "./HomeCooperation.css";
+import ConnectionSculpture from "./ConnectionSculpture";
 
 export function HomeClarity({ en = false }) {
   const [reviews, setReviews] = useState([]);
@@ -104,38 +105,11 @@ function HomeReviewRail({ reviews, en }) {
   </div>;
 }
 
-/* The former organic-loop scene is preserved on the design/rumunia branch. */
-function ConnectionArtwork() {
-  const sceneRef = useRef(null);
-  const clip = "ih-join-" + useId().replace(/[^a-z0-9_-]/gi, "");
-  const [active, setActive] = useState(false);
-  useEffect(() => {
-    const node = sceneRef.current;
-    if (!node) return;
-    if (typeof IntersectionObserver !== "function") { setActive(true); return; }
-    const observer = new IntersectionObserver(entries => setActive(entries.some(entry => entry.intersectionRatio >= .25)), { threshold: [0, .25] });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-  return <div ref={sceneRef} className="ih-join-art" data-play={active} aria-hidden="true">
-    <svg viewBox="0 0 420 300" focusable="false">
-      <defs><clipPath id={clip}><path transform="translate(74 12) scale(4.3)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" /></clipPath></defs>
-      <path className="ih-join-guide" d="M5 150H112M308 150H415" />
-      <path className="ih-join-outline" transform="translate(74 12) scale(4.3)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" />
-      <g clipPath={`url(#${clip})`}>
-        {Array.from({ length: 23 }, (_, index) => <path key={index} className="ih-join-slat" d={`M50 ${48 + index * 9.4}H370`} style={{ "--join-shift": `${index % 2 ? 330 : -330}px`, "--join-delay": `${index * 22}ms` }} />)}
-      </g>
-      <circle className="ih-join-signal ih-join-signal-left" cx="15" cy="150" r="4" />
-      <circle className="ih-join-signal ih-join-signal-right" cx="405" cy="150" r="4" />
-    </svg>
-  </div>;
-}
-
 export function HomePaths({ en = false }) {
   return <section className="ih-cooperation ih-paths" id="for-users" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"} data-no-translate="true">
     <div className="ih-flow-scene">
       <Link className="ih-flow-choice" to="/find-talent"><small>{en ? "FOR CLIENTS" : "DLA ZLECAJĄCYCH"}</small><strong>{en ? "Hire a professional" : "Zleć pracę"}</strong></Link>
-      <ConnectionArtwork />
+      <ConnectionSculpture />
       <Link className="ih-flow-choice" to="/jobs"><small>{en ? "FOR PROFESSIONALS" : "DLA WYKONAWCÓW"}</small><strong>{en ? "Find a project" : "Znajdź zlecenie"}</strong></Link>
     </div>
   </section>;

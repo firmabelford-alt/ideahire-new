@@ -38,36 +38,21 @@
   #root .ih-reviews-notice > p { margin:0!important; }
   #root .ih-reviews-notice > button { min-height:44px; padding:8px 0; border:0; background:none; color:var(--v-accent); font:550 13px/1.5 Inter,system-ui,sans-serif; cursor:pointer; }
   #root .ih-cooperation :is(a,button):focus-visible { outline:2px solid var(--v-accent)!important; outline-offset:5px!important; }
-  #root .ih-flow-scene { display:grid; grid-template-columns:minmax(150px,1fr) minmax(260px,340px) minmax(150px,1fr); align-items:center; gap:18px; max-width:900px; min-height:320px; margin:0 auto; border:0; border-radius:0; background:none; }
+  #root .ih-flow-scene { display:grid; grid-template-columns:minmax(160px,1fr) minmax(360px,510px) minmax(160px,1fr); align-items:center; gap:18px; max-width:1120px; min-height:330px; margin:0 auto; border:0; border-radius:0; background:none; }
   #root .ih-flow-choice { display:block!important; min-width:0; width:fit-content; max-width:100%; justify-self:end; text-align:right; margin:0!important; padding:12px 0!important; border:0!important; border-radius:0!important; background:none!important; color:var(--v-ink)!important; text-decoration:none!important; box-shadow:none!important; }
   #root .ih-flow-choice:last-child { justify-self:start; text-align:left; }
   #root .ih-flow-choice > small { display:block; margin-bottom:9px; color:var(--v-muted); font:500 10px/1.5 Inter,system-ui,sans-serif!important; letter-spacing:.1em; }
   #root .ih-flow-choice > strong { display:block; font:550 clamp(23px,2.2vw,28px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em; overflow-wrap:anywhere; }
-  #root .ih-join-art { position:relative; width:100%; min-width:0; aspect-ratio:7/5; background:none; border:0; border-radius:0; isolation:isolate; }
-  #root .ih-join-art > svg { display:block!important; width:100%!important; height:100%!important; max-width:none!important; overflow:visible; fill:none!important; stroke:none!important; }
-  #root .ih-join-art path { fill:none!important; stroke-linecap:butt; stroke-linejoin:miter; }
-  #root .ih-join-art clipPath path { fill:#000!important; stroke:none!important; }
-  #root .ih-join-guide { stroke:var(--v-ink)!important; stroke-width:1!important; opacity:.13; }
-  #root .ih-join-outline { stroke:var(--v-ink)!important; stroke-width:.22!important; opacity:.16; }
-  #root .ih-join-slat { stroke:var(--v-ink)!important; stroke-width:7.6!important; }
-  #root .ih-join-slat:nth-child(3n) { stroke:var(--v-accent)!important; }
-  #root .ih-join-signal { fill:var(--v-accent)!important; stroke:none!important; }
+  #root .ih-sculpture-art { position:relative; width:100%; min-width:0; aspect-ratio:49/31; background:none; border:0; border-radius:0; isolation:isolate; }
+  #root .ih-sculpture-art > canvas { display:block!important; width:100%!important; height:100%!important; max-width:none!important; background:none!important; }
   #root .ih53-home > main > .final-cta { border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; margin-top:20px!important; }
   @media(hover:hover) {
     #root .ih-flow-choice:hover > strong { text-decoration:underline; text-underline-offset:7px; text-decoration-thickness:1px; }
     #root .ih-real-review .ih-review-profile:hover { text-decoration:underline!important; text-underline-offset:4px; }
   }
-  @media(prefers-reduced-motion:no-preference) {
-    #root .ih-join-art .ih-join-slat { transform:translateX(var(--join-shift)); }
-    #root .ih-join-art[data-play="true"] .ih-join-slat { animation:ihJoinSlat 5.6s cubic-bezier(.22,.75,.25,1) var(--join-delay) infinite both!important; }
-    #root .ih-join-art[data-play="true"] .ih-join-signal-left { animation:ihJoinSignal 5.6s ease-in-out infinite!important; }
-    #root .ih-join-art[data-play="true"] .ih-join-signal-right { animation:ihJoinSignal 5.6s ease-in-out 160ms infinite reverse!important; --signal-end:-90px; }
-  }
-  @keyframes ihJoinSlat { 0%,7% { transform:translateX(var(--join-shift)); } 27%,73% { transform:translateX(0); } 91%,100% { transform:translateX(var(--join-shift)); } }
-  @keyframes ihJoinSignal { 0%,7%,100% { opacity:0; transform:translateX(0); } 15% { opacity:1; } 32%,68% { opacity:1; transform:translateX(var(--signal-end,90px)); } 87% { opacity:0; transform:translateX(var(--signal-end,90px)); } }
   @media(prefers-reduced-motion:reduce) { #root .ih-reviews-group[aria-hidden="true"] { display:none; } }
   @media(max-width:980px) {
-    #root .ih-flow-scene { grid-template-columns:minmax(0,1fr) minmax(220px,300px) minmax(0,1fr); gap:12px; min-height:280px; }
+    #root .ih-flow-scene { grid-template-columns:minmax(0,1fr) minmax(280px,400px) minmax(0,1fr); gap:12px; min-height:280px; }
     #root .ih-flow-choice > strong { font-size:24px!important; }
   }
   @media(max-width:600px) {
@@ -83,7 +68,7 @@
     #root .ih-real-review { flex-basis:clamp(275px,calc(84vw - 34px),340px); min-height:190px; padding:18px 0 0; }
     #root .ih-real-review > blockquote { font-size:21px!important; }
     #root .ih-flow-scene { grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 20px; min-height:0; }
-    #root .ih-join-art { grid-column:1/-1; grid-row:1; justify-self:center; width:min(100%,300px); }
+    #root .ih-sculpture-art { grid-column:1/-1; grid-row:1; justify-self:center; width:min(100%,440px); min-height:235px; }
     #root .ih-flow-choice { grid-row:2; align-self:start; justify-self:start; text-align:left; }
     #root .ih-flow-choice:last-child { justify-self:end; text-align:right; }
     #root .ih53-home > main > .final-cta { margin-top:10px!important; padding-top:28px!important; }

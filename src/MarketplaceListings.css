@@ -1,5 +1,6 @@
 @layer ideahirePolish {
   #root :is(.ih-listing-save, .ih-listing-saved-filter) {
+    --favorite-red: #cf284c;
     box-sizing: border-box !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -24,7 +25,8 @@
     width: 19px !important;
     height: 19px !important;
     fill: none !important;
-    stroke: currentColor !important;
+    color: var(--favorite-red) !important;
+    stroke: var(--favorite-red) !important;
     stroke-width: 1.7 !important;
   }
   #root .ih-listing-save[data-overlay] {
@@ -36,13 +38,15 @@
     color: #fff !important;
   }
   #root :is(.ih-listing-save, .ih-listing-saved-filter)[aria-pressed="true"] {
-    border-color: var(--v-action, var(--v-accent)) !important;
-    background: var(--v-action, var(--v-accent)) !important;
-    color: var(--v-action-ink, var(--v-on)) !important;
+    border-color: color-mix(in srgb, var(--favorite-red) 55%, var(--v-line)) !important;
+    background: color-mix(in srgb, var(--favorite-red) 10%, var(--v-surface)) !important;
+    color: var(--v-ink) !important;
   }
-  #root :is(.ih-listing-save, .ih-listing-saved-filter)[aria-pressed="true"] > svg { fill: currentColor !important; }
+  #root :is(.ih-listing-save, .ih-listing-saved-filter)[aria-pressed="true"] > svg { fill: var(--favorite-red) !important; }
   #root :is(.ih-listing-save, .ih-listing-saved-filter):focus-visible { outline: 2px solid var(--v-accent) !important; outline-offset: 3px !important; }
   #root .ih-listing-save[data-overlay]:focus-visible { outline-color: #fff !important; }
+  :root[data-theme="dark"] #root :is(.ih-listing-save, .ih-listing-saved-filter) { --favorite-red: #ff6b88; }
   #root .ih-market-saved-bar { display: flex; justify-content: flex-end; margin: 12px 0 14px; }
   #root .ih79-job .ih5-job-card-top > .ih-job-card-controls { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; min-width: 0; }
 }
+

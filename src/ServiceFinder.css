@@ -150,10 +150,18 @@
     margin: 0 !important;
     padding: 0 !important;
     color: var(--finder-ink) !important;
-    font: 780 clamp(36px, 4.8vw, 66px)/1.06 Inter, system-ui, sans-serif !important;
-    letter-spacing: -.059em !important;
+    font: 650 clamp(38px, 4vw, 58px)/1.08 Inter, system-ui, sans-serif !important;
+    letter-spacing: -.045em !important;
     text-align: start !important;
   }
+  body #root .ih-catalog-split .ih-catalog-count {
+    display: inline-flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 6px !important;
+    width: fit-content !important; max-width: 100% !important; margin: 0 !important; padding: 7px 10px !important;
+    border: 0 !important; border-radius: 6px !important;
+    background: color-mix(in srgb, var(--v-accent) 10%, var(--v-surface)) !important;
+    color: var(--finder-muted) !important; font: 450 12px/1.4 Inter, system-ui, sans-serif !important;
+  }
+  body #root .ih-catalog-split .ih-catalog-count > strong { color: var(--finder-ink) !important; font-weight: 650 !important; font-variant-numeric: tabular-nums; }
   body #root .ih-catalog-split .ih73-description {
     margin: 0 !important;
     color: var(--finder-muted) !important;

@@ -255,7 +255,7 @@ export function MarketIcon({ kind = "search", ...props }) {
 const CATALOG_SCENES = [
   { key: 'jobs', to: '/jobs', pl: 'Zlecenia', en: 'Jobs', video: '/media/ideahire-jobs-background.mp4?v=desk4463352-long', poster: '/media/ideahire-jobs-poster.jpg?v=desk4463352-long' },
   { key: 'people', to: '/freelancers', pl: 'Freelancerzy', en: 'Freelancers', video: '/media/ideahire-freelancers-background.mp4?v=3969421-long', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421-long' },
-  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-freelancers-background.mp4?v=3969421-long', poster: '/media/ideahire-freelancers-poster.jpg?v=3969421-long' },
+  { key: 'services', to: '/services', pl: 'Usługi', en: 'Services', video: '/media/ideahire-services-creative-work.mp4', poster: '/media/ideahire-services-creative-work.jpg' },
 ];
 
 function CatalogFilm({ scene, en, pauseControl }) {
@@ -310,7 +310,7 @@ function CatalogFilm({ scene, en, pauseControl }) {
   );
 }
 
-export function MarketCatalogHero({ active, eyebrow, title, description, actions, className = '', navigation = true, pauseFilm = false }) {
+export function MarketCatalogHero({ active, eyebrow, title, description, actions, summary, className = '', navigation = true, pauseFilm = false }) {
   const en = useSitePreferences().language === 'en';
   const navigate = useNavigate(), location = useLocation();
   const timer = useRef(null);
@@ -332,7 +332,7 @@ export function MarketCatalogHero({ active, eyebrow, title, description, actions
     data-catalog={scene.key} data-leaving={leaving || undefined} data-direction={location.state?.catalogDirection === -1 ? 'previous' : 'next'} aria-label={title}>
     <CatalogFilm key={scene.key} scene={scene} en={en} pauseControl={pauseFilm} />
     {navigation && <nav className="ih-cinema-tabs" aria-label={en ? 'Browse IdeaHire' : 'Przeglądaj IdeaHire'}>{CATALOG_SCENES.map((item, itemIndex) => <Link key={item.key} to={item.to} aria-current={item.key === scene.key ? 'page' : undefined} aria-disabled={leaving ? true : undefined} onClick={event => go(item, itemIndex < index ? -1 : 1, event)}>{en ? item.en : item.pl}</Link>)}</nav>}
-    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog" />
+    <SubpageHeading eyebrow={eyebrow} title={title} description={description} actions={actions} variant="catalog">{summary}</SubpageHeading>
     {navigation && <nav className="ih-cinema-arrows" aria-label={en ? 'Switch catalog' : 'Zmień katalog'}>
       <Link to={previous.to} aria-label={(en ? 'Previous: ' : 'Poprzednia: ') + (en ? previous.en : previous.pl)} aria-disabled={leaving ? true : undefined} onClick={event => go(previous, -1, event)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6" /></svg><span>{en ? previous.en : previous.pl}</span></Link>
       <Link to={next.to} aria-label={(en ? 'Next: ' : 'Następna: ') + (en ? next.en : next.pl)} aria-disabled={leaving ? true : undefined} onClick={event => go(next, 1, event)}><span>{en ? next.en : next.pl}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></Link>
@@ -348,7 +348,7 @@ export function MarketHeader({ eyebrow, title, description, children, count, sta
   const editing = location.pathname.startsWith('/edit-job/');
   const heading = jobs ? {
     eyebrow: en ? 'For freelancers' : 'Dla wykonawców',
-    title: en ? 'Find a job' : 'Znajdź zlecenie',
+    title: en ? 'Jobs' : 'Zlecenia',
     description: en ? 'Check the brief, budget and deadline. Choose a project for yourself.' : 'Sprawdź zakres, budżet i termin. Wybierz projekt dla siebie.',
   } : creating ? {
     eyebrow: en ? 'For clients' : 'Dla zlecających',
@@ -376,10 +376,8 @@ export function MarketResultCount({ count, noun = 'jobs', status, className = 'i
 export function MarketCatalogHeader({ eyebrow, title, description, count, noun = 'jobs', status, tabs, actions, children }) {
   return <div className="ih73-catalog-header">
     <SubpageCatalogTabs active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} />
-    <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} navigation={false} pauseFilm title={title} description={description} actions={actions} />
-    <div className="ih73-catalog-context">
-      <MarketResultCount count={count} noun={noun} status={status} />
-    </div>
+    <MarketCatalogHero active={noun === 'profiles' ? 'people' : noun === 'services' ? 'services' : 'jobs'} navigation={false} title={title} description={description} actions={actions}
+      summary={<MarketResultCount count={count} noun={noun} status={status} className="ih-catalog-count" />} />
     {children}
   </div>;
 }
