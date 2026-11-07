@@ -45,6 +45,7 @@ export default function ConnectionSculpture() {
     let frame = 0, last = 0, lastPaint = 0, elapsed = 0, nextTurn = 0;
     let visible = false, entrance = 0, targetTilt = 0, tilt = 0, lastStamp = -1, bursts = 0;
     let press = null, accent, ink;
+    let cameraZoom = 1, cameraX = 0, cameraY = 0;
     const cellKey = (x, y, z) => x + 32 + (y + 32) * 64 + (z + 32) * 4096;
     function palette() {
       const style = getComputedStyle(host);
@@ -78,19 +79,19 @@ export default function ConnectionSculpture() {
             const distance2 = dx * dx + dy * dy + dz * dz;
             if (distance2 >= 34 * 34 || distance2 < .01) continue;
             neighbours++; px += q.x; py += q.y; pz += q.z; vx += q.vx; vy += q.vy; vz += q.vz;
-            if (distance2 < 14 * 14) {
-              const distance = Math.sqrt(distance2), repel = (1 - distance / 14) * 27 / distance;
+            if (distance2 < 24 * 24) {
+              const distance = Math.sqrt(distance2), repel = (1 - distance / 24) * 24 / distance;
               sx += dx * repel; sy += dy * repel; sz += dz * repel;
             }
           }
         }
-        let ax = (focus.x - p.x) * .055 + sx;
-        let ay = (focus.y - p.y) * .095 + sy;
-        let az = (focus.z - p.z) * .095 + sz;
+        let ax = (focus.x - p.x) * .022 + sx;
+        let ay = (focus.y - p.y) * .075 + sy;
+        let az = (focus.z - p.z) * .075 + sz;
         if (neighbours) {
-          ax += (px / neighbours - p.x) * .15 + (vx / neighbours - p.vx) * .9;
-          ay += (py / neighbours - p.y) * .15 + (vy / neighbours - p.vy) * .9;
-          az += (pz / neighbours - p.z) * .15 + (vz / neighbours - p.vz) * .9;
+          ax += (px / neighbours - p.x) * .06 + (vx / neighbours - p.vx) * .9;
+          ay += (py / neighbours - p.y) * .06 + (vy / neighbours - p.vy) * .9;
+          az += (pz / neighbours - p.z) * .06 + (vz / neighbours - p.vz) * .9;
         }
         ax += Math.sin(p.y * .023 + elapsed * .31) * 5 + Math.cos(p.z * .019 - elapsed * .17) * 3;
         ay += Math.sin(p.z * .025 + elapsed * .23) * 5 - Math.cos(p.x * .016 + elapsed * .13) * 3;
@@ -131,7 +132,18 @@ export default function ConnectionSculpture() {
       context.clearRect(0, 0, width, height);
       const reveal = reduced.matches ? 1 : .35 + .65 * clamp(entrance / 1.2);
       const projected = particles.map(p => ({ p, ...project(p.x, p.y, p.z) })).sort((a, b) => a.depth - b.depth);
-      context.save(); context.translate(width / 2, height / 2); context.scale(scale, scale);
+      const bounds = projected.reduce((box, p) => ({
+        left: Math.min(box.left, p.x), right: Math.max(box.right, p.x),
+        top: Math.min(box.top, p.y), bottom: Math.max(box.bottom, p.y),
+        x: box.x + p.x, y: box.y + p.y,
+      }), { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity, x: 0, y: 0 });
+      const fit = Math.min(410 / Math.max(180, bounds.right - bounds.left + 34), 244 / Math.max(120, bounds.bottom - bounds.top + 28), 1.95);
+      const ease = reduced.matches ? 1 : .035;
+      cameraZoom += (fit - cameraZoom) * ease;
+      cameraX += (bounds.x / count - cameraX) * ease;
+      cameraY += (bounds.y / count - cameraY) * ease;
+      context.save(); context.translate(width / 2, height / 2); context.scale(scale * cameraZoom, scale * cameraZoom);
+      context.translate(-cameraX, -cameraY);
       context.lineCap = "round";
       for (const point of projected) {
         const { p, x, y, depth, perspective } = point;
@@ -179,7 +191,7 @@ export default function ConnectionSculpture() {
     }
     function position(event) {
       const bounds = host.getBoundingClientRect();
-      return { x: (event.clientX - bounds.left - width / 2) / scale, y: (event.clientY - bounds.top - height / 2) / scale };
+      return { x: (event.clientX - bounds.left - width / 2) / (scale * cameraZoom) + cameraX, y: (event.clientY - bounds.top - height / 2) / (scale * cameraZoom) + cameraY };
     }
     function move(event) {
       if (event.pointerType !== "mouse" || reduced.matches) return;
