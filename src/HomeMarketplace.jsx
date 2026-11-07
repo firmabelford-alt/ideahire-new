@@ -42,12 +42,12 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
   const host = useRef(null), rail = useRef(null), activeId = useRef(jobs[0] ? homeFeedKey(jobs[0]) : undefined), known = useRef(new Set()), initialized = useRef(false);
   const openedAt = useRef(Date.now()), interactionTimer = useRef(0), pointerActive = useRef(false);
   const [stops, setStops] = useState([0]), [position, setPosition] = useState(0);
-  const [hover, setHover] = useState(false), [focus, setFocus] = useState(false), [visible, setVisible] = useState(false);
+  const [focus, setFocus] = useState(false), [visible, setVisible] = useState(false);
   const [interacting, setInteracting] = useState(false);
   const [hidden, setHidden] = useState(() => typeof document !== 'undefined' && document.hidden), [pending, setPending] = useState(null);
   const signature = jobs.map(homeFeedKey).join('|');
   const motionPaused = paused || reduced;
-  const stopped = motionPaused || interacting || hover || focus || hidden || !visible;
+  const stopped = motionPaused || interacting || focus || hidden || !visible;
   const copy = en ? {
     eyebrow: ['Your idea', 'The right people', 'Work together'], title: ['Have something in mind?', 'Let’s get it done.'],
     intro: 'Find someone who knows how to help. Or put your skills to work on your next project.',
@@ -170,7 +170,7 @@ export default function HomeMarketplace({ en = false, jobs = [], renderProject, 
       <div className="ih88-hero-bottom"><p className="ih88-lead">{copy.intro}</p><nav className="ih88-actions" aria-label={en ? 'Start a collaboration' : 'Rozpocznij współpracę'}><EntryLink className="ih88-talent" to="/freelancers" label={copy.talent}/><EntryLink className="ih88-jobs" to="/jobs" label={copy.jobs}/></nav></div>
     </div>
     <div className="ih88-layout">
-      <section className="ih88-live" aria-labelledby="ih88-projects-title" onPointerEnter={event => { if (event.pointerType === 'mouse') setHover(true); }} onPointerLeave={() => setHover(false)} onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
+      <section className="ih88-live" aria-labelledby="ih88-projects-title" onFocusCapture={event => setFocus(Boolean(event.target.matches?.(':focus-visible')))} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}>
         <div className="ih88-live-heading"><div><h2 id="ih88-projects-title">{copy.recent}</h2><p>{copy.hint}</p></div><nav className="ih-feed-catalog-links" aria-label={en ? "Browse listings" : "Przeglądaj ogłoszenia"}><Link to="/jobs">{en ? "Projects" : "Zlecenia"}<Arrow /></Link><Link to="/services">{en ? "Services" : "Usługi"}<Arrow /></Link></nav></div>
         {jobs.length ? <>
           <div ref={rail} className="ih-showcase-rail" id="ih-home-project-rail" role="region" aria-roledescription={en ? 'carousel' : 'karuzela'} aria-label={copy.recent} tabIndex={0} data-single={jobs.length === 1} data-count={jobs.length} data-auto-moving={!stopped && jobs.length > 1} onScroll={readPosition} onPointerDown={beginPointerInteraction} onWheel={() => pauseForInteraction()} onKeyDown={event => {

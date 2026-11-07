@@ -3014,12 +3014,12 @@ function App({ session, loading, categoryGroups = [], limitedAccess = false }) {
 
         <HomePaths en={ih53English} />
 
-        <section className="final-cta home-reveal">
-          <span className="section-label">IdeaHire</span>
-          <h2 className="final-cta-title">
-            <span>{ih53English ? "Your next project" : "Twój następny projekt"}</span>
-            <span>{ih53English ? "starts here." : "zaczyna się tutaj."}</span>
-          </h2>
+        <section className="final-cta home-reveal ih-account-entry">
+          <div className="ih-account-entry-copy">
+            <span>{ih53English ? "YOUR WORKSPACE" : "TWOJE CENTRUM PRACY"}</span>
+            <h2>{session ? (ih53English ? "Your IdeaHire account" : "Twoje konto IdeaHire") : (ih53English ? "Join IdeaHire" : "Dołącz do IdeaHire")}</h2>
+            <p>{ih53English ? "Projects, conversations and arrangements in one place." : "Projekty, rozmowy i ustalenia w jednym miejscu."}</p>
+          </div>
           <Link className="btn btn-light btn-large" to={session ? "/account" : "/register"}>
             {session
               ? (ih53English ? "Go to your account" : "Przejdź do konta")

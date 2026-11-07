@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowIcon } from "./InterfaceIcons";
+import { IDEA_HIRE_MARK } from "./Brand";
 import { supabase } from "./supabase";
 import "./HomeCooperation.css";
 
@@ -45,7 +46,6 @@ function HomeReviewRail({ reviews, en }) {
     const group = groupRef.current;
     if (!viewport || !group || reviews.length < 2) return;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const hover = window.matchMedia("(hover: hover)");
     let frame = 0, last = 0, visible = true, held = false, manualUntil = 0;
     let loopWidth = group.getBoundingClientRect().width;
     const measure = () => { loopWidth = group.getBoundingClientRect().width; };
@@ -67,7 +67,7 @@ function HomeReviewRail({ reviews, en }) {
     window.addEventListener("blur", release);
     function tick(now) {
       const keyboardFocus = viewport.contains(document.activeElement) && document.activeElement.matches(":focus-visible");
-      const playing = visible && !document.hidden && !motion.matches && !held && now > manualUntil && !keyboardFocus && !(hover.matches && viewport.matches(":hover"));
+      const playing = visible && !document.hidden && !motion.matches && !held && now > manualUntil && !keyboardFocus;
       if (playing && last && loopWidth > 0) viewport.scrollLeft = (Math.max(0, viewport.scrollLeft) + Math.min(now - last, 64) * .028) % loopWidth;
       const state = playing ? "running" : "paused";
       if (viewport.dataset.autoplay !== state) viewport.dataset.autoplay = state;
@@ -100,49 +100,34 @@ function HomeReviewRail({ reviews, en }) {
 
 function ConnectionArtwork({ kind }) {
   const sceneRef = useRef(null);
-  const lastPlay = useRef(0);
   const [active, setActive] = useState(false);
-  const [cycle, setCycle] = useState(0);
   useEffect(() => {
     const node = sceneRef.current;
     if (!node) return;
-    const play = () => { lastPlay.current = Date.now(); setActive(true); };
-    if (typeof IntersectionObserver !== "function") { play(); return; }
+    if (typeof IntersectionObserver !== "function") { setActive(true); return; }
     const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) { play(); observer.disconnect(); }
-    }, { threshold: .6 });
+      setActive(entries.some(entry => entry.isIntersecting));
+    }, { threshold: .15 });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-  function replay(event) {
-    if (event.pointerType !== "mouse" || !active || Date.now() - lastPlay.current < 2000) return;
-    lastPlay.current = Date.now();
-    setCycle(value => value + 1);
-  }
-  return <div ref={sceneRef} className="ih-scene-art" data-kind={kind} data-play={active} aria-hidden="true" onPointerEnter={replay}>
-    <svg viewBox="0 0 400 340" focusable="false">
-      {kind === "search" ? <g key={cycle}>
-        <circle className="ih-scene-orbit" cx="176" cy="150" r="118" />
-        <circle className="ih-scene-dot" cx="303" cy="75" r="8" />
-        <circle className="ih-scene-orbit" cx="70" cy="267" r="12" />
-        <g className="ih-search-lens">
-          <path className="ih-search-handle" d="m246 220 66 66" />
-          <circle className="ih-search-glass" cx="176" cy="150" r="90" />
-          <circle className="ih-search-rim" cx="176" cy="150" r="90" />
-          <g className="ih-search-person"><circle cx="176" cy="130" r="19" /><path d="M138 191c0-48 76-48 76 0Z" /></g>
-          <path className="ih-search-focus" d="M113 119V91h28m70 0h28v28m0 62v28h-28m-70 0h-28v-28" />
+  return <div ref={sceneRef} className="ih-scene-art" data-kind={kind} data-play={active} aria-hidden="true">
+    <svg viewBox="0 0 400 400" focusable="false">
+      {kind === "assemble" ? <>
+        <path className="ih-poster-guide" d="M24 88H376M24 200H376M24 312H376M88 24V376M200 24V376M312 24V376" />
+        <g transform="translate(24 24) scale(5.5)">
+          <g className="ih-build-piece ih-build-left"><path d="M8 28H22V56H8Z" /></g>
+          <g className="ih-build-piece ih-build-bridge"><path d="M22 28H42V42H22Z" /></g>
+          <g className="ih-build-piece ih-build-right"><path d="M42 8H50L56 14V56H42Z" /></g>
+          <g className="ih-build-piece ih-build-dot"><path d={IDEA_HIRE_MARK.dot} /></g>
         </g>
-      </g> : <g key={cycle}>
-        <circle className="ih-scene-orbit" cx="205" cy="166" r="123" />
-        <path className="ih-flight-trail" d="M41 278c-26-81 49-125 88-87s-22 83-40 32 81-70 123-45" />
-        <g className="ih-flight-plane">
-          <path className="ih-plane-body" d="M80 165 327 68 244 274 193 198Z" />
-          <path className="ih-plane-wing" d="m193 198 134-130-104 116 21 90Z" />
-          <path className="ih-plane-fold" d="M193 198 327 68 223 184l21 90" />
+      </> : <>
+        <g className="ih-poster-orbit ih-poster-orbit-outer"><rect x="47" y="47" width="306" height="306" rx="30" /></g>
+        <g className="ih-poster-orbit ih-poster-orbit-inner"><rect x="76" y="76" width="248" height="248" rx="22" /></g>
+        <g className="ih-poster-stamp" transform="translate(88 88) scale(3.5)">
+          <path d={IDEA_HIRE_MARK.join} /><path className="ih-stamp-dot" d={IDEA_HIRE_MARK.dot} />
         </g>
-        <path className="ih-scene-spark" d="M76 89v25M64 101h25M324 256v18m-9-9h18" />
-        <circle className="ih-scene-dot" cx="331" cy="115" r="6" />
-      </g>}
+      </>}
     </svg>
   </div>;
 }
@@ -152,12 +137,12 @@ export function HomePaths({ en = false }) {
     <div className="ih-action-squares">
       <Link className="ih-action-square" to="/find-talent">
         <span className="ih-square-index"><span aria-hidden="true">01</span>{en ? "For clients" : "Dla zlecających"}</span>
-        <ConnectionArtwork kind="search" />
+        <ConnectionArtwork kind="assemble" />
         <div className="ih-square-action"><h2>{en ? "Hire a professional" : "Zleć pracę"}</h2><span><ArrowIcon direction="up-right" /></span></div>
       </Link>
-      <Link className="ih-action-square ih-action-square-flight" to="/jobs">
+      <Link className="ih-action-square ih-action-square-orbit" to="/jobs">
         <span className="ih-square-index"><span aria-hidden="true">02</span>{en ? "For professionals" : "Dla wykonawców"}</span>
-        <ConnectionArtwork kind="flight" />
+        <ConnectionArtwork kind="orbit" />
         <div className="ih-square-action"><h2>{en ? "Find a project" : "Znajdź zlecenie"}</h2><span><ArrowIcon direction="up-right" /></span></div>
       </Link>
     </div>
