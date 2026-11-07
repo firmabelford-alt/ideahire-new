@@ -23,7 +23,7 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
     <div className="ih-showcase-top">
     <Link className="ih-showcase-cover" to={href} state={destination} data-preserve-router-state="true" aria-label={`${service ? (en ? 'View service' : 'Zobacz usługę') : (en ? 'View project' : 'Zobacz zlecenie')}: ${job.title}`} tabIndex={-1}>
       <ListingThumbnail path={job.thumbnail_path} ownerId={job.user_id} kind={service ? "services" : "jobs"} title={job.title} client={client} fallback={
-        <div className="ih-showcase-no-image" aria-hidden="true"><BrandMark /></div>
+        <div className="ih-showcase-no-image" aria-hidden="true"><span>{category}</span><BrandMark /></div>
       } />
     </Link>
     <div className="ih-showcase-heading">

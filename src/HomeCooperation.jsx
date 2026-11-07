@@ -119,11 +119,11 @@ function ConnectionArtwork() {
   }, []);
   return <div ref={sceneRef} className="ih-join-art" data-play={active} aria-hidden="true">
     <svg viewBox="0 0 420 300" focusable="false">
-      <defs><clipPath id={clip}><path transform="translate(107 47) scale(3.2)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" /></clipPath></defs>
+      <defs><clipPath id={clip}><path transform="translate(74 12) scale(4.3)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" /></clipPath></defs>
       <path className="ih-join-guide" d="M5 150H112M308 150H415" />
-      <path className="ih-join-outline" transform="translate(107 47) scale(3.2)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" />
+      <path className="ih-join-outline" transform="translate(74 12) scale(4.3)" d="M8 8H22V20H8ZM42 8H50L56 14V56H42V42H22V56H8V28H42Z" />
       <g clipPath={`url(#${clip})`}>
-        {Array.from({ length: 23 }, (_, index) => <path key={index} className="ih-join-slat" d={`M50 ${67 + index * 7}H370`} style={{ "--join-shift": `${index % 2 ? 330 : -330}px`, "--join-delay": `${index * 22}ms` }} />)}
+        {Array.from({ length: 23 }, (_, index) => <path key={index} className="ih-join-slat" d={`M50 ${48 + index * 9.4}H370`} style={{ "--join-shift": `${index % 2 ? 330 : -330}px`, "--join-delay": `${index * 22}ms` }} />)}
       </g>
       <circle className="ih-join-signal ih-join-signal-left" cx="15" cy="150" r="4" />
       <circle className="ih-join-signal ih-join-signal-right" cx="405" cy="150" r="4" />

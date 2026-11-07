@@ -49,7 +49,7 @@
   #root .ih-join-art clipPath path { fill:#000!important; stroke:none!important; }
   #root .ih-join-guide { stroke:var(--v-ink)!important; stroke-width:1!important; opacity:.13; }
   #root .ih-join-outline { stroke:var(--v-ink)!important; stroke-width:.22!important; opacity:.16; }
-  #root .ih-join-slat { stroke:var(--v-ink)!important; stroke-width:5.5!important; }
+  #root .ih-join-slat { stroke:var(--v-ink)!important; stroke-width:7.6!important; }
   #root .ih-join-slat:nth-child(3n) { stroke:var(--v-accent)!important; }
   #root .ih-join-signal { fill:var(--v-accent)!important; stroke:none!important; }
   #root .ih53-home > main > .final-cta { border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; margin-top:20px!important; }
