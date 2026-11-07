@@ -47,8 +47,8 @@ export function HomeClarity({ en = false }) {
 }
 
 const DROP_TILES = [
-  [112, 82, -12, "pen"], [224, 65, 8, "code"], [294, 156, 12, "image"],
-  [251, 260, -9, "video"], [140, 286, 8, "chart"], [70, 196, -12, "person"], [180, 174, -4, "cursor"],
+  [200, 95, 0, "pen"], [130, 135, 0, "image"], [270, 135, 0, "code"],
+  [90, 215, 0, "chart"], [310, 215, 0, "video"], [200, 175, 0, "person"], [200, 255, 0, "cursor"],
 ];
 const DROP_COLUMNS = [[0, 0, 1], [1, 0, 2], [0, 1, 1], [2, 0, 1], [1, 1, 3], [2, 1, 2]];
 const TILE_ICONS = {
@@ -86,12 +86,12 @@ function ConnectionArtwork({ kind }) {
     <svg viewBox="0 0 400 370" focusable="false">
       <ellipse className="ih-drop-shadow" cx="200" cy="302" rx="135" ry="29" />
       {kind === "people" ? <g key={cycle}>
-        <path className="ih-drop-guide" d="M112 82 224 65 294 156 251 260 140 286 70 196Z M112 82 180 174 251 260M70 196 180 174 294 156M224 65 180 174 140 286" />
+        <path className="ih-drop-guide" d="m16 208 184-106 184 106-184 106Z M77 173l184 106M139 137l184 106M77 243l184-106M139 279l184-106" />
         {DROP_TILES.map(([x, y, turn, icon], index) => <g key={icon} transform={`translate(${x} ${y})`}>
           <g className="ih-drop-piece ih-drop-tile" data-tone={index % 3} style={{ "--drop-turn": `${turn}deg`, "--drop-delay": `${index * 90}ms` }}>
-            <rect className="ih-tile-under" x="-39" y="-31" width="78" height="78" rx="20" />
-            <rect className="ih-tile-face" x="-39" y="-39" width="78" height="78" rx="20" />
-            <path className="ih-tile-icon" d={TILE_ICONS[icon]} />
+            <path className="ih-tile-under" d="M-7-34q7-4 14 0L58-5q9 5 0 10L7 34q-7 4-14 0L-58 5q-9-5 0-10Z" transform="translate(0 10)" />
+            <path className="ih-tile-face" d="M-7-34q7-4 14 0L58-5q9 5 0 10L7 34q-7 4-14 0L-58 5q-9-5 0-10Z" />
+            <path className="ih-tile-icon" d={TILE_ICONS[icon]} transform="matrix(.88 .5 -.88 .5 0 0)" />
           </g>
         </g>)}
       </g> : <g key={cycle}>
