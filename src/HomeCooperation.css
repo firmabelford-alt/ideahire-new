@@ -28,8 +28,11 @@
   #root .ih-action-squares { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; max-width:1100px; margin:0 auto; }
   #root .ih-cooperation .ih-action-square { position:relative!important; display:flex!important; flex-direction:column!important; min-width:0!important; aspect-ratio:1; padding:24px!important; overflow:hidden!important; border:1px solid var(--cooperation-line)!important; border-radius:24px!important; background:var(--v-bg)!important; color:var(--v-ink)!important; text-decoration:none!important; box-shadow:none!important; isolation:isolate; touch-action:manipulation; }
   #root .ih-cooperation .ih-action-square-build { background:color-mix(in srgb,var(--v-accent) 7%,var(--v-bg))!important; }
-  #root .ih-square-index { position:absolute; top:24px; left:26px; z-index:2; color:var(--v-muted); font:500 10px/1.5 Inter,system-ui,sans-serif; }
+  #root .ih-square-index { position:absolute; top:24px; left:26px; z-index:2; display:flex; align-items:center; gap:14px; color:var(--v-muted); font:500 10px/1.5 Inter,system-ui,sans-serif; }
+  #root .ih-square-index > span { padding-right:14px; border-right:1px solid var(--cooperation-line); font-variant-numeric:tabular-nums; }
   #root .ih-drop-art { position:relative; flex:1; width:100%; min-width:0; min-height:0; margin:0 auto; pointer-events:auto; }
+  #root .ih-drop-art[data-kind="people"] { --drop-from:-290px; --drop-spin:18deg; --drop-wobble:2deg; }
+  #root .ih-drop-art[data-kind="build"] { --drop-from:-260px; --drop-spin:0deg; --drop-wobble:0deg; --drop-start:110ms; --drop-speed:660ms; }
   #root .ih-drop-art > svg { position:absolute!important; inset:0!important; display:block!important; width:100%!important; height:100%!important; max-width:none!important; fill:none!important; stroke:none!important; overflow:visible; }
   #root .ih-drop-shadow { fill:var(--v-ink)!important; opacity:.055; stroke:none!important; }
   #root .ih-drop-guide { fill:none!important; stroke:color-mix(in srgb,var(--v-accent) 18%,transparent)!important; stroke-width:1; stroke-linejoin:round; }
@@ -55,20 +58,26 @@
   #root .ih-square-action > h2 { min-width:0; margin:0!important; padding:0!important; color:var(--v-ink)!important; font:600 clamp(22px,2.5vw,32px)/1.2 Inter,system-ui,sans-serif!important; letter-spacing:-.035em!important; }
   #root .ih-square-action > span { display:grid; place-items:center; flex:none; width:46px; height:46px; border:1px solid var(--cooperation-line); border-radius:50%; color:var(--v-accent); }
   #root .ih-square-action > span > svg { display:block!important; width:22px!important; height:22px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.7!important; }
+  #root .ih-next-project { --next-ink:var(--v-action-ink,var(--v-on)); display:flex; align-items:center; justify-content:space-between; gap:32px; max-width:1100px; margin:24px auto 0; padding:40px 44px; border-radius:20px; background:var(--v-action,var(--v-accent))!important; color:var(--next-ink)!important; }
+  #root .ih-next-project > h2 { min-width:0; margin:0!important; padding:0!important; color:var(--next-ink)!important; -webkit-text-fill-color:currentColor!important; font:600 clamp(27px,3.3vw,44px)/1.1 Inter,system-ui,sans-serif!important; letter-spacing:-.045em!important; }
+  #root .ih-next-project > h2 > span { display:block; color:inherit!important; -webkit-text-fill-color:currentColor!important; }
+  #root .ih-next-project > a { display:inline-flex!important; align-items:center!important; justify-content:space-between!important; flex:none; gap:28px; min-height:52px; max-width:100%; margin:0!important; padding:14px 20px!important; border:1px solid var(--next-ink)!important; border-radius:9px!important; background:var(--next-ink)!important; color:var(--v-action,var(--v-accent))!important; font:600 14px/1.5 Inter,system-ui,sans-serif!important; text-decoration:none!important; box-shadow:none!important; }
+  #root .ih-next-project > a > svg { display:block!important; flex:none; width:20px!important; height:20px!important; fill:none!important; stroke:currentColor!important; stroke-width:1.7!important; }
+  #root .ih-next-project > a:focus-visible { outline:2px solid var(--next-ink)!important; outline-offset:5px!important; }
   @media(hover:hover) {
     #root .ih-cooperation .ih-action-square:hover { border-color:var(--v-accent)!important; }
     #root .ih-real-review .ih-review-profile:hover { text-decoration:underline!important; text-underline-offset:4px; }
   }
   @media(prefers-reduced-motion:no-preference) {
     #root .ih-drop-art:not([data-play="true"]) .ih-drop-piece { opacity:0; }
-    #root .ih-drop-art[data-play="true"] .ih-drop-piece { animation:ihDropSettle 720ms cubic-bezier(.22,.68,.28,1) var(--drop-delay,0ms) both!important; }
+    #root .ih-drop-art[data-play="true"] .ih-drop-piece { animation:ihDropSettle var(--drop-speed,720ms) cubic-bezier(.22,.68,.28,1) calc(var(--drop-delay,0ms) + var(--drop-start,0ms)) both!important; }
     #root .ih-square-action > span > svg { transition:transform 160ms ease; }
     #root .ih-action-square:hover .ih-square-action > span > svg { transform:translate(2px,-2px); }
   }
   @keyframes ihDropSettle {
-    0% { opacity:0; transform:translateY(-390px) rotate(calc(var(--drop-turn,0deg) + 22deg)) scale(.94); }
+    0% { opacity:0; transform:translateY(var(--drop-from,-290px)) rotate(calc(var(--drop-turn,0deg) + var(--drop-spin,18deg))) scale(.94); }
     18% { opacity:1; }
-    65% { transform:translateY(7px) rotate(calc(var(--drop-turn,0deg) - 2deg)) scale(1.02); }
+    65% { transform:translateY(7px) rotate(calc(var(--drop-turn,0deg) - var(--drop-wobble,2deg))) scale(1.02); }
     83% { transform:translateY(-4px) rotate(var(--drop-turn,0deg)) scale(.995); }
     100% { opacity:1; transform:translateY(0) rotate(var(--drop-turn,0deg)) scale(1); }
   }
@@ -78,6 +87,7 @@
     #root .ih-cooperation .ih-action-square { padding:20px!important; border-radius:20px!important; }
     #root .ih-square-action { padding-top:16px; gap:12px; }
     #root .ih-square-action > span { width:40px; height:40px; }
+    #root .ih-next-project { padding:32px; gap:24px; }
   }
   @media(max-width:600px) {
     #root .ih53-home .ih-cooperation { width:calc(100% - 40px)!important; padding-block:32px!important; }
@@ -90,5 +100,8 @@
     #root .ih-square-index { top:18px; left:22px; font-size:9px; }
     #root .ih-square-action > h2 { font-size:clamp(21px,6vw,28px)!important; }
     #root .ih-square-action > span { width:38px; height:38px; }
+    #root .ih-next-project { flex-direction:column; align-items:flex-start; gap:24px; max-width:460px; margin-top:18px; padding:28px 24px; border-radius:18px; }
+    #root .ih-next-project > h2 { font-size:clamp(27px,7.6vw,36px)!important; }
+    #root .ih-next-project > a { min-height:48px; padding:12px 18px!important; }
   }
 }

@@ -73,7 +73,7 @@ function ConnectionArtwork({ kind }) {
     if (typeof IntersectionObserver !== "function") { play(); return; }
     const observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting)) { play(); observer.disconnect(); }
-    }, { threshold: .3 });
+    }, { threshold: .6 });
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
@@ -112,15 +112,19 @@ export function HomePaths({ en = false }) {
   return <section className="ih-cooperation ih-paths" id="for-users" aria-label={en ? "Start a collaboration" : "Rozpocznij współpracę"} data-no-translate="true">
     <div className="ih-action-squares">
       <Link className="ih-action-square" to="/find-talent">
-        <span className="ih-square-index" aria-hidden="true">01</span>
+        <span className="ih-square-index"><span aria-hidden="true">01</span>{en ? "For clients" : "Dla zlecających"}</span>
         <ConnectionArtwork kind="people" />
         <div className="ih-square-action"><h2>{en ? "Hire a professional" : "Zleć pracę"}</h2><span><ArrowIcon direction="up-right" /></span></div>
       </Link>
       <Link className="ih-action-square ih-action-square-build" to="/jobs">
-        <span className="ih-square-index" aria-hidden="true">02</span>
+        <span className="ih-square-index"><span aria-hidden="true">02</span>{en ? "For professionals" : "Dla wykonawców"}</span>
         <ConnectionArtwork kind="build" />
         <div className="ih-square-action"><h2>{en ? "Find a project" : "Znajdź zlecenie"}</h2><span><ArrowIcon direction="up-right" /></span></div>
       </Link>
+    </div>
+    <div className="ih-next-project" aria-labelledby="ih-next-project-title">
+      <h2 id="ih-next-project-title">{en ? "Give your idea" : "Daj swojemu pomysłowi"}<span>{en ? "a next chapter." : "ciąg dalszy."}</span></h2>
+      <Link to="/find-talent">{en ? "Start a project" : "Zacznij projekt"}<ArrowIcon /></Link>
     </div>
   </section>;
 }
