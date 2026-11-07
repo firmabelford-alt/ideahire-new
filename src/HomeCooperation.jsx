@@ -51,21 +51,23 @@ function HomeReviewRail({ reviews, en }) {
     const measure = () => { loopWidth = group.getBoundingClientRect().width; };
     const pause = () => { manualUntil = performance.now() + 6000; };
     const press = () => { held = true; pause(); };
-    const release = () => { if (!held) return; held = false; pause(); };
+    const release = () => { if (!held) return; held = false; manualUntil = performance.now() + 1600; };
     const move = () => { if (held) pause(); };
+    const wheel = event => { if (Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey) pause(); };
     const resize = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
     resize?.observe(group);
     resize?.observe(viewport);
     const observer = typeof IntersectionObserver === "function" ? new IntersectionObserver(entries => { visible = entries.some(entry => entry.isIntersecting); }, { threshold: .05 }) : null;
     observer?.observe(viewport);
-    viewport.addEventListener("wheel", pause, { passive: true });
+    viewport.addEventListener("wheel", wheel, { passive: true });
     viewport.addEventListener("pointerdown", press, { passive: true });
     viewport.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("pointerup", release);
     window.addEventListener("pointercancel", release);
     window.addEventListener("blur", release);
     function tick(now) {
-      const playing = visible && !document.hidden && !motion.matches && !held && now > manualUntil && !viewport.contains(document.activeElement) && !(hover.matches && viewport.matches(":hover"));
+      const keyboardFocus = viewport.contains(document.activeElement) && document.activeElement.matches(":focus-visible");
+      const playing = visible && !document.hidden && !motion.matches && !held && now > manualUntil && !keyboardFocus && !(hover.matches && viewport.matches(":hover"));
       if (playing && last && loopWidth > 0) viewport.scrollLeft = (Math.max(0, viewport.scrollLeft) + Math.min(now - last, 64) * .028) % loopWidth;
       const state = playing ? "running" : "paused";
       if (viewport.dataset.autoplay !== state) viewport.dataset.autoplay = state;
@@ -75,7 +77,7 @@ function HomeReviewRail({ reviews, en }) {
     frame = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frame); resize?.disconnect(); observer?.disconnect();
-      viewport.removeEventListener("wheel", pause); viewport.removeEventListener("pointerdown", press); viewport.removeEventListener("pointermove", move);
+      viewport.removeEventListener("wheel", wheel); viewport.removeEventListener("pointerdown", press); viewport.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", release); window.removeEventListener("pointercancel", release); window.removeEventListener("blur", release);
       delete viewport.dataset.autoplay;
     };
