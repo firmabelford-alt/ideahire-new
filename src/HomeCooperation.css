@@ -49,14 +49,14 @@
     #root .ih-real-review .ih-review-profile:hover { text-decoration:underline!important; text-underline-offset:4px; }
   }
   @media(prefers-reduced-motion:no-preference) {
-    #root .ih-connection-word > span { animation:ihIdentityLetter 8s cubic-bezier(.25,.75,.3,1) infinite!important; animation-delay:calc(var(--letter) * 65ms)!important; }
-    #root .ih-connection-dot { animation:ihIdentityDot 8s cubic-bezier(.25,.75,.3,1) infinite!important; }
+    #root .ih-connection-word > span { animation:ihIdentityLetter 5.6s cubic-bezier(.25,.75,.3,1) infinite!important; animation-delay:calc(var(--letter) * 65ms)!important; }
+    #root .ih-connection-dot { animation:ihIdentityDot 5.6s cubic-bezier(.25,.75,.3,1) infinite!important; }
     #root .ih-connection-art[data-play="false"] :is(.ih-connection-word > span,.ih-connection-dot) { animation-play-state:paused!important; }
     #root .ih-connection-links svg { transition:transform 160ms ease; }
     #root .ih-connection-links > a:hover svg { transform:translate(3px,-3px); }
   }
-  @keyframes ihIdentityLetter { 0%,72%,100% { transform:translateY(0); } 78% { transform:translateY(-10%); } 84% { transform:translateY(8%); } 89% { transform:translateY(-2%); } 94% { transform:translateY(0); } }
-  @keyframes ihIdentityDot { 0%,69%,100% { transform:translateY(0); } 76% { transform:translateY(-15px) rotate(-8deg); } 84% { transform:translateY(2px); } 89% { transform:translateY(-1px); } 94% { transform:translateY(0); } }
+  @keyframes ihIdentityLetter { 0%,100% { transform:translateY(0); } 7% { transform:translateY(-10%); } 14% { transform:translateY(8%); } 20% { transform:translateY(-2%); } 26%,99% { transform:translateY(0); } }
+  @keyframes ihIdentityDot { 0%,100% { transform:translateY(0); } 6% { transform:translateY(-15px) rotate(-8deg); } 13% { transform:translateY(2px); } 20% { transform:translateY(-1px); } 26%,99% { transform:translateY(0); } }
   @media(prefers-reduced-motion:reduce) { #root .ih-reviews-group[aria-hidden="true"] { display:none; } }
   @media(max-width:980px) {
     #root .ih-connection-links { padding:20px 24px; }
