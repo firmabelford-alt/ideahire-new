@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowIcon } from "./InterfaceIcons";
 import { supabase } from "./supabase";
 import "./HomeCooperation.css";
 
@@ -45,7 +44,7 @@ function HomeReviewRail({ reviews, en }) {
     const group = groupRef.current;
     if (!viewport || !group || reviews.length < 2) return;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0, last = 0, visible = true, held = false, manualUntil = 0;
+    let frame = 0, last = 0, visible = true, held = false, manualUntil = 0, offset = viewport.scrollLeft;
     let loopWidth = group.getBoundingClientRect().width;
     const measure = () => { loopWidth = group.getBoundingClientRect().width; };
     const pause = () => { manualUntil = performance.now() + 6000; };
@@ -67,7 +66,10 @@ function HomeReviewRail({ reviews, en }) {
     function tick(now) {
       const keyboardFocus = viewport.contains(document.activeElement) && document.activeElement.matches(":focus-visible");
       const playing = visible && !document.hidden && !motion.matches && !held && now > manualUntil && !keyboardFocus;
-      if (playing && last && loopWidth > 0) viewport.scrollLeft = (Math.max(0, viewport.scrollLeft) + Math.min(now - last, 64) * .028) % loopWidth;
+      if (playing && last && loopWidth > 0) {
+        offset = (Math.max(0, offset) + Math.min(now - last, 64) * .028) % loopWidth;
+        viewport.scrollLeft = offset;
+      } else offset = viewport.scrollLeft;
       const state = playing ? "running" : "paused";
       if (viewport.dataset.autoplay !== state) viewport.dataset.autoplay = state;
       last = now;
@@ -89,8 +91,7 @@ function HomeReviewRail({ reviews, en }) {
           {Array.from({ length: 5 }, (_, index) => <span key={index} data-filled={index < Number(review.rating)} aria-hidden="true">★</span>)}
         </div>
         <blockquote>{review.review_text}</blockquote>
-        <div className="ih-review-source"><span>{en ? "Client review" : "Opinia zleceniodawcy"}</span><time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString(en ? "en-GB" : "pl-PL", { day: "numeric", month: "short", year: "numeric" })}</time></div>
-        <Link className="ih-review-profile" tabIndex={copy ? -1 : undefined} onMouseDown={copy ? event => event.preventDefault() : undefined} to={`/profile/${review.contractor_id}`}>{en ? "View professional" : "Zobacz wykonawcę"}<ArrowIcon direction="up-right" /></Link>
+        <div className="ih-review-source"><time dateTime={review.created_at}>{new Date(review.created_at).toLocaleDateString(en ? "en-GB" : "pl-PL", { day: "numeric", month: "short", year: "numeric" })}</time><Link className="ih-review-profile" tabIndex={copy ? -1 : undefined} onMouseDown={copy ? event => event.preventDefault() : undefined} to={`/profile/${review.contractor_id}`}>{en ? "Professional’s profile" : "Profil wykonawcy"}</Link></div>
       </article>)}
       </div>)}
     </div>
@@ -112,7 +113,7 @@ function ConnectionArtwork() {
   const back = "M290 76C410 34 529 164 460 277S246 408 207 290 184 113 290 76Z";
   const front = "M155 186C217 70 392 111 416 242S300 417 199 342 89 282 155 186Z";
   return <div ref={sceneRef} className="ih-flow-art" data-play={active} aria-hidden="true">
-    <svg viewBox="50 20 500 400" focusable="false">
+    <svg viewBox="75 42 450 360" focusable="false">
       <defs><linearGradient id={gradient} x1="100" y1="90" x2="470" y2="350" gradientUnits="userSpaceOnUse"><stop stopColor="var(--v-accent)" /><stop offset=".5" stopColor="var(--v-action,var(--v-accent))" /><stop offset="1" stopColor="var(--v-field,var(--v-accent))" /></linearGradient></defs>
       <g className="ih-flow-breath">
         <path className="ih-flow-echo" d={back} transform="translate(20 -16)" />

@@ -20,18 +20,22 @@ export function HomeProjectCard({ job, en = false, sample = false, duplicate = f
   const href = service ? `/services/${job.id}` : '/jobs';
   const destination = service || sample ? undefined : { lucynaJobId: job.id, lucynaTitle: job.title };
   return <article className="ih-showcase-card">
+    <div className="ih-showcase-top">
     <Link className="ih-showcase-cover" to={href} state={destination} data-preserve-router-state="true" aria-label={`${service ? (en ? 'View service' : 'Zobacz usługę') : (en ? 'View project' : 'Zobacz zlecenie')}: ${job.title}`} tabIndex={-1}>
       <ListingThumbnail path={job.thumbnail_path} ownerId={job.user_id} kind={service ? "services" : "jobs"} title={job.title} client={client} fallback={
-        <div className="ih-showcase-no-image"><span>IdeaHire</span><strong>{category}</strong><small>{service ? (en ? 'Service by a freelancer' : 'Usługa wykonawcy') : (en ? 'Project brief' : 'Zlecenie do realizacji')}</small></div>
+        <div className="ih-showcase-no-image" aria-hidden="true"><BrandMark /></div>
       } />
     </Link>
-    <div className="ih-showcase-body">
+    <div className="ih-showcase-heading">
       <div className="ih-showcase-category-row"><span className="ih-showcase-kind">{service ? (en ? "Service" : "Usługa") : (en ? "Project" : "Zlecenie")}</span><span className="ih-showcase-category">{category}</span></div>
       <h3 title={job.title}><Link tabIndex={duplicate ? -1 : undefined} to={href} state={destination} data-preserve-router-state="true">{String(job.title || '').slice(0, 160)}</Link></h3>
+    </div>
+    </div>
+    <div className="ih-showcase-body">
       <p className="ih-showcase-description">{String(job.description || (en ? 'See what the client needs and how you can help.' : 'Sprawdź, czego potrzebuje zleceniodawca i jak możesz pomóc.')).slice(0, 280)}</p>
       <div className="ih-showcase-author">{author}</div>
       {sample && <small className="ih-showcase-example">{en ? 'Illustrative project' : 'Przykładowe zlecenie'}</small>}
-      <div className="ih-showcase-bottom"><div><small>{service ? (job.price_mode === 'custom' ? (en ? 'Price' : 'Cena') : (en ? 'Price from' : 'Cena od')) : (en ? 'Budget' : 'Budżet')}</small><strong>{price}</strong></div><Link tabIndex={duplicate ? -1 : undefined} className="ih-showcase-open" data-preserve-router-state="true" to={href} state={destination} aria-label={`${en ? 'View details' : 'Zobacz szczegóły'}: ${job.title}`}>{en ? 'Details' : 'Szczegóły'}<Arrow /></Link></div>
+      <div className="ih-showcase-bottom"><div><small>{service ? (job.price_mode === 'custom' ? (en ? 'Price' : 'Cena') : (en ? 'Price from' : 'Cena od')) : (en ? 'Budget' : 'Budżet')}</small><strong>{price}</strong></div><Link tabIndex={duplicate ? -1 : undefined} className="ih-showcase-open" data-preserve-router-state="true" to={href} state={destination} aria-label={`${en ? 'View details' : 'Zobacz szczegóły'}: ${job.title}`}>{en ? 'View' : 'Zobacz'}</Link></div>
     </div>
   </article>;
 }
