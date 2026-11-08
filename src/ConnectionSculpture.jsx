@@ -10,20 +10,22 @@ export default function ConnectionSculpture({ en = false }) {
     let frame = 0, last = 0, elapsed = 0, visible = false;
     const tick = now => {
       if (last && visible && !document.hidden && !preference.matches) {
-        elapsed += Math.min(now-last,100);
+        elapsed += now-last;
         if (elapsed >= DURATION) { elapsed = 0; setActive(chapter => (chapter+1)%3); }
         host.style.setProperty("--chapter-progress",elapsed/DURATION);
       }
       last = now; frame = requestAnimationFrame(tick);
     };
     const observer = "IntersectionObserver" in window ? new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting; host.dataset.visible = String(visible);
+      visible = entry.isIntersecting; last = 0; host.dataset.visible = String(visible);
       if (visible) host.dataset.entered = "true";
     },{threshold:.2}) : null;
     if (observer) observer.observe(host);
     else { visible=true; host.dataset.entered="true"; }
+    const resetClock = () => { last=0; };
+    document.addEventListener("visibilitychange",resetClock);
     frame=requestAnimationFrame(tick);
-    return () => { observer?.disconnect(); cancelAnimationFrame(frame); };
+    return () => { observer?.disconnect(); cancelAnimationFrame(frame); document.removeEventListener("visibilitychange",resetClock); };
   },[]);
   const chapters = en ? [
     ["Portfolio","Choose with a clearer picture","The work.","Before the word.","See a professional’s portfolio and offer before deciding who to work with.","Work · Profile · Offer"],
