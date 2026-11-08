@@ -36,7 +36,7 @@ export function HomeClarity({ en = false }) {
     {status === "ready" && reviews.length > 0 && <div className="ih-reviews-composition">
       <div className="ih-review-summary">
         <strong>{new Intl.NumberFormat(en ? "en-GB" : "pl-PL", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(reviews.reduce((total, review) => total + Number(review.rating), 0) / reviews.length)}<small> / 5</small></strong>
-        <span>{en ? `Average of the latest ${reviews.length} reviews` : `Średnia z ostatnich ${reviews.length} opinii`}</span>
+        <span>{en ? `Average from ${reviews.length} reviews` : `Średnia z ${reviews.length} opinii`}</span>
       </div>
       <HomeReviewRail reviews={reviews} en={en} />
     </div>}
@@ -51,9 +51,16 @@ function HomeReviewRail({ reviews, en }) {
     const group = groupRef.current;
     if (!viewport || !group || reviews.length < 2) return;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0, last = 0, visible = true, held = false, manualUntil = 0, offset = viewport.scrollLeft;
+    let frame = 0, last = 0, visible = true, held = false, manualUntil = 0, dwell = 0, transition = null, step = 0;
     let loopWidth = group.getBoundingClientRect().width;
-    const measure = () => { loopWidth = group.getBoundingClientRect().width; };
+    const measure = () => {
+      const index = step ? Math.round(viewport.scrollLeft / step) : 0;
+      const card = group.firstElementChild;
+      step = card ? card.getBoundingClientRect().width + (parseFloat(getComputedStyle(group).columnGap) || 0) : 0;
+      loopWidth = group.getBoundingClientRect().width;
+      if (loopWidth > 0) viewport.scrollLeft = index * step % loopWidth;
+      dwell = 0; transition = null;
+    };
     const pause = () => { manualUntil = performance.now() + 6000; };
     const press = () => { held = true; pause(); };
     const release = () => { if (!held) return; held = false; manualUntil = performance.now() + 1600; };
@@ -73,15 +80,24 @@ function HomeReviewRail({ reviews, en }) {
     function tick(now) {
       const keyboardFocus = viewport.contains(document.activeElement) && document.activeElement.matches(":focus-visible");
       const playing = visible && !document.hidden && !motion.matches && !held && now > manualUntil && !keyboardFocus;
-      if (playing && last && loopWidth > 0) {
-        offset = (Math.max(0, offset) + Math.min(now - last, 64) * .028) % loopWidth;
-        viewport.scrollLeft = offset;
-      } else offset = viewport.scrollLeft;
+      if (playing && last && loopWidth > 0 && step > 0) {
+        const dt = Math.min(now - last, 64);
+        if (transition) {
+          transition.elapsed += dt;
+          const progress = Math.min(1, transition.elapsed / 700);
+          viewport.scrollLeft = transition.from + (transition.to - transition.from) * (1 - Math.pow(1 - progress, 3));
+          if (progress === 1) { viewport.scrollLeft = transition.to % loopWidth; transition = null; dwell = 0; }
+        } else {
+          dwell += dt;
+          if (dwell >= 4800) transition = { from: viewport.scrollLeft, to: (Math.floor(viewport.scrollLeft / step + .01) + 1) * step, elapsed: 0 };
+        }
+      } else { dwell = 0; transition = null; }
       const state = playing ? "running" : "paused";
       if (viewport.dataset.autoplay !== state) viewport.dataset.autoplay = state;
       last = now;
       frame = requestAnimationFrame(tick);
     }
+    measure();
     frame = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frame); resize?.disconnect(); observer?.disconnect();
