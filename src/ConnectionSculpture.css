@@ -33,12 +33,12 @@
   #root #for-users .ih-reveal-index [data-active="true"] i { transform:scale(1); }
   #root #for-users .ih-reveal-release { position:absolute; z-index:3; inset:-5%; background:var(--reveal-accent); pointer-events:none; opacity:0; clip-path:polygon(0 0,100% 0,82% 100%,0 100%); }
   #root #for-users .ih-reveal[data-entered="false"] .ih-reveal-shell { transform:translateY(24px) scale(.76) rotate(-2.5deg); opacity:0; }
-  #root #for-users .ih-reveal[data-entered="true"] .ih-reveal-shell { animation:ih-reveal-burst .78s cubic-bezier(.16,1,.3,1) both; }
-  #root #for-users .ih-reveal[data-entered="true"] .ih-reveal-release { animation:ih-reveal-release .74s cubic-bezier(.18,.8,.25,1) both; }
-  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-word { animation:ih-reveal-word .76s calc(.12s + var(--line)*.075s) cubic-bezier(.16,1,.3,1) both; }
-  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-description { animation:ih-reveal-description .65s .38s cubic-bezier(.16,1,.3,1) both; }
-  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-rate > span { animation:ih-reveal-rate .82s .1s cubic-bezier(.16,1,.3,1) both; }
-  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-limits { animation:ih-reveal-description .65s .48s cubic-bezier(.16,1,.3,1) both; }
+  #root #for-users .ih-reveal[data-entered="true"] .ih-reveal-shell { animation:ih-reveal-burst .78s cubic-bezier(.16,1,.3,1) backwards; }
+  #root #for-users .ih-reveal[data-entered="true"] .ih-reveal-release { animation:ih-reveal-release .74s cubic-bezier(.18,.8,.25,1) backwards; }
+  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-word { animation:ih-reveal-word .76s calc(.12s + var(--line)*.075s) cubic-bezier(.16,1,.3,1) backwards; }
+  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-description { animation:ih-reveal-description .65s .38s cubic-bezier(.16,1,.3,1) backwards; }
+  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-rate > span { animation:ih-reveal-rate .82s .1s cubic-bezier(.16,1,.3,1) backwards; }
+  #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-limits { animation:ih-reveal-description .65s .48s cubic-bezier(.16,1,.3,1) backwards; }
   #root #for-users .ih-reveal[data-visible="false"] *, #root #for-users .ih-reveal[data-visible="false"] .ih-reveal-shell { animation-play-state:paused!important; }
   #root #for-users .ih-reveal-static { display:none; }
   @keyframes ih-reveal-burst { 0% { opacity:0; transform:translateY(24px) scale(.76) rotate(-2.5deg); } 52% { opacity:1; transform:translateY(-3px) scale(1.018) rotate(.35deg); } 100% { opacity:1; transform:none; } }
