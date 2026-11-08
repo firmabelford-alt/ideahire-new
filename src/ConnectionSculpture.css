@@ -21,6 +21,8 @@
   #root .ih-cut-study[data-motion="enabled"][data-entered="false"] .ih-cut-shutter { transform:translateX(0) skewX(-12deg); }
   #root .ih-cut-study[data-motion="enabled"][data-entered="true"] .ih-cut-shutter { animation:ih-cut-shutter 1.25s cubic-bezier(.65,0,.2,1) both; }
   #root .ih-cut-study[data-motion="enabled"][data-entered="true"] .ih-cut-content { animation:ih-cut-copy 1.05s .12s cubic-bezier(.22,1,.36,1) both; }
+  #root .ih-cut-study[data-phase="open"] .ih-cut-content { animation:none!important; opacity:1!important; transform:none!important; clip-path:none!important; }
+  #root .ih-cut-study[data-phase="open"] .ih-cut-shutter { display:none!important; }
   #root .ih-cut-study[data-motion="enabled"][data-phase="open"] .ih-cut-edge { stroke-dasharray:1; animation:ih-cut-edge 8s 1s ease-in-out infinite; }
   #root .ih-cut-study[data-motion="enabled"][data-phase="open"] .ih-cut-edge-last { animation-delay:1.7s; }
   #root .ih-cut-study * { animation-play-state:running!important; }
