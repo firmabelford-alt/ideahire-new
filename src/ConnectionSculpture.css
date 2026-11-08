@@ -1,6 +1,7 @@
 @layer ideahirePolish {
-  #root .ih-cut-study { --cut-paper:var(--v-surface,#fff); --cut-ink:var(--v-ink,#10272e); --cut-muted:var(--v-muted,#536064); --cut-accent:var(--v-action,#19cbd3); --cut-line:color-mix(in srgb,var(--cut-ink) 30%,transparent); position:relative; isolation:isolate; width:100%; max-width:940px; margin:10px auto 18px; padding:62px 8% 57px; color:var(--cut-ink); container-type:inline-size; }
+  #root .ih-cut-study { --cut-paper:var(--v-surface,#fff); --cut-ink:var(--v-ink,#10272e); --cut-muted:var(--v-muted,#536064); --cut-accent:var(--v-action,#19cbd3); --cut-line:color-mix(in srgb,var(--cut-ink) 30%,transparent); position:relative; isolation:isolate; width:100%; max-width:840px; margin:10px auto 18px; padding:62px 8% 67px; color:var(--cut-ink); container-type:inline-size; }
   #root .ih-cut-outline { position:absolute; z-index:-2; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
+  #root .ih-cut-outline-mobile { display:none; }
   #root .ih-cut-paper { fill:var(--cut-paper); stroke:var(--cut-line); stroke-width:1; vector-effect:non-scaling-stroke; }
   #root .ih-cut-edge { fill:none; stroke:var(--cut-accent); stroke-width:3; vector-effect:non-scaling-stroke; }
   #root .ih-cut-content { position:relative; min-width:0; }
@@ -13,7 +14,7 @@
   #root .ih-cut-details > div { min-width:0; margin:0; padding:0; }
   #root .ih-cut-details dt { margin:0 0 8px; color:var(--cut-ink); font:550 14px/1.4 Inter,system-ui,sans-serif; letter-spacing:-.015em; }
   #root .ih-cut-details dd { margin:0; color:var(--cut-muted); font:400 13px/1.65 Inter,system-ui,sans-serif; }
-  #root .ih-cut-window { position:absolute; z-index:-1; inset:0; overflow:hidden; clip-path:polygon(6.4% 0,100% 0,100% 88.8%,93.4% 100%,0 100%,0 11.2%); pointer-events:none; }
+  #root .ih-cut-window { position:absolute; z-index:-1; inset:0; overflow:hidden; clip-path:polygon(17% 0,100% 0,100% 80%,76% 100%,0 100%,0 19.8%); pointer-events:none; }
   #root .ih-cut-shutter { position:absolute; inset:-1px -12%; display:block; background:var(--cut-ink); transform:translateX(-110%) skewX(-12deg); transform-origin:50% 50%; }
 
   #root .ih-cut-study[data-motion="enabled"][data-entered="false"] .ih-cut-content { opacity:0; }
@@ -29,6 +30,9 @@
   @keyframes ih-cut-edge { 0%,100% { stroke-dashoffset:0; } 22% { stroke-dashoffset:-1; } 43%,78% { stroke-dashoffset:-2; } }
 
   @media(max-width:700px) {
+    #root .ih-cut-outline:not(.ih-cut-outline-mobile) { display:none; }
+    #root .ih-cut-outline-mobile { display:block; }
+    #root .ih-cut-window { clip-path:polygon(17% 0,100% 0,100% 90%,76% 100%,0 100%,0 10%); }
     #root .ih-cut-study { max-width:520px; margin-block:6px 12px; padding:42px 9% 40px; }
     #root .ih-cut-kicker { margin-bottom:22px!important; font-size:9px!important; }
     #root .ih-cut-title { font-size:clamp(30px,6.5vw,45px)!important; }

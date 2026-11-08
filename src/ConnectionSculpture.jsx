@@ -37,9 +37,14 @@ export default function ConnectionSculpture({ en = false }) {
     if (event.animationName === "ih-cut-shutter") hostRef.current.dataset.phase = "open";
   }}>
     <svg className="ih-cut-outline" viewBox="0 0 1000 580" preserveAspectRatio="none" aria-hidden="true">
-      <path className="ih-cut-paper" d="M64 1H999V515L934 579H1V65Z" />
-      <path className="ih-cut-edge ih-cut-edge-first" pathLength="1" d="M1 65L64 1" />
-      <path className="ih-cut-edge ih-cut-edge-last" pathLength="1" d="M999 515L934 579" />
+      <path className="ih-cut-paper" d="M170 1H999V464L760 579H1V115Z" />
+      <path className="ih-cut-edge ih-cut-edge-first" pathLength="1" d="M1 115L170 1" />
+      <path className="ih-cut-edge ih-cut-edge-last" pathLength="1" d="M999 464L760 579" />
+    </svg>
+    <svg className="ih-cut-outline ih-cut-outline-mobile" viewBox="0 0 1000 580" preserveAspectRatio="none" aria-hidden="true">
+      <path className="ih-cut-paper" d="M170 1H999V522L760 579H1V58Z" />
+      <path className="ih-cut-edge ih-cut-edge-first" pathLength="1" d="M1 58L170 1" />
+      <path className="ih-cut-edge ih-cut-edge-last" pathLength="1" d="M999 522L760 579" />
     </svg>
     <div className="ih-cut-window" aria-hidden="true"><span className="ih-cut-shutter" /></div>
     <div className="ih-cut-content">
