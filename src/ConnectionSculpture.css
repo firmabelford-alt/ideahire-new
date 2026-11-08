@@ -1,47 +1,74 @@
 @layer ideahirePolish {
-  #root .ih-project-slit { --slit-ink:var(--v-ink,#14292e); --slit-accent:var(--v-action,#19cbd3); width:100%; max-width:900px; margin:0 auto; padding:28px 0 24px; color:var(--slit-ink); }
-  #root .ih-slit-accessible-title { position:absolute!important; width:1px!important; height:1px!important; margin:-1px!important; padding:0!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
-  #root .ih-slit-composition { display:grid; grid-template-columns:170px minmax(0,1fr); align-items:stretch; gap:42px; }
-  #root .ih-slit-art { position:relative; align-self:stretch; min-width:0; }
-  #root .ih-slit-art svg { display:block; width:100%; height:100%; overflow:visible; }
-  #root .ih-slit-outline { fill:none; stroke:var(--slit-ink); stroke-width:1; opacity:.15; }
-  #root .ih-slit-back { fill:var(--slit-ink); transform-origin:50% 100%; }
-  #root .ih-slit-front { fill:var(--slit-accent); transform-origin:50% 0; }
-  #root .ih-slit-guide { fill:none; stroke:var(--slit-ink); stroke-width:1; opacity:.15; }
-  #root .ih-slit-trace { fill:none; stroke:var(--slit-accent); stroke-width:2; stroke-dasharray:.19 .81; stroke-dashoffset:1; opacity:0; }
-  #root .ih-slit-notes { display:grid; gap:0; margin:0; padding:0; min-width:0; }
-  #root .ih-slit-note { min-height:114px; margin:0; padding:13px 0 18px; min-width:0; }
-  #root .ih-slit-note dt { margin:0; padding:0; color:var(--slit-ink); }
-  #root .ih-slit-note dt > small { display:block; margin-bottom:8px; color:var(--v-muted); font:400 11px/1.4 Inter,system-ui,sans-serif; }
-  #root .ih-slit-note dt > span { display:block; font:550 clamp(22px,2.4vw,28px)/1.2 Inter,system-ui,sans-serif; letter-spacing:-.035em; }
-  #root .ih-slit-note dd { max-width:45ch; margin:9px 0 0; padding:0; color:var(--v-muted); font:400 14px/1.7 Inter,system-ui,sans-serif; text-wrap:pretty; }
-  #root .ih-project-slit[data-motion="enabled"][data-entered="false"] .ih-slit-note { opacity:0; }
-  #root .ih-project-slit[data-motion="enabled"][data-entered="true"] .ih-slit-back { animation:ih-slit-back 1s cubic-bezier(.22,1,.36,1) both; }
-  #root .ih-project-slit[data-motion="enabled"][data-entered="true"] .ih-slit-front { animation:ih-slit-front 1s .1s cubic-bezier(.22,1,.36,1) both; }
-  #root .ih-project-slit[data-motion="enabled"][data-entered="true"] .ih-slit-note { animation:ih-slit-note .9s calc(.22s + var(--note)*.18s) cubic-bezier(.22,1,.36,1) both; }
-  #root .ih-project-slit[data-phase="open"] .ih-slit-note { animation:none!important; opacity:1!important; clip-path:none!important; transform:none!important; }
-  #root .ih-project-slit[data-motion="enabled"][data-phase="open"] .ih-slit-trace { animation:ih-slit-trace 4.8s calc(var(--trace)*.6s) ease-in-out infinite; }
-  #root .ih-project-slit * { animation-play-state:running!important; }
-  #root .ih-project-slit[data-visible="false"] .ih-slit-trace { animation-play-state:paused!important; }
-  @keyframes ih-slit-back { from { transform:translateX(16px) scaleX(.5); } to { transform:translateX(0) scaleX(1); } }
-  @keyframes ih-slit-front { from { transform:translateX(-15px) scaleX(.45); } to { transform:translateX(0) scaleX(1); } }
-  @keyframes ih-slit-note { from { opacity:1; clip-path:inset(0 100% 0 0); transform:translateX(-26px); } to { opacity:1; clip-path:inset(0); transform:translateX(0); } }
-  @keyframes ih-slit-trace { 0%,15% { opacity:0; stroke-dashoffset:1; } 28% { opacity:1; } 64% { opacity:0; stroke-dashoffset:-.25; } 100% { opacity:0; stroke-dashoffset:-.25; } }
+  #root .ih-workprint { --wp-ink:var(--v-ink,#14292e); --wp-accent:var(--v-action,#19cbd3); --wp-line:color-mix(in srgb,var(--wp-ink) 18%,transparent); --chapter-progress:0; width:100%; max-width:1100px; margin:0 auto; padding:30px 0 28px; color:var(--wp-ink); }
+  #root .ih-workprint-top { display:flex; justify-content:space-between; gap:20px; padding-top:17px; border-top:1px solid var(--wp-line); color:var(--v-muted); font:500 10px/1.5 Inter,system-ui,sans-serif; letter-spacing:.12em; }
+  #root .ih-workprint-accessible { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  #root .ih-workprint-stage { display:grid; grid-template-columns:1fr 1.15fr; align-items:center; min-height:390px; gap:18px; padding:25px 0 21px; transition:opacity .65s,transform .9s cubic-bezier(.22,1,.36,1); }
+  #root .ih-workprint-copy { display:grid; min-width:0; }
+  #root .ih-workprint-chapter { grid-area:1/1; opacity:0; visibility:hidden; transform:translateY(15px); transition:opacity .35s ease,transform .6s cubic-bezier(.22,1,.36,1),visibility .35s; }
+  #root .ih-workprint-chapter[data-active="true"] { opacity:1; visibility:visible; transform:none; transition-delay:.12s; }
+  #root .ih-workprint-eyebrow { display:block; margin-bottom:20px; color:var(--v-muted); font:400 12px/1.5 Inter,system-ui,sans-serif; }
+  #root .ih-workprint-chapter h2 { margin:0!important; color:var(--wp-ink)!important; font:550 clamp(30px,3.65vw,49px)/1.09 Inter,system-ui,sans-serif!important; letter-spacing:-.055em!important; text-align:left!important; }
+  #root .ih-workprint-chapter h2 em { font-family:Georgia,'Times New Roman',serif; font-weight:400; letter-spacing:-.055em; }
+  #root .ih-workprint-chapter p { max-width:35ch; margin:24px 0 0!important; color:var(--v-muted)!important; font:400 14px/1.75 Inter,system-ui,sans-serif!important; }
+  #root .ih-workprint-detail { display:block; margin-top:27px; color:var(--v-muted); font:400 10px/1.5 Inter,system-ui,sans-serif; letter-spacing:.025em; }
+  #root .ih-workprint-art { position:relative; display:grid; min-width:0; aspect-ratio:560/390; }
+  #root .ih-workprint-sheet { grid-area:1/1; display:block; width:100%; height:auto; overflow:visible; opacity:0; visibility:hidden; transform:translateY(18px) scale(.97); transition:opacity .35s,transform .8s cubic-bezier(.22,1,.36,1),visibility .35s; }
+  #root .ih-workprint-sheet[data-active="true"] { opacity:1; visibility:visible; transform:none; transition-delay:.15s; }
+  #root .ih-workprint-fine { fill:none; stroke:var(--wp-line); stroke-width:1; }
+  #root .ih-workprint-sans { font:800 365px/1 Arial,Helvetica,sans-serif; letter-spacing:-.09em; fill:var(--wp-ink); }
+  #root .ih-workprint-serif { font:italic 420px/1 Georgia,'Times New Roman',serif; fill:var(--wp-accent); }
+  #root .ih-workprint-registration { fill:none; stroke:var(--wp-ink); stroke-width:1; }
+  #root .ih-workprint-micro { fill:var(--v-muted); font:400 8px/1 Inter,system-ui,sans-serif; letter-spacing:1.25px; }
+  #root .ih-workprint-glyph-back { transform-origin:310px 210px; }
+  #root .ih-workprint[data-entered="true"] .ih-workprint-sheet[data-active="true"] .ih-workprint-glyph-back { animation:ih-wp-typeset-back 6.4s cubic-bezier(.22,1,.36,1) both; }
+  #root .ih-workprint[data-entered="true"] .ih-workprint-sheet[data-active="true"] .ih-workprint-glyph-front { animation:ih-wp-typeset-front 6.4s cubic-bezier(.22,1,.36,1) both; }
+  #root .ih-workprint-term-label { fill:var(--wp-ink); font:500 45px/1 Inter,system-ui,sans-serif; letter-spacing:-2px; }
+  #root .ih-workprint-rule { fill:none; stroke:var(--wp-line); stroke-width:1; }
+  #root .ih-workprint-check { fill:none; stroke:var(--wp-accent); stroke-width:8; stroke-linecap:square; stroke-linejoin:miter; stroke-dasharray:1; stroke-dashoffset:0; }
+  #root .ih-workprint[data-entered="true"] .ih-workprint-sheet[data-active="true"] .ih-workprint-term { animation:ih-wp-term .9s calc(.15s + var(--item)*.18s) both; }
+  #root .ih-workprint[data-entered="true"] .ih-workprint-sheet[data-active="true"] .ih-workprint-check { animation:ih-wp-check .75s calc(.55s + var(--item)*.35s) ease both; }
+  #root .ih-workprint-message-accent { fill:var(--wp-accent); }
+  #root .ih-workprint-message-ink { fill:var(--wp-ink); stroke:var(--v-bg,#fff); stroke-width:6; }
+  #root .ih-workprint-message-line { fill:none; stroke:#14292e; stroke-width:5; opacity:.65; }
+  #root .ih-workprint-file { fill:var(--v-bg,#fff); font:500 26px/1 Inter,system-ui,sans-serif; letter-spacing:-.7px; }
+  #root .ih-workprint-file-line { fill:none; stroke:var(--v-bg,#fff); stroke-width:2; opacity:.45; }
+  #root .ih-workprint[data-entered="true"] .ih-workprint-sheet[data-active="true"] .ih-workprint-message-back { animation:ih-wp-message-back 1.2s cubic-bezier(.22,1,.36,1) both; }
+  #root .ih-workprint[data-entered="true"] .ih-workprint-sheet[data-active="true"] .ih-workprint-message-front { animation:ih-wp-message-front 1.2s .2s cubic-bezier(.22,1,.36,1) both; }
+  #root .ih-workprint-index { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin:0!important; padding:0!important; list-style:none; }
+  #root .ih-workprint-index li { position:relative; display:flex; gap:12px; align-items:center; padding:14px 0 0; border-top:1px solid var(--wp-line); color:var(--v-muted); font:500 12px/1.5 Inter,system-ui,sans-serif; transition:color .3s; }
+  #root .ih-workprint-index li > span:first-child { font-size:10px; font-weight:400; opacity:.65; }
+  #root .ih-workprint-index li[data-active="true"] { color:var(--wp-ink); }
+  #root .ih-workprint-index i { position:absolute; left:0; right:0; top:-1px; height:2px; background:var(--wp-accent); transform:scaleX(0); transform-origin:left; }
+  #root .ih-workprint-index [data-active="true"] i { transform:scaleX(var(--chapter-progress)); }
+  #root .ih-workprint[data-entered="false"] .ih-workprint-stage { opacity:0; transform:translateY(20px); }
+  #root .ih-workprint[data-visible="false"] :is(.ih-workprint-glyph-back,.ih-workprint-glyph-front,.ih-workprint-term,.ih-workprint-check,.ih-workprint-message) { animation-play-state:paused; }
+  @keyframes ih-wp-typeset-back { 0% { transform:translate(45px,16px) rotate(8deg); opacity:0; } 17%,80% { transform:translate(0,0) rotate(-4deg); opacity:1; } 100% { transform:translate(-8px,-4px) rotate(-6deg); opacity:1; } }
+  @keyframes ih-wp-typeset-front { 0% { transform:translate(-45px,12px); opacity:0; } 17%,80% { transform:translate(0,0); opacity:1; } 100% { transform:translate(6px,0); opacity:1; } }
+  @keyframes ih-wp-term { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+  @keyframes ih-wp-check { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
+  @keyframes ih-wp-message-back { from { opacity:0; transform:translate(30px,-12px); } to { opacity:1; transform:none; } }
+  @keyframes ih-wp-message-front { from { opacity:0; transform:translate(-25px,18px); } to { opacity:1; transform:none; } }
   @media(max-width:700px) {
-    #root .ih-project-slit { max-width:520px; padding:14px 0 12px; }
-    #root .ih-slit-composition { grid-template-columns:62px minmax(0,1fr); gap:20px; }
-    #root .ih-slit-note { min-height:112px; padding:10px 0 18px; }
-    #root .ih-slit-note dt > small { font-size:10px; margin-bottom:7px; }
-    #root .ih-slit-note dt > span { font-size:22px; letter-spacing:-.03em; }
-    #root .ih-slit-note dd { font-size:13px; line-height:1.65; margin-top:8px; }
-  }
-  @media(max-width:360px) {
-    #root .ih-slit-composition { grid-template-columns:48px minmax(0,1fr); gap:16px; }
-    #root .ih-slit-note dt > span { font-size:20px; }
+    #root .ih-workprint { max-width:500px; padding:18px 0 22px; }
+    #root .ih-workprint-top { font-size:8px; letter-spacing:.08em; padding-top:13px; }
+    #root .ih-workprint-stage { grid-template-columns:1fr; gap:4px; padding:24px 0 22px; min-height:0; }
+    #root .ih-workprint-art { grid-row:1; width:100%; max-width:410px; margin:0 auto; }
+    #root .ih-workprint-copy { padding:16px 0 0; }
+    #root .ih-workprint-eyebrow { margin-bottom:13px; font-size:11px; }
+    #root .ih-workprint-chapter h2 { font-size:clamp(29px,8vw,40px)!important; line-height:1.11!important; }
+    #root .ih-workprint-chapter p { max-width:36ch; margin-top:17px!important; font-size:13px!important; line-height:1.7!important; }
+    #root .ih-workprint-detail { margin-top:16px; font-size:9px; }
+    #root .ih-workprint-index { gap:16px; }
+    #root .ih-workprint-index li { gap:7px; font-size:10px; padding-top:12px; }
+    #root .ih-workprint-index li > span:first-child { font-size:8px; }
   }
   @media(prefers-reduced-motion:reduce) {
-    #root .ih-project-slit * { animation:none!important; transition:none!important; }
-    #root .ih-project-slit :is(.ih-slit-back,.ih-slit-front,.ih-slit-note) { opacity:1!important; transform:none!important; clip-path:none!important; }
-    #root .ih-project-slit .ih-slit-trace { display:none!important; }
+    #root .ih-workprint *, #root .ih-workprint-stage { animation:none!important; transition:none!important; transform:none!important; }
+    #root .ih-workprint[data-entered="false"] .ih-workprint-stage { opacity:1; }
+    #root .ih-workprint-copy { gap:22px; }
+    #root .ih-workprint-chapter { grid-area:auto; opacity:1; visibility:visible; }
+    #root .ih-workprint-chapter:not([data-active="true"]) h2 { font-size:23px!important; }
+    #root .ih-workprint-chapter:not([data-active="true"]) :is(.ih-workprint-eyebrow,.ih-workprint-detail) { display:none; }
+    #root .ih-workprint-index { display:none; }
   }
 }
