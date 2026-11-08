@@ -1,55 +1,73 @@
 import { useEffect, useRef } from "react";
 import "./ConnectionSculpture.css";
 
-/* Typography is the composition: a printed strip releases the message. */
+/* An open working document: a brief unfolds into three shared decisions. */
 export default function ConnectionSculpture({ en = false }) {
-  const hostRef = useRef(null), motionRef = useRef(null);
+  const hostRef = useRef(null);
   useEffect(() => {
     const host = hostRef.current;
-    motionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!("IntersectionObserver" in window)) { host.dataset.entered = "true"; return; }
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      host.dataset.phase = motionRef.current.matches ? "revealed" : "revealing";
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduced.matches || !("IntersectionObserver" in window)) {
       host.dataset.entered = "true";
-      observer.disconnect();
-    }, { threshold: .22 });
+      host.dataset.phase = "settled";
+      return;
+    }
+    host.dataset.motion = "enabled";
+    const observer = new IntersectionObserver(([entry]) => {
+      host.dataset.visible = String(entry.isIntersecting);
+      if (entry.isIntersecting && host.dataset.entered !== "true") {
+        host.dataset.entered = "true";
+        host.dataset.phase = "unfolding";
+      }
+    }, { threshold: .18 });
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
-  const benefits = en ? [
-    ["Portfolio", "Explore the professional’s work and offer."],
-    ["Agreements", "Agree on the scope, deadline and price."],
-    ["Contact", "Conversations and materials alongside your project."],
+
+  const decisions = en ? [
+    ["Scope", "What we’re making.", "Pages, features and materials."],
+    ["Deadline", "When it’s ready.", "Milestones and a delivery date."],
+    ["Price", "What it costs.", "A price for the agreed scope."],
   ] : [
-    ["Portfolio", "Zobacz prace i ofertę wykonawcy."],
-    ["Ustalenia", "Uzgodnijcie zakres, termin i cenę."],
-    ["Kontakt", "Rozmowy i materiały przy projekcie."],
+    ["Zakres", "Co ma powstać.", "Podstrony, funkcje i materiały."],
+    ["Termin", "Na kiedy.", "Etapy i data oddania projektu."],
+    ["Cena", "Za ile.", "Wycena ustalonego zakresu."],
   ];
-  function moveInk(event) {
-    if (event.pointerType !== "mouse" || motionRef.current?.matches) return;
-    const box = event.currentTarget.getBoundingClientRect();
-    if (!box.width || !box.height) return;
-    const x = Math.max(-1, Math.min(1, (event.clientX - box.left) / box.width * 2 - 1));
-    const y = Math.max(-1, Math.min(1, (event.clientY - box.top) / box.height * 2 - 1));
-    event.currentTarget.style.setProperty("--ink-x", `${(x * 2).toFixed(2)}px`);
-    event.currentTarget.style.setProperty("--ink-y", `${(y * 1.25).toFixed(2)}px`);
-    event.currentTarget.style.setProperty("--ink-turn", `${(x * .35).toFixed(3)}deg`);
-  }
-  function resetInk(event) {
-    for (const [name, value] of [["--ink-x", "0px"], ["--ink-y", "0px"], ["--ink-turn", "0deg"]]) event.currentTarget.style.setProperty(name, value);
-  }
-  return <div ref={hostRef} className="ih-editorial-match" data-entered="false" data-phase="ready" onAnimationEnd={event => {
-    if (event.animationName === "ih-match-second") hostRef.current.dataset.phase = "revealed";
+
+  return <div ref={hostRef} className="ih-brief-study" data-entered="false" data-phase="ready" onAnimationEnd={event => {
+    if (event.animationName === "ih-brief-unfold" && event.target.dataset.order === "2") hostRef.current.dataset.phase = "settled";
   }}>
-    <h2 className="ih-match-title">
-      <span className="ih-match-first"><span className="ih-match-verb">{en ? "See the" : "Zobacz"}</span>{" "}
-        <span className="ih-match-print" onPointerMove={moveInk} onPointerLeave={resetInk}><span className="ih-match-print-surface" aria-hidden="true"><span className="ih-match-print-ink" /></span><span className="ih-match-print-word">{en ? "work." : "prace."}</span></span>
-      </span>
-      <span className="ih-match-second-mask"><span className="ih-match-second"><span className="ih-match-human-verb">{en ? "Meet the" : "Poznaj"}</span>{" "}<span className="ih-match-human">{en ? "person." : "człowieka."}</span></span></span>
-    </h2>
-    <dl className="ih-match-benefits">{benefits.map(([title, description], index) => <div key={title} style={{ "--step": index }}>
-      <dt>{title}</dt><dd>{description}</dd>
-    </div>)}</dl>
+    <div className="ih-brief-heading">
+      <span>{en ? "From an idea to a shared plan" : "Od pomysłu do wspólnego planu"}</span>
+      <span className="ih-brief-edition" aria-hidden="true">01—03</span>
+    </div>
+
+    <div className="ih-brief-composition">
+      <div className="ih-brief-source">
+        <p className="ih-brief-caption">{en ? "It can start with one sentence" : "Na początek wystarczy jedno zdanie"}</p>
+        <h2 className="ih-brief-sentence">
+          <span className="ih-brief-sentence-mask"><span>{en ? "“I need" : "„Potrzebuję"}</span></span>
+          <span className="ih-brief-sentence-mask"><span>{en ? "a new website.”" : "nowej strony.”"}</span></span>
+        </h2>
+        <svg className="ih-brief-pencil" viewBox="0 0 470 32" fill="none" aria-hidden="true">
+          <path pathLength="1" d="M4 19C96 9 231 8 363 14C402 16 427 16 463 11" />
+          <path className="ih-brief-pencil-return" pathLength="1" d="M13 26C125 18 264 22 331 23" />
+        </svg>
+        <p className="ih-brief-context">{en ? "Find someone whose work fits your idea. Turn the details into a plan together." : "Znajdź osobę, której prace pasują do Twojego pomysłu. Szczegóły ustalcie razem."}</p>
+      </div>
+
+      <div className="ih-brief-plan">
+        <p className="ih-brief-caption">{en ? "Three things you agree together" : "Trzy rzeczy, które ustalacie razem"}</p>
+        <div className="ih-brief-decisions">
+          <div className="ih-brief-spine" aria-hidden="true"><span /><i /></div>
+          <dl>{decisions.map(([label, title, detail], index) => <div className="ih-brief-item" key={label} data-order={index} style={{ "--order": index }}>
+            <dt><span className="ih-brief-number" aria-hidden="true">0{index + 1}</span>{label}</dt>
+            <dd><strong>{title}</strong><span>{detail}</span></dd>
+          </div>)}</dl>
+        </div>
+      </div>
+    </div>
+
+    <p className="ih-brief-note"><span>{en ? "Your idea. Your collaboration." : "Twój pomysł. Wasza współpraca."}</span><span>{en ? "Portfolio, conversations and agreements — alongside the project." : "Portfolio, rozmowy i ustalenia — przy projekcie."}</span></p>
   </div>;
 }
