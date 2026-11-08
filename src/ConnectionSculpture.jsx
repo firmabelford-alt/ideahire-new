@@ -67,7 +67,13 @@ export default function ConnectionSculpture({ en = false }) {
     "Wiadomości, materiały i ustalenia zostają przy projekcie, którego dotyczą. Łatwiej zachować kontekst i wrócić do konkretów.",
   ];
 
-  return <div className="ih-reveal" ref={hostRef} data-entered="false" data-scene={active} data-no-translate="true">
+  return <div className="ih-reveal" ref={hostRef} data-entered="false" data-opened="false" data-scene={active} data-no-translate="true" onAnimationEnd={event=>{
+    if(event.animationName==="ih-reveal-open") hostRef.current.dataset.opened="true";
+    if(event.animationName==="ih-reveal-description") {
+      const face=event.target.closest(".ih-reveal-face");
+      if(face) face.dataset.ready="true";
+    }
+  }}>
     <div className="ih-reveal-accessible">
       <h2>{en ? "Why work with IdeaHire" : "Dlaczego warto pracować z IdeaHire"}</h2>
       <dl>{topics.map((topic,index)=><div key={topic}><dt>{topic}</dt><dd>{descriptions[index]}</dd></div>)}</dl>
@@ -75,11 +81,11 @@ export default function ConnectionSculpture({ en = false }) {
     <div className="ih-reveal-shell" aria-hidden="true">
       <div className="ih-reveal-screen">
         <div className="ih-reveal-stage">
-          {headlines.map((lines, index) => <div className="ih-reveal-face" key={index} data-active={active === index}>
-            <span className="ih-reveal-topic">{topics[index]}</span>
-            <h2>{lines.map((line, lineIndex) => <span className="ih-reveal-line" key={line} style={{"--line":lineIndex}}><span className="ih-reveal-word">{line}</span></span>)}</h2>
-            <p className="ih-reveal-description">{descriptions[index]}</p>
-          </div>)}
+          <div className="ih-reveal-face" key={active} data-active="true" data-ready="false">
+            <span className="ih-reveal-topic">{topics[active]}</span>
+            <h2>{headlines[active].map((line, lineIndex) => <span className="ih-reveal-line" key={line} style={{"--line":lineIndex}}><span className="ih-reveal-word">{line}</span></span>)}</h2>
+            <p className="ih-reveal-description">{descriptions[active]}</p>
+          </div>
         </div>
         <div className="ih-reveal-static">
           {topics.map((topic,index)=><div key={topic}><strong>{topic}</strong><p>{descriptions[index]}</p></div>)}

@@ -1,14 +1,11 @@
 @layer ideahirePolish {
   #root #for-users .ih-reveal { --reveal-dark:#11282d; --reveal-paper:#f5f6ee; --reveal-accent:var(--v-action,#19cbd3); width:min(100%,1000px); aspect-ratio:2.65; min-height:360px; margin:10px auto 30px 0; position:relative; container-type:inline-size; isolation:isolate; }
   #root #for-users .ih-reveal-accessible { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip-path:inset(50%)!important; white-space:nowrap!important; }
-  #root #for-users .ih-reveal-shell { --face-bg:var(--reveal-dark); --face-ink:var(--reveal-paper); width:100%; height:100%; position:relative; overflow:hidden; border-radius:16px; background:var(--face-bg); color:var(--face-ink); box-shadow:0 20px 60px -45px #05272f70; transform-origin:0 50%; transition:background-color .55s,color .4s; }
-  #root #for-users .ih-reveal[data-scene="1"] .ih-reveal-shell { --face-bg:var(--reveal-accent); --face-ink:var(--reveal-dark); }
-  #root #for-users .ih-reveal[data-scene="2"] .ih-reveal-shell { --face-bg:var(--reveal-paper); --face-ink:var(--reveal-dark); box-shadow:inset 0 0 0 1px #11282d12,0 20px 60px -45px #05272f70; }
+  #root #for-users .ih-reveal-shell { --face-bg:var(--reveal-dark); --face-ink:var(--reveal-paper); width:100%; height:100%; position:relative; overflow:hidden; border-radius:16px; background:var(--face-bg); color:var(--face-ink); box-shadow:0 20px 60px -45px #05272f70; transform-origin:0 50%; }
   #root #for-users .ih-reveal-screen { position:relative; width:100%; height:100%; padding:clamp(28px,4.8cqw,48px); }
   #root #for-users .ih-reveal-stage { width:100%; height:100%; min-height:0; position:relative; }
-  #root #for-users .ih-reveal-face { position:absolute; inset:0; display:grid; grid-template-columns:1.18fr 1fr; grid-template-rows:auto auto; align-content:center; align-items:start; gap:17px clamp(24px,4.4cqw,44px); min-width:0; opacity:0; visibility:hidden; transform:translateX(-18px); transition:opacity .28s ease,transform .55s cubic-bezier(.16,1,.3,1),visibility .28s; }
-  #root #for-users .ih-reveal-face[data-active="true"] { opacity:1; visibility:visible; transform:none; transition-delay:.13s; }
-  #root #for-users .ih-reveal-topic { grid-column:1; grid-row:1; color:inherit; opacity:.68; font:400 12px/1.45 Inter,system-ui,sans-serif; letter-spacing:.02em; }
+  #root #for-users .ih-reveal-face { position:absolute; inset:0; display:grid; grid-template-columns:1.18fr 1fr; grid-template-rows:auto auto; align-content:center; align-items:start; gap:17px clamp(24px,4.4cqw,44px); min-width:0; }
+  #root #for-users .ih-reveal-topic { grid-column:1; grid-row:1; color:var(--reveal-accent); font:400 12px/1.45 Inter,system-ui,sans-serif; letter-spacing:.02em; }
   #root #for-users .ih-reveal-face h2 { grid-column:1; grid-row:2; min-width:0; margin:0!important; padding:0!important; color:inherit!important; font:600 clamp(31px,5.4cqw,55px)/1.09 Inter,system-ui,sans-serif!important; letter-spacing:-.055em!important; text-align:left!important; }
   #root #for-users .ih-reveal-line { display:block; overflow:hidden; padding:0 .1em .09em 0; margin-bottom:-.09em; }
   #root #for-users .ih-reveal-word { display:block; transform-origin:0 50%; }
@@ -17,6 +14,8 @@
   #root #for-users .ih-reveal[data-entered="true"] .ih-reveal-shell { animation:ih-reveal-open .78s cubic-bezier(.16,1,.3,1) backwards; }
   #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-word { animation:ih-reveal-word .76s calc(.12s + var(--line)*.075s) cubic-bezier(.16,1,.3,1) backwards; }
   #root #for-users .ih-reveal[data-entered="true"] [data-active="true"] .ih-reveal-description { animation:ih-reveal-description .65s .38s cubic-bezier(.16,1,.3,1) backwards; }
+  #root #for-users .ih-reveal[data-opened="true"] .ih-reveal-shell { animation:none!important; opacity:1; clip-path:none; transform:none; }
+  #root #for-users .ih-reveal-face[data-ready="true"] :is(.ih-reveal-word,.ih-reveal-description) { animation:none!important; transform:none!important; }
   #root #for-users .ih-reveal[data-visible="false"] *, #root #for-users .ih-reveal[data-visible="false"] .ih-reveal-shell { animation-play-state:paused!important; }
   #root #for-users .ih-reveal-static { display:none; }
   @keyframes ih-reveal-open { 0% { opacity:0; clip-path:inset(0 78% 0 0); transform:translateX(-22px); } 65% { opacity:1; clip-path:inset(0 0 0 0); transform:translateX(3px); } 100% { opacity:1; clip-path:inset(0); transform:none; } }
