@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
 import "./ConnectionSculpture.css";
 
-const READ_TIMES = [8200, 8200, 9600];
+const READ_TIMES = [8200, 8200, 8200];
 
 export default function ConnectionSculpture({ en = false }) {
   const hostRef = useRef(null);
@@ -52,58 +51,39 @@ export default function ConnectionSculpture({ en = false }) {
     };
   }, []);
 
-  const labels = en ? ["The platform", "Working together", "The fee"] : ["Platforma", "Współpraca", "Rozliczenie"];
-  const topics = en ? ["What IdeaHire is", "Before the work begins", "How the fee works"] : ["Czym jest IdeaHire", "Zanim zacznie się praca", "Jak się rozliczacie"];
+  const topics = en
+    ? ["Choose your professional", "Start with a shared plan", "Keep the context together"]
+    : ["Wybór wykonawcy", "Wspólny plan na start", "Wszystko przy projekcie"];
   const headlines = en
-    ? [["Projects.", "Services.", "Collaboration."], ["A good start", "has clear", "terms."]]
-    : [["Zlecenia.", "Usługi.", "Współpraca."], ["Dobry start", "ma konkretne", "warunki."]];
+    ? [["See the work.", "Get to know the approach."], ["The scope and deadline.", "Agreed together."], ["Messages and files.", "In the same place."]]
+    : [["Sprawdź prace.", "Poznaj podejście."], ["Zakres i termin", "ustalacie razem."], ["Rozmowy i pliki.", "W jednym miejscu."]];
   const descriptions = en ? [
-    "We connect people who have a project with freelancers who have the skills to bring it to life.",
-    "Agree on the scope, price and deadline together, before the work begins.",
+    "A portfolio and a clear offer help you choose someone with the right skills for your project.",
+    "Discuss the task, agree on the details and start the work with a shared understanding of what needs to happen.",
+    "Keep messages, materials and agreements alongside the project they belong to. It is easier to retain the context and return to the details.",
   ] : [
-    "Łączymy osoby, które mają projekt, z freelancerami, którzy mają umiejętności do jego realizacji.",
-    "Zakres, cenę i termin ustalacie wspólnie, zanim zacznie się praca.",
+    "Portfolio i oferta pomagają wybrać osobę z umiejętnościami pasującymi do Twojego zadania.",
+    "Omówcie zadanie, ustalcie szczegóły i zacznijcie pracę ze wspólnym planem. Od początku wiecie, na co się umawiacie.",
+    "Wiadomości, materiały i ustalenia zostają przy projekcie, którego dotyczą. Łatwiej zachować kontekst i wrócić do konkretów.",
   ];
-  const fee = IDEA_HIRE_PUBLIC_OFFER;
-  const locale = en ? "en-GB" : "pl-PL";
-  const rate = `${fee.percent.toLocaleString(locale)}%`;
-  const money = amount => `${amount.toLocaleString(locale)} ${en ? "PLN" : "zł"}`;
-  const feeLines = en
-    ? ["The client pays the fee.", "The freelancer receives the full agreed amount."]
-    : ["Prowizję płaci zleceniodawca.", "Wykonawca otrzymuje całą ustaloną kwotę."];
 
   return <div className="ih-reveal" ref={hostRef} data-entered="false" data-scene={active} data-no-translate="true">
     <div className="ih-reveal-accessible">
-      <h2>{en ? "IdeaHire: collaboration and fees" : "IdeaHire: współpraca i rozliczenia"}</h2>
-      <dl>
-        <dt>{topics[0]}</dt><dd>{descriptions[0]}</dd>
-        <dt>{topics[1]}</dt><dd>{descriptions[1]}</dd>
-        <dt>{topics[2]}</dt><dd>{rate}. {feeLines.join(" ")} {en ? "Minimum" : "Minimum"}: {money(fee.minimum)}. {en ? "Maximum" : "Maksimum"}: {money(fee.maximum)}.</dd>
-      </dl>
+      <h2>{en ? "Why work with IdeaHire" : "Dlaczego warto pracować z IdeaHire"}</h2>
+      <dl>{topics.map((topic,index)=><div key={topic}><dt>{topic}</dt><dd>{descriptions[index]}</dd></div>)}</dl>
     </div>
     <div className="ih-reveal-shell" aria-hidden="true">
-      <div className="ih-reveal-release" />
       <div className="ih-reveal-screen">
-        <div className="ih-reveal-heading"><span>IdeaHire<span className="ih-reveal-heading-dot">.</span></span><span className="ih-reveal-counter">0{active + 1}<span> / 03</span></span></div>
         <div className="ih-reveal-stage">
           {headlines.map((lines, index) => <div className="ih-reveal-face" key={index} data-active={active === index}>
             <span className="ih-reveal-topic">{topics[index]}</span>
             <h2>{lines.map((line, lineIndex) => <span className="ih-reveal-line" key={line} style={{"--line":lineIndex}}><span className="ih-reveal-word">{line}</span></span>)}</h2>
             <p className="ih-reveal-description">{descriptions[index]}</p>
           </div>)}
-          <div className="ih-reveal-face ih-reveal-fee" data-active={active === 2}>
-            <span className="ih-reveal-topic">{en ? "IdeaHire fee" : "Prowizja IdeaHire"}</span>
-            <div className="ih-reveal-rate"><span>{rate}</span></div>
-            <p className="ih-reveal-description">{feeLines.map(line=><span key={line}>{line}</span>)}</p>
-            <div className="ih-reveal-limits"><span><small>{en ? "Minimum fee" : "Minimum prowizji"}</small><strong>{money(fee.minimum)}</strong></span><span><small>{en ? "Maximum fee" : "Maksimum prowizji"}</small><strong>{money(fee.maximum)}</strong></span></div>
-          </div>
         </div>
         <div className="ih-reveal-static">
-          <div><strong>{topics[0]}</strong><p>{en ? "Projects, services and the people who make them happen." : "Zlecenia, usługi i ludzie, którzy je realizują."}</p></div>
-          <div><strong>{topics[1]}</strong><p>{descriptions[1]}</p></div>
-          <div><strong>{rate} — {en ? "IdeaHire fee" : "prowizja IdeaHire"}</strong><p>{en ? "Paid by the client. Min." : "Płaci zleceniodawca. Min."} {money(fee.minimum)}, {en ? "max." : "maks."} {money(fee.maximum)}.</p></div>
+          {topics.map((topic,index)=><div key={topic}><strong>{topic}</strong><p>{descriptions[index]}</p></div>)}
         </div>
-        <ol className="ih-reveal-index">{labels.map((label,index)=><li key={label} data-active={active===index}><i/>{label}</li>)}</ol>
       </div>
     </div>
   </div>;
