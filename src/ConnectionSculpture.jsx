@@ -1,71 +1,110 @@
 import { useEffect, useRef, useState } from "react";
+import { IDEA_HIRE_PUBLIC_OFFER } from "./MarketUI";
 import "./ConnectionSculpture.css";
-const DURATION = 6400;
+
+const READ_TIMES = [8200, 8200, 9600];
 
 export default function ConnectionSculpture({ en = false }) {
   const hostRef = useRef(null);
   const [active, setActive] = useState(0);
+
   useEffect(() => {
-    const host = hostRef.current, preference = matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0, last = 0, elapsed = 0, visible = false;
+    const host = hostRef.current;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0, last = 0, elapsed = 0, chapter = 0, visible = false;
+
+    const stop = () => { cancelAnimationFrame(frame); frame = 0; last = 0; };
     const tick = now => {
-      if (last && visible && !document.hidden && !preference.matches) {
-        elapsed += now-last;
-        if (elapsed >= DURATION) { elapsed = 0; setActive(chapter => (chapter+1)%3); }
-        host.style.setProperty("--chapter-progress",elapsed/DURATION);
+      if (!visible || document.hidden || preference.matches) { stop(); return; }
+      if (last) elapsed += now - last;
+      last = now;
+      if (elapsed >= READ_TIMES[chapter]) {
+        elapsed = 0;
+        chapter = (chapter + 1) % READ_TIMES.length;
+        setActive(chapter);
       }
-      last = now; frame = requestAnimationFrame(tick);
+      frame = requestAnimationFrame(tick);
     };
-    const observer = "IntersectionObserver" in window ? new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting; last = 0; host.dataset.visible = String(visible);
+    const sync = () => {
+      host.dataset.reduced = String(preference.matches);
+      if (visible && !document.hidden && !preference.matches) {
+        if (!frame) { last = 0; frame = requestAnimationFrame(tick); }
+      } else stop();
+    };
+    const enter = isVisible => {
+      visible = isVisible;
+      host.dataset.visible = String(visible);
       if (visible) host.dataset.entered = "true";
-    },{threshold:.2}) : null;
+      sync();
+    };
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver(([entry]) => enter(entry.isIntersecting), { threshold: .2 })
+      : null;
     if (observer) observer.observe(host);
-    else { visible=true; host.dataset.entered="true"; }
-    const resetClock = () => { last=0; };
-    document.addEventListener("visibilitychange",resetClock);
-    frame=requestAnimationFrame(tick);
-    return () => { observer?.disconnect(); cancelAnimationFrame(frame); document.removeEventListener("visibilitychange",resetClock); };
-  },[]);
-  const chapters = en ? [
-    ["Portfolio","Choose with a clearer picture","The work.","Before the word.","See a professional’s portfolio and offer before deciding who to work with.","Work · Profile · Offer"],
-    ["Agreements","Start on the same page","Your project.","Shared terms.","Agree on the scope, deadline and price together, before the work begins.","Scope · Deadline · Price"],
-    ["Collaboration","Keep the context together","One project.","The whole story.","Keep your files, messages and agreements alongside the project they belong to.","Files · Messages · Agreements"],
+    else enter(true);
+    preference.addEventListener("change", sync);
+    document.addEventListener("visibilitychange", sync);
+    sync();
+    return () => {
+      observer?.disconnect(); stop();
+      preference.removeEventListener("change", sync);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, []);
+
+  const labels = en ? ["The platform", "Working together", "The fee"] : ["Platforma", "Współpraca", "Rozliczenie"];
+  const topics = en ? ["What IdeaHire is", "Before the work begins", "How the fee works"] : ["Czym jest IdeaHire", "Zanim zacznie się praca", "Jak się rozliczacie"];
+  const headlines = en
+    ? [["Projects.", "Services.", "Collaboration."], ["A good start", "has clear", "terms."]]
+    : [["Zlecenia.", "Usługi.", "Współpraca."], ["Dobry start", "ma konkretne", "warunki."]];
+  const descriptions = en ? [
+    "We connect people who have a project with freelancers who have the skills to bring it to life.",
+    "Agree on the scope, price and deadline together, before the work begins.",
   ] : [
-    ["Portfolio","Wybierasz świadomie","Najpierw prace.","Potem wybór.","Poznaj portfolio i ofertę wykonawcy, zanim zdecydujesz, z kim chcesz pracować.","Prace · Profil · Oferta"],
-    ["Ustalenia","Zaczynacie od konkretów","Twój projekt.","Wspólne zasady.","Zakres, termin i cena — uzgadniacie je razem, zanim zacznie się praca.","Zakres · Termin · Cena"],
-    ["Współpraca","Zachowujecie cały kontekst","Jeden projekt.","Cała rozmowa.","Pliki, wiadomości i ustalenia zostają przy projekcie, którego dotyczą.","Pliki · Wiadomości · Ustalenia"],
+    "Łączymy osoby, które mają projekt, z freelancerami, którzy mają umiejętności do jego realizacji.",
+    "Zakres, cenę i termin ustalacie wspólnie, zanim zacznie się praca.",
   ];
-  return <div className="ih-workprint" ref={hostRef} data-chapter={active} data-entered="false">
-    <header className="ih-workprint-top"><span>{en?"FROM FINDING SOMEONE TO WORKING TOGETHER":"OD WYBORU DO WSPÓŁPRACY"}</span><span aria-hidden="true">IDEAHIRE / 0{active+1}</span></header>
-    <div className="ih-workprint-accessible"><h2>{en?"From finding someone to working together":"Od wyboru do współpracy"}</h2><dl>{chapters.map(([name,,,,text])=><div key={name}><dt>{name}</dt><dd>{text}</dd></div>)}</dl></div>
-    <div className="ih-workprint-stage">
-      <div className="ih-workprint-copy" aria-hidden="true">{chapters.map(([name,before,title,second,text,detail],index)=><div className="ih-workprint-chapter" key={name} data-active={active===index}>
-        <span className="ih-workprint-eyebrow">{before}</span><h2>{title}<br/><em>{second}</em></h2><p>{text}</p><span className="ih-workprint-detail">{detail}</span>
-      </div>)}</div>
-      <div className="ih-workprint-art" aria-hidden="true">
-        <svg className="ih-workprint-sheet" viewBox="0 0 560 390" data-active={active===0}>
-          <path className="ih-workprint-fine" d="M23 322H537M86 52V348M472 52V348"/>
-          <g className="ih-workprint-glyph-back"><text x="206" y="295" className="ih-workprint-serif">a</text></g>
-          <g className="ih-workprint-glyph-front"><text x="38" y="310" className="ih-workprint-sans">a</text></g>
-          <path className="ih-workprint-registration" d="M487 75V101M474 88H500M47 322V338M39 330H55"/>
-          <text x="484" y="306" className="ih-workprint-micro" transform="rotate(-90 484 306)">{en?"APPROACH / CRAFT / CHARACTER":"PODEJŚCIE / WARSZTAT / CHARAKTER"}</text>
-          <text x="86" y="369" className="ih-workprint-micro">Aa — 01 / PORTFOLIO</text>
-        </svg>
-        <svg className="ih-workprint-sheet" viewBox="0 0 560 390" data-active={active===1}>
-          {[0,1,2].map(line=><g key={line} className="ih-workprint-term" style={{"--item":line}}>
-            <text x="88" y={105+line*99} className="ih-workprint-term-label">{(en?["Scope","Deadline","Price"]:["Zakres","Termin","Cena"])[line]}</text>
-            <path className="ih-workprint-rule" d={`M88 ${124+line*99}H468`}/><path className="ih-workprint-check" pathLength="1" d={`M418 ${81+line*99}l13 13 25-29`}/>
-          </g>)}
-          <text x="88" y="369" className="ih-workprint-micro">{en?"02 / A SHARED STARTING POINT":"02 / WSPÓLNY PUNKT WYJŚCIA"}</text>
-        </svg>
-        <svg className="ih-workprint-sheet" viewBox="0 0 560 390" data-active={active===2}>
-          <g className="ih-workprint-message ih-workprint-message-back"><path className="ih-workprint-message-accent" d="M174 63H433C475 63 493 82 493 119V164C493 201 475 220 437 220H366L324 252V220H174C136 220 118 201 118 164V119C118 82 136 63 174 63Z"/><path className="ih-workprint-message-line" d="M166 111H432M166 136H380"/></g>
-          <g className="ih-workprint-message ih-workprint-message-front"><path className="ih-workprint-message-ink" d="M105 174H345C384 174 404 193 404 231V265C404 303 384 322 345 322H193L143 355V322H105C66 322 47 303 47 265V231C47 193 66 174 105 174Z"/><text x="91" y="239" className="ih-workprint-file">{en?"The brief.pdf":"Brief projektu.pdf"}</text><path className="ih-workprint-file-line" d="M92 265H332M92 281H254"/></g>
-          <text x="424" y="328" className="ih-workprint-micro" transform="rotate(-90 424 328)">{en?"MATERIALS + CONVERSATIONS":"MATERIAŁY + ROZMOWY"}</text>
-        </svg>
+  const fee = IDEA_HIRE_PUBLIC_OFFER;
+  const locale = en ? "en-GB" : "pl-PL";
+  const rate = `${fee.percent.toLocaleString(locale)}%`;
+  const money = amount => `${amount.toLocaleString(locale)} ${en ? "PLN" : "zł"}`;
+  const feeLines = en
+    ? ["The client pays the fee.", "The freelancer receives the full agreed amount."]
+    : ["Prowizję płaci zleceniodawca.", "Wykonawca otrzymuje całą ustaloną kwotę."];
+
+  return <div className="ih-reveal" ref={hostRef} data-entered="false" data-scene={active} data-no-translate="true">
+    <div className="ih-reveal-accessible">
+      <h2>{en ? "IdeaHire: collaboration and fees" : "IdeaHire: współpraca i rozliczenia"}</h2>
+      <dl>
+        <dt>{topics[0]}</dt><dd>{descriptions[0]}</dd>
+        <dt>{topics[1]}</dt><dd>{descriptions[1]}</dd>
+        <dt>{topics[2]}</dt><dd>{rate}. {feeLines.join(" ")} {en ? "Minimum" : "Minimum"}: {money(fee.minimum)}. {en ? "Maximum" : "Maksimum"}: {money(fee.maximum)}.</dd>
+      </dl>
+    </div>
+    <div className="ih-reveal-shell" aria-hidden="true">
+      <div className="ih-reveal-release" />
+      <div className="ih-reveal-screen">
+        <div className="ih-reveal-heading"><span>IdeaHire<span className="ih-reveal-heading-dot">.</span></span><span className="ih-reveal-counter">0{active + 1}<span> / 03</span></span></div>
+        <div className="ih-reveal-stage">
+          {headlines.map((lines, index) => <div className="ih-reveal-face" key={index} data-active={active === index}>
+            <span className="ih-reveal-topic">{topics[index]}</span>
+            <h2>{lines.map((line, lineIndex) => <span className="ih-reveal-line" key={line} style={{"--line":lineIndex}}><span className="ih-reveal-word">{line}</span></span>)}</h2>
+            <p className="ih-reveal-description">{descriptions[index]}</p>
+          </div>)}
+          <div className="ih-reveal-face ih-reveal-fee" data-active={active === 2}>
+            <span className="ih-reveal-topic">{en ? "IdeaHire fee" : "Prowizja IdeaHire"}</span>
+            <div className="ih-reveal-rate"><span>{rate}</span></div>
+            <p className="ih-reveal-description">{feeLines.map(line=><span key={line}>{line}</span>)}</p>
+            <div className="ih-reveal-limits"><span><small>{en ? "Minimum fee" : "Minimum prowizji"}</small><strong>{money(fee.minimum)}</strong></span><span><small>{en ? "Maximum fee" : "Maksimum prowizji"}</small><strong>{money(fee.maximum)}</strong></span></div>
+          </div>
+        </div>
+        <div className="ih-reveal-static">
+          <div><strong>{topics[0]}</strong><p>{en ? "Projects, services and the people who make them happen." : "Zlecenia, usługi i ludzie, którzy je realizują."}</p></div>
+          <div><strong>{topics[1]}</strong><p>{descriptions[1]}</p></div>
+          <div><strong>{rate} — {en ? "IdeaHire fee" : "prowizja IdeaHire"}</strong><p>{en ? "Paid by the client. Min." : "Płaci zleceniodawca. Min."} {money(fee.minimum)}, {en ? "max." : "maks."} {money(fee.maximum)}.</p></div>
+        </div>
+        <ol className="ih-reveal-index">{labels.map((label,index)=><li key={label} data-active={active===index}><i/>{label}</li>)}</ol>
       </div>
     </div>
-    <ol className="ih-workprint-index" aria-label={en?"Three parts of collaboration":"Trzy elementy współpracy"}>{chapters.map(([name],index)=><li key={name} data-active={active===index}><span>0{index+1}</span><span>{name}</span><i aria-hidden="true"/></li>)}</ol>
   </div>;
 }
