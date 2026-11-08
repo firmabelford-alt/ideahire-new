@@ -1,15 +1,14 @@
 import { useEffect, useRef } from "react";
 import "./ConnectionSculpture.css";
 
-/* An open working document: a brief unfolds into three shared decisions. */
+/* One continuous folded ribbon; content stays readable after its reveal. */
 export default function ConnectionSculpture({ en = false }) {
   const hostRef = useRef(null);
   useEffect(() => {
     const host = hostRef.current;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reduced.matches || !("IntersectionObserver" in window)) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
       host.dataset.entered = "true";
-      host.dataset.phase = "settled";
+      host.dataset.phase = "open";
       return;
     }
     host.dataset.motion = "enabled";
@@ -17,57 +16,37 @@ export default function ConnectionSculpture({ en = false }) {
       host.dataset.visible = String(entry.isIntersecting);
       if (entry.isIntersecting && host.dataset.entered !== "true") {
         host.dataset.entered = "true";
-        host.dataset.phase = "unfolding";
+        host.dataset.phase = "opening";
       }
-    }, { threshold: .18 });
+    }, { threshold: .15 });
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
 
-  const decisions = en ? [
-    ["Scope", "What we’re making.", "Pages, features and materials."],
-    ["Deadline", "When it’s ready.", "Milestones and a delivery date."],
-    ["Price", "What it costs.", "A price for the agreed scope."],
+  const sections = en ? [
+    ["Portfolio", "Let the work speak.", "Explore the work and offer before choosing a professional."],
+    ["Agreements", "Get the details right.", "Scope, deadline and price. Agree together before you start."],
+    ["Collaboration", "Keep it all together.", "Conversations, files and agreements alongside your project."],
   ] : [
-    ["Zakres", "Co ma powstać.", "Podstrony, funkcje i materiały."],
-    ["Termin", "Na kiedy.", "Etapy i data oddania projektu."],
-    ["Cena", "Za ile.", "Wycena ustalonego zakresu."],
+    ["Portfolio", "Prace mówią więcej.", "Sprawdź portfolio i ofertę, zanim wybierzesz wykonawcę."],
+    ["Ustalenia", "Najpierw konkrety.", "Zakres, termin i cena. Ustalcie je wspólnie przed startem."],
+    ["Współpraca", "Wszystko przy projekcie.", "Rozmowy, pliki i ustalenia w jednym miejscu."],
   ];
 
-  return <div ref={hostRef} className="ih-brief-study" data-entered="false" data-phase="ready" onAnimationEnd={event => {
-    if (event.animationName === "ih-brief-unfold" && event.target.dataset.order === "2") hostRef.current.dataset.phase = "settled";
+  return <div ref={hostRef} className="ih-folded-ribbon" data-entered="false" data-phase="ready" onAnimationEnd={event => {
+    if (event.animationName === "ih-ribbon-copy" && event.target.dataset.order === "2") hostRef.current.dataset.phase = "open";
   }}>
-    <div className="ih-brief-heading">
-      <span>{en ? "From an idea to a shared plan" : "Od pomysłu do wspólnego planu"}</span>
-      <span className="ih-brief-edition" aria-hidden="true">01—03</span>
-    </div>
-
-    <div className="ih-brief-composition">
-      <div className="ih-brief-source">
-        <p className="ih-brief-caption">{en ? "It can start with one sentence" : "Na początek wystarczy jedno zdanie"}</p>
-        <h2 className="ih-brief-sentence">
-          <span className="ih-brief-sentence-mask"><span>{en ? "“I need" : "„Potrzebuję"}</span></span>
-          <span className="ih-brief-sentence-mask"><span>{en ? "a new website.”" : "nowej strony.”"}</span></span>
-        </h2>
-        <svg className="ih-brief-pencil" viewBox="0 0 470 32" fill="none" aria-hidden="true">
-          <path pathLength="1" d="M4 19C96 9 231 8 363 14C402 16 427 16 463 11" />
-          <path className="ih-brief-pencil-return" pathLength="1" d="M13 26C125 18 264 22 331 23" />
-        </svg>
-        <p className="ih-brief-context">{en ? "Find someone whose work fits your idea. Turn the details into a plan together." : "Znajdź osobę, której prace pasują do Twojego pomysłu. Szczegóły ustalcie razem."}</p>
-      </div>
-
-      <div className="ih-brief-plan">
-        <p className="ih-brief-caption">{en ? "Three things you agree together" : "Trzy rzeczy, które ustalacie razem"}</p>
-        <div className="ih-brief-decisions">
-          <div className="ih-brief-spine" aria-hidden="true"><span /><i /></div>
-          <dl>{decisions.map(([label, title, detail], index) => <div className="ih-brief-item" key={label} data-order={index} style={{ "--order": index }}>
-            <dt><span className="ih-brief-number" aria-hidden="true">0{index + 1}</span>{label}</dt>
-            <dd><strong>{title}</strong><span>{detail}</span></dd>
-          </div>)}</dl>
+    <h2 className="ih-ribbon-accessible-title">{en ? "From choosing a professional to working together" : "Od wyboru wykonawcy do wspólnej pracy"}</h2>
+    <div className="ih-ribbon-body">
+      {sections.map(([label, title, description], index) => <article className="ih-ribbon-band" key={label} style={{ "--band": index }} data-band={index}>
+        <span className="ih-ribbon-paper" aria-hidden="true"><span className="ih-ribbon-crease" /></span>
+        <div className="ih-ribbon-copy" data-order={index}>
+          <p className="ih-ribbon-label"><span aria-hidden="true">0{index + 1}</span>{label}</p>
+          <h3>{title}</h3>
+          <p className="ih-ribbon-description">{description}</p>
         </div>
-      </div>
+        <span className="ih-ribbon-folio" aria-hidden="true">0{index + 1}</span>
+      </article>)}
     </div>
-
-    <p className="ih-brief-note"><span>{en ? "Your idea. Your collaboration." : "Twój pomysł. Wasza współpraca."}</span><span>{en ? "Portfolio, conversations and agreements — alongside the project." : "Portfolio, rozmowy i ustalenia — przy projekcie."}</span></p>
   </div>;
 }
