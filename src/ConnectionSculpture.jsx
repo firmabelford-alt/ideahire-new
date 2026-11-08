@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import "./ConnectionSculpture.css";
 
-/* One continuous folded ribbon; content stays readable after its reveal. */
+/* A single die-cut sheet, opened by a flat travelling shutter. */
 export default function ConnectionSculpture({ en = false }) {
   const hostRef = useRef(null);
   useEffect(() => {
@@ -23,30 +23,30 @@ export default function ConnectionSculpture({ en = false }) {
     return () => observer.disconnect();
   }, []);
 
-  const sections = en ? [
-    ["Portfolio", "Let the work speak.", "Explore the work and offer before choosing a professional."],
-    ["Agreements", "Get the details right.", "Scope, deadline and price. Agree together before you start."],
-    ["Collaboration", "Keep it all together.", "Conversations, files and agreements alongside your project."],
+  const details = en ? [
+    ["Portfolio", "Work and offers before you choose."],
+    ["Agreements", "Scope, deadline and price before you start."],
+    ["Contact", "Conversations and files alongside the project."],
   ] : [
-    ["Portfolio", "Prace mówią więcej.", "Sprawdź portfolio i ofertę, zanim wybierzesz wykonawcę."],
-    ["Ustalenia", "Najpierw konkrety.", "Zakres, termin i cena. Ustalcie je wspólnie przed startem."],
-    ["Współpraca", "Wszystko przy projekcie.", "Rozmowy, pliki i ustalenia w jednym miejscu."],
+    ["Portfolio", "Prace i oferta przed wyborem."],
+    ["Ustalenia", "Zakres, termin i cena przed startem."],
+    ["Kontakt", "Rozmowy i pliki przy projekcie."],
   ];
 
-  return <div ref={hostRef} className="ih-folded-ribbon" data-entered="false" data-phase="ready" onAnimationEnd={event => {
-    if (event.animationName === "ih-ribbon-copy" && event.target.dataset.order === "2") hostRef.current.dataset.phase = "open";
+  return <div ref={hostRef} className="ih-cut-study" data-entered="false" data-phase="ready" onAnimationEnd={event => {
+    if (event.animationName === "ih-cut-shutter") hostRef.current.dataset.phase = "open";
   }}>
-    <h2 className="ih-ribbon-accessible-title">{en ? "From choosing a professional to working together" : "Od wyboru wykonawcy do wspólnej pracy"}</h2>
-    <div className="ih-ribbon-body">
-      {sections.map(([label, title, description], index) => <article className="ih-ribbon-band" key={label} style={{ "--band": index }} data-band={index}>
-        <span className="ih-ribbon-paper" aria-hidden="true"><span className="ih-ribbon-crease" /></span>
-        <div className="ih-ribbon-copy" data-order={index}>
-          <p className="ih-ribbon-label"><span aria-hidden="true">0{index + 1}</span>{label}</p>
-          <h3>{title}</h3>
-          <p className="ih-ribbon-description">{description}</p>
-        </div>
-        <span className="ih-ribbon-folio" aria-hidden="true">0{index + 1}</span>
-      </article>)}
+    <svg className="ih-cut-outline" viewBox="0 0 1000 580" preserveAspectRatio="none" aria-hidden="true">
+      <path className="ih-cut-paper" d="M64 1H999V515L934 579H1V65Z" />
+      <path className="ih-cut-edge ih-cut-edge-first" pathLength="1" d="M1 65L64 1" />
+      <path className="ih-cut-edge ih-cut-edge-last" pathLength="1" d="M999 515L934 579" />
+    </svg>
+    <div className="ih-cut-window" aria-hidden="true"><span className="ih-cut-shutter" /></div>
+    <div className="ih-cut-content">
+      <p className="ih-cut-kicker">{en ? "Before the first “let’s do it”" : "Przed pierwszym „działamy”"}</p>
+      <h2 className="ih-cut-title"><span>{en ? "Get to know the work." : "Poznaj prace."}</span><span>{en ? "Agree on the details." : "Ustal szczegóły."}</span></h2>
+      <p className="ih-cut-intro">{en ? "Choose a professional by their work. Talk through your project and agree on the next step together." : "Wybierz wykonawcę po jego pracach. Porozmawiajcie o projekcie i wspólnie ustalcie następny krok."}</p>
+      <dl className="ih-cut-details">{details.map(([label, description]) => <div key={label}><dt>{label}</dt><dd>{description}</dd></div>)}</dl>
     </div>
   </div>;
 }
