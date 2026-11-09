@@ -1,4 +1,3 @@
-import { LucynaLoading } from './Subpages';
 import { confirmAction } from './SiteDialogs';
 import { FormSelect } from "./FormControls";
 /* IdeaHire | Lucyna AI | P35 | Swobodna rozmowa, rzeczywiste narzędzia i strumień odpowiedzi. */
@@ -13,6 +12,8 @@ import { useLucynaMemory } from "./LucynaMemory";
 import LucynaTools, { ReviewResult, MessageVariants } from "./LucynaTools";
 export { containsPrivateInput } from "./LucynaCore";
 import "./Lucyna.css";
+import "./LucynaMedia.css";
+import { prepareLucynaImage, rememberLucynaImage, lucynaImage, forgetLucynaImages, validGeneratedImage, isImageGenerationRequest, isImageRevisionRequest, downloadLucynaImage } from "./LucynaMedia";
 import LucynaSymbol from "./LucynaSymbol";
 import { useLucynaReveal, useLucynaEntrance, LucynaWords } from "./LucynaMotion";
 
@@ -20,6 +21,7 @@ const CATEGORIES = ["Programowanie", "Grafika i design", "Marketing", "Copywriti
   "Fotografia", "AI i automatyzacje", "Dane, analizy i research", "Biznes i e-commerce", "Architektura, wnętrza i CAD"];
 const MODES = [
   { id: "chat", icon: "spark", title: "Rozmowa z Lucyną", short: "Rozmowa", text: "Pomysł, konkretna odpowiedź i następny krok.", example: "Pomóż mi zacząć współpracę w IdeaHire." },
+  { id: "image", icon: "image", title: "Stwórz grafikę", short: "Grafika", text: "Opisz pomysł i otrzymaj obraz do pobrania.", example: "" },
   { id: "message", icon: "edit", title: "Ułóż wiadomość", short: "Wiadomość", text: "Dobierz ton i przygotuj treść do współpracy.", example: "" },
   { id: "review", icon: "check", title: "Sprawdź rezultat", short: "Sprawdź pracę", text: "Kryteria, dowody i propozycje poprawek.", example: "" },
   { id: "freelancers", icon: "people", title: "Znajdź wykonawcę", short: "Wykonawcy", text: "Przygotuj filtry i poznaj dostępne profile.", example: "Szukam wykonawcy prostej strony internetowej." },
@@ -48,6 +50,7 @@ const ERRORS = {
   free_setup: "Darmowa pula Lucyny czeka na konfigurację. Lokalne szablony i katalogi są dostępne.",
   review_pending: "Analiza pracy jest w przygotowaniu do udostępnienia. Możesz już przygotować własne kryteria odbioru.",
   review_input: "Sprawdź kryteria, wielkość materiału i potwierdzenia przed analizą.",
+  image_input: "Dodaj poprawny obraz JPG, PNG lub WebP. Tworzenie nowej grafiki korzysta z opisu — przesłane obrazy analizuję w zwykłej rozmowie.",
   source: "Nie masz dostępu do wskazanej pracy lub rozmowy. Nie wysłaliśmy materiału do AI.",
   weather: "Źródło pogody jest chwilowo niedostępne. Spróbuj później.",
   weather_limit: "Dzienna pula pobierania nowych prognoz została wyczerpana. Zapisane prognozy są nadal dostępne.",
@@ -114,6 +117,7 @@ function Icon({ name = "spark", ...props }) {
     work: "M3 7h18v14H3ZM8 7V3h8v4M3 12l9 3 9-3",
     edit: "m4 16-1 5 5-1L20 8l-4-4ZM14 6l4 4M4 4h6",
     help: "M9 9a3 3 0 1 1 5 2c-1.2.8-2 1.2-2 3M12 17h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z",
+    image: "M3 3h18v18H3ZM3 16l5-5 4 4 3-3 6 6M15 7h.01",
     plus: "M12 5v14M5 12h14", close: "m6 6 12 12M18 6 6 18",
     send: "M12 20V4m-6 6 6-6 6 6", stop: "M6 6h12v12H6Z",
     history: "M3 4h18v16H3ZM8 4v16M12 9h5M12 13h5",
@@ -131,10 +135,18 @@ function Icon({ name = "spark", ...props }) {
 function Mark({ small = false }) {
   return <span className={"lu-mark" + (small ? " is-small" : "")} aria-hidden="true"><LucynaSymbol/></span>;
 }
+function ChatImage({ owner, message }) {
+  const image = lucynaImage(owner, message.id);
+  if (!image) return null;
+  return <figure className="lu-chat-image"><img src={image.data_url} width={image.width} height={image.height}
+    alt={image.generated ? "Grafika wygenerowana przez Lucynę AI według Twojego opisu" : "Obraz przesłany do rozmowy z Lucyną"}/>
+    <figcaption><button type="button" className="lu-image-download" onClick={()=>downloadLucynaImage(image,message.id)}><Icon name="download"/>Pobierz obraz</button>
+    <span>{image.generated ? "Wygenerowano z AI" : "Załączony obraz"} · {image.width} × {image.height} · dostępny w tej sesji</span></figcaption></figure>;
+}
 function ThinkingIndicator({phase = "preparing"}) {
   const [elapsed,setElapsed]=useState(0);
   useEffect(()=>{const start=Date.now();const timer=setInterval(()=>setElapsed(Math.floor((Date.now()-start)/1000)),1000);return ()=>clearInterval(timer);},[]);
-  const labels = {preparing:"Przygotowuję odpowiedź…",analyzing:"Analizuję Twoją prośbę…",
+  const labels = {image:"Tworzę grafikę…",vision:"Przyglądam się obrazowi…",preparing:"Przygotowuję odpowiedź…",analyzing:"Analizuję Twoją prośbę…",
     jobs:"Sprawdzam aktualne zlecenia…",freelancers:"Sprawdzam katalog wykonawców…",services:"Sprawdzam opublikowane usługi…",
     drafting:"Układam propozycje wiadomości…",editing:"Sprawdzam sens, daty i brzmienie…",
     review:"Sprawdzam materiał względem kryteriów…",message:"Układam dwie wersje wiadomości…",
@@ -260,7 +272,7 @@ function Results({ mode, items, total }) {
 export default function Lucyna({ supabase, user, Navbar, embedded = false, visible = true, administration = false }) {
   const navigate = useNavigate(), location = useLocation();
   const handoff = useMemo(() => embedded ? null : takeLucynaHandoff(user?.id), [embedded, user?.id]);
-  const modes = administration ? MODES.filter(item => ["chat","message","help"].includes(item.id)) : MODES;
+  const modes = administration ? MODES.filter(item => ["chat","message","help","image"].includes(item.id)) : MODES;
   const [routeParams] = useSearchParams();
   const params = useMemo(() => embedded ? new URLSearchParams() : routeParams, [embedded, routeParams]);
   const [home,setHome] = useState(() => !handoff && !params.get('mode'));
@@ -270,6 +282,10 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   const active = useMemo(() => conversations.find(c => c.id === activeId) || conversations[0], [activeId, conversations]);
   const mode = modes.find(m => m.id === active.mode) || modes[0];
   const [draft, setDraft] = useState(handoff?.draft || ""); const [busy, setBusy] = useState(false);
+  const [imageDraft,setImageDraft] = useState(null), [imagePreparing,setImagePreparing] = useState(false);
+  const imageInputRef = useRef(null), imageOwnerRef = useRef({uid:user?.id,conversationId:active.id}), imagePreparationRef = useRef(0);
+  imageOwnerRef.current = {uid:user?.id,conversationId:active.id};
+  useEffect(()=>{imagePreparationRef.current++;setImageDraft(null);setImagePreparing(false);},[active.id,user?.id]);
   const entrance=useLucynaEntrance(setHome);
   useEffect(()=>{entrance.reset();},[active.id,user?.id,entrance.reset]);
   const [responseStyle, setResponseStyle] = useState("concise");
@@ -364,6 +380,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     if (ownerRef.current !== user?.id) {
       requestRef.current?.abort(); searchRef.current?.abort();
       requestRef.current = null; searchRef.current = null;
+      forgetLucynaImages(ownerRef.current);
       ownerRef.current = user?.id;
       setConversations([newConversation()]); setActiveId(null); setDraft(""); setNotice(""); setHome(true);
       setToolsOpen(false); setBusy(false); setSearching(false); setHistoryOpen(false); setInfoOpen(false); setToolDraft("");initialRoute.current="";
@@ -502,7 +519,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   function openTask(id) {
     if (busy) return;
     chooseMode(id);
-    if (id !== 'chat') { composeFocusRef.current = false; setTaskMenu(false); setToolsOpen(true); }
+    if (!['chat','image'].includes(id)) { composeFocusRef.current = false; setTaskMenu(false); setToolsOpen(true); }
   }
   function startNew() {
     if (conversations.length>=12) {setHome(false);setNotice("Masz już 12 rozmów. Możesz kontynuować otwartą rozmowę. Aby utworzyć nową, pobierz kopię i samodzielnie usuń wybraną rozmowę z historii.");return;}
@@ -576,12 +593,39 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     setConversations(all => all.map(c => c.id === active.id ? { ...c, title: c.messages.length ? c.title : mode.title,
       messages: [...c.messages, { id: makeId(), role: 'assistant', text: String(text).slice(0, 8000), status: 'done', kind: 'local', reveal:true, createdAt: new Date().toISOString() }] } : c));
   }
+  async function attachImage(file) {
+    if (!file || busy || imagePreparing || deleting) return;
+    const operation = ++imagePreparationRef.current, owner = user?.id, thread = active.id;
+    setImagePreparing(true); setNotice("");
+    try {
+      const image = await prepareLucynaImage(file);
+      if (operation !== imagePreparationRef.current || owner !== imageOwnerRef.current.uid || thread !== imageOwnerRef.current.conversationId) return;
+      chooseMode("chat"); setImageDraft(image);
+    } catch (error) { if (operation === imagePreparationRef.current) setNotice(error.message || "Nie udało się przygotować obrazu."); }
+    finally { if (operation === imagePreparationRef.current) setImagePreparing(false); }
+  }
+  function pasteImage(event) {
+    const file = [...(event.clipboardData?.files || [])].find(item=>item.type.startsWith("image/"));
+    if (file) { event.preventDefault(); attachImage(file); }
+  }
+  function mediaTools() {
+    return <><div className="lu-media-tools" aria-label="Obrazy w rozmowie">
+      <button type="button" disabled={busy || deleting || imagePreparing || !memory.ready} onClick={()=>imageInputRef.current?.click()}><Icon name="plus"/>{imagePreparing ? "Przygotowuję obraz…" : "Dodaj obraz"}</button>
+      <button type="button" aria-pressed={active.mode === "image"} disabled={busy || deleting || imagePreparing || !!imageDraft || !memory.ready} onClick={()=>chooseMode(active.mode === "image" ? "chat" : "image")}><Icon name="image"/>{active.mode === "image" ? "Wróć do rozmowy" : "Stwórz grafikę"}</button>
+    </div>{imageDraft && <div className="lu-media-preview"><img src={imageDraft.data_url} alt="Podgląd obrazu do wysłania"/><p>Obraz wyślę do AI dopiero z wiadomością, bez metadanych. Przed wysłaniem usuń poufne dane.</p><button className="lu-text-button" type="button" disabled={busy} onClick={()=>setImageDraft(null)}>Usuń</button></div>}
+    {active.mode === "image" && <p className="lu-image-mode-note">Opisz nową grafikę: temat, styl i kolory. Obraz otrzymasz tutaj i pobierzesz na urządzenie.</p>}</>;
+  }
   async function send(event, options = {}) {
     event?.preventDefault();
-    if (requestRef.current || expansionRef.current || deleting || entrance.phase==='leaving' || !(options.text || draft).trim()) return;
+    if (requestRef.current || expansionRef.current || deleting || imagePreparing || (!(options.text || draft).trim() && !imageDraft)) return;
     if (!memory.ready) { setNotice("Wczytuję ustawienia historii. Spróbuj za chwilę."); return; }
-    const text = (options.text || draft).trim();
-    const sendMode = options.review ? "review" : options.mode || (active.mode === "review" ? "chat" : active.mode);
+    const image = !options.review && !options.messageDraft && !options.messageInput ? imageDraft : null;
+    const text = (options.text || draft).trim() || (image ? "Przeanalizuj przesłany obraz i opisz najważniejsze szczegóły." : "");
+    const selectedMode = options.mode || active.mode;
+    const lastReply = [...active.messages].reverse().find(message=>message.role === "assistant" && message.status === "done" && !message.error);
+    const imageRevision = lastReply?.kind === "image" && isImageRevisionRequest(text);
+    const sendMode = options.review ? "review" : !image && (selectedMode === "image" || isImageGenerationRequest(text) || imageRevision) ? "image" : image ? "chat" : selectedMode === "review" ? "chat" : selectedMode;
+    if (image && isImageGenerationRequest(text)) { setNotice("Tworzenie grafiki korzysta z opisu. Usuń załącznik, aby wygenerować nowy obraz, albo napisz, co mam przeanalizować na przesłanym zdjęciu."); return; }
     if (text.length > 6000 || new TextEncoder().encode(text).length > 10000) { setNotice(ERRORS.invalid); return; }
     if (containsPrivateInput(text)) { setNotice(ERRORS.private); return; }
     if (options.review && [options.review.material, ...options.review.criteria].some(containsPrivateInput)) { setNotice(ERRORS.private); return; }
@@ -589,10 +633,10 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     entrance.enter(home);
     const standaloneFee = /^(?:oblicz|policz|ile\s+(?:wynosi|zapłacę|zaplacę|zaplac|kosztuje)|jaka\s+(?:jest\s+)?(?:opłata|oplata|prowizja))/i.test(text)
       && /\d/.test(text) && !/zwrot|refund|vat|podat|faktur|sp[oó]r/i.test(text);
-    const composingMessage=sendMode!=='help' && isLucynaMessageRequest(text);
-    const reviewSetup=!options.review && isLucynaReviewRequest(text) && status.eligible !== false;
-    const guide = !options.review && !composingMessage && sendMode !== "message" && (sendMode === 'help' || !active.messages.length || standaloneFee) ? knowledgeAnswer(text) : null;
-    const local = reviewSetup ? "Jasne. Dodaj rezultat i wskaż, co mam sprawdzić. Porównam materiał z Twoimi kryteriami, opiszę uwagi i zaproponuję poprawki. Decyzja o odbiorze pozostaje po Twojej stronie." : !options.review && !composingMessage && sendMode !== "message" ? guide?.text || localAnswer(text, new Date(), false) : null;
+    const composingMessage=!image && sendMode!=='image' && sendMode!=='help' && isLucynaMessageRequest(text);
+    const reviewSetup=!image && sendMode!=="image" && !options.review && isLucynaReviewRequest(text) && status.eligible !== false;
+    const guide = !image && sendMode!=="image" && !options.review && !composingMessage && sendMode !== "message" && (sendMode === 'help' || !active.messages.length || standaloneFee) ? knowledgeAnswer(text) : null;
+    const local = reviewSetup ? "Jasne. Dodaj rezultat i wskaż, co mam sprawdzić. Porównam materiał z Twoimi kryteriami, opiszę uwagi i zaproponuję poprawki. Decyzja o odbiorze pozostaje po Twojej stronie." : !image && sendMode!=="image" && !options.review && !composingMessage && sendMode !== "message" ? guide?.text || localAnswer(text, new Date(), false) : null;
     if (local) {
       const guideTargets = { 'centrum-profilu': 'profile', 'edytuj-profil': 'profile', portfolio: 'portfolio', 'moje-zlecenia': 'my_jobs', 'znajdz-zlecenie': 'jobs', 'wiadomosci': 'messages', kalendarz: 'calendar', 'widocznosc-freelancera': 'profile' };
       const target = guideTargets[guide?.sources?.[0]?.id];
@@ -607,12 +651,14 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
     const conversationId = active.id, messageId = makeId(), requestId = makeId(), ownerId = user?.id;
     const controller = new AbortController();
     controller.conversationId = conversationId; controller.messageId = messageId; requestRef.current = controller;
+    const userMessageId = makeId();
+    if (image) { rememberLucynaImage(ownerId,userMessageId,image); setImageDraft(null); }
     setBusy(true); setDraft(""); setNotice(""); followingRef.current = true;
     setConversations(all => all.map(c => c.id === conversationId ? { ...c, title: c.messages.length ? c.title : text.slice(0, 52),
       ...(options.review ? { sourceDeliveryId: options.review.source_delivery_id || null, sourceConversationId: options.review.source_conversation_id || null } : {}),
-      messages: [...c.messages, { id: makeId(), role: "user", text, status: "done", createdAt: new Date().toISOString() },
+      messages: [...c.messages, { id: userMessageId, role: "user", text: text + (image ? "\n\n[Załączono obraz do analizy — plik dostępny w tej sesji.]" : ""), status: "done", createdAt: new Date().toISOString() },
         { id: messageId, role: "assistant", text: "", status: "loading", createdAt: new Date().toISOString(),
-          reveal:true, provenance: { ai_generated: true, verified: false }, kind: options.review ? "review" : "ai", phase:options.review ? "review" : options.messageDraft ? "message" : "preparing" }] } : c));
+          reveal:true, provenance: { ai_generated: true, verified: false }, kind: options.review ? "review" : "ai", phase:sendMode === "image" ? "image" : image ? "vision" : options.review ? "review" : options.messageDraft ? "message" : "preparing" }] } : c));
     const timer = window.setTimeout(() => controller.abort(), 90_000);
     try {
       const { data, error } = await supabase.auth.getSession();
@@ -624,6 +670,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
         body: JSON.stringify({ request_id: requestId, mode: sendMode, message: text, notice_version: LUCYNA_NOTICE_VERSION, response_style: responseStyle, message_draft: !!options.messageDraft,
           ...(options.messageInput ? {message_input:options.messageInput} : {}),
           ...(options.review ? { review: options.review } : {}),
+          ...(image ? {image:image.data_url} : {}),
           notes: options.review ? "" : conversationNotes(active.messages),
           history: options.review ? [] : conversationContext(active.messages) }), signal: controller.signal,
       });
@@ -635,7 +682,11 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       if (response.headers.get("content-type")?.includes("application/json")) {
         const result = await response.json();
         if (requestRef.current !== controller || !mounted.current) return;
-        if (result.variants) {
+        if (result.kind === "image") {
+          if (!validGeneratedImage(result.image) || typeof result.text !== "string" || result.provenance?.ai_generated !== true) throw Object.assign(new Error(),{code:"provider_format"});
+          rememberLucynaImage(ownerId,messageId,{...result.image,generated:true});
+          patchMessage(conversationId,messageId,{text:result.text.slice(0,8000),kind:"image",status:"done",reveal:false,provenance:result.provenance});
+        } else if (result.variants) {
           const variants=normalizeMessageVariants(result.variants);
           if(!variants)throw Object.assign(new Error(),{code:'provider_format'});
           patchMessage(conversationId,messageId,{text:typeof result.text==='string'?result.text.slice(0,400):'',variants,provenance:result.provenance,kind:'ai',status:'done'});
@@ -700,9 +751,9 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
       const reference = UUID.test(error.detail?.request_id || "") ? error.detail.request_id : requestId;
       const message = (ERRORS[code] || ERRORS.unavailable) + "\nIdentyfikator zgłoszenia: " + reference;
       patchMessage(conversationId, messageId, { status: "error", error: message });
-      if (BLOCKED.has(code) || Number.isInteger(error.detail?.remaining)) setStatus(old => ({ ...old,
+      if ((BLOCKED.has(code) && (sendMode !== "image" || ["auth","account","disabled","setup","user_limit","global_limit"].includes(code))) || Number.isInteger(error.detail?.remaining)) setStatus(old => ({ ...old,
         ...(Number.isInteger(error.detail?.remaining) ? { remaining: error.detail.remaining } : {}),
-        code: BLOCKED.has(code) ? code : error.detail?.remaining === 0 ? "user_limit" : old.code, diagnosticRequestId:reference }));
+        code: BLOCKED.has(code) && (sendMode !== "image" || ["auth","account","disabled","setup","user_limit","global_limit"].includes(code)) ? code : error.detail?.remaining === 0 ? "user_limit" : old.code, diagnosticRequestId:reference }));
     } finally {
       window.clearTimeout(timer);
       if (requestRef.current === controller) {
@@ -732,8 +783,9 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
   }
   return <div className="lucyna-route" data-embedded={embedded}>
     <section className="lucyna-root lucyna-studio lucyna-atelier"
-      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-CLARITY-20261029" data-entrance={entrance.phase} data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
-      {!memory.ready && <LucynaLoading className="lu-boot" />}
+      ref={pageRef} data-embedded={embedded} data-lucyna-version={LUCYNA_BUILD_VERSION} data-lucyna-release="LUCYNA-MULTIMODAL-20261109" data-entrance={entrance.phase} data-history-side={wide} data-home={home} data-busy={busy} aria-label="Lucyna AI — asystentka IdeaHire">
+      <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="Wybierz obraz do rozmowy" onChange={event=>{const file=event.target.files?.[0];event.target.value="";attachImage(file);}}/>
+      {!memory.ready && <span className="lu-session-status" role="status">Wczytuję rozmowy…</span>}
       <div className="lu-shell">
         {historyOpen && !wide && <button className="lu-drawer-shade" type="button"
           aria-label="Zamknij historię rozmów" onClick={() => setHistoryOpen(false)} />}
@@ -781,13 +833,14 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
           </header>
           {administration && <p className="lu-admin-scope">Lucyna nie pobiera akt spraw ani wiadomości dowodowych. Szkice wymagają Twojej oceny przed użyciem.</p>}
           {home && <section className="lu-home" aria-label="Menu główne Lucyny">
-            <div className="lu-home-intro"><div className="lu-quiet-identity" aria-hidden="true"><LucynaSymbol/><span>Lucyna<small>AI w IdeaHire</small></span></div><h2>W czym Ci pomóc?</h2><p>Możemy ułożyć wiadomość, dopracować zlecenie albo przyjrzeć się gotowej pracy.</p>
+            <div className="lu-home-intro"><div className="lu-quiet-identity" aria-hidden="true"><LucynaSymbol/><span>Lucyna<small>AI w IdeaHire</small></span></div><h2>W czym Ci pomóc?</h2><p>Dopracujmy pomysł, znajdźmy kolejny krok albo stwórzmy grafikę. Pomogę Ci wykorzystać możliwości IdeaHire.</p>
               <LucynaAvailabilityNotice status={status} notice={notice} onRefresh={()=>refreshStatus(true)} onHelp={()=>openTask('help')}/>
-              <form className="lu-home-composer" onSubmit={send}><label className="lu-sr-only" htmlFor="lucyna-start-message">Zacznij rozmowę z Lucyną</label><input id="lucyna-start-message" type="text" autoComplete="off" value={draft} maxLength={6000} placeholder="Napisz do Lucyny…" onChange={e=>setDraft(e.target.value)}/><button className="lu-send" type="submit" disabled={!memory.ready || busy || entrance.phase==='leaving' || !draft.trim()} aria-label="Rozpocznij rozmowę"><Icon name="send"/></button></form>
+              <form className="lu-home-composer" onSubmit={send}><label className="lu-sr-only" htmlFor="lucyna-start-message">Zacznij rozmowę z Lucyną</label><input id="lucyna-start-message" type="text" autoComplete="off" value={draft} maxLength={6000} placeholder="Napisz do Lucyny…" onPaste={pasteImage} onChange={e=>setDraft(e.target.value)}/><button className="lu-send" type="submit" disabled={!memory.ready || busy || imagePreparing || (!draft.trim() && !imageDraft)} aria-label="Rozpocznij rozmowę"><Icon name="send"/></button></form>
+              {mediaTools()}
               <button type="button" className="lu-text-button lu-home-empty-chat" disabled={!memory.ready || busy} onClick={()=>active.messages.length?startNew():chooseMode('chat')}>Otwórz pustą rozmowę<Icon name="arrow"/></button>
               {!!active.messages.length && <button type="button" className="lu-text-button" onClick={()=>setHome(false)}>Wróć do otwartej rozmowy<Icon name="arrow"/></button>}
             </div>
-            <div className="lu-home-directions"><span className="lu-welcome-eyebrow">MOŻEMY ZACZĄĆ OD TEGO</span>{modes.filter(m=>['message','brief','review','freelancers','help'].includes(m.id)).map((item,index)=><button type="button" key={item.id} disabled={!memory.ready || busy} onClick={()=>openTask(item.id)}><span className="lu-direction-number"><Icon name={item.icon}/></span><span><strong>{item.title}</strong><small>{item.id==='message'?'Dwie wersje. Jeden wybrany przez Ciebie ton.':item.id==='review'?'Kryteria, notatka i wskaźnik zgodności.':item.text}</small></span><Icon name="arrow"/></button>)}
+            <div className="lu-home-directions"><span className="lu-welcome-eyebrow">MOŻEMY ZACZĄĆ OD TEGO</span>{modes.filter(m=>['message','image','brief','review','freelancers','help'].includes(m.id)).map((item,index)=><button type="button" key={item.id} disabled={!memory.ready || busy} onClick={()=>openTask(item.id)}><span className="lu-direction-number"><Icon name={item.icon}/></span><span><strong>{item.title}</strong><small>{item.id==='message'?'Dwie wersje. Jeden wybrany przez Ciebie ton.':item.id==='review'?'Kryteria, notatka i wskaźnik zgodności.':item.text}</small></span><Icon name="arrow"/></button>)}
               <p>Rozmawiasz z AI. Ty wybierasz, edytujesz i podejmujesz decyzje. <button type="button" className="lu-text-button" onClick={()=>setInfoOpen(true)}>Historia i prywatność</button></p>
             </div>
           </section>}
@@ -809,6 +862,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 {message.text && !message.variants && <MotionAnswer message={message.role==='user' && message.text.startsWith('Pomóż mi napisać ') && message.text.includes('Przygotuj dwa warianty w tym samym tonie, zachowując te same fakty.') ? {...message,text:message.text.replace(/^Pomóż mi napisać [\s\S]*?\n\nCel:\s*/,'').replace(/\n\nFakty i ustalenia:\s*/,'\n\n')} : message}/>}
                 {message.role==='assistant' && message.status==='done' && !message.review && !message.error && isLucynaReviewRequest(active.messages[messageIndex-1]?.text) && <button type="button" className="lu-review-invitation" disabled={busy || !memory.ready || status.eligible===false} onClick={()=>openTask('review')}><Icon name="check"/><span>Dodaj pracę do sprawdzenia<small>Materiał, kryteria i konkretne sugestie</small></span><Icon name="arrow"/></button>}
                 {message.variants && <MessageVariants variants={message.variants} note={message.text} animate={!!message.reveal} busy={busy} onNotice={setNotice} onRefine={refineMessage}/>}
+                <ChatImage owner={user?.id} message={message}/>
                 {message.review && <ReviewResult review={message.review} animate={!!message.reveal} onDraft={useCorrection} busy={busy} />}
                 {message.actions?.length > 0 && <LucynaActionCards actions={message.actions} userId={user?.id} administration={administration} onNotice={setNotice} />}
                 {["loading","streaming"].includes(message.status) && (!message.text || ["jobs","freelancers","services","checking","analyzing"].includes(message.phase)) && <ThinkingIndicator phase={message.phase} />}
@@ -830,7 +884,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 {message.partial && <span className="lu-message-note">Odpowiedź jest częściowa.</span>}
                 {message.role === "assistant" && !["loading", "streaming"].includes(message.status) && (message.text || message.review) && <div className="lu-message-actions">
                   <button type="button" onClick={() => copy(message)}><Icon name={copied === message.id ? "check" : "copy"} />{copied === message.id ? "Skopiowano" : message.variants ? "Kopiuj całą odpowiedź" : "Kopiuj"}</button>
-                  {message.provenance?.ai_generated && <span>Wygenerowano z AI</span>}
+                  {message.provenance?.ai_generated && message.kind !== "image" && <span>Wygenerowano z AI</span>}
                   {["guide", "local"].includes(message.kind) && <span>{message.kind === 'guide' ? 'Instrukcja IdeaHire' : 'Narzędzie lokalne'} · bez zużycia puli AI</span>}
                 </div>}
               </div>
@@ -841,15 +895,17 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
             <div className="lu-composer-area">
             {(notice || !QUOTA_CODES.has(status.code)) && <LucynaAvailabilityNotice status={status} notice={notice} onRefresh={()=>refreshStatus(true)} onHelp={()=>openTask('help')}/>}
               {!active.messages.length && <p className="lu-writing-label">OD CZEGO ZACZYNAMY?</p>}
+            {mediaTools()}
             <form className={"lu-composer" + (busy ? " is-busy" : "")} onSubmit={send}>
               <label className="lu-sr-only" htmlFor="lucyna-message">Wiadomość do Lucyny AI</label>
               <textarea id="lucyna-message" ref={textareaRef} rows={1} maxLength={6000} value={draft}
-                placeholder={isSearch ? "Opisz, kogo lub jakiego zlecenia szukasz…" : active.mode === "brief" ? "Opisz pomysł na zlecenie…" : "Napisz do Lucyny AI…"}
+                onPaste={pasteImage}
+                placeholder={active.mode === "image" ? "Opisz grafikę, którą mam stworzyć…" : isSearch ? "Opisz, kogo lub jakiego zlecenia szukasz…" : active.mode === "brief" ? "Opisz pomysł na zlecenie…" : "Napisz do Lucyny AI…"}
                 onChange={event => setDraft(event.target.value)} onKeyDown={event => {
                   if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing && !window.matchMedia("(pointer: coarse)").matches) { event.preventDefault(); if (!busy) send(); }
                 }} />
               {busy ? <button className="lu-interrupt" type="button" onClick={stop} aria-label="Przerwij przygotowywanie odpowiedzi">Przerwij</button>
-                : <button className="lu-send" type="submit" disabled={!draft.trim() || !memory.ready || deleting} aria-label="Wyślij wiadomość do Lucyny AI"><Icon name="send" /></button>}
+                : <button className="lu-send" type="submit" disabled={(!draft.trim() && !imageDraft) || imagePreparing || !memory.ready || deleting} aria-label="Wyślij wiadomość do Lucyny AI"><Icon name="send" /></button>}
             </form>
               {!active.messages.length && <div className="lu-prompt-links" aria-label="Pomysły na początek rozmowy">
                 <button type="button" onClick={() => { chooseMode('freelancers'); setDraft('Szukam wykonawcy do '); }}>Znajdź wykonawcę<Icon name="arrow" /></button>
@@ -857,7 +913,7 @@ export default function Lucyna({ supabase, user, Navbar, embedded = false, visib
                 <button type="button" disabled={!memory.ready || busy} onClick={() => send(null, { text: 'Czym jest IdeaHire?', mode: 'help' })}>Poznaj IdeaHire<Icon name="arrow" /></button>
               </div>}
               {memory.ready && !memory.acknowledged && <section className="lu-first-notice" aria-label="Informacja przed użyciem AI">
-                <p>Lucyna to AI. Pytanie i kontekst rozmowy przetwarza Cloudflare. Sam wybierasz, czy zapisywać historię na koncie.</p>
+                <p>Lucyna to AI. Pytanie, kontekst i wybrany obraz przetwarza Cloudflare. Obrazy są dostępne w bieżącej sesji; możesz je pobrać. Sam wybierasz, czy zapisywać historię na koncie.</p>
                 <div><button type="button" className="lu-text-button" disabled={memory.ackSaving} onClick={() => memory.acknowledge(false).catch(() => setNotice('Nie udało się zapisać ustawienia. Spróbuj ponownie.'))}>Kontynuuj bez zapisu<Icon name="arrow" /></button><button type="button" className="lu-text-button" onClick={() => { setToolsOpen(false); setHistoryOpen(false); setInfoOpen(true); }}>Ustaw historię</button></div>
               </section>}
               <div className="lu-composer-meta"><span>AI może się mylić. Sprawdź odpowiedź.</span><button type="button" onClick={openWorkshop} aria-haspopup="dialog">{active.mode === 'chat' ? 'Opcje' : mode.short}<Icon name="arrow" /></button></div>

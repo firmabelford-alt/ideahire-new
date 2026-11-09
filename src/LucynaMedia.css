@@ -1,0 +1,28 @@
+@layer ideahireHeadings {
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools { display:flex!important; align-items:center!important; flex-wrap:wrap!important; gap:8px!important; margin:10px 0!important; padding:0!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools button { display:inline-flex!important; align-items:center!important; gap:7px!important; min-height:40px!important; padding:8px 12px!important; border:1px solid var(--lu-line)!important; border-radius:9px!important; background:var(--lu-surface)!important; color:var(--lu-ink)!important; font:550 12px/1.5 Inter,system-ui,sans-serif!important; cursor:pointer!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools button[aria-pressed="true"] { background:var(--lu-soft)!important; border-color:var(--lu-accent)!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools button:disabled { opacity:.5!important; cursor:default!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools svg { width:17px!important; height:17px!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-preview { display:flex!important; align-items:center!important; gap:14px!important; padding:12px!important; margin:8px 0!important; background:var(--lu-soft)!important; border:1px solid var(--lu-line)!important; border-radius:10px!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-preview img { width:64px!important; height:64px!important; flex:none!important; object-fit:contain!important; background:#fff!important; border-radius:5px!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-preview p { min-width:0!important; margin:0!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; color:var(--lu-muted)!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-media-preview button { flex:none!important; min-height:40px!important; color:var(--lu-ink)!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-chat-image { width:min(100%,560px)!important; margin:12px 0 18px!important; padding:0!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-chat-image img { display:block!important; width:auto!important; max-width:100%!important; height:auto!important; max-height:520px!important; object-fit:contain!important; border:1px solid var(--lu-line)!important; border-radius:12px!important; background:var(--lu-soft)!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-chat-image figcaption { display:flex!important; flex-wrap:wrap!important; align-items:center!important; gap:8px 16px!important; margin:8px 0 0!important; font:400 11px/1.6 Inter,system-ui,sans-serif!important; color:var(--lu-muted)!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-chat-image .lu-image-download { border:0!important; background:none!important; padding:0!important; cursor:pointer!important; display:inline-flex!important; align-items:center!important; gap:7px!important; min-height:40px!important; color:var(--lu-ink)!important; font-weight:650!important; text-decoration:underline!important; text-underline-offset:3px!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-session-status { position:absolute!important; z-index:2!important; top:75px!important; right:20px!important; padding:5px 10px!important; background:var(--lu-surface)!important; color:var(--lu-muted)!important; border-radius:6px!important; font:400 11px/1.5 Inter,system-ui,sans-serif!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-image-mode-note { margin:8px 0!important; color:var(--lu-muted)!important; font:400 12px/1.6 Inter,system-ui,sans-serif!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-thinking { gap:9px!important; min-height:28px!important; font-size:12px!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-thinking-stroke { width:14px!important; height:14px!important; border:2px solid var(--lu-line)!important; border-top-color:var(--lu-accent)!important; border-radius:50%!important; background:none!important; animation:lu-media-spin 900ms linear infinite!important; }
+  :is(#root,#ih64-lucyna) .lucyna-root .lu-thinking-stroke::before,:is(#root,#ih64-lucyna) .lucyna-root .lu-thinking-stroke::after,:is(#root,#ih64-lucyna) .lucyna-root .lu-thinking-stroke i { display:none!important; }
+  @keyframes lu-media-spin { to { transform:rotate(360deg); } }
+  @media(max-width:600px) {
+    :is(#root,#ih64-lucyna) .lucyna-root .lu-chat-image img { max-height:360px!important; }
+    :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools { gap:6px!important; }
+    :is(#root,#ih64-lucyna) .lucyna-root .lu-media-tools button { padding:8px 10px!important; }
+    :is(#root,#ih64-lucyna) .lucyna-root .lu-media-preview { gap:9px!important; padding:9px!important; }
+  }
+  @media(prefers-reduced-motion:reduce) { :is(#root,#ih64-lucyna) .lucyna-root .lu-thinking-stroke { animation:none!important; } }
+}

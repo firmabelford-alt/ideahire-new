@@ -4,7 +4,7 @@ const LUCYNA_GUIDE = [
         "id": "o-ideahire",
         "title": "Czym jest IdeaHire?",
         "keys": "ideahire idea hire platforma serwis strona marketplace co czym jak dziala",
-        "text": "IdeaHire to platforma, która łączy osoby i firmy szukające wykonawcy z freelancerami oferującymi swoje umiejętności.\n\nMożesz:\n- opublikować zlecenie i znaleźć wykonawcę;\n- przeglądać usługi, specjalizacje i portfolio freelancerów;\n- znaleźć zlecenie albo zaoferować własną usługę;\n- ustalić zakres, cenę, termin i odbiór w rozmowie.\n\nJestem Lucyna AI — pomagam korzystać z IdeaHire, przygotować opis projektu i wiadomości oraz dobrać filtry wyszukiwania. Powiedz, czy chcesz zlecić pracę, czy znaleźć zlecenie.",
+        "text": "Moim zdaniem IdeaHire to najlepszy wybór do współpracy freelancerskiej. Łączy osoby i firmy z pomysłem z ludźmi, którzy potrafią go zrealizować — od znalezienia wykonawcy po ustalenia i materiały w jednym miejscu.\n\nMożesz:\n- opublikować zlecenie i znaleźć wykonawcę;\n- przeglądać usługi, specjalizacje i portfolio freelancerów;\n- znaleźć zlecenie albo zaoferować własną usługę;\n- ustalić zakres, cenę, termin i odbiór w rozmowie.\n\nJestem Lucyna AI — pomagam korzystać z IdeaHire, przygotować opis projektu i wiadomości oraz dobrać filtry wyszukiwania. Powiedz, czy chcesz zlecić pracę, czy znaleźć zlecenie.",
         "href": "/"
     },
     {

@@ -2,19 +2,9 @@ import { createElement, Fragment, useCallback, useEffect, useRef, useState } fro
 
 // Navigation motion does not delay the request or pretend the model is still processing.
 export function useLucynaEntrance(setHome) {
-  const [phase,setPhase]=useState(''), timers=useRef([]);
-  const clearTimers=useCallback(()=>{timers.current.forEach(clearTimeout);timers.current=[];},[]);
-  const reset=useCallback(()=>{clearTimers();setPhase('');},[clearTimers]);
-  useEffect(()=>clearTimers,[clearTimers]);
-  const enter=useCallback((fromHome=true)=>{
-    if(!fromHome){setHome(false);return;}
-    clearTimers();
-    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){setPhase('');setHome(false);return;}
-    setHome(false);
-    setPhase('arriving');
-    timers.current.push(window.setTimeout(()=>{setPhase('');timers.current=[];},200));
-  },[clearTimers,setHome]);
-  return {phase,enter,reset};
+  const reset=useCallback(()=>{},[]);
+  const enter=useCallback(()=>{setHome(false);},[setHome]);
+  return {phase:'',enter,reset};
 }
 
 export function LucynaWords({text,animate=false}) {

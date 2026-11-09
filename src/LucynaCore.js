@@ -2,7 +2,7 @@
 import { knowledgeAnswer } from "./LucynaKnowledge.js";
 
 export const LUCYNA_BUILD_VERSION = "P35-2026-10-14";
-export const LUCYNA_RELEASE = "LUCYNA-ATELIER-TOOLS-2026-10-29";
+export const LUCYNA_RELEASE = "LUCYNA-MULTIMODAL-2026-11-09";
 export const LUCYNA_HISTORY_MESSAGES = 200;
 export const LUCYNA_HISTORY_BYTES = 112000; // Leaves room for PostgreSQL JSONB spacing within 120 kB.
 export const LUCYNA_NOTICE_VERSION = "IH-LUCYNA-2026-10-13-V3";
@@ -127,7 +127,7 @@ export function packConversation(conversation) {
     }];
     return value;
   });
-  return { id: conversation.id, title: conversation.title.slice(0, 80), mode: conversation.mode,
+  return { id: conversation.id, title: conversation.title.slice(0, 80), mode: conversation.mode === "image" ? "chat" : conversation.mode,
     messages, sourceDeliveryId: LUCYNA_UUID.test(conversation.sourceDeliveryId || "") ? conversation.sourceDeliveryId : null,
     sourceConversationId: LUCYNA_UUID.test(conversation.sourceConversationId || "") ? conversation.sourceConversationId : null };
 }

@@ -78,9 +78,11 @@ export function SubpageTheme() {
 
 export function LucynaLoading({ className = '' }) {
   const en = useSitePreferences().language === 'en';
-  return <div className={'ih-lucyna-loading ' + className} role="status" aria-busy="true">
-    <BrandMark /><strong>Lucyna AI</strong><span>{en ? 'Loading your workspace…' : 'Wczytuję Twoją przestrzeń…'}</span>
-    <i aria-hidden="true" />
+  return <div className={'lu-opening ' + className} role="status" aria-busy="true"
+    style={{boxSizing:'border-box',width:'100%',maxWidth:640,minHeight:220,margin:'0 auto',padding:'32px 24px',background:'var(--v-surface)',color:'var(--v-ink)',fontFamily:'Inter,system-ui,sans-serif'}}>
+    <strong style={{display:'block',fontSize:16,lineHeight:1.5}}>Lucyna AI</strong>
+    <p style={{margin:'8px 0 24px',fontSize:13,lineHeight:1.6,color:'var(--v-muted)'}}>{en ? 'Opening your conversation…' : 'Wczytuję rozmowę…'}</p>
+    <div aria-hidden="true" style={{display:'grid',gap:12}}>{['72%','92%','54%'].map(width=><span key={width} style={{display:'block',width,height:10,borderRadius:4,background:'var(--v-soft)'}}/>)}</div>
   </div>;
 }
 
